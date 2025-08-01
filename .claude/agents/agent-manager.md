@@ -517,32 +517,138 @@ check_and_update_agents() {
 setup_startup_hooks() {
     echo "🔗 Setting up Agent Manager startup hooks..."
     
-    # Create or update Claude Code hooks configuration
-    local hooks_config=".claude/hooks.json"
+    local settings_file=".claude/settings.json"
+    local backup_file=".claude/settings.json.backup.$(date +%s)"
     
-    cat > "$hooks_config" << 'EOF'
+    # Create backup if settings.json exists
+    if [ -f "$settings_file" ]; then
+        echo "💾 Creating backup of existing settings.json..."
+        cp "$settings_file" "$backup_file"
+    fi
+    
+    # Create default settings if file doesn't exist
+    if [ ! -f "$settings_file" ]; then
+        echo "📄 Creating new settings.json file..."
+        mkdir -p ".claude"
+        echo "{}" > "$settings_file"
+    fi
+    
+    # Read existing settings
+    local existing_settings
+    if ! existing_settings=$(cat "$settings_file" 2>/dev/null); then
+        echo "⚠️  Failed to read existing settings, creating new file..."
+        echo "{}" > "$settings_file"
+        existing_settings="{}"
+    fi
+    
+    # Validate JSON syntax
+    if ! echo "$existing_settings" | python3 -m json.tool >/dev/null 2>&1; then
+        echo "⚠️  Invalid JSON in settings.json, creating backup and recreating..."
+        cp "$settings_file" "$backup_file.invalid"
+        existing_settings="{}"
+    fi
+    
+    # Create agent-manager hook configuration
+    local agent_manager_hook=$(cat << 'EOH'
 {
-  "on_session_start": [
+  "matchers": {
+    "sessionType": ["startup", "resume"]
+  },
+  "hooks": [
     {
-      "name": "agent-manager-check",
-      "command": "/agent:agent-manager",
-      "args": "check-and-update-agents",
-      "async": true,
-      "timeout": "60s"
-    }
-  ],
-  "on_session_end": [
-    {
-      "name": "agent-manager-cleanup", 
-      "command": "/agent:agent-manager",
-      "args": "cleanup-cache",
-      "async": true
+      "type": "command",
+      "command": "echo 'Checking for agent updates...' && /agent:agent-manager check-and-update-agents"
     }
   ]
 }
-EOF
+EOH
+)
     
-    echo "✅ Startup hooks configured"
+    # Use Python to merge JSON preserving existing settings
+    python3 << PYTHON_SCRIPT
+import json
+import sys
+
+try:
+    # Read existing settings
+    with open('$settings_file', 'r') as f:
+        settings = json.load(f)
+    
+    # Ensure hooks section exists
+    if 'hooks' not in settings:
+        settings['hooks'] = {}
+    
+    # Ensure SessionStart section exists
+    if 'SessionStart' not in settings['hooks']:
+        settings['hooks']['SessionStart'] = []
+    
+    # Create agent-manager hook
+    agent_manager_hook = $agent_manager_hook
+    
+    # Check if agent-manager hook already exists and remove it
+    settings['hooks']['SessionStart'] = [
+        hook for hook in settings['hooks']['SessionStart'] 
+        if not (isinstance(hook.get('hooks'), list) and 
+                any('agent-manager check-and-update-agents' in h.get('command', '') 
+                    for h in hook.get('hooks', [])))
+    ]
+    
+    # Add the new agent-manager hook
+    settings['hooks']['SessionStart'].append(agent_manager_hook)
+    
+    # Write updated settings
+    with open('$settings_file', 'w') as f:
+        json.dump(settings, f, indent=2)
+    
+    print("✅ Successfully updated settings.json with agent-manager hooks")
+    
+except Exception as e:
+    print(f"❌ Error updating settings.json: {e}")
+    sys.exit(1)
+PYTHON_SCRIPT
+    
+    local python_exit_code=$?
+    
+    if [ $python_exit_code -ne 0 ]; then
+        echo "❌ Failed to update settings.json with Python"
+        
+        # Fallback: restore backup if it exists
+        if [ -f "$backup_file" ]; then
+            echo "🔄 Restoring backup..."
+            cp "$backup_file" "$settings_file"
+        fi
+        
+        return 1
+    fi
+    
+    # Validate the final JSON
+    if ! python3 -m json.tool "$settings_file" >/dev/null 2>&1; then
+        echo "❌ Generated invalid JSON, restoring backup..."
+        if [ -f "$backup_file" ]; then
+            cp "$backup_file" "$settings_file"
+        fi
+        return 1
+    fi
+    
+    echo "✅ Startup hooks configured in $settings_file"
+    echo "💡 Backup created at: $backup_file"
+    
+    # Show the hooks section for verification
+    echo "📋 Current SessionStart hooks:"
+    python3 -c "
+import json
+try:
+    with open('$settings_file', 'r') as f:
+        settings = json.load(f)
+    hooks = settings.get('hooks', {}).get('SessionStart', [])
+    if hooks:
+        for i, hook in enumerate(hooks):
+            print(f'  {i+1}. {hook}')
+    else:
+        print('  No SessionStart hooks found')
+except Exception as e:
+    print(f'  Error reading hooks: {e}')
+"
 }
 ```
 
