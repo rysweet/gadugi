@@ -43,44 +43,35 @@ gadugi/
 
 ### Bootstrap Agent Manager
 
-The agent-manager must be installed locally to manage synchronization with gadugi:
+The agent-manager is required to sync agents from gadugi:
 
-1. **Download agent-manager**:
+1. **Download agent-manager locally**:
    ```bash
    mkdir -p .claude/agents
    curl -o .claude/agents/agent-manager.md \
      https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-manager.md
    ```
 
-2. **Configure gadugi repository**:
-   ```yaml
-   # .claude/agent-manager/config.yaml
-   repositories:
-     - name: "gadugi"
-       url: "https://github.com/rysweet/gadugi"
-       type: "github"
-       branch: "main"
+2. **Initialize and configure**:
+   ```
+   /agent:agent-manager init
+   /agent:agent-manager register-repo https://github.com/rysweet/gadugi
    ```
 
-3. **Sync agents**:
+3. **Install agents**:
    ```
-   /agent:agent-manager sync gadugi
-   ```
-
-### Using Gadugi in Your Project
-
-1. **Update your CLAUDE.md** to import shared instructions:
-   ```markdown
-   @https://raw.githubusercontent.com/rysweet/gadugi/main/claude-generic-instructions.md
-   @https://raw.githubusercontent.com/rysweet/gadugi/main/AGENT_HIERARCHY.md
+   /agent:agent-manager install all
    ```
 
-2. **Invoke agents** as needed:
-   ```
-   /agent:workflow-master
-   /agent:orchestrator-agent
-   /agent:code-reviewer
-   ```
+The agent-manager will handle all necessary configuration updates.
+
+### Using Agents
+
+Once installed, invoke agents as needed:
+- `/agent:workflow-master` - For complete development workflows
+- `/agent:orchestrator-agent` - For parallel task execution
+- `/agent:code-reviewer` - For code review tasks
+- `/agent:prompt-writer` - For creating structured prompts
 
 ## Available Agents
 
