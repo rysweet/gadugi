@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Test the agent-manager hook setup functionality.
+Test the agent-manager hook setup functionality with external scripts.
 
 These tests validate that the agent-manager correctly sets up SessionStart hooks
-in .claude/settings.json and creates the check-agent-updates.sh script.
+in .claude/settings.json using the external setup-hooks.sh script.
 """
 
 import json
@@ -35,62 +35,28 @@ class TestAgentManagerHookSetup(unittest.TestCase):
         # Path to hooks directory
         self.hooks_dir = self.claude_dir / 'hooks'
         
-        # Path to agent-manager script (we'll need to extract it from the .md file)
+        # Path to agent-manager script
         self.agent_manager_root = Path(__file__).parent.parent
-        self.agent_file = self.agent_manager_root.parent / 'agents' / 'agent-manager.md'
+        self.setup_script = self.agent_manager_root / 'scripts' / 'setup-hooks.sh'
     
     def tearDown(self):
         """Clean up test environment."""
         os.chdir(self.original_cwd)
         shutil.rmtree(self.test_dir)
     
-    def extract_function_from_agent(self, function_name):
-        """Extract a bash function from the agent-manager.md file."""
-        with open(self.agent_file, 'r') as f:
-            content = f.read()
-        
-        # Find the function
-        start_marker = f"{function_name}() {{"
-        start = content.find(start_marker)
-        if start == -1:
-            return None
-        
-        # Extract until the closing brace at the start of a line
-        brace_count = 1
-        i = start + len(start_marker)
-        while i < len(content) and brace_count > 0:
-            if content[i] == '{':
-                brace_count += 1
-            elif content[i] == '}':
-                brace_count -= 1
-            i += 1
-        
-        return content[start:i]
+    def run_setup_script(self):
+        """Run the setup-hooks.sh script in the test directory."""
+        result = subprocess.run(
+            ['/bin/bash', str(self.setup_script)],
+            cwd=self.test_dir,
+            capture_output=True,
+            text=True
+        )
+        return result
     
     def test_hook_setup_creates_settings_file(self):
-        """Test that setup_startup_hooks creates settings.json if it doesn't exist."""
-        # Extract and run the setup function
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        self.assertIsNotNone(setup_func, "Could not find setup_startup_hooks function")
-        
-        # Create a test script that includes the function
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function
-setup_startup_hooks
-"""
-        
-        # Write and execute the test script
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        result = subprocess.run(['/bin/bash', str(script_path)], 
-                              capture_output=True, text=True)
+        """Test that setup script creates settings.json if it doesn't exist."""
+        result = self.run_setup_script()
         
         # Check that settings.json was created
         self.assertTrue(self.settings_file.exists(), 
@@ -105,7 +71,7 @@ setup_startup_hooks
         self.assertIsInstance(settings['hooks']['SessionStart'], list)
     
     def test_hook_setup_preserves_existing_settings(self):
-        """Test that setup_startup_hooks preserves existing settings."""
+        """Test that setup script preserves existing settings."""
         # Create existing settings with permissions
         existing_settings = {
             "permissions": {
@@ -120,23 +86,8 @@ setup_startup_hooks
         with open(self.settings_file, 'w') as f:
             json.dump(existing_settings, f, indent=2)
         
-        # Extract and run the setup function
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        subprocess.run(['/bin/bash', str(script_path)], capture_output=True)
+        # Run setup
+        self.run_setup_script()
         
         # Check that existing settings are preserved
         with open(self.settings_file, 'r') as f:
@@ -150,23 +101,7 @@ setup_startup_hooks
     
     def test_hook_command_is_shell_compatible(self):
         """Test that the hook command is shell-compatible and doesn't use /agent: syntax."""
-        # Run setup
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        subprocess.run(['/bin/bash', str(script_path)], capture_output=True)
+        self.run_setup_script()
         
         # Check the hook command
         with open(self.settings_file, 'r') as f:
@@ -200,24 +135,9 @@ setup_startup_hooks
     
     def test_hook_deduplication(self):
         """Test that multiple runs don't create duplicate hooks."""
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function multiple times
-setup_startup_hooks
-setup_startup_hooks
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        subprocess.run(['/bin/bash', str(script_path)], capture_output=True)
+        # Run the script multiple times
+        for _ in range(3):
+            self.run_setup_script()
         
         # Check that there's only one agent-manager hook
         with open(self.settings_file, 'r') as f:
@@ -235,22 +155,7 @@ setup_startup_hooks
         with open(self.settings_file, 'w') as f:
             json.dump({"existing": "data"}, f)
         
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        subprocess.run(['/bin/bash', str(script_path)], capture_output=True)
+        self.run_setup_script()
         
         # Check that a backup was created
         backups = list(self.claude_dir.glob('settings.json.backup.*'))
@@ -268,22 +173,7 @@ setup_startup_hooks
         with open(self.settings_file, 'w') as f:
             f.write('{"invalid": json content}')
         
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function (remove set -e to allow handling of errors)
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        result = subprocess.run(['/bin/bash', str(script_path)], 
-                              capture_output=True, text=True)
+        result = self.run_setup_script()
         
         # Should still create valid settings
         self.assertTrue(self.settings_file.exists())
@@ -306,22 +196,7 @@ setup_startup_hooks
     
     def test_script_creation(self):
         """Test that the check-agent-updates.sh script is created."""
-        setup_func = self.extract_function_from_agent('setup_startup_hooks')
-        test_script = f"""#!/bin/bash
-set -e
-cd {self.test_dir}
-
-{setup_func}
-
-# Run the function
-setup_startup_hooks
-"""
-        
-        script_path = Path(self.test_dir) / 'test_setup.sh'
-        script_path.write_text(test_script)
-        script_path.chmod(0o755)
-        
-        subprocess.run(['/bin/bash', str(script_path)], capture_output=True)
+        self.run_setup_script()
         
         # Check that script was created
         update_script = self.hooks_dir / 'check-agent-updates.sh'
@@ -337,6 +212,26 @@ setup_startup_hooks
         self.assertIn('#!/bin/sh', content, "Script missing shebang")
         self.assertIn('Agent Manager', content, 
                      "Script missing expected content")
+    
+    def test_gitignore_update(self):
+        """Test that .gitignore is created/updated with agent-manager entries."""
+        self.run_setup_script()
+        
+        # Check that .gitignore was created or updated
+        gitignore_path = Path(self.test_dir) / '.gitignore'
+        self.assertTrue(gitignore_path.exists(), ".gitignore not created")
+        
+        # Check content
+        content = gitignore_path.read_text()
+        expected_entries = [
+            '.claude/agent-manager/cache/last-check-timestamp',
+            '.claude/agent-manager/logs/',
+            '.claude/cache/',
+            '.claude/hooks/',
+        ]
+        
+        for entry in expected_entries:
+            self.assertIn(entry, content, f"Missing .gitignore entry: {entry}")
 
 
 if __name__ == '__main__':
