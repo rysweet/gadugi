@@ -144,12 +144,35 @@ AgentManager
 
 #### Startup Check
 ```bash
-# Automatic startup check (called via hooks)
+# Manual startup check (use directly in Claude Code)
 /agent:agent-manager check-and-update-agents
 
 # Force update check
 /agent:agent-manager check-and-update-agents --force
 ```
+
+#### Hook Limitations and Best Practices
+
+**Important**: Claude Code hooks execute in shell environments and cannot directly invoke agents using `/agent:agent-name` syntax. This syntax only works within Claude Code sessions.
+
+**❌ This will fail in hooks:**
+```json
+{
+  "type": "command",
+  "command": "/agent:agent-manager check-and-update-agents"
+}
+```
+*Error: `/bin/sh: /agent:agent-manager: No such file or directory`*
+
+**✅ Recommended hook approach:**
+```json
+{
+  "type": "command", 
+  "command": "echo '🚀 Session started. Use \"/agent:agent-manager check-and-update-agents\" to check for updates.'"
+}
+```
+
+**Best Practice**: Use hooks for notifications and reminders, then manually invoke agents in Claude Code sessions as needed.
 
 #### Cache Management
 ```bash
@@ -549,6 +572,8 @@ setup_startup_hooks() {
     fi
     
     # Create agent-manager hook configuration
+    # NOTE: Hooks run in shell environment and cannot directly invoke Claude agents
+    # using /agent:agent-name syntax. This hook provides a startup message instead.
     local agent_manager_hook=$(cat << 'EOH'
 {
   "matchers": {
@@ -557,7 +582,7 @@ setup_startup_hooks() {
   "hooks": [
     {
       "type": "command",
-      "command": "echo 'Checking for agent updates...' && /agent:agent-manager check-and-update-agents"
+      "command": "echo '🚀 Claude Code session started. Use \"/agent:agent-manager check-and-update-agents\" to check for agent updates.'"
     }
   ]
 }
@@ -586,11 +611,14 @@ try:
     agent_manager_hook = $agent_manager_hook
     
     # Check if agent-manager hook already exists and remove it
+    # Remove both old problematic hooks and existing notification hooks
     settings['hooks']['SessionStart'] = [
         hook for hook in settings['hooks']['SessionStart'] 
         if not (isinstance(hook.get('hooks'), list) and 
-                any('agent-manager check-and-update-agents' in h.get('command', '') 
-                    for h in hook.get('hooks', [])))
+                any('agent-manager' in h.get('command', '') 
+                    for h in hook.get('hooks', []))) and
+        not (isinstance(hook.get('command'), str) and 
+             'agent-manager' in hook.get('command', ''))
     ]
     
     # Add the new agent-manager hook
