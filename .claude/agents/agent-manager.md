@@ -551,26 +551,88 @@ check_and_update_agents() {
 
 # Startup hook integration
 setup_startup_hooks() {
-    # Download and execute the setup-hooks script
-    local script_url="https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agent-manager/scripts/setup-hooks.sh"
-    local script_path=".claude/agent-manager/scripts/setup-hooks.sh"
+    # Download and execute the setup-hooks script with integrity verification
+    local base_url="https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agent-manager/scripts"
+    local script_name="setup-hooks.sh"
+    local script_path=".claude/agent-manager/scripts/$script_name"
+    local checksums_url="$base_url/checksums.sha256"
+    local checksums_path=".claude/agent-manager/scripts/checksums.sha256"
     
     # Ensure scripts directory exists
     mkdir -p "$(dirname "$script_path")"
     
+    # Function to verify script integrity
+    verify_script_integrity() {
+        local script_file="$1"
+        local checksums_file="$2"
+        
+        if ! command -v sha256sum >/dev/null 2>&1; then
+            echo "⚠️  WARNING: sha256sum not found. Skipping integrity verification."
+            return 0
+        fi
+        
+        # Extract expected checksum for the script
+        local expected_checksum=$(grep "$script_name" "$checksums_file" | awk '{print $1}')
+        if [ -z "$expected_checksum" ]; then
+            echo "❌ No checksum found for $script_name"
+            return 1
+        fi
+        
+        # Calculate actual checksum
+        local actual_checksum=$(sha256sum "$script_file" | awk '{print $1}')
+        
+        if [ "$expected_checksum" = "$actual_checksum" ]; then
+            echo "✅ Script integrity verified"
+            return 0
+        else
+            echo "❌ Script integrity check failed!"
+            echo "   Expected: $expected_checksum"
+            echo "   Actual:   $actual_checksum"
+            return 1
+        fi
+    }
+    
     # Download or use local script
     if [ -f "$script_path" ]; then
         echo "📄 Using local setup-hooks script..."
+        # Still verify local script if checksums available
+        if [ -f "$checksums_path" ]; then
+            verify_script_integrity "$script_path" "$checksums_path" || return 1
+        fi
     else
-        echo "📥 Downloading setup-hooks script..."
+        echo "📥 Downloading setup-hooks script and checksums..."
+        
+        # Download checksums first
         if command -v curl >/dev/null 2>&1; then
-            curl -sSL "$script_url" -o "$script_path"
+            curl -sSL "$checksums_url" -o "$checksums_path" || {
+                echo "❌ Failed to download checksums"
+                return 1
+            }
+            curl -sSL "$base_url/$script_name" -o "$script_path" || {
+                echo "❌ Failed to download script"
+                return 1
+            }
         elif command -v wget >/dev/null 2>&1; then
-            wget -q "$script_url" -O "$script_path"
+            wget -q "$checksums_url" -O "$checksums_path" || {
+                echo "❌ Failed to download checksums"
+                return 1
+            }
+            wget -q "$base_url/$script_name" -O "$script_path" || {
+                echo "❌ Failed to download script"
+                return 1
+            }
         else
             echo "❌ Neither curl nor wget found. Cannot download script."
             return 1
         fi
+        
+        # Verify downloaded script
+        verify_script_integrity "$script_path" "$checksums_path" || {
+            echo "🛡️ Removing unverified script for security"
+            rm -f "$script_path"
+            return 1
+        }
+        
         chmod +x "$script_path"
     fi
     

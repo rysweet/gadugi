@@ -40,4 +40,46 @@
 - Tests use realistic subprocess execution rather than mocks
 - Edge cases well covered (invalid JSON, missing files, permission issues)
 - All 7 test cases passing consistently
-EOF < /dev/null
+
+### PR #5: refactor: extract agent-manager functions to external scripts and add .gitignore
+
+#### What I Learned
+- Gadugi's agent-manager is evolving from embedded scripts in markdown to proper script architecture
+- The project uses a download/execute pattern for script distribution from GitHub
+- Test architecture improved significantly by moving from function extraction to direct script execution
+- The .gitignore was missing and needed comprehensive coverage for Python and Claude Code artifacts
+
+#### Architectural Evolution Observed
+- **Script Extraction Pattern**: Moving from inline bash in markdown to external .sh files in scripts/ directory
+- **Improved Testability**: Tests now execute scripts directly rather than extracting functions from markdown
+- **Cleaner Separation**: agent-manager.md becomes pure documentation, scripts/ contains implementation
+- **Command Line Interface**: New agent-manager.sh provides clean CLI for script operations
+
+#### Security Patterns Discovered
+- **Download/Execute Vulnerability**: Scripts downloaded from GitHub without integrity verification
+- **Supply Chain Risk**: Hardcoded GitHub raw URLs pose security concerns if repository compromised
+- **Shell Compatibility**: Mixed bash/sh usage could cause portability issues
+
+#### Code Quality Improvements
+- **Comprehensive .gitignore**: Properly excludes Python bytecode, Claude Code runtime files, IDE artifacts
+- **Robust Error Handling**: JSON corruption recovery with backup creation
+- **Hook Deduplication**: Complex but necessary logic to prevent duplicate hook registration
+- **POSIX Considerations**: Scripts use appropriate shebangs for cross-platform compatibility
+
+#### Patterns to Watch
+- **Security First**: Always verify integrity of downloaded scripts before execution
+- **Shell Consistency**: Standardize on either bash or sh throughout the codebase  
+- **Test Evolution**: Direct script execution is much cleaner than function extraction
+- **Gitignore Maintenance**: New comprehensive .gitignore needs ongoing maintenance
+
+#### Test Coverage Assessment
+- All 8 tests passing after refactoring (improved from 7 in previous PR)
+- Test architecture significantly improved with direct script execution
+- Missing: Network failure scenarios, integrity verification tests
+- Excellent coverage of JSON handling, file operations, and hook setup
+
+#### Follow-up Recommendations
+- Address download/execute security vulnerability
+- Standardize shell compatibility across all scripts
+- Consider removing download pattern since scripts are now version controlled
+- Add integration tests for network-dependent operations
