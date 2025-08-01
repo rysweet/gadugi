@@ -4,7 +4,7 @@
 
 ## Overview
 
-Gadugi provides a collection of reusable AI agents that work together to enhance software development workflows. While currently implemented for Claude Code, the architecture is designed to be agent-host neutral and can be adapted to other AI coding assistants.
+Gadugi provides a collection of reusable AI agents that work together (and in parallel) to enhance software development workflows. While currently implemented for Claude Code, the architecture is designed to be agent-host neutral and can be adapted to other AI coding assistants.
 
 ## Philosophy
 
