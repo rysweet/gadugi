@@ -7,42 +7,42 @@ claude_code_version: ">=1.0.0"
 
 agents:
   - name: "workflow-master"
-    file: ".claude/agents/workflow-master.md"
+    file: "agents/workflow-master.md"
     version: "2.0.0"
     description: "Orchestrates complete development workflows from issue creation to PR review"
     category: "workflow"
     required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
     
   - name: "orchestrator-agent"
-    file: ".claude/agents/orchestrator-agent.md"
+    file: "agents/orchestrator-agent.md"
     version: "1.0.0"
     description: "Coordinates parallel execution of multiple WorkflowMasters"
     category: "workflow"
     required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
     
   - name: "code-reviewer"
-    file: ".claude/agents/code-reviewer.md"
+    file: "agents/code-reviewer.md"
     version: "1.5.0"
     description: "Performs comprehensive code reviews on pull requests"
     category: "quality"
     required_tools: ["Read", "Grep", "LS", "Bash", "WebSearch", "WebFetch", "TodoWrite"]
     
   - name: "code-review-response"
-    file: ".claude/agents/code-review-response.md"
+    file: "agents/code-review-response.md"
     version: "1.0.0"
     description: "Processes code review feedback and implements changes"
     category: "quality"
     required_tools: ["Read", "Edit", "MultiEdit", "Bash", "Grep", "LS", "TodoWrite"]
     
   - name: "prompt-writer"
-    file: ".claude/agents/prompt-writer.md"
+    file: "agents/prompt-writer.md"
     version: "1.2.0"
     description: "Creates high-quality structured prompts for development workflows"
     category: "productivity"
     required_tools: ["Read", "Write", "Grep", "LS", "WebSearch", "TodoWrite"]
     
   - name: "agent-manager"
-    file: ".claude/agents/agent-manager.md"
+    file: "agents/agent-manager.md"
     version: "1.0.0"
     description: "Manages external agent repositories with version control"
     category: "infrastructure"
