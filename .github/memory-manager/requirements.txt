@@ -1,0 +1,2 @@
+# Memory Manager Dependencies
+PyYAML>=6.0
