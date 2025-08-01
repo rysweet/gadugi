@@ -144,12 +144,48 @@ AgentManager
 
 #### Startup Check
 ```bash
-# Automatic startup check (called via hooks)
+# Manual startup check (use directly in Claude Code)
 /agent:agent-manager check-and-update-agents
 
 # Force update check
 /agent:agent-manager check-and-update-agents --force
 ```
+
+#### Hook Integration with Shell Scripts
+
+**Important**: Claude Code hooks execute in shell environments and cannot directly invoke agents using `/agent:agent-name` syntax. This syntax only works within Claude Code sessions.
+
+**❌ This will fail in hooks:**
+```json
+{
+  "type": "command",
+  "command": "/agent:agent-manager check-and-update-agents"
+}
+```
+*Error: `/bin/sh: /agent:agent-manager: No such file or directory`*
+
+**✅ Robust solution using shell scripts:**
+```json
+{
+  "type": "command", 
+  "command": ".claude/hooks/check-agent-updates.sh --quiet"
+}
+```
+
+**How it works:**
+1. Agent-manager installs `check-agent-updates.sh` to `.claude/hooks/`
+2. Script performs agent update checks using local manifests
+3. Hook executes the shell script during session startup
+4. Script provides notifications and logs results
+5. Users can invoke full agent functionality with `/agent:agent-manager` commands
+
+**Features of the shell script approach:**
+- ✅ **Offline support**: Works without network connectivity
+- ✅ **Cross-platform**: POSIX-compatible shell script
+- ✅ **Lightweight**: Minimal resource usage during startup
+- ✅ **Configurable**: Respects agent-manager configuration settings
+- ✅ **Logging**: Comprehensive logging for debugging
+- ✅ **Graceful degradation**: Falls back when resources unavailable
 
 #### Cache Management
 ```bash
@@ -519,6 +555,36 @@ setup_startup_hooks() {
     
     local settings_file=".claude/settings.json"
     local backup_file=".claude/settings.json.backup.$(date +%s)"
+    local hooks_dir=".claude/hooks"
+    local script_source=".claude/agent-manager/hooks/check-agent-updates.sh"
+    local script_target="$hooks_dir/check-agent-updates.sh"
+    
+    # Create hooks directory if it doesn't exist
+    mkdir -p "$hooks_dir"
+    
+    # Install the check-agent-updates.sh script to .claude/hooks/
+    echo "📦 Installing agent update checker script..."
+    
+    if [ -f "$script_source" ]; then
+        echo "📄 Copying script from $script_source to $script_target"
+        cp "$script_source" "$script_target"
+        chmod +x "$script_target"
+        echo "✅ Script installed and made executable"
+    else
+        echo "⚠️  Source script not found at $script_source"
+        echo "🔧 Creating script at target location..."
+        
+        # Create the script directly if source doesn't exist
+        cat > "$script_target" << 'SCRIPT_EOF'
+#!/bin/sh
+# check-agent-updates.sh - Lightweight agent update checker
+echo "🚀 Claude Code session started"
+echo "🤖 Agent Manager available"
+echo "💡 Use '/agent:agent-manager check-and-update-agents' to check for updates"
+SCRIPT_EOF
+        chmod +x "$script_target"
+        echo "✅ Basic script created and made executable"
+    fi
     
     # Create backup if settings.json exists
     if [ -f "$settings_file" ]; then
@@ -546,9 +612,12 @@ setup_startup_hooks() {
         echo "⚠️  Invalid JSON in settings.json, creating backup and recreating..."
         cp "$settings_file" "$backup_file.invalid"
         existing_settings="{}"
+        # Write valid empty JSON to the file
+        echo "{}" > "$settings_file"
     fi
     
     # Create agent-manager hook configuration
+    # This hook executes the shell script instead of trying to invoke Claude agents
     local agent_manager_hook=$(cat << 'EOH'
 {
   "matchers": {
@@ -557,7 +626,7 @@ setup_startup_hooks() {
   "hooks": [
     {
       "type": "command",
-      "command": "echo 'Checking for agent updates...' && /agent:agent-manager check-and-update-agents"
+      "command": ".claude/hooks/check-agent-updates.sh --quiet"
     }
   ]
 }
@@ -586,11 +655,16 @@ try:
     agent_manager_hook = $agent_manager_hook
     
     # Check if agent-manager hook already exists and remove it
+    # Remove hooks that contain check-agent-updates.sh or old agent-manager syntax
     settings['hooks']['SessionStart'] = [
         hook for hook in settings['hooks']['SessionStart'] 
         if not (isinstance(hook.get('hooks'), list) and 
-                any('agent-manager check-and-update-agents' in h.get('command', '') 
-                    for h in hook.get('hooks', [])))
+                any('check-agent-updates.sh' in h.get('command', '') or
+                    'agent-manager' in h.get('command', '') 
+                    for h in hook.get('hooks', []))) and
+        not (isinstance(hook.get('command'), str) and 
+             ('check-agent-updates.sh' in hook.get('command', '') or
+              'agent-manager' in hook.get('command', '')))
     ]
     
     # Add the new agent-manager hook
