@@ -2,6 +2,13 @@
 name: workflow-master
 description: Orchestrates complete development workflows from prompt files, ensuring all phases from issue creation to PR review are executed systematically
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
+imports: |
+  # Enhanced Separation Architecture - Shared Modules
+  from .claude.shared.github_operations import GitHubManager, PullRequestManager, IssueManager
+  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
 ---
 
 # WorkflowMaster Sub-Agent for Blarify
@@ -17,48 +24,108 @@ You are the WorkflowMaster sub-agent, responsible for orchestrating complete dev
 5. **Coordinate Sub-Agents**: Invoke other agents like code-reviewer at appropriate times
 6. **Handle Interruptions**: Save state and enable graceful resumption
 
+## Enhanced Separation Architecture Integration
+
+The WorkflowMaster leverages the Enhanced Separation shared modules for robust, reliable workflow execution:
+
+### Shared Module Initialization
+```python
+# Initialize shared managers for workflow execution
+github_manager = GitHubManager(config=AgentConfig())
+state_manager = WorkflowStateManager()
+error_handler = ErrorHandler(retry_manager=RetryManager())
+task_tracker = TaskTracker(todowrite_manager=TodoWriteManager())
+phase_tracker = WorkflowPhaseTracker()
+productivity_analyzer = ProductivityAnalyzer()
+
+# Configure circuit breakers for workflow resilience
+github_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
+implementation_circuit_breaker = CircuitBreaker(failure_threshold=5, timeout=600)
+```
+
+### GitHub Operations Integration
+- **Issue Management**: Use `IssueManager` for robust issue creation with retry logic
+- **PR Management**: Use `PullRequestManager` for reliable PR creation and updates
+- **Batch Operations**: Leverage efficient batch operations for multi-step workflows
+
+### State Management Integration
+- **Workflow State**: Comprehensive state tracking with `WorkflowStateManager`
+- **Phase Checkpoints**: Automatic checkpointing with `CheckpointManager`
+- **Recovery System**: Robust backup/restore with `StateBackupRestore`
+
+### Error Handling Integration
+- **Resilient Operations**: All operations wrapped with retry logic and circuit breakers
+- **Graceful Recovery**: Automatic error recovery with fallback strategies
+- **Comprehensive Logging**: Detailed error context for debugging and analysis
+
+### Task Tracking Integration
+- **Phase Management**: Advanced phase tracking with `WorkflowPhaseTracker`
+- **TodoWrite Enhancement**: Seamless integration with `TodoWriteManager`
+- **Performance Metrics**: Real-time productivity analysis with `ProductivityAnalyzer`
+
 ## Workflow Execution Pattern
 
-### 0. Task Initialization & Resumption Check Phase (ALWAYS FIRST)
+### 0. Enhanced Task Initialization & Resumption Check Phase (ALWAYS FIRST)
 
-Before starting ANY workflow:
+Before starting ANY workflow, use the shared modules for robust initialization:
 
-1. **Generate or receive task ID**:
-   ```bash
-   # Generate unique task ID if not provided
-   TASK_ID="${TASK_ID:-task-$(date +%Y%m%d-%H%M%S)-$(openssl rand -hex 2)}"
-   echo "Task ID: $TASK_ID"
-   ```
+```python
+# Enhanced task initialization with shared modules
+def initialize_workflow_task(task_id=None, prompt_file=None):
+    # Generate unique task ID with enhanced tracking
+    if not task_id:
+        task_id = f"task-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{secrets.token_hex(2)}"
+    
+    # Initialize productivity tracking
+    productivity_analyzer.start_workflow_tracking(task_id, prompt_file)
+    
+    # Check for existing state with enhanced state management
+    existing_state = state_manager.load_state(task_id)
+    if existing_state:
+        print(f"Found interrupted workflow for task {task_id}")
+        
+        # Validate state consistency
+        if state_manager.validate_state_consistency(existing_state):
+            # Offer resumption options with recovery context
+            recovery_options = generate_recovery_options(existing_state)
+            offer_resumption_choice(recovery_options)
+        else:
+            print("State inconsistency detected, initiating recovery...")
+            recovery_manager.initiate_state_recovery(task_id)
+    
+    # Check for any orphaned workflows with advanced detection
+    orphaned_workflows = state_manager.detect_orphaned_workflows()
+    if orphaned_workflows:
+        print("Found interrupted workflows:")
+        for workflow in orphaned_workflows:
+            print(f"- {workflow.task_id}: {workflow.description} (Phase: {workflow.current_phase})")
+    
+    # Initialize comprehensive workflow state
+    workflow_state = WorkflowState(
+        task_id=task_id,
+        prompt_file=prompt_file,
+        phase=WorkflowPhase.INITIALIZATION,
+        started_at=datetime.now(),
+        state_directory=f".github/workflow-states/{task_id}"
+    )
+    
+    # Create initial checkpoint with backup
+    checkpoint_manager = CheckpointManager(state_manager)
+    checkpoint_manager.create_checkpoint(workflow_state)
+    
+    # Initialize backup system
+    backup_restore = StateBackupRestore(state_manager)
+    backup_restore.create_backup(task_id)
+    
+    return workflow_state
+```
 
-2. **Check for existing task state**:
-   ```bash
-   STATE_DIR=".github/workflow-states/$TASK_ID"
-   STATE_FILE="$STATE_DIR/state.md"
-   
-   if [ -f "$STATE_FILE" ]; then
-       echo "Found state for task $TASK_ID"
-       cat "$STATE_FILE"
-   fi
-   ```
-
-3. **Check for ANY interrupted workflows** (if no specific task ID):
-   ```bash
-   if [ -z "$TASK_ID" ] && [ -d ".github/workflow-states" ]; then
-       echo "Found interrupted workflows:"
-       ls -la .github/workflow-states/
-   fi
-   ```
-
-4. **If state exists for this task**:
-   - Read and display the interrupted workflow details
-   - Check if the branch and issue still exist
-   - Offer options: "Would you like to (1) Resume task $TASK_ID, (2) Start fresh, or (3) Review details first?"
-   - If resuming, skip to the appropriate phase based on saved state
-
-5. **Initialize task state directory**:
-   ```bash
-   mkdir -p "$STATE_DIR"
-   ```
+Enhanced initialization features:
+1. **Advanced State Detection**: Comprehensive workflow state analysis and validation
+2. **Recovery Management**: Intelligent recovery options based on workflow state
+3. **Productivity Tracking**: Performance analytics from workflow start
+4. **Backup System**: Automatic backup creation for recovery scenarios
+5. **Orphaned Workflow Detection**: Smart detection of incomplete workflows
 
 You MUST execute these phases in order for every prompt:
 
@@ -83,14 +150,62 @@ You MUST execute these phases in order for every prompt:
   - Success criteria
 - Create comprehensive task list using TodoWrite
 
-### 2. Issue Creation Phase
-- Create detailed GitHub issue using `gh issue create`
-- Include:
-  - Clear problem statement
-  - Technical requirements
-  - Implementation plan
-  - Success criteria
-- Save issue number for branch naming and PR linking
+### 2. Enhanced Issue Creation Phase
+```python
+# Issue creation with shared modules and error handling
+@error_handler.with_circuit_breaker(github_circuit_breaker)
+def create_workflow_issue(workflow_state, prompt_data):
+    # Track phase start
+    phase_tracker.start_phase(WorkflowPhase.ISSUE_CREATION)
+    productivity_analyzer.record_phase_start("issue_creation")
+    
+    # Prepare comprehensive issue data
+    issue_data = IssueData(
+        title=f"{prompt_data.feature_name} - {workflow_state.task_id}",
+        body=format_issue_body(prompt_data),
+        labels=["enhancement", "ai-generated"],
+        assignees=[]
+    )
+    
+    # Create issue with retry logic
+    issue_result = retry_manager.execute_with_retry(
+        lambda: github_manager.create_issue(issue_data),
+        max_attempts=3,
+        backoff_strategy="exponential"
+    )
+    
+    if issue_result.success:
+        # Update workflow state
+        workflow_state.issue_number = issue_result.issue_number
+        workflow_state.issue_url = issue_result.issue_url
+        
+        # Create checkpoint after successful issue creation
+        checkpoint_manager.create_checkpoint(workflow_state)
+        
+        # Track phase completion
+        phase_tracker.complete_phase(WorkflowPhase.ISSUE_CREATION)
+        productivity_analyzer.record_phase_completion("issue_creation")
+        
+        print(f"✅ Created issue #{issue_result.issue_number}: {issue_result.issue_url}")
+        return issue_result
+    else:
+        # Handle failure with error context
+        error_context = ErrorContext(
+            error=issue_result.error,
+            task_id=workflow_state.task_id,
+            phase="issue_creation",
+            recovery_action="retry_issue_creation"
+        )
+        error_handler.handle_error(error_context)
+        raise WorkflowError(f"Failed to create issue: {issue_result.error}")
+```
+
+Enhanced issue creation features:
+- **Resilient Creation**: Retry logic with exponential backoff
+- **Circuit Breaker Protection**: Prevents GitHub API overload
+- **Comprehensive Tracking**: Phase and performance tracking
+- **Automatic Checkpointing**: State preservation after successful creation
+- **Rich Error Handling**: Detailed error context and recovery strategies
 
 ### 3. Branch Management Phase
 - Create feature branch: `feature/[descriptor]-[issue-number]`
@@ -126,26 +241,84 @@ You MUST execute these phases in order for every prompt:
 - Document any API changes
 - Ensure all docstrings are complete
 
-### 8. Pull Request Phase
-- Create PR using `gh pr create`
-- Include:
-  - Comprehensive description of changes
-  - Link to original issue (Fixes #N)
-  - Summary of testing performed
-  - Any breaking changes or migration notes
-  - Note that PR was created by AI agent
-- Ensure all commits have proper format
-- Add footer: "*Note: This PR was created by an AI agent on behalf of the repository owner.*"
-- **CRITICAL**: Verify PR creation and update state atomically:
-  ```bash
-  PR_NUMBER=$(gh pr create ... | grep -o '[0-9]*$')
-  if [ -n "$PR_NUMBER" ]; then
-      complete_phase 8 "Pull Request" "verify_phase_8"
-  else
-      echo "ERROR: Failed to create PR!"
-      exit 1
-  fi
-  ```
+### 8. Enhanced Pull Request Phase
+```python
+# PR creation with shared modules and comprehensive error handling
+@error_handler.with_circuit_breaker(github_circuit_breaker)
+def create_workflow_pull_request(workflow_state, implementation_summary):
+    # Track phase start
+    phase_tracker.start_phase(WorkflowPhase.PULL_REQUEST_CREATION)
+    productivity_analyzer.record_phase_start("pr_creation")
+    
+    # Prepare comprehensive PR data
+    pr_data = PullRequestData(
+        title=f"{implementation_summary.feature_name} - Implementation",
+        body=format_pr_body(workflow_state, implementation_summary),
+        head=workflow_state.branch_name,
+        base="main",
+        draft=False,
+        labels=["enhancement", "ai-generated"]
+    )
+    
+    # Create PR with retry logic and atomic state updates
+    try:
+        pr_result = retry_manager.execute_with_retry(
+            lambda: github_manager.create_pull_request(pr_data),
+            max_attempts=3,
+            backoff_strategy="exponential"
+        )
+        
+        if pr_result.success:
+            # Atomic state update - both must succeed
+            workflow_state.pr_number = pr_result.pr_number
+            workflow_state.pr_url = pr_result.pr_url
+            workflow_state.phase = WorkflowPhase.PULL_REQUEST_CREATED
+            
+            # Verify PR actually exists before marking complete
+            verification_result = github_manager.verify_pull_request_exists(pr_result.pr_number)
+            if not verification_result.exists:
+                raise WorkflowError(f"PR {pr_result.pr_number} was created but cannot be verified")
+            
+            # Create critical checkpoint after PR creation
+            checkpoint_manager.create_checkpoint(workflow_state)
+            
+            # Track successful completion
+            phase_tracker.complete_phase(WorkflowPhase.PULL_REQUEST_CREATION)
+            productivity_analyzer.record_phase_completion("pr_creation")
+            
+            print(f"✅ Created PR #{pr_result.pr_number}: {pr_result.pr_url}")
+            return pr_result
+            
+        else:
+            raise WorkflowError(f"Failed to create PR: {pr_result.error}")
+            
+    except Exception as e:
+        # Comprehensive error handling with recovery context
+        error_context = ErrorContext(
+            error=e,
+            task_id=workflow_state.task_id,
+            phase="pull_request_creation",
+            system_state={
+                "branch": workflow_state.branch_name,
+                "issue": workflow_state.issue_number,
+                "commits": get_commit_count(workflow_state.branch_name)
+            },
+            recovery_action="retry_pr_creation_with_verification"
+        )
+        
+        error_handler.handle_error(error_context)
+        
+        # Mark phase as failed but preserve state for recovery
+        phase_tracker.mark_phase_failed(WorkflowPhase.PULL_REQUEST_CREATION, str(e))
+        raise WorkflowError(f"CRITICAL: Failed to create PR for task {workflow_state.task_id}: {e}")
+```
+
+Enhanced PR creation features:
+- **Atomic State Updates**: Ensures state consistency with verification
+- **Comprehensive Verification**: Confirms PR actually exists before proceeding
+- **Rich Error Context**: Detailed failure information for debugging
+- **Critical Checkpointing**: State preservation at crucial workflow milestone
+- **Advanced Recovery**: Detailed recovery context for failure scenarios
 
 ### 9. Review Phase (MANDATORY - NEVER SKIP)
 - **CRITICAL**: This phase MUST execute after Phase 8
@@ -193,37 +366,160 @@ You MUST execute these phases in order for every prompt:
   git push || true
   ```
 
-## Progress Tracking
+## Enhanced Progress Tracking (Shared Modules)
 
-Use TodoWrite to maintain task lists throughout execution:
+Use the enhanced TodoWrite integration with comprehensive task management:
 
 ```python
-# Required task structure - all fields are mandatory
-[
-  {"id": "1", "content": "Create GitHub issue for [feature]", "status": "pending", "priority": "high"},
-  {"id": "2", "content": "Create feature branch", "status": "pending", "priority": "high"},
-  {"id": "3", "content": "Research existing implementation", "status": "pending", "priority": "high"},
-  {"id": "4", "content": "Implement [specific component]", "status": "pending", "priority": "high"},
-  {"id": "5", "content": "Write unit tests", "status": "pending", "priority": "high"},
-  {"id": "6", "content": "Update documentation", "status": "pending", "priority": "medium"},
-  {"id": "7", "content": "Create pull request", "status": "pending", "priority": "high"},
-  {"id": "8", "content": "Complete code review", "status": "pending", "priority": "high"}
-]
+# Enhanced task tracking with shared modules
+class WorkflowTaskManager:
+    def __init__(self, workflow_state):
+        self.todowrite_manager = TodoWriteManager()
+        self.task_tracker = TaskTracker()
+        self.phase_tracker = WorkflowPhaseTracker()
+        self.workflow_state = workflow_state
+    
+    def initialize_workflow_tasks(self, prompt_data):
+        # Create comprehensive task list with enhanced metadata
+        tasks = [
+            TaskData(
+                id="1", 
+                content=f"Create GitHub issue for {prompt_data.feature_name}",
+                status="pending", 
+                priority="high",
+                phase=WorkflowPhase.ISSUE_CREATION,
+                estimated_duration_minutes=5,
+                dependencies=[]
+            ),
+            TaskData(
+                id="2",
+                content="Create feature branch",
+                status="pending",
+                priority="high", 
+                phase=WorkflowPhase.BRANCH_MANAGEMENT,
+                estimated_duration_minutes=2,
+                dependencies=["1"]
+            ),
+            TaskData(
+                id="3",
+                content="Research existing implementation", 
+                status="pending",
+                priority="high",
+                phase=WorkflowPhase.RESEARCH_PLANNING,
+                estimated_duration_minutes=15,
+                dependencies=["2"]
+            ),
+            TaskData(
+                id="4",
+                content="Implement core functionality",
+                status="pending",
+                priority="high",
+                phase=WorkflowPhase.IMPLEMENTATION,
+                estimated_duration_minutes=45,
+                dependencies=["3"]
+            ),
+            TaskData(
+                id="5",
+                content="Write comprehensive tests",
+                status="pending", 
+                priority="high",
+                phase=WorkflowPhase.TESTING,
+                estimated_duration_minutes=30,
+                dependencies=["4"]
+            ),
+            TaskData(
+                id="6",
+                content="Update documentation",
+                status="pending",
+                priority="medium",
+                phase=WorkflowPhase.DOCUMENTATION,
+                estimated_duration_minutes=20,
+                dependencies=["4"]
+            ),
+            TaskData(
+                id="7",
+                content="Create pull request",
+                status="pending",
+                priority="high",
+                phase=WorkflowPhase.PULL_REQUEST_CREATION,
+                estimated_duration_minutes=10,
+                dependencies=["5", "6"]
+            ),
+            TaskData(
+                id="8",
+                content="Complete code review process",
+                status="pending",
+                priority="high",
+                phase=WorkflowPhase.REVIEW,
+                estimated_duration_minutes=15,
+                dependencies=["7"]
+            )
+        ]
+        
+        # Initialize with enhanced tracking
+        self.task_tracker.initialize_task_list(tasks, self.workflow_state.task_id)
+        self.todowrite_manager.create_enhanced_task_list(tasks)
+        
+        return tasks
+    
+    def update_task_progress(self, task_id, status, progress_notes=None):
+        # Enhanced task updates with analytics
+        self.task_tracker.update_task_status(
+            task_id, 
+            status, 
+            workflow_id=self.workflow_state.task_id,
+            progress_notes=progress_notes
+        )
+        
+        # Update TodoWrite with validation
+        self.todowrite_manager.update_task_with_validation(task_id, status)
+        
+        # Track productivity metrics
+        if status == "completed":
+            productivity_analyzer.record_task_completion(
+                task_id,
+                self.workflow_state.task_id,
+                duration=self.task_tracker.get_task_duration(task_id)
+            )
 ```
 
-### Task Validation Requirements
-Each task object MUST include:
-- `id`: Unique string identifier
-- `content`: Description of the task
-- `status`: One of "pending", "in_progress", "completed"
-- `priority`: One of "high", "medium", "low"
+### Enhanced Task Management Features
+- **Dependency Tracking**: Automatic dependency validation and enforcement
+- **Duration Estimation**: Realistic time estimates for productivity planning
+- **Phase Integration**: Tasks aligned with workflow phases for comprehensive tracking
+- **Progress Analytics**: Real-time productivity metrics and insights
+- **Validation Layer**: Automatic task structure validation before updates
+- **Recovery Support**: Task state preservation for workflow resumption
 
-Validate task structure before submission to TodoWrite to prevent runtime errors.
+### Advanced Task Status Flow
+```python
+# Enhanced status transitions with validation
+def transition_task_status(task_id, new_status):
+    # Validate transition is allowed
+    current_task = task_tracker.get_task(task_id)
+    if not task_tracker.is_valid_transition(current_task.status, new_status):
+        raise TaskTransitionError(f"Invalid transition: {current_task.status} -> {new_status}")
+    
+    # Check dependencies for in_progress transitions
+    if new_status == "in_progress":
+        unmet_dependencies = task_tracker.check_dependencies(task_id)
+        if unmet_dependencies:
+            raise DependencyError(f"Unmet dependencies: {unmet_dependencies}")
+    
+    # Ensure only one task is in_progress
+    if new_status == "in_progress":
+        active_tasks = task_tracker.get_active_tasks()
+        if active_tasks:
+            raise ConcurrencyError(f"Task {active_tasks[0].id} is already in progress")
+    
+    # Update with enhanced tracking
+    update_task_progress(task_id, new_status)
+```
 
-Update task status in real-time:
-- `pending` → `in_progress` → `completed`
-- Only one task should be `in_progress` at a time
-- Mark completed immediately upon finishing
+Status transitions: `pending` → `in_progress` → `completed` (with validation)
+- **Dependency Validation**: Automatic checking of task dependencies
+- **Concurrency Control**: Ensures single task focus for quality
+- **Transition Validation**: Prevents invalid status changes
 
 ## Error Handling
 
