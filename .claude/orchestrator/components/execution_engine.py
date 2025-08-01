@@ -29,6 +29,9 @@ import threading
 import queue
 import logging
 
+# Import the PromptGenerator for creating WorkflowMaster prompts
+from .prompt_generator import PromptGenerator, PromptContext
+
 # Security: Define strict resource limits
 MAX_CONCURRENT_TASKS = 8
 MAX_MEMORY_PER_TASK_GB = 2.0
@@ -167,13 +170,15 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks"""
     
-    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str):
+    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict] = None):
         self.task_id = task_id
         self.worktree_path = worktree_path
         self.prompt_file = prompt_file
+        self.task_context = task_context or {}
         self.process: Optional[subprocess.Popen] = None
         self.start_time: Optional[datetime] = None
         self.result: Optional[ExecutionResult] = None
+        self.prompt_generator = PromptGenerator()
     
     def execute(self, timeout: Optional[int] = None) -> ExecutionResult:
         """Execute the task using Claude CLI"""
@@ -187,10 +192,39 @@ class TaskExecutor:
         stderr_file = output_dir / f"{self.task_id}_stderr.log"
         json_output_file = output_dir / f"{self.task_id}_output.json"
         
-        # Prepare Claude CLI command
+        # CRITICAL FIX: Generate WorkflowMaster-specific prompt with full context
+        try:
+            # Create context for prompt generation
+            prompt_context = self.prompt_generator.create_context_from_task(
+                task={
+                    'id': self.task_id,
+                    'name': self.task_context.get('name', self.task_id),
+                    'dependencies': self.task_context.get('dependencies', []),
+                    'target_files': self.task_context.get('target_files', []),
+                    'requirements': self.task_context.get('requirements', {})
+                },
+                original_prompt_path=self.prompt_file,
+                phase_focus=self.task_context.get('phase_focus')
+            )
+            
+            # Generate the workflow prompt in the worktree
+            workflow_prompt = self.prompt_generator.generate_workflow_prompt(
+                prompt_context, 
+                self.worktree_path
+            )
+            
+            print(f"📝 Generated WorkflowMaster prompt: {workflow_prompt}")
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Failed to generate WorkflowMaster prompt: {e}")
+            workflow_prompt = self.prompt_file
+        
+        # Prepare Claude CLI command - CRITICAL FIX: Use WorkflowMaster agent with generated prompt
+        # This fixes the core issue where generic Claude execution was happening instead of WorkflowMaster workflow
         claude_cmd = [
             "claude",
-            "-p", self.prompt_file,
+            "/agent:workflow-master",
+            f"Execute the complete workflow for {workflow_prompt}",
             "--output-format", "json"
         ]
         
@@ -393,7 +427,8 @@ class ExecutionEngine:
                 executor = TaskExecutor(
                     task_id=task_id,
                     worktree_path=worktree_info.worktree_path,
-                    prompt_file=prompt_file
+                    prompt_file=prompt_file,
+                    task_context=task  # Pass full task context for prompt generation
                 )
                 
                 executors.append(executor)
