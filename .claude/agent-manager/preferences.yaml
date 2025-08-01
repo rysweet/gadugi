@@ -1,0 +1,36 @@
+# Agent Manager User Preferences
+# This file stores user-specific agent management preferences
+
+installation:
+  # Preferred versions for specific agents
+  preferred_versions:
+    # workflow-master: "2.1.0"  # Pin to specific version
+    # code-reviewer: "latest"   # Always use latest
+    
+  # Agent categories to auto-install
+  auto_install_categories:
+    - "development"
+    - "testing"
+    
+  # Agents to exclude from auto-installation
+  excluded_agents:
+    # - "experimental-agent"
+    # - "deprecated-workflow"
+    
+  # Conflict resolution preferences
+  conflict_resolution:
+    strategy: "prefer_newer"  # prefer_newer, prefer_older, prompt
+
+update:
+  # Update preferences
+  update_schedule: "daily"    # daily, weekly, manual
+  update_categories:
+    - "development"
+  exclude_from_updates:
+    # - "workflow-master"  # Pinned version
+
+# Notification preferences
+notifications:
+  update_available: true
+  installation_complete: true
+  errors_only: false

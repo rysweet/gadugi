@@ -1,0 +1,80 @@
+name: "Gadugi - Claude Code Agent Collection"
+version: "1.0.0"
+description: "Community-driven collection of reusable Claude Code agents embodying Cherokee Gadugi philosophy"
+maintainer: "Ryan Sweet <rysweet@microsoft.com>"
+repository: "https://github.com/rysweet/gadugi"
+claude_code_version: ">=1.0.0"
+
+agents:
+  - name: "workflow-master"
+    file: "agents/workflow-master.md"
+    version: "2.0.0"
+    description: "Orchestrates complete development workflows from issue creation to PR review"
+    category: "workflow"
+    required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
+    
+  - name: "orchestrator-agent"
+    file: "agents/orchestrator-agent.md"
+    version: "1.0.0"
+    description: "Coordinates parallel execution of multiple WorkflowMasters"
+    category: "workflow"
+    required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
+    
+  - name: "code-reviewer"
+    file: "agents/code-reviewer.md"
+    version: "1.5.0"
+    description: "Performs comprehensive code reviews on pull requests"
+    category: "quality"
+    required_tools: ["Read", "Grep", "LS", "Bash", "WebSearch", "WebFetch", "TodoWrite"]
+    
+  - name: "code-review-response"
+    file: "agents/code-review-response.md"
+    version: "1.0.0"
+    description: "Processes code review feedback and implements changes"
+    category: "quality"
+    required_tools: ["Read", "Edit", "MultiEdit", "Bash", "Grep", "LS", "TodoWrite"]
+    
+  - name: "prompt-writer"
+    file: "agents/prompt-writer.md"
+    version: "1.2.0"
+    description: "Creates high-quality structured prompts for development workflows"
+    category: "productivity"
+    required_tools: ["Read", "Write", "Grep", "LS", "WebSearch", "TodoWrite"]
+    
+  - name: "agent-manager"
+    file: "agents/agent-manager.md"
+    version: "1.0.0"
+    description: "Manages external agent repositories with version control"
+    category: "infrastructure"
+    required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "WebFetch", "TodoWrite"]
+
+categories:
+  - name: "workflow"
+    description: "Agents that orchestrate and manage development workflows"
+    agents: ["workflow-master", "orchestrator-agent"]
+    
+  - name: "quality"
+    description: "Agents focused on code quality and review processes"
+    agents: ["code-reviewer", "code-review-response"]
+    
+  - name: "productivity"
+    description: "Agents that enhance developer productivity"
+    agents: ["prompt-writer"]
+    
+  - name: "infrastructure"
+    description: "Agents that manage other agents and infrastructure"
+    agents: ["agent-manager"]
+
+instructions:
+  - name: "claude-generic-instructions"
+    file: "instructions/claude-generic-instructions.md"
+    version: "1.0.0"
+    description: "Generic best practices and instructions for Claude Code"
+
+changelog:
+  - version: "1.0.0"
+    date: "2025-08-01"
+    changes:
+      - "Initial release with core agent collection"
+      - "Established Gadugi philosophy and community structure"
+      - "Migrated agents from cue repository"

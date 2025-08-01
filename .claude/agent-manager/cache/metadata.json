@@ -1,0 +1,11 @@
+{
+  "agent_manager_version": "1.0.0",
+  "initialized": "2025-08-01T03:30:00Z",
+  "last_operation": null,
+  "cache_stats": {
+    "total_size": 0,
+    "file_count": 0,
+    "last_cleanup": null
+  },
+  "error_log": []
+}

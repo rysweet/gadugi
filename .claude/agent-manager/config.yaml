@@ -1,0 +1,49 @@
+# Agent Manager Configuration
+# This file configures external agent repository management
+
+repositories: []
+  # Example repository configurations:
+  # - name: "company-agents"
+  #   url: "https://github.com/company/claude-agents"
+  #   type: "github"
+  #   branch: "main"
+  #   auth:
+  #     type: "token"
+  #     token_env: "GITHUB_TOKEN"
+  #   priority: 1
+  #   auto_update: true
+  #
+  # - name: "community-agents"
+  #   url: "https://github.com/claude-community/agents"
+  #   type: "github"
+  #   branch: "stable"
+  #   auth:
+  #     type: "public"
+  #   priority: 2
+  #   auto_update: false
+  #
+  # - name: "local-dev"
+  #   url: "/path/to/local/agents"
+  #   type: "local"
+  #   priority: 3
+  #   auto_update: false
+
+settings:
+  # Update behavior
+  auto_update: true
+  check_interval: "24h"
+  update_on_startup: true
+  
+  # Cache settings
+  cache_ttl: "7d"
+  max_cache_size: "100MB"
+  offline_mode: false
+  
+  # Security settings
+  verify_checksums: true
+  allow_unsigned: false
+  scan_agents: true
+  
+  # Logging
+  log_level: "info"
+  log_retention: "30d"
