@@ -1,43 +1,58 @@
-# Gadugi - Community Claude Code Agents
+# Gadugi - Multi-Agent System for AI-Assisted Coding
 
-> **Gadugi** (gah-DOO-gee) - A Cherokee concept of communal work where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
+> **Gadugi** is a multi-agent system for AI-assisted coding. It takes its name from the Cherokee word (gah-DOO-gee) that means communal work - where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
 
 ## Overview
 
-Gadugi is a centralized repository of reusable Claude Code agents and instructions, embodying the Cherokee philosophy of communal work and collective wisdom. This repository serves as the foundation for a distributed ecosystem of AI-powered development tools that can be shared across projects.
+Gadugi provides a collection of reusable AI agents that work together to enhance software development workflows. While currently implemented for Claude Code, the architecture is designed to be agent-host neutral and can be adapted to other AI coding assistants.
 
 ## Philosophy
 
 The Cherokee concept of Gadugi represents:
-- **ᎦᏚᎩ (Gadugi) - Communal Work**: Community members working together for mutual benefit
-- **ᎠᏓᏅᏙ (Adanvdo) - Collective Wisdom**: Sharing knowledge for the greater good  
-- **ᎠᎵᏍᏕᎸᏗ (Alisgelvdi) - Mutual Support**: Helping others knowing we all thrive together
-- **ᎤᏂᎦᏚ (Unigadv) - Shared Resources**: Pooling tools and knowledge efficiently
-
-This philosophy aligns perfectly with our vision of a shared agent repository where the Claude Code community contributes, maintains, and benefits from collective AI-powered development tools.
+- **ᎦᏚᎩ (Gadugi) - Communal Work**: Agents working together for mutual benefit
+- **ᎠᏓᏅᏙ (Adanvdo) - Collective Wisdom**: Sharing patterns and knowledge  
+- **ᎠᎵᏍᏕᎸᏗ (Alisgelvdi) - Mutual Support**: Agents helping each other
+- **ᎤᏂᎦᏚ (Unigadv) - Shared Resources**: Pooling tools and capabilities
 
 ## Repository Structure
 
 ```
 gadugi/
-├── agents/                 # Reusable Claude Code agents
-│   ├── workflow-master.md      # Orchestrates development workflows
-│   ├── orchestrator-agent.md   # Manages parallel agent execution
-│   ├── code-reviewer.md        # Automated code review
-│   ├── prompt-writer.md        # Creates structured prompts
-│   └── agent-manager.md        # Manages external agents
-├── instructions/           # Generic Claude instructions
-│   └── claude-generic-instructions.md
-├── prompts/               # Reusable prompt templates
-├── examples/              # Integration examples
-└── docs/                  # Additional documentation
+├── .claude/
+│   ├── agents/                 # All agents stored here
+│   │   ├── workflow-master.md      # Orchestrates development workflows
+│   │   ├── orchestrator-agent.md   # Manages parallel execution
+│   │   ├── code-reviewer.md        # Automated code review
+│   │   ├── code-review-response.md # Processes review feedback
+│   │   ├── prompt-writer.md        # Creates structured prompts
+│   │   ├── agent-manager.md        # Manages agent synchronization
+│   │   ├── task-analyzer.md        # Analyzes task dependencies
+│   │   ├── worktree-manager.md     # Manages git worktrees
+│   │   └── execution-monitor.md    # Monitors parallel execution
+│   ├── agent-manager/          # Agent manager configuration
+│   ├── orchestrator/           # Orchestrator components
+│   ├── docs/                   # Additional documentation
+│   └── templates/              # Workflow templates
+├── prompts/                    # Prompt templates
+├── manifest.yaml              # Agent registry and versions
+├── LICENSE                    # MIT License
+└── README.md                  # This file
 ```
 
 ## Quick Start
 
-### Using Gadugi in Your Project
+### Bootstrap Agent Manager
 
-1. **Configure Agent Manager** in your project:
+The agent-manager must be installed locally to manage synchronization with gadugi:
+
+1. **Download agent-manager**:
+   ```bash
+   mkdir -p .claude/agents
+   curl -o .claude/agents/agent-manager.md \
+     https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-manager.md
+   ```
+
+2. **Configure gadugi repository**:
    ```yaml
    # .claude/agent-manager/config.yaml
    repositories:
@@ -47,56 +62,44 @@ gadugi/
        branch: "main"
    ```
 
-2. **Import Instructions** in your CLAUDE.md:
-   ```markdown
-   @https://raw.githubusercontent.com/rysweet/gadugi/main/instructions/claude-generic-instructions.md
+3. **Sync agents**:
+   ```
+   /agent:agent-manager sync gadugi
    ```
 
-3. **Sync Agents** using Agent Manager:
-   ```bash
-   /agent:agent-manager install workflow-master
+### Using Gadugi in Your Project
+
+1. **Update your CLAUDE.md** to import shared instructions:
+   ```markdown
+   @https://raw.githubusercontent.com/rysweet/gadugi/main/claude-generic-instructions.md
+   @https://raw.githubusercontent.com/rysweet/gadugi/main/AGENT_HIERARCHY.md
+   ```
+
+2. **Invoke agents** as needed:
+   ```
+   /agent:workflow-master
+   /agent:orchestrator-agent
+   /agent:code-reviewer
    ```
 
 ## Available Agents
 
 ### Workflow Management
-- **workflow-master**: Orchestrates complete development workflows from issue to PR
-- **orchestrator-agent**: Enables parallel execution of multiple agents
+- **workflow-master** - Orchestrates complete development workflows from issue to PR
+- **orchestrator-agent** - Enables parallel execution of multiple agents
+- **task-analyzer** - Analyzes prompt files for dependencies and parallelization
+- **worktree-manager** - Manages git worktree lifecycle for isolated execution
+- **execution-monitor** - Monitors parallel executions and tracks progress
 
 ### Code Quality
-- **code-reviewer**: Performs thorough code reviews on pull requests
-- **code-review-response**: Processes and responds to code review feedback
-- **prompt-writer**: Creates structured prompts for complex tasks
+- **code-reviewer** - Performs comprehensive code reviews on pull requests
+- **code-review-response** - Processes and responds to code review feedback
+
+### Productivity
+- **prompt-writer** - Creates high-quality structured prompts for complex tasks
 
 ### Infrastructure
-- **agent-manager**: Manages agent repositories and updates
-
-## Contributing
-
-We welcome contributions that embody the spirit of Gadugi:
-
-1. **Fork** the repository
-2. **Create** a feature branch
-3. **Implement** your agent or improvement
-4. **Test** thoroughly
-5. **Submit** a pull request
-
-### Contribution Guidelines
-
-- Follow existing agent patterns and structure
-- Include comprehensive documentation
-- Add examples for complex agents
-- Test your contributions
-- Help review others' contributions
-
-## Community
-
-The Gadugi project thrives on community collaboration:
-
-- **Share** your custom agents
-- **Improve** existing agents
-- **Document** best practices
-- **Support** other developers
+- **agent-manager** - Manages external agent repositories with version control
 
 ## Version Management
 
@@ -105,6 +108,8 @@ We use semantic versioning:
 - **Minor**: New agents or features
 - **Patch**: Bug fixes and improvements
 
+See `manifest.yaml` for current agent versions.
+
 ## License
 
 MIT License - See [LICENSE](LICENSE) for details
@@ -112,11 +117,8 @@ MIT License - See [LICENSE](LICENSE) for details
 ## Acknowledgments
 
 - The Cherokee Nation for the inspiring concept of Gadugi
-- The Claude Code community for continuous contributions
 - Anthropic for enabling AI-powered development
 
 ---
 
 *ᎤᎵᎮᎵᏍᏗ (Ulihelisdi) - "We are helping each other"*
-
-Join us in building a thriving ecosystem of AI-powered development tools through the spirit of Gadugi.
