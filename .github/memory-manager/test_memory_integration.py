@@ -243,12 +243,11 @@ Last Updated: 2025-08-01T13:00:00-08:00
     def test_sync_config_validation(self):
         """Test sync configuration validation"""
         config = SyncConfig(
-            batch_size=10,
-            sync_frequency_minutes=5
+            batch_size=10
         )
         
         self.assertGreater(config.batch_size, 0)
-        self.assertGreater(config.sync_frequency_minutes, 0)
+        self.assertGreater(config.sync_frequency, 0)
     
     def test_conflict_detection(self):
         """Test conflict detection logic"""

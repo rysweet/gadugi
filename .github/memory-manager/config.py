@@ -155,20 +155,16 @@ class MemoryManagerConfig:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
-        result = asdict(self)
+        # Convert enums to strings before calling asdict to ensure proper YAML serialization
+        sync_dict = asdict(self.sync)
+        if hasattr(self.sync.direction, 'value'):
+            sync_dict['direction'] = self.sync.direction.value
+        if hasattr(self.sync.conflict_resolution, 'value'):
+            sync_dict['conflict_resolution'] = self.sync.conflict_resolution.value
         
-        # Convert enums to strings for YAML serialization
-        if hasattr(result.get('sync', {}), 'direction'):
-            result['sync']['direction'] = result['sync']['direction'].value
-        if hasattr(result.get('sync', {}), 'conflict_resolution'):
-            result['sync']['conflict_resolution'] = result['sync']['conflict_resolution'].value
-            
-        # Handle nested dataclass serialization
-        for key, value in result.items():
-            if hasattr(value, '__dict__') and hasattr(value, '__dataclass_fields__'):
-                if key == 'sync':
-                    result[key]['direction'] = value.direction.value if hasattr(value, 'direction') else result[key].get('direction')
-                    result[key]['conflict_resolution'] = value.conflict_resolution.value if hasattr(value, 'conflict_resolution') else result[key].get('conflict_resolution')
+        # Create the full dictionary
+        result = asdict(self)
+        result['sync'] = sync_dict
         
         return result
     
