@@ -1,0 +1,234 @@
+# Security Policies for Gadugi Container Execution Environment
+# 
+# This file defines custom security policies for different execution contexts.
+# Policies control resource limits, security constraints, and access controls.
+
+policies:
+  # Development policy - less restrictive for development work
+  development:
+    security_level: "minimal"
+    network_policy: "limited"
+    resources:
+      memory: "1g"
+      cpu: "2.0"
+      disk: "2g"
+      processes: 2048
+      open_files: 2048
+      execution_time: 3600  # 1 hour
+    security:
+      read_only_root: false
+      no_new_privileges: true
+      drop_capabilities: ["NET_RAW", "SYS_ADMIN"]
+      user_id: 1000
+      group_id: 1000
+    allowed_images:
+      - "python:3.11-slim"
+      - "python:3.11"
+      - "node:18-alpine"
+      - "node:18"
+      - "ubuntu:22.04"
+      - "alpine:latest"
+    blocked_commands:
+      - "sudo"
+      - "su" 
+      - "passwd"
+      - "systemctl"
+    environment_whitelist:
+      - "PATH"
+      - "HOME"
+      - "USER"
+      - "LANG"
+      - "LC_ALL"
+      - "PYTHONPATH"
+      - "NODE_PATH"
+    audit_required: true
+
+  # Testing policy - for automated testing environments
+  testing:
+    security_level: "standard"
+    network_policy: "none"
+    resources:
+      memory: "512m"
+      cpu: "1.0"
+      disk: "1g"
+      processes: 1024
+      open_files: 1024
+      execution_time: 900  # 15 minutes
+    security:
+      read_only_root: true
+      no_new_privileges: true
+      drop_capabilities: ["ALL"]
+      user_id: 1001
+      group_id: 1001
+    allowed_images:
+      - "python:3.11-slim"
+      - "node:18-alpine"
+      - "alpine:latest"
+    blocked_commands:
+      - "sudo"
+      - "su"
+      - "passwd"
+      - "chown"
+      - "chmod"
+      - "mount"
+      - "umount"
+      - "wget"
+      - "curl"
+    environment_whitelist:
+      - "PATH"
+      - "HOME"
+      - "USER"
+      - "PYTHONPATH"
+    mount_restrictions:
+      tmpfs_only: true
+      max_size: "100m"
+      no_exec: true
+      no_suid: true
+    audit_required: true
+
+  # Production policy - maximum security for production environments
+  production:
+    security_level: "paranoid"
+    network_policy: "none"
+    resources:
+      memory: "256m"
+      cpu: "0.5"
+      disk: "500m"
+      processes: 256
+      open_files: 256
+      execution_time: 300  # 5 minutes
+    security:
+      read_only_root: true
+      no_new_privileges: true
+      drop_capabilities: ["ALL"]
+      seccomp_profile: "runtime/default"
+      apparmor_profile: "docker-default"
+      user_id: 65534  # nobody
+      group_id: 65534
+    allowed_images:
+      - "gcr.io/distroless/python3"
+      - "gcr.io/distroless/nodejs"
+      - "gcr.io/distroless/static"
+    blocked_commands: []  # All commands blocked by default
+    environment_whitelist: []  # No environment variables allowed
+    mount_restrictions:
+      tmpfs_only: true
+      max_size: "50m"
+      no_exec: true
+      no_suid: true
+      no_dev: true
+    audit_required: true
+
+  # CI/CD policy - for continuous integration environments
+  cicd:
+    security_level: "hardened"
+    network_policy: "internal"
+    resources:
+      memory: "768m"
+      cpu: "1.5"
+      disk: "1.5g"
+      processes: 1536
+      open_files: 1536
+      execution_time: 1800  # 30 minutes
+    security:
+      read_only_root: true
+      no_new_privileges: true
+      drop_capabilities: ["ALL"]
+      add_capabilities: []
+      user_id: 1002
+      group_id: 1002
+    allowed_images:
+      - "python:3.11-slim"
+      - "python:3.10-slim"
+      - "node:18-alpine"
+      - "node:16-alpine"
+      - "ubuntu:22.04"
+      - "alpine:latest"
+    blocked_commands:
+      - "sudo"
+      - "su"
+      - "passwd"
+      - "systemctl"
+      - "service"
+      - "mount"
+      - "umount"
+    environment_whitelist:
+      - "PATH"
+      - "HOME"
+      - "USER"
+      - "CI"
+      - "BUILD_NUMBER"
+      - "GIT_COMMIT"
+      - "BRANCH_NAME"
+      - "PYTHONPATH"
+      - "NODE_PATH"
+    mount_restrictions:
+      tmpfs_only: true
+      max_size: "200m"
+      no_exec: false  # Allow execution for builds
+      no_suid: true
+    audit_required: true
+
+  # Sandbox policy - for untrusted code execution
+  sandbox:
+    security_level: "paranoid"
+    network_policy: "none"
+    resources:
+      memory: "128m"
+      cpu: "0.25"
+      disk: "100m"
+      processes: 64
+      open_files: 64
+      execution_time: 120  # 2 minutes
+    security:
+      read_only_root: true
+      no_new_privileges: true
+      drop_capabilities: ["ALL"]
+      seccomp_profile: "runtime/default"
+      user_id: 65534
+      group_id: 65534
+    allowed_images:
+      - "gcr.io/distroless/python3"
+      - "gcr.io/distroless/static"
+      - "scratch"
+    blocked_commands: []  # All commands blocked
+    environment_whitelist: []  # No environment variables
+    mount_restrictions:
+      tmpfs_only: true
+      max_size: "25m"
+      no_exec: true
+      no_suid: true
+      no_dev: true
+    audit_required: true
+
+  # Demo policy - for demonstrations and examples
+  demo:
+    security_level: "minimal"
+    network_policy: "none"
+    resources:
+      memory: "256m"
+      cpu: "0.5"
+      disk: "500m"
+      processes: 512
+      open_files: 512
+      execution_time: 600  # 10 minutes
+    security:
+      read_only_root: false
+      no_new_privileges: true
+      drop_capabilities: ["NET_RAW", "SYS_ADMIN"]
+      user_id: 1000
+      group_id: 1000
+    allowed_images:
+      - "python:3.11-slim"
+      - "node:18-alpine"
+      - "alpine:latest"
+    blocked_commands:
+      - "sudo"
+      - "su"
+      - "systemctl"
+    environment_whitelist:
+      - "PATH"
+      - "HOME"
+      - "USER"
+      - "LANG"
+    audit_required: false  # Simplified auditing for demos
