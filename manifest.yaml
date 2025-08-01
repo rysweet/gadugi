@@ -1,11 +1,12 @@
 name: "Gadugi - Claude Code Agent Collection"
-version: "1.0.0"
+version: "1.0.1"
 description: "Community-driven collection of reusable Claude Code agents embodying Cherokee Gadugi philosophy"
 maintainer: "Ryan Sweet <rysweet@microsoft.com>"
 repository: "https://github.com/rysweet/gadugi"
 claude_code_version: ">=1.0.0"
 
 agents:
+  # Workflow Management Agents
   - name: "workflow-master"
     file: ".claude/agents/workflow-master.md"
     version: "2.0.0"
@@ -20,6 +21,29 @@ agents:
     category: "workflow"
     required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
     
+  # Sub-agents for OrchestratorAgent
+  - name: "task-analyzer"
+    file: ".claude/agents/task-analyzer.md"
+    version: "1.0.0"
+    description: "Analyzes prompt files to identify dependencies and parallelization opportunities"
+    category: "workflow"
+    required_tools: ["Read", "Grep", "LS", "Glob", "Bash"]
+    
+  - name: "worktree-manager"
+    file: ".claude/agents/worktree-manager.md"
+    version: "1.0.0"
+    description: "Manages git worktree lifecycle for isolated parallel execution"
+    category: "workflow"
+    required_tools: ["Bash", "Read", "Write", "LS"]
+    
+  - name: "execution-monitor"
+    file: ".claude/agents/execution-monitor.md"
+    version: "1.0.0"
+    description: "Monitors parallel Claude Code CLI executions and tracks progress"
+    category: "workflow"
+    required_tools: ["Bash", "Read", "Write", "TodoWrite"]
+    
+  # Code Quality Agents
   - name: "code-reviewer"
     file: ".claude/agents/code-reviewer.md"
     version: "1.5.0"
@@ -34,6 +58,7 @@ agents:
     category: "quality"
     required_tools: ["Read", "Edit", "MultiEdit", "Bash", "Grep", "LS", "TodoWrite"]
     
+  # Productivity Agents
   - name: "prompt-writer"
     file: ".claude/agents/prompt-writer.md"
     version: "1.2.0"
@@ -41,6 +66,7 @@ agents:
     category: "productivity"
     required_tools: ["Read", "Write", "Grep", "LS", "WebSearch", "TodoWrite"]
     
+  # Infrastructure Agents
   - name: "agent-manager"
     file: ".claude/agents/agent-manager.md"
     version: "1.0.0"
@@ -51,7 +77,7 @@ agents:
 categories:
   - name: "workflow"
     description: "Agents that orchestrate and manage development workflows"
-    agents: ["workflow-master", "orchestrator-agent"]
+    agents: ["workflow-master", "orchestrator-agent", "task-analyzer", "worktree-manager", "execution-monitor"]
     
   - name: "quality"
     description: "Agents focused on code quality and review processes"
@@ -67,11 +93,18 @@ categories:
 
 instructions:
   - name: "claude-generic-instructions"
-    file: "instructions/claude-generic-instructions.md"
+    file: "claude-generic-instructions.md"
     version: "1.0.0"
     description: "Generic best practices and instructions for Claude Code"
 
 changelog:
+  - version: "1.0.1"
+    date: "2025-08-01"
+    changes:
+      - "Fixed repository structure - agents only in .claude/agents/"
+      - "Added missing sub-agents: task-analyzer, worktree-manager, execution-monitor"
+      - "Updated all file paths to use .claude/agents/"
+      - "Removed duplicate directories"
   - version: "1.0.0"
     date: "2025-08-01"
     changes:
