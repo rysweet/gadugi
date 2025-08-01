@@ -1,0 +1,112 @@
+# Memory Manager Configuration
+backup_directory: .github/memory-sync-state/backups
+config_file_path: .github/memory-manager/config.yaml
+enabled: true
+version: "1.0.0"
+
+# Memory.md file location
+memory_file_path: .github/Memory.md
+state_directory: .github/memory-sync-state
+
+# Content management rules
+content_rules:
+  completed_patterns:
+  - "✅"
+  - "[x]"
+  maintain_chronological_order: true
+  max_file_size_kb: 500
+  max_items_per_section: 30
+  normalize_task_format: true
+  optional_sections:
+  - "Completed Tasks"
+  - "Reflections" 
+  - "Important Context"
+  - "Code Review Summary"
+  pending_patterns:
+  - "[ ]"
+  - "- [ ]"
+  preserve_context_links: true
+  priority_patterns:
+  - "**CRITICAL**"
+  - "**HIGH**"
+  - "**URGENT**"
+  required_sections:
+  - "Current Goals"
+  - "Recent Accomplishments"
+  - "Next Steps"
+
+# GitHub Issues integration
+issue_creation:
+  auto_assign: false
+  assignee: null
+  default_labels:
+  - "memory-sync"
+  - "ai-assistant"
+  - "automated"
+  include_context: true
+  include_metadata: true
+  max_title_length: 80
+  priority_label_map:
+    high: "priority:high"
+    low: "priority:low"
+    medium: "priority:medium"
+  priority_labels: true
+  template_name: "memory-task"
+
+# Monitoring and logging
+monitoring:
+  alert_email: null
+  alert_on_conflicts: true
+  alert_on_failures: true
+  enable_logging: true
+  log_file: "memory-sync.log"
+  log_level: "INFO"
+  track_api_usage: true
+  track_conflict_rates: true
+  track_sync_performance: true
+
+# Content pruning configuration
+pruning:
+  completed_task_age_days: 7
+  max_accomplishments: 20
+  max_context_items: 15
+  preserve_high_priority: true
+  preserve_issue_references: true
+  preserve_recent_count: 10
+  reflection_age_days: 30
+  section_rules:
+    "Completed Tasks":
+      max_age_days: 7
+      max_items: 20
+    "Current Goals":
+      max_items: 10
+      preserve_all: true
+    "Important Context":
+      max_items: 15
+      relevance_scoring: true
+    "Next Steps":
+      preserve_all: true
+    "Recent Accomplishments":
+      max_age_days: 14
+      max_items: 15
+    "Reflections":
+      consolidate_similar: true
+      max_age_days: 30
+
+# Synchronization configuration  
+sync:
+  api_delay_seconds: 0.1
+  auto_close_completed: true
+  auto_create_issues: true
+  backup_before_sync: true
+  batch_size: 10
+  conflict_resolution: "manual"  # manual, memory_wins, github_wins, latest_wins
+  direction: "bidirectional"     # memory_to_github, github_to_memory, bidirectional
+  dry_run: false
+  exclude_sections:
+  - "Reflections"
+  - "Important Context"
+  include_sections: []
+  max_retries: 3
+  retry_delay_seconds: 2
+  sync_frequency_minutes: 5
