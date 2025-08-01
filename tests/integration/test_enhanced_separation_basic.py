@@ -361,7 +361,7 @@ class TestEnhancedSeparationCodeReduction:
         state_manager = StateManager()
         error_handler = ErrorHandler()
         task_tracker = TaskTracker()
-        config = AgentConfig()
+        config = AgentConfig(agent_id="test-basic", name="Test Basic")
         
         # All should be non-None
         assert github_ops is not None

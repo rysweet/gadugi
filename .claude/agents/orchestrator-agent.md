@@ -4,7 +4,7 @@ description: Coordinates parallel execution of multiple WorkflowMasters for inde
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Glob
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.github_operations import GitHubManager, PullRequestManager, IssueManager
+  from .claude.shared.github_operations import GitHubOperations
   from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
   from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
   from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
@@ -31,7 +31,7 @@ The OrchestratorAgent leverages the Enhanced Separation shared modules for optim
 ### Shared Module Initialization
 ```python
 # Initialize shared managers at startup
-github_manager = GitHubManager(config=AgentConfig())
+github_ops = GitHubOperations()
 state_manager = WorkflowStateManager()
 error_handler = ErrorHandler(retry_manager=RetryManager())
 task_tracker = TaskTracker(todowrite_manager=TodoWriteManager())
@@ -43,9 +43,9 @@ execution_circuit_breaker = CircuitBreaker(failure_threshold=5, timeout=600)
 ```
 
 ### GitHub Operations Integration
-- **Issue Management**: Use `IssueManager` for coordinated issue creation across parallel tasks
-- **PR Coordination**: Use `PullRequestManager` for handling multiple parallel PRs
-- **Batch Operations**: Leverage batch GitHub operations for efficiency
+- **Issue Management**: Use `GitHubOperations.create_issue()` for coordinated issue creation across parallel tasks
+- **PR Coordination**: Use `GitHubOperations.create_pr()` for handling multiple parallel PRs
+- **Batch Operations**: Leverage `GitHubOperations.batch_create_issues()` for efficiency
 
 ### State Management Integration
 - **Orchestration State**: Track parallel execution state with `WorkflowStateManager`

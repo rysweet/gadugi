@@ -28,11 +28,11 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '.claude', 'shared'))
 
-from github_operations import GitHubManager, PullRequestManager, IssueManager
-from state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
-from error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
-from task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
-from interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
+from github_operations import GitHubOperations
+from state_management import StateManager, CheckpointManager
+from utils.error_handling import ErrorHandler, CircuitBreaker
+from task_tracking import TaskTracker, TodoWriteIntegration, WorkflowPhaseTracker, TaskMetrics
+from interfaces import AgentConfig, TaskData, ErrorContext, WorkflowPhase
 
 
 class TestWorkflowMasterIntegration:
@@ -41,19 +41,19 @@ class TestWorkflowMasterIntegration:
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.config = AgentConfig()
+        self.config = AgentConfig(agent_id="test-workflow-master", name="Test WorkflowMaster")
         
         # Initialize shared modules
-        self.github_manager = GitHubManager(config=self.config)
-        self.state_manager = WorkflowStateManager()
-        self.error_handler = ErrorHandler(retry_manager=RetryManager())
-        self.task_tracker = TaskTracker(todowrite_manager=TodoWriteManager())
+        self.github_ops = GitHubOperations()
+        self.state_manager = StateManager()
+        self.error_handler = ErrorHandler()
+        self.task_tracker = TaskTracker()
         self.phase_tracker = WorkflowPhaseTracker()
-        self.productivity_analyzer = ProductivityAnalyzer()
+        self.task_metrics = TaskMetrics()
         
         # Mock external dependencies
         self.mock_gh_api = Mock()
-        self.github_manager._api_client = self.mock_gh_api
+        self.github_ops._api_client = self.mock_gh_api
         
     def teardown_method(self):
         """Cleanup test environment"""
@@ -63,15 +63,15 @@ class TestWorkflowMasterIntegration:
         """Test WorkflowMaster initialization uses shared modules correctly"""
         
         # Test shared module initialization
-        assert self.github_manager is not None
+        assert self.github_ops is not None
         assert self.state_manager is not None
         assert self.error_handler is not None
         assert self.task_tracker is not None
         assert self.phase_tracker is not None
-        assert self.productivity_analyzer is not None
+        assert self.task_metrics is not None
         
         # Test configuration propagation
-        assert self.github_manager.config == self.config
+        assert self.github_ops.config == self.config
         
         # Test circuit breaker initialization
         github_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
@@ -87,7 +87,7 @@ class TestWorkflowMasterIntegration:
         prompt_file = "test-feature.md"
         
         # Test workflow initialization
-        self.productivity_analyzer.start_workflow_tracking(task_id, prompt_file)
+        self.task_metrics.start_workflow_tracking(task_id, prompt_file)
         
         # Create initial workflow state
         workflow_state = WorkflowState(
@@ -141,10 +141,10 @@ class TestWorkflowMasterIntegration:
         
         # Test phase tracking
         self.phase_tracker.start_phase(WorkflowPhase.ISSUE_CREATION)
-        self.productivity_analyzer.record_phase_start("issue_creation")
+        self.task_metrics.record_phase_start("issue_creation")
         
         # Mock successful issue creation
-        with patch.object(self.github_manager, 'create_issue') as mock_create_issue:
+        with patch.object(self.github_ops, 'create_issue') as mock_create_issue:
             mock_create_issue.return_value = {
                 "success": True,
                 "issue_number": 123,
@@ -154,7 +154,7 @@ class TestWorkflowMasterIntegration:
             # Test retry logic integration
             retry_manager = RetryManager()
             issue_result = retry_manager.execute_with_retry(
-                lambda: self.github_manager.create_issue({
+                lambda: self.github_ops.create_issue({
                     "title": f"{prompt_data['feature_name']} - {task_id}",
                     "body": "Test issue body",
                     "labels": ["enhancement", "ai-generated"]
@@ -176,7 +176,7 @@ class TestWorkflowMasterIntegration:
             
             # Test phase completion tracking
             self.phase_tracker.complete_phase(WorkflowPhase.ISSUE_CREATION)
-            self.productivity_analyzer.record_phase_completion("issue_creation")
+            self.task_metrics.record_phase_completion("issue_creation")
     
     def test_enhanced_pull_request_phase(self):
         """Test enhanced PR creation with atomic state updates and verification"""
@@ -200,10 +200,10 @@ class TestWorkflowMasterIntegration:
         
         # Test phase tracking
         self.phase_tracker.start_phase(WorkflowPhase.PULL_REQUEST_CREATION)
-        self.productivity_analyzer.record_phase_start("pr_creation")
+        self.task_metrics.record_phase_start("pr_creation")
         
         # Mock successful PR creation
-        with patch.object(self.github_manager, 'create_pull_request') as mock_create_pr:
+        with patch.object(self.github_ops, 'create_pull_request') as mock_create_pr:
             mock_create_pr.return_value = {
                 "success": True,
                 "pr_number": 456,
@@ -211,13 +211,13 @@ class TestWorkflowMasterIntegration:
             }
             
             # Mock PR verification
-            with patch.object(self.github_manager, 'verify_pull_request_exists') as mock_verify:
+            with patch.object(self.github_ops, 'verify_pull_request_exists') as mock_verify:
                 mock_verify.return_value = {"exists": True}
                 
                 # Test PR creation with retry logic
                 retry_manager = RetryManager()
                 pr_result = retry_manager.execute_with_retry(
-                    lambda: self.github_manager.create_pull_request({
+                    lambda: self.github_ops.create_pull_request({
                         "title": f"{implementation_summary['feature_name']} - Implementation",
                         "body": "Test PR body",
                         "head": workflow_state.branch_name,
@@ -237,7 +237,7 @@ class TestWorkflowMasterIntegration:
                 workflow_state.phase = WorkflowPhase.PULL_REQUEST_CREATED
                 
                 # Test verification step
-                verification_result = self.github_manager.verify_pull_request_exists(pr_result["pr_number"])
+                verification_result = self.github_ops.verify_pull_request_exists(pr_result["pr_number"])
                 assert verification_result["exists"] == True
                 
                 # Test critical checkpoint after PR creation
@@ -246,7 +246,7 @@ class TestWorkflowMasterIntegration:
                 
                 # Test phase completion
                 self.phase_tracker.complete_phase(WorkflowPhase.PULL_REQUEST_CREATION)
-                self.productivity_analyzer.record_phase_completion("pr_creation")
+                self.task_metrics.record_phase_completion("pr_creation")
     
     def test_enhanced_task_tracking_with_dependencies(self):
         """Test enhanced task tracking with dependency validation"""
@@ -321,7 +321,7 @@ class TestWorkflowMasterIntegration:
         assert current_task is not None
         
         # Test productivity tracking
-        self.productivity_analyzer.record_task_completion(
+        self.task_metrics.record_task_completion(
             "1",
             workflow_state.task_id,
             duration=300  # 5 minutes
@@ -410,7 +410,7 @@ class TestWorkflowMasterIntegration:
         for i, phase in enumerate(phases_to_test):
             # Start phase
             self.phase_tracker.start_phase(phase)
-            self.productivity_analyzer.record_phase_start(phase.value.lower())
+            self.task_metrics.record_phase_start(phase.value.lower())
             
             # Simulate phase work (mock)
             import time
@@ -418,14 +418,14 @@ class TestWorkflowMasterIntegration:
             
             # Complete phase
             self.phase_tracker.complete_phase(phase)
-            self.productivity_analyzer.record_phase_completion(phase.value.lower())
+            self.task_metrics.record_phase_completion(phase.value.lower())
             
             # Verify phase completion
             phase_status = self.phase_tracker.get_phase_status(phase)
             assert phase_status is not None
         
         # Test phase metrics
-        phase_metrics = self.productivity_analyzer.get_phase_metrics(task_id)
+        phase_metrics = self.task_metrics.get_phase_metrics(task_id)
         assert isinstance(phase_metrics, dict)
     
     def test_state_consistency_validation(self):
@@ -473,7 +473,7 @@ class TestWorkflowMasterIntegration:
         prompt_file = "end-to-end-test.md"
         
         # Initialize workflow
-        self.productivity_analyzer.start_workflow_tracking(task_id, prompt_file)
+        self.task_metrics.start_workflow_tracking(task_id, prompt_file)
         
         workflow_state = WorkflowState(
             task_id=task_id,
@@ -486,10 +486,10 @@ class TestWorkflowMasterIntegration:
         workflow_state.phase = WorkflowPhase.ISSUE_CREATION
         self.phase_tracker.start_phase(WorkflowPhase.ISSUE_CREATION)
         
-        with patch.object(self.github_manager, 'create_issue') as mock_issue:
+        with patch.object(self.github_ops, 'create_issue') as mock_issue:
             mock_issue.return_value = {"success": True, "issue_number": 101, "issue_url": "test-url"}
             
-            issue_result = self.github_manager.create_issue({"title": "E2E Test", "body": "Test"})
+            issue_result = self.github_ops.create_issue({"title": "E2E Test", "body": "Test"})
             workflow_state.issue_number = issue_result["issue_number"]
             
         self.phase_tracker.complete_phase(WorkflowPhase.ISSUE_CREATION)
@@ -515,13 +515,13 @@ class TestWorkflowMasterIntegration:
         # Phase 8: Pull Request Creation
         workflow_state.phase = WorkflowPhase.PULL_REQUEST_CREATION
         
-        with patch.object(self.github_manager, 'create_pull_request') as mock_pr:
+        with patch.object(self.github_ops, 'create_pull_request') as mock_pr:
             mock_pr.return_value = {"success": True, "pr_number": 201, "pr_url": "pr-test-url"}
             
-            with patch.object(self.github_manager, 'verify_pull_request_exists') as mock_verify:
+            with patch.object(self.github_ops, 'verify_pull_request_exists') as mock_verify:
                 mock_verify.return_value = {"exists": True}
                 
-                pr_result = self.github_manager.create_pull_request({"title": "E2E Test PR", "body": "Test PR"})
+                pr_result = self.github_ops.create_pull_request({"title": "E2E Test PR", "body": "Test PR"})
                 workflow_state.pr_number = pr_result["pr_number"]
         
         # Phase 9: Review (preparation)

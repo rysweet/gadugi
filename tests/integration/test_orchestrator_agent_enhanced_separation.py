@@ -41,7 +41,7 @@ class TestOrchestratorAgentIntegration:
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.config = AgentConfig()
+        self.config = AgentConfig(agent_id="test-orchestrator", name="Test Orchestrator")
         
         # Initialize shared modules
         self.github_operations = GitHubOperations()
@@ -416,10 +416,10 @@ class TestOrchestratorAgentPerformance:
         
         # Mock multiple GitHub operations
         for i in range(10):
-            with patch.object(GitHubManager, 'create_issue') as mock_create:
+            with patch.object(GitHubOperations, 'create_issue') as mock_create:
                 mock_create.return_value = {"success": True, "issue_number": 100 + i}
-                github_manager = GitHubManager(config=AgentConfig())
-                github_manager.create_issue({"title": f"Test Issue {i}", "body": "Test"})
+                github_ops = GitHubOperations()
+                github_ops.create_issue(f"Test Issue {i}", "Test")
         
         github_ops_time = time.time() - start_time
         

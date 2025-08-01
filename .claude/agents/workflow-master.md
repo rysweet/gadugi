@@ -4,7 +4,7 @@ description: Orchestrates complete development workflows from prompt files, ensu
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.github_operations import GitHubManager, PullRequestManager, IssueManager
+  from .claude.shared.github_operations import GitHubOperations
   from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
   from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
   from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
@@ -31,7 +31,7 @@ The WorkflowMaster leverages the Enhanced Separation shared modules for robust, 
 ### Shared Module Initialization
 ```python
 # Initialize shared managers for workflow execution
-github_manager = GitHubManager(config=AgentConfig())
+github_ops = GitHubOperations()
 state_manager = WorkflowStateManager()
 error_handler = ErrorHandler(retry_manager=RetryManager())
 task_tracker = TaskTracker(todowrite_manager=TodoWriteManager())
@@ -44,9 +44,9 @@ implementation_circuit_breaker = CircuitBreaker(failure_threshold=5, timeout=600
 ```
 
 ### GitHub Operations Integration
-- **Issue Management**: Use `IssueManager` for robust issue creation with retry logic
-- **PR Management**: Use `PullRequestManager` for reliable PR creation and updates
-- **Batch Operations**: Leverage efficient batch operations for multi-step workflows
+- **Issue Management**: Use `GitHubOperations.create_issue()` for robust issue creation with retry logic
+- **PR Management**: Use `GitHubOperations.create_pr()` for reliable PR creation and updates
+- **Batch Operations**: Leverage `GitHubOperations.batch_create_issues()` for multi-step workflows
 
 ### State Management Integration
 - **Workflow State**: Comprehensive state tracking with `WorkflowStateManager`
