@@ -551,178 +551,93 @@ check_and_update_agents() {
 
 # Startup hook integration
 setup_startup_hooks() {
-    echo "🔗 Setting up Agent Manager startup hooks..."
+    # Download and execute the setup-hooks script with integrity verification
+    local base_url="https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agent-manager/scripts"
+    local script_name="setup-hooks.sh"
+    local script_path=".claude/agent-manager/scripts/$script_name"
+    local checksums_url="$base_url/checksums.sha256"
+    local checksums_path=".claude/agent-manager/scripts/checksums.sha256"
     
-    local settings_file=".claude/settings.json"
-    local backup_file=".claude/settings.json.backup.$(date +%s)"
-    local hooks_dir=".claude/hooks"
-    local script_source=".claude/agent-manager/hooks/check-agent-updates.sh"
-    local script_target="$hooks_dir/check-agent-updates.sh"
+    # Ensure scripts directory exists
+    mkdir -p "$(dirname "$script_path")"
     
-    # Create hooks directory if it doesn't exist
-    mkdir -p "$hooks_dir"
-    
-    # Install the check-agent-updates.sh script to .claude/hooks/
-    echo "📦 Installing agent update checker script..."
-    
-    if [ -f "$script_source" ]; then
-        echo "📄 Copying script from $script_source to $script_target"
-        cp "$script_source" "$script_target"
-        chmod +x "$script_target"
-        echo "✅ Script installed and made executable"
-    else
-        echo "⚠️  Source script not found at $script_source"
-        echo "🔧 Creating script at target location..."
+    # Function to verify script integrity
+    verify_script_integrity() {
+        local script_file="$1"
+        local checksums_file="$2"
         
-        # Create the script directly if source doesn't exist
-        cat > "$script_target" << 'SCRIPT_EOF'
-#!/bin/sh
-# check-agent-updates.sh - Lightweight agent update checker
-echo "🚀 Claude Code session started"
-echo "🤖 Agent Manager available"
-echo "💡 Use '/agent:agent-manager check-and-update-agents' to check for updates"
-SCRIPT_EOF
-        chmod +x "$script_target"
-        echo "✅ Basic script created and made executable"
-    fi
-    
-    # Create backup if settings.json exists
-    if [ -f "$settings_file" ]; then
-        echo "💾 Creating backup of existing settings.json..."
-        cp "$settings_file" "$backup_file"
-    fi
-    
-    # Create default settings if file doesn't exist
-    if [ ! -f "$settings_file" ]; then
-        echo "📄 Creating new settings.json file..."
-        mkdir -p ".claude"
-        echo "{}" > "$settings_file"
-    fi
-    
-    # Read existing settings
-    local existing_settings
-    if ! existing_settings=$(cat "$settings_file" 2>/dev/null); then
-        echo "⚠️  Failed to read existing settings, creating new file..."
-        echo "{}" > "$settings_file"
-        existing_settings="{}"
-    fi
-    
-    # Validate JSON syntax
-    if ! echo "$existing_settings" | python3 -m json.tool >/dev/null 2>&1; then
-        echo "⚠️  Invalid JSON in settings.json, creating backup and recreating..."
-        cp "$settings_file" "$backup_file.invalid"
-        existing_settings="{}"
-        # Write valid empty JSON to the file
-        echo "{}" > "$settings_file"
-    fi
-    
-    # Create agent-manager hook configuration
-    # This hook executes the shell script instead of trying to invoke Claude agents
-    local agent_manager_hook=$(cat << 'EOH'
-{
-  "matchers": {
-    "sessionType": ["startup", "resume"]
-  },
-  "hooks": [
-    {
-      "type": "command",
-      "command": ".claude/hooks/check-agent-updates.sh --quiet"
+        if ! command -v sha256sum >/dev/null 2>&1; then
+            echo "⚠️  WARNING: sha256sum not found. Skipping integrity verification."
+            return 0
+        fi
+        
+        # Extract expected checksum for the script
+        local expected_checksum=$(grep "$script_name" "$checksums_file" | awk '{print $1}')
+        if [ -z "$expected_checksum" ]; then
+            echo "❌ No checksum found for $script_name"
+            return 1
+        fi
+        
+        # Calculate actual checksum
+        local actual_checksum=$(sha256sum "$script_file" | awk '{print $1}')
+        
+        if [ "$expected_checksum" = "$actual_checksum" ]; then
+            echo "✅ Script integrity verified"
+            return 0
+        else
+            echo "❌ Script integrity check failed!"
+            echo "   Expected: $expected_checksum"
+            echo "   Actual:   $actual_checksum"
+            return 1
+        fi
     }
-  ]
-}
-EOH
-)
     
-    # Use Python to merge JSON preserving existing settings
-    python3 << PYTHON_SCRIPT
-import json
-import sys
-
-try:
-    # Read existing settings
-    with open('$settings_file', 'r') as f:
-        settings = json.load(f)
-    
-    # Ensure hooks section exists
-    if 'hooks' not in settings:
-        settings['hooks'] = {}
-    
-    # Ensure SessionStart section exists
-    if 'SessionStart' not in settings['hooks']:
-        settings['hooks']['SessionStart'] = []
-    
-    # Create agent-manager hook
-    agent_manager_hook = $agent_manager_hook
-    
-    # Check if agent-manager hook already exists and remove it
-    # Remove hooks that contain check-agent-updates.sh or old agent-manager syntax
-    settings['hooks']['SessionStart'] = [
-        hook for hook in settings['hooks']['SessionStart'] 
-        if not (isinstance(hook.get('hooks'), list) and 
-                any('check-agent-updates.sh' in h.get('command', '') or
-                    'agent-manager' in h.get('command', '') 
-                    for h in hook.get('hooks', []))) and
-        not (isinstance(hook.get('command'), str) and 
-             ('check-agent-updates.sh' in hook.get('command', '') or
-              'agent-manager' in hook.get('command', '')))
-    ]
-    
-    # Add the new agent-manager hook
-    settings['hooks']['SessionStart'].append(agent_manager_hook)
-    
-    # Write updated settings
-    with open('$settings_file', 'w') as f:
-        json.dump(settings, f, indent=2)
-    
-    print("✅ Successfully updated settings.json with agent-manager hooks")
-    
-except Exception as e:
-    print(f"❌ Error updating settings.json: {e}")
-    sys.exit(1)
-PYTHON_SCRIPT
-    
-    local python_exit_code=$?
-    
-    if [ $python_exit_code -ne 0 ]; then
-        echo "❌ Failed to update settings.json with Python"
+    # Download or use local script
+    if [ -f "$script_path" ]; then
+        echo "📄 Using local setup-hooks script..."
+        # Still verify local script if checksums available
+        if [ -f "$checksums_path" ]; then
+            verify_script_integrity "$script_path" "$checksums_path" || return 1
+        fi
+    else
+        echo "📥 Downloading setup-hooks script and checksums..."
         
-        # Fallback: restore backup if it exists
-        if [ -f "$backup_file" ]; then
-            echo "🔄 Restoring backup..."
-            cp "$backup_file" "$settings_file"
+        # Download checksums first
+        if command -v curl >/dev/null 2>&1; then
+            curl -sSL "$checksums_url" -o "$checksums_path" || {
+                echo "❌ Failed to download checksums"
+                return 1
+            }
+            curl -sSL "$base_url/$script_name" -o "$script_path" || {
+                echo "❌ Failed to download script"
+                return 1
+            }
+        elif command -v wget >/dev/null 2>&1; then
+            wget -q "$checksums_url" -O "$checksums_path" || {
+                echo "❌ Failed to download checksums"
+                return 1
+            }
+            wget -q "$base_url/$script_name" -O "$script_path" || {
+                echo "❌ Failed to download script"
+                return 1
+            }
+        else
+            echo "❌ Neither curl nor wget found. Cannot download script."
+            return 1
         fi
         
-        return 1
+        # Verify downloaded script
+        verify_script_integrity "$script_path" "$checksums_path" || {
+            echo "🛡️ Removing unverified script for security"
+            rm -f "$script_path"
+            return 1
+        }
+        
+        chmod +x "$script_path"
     fi
     
-    # Validate the final JSON
-    if ! python3 -m json.tool "$settings_file" >/dev/null 2>&1; then
-        echo "❌ Generated invalid JSON, restoring backup..."
-        if [ -f "$backup_file" ]; then
-            cp "$backup_file" "$settings_file"
-        fi
-        return 1
-    fi
-    
-    echo "✅ Startup hooks configured in $settings_file"
-    echo "💡 Backup created at: $backup_file"
-    
-    # Show the hooks section for verification
-    echo "📋 Current SessionStart hooks:"
-    python3 -c "
-import json
-try:
-    with open('$settings_file', 'r') as f:
-        settings = json.load(f)
-    hooks = settings.get('hooks', {}).get('SessionStart', [])
-    if hooks:
-        for i, hook in enumerate(hooks):
-            print(f'  {i+1}. {hook}')
-    else:
-        print('  No SessionStart hooks found')
-except Exception as e:
-    print(f'  Error reading hooks: {e}')
-"
+    # Execute the script
+    bash "$script_path"
 }
 ```
 

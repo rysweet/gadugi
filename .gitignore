@@ -1,0 +1,64 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Claude Code agent-manager
+.claude/agent-manager/cache/last-check-timestamp
+.claude/agent-manager/logs/
+.claude/agent-manager/tests/__pycache__/
+.claude/cache/
+.claude/hooks/
+.claude/logs/
+
+# Agent-manager runtime files
+.claude/agent-manager/hooks/check-agent-updates.sh
+# Note: scripts/ directory is tracked in version control
+
+# IDE and OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Temporary files
+*.tmp
+*.bak
+.backup.*
