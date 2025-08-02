@@ -23,14 +23,14 @@
   - [ ] Create Task Research Agent for unknown task solutions
 
 ### Phase 2: Architecture Analysis (Must Run Sequentially)
-- [ ] **Orchestrator/WorkflowMaster Optimization**
-  - [ ] Analyze current separation between Orchestrator and WorkflowMaster
+- [ ] **Orchestrator/WorkflowManager Optimization**
+  - [ ] Analyze current separation between Orchestrator and WorkflowManager
   - [ ] Design shared module architecture
   - [ ] Ensure Orchestrator is always the entry point for workflow orchestration
-  - [ ] Make WorkflowMaster a delegate of Orchestrator
+  - [ ] Make WorkflowManager a delegate of Orchestrator
 
 ### Phase 3: System Robustness and Team Capabilities (Can Execute in Parallel)
-- [ ] **WorkflowMaster Robustness**
+- [ ] **WorkflowManager Robustness**
   - [ ] Move shell variables and pipes logic to code
   - [ ] Implement task ID management in code
   - [ ] Reduce dependency on shell approval requirements
@@ -63,10 +63,10 @@
 4. **Task Analysis Stream**: TaskBoundsEval, TaskDecomposer, Research Agent
 
 ### Group 2: Architecture (Phase 2) - Sequential
-5. **Orchestrator/WorkflowMaster Analysis**: Must complete before Phase 3
+5. **Orchestrator/WorkflowManager Analysis**: Must complete before Phase 3
 
 ### Group 3: Robustness & Intelligence (Phase 3) - 4 Parallel Streams
-6. **WorkflowMaster Stream**: Code migration and state management
+6. **WorkflowManager Stream**: Code migration and state management
 7. **Team Intelligence Stream**: TeamCoach and Agent Creators
 8. **Documentation Stream**: SpecMaintainer and HostTranslator
 9. **Hooks Integration Stream**: All Claude-Code hooks
@@ -76,19 +76,19 @@
 ### Critical Dependencies:
 - XPIA Defense must be available before hooks integration
 - Memory refactoring should complete early to benefit other tasks
-- Orchestrator/WorkflowMaster analysis must complete before their refactoring
+- Orchestrator/WorkflowManager analysis must complete before their refactoring
 - Container environment helps with testing all other components
 
 ### Resource Constraints:
-- Maximum 4-5 parallel WorkflowMasters recommended
+- Maximum 4-5 parallel WorkflowManagers recommended
 - Each phase should complete before starting the next
 - Integration testing required between phases
 
 ## Execution Strategy
 
-1. **Phase 1**: Launch 4 parallel WorkflowMasters for foundation tasks
+1. **Phase 1**: Launch 4 parallel WorkflowManagers for foundation tasks
 2. **Phase 2**: Sequential execution of architecture analysis
-3. **Phase 3**: Launch 4 parallel WorkflowMasters for system enhancements
+3. **Phase 3**: Launch 4 parallel WorkflowManagers for system enhancements
 4. **Integration**: Comprehensive testing of all components together
 
 ## Success Metrics

@@ -1,8 +1,8 @@
-# WorkflowMaster Integration Testing Guide
+# WorkflowManager Integration Testing Guide
 
 ## Overview
 
-This guide provides instructions for creating integration tests for the WorkflowMaster sub-agent to ensure reliable workflow execution.
+This guide provides instructions for creating integration tests for the WorkflowManager sub-agent to ensure reliable workflow execution.
 
 ## Test Structure
 
@@ -14,10 +14,10 @@ Create a minimal test prompt file for validation:
 # Test Feature Implementation Prompt
 
 ## Overview
-Test feature for WorkflowMaster integration testing.
+Test feature for WorkflowManager integration testing.
 
 ## Problem Statement
-We need to verify WorkflowMaster can execute all workflow phases correctly.
+We need to verify WorkflowManager can execute all workflow phases correctly.
 
 ## Requirements
 - Create a simple test file
@@ -59,8 +59,8 @@ import subprocess
 import time
 import os
 
-class TestWorkflowMasterIntegration:
-    """Integration tests for WorkflowMaster sub-agent."""
+class TestWorkflowManagerIntegration:
+    """Integration tests for WorkflowManager sub-agent."""
     
     def setup_method(self):
         """Set up test environment."""
@@ -80,7 +80,7 @@ class TestWorkflowMasterIntegration:
         # 1. Create test prompt
         self._create_test_prompt()
         
-        # 2. Invoke WorkflowMaster
+        # 2. Invoke WorkflowManager
         # Note: This would be done through Claude Code
         # For testing, we verify each phase manually
         
@@ -107,7 +107,7 @@ class TestWorkflowMasterIntegration:
         This prompt is missing required sections.
         """
         
-        # Verify WorkflowMaster detects invalid prompt
+        # Verify WorkflowManager detects invalid prompt
         # and invokes PromptWriter
         
     def test_task_structure_validation(self):
@@ -163,9 +163,9 @@ def _verify_files_created(self):
 ### Manual Testing
 
 1. Create test prompt file
-2. Invoke WorkflowMaster:
+2. Invoke WorkflowManager:
    ```
-   /agent:workflow-master
+   /agent:workflow-manager
    Execute workflow from: /prompts/test_feature.md
    ```
 3. Monitor execution and verify each phase
@@ -187,7 +187,7 @@ pytest test_workflow_master_integration.py -v
 
 ### 2. Invalid Prompt
 - Missing required sections
-- WorkflowMaster invokes PromptWriter
+- WorkflowManager invokes PromptWriter
 - New prompt created and workflow continues
 
 ### 3. Task Validation
@@ -214,6 +214,6 @@ Integration tests should verify:
 
 After each test run:
 1. Document any issues found
-2. Update WorkflowMaster to handle edge cases
+2. Update WorkflowManager to handle edge cases
 3. Add new test scenarios as discovered
 4. Improve error messages and recovery mechanisms

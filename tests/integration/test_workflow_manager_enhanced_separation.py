@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Integration tests for WorkflowMaster with Enhanced Separation shared modules.
+Integration tests for WorkflowManager with Enhanced Separation shared modules.
 
-Tests the integration between WorkflowMaster and the shared modules:
+Tests the integration between WorkflowManager and the shared modules:
 - github_operations
 - state_management  
 - error_handling
@@ -35,13 +35,13 @@ from task_tracking import TaskTracker, TodoWriteIntegration, WorkflowPhaseTracke
 from interfaces import AgentConfig, TaskData, ErrorContext, WorkflowPhase
 
 
-class TestWorkflowMasterIntegration:
-    """Integration tests for WorkflowMaster with shared modules"""
+class TestWorkflowManagerIntegration:
+    """Integration tests for WorkflowManager with shared modules"""
     
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.config = AgentConfig(agent_id="test-workflow-master", name="Test WorkflowMaster")
+        self.config = AgentConfig(agent_id="test-workflow-manager", name="Test WorkflowManager")
         
         # Initialize shared modules
         self.github_ops = GitHubOperations()
@@ -60,7 +60,7 @@ class TestWorkflowMasterIntegration:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_workflow_master_initialization_with_shared_modules(self):
-        """Test WorkflowMaster initialization uses shared modules correctly"""
+        """Test WorkflowManager initialization uses shared modules correctly"""
         
         # Test shared module initialization
         assert self.github_ops is not None
@@ -542,7 +542,7 @@ class TestWorkflowMasterIntegration:
         assert total_duration > 0
 
 
-class TestWorkflowMasterTaskValidation:
+class TestWorkflowManagerTaskValidation:
     """Test task validation and dependency management"""
     
     def setup_method(self):

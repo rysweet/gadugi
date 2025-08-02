@@ -83,24 +83,24 @@
 - Standardize shell compatibility across all scripts
 - Consider removing download pattern since scripts are now version controlled
 - Add integration tests for network-dependent operations
-### PR #10: fix: resolve OrchestratorAgent → WorkflowMaster implementation failure (issue #1)
+### PR #10: fix: resolve OrchestratorAgent → WorkflowManager implementation failure (issue #1)
 
 #### What I Learned
 - **Critical Single-Line Bug**: A single incorrect Claude CLI invocation undermined an entire sophisticated orchestration system
-- **Agent Invocation Patterns**: `/agent:workflow-master` invocation is fundamentally different from `-p prompt.md` execution
-- **Context Flow Architecture**: OrchestratorAgent → TaskExecutor → PromptGenerator → WorkflowMaster requires precise context passing
-- **Parallel Worktree Execution**: WorkflowMasters execute in isolated worktree environments with generated context-specific prompts
+- **Agent Invocation Patterns**: `/agent:workflow-manager` invocation is fundamentally different from `-p prompt.md` execution
+- **Context Flow Architecture**: OrchestratorAgent → TaskExecutor → PromptGenerator → WorkflowManager requires precise context passing
+- **Parallel Worktree Execution**: WorkflowManagers execute in isolated worktree environments with generated context-specific prompts
 - **Surgical Fix Impact**: One-line command change transforms 0% implementation success to 95%+ success rate
 
 #### Architectural Insights Discovered
-- **WorkflowMaster Agent Requirement**: Generic Claude CLI execution cannot replace proper agent workflow invocation
+- **WorkflowManager Agent Requirement**: Generic Claude CLI execution cannot replace proper agent workflow invocation
 - **PromptGenerator Component Pattern**: New component created to bridge context between orchestration and execution layers
-- **Template-Based Prompt Generation**: Systematic approach to creating WorkflowMaster-specific prompts from original requirements
+- **Template-Based Prompt Generation**: Systematic approach to creating WorkflowManager-specific prompts from original requirements
 - **Context Preservation Strategy**: Full task context must flow through orchestration pipeline to enable proper implementation
 - **Error Handling Architecture**: Graceful degradation allows fallback to original prompt if generation fails
 
 #### Design Patterns Discovered
-- **Agent Handoff Pattern**: OrchestratorAgent coordinates, WorkflowMaster implements - clear separation of concerns
+- **Agent Handoff Pattern**: OrchestratorAgent coordinates, WorkflowManager implements - clear separation of concerns
 - **Context Translation Layer**: PromptGenerator acts as translator between orchestration context and implementation requirements
 - **Surgical Fix Principle**: Minimal code change with maximum impact - single line fix enables entire system capability
 - **Test-Driven Validation**: 10/10 test coverage validates fix without regression to existing functionality
@@ -133,9 +133,9 @@
 - **Production Readiness**: System now capable of delivering actual implementation files, not just coordination
 
 #### Critical Technical Details
-- **Command Construction**: `claude /agent:workflow-master "Execute workflow for {prompt}"` vs `claude -p prompt.md`
-- **Prompt Structure**: WorkflowMaster prompts must emphasize "CREATE ACTUAL FILES" and include all 9 phases
-- **Context Flow**: task_context → PromptContext → WorkflowMaster prompt → Agent execution
+- **Command Construction**: `claude /agent:workflow-manager "Execute workflow for {prompt}"` vs `claude -p prompt.md`
+- **Prompt Structure**: WorkflowManager prompts must emphasize "CREATE ACTUAL FILES" and include all 9 phases
+- **Context Flow**: task_context → PromptContext → WorkflowManager prompt → Agent execution
 - **Template Location**: `.claude/orchestrator/templates/workflow_template.md` provides extensible template system
 - **Validation Logic**: `validate_prompt_content()` ensures generated prompts contain required sections
 
@@ -312,7 +312,7 @@ EOF < /dev/null### PR #25: 🛡️ Implement XPIA Defense Agent for Multi-Agent 
 - **Hook System Integration**: Proper agent-manager integration for universal coverage
 - **Configuration Management**: Runtime security policy updates
 - **Status Monitoring**: Comprehensive operational visibility
-- **Universal Agent Protection**: WorkflowMaster, OrchestratorAgent, Code-Reviewer all automatically protected
+- **Universal Agent Protection**: WorkflowManager, OrchestratorAgent, Code-Reviewer all automatically protected
 
 #### Test Architecture Analysis
 - **Comprehensive Coverage**: 29 tests across 6 test classes

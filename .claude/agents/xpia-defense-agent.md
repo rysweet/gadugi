@@ -34,7 +34,7 @@
 - **Agent-Manager Hooks**: Transparent middleware using existing hook system
 - **Enhanced Separation**: Leverages shared modules for GitHub operations and error handling
 - **Simple Memory Manager**: Uses GitHub Issues for security logging and threat intelligence
-- **All Agents**: Protects WorkflowMaster, OrchestratorAgent, Code-Reviewer, and future agents
+- **All Agents**: Protects WorkflowManager, OrchestratorAgent, Code-Reviewer, and future agents
 
 ### Security Framework
 ```

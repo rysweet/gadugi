@@ -38,7 +38,7 @@ MAX_PARALLEL_TASKS=4  # Configurable based on system resources
 
 ### 1. Parallel Process Spawning
 
-Launch WorkflowMasters with monitoring:
+Launch WorkflowManagers with monitoring:
 ```bash
 spawn_workflow_master() {
     local TASK_ID="$1"
@@ -47,7 +47,7 @@ spawn_workflow_master() {
     local LOG_FILE=".logs/$TASK_ID.log"
     local JSON_OUTPUT=".results/$TASK_ID.json"
     
-    echo "🚀 Spawning WorkflowMaster for task $TASK_ID..."
+    echo "🚀 Spawning WorkflowManager for task $TASK_ID..."
     
     # Create output directories
     mkdir -p .logs .results

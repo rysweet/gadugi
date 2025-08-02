@@ -68,7 +68,7 @@ The agent-manager will handle all necessary configuration updates.
 ### Using Agents
 
 Once installed, invoke agents as needed:
-- `/agent:workflow-master` - For complete development workflows
+- `/agent:workflow-manager` - For complete development workflows
 - `/agent:orchestrator-agent` - For parallel task execution
 - `/agent:code-reviewer` - For code review tasks
 - `/agent:prompt-writer` - For creating structured prompts

@@ -1,18 +1,18 @@
-# WorkflowMaster Usage Guide
+# WorkflowManager Usage Guide
 
 ## Overview
 
-WorkflowMaster is a specialized sub-agent that orchestrates complete development workflows from prompt files. It ensures consistent execution of all development phases from issue creation through PR review.
+WorkflowManager is a specialized sub-agent that orchestrates complete development workflows from prompt files. It ensures consistent execution of all development phases from issue creation through PR review.
 
 ## Invocation
 
 ```
-/agent:workflow-master
+/agent:workflow-manager
 
 Execute the workflow from: /prompts/FeatureName.md
 ```
 
-## What WorkflowMaster Does
+## What WorkflowManager Does
 
 1. **Reads and parses** the specified prompt file
 2. **Creates a comprehensive task list** using TodoWrite
@@ -33,10 +33,10 @@ Execute the workflow from: /prompts/FeatureName.md
 ## Example Session
 
 ```
-User: /agent:workflow-master
+User: /agent:workflow-manager
       Execute the workflow from: /prompts/AddCacheFeature.md
 
-WorkflowMaster: I'll execute the workflow described in `/prompts/AddCacheFeature.md`.
+WorkflowManager: I'll execute the workflow described in `/prompts/AddCacheFeature.md`.
 
 [Creates task list with TodoWrite]
 
@@ -60,16 +60,16 @@ Workflow complete! Feature delivered from issue #42 to PR #99.
 ## Integration with Other Agents
 
 ### PromptWriter
-- Creates the structured prompts that WorkflowMaster executes
+- Creates the structured prompts that WorkflowManager executes
 - Ensures prompts include all necessary workflow information
 
 ### code-reviewer
-- Invoked by WorkflowMaster during the review phase
+- Invoked by WorkflowManager during the review phase
 - Provides comprehensive PR feedback
 
 ## Error Handling
 
-WorkflowMaster handles common issues:
+WorkflowManager handles common issues:
 - Git conflicts
 - Test failures  
 - CI/CD issues
@@ -82,7 +82,7 @@ Each error includes:
 
 ## State Management
 
-If interrupted, WorkflowMaster saves state to `.github/Memory.md`:
+If interrupted, WorkflowManager saves state to `.github/Memory.md`:
 - Current phase
 - Completed tasks
 - Next steps
@@ -93,7 +93,7 @@ If interrupted, WorkflowMaster saves state to `.github/Memory.md`:
 1. **Always provide a valid prompt file** from `/prompts/`
 2. **Ensure clean working directory** before invocation
 3. **Monitor progress** via task updates
-4. **Allow WorkflowMaster to complete** all phases
+4. **Allow WorkflowManager to complete** all phases
 5. **Review the final PR** before merging
 
 ## Workflow Templates
@@ -114,16 +114,16 @@ See `.claude/agents/workflow-templates/` for examples:
 - Run `git status` to check
 
 ### "Tests failing"
-- WorkflowMaster will attempt to fix
+- WorkflowManager will attempt to fix
 - May need manual intervention for complex issues
 
 ### "CI/CD failures"
 - Check pipeline logs
-- WorkflowMaster will attempt common fixes
+- WorkflowManager will attempt common fixes
 
 ## Success Metrics
 
-WorkflowMaster aims for:
+WorkflowManager aims for:
 - 95%+ workflow completion rate
 - All phases executed in order
 - Clean git history
@@ -133,7 +133,7 @@ WorkflowMaster aims for:
 ## Future Enhancements
 
 ### Short-term (1-2 weeks)
-- **Priority 1**: Integration test suite for WorkflowMaster
+- **Priority 1**: Integration test suite for WorkflowManager
   - Test prompt validation mechanism
   - Verify TodoWrite task structure validation
   - End-to-end workflow execution tests

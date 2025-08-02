@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Integration test to validate the OrchestratorAgent → WorkflowMaster fix.
+Integration test to validate the OrchestratorAgent → WorkflowManager fix.
 
 This script creates a minimal test scenario to demonstrate that the critical
 command construction fix resolves issue #1.
@@ -75,7 +75,7 @@ def test_command_generation():
         
         workflow_prompt = prompt_gen.generate_workflow_prompt(context, temp_path)
         
-        print(f"✅ Generated WorkflowMaster prompt: {workflow_prompt}")
+        print(f"✅ Generated WorkflowManager prompt: {workflow_prompt}")
         
         # Read generated prompt content
         with open(workflow_prompt, 'r') as f:
@@ -83,7 +83,7 @@ def test_command_generation():
         
         # Validate key elements
         validations = [
-            ("WorkflowMaster Task Execution", "Should be WorkflowMaster task"),
+            ("WorkflowManager Task Execution", "Should be WorkflowManager task"),
             ("test-integration-001", "Should include task ID"),
             ("Test Integration Task", "Should include task name"),
             ("CREATE ACTUAL FILES", "Should emphasize file creation"),
@@ -105,7 +105,7 @@ def test_command_generation():
         # This would be the actual command (but we don't execute it)
         simulated_cmd = [
             "claude",
-            "/agent:workflow-master", 
+            "/agent:workflow-manager", 
             f"Execute the complete workflow for {workflow_prompt}",
             "--output-format", "json"
         ]
@@ -113,10 +113,10 @@ def test_command_generation():
         print(f"Command: {' '.join(simulated_cmd)}")
         
         # Validate command structure
-        if simulated_cmd[1] == "/agent:workflow-master":
-            print("✅ Uses WorkflowMaster agent (FIXED)")
+        if simulated_cmd[1] == "/agent:workflow-manager":
+            print("✅ Uses WorkflowManager agent (FIXED)")
         else:
-            print("❌ Does not use WorkflowMaster agent")
+            print("❌ Does not use WorkflowManager agent")
             return False
         
         if "-p" not in simulated_cmd:
@@ -200,7 +200,7 @@ def test_worktree_integration():
 def main():
     """Run integration tests"""
     
-    print("🚀 OrchestratorAgent → WorkflowMaster Fix Integration Test")
+    print("🚀 OrchestratorAgent → WorkflowManager Fix Integration Test")
     print("=" * 60)
     print("Testing fixes for issue #1: Implementation failure")
     print()
@@ -221,8 +221,8 @@ def main():
         print("🎉 ALL INTEGRATION TESTS PASSED!")
         print()
         print("The critical fixes are working correctly:")
-        print("✅ Claude CLI uses /agent:workflow-master instead of -p")
-        print("✅ PromptGenerator creates WorkflowMaster-specific prompts")
+        print("✅ Claude CLI uses /agent:workflow-manager instead of -p")
+        print("✅ PromptGenerator creates WorkflowManager-specific prompts")
         print("✅ Context is properly passed to TaskExecutors")
         print("✅ Integration with WorktreeManager works correctly")
         print()

@@ -60,7 +60,7 @@ GitHub Issues provides all necessary functionality for project memory management
 #### 3. Agent Integration
 - **Memory Updates**: All agents update memory by adding issue comments
 - **Context Retrieval**: Agents read memory from GitHub Issues instead of Memory.md
-- **Workflow Integration**: WorkflowMaster and other agents create/update issues
+- **Workflow Integration**: WorkflowManager and other agents create/update issues
 - **Search Integration**: Agents can search memory using GitHub's search API
 
 ### Technical Requirements
@@ -103,7 +103,7 @@ Project Memory Issue:
 - Files: src/module.py
 
 ---
-*Added by: AI Agent (WorkflowMaster/OrchestratorAgent/etc.)*
+*Added by: AI Agent (WorkflowManager/OrchestratorAgent/etc.)*
 ```
 
 #### 3. API Integration
@@ -115,7 +115,7 @@ Project Memory Issue:
 ### Integration Requirements
 
 #### 1. Agent Updates
-- **WorkflowMaster**: Update memory via issue comments during workflow phases
+- **WorkflowManager**: Update memory via issue comments during workflow phases
 - **OrchestratorAgent**: Coordinate memory updates from parallel tasks
 - **Code-Reviewer**: Add review insights as issue comments
 - **All Agents**: Replace Memory.md references with GitHub Issues API calls
@@ -253,7 +253,7 @@ Agent Task Completion → GitHub Issues API → Issue Comment → Memory Updated
 
 1. **Update Agent Memory Operations**
    - Replace Memory.md operations in all agents
-   - Update WorkflowMaster memory integration
+   - Update WorkflowManager memory integration
    - Modify OrchestratorAgent memory coordination
    - Update Code-Reviewer memory operations
 
@@ -356,7 +356,7 @@ class TestSimpleMemoryManager:
 ```python
 class TestAgentMemoryIntegration:
     def test_workflow_master_memory_updates(self):
-        """Test WorkflowMaster memory integration"""
+        """Test WorkflowManager memory integration"""
         
     def test_orchestrator_agent_coordination(self):
         """Test OrchestratorAgent memory coordination"""
@@ -501,7 +501,7 @@ git push -u origin feature/simplify-memory-manager-github-only
 
 #### Phase 2 Tasks:
 1. **Update Agent Memory Integration**
-   - Replace Memory.md operations in WorkflowMaster
+   - Replace Memory.md operations in WorkflowManager
    - Update OrchestratorAgent memory coordination
    - Modify Code-Reviewer memory operations
    - Update all other agents
@@ -659,7 +659,7 @@ gh pr create \
 ### Internal Integration Points
 
 #### 1. Agent System
-- **WorkflowMaster**: Memory updates during workflow phases
+- **WorkflowManager**: Memory updates during workflow phases
 - **OrchestratorAgent**: Coordination of parallel memory updates
 - **Code-Reviewer**: Integration of review insights into memory
 - **All Agents**: Consistent memory operation patterns

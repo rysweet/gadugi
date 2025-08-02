@@ -83,7 +83,7 @@ from .teamcoach.phase3 import CoachingEngine, ConflictResolver, WorkflowOptimize
 
 ### Agent Ecosystem Integration
 - **OrchestratorAgent**: Enhanced team formation and parallel execution optimization
-- **WorkflowMaster**: Performance feedback integration and workflow optimization guidance
+- **WorkflowManager**: Performance feedback integration and workflow optimization guidance
 - **Code-Reviewer**: Quality metrics integration and review assignment optimization
 - **All Agents**: Continuous performance monitoring and capability assessment
 

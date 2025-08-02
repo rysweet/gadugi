@@ -44,7 +44,7 @@ This revised orchestration plan incorporates findings from the ephemeral conflic
    - Duration: ~2 hours
    - Critical: Update all subsequent prompts to use new memory format
 
-2. **Orchestrator/WorkflowMaster Architecture Analysis**
+2. **Orchestrator/WorkflowManager Architecture Analysis**
    - Prompt: `analyze-orchestrator-workflowmaster-architecture.md`
    - Why Sequential: Findings affect multiple other tasks
    - Duration: ~1.5 hours
@@ -87,7 +87,7 @@ This revised orchestration plan incorporates findings from the ephemeral conflic
 - Prompt: `implement-teamcoach-agent.md`
 - Uses agent creation framework from Phase 2
 
-**Stream C: WorkflowMaster Robustness**
+**Stream C: WorkflowManager Robustness**
 - Prompt: `fix-workflowmaster-brittleness-issues.md`
 - Incorporates architecture analysis from Phase 1
 
@@ -103,13 +103,13 @@ mkdir -p .claude/shared/{base_classes,interfaces,utils}
 ### Phase 1: Sequential Foundation
 ```bash
 # Execute Memory.md migration first
-/agent:workflow-master
+/agent:workflow-manager
 
 Task: Execute workflow for /prompts/integrate-memory-github-issues.md
 Priority: CRITICAL - All other tasks depend on this
 
 # Wait for completion, then:
-/agent:workflow-master
+/agent:workflow-manager
 
 Task: Execute workflow for /prompts/analyze-orchestrator-workflowmaster-architecture.md
 ```
@@ -128,12 +128,12 @@ Use --max-parallel=2 to limit resource usage
 ### Phase 3: Sequential Security
 ```bash
 # XPIA Defense first
-/agent:workflow-master
+/agent:workflow-manager
 
 Task: Execute workflow for /prompts/implement-xpia-defense-agent.md
 
 # Then hooks integration
-/agent:workflow-master
+/agent:workflow-manager
 
 Task: Execute workflow for /prompts/enhance-claude-code-hooks-integration.md
 ```

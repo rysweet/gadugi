@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides comprehensive instructions for migrating from the original OrchestratorAgent/WorkflowMaster architecture to the Enhanced Separation architecture implemented in PR #16. This migration delivers significant benefits:
+This guide provides comprehensive instructions for migrating from the original OrchestratorAgent/WorkflowManager architecture to the Enhanced Separation architecture implemented in PR #16. This migration delivers significant benefits:
 
 - **70% code duplication reduction** through shared modules
 - **5-10% additional performance optimization** 
@@ -109,9 +109,9 @@ cat .claude/agents/orchestrator-agent.md | head -20
 claude /agent:orchestrator-agent "Test basic functionality"
 ```
 
-#### Step 2.2: Update WorkflowMaster  
+#### Step 2.2: Update WorkflowManager  
 
-The WorkflowMaster has been updated with Enhanced Separation integration:
+The WorkflowManager has been updated with Enhanced Separation integration:
 
 **Key Changes:**
 - Added shared module imports in agent frontmatter
@@ -127,7 +127,7 @@ cat .claude/agents/workflow-master.md | head -20
 # Should show imports section with shared modules
 
 # Verify agent can be invoked (test with simple prompt)
-claude /agent:workflow-master "Test basic functionality"
+claude /agent:workflow-manager "Test basic functionality"
 ```
 
 #### Step 2.3: Update Agent Documentation
@@ -182,10 +182,10 @@ Execute these prompts in parallel:
 # - Result integration with performance analytics
 ```
 
-**WorkflowMaster Testing:**
+**WorkflowManager Testing:**
 ```bash
 # Test complete workflow execution
-claude /agent:workflow-master "
+claude /agent:workflow-manager "
 Task: Execute workflow for test-implementation.md
 "
 

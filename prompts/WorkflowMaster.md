@@ -1,4 +1,4 @@
-# WorkflowMaster Sub-Agent Implementation Prompt
+# WorkflowManager Sub-Agent Implementation Prompt
 
 ## Overview
 
@@ -13,7 +13,7 @@ While we have well-structured prompts that describe features and workflows, exec
 4. Missing code review steps
 5. Poor progress tracking and communication
 
-A specialized WorkflowMaster sub-agent can:
+A specialized WorkflowManager sub-agent can:
 1. Execute complete workflows systematically
 2. Ensure no steps are missed or shortcuts taken
 3. Maintain consistent git practices and PR quality
@@ -49,7 +49,7 @@ The sub-agent should:
 
 ### Workflow Execution Pattern
 
-The standard workflow that WorkflowMaster follows:
+The standard workflow that WorkflowManager follows:
 
 1. **Issue Creation Phase**
    - Parse requirements from prompt
@@ -100,7 +100,7 @@ The standard workflow that WorkflowMaster follows:
 
 ## Implementation Plan
 
-### Phase 1: Create WorkflowMaster Sub-Agent
+### Phase 1: Create WorkflowManager Sub-Agent
 
 1. Create `.claude/agents/workflow-master.md` with:
    - Proper YAML frontmatter
@@ -169,7 +169,7 @@ The standard workflow that WorkflowMaster follows:
 
 ## Success Criteria
 
-- WorkflowMaster successfully executes complete workflows from prompt files
+- WorkflowManager successfully executes complete workflows from prompt files
 - All required phases are completed in order
 - Git history is clean and well-documented
 - PRs include comprehensive descriptions and pass reviews
@@ -178,7 +178,7 @@ The standard workflow that WorkflowMaster follows:
 
 ## Error Handling
 
-WorkflowMaster should handle common issues:
+WorkflowManager should handle common issues:
 - Git conflicts during branch creation
 - Test failures requiring fixes
 - CI/CD pipeline failures
@@ -193,9 +193,9 @@ Each error should:
 
 ## Integration with PromptWriter
 
-WorkflowMaster works hand-in-hand with PromptWriter:
+WorkflowManager works hand-in-hand with PromptWriter:
 1. PromptWriter creates structured prompts
-2. WorkflowMaster executes those prompts
+2. WorkflowManager executes those prompts
 3. Feedback from execution improves future prompts
 4. Patterns identified enhance both agents
 
@@ -203,7 +203,7 @@ WorkflowMaster works hand-in-hand with PromptWriter:
 
 When invoked with a prompt file:
 
-1. WorkflowMaster reads and parses the prompt
+1. WorkflowManager reads and parses the prompt
 2. Creates comprehensive task list with TodoWrite
 3. Executes each phase systematically
 4. Tracks progress and handles issues
@@ -212,7 +212,7 @@ When invoked with a prompt file:
 
 ## Next Steps
 
-1. Create GitHub issue for WorkflowMaster implementation
+1. Create GitHub issue for WorkflowManager implementation
 2. Create feature branch
 3. Implement the sub-agent in `.claude/agents/workflow-master.md`
 4. Create workflow templates and examples

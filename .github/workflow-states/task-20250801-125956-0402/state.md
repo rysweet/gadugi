@@ -1,4 +1,4 @@
-# WorkflowMaster State
+# WorkflowManager State
 Task ID: task-20250801-125956-0402
 Last Updated: 2025-08-01T13:15:00-08:00
 

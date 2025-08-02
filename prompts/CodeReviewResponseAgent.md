@@ -264,7 +264,7 @@ The agent should parse review feedback and categorize it:
 
 The CodeReviewResponseAgent fits into the development workflow as follows:
 
-1. **Developer creates PR** → WorkflowMaster handles creation
+1. **Developer creates PR** → WorkflowManager handles creation
 2. **Code-reviewer agent reviews PR** → Provides structured feedback
 3. **CodeReviewResponseAgent processes feedback** → Implements changes and responds
 4. **Final review and merge** → Human reviewer approves final state

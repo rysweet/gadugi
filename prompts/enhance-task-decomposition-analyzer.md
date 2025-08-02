@@ -38,7 +38,7 @@ The current TaskAnalyzer has limitations that restrict optimal parallel executio
 
 ### Integration Requirements
 - **OrchestratorAgent Compatibility**: Enhance existing integration without breaking changes
-- **WorkflowMaster Integration**: Provide detailed execution guidance to WorkflowMasters
+- **WorkflowManager Integration**: Provide detailed execution guidance to WorkflowManagers
 - **Real-time Adaptation**: Adjust plans based on runtime feedback
 - **Configuration Management**: Configurable analysis depth and optimization strategies
 
@@ -80,7 +80,7 @@ class EnhancedTaskAnalyzer:
 
 ### Integration Points
 - **OrchestratorAgent**: Enhanced orchestration decision-making
-- **WorkflowMaster**: Detailed execution guidance and optimization
+- **WorkflowManager**: Detailed execution guidance and optimization
 - **ExecutionMonitor**: Real-time feedback for adaptive optimization
 - **Performance Database**: Historical data for learning and prediction
 
@@ -100,7 +100,7 @@ class EnhancedTaskAnalyzer:
 
 ### Phase 3: Integration and Optimization
 - Enhance OrchestratorAgent integration
-- Add WorkflowMaster guidance capabilities
+- Add WorkflowManager guidance capabilities
 - Implement configuration management
 - Add visualization and debugging tools
 
@@ -121,7 +121,7 @@ class EnhancedTaskAnalyzer:
 
 ### Integration Testing
 - **OrchestratorAgent**: Test enhanced orchestration decisions
-- **WorkflowMaster**: Verify improved execution guidance
+- **WorkflowManager**: Verify improved execution guidance
 - **Real-world Scenarios**: Test with actual development workflows
 - **Error Handling**: Test graceful degradation with analysis failures
 - **Performance**: Ensure analysis doesn't significantly slow orchestration
@@ -162,7 +162,7 @@ class EnhancedTaskAnalyzer:
 5. **Dependency Analysis Enhancement**: Implement multi-level dependency mapping
 6. **Resource Modeling**: Create resource estimation and prediction systems
 7. **Learning System**: Implement execution history tracking and learning
-8. **Integration Enhancement**: Upgrade OrchestratorAgent and WorkflowMaster integration
+8. **Integration Enhancement**: Upgrade OrchestratorAgent and WorkflowManager integration
 9. **Testing and Validation**: Comprehensive testing of all analysis capabilities
 10. **Performance Optimization**: Optimize for speed and accuracy
 11. **Documentation**: Create comprehensive usage and configuration guides

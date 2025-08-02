@@ -1,6 +1,6 @@
 # Standard Feature Workflow Template
 
-This template demonstrates the standard workflow execution pattern for WorkflowMaster.
+This template demonstrates the standard workflow execution pattern for WorkflowManager.
 
 ## Phase 1: Issue Creation
 

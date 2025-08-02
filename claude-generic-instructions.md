@@ -246,7 +246,7 @@ If the user expressed frustration or provided feedback:
 
 ### CRITICAL: Use Agents for Workflows
 
-**If a task involves creating issues, branches, code changes, and PRs, you MUST use an orchestration agent (like WorkflowMaster) rather than executing steps manually.**
+**If a task involves creating issues, branches, code changes, and PRs, you MUST use an orchestration agent (like WorkflowManager) rather than executing steps manually.**
 
 ### Using Agents
 To invoke a reusable agent, use the following pattern:
@@ -259,9 +259,9 @@ Requirements: [What needs to be achieved]
 
 ### Common Workflow Agents (in hierarchical order)
 - **orchestrator-agent**: Top-level coordinator for parallel task execution (use FIRST for multiple tasks)
-- **workflow-master**: Orchestrates individual development workflows from issue to PR
+- **workflow-manager**: Orchestrates individual development workflows from issue to PR
 - **memory-manager**: Manages Memory.md pruning, curation, and GitHub Issues sync (NEW!)
-- **code-reviewer**: Reviews pull requests (invoked by WorkflowMaster in Phase 9)
+- **code-reviewer**: Reviews pull requests (invoked by WorkflowManager in Phase 9)
 - **prompt-writer**: Creates structured prompts
 - **task-analyzer**: Analyzes dependencies (invoked by OrchestratorAgent)
 - **worktree-manager**: Manages git worktrees (invoked by OrchestratorAgent)

@@ -31,7 +31,7 @@ class AgentMemoryIntegration:
         Initialize agent memory integration.
         
         Args:
-            agent_name: Name of the agent (e.g., 'WorkflowMaster', 'OrchestratorAgent')
+            agent_name: Name of the agent (e.g., 'WorkflowManager', 'OrchestratorAgent')
             repo_path: Path to repository (defaults to current directory)
         """
         self.agent_name = agent_name
@@ -147,16 +147,16 @@ class AgentMemoryIntegration:
         }
 
 
-class WorkflowMasterMemoryMixin:
+class WorkflowManagerMemoryMixin:
     """
-    Mixin class for WorkflowMaster memory integration.
+    Mixin class for WorkflowManager memory integration.
     
     This replaces the old Memory.md update patterns with GitHub Issues operations.
     """
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.memory_agent = AgentMemoryIntegration("WorkflowMaster")
+        self.memory_agent = AgentMemoryIntegration("WorkflowManager")
     
     def update_workflow_progress(self, phase: str, description: str, 
                                issue_number: Optional[int] = None,

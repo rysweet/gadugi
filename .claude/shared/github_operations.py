@@ -1,6 +1,6 @@
 """
 GitHub operations module for Enhanced Separation architecture.
-Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowMaster.
+Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowManager.
 """
 
 import subprocess
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 class GitHubOperations:
     """
     Unified GitHub operations for the Enhanced Separation architecture.
-    Reduces 29% code duplication between OrchestratorAgent and WorkflowMaster.
+    Reduces 29% code duplication between OrchestratorAgent and WorkflowManager.
     """
     
     def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None):
