@@ -25,7 +25,7 @@ wheels/
 .claude/agent-manager/logs/
 .claude/agent-manager/tests/__pycache__/
 .claude/cache/
-.claude/hooks/
+# .claude/hooks/ # TeamCoach hooks need to be tracked
 .claude/logs/
 
 # Agent-manager runtime files
