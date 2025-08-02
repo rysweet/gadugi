@@ -159,21 +159,23 @@ class TestEnhancedSeparationBasic:
         circuit_breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1.0)
         assert circuit_breaker is not None
 
-        # Test successful operations
-        result = circuit_breaker.call(lambda: "success")
+        # Test successful operations with decorator
+        @circuit_breaker
+        def successful_function():
+            return "success"
+        
+        result = successful_function()
         assert result == "success"
 
         # Test failure handling
+        @circuit_breaker
+        def failing_function():
+            raise Exception("Test failure")
+        
         failure_count = 0
         for i in range(3):
             try:
-                if i < 2:
-                    circuit_breaker.call(
-                        lambda: exec('raise Exception("Test failure")')
-                    )
-                else:
-                    # This should trigger circuit breaker
-                    circuit_breaker.call(lambda: "should not execute")
+                failing_function()
             except Exception:
                 failure_count += 1
 
