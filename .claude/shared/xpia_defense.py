@@ -21,11 +21,37 @@ import urllib.parse
 
 
 class ThreatLevel(Enum):
-    """Threat severity levels"""
+    """Threat severity levels with ordering support"""
     SAFE = "safe"
     SUSPICIOUS = "suspicious"
     MALICIOUS = "malicious"
     CRITICAL = "critical"
+    
+    def __lt__(self, other):
+        """Less than comparison based on threat severity"""
+        if not isinstance(other, ThreatLevel):
+            return NotImplemented
+        
+        order = [ThreatLevel.SAFE, ThreatLevel.SUSPICIOUS, ThreatLevel.MALICIOUS, ThreatLevel.CRITICAL]
+        return order.index(self) < order.index(other)
+    
+    def __le__(self, other):
+        """Less than or equal to comparison"""
+        if not isinstance(other, ThreatLevel):
+            return NotImplemented
+        return self < other or self == other
+    
+    def __gt__(self, other):
+        """Greater than comparison"""
+        if not isinstance(other, ThreatLevel):
+            return NotImplemented
+        return not self <= other
+    
+    def __ge__(self, other):
+        """Greater than or equal to comparison"""
+        if not isinstance(other, ThreatLevel):
+            return NotImplemented
+        return not self < other
 
 
 class SecurityMode(Enum):
@@ -76,7 +102,7 @@ class ThreatPatternLibrary:
         patterns.extend([
             ThreatPattern(
                 name="system_prompt_override",
-                pattern=r"(?i)(ignore\s+(?:all\s+)?(?:previous|above)\s+(?:instructions?|prompts?|commands?)|forget\s+(?:everything|all)\s+(?:above|before)|reveal\s+(?:your\s+)?(?:system\s+)?prompt)",
+                pattern=r"(?i)(ignore\s+(?:all\s+)?(?:previous\s+|above\s+)?(?:instructions?|prompts?|commands?)|forget\s+(?:everything|all)\s+(?:above|before)|reveal\s+(?:your\s+)?(?:system\s+)?prompt)",
                 threat_level=ThreatLevel.CRITICAL,
                 description="Attempts to override system prompts or instructions",
                 category="direct_injection"
@@ -101,7 +127,7 @@ class ThreatPatternLibrary:
         patterns.extend([
             ThreatPattern(
                 name="info_extraction",
-                pattern=r"(?i)(show\s+me\s+(?:your|the)\s+(?:system|internal|hidden|secret)|reveal\s+(?:your|the)\s+(?:prompt|instructions|code)|what\s+(?:are\s+)?your\s+(?:instructions|rules|guidelines))",
+                pattern=r"(?i)(show\s+me\s+(?:your\s+|the\s+)?(?:system|internal|hidden|secret)|reveal\s+(?:your\s+|the\s+)?(?:prompt|instructions|code)|what\s+(?:are\s+)?your\s+(?:instructions|rules|guidelines))",
                 threat_level=ThreatLevel.MALICIOUS,
                 description="Attempts to extract system information or prompts",
                 category="information_extraction"

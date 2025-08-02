@@ -212,6 +212,56 @@ def handle_cleanup(manager: SimpleMemoryManager, args) -> int:
     return 0
 
 
+def handle_lock_status(manager: SimpleMemoryManager, args) -> int:
+    """Handle lock status command"""
+    result = manager.check_lock_status()
+    
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        if result['success']:
+            print(f"🔒 Memory Issue Lock Status")
+            print("=" * 40)
+            print(f"Issue Number: #{result['issue_number']}")
+            print(f"Locked: {'Yes' if result['locked'] else 'No'}")
+            if result['locked'] and result.get('lock_reason'):
+                print(f"Lock Reason: {result['lock_reason']}")
+            if result['locked']:
+                print("\n✅ Memory is protected from unauthorized modifications")
+                print("Only collaborators with write access can comment")
+            else:
+                print("\n⚠️  Memory is NOT locked - anyone can comment!")
+                print("Consider locking for security")
+        else:
+            print(f"❌ Failed to check lock status: {result.get('error', 'Unknown error')}")
+            return 1
+    
+    return 0
+
+
+def handle_unlock(manager: SimpleMemoryManager, args) -> int:
+    """Handle unlock command"""
+    if not args.confirm:
+        print("⚠️  WARNING: Unlocking the memory issue reduces security!")
+        print("Non-collaborators will be able to add comments (potential memory poisoning)")
+        print("\nTo proceed, use: --confirm")
+        return 1
+    
+    result = manager.unlock_memory_issue()
+    
+    if args.json:
+        print(json.dumps({'success': result}, indent=2))
+    else:
+        if result:
+            print("🔓 Memory issue unlocked")
+            print("⚠️  WARNING: Non-collaborators can now comment on the memory issue")
+        else:
+            print("❌ Failed to unlock memory issue")
+            return 1
+    
+    return 0
+
+
 def main():
     """Main CLI interface"""
     parser = argparse.ArgumentParser(
@@ -239,6 +289,12 @@ Examples:
   
   # Search specific section
   python simple_memory_cli.py search "bug fix" --section completed-tasks
+  
+  # Check memory lock status
+  python simple_memory_cli.py lock-status
+  
+  # Unlock memory (requires confirmation)
+  python simple_memory_cli.py unlock --confirm
         """
     )
     
@@ -277,6 +333,14 @@ Examples:
     cleanup_parser.add_argument('--days', type=int, default=30, help='Archive entries older than N days')
     cleanup_parser.add_argument('--dry-run', action='store_true', help='Preview what would be archived')
     
+    # Lock command
+    lock_parser = subparsers.add_parser('lock-status', help='Check memory issue lock status')
+    
+    # Unlock command (with warning)
+    unlock_parser = subparsers.add_parser('unlock', help='Unlock memory issue (WARNING: reduces security)')
+    unlock_parser.add_argument('--confirm', action='store_true', 
+                             help='Confirm you want to unlock (allows non-collaborators to comment)')
+    
     args = parser.parse_args()
     
     if not args.command:
@@ -301,6 +365,10 @@ Examples:
             return handle_search(manager, args)
         elif args.command == 'cleanup':
             return handle_cleanup(manager, args)
+        elif args.command == 'lock-status':
+            return handle_lock_status(manager, args)
+        elif args.command == 'unlock':
+            return handle_unlock(manager, args)
         else:
             print(f"Unknown command: {args.command}")
             return 1
