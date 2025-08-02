@@ -22,8 +22,8 @@ sys.path.append(
 
 from github_operations import GitHubOperations
 from interfaces import AgentConfig
-from state_management import CheckpointManager, StateManager
-from task_tracking import Task, TaskStatus, TaskTracker, TodoWriteIntegration
+from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
+from task_tracking import Task, TaskStatus, TaskTracker, TodoWriteIntegration, TaskMetrics
 from utils.error_handling import CircuitBreaker, ErrorHandler
 
 
@@ -75,7 +75,13 @@ class TestEnhancedSeparationBasic:
         }
 
         # Save state
-        result = self.state_manager.save_state(state_id, state_data)
+        task_state = TaskState(
+            task_id=state_id,
+            prompt_file="test-prompt.md",
+            status="in_progress",
+            context=state_data
+        )
+        result = self.state_manager.save_state(task_state)
         assert result == True
 
         # Load state
@@ -241,7 +247,13 @@ class TestEnhancedSeparationBasic:
         }
 
         # Save initial state
-        self.state_manager.save_state(workflow_id, workflow_state)
+        task_state = TaskState(
+            task_id=workflow_id,
+            prompt_file="workflow.md",
+            status="in_progress",
+            context=workflow_state
+        )
+        self.state_manager.save_state(task_state)
 
         # Step 2: Create tasks
         tasks = [
@@ -274,7 +286,13 @@ class TestEnhancedSeparationBasic:
 
             # Update workflow state
             workflow_state["phase"] = f"executing_{task.id}"
-            self.state_manager.save_state(workflow_id, workflow_state)
+            task_state = TaskState(
+                task_id=workflow_id,
+                prompt_file="workflow.md",
+                status="in_progress",
+                context=workflow_state
+            )
+            self.state_manager.save_state(task_state)
 
             # Create checkpoint
             checkpoint_manager = CheckpointManager(self.state_manager)
@@ -286,7 +304,13 @@ class TestEnhancedSeparationBasic:
         # Step 4: Finalize workflow
         workflow_state["phase"] = "completed"
         workflow_state["completed_at"] = datetime.now().isoformat()
-        self.state_manager.save_state(workflow_id, workflow_state)
+        task_state = TaskState(
+            task_id=workflow_id,
+            prompt_file="workflow.md",
+            status="completed",
+            context=workflow_state
+        )
+        self.state_manager.save_state(task_state)
 
         # Verify final state
         final_state = self.state_manager.load_state(workflow_id)
@@ -315,9 +339,15 @@ class TestEnhancedSeparationBasic:
             }
 
             # Save and load state
-            self.state_manager.save_state(state_id, state_data)
+            task_state = TaskState(
+                task_id=state_id,
+                prompt_file="test.md",
+                status="in_progress",
+                context=state_data
+            )
+            self.state_manager.save_state(task_state)
             loaded_state = self.state_manager.load_state(state_id)
-            assert loaded_state["iteration"] == i
+            assert loaded_state.context["iteration"] == i
 
         state_ops_time = time.time() - start_time
 
