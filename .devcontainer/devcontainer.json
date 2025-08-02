@@ -1,0 +1,66 @@
+{
+  "name": "Gadugi PR Backlog Manager",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11",
+      "installTools": true
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true
+    }
+  },
+  
+  "postCreateCommand": ".devcontainer/setup.sh",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.black-formatter",
+        "ms-vscode.vscode-yaml",
+        "GitHub.vscode-pull-request-github",
+        "GitHub.copilot"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+  
+  "containerEnv": {
+    "CLAUDE_AUTO_APPROVE": "true",
+    "CLAUDE_GITHUB_ACTIONS": "true",
+    "PYTHONPATH": "/workspaces/gadugi/.claude/shared"
+  },
+  
+  "mounts": [
+    "source=${localWorkspaceFolder}/.claude,target=/workspaces/gadugi/.claude,type=bind,consistency=cached"
+  ],
+  
+  "workspaceFolder": "/workspaces/gadugi",
+  
+  "portsAttributes": {
+    "8000": {
+      "label": "Development Server",
+      "onAutoForward": "notify"
+    }
+  },
+  
+  "remoteUser": "vscode"
+}
