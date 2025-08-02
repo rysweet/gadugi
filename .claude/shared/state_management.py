@@ -3,17 +3,17 @@ State management module for Enhanced Separation architecture.
 Provides unified state persistence for OrchestratorAgent and WorkflowManager.
 """
 
-import json
-import gzip
 import fcntl
-import shutil
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, asdict, field
-from enum import Enum
+import gzip
+import json
 import logging
+import shutil
 import uuid
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 # Custom exceptions

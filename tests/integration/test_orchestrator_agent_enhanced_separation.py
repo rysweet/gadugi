@@ -1,21 +1,4 @@
 #!/usr/bin/env python3
-import sys
-import os
-
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
-import pytest
-import tempfile
-import shutil
-from datetime import datetime
-from unittest.mock import Mock, patch
-from github_operations import GitHubOperations
-from state_management import StateManager, CheckpointManager
-from utils.error_handling import ErrorHandler, CircuitBreaker
-from task_tracking import TaskTracker, TaskMetrics
-from interfaces import AgentConfig, TaskData, ErrorContext, WorkflowPhase
-
 """
 Integration tests for OrchestratorAgent with Enhanced Separation shared modules.
 
@@ -33,45 +16,31 @@ Validates that the Enhanced Separation architecture maintains:
 - Robust task tracking and analytics
 """
 
+import asyncio
+import os
+import shutil
+import sys
+import tempfile
+from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
-# Mocks for undefined classes (for Ruff F821)
-class RetryManager:
-    def execute_with_retry(self, func, *args, **kwargs):
-        return func()
-
-
-class WorkflowState:
-    def __init__(self, task_id, phase, started_at=None, metadata=None):
-        self.task_id = task_id
-        self.phase = phase
-        self.started_at = started_at
-        self.metadata = metadata or {}
-
-
-class StateBackupRestore:
-    def __init__(self, state_manager):
-        self.state_manager = state_manager
-
-    def create_backup(self, orchestration_id):
-        return f"backup-{orchestration_id}"
-
-
-class RecoveryManager:
-    def create_recovery_plan(self, error_context):
-        return {"plan": "mock"}
-
-
-class WorkflowStateManager:
-    def save_state(self, state):
-        pass
-
-    def load_state(self, task_id):
-        return None
-
+import pytest
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
+
+from github_operations import GitHubOperations
+from interfaces import AgentConfig, ErrorContext, TaskData, WorkflowPhase
+from state_management import CheckpointManager, StateManager
+from task_tracking import (
+    TaskMetrics,
+    TaskTracker,
+    TodoWriteIntegration,
+    WorkflowPhaseTracker,
+)
+from utils.error_handling import CircuitBreaker, ErrorHandler
 
 
 class TestOrchestratorAgentIntegration:
@@ -122,6 +91,7 @@ class TestOrchestratorAgentIntegration:
         """Test parallel task analysis with enhanced error handling"""
 
         # Mock prompt files for analysis
+        prompt_files = ["test-feature-a.md", "test-feature-b.md", "test-feature-c.md"]
 
         # Mock task analysis result
         analysis_result = {
@@ -338,7 +308,7 @@ class TestOrchestratorAgentIntegration:
             else:
                 reduced_parallelism = False
 
-            assert reduced_parallelism
+            assert reduced_parallelism == True
             mock_detect.assert_called_once()
 
     def test_end_to_end_orchestration_workflow(self):
@@ -348,6 +318,7 @@ class TestOrchestratorAgentIntegration:
         orchestration_id = f"e2e-test-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
         # Phase 1: Task Analysis
+        prompt_files = ["feature-a.md", "feature-b.md"]
         self.productivity_analyzer.record_phase_start("task_analysis")
 
         # Phase 2: Environment Setup
@@ -405,8 +376,7 @@ class TestOrchestratorAgentIntegration:
 
         # Verify performance improvements
         performance_metrics = self.productivity_analyzer.calculate_speedup(
-            execution_results,
-            baseline_sequential_time=600,  # 10 minutes sequential
+            execution_results, baseline_sequential_time=600  # 10 minutes sequential
         )
 
         # Should achieve meaningful speedup

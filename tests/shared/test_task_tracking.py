@@ -3,14 +3,18 @@ Comprehensive tests for task_tracking.py module (TodoWrite integration).
 Tests task management, workflow tracking, and Claude Code integration.
 """
 
-import pytest
-import time
-from unittest.mock import patch
-from datetime import datetime
+import json
+import os
 
 # Import the module we're testing
 import sys
-import os
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -18,16 +22,16 @@ sys.path.insert(
 
 try:
     from task_tracking import (
-        TaskStatus,
-        TaskPriority,
         Task,
+        TaskError,
         TaskList,
+        TaskMetrics,
+        TaskPriority,
+        TaskStatus,
+        TaskTracker,
+        TaskValidationError,
         TodoWriteIntegration,
         WorkflowPhaseTracker,
-        TaskMetrics,
-        TaskError,
-        TaskValidationError,
-        TaskTracker,
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
@@ -515,7 +519,7 @@ class TestTodoWriteIntegration:
 
     def test_submit_invalid_task_list(self):
         """Test submitting invalid task list."""
-        TodoWriteIntegration()
+        integration = TodoWriteIntegration()
 
         task_list = TaskList()
         invalid_task = Task("", "Invalid task")  # Empty ID

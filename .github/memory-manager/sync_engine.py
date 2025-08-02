@@ -6,17 +6,18 @@ This module orchestrates the synchronization between Memory.md tasks and GitHub 
 handling conflict resolution, status updates, and maintaining data consistency.
 """
 
+import hashlib
 import json
-import time
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from pathlib import Path
-from enum import Enum
 import shutil
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 
-from memory_parser import MemoryParser, MemoryDocument, Task, TaskStatus
 from github_integration import GitHubIntegration, GitHubIssue
+from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
 
 
 class SyncDirection(Enum):
@@ -341,9 +342,11 @@ class SyncEngine:
                 "number": issue.number,
                 "title": issue.title,
                 "state": issue.state,
-                "updated_at": issue.updated_at.isoformat()
-                if hasattr(issue.updated_at, "isoformat")
-                else str(issue.updated_at),
+                "updated_at": (
+                    issue.updated_at.isoformat()
+                    if hasattr(issue.updated_at, "isoformat")
+                    else str(issue.updated_at)
+                ),
             }
 
             return SyncConflict(
@@ -471,7 +474,7 @@ def main():
         # Perform sync
         result = sync_engine.sync()
 
-        print("\nSync result:")
+        print(f"\nSync result:")
         print(f"Success: {result.success}")
         print(f"Duration: {result.duration.total_seconds():.1f}s")
         print(f"Created issues: {result.created_issues}")
@@ -480,7 +483,7 @@ def main():
         print(f"Errors: {len(result.errors)}")
 
         if result.errors:
-            print("\nErrors:")
+            print(f"\nErrors:")
             for error in result.errors:
                 print(f"  - {error}")
 

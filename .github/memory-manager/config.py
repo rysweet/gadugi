@@ -6,13 +6,15 @@ This module handles configuration for the Memory.md to GitHub Issues integration
 including sync policies, pruning rules, and operational parameters.
 """
 
-import yaml
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict, field
-from pathlib import Path
+import json
 import os
+from dataclasses import asdict, dataclass, field
+from datetime import timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from sync_engine import SyncDirection, ConflictResolution
+import yaml
+from sync_engine import ConflictResolution, SyncDirection
 
 
 @dataclass
@@ -390,7 +392,7 @@ def main():
         # Validate configuration
         errors = manager.validate_config()
         if errors:
-            print("\nConfiguration errors:")
+            print(f"\nConfiguration errors:")
             for error in errors:
                 print(f"  - {error}")
         else:

@@ -3,11 +3,11 @@
 Test the checksum verification functionality for downloaded scripts.
 """
 
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-import subprocess
-import shutil
 
 
 class TestChecksumVerification(unittest.TestCase):

@@ -6,18 +6,20 @@ This test suite validates all components of the Memory.md integration system,
 including parsing, GitHub API integration, synchronization, and conflict resolution.
 """
 
-import unittest
-import tempfile
 import json
+import os
+import tempfile
+import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
+
+from config import ConfigManager, MemoryManagerConfig, PruningConfig
+from github_integration import GitHubIntegration, GitHubIssue
 
 # Import our modules
-from memory_parser import MemoryParser, Task, TaskStatus, TaskPriority, MemoryDocument
-from github_integration import GitHubIntegration, GitHubIssue
-from sync_engine import SyncEngine, SyncDirection, SyncConfig
-from config import ConfigManager, MemoryManagerConfig
+from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
+from sync_engine import ConflictResolution, SyncConfig, SyncDirection, SyncEngine
 
 
 class TestMemoryParser(unittest.TestCase):
@@ -148,7 +150,7 @@ class TestGitHubIntegration(unittest.TestCase):
 
         # Should not raise exception
         try:
-            GitHubIntegration(self.temp_dir)
+            github = GitHubIntegration(self.temp_dir)
         except RuntimeError:
             self.fail("GitHubIntegration raised RuntimeError unexpectedly")
 
@@ -206,7 +208,8 @@ class TestSyncEngine(unittest.TestCase):
         self.memory_file = Path(self.temp_dir) / "Memory.md"
 
         # Create sample Memory.md
-        self.memory_file.write_text("""# AI Assistant Memory
+        self.memory_file.write_text(
+            """# AI Assistant Memory
 Last Updated: 2025-08-01T13:00:00-08:00
 
 ## Current Goals
@@ -215,7 +218,8 @@ Last Updated: 2025-08-01T13:00:00-08:00
 
 ## Recent Accomplishments
 - Completed feature A
-""")
+"""
+        )
 
         # Configure sync engine
         config = SyncConfig(dry_run=True)  # Safe mode for testing
@@ -380,7 +384,8 @@ class TestIntegrationScenarios(unittest.TestCase):
         self.memory_file = Path(self.temp_dir) / "Memory.md"
 
         # Create realistic Memory.md content
-        self.memory_file.write_text("""# AI Assistant Memory
+        self.memory_file.write_text(
+            """# AI Assistant Memory
 Last Updated: 2025-08-01T13:00:00-08:00
 
 ## Current Goals
@@ -401,7 +406,8 @@ Last Updated: 2025-08-01T13:00:00-08:00
 ## Next Steps
 - Plan next sprint
 - Review code quality metrics
-""")
+"""
+        )
 
     def tearDown(self):
         """Clean up integration test environment"""
@@ -481,8 +487,8 @@ def run_comprehensive_tests():
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'=' * 60}")
-    print("Test Summary:")
+    print(f"\n{'='*60}")
+    print(f"Test Summary:")
     print(f"  Total tests: {result.testsRun}")
     print(f"  Successes: {result.testsRun - len(result.failures) - len(result.errors)}")
     print(f"  Failures: {len(result.failures)}")
@@ -492,12 +498,12 @@ def run_comprehensive_tests():
     )
 
     if result.failures:
-        print("\nFailures:")
+        print(f"\nFailures:")
         for test, traceback in result.failures:
             print(f"  - {test}: {traceback.split('AssertionError:')[-1].strip()}")
 
     if result.errors:
-        print("\nErrors:")
+        print(f"\nErrors:")
         for test, traceback in result.errors:
             print(f"  - {test}: {traceback.split('\\n')[-2]}")
 

@@ -7,12 +7,13 @@ information including tasks, goals, accomplishments, and context for integration
 with GitHub Issues and project management systems.
 """
 
+import json
 import re
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class TaskStatus(Enum):

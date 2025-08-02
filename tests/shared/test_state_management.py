@@ -3,17 +3,19 @@ Comprehensive tests for state_management.py module.
 Tests the Enhanced Separation architecture implementation for state persistence.
 """
 
-import pytest
 import json
-import tempfile
+import os
 import shutil
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from unittest.mock import patch
 
 # Import the module we're testing (will be implemented after tests)
 import sys
-import os
+import tempfile
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import Mock, call, patch
+
+import pytest
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -21,12 +23,12 @@ sys.path.insert(
 
 try:
     from state_management import (
-        StateManager,
-        StateError,
         CheckpointManager,
+        StateError,
+        StateManager,
+        StateValidationError,
         TaskState,
         WorkflowPhase,
-        StateValidationError,
     )
 except ImportError:
     # These will be implemented after tests pass
@@ -581,9 +583,7 @@ class TestCheckpointManager:
         checkpoint_ids = []
         for i in range(3):
             state.current_phase = i + 1
-            checkpoint_id = checkpoint_manager.create_checkpoint(
-                state, f"Phase {i + 1}"
-            )
+            checkpoint_id = checkpoint_manager.create_checkpoint(state, f"Phase {i+1}")
             checkpoint_ids.append(checkpoint_id)
 
         # List checkpoints
@@ -630,7 +630,7 @@ class TestCheckpointManager:
         # Create more checkpoints than the limit
         for i in range(7):  # max_checkpoints_per_task is 5
             state.current_phase = i + 1
-            checkpoint_manager.create_checkpoint(state, f"Checkpoint {i + 1}")
+            checkpoint_manager.create_checkpoint(state, f"Checkpoint {i+1}")
 
         # Trigger cleanup
         checkpoint_manager.cleanup_old_checkpoints("cleanup-checkpoints")

@@ -6,10 +6,10 @@ Runs all test suites and generates a comprehensive test report.
 """
 
 import sys
-import unittest
 import time
-from pathlib import Path
+import unittest
 from io import StringIO
+from pathlib import Path
 
 # Add components to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "components"))

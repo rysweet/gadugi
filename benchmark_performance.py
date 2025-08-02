@@ -4,10 +4,11 @@ Performance benchmark to validate the 5-10% improvement claim from Enhanced Sepa
 Compares GitHub operations performance between shared module and individual implementations.
 """
 
-import time
-import sys
 import os
-from unittest.mock import patch
+import statistics
+import sys
+import time
+from unittest.mock import Mock, patch
 
 # Add shared modules to path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".claude", "shared"))
@@ -52,7 +53,7 @@ def benchmark_individual_operations():
 
         data = {"title": title, "body": body}
         serialized = json.dumps(data)  # Extra serialization overhead
-        json.loads(serialized)  # Extra parsing overhead
+        parsed = json.loads(serialized)  # Extra parsing overhead
         return {"number": 123, "url": "https://github.com/test/repo/issues/123"}
 
     start_time = time.time()
@@ -127,8 +128,9 @@ def run_performance_benchmark():
 
 def benchmark_memory_usage():
     """Benchmark memory usage of shared modules."""
-    import psutil
     import gc
+
+    import psutil
 
     print("\nMemory Usage Benchmark:")
     print("-" * 30)
@@ -138,12 +140,12 @@ def benchmark_memory_usage():
     baseline_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
 
     # Load shared modules
-    GitHubOperations()
+    github_ops = GitHubOperations()
     from state_management import StateManager
     from task_tracking import TaskTracker
 
-    StateManager()
-    TaskTracker()
+    state_manager = StateManager()
+    task_tracker = TaskTracker()
 
     loaded_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
     overhead = loaded_memory - baseline_memory

@@ -6,24 +6,25 @@ Tests basic functionality of shared modules and their integration.
 Validates that the Enhanced Separation architecture is functional.
 """
 
-import pytest
-import tempfile
-import shutil
-from datetime import datetime
-
-import sys
 import os
+import shutil
+import sys
+import tempfile
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
 from github_operations import GitHubOperations
-from state_management import StateManager, CheckpointManager
-from utils.error_handling import ErrorHandler, CircuitBreaker
-from task_tracking import TaskTracker, TodoWriteIntegration, Task, TaskStatus
-from task_tracking import TaskPriority
 from interfaces import AgentConfig
+from state_management import CheckpointManager, StateManager
+from task_tracking import Task, TaskStatus, TaskTracker, TodoWriteIntegration
+from utils.error_handling import CircuitBreaker, ErrorHandler
 
 
 class TestEnhancedSeparationBasic:
@@ -50,9 +51,9 @@ class TestEnhancedSeparationBasic:
 
         # Check that basic methods exist
         assert hasattr(self.github_operations, "create_issue")
-        assert hasattr(self.github_operations, "create_pr")
+        assert hasattr(self.github_operations, "create_pull_request")
         assert hasattr(self.github_operations, "get_issue")
-        assert hasattr(self.github_operations, "list_prs")
+        assert hasattr(self.github_operations, "list_pull_requests")
 
         # Test configuration
         config = {"retry_count": 3, "timeout": 30}
@@ -75,20 +76,20 @@ class TestEnhancedSeparationBasic:
 
         # Save state
         result = self.state_manager.save_state(state_id, state_data)
-        assert result
+        assert result == True
 
         # Load state
         loaded_state = self.state_manager.load_state(state_id)
         assert loaded_state is not None
-        assert loaded_state.task_id == state_id
-        assert loaded_state.current_phase_name == "implementation"
-        assert loaded_state.context["test"]
+        assert loaded_state["task_id"] == state_id
+        assert loaded_state["phase"] == "implementation"
+        assert loaded_state["metadata"]["test"] == True
 
     def test_checkpoint_manager_integration(self):
         """Test CheckpointManager integration with StateManager"""
 
         # Create checkpoint manager
-        checkpoint_manager = CheckpointManager()
+        checkpoint_manager = CheckpointManager(self.state_manager)
         assert checkpoint_manager is not None
 
         # Create a test state
@@ -100,26 +101,13 @@ class TestEnhancedSeparationBasic:
         }
 
         # Create checkpoint
-        from state_management import TaskState
-
-        # Remove 'phase' and map to 'current_phase_name'
-        state_dict = {"task_id": state_id, **state_data}
-        if "phase" in state_dict:
-            state_dict["current_phase_name"] = state_dict.pop("phase")
-        # Remove 'timestamp' if present
-        state_dict.pop("timestamp", None)
-        if "prompt_file" not in state_dict:
-            state_dict["prompt_file"] = "test-prompt.txt"
-        if "status" not in state_dict:
-            state_dict["status"] = "pending"
-        state = TaskState.from_dict(state_dict)
-        checkpoint_id = checkpoint_manager.create_checkpoint(state, "test checkpoint")
+        checkpoint_id = checkpoint_manager.create_checkpoint(state_id, state_data)
         assert checkpoint_id is not None
 
         # Verify checkpoint was created
         checkpoints = checkpoint_manager.list_checkpoints(state_id)
         assert len(checkpoints) > 0
-        assert any(cp["checkpoint_id"] == checkpoint_id for cp in checkpoints)
+        assert any(cp["id"] == checkpoint_id for cp in checkpoints)
 
     def test_error_handler_basic_functionality(self):
         """Test ErrorHandler basic error handling"""
@@ -127,23 +115,25 @@ class TestEnhancedSeparationBasic:
         assert self.error_handler is not None
 
         # Test error handling with context
-        import pytest
-
-        with pytest.raises(ValueError, match="Test error for error handler"):
+        try:
             raise ValueError("Test error for error handler")
+        except Exception as e:
+            # This should not raise an exception
+            self.error_handler.handle_error(e, context={"test": "error_handling"})
 
         # Test error logging functionality
         assert hasattr(self.error_handler, "handle_error")
+        assert hasattr(self.error_handler, "log_error")
 
     def test_circuit_breaker_basic_functionality(self):
         """Test CircuitBreaker basic functionality"""
 
         # Create circuit breaker with low thresholds for testing
-        circuit_breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1)
+        circuit_breaker = CircuitBreaker(failure_threshold=2, timeout=1)
         assert circuit_breaker is not None
 
         # Test successful operations
-        result = circuit_breaker(lambda: "success")()
+        result = circuit_breaker.call(lambda: "success")
         assert result == "success"
 
         # Test failure handling
@@ -169,22 +159,33 @@ class TestEnhancedSeparationBasic:
         assert self.task_tracker is not None
 
         # Create a test task
+        task = Task(
+            id="test-task-001",
+            title="Test Task",
+            description="Test task for task tracker",
+            status=TaskStatus.PENDING,
+            priority="high",
+            created_at=datetime.now(),
+        )
+
+        # Add task to tracker
+        self.task_tracker.add_task(task)
 
         # Retrieve task
-        retrieved_task = self.task_tracker.task_list.get_task("test-task-001")
+        retrieved_task = self.task_tracker.get_task("test-task-001")
         assert retrieved_task is not None
         assert retrieved_task.id == "test-task-001"
-        assert retrieved_task.content == "Test Task"
+        assert retrieved_task.title == "Test Task"
         assert retrieved_task.status == TaskStatus.PENDING
 
         # Update task status
         self.task_tracker.update_task_status("test-task-001", TaskStatus.IN_PROGRESS)
-        updated_task = self.task_tracker.task_list.get_task("test-task-001")
+        updated_task = self.task_tracker.get_task("test-task-001")
         assert updated_task.status == TaskStatus.IN_PROGRESS
 
         # Complete task
         self.task_tracker.update_task_status("test-task-001", TaskStatus.COMPLETED)
-        completed_task = self.task_tracker.task_list.get_task("test-task-001")
+        completed_task = self.task_tracker.get_task("test-task-001")
         assert completed_task.status == TaskStatus.COMPLETED
 
     def test_todowrite_integration_basic(self):
@@ -210,20 +211,8 @@ class TestEnhancedSeparationBasic:
         ]
 
         # Test task list validation
-        # Validate each task using Task.validate()
-        is_valid = True
-        for t in tasks:
-            try:
-                Task(
-                    id=t["id"],
-                    content=t["content"],
-                    status=TaskStatus(t["status"]),
-                    priority=TaskPriority(t["priority"]),
-                ).validate()
-            except Exception:
-                is_valid = False
-                break
-        assert is_valid
+        is_valid = todowrite_integration.validate_task_list(tasks)
+        assert is_valid == True
 
         # Test invalid task list
         invalid_tasks = [
@@ -234,19 +223,8 @@ class TestEnhancedSeparationBasic:
             }
         ]
 
-        is_valid_invalid = True
-        for t in invalid_tasks:
-            try:
-                Task(
-                    id=t["id"],
-                    content=t.get("content", ""),
-                    status=TaskStatus(t.get("status", "pending")),
-                    priority=TaskPriority(t.get("priority", "medium")),
-                ).validate()
-            except Exception:
-                is_valid_invalid = False
-                break
-        assert not is_valid_invalid
+        is_valid_invalid = todowrite_integration.validate_task_list(invalid_tasks)
+        assert is_valid_invalid == False
 
     def test_integration_workflow_simulation(self):
         """Test a simplified workflow simulation using all shared modules"""
@@ -378,9 +356,10 @@ class TestEnhancedSeparationCodeReduction:
 
         # Test all shared modules can be imported
         from github_operations import GitHubOperations
+        from interfaces import AgentConfig
         from state_management import StateManager
-        from utils.error_handling import ErrorHandler
         from task_tracking import TaskTracker
+        from utils.error_handling import ErrorHandler
 
         # Test instantiation
         github_ops = GitHubOperations()
@@ -430,7 +409,7 @@ class TestEnhancedSeparationCodeReduction:
         lines_saved = total_original_lines - total_after_lines
         reduction_percentage = (lines_saved / total_original_lines) * 100
 
-        print("Code Duplication Reduction Analysis:")
+        print(f"Code Duplication Reduction Analysis:")
         print(f"Original total lines: {total_original_lines}")
         print(f"Duplicated lines (29%): {duplicated_lines}")
         print(f"After Enhanced Separation: {total_after_lines}")

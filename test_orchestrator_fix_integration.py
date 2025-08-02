@@ -7,6 +7,7 @@ command construction fix resolves issue #1.
 """
 
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -30,7 +31,8 @@ def test_command_generation():
 
         # Create test prompt
         prompt_file = temp_path / "test-prompt.md"
-        prompt_file.write_text("""# Test Implementation Task
+        prompt_file.write_text(
+            """# Test Implementation Task
 
 ## Requirements
 - Create a simple Python module
@@ -46,7 +48,8 @@ def test_command_generation():
 - Module works correctly
 - Tests pass
 - Code is documented
-""")
+"""
+        )
 
         # Create task context
         task_context = {
@@ -58,7 +61,7 @@ def test_command_generation():
         }
 
         # Create TaskExecutor (this triggers the fix)
-        TaskExecutor(
+        executor = TaskExecutor(
             task_id=task_context["id"],
             worktree_path=temp_path,
             prompt_file=str(prompt_file),
@@ -71,7 +74,7 @@ def test_command_generation():
 
         workflow_prompt = prompt_gen.generate_workflow_prompt(context, temp_path)
 
-        print(f"✅ Generated WorkflowManager prompt: {workflow_prompt}")
+        print(f"✅ Generated WorkflowMaster prompt: {workflow_prompt}")
 
         # Read generated prompt content
         with open(workflow_prompt, "r") as f:
@@ -110,10 +113,10 @@ def test_command_generation():
         print(f"Command: {' '.join(simulated_cmd)}")
 
         # Validate command structure
-        if simulated_cmd[1] == "/agent:workflow-manager":
-            print("✅ Uses WorkflowManager agent (FIXED)")
+        if simulated_cmd[1] == "/agent:workflow-master":
+            print("✅ Uses WorkflowMaster agent (FIXED)")
         else:
-            print("❌ Does not use WorkflowManager agent")
+            print("❌ Does not use WorkflowMaster agent")
             return False
 
         if "-p" not in simulated_cmd:
@@ -196,8 +199,7 @@ def test_worktree_integration():
 
 def main():
     """Run integration tests"""
-
-    print("🚀 OrchestratorAgent → WorkflowManager Fix Integration Test")
+    print("🚀 OrchestratorAgent → WorkflowMaster Fix Integration Test")
     print("=" * 60)
     print("Testing fixes for issue #1: Implementation failure")
     print()
@@ -218,8 +220,8 @@ def main():
         print("🎉 ALL INTEGRATION TESTS PASSED!")
         print()
         print("The critical fixes are working correctly:")
-        print("✅ Claude CLI uses /agent:workflow-manager instead of -p")
-        print("✅ PromptGenerator creates WorkflowManager-specific prompts")
+        print("✅ Claude CLI uses /agent:workflow-master instead of -p")
+        print("✅ PromptGenerator creates WorkflowMaster-specific prompts")
         print("✅ Context is properly passed to TaskExecutors")
         print("✅ Integration with WorktreeManager works correctly")
         print()

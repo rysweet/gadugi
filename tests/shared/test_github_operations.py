@@ -3,21 +3,24 @@ Comprehensive tests for github_operations.py module.
 Tests the Enhanced Separation architecture implementation.
 """
 
-import pytest
 import json
+import os
 import subprocess
-from unittest.mock import Mock, patch
 
 # Import the module we're testing (will be implemented after tests)
 import sys
-import os
+from pathlib import Path
+from typing import Any, Dict, List
+from unittest.mock import Mock, call, patch
+
+import pytest
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
 try:
-    from github_operations import GitHubOperations, GitHubError, RateLimitError
+    from github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
     pass

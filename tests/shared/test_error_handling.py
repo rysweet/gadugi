@@ -3,13 +3,16 @@ Comprehensive tests for error_handling.py module.
 Tests error handling utilities, retry logic, circuit breakers, and recovery patterns.
 """
 
-import pytest
-import time
-from unittest.mock import patch, call
+import logging
+import os
 
 # Import the module we're testing
 import sys
-import os
+import time
+from typing import Any, Dict
+from unittest.mock import Mock, call, patch
+
+import pytest
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -17,17 +20,17 @@ sys.path.insert(
 
 try:
     from utils.error_handling import (
-        ErrorSeverity,
-        RetryStrategy,
-        GadugiError,
-        RecoverableError,
-        NonRecoverableError,
-        retry,
-        graceful_degradation,
-        ErrorHandler,
         CircuitBreaker,
-        handle_with_fallback,
         ErrorContext,
+        ErrorHandler,
+        ErrorSeverity,
+        GadugiError,
+        NonRecoverableError,
+        RecoverableError,
+        RetryStrategy,
+        graceful_degradation,
+        handle_with_fallback,
+        retry,
         validate_input,
     )
 except ImportError:
@@ -735,7 +738,7 @@ class TestErrorContext:
         """Test ErrorContext with successful operation."""
         with patch("utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
-                pass
+                result = "success"
 
             assert ctx.error is None
             mock_logger.debug.assert_has_calls(

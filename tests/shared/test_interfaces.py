@@ -3,48 +3,46 @@ Comprehensive tests for interfaces.py module.
 Tests shared interfaces, protocols, and contracts for the Enhanced Separation architecture.
 """
 
-import pytest
-from typing import Dict, Any, List, Optional, Protocol
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
+import json
+import os
 
 # Import the module we're testing
 import sys
-import os
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Protocol, Union
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
 try:
-    from interfaces import (
-        # Core interfaces
-        AgentInterface,
-        StateManagerInterface,
-        GitHubOperationsInterface,
-        TaskTrackerInterface,
-        ErrorHandlerInterface,
-        # Data models
+    from interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
         AgentConfig,
-        WorkflowPhase,
-        TaskData,
-        StateData,
-        GitHubIssue,
-        GitHubPR,
-        ErrorContext,
-        # Protocols
-        TodoWriteProvider,
-        LoggerProvider,
-        FileSystemProvider,
-        # Configuration schemas
         AgentConfigSchema,
-        WorkflowConfigSchema,
-        # Result types
-        OperationResult,
-        ValidationResult,
-        # Factory interfaces
-        ComponentFactory,
         AgentFactory,
+        AgentInterface,
+        ComponentFactory,
+        ErrorContext,
+        ErrorHandlerInterface,
+        FileSystemProvider,
+        GitHubIssue,
+        GitHubOperationsInterface,
+        GitHubPR,
+        LoggerProvider,
+        OperationResult,
+        StateData,
+        StateManagerInterface,
+        TaskData,
+        TaskTrackerInterface,
+        TodoWriteProvider,
+        ValidationResult,
+        WorkflowConfigSchema,
+        WorkflowPhase,
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
@@ -52,9 +50,11 @@ except ImportError:
         "Warning: Could not import interfaces module. Tests will define what needs to be implemented."
     )
 
-    from typing import Protocol, Any, Dict, List, Optional
     from abc import ABC, abstractmethod
     from dataclasses import dataclass
+    from datetime import datetime
+    from enum import Enum
+    from typing import Any, Dict, List, Optional, Protocol
 
     # Core interfaces
     class AgentInterface(ABC):

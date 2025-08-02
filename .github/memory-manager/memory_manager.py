@@ -8,16 +8,18 @@ with GitHub Issues, including pruning, syncing, and conflict resolution.
 
 import argparse
 import json
-import sys
-from typing import Dict, List, Optional, Any
-from pathlib import Path
 import os
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from config import ConfigManager, MemoryManagerConfig, create_default_config
+from github_integration import GitHubIntegration
 
 # Import our components
-from memory_parser import MemoryParser, TaskStatus
-from github_integration import GitHubIntegration
-from sync_engine import SyncEngine, SyncDirection
-from config import ConfigManager, create_default_config
+from memory_parser import MemoryDocument, MemoryParser, TaskStatus
+from sync_engine import ConflictResolution, SyncDirection, SyncEngine
 
 
 class MemoryManager:
@@ -54,9 +56,11 @@ class MemoryManager:
                 "memory_file": {
                     "path": str(memory_path),
                     "exists": memory_path.exists(),
-                    "last_updated": memory_doc.last_updated.isoformat()
-                    if memory_doc.last_updated
-                    else None,
+                    "last_updated": (
+                        memory_doc.last_updated.isoformat()
+                        if memory_doc.last_updated
+                        else None
+                    ),
                     "total_tasks": len(memory_doc.tasks),
                     "completed_tasks": len(
                         memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
@@ -75,13 +79,17 @@ class MemoryManager:
                 },
                 "sync_status": sync_status,
                 "config": {
-                    "sync_direction": self.config.sync.direction.value
-                    if hasattr(self.config.sync.direction, "value")
-                    else str(self.config.sync.direction),
+                    "sync_direction": (
+                        self.config.sync.direction.value
+                        if hasattr(self.config.sync.direction, "value")
+                        else str(self.config.sync.direction)
+                    ),
                     "auto_create_issues": self.config.sync.auto_create_issues,
-                    "conflict_resolution": self.config.sync.conflict_resolution.value
-                    if hasattr(self.config.sync.conflict_resolution, "value")
-                    else str(self.config.sync.conflict_resolution),
+                    "conflict_resolution": (
+                        self.config.sync.conflict_resolution.value
+                        if hasattr(self.config.sync.conflict_resolution, "value")
+                        else str(self.config.sync.conflict_resolution)
+                    ),
                 },
             }
 
@@ -141,7 +149,7 @@ class MemoryManager:
 
             # This is a simplified pruning preview
             # Full implementation would modify the Memory.md content
-            memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
+            completed_tasks = memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
             old_tasks = []  # Would calculate based on age
 
             pruning_stats["tasks_to_prune"] = len(old_tasks)
@@ -239,7 +247,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Status command
-    subparsers.add_parser("status", help="Show current status")
+    status_parser = subparsers.add_parser("status", help="Show current status")
 
     # Sync command
     sync_parser = subparsers.add_parser(
@@ -274,7 +282,9 @@ def main():
     )
 
     # Conflicts command
-    subparsers.add_parser("conflicts", help="List synchronization conflicts")
+    conflicts_parser = subparsers.add_parser(
+        "conflicts", help="List synchronization conflicts"
+    )
 
     # Resolve conflict command
     resolve_parser = subparsers.add_parser(
@@ -284,10 +294,12 @@ def main():
     resolve_parser.add_argument("resolution", help="Resolution strategy")
 
     # Validate command
-    subparsers.add_parser("validate", help="Validate configuration")
+    validate_parser = subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    subparsers.add_parser("init", help="Initialize Memory Manager configuration")
+    init_parser = subparsers.add_parser(
+        "init", help="Initialize Memory Manager configuration"
+    )
 
     args = parser.parse_args()
 
