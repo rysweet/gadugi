@@ -1,3 +1,4 @@
+---
 # PR Backlog Management Workflow
 # Automatically manages PR backlog by evaluating readiness criteria
 # and applying appropriate labels for human review
@@ -20,6 +21,7 @@ on:
 env:
   CLAUDE_AUTO_APPROVE: true
   CLAUDE_GITHUB_ACTIONS: true
+  PYTHONPATH: ${{ github.workspace }}/.claude/shared
 
 jobs:
   manage-pr-backlog:
@@ -32,137 +34,95 @@ jobs:
       checks: read
       metadata: read
       actions: read
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for proper branch comparison
           token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Claude Code CLI
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
         run: |
-          # Install Claude Code CLI
-          curl -fsSL https://claude.ai/cli/install.sh | bash
-          echo "$HOME/.claude/bin" >> $GITHUB_PATH
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
-      - name: Validate Claude Code installation
-        run: |
-          claude --version
-          claude config list || echo "No config found, will auto-configure"
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
-      - name: Configure Claude Code for GitHub Actions
-        run: |
-          claude config set auto-approve true
-          claude config set github-actions true
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
+          python -m pip install --upgrade pip
+          pip install requests pyyaml
+          # Install GitHub CLI for repository operations
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | \
+            sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | \
+            sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+
       - name: Determine processing mode
         id: mode
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "mode=single" >> $GITHUB_OUTPUT
             echo "pr_number=${{ github.event.number }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.pr_number }}" ]; then
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && \
+               [ -n "${{ github.event.inputs.pr_number }}" ]; then
             echo "mode=single" >> $GITHUB_OUTPUT
             echo "pr_number=${{ github.event.inputs.pr_number }}" >> $GITHUB_OUTPUT
           else
             echo "mode=backlog" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Run PR Backlog Manager - Single PR
-        if: steps.mode.outputs.mode == 'single'
+
+      - name: Run PR Backlog Manager
+        id: pr_backlog
         run: |
-          claude --auto-approve /agent:pr-backlog-manager \
-            "Evaluate PR #${{ steps.mode.outputs.pr_number }} for readiness:
-            
-            ## Objective
-            Perform comprehensive PR readiness assessment and apply appropriate labels.
-            
-            ## Tasks
-            1. Check merge conflict status
-            2. Verify CI/CD status  
-            3. Ensure branch is up-to-date with main
-            4. Validate code review completion (both human and AI)
-            5. Check PR metadata completeness
-            6. Apply 'ready-seeking-human' label if all criteria met
-            7. Delegate issue resolution to WorkflowMaster if needed
-            
-            ## Context
-            - PR Number: #${{ steps.mode.outputs.pr_number }}
-            - Event: ${{ github.event_name }}
-            - Repository: ${{ github.repository }}
-            - Auto-approve enabled for safe operations only"
+          cd ${{ github.workspace }}
+          python3 .claude/agents/pr-backlog-manager/github_actions_integration.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
-      - name: Run PR Backlog Manager - Full Backlog
-        if: steps.mode.outputs.mode == 'backlog'
-        run: |
-          claude --auto-approve /agent:pr-backlog-manager \
-            "Process entire PR backlog for ready-seeking-human candidates:
-            
-            ## Objective
-            Systematic evaluation of all open PRs for readiness criteria.
-            
-            ## Tasks
-            1. Scan all ready_for_review PRs without ready-seeking-human label
-            2. Prioritize PRs by age and recent activity
-            3. Evaluate each PR against readiness criteria:
-               - No merge conflicts
-               - CI/CD passing
-               - Up-to-date with main branch
-               - Code review completed (human + AI)
-               - PR metadata complete
-            4. Apply appropriate labels based on status
-            5. Delegate issue resolution to WorkflowMaster where possible
-            6. Generate summary report of backlog health
-            
-            ## Context
-            - Repository: ${{ github.repository }}
-            - Scheduled run: ${{ github.event_name == 'schedule' }}
-            - Auto-approve enabled for safe operations only"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
+          MAX_PROCESSING_TIME: 600
+          RATE_LIMIT_THRESHOLD: 50
+
       - name: Upload processing logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: pr-backlog-processing-logs-${{ github.run_id }}
           path: |
+            ~/.claude/artifacts/
             ~/.claude/logs/
             ./.github/workflow-states/
           retention-days: 30
-      
+
       - name: Comment on PR (single mode)
         if: steps.mode.outputs.mode == 'single' && (success() || failure())
         run: |
-          if [ "${{ job.status }}" = "success" ]; then
+          if [ "${{ steps.pr_backlog.outcome }}" = "success" ]; then
             STATUS_EMOJI="✅"
             STATUS_TEXT="completed successfully"
+            READY_STATUS="${{ steps.pr_backlog.outputs.pr_ready }}"
+            READINESS_SCORE="${{ steps.pr_backlog.outputs.readiness_score }}"
+            DETAILS="**Ready for Review:** ${READY_STATUS}
+            **Readiness Score:** ${READINESS_SCORE}%"
           else
             STATUS_EMOJI="❌"
             STATUS_TEXT="encountered errors"
+            DETAILS="Please check the workflow logs for details."
           fi
-          
+
           gh pr comment ${{ steps.mode.outputs.pr_number }} --body \
             "${STATUS_EMOJI} **PR Backlog Manager Evaluation**
-            
+
             The automated PR readiness evaluation has ${STATUS_TEXT}.
-            
+
+            ${DETAILS}
+
             **Processing Details:**
             - Event: ${{ github.event_name }}
-            - Workflow Run: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - Workflow Run: [${{ github.run_id }}](\
+${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
             - Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
-            
+
             *This comment was generated automatically by the PR Backlog Manager.*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
