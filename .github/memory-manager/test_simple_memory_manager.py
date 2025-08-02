@@ -165,7 +165,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         # Verify issue creation parameters
         call_args = self.github_mock.create_issue.call_args
         self.assertEqual(call_args[1]['title'], '🧠 Project Memory - AI Assistant Context')
-        self.assertIn('memory', call_args[1]['labels'])
+        self.assertIn('enhancement', call_args[1]['labels'])
     
     def test_create_memory_issue_body(self):
         """Test memory issue body creation"""
@@ -219,7 +219,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock issue with comments
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -255,7 +255,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock issue with multiple section comments
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -328,7 +328,7 @@ spanning multiple lines.
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock search results
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'items': [
@@ -369,7 +369,7 @@ spanning multiple lines.
         }
         
         # Mock memory content
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -392,7 +392,7 @@ spanning multiple lines.
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock memory content for cleanup
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -449,7 +449,7 @@ class TestIntegration(unittest.TestCase):
         mock_github_class.return_value = github_mock
         
         # Mock memory issue creation
-        github_mock._execute_command.return_value = {'success': True, 'data': []}
+        github_mock._execute_gh_command.return_value = {'success': True, 'data': []}
         github_mock.create_issue.return_value = {
             'success': True, 
             'data': {'number': 100, 'html_url': 'https://github.com/test/repo/issues/100'}
@@ -462,8 +462,22 @@ class TestIntegration(unittest.TestCase):
         }
         
         # Mock reading memory
-        github_mock._execute_command.side_effect = [
+        github_mock._execute_gh_command.side_effect = [
             {'success': True, 'data': []},  # Initial search for existing issue
+            {
+                'success': True,
+                'data': {
+                    'comments': [
+                        {
+                            'id': 'comment1',
+                            'body': '### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Type**: current-goals\n**Priority**: high\n\n**Content**:\nComplete memory manager implementation\n\n---\n*Added by: WorkflowMaster*',
+                            'createdAt': '2025-01-01T12:00:00Z',
+                            'author': {'login': 'testuser'}
+                        }
+                    ],
+                    'updatedAt': '2025-01-01T12:00:00Z'
+                }
+            },
             {
                 'success': True,
                 'data': {
