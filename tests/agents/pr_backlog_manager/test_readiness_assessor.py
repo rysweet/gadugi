@@ -328,7 +328,7 @@ class TestSyncAssessment:
         assert assessment.commits_behind == 5
         assert assessment.commits_ahead == 2
         assert assessment.requires_update is True
-        assert assessment.is_auto_updatable is True  # <= 10 commits behind
+        assert assessment.is_auto_updatable is False  # complexity is moderate, not simple
         assert assessment.sync_complexity == "moderate"  # Has merge commit
     
     def test_assess_branch_sync_far_behind(self, assessor, mock_github_ops, sample_pr_details):
