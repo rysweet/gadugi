@@ -358,6 +358,39 @@ python -m unittest test_simple_memory_manager.TestSimpleMemoryManager
 - **Input Validation**: All memory content is validated before storage
 - **Access Control**: Respects GitHub repository permissions
 - **Audit Trail**: Complete logging of all memory operations
+- **Issue Locking**: Memory issues are automatically locked to prevent unauthorized modifications
+
+### Memory Poisoning Protection
+
+The Simple Memory Manager implements automatic issue locking to prevent memory poisoning attacks:
+
+- **Automatic Locking**: Memory issues are locked immediately after creation
+- **Collaborator-Only Access**: Only users with write repository access can comment on locked issues
+- **Configurable Security**: Lock behavior can be customized via initialization parameters
+- **Lock Status Monitoring**: CLI commands to check and manage lock status
+
+```python
+# Initialize with automatic locking (default)
+manager = SimpleMemoryManager(auto_lock=True)
+
+# Initialize with custom lock reason
+manager = SimpleMemoryManager(lock_reason="resolved")
+
+# Disable automatic locking (not recommended)
+manager = SimpleMemoryManager(auto_lock=False)
+```
+
+### CLI Security Commands
+
+```bash
+# Check if memory issue is locked
+python simple_memory_cli.py lock-status
+
+# Unlock memory issue (WARNING: reduces security)
+python simple_memory_cli.py unlock --confirm
+```
+
+**Warning**: Unlocking the memory issue allows non-collaborators to comment, potentially enabling memory poisoning attacks. Only unlock if absolutely necessary and re-lock as soon as possible.
 
 ### Privacy Considerations
 
