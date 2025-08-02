@@ -64,3 +64,33 @@ This file combines generic Claude Code best practices with project-specific inst
 ## Project-Specific Instructions
 
 @claude-project-specific.md
+
+## Communication Guidelines
+
+### Language Style
+- Use neutral, factual language in all communications
+- Focus on functionality and features, not superlatives
+- Avoid self-congratulatory or promotional language
+
+### Specific Terms to Avoid
+- "major accomplishment" → "completed task"
+- "enterprise-grade" → "scalable" 
+- "production-ready" → "tested"
+- "significant enhancement" → "improvement"
+- "comprehensive" → "complete"
+- "robust" → "reliable"
+- "excellent/exceptional" → "good"
+- "cutting-edge" → "current"
+- "groundbreaking" → "new"
+
+### PR and Issue Descriptions
+- State what was done, not how well it was done
+- List features and changes factually
+- Describe functionality without adjectives
+- Focus on user value, not technical impressiveness
+
+### Code Review Comments
+- "The implementation works correctly" instead of "Excellent implementation"
+- "This follows project conventions" instead of "Outstanding code quality"
+- Point out issues directly without cushioning language
+- Suggest improvements without excessive praise
