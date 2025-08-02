@@ -6,14 +6,14 @@ Manages git worktrees for isolated parallel execution environments,
 including creation, synchronization, and cleanup operations.
 """
 
+import json
 import os
 import shutil
 import subprocess
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-import tempfile
-import json
 
 
 @dataclass

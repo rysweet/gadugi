@@ -3,12 +3,12 @@ GitHub operations module for Enhanced Separation architecture.
 Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowMaster.
 """
 
-import subprocess
 import json
-import time
 import logging
-from typing import Dict, Any, List, Optional, Union
+import subprocess
+import time
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Union
 
 
 # Custom exceptions

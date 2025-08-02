@@ -12,25 +12,26 @@ Security Features:
 - Timeout enforcement to prevent runaway processes
 """
 
-import os
-import sys
-import json
-import time
-import signal
-import psutil
 import asyncio
-import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any
-from dataclasses import dataclass, asdict
-from concurrent.futures import ProcessPoolExecutor, as_completed
-from datetime import datetime, timedelta
-import threading
-import queue
+import json
 import logging
+import os
+import queue
+import signal
+import subprocess
+import sys
+import threading
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
+import psutil
 
 # Import the PromptGenerator for creating WorkflowMaster prompts
-from .prompt_generator import PromptGenerator, PromptContext
+from .prompt_generator import PromptContext, PromptGenerator
 
 # Security: Define strict resource limits
 MAX_CONCURRENT_TASKS = 8

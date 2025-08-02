@@ -12,20 +12,20 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import os
-import sys
-import unittest
-import tempfile
-import shutil
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
 import json
+import os
+import shutil
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, call, patch
 
 # Add parent directory to path to import components
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from components.execution_engine import TaskExecutor, ExecutionEngine
-from components.prompt_generator import PromptGenerator, PromptContext
+from components.execution_engine import ExecutionEngine, TaskExecutor
+from components.prompt_generator import PromptContext, PromptGenerator
 from components.worktree_manager import WorktreeManager
 
 

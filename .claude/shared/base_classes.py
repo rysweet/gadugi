@@ -3,12 +3,12 @@ Shared base classes for Gadugi multi-agent system.
 These base classes provide common functionality to avoid duplication across agents.
 """
 
+import json
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
-import json
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 class BaseAgent(ABC):

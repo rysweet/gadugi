@@ -5,19 +5,20 @@ Test suite for WorktreeManager component of OrchestratorAgent
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import unittest
-import tempfile
 import json
-import subprocess
 import shutil
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
+import subprocess
 
 # Add the components directory to the path
 import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, call, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
-from worktree_manager import WorktreeManager, WorktreeInfo
+from worktree_manager import WorktreeInfo, WorktreeManager
 
 
 class TestWorktreeManager(unittest.TestCase):
@@ -501,7 +502,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
 
 if __name__ == '__main__':
     import shutil
-    
+
     # Skip integration tests if git is not available
     if not shutil.which('git'):
         print("Warning: Git not available, skipping integration tests")

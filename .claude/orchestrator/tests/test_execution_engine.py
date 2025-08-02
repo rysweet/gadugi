@@ -5,22 +5,27 @@ Test suite for ExecutionEngine component of OrchestratorAgent
 Tests parallel execution, resource monitoring, and process management.
 """
 
-import unittest
-import tempfile
-import time
 import json
 import shutil
 import subprocess
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
-from datetime import datetime, timedelta
 
 # Add the components directory to the path
 import sys
+import tempfile
+import time
+import unittest
+from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, call, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
 from execution_engine import (
-    ExecutionEngine, TaskExecutor, ResourceMonitor, ExecutionResult, SystemResources
+    ExecutionEngine,
+    ExecutionResult,
+    ResourceMonitor,
+    SystemResources,
+    TaskExecutor,
 )
 
 
@@ -529,7 +534,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
 
 if __name__ == '__main__':
     import shutil
-    
+
     # Check for required tools
     missing_tools = []
     if not shutil.which('echo'):

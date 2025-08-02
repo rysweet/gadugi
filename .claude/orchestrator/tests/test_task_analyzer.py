@@ -5,17 +5,18 @@ Test suite for TaskAnalyzer component of OrchestratorAgent
 Tests prompt file analysis, dependency detection, and task classification.
 """
 
-import unittest
-import tempfile
 import json
-from pathlib import Path
-from unittest.mock import patch, mock_open, MagicMock
 
 # Add the components directory to the path
 import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, mock_open, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
-from task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity
+from task_analyzer import TaskAnalyzer, TaskComplexity, TaskInfo, TaskType
 
 
 class TestTaskAnalyzer(unittest.TestCase):
