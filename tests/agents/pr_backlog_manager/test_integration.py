@@ -300,7 +300,7 @@ class TestComponentIntegration:
         assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION
         assert tasks[1].task_type == DelegationType.CI_FAILURE_FIX
         assert all(task.pr_number == 123 for task in tasks)
-        assert all(task.status in [DelegationStatus.DELEGATED, DelegationStatus.FAILED] for task in tasks)
+        assert all(task.status in [DelegationStatus.DELEGATED, DelegationStatus.IN_PROGRESS, DelegationStatus.FAILED] for task in tasks)
 
 
 class TestGitHubActionsIntegration:

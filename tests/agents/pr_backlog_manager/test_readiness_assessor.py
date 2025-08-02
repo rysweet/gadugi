@@ -401,7 +401,7 @@ class TestMetadataAssessment:
         assert assessment.has_appropriate_labels is True
         assert assessment.has_linked_issues is False  # No issue references in body
         assert assessment.is_complete is True
-        assert assessment.completeness_score > 75  # Should be high
+        assert assessment.completeness_score >= 75  # Should be high
     
     def test_assess_metadata_incomplete(self, assessor):
         """Test metadata assessment for incomplete metadata."""

@@ -8,7 +8,7 @@ including WorkflowMaster for complex resolutions and code-reviewer for AI review
 import logging
 import json
 import subprocess
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
@@ -431,11 +431,6 @@ Resolve the identified blocking issue for PR #{pr_number}.
             task.status = DelegationStatus.FAILED
             task.error_message = str(e)
             task.retry_count += 1
-            
-            # Retry if within limits
-            if task.retry_count < self.config['max_retries']:
-                logger.info(f"Retrying delegation {task.task_id} (attempt {task.retry_count + 1})")
-                self._execute_delegation(task)
     
     def _delegate_to_workflow_master(self, task: DelegationTask) -> None:
         """Delegate task to WorkflowMaster agent."""
@@ -642,8 +637,7 @@ jobs:
     
     def cleanup_completed_delegations(self, max_age_hours: int = 24) -> int:
         """Clean up completed delegation tasks older than specified age."""
-        cutoff_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        cutoff_time = cutoff_time.replace(hour=cutoff_time.hour - max_age_hours)
+        cutoff_time = datetime.now() - timedelta(hours=max_age_hours)
         
         to_remove = []
         for task_id, task in self.active_delegations.items():

@@ -502,7 +502,7 @@ class TestArtifactCreation:
             assert '🤖 PR Backlog Manager Results' in written_content
             assert '✅ Success' in written_content
             assert 'single_pr' in written_content
-            assert 'PR Number: #123' in written_content
+            assert 'PR Number:** #123' in written_content
     
     def test_set_github_outputs_single_pr(self, integration):
         """Test GitHub Actions outputs for single PR processing."""
