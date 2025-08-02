@@ -6,8 +6,10 @@
 1. **READ** `.github/Memory.md` for current context
 2. **UPDATE** `.github/Memory.md` after completing any significant task
 3. **COMMIT** Memory.md changes regularly to preserve context
+4. **NEW**: Memory.md automatically syncs with GitHub Issues for better project visibility
 
 **Memory.md is your persistent brain across sessions - USE IT!**
+**NEW**: Tasks in Memory.md are automatically converted to GitHub Issues for collaboration and tracking.
 
 **WHEN WORKING ON CLAUDE AGENTS OR INSTRUCTIONS**:
 - **READ** https://docs.anthropic.com/en/docs/claude-code/memory for proper import syntax
@@ -137,12 +139,38 @@ Last Updated: [ISO 8601 timestamp]
 
 **Set a mental reminder: "Did I update Memory.md in the last 30 minutes?"**
 
-### Memory Pruning
-Keep the memory file concise by:
-- Removing completed tasks older than 7 days
+### Memory Pruning and GitHub Integration (NEW!)
+Keep the memory file concise and synced with GitHub Issues:
+
+**Automatic Pruning**:
+- Removing completed tasks older than 7 days (configurable)
 - Consolidating similar context items
 - Archiving detailed reflections after incorporating improvements
 - Keeping only the most recent 5-10 accomplishments
+
+**GitHub Issues Integration**:
+- Memory.md tasks automatically create GitHub Issues
+- Bidirectional synchronization keeps both systems updated
+- Issues labeled with "memory-sync", "ai-assistant"
+- Completed tasks automatically close corresponding issues
+- Use `/agent:memory-manager` for manual sync and maintenance
+
+**Memory Manager CLI**:
+```bash
+# Initialize Memory Manager configuration
+python3 .github/memory-manager/memory_manager.py init
+
+# Check current sync status
+python3 .github/memory-manager/memory_manager.py status
+
+# Manual synchronization (dry-run first)
+python3 .github/memory-manager/memory_manager.py sync --dry-run
+python3 .github/memory-manager/memory_manager.py sync
+
+# Prune old entries
+python3 .github/memory-manager/memory_manager.py prune --dry-run
+python3 .github/memory-manager/memory_manager.py prune
+```
 
 ## Task Completion Reflection
 
@@ -232,6 +260,7 @@ Requirements: [What needs to be achieved]
 ### Common Workflow Agents (in hierarchical order)
 - **orchestrator-agent**: Top-level coordinator for parallel task execution (use FIRST for multiple tasks)
 - **workflow-master**: Orchestrates individual development workflows from issue to PR
+- **memory-manager**: Manages Memory.md pruning, curation, and GitHub Issues sync (NEW!)
 - **code-reviewer**: Reviews pull requests (invoked by WorkflowMaster in Phase 9)
 - **prompt-writer**: Creates structured prompts
 - **task-analyzer**: Analyzes dependencies (invoked by OrchestratorAgent)
