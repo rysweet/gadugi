@@ -40,7 +40,7 @@ from task_tracking import (
     TodoWriteIntegration,
     WorkflowPhaseTracker,
 )
-from utils.error_handling import CircuitBreaker, ErrorHandler
+from utils.error_handling import CircuitBreaker, ErrorHandler, retry
 
 
 class TestWorkflowMasterIntegration:
@@ -108,7 +108,7 @@ class TestWorkflowMasterIntegration:
             prompt_file=prompt_file,
             current_phase=0,  # INITIALIZATION
             status="in_progress",
-            context={"state_directory": f".github/workflow-states/{task_id}"}
+            context={"state_directory": f".github/workflow-states/{task_id}"},
         )
 
         # Test state persistence
@@ -139,7 +139,7 @@ class TestWorkflowMasterIntegration:
             task_id=task_id,
             prompt_file="test-issue.md",
             current_phase=2,  # ISSUE_CREATION
-            status="in_progress"
+            status="in_progress",
         )
 
         # Mock prompt data
@@ -163,18 +163,17 @@ class TestWorkflowMasterIntegration:
             }
 
             # Test retry logic integration
-            retry_manager = RetryManager()
-            issue_result = retry_manager.execute_with_retry(
-                lambda: self.github_ops.create_issue(
+            @retry(max_attempts=3, delay=0.1)
+            def create_issue_with_retry():
+                return self.github_ops.create_issue(
                     {
                         "title": f"{prompt_data['feature_name']} - {task_id}",
                         "body": "Test issue body",
                         "labels": ["enhancement", "ai-generated"],
                     }
-                ),
-                max_attempts=3,
-                backoff_strategy="exponential",
-            )
+                )
+            
+            issue_result = create_issue_with_retry()
 
             assert issue_result["success"] == True
             assert issue_result["issue_number"] == 123
@@ -195,7 +194,7 @@ class TestWorkflowMasterIntegration:
         """Test enhanced PR creation with atomic state updates and verification"""
 
         task_id = "test-pr-creation"
-        workflow_state = WorkflowState(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
@@ -230,9 +229,9 @@ class TestWorkflowMasterIntegration:
                 mock_verify.return_value = {"exists": True}
 
                 # Test PR creation with retry logic
-                retry_manager = RetryManager()
-                pr_result = retry_manager.execute_with_retry(
-                    lambda: self.github_ops.create_pull_request(
+                @retry(max_attempts=3, delay=0.1)
+                def create_pr_with_retry():
+                    return self.github_ops.create_pull_request(
                         {
                             "title": f"{implementation_summary['feature_name']} - Implementation",
                             "body": "Test PR body",
@@ -240,10 +239,9 @@ class TestWorkflowMasterIntegration:
                             "base": "main",
                             "labels": ["enhancement", "ai-generated"],
                         }
-                    ),
-                    max_attempts=3,
-                    backoff_strategy="exponential",
-                )
+                    )
+                
+                pr_result = create_pr_with_retry()
 
                 assert pr_result["success"] == True
                 assert pr_result["pr_number"] == 456
@@ -270,7 +268,7 @@ class TestWorkflowMasterIntegration:
     def test_enhanced_task_tracking_with_dependencies(self):
         """Test enhanced task tracking with dependency validation"""
 
-        workflow_state = WorkflowState(
+        workflow_state = TaskState(
             task_id="test-task-tracking",
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
@@ -350,7 +348,7 @@ class TestWorkflowMasterIntegration:
         """Test comprehensive error handling scenarios"""
 
         task_id = "test-error-handling"
-        workflow_state = WorkflowState(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
@@ -454,7 +452,7 @@ class TestWorkflowMasterIntegration:
         task_id = "test-state-consistency"
 
         # Create workflow state
-        workflow_state = WorkflowState(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
@@ -495,18 +493,22 @@ class TestWorkflowMasterIntegration:
         prompt_file = "end-to-end-test.md"
 
         # Initialize workflow
-        self.task_metrics.start_workflow_phase("initialization", "Starting end-to-end workflow")
+        self.task_metrics.start_workflow_phase(
+            "initialization", "Starting end-to-end workflow"
+        )
 
         workflow_state = TaskState(
             task_id=task_id,
             prompt_file=prompt_file,
             current_phase=0,  # INITIALIZATION
-            status="in_progress"
+            status="in_progress",
         )
 
         # Phase 1: Issue Creation
         workflow_state.current_phase = 2  # ISSUE_CREATION
-        self.phase_tracker.start_workflow_phase("issue_creation", "Creating GitHub issue")
+        self.phase_tracker.start_workflow_phase(
+            "issue_creation", "Creating GitHub issue"
+        )
 
         with patch.object(self.github_ops, "create_issue") as mock_issue:
             mock_issue.return_value = {
@@ -585,7 +587,9 @@ class TestWorkflowMasterTaskValidation:
 
     def setup_method(self):
         """Setup test environment"""
-        self.task_tracker = TaskTracker()  # TodoWriteIntegration is internal to TaskTracker
+        self.task_tracker = (
+            TaskTracker()
+        )  # TodoWriteIntegration is internal to TaskTracker
 
     def test_task_dependency_validation(self):
         """Test comprehensive task dependency validation"""

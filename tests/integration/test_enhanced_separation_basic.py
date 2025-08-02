@@ -23,7 +23,13 @@ sys.path.append(
 from github_operations import GitHubOperations
 from interfaces import AgentConfig
 from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
-from task_tracking import Task, TaskStatus, TaskTracker, TodoWriteIntegration, TaskMetrics
+from task_tracking import (
+    Task,
+    TaskMetrics,
+    TaskStatus,
+    TaskTracker,
+    TodoWriteIntegration,
+)
 from utils.error_handling import CircuitBreaker, ErrorHandler
 
 
@@ -79,7 +85,7 @@ class TestEnhancedSeparationBasic:
             task_id=state_id,
             prompt_file="test-prompt.md",
             status="in_progress",
-            context=state_data
+            context=state_data,
         )
         result = self.state_manager.save_state(task_state)
         assert result == True
@@ -87,15 +93,15 @@ class TestEnhancedSeparationBasic:
         # Load state
         loaded_state = self.state_manager.load_state(state_id)
         assert loaded_state is not None
-        assert loaded_state["task_id"] == state_id
-        assert loaded_state["phase"] == "implementation"
-        assert loaded_state["metadata"]["test"] == True
+        assert loaded_state.task_id == state_id
+        assert loaded_state.context["phase"] == "implementation"
+        assert loaded_state.context["metadata"]["test"] == True
 
     def test_checkpoint_manager_integration(self):
         """Test CheckpointManager integration with StateManager"""
 
-        # Create checkpoint manager
-        checkpoint_manager = CheckpointManager(self.state_manager)
+        # Create checkpoint manager with config
+        checkpoint_manager = CheckpointManager()
         assert checkpoint_manager is not None
 
         # Create a test state
@@ -106,36 +112,51 @@ class TestEnhancedSeparationBasic:
             "timestamp": datetime.now().isoformat(),
         }
 
+        # Create a task state for checkpoint
+        task_state = TaskState(
+            task_id=state_id,
+            prompt_file="test-checkpoint.md",
+            status="in_progress",
+            context=state_data,
+        )
+        
         # Create checkpoint
-        checkpoint_id = checkpoint_manager.create_checkpoint(state_id, state_data)
+        checkpoint_id = checkpoint_manager.create_checkpoint(task_state, "Test checkpoint")
         assert checkpoint_id is not None
 
         # Verify checkpoint was created
         checkpoints = checkpoint_manager.list_checkpoints(state_id)
         assert len(checkpoints) > 0
-        assert any(cp["id"] == checkpoint_id for cp in checkpoints)
+        assert any(cp["checkpoint_id"] == checkpoint_id for cp in checkpoints)
 
     def test_error_handler_basic_functionality(self):
         """Test ErrorHandler basic error handling"""
 
         assert self.error_handler is not None
 
+        # Register a recovery strategy for ValueError
+        def recover_from_value_error(error, context):
+            return f"Recovered from: {error}"
+        
+        self.error_handler.register_recovery_strategy(ValueError, recover_from_value_error)
+        
         # Test error handling with context
         try:
             raise ValueError("Test error for error handler")
         except Exception as e:
-            # This should not raise an exception
-            self.error_handler.handle_error(e, context={"test": "error_handling"})
+            # This should not raise an exception now that we have a recovery strategy
+            result = self.error_handler.handle_error(e, context={"test": "error_handling"})
+            assert "Recovered from:" in result
 
-        # Test error logging functionality
+        # Test error handler functionality
         assert hasattr(self.error_handler, "handle_error")
-        assert hasattr(self.error_handler, "log_error")
+        assert hasattr(self.error_handler, "register_recovery_strategy")
 
     def test_circuit_breaker_basic_functionality(self):
         """Test CircuitBreaker basic functionality"""
 
         # Create circuit breaker with low thresholds for testing
-        circuit_breaker = CircuitBreaker(failure_threshold=2, timeout=1)
+        circuit_breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=1.0)
         assert circuit_breaker is not None
 
         # Test successful operations
@@ -251,7 +272,7 @@ class TestEnhancedSeparationBasic:
             task_id=workflow_id,
             prompt_file="workflow.md",
             status="in_progress",
-            context=workflow_state
+            context=workflow_state,
         )
         self.state_manager.save_state(task_state)
 
@@ -290,7 +311,7 @@ class TestEnhancedSeparationBasic:
                 task_id=workflow_id,
                 prompt_file="workflow.md",
                 status="in_progress",
-                context=workflow_state
+                context=workflow_state,
             )
             self.state_manager.save_state(task_state)
 
@@ -308,14 +329,14 @@ class TestEnhancedSeparationBasic:
             task_id=workflow_id,
             prompt_file="workflow.md",
             status="completed",
-            context=workflow_state
+            context=workflow_state,
         )
         self.state_manager.save_state(task_state)
 
         # Verify final state
         final_state = self.state_manager.load_state(workflow_id)
-        assert final_state["phase"] == "completed"
-        assert "completed_at" in final_state
+        assert final_state.context["phase"] == "completed"
+        assert "completed_at" in final_state.context
 
         # Verify all tasks completed
         for task in tasks:
@@ -343,7 +364,7 @@ class TestEnhancedSeparationBasic:
                 task_id=state_id,
                 prompt_file="test.md",
                 status="in_progress",
-                context=state_data
+                context=state_data,
             )
             self.state_manager.save_state(task_state)
             loaded_state = self.state_manager.load_state(state_id)
