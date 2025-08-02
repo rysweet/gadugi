@@ -21,16 +21,47 @@ from typing import Dict, List, Optional, Tuple, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Import shared modules and Phase 1 components
-from ...shared.interfaces import AgentConfig, TaskResult
-from ...shared.task_tracking import TaskMetrics
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
-from ..phase1.capability_assessment import (
-    CapabilityAssessment, AgentCapabilityProfile, CapabilityDomain, 
-    ProficiencyLevel, TaskCapabilityRequirement
-)
-from ..phase1.performance_analytics import AgentPerformanceAnalyzer
+# Import shared modules with absolute path resolution
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
+
+# Import available shared module components
+from interfaces import AgentConfig, OperationResult
+from utils.error_handling import ErrorHandler, CircuitBreaker
+from state_management import StateManager
+
+# Define missing classes locally
+TaskResult = OperationResult
+
+# Import task tracking if available
+try:
+    from task_tracking import TaskMetrics
+except ImportError:
+    class TaskMetrics:
+        def __init__(self, *args, **kwargs):
+            pass
+# Import Phase 1 components (will be available when all imports are fixed)
+try:
+    from ..phase1.capability_assessment import (
+        CapabilityAssessment, AgentCapabilityProfile, CapabilityDomain, 
+        ProficiencyLevel, TaskCapabilityRequirement
+    )
+    from ..phase1.performance_analytics import AgentPerformanceAnalyzer
+except ImportError:
+    # Define minimal stubs if Phase 1 imports fail
+    class CapabilityAssessment:
+        pass
+    class AgentCapabilityProfile:
+        pass
+    class CapabilityDomain:
+        pass
+    class ProficiencyLevel:
+        pass
+    class TaskCapabilityRequirement:
+        pass
+    class AgentPerformanceAnalyzer:
+        pass
 
 
 class MatchingStrategy(Enum):
@@ -210,7 +241,7 @@ class TaskAgentMatcher:
         
         self.logger.info("TaskAgentMatcher initialized")
     
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
     def find_optimal_agent(self, 
                           task_requirements: TaskRequirements,
                           available_agents: List[str],

@@ -35,10 +35,11 @@ from .phase3.conflict_resolver import AgentConflictResolver
 from .phase3.workflow_optimizer import WorkflowOptimizer
 from .phase3.strategic_planner import StrategicTeamPlanner
 
-from .phase4.performance_learner import TeamPerformanceLearner
-from .phase4.adaptive_manager import AdaptiveTeamManager
-from .phase4.ml_models import MLModels
-from .phase4.continuous_improvement import ContinuousImprovement
+# Phase 4 imports temporarily commented out until implementation is complete
+# from .phase4.performance_learner import TeamPerformanceLearner
+# from .phase4.adaptive_manager import AdaptiveTeamManager
+# from .phase4.ml_models import MLModels
+# from .phase4.continuous_improvement import ContinuousImprovement
 
 __version__ = "1.0.0"
 __author__ = "Claude Code AI Agent"
@@ -62,9 +63,9 @@ __all__ = [
     "WorkflowOptimizer", 
     "StrategicTeamPlanner",
     
-    # Phase 4 - Learning and Adaptation
-    "TeamPerformanceLearner",
-    "AdaptiveTeamManager",
-    "MLModels",
-    "ContinuousImprovement"
+    # Phase 4 - Learning and Adaptation (temporarily disabled until implementation complete)
+    # "TeamPerformanceLearner",
+    # "AdaptiveTeamManager", 
+    # "MLModels",
+    # "ContinuousImprovement"
 ]

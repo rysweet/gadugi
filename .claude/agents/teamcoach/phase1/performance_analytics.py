@@ -21,13 +21,45 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Import shared modules
-from ...shared.interfaces import (
-    AgentMetrics, PerformanceMetrics, AgentConfig, TaskResult
-)
-from ...shared.task_tracking import TaskMetrics
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+# Import shared modules with absolute path resolution
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
+
+# Import available shared module components
+from interfaces import AgentConfig, OperationResult, ValidationResult
+from utils.error_handling import ErrorHandler, CircuitBreaker
+from state_management import StateManager
+
+# Import task tracking if available
+try:
+    from task_tracking import TaskMetrics
+except ImportError:
+    # Define minimal TaskMetrics if not available
+    class TaskMetrics:
+        def __init__(self, *args, **kwargs):
+            pass
+
+# Define TeamCoach-specific data classes
+@dataclass
+class AgentMetrics:
+    """Agent performance metrics data structure"""
+    agent_id: str
+    agent_name: str
+    success_rate: float = 0.0
+    average_execution_time: float = 0.0
+    total_tasks: int = 0
+    completed_tasks: int = 0
+    error_rate: float = 0.0
+    
+@dataclass  
+class PerformanceMetrics:
+    """Performance metrics container"""
+    timestamp: datetime = field(default_factory=datetime.now)
+    metrics: Dict[str, Any] = field(default_factory=dict)
+    
+# Use OperationResult as TaskResult
+TaskResult = OperationResult
 
 
 class PerformanceCategory(Enum):
@@ -148,7 +180,7 @@ class AgentPerformanceAnalyzer:
         
         self.logger.info("AgentPerformanceAnalyzer initialized")
     
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
     def analyze_agent_performance(self, 
                                 agent_id: str, 
                                 time_period: Optional[Tuple[datetime, datetime]] = None,

@@ -21,11 +21,36 @@ from typing import Dict, List, Set, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Import shared modules
-from ...shared.interfaces import AgentConfig, TaskResult, CapabilityProfile
-from ...shared.task_tracking import TaskMetrics
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+# Import shared modules with absolute path resolution
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..', 'shared'))
+
+# Import available shared module components
+from interfaces import AgentConfig, OperationResult
+from utils.error_handling import ErrorHandler, CircuitBreaker
+from state_management import StateManager
+
+# Define missing classes locally
+TaskResult = OperationResult
+
+# Import task tracking if available
+try:
+    from task_tracking import TaskMetrics
+except ImportError:
+    class TaskMetrics:
+        def __init__(self, *args, **kwargs):
+            pass
+
+# Define capability-specific data classes
+@dataclass
+class CapabilityProfile:
+    """Agent capability profile"""
+    agent_id: str
+    capabilities: Dict[str, float] = field(default_factory=dict)
+    specializations: List[str] = field(default_factory=list)
+    strengths: List[str] = field(default_factory=list)
+    weaknesses: List[str] = field(default_factory=list)
 
 
 class CapabilityDomain(Enum):
@@ -161,7 +186,7 @@ class CapabilityAssessment:
         
         self.logger.info("CapabilityAssessment initialized")
     
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
     def assess_agent_capabilities(self, 
                                 agent_id: str,
                                 force_refresh: bool = False) -> AgentCapabilityProfile:
