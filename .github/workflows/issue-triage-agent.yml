@@ -1,0 +1,496 @@
+name: Issue Triage Agent
+
+on:
+  issues:
+    types: 
+      - opened
+      - reopened
+  
+  # Also trigger on specific schedules for batch triage
+  schedule:
+    # Run triage every 6 hours for untriaged issues
+    - cron: '0 */6 * * *'
+
+jobs:
+  triage-new-issue:
+    runs-on: ubuntu-latest
+    
+    # Only run for issue events, not scheduled runs
+    if: github.event_name == 'issues'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd .github/memory-manager
+        pip install -r requirements.txt
+    
+    - name: Analyze issue for triage
+      id: analyze-issue
+      run: |
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        ISSUE_TITLE="${{ github.event.issue.title }}"
+        ISSUE_BODY="${{ github.event.issue.body }}"
+        ISSUE_LABELS="${{ join(github.event.issue.labels.*.name, ',') }}"
+        ISSUE_AUTHOR="${{ github.event.issue.user.login }}"
+        
+        # Determine appropriate agent and triage priority
+        AGENT="orchestrator-agent"  # Default for triage
+        SCENARIO="issue-triage"
+        PRIORITY="medium"
+        TRIAGE_CATEGORY="general"
+        SUGGESTED_LABELS=""
+        
+        # Analyze issue content for categorization
+        TITLE_LOWER=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
+        BODY_LOWER=$(echo "$ISSUE_BODY" | tr '[:upper:]' '[:lower:]')
+        
+        # Bug detection
+        if [[ "$TITLE_LOWER" =~ bug|error|crash|fail|broken|issue ]] || \
+           [[ "$BODY_LOWER" =~ "expected.*actual"|"steps to reproduce"|"error message"|"traceback"|"exception" ]]; then
+          TRIAGE_CATEGORY="bug"
+          PRIORITY="high"
+          SUGGESTED_LABELS="bug,needs-investigation"
+          AGENT="code-reviewer"
+          SCENARIO="bug-triage"
+        
+        # Feature request detection
+        elif [[ "$TITLE_LOWER" =~ feature|enhancement|improvement|add|support ]] || \
+             [[ "$BODY_LOWER" =~ "would like"|"could you"|"feature request"|"enhancement" ]]; then
+          TRIAGE_CATEGORY="feature"
+          PRIORITY="medium"
+          SUGGESTED_LABELS="enhancement,feature-request"
+          AGENT="workflow-master"
+          SCENARIO="feature-triage"
+        
+        # Documentation issues
+        elif [[ "$TITLE_LOWER" =~ doc|documentation|readme|guide|tutorial ]] || \
+             [[ "$BODY_LOWER" =~ "documentation"|"readme"|"guide"|"tutorial"|"unclear" ]]; then
+          TRIAGE_CATEGORY="documentation"
+          PRIORITY="medium"
+          SUGGESTED_LABELS="documentation,good-first-issue"
+          AGENT="prompt-writer"
+          SCENARIO="docs-triage"
+        
+        # Question/Support
+        elif [[ "$TITLE_LOWER" =~ question|help|how.*to|support ]] || \
+             [[ "$BODY_LOWER" =~ "how do i"|"how to"|"question"|"help"|"not sure" ]]; then
+          TRIAGE_CATEGORY="question"
+          PRIORITY="low"
+          SUGGESTED_LABELS="question,support"
+          AGENT="prompt-writer"
+          SCENARIO="support-triage"
+        
+        # Performance issues
+        elif [[ "$TITLE_LOWER" =~ performance|slow|speed|optimization|latency ]] || \
+             [[ "$BODY_LOWER" =~ "performance"|"slow"|"takes too long"|"optimization"|"faster" ]]; then
+          TRIAGE_CATEGORY="performance"
+          PRIORITY="high"
+          SUGGESTED_LABELS="performance,optimization"
+          AGENT="code-reviewer"
+          SCENARIO="performance-triage"
+        fi
+        
+        # Check if issue already has labels (might be pre-triaged)
+        if [[ -n "$ISSUE_LABELS" ]]; then
+          SCENARIO="pre-labeled-triage"
+          PRIORITY="low"
+        fi
+        
+        echo "agent=$AGENT" >> $GITHUB_OUTPUT
+        echo "scenario=$SCENARIO" >> $GITHUB_OUTPUT
+        echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
+        echo "category=$TRIAGE_CATEGORY" >> $GITHUB_OUTPUT
+        echo "suggested_labels=$SUGGESTED_LABELS" >> $GITHUB_OUTPUT
+        
+        echo "Triage Analysis Results:"
+        echo "- Category: $TRIAGE_CATEGORY"
+        echo "- Agent: $AGENT"
+        echo "- Scenario: $SCENARIO"  
+        echo "- Priority: $PRIORITY"
+        echo "- Suggested Labels: $SUGGESTED_LABELS"
+    
+    - name: Update memory with issue context
+      run: |
+        cd .github/memory-manager
+        
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        ISSUE_TITLE="${{ github.event.issue.title }}"
+        ISSUE_AUTHOR="${{ github.event.issue.user.login }}"
+        ISSUE_URL="${{ github.event.issue.html_url }}"
+        AGENT="${{ steps.analyze-issue.outputs.agent }}"
+        SCENARIO="${{ steps.analyze-issue.outputs.scenario }}"
+        PRIORITY="${{ steps.analyze-issue.outputs.priority }}"
+        CATEGORY="${{ steps.analyze-issue.outputs.category }}"
+        SUGGESTED_LABELS="${{ steps.analyze-issue.outputs.suggested_labels }}"
+        
+        CONTEXT="Issue Triage - New Issue Analysis:
+        
+        **Issue Details:**
+        - Issue #$ISSUE_NUMBER: $ISSUE_TITLE
+        - Author: $ISSUE_AUTHOR
+        - URL: $ISSUE_URL
+        - Repository: ${{ github.repository }}
+        - Created: ${{ github.event.issue.created_at }}
+        
+        **Triage Analysis:**
+        - Category: $CATEGORY
+        - Selected Agent: $AGENT
+        - Triage Scenario: $SCENARIO
+        - Priority: $PRIORITY
+        - Suggested Labels: $SUGGESTED_LABELS
+        
+        **Content Analysis:**
+        - Title Pattern Match: Detected $CATEGORY characteristics
+        - Body Analysis: Applied content-based categorization
+        - Existing Labels: ${{ join(github.event.issue.labels.*.name, ', ') }}
+        
+        **Recommended Actions:**
+        1. Apply suggested labels: $SUGGESTED_LABELS
+        2. Assign to appropriate team/maintainer
+        3. $AGENT should analyze for detailed classification
+        4. Update issue with triage results and next steps
+        
+        **Workflow Context:**
+        - Event: ${{ github.event.action }}
+        - Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+        python simple_memory_cli.py update "$CONTEXT" \
+          --section current-goals \
+          --agent "GitHubActions-IssueTriage" \
+          --priority "$PRIORITY" \
+          --related "#$ISSUE_NUMBER"
+    
+    - name: Apply suggested labels
+      uses: actions/github-script@v7
+      if: steps.analyze-issue.outputs.suggested_labels != ''
+      with:
+        script: |
+          const suggestedLabels = '${{ steps.analyze-issue.outputs.suggested_labels }}';
+          const labels = suggestedLabels.split(',').map(label => label.trim()).filter(label => label);
+          
+          if (labels.length > 0) {
+            console.log('Applying labels:', labels);
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: labels
+            });
+          }
+    
+    - name: Create triage comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const agent = '${{ steps.analyze-issue.outputs.agent }}';
+          const scenario = '${{ steps.analyze-issue.outputs.scenario }}';
+          const priority = '${{ steps.analyze-issue.outputs.priority }}';
+          const category = '${{ steps.analyze-issue.outputs.category }}';
+          const suggestedLabels = '${{ steps.analyze-issue.outputs.suggested_labels }}';
+          const issueNumber = context.payload.issue.number;
+          const issueTitle = context.payload.issue.title;
+          
+          // Get category emoji and description
+          const categoryInfo = {
+            'bug': { emoji: '🐛', description: 'Bug Report', color: 'red' },
+            'feature': { emoji: '✨', description: 'Feature Request', color: 'blue' },
+            'documentation': { emoji: '📖', description: 'Documentation', color: 'green' },
+            'question': { emoji: '❓', description: 'Question/Support', color: 'purple' },
+            'performance': { emoji: '⚡', description: 'Performance Issue', color: 'orange' },
+            'general': { emoji: '📋', description: 'General Issue', color: 'gray' }
+          };
+          
+          const info = categoryInfo[category] || categoryInfo['general'];
+          
+          const triageCommentBody = `🤖 **Automated Issue Triage**
+          
+          ${info.emoji} **Category:** ${info.description}
+          
+          ### 📊 Triage Analysis
+          - **Priority:** ${priority.toUpperCase()}
+          - **Category:** ${category}
+          - **Assigned Agent:** \`${agent}\`
+          - **Scenario:** \`${scenario}\`
+          
+          ${suggestedLabels ? `### 🏷️ Applied Labels\n${suggestedLabels.split(',').map(label => \`- \\\`${label.trim()}\\\`\`).join('\\n')}\n` : ''}
+          
+          ---
+          
+          ### 🎯 Recommended Next Steps
+          
+          #### For Maintainers:
+          1. **Review** the automatic categorization
+          2. **Assign** to appropriate team member
+          3. **Invoke agent** for detailed analysis:
+             \`\`\`
+             /agent:${agent}
+             
+             Please analyze issue #${issueNumber} for ${scenario}.
+             Category: ${category}
+             Priority: ${priority}
+             \`\`\`
+          
+          #### Agent Processing:
+          The **${agent}** agent will:
+          - Analyze issue content in detail
+          - Provide technical recommendations
+          - Suggest implementation approach
+          - Identify related issues/PRs
+          
+          ### 📋 Triage Checklist:
+          - [x] Automatic categorization applied
+          - [x] Labels assigned based on content analysis
+          - [ ] Manual review by maintainer
+          - [ ] Assignment to team member
+          - [ ] Agent analysis completion
+          - [ ] Next steps documented
+          
+          ---
+          
+          ### 🔧 Manual Commands (if needed):
+          
+          **Different Agent Analysis:**
+          \`\`\`bash
+          # For complex feature requests
+          /agent:workflow-master
+          
+          # For code-related issues  
+          /agent:code-reviewer
+          
+          # For large issue coordination
+          /agent:orchestrator-agent
+          \`\`\`
+          
+          **Re-triage:**
+          If this categorization seems incorrect, apply the \`needs-retriage\` label and a maintainer will review.
+          
+          ---
+          
+          *🚀 This triage was automatically performed by GitHub Actions based on issue content analysis.*
+          `;
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: issueNumber,
+            body: triageCommentBody
+          });
+    
+    - name: Set issue priority milestone (if configured)
+      uses: actions/github-script@v7
+      if: steps.analyze-issue.outputs.priority == 'high'
+      with:
+        script: |
+          // This would set a milestone for high-priority issues
+          // You would need to create milestones like "High Priority", "Next Release", etc.
+          
+          console.log('High priority issue detected - would set priority milestone');
+          
+          // Uncomment and configure milestones as needed:
+          // const milestones = await github.rest.issues.listMilestones({
+          //   owner: context.repo.owner,
+          //   repo: context.repo.repo,
+          //   state: 'open'
+          // });
+          
+          // const priorityMilestone = milestones.data.find(m => m.title === 'High Priority');
+          // if (priorityMilestone) {
+          //   await github.rest.issues.update({
+          //     owner: context.repo.owner,
+          //     repo: context.repo.repo,
+          //     issue_number: context.payload.issue.number,
+          //     milestone: priorityMilestone.number
+          //   });
+          // }
+    
+    - name: Log triage results
+      run: |
+        echo "=== Issue Triage Results ==="
+        echo "Issue: #${{ github.event.issue.number }} - ${{ github.event.issue.title }}"
+        echo "Author: ${{ github.event.issue.user.login }}"
+        echo "Category: ${{ steps.analyze-issue.outputs.category }}"
+        echo "Priority: ${{ steps.analyze-issue.outputs.priority }}"
+        echo "Agent: ${{ steps.analyze-issue.outputs.agent }}"
+        echo "Scenario: ${{ steps.analyze-issue.outputs.scenario }}"
+        echo "Suggested Labels: ${{ steps.analyze-issue.outputs.suggested_labels }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "=========================="
+
+  batch-triage-untriaged:
+    runs-on: ubuntu-latest
+    
+    # Only run on scheduled events
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd .github/memory-manager
+        pip install -r requirements.txt
+    
+    - name: Find untriaged issues
+      id: find-untriaged
+      uses: actions/github-script@v7
+      with:
+        script: |
+          // Find open issues without triage labels
+          const { data: issues } = await github.rest.issues.listForRepo({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            state: 'open',
+            labels: '',  // Issues without labels
+            sort: 'created',
+            direction: 'desc',
+            per_page: 20  // Limit to avoid overwhelming
+          });
+          
+          // Filter for truly untriaged issues (no category labels)
+          const triageLabels = ['bug', 'enhancement', 'documentation', 'question', 'performance', 'feature-request'];
+          const untriagedIssues = issues.filter(issue => {
+            const issueLabels = issue.labels.map(label => label.name);
+            return !triageLabels.some(triageLabel => issueLabels.includes(triageLabel));
+          });
+          
+          console.log(\`Found \${untriagedIssues.length} untriaged issues\`);
+          
+          // Store issue numbers for processing
+          const issueNumbers = untriagedIssues.slice(0, 10).map(issue => issue.number); // Limit to 10
+          console.log('Issues to triage:', issueNumbers);
+          
+          return { 
+            count: untriagedIssues.length,
+            issues: issueNumbers 
+          };
+    
+    - name: Update memory with batch triage context
+      if: fromJson(steps.find-untriaged.outputs.result).count > 0
+      run: |
+        cd .github/memory-manager
+        
+        UNTRIAGED_COUNT="${{ fromJson(steps.find-untriaged.outputs.result).count }}"
+        ISSUE_NUMBERS="${{ join(fromJson(steps.find-untriaged.outputs.result).issues, ', ') }}"
+        
+        CONTEXT="Batch Issue Triage - Scheduled Run:
+        
+        **Batch Triage Context:**
+        - Trigger: Scheduled run (every 6 hours)
+        - Untriaged Issues Found: $UNTRIAGED_COUNT
+        - Issues to Process: $ISSUE_NUMBERS
+        - Repository: ${{ github.repository }}
+        - Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        
+        **Processing Strategy:**
+        - Focus on recently created issues without category labels
+        - Apply orchestrator-agent for batch processing
+        - Limit to 10 issues per run to avoid overload
+        - Update memory with results for tracking
+        
+        **Recommended Actions:**
+        1. Invoke orchestrator-agent for batch analysis
+        2. Apply appropriate category labels
+        3. Set priority levels
+        4. Assign to appropriate team members
+        5. Update memory with triage results
+        
+        **Workflow Context:**
+        - Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        - Next Scheduled Run: 6 hours from now"
+        
+        python simple_memory_cli.py update "$CONTEXT" \
+          --section current-goals \
+          --agent "GitHubActions-BatchTriage" \
+          --priority medium
+    
+    - name: Create batch triage comment
+      if: fromJson(steps.find-untriaged.outputs.result).count > 0
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const result = ${{ steps.find-untriaged.outputs.result }};
+          const untriagedCount = result.count;
+          const issueNumbers = result.issues;
+          
+          // Create a summary issue or comment on the most recent untriaged issue
+          if (issueNumbers.length > 0) {
+            const latestIssue = Math.max(...issueNumbers);
+            
+            const batchTriageComment = \`🤖 **Scheduled Batch Triage Report**
+            
+            **📊 Triage Summary**
+            - Found **\${untriagedCount}** untriaged issues
+            - Processing **\${issueNumbers.length}** issues this run
+            - Issues: #\${issueNumbers.join(', #')}
+            
+            ### 🎯 Batch Processing
+            
+            The orchestrator-agent will process these issues for:
+            - Automatic categorization
+            - Label application
+            - Priority assignment
+            - Team routing
+            
+            #### Agent Command for Batch Processing:
+            \\\`\\\`\\\`
+            /agent:orchestrator-agent
+            
+            Please perform batch triage analysis for issues: #\${issueNumbers.join(', #')}
+            
+            Focus on:
+            - Content analysis for categorization
+            - Label application based on patterns
+            - Priority assignment
+            - Maintainer recommendations
+            \\\`\\\`\\\`
+            
+            ### 📋 Triage Queue Status
+            - **Total Untriaged:** \${untriagedCount}
+            - **This Batch:** \${issueNumbers.length}
+            - **Remaining:** \${untriagedCount - issueNumbers.length}
+            
+            ---
+            
+            *🕒 This batch triage runs every 6 hours automatically*\`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: latestIssue,
+              body: batchTriageComment
+            });
+          }
+    
+    - name: Log batch triage summary
+      run: |
+        UNTRIAGED_COUNT="${{ fromJson(steps.find-untriaged.outputs.result).count }}"
+        
+        echo "=== Batch Triage Summary ==="
+        echo "Scheduled Run: $(date)"
+        echo "Untriaged Issues Found: $UNTRIAGED_COUNT"
+        echo "Issues Processed: ${{ join(fromJson(steps.find-untriaged.outputs.result).issues, ', ') }}"
+        echo "Repository: ${{ github.repository }}"
+        echo "Next Run: In 6 hours"
+        echo "Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        echo "=========================="

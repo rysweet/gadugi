@@ -1,0 +1,263 @@
+# GitHub Actions Agent Configuration
+# 
+# This file contains configuration templates and examples for setting up
+# GitHub Actions integration with Gadugi AI agents.
+
+# =============================================================================
+# LABEL-BASED AGENT MAPPING
+# =============================================================================
+# Configure which agents are invoked for specific labels
+
+label_agent_mapping:
+  # Code Review Agents
+  "needs-review": "code-reviewer"
+  "code-review": "code-reviewer" 
+  "bug-analysis": "code-reviewer"
+  "security-review": "code-reviewer"
+  "performance-review": "code-reviewer"
+  
+  # Workflow Management
+  "workflow": "workflow-master"
+  "feature-request": "workflow-master"
+  "enhancement": "workflow-master"
+  "epic": "workflow-master"
+  
+  # Issue Triage and Coordination
+  "needs-triage": "orchestrator-agent"
+  "coordination": "orchestrator-agent"
+  "multi-component": "orchestrator-agent"
+  "complex": "orchestrator-agent"
+  
+  # Documentation and Prompts
+  "documentation": "prompt-writer"
+  "prompts": "prompt-writer"
+  "guides": "prompt-writer"
+  "examples": "prompt-writer"
+  
+  # Direct Agent Invocation (using ai-agent: prefix)
+  "ai-agent:code-reviewer": "code-reviewer"
+  "ai-agent:workflow-master": "workflow-master"
+  "ai-agent:orchestrator": "orchestrator-agent"
+  "ai-agent:prompt-writer": "prompt-writer"
+  "ai-agent:memory-manager": "memory-manager"
+
+# =============================================================================
+# SCENARIO MAPPING
+# =============================================================================
+# Define scenarios based on context
+
+issue_scenarios:
+  bug_patterns:
+    - "bug"
+    - "error"
+    - "crash"
+    - "fail"
+    - "broken"
+  feature_patterns:
+    - "feature"
+    - "enhancement"
+    - "improvement"
+    - "add"
+    - "support"
+  docs_patterns:
+    - "doc"
+    - "documentation"
+    - "readme"
+    - "guide"
+    - "tutorial"
+  question_patterns:
+    - "question"
+    - "help"
+    - "how to"
+    - "support"
+  performance_patterns:
+    - "performance"
+    - "slow"
+    - "speed"
+    - "optimization"
+    - "latency"
+
+pr_scenarios:
+  small_pr: 
+    max_files: 5
+    max_lines: 100
+    agent: "code-reviewer"
+    scenario: "quick-review"
+  
+  medium_pr:
+    max_files: 15
+    max_lines: 500
+    agent: "code-reviewer" 
+    scenario: "standard-review"
+    
+  large_pr:
+    max_files: 999
+    max_lines: 999999
+    agent: "orchestrator-agent"
+    scenario: "large-pr-coordination"
+
+  feature_pr:
+    title_patterns: ["feat:", "feature:", "add:", "implement:"]
+    agent: "workflow-master"
+    scenario: "feature-review"
+    
+  bugfix_pr:
+    title_patterns: ["fix:", "bug:", "hotfix:", "patch:"]
+    agent: "code-reviewer"
+    scenario: "bugfix-review"
+    
+  docs_pr:
+    title_patterns: ["docs:", "doc:", "readme:", "guide:"]
+    agent: "prompt-writer"
+    scenario: "documentation-review"
+
+# =============================================================================
+# PRIORITY RULES
+# =============================================================================
+# Configure priority assignment based on various factors
+
+priority_rules:
+  high_priority:
+    labels: ["critical", "urgent", "security", "hotfix", "p0"]
+    title_keywords: ["critical", "urgent", "security", "breach", "vulnerability"]
+    pr_size_threshold: 50  # Files changed
+    
+  medium_priority:
+    labels: ["important", "enhancement", "feature", "p1", "p2"]
+    title_keywords: ["feature", "enhancement", "improvement"]
+    pr_size_threshold: 20
+    
+  low_priority:
+    labels: ["minor", "cleanup", "refactor", "p3", "p4"]
+    title_keywords: ["cleanup", "refactor", "minor", "typo"]
+
+# =============================================================================
+# MEMORY SECTION MAPPING  
+# =============================================================================
+# Configure which memory sections are used for different scenarios
+
+memory_sections:
+  issue_triage: "current-goals"
+  pr_review: "current-goals" 
+  bug_analysis: "important-context"
+  feature_planning: "next-steps"
+  documentation: "completed-tasks"
+  coordination: "current-goals"
+  
+# =============================================================================
+# NOTIFICATION SETTINGS
+# =============================================================================
+# Configure notification and commenting behavior
+
+notifications:
+  auto_comment:
+    issues: true
+    pull_requests: true
+    
+  comment_templates:
+    agent_invocation: |
+      🤖 **Agent Invocation**: {agent} 
+      📋 **Scenario**: {scenario}  
+      ⏰ **Priority**: {priority}
+      🎯 **Context**: {context}
+      
+    triage_complete: |
+      ✅ **Triage Complete**
+      🏷️ **Labels Applied**: {labels}
+      👥 **Assigned**: {assignees}
+      📝 **Next Steps**: {next_steps}
+      
+  integration_webhooks:
+    slack_webhook: ""  # Configure Slack webhook URL
+    discord_webhook: ""  # Configure Discord webhook URL
+    teams_webhook: ""  # Configure Teams webhook URL
+
+# =============================================================================
+# TEAM ASSIGNMENT RULES
+# =============================================================================
+# Configure automatic team/reviewer assignment
+
+team_assignments:
+  code_review:
+    python_files: ["@python-team", "@backend-team"]
+    javascript_files: ["@frontend-team", "@js-team"]
+    yaml_files: ["@devops-team", "@infra-team"]
+    markdown_files: ["@docs-team", "@technical-writers"]
+    
+  issue_routing:
+    bug_reports: ["@triage-team", "@qa-team"]
+    feature_requests: ["@product-team", "@engineering-leads"]
+    documentation: ["@docs-team", "@developer-advocates"]
+    security: ["@security-team", "@senior-engineers"]
+
+# =============================================================================
+# WORKFLOW CUSTOMIZATION
+# =============================================================================
+# Advanced configuration options
+
+advanced_config:
+  # Batch processing limits
+  batch_processing:
+    max_issues_per_run: 10
+    max_prs_per_run: 5
+    schedule_interval: "0 */6 * * *"  # Every 6 hours
+    
+  # Circuit breaker settings
+  circuit_breaker:
+    failure_threshold: 3
+    timeout_seconds: 300
+    
+  # Rate limiting
+  rate_limits:
+    github_api_requests_per_hour: 5000
+    agent_invocations_per_hour: 100
+    
+  # Memory management
+  memory_retention:
+    cleanup_after_days: 30
+    max_entries_per_section: 1000
+    
+  # Security settings
+  security:
+    allowed_actors: []  # Empty means all actors allowed
+    required_permissions: ["write"]  # Repository permissions required
+    enable_secret_scanning: true
+
+# =============================================================================
+# EXAMPLE CONFIGURATIONS
+# =============================================================================
+
+# Example 1: Simple Bug Triage
+example_bug_triage:
+  name: "Simple Bug Triage"
+  triggers:
+    - "issues.opened"
+    - "issues.labeled['bug']"
+  agent: "code-reviewer"
+  scenario: "bug-analysis"
+  priority: "high"
+  auto_labels: ["needs-investigation", "bug"]
+  
+# Example 2: Feature Request Workflow
+example_feature_workflow:
+  name: "Feature Request Workflow" 
+  triggers:
+    - "issues.labeled['feature-request']"
+  agent: "workflow-master"
+  scenario: "feature-planning"
+  priority: "medium"
+  auto_labels: ["enhancement", "needs-discussion"]
+  assign_to: "@product-team"
+  
+# Example 3: Large PR Review Orchestration
+example_large_pr_review:
+  name: "Large PR Review"
+  triggers:
+    - "pull_request.ready_for_review"
+  conditions:
+    - "changed_files > 20"
+    - "additions + deletions > 500"
+  agent: "orchestrator-agent"
+  scenario: "large-pr-coordination"
+  priority: "high"
+  auto_assign_reviewers: true

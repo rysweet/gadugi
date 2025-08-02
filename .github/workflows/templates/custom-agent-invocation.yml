@@ -1,0 +1,181 @@
+# Custom Agent Invocation Template
+# 
+# This template shows how to create a custom workflow that invokes 
+# specific agents based on your repository's unique requirements.
+#
+# Copy this file to .github/workflows/ and customize as needed.
+
+name: Custom Agent Invocation
+
+on:
+  # Customize these triggers based on your needs
+  issues:
+    types: [opened, labeled, assigned]
+  pull_request:
+    types: [opened, ready_for_review, review_requested]
+  # You can also add webhook events, schedule, or manual triggers
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: 'Agent to invoke'
+        required: true
+        type: choice
+        options:
+          - code-reviewer
+          - workflow-master
+          - orchestrator-agent
+          - prompt-writer
+          - agent-manager
+      target_type:
+        description: 'Target type'
+        required: true
+        type: choice
+        options:
+          - issue
+          - pull_request
+          - repository
+      target_number:
+        description: 'Issue or PR number (if applicable)'
+        required: false
+        type: string
+      scenario:
+        description: 'Processing scenario'
+        required: true
+        type: string
+        default: 'custom-invocation'
+
+jobs:
+  custom-agent-invocation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    # Example: Custom logic to determine agent and scenario
+    - name: Determine agent and scenario
+      id: determine-action
+      run: |
+        # Set default values
+        AGENT="code-reviewer"
+        SCENARIO="general-analysis"
+        PRIORITY="medium"
+        TARGET_TYPE="repository"
+        TARGET_NUMBER=""
+        
+        # For manual workflow dispatch
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          AGENT="${{ github.event.inputs.agent }}"
+          SCENARIO="${{ github.event.inputs.scenario }}"
+          TARGET_TYPE="${{ github.event.inputs.target_type }}"
+          TARGET_NUMBER="${{ github.event.inputs.target_number }}"
+        
+        # For issue events
+        elif [[ "${{ github.event_name }}" == "issues" ]]; then
+          TARGET_TYPE="issue"
+          TARGET_NUMBER="${{ github.event.issue.number }}"
+          
+          # Custom logic based on issue characteristics
+          ISSUE_TITLE="${{ github.event.issue.title }}"
+          ISSUE_LABELS="${{ join(github.event.issue.labels.*.name, ',') }}"
+          
+          case "${{ github.event.action }}" in
+            "opened")
+              AGENT="orchestrator-agent"
+              SCENARIO="new-issue-analysis"
+              PRIORITY="high"
+              ;;
+            "labeled")
+              # Check specific labels
+              if [[ "$ISSUE_LABELS" == *"critical"* ]]; then
+                AGENT="workflow-master"
+                SCENARIO="critical-issue"
+                PRIORITY="high"
+              elif [[ "$ISSUE_LABELS" == *"documentation"* ]]; then
+                AGENT="prompt-writer"
+                SCENARIO="docs-issue"
+                PRIORITY="medium"
+              fi
+              ;;
+            "assigned")
+              AGENT="task-analyzer"
+              SCENARIO="assignment-analysis"
+              PRIORITY="medium"
+              ;;
+          esac
+        
+        # For PR events
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          TARGET_TYPE="pull_request"
+          TARGET_NUMBER="${{ github.event.pull_request.number }}"
+          
+          # Custom logic based on PR characteristics
+          PR_SIZE="${{ github.event.pull_request.changed_files }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          
+          if [[ "$PR_SIZE" -gt 20 ]]; then
+            AGENT="orchestrator-agent"
+            SCENARIO="large-pr-coordination"
+            PRIORITY="high"
+          elif [[ "$PR_TITLE" =~ ^feat|^feature ]]; then
+            AGENT="workflow-master"
+            SCENARIO="feature-review"
+            PRIORITY="high"
+          else
+            AGENT="code-reviewer"
+            SCENARIO="standard-review"
+            PRIORITY="medium"
+          fi
+        fi
+        
+        # Output determined values
+        echo "agent=$AGENT" >> $GITHUB_OUTPUT
+        echo "scenario=$SCENARIO" >> $GITHUB_OUTPUT
+        echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
+        echo "target_type=$TARGET_TYPE" >> $GITHUB_OUTPUT
+        echo "target_number=$TARGET_NUMBER" >> $GITHUB_OUTPUT
+        
+        echo "Determined Action:"
+        echo "- Agent: $AGENT"
+        echo "- Scenario: $SCENARIO"
+        echo "- Priority: $PRIORITY"
+        echo "- Target: $TARGET_TYPE #$TARGET_NUMBER"
+
+    # Use the reusable agent invocation action
+    - name: Invoke Gadugi Agent
+      uses: ./.github/actions/invoke-agent
+      with:
+        agent: ${{ steps.determine-action.outputs.agent }}
+        scenario: ${{ steps.determine-action.outputs.scenario }}
+        priority: ${{ steps.determine-action.outputs.priority }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        target-type: ${{ steps.determine-action.outputs.target_type }}
+        target-number: ${{ steps.determine-action.outputs.target_number }}
+        context-data: |
+          {
+            "workflow": "${{ github.workflow }}",
+            "event": "${{ github.event_name }}",
+            "action": "${{ github.event.action }}",
+            "actor": "${{ github.actor }}",
+            "repository": "${{ github.repository }}"
+          }
+        memory-section: "current-goals"
+        auto-comment: "true"
+
+    # Optional: Additional custom processing
+    - name: Custom post-processing
+      run: |
+        echo "=== Custom Post-Processing ==="
+        echo "Agent invoked: ${{ steps.determine-action.outputs.agent }}"
+        echo "Scenario: ${{ steps.determine-action.outputs.scenario }}"
+        
+        # Add your custom logic here
+        # Examples:
+        # - Send notifications to Slack/Discord
+        # - Update external project management tools
+        # - Trigger additional workflows
+        # - Update databases or metrics
+        
+        echo "Custom processing completed"
