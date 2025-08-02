@@ -3,12 +3,12 @@ Shared interfaces, protocols, and contracts for Gadugi Enhanced Separation archi
 Provides type-safe contracts for inter-component communication and dependency injection.
 """
 
-import logging
+from typing import Dict, Any, List, Optional, Protocol, Union, TypeVar, Generic
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar, Union
+import logging
 
 logger = logging.getLogger(__name__)
 

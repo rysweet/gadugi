@@ -78,12 +78,16 @@ class TestOrchestratorAgentIntegration:
         assert self.task_metrics is not None
 
         # Test basic functionality
-        assert hasattr(self.github_operations, 'create_issue')
-        assert hasattr(self.state_manager, 'save_state')
+        assert hasattr(self.github_operations, "create_issue")
+        assert hasattr(self.state_manager, "save_state")
 
         # Test circuit breaker initialization
-        github_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=300)
-        execution_circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=600)
+        github_circuit_breaker = CircuitBreaker(
+            failure_threshold=3, recovery_timeout=300
+        )
+        execution_circuit_breaker = CircuitBreaker(
+            failure_threshold=5, recovery_timeout=600
+        )
 
         assert github_circuit_breaker.failure_threshold == 3
         assert execution_circuit_breaker.failure_threshold == 5
@@ -318,7 +322,7 @@ class TestOrchestratorAgentIntegration:
         self.productivity_analyzer.record_phase_start("task_analysis")
 
         # Phase 2: Environment Setup
-        orchestration_state = WorkflowState(
+        orchestration_state = TaskState(
             task_id=orchestration_id,
             phase=WorkflowPhase.ENVIRONMENT_SETUP,
             started_at=datetime.now(),
@@ -444,9 +448,9 @@ class TestOrchestratorAgentPerformance:
         # Test state management performance
         start_time = time.time()
 
-        state_manager = WorkflowStateManager()
+        state_manager = StateManager()
         for i in range(10):
-            state = WorkflowState(
+            state = TaskState(
                 task_id=f"perf-test-{i}",
                 phase=WorkflowPhase.IMPLEMENTATION,
                 started_at=datetime.now(),

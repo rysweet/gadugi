@@ -3,12 +3,12 @@ GitHub operations module for Enhanced Separation architecture.
 Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowManager.
 """
 
-import json
-import logging
 import subprocess
+import json
 import time
+import logging
+from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
 
 
 # Custom exceptions
@@ -721,3 +721,14 @@ class GitHubOperations:
         if result['success'] and result['data']:
             return result['data'].get('checks', {})
         return {'totalCount': 0, 'passing': 0, 'failing': 0}
+    
+    # Method aliases for backward compatibility with tests
+    def create_pull_request(self, title: str, body: str, base: str = 'main', 
+                          head: Optional[str] = None, draft: bool = False) -> Dict[str, Any]:
+        """Alias for create_pr method."""
+        return self.create_pr(title, body, base, head, draft)
+    
+    def list_pull_requests(self, state: str = 'open', base: Optional[str] = None,
+                          limit: int = 30) -> Dict[str, Any]:
+        """Alias for list_prs method."""
+        return self.list_prs(state, base, limit)

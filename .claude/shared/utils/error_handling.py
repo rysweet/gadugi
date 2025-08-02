@@ -3,11 +3,12 @@ Error handling utilities for Gadugi multi-agent system.
 Provides retry logic, graceful degradation, and error recovery patterns.
 """
 
+import time
 import functools
 import logging
-import time
+from typing import Callable, Any, Optional, Dict, List, Type
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type
+
 
 logger = logging.getLogger(__name__)
 

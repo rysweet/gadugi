@@ -3,11 +3,12 @@ GitHub integration utilities for Gadugi multi-agent system.
 Provides common GitHub operations used across multiple agents.
 """
 
-import json
-import logging
 import subprocess
+import json
 import time
-from typing import Any, Dict, List, Optional
+from typing import Dict, Any, List, Optional
+import logging
+
 
 logger = logging.getLogger(__name__)
 

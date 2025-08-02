@@ -40,17 +40,17 @@ from task_tracking import (
     TodoWriteIntegration,
     WorkflowPhaseTracker,
 )
-from utils.error_handling import CircuitBreaker, ErrorHandler
+from utils.error_handling import CircuitBreaker, ErrorHandler, retry
 
 
-class TestWorkflowMasterIntegration:
-    """Integration tests for WorkflowMaster with shared modules"""
+class TestWorkflowManagerIntegration:
+    """Integration tests for WorkflowManager with shared modules"""
 
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
         self.config = AgentConfig(
-            agent_id="test-workflow-master", name="Test WorkflowMaster"
+            agent_id="test-workflow-manager", name="Test WorkflowManager"
         )
 
         # Initialize shared modules
@@ -69,8 +69,8 @@ class TestWorkflowMasterIntegration:
         """Cleanup test environment"""
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    def test_workflow_master_initialization_with_shared_modules(self):
-        """Test WorkflowMaster initialization uses shared modules correctly"""
+    def test_workflow_manager_initialization_with_shared_modules(self):
+        """Test WorkflowManager initialization uses shared modules correctly"""
 
         # Test shared module initialization
         assert self.github_ops is not None
@@ -84,9 +84,9 @@ class TestWorkflowMasterIntegration:
         assert self.github_ops.config == self.config
 
         # Test circuit breaker initialization
-        github_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
+        github_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=300)
         implementation_circuit_breaker = CircuitBreaker(
-            failure_threshold=5, timeout=600
+            failure_threshold=5, recovery_timeout=600
         )
 
         assert github_circuit_breaker.failure_threshold == 3
@@ -108,7 +108,7 @@ class TestWorkflowMasterIntegration:
             prompt_file=prompt_file,
             current_phase=0,  # INITIALIZATION
             status="in_progress",
-            context={"state_directory": f".github/workflow-states/{task_id}"}
+            context={"state_directory": f".github/workflow-states/{task_id}"},
         )
 
         # Test state persistence
@@ -139,7 +139,7 @@ class TestWorkflowMasterIntegration:
             task_id=task_id,
             prompt_file="test-issue.md",
             current_phase=2,  # ISSUE_CREATION
-            status="in_progress"
+            status="in_progress",
         )
 
         # Mock prompt data
@@ -162,15 +162,18 @@ class TestWorkflowMasterIntegration:
                 "issue_url": "https://github.com/test/repo/issues/123",
             }
 
-            # Test retry logic integration (mocked)
-            # retry_manager = RetryManager()
-            issue_result = self.github_ops.create_issue(
-                {
-                    "title": f"{prompt_data['feature_name']} - {task_id}",
-                    "body": "Test issue body",
-                    "labels": ["enhancement", "ai-generated"],
-                }
-            )
+            # Test retry logic integration
+            @retry(max_attempts=3, delay=0.1)
+            def create_issue_with_retry():
+                return self.github_ops.create_issue(
+                    {
+                        "title": f"{prompt_data['feature_name']} - {task_id}",
+                        "body": "Test issue body",
+                        "labels": ["enhancement", "ai-generated"],
+                    }
+                )
+            
+            issue_result = create_issue_with_retry()
 
             assert issue_result["success"] == True
             assert issue_result["issue_number"] == 123
@@ -191,8 +194,7 @@ class TestWorkflowMasterIntegration:
         """Test enhanced PR creation with atomic state updates and verification"""
 
         task_id = "test-pr-creation"
-        from types import SimpleNamespace
-        workflow_state = SimpleNamespace(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
@@ -228,17 +230,20 @@ class TestWorkflowMasterIntegration:
             ) as mock_verify:
                 mock_verify.return_value = {"exists": True}
 
-                # Test PR creation with retry logic (mocked)
-                # retry_manager = RetryManager()
-                pr_result = self.github_ops.create_pull_request(
-                    {
-                        "title": f"{implementation_summary['feature_name']} - Implementation",
-                        "body": "Test PR body",
-                        "head": workflow_state.branch_name,
-                        "base": "main",
-                        "labels": ["enhancement", "ai-generated"],
-                    }
-                )
+                # Test PR creation with retry logic
+                @retry(max_attempts=3, delay=0.1)
+                def create_pr_with_retry():
+                    return self.github_ops.create_pull_request(
+                        {
+                            "title": f"{implementation_summary['feature_name']} - Implementation",
+                            "body": "Test PR body",
+                            "head": workflow_state.branch_name,
+                            "base": "main",
+                            "labels": ["enhancement", "ai-generated"],
+                        }
+                    )
+                
+                pr_result = create_pr_with_retry()
 
                 assert pr_result["success"] == True
                 assert pr_result["pr_number"] == 456
@@ -265,8 +270,7 @@ class TestWorkflowMasterIntegration:
     def test_enhanced_task_tracking_with_dependencies(self):
         """Test enhanced task tracking with dependency validation"""
 
-        from types import SimpleNamespace
-        workflow_state = SimpleNamespace(
+        workflow_state = TaskState(
             task_id="test-task-tracking",
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
@@ -346,8 +350,7 @@ class TestWorkflowMasterIntegration:
         """Test comprehensive error handling scenarios"""
 
         task_id = "test-error-handling"
-        from types import SimpleNamespace
-        workflow_state = SimpleNamespace(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
@@ -370,7 +373,7 @@ class TestWorkflowMasterIntegration:
 
         # Test circuit breaker functionality
         implementation_circuit_breaker = CircuitBreaker(
-            failure_threshold=2, timeout=300
+            failure_threshold=2, recovery_timeout=300
         )
 
         # Test failure scenarios
@@ -447,8 +450,7 @@ class TestWorkflowMasterIntegration:
         task_id = "test-state-consistency"
 
         # Create workflow state
-        from types import SimpleNamespace
-        workflow_state = SimpleNamespace(
+        workflow_state = TaskState(
             task_id=task_id,
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
@@ -490,18 +492,22 @@ class TestWorkflowMasterIntegration:
         prompt_file = "end-to-end-test.md"
 
         # Initialize workflow
-        self.task_metrics.start_workflow_phase("initialization", "Starting end-to-end workflow")
+        self.task_metrics.start_workflow_phase(
+            "initialization", "Starting end-to-end workflow"
+        )
 
         workflow_state = TaskState(
             task_id=task_id,
             prompt_file=prompt_file,
             current_phase=0,  # INITIALIZATION
-            status="in_progress"
+            status="in_progress",
         )
 
         # Phase 1: Issue Creation
         workflow_state.current_phase = 2  # ISSUE_CREATION
-        self.phase_tracker.start_workflow_phase("issue_creation", "Creating GitHub issue")
+        self.phase_tracker.start_workflow_phase(
+            "issue_creation", "Creating GitHub issue"
+        )
 
         with patch.object(self.github_ops, "create_issue") as mock_issue:
             mock_issue.return_value = {
@@ -575,12 +581,14 @@ class TestWorkflowMasterIntegration:
         assert total_duration > 0
 
 
-class TestWorkflowMasterTaskValidation:
+class TestWorkflowManagerTaskValidation:
     """Test task validation and dependency management"""
 
     def setup_method(self):
         """Setup test environment"""
-        self.task_tracker = TaskTracker()  # TodoWriteIntegration is internal to TaskTracker
+        self.task_tracker = (
+            TaskTracker()
+        )  # TodoWriteIntegration is internal to TaskTracker
 
     def test_task_dependency_validation(self):
         """Test comprehensive task dependency validation"""
