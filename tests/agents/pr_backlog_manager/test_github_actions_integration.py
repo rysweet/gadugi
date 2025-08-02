@@ -26,6 +26,46 @@ except ImportError:
     pytest.skip("PR Backlog Manager modules not available for testing", allow_module_level=True)
 
 
+@pytest.fixture
+def mock_pr_backlog_manager():
+    """Create mock PR backlog manager."""
+    mock = Mock()
+    mock.process_single_pr.return_value = Mock(
+        pr_number=123,
+        status=Mock(value="ready"),
+        readiness_score=95.0,
+        is_ready=True,
+        blocking_issues=[],
+        resolution_actions=[],
+        processing_time=2.5
+    )
+    mock.process_backlog.return_value = Mock(
+        total_prs=5,
+        ready_prs=3,
+        blocked_prs=2,
+        processing_time=45.0,
+        automation_rate=85.0,
+        success_rate=90.0
+    )
+    return mock
+
+
+@pytest.fixture
+def github_env_vars():
+    """Standard GitHub Actions environment variables."""
+    return {
+        'GITHUB_ACTIONS': 'true',
+        'GITHUB_TOKEN': 'test-token',
+        'GITHUB_EVENT_NAME': 'pull_request',
+        'GITHUB_REPOSITORY': 'user/test-repo',
+        'GITHUB_ACTOR': 'test-user',
+        'GITHUB_REF': 'refs/pull/123/merge',
+        'GITHUB_SHA': 'abc123',
+        'GITHUB_RUN_ID': '456789',
+        'GITHUB_RUN_ATTEMPT': '1'
+    }
+
+
 class TestGitHubContext:
     """Test GitHubContext functionality."""
     
@@ -173,44 +213,6 @@ class TestSecurityConstraints:
 
 class TestGitHubActionsIntegration:
     """Test GitHubActionsIntegration functionality."""
-    
-    @pytest.fixture
-    def mock_pr_backlog_manager(self):
-        """Create mock PR backlog manager."""
-        mock = Mock()
-        mock.process_single_pr.return_value = Mock(
-            pr_number=123,
-            status=Mock(value="ready"),
-            readiness_score=95.0,
-            is_ready=True,
-            blocking_issues=[],
-            resolution_actions=[],
-            processing_time=2.5
-        )
-        mock.process_backlog.return_value = Mock(
-            total_prs=5,
-            ready_prs=3,
-            blocked_prs=2,
-            processing_time=45.0,
-            automation_rate=85.0,
-            success_rate=90.0
-        )
-        return mock
-    
-    @pytest.fixture
-    def github_env_vars(self):
-        """Standard GitHub Actions environment variables."""
-        return {
-            'GITHUB_ACTIONS': 'true',
-            'GITHUB_TOKEN': 'test-token',
-            'GITHUB_EVENT_NAME': 'pull_request',
-            'GITHUB_REPOSITORY': 'user/test-repo',
-            'GITHUB_ACTOR': 'test-user',
-            'GITHUB_REF': 'refs/pull/123/merge',
-            'GITHUB_SHA': 'abc123',
-            'GITHUB_RUN_ID': '456789',
-            'GITHUB_RUN_ATTEMPT': '1'
-        }
     
     def test_initialization_valid_environment(self, mock_pr_backlog_manager, github_env_vars):
         """Test GitHubActionsIntegration initialization in valid environment."""

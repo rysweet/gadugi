@@ -25,43 +25,42 @@ except ImportError:
     pytest.skip("PR Backlog Manager modules not available for testing", allow_module_level=True)
 
 
-class TestReadinessAssessor:
-    """Test suite for ReadinessAssessor functionality."""
-    
-    @pytest.fixture
-    def mock_github_ops(self):
-        """Create mock GitHub operations."""
-        mock = Mock()
-        mock.get_pr_status_checks.return_value = []
-        mock.get_pr_reviews.return_value = []
-        mock.get_pr_comments.return_value = []
-        mock.compare_commits.return_value = {'behind_by': 0, 'ahead_by': 1, 'commits': []}
-        return mock
-    
-    @pytest.fixture
-    def assessor(self, mock_github_ops):
-        """Create ReadinessAssessor instance."""
-        return ReadinessAssessor(mock_github_ops)
-    
-    @pytest.fixture
-    def sample_pr_details(self):
-        """Sample PR details for testing."""
-        return {
-            'number': 123,
-            'title': 'feat: add new feature',
-            'body': 'This PR adds a comprehensive new feature to the system',
-            'labels': [{'name': 'enhancement'}],
-            'mergeable': True,
-            'mergeable_state': 'clean',
-            'base': {'sha': 'base123'},
-            'head': {'sha': 'head123'},
-            'additions': 150,
-            'deletions': 75,
-            'changed_files': 8,
-            'updated_at': '2024-01-01T12:00:00Z',
-            'requested_reviewers': [],
-            'requested_teams': []
-        }
+@pytest.fixture
+def mock_github_ops():
+    """Create mock GitHub operations."""
+    mock = Mock()
+    mock.get_pr_status_checks.return_value = []
+    mock.get_pr_reviews.return_value = []
+    mock.get_pr_comments.return_value = []
+    mock.compare_commits.return_value = {'behind_by': 0, 'ahead_by': 1, 'commits': []}
+    return mock
+
+
+@pytest.fixture
+def assessor(mock_github_ops):
+    """Create ReadinessAssessor instance."""
+    return ReadinessAssessor(mock_github_ops)
+
+
+@pytest.fixture
+def sample_pr_details():
+    """Sample PR details for testing."""
+    return {
+        'number': 123,
+        'title': 'feat: add new feature',
+        'body': 'This PR adds a comprehensive new feature to the system',
+        'labels': [{'name': 'enhancement'}],
+        'mergeable': True,
+        'mergeable_state': 'clean',
+        'base': {'sha': 'base123'},
+        'head': {'sha': 'head123'},
+        'additions': 150,
+        'deletions': 75,
+        'changed_files': 8,
+        'updated_at': '2024-01-01T12:00:00Z',
+        'requested_reviewers': [],
+        'requested_teams': []
+    }
 
 
 class TestConflictAssessment:

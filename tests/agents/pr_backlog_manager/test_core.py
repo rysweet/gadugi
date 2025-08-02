@@ -359,10 +359,10 @@ class TestPRBacklogManager:
         actions = pr_backlog_manager._generate_resolution_actions(123, blocking_issues)
         
         assert len(actions) == 4
-        assert any('WorkflowMaster' in action for action in actions if 'merge conflict' in blocking_issues[0])
-        assert any('WorkflowMaster' in action for action in actions if 'ci checks' in blocking_issues[1])
-        assert any('WorkflowMaster' in action for action in actions if 'behind main' in blocking_issues[2])
-        assert any('code-reviewer' in action for action in actions if 'ai code review' in blocking_issues[3])
+        assert any('WorkflowMaster' in action for action in actions)
+        assert any('merge conflict' in action.lower() for action in actions)
+        assert any('CI' in action for action in actions)
+        assert any('code-reviewer' in action for action in actions)
     
     def test_process_single_pr_success(self, pr_backlog_manager, sample_pr_data, mock_github_ops):
         """Test successful single PR processing."""
@@ -563,7 +563,7 @@ class TestPRAssessment:
         assert assessment.pr_number == 123
         assert assessment.status == PRStatus.PROCESSING
         assert assessment.is_ready is False  # Not all criteria met
-        assert assessment.readiness_score == 80.0  # 4 out of 5 criteria met
+        assert abs(assessment.readiness_score - 66.67) < 0.01  # 4 out of 6 criteria met
         assert len(assessment.blocking_issues) == 2
         assert len(assessment.resolution_actions) == 2
     

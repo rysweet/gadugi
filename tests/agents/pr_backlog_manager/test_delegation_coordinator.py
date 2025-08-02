@@ -25,32 +25,35 @@ except ImportError:
     pytest.skip("PR Backlog Manager modules not available for testing", allow_module_level=True)
 
 
+@pytest.fixture
+def mock_github_ops():
+    """Create mock GitHub operations."""
+    mock = Mock()
+    mock.add_pr_labels.return_value = None
+    mock.add_pr_comment.return_value = None
+    return mock
+
+
+@pytest.fixture
+def coordinator(mock_github_ops):
+    """Create DelegationCoordinator instance."""
+    return DelegationCoordinator(mock_github_ops, auto_approve=False)
+
+
+@pytest.fixture
+def sample_pr_context():
+    """Sample PR context for testing."""
+    return {
+        'repository': 'user/repo',
+        'title': 'feat: add new feature',
+        'author': 'developer',
+        'labels': ['enhancement'],
+        'github_actions': True
+    }
+
+
 class TestDelegationCoordinator:
     """Test suite for DelegationCoordinator functionality."""
-    
-    @pytest.fixture
-    def mock_github_ops(self):
-        """Create mock GitHub operations."""
-        mock = Mock()
-        mock.add_pr_labels.return_value = None
-        mock.add_pr_comment.return_value = None
-        return mock
-    
-    @pytest.fixture
-    def coordinator(self, mock_github_ops):
-        """Create DelegationCoordinator instance."""
-        return DelegationCoordinator(mock_github_ops, auto_approve=False)
-    
-    @pytest.fixture
-    def sample_pr_context(self):
-        """Sample PR context for testing."""
-        return {
-            'repository': 'user/repo',
-            'title': 'feat: add new feature',
-            'author': 'developer',
-            'labels': ['enhancement'],
-            'github_actions': True
-        }
 
 
 class TestDelegationTask:
