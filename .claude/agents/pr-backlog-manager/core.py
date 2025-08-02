@@ -36,6 +36,30 @@ except ImportError as e:
         def __init__(self, **kwargs): pass
     class TaskTracker:
         def __init__(self, **kwargs): pass
+    class AgentConfig:
+        def __init__(self, agent_id: str, name: str, **kwargs):
+            self.agent_id = agent_id
+            self.name = name
+    class RetryStrategy(Enum):
+        EXPONENTIAL = "exponential"
+        LINEAR = "linear"
+        FIXED = "fixed"
+    class ErrorSeverity(Enum):
+        LOW = 1
+        MEDIUM = 2
+        HIGH = 3
+        CRITICAL = 4
+    class GadugiError(Exception):
+        def __init__(self, message: str, severity: ErrorSeverity = ErrorSeverity.MEDIUM):
+            super().__init__(message)
+            self.severity = severity
+    class CircuitBreaker:
+        def __init__(self, failure_threshold: int, recovery_timeout: float):
+            pass
+    def retry_with_backoff(max_attempts: int = 3, strategy = None):
+        def decorator(func):
+            return func
+        return decorator
     OperationResult = Dict[str, Any]
 
 
