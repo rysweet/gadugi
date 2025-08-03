@@ -99,11 +99,27 @@ class SimpleMemoryManager:
     
     MEMORY_ISSUE_TITLE = "🧠 Project Memory - AI Assistant Context"
     MEMORY_LABELS = ["enhancement"]  # Using standard GitHub labels
+    DEFAULT_LOCK_REASON = "off-topic"  # Prevents non-collaborator comments
     
-    def __init__(self, repo_path: Optional[str] = None):
-        """Initialize Simple Memory Manager"""
+    def __init__(self, repo_path: Optional[str] = None, auto_lock: bool = True, lock_reason: Optional[str] = None):
+        """
+        Initialize Simple Memory Manager
+        
+        Args:
+            repo_path: Path to repository (defaults to current directory)
+            auto_lock: Whether to automatically lock memory issue for security (default: True)
+            lock_reason: GitHub lock reason - one of: off-topic, too heated, resolved, spam (default: off-topic)
+        """
         self.repo_path = Path(repo_path or os.getcwd())
         self.logger = logging.getLogger(__name__)
+        self.auto_lock = auto_lock
+        self.lock_reason = lock_reason or self.DEFAULT_LOCK_REASON
+        
+        # Validate lock reason
+        valid_reasons = ["off-topic", "too heated", "resolved", "spam"]
+        if self.lock_reason not in valid_reasons:
+            self.logger.warning(f"Invalid lock reason '{self.lock_reason}', using default")
+            self.lock_reason = self.DEFAULT_LOCK_REASON
         
         # Initialize GitHub operations using shared module
         self.github = GitHubOperations()
@@ -139,6 +155,14 @@ class SimpleMemoryManager:
             if result['success']:
                 issue_number = result['data']['number']
                 self.logger.info(f"Created new memory issue #{issue_number}")
+                
+                # Lock the issue if auto_lock is enabled
+                if self.auto_lock:
+                    if self._lock_memory_issue(issue_number):
+                        self.logger.info(f"Successfully locked memory issue #{issue_number} for security")
+                    else:
+                        self.logger.warning(f"Failed to lock memory issue #{issue_number}, continuing anyway")
+                
                 return issue_number
             else:
                 raise GitHubError("Failed to create memory issue", "create_issue", result)
@@ -187,6 +211,10 @@ AI agents update this memory by adding structured comments with the following fo
 - **Team Collaboration**: Natural issue-based collaboration
 - **Version History**: Complete audit trail of all changes
 - **Cross-Referencing**: Native GitHub issue/PR linking
+
+## Security
+This issue is automatically locked to prevent unauthorized memory modifications.
+Only repository collaborators with write access can add comments.
 
 This approach eliminates the complexity of Memory.md file operations and provides
 enhanced integration with GitHub's collaboration features."""
@@ -520,6 +548,95 @@ enhanced integration with GitHub's collaboration features."""
         
         except Exception as e:
             self.logger.error(f"Memory cleanup failed: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
+    
+    def _lock_memory_issue(self, issue_number: int) -> bool:
+        """
+        Lock the memory issue to prevent unauthorized modifications.
+        
+        Only collaborators with write access can comment on locked issues,
+        providing protection against memory poisoning from external users.
+        
+        Args:
+            issue_number: GitHub issue number to lock
+            
+        Returns:
+            True if successfully locked, False otherwise
+        """
+        try:
+            result = self.github._execute_gh_command([
+                'issue', 'lock', str(issue_number),
+                '--reason', self.lock_reason
+            ])
+            
+            if result['success']:
+                self.logger.info(f"Locked issue #{issue_number} with reason: {self.lock_reason}")
+                return True
+            else:
+                self.logger.error(f"Failed to lock issue #{issue_number}: {result.get('error', 'Unknown error')}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Exception while locking issue #{issue_number}: {e}")
+            return False
+    
+    def unlock_memory_issue(self) -> bool:
+        """
+        Unlock the memory issue (administrative function).
+        
+        Warning: Unlocking allows non-collaborators to comment,
+        potentially enabling memory poisoning attacks.
+        
+        Returns:
+            True if successfully unlocked, False otherwise
+        """
+        try:
+            result = self.github._execute_gh_command([
+                'issue', 'unlock', str(self.memory_issue_number)
+            ])
+            
+            if result['success']:
+                self.logger.warning(f"Unlocked memory issue #{self.memory_issue_number} - security protection disabled!")
+                return True
+            else:
+                self.logger.error(f"Failed to unlock issue: {result.get('error', 'Unknown error')}")
+                return False
+                
+        except Exception as e:
+            self.logger.error(f"Exception while unlocking issue: {e}")
+            return False
+    
+    def check_lock_status(self) -> Dict[str, Any]:
+        """
+        Check if the memory issue is locked.
+        
+        Returns:
+            Dictionary with lock status and details
+        """
+        try:
+            result = self.github._execute_gh_command([
+                'api', f'repos/:owner/:repo/issues/{self.memory_issue_number}',
+                '--jq', '{ locked: .locked, lock_reason: .active_lock_reason }'
+            ])
+            
+            if result['success'] and result['data']:
+                return {
+                    'success': True,
+                    'locked': result['data'].get('locked', False),
+                    'lock_reason': result['data'].get('activeLockReason', None),
+                    'issue_number': self.memory_issue_number
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': result.get('error', 'Failed to get lock status')
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Failed to check lock status: {e}")
             return {
                 'success': False,
                 'error': str(e)
