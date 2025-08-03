@@ -2,7 +2,7 @@ name: Test with UV
 
 on:
   push:
-    branches: [main, feature/migrate-to-uv-packaging]
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -11,8 +11,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.13"]
+        os: [ubuntu-latest]
+        python-version: ["3.12"]
 
     steps:
     - uses: actions/checkout@v4
@@ -69,24 +69,3 @@ jobs:
   
     - name: Run ruff format check
       run: uv run ruff format --check .
-
-  performance-benchmark:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install UV
-      uses: astral-sh/setup-uv@v1
-      with:
-        version: "latest"
-
-    - name: Set up Python
-      run: uv python install 3.13
-
-    - name: Benchmark UV vs pip installation
-      run: |
-        echo "=== UV Installation Benchmark ==="
-        time uv sync --all-extras
-
-        echo "=== Comparing lock file generation speed ==="
-        time uv lock --upgrade
