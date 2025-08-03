@@ -19,6 +19,11 @@ from datetime import datetime
 def invoke_teamcoach_agent_analysis(agent_data):
     """Invoke TeamCoach for specific agent performance analysis."""
     
+    # CRITICAL: Check for cascade prevention flag
+    if os.environ.get('CLAUDE_HOOK_EXECUTION', '0') == '1':
+        print("🛡️ Cascade prevention: TeamCoach subagent hook skipped during hook execution")
+        return True
+    
     # Extract agent information from hook input
     agent_name = agent_data.get('agent_name', 'unknown-agent')
     task_result = agent_data.get('result', 'unknown')
@@ -53,10 +58,14 @@ Agent: {agent_name}
 """.strip()
 
     try:
-        # Invoke TeamCoach using Claude Code CLI
+        # Set cascade prevention environment variable
+        env = os.environ.copy()
+        env['CLAUDE_HOOK_EXECUTION'] = '1'
+        
+        # Invoke TeamCoach using Claude Code CLI with cascade prevention
         result = subprocess.run([
             'claude', '/agent:teamcoach', teamcoach_prompt
-        ], capture_output=True, text=True, timeout=180)  # 3 minute timeout
+        ], capture_output=True, text=True, timeout=180, env=env)  # 3 minute timeout
         
         if result.returncode == 0:
             print(f"✅ TeamCoach agent analysis completed for {agent_name}")
