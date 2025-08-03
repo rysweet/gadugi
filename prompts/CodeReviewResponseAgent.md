@@ -2,7 +2,7 @@
 
 ## Overview
 
-We need to implement a specialized code review response sub-agent for the Blarify project that receives feedback from the code-reviewer sub-agent and responds appropriately. This agent will analyze review feedback, implement agreed-upon changes, provide clear rationale for disagreements, and maintain professional dialogue throughout the review process.
+We need to implement a specialized code review response sub-agent for the Gadugi project that receives feedback from the code-reviewer sub-agent and responds appropriately. This agent will analyze review feedback, implement agreed-upon changes, provide clear rationale for disagreements, and maintain professional dialogue throughout the review process.
 
 ## Problem Statement
 

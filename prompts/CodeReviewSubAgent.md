@@ -2,11 +2,11 @@
 
 ## Overview
 
-We need to implement a specialized code review sub-agent for the Blarify project that can be invoked to perform thorough, consistent code reviews on pull requests. This sub-agent will enhance our development workflow by providing automated, high-quality code reviews following best practices.
+We need to implement a specialized code review sub-agent for the Gadugi project that can be invoked to perform thorough, consistent code reviews on pull requests. This sub-agent will enhance our development workflow by providing automated, high-quality code reviews following best practices.
 
 ## Motivation
 
-As the Blarify codebase grows, maintaining consistent code quality across all contributions becomes challenging. Manual code reviews can vary in thoroughness and may miss important issues. A specialized sub-agent can:
+As the Gadugi codebase grows, maintaining consistent code quality across all contributions becomes challenging. Manual code reviews can vary in thoroughness and may miss important issues. A specialized sub-agent can:
 
 1. Ensure consistent review standards across all PRs
 2. Catch security vulnerabilities and performance issues
@@ -104,7 +104,7 @@ The sub-agent should:
    - Diff analysis
    - Comment posting
 
-### Phase 3: Blarify-Specific Focus
+### Phase 3: Gadugi-Specific Focus
 
 Add specialized checks for:
 - Graph operations and node management

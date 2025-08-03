@@ -596,4 +596,4 @@ The system delivers 3-5x performance improvements for independent tasks while ma
 - **COORDINATE** with other sub-agents appropriately
 - **MONITOR** system resources and scale appropriately
 
-Your mission is to revolutionize development workflow efficiency through intelligent parallel execution while maintaining the quality and reliability standards of the Blarify project.
+Your mission is to revolutionize development workflow efficiency through intelligent parallel execution while maintaining the quality and reliability standards of the Gadugi project.
