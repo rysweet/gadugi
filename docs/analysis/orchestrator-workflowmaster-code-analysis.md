@@ -1,8 +1,8 @@
-# Orchestrator/WorkflowMaster Code Similarity Analysis
+# Orchestrator/WorkflowManager Code Similarity Analysis
 
 ## Executive Summary
 
-This analysis provides detailed quantitative metrics on code similarity between OrchestratorAgent and WorkflowMaster, identifying opportunities for optimization while preserving the distinct value propositions of each agent.
+This analysis provides detailed quantitative metrics on code similarity between OrchestratorAgent and WorkflowManager, identifying opportunities for optimization while preserving the distinct value propositions of each agent.
 
 **Key Findings**:
 - **29% functional overlap** between agents in shared utilities
@@ -19,7 +19,7 @@ This analysis provides detailed quantitative metrics on code similarity between 
   - `.claude/orchestrator/components/prompt_generator.py` (342 lines)
   - **Total**: 1,337 lines
 
-- **WorkflowMaster Files Analyzed**:
+- **WorkflowManager Files Analyzed**:
   - `.claude/agents/workflow-master.md` (513 lines)
   - State management and workflow patterns (estimated 400 lines equivalent)
   - **Total**: 913 lines
@@ -45,7 +45,7 @@ gh_operations = [
 ]
 ```
 
-#### WorkflowMaster GitHub Usage (78 lines equivalent)
+#### WorkflowManager GitHub Usage (78 lines equivalent)
 ```python
 # Complete workflow GitHub integration
 gh_operations = [
@@ -60,7 +60,7 @@ gh_operations = [
 **Overlap Analysis**:
 - **Shared**: Basic `gh` CLI command construction (~35%)
 - **Unique to Orchestrator**: Parent issue creation, multi-PR coordination
-- **Unique to WorkflowMaster**: Complete issue-to-PR lifecycle, review integration
+- **Unique to WorkflowManager**: Complete issue-to-PR lifecycle, review integration
 
 **Recommendation**: Extract `GitHubOperations` utility class with shared command patterns.
 
@@ -80,7 +80,7 @@ class ExecutionState:
     def save_results(output_file)
 ```
 
-#### WorkflowMaster State (156 lines equivalent)
+#### WorkflowManager State (156 lines equivalent)
 ```python
 class WorkflowState:
     current_phase: int
@@ -99,7 +99,7 @@ class WorkflowState:
 **Overlap Analysis**:
 - **Shared**: Task ID management, status tracking (~28%)
 - **Unique to Orchestrator**: Multi-task coordination, resource monitoring
-- **Unique to WorkflowMaster**: Phase-based progression, resumption logic
+- **Unique to WorkflowManager**: Phase-based progression, resumption logic
 
 **Recommendation**: Extract `BaseStateManager` with common patterns, specialized implementations.
 
@@ -114,7 +114,7 @@ def handle_worktree_conflicts()
 def graceful_shutdown_all_tasks()
 ```
 
-#### WorkflowMaster Error Handling (58 lines equivalent)
+#### WorkflowManager Error Handling (58 lines equivalent)
 ```python
 # Workflow phase errors
 def handle_git_conflicts()
@@ -127,7 +127,7 @@ def handle_interruption_recovery()
 **Overlap Analysis**:
 - **Shared**: Basic exception patterns, logging formats (~22%)
 - **Unique to Orchestrator**: Resource and process management
-- **Unique to WorkflowMaster**: Phase-specific error recovery
+- **Unique to WorkflowManager**: Phase-specific error recovery
 
 **Recommendation**: Extract `ErrorHandler` base class with specialized implementations.
 
@@ -142,7 +142,7 @@ def monitor_system_resources()
 def generate_performance_report()
 ```
 
-#### WorkflowMaster Task Tracking (87 lines equivalent)
+#### WorkflowManager Task Tracking (87 lines equivalent)
 ```python
 # Sequential workflow tracking
 def update_todo_status()
@@ -154,14 +154,14 @@ def handle_task_resumption()
 **Overlap Analysis**:
 - **Shared**: TodoWrite integration, progress reporting (~31%)
 - **Unique to Orchestrator**: Multi-task aggregation, performance metrics
-- **Unique to WorkflowMaster**: Phase progression, state persistence
+- **Unique to WorkflowManager**: Phase progression, state persistence
 
 **Recommendation**: Extract `TaskTracker` interface with agent-specific implementations.
 
 ## Quantitative Metrics Summary
 
 ### Code Distribution
-| Component | OrchestratorAgent | WorkflowMaster | Shared Logic | Duplication % |
+| Component | OrchestratorAgent | WorkflowManager | Shared Logic | Duplication % |
 |-----------|------------------|----------------|--------------|---------------|
 | **GitHub Operations** | 45 lines | 78 lines | 35 lines | 35% |
 | **State Management** | 95 lines | 156 lines | 44 lines | 28% |
@@ -173,14 +173,14 @@ def handle_task_resumption()
 ### Functional Overlap Analysis
 - **Total Overlapping Functionality**: 119 lines
 - **OrchestratorAgent Overlap**: 213 lines (16% of total)
-- **WorkflowMaster Overlap**: 379 lines (42% of total)
+- **WorkflowManager Overlap**: 379 lines (42% of total)
 - **System-wide Duplication**: 29% average
 
 ### Abstraction Level Analysis
 ```
 High Level (Orchestration):
 ├── OrchestratorAgent: Multi-task coordination
-├── WorkflowMaster: Single workflow execution
+├── WorkflowManager: Single workflow execution
 └── Shared: Common utilities
 
 Medium Level (Operations):
@@ -198,7 +198,7 @@ Low Level (Implementation):
 
 ### Current Architecture Performance
 - **OrchestratorAgent Overhead**: ~2-3 seconds agent invocation
-- **WorkflowMaster Overhead**: ~1-2 seconds per phase transition
+- **WorkflowManager Overhead**: ~1-2 seconds per phase transition
 - **Parallel Execution Benefit**: 3-5x speed improvement
 - **Resource Usage**: ~2GB RAM per parallel task
 
@@ -243,7 +243,7 @@ Low Level (Implementation):
 
 ### Phase 2: Refactor Agent Implementation (Short-term)
 - Update OrchestratorAgent to use shared utilities
-- Update WorkflowMaster to use shared utilities  
+- Update WorkflowManager to use shared utilities  
 - Maintain backward compatibility during transition
 - Add comprehensive test coverage for shared modules
 

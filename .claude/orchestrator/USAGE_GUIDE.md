@@ -60,13 +60,13 @@ For now, you can manually execute the recommended parallel groups:
 
 ```bash
 # Group 1 (Parallel): Test coverage tasks
-/agent:workflow-master prompts/test-definition-node.md &
-/agent:workflow-master prompts/test-relationship-creator.md &
-/agent:workflow-master prompts/test-documentation-linker.md &
+/agent:workflow-manager prompts/test-definition-node.md &
+/agent:workflow-manager prompts/test-relationship-creator.md &
+/agent:workflow-manager prompts/test-documentation-linker.md &
 wait
 
 # Group 2 (Sequential): Feature implementation
-/agent:workflow-master prompts/implement-query-builder.md
+/agent:workflow-manager prompts/implement-query-builder.md
 ```
 
 ## Detailed Usage Scenarios
@@ -95,9 +95,9 @@ python task_analyzer.py --prompts-dir ../../../prompts/
 ```bash
 # All three can run simultaneously
 echo "Starting parallel test coverage improvement..." 
-/agent:workflow-master prompts/test-definition-node.md &
-/agent:workflow-master prompts/test-relationship-creator.md &  
-/agent:workflow-master prompts/test-documentation-linker.md &
+/agent:workflow-manager prompts/test-definition-node.md &
+/agent:workflow-manager prompts/test-relationship-creator.md &  
+/agent:workflow-manager prompts/test-documentation-linker.md &
 wait
 echo "All test coverage tasks complete!"
 ```
@@ -126,9 +126,9 @@ python task_analyzer.py --prompts-dir ../../../prompts/
 ```bash
 # Parallel bug fix execution
 echo "Starting parallel bug fixes..."
-/agent:workflow-master prompts/fix-circular-import.md &
-/agent:workflow-master prompts/fix-memory-leak.md &
-/agent:workflow-master prompts/fix-ui-rendering.md &
+/agent:workflow-manager prompts/fix-circular-import.md &
+/agent:workflow-manager prompts/fix-memory-leak.md &
+/agent:workflow-manager prompts/fix-ui-rendering.md &
 wait
 echo "All bugs fixed!"
 ```
@@ -158,17 +158,17 @@ python task_analyzer.py --prompts-dir ../../../prompts/
 ```bash
 # Phase 1: Independent tasks
 echo "Phase 1: Starting base refactoring and documentation..."
-/agent:workflow-master prompts/refactor-base-classes.md &
-/agent:workflow-master prompts/update-documentation.md &
+/agent:workflow-manager prompts/refactor-base-classes.md &
+/agent:workflow-manager prompts/update-documentation.md &
 wait
 
 # Phase 2: Dependent task
 echo "Phase 2: Updating derived classes..."
-/agent:workflow-master prompts/update-derived-classes.md
+/agent:workflow-manager prompts/update-derived-classes.md
 
 # Phase 3: Final integration
 echo "Phase 3: Writing integration tests..."
-/agent:workflow-master prompts/write-integration-tests.md
+/agent:workflow-manager prompts/write-integration-tests.md
 
 echo "Mixed workflow complete!"
 ```
@@ -201,21 +201,21 @@ Start with high-priority tasks in parallel, then continue with others:
 ```bash
 # Priority 1: Critical bugs (parallel)
 echo "Priority 1: Critical fixes..."
-/agent:workflow-master prompts/fix-critical-security-bug.md &
-/agent:workflow-master prompts/fix-data-corruption-bug.md &
+/agent:workflow-manager prompts/fix-critical-security-bug.md &
+/agent:workflow-manager prompts/fix-data-corruption-bug.md &
 wait
 
 # Priority 2: Test coverage (parallel)
 echo "Priority 2: Test coverage..."
-/agent:workflow-master prompts/test-module-a.md &
-/agent:workflow-master prompts/test-module-b.md &
-/agent:workflow-master prompts/test-module-c.md &
+/agent:workflow-manager prompts/test-module-a.md &
+/agent:workflow-manager prompts/test-module-b.md &
+/agent:workflow-manager prompts/test-module-c.md &
 wait
 
 # Priority 3: Feature enhancements (can overlap)
 echo "Priority 3: Feature work..."
-/agent:workflow-master prompts/implement-feature-x.md &
-/agent:workflow-master prompts/implement-feature-y.md &
+/agent:workflow-manager prompts/implement-feature-x.md &
+/agent:workflow-manager prompts/implement-feature-y.md &
 wait
 ```
 
@@ -242,7 +242,7 @@ echo "🚀 Starting parallel execution of tasks: $PARALLEL_TASKS"
 pids=()
 for task in $PARALLEL_TASKS; do
     echo "Starting task: $task"
-    /agent:workflow-master "prompts/${task}.md" &
+    /agent:workflow-manager "prompts/${task}.md" &
     pids+=($!)
 done
 
@@ -327,12 +327,12 @@ cat analysis.json | jq '.groups[].tasks[] | {id, complexity, conflicts}'
 ```bash
 # Reduce concurrency
 # Instead of 4 parallel tasks, try 2:
-/agent:workflow-master prompts/task1.md &
-/agent:workflow-master prompts/task2.md &
+/agent:workflow-manager prompts/task1.md &
+/agent:workflow-manager prompts/task2.md &
 wait
 
-/agent:workflow-master prompts/task3.md &
-/agent:workflow-master prompts/task4.md &
+/agent:workflow-manager prompts/task3.md &
+/agent:workflow-manager prompts/task4.md &
 wait
 ```
 
@@ -401,7 +401,7 @@ ps aux | grep claude
 git worktree list
 
 # 3. Manually complete or restart failed tasks
-/agent:workflow-master prompts/failed-task.md
+/agent:workflow-manager prompts/failed-task.md
 
 # 4. Clean up partial work if needed
 git worktree remove .worktrees/failed-task

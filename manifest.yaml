@@ -7,8 +7,8 @@ claude_code_version: ">=1.0.0"
 
 agents:
   # Workflow Management Agents
-  - name: "workflow-master"
-    file: ".claude/agents/workflow-master.md"
+  - name: "workflow-manager"
+    file: ".claude/agents/workflow-manager.md"
     version: "2.0.0"
     description: "Orchestrates complete development workflows from issue creation to PR review"
     category: "workflow"
@@ -17,7 +17,7 @@ agents:
   - name: "orchestrator-agent"
     file: ".claude/agents/orchestrator-agent.md"
     version: "1.0.0"
-    description: "Coordinates parallel execution of multiple WorkflowMasters"
+    description: "Coordinates parallel execution of multiple WorkflowManagers"
     category: "workflow"
     required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS", "TodoWrite", "Task"]
     
@@ -77,7 +77,7 @@ agents:
 categories:
   - name: "workflow"
     description: "Agents that orchestrate and manage development workflows"
-    agents: ["workflow-master", "orchestrator-agent", "task-analyzer", "worktree-manager", "execution-monitor"]
+    agents: ["workflow-manager", "orchestrator-agent", "task-analyzer", "worktree-manager", "execution-monitor"]
     
   - name: "quality"
     description: "Agents focused on code quality and review processes"

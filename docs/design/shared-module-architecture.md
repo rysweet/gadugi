@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the shared module architecture for the Enhanced Separation approach, providing common utilities for both OrchestratorAgent and WorkflowMaster while preserving their specialized capabilities.
+This document defines the shared module architecture for the Enhanced Separation approach, providing common utilities for both OrchestratorAgent and WorkflowManager while preserving their specialized capabilities.
 
 ## Design Principles
 
@@ -119,7 +119,7 @@ issue_config = IssueConfig(
 )
 issue_number = github.create_issue(issue_config)
 
-# WorkflowMaster usage
+# WorkflowManager usage
 github = GitHubOperations()
 pr_config = PRConfig(
     title="Implement new feature",
@@ -215,7 +215,7 @@ class OrchestratorStateManager(StateManager):
         }
 
 class WorkflowStateManager(StateManager):
-    """State manager for WorkflowMaster"""
+    """State manager for WorkflowManager"""
     
     def get_default_state(self) -> Dict[str, Any]:
         return {
@@ -549,7 +549,7 @@ class CoordinationAgent(Agent):
 
 ### Phase 2: Agent Integration  
 1. Update OrchestratorAgent to use shared utilities
-2. Update WorkflowMaster to use shared utilities
+2. Update WorkflowManager to use shared utilities
 3. Maintain parallel execution with both old and new implementations
 4. Validate performance and functionality parity
 
@@ -601,7 +601,7 @@ class TestAgentIntegration:
         pass
     
     def test_workflowmaster_with_shared_modules(self):
-        # Test WorkflowMaster integration
+        # Test WorkflowManager integration
         pass
     
     def test_agent_coordination(self):

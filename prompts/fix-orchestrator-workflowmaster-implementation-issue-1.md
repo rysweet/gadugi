@@ -1,46 +1,46 @@
-# Fix OrchestratorAgent WorkflowMaster Implementation Failure - Issue #1
+# Fix OrchestratorAgent WorkflowManager Implementation Failure - Issue #1
 
 ## Overview
 
-The Blarify project's OrchestratorAgent successfully orchestrates parallel WorkflowMaster execution but fails at the crucial implementation phase. While the orchestration infrastructure (task analysis, worktree creation, branch management, parallel launch, dependency sequencing) works perfectly, the WorkflowMasters don't create actual implementation files. This represents a critical gap between orchestration mechanics and actual code execution.
+The Blarify project's OrchestratorAgent successfully orchestrates parallel WorkflowManager execution but fails at the crucial implementation phase. While the orchestration infrastructure (task analysis, worktree creation, branch management, parallel launch, dependency sequencing) works perfectly, the WorkflowManagers don't create actual implementation files. This represents a critical gap between orchestration mechanics and actual code execution.
 
 ## Problem Statement
 
 ### Current Situation
-When using OrchestratorAgent to orchestrate parallel WorkflowMaster execution for a comprehensive pre-commit workflow implementation:
+When using OrchestratorAgent to orchestrate parallel WorkflowManager execution for a comprehensive pre-commit workflow implementation:
 
 **✅ Successful Orchestration:**
 - Task Analysis: Correctly analyzed 1,743-line prompt file, identified 5 implementation phases
 - Worktree Creation: Successfully created 5 isolated git worktrees for parallel execution  
 - Branch Management: Created 5 feature branches (precommit-phase1-infrastructure, etc.)
-- Parallel Launch: Successfully launched 5 WorkflowMaster processes in parallel
+- Parallel Launch: Successfully launched 5 WorkflowManager processes in parallel
 - Dependency Sequencing: Properly managed dependencies (Phase 1 → Phases 2&3 → Phase 4, with Phase 5 independent)
 
 **❌ Failed Implementation:**
-- No Files Created: WorkflowMasters didn't create any actual implementation files
+- No Files Created: WorkflowManagers didn't create any actual implementation files
 - Only Memory.md Updated: All 5 branches only contain Memory.md updates
-- Wrong Context: Log files suggest WorkflowMasters were analyzing different prompts than intended
+- Wrong Context: Log files suggest WorkflowManagers were analyzing different prompts than intended
 
 ### Root Cause Hypotheses
-1. **Prompt File Issues**: WorkflowMasters may not receive correct phase-specific prompts
+1. **Prompt File Issues**: WorkflowManagers may not receive correct phase-specific prompts
 2. **Permission Problems**: File creation permissions in worktrees (Phase 5 logs mentioned needing write permissions)
-3. **Context Loss**: WorkflowMasters may lose context about what to implement
+3. **Context Loss**: WorkflowManagers may lose context about what to implement
 4. **Prompt Routing**: Phase-specific prompts may not be properly generated or placed
-5. **WorkflowMaster State Machine**: Implementation phases may not be executing correctly
+5. **WorkflowManager State Machine**: Implementation phases may not be executing correctly
 
 ## Feature Requirements
 
 ### Functional Requirements
-1. **Prompt Delivery**: Ensure WorkflowMasters receive complete, phase-specific prompt files with clear implementation instructions
-2. **File Creation Verification**: Validate that WorkflowMasters can create files in worktree directories
-3. **Context Preservation**: Maintain implementation context throughout WorkflowMaster execution
-4. **Execution Validation**: Add verification that WorkflowMasters execute intended prompts
+1. **Prompt Delivery**: Ensure WorkflowManagers receive complete, phase-specific prompt files with clear implementation instructions
+2. **File Creation Verification**: Validate that WorkflowManagers can create files in worktree directories
+3. **Context Preservation**: Maintain implementation context throughout WorkflowManager execution
+4. **Execution Validation**: Add verification that WorkflowManagers execute intended prompts
 5. **Implementation Tracking**: Monitor actual file creation vs. just Memory.md updates
 
 ### Technical Requirements
-1. **Prompt Routing System**: Reliable mechanism to deliver phase-specific prompts to WorkflowMasters
+1. **Prompt Routing System**: Reliable mechanism to deliver phase-specific prompts to WorkflowManagers
 2. **Permission Management**: Ensure proper file creation permissions in all worktree directories
-3. **State Validation**: Verify WorkflowMaster state transitions include actual implementation
+3. **State Validation**: Verify WorkflowManager state transitions include actual implementation
 4. **Dry Run Mode**: Add capability to verify execution plan before launching parallel tasks
 5. **Implementation Monitoring**: Real-time tracking of file creation and code changes
 
@@ -54,16 +54,16 @@ When using OrchestratorAgent to orchestrate parallel WorkflowMaster execution fo
 
 ### Current Implementation Review
 
-Based on issue #1 description, the problem occurs in the handoff between OrchestratorAgent and WorkflowMasters:
+Based on issue #1 description, the problem occurs in the handoff between OrchestratorAgent and WorkflowManagers:
 
 1. **OrchestratorAgent Success**: All orchestration mechanics work perfectly
-2. **WorkflowMaster Failure**: Implementation phases don't create actual files
-3. **State Inconsistency**: WorkflowMasters report completion but produce no artifacts
+2. **WorkflowManager Failure**: Implementation phases don't create actual files
+3. **State Inconsistency**: WorkflowManagers report completion but produce no artifacts
 
 ### Architecture Investigation Required
 
 1. **Prompt File Generation**: How are phase-specific prompts created and delivered?
-2. **WorkflowMaster State Machine**: Which phase handles actual file creation?
+2. **WorkflowManager State Machine**: Which phase handles actual file creation?
 3. **Worktree File Permissions**: Are there permission issues preventing file creation?
 4. **Context Passing**: How is implementation context preserved across the orchestration boundary?
 
@@ -76,7 +76,7 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 
 2. **Implementation Phase Verification**:
    - Add checkpoints for actual file creation
-   - Validate WorkflowMaster implementation phases
+   - Validate WorkflowManager implementation phases
    - Monitor file system changes during execution
 
 3. **Permission Management**:
@@ -85,35 +85,35 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
    - Ensure proper git configuration in worktrees
 
 4. **Context Preservation**:
-   - Validate context passing between OrchestratorAgent and WorkflowMasters
-   - Ensure implementation specifications reach WorkflowMasters
+   - Validate context passing between OrchestratorAgent and WorkflowManagers
+   - Ensure implementation specifications reach WorkflowManagers
    - Add context validation checkpoints
 
 ## Implementation Plan
 
 ### Phase 1: Diagnostic Analysis
-**Objective**: Understand the exact failure point in WorkflowMaster execution
+**Objective**: Understand the exact failure point in WorkflowManager execution
 
 **Tasks**:
-1. Analyze existing WorkflowMaster state machine and implementation phases
-2. Review OrchestratorAgent → WorkflowMaster handoff mechanism
+1. Analyze existing WorkflowManager state machine and implementation phases
+2. Review OrchestratorAgent → WorkflowManager handoff mechanism
 3. Examine worktree permission structure and file creation capabilities
-4. Identify where actual file creation should occur in WorkflowMaster phases
+4. Identify where actual file creation should occur in WorkflowManager phases
 5. Create comprehensive diagnostic logging for the next test run
 
 **Deliverables**:
-- Analysis report of WorkflowMaster implementation phases
+- Analysis report of WorkflowManager implementation phases
 - Identified failure points in the execution chain
 - Permission audit of worktree directories
 - Enhanced logging for future debugging
 
 ### Phase 2: Prompt Routing Fix
-**Objective**: Ensure WorkflowMasters receive correct, complete prompts
+**Objective**: Ensure WorkflowManagers receive correct, complete prompts
 
 **Tasks**:
 1. Audit prompt file generation and delivery mechanism
 2. Validate phase-specific prompt content and placement
-3. Add verification that prompts reach WorkflowMasters correctly
+3. Add verification that prompts reach WorkflowManagers correctly
 4. Implement prompt content validation
 5. Add debugging for prompt routing failures
 
@@ -124,17 +124,17 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 - Test cases for prompt routing
 
 ### Phase 3: Implementation Phase Verification
-**Objective**: Ensure WorkflowMaster implementation phases create actual files
+**Objective**: Ensure WorkflowManager implementation phases create actual files
 
 **Tasks**:
-1. Review WorkflowMaster implementation phase logic
+1. Review WorkflowManager implementation phase logic
 2. Add file creation verification checkpoints
 3. Implement real-time monitoring of file system changes
 4. Add validation that implementation phases execute correctly
 5. Create recovery mechanisms for failed implementations
 
 **Deliverables**:
-- Enhanced WorkflowMaster implementation phase logic
+- Enhanced WorkflowManager implementation phase logic
 - File creation monitoring system
 - Implementation verification checkpoints
 - Recovery mechanisms for failures
@@ -145,7 +145,7 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 **Tasks**:
 1. Fix any file creation permission issues in worktrees
 2. Validate git configuration in worktree directories
-3. Ensure implementation context reaches WorkflowMasters
+3. Ensure implementation context reaches WorkflowManagers
 4. Add context validation at key points
 5. Test file creation capabilities across all worktrees
 
@@ -159,7 +159,7 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 **Objective**: Verify the complete fix works end-to-end
 
 **Tasks**:
-1. Create test scenarios for OrchestratorAgent → WorkflowMaster execution
+1. Create test scenarios for OrchestratorAgent → WorkflowManager execution
 2. Implement dry-run mode for validation before execution
 3. Add comprehensive monitoring for actual implementation
 4. Test with the original pre-commit workflow scenario
@@ -175,14 +175,14 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 ## Testing Requirements
 
 ### Unit Tests
-1. **Prompt Routing Tests**: Verify prompt delivery to WorkflowMasters
+1. **Prompt Routing Tests**: Verify prompt delivery to WorkflowManagers
 2. **Permission Tests**: Validate file creation capabilities in worktrees
-3. **Context Preservation Tests**: Ensure implementation context reaches WorkflowMasters
+3. **Context Preservation Tests**: Ensure implementation context reaches WorkflowManagers
 4. **Implementation Phase Tests**: Verify actual file creation occurs
 
 ### Integration Tests
-1. **End-to-End Orchestration**: Full OrchestratorAgent → WorkflowMaster workflow
-2. **Parallel Execution**: Multiple WorkflowMasters creating files simultaneously
+1. **End-to-End Orchestration**: Full OrchestratorAgent → WorkflowManager workflow
+2. **Parallel Execution**: Multiple WorkflowManagers creating files simultaneously
 3. **Dependency Management**: Proper sequencing with actual implementation
 4. **Recovery Testing**: Graceful handling of partial failures
 
@@ -195,14 +195,14 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 ### Performance Tests
 1. **Execution Time**: Measure impact of fixes on execution speed
 2. **Resource Usage**: Monitor resource consumption during parallel implementation
-3. **Scalability**: Test with varying numbers of parallel WorkflowMasters
+3. **Scalability**: Test with varying numbers of parallel WorkflowManagers
 
 ## Success Criteria
 
 ### Primary Success Metrics
-1. **Implementation Success Rate**: 95%+ of WorkflowMasters create actual implementation files
+1. **Implementation Success Rate**: 95%+ of WorkflowManagers create actual implementation files
 2. **File Creation Verification**: All expected files created according to specifications
-3. **Zero Memory-Only Completions**: No WorkflowMasters complete with only Memory.md updates
+3. **Zero Memory-Only Completions**: No WorkflowManagers complete with only Memory.md updates
 4. **Context Preservation**: Implementation specifications correctly reach and execute
 
 ### Secondary Success Metrics
@@ -214,7 +214,7 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 ### Validation Tests
 1. **Pre-Commit Workflow Recreation**: Successfully implement the original 5-phase pre-commit workflow
 2. **Multiple Scenario Testing**: Work correctly with different types of implementation tasks
-3. **Parallel Verification**: Multiple WorkflowMasters can create files simultaneously
+3. **Parallel Verification**: Multiple WorkflowManagers can create files simultaneously
 4. **Regression Prevention**: Original orchestration capabilities remain intact
 
 ## Implementation Steps
@@ -229,14 +229,14 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 - Ensure clean working directory before branching
 
 ### Step 3: Diagnostic Analysis Phase
-- Analyze WorkflowMaster state machine and implementation phases
+- Analyze WorkflowManager state machine and implementation phases
 - Review OrchestratorAgent handoff mechanism
 - Audit worktree permissions and file creation capabilities
 - Create diagnostic logging infrastructure
 
 ### Step 4: Implementation Fixes
 - Fix prompt routing and delivery system
-- Enhance WorkflowMaster implementation phase logic
+- Enhance WorkflowManager implementation phase logic
 - Resolve permission and context preservation issues
 - Add comprehensive monitoring and validation
 

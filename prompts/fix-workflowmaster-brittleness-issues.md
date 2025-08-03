@@ -1,16 +1,16 @@
-# Fix WorkflowMaster Brittleness Issues
+# Fix WorkflowManager Brittleness Issues
 
 ## Title and Overview
 
-**WorkflowMaster Robustness Enhancement**
+**WorkflowManager Robustness Enhancement**
 
-This prompt identifies and fixes brittleness issues in the WorkflowMaster agent to create a more resilient and reliable development workflow execution system. The focus is on error handling, state recovery, edge case management, and operational robustness.
+This prompt identifies and fixes brittleness issues in the WorkflowManager agent to create a more resilient and reliable development workflow execution system. The focus is on error handling, state recovery, edge case management, and operational robustness.
 
-**Context**: While WorkflowMaster successfully orchestrates development workflows, operational experience has revealed brittleness points that can cause workflow failures or require manual intervention. Addressing these systematically will create a production-ready, fault-tolerant system.
+**Context**: While WorkflowManager successfully orchestrates development workflows, operational experience has revealed brittleness points that can cause workflow failures or require manual intervention. Addressing these systematically will create a production-ready, fault-tolerant system.
 
 ## Problem Statement
 
-WorkflowMaster exhibits brittleness in several areas that impact reliability:
+WorkflowManager exhibits brittleness in several areas that impact reliability:
 
 1. **Error Recovery**: Insufficient graceful handling of partial failures and recovery mechanisms
 2. **State Management**: State corruption or inconsistency during workflow interruptions
@@ -76,7 +76,7 @@ def save_progress(phase, status):
 
 #### Enhanced Error Handling
 ```python
-class RobustWorkflowMaster:
+class RobustWorkflowManager:
     def __init__(self):
         self.retry_config = RetryConfig()
         self.state_manager = WorkflowStateManager()
@@ -210,7 +210,7 @@ class WorkflowStateManager:
 
 ## Implementation Steps
 
-1. **Create GitHub Issue**: Document WorkflowMaster brittleness analysis and enhancement plan
+1. **Create GitHub Issue**: Document WorkflowManager brittleness analysis and enhancement plan
 2. **Create Feature Branch**: `feature-workflowmaster-robustness-enhancement`
 3. **Brittleness Assessment**: Systematic analysis of current failure points
 4. **Error Classification System**: Implement comprehensive error categorization

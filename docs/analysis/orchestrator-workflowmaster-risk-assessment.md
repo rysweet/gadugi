@@ -1,8 +1,8 @@
-# Orchestrator/WorkflowMaster Architecture Risk Assessment
+# Orchestrator/WorkflowManager Architecture Risk Assessment
 
 ## Executive Summary
 
-This risk assessment evaluates potential risks associated with each architectural option for the Orchestrator/WorkflowMaster system. The analysis identifies **Enhanced Separation** as the **lowest-risk, highest-benefit** approach for maintaining the proven performance benefits while addressing code duplication concerns.
+This risk assessment evaluates potential risks associated with each architectural option for the Orchestrator/WorkflowManager system. The analysis identifies **Enhanced Separation** as the **lowest-risk, highest-benefit** approach for maintaining the proven performance benefits while addressing code duplication concerns.
 
 **Risk Summary**:
 - **Status Quo**: Low risk, proven performance, moderate maintenance burden

@@ -19,7 +19,7 @@ This document explains the proper agent hierarchy for executing development work
             └─── Spawns multiple ↓
                         
 ┌─────────────────────────┐
-│    WorkflowMaster       │ ← Or start here for single tasks
+│    WorkflowManager       │ ← Or start here for single tasks
 │  (Workflow Executor)    │
 └───────────┬─────────────┘
             │
@@ -45,7 +45,7 @@ This document explains the proper agent hierarchy for executing development work
 - You want 3-5x speed improvement
 - Example: Writing tests for 5 different modules
 
-### Use WorkflowMaster when:
+### Use WorkflowManager when:
 - You have a single complex task
 - The task requires sequential phases
 - No parallelization opportunity
@@ -69,9 +69,9 @@ Execute these specific prompts in parallel:
 - fix-documentation-linker.md
 ```
 
-### Single Task (Use WorkflowMaster)
+### Single Task (Use WorkflowManager)
 ```
-/agent:workflow-master
+/agent:workflow-manager
 
 Task: Execute workflow for /prompts/implement-new-feature.md
 ```
@@ -96,7 +96,7 @@ git push
 ## Common Mistakes
 
 1. **Wrong**: Manually creating issues, branches, and PRs
-2. **Wrong**: Using WorkflowMaster for multiple independent tasks
+2. **Wrong**: Using WorkflowManager for multiple independent tasks
 3. **Wrong**: Skipping OrchestratorAgent when parallelization is possible
 4. **Right**: Let agents handle the entire workflow
-5. **Right**: Use OrchestratorAgent first, it will spawn WorkflowMasters
+5. **Right**: Use OrchestratorAgent first, it will spawn WorkflowManagers

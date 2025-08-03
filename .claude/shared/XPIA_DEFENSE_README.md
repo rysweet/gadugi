@@ -95,7 +95,7 @@ from xpia_middleware import xpia_validate_user_input
 # Automatic validation through middleware
 validation_result = xpia_validate_user_input(
     content="User input content",
-    context={"source": "web_form", "agent": "WorkflowMaster"}
+    context={"source": "web_form", "agent": "WorkflowManager"}
 )
 
 if validation_result['safe']:
@@ -112,7 +112,7 @@ from xpia_middleware import xpia_validate_agent_communication
 result = xpia_validate_agent_communication(
     content="Task instruction from orchestrator",
     source_agent="OrchestratorAgent",
-    target_agent="WorkflowMaster"
+    target_agent="WorkflowManager"
 )
 
 if result['safe']:
@@ -186,7 +186,7 @@ The XPIA Defense integrates transparently with the agent-manager hook system:
 
 ### Automatic Protection
 All agents automatically benefit from XPIA protection:
-- **WorkflowMaster**: Protected during issue creation and code generation
+- **WorkflowManager**: Protected during issue creation and code generation
 - **OrchestratorAgent**: Protected during parallel task coordination
 - **Code-Reviewer**: Protected during PR analysis and review
 - **Custom Agents**: Automatic protection without code changes
@@ -328,6 +328,29 @@ logging.getLogger('xpia_middleware_security').setLevel(logging.DEBUG)
 - **Cloud Integration**: Integration with cloud security services
 - **Team Collaboration**: Shared threat intelligence across teams
 - **Compliance Reporting**: Automated compliance and audit reporting
+
+## Claude Code Hook Integration
+
+### Web Operations Protection
+XPIA now includes Claude Code hooks for protecting web operations:
+
+#### Quick Setup
+```bash
+# Run the setup script
+bash .claude/hooks/setup_xpia_web_hooks.sh
+```
+
+#### Protected Operations
+- **WebFetch**: URLs and prompts validated before fetching
+- **WebSearch**: Search queries validated before execution  
+- **PostToolUse**: Returned web content sanitized
+
+#### Hook Implementation
+The hooks use Claude Code's PreToolUse and PostToolUse events:
+- `xpia_web_validator.py`: Main validation logic
+- `setup_xpia_web_hooks.sh`: Automated setup script
+
+See `.claude/hooks/` for complete implementation details.
 
 ## Support and Maintenance
 

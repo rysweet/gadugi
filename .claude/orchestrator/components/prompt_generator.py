@@ -2,8 +2,8 @@
 """
 PromptGenerator Component for OrchestratorAgent
 
-Generates phase-specific prompts for WorkflowMaster execution in parallel worktrees.
-This component addresses the critical issue where WorkflowMasters were receiving
+Generates phase-specific prompts for WorkflowManager execution in parallel worktrees.
+This component addresses the critical issue where WorkflowManagers were receiving
 generic prompts instead of implementation-specific instructions.
 """
 
@@ -28,7 +28,7 @@ class PromptContext:
 
 
 class PromptGenerator:
-    """Generates phase-specific prompts for WorkflowMaster execution"""
+    """Generates phase-specific prompts for WorkflowManager execution"""
     
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root).resolve()
@@ -43,7 +43,7 @@ class PromptGenerator:
         context: PromptContext,
         worktree_path: Path
     ) -> str:
-        """Generate a complete workflow prompt for WorkflowMaster execution"""
+        """Generate a complete workflow prompt for WorkflowManager execution"""
         
         prompt_content = self._build_workflow_prompt(context)
         
@@ -67,7 +67,7 @@ class PromptGenerator:
         sections = self._parse_prompt_sections(original_content)
         
         # Build the workflow-specific prompt
-        prompt_content = f"""# WorkflowMaster Task Execution
+        prompt_content = f"""# WorkflowManager Task Execution
 
 ## Task Information
 - **Task ID**: {context.task_id}
@@ -93,9 +93,9 @@ class PromptGenerator:
 
 ## Execution Instructions
 
-**CRITICAL**: You are executing as WorkflowMaster in a parallel execution environment.
+**CRITICAL**: You are executing as WorkflowManager in a parallel execution environment.
 
-1. **Complete All 9 Phases**: Execute the full WorkflowMaster workflow
+1. **Complete All 9 Phases**: Execute the full WorkflowManager workflow
    - Phase 1: Initial Setup (analyze this prompt)
    - Phase 2: Issue Management (link to existing issue if provided)
    - Phase 3: Branch Management (you're already in the correct branch)
@@ -126,7 +126,7 @@ class PromptGenerator:
 
 ---
 
-**Execute the complete WorkflowMaster workflow for this task.**
+**Execute the complete WorkflowManager workflow for this task.**
 """
         
         return prompt_content
@@ -216,9 +216,9 @@ class PromptGenerator:
         template_file = self.templates_dir / "workflow_template.md"
         
         if not template_file.exists():
-            template_content = """# WorkflowMaster Task Template
+            template_content = """# WorkflowManager Task Template
 
-This is a template for generating WorkflowMaster tasks.
+This is a template for generating WorkflowManager tasks.
 
 ## Variables Available:
 - {task_id}: Unique task identifier
@@ -231,7 +231,7 @@ This is a template for generating WorkflowMaster tasks.
 
 ## Usage:
 This template is used by PromptGenerator to create context-aware prompts
-for WorkflowMaster execution in parallel worktree environments.
+for WorkflowManager execution in parallel worktree environments.
 """
             
             with open(template_file, 'w') as f:
@@ -280,8 +280,8 @@ for WorkflowMaster execution in parallel worktree environments.
             if 'CREATE ACTUAL FILES' not in content:
                 issues.append("Missing critical file creation instruction")
             
-            if 'WorkflowMaster workflow' not in content:
-                issues.append("Missing WorkflowMaster workflow instruction")
+            if 'WorkflowManager workflow' not in content:
+                issues.append("Missing WorkflowManager workflow instruction")
             
         except Exception as e:
             issues.append(f"Failed to validate prompt: {str(e)}")
@@ -293,7 +293,7 @@ def main():
     """CLI entry point for PromptGenerator"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Generate WorkflowMaster prompts")
+    parser = argparse.ArgumentParser(description="Generate WorkflowManager prompts")
     parser.add_argument("--task-id", required=True, help="Task ID")
     parser.add_argument("--task-name", required=True, help="Task name") 
     parser.add_argument("--original-prompt", required=True, help="Original prompt file path")

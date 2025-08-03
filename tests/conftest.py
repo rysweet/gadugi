@@ -67,7 +67,7 @@ def sample_task():
 def mock_state_file(temp_dir):
     """Create a mock state file for testing."""
     state_file = temp_dir / 'state.md'
-    state_content = """# WorkflowMaster State
+    state_content = """# WorkflowManager State
 Task ID: test-task-001
 Last Updated: 2025-08-01T22:00:00Z
 

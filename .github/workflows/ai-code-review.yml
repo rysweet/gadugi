@@ -1,0 +1,55 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [ready_for_review, opened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Code Review with code-reviewer agent
+        id: code-review
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: "Use the code-reviewer subagent to check changes in this PR. Focus on code quality, potential bugs, and performance issues. Suggest improvements where appropriate. Write your review as markdown text."
+          settings: ".claude/settings.json"
+          allowed_tools: "Bash(git diff --name-only HEAD~1),Bash(git diff HEAD~1),View,GlobTool,GrepTool,Write"
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Extract and Comment PR Review
+        if: steps.code-review.outputs.conclusion == 'success'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const executionFile = '${{ steps.code-review.outputs.execution_file }}';
+            const executionLog = JSON.parse(fs.readFileSync(executionFile, 'utf8'));
+
+            // Extract the review content from the execution log
+            let review = '';
+
+            // Find the last assistant message which should contain the review
+            for (let i = executionLog.length - 1; i >= 0; i--) {
+              if (executionLog[i].role === 'assistant') {
+                review = executionLog[i].content;
+                break;
+              }
+            }
+
+            if (review) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: "## AI Code Review by code-reviewer agent\n\n" + review + "\n\n*Generated using the repository's .claude configuration*"
+              });
+            }

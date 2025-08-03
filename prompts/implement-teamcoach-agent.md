@@ -129,7 +129,7 @@ class TeamCompositionOptimizer:
 
 ### Integration Points
 - **OrchestratorAgent**: Enhanced team formation and task assignment
-- **WorkflowMaster**: Performance feedback and optimization guidance
+- **WorkflowManager**: Performance feedback and optimization guidance
 - **All Agents**: Performance monitoring and capability assessment
 - **Memory System**: Long-term learning and pattern recognition
 

@@ -1,6 +1,6 @@
 """
 State management module for Enhanced Separation architecture.
-Provides unified state persistence for OrchestratorAgent and WorkflowMaster.
+Provides unified state persistence for OrchestratorAgent and WorkflowManager.
 """
 
 import json

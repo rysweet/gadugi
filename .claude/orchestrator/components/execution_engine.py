@@ -29,7 +29,7 @@ import threading
 import queue
 import logging
 
-# Import the PromptGenerator for creating WorkflowMaster prompts
+# Import the PromptGenerator for creating WorkflowManager prompts
 from .prompt_generator import PromptGenerator, PromptContext
 
 # Security: Define strict resource limits
@@ -192,7 +192,7 @@ class TaskExecutor:
         stderr_file = output_dir / f"{self.task_id}_stderr.log"
         json_output_file = output_dir / f"{self.task_id}_output.json"
         
-        # CRITICAL FIX: Generate WorkflowMaster-specific prompt with full context
+        # CRITICAL FIX: Generate WorkflowManager-specific prompt with full context
         try:
             # Create context for prompt generation
             prompt_context = self.prompt_generator.create_context_from_task(
@@ -213,17 +213,17 @@ class TaskExecutor:
                 self.worktree_path
             )
             
-            print(f"📝 Generated WorkflowMaster prompt: {workflow_prompt}")
+            print(f"📝 Generated WorkflowManager prompt: {workflow_prompt}")
             
         except Exception as e:
-            print(f"⚠️  Warning: Failed to generate WorkflowMaster prompt: {e}")
+            print(f"⚠️  Warning: Failed to generate WorkflowManager prompt: {e}")
             workflow_prompt = self.prompt_file
         
-        # Prepare Claude CLI command - CRITICAL FIX: Use WorkflowMaster agent with generated prompt
-        # This fixes the core issue where generic Claude execution was happening instead of WorkflowMaster workflow
+        # Prepare Claude CLI command - CRITICAL FIX: Use WorkflowManager agent with generated prompt
+        # This fixes the core issue where generic Claude execution was happening instead of WorkflowManager workflow
         claude_cmd = [
             "claude",
-            "/agent:workflow-master",
+            "/agent:workflow-manager",
             f"Execute the complete workflow for {workflow_prompt}",
             "--output-format", "json"
         ]

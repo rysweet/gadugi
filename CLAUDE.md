@@ -27,14 +27,14 @@ This file combines generic Claude Code best practices with project-specific inst
    
    **For single sequential tasks**:
    ```
-   /agent:workflow-master
+   /agent:workflow-manager
    
    Task: Execute workflow for /prompts/[prompt-file].md
    ```
 
 3. **Agent Hierarchy**:
    - **OrchestratorAgent**: Top-level coordinator for parallel execution
-   - **WorkflowMaster**: Handles individual workflow execution
+   - **WorkflowManager**: Handles individual workflow execution
    - **Code-Reviewer**: Executes Phase 9 reviews
 
 4. **Automated Workflow Handling**:
@@ -52,7 +52,7 @@ This file combines generic Claude Code best practices with project-specific inst
 
 **Before ANY development task, ask yourself**:
 - Multiple related tasks? → Use OrchestratorAgent
-- Single complex task? → Use WorkflowMaster
+- Single complex task? → Use WorkflowManager
 - Need an issue/branch/PR? → Use agents, not manual execution
 
 ---

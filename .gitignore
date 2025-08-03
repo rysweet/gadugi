@@ -62,3 +62,8 @@ docs/.doctrees/
 *.tmp
 *.bak
 .backup.*
+
+# Task and workflow state files
+.task/
+task-*/
+.github/workflow-states/task-*/

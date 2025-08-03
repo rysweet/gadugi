@@ -128,7 +128,7 @@ Could you clarify:
 - Receives structured feedback from code-reviewer
 - Processes categorized issues systematically
 
-### WorkflowMaster
+### WorkflowManager
 - Part of the review phase in workflow
 - Updates workflow status after processing
 

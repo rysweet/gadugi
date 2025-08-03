@@ -1,0 +1,34 @@
+{
+  "terminal.integrated.profiles.osx": {
+    "Claude - Main (fix/issue-38)": {
+      "path": "bash",
+      "args": ["-c", "cd /Users/ryan/src/gadugi && claude"],
+      "icon": "terminal"
+    },
+    "Claude - Memory GitHub": {
+      "path": "bash", 
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/memory-github-pr14-20250801-142454 && claude"],
+      "icon": "terminal"
+    },
+    "Claude - PR Backlog": {
+      "path": "bash",
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation && claude"],
+      "icon": "terminal"
+    },
+    "Claude - PR25 Review": {
+      "path": "bash",
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/pr25-review-20250801-164649-4741 && claude"],
+      "icon": "terminal"
+    },
+    "Claude - TeamCoach": {
+      "path": "bash",
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/teamcoach-implementation && claude"],
+      "icon": "terminal"
+    },
+    "Claude - UV Migration": {
+      "path": "bash",
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/uv-migration-20250802 && claude"],
+      "icon": "terminal"
+    }
+  }
+}

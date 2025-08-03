@@ -2,7 +2,7 @@
 
 ## Overview
 
-The PromptWriter sub-agent is a specialized tool for creating high-quality, structured prompt files that guide complete development workflows. It ensures consistent, comprehensive prompts that can be executed by the WorkflowMaster sub-agent from issue creation through PR review.
+The PromptWriter sub-agent is a specialized tool for creating high-quality, structured prompt files that guide complete development workflows. It ensures consistent, comprehensive prompts that can be executed by the WorkflowManager sub-agent from issue creation through PR review.
 
 ## When to Use PromptWriter
 
@@ -175,18 +175,18 @@ A good prompt from PromptWriter will have:
 - **Comprehensive Testing**: Covers edge cases and integration
 - **Measurable Success**: Clear criteria for completion
 
-## Integration with WorkflowMaster
+## Integration with WorkflowManager
 
-Prompts created by PromptWriter are designed for WorkflowMaster execution:
+Prompts created by PromptWriter are designed for WorkflowManager execution:
 
 ### Automatic Workflow Execution
 ```
-/agent:workflow-master
+/agent:workflow-manager
 
 Execute the complete workflow described in /prompts/[your-prompt-file].md
 ```
 
-### Prompt Structure for WorkflowMaster
+### Prompt Structure for WorkflowManager
 
 PromptWriter ensures prompts include:
 
@@ -238,7 +238,7 @@ PromptWriter: Based on our discussion, I've created a comprehensive prompt at `/
 - Performance considerations for multiple users
 - Complete implementation workflow
 
-The prompt is ready for WorkflowMaster execution.
+The prompt is ready for WorkflowManager execution.
 ```
 
 ### Example 2: Performance Optimization
@@ -267,7 +267,7 @@ PromptWriter: I've created a detailed prompt at `/prompts/graph-performance-opti
 - Benchmarking and testing strategy
 - Complete development workflow
 
-Ready for WorkflowMaster execution.
+Ready for WorkflowManager execution.
 ```
 
 ## Troubleshooting Common Issues
@@ -338,7 +338,7 @@ Use PromptWriter prompts as:
 
 PromptWriter improves over time by:
 - Learning from successful prompt patterns
-- Incorporating feedback from WorkflowMaster execution
+- Incorporating feedback from WorkflowManager execution
 - Updating templates based on project evolution
 - Adapting to new architectural patterns and technologies
 
