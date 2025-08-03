@@ -144,3 +144,9 @@ The Program Manager is responsible for:
 5. **Right**: Let agents handle the entire workflow
 6. **Right**: Use OrchestratorAgent first, it will spawn WorkflowManagers
 7. **Right**: Run Program Manager regularly for project health
+
+## Understanding Agent Implementation
+
+Agents in Gadugi work through Claude's `/agent:` command. Some agents are purely instruction-based (just a `.claude/agents/*.md` file), while others have Python backends for complex operations. Users never need to run Python scripts directly - Claude handles all the implementation details.
+
+For detailed information about how agents are implemented, see [AGENT_IMPLEMENTATION_GUIDE.md](docs/AGENT_IMPLEMENTATION_GUIDE.md).
