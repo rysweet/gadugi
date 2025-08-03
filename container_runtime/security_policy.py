@@ -314,9 +314,12 @@ class SecurityPolicyEngine:
         """
         policy = self.get_policy(policy_name)
         
-        # Check image whitelist
-        if policy.allowed_images and image not in policy.allowed_images:
-            raise GadugiError(f"Image '{image}' not allowed by policy '{policy.name}'")
+        # Check image whitelist with normalization
+        if policy.allowed_images:
+            normalized_image = self._normalize_image_reference(image)
+            normalized_allowed = set(self._normalize_image_reference(img) for img in policy.allowed_images)
+            if normalized_image not in normalized_allowed:
+                raise GadugiError(f"Image '{image}' not allowed by policy '{policy.name}'")
         
         # Check command blacklist
         if command and policy.blocked_commands:
