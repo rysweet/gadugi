@@ -162,3 +162,7 @@ The worktree-manager agent handles:
 - Integration with orchestrator for parallel work
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
+
+## Memories and Best Practices
+
+- Remember to not use artificial dev timescales in planning or estimating.
