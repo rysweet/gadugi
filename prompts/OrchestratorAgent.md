@@ -1,12 +1,12 @@
-# OrchestratorAgent for Parallel WorkflowMaster Execution
+# OrchestratorAgent for Parallel WorkflowManager Execution
 
 ## Overview
 
-The OrchestratorAgent is a sophisticated coordination system for the Blarify project that enables parallel execution of multiple WorkflowMasters. This agent addresses the current sequential execution limitation by intelligently analyzing task dependencies, managing git worktrees, and coordinating multiple Claude Code CLI instances running in parallel.
+The OrchestratorAgent is a sophisticated coordination system for the Blarify project that enables parallel execution of multiple WorkflowManagers. This agent addresses the current sequential execution limitation by intelligently analyzing task dependencies, managing git worktrees, and coordinating multiple Claude Code CLI instances running in parallel.
 
 ## Problem Statement
 
-Currently, WorkflowMasters execute sequentially, which creates significant inefficiencies when multiple independent tasks could run simultaneously. For example:
+Currently, WorkflowManagers execute sequentially, which creates significant inefficiencies when multiple independent tasks could run simultaneously. For example:
 
 - Writing tests for different modules (e.g., `definition_node.py`, `relationship_creator.py`, `documentation_linker.py`)
 - Fixing unrelated bugs in separate components
@@ -21,12 +21,12 @@ This sequential approach can result in 3-5x longer execution times for independe
 - **Claude Code CLI Non-Interactive Mode**: `claude -p "prompt" --output-format json`
 - **Git Worktrees**: `git worktree add .worktrees/task-N -b branch-name` for isolated working directories
 - **JSON Monitoring**: Real-time progress tracking through structured output
-- **Existing Sub-Agents**: WorkflowMaster, PromptWriter, CodeReviewer available for orchestration
+- **Existing Sub-Agents**: WorkflowManager, PromptWriter, CodeReviewer available for orchestration
 
 ### Current System State
 - 5+ test coverage tasks identified that could run in parallel
 - Existing `/prompts/` directory structure with task definitions
-- Functional WorkflowMaster sub-agent with proven workflow execution
+- Functional WorkflowManager sub-agent with proven workflow execution
 - Git repository with clean branching strategy
 
 ## Feature Requirements
@@ -65,7 +65,7 @@ This sequential approach can result in 3-5x longer execution times for independe
 
 #### 6. Resource Management
 - **System Resource Monitoring**: Track CPU, memory, and disk usage
-- **Adaptive Scaling**: Adjust concurrent WorkflowMaster count based on performance
+- **Adaptive Scaling**: Adjust concurrent WorkflowManager count based on performance
 - **Priority Queuing**: Execute high-priority tasks first
 - **Load Balancing**: Distribute tasks evenly across available resources
 
@@ -95,7 +95,7 @@ This sequential approach can result in 3-5x longer execution times for independe
 
 The existing system has these components that the OrchestratorAgent can leverage:
 
-1. **WorkflowMaster Sub-Agent** (`.claude/agents/workflow-master.md`):
+1. **WorkflowManager Sub-Agent** (`.claude/agents/workflow-master.md`):
    - Proven workflow execution capabilities
    - Integration with GitHub CLI for issue/PR management
    - Standardized prompt processing
@@ -266,8 +266,8 @@ def analyze_file_dependencies(prompts):
 ### Phase 3: Integration and Testing
 
 #### System Integration
-1. **WorkflowMaster Integration**:
-   - Seamless handoff to existing WorkflowMaster
+1. **WorkflowManager Integration**:
+   - Seamless handoff to existing WorkflowManager
    - Shared memory and context management
    - Error handling coordination
 
@@ -338,7 +338,7 @@ def analyze_file_dependencies(prompts):
    - Scalability limits
 
 3. **Compatibility Tests**:
-   - Integration with existing WorkflowMaster
+   - Integration with existing WorkflowManager
    - GitHub CLI compatibility
    - CI/CD pipeline integration
 
@@ -431,7 +431,7 @@ def retry_failed_task(task, attempt=1):
 
 ### Quality Metrics
 - **Complete git history preservation** with proper attribution
-- **Seamless integration** with existing WorkflowMaster workflows
+- **Seamless integration** with existing WorkflowManager workflows
 - **Comprehensive error handling** with graceful failure recovery
 - **Real-time progress visibility** for all parallel executions
 
@@ -444,7 +444,7 @@ def retry_failed_task(task, attempt=1):
 ## Implementation Steps
 
 ### Step 1: Issue Creation and Planning
-1. Create GitHub issue: "Implement OrchestratorAgent for Parallel WorkflowMaster Execution"
+1. Create GitHub issue: "Implement OrchestratorAgent for Parallel WorkflowManager Execution"
 2. Add detailed requirements and acceptance criteria
 3. Assign appropriate labels and milestones
 4. Link to related issues and dependencies
@@ -468,7 +468,7 @@ def retry_failed_task(task, attempt=1):
 4. Validate performance improvements with benchmarks
 
 ### Step 5: Integration and Documentation
-1. Integrate with existing WorkflowMaster and sub-agent ecosystem
+1. Integrate with existing WorkflowManager and sub-agent ecosystem
 2. Create comprehensive usage documentation
 3. Add troubleshooting guides and FAQ
 4. Update project memory and context files
@@ -509,4 +509,4 @@ The OrchestratorAgent represents a significant advancement in AI-assisted develo
 - Contribution to AI-assisted development best practices
 - Knowledge sharing through comprehensive documentation
 
-This OrchestratorAgent implementation will serve as a foundational component for advanced AI-assisted development workflows, demonstrating the power of intelligent coordination in software development processes. The 3-5x performance improvement for independent tasks will significantly enhance developer productivity while maintaining the high quality standards established by the existing WorkflowMaster system.
+This OrchestratorAgent implementation will serve as a foundational component for advanced AI-assisted development workflows, demonstrating the power of intelligent coordination in software development processes. The 3-5x performance improvement for independent tasks will significantly enhance developer productivity while maintaining the high quality standards established by the existing WorkflowManager system.

@@ -48,7 +48,7 @@ class TestMemoryUpdate(unittest.TestCase):
         update = MemoryUpdate(
             content="Test content",
             section="current-goals",
-            agent="WorkflowMaster",
+            agent="WorkflowManager",
             priority="medium",
             related_issues=[123],
             related_files=["src/test.py"]
@@ -62,7 +62,7 @@ class TestMemoryUpdate(unittest.TestCase):
         self.assertIn("**Related**: #123", comment)
         self.assertIn("**Content**:\nTest content", comment)
         self.assertIn("- File: src/test.py", comment)
-        self.assertIn("*Added by: WorkflowMaster*", comment)
+        self.assertIn("*Added by: WorkflowManager*", comment)
 
 
 class TestMemorySection(unittest.TestCase):
@@ -300,7 +300,7 @@ spanning multiple lines.
 - File: src/test.py
 
 ---
-*Added by: WorkflowMaster*"""
+*Added by: WorkflowManager*"""
         
         result = manager._parse_memory_comment(comment_body)
         
@@ -309,7 +309,7 @@ spanning multiple lines.
         self.assertEqual(result['priority'], 'high')
         self.assertEqual(result['timestamp'], '2025-01-01T12:00:00')
         self.assertEqual(result['related_issues'], [123, 456])
-        self.assertEqual(result['agent'], 'WorkflowMaster')
+        self.assertEqual(result['agent'], 'WorkflowManager')
         self.assertIn('This is important context', result['content'])
     
     def test_parse_memory_comment_invalid(self):
@@ -470,7 +470,7 @@ class TestIntegration(unittest.TestCase):
                     'comments': [
                         {
                             'id': 'comment1',
-                            'body': '### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Type**: current-goals\n**Priority**: high\n\n**Content**:\nComplete memory manager implementation\n\n---\n*Added by: WorkflowMaster*',
+                            'body': '### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Type**: current-goals\n**Priority**: high\n\n**Content**:\nComplete memory manager implementation\n\n---\n*Added by: WorkflowManager*',
                             'createdAt': '2025-01-01T12:00:00Z',
                             'author': {'login': 'testuser'}
                         }
@@ -487,7 +487,7 @@ class TestIntegration(unittest.TestCase):
         update_result = manager.update_memory(
             content="Complete memory manager implementation",
             section="current-goals",
-            agent="WorkflowMaster",
+            agent="WorkflowManager",
             priority="high"
         )
         
@@ -505,7 +505,7 @@ class TestIntegration(unittest.TestCase):
         goal_data = memory_data['sections']['current-goals'][0]
         self.assertEqual(goal_data['section'], 'current-goals')
         self.assertEqual(goal_data['priority'], 'high')
-        self.assertEqual(goal_data['agent'], 'WorkflowMaster')
+        self.assertEqual(goal_data['agent'], 'WorkflowManager')
         self.assertIn('Complete memory manager', goal_data['content'])
 
 

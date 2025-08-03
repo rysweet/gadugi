@@ -25,7 +25,7 @@ Review all prompts created for issue #9 implementation to ensure:
 5. `analyze-orchestrator-workflowmaster-architecture.md` - Architecture analysis
 
 #### Phase 3 Prompts (Parallel Execution)
-6. `fix-workflowmaster-brittleness-issues.md` - WorkflowMaster robustness
+6. `fix-workflowmaster-brittleness-issues.md` - WorkflowManager robustness
 7. `implement-teamcoach-agent.md` - Team intelligence
 8. `create-systematic-agent-creation-system.md` - Agent creation
 9. `enhance-claude-code-hooks-integration.md` - Hooks integration

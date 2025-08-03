@@ -1,10 +1,10 @@
 # Test Workflow Execution
 
-This document demonstrates how WorkflowMaster would execute a workflow.
+This document demonstrates how WorkflowManager would execute a workflow.
 
 ## Example Prompt: Simple Feature Addition
 
-Given a prompt file `/prompts/AddLoggingFeature.md`, WorkflowMaster would:
+Given a prompt file `/prompts/AddLoggingFeature.md`, WorkflowManager would:
 
 ### 1. Parse the Prompt
 Extract:
@@ -80,7 +80,7 @@ Throughout execution, update task status:
 
 ## Verification
 
-WorkflowMaster ensures:
+WorkflowManager ensures:
 - ✅ All phases completed
 - ✅ Clean git history
 - ✅ Comprehensive PR

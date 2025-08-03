@@ -1,6 +1,6 @@
-# WorkflowMaster Task Template
+# WorkflowManager Task Template
 
-This is a template for generating WorkflowMaster tasks.
+This is a template for generating WorkflowManager tasks.
 
 ## Variables Available:
 - {task_id}: Unique task identifier
@@ -13,4 +13,4 @@ This is a template for generating WorkflowMaster tasks.
 
 ## Usage:
 This template is used by PromptGenerator to create context-aware prompts
-for WorkflowMaster execution in parallel worktree environments.
+for WorkflowManager execution in parallel worktree environments.

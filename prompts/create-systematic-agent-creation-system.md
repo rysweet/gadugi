@@ -153,7 +153,7 @@ class AgentRegistry:
 ### Integration Points
 - **OrchestratorAgent**: Registry integration for agent discovery and coordination
 - **TeamCoach**: Agent capability assessment and optimization
-- **WorkflowMaster**: Template for workflow-based agents
+- **WorkflowManager**: Template for workflow-based agents
 - **Monitoring Systems**: Automatic monitoring setup for new agents
 
 ## Implementation Plan

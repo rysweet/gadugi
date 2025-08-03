@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Test Suite for OrchestratorAgent → WorkflowMaster Implementation Fixes
+Test Suite for OrchestratorAgent → WorkflowManager Implementation Fixes
 
 This test suite validates the critical fixes for issue #1 where OrchestratorAgent
-orchestration worked but WorkflowMasters failed to create actual implementation files.
+orchestration worked but WorkflowManagers failed to create actual implementation files.
 
 Key areas tested:
 1. Claude CLI command construction (agent invocation vs generic prompt)
-2. PromptGenerator creates WorkflowMaster-specific prompts
+2. PromptGenerator creates WorkflowManager-specific prompts
 3. Context passing to TaskExecutors
 4. End-to-end workflow execution validation
 """
@@ -50,7 +50,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
     @patch('components.execution_engine.subprocess.Popen')
     @patch('components.execution_engine.psutil.Process')
     def test_claude_cli_uses_workflow_master_agent(self, mock_psutil_process, mock_popen):
-        """Test that Claude CLI command uses /agent:workflow-master instead of -p"""
+        """Test that Claude CLI command uses /agent:workflow-manager instead of -p"""
         
         # Create mock process
         mock_process = MagicMock()
@@ -84,7 +84,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         
         # Critical assertions
         self.assertEqual(call_args[0], "claude", "Should use claude CLI")
-        self.assertEqual(call_args[1], "/agent:workflow-master", "Should use WorkflowMaster agent")
+        self.assertEqual(call_args[1], "/agent:workflow-manager", "Should use WorkflowManager agent")
         self.assertIn("Execute the complete workflow", call_args[2], "Should include workflow instruction")
         self.assertIn("--output-format", call_args, "Should include output format")
         self.assertIn("json", call_args, "Should use JSON output format")
@@ -103,7 +103,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         old_cmd = ["claude", "-p", "prompt.md", "--output-format", "json"]
         
         # New fixed pattern
-        new_cmd = ["claude", "/agent:workflow-master", "Execute the complete workflow for prompt.md", "--output-format", "json"]
+        new_cmd = ["claude", "/agent:workflow-manager", "Execute the complete workflow for prompt.md", "--output-format", "json"]
         
         # Verify old pattern is detected as broken
         self.assertIn("-p", old_cmd, "Old pattern should contain -p flag")
@@ -111,7 +111,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         
         # Verify new pattern is correct
         self.assertNotIn("-p", new_cmd, "New pattern should not contain -p flag")
-        self.assertIn("/agent:workflow-master", new_cmd, "New pattern should contain agent invocation")
+        self.assertIn("/agent:workflow-manager", new_cmd, "New pattern should contain agent invocation")
 
 
 class TestPromptGenerator(unittest.TestCase):
@@ -177,7 +177,7 @@ The implementation requires:
         self.assertEqual(context.target_files, ['file1.py', 'file2.py'])
     
     def test_workflow_prompt_generation(self):
-        """Test generating WorkflowMaster workflow prompts"""
+        """Test generating WorkflowManager workflow prompts"""
         
         context = PromptContext(
             task_id="test-001",
@@ -202,7 +202,7 @@ The implementation requires:
             content = f.read()
         
         # Critical validations
-        self.assertIn("WorkflowMaster Task Execution", content, "Should be WorkflowMaster task")
+        self.assertIn("WorkflowManager Task Execution", content, "Should be WorkflowManager task")
         self.assertIn("test-001", content, "Should include task ID")
         self.assertIn("Test Task", content, "Should include task name")
         self.assertIn("Implementation", content, "Should include phase focus")
@@ -219,7 +219,7 @@ The implementation requires:
         
         # Create a valid prompt
         valid_prompt = self.temp_dir / "valid.md"
-        valid_prompt.write_text("""# WorkflowMaster Task Execution
+        valid_prompt.write_text("""# WorkflowManager Task Execution
 
 ## Task Information
 Task details here
@@ -229,7 +229,7 @@ Requirements here
 
 ## Execution Instructions
 CREATE ACTUAL FILES - this is critical
-Complete WorkflowMaster workflow
+Complete WorkflowManager workflow
 
 ## Original Prompt Content
 Original content here
@@ -380,7 +380,7 @@ class TestEndToEndWorkflowValidation(unittest.TestCase):
         with open(workflow_prompt, 'r') as f:
             content = f.read()
         
-        self.assertIn("WorkflowMaster Task Execution", content)
+        self.assertIn("WorkflowManager Task Execution", content)
         self.assertIn("CREATE ACTUAL FILES", content)
         self.assertIn("Test Task Implementation", content)
         
@@ -401,8 +401,8 @@ class TestRegressionPrevention(unittest.TestCase):
             code_content = f.read()
         
         # Ensure the fix is still in place
-        self.assertIn("/agent:workflow-master", code_content, 
-                     "ExecutionEngine should use WorkflowMaster agent invocation")
+        self.assertIn("/agent:workflow-manager", code_content, 
+                     "ExecutionEngine should use WorkflowManager agent invocation")
         
         # Ensure the old broken pattern is not present
         self.assertNotIn('"-p", self.prompt_file', code_content,
@@ -424,18 +424,18 @@ class TestRegressionPrevention(unittest.TestCase):
         self.assertIsNotNone(generator, "PromptGenerator should be instantiable")
     
     def test_workflow_master_agent_availability(self):
-        """Test that WorkflowMaster agent is available"""
+        """Test that WorkflowManager agent is available"""
         
-        # Check if WorkflowMaster agent file exists
+        # Check if WorkflowManager agent file exists
         agent_file = Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "workflow-master.md"
-        self.assertTrue(agent_file.exists(), "WorkflowMaster agent should exist")
+        self.assertTrue(agent_file.exists(), "WorkflowManager agent should exist")
         
         # Read agent content
         with open(agent_file, 'r') as f:
             agent_content = f.read()
         
         # Verify key components
-        self.assertIn("workflow-master", agent_content, "Should be WorkflowMaster agent")
+        self.assertIn("workflow-master", agent_content, "Should be WorkflowManager agent")
         self.assertIn("Phase 5: Implementation", agent_content, "Should have implementation phase")
         self.assertIn("CREATE", agent_content.upper(), "Should mention file creation")
 
@@ -468,7 +468,7 @@ def run_test_suite():
 
 
 if __name__ == "__main__":
-    print("🧪 Running OrchestratorAgent → WorkflowMaster Fix Test Suite")
+    print("🧪 Running OrchestratorAgent → WorkflowManager Fix Test Suite")
     print("=" * 70)
     
     success = run_test_suite()

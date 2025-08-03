@@ -1,22 +1,22 @@
-# ADR-002: Orchestrator/WorkflowMaster Architecture Analysis and Decision
+# ADR-002: Orchestrator/WorkflowManager Architecture Analysis and Decision
 
 ## Status
 **DECIDED** - Recommendation: Enhanced Separation Architecture
 
 ## Context
 
-Following the successful resolution of the OrchestratorAgent implementation issue (PR #10), both the OrchestratorAgent and WorkflowMaster are now functioning effectively. This analysis evaluates potential architectural optimizations, code consolidation opportunities, and strategic improvements.
+Following the successful resolution of the OrchestratorAgent implementation issue (PR #10), both the OrchestratorAgent and WorkflowManager are now functioning effectively. This analysis evaluates potential architectural optimizations, code consolidation opportunities, and strategic improvements.
 
 ### Current Architecture Overview
 
 **OrchestratorAgent**:
 - **Purpose**: Coordinate parallel execution of multiple tasks
 - **Key Features**: Task analysis, dependency management, parallel coordination  
-- **Integration**: Spawns multiple WorkflowMaster instances via sub-agents
+- **Integration**: Spawns multiple WorkflowManager instances via sub-agents
 - **Value Proposition**: 3-5x speed improvement through parallelization
 - **Implementation**: 303 lines (agent definition) + 692 lines (ExecutionEngine) + 342 lines (PromptGenerator) = 1,337 total lines
 
-**WorkflowMaster**:
+**WorkflowManager**:
 - **Purpose**: Execute complete development workflows from issue to PR
 - **Key Features**: 9-phase workflow execution, state management, code review integration
 - **Integration**: Can be invoked directly or by OrchestratorAgent
@@ -47,12 +47,12 @@ The current dual-agent architecture raises several questions:
 
 **OrchestratorAgent Only**:
 - Parallel task coordination and dependency analysis
-- WorkflowMaster spawning and monitoring  
+- WorkflowManager spawning and monitoring  
 - Resource optimization and system monitoring
 - Worktree management and isolation
 - Cross-task conflict detection
 
-**WorkflowMaster Only**:
+**WorkflowManager Only**:
 - Sequential 9-phase workflow execution
 - Code implementation and testing phases
 - Code review orchestration and response
@@ -63,7 +63,7 @@ The current dual-agent architecture raises several questions:
 
 **Quantitative Analysis**:
 
-| Component | OrchestratorAgent | WorkflowMaster | Overlap % |
+| Component | OrchestratorAgent | WorkflowManager | Overlap % |
 |-----------|------------------|----------------|-----------|
 | GitHub Operations | 45 lines | 78 lines | ~35% |
 | State Management | 95 lines | 156 lines | ~28% |
@@ -73,20 +73,20 @@ The current dual-agent architecture raises several questions:
 
 **Key Findings**:
 - **29% functional overlap** between agents
-- **Different abstraction levels**: OrchestratorAgent operates on task collections, WorkflowMaster on individual workflows
+- **Different abstraction levels**: OrchestratorAgent operates on task collections, WorkflowManager on individual workflows
 - **Complementary patterns**: Shared utilities could be extracted without losing specialization
 
 ### 3. Performance Impact Analysis
 
 **Current Execution Pattern**:
 ```
-User Request → OrchestratorAgent → Multiple WorkflowMasters → Results
-- Agent invocation overhead: ~2-3 seconds per WorkflowMaster
+User Request → OrchestratorAgent → Multiple WorkflowManagers → Results
+- Agent invocation overhead: ~2-3 seconds per WorkflowManager
 - Parallel execution benefit: 3-5x speed improvement
 - Resource usage: ~2GB RAM per parallel task
 ```
 
-**Critical Insight**: The PR #10 fix resolved the core execution issue. Performance bottleneck was **not** the dual-agent architecture, but incorrect command construction (`claude -p` vs `/agent:workflow-master`).
+**Critical Insight**: The PR #10 fix resolved the core execution issue. Performance bottleneck was **not** the dual-agent architecture, but incorrect command construction (`claude -p` vs `/agent:workflow-manager`).
 
 ### 4. Architectural Alternatives Evaluation
 
@@ -218,7 +218,7 @@ class OrchestratorInterface:
 #### Phase 3: Enhanced Documentation
 Create comprehensive usage guides:
 - **When to use OrchestratorAgent**: Multiple independent tasks, parallelizable workflows
-- **When to use WorkflowMaster**: Single task execution, sequential workflow needs
+- **When to use WorkflowManager**: Single task execution, sequential workflow needs
 - **Integration patterns**: How agents coordinate and share state
 
 #### Phase 4: Monitoring and Metrics

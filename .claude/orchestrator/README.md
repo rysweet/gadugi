@@ -1,6 +1,6 @@
 # OrchestratorAgent - Parallel Workflow Execution System
 
-The OrchestratorAgent is a sophisticated coordination system that enables parallel execution of multiple WorkflowMasters, achieving 3-5x faster development workflows through intelligent task analysis and git worktree management.
+The OrchestratorAgent is a sophisticated coordination system that enables parallel execution of multiple WorkflowManagers, achieving 3-5x faster development workflows through intelligent task analysis and git worktree management.
 
 ## Overview
 
@@ -332,13 +332,13 @@ engine.execute_tasks_parallel(tasks, manager, progress_callback)
 
 ## Integration with Existing Systems
 
-### WorkflowMaster Integration
+### WorkflowManager Integration
 
-The OrchestratorAgent is designed to work seamlessly with existing WorkflowMaster patterns:
+The OrchestratorAgent is designed to work seamlessly with existing WorkflowManager patterns:
 
 ```bash
-# Traditional WorkflowMaster usage
-/agent:workflow-master prompts/single-task.md
+# Traditional WorkflowManager usage
+/agent:workflow-manager prompts/single-task.md
 
 # OrchestratorAgent usage for multiple tasks
 /agent:orchestrator-agent prompts/  # Analyzes all prompts

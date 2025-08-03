@@ -84,7 +84,7 @@ Options:
 
 ### Workflow Integration
 The agent integrates with existing workflows:
-- **WorkflowMaster**: Updates Memory.md during workflow phases
+- **WorkflowManager**: Updates Memory.md during workflow phases
 - **Code-Reviewer**: Maintains review history and insights
 - **OrchestratorAgent**: Coordinates multiple memory updates
 
@@ -175,7 +175,7 @@ Pruning ← Curator ← Conflict Resolution ← Sync Engine ← Issue Changes
 
 ## Agent Interaction Patterns
 
-### With WorkflowMaster
+### With WorkflowManager
 - Receives Memory.md updates during workflow phases
 - Coordinates pruning after workflow completion
 - Maintains workflow history and outcomes
@@ -273,4 +273,4 @@ conflict_resolution = {
 
 **Dependencies**: Requires Python 3.8+, GitHub CLI (gh), and appropriate repository permissions.
 
-**Integration**: Works seamlessly with existing WorkflowMaster, Code-Reviewer, and OrchestratorAgent workflows.
+**Integration**: Works seamlessly with existing WorkflowManager, Code-Reviewer, and OrchestratorAgent workflows.

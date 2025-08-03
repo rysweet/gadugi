@@ -13,8 +13,8 @@ This prompt coordinates the implementation of multiple housekeeping and system e
 The Gadugi multi-agent system has achieved core functionality but requires systematic improvements across several areas:
 
 1. **Memory Management**: Current Memory.md approach needs integration with GitHub issues for better tracking
-2. **Workflow Brittleness**: WorkflowMaster has identified brittleness points that need hardening  
-3. **Agent Architecture**: Potential merger/consolidation opportunities between Orchestrator and WorkflowMaster
+2. **Workflow Brittleness**: WorkflowManager has identified brittleness points that need hardening  
+3. **Agent Architecture**: Potential merger/consolidation opportunities between Orchestrator and WorkflowManager
 4. **Security**: Need for XPIA (Cross-Prompt Injection Attack) defense mechanisms
 5. **Agent Creation**: Systematic approach to creating new agents and team coordination
 6. **Task Decomposition**: Enhanced automated task breaking and dependency analysis
@@ -31,13 +31,13 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 - **Integration**: Work with existing Memory.md format and gh CLI
 - **User Story**: As a developer, I want Memory.md tasks automatically tracked as GitHub issues so they're visible in project management
 
-### 2. WorkflowMaster Robustness Enhancement
-- **Functional**: Identify and fix brittleness points in WorkflowMaster execution
+### 2. WorkflowManager Robustness Enhancement
+- **Functional**: Identify and fix brittleness points in WorkflowManager execution
 - **Technical**: Enhanced error handling, retry mechanisms, state recovery
 - **Integration**: Maintain compatibility with OrchestratorAgent parallel execution
-- **User Story**: As a developer, I want WorkflowMaster to handle edge cases gracefully without requiring manual intervention
+- **User Story**: As a developer, I want WorkflowManager to handle edge cases gracefully without requiring manual intervention
 
-### 3. Orchestrator/WorkflowMaster Architecture Analysis
+### 3. Orchestrator/WorkflowManager Architecture Analysis
 - **Functional**: Analyze merger/consolidation opportunities
 - **Technical**: Identify shared code, overlapping responsibilities, optimization potential
 - **Integration**: Maintain existing parallel execution capabilities
@@ -85,7 +85,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 
 **Areas for Improvement**:
 - Memory.md is file-based without project management integration
-- WorkflowMaster has identified brittleness points requiring investigation
+- WorkflowManager has identified brittleness points requiring investigation
 - Security model lacks prompt injection protection
 - Agent creation is ad-hoc without systematic approach
 - Container execution is handled through shell scripts without isolation
@@ -115,7 +115,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 
 **Internal Integration**:
 - OrchestratorAgent: Enhanced with new task decomposition
-- WorkflowMaster: Hardened against brittleness
+- WorkflowManager: Hardened against brittleness
 - agent-manager: Extended with container execution
 - Memory.md: Integrated with GitHub issues
 - All agents: Protected by XPIA defense
@@ -142,7 +142,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 **Milestone**: System architecture optimization decisions
 **Duration**: Estimated 1 week  
 **Deliverables**:
-- Comprehensive Orchestrator/WorkflowMaster analysis
+- Comprehensive Orchestrator/WorkflowManager analysis
 - Architecture optimization recommendations
 - Implementation plan for potential merger (if beneficial)
 
@@ -150,7 +150,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 **Milestone**: Enhanced system robustness and team coordination
 **Duration**: Estimated 1-2 weeks
 **Deliverables**:
-- WorkflowMaster brittleness fixes
+- WorkflowManager brittleness fixes
 - TeamCoach agent implementation
 - Agent creation system
 - Enhanced Claude-Code hooks integration
@@ -190,7 +190,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 - GitHub API failures during Memory.md sync
 - Container runtime failures and recovery
 - XPIA defense false positives
-- WorkflowMaster state corruption and recovery
+- WorkflowManager state corruption and recovery
 - Agent creation failures and rollback
 - Parallel execution deadlocks and resolution
 
@@ -198,7 +198,7 @@ The Gadugi multi-agent system has achieved core functionality but requires syste
 
 ### Measurable Outcomes
 1. **Security**: 100% XPIA injection attempts blocked in testing
-2. **Robustness**: WorkflowMaster brittleness incidents reduced by 90%
+2. **Robustness**: WorkflowManager brittleness incidents reduced by 90%
 3. **Integration**: Memory.md tasks automatically created as GitHub issues with 95% accuracy
 4. **Performance**: Parallel execution speedup maintained at 3-5x with new components
 5. **Container Security**: 100% isolation of untrusted code execution
@@ -241,13 +241,13 @@ Execute in parallel:
 
 ### Step 4: Phase 2 Sequential Execution - Architecture Analysis
 Execute sequentially (depends on current system understanding):
-- **Task E**: Comprehensive Orchestrator/WorkflowMaster analysis
+- **Task E**: Comprehensive Orchestrator/WorkflowManager analysis
 - **Task F**: Architecture optimization recommendations
 - **Deliverable**: Architecture analysis report and optimization plan
 
 ### Step 5: Phase 3 Parallel Execution - Robustness and Capabilities
 Execute in parallel:
-- **Task G**: WorkflowMaster brittleness identification and fixes
+- **Task G**: WorkflowManager brittleness identification and fixes
 - **Task H**: TeamCoach agent implementation
 - **Task I**: Agent creation system development
 - **Task J**: Claude-Code hooks integration enhancement
@@ -286,10 +286,10 @@ Execute in parallel:
 4. **Enhanced TaskAnalyzer** (`/prompts/enhance-task-decomposition-analyzer.md`)
 
 ### Group 2: Architecture Analysis (Sequential)
-5. **Orchestrator/WorkflowMaster Analysis** (`/prompts/analyze-orchestrator-workflowmaster-architecture.md`)
+5. **Orchestrator/WorkflowManager Analysis** (`/prompts/analyze-orchestrator-workflowmaster-architecture.md`)
 
 ### Group 3: Robustness and Team Capabilities (Parallel)
-6. **WorkflowMaster Brittleness Fixes** (`/prompts/fix-workflowmaster-brittleness-issues.md`)
+6. **WorkflowManager Brittleness Fixes** (`/prompts/fix-workflowmaster-brittleness-issues.md`)
 7. **TeamCoach Agent** (`/prompts/implement-teamcoach-agent.md`)
 8. **Agent Creation System** (`/prompts/create-systematic-agent-creation-system.md`)
 9. **Claude-Code Hooks Enhancement** (`/prompts/enhance-claude-code-hooks-integration.md`)
@@ -341,9 +341,9 @@ This prompt is designed for execution by the **OrchestratorAgent** due to the hi
 1. **Create the master GitHub issue** from this prompt
 2. **Analyze tasks** using TaskAnalyzer for dependency mapping
 3. **Set up parallel execution** using WorktreeManager for git isolation
-4. **Execute Group 1 tasks in parallel** (4 simultaneous WorkflowMasters)
+4. **Execute Group 1 tasks in parallel** (4 simultaneous WorkflowManagers)
 5. **Execute Group 2 task sequentially** (wait for Group 1 completion)
-6. **Execute Group 3 tasks in parallel** (4 simultaneous WorkflowMasters)
+6. **Execute Group 3 tasks in parallel** (4 simultaneous WorkflowManagers)
 7. **Coordinate integration testing** across all components
 8. **Manage final documentation and PR creation**
 

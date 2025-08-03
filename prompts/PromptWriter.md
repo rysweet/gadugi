@@ -18,7 +18,7 @@ A specialized PromptWriter sub-agent can:
 2. Include comprehensive workflow steps from planning to deployment
 3. Provide clear technical specifications and success criteria
 4. Maintain consistency across all feature development
-5. Integrate seamlessly with the WorkflowMaster for execution
+5. Integrate seamlessly with the WorkflowManager for execution
 
 ## Requirements
 
@@ -125,7 +125,7 @@ Every prompt should include these sections:
    - Clear success metrics
    - Complete workflow steps
 
-2. Integration with WorkflowMaster:
+2. Integration with WorkflowManager:
    - Prompts formatted for easy parsing
    - Clear action items identified
    - Dependencies explicitly stated
@@ -144,7 +144,7 @@ Every prompt should include these sections:
 - All prompts include full workflow from issue to PR
 - Technical specifications are clear and implementable
 - Testing requirements are comprehensive
-- WorkflowMaster can execute prompts without clarification
+- WorkflowManager can execute prompts without clarification
 - 90%+ of prompts require no significant revisions
 
 ## Example Usage
@@ -156,7 +156,7 @@ When invoked at the start of a session:
 3. Drafts comprehensive prompt following the template
 4. Reviews prompt for completeness and accuracy
 5. Saves to `/prompts/` with descriptive filename
-6. Confirms readiness for WorkflowMaster execution
+6. Confirms readiness for WorkflowManager execution
 
 ## Next Steps
 

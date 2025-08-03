@@ -279,7 +279,7 @@ Examples:
   python simple_memory_cli.py read --section current-goals
   
   # Add memory update
-  python simple_memory_cli.py update "New feature completed" --section completed-tasks --agent WorkflowMaster --priority high
+  python simple_memory_cli.py update "New feature completed" --section completed-tasks --agent WorkflowManager --priority high
   
   # Add memory from stdin
   echo "Long memory content..." | python simple_memory_cli.py update - --section important-context --agent OrchestratorAgent

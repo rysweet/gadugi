@@ -40,7 +40,7 @@ python simple_memory_cli.py status
 # Add memory update
 python simple_memory_cli.py update "Feature completed successfully" \
   --section completed-tasks \
-  --agent WorkflowMaster \
+  --agent WorkflowManager \
   --priority high \
   --related "#123,#456"
 
@@ -125,7 +125,7 @@ manager = SimpleMemoryManager(repo_path="/path/to/repo")
 result = manager.update_memory(
     content="Memory content",
     section="current-goals",
-    agent="WorkflowMaster",
+    agent="WorkflowManager",
     priority="high",
     related_issues=[123, 456],
     related_prs=[789],
@@ -232,12 +232,12 @@ else:
 
 ## Agent Integration Patterns
 
-### WorkflowMaster Integration
+### WorkflowManager Integration
 
 ```python
-from agent_integration import WorkflowMasterMemoryMixin
+from agent_integration import WorkflowManagerMemoryMixin
 
-class WorkflowMaster(WorkflowMasterMemoryMixin):
+class WorkflowManager(WorkflowManagerMemoryMixin):
     def execute_phase(self, phase_name: str):
         # Your phase implementation
         implementation_result = self.implement_phase(phase_name)

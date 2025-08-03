@@ -166,7 +166,7 @@ class FileChangeIntelligenceHandler:
 ### Integration Points
 - **agent-manager**: Enhanced hook system building on existing foundation
 - **OrchestratorAgent**: Automatic triggering from Claude Code events
-- **WorkflowMaster**: Integration with Claude Code development lifecycle
+- **WorkflowManager**: Integration with Claude Code development lifecycle
 - **All Agents**: Context sharing and intelligent triggering
 
 ## Implementation Plan

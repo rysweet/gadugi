@@ -28,7 +28,7 @@ This template shows how to integrate Gadugi agents and instructions into your pr
 ## Available Agents from Gadugi
 
 When you need specialized agents, use:
-- `/agent:workflow-master` - For complete development workflows
+- `/agent:workflow-manager` - For complete development workflows
 - `/agent:orchestrator-agent` - For parallel task execution
 - `/agent:code-reviewer` - For code review tasks
 - `/agent:prompt-writer` - For creating structured prompts

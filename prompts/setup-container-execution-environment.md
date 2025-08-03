@@ -76,7 +76,7 @@ docker run --rm \
 
 ### Integration Points
 - **agent-manager**: Replace shell execution with container execution
-- **WorkflowMaster**: Enhanced security for implementation phases
+- **WorkflowManager**: Enhanced security for implementation phases
 - **OrchestratorAgent**: Isolated parallel execution environments
 - **Testing Framework**: Containerized test execution
 
@@ -96,7 +96,7 @@ docker run --rm \
 
 ### Phase 3: Integration
 - Integrate with agent-manager hook system
-- Update WorkflowMaster and OrchestratorAgent
+- Update WorkflowManager and OrchestratorAgent
 - Add configuration management
 - Create fallback mechanisms
 

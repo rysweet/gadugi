@@ -1,4 +1,4 @@
-# Diagnostic Analysis: OrchestratorAgent → WorkflowMaster Implementation Failure
+# Diagnostic Analysis: OrchestratorAgent → WorkflowManager Implementation Failure
 
 **Task ID**: task-20250801-113240-4c1e  
 **Issue**: #1 - OrchestratorAgent parallel execution failed to implement actual files  
@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-The OrchestratorAgent successfully orchestrates parallel execution infrastructure but fails at the critical handoff to WorkflowMasters for actual implementation. The root cause is a **fundamental command structure issue** in how Claude CLI is invoked within worktrees.
+The OrchestratorAgent successfully orchestrates parallel execution infrastructure but fails at the critical handoff to WorkflowManagers for actual implementation. The root cause is a **fundamental command structure issue** in how Claude CLI is invoked within worktrees.
 
 ## Detailed Findings
 
@@ -31,47 +31,47 @@ claude_cmd = [
 ```
 
 **Problems**:
-- **Missing Agent Invocation**: The command invokes Claude CLI with a prompt file but doesn't specify the WorkflowMaster agent
-- **Wrong Context**: Without agent specification, Claude CLI executes in generic mode rather than WorkflowMaster mode
+- **Missing Agent Invocation**: The command invokes Claude CLI with a prompt file but doesn't specify the WorkflowManager agent
+- **Wrong Context**: Without agent specification, Claude CLI executes in generic mode rather than WorkflowManager mode
 - **No Task Context**: The prompt file path may not contain the full context needed for implementation
 
 **Expected Command**:
 ```python
 claude_cmd = [
     "claude",
-    "/agent:workflow-master",
+    "/agent:workflow-manager",
     f"Task: Execute workflow for {self.prompt_file}",
     "--output-format", "json"
 ]
 ```
 
 #### 2. **Prompt Routing Mechanism Missing**
-**Issue**: No mechanism to ensure WorkflowMasters receive phase-specific prompts with implementation instructions
+**Issue**: No mechanism to ensure WorkflowManagers receive phase-specific prompts with implementation instructions
 
 **Current Flow**:
 1. OrchestratorAgent creates worktrees ✅
 2. ExecutionEngine spawns `claude -p prompt_file` ❌ 
-3. Generic Claude execution occurs instead of WorkflowMaster workflow ❌
+3. Generic Claude execution occurs instead of WorkflowManager workflow ❌
 
 **Required Flow**:
 1. OrchestratorAgent creates worktrees ✅
 2. Generate phase-specific prompt files in each worktree ❌ (MISSING)
-3. ExecutionEngine spawns `/agent:workflow-master` with proper task context ❌ (WRONG)
-4. WorkflowMaster executes full workflow including implementation ❌ (NEVER REACHED)
+3. ExecutionEngine spawns `/agent:workflow-manager` with proper task context ❌ (WRONG)
+4. WorkflowManager executes full workflow including implementation ❌ (NEVER REACHED)
 
 #### 3. **Context Preservation Failure**
-**Issue**: Implementation context doesn't reach WorkflowMasters
+**Issue**: Implementation context doesn't reach WorkflowManagers
 
 **Problems**:
 - Prompt files may be generic rather than phase-specific
-- No mechanism to pass task-specific requirements to WorkflowMasters
-- WorkflowMasters execute in isolation without proper context about what to implement
+- No mechanism to pass task-specific requirements to WorkflowManagers
+- WorkflowManagers execute in isolation without proper context about what to implement
 
 #### 4. **State Machine Bypass**
-**Issue**: WorkflowMaster's 9-phase state machine is bypassed entirely
+**Issue**: WorkflowManager's 9-phase state machine is bypassed entirely
 
 **Current**: Generic Claude execution → Memory.md updates only
-**Required**: WorkflowMaster → Phase 1-9 → Actual implementation files
+**Required**: WorkflowManager → Phase 1-9 → Actual implementation files
 
 ## Impact Analysis
 
@@ -84,7 +84,7 @@ claude_cmd = [
 
 ### Failed Implementation (0% Working)
 - ❌ No actual implementation files created
-- ❌ WorkflowMaster workflows never execute
+- ❌ WorkflowManager workflows never execute
 - ❌ Only Memory.md gets updated
 - ❌ All parallel "work" is just context analysis
 
@@ -112,8 +112,8 @@ OrchestratorAgent
 ├── WorktreeManager (✅ Works)
 ├── PromptGenerator (❌ MISSING - Create phase-specific prompts)
 ├── ExecutionEngine (🔧 NEEDS FIX - Proper agent invocation)
-    └── `/agent:workflow-master` (🔧 FIX - Agent mode)
-        └── WorkflowMaster 9-phase execution (🔧 FIX - Full workflow)
+    └── `/agent:workflow-manager` (🔧 FIX - Agent mode)
+        └── WorkflowManager 9-phase execution (🔧 FIX - Full workflow)
             ├── Phase 5: Implementation (🔧 FIX - Actual files)
             ├── Phase 6: Testing (🔧 FIX - Test creation)
             ├── Phase 8: PR Creation (🔧 FIX - Real PRs)  
@@ -131,7 +131,7 @@ OrchestratorAgent
 **Fix**: Add PromptGenerator component to create implementation-focused prompts
 
 ### 3. Context Passing Mechanism
-**Problem**: No way to pass implementation requirements to WorkflowMasters
+**Problem**: No way to pass implementation requirements to WorkflowManagers
 **Fix**: Structure agent invocation to include full context
 
 ### 4. Execution Mode Detection
@@ -142,13 +142,13 @@ OrchestratorAgent
 
 ### Pre-Fix Verification
 1. **Confirm Command Issue**: Test current `claude -p` command in worktree
-2. **Confirm Agent Execution**: Test `/agent:workflow-master` command manually
+2. **Confirm Agent Execution**: Test `/agent:workflow-manager` command manually
 3. **Confirm Context Loss**: Verify prompt files lack implementation specifics
 
 ### Post-Fix Verification  
-1. **Command Execution**: Verify `/agent:workflow-master` executes in worktrees
+1. **Command Execution**: Verify `/agent:workflow-manager` executes in worktrees
 2. **File Creation**: Confirm actual implementation files are created
-3. **Full Workflow**: Verify complete WorkflowMaster 9-phase execution
+3. **Full Workflow**: Verify complete WorkflowManager 9-phase execution
 4. **Integration**: Test end-to-end orchestration → implementation flow
 
 ## Recommended Fix Priority
@@ -161,7 +161,7 @@ OrchestratorAgent
 ### Phase 2: Context Enhancement (HIGH - 2 hours)  
 - Add PromptGenerator component
 - Create phase-specific prompt generation
-- Enhance context passing to WorkflowMasters
+- Enhance context passing to WorkflowManagers
 
 ### Phase 3: Integration Testing (HIGH - 1 hour)
 - Test full orchestration → implementation flow
@@ -176,8 +176,8 @@ OrchestratorAgent
 ## Success Metrics
 
 ### Primary (Must Have)
-- ✅ WorkflowMasters create actual implementation files (not just Memory.md)
-- ✅ Full 9-phase WorkflowMaster execution in parallel worktrees
+- ✅ WorkflowManagers create actual implementation files (not just Memory.md)
+- ✅ Full 9-phase WorkflowManager execution in parallel worktrees
 - ✅ Parallel execution produces real deliverables (files, tests, PRs)
 
 ### Secondary (Should Have)  

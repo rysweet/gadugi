@@ -574,7 +574,7 @@ Analysis:
 
 Your analysis directly enables:
 - Optimal worktree allocation
-- Parallel WorkflowMaster spawning
+- Parallel WorkflowManager spawning
 - Merge conflict prevention
 - Resource optimization
 
