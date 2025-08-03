@@ -239,70 +239,6 @@ def handle_lock_status(manager: SimpleMemoryManager, args) -> int:
     return 0
 
 
-def handle_security_status(manager: SimpleMemoryManager, args) -> int:
-    """Handle security status command"""
-    result = manager.get_security_status()
-    
-    if args.json:
-        print(json.dumps(result, indent=2))
-    else:
-        if result['success']:
-            print(f"🔐 Memory Security Status")
-            print("=" * 40)
-            print(f"Security Level: {result['security_level']}")
-            print(f"Issue Number: #{result['issue_number']}")
-            print(f"Locked: {'Yes' if result['locked'] else 'No'}")
-            if result['locked'] and result.get('lock_reason'):
-                print(f"Lock Reason: {result['lock_reason']}")
-            print(f"Auto-lock Enabled: {'Yes' if result['auto_lock_enabled'] else 'No'}")
-            print(f"Strict Security: {'Yes' if result['strict_security_enabled'] else 'No'}")
-            
-            if result.get('warnings'):
-                print("\n⚠️  Security Warnings:")
-                for warning in result['warnings']:
-                    print(f"  • {warning}")
-            
-            if result.get('recommendations'):
-                print("\n💡 Recommendations:")
-                for rec in result['recommendations']:
-                    print(f"  • {rec}")
-            
-            if result['security_level'] == 'HIGH':
-                print("\n✅ Memory security is properly configured")
-            else:
-                print("\n❌ Memory security needs attention")
-        else:
-            print(f"❌ Failed to get security status: {result.get('error', 'Unknown error')}")
-            return 1
-    
-    return 0
-
-
-def handle_lock(manager: SimpleMemoryManager, args) -> int:
-    """Handle manual lock command"""
-    if not args.confirm:
-        print("🔒 Lock Memory Issue")
-        print("This will prevent non-collaborators from commenting on the memory issue.")
-        print("Only users with write access to the repository will be able to add comments.")
-        print("\nTo proceed, use: --confirm")
-        return 1
-    
-    result = manager.lock_memory_issue()
-    
-    if args.json:
-        print(json.dumps({'success': result}, indent=2))
-    else:
-        if result:
-            print("🔒 Memory issue locked successfully")
-            print("✅ Only collaborators with write access can now comment")
-        else:
-            print("❌ Failed to lock memory issue")
-            print("Check that you have write access to the repository")
-            return 1
-    
-    return 0
-
-
 def handle_unlock(manager: SimpleMemoryManager, args) -> int:
     """Handle unlock command"""
     if not args.confirm:
@@ -354,14 +290,8 @@ Examples:
   # Search specific section
   python simple_memory_cli.py search "bug fix" --section completed-tasks
   
-  # Get comprehensive security status
-  python simple_memory_cli.py security-status
-  
   # Check memory lock status
   python simple_memory_cli.py lock-status
-  
-  # Manually lock memory issue
-  python simple_memory_cli.py lock --confirm
   
   # Unlock memory (requires confirmation)
   python simple_memory_cli.py unlock --confirm
@@ -403,16 +333,8 @@ Examples:
     cleanup_parser.add_argument('--days', type=int, default=30, help='Archive entries older than N days')
     cleanup_parser.add_argument('--dry-run', action='store_true', help='Preview what would be archived')
     
-    # Security status command
-    security_parser = subparsers.add_parser('security-status', help='Get comprehensive security status and recommendations')
-    
-    # Lock status command
+    # Lock command
     lock_parser = subparsers.add_parser('lock-status', help='Check memory issue lock status')
-    
-    # Manual lock command
-    manual_lock_parser = subparsers.add_parser('lock', help='Manually lock memory issue for security')
-    manual_lock_parser.add_argument('--confirm', action='store_true',
-                                   help='Confirm you want to lock the memory issue')
     
     # Unlock command (with warning)
     unlock_parser = subparsers.add_parser('unlock', help='Unlock memory issue (WARNING: reduces security)')
@@ -443,12 +365,8 @@ Examples:
             return handle_search(manager, args)
         elif args.command == 'cleanup':
             return handle_cleanup(manager, args)
-        elif args.command == 'security-status':
-            return handle_security_status(manager, args)
         elif args.command == 'lock-status':
             return handle_lock_status(manager, args)
-        elif args.command == 'lock':
-            return handle_lock(manager, args)
         elif args.command == 'unlock':
             return handle_unlock(manager, args)
         else:
