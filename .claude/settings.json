@@ -88,28 +88,5 @@
     ],
     "deny": []
   },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/teamcoach-stop.py",
-            "timeout": 300
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/teamcoach-subagent-stop.py",
-            "timeout": 180
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": {}
 }
