@@ -340,51 +340,294 @@ Enhanced PR creation features:
 - **Critical Checkpointing**: State preservation at crucial workflow milestone
 - **Advanced Recovery**: Detailed recovery context for failure scenarios
 
-### 9. Review Phase (MANDATORY - NEVER SKIP)
-- **CRITICAL**: This phase MUST execute after Phase 8
-- **FIRST**: Check if code review already exists (recovery case)
-  ```bash
-  if ! gh pr view "$PR_NUMBER" --json reviews | grep -q "review"; then
-      echo "No review found, invoking code-reviewer..."
-      MUST_INVOKE_CODE_REVIEWER=true
-  else
-      echo "Review already exists, proceeding..."
-  fi
-  ```
-- **MANDATORY**: Invoke code-reviewer sub-agent: `/agent:code-reviewer`
-- **VERIFY** review was posted:
-  ```bash
-  # Wait for review to be posted
-  RETRY_COUNT=0
-  while [ $RETRY_COUNT -lt 5 ]; do
-      sleep 10
-      if gh pr view "$PR_NUMBER" --json reviews | grep -q "review"; then
-          echo "✅ Code review posted successfully"
-          break
-      fi
-      RETRY_COUNT=$((RETRY_COUNT + 1))
-  done
-  
-  if [ $RETRY_COUNT -eq 5 ]; then
-      echo "CRITICAL: Code review was not posted after 5 retries!"
-      exit 1
-  fi
-  ```
-- **MANDATORY**: After code review verification, invoke CodeReviewResponseAgent: `/agent:code-review-response`
-  - Even for approvals, acknowledge the review and confirm merge readiness
-  - Process any suggestions for future improvements
-  - Thank the reviewer and document outcomes
-- Monitor CI/CD pipeline status
-- Address any review feedback systematically
-- Make necessary corrections
-- **CRITICAL**: Update state and commit memory files:
-  ```bash
-  complete_phase 9 "Review" "verify_phase_9"
-  
-  git add .github/Memory.md .github/CodeReviewerProjectMemory.md
-  git commit -m "docs: update project memory files" || true
-  git push || true
-  ```
+### 9. Review Phase (MANDATORY - NEVER SKIP) - ENFORCED WITH AUTOMATIC EXECUTION
+
+**CRITICAL: Phase 9 Enforcement - MULTIPLE ENFORCEMENT MECHANISMS**
+
+This phase is ABSOLUTELY MANDATORY and has multiple automatic enforcement mechanisms to ensure it NEVER gets skipped.
+
+#### **ENFORCEMENT MECHANISM 1: Automatic Invocation After PR Creation**
+
+**IMMEDIATELY after PR creation success in Phase 8**:
+```bash
+# AUTOMATIC TRIGGER - No user intervention required
+echo "🚨 CRITICAL: Phase 8 complete - AUTOMATIC Phase 9 enforcement triggered"
+echo "Setting 30-second timer for MANDATORY code review invocation..."
+
+# Wait 30 seconds to allow PR to propagate
+sleep 30
+
+# FORCE code review invocation
+echo "⚡ ENFORCING Phase 9: Invoking code-reviewer agent NOW"
+PHASE_9_ENFORCEMENT=true
+```
+
+#### **ENFORCEMENT MECHANISM 2: State Validation Before Completion**
+
+**BEFORE marking workflow complete, VERIFY review exists**:
+```bash
+# CRITICAL VALIDATION - Workflow CANNOT complete without this
+verify_phase_9_completion() {
+    local PR_NUMBER="$1"
+    
+    if ! gh pr view "$PR_NUMBER" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
+        echo "🚨 CRITICAL ERROR: Workflow marked complete but NO REVIEW FOUND!"
+        echo "📋 ENFORCING Phase 9: Invoking code-reviewer agent immediately"
+        
+        # FORCE code review invocation
+        MUST_INVOKE_CODE_REVIEWER=true
+        return 1
+    fi
+    
+    echo "✅ Phase 9 validation passed: Review exists for PR #$PR_NUMBER"
+    return 0
+}
+
+# Call this BEFORE any workflow completion
+if ! verify_phase_9_completion "$PR_NUMBER"; then
+    echo "🚨 BLOCKING workflow completion until Phase 9 is complete"
+    exit 1
+fi
+```
+
+#### **ENFORCEMENT MECHANISM 3: Enhanced Task List Requirements**
+
+**ALWAYS include these tasks in TodoWrite (with MAXIMUM priority)**:
+```python
+# MANDATORY tasks that MUST be in every workflow
+TaskData(
+    id="9",
+    content="🚨 MANDATORY: Invoke code-reviewer agent (Phase 9 - CANNOT SKIP)",
+    status="pending",
+    priority="high",  # Maximum priority
+    phase=WorkflowPhase.REVIEW,
+    auto_invoke=True,  # Flag for automatic execution
+    enforcement_level="CRITICAL"  # New enforcement level
+),
+TaskData(
+    id="10", 
+    content="🚨 MANDATORY: Process review with code-review-response agent",
+    status="pending",
+    priority="high",  # Maximum priority
+    phase=WorkflowPhase.REVIEW_RESPONSE,
+    auto_invoke=True,  # Flag for automatic execution
+    enforcement_level="CRITICAL"  # New enforcement level
+)
+```
+
+#### **ENFORCEMENT MECHANISM 4: Automatic Phase Transitions**
+
+**These transitions MUST happen automatically (NO user intervention)**:
+
+1. **Phase 8 → Phase 9 (Automatic - 30 second delay)**:
+   ```bash
+   # After PR creation confirmation
+   echo "✅ Phase 8 complete: PR #$PR_NUMBER created"
+   echo "⏱️  Starting 30-second countdown to Phase 9..."
+   sleep 30
+   echo "🚨 AUTOMATIC Phase 9 execution starting NOW"
+   
+   # NO user intervention - automatic invocation
+   invoke_code_reviewer_automatically
+   ```
+
+2. **Phase 9 → Phase 10 (Immediate after review posted)**:
+   ```bash
+   # After review posted confirmation
+   echo "✅ Code review posted successfully"
+   echo "⚡ IMMEDIATE Phase 10 execution starting NOW"
+   
+   # NO user intervention - immediate invocation
+   invoke_code_review_response_automatically
+   ```
+
+#### **Phase 9 Execution Steps (ENFORCED)**
+
+1. **Check if code review already exists** (recovery case):
+   ```bash
+   if ! gh pr view "$PR_NUMBER" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
+       echo "🚨 No review found - invoking code-reviewer (MANDATORY)"
+       MUST_INVOKE_CODE_REVIEWER=true
+   else
+       echo "✅ Review exists - proceeding to response phase"
+       MUST_INVOKE_CODE_REVIEW_RESPONSE=true
+   fi
+   ```
+
+2. **MANDATORY: Invoke code-reviewer sub-agent**:
+   ```bash
+   echo "🚨 CRITICAL: Invoking code-reviewer agent for PR #$PR_NUMBER"
+   echo "Command: /agent:code-reviewer"
+   echo "Context: PR #$PR_NUMBER requires mandatory Phase 9 code review"
+   
+   # This MUST happen - no exceptions
+   /agent:code-reviewer
+   ```
+
+3. **VERIFY review was posted** (with retries):
+   ```bash
+   # Enhanced verification with better error handling
+   verify_review_posted() {
+       local PR_NUMBER="$1"
+       local MAX_RETRIES=10
+       local RETRY_COUNT=0
+       
+       echo "🔍 Verifying code review was posted..."
+       
+       while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+           if gh pr view "$PR_NUMBER" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
+               echo "✅ Code review posted successfully on attempt $((RETRY_COUNT + 1))"
+               return 0
+           fi
+           
+           RETRY_COUNT=$((RETRY_COUNT + 1))
+           echo "⏳ Attempt $RETRY_COUNT/$MAX_RETRIES: Waiting for review... (10s)"
+           sleep 10
+       done
+       
+       echo "🚨 CRITICAL ERROR: Code review was not posted after $MAX_RETRIES attempts!"
+       echo "🚨 This is a BLOCKING error - workflow cannot continue!"
+       return 1
+   }
+   
+   # CRITICAL - workflow stops if this fails
+   if ! verify_review_posted "$PR_NUMBER"; then
+       echo "🚨 CRITICAL: Phase 9 verification failed!"
+       echo "🚨 ENFORCING retry of code-reviewer invocation..."
+       
+       # Retry code-reviewer invocation
+       echo "🔄 RETRY: Invoking code-reviewer agent again"
+       /agent:code-reviewer
+       
+       # Verify again
+       if ! verify_review_posted "$PR_NUMBER"; then
+           echo "🚨 FATAL: Unable to complete Phase 9 after retry!"
+           exit 1
+       fi
+   fi
+   ```
+
+4. **MANDATORY: Invoke CodeReviewResponseAgent**:
+   ```bash
+   echo "✅ Review verified - proceeding to response phase"
+   echo "🚨 CRITICAL: Invoking code-review-response agent"
+   echo "Command: /agent:code-review-response"
+   echo "Context: Processing review for PR #$PR_NUMBER"
+   
+   # This MUST happen for ALL reviews (even approvals)
+   /agent:code-review-response
+   ```
+
+5. **Final state update and commit**:
+   ```bash
+   # CRITICAL: Update state and commit memory files
+   echo "📝 Updating workflow state and memory files..."
+   
+   complete_phase 9 "Review" "verify_phase_9"
+   complete_phase 10 "Review Response" "verify_phase_10"
+   
+   git add .github/Memory.md .github/CodeReviewerProjectMemory.md
+   git commit -m "docs: update project memory files after Phase 9+10 completion
+
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>" || true
+   git push || true
+   
+   echo "✅ Phase 9 and 10 completed successfully"
+   ```
+
+#### **Orphaned PR Recovery (AUTOMATIC)**
+
+**BEFORE starting any new workflow, check for orphaned PRs**:
+```bash
+check_and_fix_orphaned_prs() {
+    echo "🔍 Scanning for PRs missing mandatory reviews..."
+    
+    # Find PRs created by WorkflowManager without reviews (>5 minutes old)
+    gh pr list --author "@me" --state open --json number,title,createdAt,reviews | \
+    jq -r --arg threshold "$(date -d '5 minutes ago' -Iseconds)" \
+    '.[] | select(.createdAt < $threshold and (.reviews | length == 0)) | "PR #\(.number): \(.title)"' | \
+    while read -r pr_info; do
+        if [ -n "$pr_info" ]; then
+            echo "🚨 FOUND ORPHANED PR: $pr_info"
+            PR_NUM=$(echo "$pr_info" | grep -o '#[0-9]*' | cut -d'#' -f2)
+            
+            echo "⚡ AUTOMATICALLY FIXING: Invoking code-reviewer for PR #$PR_NUM"
+            echo "Context: Orphaned PR recovery - mandatory Phase 9 enforcement"
+            
+            # FORCE code review for orphaned PR
+            export PR_NUMBER="$PR_NUM"
+            /agent:code-reviewer
+            
+            echo "✅ Orphaned PR #$PR_NUM review initiated"
+        fi
+    done
+}
+
+# ALWAYS run this at workflow start
+check_and_fix_orphaned_prs
+```
+
+#### **State Consistency Validation (AUTOMATIC)**
+
+**Validate and auto-fix state inconsistencies**:
+```bash
+validate_and_fix_state_consistency() {
+    local STATE_FILE="$1"
+    
+    if [ ! -f "$STATE_FILE" ]; then
+        echo "⚠️  No state file found - this is acceptable for new workflows"
+        return 0
+    fi
+    
+    echo "🔍 Validating workflow state consistency..."
+    
+    # Check if PR was created but Phase 8 not marked complete
+    if grep -q "PR #[0-9]" "$STATE_FILE" && ! grep -q "\[x\] Phase 8:" "$STATE_FILE"; then
+        echo "⚠️  Auto-fixing: PR created but Phase 8 not marked complete"
+        sed -i "s/\[ \] Phase 8:/\[x\] Phase 8:/" "$STATE_FILE"
+        echo "✅ Phase 8 state corrected"
+    fi
+    
+    # Check if Phase 8 complete but no Phase 9
+    if grep -q "\[x\] Phase 8:" "$STATE_FILE" && ! grep -q "\[x\] Phase 9:" "$STATE_FILE"; then
+        PR_NUM=$(grep -o "PR #[0-9]*" "$STATE_FILE" | head -1 | cut -d'#' -f2)
+        
+        if [ -n "$PR_NUM" ]; then
+            echo "🔍 Checking if PR #$PR_NUM has review..."
+            
+            if ! gh pr view "$PR_NUM" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
+                echo "🚨 CRITICAL: Phase 8 complete but NO CODE REVIEW found!"
+                echo "⚡ ENFORCING Phase 9: Invoking code-reviewer immediately"
+                
+                export PR_NUMBER="$PR_NUM"
+                MUST_INVOKE_CODE_REVIEWER=true
+                
+                echo "🚨 AUTOMATIC ENFORCEMENT: Starting Phase 9 for PR #$PR_NUM"
+                /agent:code-reviewer
+            else
+                echo "✅ Review exists - updating state to reflect completion"
+                sed -i "s/\[ \] Phase 9:/\[x\] Phase 9:/" "$STATE_FILE"
+            fi
+        fi
+    fi
+}
+
+# ALWAYS run this at workflow start
+validate_and_fix_state_consistency ".github/workflow-states/$TASK_ID/state.md"
+```
+
+**EXECUTION COMMITMENT: Phase 9 CANNOT BE SKIPPED**
+
+The WorkflowManager MUST NEVER complete without executing Phase 9 and 10. These enforcement mechanisms ensure:
+
+1. ✅ **100% Phase 9 Execution**: Every PR gets a code review automatically
+2. ✅ **Automatic Recovery**: Orphaned PRs detected and fixed within 5 minutes  
+3. ✅ **State Validation**: Inconsistent states auto-corrected
+4. ✅ **No Manual Intervention**: Phases 9 and 10 execute automatically
+5. ✅ **Retry Logic**: Failed attempts are automatically retried
+6. ✅ **Blocking Errors**: Workflow stops if Phase 9 cannot complete
 
 ## Enhanced Progress Tracking (Shared Modules)
 
@@ -805,16 +1048,200 @@ Maintain these standards throughout:
 - **code-reviewer**: Invoke for PR reviews
 - **Future agents**: Be prepared to coordinate with specialized agents
 
+## EXECUTION COMPLETION REQUIREMENTS (CRITICAL)
+
+**WorkflowManager MUST NEVER terminate until ALL phases are complete**
+
+### **NEVER terminate WorkflowManager until:**
+
+1. ✅ **All 10 phases are complete** OR
+2. ❌ **An unrecoverable error occurs** OR  
+3. 🛑 **User explicitly cancels**
+
+### **Execution Commitment (ABSOLUTE REQUIREMENTS)**
+
+When invoked with a prompt file, you MUST:
+
+1. **Parse the prompt completely** ✅
+   ```bash
+   # MANDATORY: Read and validate prompt structure
+   if [ ! -f "$PROMPT_FILE" ]; then
+       echo "🚨 CRITICAL ERROR: Prompt file not found!"
+       exit 1
+   fi
+   
+   echo "📖 Parsing prompt: $PROMPT_FILE"
+   # Validate required sections exist
+   validate_prompt_structure "$PROMPT_FILE"
+   ```
+
+2. **Generate full task list (including review tasks)** ✅
+   ```bash
+   # MANDATORY: Create TodoWrite with ALL 10+ tasks
+   echo "📋 Generating comprehensive task list..."
+   
+   # MUST include these MANDATORY tasks:
+   # - Tasks 1-8: Standard workflow phases
+   # - Task 9: MANDATORY code-reviewer invocation
+   # - Task 10: MANDATORY code-review-response
+   # - Additional tasks as needed per prompt
+   
+   create_comprehensive_task_list
+   ```
+
+3. **BEGIN EXECUTION IMMEDIATELY** ⚡
+   ```bash
+   # CRITICAL: NO waiting for user confirmation
+   echo "⚡ STARTING IMMEDIATE EXECUTION - No user confirmation needed"
+   echo "🚀 Beginning Phase 1: Initial Setup"
+   
+   # DO NOT STOP after planning
+   EXECUTION_MODE="IMMEDIATE"
+   PREVENT_EARLY_TERMINATION=true
+   ```
+
+4. **Continue through ALL phases** 🔄
+   ```bash
+   # MANDATORY: Execute phases 1-10 sequentially
+   for phase in {1..10}; do
+       echo "🚀 Executing Phase $phase..."
+       
+       if ! execute_phase "$phase"; then
+           echo "🚨 CRITICAL: Phase $phase failed!"
+           
+           # Only stop for unrecoverable errors
+           if is_unrecoverable_error "$?"; then
+               echo "💥 UNRECOVERABLE ERROR: Stopping execution"
+               exit 1
+           else
+               echo "🔄 RECOVERABLE ERROR: Attempting retry..."
+               retry_phase "$phase"
+           fi
+       fi
+       
+       echo "✅ Phase $phase completed successfully"
+   done
+   ```
+
+5. **Only stop for unrecoverable errors** 🛑
+   ```bash
+   # Define what constitutes unrecoverable errors
+   is_unrecoverable_error() {
+       local exit_code="$1"
+       
+       case $exit_code in
+           130) echo "User interrupted (Ctrl+C)"; return 0 ;;
+           137) echo "Process killed"; return 0 ;;
+           139) echo "Segmentation fault"; return 0 ;;
+           *) echo "Recoverable error"; return 1 ;;
+       esac
+   }
+   ```
+
+### **ANTI-TERMINATION SAFEGUARDS**
+
+**🚨 NEVER do these actions:**
+
+- ❌ **Stop after planning** - Planning is Phase 4, you MUST continue to implementation
+- ❌ **Wait for user confirmation between phases** - All phases execute automatically
+- ❌ **Skip Phase 9 or 10** - These are MANDATORY with multiple enforcement mechanisms
+- ❌ **Mark workflow complete without review** - Phase 9 validation MUST pass
+- ❌ **Terminate due to recoverable errors** - Retry logic MUST be applied
+
+**✅ ALWAYS do these actions:**
+
+- ✅ **Continue execution after planning** - Phases 5-10 are implementation and delivery
+- ✅ **Execute Phase 9 automatically** - 30-second timer after PR creation
+- ✅ **Execute Phase 10 automatically** - Immediate after review posted
+- ✅ **Retry failed operations** - Up to 3 attempts for recoverable failures
+- ✅ **Update state after each phase** - Checkpoint system tracks progress
+
+### **Progress Verification Checkpoints**
+
+After each phase, verify:
+
+1. **Expected artifacts exist** ✅
+   ```bash
+   verify_phase_artifacts() {
+       local phase="$1"
+       
+       case $phase in
+           2) verify_issue_created "$ISSUE_NUMBER" ;;
+           3) verify_branch_exists "$BRANCH_NAME" ;;
+           8) verify_pr_created "$PR_NUMBER" ;;
+           9) verify_review_posted "$PR_NUMBER" ;;
+           10) verify_review_response_posted "$PR_NUMBER" ;;
+       esac
+   }
+   ```
+
+2. **State file is updated** 💾
+   ```bash
+   verify_state_updated() {
+       local phase="$1"
+       local state_file=".github/workflow-states/$TASK_ID/state.md"
+       
+       if ! grep -q "\[x\] Phase $phase:" "$state_file"; then
+           echo "🚨 ERROR: Phase $phase not marked complete in state!"
+           return 1
+       fi
+   }
+   ```
+
+3. **Next phase is queued for execution** ➡️
+   ```bash
+   queue_next_phase() {
+       local current_phase="$1"
+       local next_phase=$((current_phase + 1))
+       
+       if [ $next_phase -le 10 ]; then
+           echo "⏭️  Queuing Phase $next_phase for execution..."
+           NEXT_PHASE_QUEUED=true
+       fi
+   }
+   ```
+
+4. **No manual intervention needed for next phase** 🤖
+   ```bash
+   check_automation_ready() {
+       local phase="$1"
+       
+       # Phases 9 and 10 are fully automated
+       if [ $phase -eq 9 ] || [ $phase -eq 10 ]; then
+           echo "🤖 Phase $phase: Fully automated - no manual intervention"
+           return 0
+       fi
+       
+       # Other phases may need minimal setup
+       echo "⚙️  Phase $phase: Automated execution ready"
+       return 0
+   }
+   ```
+
+### **Execution Flow Guarantee**
+
+**GUARANTEED EXECUTION PATTERN:**
+
+1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
+2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning  
+3. 🔧 **Phase 5-7**: Implementation, Testing, Documentation
+4. 📨 **Phase 8**: PR Creation → ⏱️ **30-second timer** → 🚨 **AUTOMATIC Phase 9**
+5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**  
+6. 💬 **Phase 10**: Review Response → 📝 **Final state update** → ✅ **COMPLETE**
+
+**This pattern CANNOT be interrupted except for unrecoverable errors or explicit user cancellation.**
+
 ## Example Execution Flow
 
 When invoked with a prompt file:
 
 1. "I'll execute the workflow described in `/prompts/FeatureName.md`"
 2. Read and parse the prompt file
-3. Create comprehensive task list
-4. Execute each phase systematically
-5. Track progress and handle any issues
-6. Deliver complete feature from issue to merged PR
+3. Create comprehensive task list including MANDATORY Phase 9 and 10
+4. **🚀 BEGIN IMMEDIATE EXECUTION (NO WAITING)**
+5. Execute each phase systematically with automatic transitions
+6. Track progress with anti-termination safeguards
+7. Deliver complete feature from issue to reviewed and merged PR
 
 ## Important Reminders
 
