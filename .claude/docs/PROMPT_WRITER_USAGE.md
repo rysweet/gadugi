@@ -27,7 +27,7 @@ I need to implement [feature name] that will [brief description].
 ```
 /agent:prompt-writer
 
-Context: I'm working on improving the graph query performance in Blarify
+Context: I'm working on improving the orchestration performance in Gadugi
 Requirements: Need to implement caching and query optimization
 Constraints: Must maintain backward compatibility with existing API
 Users: Developers analyzing large codebases (100k+ files)
@@ -219,7 +219,7 @@ Prompts are committed to git for:
 ```
 User: /agent:prompt-writer
 
-I need to add real-time collaboration features to Blarify so multiple developers can work on the same codebase analysis simultaneously.
+I need to add real-time collaboration features to Gadugi so multiple developers can work on the same workflow orchestration simultaneously.
 
 PromptWriter: I'll help you create a comprehensive prompt for real-time collaboration. Let me ask some questions to ensure we capture all requirements:
 

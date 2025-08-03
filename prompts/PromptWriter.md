@@ -2,7 +2,7 @@
 
 ## Overview
 
-We need to implement a specialized prompt-writing sub-agent for the Blarify project that can be invoked at the start of new working sessions to create high-quality, structured prompt files. This sub-agent will ensure consistent, comprehensive prompts that guide the coding agent through the complete development workflow from issue creation to PR review.
+We need to implement a specialized prompt-writing sub-agent for the Gadugi project that can be invoked at the start of new working sessions to create high-quality, structured prompt files. This sub-agent will ensure consistent, comprehensive prompts that guide the coding agent through the complete development workflow from issue creation to PR review.
 
 ## Motivation
 
@@ -57,7 +57,7 @@ The sub-agent should:
 
 Every prompt should include these sections:
 
-1. **Introduction**: Context about Blarify and the specific area of focus
+1. **Introduction**: Context about Gadugi and the specific area of focus
 2. **Problem Statement**: Clear description of what needs to be solved
 3. **Feature Requirements**: Detailed functional and technical requirements
 4. **Technical Analysis**: Current implementation review and proposed changes

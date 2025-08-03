@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document explains the proper agent hierarchy for executing development workflows in the Blarify project.
+This document explains the proper agent hierarchy for executing development workflows in the Gadugi project.
 
 ## Agent Hierarchy Diagram
 
