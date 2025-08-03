@@ -161,9 +161,8 @@ uv sync                          # Production only
 
 # Run commands
 uv run pytest tests/             # Run tests
-uv run black .                   # Format code
-uv run isort .                   # Sort imports
-uv run flake8 .                  # Lint code
+uv run ruff format .             # Format code
+uv run ruff check .              # Lint code
 
 # Manage dependencies
 uv add requests                  # Add dependency
@@ -183,8 +182,8 @@ UV provides significant performance improvements over pip:
 
 1. **Setup**: `uv sync --extra dev`
 2. **Test**: `uv run pytest tests/`
-3. **Format**: `uv run black . && uv run isort .`
-4. **Lint**: `uv run flake8 .`
+3. **Format**: `uv run ruff format .`
+4. **Lint**: `uv run ruff check .`
 5. **Add deps**: `uv add package`
 
 See [docs/uv-migration-guide.md](docs/uv-migration-guide.md) for detailed instructions.

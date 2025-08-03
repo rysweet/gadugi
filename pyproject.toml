@@ -25,8 +25,7 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
-    "isort>=5.12",
-    "flake8>=5.0",
+    "ruff>=0.4.4",
 ]
 test = [
     "pytest>=7.0",
@@ -75,11 +74,19 @@ exclude_lines = [
     "raise NotImplementedError",
 ]
 
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+extend-exclude = [
+    ".git",
+    ".venv",
+    ".claude",
+    "__pycache__",
+]
+lint.select = ["ALL"]
+lint.ignore = []
 
-[tool.isort]
-line_length = 88
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-ensure_newline_before_comments = true
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 88
+line-ending = "auto"

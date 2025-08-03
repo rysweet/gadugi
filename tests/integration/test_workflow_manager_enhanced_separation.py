@@ -32,7 +32,11 @@ sys.path.append(
 )
 
 from github_operations import GitHubOperations
+<<<<<<< HEAD:tests/integration/test_workflow_manager_enhanced_separation.py
 from interfaces import AgentConfig, ErrorContext, TaskData
+=======
+from interfaces import AgentConfig, TaskData, ErrorContext
+>>>>>>> 246d12a (Resolve merge conflicts and stage all changes after ruff migration):tests/integration/test_workflow_master_enhanced_separation.py
 from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
 from task_tracking import (
     TaskMetrics,
@@ -163,7 +167,7 @@ class TestWorkflowManagerIntegration:
             }
 
             # Test retry logic integration
-            @retry(max_attempts=3, delay=0.1)
+            @retry(max_attempts=3, initial_delay=0.1)
             def create_issue_with_retry():
                 return self.github_ops.create_issue(
                     {
@@ -172,7 +176,7 @@ class TestWorkflowManagerIntegration:
                         "labels": ["enhancement", "ai-generated"],
                     }
                 )
-            
+
             issue_result = create_issue_with_retry()
 
             assert issue_result["success"] == True
@@ -196,6 +200,7 @@ class TestWorkflowManagerIntegration:
         task_id = "test-pr-creation"
         workflow_state = TaskState(
             task_id=task_id,
+            prompt_file="test-pr.md",
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
             issue_number=123,
@@ -231,7 +236,7 @@ class TestWorkflowManagerIntegration:
                 mock_verify.return_value = {"exists": True}
 
                 # Test PR creation with retry logic
-                @retry(max_attempts=3, delay=0.1)
+                @retry(max_attempts=3, initial_delay=0.1)
                 def create_pr_with_retry():
                     return self.github_ops.create_pull_request(
                         {
@@ -242,7 +247,7 @@ class TestWorkflowManagerIntegration:
                             "labels": ["enhancement", "ai-generated"],
                         }
                     )
-                
+
                 pr_result = create_pr_with_retry()
 
                 assert pr_result["success"] == True
@@ -272,6 +277,7 @@ class TestWorkflowManagerIntegration:
 
         workflow_state = TaskState(
             task_id="test-task-tracking",
+            prompt_file="test-tracking.md",
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
         )
@@ -343,7 +349,9 @@ class TestWorkflowManagerIntegration:
 
         # Test productivity tracking
         self.task_metrics.record_task_completion(
-            "1", workflow_state.task_id, duration=300  # 5 minutes
+            "1",
+            workflow_state.task_id,
+            duration=300,  # 5 minutes
         )
 
     def test_comprehensive_error_handling_and_recovery(self):
@@ -352,6 +360,7 @@ class TestWorkflowManagerIntegration:
         task_id = "test-error-handling"
         workflow_state = TaskState(
             task_id=task_id,
+            prompt_file="test-error.md",
             phase=WorkflowPhase.IMPLEMENTATION,
             started_at=datetime.now(),
         )
@@ -408,24 +417,28 @@ class TestWorkflowManagerIntegration:
 
         task_id = "test-phase-tracking"
 
-        # Test all workflow phases (using numeric values)
+        # Test all workflow phases (using enum values)
         phases_to_test = [
-            0,  # INITIALIZATION
-            2,  # ISSUE_CREATION
-            3,  # BRANCH_MANAGEMENT
-            4,  # RESEARCH_PLANNING
-            5,  # IMPLEMENTATION
-            6,  # TESTING
-            7,  # DOCUMENTATION
-            8,  # PULL_REQUEST
-            9,  # REVIEW
+            WorkflowPhase.INITIALIZATION,
+            WorkflowPhase.ISSUE_CREATION,
+            WorkflowPhase.BRANCH_MANAGEMENT,
+            WorkflowPhase.RESEARCH_PLANNING,
+            WorkflowPhase.IMPLEMENTATION,
+            WorkflowPhase.TESTING,
+            WorkflowPhase.DOCUMENTATION,
+            WorkflowPhase.PULL_REQUEST,
+            WorkflowPhase.REVIEW,
         ]
 
         # Test phase progression
         for i, phase in enumerate(phases_to_test):
             # Start phase
             self.phase_tracker.start_phase(phase)
+<<<<<<< HEAD:tests/integration/test_workflow_manager_enhanced_separation.py
             self.task_metrics.record_phase_start(f"phase_{phase}")
+=======
+            self.task_metrics.record_phase_start(phase.name.lower())
+>>>>>>> 246d12a (Resolve merge conflicts and stage all changes after ruff migration):tests/integration/test_workflow_master_enhanced_separation.py
 
             # Simulate phase work (mock)
             import time
@@ -452,6 +465,7 @@ class TestWorkflowManagerIntegration:
         # Create workflow state
         workflow_state = TaskState(
             task_id=task_id,
+            prompt_file="test-consistency.md",
             phase=WorkflowPhase.PULL_REQUEST_CREATION,
             started_at=datetime.now(),
             pr_number=789,

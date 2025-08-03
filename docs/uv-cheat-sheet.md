@@ -42,9 +42,8 @@ uv run python -c "code"    # Run inline Python code
 
 # Common development commands
 uv run pytest tests/       # Run tests
-uv run black .             # Format code
-uv run isort .             # Sort imports
-uv run flake8 .            # Run linting
+uv run ruff format .       # Format code
+uv run ruff check .        # Run linting
 ```
 
 ## Development Workflow
@@ -65,8 +64,8 @@ uv run pytest -x                  # Stop on first failure
 uv run pytest -v                  # Verbose output
 
 # Code quality
-uv run black . && uv run isort .  # Format and sort
-uv run flake8 .                   # Check style
+uv run ruff format .              # Format code
+uv run ruff check .               # Check style
 ```
 
 ### Adding New Features
@@ -269,9 +268,9 @@ uv run pytest tests/ --cov=. --cov-report=xml
 | Install dependencies | `uv sync --extra dev` |
 | Run tests | `uv run pytest tests/` |
 | Add dependency | `uv add package` |
-| Format code | `uv run black .` |
-| Sort imports | `uv run isort .` |
-| Run linting | `uv run flake8 .` |
+| Format code | `uv run ruff format .` |
+| Sort imports | *(handled by ruff)* |
+| Run linting | `uv run ruff check .` |
 | Update dependencies | `uv lock --upgrade` |
 | Clear cache | `uv cache clean` |
 | Reset environment | `rm -rf .venv && uv sync --extra dev` |

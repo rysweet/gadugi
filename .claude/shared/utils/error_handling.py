@@ -277,6 +277,39 @@ class CircuitBreaker:
         self.failure_count = 0
         self.last_failure_time = None
         self.is_open = False
+        
+    def call(self, func: Callable, *args, **kwargs) -> Any:
+        """Call a function with circuit breaker protection."""
+        # Check if circuit should be reset
+        if self.is_open and self.last_failure_time:
+            if time.time() - self.last_failure_time > self.recovery_timeout:
+                logger.info(f"Circuit breaker reset for function call")
+                self.reset()
+                
+        # If circuit is open, fail fast
+        if self.is_open:
+            raise NonRecoverableError(
+                f"Circuit breaker open for function call",
+                {'failure_count': self.failure_count}
+            )
+            
+        try:
+            result = func(*args, **kwargs)
+            # Reset failure count on success
+            if self.failure_count > 0:
+                logger.info(f"Circuit breaker reset after successful call")
+                self.failure_count = 0
+                self.last_failure_time = None
+            return result
+        except Exception as e:
+            self.failure_count += 1
+            self.last_failure_time = time.time()
+            
+            if self.failure_count >= self.failure_threshold:
+                self.is_open = True
+                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+                
+            raise
 
 
 def handle_with_fallback(

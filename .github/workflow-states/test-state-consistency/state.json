@@ -1,0 +1,14 @@
+{
+  "task_id": "test-state-consistency",
+  "prompt_file": "test-consistency.md",
+  "status": "pending",
+  "branch": null,
+  "issue_number": null,
+  "pr_number": 789,
+  "current_phase": 8,
+  "current_phase_name": "Pull Request",
+  "created_at": "2025-08-02T23:06:16.967219+00:00Z",
+  "updated_at": "2025-08-02T23:06:16.967220+00:00Z",
+  "context": {},
+  "error_info": {}
+}

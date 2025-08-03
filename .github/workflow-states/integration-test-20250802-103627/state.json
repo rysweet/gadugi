@@ -1,0 +1,20 @@
+{
+  "task_id": "integration-test-20250802-103627",
+  "prompt_file": "workflow.md",
+  "status": "in_progress",
+  "branch": null,
+  "issue_number": null,
+  "pr_number": null,
+  "current_phase": 0,
+  "current_phase_name": "Task Initialization & Resumption Check",
+  "created_at": "2025-08-02T17:36:27.110479+00:00Z",
+  "updated_at": "2025-08-02T17:36:27.110480+00:00Z",
+  "context": {
+    "task_id": "integration-test-20250802-103627",
+    "phase": "executing_integration-test-20250802-103627-task-1",
+    "started_at": "2025-08-02T10:36:27.109377",
+    "tasks": [],
+    "github_operations": []
+  },
+  "error_info": {}
+}

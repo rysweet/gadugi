@@ -59,13 +59,54 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
     
+    def __init__(self, id: str, content: str = None, status = TaskStatus.PENDING,
+                 priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
+        """Initialize task with compatibility for title parameter."""
+        self.id = id
+        # Support both content and title parameters for API compatibility
+        if content is not None:
+            self.content = content
+        elif title is not None:
+            self.content = title
+        else:
+            raise ValueError("Either 'content' or 'title' must be provided")
+        
+        # Ensure status and priority are enums
+        if isinstance(status, str):
+            self.status = TaskStatus(status)
+        else:
+            self.status = status
+            
+        if isinstance(priority, str):
+            self.priority = TaskPriority(priority)
+        else:
+            self.priority = priority
+            
+        self.created_at = datetime.now()
+        self.started_at = None
+        self.completed_at = None
+        self.estimated_duration = kwargs.get('estimated_duration')
+        self.dependencies = kwargs.get('dependencies', [])
+        self.tags = kwargs.get('tags', [])
+        self.metadata = kwargs.get('metadata', {})
+    
+    @property
+    def title(self) -> str:
+        """Get title (alias for content for API compatibility)."""
+        return self.content
+    
+    @title.setter
+    def title(self, value: str) -> None:
+        """Set title (alias for content for API compatibility)."""
+        self.content = value
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert task to dictionary format."""
         return {
             "id": self.id,
             "content": self.content,
-            "status": self.status.value,
-            "priority": self.priority.value
+            "status": self.status.value if hasattr(self.status, 'value') else self.status,
+            "priority": self.priority.value if hasattr(self.priority, 'value') else self.priority
         }
     
     @classmethod
@@ -335,6 +376,21 @@ class TodoWriteIntegration:
             "current_task_count": self.current_task_list.count() if self.current_task_list else 0,
             "call_history": self.call_history[-10:]  # Last 10 calls
         }
+    
+    def validate_task_list(self, task_list: TaskList) -> bool:
+        """Validate a task list before submission."""
+        try:
+            if task_list.count() == 0:
+                return False
+            
+            # Validate all tasks
+            for task in task_list.tasks.values():
+                task.validate()
+            
+            return True
+        except Exception as e:
+            logger.error(f"Task list validation failed: {e}")
+            return False
 
 
 class WorkflowPhaseTracker:
@@ -521,6 +577,19 @@ class TaskMetrics:
             "blocked_tasks": stats["blocked"],
             "task_completion_count": len(self.task_completion_times)
         }
+    
+    def start_workflow_phase(self, phase_name: str, description: str = None) -> None:
+        """Start tracking a workflow phase."""
+        self.current_phase = phase_name
+        self.phase_start_time = datetime.now()
+        log_msg = f"Started workflow phase: {phase_name}"
+        if description:
+            log_msg += f" - {description}"
+        logger.debug(log_msg)
+    
+    def record_phase_start(self, phase_name: str) -> None:
+        """Record the start of a workflow phase."""
+        self.start_workflow_phase(phase_name)
 
 
 class TaskTracker:
@@ -558,6 +627,24 @@ class TaskTracker:
         logger.info(f"Created task: {task.content}")
         return task
     
+    def add_task(self, task: Task) -> None:
+        """Add an existing task to the tracker."""
+        self.task_list.add_task(task)
+        
+        # Submit to TodoWrite
+        result = self.todowrite.add_task(task)
+        
+        if not result.get("success"):
+            # Remove from local list if TodoWrite failed
+            self.task_list.remove_task(task.id)
+            raise TaskError(f"Failed to add task to TodoWrite: {result}")
+        
+        logger.info(f"Added task: {task.content}")
+    
+    def get_task(self, task_id: str) -> Optional[Task]:
+        """Get a task by ID."""
+        return self.task_list.get_task(task_id)
+    
     def update_task_status(self, task_id: str, new_status: TaskStatus) -> None:
         """Update task status with metrics tracking."""
         task = self.task_list.get_task(task_id)
@@ -584,21 +671,22 @@ class TaskTracker:
             raise TaskError(f"Failed to update task status in TodoWrite: {result}")
     
     def start_workflow_phase(self, phase_name: str, description: str, 
-                           phase_tasks: List[Dict[str, Any]]) -> None:
+                           phase_tasks: Optional[List[Dict[str, Any]]] = None) -> None:
         """Start a new workflow phase with associated tasks."""
         # Start the phase
         self.phase_tracker.start_phase(phase_name, description)
         
         try:
-            # Create task list for this phase
-            phase_task_list = self.phase_tracker.create_phase_task_list(phase_name, phase_tasks)
+            # Create task list for this phase (if tasks provided)
+            if phase_tasks:
+                phase_task_list = self.phase_tracker.create_phase_task_list(phase_name, phase_tasks)
             
-            # Add tasks to main task list
-            for task in phase_task_list.tasks.values():
-                self.task_list.add_task(task)
-            
-            # Submit to TodoWrite
-            result = self.todowrite.submit_task_list(self.task_list)
+                # Add tasks to main task list
+                for task in phase_task_list.tasks.values():
+                    self.task_list.add_task(task)
+                
+                # Submit to TodoWrite
+                result = self.todowrite.submit_task_list(self.task_list)
             
             if not result.get("success"):
                 raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")

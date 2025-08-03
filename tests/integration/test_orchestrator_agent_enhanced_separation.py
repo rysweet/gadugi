@@ -32,7 +32,7 @@ sys.path.append(
 )
 
 from github_operations import GitHubOperations
-from interfaces import AgentConfig
+from interfaces import AgentConfig, TaskData, ErrorContext
 from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
 from task_tracking import (
     TaskMetrics,
@@ -213,11 +213,11 @@ class TestOrchestratorAgentIntegration:
         pr_numbers = [t["pr_number"] for t in successful_tasks]
 
         with patch.object(
-            self.github_manager, "batch_merge_pull_requests"
+            self.github_operations, "batch_merge_pull_requests"
         ) as mock_batch:
             mock_batch.return_value = {"merged": pr_numbers, "failed": []}
 
-            result = self.github_manager.batch_merge_pull_requests(pr_numbers)
+            result = self.github_operations.batch_merge_pull_requests(pr_numbers)
 
             assert result["merged"] == pr_numbers
             assert len(result["failed"]) == 0
@@ -234,14 +234,12 @@ class TestOrchestratorAgentIntegration:
         ]
 
         # Test performance analysis
-        self.productivity_analyzer.start_parallel_execution_tracking(
-            len(execution_results)
-        )
+        self.task_metrics.start_parallel_execution_tracking(len(execution_results))
 
         total_parallel_time = max(r["duration"] for r in execution_results)
         estimated_sequential_time = sum(r["duration"] for r in execution_results)
 
-        performance_metrics = self.productivity_analyzer.calculate_speedup(
+        performance_metrics = self.task_metrics.calculate_speedup(
             execution_results, baseline_sequential_time=estimated_sequential_time
         )
 
@@ -297,12 +295,12 @@ class TestOrchestratorAgentIntegration:
 
         # Mock resource exhaustion scenario
         with patch.object(
-            self.productivity_analyzer, "detect_resource_exhaustion"
+            self.task_metrics, "detect_resource_exhaustion"
         ) as mock_detect:
             mock_detect.return_value = True
 
             # Test graceful degradation trigger
-            if self.productivity_analyzer.detect_resource_exhaustion():
+            if self.task_metrics.detect_resource_exhaustion():
                 # Should trigger reduction in parallelism
                 reduced_parallelism = True
             else:
@@ -319,7 +317,7 @@ class TestOrchestratorAgentIntegration:
 
         # Phase 1: Task Analysis
         prompt_files = ["feature-a.md", "feature-b.md"]
-        self.productivity_analyzer.record_phase_start("task_analysis")
+        self.task_metrics.record_phase_start("task_analysis")
 
         # Phase 2: Environment Setup
         orchestration_state = TaskState(
@@ -359,11 +357,11 @@ class TestOrchestratorAgentIntegration:
 
         # Mock GitHub integration
         with patch.object(
-            self.github_manager, "batch_merge_pull_requests"
+            self.github_operations, "batch_merge_pull_requests"
         ) as mock_batch:
             mock_batch.return_value = {"merged": pr_numbers, "failed": []}
 
-            batch_result = self.github_manager.batch_merge_pull_requests(pr_numbers)
+            batch_result = self.github_operations.batch_merge_pull_requests(pr_numbers)
             assert len(batch_result["merged"]) == 2
 
         # Update final state
@@ -375,8 +373,9 @@ class TestOrchestratorAgentIntegration:
         assert final_state.phase == WorkflowPhase.COMPLETED
 
         # Verify performance improvements
-        performance_metrics = self.productivity_analyzer.calculate_speedup(
-            execution_results, baseline_sequential_time=600  # 10 minutes sequential
+        performance_metrics = self.task_metrics.calculate_speedup(
+            execution_results,
+            baseline_sequential_time=600,  # 10 minutes sequential
         )
 
         # Should achieve meaningful speedup
@@ -407,9 +406,9 @@ class TestOrchestratorAgentPerformance:
         speedup = sequential_time / parallel_time
 
         # Validate speedup is in expected range
-        assert (
-            3.0 <= speedup <= 5.5
-        ), f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
+        assert 3.0 <= speedup <= 5.5, (
+            f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
+        )
 
         # Test with different parallelization scenarios
         test_scenarios = [
@@ -424,9 +423,9 @@ class TestOrchestratorAgentPerformance:
             par_time = max(durations)
             actual_speedup = seq_time / par_time
 
-            assert (
-                actual_speedup >= expected_min
-            ), f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
+            assert actual_speedup >= expected_min, (
+                f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
+            )
 
     def test_shared_module_performance_overhead(self):
         """Test that shared modules don't add significant performance overhead"""
@@ -452,6 +451,7 @@ class TestOrchestratorAgentPerformance:
         for i in range(10):
             state = TaskState(
                 task_id=f"perf-test-{i}",
+                prompt_file="perf-test.md",
                 phase=WorkflowPhase.IMPLEMENTATION,
                 started_at=datetime.now(),
             )
@@ -461,9 +461,9 @@ class TestOrchestratorAgentPerformance:
         state_ops_time = time.time() - start_time
 
         # Performance should be reasonable (< 1 second for 10 operations each)
-        assert (
-            github_ops_time < 1.0
-        ), f"GitHub operations too slow: {github_ops_time:.3f}s"
+        assert github_ops_time < 1.0, (
+            f"GitHub operations too slow: {github_ops_time:.3f}s"
+        )
         assert state_ops_time < 1.0, f"State operations too slow: {state_ops_time:.3f}s"
 
 

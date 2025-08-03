@@ -110,11 +110,10 @@ uv sync --extra dev  # Only needed if dependencies changed
 uv run pytest tests/
 
 # Format code
-uv run black .
-uv run isort .
+uv run ruff format .
 
 # Run linting
-uv run flake8 .
+uv run ruff check .
 
 # Add a new dependency
 uv add requests

@@ -119,9 +119,11 @@ class TestEnhancedSeparationBasic:
             status="in_progress",
             context=state_data,
         )
-        
+
         # Create checkpoint
-        checkpoint_id = checkpoint_manager.create_checkpoint(task_state, "Test checkpoint")
+        checkpoint_id = checkpoint_manager.create_checkpoint(
+            task_state, "Test checkpoint"
+        )
         assert checkpoint_id is not None
 
         # Verify checkpoint was created
@@ -137,15 +139,19 @@ class TestEnhancedSeparationBasic:
         # Register a recovery strategy for ValueError
         def recover_from_value_error(error, context):
             return f"Recovered from: {error}"
-        
-        self.error_handler.register_recovery_strategy(ValueError, recover_from_value_error)
-        
+
+        self.error_handler.register_recovery_strategy(
+            ValueError, recover_from_value_error
+        )
+
         # Test error handling with context
         try:
             raise ValueError("Test error for error handler")
         except Exception as e:
             # This should not raise an exception now that we have a recovery strategy
-            result = self.error_handler.handle_error(e, context={"test": "error_handling"})
+            result = self.error_handler.handle_error(
+                e, context={"test": "error_handling"}
+            )
             assert "Recovered from:" in result
 
         # Test error handler functionality
@@ -163,7 +169,7 @@ class TestEnhancedSeparationBasic:
         @circuit_breaker
         def successful_function():
             return "success"
-        
+
         result = successful_function()
         assert result == "success"
 
@@ -171,7 +177,7 @@ class TestEnhancedSeparationBasic:
         @circuit_breaker
         def failing_function():
             raise Exception("Test failure")
-        
+
         failure_count = 0
         for i in range(3):
             try:
@@ -470,9 +476,9 @@ class TestEnhancedSeparationCodeReduction:
         print(f"Reduction percentage: {reduction_percentage:.1f}%")
 
         # Should achieve significant reduction
-        assert (
-            reduction_percentage > 15.0
-        ), f"Expected >15% reduction, got {reduction_percentage:.1f}%"
+        assert reduction_percentage > 15.0, (
+            f"Expected >15% reduction, got {reduction_percentage:.1f}%"
+        )
         assert lines_saved > 200, f"Expected >200 lines saved, got {lines_saved}"
 
         print(

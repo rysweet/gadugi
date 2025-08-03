@@ -487,7 +487,7 @@ def run_comprehensive_tests():
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Test Summary:")
     print(f"  Total tests: {result.testsRun}")
     print(f"  Successes: {result.testsRun - len(result.failures) - len(result.errors)}")

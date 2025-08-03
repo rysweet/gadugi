@@ -1,0 +1,14 @@
+{
+  "task_id": "perf-test-0",
+  "prompt_file": "perf-test.md",
+  "status": "pending",
+  "branch": null,
+  "issue_number": null,
+  "pr_number": null,
+  "current_phase": 5,
+  "current_phase_name": "Implementation",
+  "created_at": "2025-08-02T23:06:16.775792+00:00Z",
+  "updated_at": "2025-08-02T23:06:16.775793+00:00Z",
+  "context": {},
+  "error_info": {}
+}

@@ -408,6 +408,7 @@ class TaskData:
     assignee: Optional[str] = None
     labels: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    dependencies: List[str] = field(default_factory=list)
     
     def to_todowrite_format(self) -> Dict[str, Any]:
         """Convert to TodoWrite format."""
