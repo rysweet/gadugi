@@ -379,7 +379,7 @@ The OrchestratorAgent is designed to be extensible. Common extension points:
 
 ## License and Attribution
 
-This OrchestratorAgent implementation is part of the Blarify project and follows the same licensing terms. When using this system, please maintain proper attribution:
+This OrchestratorAgent implementation is part of the Gadugi project and follows the same licensing terms. When using this system, please maintain proper attribution:
 
 ```
 🤖 Generated with [Claude Code](https://claude.ai/code)

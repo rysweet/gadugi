@@ -2,7 +2,7 @@
 
 ## Overview
 
-The OrchestratorAgent is a sophisticated coordination system for the Blarify project that enables parallel execution of multiple WorkflowManagers. This agent addresses the current sequential execution limitation by intelligently analyzing task dependencies, managing git worktrees, and coordinating multiple Claude Code CLI instances running in parallel.
+The OrchestratorAgent is a sophisticated coordination system for the Gadugi project that enables parallel execution of multiple WorkflowManagers. This agent addresses the current sequential execution limitation by intelligently analyzing task dependencies, managing git worktrees, and coordinating multiple Claude Code CLI instances running in parallel.
 
 ## Problem Statement
 

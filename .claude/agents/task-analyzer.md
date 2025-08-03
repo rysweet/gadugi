@@ -406,7 +406,7 @@ Return comprehensive analysis with Task Decomposition Analyzer integration:
         "confidence_level": "HIGH"
       },
       "dependencies": {
-        "file_dependencies": ["blarify/graph/node/definition_node.py"],
+        "file_dependencies": ["gadugi/agents/enhanced_workflow_master.py"],
         "semantic_dependencies": [],
         "resource_dependencies": ["python_test_environment"],
         "api_dependencies": [],

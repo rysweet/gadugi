@@ -119,16 +119,16 @@ class TestTaskAnalyzer(unittest.TestCase):
         """Test extraction of target files from prompt content"""
         content = """
         Modify the following files:
-        - `blarify/graph/node/definition_node.py`
-        - `tests/test_definition_node.py`
-        - Update blarify/utils/helper.py
+        - `gadugi/agents/workflow_manager.py`
+        - `tests/test_workflow_manager.py`
+        - Update gadugi/utils/helper.py
         """
         
         target_files = self.analyzer._extract_target_files(content)
         expected_files = [
-            'blarify/graph/node/definition_node.py',
-            'tests/test_definition_node.py',
-            'blarify/utils/helper.py'
+            'gadugi/agents/workflow_manager.py',
+            'tests/test_workflow_manager.py',
+            'gadugi/utils/helper.py'
         ]
         
         for expected_file in expected_files:
@@ -137,7 +137,7 @@ class TestTaskAnalyzer(unittest.TestCase):
     def test_extract_test_files(self):
         """Test extraction and inference of test files"""
         content = "Write tests in test_definition_node.py"
-        target_files = ['blarify/graph/node/definition_node.py']
+        target_files = ['gadugi/agents/workflow_manager.py']
         
         test_files = self.analyzer._extract_test_files(content, target_files)
         
@@ -184,24 +184,24 @@ class TestTaskAnalyzer(unittest.TestCase):
         # Create mock import nodes with proper types
         import ast
         import_node = MagicMock(spec=ast.Import)
-        import_node.names = [MagicMock(name='blarify.graph.node')]
+        import_node.names = [MagicMock(name='gadugi.agents.workflow_manager')]
         
         from_import_node = MagicMock(spec=ast.ImportFrom)
-        from_import_node.module = 'blarify.utils.helper'
+        from_import_node.module = 'gadugi.utils.helper'
         
         # Mock ast.walk to return our mock nodes
         mock_walk.return_value = [import_node, from_import_node]
         
         # Mock file content
-        mock_file.return_value.read.return_value = "import blarify.graph.node"
+        mock_file.return_value.read.return_value = "import gadugi.agents.workflow_manager"
         
         test_file = self.project_root / "test.py"
         test_file.touch()
         
         dependencies = self.analyzer._analyze_python_imports(test_file)
         
-        self.assertIn('blarify.graph.node', dependencies)
-        self.assertIn('blarify.utils.helper', dependencies)
+        self.assertIn('gadugi.agents.workflow_manager', dependencies)
+        self.assertIn('gadugi.utils.helper', dependencies)
     
     def test_analyze_prompt_file_complete(self):
         """Test complete prompt file analysis"""
@@ -211,7 +211,7 @@ class TestTaskAnalyzer(unittest.TestCase):
 Improve test coverage for the definition_node.py module from 32% to 80%.
 
 ## Implementation
-- Write unit tests for `blarify/graph/node/types/definition_node.py`
+- Write unit tests for `gadugi/agents/workflow_manager.py`
 - Create `tests/test_definition_node.py`
 - Mock external dependencies appropriately
 
@@ -227,7 +227,7 @@ Comprehensive test suite with edge cases.
         self.assertEqual(task_info.id, "test_definition_node")
         self.assertEqual(task_info.name, "Test Coverage for Definition Node")
         self.assertEqual(task_info.task_type, TaskType.TEST_COVERAGE)
-        self.assertIn('blarify/graph/node/types/definition_node.py', task_info.target_files)
+        self.assertIn('gadugi/agents/workflow_manager.py', task_info.target_files)
         self.assertIn('tests/test_definition_node.py', task_info.test_files)
     
     def test_detect_conflicts(self):
@@ -433,8 +433,8 @@ class TestTaskAnalyzerIntegration(unittest.TestCase):
 Improve test coverage for the definition_node.py module from 32.09% to 80%+ by writing comprehensive unit tests.
 
 ## Target Files
-- `blarify/graph/node/types/definition_node.py`
-- `tests/test_definition_node.py` (to be created)
+- `gadugi/agents/workflow_manager.py`
+- `tests/test_workflow_manager.py` (to be created)
 
 ## Implementation Steps
 1. Analyze existing definition_node.py implementation
@@ -455,8 +455,8 @@ Improve test coverage for the definition_node.py module from 32.09% to 80%+ by w
 There's a circular import issue between DefinitionNode and lsp_helper causing import failures.
 
 ## Target Files
-- `blarify/code_references/lsp_helper.py`
-- `blarify/graph/node/types/definition_node.py`
+- `gadugi/shared/github_operations.py`
+- `gadugi/agents/workflow_manager.py`
 
 ## Solution
 Refactor import structure to eliminate circular dependency.
@@ -472,10 +472,10 @@ Ensure all existing functionality continues to work.
 Add sophisticated query building capabilities with performance optimization, caching, and distributed processing.
 
 ## Target Files
-- `blarify/query/advanced_builder.py` (new)
-- `blarify/query/optimizer.py` (new)
-- `blarify/query/cache.py` (new)
-- `blarify/utils/performance.py` (modify)
+- `gadugi/orchestrator/advanced_scheduler.py` (new)
+- `gadugi/orchestrator/optimizer.py` (new)
+- `gadugi/orchestrator/cache.py` (new)
+- `gadugi/utils/performance.py` (modify)
 - Multiple test files
 
 ## Requirements

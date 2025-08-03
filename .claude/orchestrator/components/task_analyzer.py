@@ -479,10 +479,10 @@ class TaskAnalyzer:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
-                        if alias.name.startswith('blarify'):
+                        if alias.name.startswith('gadugi'):
                             dependencies.append(alias.name)
                 elif isinstance(node, ast.ImportFrom):
-                    if node.module and node.module.startswith('blarify'):
+                    if node.module and node.module.startswith('gadugi'):
                         dependencies.append(node.module)
         
         except (SyntaxError, FileNotFoundError):

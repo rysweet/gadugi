@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document explains the proper agent hierarchy for executing development workflows in the Gadugi multi-agent orchestration platform.
+This document explains the agent hierarchy for executing development workflows in the Gadugi multi-agent orchestration platform.
+
 
 ## Agent Hierarchy Diagram
 

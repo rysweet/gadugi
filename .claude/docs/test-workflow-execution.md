@@ -8,7 +8,7 @@ Given a prompt file `/prompts/AddLoggingFeature.md`, WorkflowManager would:
 
 ### 1. Parse the Prompt
 Extract:
-- Feature: Add structured logging to Blarify
+- Feature: Add structured logging to Gadugi
 - Requirements: Use Python logging module, JSON format
 - Success criteria: All modules use consistent logging
 
@@ -31,7 +31,7 @@ tasks = [
 
 #### Issue Creation
 ```bash
-gh issue create --title "feat: add structured logging to Blarify" \
+gh issue create --title "feat: add structured logging to Gadugi" \
   --body "Add JSON-formatted structured logging using Python logging module..."
 # Returns: Issue #22 created
 ```

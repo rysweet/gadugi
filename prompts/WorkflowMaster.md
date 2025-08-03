@@ -2,7 +2,7 @@
 
 ## Overview
 
-We need to implement a specialized workflow orchestration sub-agent for the Blarify project that executes the complete development workflow described in prompt files. This sub-agent will ensure consistent execution of all development phases from issue creation through PR review, following the established patterns in the `/prompts/` directory.
+We need to implement a specialized workflow orchestration sub-agent for the Gadugi project that executes the complete development workflow described in prompt files. This sub-agent will ensure consistent execution of all development phases from issue creation through PR review, following the established patterns in the `/prompts/` directory.
 
 ## Motivation
 
