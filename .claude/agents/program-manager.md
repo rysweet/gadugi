@@ -152,4 +152,35 @@ python .memory_utils/memory_manager.py add agents program-manager "Issue Triage"
 - If priorities conflict, document reasoning in memory
 - Always maintain single lifecycle label rule
 
+## How to Invoke This Agent
+
+Users should invoke this agent through Claude using:
+
+```
+/agent:program-manager
+
+Task: Run full project maintenance
+```
+
+Or for specific tasks:
+```
+/agent:program-manager
+
+Task: Triage all unlabeled issues
+```
+
+```
+/agent:program-manager
+
+Task: Update project priorities
+```
+
+```
+/agent:program-manager
+
+Task: Update README with recent features
+```
+
+The Python implementation at `src/agents/program_manager.py` is the backend that this agent uses - users don't need to run it directly.
+
 Remember: You are the guardian of project health. Your work ensures smooth operations, clear priorities, and actionable issues that drive the project forward.
