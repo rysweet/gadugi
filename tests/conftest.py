@@ -5,9 +5,8 @@ Pytest configuration and shared fixtures for Gadugi tests.
 import pytest
 import tempfile
 import shutil
-import os
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from typing import Dict, Any, Generator
 
 
@@ -24,24 +23,32 @@ def temp_dir() -> Generator[Path, None, None]:
 @pytest.fixture
 def mock_gh_response():
     """Mock GitHub CLI response."""
-    def _mock_response(success: bool = True, data: Dict[str, Any] = None, 
-                      raw_output: str = "", error: str = ""):
+
+    def _mock_response(
+        success: bool = True,
+        data: Dict[str, Any] = None,
+        raw_output: str = "",
+        error: str = "",
+    ):
         return {
-            'success': success,
-            'data': data,
-            'raw_output': raw_output,
-            'error': error
+            "success": success,
+            "data": data,
+            "raw_output": raw_output,
+            "error": error,
         }
+
     return _mock_response
 
 
 @pytest.fixture
 def mock_subprocess():
     """Mock subprocess for GitHub operations."""
-    with patch('subprocess.run') as mock_run:
+    with patch("subprocess.run") as mock_run:
         mock_run.return_value.returncode = 0
-        mock_run.return_value.stdout = '{"number": 1, "url": "https://github.com/test/repo/issues/1"}'
-        mock_run.return_value.stderr = ''
+        mock_run.return_value.stdout = (
+            '{"number": 1, "url": "https://github.com/test/repo/issues/1"}'
+        )
+        mock_run.return_value.stderr = ""
         yield mock_run
 
 
@@ -49,24 +56,21 @@ def mock_subprocess():
 def sample_task():
     """Sample task data for testing."""
     return {
-        'task_id': 'test-task-001',
-        'prompt_file': 'test-feature.md',
-        'branch': 'feature/test-feature-001',
-        'issue_number': 1,
-        'pr_number': None,
-        'status': 'pending',
-        'created_at': '2025-08-01T22:00:00Z',
-        'context': {
-            'user_request': 'Add test feature',
-            'priority': 'high'
-        }
+        "task_id": "test-task-001",
+        "prompt_file": "test-feature.md",
+        "branch": "feature/test-feature-001",
+        "issue_number": 1,
+        "pr_number": None,
+        "status": "pending",
+        "created_at": "2025-08-01T22:00:00Z",
+        "context": {"user_request": "Add test feature", "priority": "high"},
     }
 
 
 @pytest.fixture
 def mock_state_file(temp_dir):
     """Create a mock state file for testing."""
-    state_file = temp_dir / 'state.md'
+    state_file = temp_dir / "state.md"
     state_content = """# WorkflowManager State
 Task ID: test-task-001
 Last Updated: 2025-08-01T22:00:00Z
@@ -115,23 +119,13 @@ Last Updated: 2025-08-01T22:00:00Z
 def mock_config():
     """Sample configuration for testing."""
     return {
-        'github': {
-            'retry_config': {
-                'max_retries': 3,
-                'initial_delay': 1,
-                'backoff_factor': 2
-            }
+        "github": {
+            "retry_config": {"max_retries": 3, "initial_delay": 1, "backoff_factor": 2}
         },
-        'state_management': {
-            'state_dir': '.github/workflow-states',
-            'cleanup_after_days': 30
+        "state_management": {
+            "state_dir": ".github/workflow-states",
+            "cleanup_after_days": 30,
         },
-        'task_tracking': {
-            'todo_write_enabled': True,
-            'max_tasks_per_list': 20
-        },
-        'performance': {
-            'monitoring_enabled': True,
-            'metrics_retention_days': 7
-        }
+        "task_tracking": {"todo_write_enabled": True, "max_tasks_per_list": 20},
+        "performance": {"monitoring_enabled": True, "metrics_retention_days": 7},
     }
