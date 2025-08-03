@@ -41,6 +41,10 @@ from .claude.shared.interfaces import AgentConfig, WorkflowPhase
 from container_runtime.agent_integration import AgentContainerExecutor
 from container_runtime.execution_engine import ContainerExecutionEngine
 
+# Test agent imports
+from test_solver_agent import TestSolverAgent
+from test_writer_agent import TestWriterAgent
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -155,6 +159,16 @@ class EnhancedWorkflowMaster:
         self.current_workflow: Optional[WorkflowState] = None
         self.autonomous_mode = self.config.get('autonomous_mode', True)
         
+        # Test agents
+        self.test_solver = TestSolverAgent(AgentConfig(
+            agent_id="test_solver",
+            name="Test Solver Agent"
+        ))
+        self.test_writer = TestWriterAgent(AgentConfig(
+            agent_id="test_writer", 
+            name="Test Writer Agent"
+        ))
+        
         # Performance tracking
         self.start_time = time.time()
         self.execution_stats = {
@@ -162,10 +176,12 @@ class EnhancedWorkflowMaster:
             'completed_tasks': 0,
             'failed_tasks': 0,
             'autonomous_decisions': 0,
-            'container_executions': 0
+            'container_executions': 0,
+            'test_solver_invocations': 0,
+            'test_writer_invocations': 0
         }
         
-        logger.info("Enhanced WorkflowMaster initialized")
+        logger.info("Enhanced WorkflowMaster initialized with test agents")
     
     def generate_task_id(self) -> str:
         """Generate unique task ID with timestamp and entropy."""
@@ -1034,111 +1050,55 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
             return False
     
     def execute_testing_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
-        """Execute comprehensive testing in container environment."""
+        """Execute comprehensive testing with Test Solver and Test Writer agents."""
         try:
-            # Test execution with comprehensive coverage
-            testing_code = f"""
-import unittest
-import json
-import tempfile
-from pathlib import Path
-
-class EnhancedWorkflowMasterTests(unittest.TestCase):
-    def setUp(self):
-        self.test_data = {{
-            'task_id': 'test-{workflow.task_id}',
-            'test_suite': 'enhanced_workflowmaster'
-        }}
-    
-    def test_task_id_generation(self):
-        # Test unique task ID generation
-        task_ids = set()
-        for i in range(10):
-            # Simulate task ID generation
-            import time
-            import secrets
-            from datetime import datetime
-            timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-            entropy = secrets.token_hex(4)
-            task_id = f"task-{{timestamp}}-{{entropy}}"
-            task_ids.add(task_id)
-            time.sleep(0.001)  # Ensure timestamp variation
-        
-        self.assertEqual(len(task_ids), 10, "All task IDs should be unique")
-    
-    def test_autonomous_decision_logic(self):
-        # Test autonomous decision making
-        decisions = ['continue', 'retry', 'skip', 'abort', 'escalate']
-        self.assertIn('retry', decisions)
-        self.assertIn('continue', decisions)
-    
-    def test_state_management(self):
-        # Test state persistence
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-            test_state = {{'task_id': 'test', 'status': 'active'}}
-            json.dump(test_state, f)
-            temp_file = f.name
-        
-        # Verify state can be loaded
-        with open(temp_file, 'r') as f:
-            loaded_state = json.load(f)
-        
-        self.assertEqual(loaded_state['task_id'], 'test')
-        Path(temp_file).unlink()  # Cleanup
-    
-    def test_container_integration(self):
-        # Test container execution simulation
-        mock_result = {{
-            'success': True,
-            'exit_code': 0,
-            'stdout': 'Container execution successful',
-            'stderr': '',
-            'execution_time': 1.5
-        }}
-        
-        self.assertTrue(mock_result['success'])
-        self.assertEqual(mock_result['exit_code'], 0)
-
-# Run tests
-if __name__ == '__main__':
-    # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(EnhancedWorkflowMasterTests)
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
-    
-    # Print results
-    print(f"\\nTest Results:")
-    print(f"Tests run: {{result.testsRun}}")
-    print(f"Failures: {{len(result.failures)}}")
-    print(f"Errors: {{len(result.errors)}}")
-    print(f"Success: {{result.wasSuccessful()}}")
-    
-    # Save test results
-    test_results = {{
-        'tests_run': result.testsRun,
-        'failures': len(result.failures),
-        'errors': len(result.errors),
-        'success': result.wasSuccessful()
-    }}
-    
-    with open('/workspace/{workflow.task_id}/test_results.json', 'w') as f:
-        json.dump(test_results, f, indent=2)
-"""
+            logger.info(f"Executing testing task with integrated test agents")
             
-            result = self.container_executor.execute_python_code(
-                code=testing_code,
-                security_policy=task.container_policy,
-                timeout=task.timeout_seconds,
-                user_id=workflow.task_id
-            )
+            # Phase 1: Detect failing tests and use Test Solver
+            failing_tests = self.detect_failing_tests(workflow)
+            if failing_tests:
+                logger.info(f"Found {len(failing_tests)} failing tests, invoking Test Solver")
+                self.execution_stats['test_solver_invocations'] += 1
+                
+                for test_identifier in failing_tests:
+                    result = self.test_solver.solve_test_failure(test_identifier)
+                    self.log_execution_step(workflow, f"Test Solver: {result.resolution_applied}")
+                    
+                    if result.final_status.value == "pass":
+                        logger.info(f"✅ Test {test_identifier} resolved successfully")
+                    elif result.final_status.value == "skip":
+                        logger.info(f"⚠️ Test {test_identifier} skipped: {result.skip_justification}")
+                    else:
+                        logger.warning(f"❌ Test {test_identifier} still failing after resolution attempt")
+            
+            # Phase 2: Detect code without test coverage and use Test Writer
+            coverage_gaps = self.detect_coverage_gaps(workflow)
+            if coverage_gaps:
+                logger.info(f"Found {len(coverage_gaps)} coverage gaps, invoking Test Writer")
+                self.execution_stats['test_writer_invocations'] += 1
+                
+                for code_file in coverage_gaps:
+                    context = f"Creating tests for {code_file} as part of workflow {workflow.task_id}"
+                    result = self.test_writer.create_tests(code_file, context)
+                    self.log_execution_step(workflow, f"Test Writer: Created {len(result.tests_created)} tests for {code_file}")
+                    
+                    # Write created tests to appropriate location
+                    test_file_path = self.determine_test_file_path(code_file)
+                    self.write_test_suite(test_file_path, result)
+                    logger.info(f"✅ Created {len(result.tests_created)} tests in {test_file_path}")
+            
+            # Phase 3: Run full test suite to validate changes
+            final_test_result = self.run_test_suite(workflow)
             
             self.execution_stats['container_executions'] += 1
             
-            if result['success']:
-                logger.info("Testing task completed successfully")
+            if final_test_result['success']:
+                logger.info("Testing task completed successfully with integrated test agents")
+                # Log summary of test agent activities
+                self.log_execution_step(workflow, f"Test agents summary: {self.execution_stats['test_solver_invocations']} solver invocations, {self.execution_stats['test_writer_invocations']} writer invocations")
                 return True
             else:
-                logger.error(f"Testing failed: {result['stderr']}")
+                logger.error(f"Testing failed after agent interventions: {final_test_result.get('stderr', 'Unknown error')}")
                 return False
                 
         except Exception as e:
@@ -1392,6 +1352,299 @@ print(f"Review status saved: {{review_status}}")
         except Exception as e:
             logger.error(f"Code review execution failed: {e}")
             return False
+
+    # Test Agent Integration Helper Methods
+    
+    def detect_failing_tests(self, workflow: WorkflowState) -> List[str]:
+        """Detect failing tests in the current workflow context."""
+        try:
+            # Run test discovery and execution to find failing tests
+            test_result = self.container_executor.execute_command(
+                command=[
+                    "python", "-m", "pytest", "--collect-only", "-q", 
+                    "--tb=no", "tests/"
+                ],
+                security_policy="testing",
+                timeout=60,
+                user_id=workflow.task_id
+            )
+            
+            if not test_result['success']:
+                logger.warning("Could not discover tests")
+                return []
+            
+            # Run tests to find failures
+            test_execution = self.container_executor.execute_command(
+                command=[
+                    "python", "-m", "pytest", "--tb=short", "-v", 
+                    "--json-report", "--json-report-file=/tmp/test_results.json",
+                    "tests/"
+                ],
+                security_policy="testing", 
+                timeout=300,
+                user_id=workflow.task_id
+            )
+            
+            failing_tests = []
+            if test_execution['success']:
+                # Parse test results to find failures
+                try:
+                    # In real implementation, would parse JSON report
+                    # For now, extract from stdout/stderr
+                    output = test_execution.get('stdout', '') + test_execution.get('stderr', '')
+                    lines = output.split('\n')
+                    
+                    for line in lines:
+                        if 'FAILED' in line and '::' in line:
+                            # Extract test identifier
+                            parts = line.split()
+                            for part in parts:
+                                if '::' in part and 'test_' in part:
+                                    failing_tests.append(part)
+                                    break
+                except Exception as e:
+                    logger.warning(f"Error parsing test results: {e}")
+            
+            logger.info(f"Detected {len(failing_tests)} failing tests")
+            return failing_tests
+            
+        except Exception as e:
+            logger.error(f"Error detecting failing tests: {e}")
+            return []
+    
+    def detect_coverage_gaps(self, workflow: WorkflowState) -> List[str]:
+        """Detect code files that need test coverage."""
+        try:
+            # Run coverage analysis
+            coverage_result = self.container_executor.execute_command(
+                command=[
+                    "python", "-m", "coverage", "run", "--source=.", "-m", "pytest",
+                    "&&", "python", "-m", "coverage", "report", "--format=json"
+                ],
+                security_policy="testing",
+                timeout=300,
+                user_id=workflow.task_id
+            )
+            
+            coverage_gaps = []
+            
+            if coverage_result['success']:
+                try:
+                    # Parse coverage report (simplified)
+                    output = coverage_result.get('stdout', '')
+                    
+                    # Look for Python files with low or no coverage
+                    # In real implementation, would parse JSON coverage report
+                    for line in output.split('\n'):
+                        if '.py' in line and ('0%' in line or 'missing' in line.lower()):
+                            # Extract filename
+                            parts = line.split()
+                            for part in parts:
+                                if part.endswith('.py') and not part.startswith('test_'):
+                                    coverage_gaps.append(part)
+                                    break
+                except Exception as e:
+                    logger.warning(f"Error parsing coverage results: {e}")
+            
+            # Also check for newly created files in this workflow
+            new_files = self.detect_new_code_files(workflow)
+            coverage_gaps.extend(new_files)
+            
+            # Remove duplicates
+            coverage_gaps = list(set(coverage_gaps))
+            
+            logger.info(f"Detected {len(coverage_gaps)} files needing test coverage")
+            return coverage_gaps
+            
+        except Exception as e:
+            logger.error(f"Error detecting coverage gaps: {e}")
+            return []
+    
+    def detect_new_code_files(self, workflow: WorkflowState) -> List[str]:
+        """Detect new code files created in this workflow."""
+        try:
+            if not workflow.branch_name:
+                return []
+            
+            # Get files changed in current branch
+            git_result = self.container_executor.execute_command(
+                command=[
+                    "git", "diff", "--name-only", "main", workflow.branch_name
+                ],
+                security_policy="standard",
+                timeout=30,
+                user_id=workflow.task_id
+            )
+            
+            new_code_files = []
+            if git_result['success']:
+                files = git_result.get('stdout', '').strip().split('\n')
+                for file in files:
+                    if file.endswith('.py') and not file.startswith('test_') and 'test' not in file:
+                        new_code_files.append(file)
+            
+            return new_code_files
+            
+        except Exception as e:
+            logger.error(f"Error detecting new code files: {e}")
+            return []
+    
+    def determine_test_file_path(self, code_file: str) -> str:
+        """Determine appropriate test file path for a code file."""
+        # Convert code file path to test file path
+        # e.g., src/module.py -> tests/test_module.py
+        
+        if code_file.startswith('src/'):
+            # src/module.py -> tests/test_module.py
+            base_name = code_file[4:]  # Remove 'src/'
+        else:
+            base_name = code_file
+        
+        # Remove .py extension and add test prefix
+        name_without_ext = base_name[:-3] if base_name.endswith('.py') else base_name
+        test_file_name = f"test_{name_without_ext}.py"
+        
+        return f"tests/{test_file_name}"
+    
+    def write_test_suite(self, test_file_path: str, test_writer_result) -> bool:
+        """Write generated test suite to file."""
+        try:
+            from pathlib import Path
+            
+            # Create directory if it doesn't exist
+            test_file = Path(test_file_path)
+            test_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Generate complete test file content
+            content = self.generate_test_file_content(test_writer_result)
+            
+            # Write test file
+            with open(test_file_path, 'w') as f:
+                f.write(content)
+            
+            logger.info(f"Written test suite to {test_file_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error writing test suite to {test_file_path}: {e}")
+            return False
+    
+    def generate_test_file_content(self, test_writer_result) -> str:
+        """Generate complete test file content from TestWriterResult."""
+        content_parts = []
+        
+        # Add file header
+        content_parts.append('"""')
+        content_parts.append(f'Test suite for {test_writer_result.module_name}')
+        content_parts.append('Generated by Test Writer Agent')
+        content_parts.append('"""')
+        content_parts.append('')
+        
+        # Add imports
+        content_parts.append('import pytest')
+        content_parts.append('import unittest')
+        content_parts.append('from unittest.mock import Mock, patch')
+        content_parts.append('')
+        
+        # Add fixtures
+        for fixture in test_writer_result.fixtures_created:
+            content_parts.append('@pytest.fixture')
+            if fixture.scope != 'function':
+                content_parts.append(f'(scope="{fixture.scope}")')
+            content_parts.append(f'def {fixture.name}():')
+            content_parts.append(f'    """{fixture.purpose}"""')
+            content_parts.append(f'    {fixture.setup_code}')
+            if fixture.cleanup_code and fixture.cleanup_code.strip():
+                content_parts.append(f'    yield')
+                content_parts.append(f'    {fixture.cleanup_code}')
+            content_parts.append('')
+        
+        # Add test classes and methods
+        current_class = None
+        for test in test_writer_result.tests_created:
+            # Check if we need a new test class
+            test_class = self.extract_test_class_name(test.name)
+            if test_class != current_class:
+                if current_class:
+                    content_parts.append('')  # Close previous class
+                
+                current_class = test_class
+                content_parts.append(f'class {test_class}:')
+                content_parts.append(f'    """Test class for {test_class}."""')
+                content_parts.append('')
+            
+            # Add test method
+            fixtures_params = ', '.join(test.fixtures_used) if test.fixtures_used else ''
+            content_parts.append(f'    def {test.name}(self{", " + fixtures_params if fixtures_params else ""}):')
+            content_parts.append(f'        {test.documentation}')
+            content_parts.append(f'        {test.setup_code}')
+            content_parts.append(f'        {test.test_code}')
+            content_parts.append(f'        {test.assertion_code}')
+            if test.cleanup_code and test.cleanup_code.strip():
+                content_parts.append(f'        {test.cleanup_code}')
+            content_parts.append('')
+        
+        return '\n'.join(content_parts)
+    
+    def extract_test_class_name(self, test_method_name: str) -> str:
+        """Extract test class name from test method name."""
+        # Convert test_method_name to TestClassName
+        # e.g., test_user_creation -> TestUserCreation
+        
+        if not test_method_name.startswith('test_'):
+            return 'TestClass'
+        
+        # Remove 'test_' prefix
+        base_name = test_method_name[5:]
+        
+        # Split by underscores and capitalize
+        parts = base_name.split('_')
+        if len(parts) >= 2:
+            # Use first two parts for class name
+            class_name = ''.join(word.capitalize() for word in parts[:2])
+            return f'Test{class_name}'
+        else:
+            return 'TestClass'
+    
+    def run_test_suite(self, workflow: WorkflowState) -> Dict[str, Any]:
+        """Run the complete test suite and return results."""
+        try:
+            test_result = self.container_executor.execute_command(
+                command=[
+                    "python", "-m", "pytest", "-v", "--tb=short",
+                    "--json-report", "--json-report-file=/tmp/final_test_results.json"
+                ],
+                security_policy="testing",
+                timeout=600,
+                user_id=workflow.task_id
+            )
+            
+            return {
+                'success': test_result['success'],
+                'stdout': test_result.get('stdout', ''),
+                'stderr': test_result.get('stderr', ''),
+                'exit_code': test_result.get('exit_code', 1)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error running test suite: {e}")
+            return {
+                'success': False,
+                'stdout': '',
+                'stderr': str(e),
+                'exit_code': 1
+            }
+    
+    def log_execution_step(self, workflow: WorkflowState, message: str):
+        """Log an execution step to the workflow state."""
+        step = {
+            'timestamp': datetime.now().isoformat(),
+            'message': message,
+            'task_id': workflow.task_id
+        }
+        workflow.execution_log.append(step)
+        logger.info(f"[{workflow.task_id}] {message}")
+
 
 def main():
     """Main entry point for enhanced workflow master."""
