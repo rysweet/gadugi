@@ -1,0 +1,154 @@
+{
+  "name": "gadugi-vscode-extension",
+  "displayName": "Gadugi Multi-Agent Development",
+  "description": "VS Code extension for Gadugi multi-agent development workflows with git worktree management and Claude Code integration",
+  "version": "0.1.0",
+  "publisher": "gadugi",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers",
+    "Terminal"
+  ],
+  "keywords": [
+    "git",
+    "worktree",
+    "claude",
+    "ai",
+    "development",
+    "multi-agent"
+  ],
+  "activationEvents": [
+    "onCommand:gadugi.bloom",
+    "onView:gadugi.monitor"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "gadugi.bloom",
+        "title": "Bloom: start a new terminal for each worktree and then resume claude in that worktree",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.launchClaude",
+        "title": "Launch Claude",
+        "icon": "$(play)",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.terminateProcess",
+        "title": "Terminate Process",
+        "icon": "$(stop)",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.navigateToWorktree",
+        "title": "Navigate to Worktree",
+        "icon": "$(folder-opened)",
+        "category": "Gadugi"
+      }
+    ],
+    "views": {
+      "gadugi": [
+        {
+          "id": "gadugi.monitor",
+          "name": "Worktree & Process Monitor",
+          "when": "workspaceHasGitRepo"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "gadugi",
+          "title": "Gadugi",
+          "icon": "$(git-branch)"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "gadugi.refresh",
+          "when": "view == gadugi.monitor",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "gadugi.launchClaude",
+          "when": "view == gadugi.monitor && viewItem == worktree",
+          "group": "inline"
+        },
+        {
+          "command": "gadugi.navigateToWorktree",
+          "when": "view == gadugi.monitor && viewItem == worktree",
+          "group": "inline"
+        },
+        {
+          "command": "gadugi.terminateProcess",
+          "when": "view == gadugi.monitor && viewItem == process",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Gadugi",
+      "properties": {
+        "gadugi.updateInterval": {
+          "type": "number",
+          "default": 3000,
+          "description": "Update interval for process monitoring in milliseconds"
+        },
+        "gadugi.claudeCommand": {
+          "type": "string",
+          "default": "claude --resume",
+          "description": "Command to execute when starting Claude Code"
+        },
+        "gadugi.showResourceUsage": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show resource usage information for processes"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "test:unit": "npm run compile && mocha --ui tdd out/test/unit/**/*.test.js",
+    "test:integration": "npm run compile && mocha --ui tdd out/test/integration/**/*.test.js",
+    "test:coverage": "nyc npm run test:unit"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.2.0",
+    "eslint": "^8.28.0",
+    "mocha": "^10.1.0",
+    "nyc": "^15.1.0",
+    "typescript": "^4.9.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gadugi/gadugi-vscode-extension"
+  },
+  "license": "MIT"
+}
