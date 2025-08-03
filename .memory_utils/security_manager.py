@@ -104,37 +104,47 @@ class SecurityManager:
         self.logger = logging.getLogger(__name__)
     
     def validate_content(self, content: str, memory_level: str, 
-                        strict_mode: bool = True) -> SecurityResult:
+                        strict_mode: bool = True, content_type: str = "general") -> SecurityResult:
         """
-        Validate memory content for security threats
+        Validate memory content for security threats with context-aware validation
         
         Args:
             content: Memory content to validate
             memory_level: Level of memory (affects validation strictness)
             strict_mode: If True, content is rejected; if False, sanitized
+            content_type: Type of content (general, development, documentation, configuration)
             
         Returns:
             SecurityResult with validation outcome
         """
         issues = []
         
-        # Check for XPIA patterns
-        xpia_matches = self._check_patterns(content, self.XPIA_PATTERNS, "XPIA")
+        # Context-aware validation - adjust patterns based on memory level and content type
+        xpia_patterns = self._get_context_aware_patterns("XPIA", memory_level, content_type)
+        secret_patterns = self._get_context_aware_patterns("SECRET", memory_level, content_type)
+        
+        # Check for XPIA patterns with context awareness
+        xpia_matches = self._check_patterns(content, xpia_patterns, "XPIA")
         issues.extend(xpia_matches)
         
-        # Check for secrets
-        secret_matches = self._check_patterns(content, self.SECRET_PATTERNS, "Secret")
+        # Check for secrets with context awareness
+        secret_matches = self._check_patterns(content, secret_patterns, "Secret")
         issues.extend(secret_matches)
         
         # Check for executable content in certain memory levels
-        if memory_level in ["project", "team", "organization"]:
+        if memory_level in ["project", "team", "organization"] and content_type != "development":
             exec_matches = self._check_patterns(content, self.EXECUTABLE_PATTERNS, "Executable")
             issues.extend(exec_matches)
         
         # Additional validation for specific memory levels
-        if memory_level == "task":
-            # Task memories can be more permissive
-            issues = [i for i in issues if not i.startswith("XPIA:")]
+        if memory_level == "tasks":
+            # Task memories can be more permissive for development content
+            if content_type == "development":
+                issues = [i for i in issues if not (i.startswith("XPIA:") and "password" not in i.lower())]
+        elif memory_level == "knowledge":
+            # Knowledge base can contain code examples
+            if content_type == "documentation":
+                issues = [i for i in issues if not i.startswith("Executable:")]
         
         is_safe = len(issues) == 0
         
@@ -143,7 +153,7 @@ class SecurityManager:
         if not strict_mode and not is_safe:
             sanitized_content = self._sanitize_content(content, issues)
             # Re-validate sanitized content
-            recheck = self.validate_content(sanitized_content, memory_level, strict_mode=True)
+            recheck = self.validate_content(sanitized_content, memory_level, strict_mode=True, content_type=content_type)
             if recheck.is_safe:
                 is_safe = True
                 issues.append("Content was sanitized")
@@ -178,6 +188,73 @@ class SecurityManager:
             sanitized = re.sub(pattern, "[CODE_REMOVED]", sanitized, flags=re.IGNORECASE | re.MULTILINE | re.DOTALL)
         
         return sanitized
+    
+    def _get_context_aware_patterns(self, pattern_type: str, memory_level: str, content_type: str) -> List[str]:
+        """
+        Get context-aware patterns based on memory level and content type
+        
+        Args:
+            pattern_type: Type of patterns (XPIA, SECRET, EXECUTABLE)
+            memory_level: Memory level
+            content_type: Content type
+            
+        Returns:
+            List of appropriate patterns for the context
+        """
+        if pattern_type == "XPIA":
+            base_patterns = self.XPIA_PATTERNS.copy()
+            
+            # More permissive for development content in task memory
+            if memory_level == "tasks" and content_type == "development":
+                # Remove patterns that might flag legitimate development discussions
+                permissive_patterns = [
+                    p for p in base_patterns 
+                    if not any(phrase in p.lower() for phrase in [
+                        "act as", "pretend", "you are now", "role"
+                    ])
+                ]
+                return permissive_patterns
+            
+            # More permissive for agent memory discussing development work
+            if memory_level == "agents" and content_type in ["development", "general"]:
+                # Allow discussion of agent workflows and testing patterns
+                dev_patterns = [
+                    p for p in base_patterns 
+                    if not any(benign in p.lower() for benign in [
+                        "execute", "run", "test", "implement", "code", "review"
+                    ])
+                ]
+                return dev_patterns
+            
+            return base_patterns
+        
+        elif pattern_type == "SECRET":
+            base_patterns = self.SECRET_PATTERNS.copy()
+            
+            # More permissive for documentation that might discuss credential patterns
+            if content_type == "documentation":
+                # Filter out patterns that might match documentation examples
+                doc_safe_patterns = []
+                for pattern in base_patterns:
+                    # Skip patterns that might match example credential formats
+                    if not any(example in pattern.lower() for example in [
+                        "password\\s*[=:]\\s*", "api[_\\s-]?key\\s*[=:]"
+                    ]):
+                        doc_safe_patterns.append(pattern)
+                    # Keep the most critical patterns (actual AWS keys, SSH keys, JWT)
+                    elif any(critical in pattern for critical in [
+                        "AKIA[0-9A-Z]{16}", "-----BEGIN", "eyJ[A-Za-z0-9\\-_]+\\."
+                    ]):
+                        doc_safe_patterns.append(pattern)
+                return doc_safe_patterns
+            
+            return base_patterns
+        
+        elif pattern_type == "EXECUTABLE":
+            # Return base patterns for executable content
+            return self.EXECUTABLE_PATTERNS
+        
+        return []
     
     def check_agent_permissions(self, agent_id: str, memory_path: str, 
                               operation: str, agent_type: str) -> Tuple[bool, Optional[str]]:
@@ -279,7 +356,7 @@ if __name__ == "__main__":
     
     if command == "validate" and len(sys.argv) >= 3:
         content = ' '.join(sys.argv[2:])
-        result = manager.validate_content(content, "project")
+        result = manager.validate_content(content, "project", content_type="general")
         
         print(f"Safe: {result.is_safe}")
         if result.issues:
@@ -294,7 +371,7 @@ if __name__ == "__main__":
         try:
             with open(filepath, 'r') as f:
                 content = f.read()
-            result = manager.validate_content(content, "project")
+            result = manager.validate_content(content, "project", content_type="general")
             print(f"File: {filepath}")
             print(f"Safe: {result.is_safe}")
             if result.issues:
