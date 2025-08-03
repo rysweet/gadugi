@@ -435,8 +435,9 @@ Resolve the identified blocking issue for PR #{pr_number}.
     def _delegate_to_workflow_master(self, task: DelegationTask) -> None:
         """Delegate task to WorkflowMaster agent."""
         if self.auto_approve:
-            # In auto-approve mode, create structured prompt file
+            # In GitHub Actions mode, create workflow and prompt file
             self._create_workflow_master_prompt(task)
+            self._create_workflow_master_workflow(task)
         else:
             # In interactive mode, use direct invocation
             self._invoke_workflow_master_interactive(task)
@@ -456,6 +457,49 @@ Resolve the identified blocking issue for PR #{pr_number}.
         except Exception as e:
             raise Exception(f"Failed to create WorkflowMaster prompt: {e}")
     
+    def _create_workflow_master_workflow(self, task: DelegationTask) -> None:
+        """Create a GitHub Actions workflow for WorkflowMaster execution."""
+        prompt_filename = f"resolve-pr-{task.pr_number}-{task.task_type.value}.md"
+        
+        workflow_content = f"""
+name: WorkflowMaster Resolution for PR #{task.pr_number}
+
+on:
+  workflow_dispatch:
+
+jobs:
+  resolve-pr-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      checks: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute WorkflowMaster Resolution
+        uses: anthropics/claude-code-base-action@v1
+        with:
+          agent: 'workflow-master'
+          prompt_file: '.github/workflow-states/{prompt_filename}'
+        env:
+          GITHUB_TOKEN: ${{{{ secrets.GITHUB_TOKEN }}}}
+          ANTHROPIC_API_KEY: ${{{{ secrets.ANTHROPIC_API_KEY }}}}
+"""
+        
+        workflow_path = f".github/workflows/resolve-pr-{task.pr_number}-{task.task_type.value}.yml"
+        
+        try:
+            with open(workflow_path, 'w') as f:
+                f.write(workflow_content)
+            
+            logger.info(f"Created WorkflowMaster workflow: {workflow_path}")
+            task.status = DelegationStatus.IN_PROGRESS
+            
+        except Exception as e:
+            raise Exception(f"Failed to create WorkflowMaster workflow: {e}")
+
     def _invoke_workflow_master_interactive(self, task: DelegationTask) -> None:
         """Invoke WorkflowMaster in interactive mode."""
         try:
@@ -491,12 +535,27 @@ on:
 jobs:
   ai-code-review:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
       - name: Run AI Code Review
-        run: |
-          claude --auto-approve /agent:code-reviewer \\
-            "Perform comprehensive code review for PR #{task.pr_number}"
+        uses: anthropics/claude-code-base-action@v1
+        with:
+          agent: 'code-reviewer'
+          prompt: |
+            Perform comprehensive code review for PR #{task.pr_number}.
+            
+            Focus on:
+            - Code quality and best practices
+            - Security vulnerabilities  
+            - Performance implications
+            - Test coverage
+            - Documentation completeness
+            
+            Provide constructive feedback and approve if changes meet standards.
         env:
           GITHUB_TOKEN: ${{{{ secrets.GITHUB_TOKEN }}}}
           ANTHROPIC_API_KEY: ${{{{ secrets.ANTHROPIC_API_KEY }}}}
