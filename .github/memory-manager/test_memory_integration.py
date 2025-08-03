@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-"""
-Comprehensive tests for Memory.md to GitHub Issues integration
+"""Comprehensive tests for Memory.md to GitHub Issues integration
 
 This test suite validates all components of the Memory.md integration system,
 including parsing, GitHub API integration, synchronization, and conflict resolution.
 """
 
 import json
-import os
 import tempfile
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
-from config import ConfigManager, MemoryManagerConfig, PruningConfig
+from config import ConfigManager, MemoryManagerConfig
 from github_integration import GitHubIntegration, GitHubIssue
 
 # Import our modules
 from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
-from sync_engine import ConflictResolution, SyncConfig, SyncDirection, SyncEngine
+from sync_engine import SyncConfig, SyncDirection, SyncEngine
 
 
 class TestMemoryParser(unittest.TestCase):
@@ -218,7 +216,7 @@ Last Updated: 2025-08-01T13:00:00-08:00
 
 ## Recent Accomplishments
 - Completed feature A
-"""
+""",
         )
 
         # Configure sync engine
@@ -310,7 +308,7 @@ Last Updated: 2025-08-01T13:00:00-08:00
         self.assertTrue(state_file.exists())
 
         # Load and verify
-        with open(state_file, "r") as f:
+        with open(state_file) as f:
             state_data = json.load(f)
 
         self.assertIn("last_sync", state_data)
@@ -406,7 +404,7 @@ Last Updated: 2025-08-01T13:00:00-08:00
 ## Next Steps
 - Plan next sprint
 - Review code quality metrics
-"""
+""",
         )
 
     def tearDown(self):
@@ -488,24 +486,25 @@ def run_comprehensive_tests():
 
     # Print summary
     print(f"\n{'=' * 60}")
-    print(f"Test Summary:")
+    print("Test Summary:")
     print(f"  Total tests: {result.testsRun}")
     print(f"  Successes: {result.testsRun - len(result.failures) - len(result.errors)}")
     print(f"  Failures: {len(result.failures)}")
     print(f"  Errors: {len(result.errors)}")
     print(
-        f"  Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+        f"  Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%",
     )
 
     if result.failures:
-        print(f"\nFailures:")
+        print("\nFailures:")
         for test, traceback in result.failures:
             print(f"  - {test}: {traceback.split('AssertionError:')[-1].strip()}")
 
     if result.errors:
-        print(f"\nErrors:")
+        print("\nErrors:")
         for test, traceback in result.errors:
-            print(f"  - {test}: {traceback.split('\\n')[-2]}")
+            split_tb = traceback.split('\n')
+            print(f"  - {test}: {split_tb[-2]}")
 
     return result.wasSuccessful()
 
