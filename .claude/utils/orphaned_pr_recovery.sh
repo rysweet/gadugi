@@ -137,14 +137,32 @@ This PR was detected as missing the mandatory code review (Phase 9). The code-re
     export PR_NUMBER="$pr_number"
     export ORPHANED_PR_RECOVERY=true
     
-    # Invoke code-reviewer agent
-    # Note: This would be the actual agent invocation in a real scenario
-    log "INFO" "Executing: /agent:code-reviewer for PR #$pr_number"
+    # Invoke code-reviewer agent using Claude CLI
+    log "INFO" "Executing: claude -p '/agent:code-reviewer' for PR #$pr_number"
     
-    # For now, we'll simulate the invocation and create a marker
-    local marker_file="/tmp/code_reviewer_invoked_$pr_number.marker"
-    echo "$(date -Iseconds)" > "$marker_file"
-    log "INFO" "Code-reviewer invocation completed for PR #$pr_number (marker: $marker_file)"
+    # Build the agent invocation prompt
+    local agent_prompt="/agent:code-reviewer
+
+Review PR #$pr_number which appears to be missing the mandatory Phase 9 code review.
+
+Context: This is an orphaned PR recovery action. The PR was created more than $MAX_AGE_MINUTES minutes ago without receiving a code review, violating the mandatory Phase 9 requirement.
+
+Please conduct a thorough code review focusing on:
+1. Implementation quality and correctness
+2. Test coverage and quality
+3. Documentation completeness
+4. Security considerations
+5. Performance impact
+
+This review is being automatically invoked by the WorkflowManager consistency enforcement system."
+    
+    # Execute Claude CLI to invoke the code-reviewer agent
+    if claude -p "$agent_prompt"; then
+        log "INFO" "Code-reviewer invocation completed successfully for PR #$pr_number"
+    else
+        log "ERROR" "Code-reviewer invocation failed for PR #$pr_number"
+        return 1
+    fi
     
     return 0
 }

@@ -1,5 +1,19 @@
 # AI Assistant Memory
-Last Updated: 2025-08-02T09:30:00-08:00
+Last Updated: 2025-08-03T13:00:00-07:00
+
+## Current Goals
+- 🔄 **IN PROGRESS**: Fix WorkflowManager Phase 9 Consistency (Issue #38, PR #88)
+  - Problem: WorkflowManager doesn't reliably invoke code-reviewer after PR creation
+  - PR #88 created but code review not invoked (demonstrating the exact problem)
+  - Need to fix orphaned_pr_recovery.sh to use Claude CLI for actual agent invocation
+
+## Claude Code CLI Reference (NEW)
+**Important**: Claude Code can be invoked from command line for automation!
+- Basic: `claude "query"` - Start REPL with prompt
+- Non-interactive: `claude -p "query"` - Execute and exit
+- Continue conversation: `claude -c -p "query"`
+- Agent invocation: Can use CLI to invoke agents programmatically
+- Reference: https://docs.anthropic.com/en/docs/claude-code/cli-reference
 
 ## Current Goals
 - ✅ **COMPLETED**: Enhanced Separation Architecture Implementation (FULLY COMPLETE)
