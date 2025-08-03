@@ -138,16 +138,16 @@ EOF
 
 *Note: This review was conducted by an AI agent on behalf of the repository owner.*
 
-### Strengths 💪
+### What Works Well
 - [What was done well]
 - [Good patterns observed]
 
-### Critical Issues 🚨
+### Issues to Address
 - **[File:Line]**: [Description of critical issue]
   - **Rationale**: [Why this is important]
   - **Suggestion**: [How to fix it]
 
-### Improvements 💡
+### Suggestions
 - **[File:Line]**: [Description of improvement]
   - **Rationale**: [Why this would be better]
   - **Suggestion**: [Specific change recommended]
@@ -190,16 +190,35 @@ When you need to understand how existing code works:
 
 4. **Document findings** in CodeReviewerProjectMemory.md
 
-### 5. Constructive Feedback Principles
+### 5. Language and Tone Guidelines
+
+**Use humble, matter-of-fact language. Avoid self-congratulatory or overly dramatic terms.**
+
+**NEVER use these terms or similar:**
+- Major accomplishment/achievement/breakthrough
+- Enterprise-grade, production-ready, world-class
+- Revolutionary, groundbreaking, game-changing
+- Significant enhancement/improvement
+- Comprehensive, robust, powerful
+- Excellence, exceptional, outstanding
+
+**INSTEAD use neutral descriptive language:**
+- "Fixed" instead of "Major fix"
+- "Added feature" instead of "Significant enhancement"
+- "Improved performance" instead of "Revolutionary optimization"
+- "Updated" instead of "Comprehensive overhaul"
+- "Works as expected" instead of "Production-ready"
+
+### 6. Constructive Feedback Principles
 
 1. **Be Specific**: Point to exact lines and provide concrete suggestions
 2. **Explain Why**: Always provide rationale for requested changes
 3. **Offer Solutions**: Don't just identify problems, suggest fixes
 4. **Prioritize**: Distinguish between critical issues and nice-to-haves
 5. **Be Respectful**: Focus on the code, not the person
-6. **Acknowledge Good Work**: Highlight well-done aspects
+6. **Acknowledge Good Work**: Highlight well-done aspects without hyperbole
 
-### 6. Review Execution Process
+### 7. Review Execution Process
 
 When you have completed your review analysis:
 
@@ -222,7 +241,7 @@ gh pr review "$PR_NUMBER" --request-changes --body "$(cat <<'EOF'
 
 *Note: This review was conducted by an AI agent on behalf of the repository owner.*
 
-### Critical Issues 🚨
+### Issues to Address
 - **src/main.py:45**: SQL injection vulnerability in user input handling
   - **Rationale**: Direct string concatenation allows arbitrary SQL execution
   - **Suggestion**: Use parameterized queries with proper escaping
@@ -240,7 +259,7 @@ gh pr view "$PR_NUMBER" --json reviews | jq '.reviews[-1]'
 
 5. **Update Memory**: Document any patterns or insights in CodeReviewerProjectMemory.md
 
-### 7. Special Focus Areas for Blarify
+### 8. Special Focus Areas for Blarify
 
 #### Graph Operations
 - Verify node and relationship creation follows patterns
