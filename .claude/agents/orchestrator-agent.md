@@ -86,25 +86,33 @@ Execute these specific prompts in parallel:
 
 The OrchestratorAgent coordinates three specialized sub-agents to achieve parallel execution:
 
-### 1. TaskAnalyzer Sub-Agent (`/agent:task-analyzer`)
-**Purpose**: Analyzes specific prompt files for dependencies and parallelization opportunities
+### 1. Enhanced TaskAnalyzer Sub-Agent (`/agent:task-analyzer`)
+**Purpose**: Comprehensive task analysis with enhanced Task Decomposition Analyzer integration
 
 **Invocation**:
 ```
 /agent:task-analyzer
 
-Analyze these prompt files for parallel execution:
+Analyze these prompt files for enhanced parallel execution:
 - test-definition-node.md
 - test-relationship-creator.md
 - fix-import-bug.md
+
+Configuration:
+- Enable Task Decomposition Analyzer integration: true
+- Use machine learning classification: true
+- Pattern recognition: enabled
+- Historical analysis: enabled
 ```
 
-**Returns**:
-- Parallelizable task groups
-- Sequential dependencies  
-- Resource requirements
-- Conflict matrix
-- Execution plan with timing estimates
+**Enhanced Returns**:
+- **Task Bounds Evaluation**: Understanding levels and decomposition requirements
+- **Intelligent Decomposition**: Automatic subtask generation for complex tasks
+- **Research Recommendations**: Identified research requirements with suggested approaches
+- **ML-Based Classification**: Advanced task type and pattern recognition
+- **Performance Predictions**: Resource requirements and execution time estimates
+- **Parallelization Optimization**: Advanced parallel execution planning with load balancing
+- **Risk Assessment**: Comprehensive risk analysis with mitigation strategies
 
 ### 2. WorktreeManager Sub-Agent (`/agent:worktree-manager`)
 **Purpose**: Creates and manages isolated git worktree environments
@@ -148,29 +156,103 @@ Execute these tasks in parallel:
 
 When invoked with a list of prompt files, the OrchestratorAgent executes this enhanced workflow using shared modules:
 
-### Phase 1: Task Analysis with Enhanced Error Handling
+### Phase 1: Enhanced Task Analysis with Decomposition Integration
 ```python
-# Initialize with circuit breaker protection
+# Enhanced task analysis with Task Decomposition Analyzer integration
 @error_handler.with_circuit_breaker(github_circuit_breaker)
-def analyze_tasks(prompt_files):
-    # Invoke task-analyzer with retry logic
+def analyze_tasks_enhanced(prompt_files):
+    # Initialize enhanced analysis tracking
+    performance_analyzer.record_phase_start("enhanced_task_analysis")
+    task_tracker.update_phase(WorkflowPhase.ANALYSIS, "in_progress")
+    
+    # Step 1: Initial task analysis with enhanced capabilities
     analysis_result = retry_manager.execute_with_retry(
-        lambda: invoke_task_analyzer(prompt_files),
+        lambda: invoke_enhanced_task_analyzer(prompt_files, {
+            'enable_decomposition': True,
+            'ml_classification': True,
+            'pattern_recognition': True,
+            'historical_analysis': True
+        }),
         max_attempts=3,
         backoff_strategy="exponential"
     )
     
-    # Track analysis metrics
-    performance_analyzer.record_phase_start("task_analysis")
-    task_tracker.update_phase(WorkflowPhase.ANALYSIS, "in_progress")
+    # Step 2: Process decomposition results
+    enhanced_tasks = []
+    for task in analysis_result.tasks:
+        if task.requires_decomposition:
+            # Task was automatically decomposed by TaskDecomposer
+            enhanced_tasks.extend(task.subtasks)
+            performance_analyzer.record_decomposition_benefit(
+                task.id, task.decomposition_benefit
+            )
+        else:
+            enhanced_tasks.append(task)
     
-    return analysis_result
+    # Step 3: Apply ML-based optimizations
+    ml_optimizations = apply_ml_optimizations(enhanced_tasks)
+    for task in enhanced_tasks:
+        task.apply_optimizations(ml_optimizations.get(task.id, []))
+    
+    # Step 4: Update execution plan with enhanced insights
+    enhanced_execution_plan = generate_enhanced_execution_plan(
+        enhanced_tasks,
+        analysis_result.dependency_graph,
+        analysis_result.performance_predictions
+    )
+    
+    # Track enhanced analysis completion
+    performance_analyzer.record_phase_completion("enhanced_task_analysis", {
+        'original_task_count': len(prompt_files),
+        'enhanced_task_count': len(enhanced_tasks),
+        'decomposition_applied': sum(1 for t in analysis_result.tasks if t.requires_decomposition),
+        'research_required': sum(1 for t in analysis_result.tasks if t.requires_research),
+        'ml_classifications': len([t for t in enhanced_tasks if hasattr(t, 'ml_classification')])
+    })
+    
+    return enhanced_execution_plan
+
+def invoke_enhanced_task_analyzer(prompt_files, config):
+    """Invoke task analyzer with enhanced decomposition capabilities"""
+    # The enhanced task-analyzer now automatically coordinates with:
+    # - TaskBoundsEval for complexity assessment
+    # - TaskDecomposer for intelligent decomposition
+    # - TaskResearchAgent for research requirements
+    # - ML classification for pattern recognition
+    
+    analyzer_prompt = f"""
+    /agent:task-analyzer
+    
+    Perform enhanced analysis with Task Decomposition Analyzer integration:
+    Prompt files: {', '.join(prompt_files)}
+    
+    Enhanced Configuration:
+    - Task Decomposition Analyzer integration: {config['enable_decomposition']}
+    - Machine learning classification: {config['ml_classification']}
+    - Pattern recognition system: {config['pattern_recognition']}
+    - Historical analysis: {config['historical_analysis']}
+    
+    Required Analysis:
+    1. Evaluate task bounds and complexity for each prompt
+    2. Apply intelligent decomposition where beneficial
+    3. Identify research requirements and suggest approaches
+    4. Perform ML-based classification and pattern recognition
+    5. Generate optimized parallel execution plan
+    6. Provide comprehensive risk assessment
+    
+    Return enhanced analysis with all coordination results included.
+    """
+    
+    return execute_claude_agent_invocation(analyzer_prompt)
 ```
 
-1. Use enhanced error handling for task analysis invocation
-2. Track performance metrics from the start
-3. Generate unique task IDs with state persistence
-4. Create initial workflow checkpoints
+**Enhanced Phase 1 Features**:
+1. **Automatic Task Decomposition**: Complex tasks are intelligently broken down
+2. **ML-Based Classification**: Advanced pattern recognition for optimization
+3. **Research Integration**: Automatic identification of research requirements
+4. **Performance Prediction**: Accurate resource and time estimation
+5. **Risk Assessment**: Comprehensive risk analysis with mitigation strategies
+6. **Optimization Application**: ML-suggested optimizations are automatically applied
 
 ### Phase 2: Environment Setup with State Management
 ```python
