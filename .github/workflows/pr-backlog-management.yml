@@ -101,7 +101,7 @@ jobs:
           fi
           
           # Run the PR Backlog Manager
-          python3 .claude/agents/pr-backlog-manager/github_actions_integration.py
+          python3 -m .claude.agents.pr-backlog-manager.github_actions_integration
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAX_PROCESSING_TIME: 600
