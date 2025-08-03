@@ -107,7 +107,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         self.mock_github_class.return_value = self.github_mock
         
         # Setup default mock responses
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': []
         }
@@ -133,7 +133,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
     def test_get_or_create_memory_issue_existing(self):
         """Test finding existing memory issue"""
         # Mock existing memory issue
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': [
                 {
@@ -152,7 +152,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
     def test_get_or_create_memory_issue_new(self):
         """Test creating new memory issue"""
         # Mock no existing issues
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': []
         }
@@ -165,7 +165,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         # Verify issue creation parameters
         call_args = self.github_mock.create_issue.call_args
         self.assertEqual(call_args[1]['title'], '🧠 Project Memory - AI Assistant Context')
-        self.assertIn('memory', call_args[1]['labels'])
+        self.assertIn('enhancement', call_args[1]['labels'])
     
     def test_create_memory_issue_body(self):
         """Test memory issue body creation"""
@@ -219,7 +219,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock issue with comments
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -255,7 +255,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock issue with multiple section comments
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -328,7 +328,7 @@ spanning multiple lines.
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock search results
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'items': [
@@ -369,7 +369,7 @@ spanning multiple lines.
         }
         
         # Mock memory content
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -392,7 +392,7 @@ spanning multiple lines.
         manager = SimpleMemoryManager(str(self.repo_path))
         
         # Mock memory content for cleanup
-        self.github_mock._execute_command.return_value = {
+        self.github_mock._execute_gh_command.return_value = {
             'success': True,
             'data': {
                 'comments': [
@@ -449,7 +449,7 @@ class TestIntegration(unittest.TestCase):
         mock_github_class.return_value = github_mock
         
         # Mock memory issue creation
-        github_mock._execute_command.return_value = {'success': True, 'data': []}
+        github_mock._execute_gh_command.return_value = {'success': True, 'data': []}
         github_mock.create_issue.return_value = {
             'success': True, 
             'data': {'number': 100, 'html_url': 'https://github.com/test/repo/issues/100'}
@@ -462,7 +462,7 @@ class TestIntegration(unittest.TestCase):
         }
         
         # Mock reading memory
-        github_mock._execute_command.side_effect = [
+        github_mock._execute_gh_command.side_effect = [
             {'success': True, 'data': []},  # Initial search for existing issue
             {
                 'success': True,
@@ -471,6 +471,20 @@ class TestIntegration(unittest.TestCase):
                         {
                             'id': 'comment1',
                             'body': '### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Type**: current-goals\n**Priority**: high\n\n**Content**:\nComplete memory manager implementation\n\n---\n*Added by: WorkflowManager*',
+                            'createdAt': '2025-01-01T12:00:00Z',
+                            'author': {'login': 'testuser'}
+                        }
+                    ],
+                    'updatedAt': '2025-01-01T12:00:00Z'
+                }
+            },
+            {
+                'success': True,
+                'data': {
+                    'comments': [
+                        {
+                            'id': 'comment1',
+                            'body': '### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Type**: current-goals\n**Priority**: high\n\n**Content**:\nComplete memory manager implementation\n\n---\n*Added by: WorkflowMaster*',
                             'createdAt': '2025-01-01T12:00:00Z',
                             'author': {'login': 'testuser'}
                         }
@@ -507,6 +521,340 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(goal_data['priority'], 'high')
         self.assertEqual(goal_data['agent'], 'WorkflowManager')
         self.assertIn('Complete memory manager', goal_data['content'])
+
+
+class TestMemoryLocking(unittest.TestCase):
+    """Test memory locking functionality"""
+    
+    def setUp(self):
+        """Set up test environment for locking tests"""
+        self.temp_dir = tempfile.mkdtemp()
+        self.repo_path = Path(self.temp_dir)
+        
+        # Mock GitHubOperations
+        self.github_mock = Mock()
+        self.github_patcher = patch('simple_memory_manager.GitHubOperations')
+        self.mock_github_class = self.github_patcher.start()
+        self.mock_github_class.return_value = self.github_mock
+        
+        # Setup default mock responses
+        self.github_mock._execute_gh_command.return_value = {
+            'success': True,
+            'data': []
+        }
+        
+        self.github_mock.create_issue.return_value = {
+            'success': True,
+            'data': {'number': 42, 'html_url': 'https://github.com/test/repo/issues/42'}
+        }
+    
+    def tearDown(self):
+        """Clean up test environment"""
+        self.github_patcher.stop()
+        shutil.rmtree(self.temp_dir)
+    
+    def test_auto_lock_enabled_by_default(self):
+        """Test that auto-lock is enabled by default"""
+        manager = SimpleMemoryManager(str(self.repo_path))
+        self.assertTrue(manager.auto_lock)
+        self.assertFalse(manager.strict_security)
+    
+    def test_auto_lock_can_be_disabled(self):
+        """Test that auto-lock can be disabled"""
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=False)
+        self.assertFalse(manager.auto_lock)
+    
+    def test_strict_security_mode(self):
+        """Test strict security mode configuration"""
+        manager = SimpleMemoryManager(str(self.repo_path), strict_security=True)
+        self.assertTrue(manager.strict_security)
+    
+    def test_lock_memory_issue_success(self):
+        """Test successful memory issue locking"""
+        # Mock successful lock operation
+        self.github_mock._execute_gh_command.return_value = {
+            'success': True,
+            'data': {}
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager._lock_memory_issue(42)
+        
+        self.assertTrue(result)
+        
+        # Verify lock command was called with correct parameters
+        lock_call = None
+        for call in self.github_mock._execute_gh_command.call_args_list:
+            args = call[0][0]
+            if 'lock' in args:
+                lock_call = args
+                break
+        
+        self.assertIsNotNone(lock_call)
+        self.assertIn('issue', lock_call)
+        self.assertIn('lock', lock_call)
+        self.assertIn('42', lock_call)
+        self.assertIn('--reason', lock_call)
+        self.assertIn('off-topic', lock_call)
+    
+    def test_lock_memory_issue_failure(self):
+        """Test memory issue lock failure"""
+        # Mock failed lock operation
+        self.github_mock._execute_gh_command.return_value = {
+            'success': False,
+            'error': 'Insufficient permissions'
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager._lock_memory_issue(42)
+        
+        self.assertFalse(result)
+    
+    def test_unlock_memory_issue_success(self):
+        """Test successful memory issue unlocking"""
+        # Mock successful unlock operation
+        self.github_mock._execute_gh_command.return_value = {
+            'success': True,
+            'data': {}
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.unlock_memory_issue()
+        
+        self.assertTrue(result)
+        
+        # Verify unlock command was called
+        unlock_call = None
+        for call in self.github_mock._execute_gh_command.call_args_list:
+            args = call[0][0]
+            if 'unlock' in args:
+                unlock_call = args
+                break
+        
+        self.assertIsNotNone(unlock_call)
+        self.assertIn('issue', unlock_call)
+        self.assertIn('unlock', unlock_call)
+        self.assertIn('42', unlock_call)
+    
+    def test_unlock_memory_issue_failure(self):
+        """Test memory issue unlock failure"""
+        # Mock failed unlock operation
+        self.github_mock._execute_gh_command.return_value = {
+            'success': False,
+            'error': 'Issue not found'
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.unlock_memory_issue()
+        
+        self.assertFalse(result)
+    
+    def test_check_lock_status_locked(self):
+        """Test checking lock status for locked issue"""
+        # Mock different calls: issue list (empty) and API call (locked)
+        def mock_execute_side_effect(args):
+            if 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            elif 'api' in args:
+                return {
+                    'success': True,
+                    'data': {
+                        'locked': True,
+                        'lock_reason': 'off-topic'
+                    }
+                }
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.check_lock_status()
+        
+        self.assertTrue(result['success'])
+        self.assertTrue(result['locked'])
+        self.assertEqual(result['lock_reason'], 'off-topic')
+        self.assertEqual(result['issue_number'], 42)
+    
+    def test_check_lock_status_unlocked(self):
+        """Test checking lock status for unlocked issue"""
+        # Mock different calls: issue list (empty) and API call (unlocked)
+        def mock_execute_side_effect(args):
+            if 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            elif 'api' in args:
+                return {
+                    'success': True,
+                    'data': {
+                        'locked': False,
+                        'lock_reason': None
+                    }
+                }
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.check_lock_status()
+        
+        self.assertTrue(result['success'])
+        self.assertFalse(result['locked'])
+        self.assertIsNone(result['lock_reason'])
+    
+    def test_check_lock_status_api_failure(self):
+        """Test lock status check API failure"""
+        # Mock API failure
+        self.github_mock._execute_gh_command.return_value = {
+            'success': False,
+            'error': 'API error'
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.check_lock_status()
+        
+        self.assertFalse(result['success'])
+        self.assertIn('error', result)
+    
+    def test_get_security_status_high_security(self):
+        """Test security status for properly secured memory"""
+        # Mock different calls: issue list (empty), lock, and API call (locked)
+        def mock_execute_side_effect(args):
+            if 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            elif 'lock' in args:
+                return {'success': True, 'data': {}}  # Successful lock
+            elif 'api' in args:
+                return {
+                    'success': True,
+                    'data': {
+                        'locked': True,
+                        'lock_reason': 'off-topic'
+                    }
+                }
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=True, strict_security=True)
+        result = manager.get_security_status()
+        
+        self.assertTrue(result['success'])
+        self.assertEqual(result['security_level'], 'HIGH')
+        self.assertTrue(result['locked'])
+        self.assertTrue(result['auto_lock_enabled'])
+        self.assertTrue(result['strict_security_enabled'])
+        self.assertEqual(len(result['warnings']), 0)
+    
+    def test_get_security_status_low_security(self):
+        """Test security status for unsecured memory"""
+        # Mock different calls: issue list (empty) and API call (unlocked)
+        def mock_execute_side_effect(args):
+            if 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            elif 'api' in args:
+                return {
+                    'success': True,
+                    'data': {
+                        'locked': False,
+                        'lock_reason': None
+                    }
+                }
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=False, strict_security=False)
+        result = manager.get_security_status()
+        
+        self.assertTrue(result['success'])
+        self.assertEqual(result['security_level'], 'LOW')
+        self.assertFalse(result['locked'])
+        self.assertFalse(result['auto_lock_enabled'])
+        self.assertFalse(result['strict_security_enabled'])
+        self.assertGreater(len(result['warnings']), 0)
+        self.assertGreater(len(result['recommendations']), 0)
+        
+        # Check specific warnings
+        warning_text = ' '.join(result['warnings'])
+        self.assertIn('NOT locked', warning_text)
+        self.assertIn('poison memory', warning_text)
+    
+    def test_get_security_status_auto_lock_failed(self):
+        """Test security status when auto-lock is enabled but failed"""
+        # Mock different calls: issue list (empty), failed lock, and API call (unlocked)
+        def mock_execute_side_effect(args):
+            if 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            elif 'lock' in args:
+                return {'success': False, 'error': 'Permission denied'}  # Failed lock
+            elif 'api' in args:
+                return {
+                    'success': True,
+                    'data': {
+                        'locked': False,
+                        'lock_reason': None
+                    }
+                }
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=True)
+        result = manager.get_security_status()
+        
+        self.assertTrue(result['success'])
+        self.assertEqual(result['security_level'], 'LOW')
+        self.assertTrue(result['auto_lock_enabled'])
+        self.assertFalse(result['locked'])
+        
+        # Should have warning about auto-lock failure
+        warning_text = ' '.join(result['warnings'])
+        self.assertIn('Auto-lock is enabled', warning_text)
+        self.assertIn('may have failed', warning_text)
+    
+    def test_manual_lock_memory_issue(self):
+        """Test manual lock functionality"""
+        # Mock successful lock
+        self.github_mock._execute_gh_command.return_value = {
+            'success': True,
+            'data': {}
+        }
+        
+        manager = SimpleMemoryManager(str(self.repo_path))
+        result = manager.lock_memory_issue()
+        
+        self.assertTrue(result)
+    
+    def test_strict_security_mode_failure(self):
+        """Test that strict security mode fails initialization when locking fails"""
+        # Mock failed lock operation  
+        def mock_execute_side_effect(args):
+            if 'lock' in args:
+                return {'success': False, 'error': 'Permission denied'}
+            elif 'list' in args:
+                return {'success': True, 'data': []}  # No existing issues
+            else:
+                return {'success': True, 'data': {}}
+        
+        self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
+        
+        # Should raise GitHubError in strict mode
+        with self.assertRaises(Exception):  # GitHubError will be raised
+            SimpleMemoryManager(str(self.repo_path), auto_lock=True, strict_security=True)
+    
+    def test_custom_lock_reason(self):
+        """Test custom lock reason configuration"""
+        manager = SimpleMemoryManager(str(self.repo_path), lock_reason="spam")
+        self.assertEqual(manager.lock_reason, "spam")
+    
+    def test_invalid_lock_reason_fallback(self):
+        """Test fallback to default for invalid lock reason"""
+        manager = SimpleMemoryManager(str(self.repo_path), lock_reason="invalid-reason")
+        self.assertEqual(manager.lock_reason, "off-topic")  # Should fallback to default
 
 
 if __name__ == '__main__':
