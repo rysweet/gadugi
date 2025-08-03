@@ -1,0 +1,1 @@
+# Make .claude a Python package to enable imports
