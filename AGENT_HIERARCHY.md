@@ -2,11 +2,23 @@
 
 ## Overview
 
-This document explains the proper agent hierarchy for executing development workflows in the Gadugi project.
+This document explains the agent hierarchy for executing development workflows in the Gadugi multi-agent orchestration platform.
+
 
 ## Agent Hierarchy Diagram
 
 ```
+┌─────────────────────────┐
+│   Program Manager       │ ← Maintains project health
+│ (Project Orchestrator)  │
+└───────────┬─────────────┘
+            │
+            ├─── Manages → Issue Pipeline (triage, labeling)
+            ├─── Updates → Project Priorities (.memory)
+            ├─── Maintains → README & Documentation
+            │
+            └─── Coordinates with ↓
+
 ┌─────────────────────────┐
 │   OrchestratorAgent     │ ← Start here for multiple tasks
 │ (Parallel Coordinator)  │
@@ -19,7 +31,7 @@ This document explains the proper agent hierarchy for executing development work
             └─── Spawns multiple ↓
                         
 ┌─────────────────────────┐
-│    WorkflowManager       │ ← Or start here for single tasks
+│    WorkflowManager      │ ← Or start here for single tasks
 │  (Workflow Executor)    │
 └───────────┬─────────────┘
             │
@@ -38,6 +50,13 @@ This document explains the proper agent hierarchy for executing development work
 ```
 
 ## When to Use Each Agent
+
+### Use Program Manager when:
+- Running regular project maintenance (manually or via cron)
+- Triaging unlabeled issues
+- Updating project priorities
+- Keeping documentation current
+- Example: `python src/agents/program_manager.py full`
 
 ### Use OrchestratorAgent when:
 - You have multiple independent tasks to execute
@@ -86,17 +105,42 @@ git push
 
 ## Benefits of Using Agents
 
-1. **Automation**: All phases execute automatically
-2. **Consistency**: Same workflow every time
-3. **State Tracking**: Progress saved and resumable
-4. **Code Reviews**: Phase 9 never skipped
-5. **Parallelization**: 3-5x faster for multiple tasks
-6. **Error Handling**: Graceful recovery from failures
+1. **Project Health**: Program Manager maintains issue hygiene and priorities
+2. **Automation**: All phases execute automatically
+3. **Consistency**: Same workflow every time
+4. **State Tracking**: Progress saved and resumable
+5. **Code Reviews**: Phase 9 never skipped
+6. **Parallelization**: 3-5x faster for multiple tasks
+7. **Error Handling**: Graceful recovery from failures
+8. **Documentation**: README and docs stay current automatically
+
+## Program Manager Details
+
+The Program Manager is responsible for:
+
+### Issue Pipeline Management
+- **Triage**: Automatically labels unlabeled issues based on content
+- **Pipeline**: Moves issues through lifecycle stages (idea → draft → ready)
+- **Hygiene**: Ensures single lifecycle label per issue
+- **Classification**: Detects bugs, well-structured drafts, and raw ideas
+
+### Project Coordination
+- **Priorities**: Maintains `.memory/project/priorities.md` with top 5 priorities
+- **Milestones**: Tracks milestone progress and deadlines
+- **Recommendations**: Identifies bottlenecks and stale issues
+- **Metrics**: Provides pipeline status and velocity insights
+
+### Documentation
+- **README**: Detects new features from PRs and updates README
+- **Agents**: Identifies new agents not documented
+- **Automation**: Can run via cron for continuous maintenance
 
 ## Common Mistakes
 
 1. **Wrong**: Manually creating issues, branches, and PRs
 2. **Wrong**: Using WorkflowManager for multiple independent tasks
 3. **Wrong**: Skipping OrchestratorAgent when parallelization is possible
-4. **Right**: Let agents handle the entire workflow
-5. **Right**: Use OrchestratorAgent first, it will spawn WorkflowManagers
+4. **Wrong**: Manually triaging issues when Program Manager can automate
+5. **Right**: Let agents handle the entire workflow
+6. **Right**: Use OrchestratorAgent first, it will spawn WorkflowManagers
+7. **Right**: Run Program Manager regularly for project health
