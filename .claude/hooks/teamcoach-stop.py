@@ -19,6 +19,11 @@ from datetime import datetime
 def invoke_teamcoach():
     """Invoke TeamCoach agent for session analysis."""
     
+    # CRITICAL: Check for cascade prevention flag
+    if os.environ.get('CLAUDE_HOOK_EXECUTION', '0') == '1':
+        print("🛡️ Cascade prevention: TeamCoach hook skipped during hook execution")
+        return True
+    
     # Create TeamCoach prompt for session analysis
     teamcoach_prompt = """
 Task: Analyze completed session and provide team coaching recommendations
@@ -48,10 +53,14 @@ Mode: Post-session analysis with focus on continuous improvement
 """.strip()
 
     try:
-        # Invoke TeamCoach using Claude Code CLI
+        # Set cascade prevention environment variable
+        env = os.environ.copy()
+        env['CLAUDE_HOOK_EXECUTION'] = '1'
+        
+        # Invoke TeamCoach using Claude Code CLI with cascade prevention
         result = subprocess.run([
             'claude', '/agent:teamcoach', teamcoach_prompt
-        ], capture_output=True, text=True, timeout=300)  # 5 minute timeout
+        ], capture_output=True, text=True, timeout=300, env=env)  # 5 minute timeout
         
         if result.returncode == 0:
             print(f"✅ TeamCoach analysis completed successfully")
