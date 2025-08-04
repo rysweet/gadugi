@@ -94,9 +94,9 @@ python task_analyzer.py --prompts-dir ../../../prompts/
 **Execution Strategy**:
 ```bash
 # All three can run simultaneously
-echo "Starting parallel test coverage improvement..." 
+echo "Starting parallel test coverage improvement..."
 /agent:workflow-manager prompts/test-definition-node.md &
-/agent:workflow-manager prompts/test-relationship-creator.md &  
+/agent:workflow-manager prompts/test-relationship-creator.md &
 /agent:workflow-manager prompts/test-documentation-linker.md &
 wait
 echo "All test coverage tasks complete!"
@@ -190,7 +190,7 @@ print(f'CPU usage: {psutil.cpu_percent(interval=1)}%')
 
 # Adjust concurrency based on resources
 # High-end system (8+ cores, 16+ GB RAM): Run 4 parallel tasks
-# Mid-range system (4-8 cores, 8-16 GB RAM): Run 2-3 parallel tasks  
+# Mid-range system (4-8 cores, 8-16 GB RAM): Run 2-3 parallel tasks
 # Low-end system (<4 cores, <8 GB RAM): Run 1-2 parallel tasks
 ```
 
@@ -270,7 +270,7 @@ fi
 ```bash
 # Group tasks by estimated execution time for better load balancing
 # Short tasks (< 30 min): Group 3-4 together
-# Medium tasks (30-60 min): Group 2-3 together  
+# Medium tasks (30-60 min): Group 2-3 together
 # Long tasks (> 60 min): Run individually or with one short task
 ```
 

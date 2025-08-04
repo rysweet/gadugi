@@ -343,7 +343,7 @@ sys.exit(0)
                     try:
                         json_output = json.loads(line)
                         break
-                    except:
+                    except Exception:
                         continue
 
             self.assertIsNotNone(json_output, "Should have JSON output")

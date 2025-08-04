@@ -6,17 +6,17 @@ installation:
   preferred_versions:
     # workflow-master: "2.1.0"  # Pin to specific version
     # code-reviewer: "latest"   # Always use latest
-    
+
   # Agent categories to auto-install
   auto_install_categories:
     - "development"
     - "testing"
-    
+
   # Agents to exclude from auto-installation
   excluded_agents:
     # - "experimental-agent"
     # - "deprecated-workflow"
-    
+
   # Conflict resolution preferences
   conflict_resolution:
     strategy: "prefer_newer"  # prefer_newer, prefer_older, prompt

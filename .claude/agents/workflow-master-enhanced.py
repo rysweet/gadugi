@@ -781,7 +781,7 @@ echo "Branch {branch_name} created and pushed successfully"
 - Total Tasks: {len(workflow.tasks)}
 - Completed: {len(completed_tasks)}
 - Failed: {len(failed_tasks)}
-- Progress: {len(completed_tasks)/len(workflow.tasks)*100:.1f}%
+- Progress: {len(completed_tasks) / len(workflow.tasks) * 100:.1f}%
 
 ### Timeline
 - Created: {workflow.created_at}
@@ -1677,7 +1677,7 @@ print(f"Review status saved: {{review_status}}")
                 ", ".join(test.fixtures_used) if test.fixtures_used else ""
             )
             content_parts.append(
-                f'    def {test.name}(self{", " + fixtures_params if fixtures_params else ""}):'
+                f"    def {test.name}(self{', ' + fixtures_params if fixtures_params else ''}):"
             )
             content_parts.append(f"        {test.documentation}")
             content_parts.append(f"        {test.setup_code}")

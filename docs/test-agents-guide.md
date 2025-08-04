@@ -158,18 +158,18 @@ Tests are only skipped with explicit justification:
 ```python
 class TestModuleName:
     """Comprehensive test suite for ModuleName."""
-    
+
     @pytest.fixture(autouse=True)
     def setup_and_cleanup(self):
         """Setup test environment and ensure cleanup."""
         # Setup code
         yield
         # Cleanup code
-    
+
     def test_function_happy_path(self, shared_fixture):
         """
         Test function with valid inputs.
-        
+
         Requirements:
         - Validates core functionality
         - Ensures proper return values
@@ -177,10 +177,10 @@ class TestModuleName:
         """
         # Arrange
         test_input = create_valid_input()
-        
+
         # Act
         result = target_function(test_input)
-        
+
         # Assert
         assert result == expected_value
         assert validate_side_effects()
@@ -331,7 +331,7 @@ logging.basicConfig(level=logging.DEBUG)
 solver = TestSolverAgent()
 result = solver.solve_test_failure(test_id)
 
-# Test Writer debugging  
+# Test Writer debugging
 writer = TestWriterAgent()
 result = writer.create_tests(code_file, context)
 ```
@@ -360,14 +360,14 @@ The agent framework is designed for extension:
 ```python
 class CustomTestSolverAgent(TestSolverAgent):
     """Custom test solver with project-specific logic."""
-    
+
     def _analyze_failure_patterns(self, error_message, test_code, category):
         # Add custom analysis logic
         return super()._analyze_failure_patterns(error_message, test_code, category)
 
 class CustomTestWriterAgent(TestWriterAgent):
     """Custom test writer with domain-specific patterns."""
-    
+
     def _create_individual_test(self, test_method, code_analysis, tdd_context):
         # Add custom test generation logic
         return super()._create_individual_test(test_method, code_analysis, tdd_context)

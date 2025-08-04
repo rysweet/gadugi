@@ -20,7 +20,7 @@ export class TerminalService {
   ): Promise<vscode.Terminal | undefined> {
     try {
       const terminalName = `Claude: ${worktreeName}`;
-      
+
       // Check if terminal already exists
       const existingTerminal = this.findTerminalByName(terminalName);
       if (existingTerminal) {
@@ -72,7 +72,7 @@ export class TerminalService {
     // Search through all VS Code terminals
     const allTerminals = vscode.window.terminals;
     const terminal = allTerminals.find(t => t.name === name && t.exitStatus === undefined);
-    
+
     if (terminal) {
       this.terminals.set(name, terminal);
     }
@@ -95,7 +95,7 @@ export class TerminalService {
 
     for (const worktree of worktrees) {
       const terminal = await this.createWorktreeTerminal(worktree.path, worktree.name, command);
-      
+
       if (terminal) {
         results.success++;
       } else {
@@ -123,7 +123,7 @@ export class TerminalService {
 
       terminal.sendText(command);
       terminal.show();
-      
+
       ErrorUtils.logInfo(`Executed command in terminal "${terminalName}": ${command}`, 'command-execution');
       return true;
 
@@ -156,7 +156,7 @@ export class TerminalService {
    * Get terminals that match the Claude naming pattern
    */
   getClaudeTerminals(): vscode.Terminal[] {
-    return this.getActiveTerminals().filter(terminal => 
+    return this.getActiveTerminals().filter(terminal =>
       terminal.name.startsWith('Claude:')
     );
   }
@@ -173,7 +173,7 @@ export class TerminalService {
 
       terminal.dispose();
       this.terminals.delete(terminalName);
-      
+
       ErrorUtils.logInfo(`Closed terminal "${terminalName}"`, 'terminal-management');
       return true;
 
@@ -211,14 +211,14 @@ export class TerminalService {
   async navigateToWorktree(worktreePath: string, worktreeName: string): Promise<vscode.Terminal | undefined> {
     try {
       const terminalName = `Navigate: ${worktreeName}`;
-      
+
       const terminal = vscode.window.createTerminal({
         name: terminalName,
         cwd: worktreePath
       });
 
       terminal.show();
-      
+
       ErrorUtils.logInfo(`Opened navigation terminal for ${worktreeName}`, 'navigation');
       return terminal;
 

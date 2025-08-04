@@ -221,7 +221,7 @@ class TaskAnalyzer:
                 first_line = f.readline().strip()
                 if "IMPLEMENTED" in first_line or "COMPLETED" in first_line:
                     return True
-        except:
+        except Exception:
             pass
 
         # Check for corresponding closed issue/PR (if pattern is predictable)

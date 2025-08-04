@@ -581,7 +581,9 @@ class TestCheckpointManager:
         checkpoint_ids = []
         for i in range(3):
             state.current_phase = i + 1
-            checkpoint_id = checkpoint_manager.create_checkpoint(state, f"Phase {i+1}")
+            checkpoint_id = checkpoint_manager.create_checkpoint(
+                state, f"Phase {i + 1}"
+            )
             checkpoint_ids.append(checkpoint_id)
 
         # List checkpoints
@@ -628,7 +630,7 @@ class TestCheckpointManager:
         # Create more checkpoints than the limit
         for i in range(7):  # max_checkpoints_per_task is 5
             state.current_phase = i + 1
-            checkpoint_manager.create_checkpoint(state, f"Checkpoint {i+1}")
+            checkpoint_manager.create_checkpoint(state, f"Checkpoint {i + 1}")
 
         # Trigger cleanup
         checkpoint_manager.cleanup_old_checkpoints("cleanup-checkpoints")

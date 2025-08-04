@@ -1,10 +1,4 @@
-"""
-Audit Logger for Container Execution.
-
-Provides comprehensive audit logging for container execution activities,
-including security events, resource usage, and operational activities.
-"""
-
+from datetime import timedelta
 import json
 import logging
 import hashlib
@@ -14,16 +8,23 @@ from datetime import datetime
 from pathlib import Path
 from enum import Enum
 import uuid
-
-# Import Enhanced Separation shared modules
 import sys
 import os
+from error_handling import GadugiError
+
+"""
+Audit Logger for Container Execution.
+
+Provides comprehensive audit logging for container execution activities,
+including security events, resource usage, and operational activities.
+"""
+
+
+# Import Enhanced Separation shared modules
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
 )
-from error_handling import GadugiError
-
 logger = logging.getLogger(__name__)
 
 

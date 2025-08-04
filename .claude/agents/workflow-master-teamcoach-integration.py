@@ -433,15 +433,15 @@ class TeamCoachIntegration:
         validation_tasks = []
         for task in workflow_state.tasks:
             if task.priority == "high" and task.name in ["implementation", "testing"]:
-                validation_task = TaskInfo(
-                    id=f"{task.id}_validation",
-                    name=f"{task.name}_validation",
-                    description=f"Validation for {task.description}",
-                    phase=task.phase,
-                    priority="medium",
-                    dependencies=[task.id],
-                    estimated_minutes=5,
-                )
+                validation_task = {
+                    "id": f"{task.id}_validation",
+                    "name": f"{task.name}_validation",
+                    "description": f"Validation for {getattr(task, 'description', '')}",
+                    "phase": getattr(task, "phase", None),
+                    "priority": "medium",
+                    "dependencies": [task.id],
+                    "estimated_minutes": 5,
+                }
                 validation_tasks.append(validation_task)
 
         # Add validation tasks to workflow

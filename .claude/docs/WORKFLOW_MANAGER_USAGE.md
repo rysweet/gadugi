@@ -71,7 +71,7 @@ Workflow complete! Feature delivered from issue #42 to PR #99.
 
 WorkflowManager handles common issues:
 - Git conflicts
-- Test failures  
+- Test failures
 - CI/CD issues
 - Review feedback
 

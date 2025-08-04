@@ -1,3 +1,13 @@
+from datetime import timedelta
+import logging
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import List, Dict, Any, Optional
+from ..phase1.performance_analytics import AgentPerformanceAnalyzer, PerformanceMetrics
+from ..phase1.capability_assessment import CapabilityAssessment, AgentCapability
+from ..phase2.task_matcher import TaskAgentMatcher
+
 """
 TeamCoach Phase 3: Coaching Engine
 
@@ -5,15 +15,6 @@ Provides intelligent coaching recommendations for agent performance improvement,
 skill development guidance, and team optimization strategies.
 """
 
-import logging
-from dataclasses import dataclass
-from datetime import datetime
-from enum import Enum
-from typing import List, Dict, Any, Optional
-
-from ..phase1.performance_analytics import AgentPerformanceAnalyzer, PerformanceMetrics
-from ..phase1.capability_assessment import CapabilityAssessment, AgentCapability
-from ..phase2.task_matcher import TaskAgentMatcher
 
 logger = logging.getLogger(__name__)
 
@@ -832,4 +833,3 @@ class CoachingEngine:
 
 
 # Import timedelta for date calculations
-from datetime import timedelta

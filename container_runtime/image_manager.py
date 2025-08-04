@@ -246,7 +246,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \\
     && apt-get clean
 
 # Install Python packages if specified
-{f'RUN pip install --no-cache-dir {packages_str}' if packages_str else ''}
+{f"RUN pip install --no-cache-dir {packages_str}" if packages_str else ""}
 
 # Create non-root user
 RUN groupadd -g {context.group_id} gadugi \\
@@ -284,7 +284,7 @@ RUN apk update && apk upgrade \\
     && rm -rf /var/cache/apk/*
 
 # Install npm packages if specified
-{f'RUN npm install -g {packages_str}' if packages_str else ''}
+{f"RUN npm install -g {packages_str}" if packages_str else ""}
 
 # Create non-root user
 RUN addgroup -g {context.group_id} gadugi \\

@@ -9,17 +9,21 @@ This package provides utilities for the Gadugi memory system:
 """
 
 from .memory_manager import MemoryManager, MemoryLevel, MemoryEntry, MemorySection
-from .agent_interface import AgentMemoryInterface, AgentPermissions, get_memory_interface
+from .agent_interface import (
+    AgentMemoryInterface,
+    AgentPermissions,
+    get_memory_interface,
+)
 from .security_manager import SecurityManager, SecurityResult
 
 __all__ = [
-    'MemoryManager',
-    'MemoryLevel',
-    'MemoryEntry',
-    'MemorySection',
-    'AgentMemoryInterface',
-    'AgentPermissions',
-    'get_memory_interface',
-    'SecurityManager',
-    'SecurityResult'
+    "MemoryManager",
+    "MemoryLevel",
+    "MemoryEntry",
+    "MemorySection",
+    "AgentMemoryInterface",
+    "AgentPermissions",
+    "get_memory_interface",
+    "SecurityManager",
+    "SecurityResult",
 ]

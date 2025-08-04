@@ -71,23 +71,23 @@ class PromptGenerator:
 - **Task ID**: {context.task_id}
 - **Task Name**: {context.task_name}
 - **Original Prompt**: {context.original_prompt}
-- **Phase Focus**: {context.phase_focus or 'Full Implementation'}
+- **Phase Focus**: {context.phase_focus or "Full Implementation"}
 
 ## Implementation Requirements
 
-{sections.get('requirements', 'See original prompt for detailed requirements.')}
+{sections.get("requirements", "See original prompt for detailed requirements.")}
 
 ## Technical Specifications
 
-{sections.get('technical_analysis', 'See original prompt for technical details.')}
+{sections.get("technical_analysis", "See original prompt for technical details.")}
 
 ## Implementation Plan
 
-{sections.get('implementation_plan', 'Follow the implementation steps from the original prompt.')}
+{sections.get("implementation_plan", "Follow the implementation steps from the original prompt.")}
 
 ## Success Criteria
 
-{sections.get('success_criteria', 'Complete all phases successfully with working implementation.')}
+{sections.get("success_criteria", "Complete all phases successfully with working implementation.")}
 
 ## Execution Instructions
 

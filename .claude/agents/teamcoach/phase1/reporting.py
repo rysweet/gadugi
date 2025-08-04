@@ -1,19 +1,4 @@
-"""
-TeamCoach Phase 1: Performance Reporting System
-
-This module provides comprehensive performance reporting and visualization capabilities.
-The ReportingSystem class generates detailed reports, dashboards, and insights from
-collected performance metrics and capability assessments.
-
-Key Features:
-- Comprehensive performance reports
-- Interactive dashboards
-- Trend analysis and visualization
-- Comparative performance analysis
-- Automated report generation
-- Multiple output formats (JSON, HTML, PDF)
-"""
-
+import numpy as np
 import logging
 import json
 from datetime import datetime
@@ -31,6 +16,25 @@ from ...shared.state_management import StateManager
 from .performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
 from .capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from .metrics_collector import MetricsCollector
+
+"""
+TeamCoach Phase 1: Performance Reporting System
+
+This module provides comprehensive performance reporting and visualization capabilities.
+The ReportingSystem class generates detailed reports, dashboards, and insights from
+collected performance metrics and capability assessments.
+
+Key Features:
+- Comprehensive performance reports
+- Interactive dashboards
+- Trend analysis and visualization
+- Comparative performance analysis
+- Automated report generation
+- Multiple output formats (JSON, HTML, PDF)
+"""
+
+
+# Import shared modules and Phase 1 components
 
 
 class ReportType(Enum):
@@ -477,7 +481,7 @@ class ReportingSystem:
 ## Performance Summary
 
 **Agent**: {performance_data.agent_name}
-**Analysis Period**: {performance_data.time_period[0].strftime('%Y-%m-%d')} to {performance_data.time_period[1].strftime('%Y-%m-%d')}
+**Analysis Period**: {performance_data.time_period[0].strftime("%Y-%m-%d")} to {performance_data.time_period[1].strftime("%Y-%m-%d")}
 
 ### Key Metrics
 - **Success Rate**: {performance_data.success_rate:.1%}
@@ -531,7 +535,7 @@ class ReportingSystem:
 ## Capability Analysis
 
 **Agent**: {capability_profile.agent_name}
-**Profile Generated**: {capability_profile.profile_generated.strftime('%Y-%m-%d %H:%M')}
+**Profile Generated**: {capability_profile.profile_generated.strftime("%Y-%m-%d %H:%M")}
 **Versatility Score**: {capability_profile.versatility_score:.2f}
 
 ### Primary Strengths
@@ -1139,8 +1143,8 @@ class ReportingSystem:
     <h1>{report.title}</h1>
 
     <div class="metadata">
-        <p><strong>Generated:</strong> {report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
-        <p><strong>Period:</strong> {report.time_period[0].strftime('%Y-%m-%d')} to {report.time_period[1].strftime('%Y-%m-%d')}</p>
+        <p><strong>Generated:</strong> {report.generated_at.strftime("%Y-%m-%d %H:%M:%S")}</p>
+        <p><strong>Period:</strong> {report.time_period[0].strftime("%Y-%m-%d")} to {report.time_period[1].strftime("%Y-%m-%d")}</p>
         <p><strong>Generation Time:</strong> {report.generation_time:.2f} seconds</p>
     </div>
 
@@ -1158,7 +1162,7 @@ class ReportingSystem:
             # Add charts
             for i, chart in enumerate(section.charts):
                 html += "        <div class='chart'>\n"
-                html += f"            <img src='data:image/png;base64,{chart}' alt='Chart {i+1}' style='max-width: 100%;'>\n"
+                html += f"            <img src='data:image/png;base64,{chart}' alt='Chart {i + 1}' style='max-width: 100%;'>\n"
                 html += "        </div>\n"
 
             html += "    </div>\n"

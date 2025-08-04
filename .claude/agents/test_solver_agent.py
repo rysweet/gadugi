@@ -491,14 +491,14 @@ class TestSolverAgent:
                 )
 
                 if result.returncode != 0:
-                    validation_results.append(f"Run {i+1}: FAILED")
+                    validation_results.append(f"Run {i + 1}: FAILED")
                     return {
                         "success": False,
                         "details": validation_results
                         + [f"Test still failing: {result.stderr}"],
                     }
                 else:
-                    validation_results.append(f"Run {i+1}: PASSED")
+                    validation_results.append(f"Run {i + 1}: PASSED")
 
             # Run related tests to check for regression
             test_file = test_identifier.split("::")[0]
@@ -662,7 +662,7 @@ class TestSolverAgent:
                 [sys.executable, "-m", "pip", "list"], capture_output=True, text=True
             )
             return result.stdout.split("\n")
-        except:
+        except Exception:
             return []
 
     def _calculate_confidence_score(

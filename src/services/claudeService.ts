@@ -50,7 +50,7 @@ export class ClaudeService {
   ): Promise<{ success: boolean; pid?: number; error?: string }> {
     try {
       const [cmd, ...args] = command.split(' ');
-      
+
       return await ProcessUtils.startProcess(cmd, args, workingDirectory);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -72,7 +72,7 @@ export class ClaudeService {
     try {
       // Send the Claude command to the terminal
       terminal.sendText(command);
-      
+
       ErrorUtils.logInfo(`Launched Claude in terminal with command: ${command}`, 'claude-terminal-launch');
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -100,13 +100,13 @@ export class ClaudeService {
   async killClaudeProcess(pid: number): Promise<boolean> {
     try {
       const result = await ProcessUtils.killProcess(pid);
-      
+
       if (result) {
         ErrorUtils.logInfo(`Successfully killed Claude process ${pid}`, 'claude-process-management');
       } else {
         ErrorUtils.logWarning(`Failed to kill Claude process ${pid}`, 'claude-process-management');
       }
-      
+
       return result;
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
@@ -133,15 +133,15 @@ export class ClaudeService {
    */
   async validateClaudeInstallation(): Promise<boolean> {
     const result = await this.isClaudeInstalled();
-    
+
     if (!result.installed) {
       const message = 'Claude Code is not installed or not accessible. Please install Claude Code CLI to use this extension.';
       const action = await ErrorUtils.showErrorMessage(message, 'Install Guide', 'Dismiss');
-      
+
       if (action === 'Install Guide') {
         vscode.env.openExternal(vscode.Uri.parse('https://claude.ai/docs/cli'));
       }
-      
+
       return false;
     }
 
@@ -165,7 +165,7 @@ export class ClaudeService {
       return new Promise((resolve) => {
         // Test with --help flag to avoid actually starting Claude
         const testCommand = command.replace('--resume', '--help');
-        
+
         exec(testCommand, { timeout: ClaudeService.TIMEOUT_MS }, (error, stdout, stderr) => {
           if (error) {
             resolve({
@@ -210,7 +210,7 @@ export class ClaudeService {
     const interval = setInterval(async () => {
       const isRunning = await this.isClaudeProcessRunning(pid);
       callback(isRunning);
-      
+
       if (!isRunning) {
         clearInterval(interval);
       }
@@ -227,10 +227,10 @@ export class ClaudeService {
     try {
       const fs = require('fs');
       const path = require('path');
-      
+
       // Check for common Claude configuration files
       const configFiles = ['.claude', '.claude.json', 'claude.json'];
-      
+
       for (const configFile of configFiles) {
         const configPath = path.join(workingDirectory, configFile);
         if (fs.existsSync(configPath)) {
@@ -240,7 +240,7 @@ export class ClaudeService {
           };
         }
       }
-      
+
       return { hasClaudeConfig: false };
     } catch (error) {
       return { hasClaudeConfig: false };
@@ -255,7 +255,7 @@ export class ClaudeService {
     command: string = this.getClaudeCommand()
   ): LaunchConfig {
     const [cmd, ...args] = command.split(' ');
-    
+
     return {
       command: cmd,
       args,
@@ -281,7 +281,7 @@ export class ClaudeService {
     for (const directory of directories) {
       try {
         const result = await this.launchClaude(directory, command);
-        
+
         if (result.success && result.pid) {
           results.successful++;
           results.pids.push(result.pid);
@@ -289,7 +289,7 @@ export class ClaudeService {
           results.failed++;
           results.errors.push(result.error || `Failed to launch in ${directory}`);
         }
-        
+
         // Small delay between launches to avoid overwhelming the system
         await new Promise(resolve => setTimeout(resolve, 500));
       } catch (error) {
@@ -304,16 +304,16 @@ export class ClaudeService {
   /**
    * Get Claude process statistics
    */
-  async getClaudeStats(): Promise<{ 
-    totalProcesses: number; 
-    runningProcesses: number; 
+  async getClaudeStats(): Promise<{
+    totalProcesses: number;
+    runningProcesses: number;
     avgRuntime: number;
     totalMemoryUsage: number;
   }> {
     try {
       const processes = await this.getRunningClaudeProcesses();
       const now = new Date();
-      
+
       let totalRuntime = 0;
       let totalMemory = 0;
       let runningCount = 0;

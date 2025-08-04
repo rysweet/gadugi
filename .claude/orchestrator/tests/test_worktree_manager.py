@@ -309,15 +309,15 @@ class TestWorktreeManager(unittest.TestCase):
         """Test cleanup of all worktrees"""
         # Create multiple worktrees
         for i in range(3):
-            task_id = f"task{i+1}"
+            task_id = f"task{i + 1}"
             worktree_path = self.worktrees_dir / f"task-{task_id}"
             worktree_path.mkdir(parents=True)
 
             worktree_info = WorktreeInfo(
                 task_id=task_id,
-                task_name=f"Task {i+1}",
+                task_name=f"Task {i + 1}",
                 worktree_path=worktree_path,
-                branch_name=f"feature/parallel-task{i+1}",
+                branch_name=f"feature/parallel-task{i + 1}",
                 status="completed",
                 created_at="2025-08-01T12:00:00",
             )
@@ -417,12 +417,12 @@ detached
         # Create worktrees with different statuses
         statuses = ["active", "completed", "failed", "active"]
         for i, status in enumerate(statuses):
-            task_id = f"task{i+1}"
+            task_id = f"task{i + 1}"
             worktree_info = WorktreeInfo(
                 task_id=task_id,
-                task_name=f"Task {i+1}",
+                task_name=f"Task {i + 1}",
                 worktree_path=self.worktrees_dir / f"task-{task_id}",
-                branch_name=f"feature/parallel-task{i+1}",
+                branch_name=f"feature/parallel-task{i + 1}",
                 status=status,
                 created_at="2025-08-01T12:00:00",
             )
@@ -476,7 +476,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         # Clean up any worktrees first
         try:
             self.manager.cleanup_all_worktrees(force=True)
-        except:
+        except Exception:
             pass  # Ignore cleanup errors
 
         import shutil

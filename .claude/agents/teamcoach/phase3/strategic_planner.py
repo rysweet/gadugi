@@ -246,8 +246,8 @@ class StrategicPlanner:
         for i, obj in enumerate(business_objectives):
             # Create goal from objective
             goal = StrategicGoal(
-                goal_id=f"goal_{i+1}",
-                title=obj.get("title", f"Strategic Goal {i+1}"),
+                goal_id=f"goal_{i + 1}",
+                title=obj.get("title", f"Strategic Goal {i + 1}"),
                 description=obj.get("description", ""),
                 target_metric=obj.get("metric", "performance_score"),
                 current_value=self._get_current_metric_value(

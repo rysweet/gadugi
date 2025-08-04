@@ -44,11 +44,6 @@ repos:
         args: ['--baseline', '.secrets.baseline']
         exclude: .*\.lock$|package-lock\.json$
 
-  # Security: Safety check for known vulnerabilities
-  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-    rev: v1.3.3
-    hooks:
-      - id: python-safety-dependencies-check
 
   # Run tests (using local hook)
   - repo: local

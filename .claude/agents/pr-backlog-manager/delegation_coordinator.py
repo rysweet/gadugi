@@ -245,14 +245,14 @@ class DelegationCoordinator:
 # Issue Resolution for PR #{pr_number}
 
 ## Context
-- Repository: {pr_context.get('repository', 'Unknown')}
-- PR Title: {pr_context.get('title', 'N/A')}
-- PR Author: {pr_context.get('author', 'N/A')}
+- Repository: {pr_context.get("repository", "Unknown")}
+- PR Title: {pr_context.get("title", "N/A")}
+- PR Author: {pr_context.get("author", "N/A")}
 - Blocking Issue: {blocking_issue}
 
 ## Auto-Approve Context
 - Auto-approve enabled: {self.auto_approve}
-- GitHub Actions environment: {pr_context.get('github_actions', False)}
+- GitHub Actions environment: {pr_context.get("github_actions", False)}
 - Delegation timestamp: {datetime.now().isoformat()}
 """
 

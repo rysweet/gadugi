@@ -7,7 +7,7 @@ A secure, containerized execution environment for the Gadugi multi-agent system 
 The Container Execution Environment provides:
 
 - **Security Isolation**: Execute code in completely isolated containers
-- **Resource Management**: Configurable CPU, memory, disk, and network limits  
+- **Resource Management**: Configurable CPU, memory, disk, and network limits
 - **Multiple Runtimes**: Support for Python, Node.js, Shell, and multi-language execution
 - **Security Policies**: Comprehensive security policies with different levels of restriction
 - **Audit Logging**: Complete audit trail of all execution activities
@@ -267,7 +267,7 @@ recent_violations = engine.audit_logger.search_events(
 The system automatically creates hardened runtime images:
 
 - **Python**: Based on python:3.11-slim with security hardening
-- **Node.js**: Based on node:18-alpine with security hardening  
+- **Node.js**: Based on node:18-alpine with security hardening
 - **Shell**: Based on alpine:latest with minimal tools
 - **Multi**: Ubuntu-based image with multiple runtimes
 
@@ -337,7 +337,7 @@ print(f"Total memory: {usage['total_memory_mb']} MB")
 Resource alerts for critical situations:
 
 - CPU usage > 95%
-- Memory usage > 95% 
+- Memory usage > 95%
 - Disk usage > 95%
 - Container failures
 - Security violations
@@ -437,7 +437,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 
-- Create an issue in the GitHub repository  
+- Create an issue in the GitHub repository
 - Review the troubleshooting guide
 - Check the audit logs for detailed error information
 - Enable debug logging for detailed diagnostics

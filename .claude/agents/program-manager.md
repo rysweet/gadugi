@@ -133,7 +133,7 @@ gh issue create --title "Title" --body "Description" --label "idea"
 # Update priorities
 python .memory_utils/memory_manager.py add project priorities "Top Priorities" "1. Complete Program Manager\n2. ..."
 
-# Read current priorities  
+# Read current priorities
 python .memory_utils/memory_manager.py read project priorities
 
 # Record triage activity
@@ -142,7 +142,7 @@ python .memory_utils/memory_manager.py add agents program-manager "Issue Triage"
 
 ## Integration with Other Agents
 - Works with **workflow-manager** to ensure issues are implementation-ready
-- Coordinates with **orchestrator-agent** on multi-issue initiatives  
+- Coordinates with **orchestrator-agent** on multi-issue initiatives
 - Provides context to **task-analyzer** about project priorities
 - Updates documentation that **code-reviewer** references
 

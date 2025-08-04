@@ -517,7 +517,7 @@ class TestWriterAgent:
         # Combine all test code
         full_test_code = f"""
 {test_spec.documentation}
-def {test_spec.name}({', '.join(test_spec.fixtures_used)}):
+def {test_spec.name}({", ".join(test_spec.fixtures_used)}):
     {test_spec.setup_code}
 
     {test_spec.test_code}
@@ -627,7 +627,7 @@ def {test_spec.name}({', '.join(test_spec.fixtures_used)}):
 
 This test validates:
 - {test.purpose}
-- Coverage areas: {', '.join(test.coverage_areas)}
+- Coverage areas: {", ".join(test.coverage_areas)}
 - Test strategy: {self._describe_test_strategy(test)}
 
 Requirements verified:
@@ -639,7 +639,7 @@ Expected behavior:
 - Verification: {self._describe_test_verification(test)}
 
 Maintenance notes:
-- Test uses fixtures: {', '.join(test.fixtures_used)}
+- Test uses fixtures: {", ".join(test.fixtures_used)}
 - Idempotent: Yes
 - Parallel safe: Yes
 - Dependencies: {self._describe_test_dependencies(test)}
@@ -867,7 +867,7 @@ Maintenance notes:
     ) -> str:
         """Generate generic test code."""
         return f"""
-    # Test {category.replace('_', ' ')} for {method_name}
+    # Test {category.replace("_", " ")} for {method_name}
     # Arrange
     test_setup = prepare_test_for_{category}()
 
@@ -1005,7 +1005,7 @@ Maintenance notes:
         return f"""
     # Setup for {method_name} test
     target_object = create_test_target()
-    # Using fixtures: {', '.join(fixtures_used)}
+    # Using fixtures: {", ".join(fixtures_used)}
 """
 
     def _generate_assertions(self, method_name: str, category: str) -> str:
@@ -1023,7 +1023,7 @@ Maintenance notes:
 
         return f"""
     # Cleanup after test
-    # Fixtures handle automatic cleanup: {', '.join(fixtures_used)}
+    # Fixtures handle automatic cleanup: {", ".join(fixtures_used)}
 """
 
     def _generate_test_documentation(
@@ -1034,14 +1034,14 @@ Maintenance notes:
     ) -> str:
         """Generate comprehensive test documentation."""
         return f'''"""
-{test_method['purpose']}
+{test_method["purpose"]}
 
-Target: {test_method['target_method']}
-Category: {test_method['category']}
-TDD Context: {"Yes" if tdd_context['is_tdd_scenario'] else "No"}
+Target: {test_method["target_method"]}
+Category: {test_method["category"]}
+TDD Context: {"Yes" if tdd_context["is_tdd_scenario"] else "No"}
 
 This test ensures:
-- Correct behavior under {test_method['category']} conditions
+- Correct behavior under {test_method["category"]} conditions
 - Proper error handling and edge cases
 - Idempotent execution
 - Resource cleanup

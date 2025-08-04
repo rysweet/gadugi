@@ -566,7 +566,7 @@ class WorkflowOptimizer:
                         if t.get("communication_delay", 0)
                         > self.bottleneck_thresholds["communication_delay"]
                     ],
-                    description=f"Communication delays averaging {avg_delay/60:.1f} minutes",
+                    description=f"Communication delays averaging {avg_delay / 60:.1f} minutes",
                     evidence={
                         "agent_pair": pair,
                         "average_delay": avg_delay,
@@ -1003,7 +1003,7 @@ class WorkflowOptimizer:
                     try:
                         nums = part.split("-")
                         return int(float(nums[1]))  # Use upper bound
-                    except:
+                    except Exception:
                         pass
         elif "week" in effort_lower:
             # Convert weeks to days
@@ -1015,7 +1015,7 @@ class WorkflowOptimizer:
                     try:
                         nums = part.split("-")
                         return int(float(nums[1])) * 5
-                    except:
+                    except Exception:
                         pass
 
         return 7  # Default to 1 week

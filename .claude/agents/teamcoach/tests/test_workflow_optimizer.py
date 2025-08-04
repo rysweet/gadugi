@@ -193,7 +193,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
                 {
                     "task_id": f"chain_{i}",
                     "duration": 3600,
-                    "dependencies": [f"chain_{i-1}"] if i > 0 else [],
+                    "dependencies": [f"chain_{i - 1}"] if i > 0 else [],
                     "start_time": datetime.utcnow().timestamp() + i * 3600,
                     "end_time": datetime.utcnow().timestamp() + (i + 1) * 3600,
                 }

@@ -1,0 +1,19 @@
+{
+  "checkpoint_id": "72151870",
+  "description": "test checkpoint",
+  "created_at": "2025-08-03T22:23:47.869222+00:00Z",
+  "state": {
+    "task_id": "test-checkpoint-001",
+    "prompt_file": "test-prompt.txt",
+    "status": "pending",
+    "branch": null,
+    "issue_number": null,
+    "pr_number": null,
+    "current_phase": 0,
+    "current_phase_name": "testing",
+    "created_at": "2025-08-03T22:23:47.869149+00:00Z",
+    "updated_at": "2025-08-03T22:23:47.869152+00:00Z",
+    "context": {},
+    "error_info": {}
+  }
+}

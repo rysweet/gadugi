@@ -1,3 +1,17 @@
+from datetime import timedelta
+import logging
+import threading
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Callable, Union, Tuple
+from dataclasses import dataclass, field
+from enum import Enum
+from collections import defaultdict, deque
+
+# Import shared modules
+from ...shared.task_tracking import TaskMetrics
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
+from ...shared.state_management import StateManager
+
 """
 TeamCoach Phase 1: Metrics Collection Infrastructure
 
@@ -14,18 +28,8 @@ Key Features:
 - Extensible metric definitions
 """
 
-import logging
-import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Callable, Union, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
-from collections import defaultdict, deque
 
 # Import shared modules
-from ...shared.task_tracking import TaskMetrics
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
 
 
 class MetricType(Enum):
@@ -756,5 +760,5 @@ class MetricsCollector:
         """Cleanup when collector is destroyed."""
         try:
             self.stop_collection()
-        except:
+        except Exception:
             pass  # Ignore errors during cleanup

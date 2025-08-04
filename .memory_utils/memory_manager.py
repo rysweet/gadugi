@@ -57,7 +57,7 @@ class MemoryEntry:
             try:
                 timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
                 return cls(content, timestamp)
-            except:
+            except Exception:
                 pass
         return None
 

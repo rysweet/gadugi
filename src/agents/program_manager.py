@@ -1,10 +1,4 @@
-"""
-Program Manager Agent Implementation
-
-Manages project health through issue lifecycle management, priority tracking,
-and documentation maintenance.
-"""
-
+from datetime import timedelta
 import json
 import os
 import re
@@ -13,9 +7,17 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+import sys
+
+"""
+Program Manager Agent Implementation
+
+Manages project health through issue lifecycle management, priority tracking,
+and documentation maintenance.
+"""
+
 
 # Add parent directory to path for imports
-import sys
 
 sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -538,7 +540,7 @@ class ProgramManager:
         try:
             date = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
             return (datetime.now(date.tzinfo) - date).days
-        except:
+        except Exception:
             return 0
 
     def update_project_priorities(self) -> bool:
@@ -576,7 +578,7 @@ class ProgramManager:
             top_ready = unblocked_ready[:3]
             ready_list = ", ".join([f"#{issue['number']}" for issue in top_ready])
             priorities.append(
-                f"{priority_number}. **Implement ready issues**: {ready_list} (and {len(unblocked_ready)-3} more)"
+                f"{priority_number}. **Implement ready issues**: {ready_list} (and {len(unblocked_ready) - 3} more)"
             )
             priority_number += 1
 
@@ -896,9 +898,6 @@ class ProgramManager:
             "maintenance_complete",
             f"Completed full project maintenance cycle at {datetime.now().isoformat()}",
         )
-
-
-from datetime import timedelta
 
 
 if __name__ == "__main__":
