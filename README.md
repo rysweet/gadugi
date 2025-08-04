@@ -73,28 +73,6 @@ Once installed, invoke agents as needed:
 - `/agent:code-reviewer` - For code review tasks
 - `/agent:prompt-writer` - For creating structured prompts
 
-### Important: Hook Limitations
-
-**Claude Code hooks cannot directly invoke agents using `/agent:agent-name` syntax.**
-
-Hooks execute in shell environments where the `/agent:` syntax is not recognized, resulting in "No such file or directory" errors. Instead:
-
-**❌ This fails in hooks:**
-```json
-{
-  "command": "/agent:agent-manager check-and-update-agents"
-}
-```
-
-**✅ Use hooks for notifications:**
-```json
-{
-  "command": "echo 'Use \"/agent:agent-manager check-and-update-agents\" to check for updates'"
-}
-```
-
-Then manually invoke agents in Claude Code sessions as needed.
-
 ## Available Agents
 
 ### Workflow Management
