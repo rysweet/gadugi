@@ -55,6 +55,21 @@
         "title": "Navigate to Worktree",
         "icon": "$(folder-opened)",
         "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.showGitStatus",
+        "title": "Show Git Status",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.showGitSetup",
+        "title": "Show Git Setup Guidance",
+        "category": "Gadugi"
+      },
+      {
+        "command": "gadugi.resetGitSetupGuidance",
+        "title": "Reset Git Setup Guidance",
+        "category": "Gadugi"
       }
     ],
     "views": {
@@ -137,6 +152,7 @@
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
+    "@types/sinon": "^10.0.13",
     "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
@@ -144,6 +160,7 @@
     "eslint": "^8.28.0",
     "mocha": "^10.1.0",
     "nyc": "^15.1.0",
+    "sinon": "^15.0.1",
     "typescript": "^4.9.4"
   },
   "repository": {
