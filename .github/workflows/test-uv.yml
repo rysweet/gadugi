@@ -28,10 +28,10 @@ jobs:
     - name: Install Docker (Ubuntu only)
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get update
-        sudo apt-get install -y docker.io
-        sudo systemctl start docker
-        sudo usermod -aG docker $USER
+        # Docker is pre-installed on GitHub-hosted Ubuntu runners
+        # Just verify it's working
+        docker --version
+        sudo systemctl status docker || true
 
     - name: Create virtual environment
       run: uv venv --python ${{ matrix.python-version }}
