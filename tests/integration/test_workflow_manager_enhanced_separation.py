@@ -32,11 +32,7 @@ sys.path.append(
 )
 
 from github_operations import GitHubOperations
-<<<<<<< HEAD:tests/integration/test_workflow_manager_enhanced_separation.py
-from interfaces import AgentConfig, ErrorContext, TaskData
-=======
 from interfaces import AgentConfig, TaskData, ErrorContext
->>>>>>> 246d12a (Resolve merge conflicts and stage all changes after ruff migration):tests/integration/test_workflow_master_enhanced_separation.py
 from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
 from task_tracking import (
     TaskMetrics,
@@ -88,7 +84,9 @@ class TestWorkflowManagerIntegration:
         assert self.github_ops.config == self.config
 
         # Test circuit breaker initialization
-        github_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=300)
+        github_circuit_breaker = CircuitBreaker(
+            failure_threshold=3, recovery_timeout=300
+        )
         implementation_circuit_breaker = CircuitBreaker(
             failure_threshold=5, recovery_timeout=600
         )
@@ -408,7 +406,7 @@ class TestWorkflowManagerIntegration:
             "estimated_recovery_time": 300,
             "rollback_target": "last_known_good_commit",
         }
-        
+
         assert mock_recovery_plan["recovery_strategy"] == "rollback_and_retry"
         assert "estimated_recovery_time" in mock_recovery_plan
 
@@ -434,11 +432,7 @@ class TestWorkflowManagerIntegration:
         for i, phase in enumerate(phases_to_test):
             # Start phase
             self.phase_tracker.start_phase(phase)
-<<<<<<< HEAD:tests/integration/test_workflow_manager_enhanced_separation.py
-            self.task_metrics.record_phase_start(f"phase_{phase}")
-=======
             self.task_metrics.record_phase_start(phase.name.lower())
->>>>>>> 246d12a (Resolve merge conflicts and stage all changes after ruff migration):tests/integration/test_workflow_master_enhanced_separation.py
 
             # Simulate phase work (mock)
             import time
@@ -480,6 +474,7 @@ class TestWorkflowManagerIntegration:
 
         # Test inconsistent state detection
         from types import SimpleNamespace
+
         inconsistent_state = SimpleNamespace(
             task_id="inconsistent-test",
             phase=WorkflowPhase.REVIEW,  # Advanced phase

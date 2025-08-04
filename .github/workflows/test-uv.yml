@@ -66,6 +66,6 @@ jobs:
 
     - name: Run ruff check (lint and format)
       run: uv run ruff check .
-  
+
     - name: Run ruff format check
       run: uv run ruff format --check .

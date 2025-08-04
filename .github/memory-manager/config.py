@@ -392,7 +392,7 @@ def main():
         # Validate configuration
         errors = manager.validate_config()
         if errors:
-            print(f"\nConfiguration errors:")
+            print("\nConfiguration errors:")
             for error in errors:
                 print(f"  - {error}")
         else:

@@ -503,7 +503,7 @@ def run_comprehensive_tests():
     if result.errors:
         print("\nErrors:")
         for test, traceback in result.errors:
-            split_tb = traceback.split('\n')
+            split_tb = traceback.split("\n")
             print(f"  - {test}: {split_tb[-2]}")
 
     return result.wasSuccessful()

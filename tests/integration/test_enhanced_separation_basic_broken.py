@@ -466,7 +466,7 @@ class TestEnhancedSeparationCodeReduction:
         lines_saved = total_original_lines - total_after_lines
         reduction_percentage = (lines_saved / total_original_lines) * 100
 
-        print(f"Code Duplication Reduction Analysis:")
+        print("Code Duplication Reduction Analysis:")
         print(f"Original total lines: {total_original_lines}")
         print(f"Duplicated lines (29%): {duplicated_lines}")
         print(f"After Enhanced Separation: {total_after_lines}")
@@ -474,9 +474,9 @@ class TestEnhancedSeparationCodeReduction:
         print(f"Reduction percentage: {reduction_percentage:.1f}%")
 
         # Should achieve significant reduction
-        assert reduction_percentage > 15.0, (
-            f"Expected >15% reduction, got {reduction_percentage:.1f}%"
-        )
+        assert (
+            reduction_percentage > 15.0
+        ), f"Expected >15% reduction, got {reduction_percentage:.1f}%"
         assert lines_saved > 200, f"Expected >200 lines saved, got {lines_saved}"
 
         print(

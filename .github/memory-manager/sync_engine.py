@@ -474,7 +474,7 @@ def main():
         # Perform sync
         result = sync_engine.sync()
 
-        print(f"\nSync result:")
+        print("\nSync result:")
         print(f"Success: {result.success}")
         print(f"Duration: {result.duration.total_seconds():.1f}s")
         print(f"Created issues: {result.created_issues}")
@@ -483,7 +483,7 @@ def main():
         print(f"Errors: {len(result.errors)}")
 
         if result.errors:
-            print(f"\nErrors:")
+            print("\nErrors:")
             for error in result.errors:
                 print(f"  - {error}")
 

@@ -7,7 +7,7 @@ The XPIA Defense System provides comprehensive protection against Cross-Prompt I
 ## Key Features
 
 - **Real-time Threat Detection**: Identifies injection attacks, role manipulation, command injection, and information extraction attempts
-- **Content Sanitization**: Removes or neutralizes malicious content while preserving legitimate functionality  
+- **Content Sanitization**: Removes or neutralizes malicious content while preserving legitimate functionality
 - **Transparent Integration**: Works seamlessly with existing agents through middleware hooks
 - **Performance Optimized**: <100ms processing time for typical content validation
 - **Comprehensive Logging**: Full audit trail of all security decisions and threat detections
