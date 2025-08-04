@@ -41,6 +41,19 @@ log_warning() {
     echo -e "${YELLOW}[WARN]${NC} $*"
 }
 
+# Cross-platform date helper function
+get_date_minutes_ago() {
+    local minutes_ago="$1"
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - use date -v
+        date -v-"${minutes_ago}M" -Iseconds
+    else
+        # Linux/GNU date - use date -d
+        date -d "${minutes_ago} minutes ago" -Iseconds
+    fi
+}
+
 # Test helper functions
 run_test() {
     local test_name="$1"
@@ -118,7 +131,7 @@ test_dry_run_option() {
             "number": 123,
             "title": "Feature Implementation",
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'
@@ -142,14 +155,14 @@ test_orphaned_pr_detection() {
             "number": 123,
             "title": "Old Feature Implementation",
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         },
         {
             "number": 124,
             "title": "Recent Feature Implementation", 
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '2 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 2)'",
             "reviews": []
         }
     ]'
@@ -173,14 +186,14 @@ test_workflow_pr_identification() {
             "number": 125,
             "title": "Feature Implementation", 
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         },
         {
             "number": 126,
             "title": "Manual Bug Fix",
             "author": {"login": "test-user"}, 
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'
@@ -204,7 +217,7 @@ test_max_age_parameter() {
             "number": 127,
             "title": "Feature Implementation",
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '3 minutes ago' -Iseconds)'", 
+            "createdAt": "'$(get_date_minutes_ago 3)'", 
             "reviews": []
         }
     ]'
@@ -244,7 +257,7 @@ test_logging_functionality() {
             "number": 128,
             "title": "Feature Implementation",
             "author": {"login": "test-user"}, 
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'
@@ -288,7 +301,7 @@ EOF
             "number": 129,
             "title": "State File Test Implementation",
             "author": {"login": "test-user"},
-            "createdAt": "'$(date -d '10 minutes ago' -Iseconds)'",
+            "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'

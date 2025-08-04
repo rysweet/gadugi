@@ -423,12 +423,16 @@ TaskData(
    ```bash
    # After PR creation confirmation
    echo "✅ Phase 8 complete: PR #$PR_NUMBER created"
-   echo "⏱️  Starting 30-second countdown to Phase 9..."
-   sleep 30
-   echo "🚨 AUTOMATIC Phase 9 execution starting NOW"
+   echo "⏱️  Phase 9 enforcement script triggering..."
    
-   # NO user intervention - automatic invocation
-   invoke_code_reviewer_automatically
+   # Execute the enforcement script in background for automatic execution
+   .claude/scripts/enforce_phase_9.sh "$PR_NUMBER" &
+   ENFORCEMENT_PID=$!
+   
+   echo "🚨 AUTOMATIC Phase 9 execution started (PID: $ENFORCEMENT_PID)"
+   echo "Enforcement script will handle 30-second delay and code reviewer invocation"
+   
+   # NO user intervention - enforcement script handles everything
    ```
 
 2. **Phase 9 → Phase 10 (Immediate after review posted)**:
@@ -577,7 +581,29 @@ validate_and_fix_state_consistency() {
     local STATE_FILE="$1"
     
     if [ ! -f "$STATE_FILE" ]; then
-        echo "⚠️  No state file found - this is acceptable for new workflows"
+        echo "⚠️  No state file found at $STATE_FILE"
+        echo "Creating state directory structure..."
+        mkdir -p "$(dirname "$STATE_FILE")"
+        
+        # Create minimal state file for recovery
+        cat > "$STATE_FILE" << EOF
+# WorkflowManager State - Auto-Recovery
+Task ID: $TASK_ID
+
+## Phase Completion Status
+- [ ] Phase 1: Setup
+- [ ] Phase 2: Issue Creation
+- [ ] Phase 3: Branch Creation
+- [ ] Phase 4: Research & Planning
+- [ ] Phase 5-7: Implementation
+- [ ] Phase 8: Pull Request
+- [ ] Phase 9: Review
+- [ ] Phase 10: Review Response
+
+## Recovery Context
+State file auto-created during recovery check.
+EOF
+        echo "✅ Created basic state file for workflow tracking"
         return 0
     fi
     
