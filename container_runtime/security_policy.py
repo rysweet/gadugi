@@ -401,7 +401,7 @@ class SecurityPolicyEngine:
         # Handle registry prefix normalization
         # docker.io/library/image:tag -> library/image:tag
         if image.startswith("docker.io/"):
-            image = image[10:]
+            image = image.removeprefix("docker.io/")
 
         # Official images on Docker Hub are in the library namespace
         if "/" not in image.split(":")[0]:
