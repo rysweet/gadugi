@@ -308,7 +308,7 @@ except ImportError as e:
             )
             active_tasks = self.current_task_list.get_active_tasks()
 
-            return {
+            stats = {
                 "total_tasks": self.current_task_list.count(),
                 "completed_tasks": len(completed_tasks),
                 "active_tasks": len(active_tasks),
@@ -318,6 +318,10 @@ except ImportError as e:
                 if self.last_update_time
                 else None,
             }
+            # Ensure total_calls is always present
+            if "total_calls" not in stats:
+                stats["total_calls"] = 0
+            return stats
 
     class WorkflowPhaseTracker:
         def __init__(self):
