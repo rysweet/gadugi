@@ -75,6 +75,14 @@ class TestCompactionRule(unittest.TestCase):
         self.assertFalse(rule.should_preserve("Regular task", age_days=100))
 
 
+import importlib.util
+
+MEMORY_PARSER_AVAILABLE = importlib.util.find_spec("memory_parser") is not None
+
+
+@unittest.skipUnless(
+    MEMORY_PARSER_AVAILABLE, "memory_parser not available, skipping execution tests"
+)
 class TestMemoryCompactor(unittest.TestCase):
     """Test MemoryCompactor functionality"""
 
@@ -266,9 +274,9 @@ Last Updated: 2025-08-05T10:00:00-08:00
     @patch("pathlib.Path.stat")
     def test_compact_memory_execution(self, mock_stat, mock_exists, mock_file):
         """Test actual compaction execution"""
-        import sys
+        import importlib.util
 
-        if "memory_parser" not in sys.modules:
+        if importlib.util.find_spec("memory_parser") is None:
             self.skipTest("memory_parser not available, skipping execution test")
 
         # Mock file system operations
