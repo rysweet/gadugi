@@ -182,7 +182,7 @@ DEFAULT_TIMEOUTS = {
     },
     WorkflowStage.IMPLEMENTATION_PROGRESS: {
         'timeout_seconds': 1800,  # 30 minutes
-        'warning_threshold_seconds': 1200,  # 20 minutes  
+        'warning_threshold_seconds': 1200,  # 20 minutes
         'recovery_actions': ['checkpoint_progress', 'simplify_implementation']
     },
     WorkflowStage.PR_CREATION: {
@@ -355,7 +355,7 @@ def custom_health_check(workflow_id):
     # Custom health check logic
     database_healthy = check_database_connection()
     api_healthy = check_external_api_status()
-    
+
     return {
         'status': 'HEALTHY' if all([database_healthy, api_healthy]) else 'DEGRADED',
         'custom_metrics': {
@@ -382,7 +382,7 @@ def execute_workflow_with_reliability(task_data, worktree_path):
         enable_persistence=True,
         max_retries=3
     )
-    
+
     manager = EnhancedWorkflowManager(config, worktree_path)
     return manager.execute_workflow(task_data['prompt_file'])
 ```
@@ -476,19 +476,19 @@ class WorkflowConfiguration:
     enable_health_checks: bool = True       # Enable system health checks
     enable_recovery: bool = True            # Enable automatic error recovery
     enable_persistence: bool = True         # Enable state persistence
-    
+
     # Error handling settings
     max_retries: int = 3                    # Maximum retry attempts
     timeout_multiplier: float = 1.5         # Timeout adjustment factor
-    
+
     # Logging configuration
     log_level: str = 'INFO'                 # Logging level
     log_format: str = 'detailed'            # Log format style
-    
+
     # Performance settings
     checkpoint_frequency: int = 5           # Checkpoint every N phases
     health_check_interval: int = 300        # Health check interval (seconds)
-    
+
     # Storage configuration
     state_directory: str = '.github/workflow-states'
     checkpoint_directory: str = '.github/workflow-checkpoints'
@@ -639,7 +639,7 @@ Generate support diagnostic bundle:
 ```python
 def generate_diagnostic_bundle(workflow_id):
     """Generate comprehensive diagnostic information for support"""
-    
+
     diagnostics = {
         'workflow_diagnostics': manager.reliability_manager.get_workflow_diagnostics(workflow_id),
         'system_health': manager.reliability_manager.perform_health_check(workflow_id),
@@ -648,10 +648,10 @@ def generate_diagnostic_bundle(workflow_id):
         'state_files': collect_state_files(workflow_id),
         'performance_metrics': generate_performance_report(workflow_id)
     }
-    
+
     with open(f'diagnostic-bundle-{workflow_id}.json', 'w') as f:
         json.dump(diagnostics, f, indent=2, default=str)
-    
+
     return f'diagnostic-bundle-{workflow_id}.json'
 ```
 
@@ -684,7 +684,7 @@ Overhead: 4.5s (1.8%)
 
 Features enabled:
 - Comprehensive monitoring: +1.2s (0.5%)
-- Health checks (3 critical stages): +0.8s (0.3%)  
+- Health checks (3 critical stages): +0.8s (0.3%)
 - State persistence (7 checkpoints): +1.1s (0.4%)
 - Error handling infrastructure: +0.9s (0.4%)
 - Performance analytics: +0.5s (0.2%)
@@ -819,7 +819,7 @@ To contribute to the reliability features:
    ```bash
    # Run tests
    pytest tests/test_enhanced_workflow_manager_reliability.py
-   
+
    # Check coverage
    pytest --cov=claude.shared.workflow_reliability --cov-report=html
    ```

@@ -36,7 +36,7 @@ export class GitSetupService {
 
     try {
       const gitStatus = await this.getGitStatus();
-      
+
       if (gitStatus.hasGit && gitStatus.hasRepository) {
         this.statusBarItem.text = '$(source-control) Git Ready';
         this.statusBarItem.tooltip = 'Git repository detected - Gadugi is ready';
@@ -104,7 +104,7 @@ export class GitSetupService {
       }
 
       const gitStatus = await this.getGitStatus();
-      
+
       if (gitStatus.hasGit && gitStatus.hasRepository) {
         // Everything is good, no need to show guidance
         return;
@@ -178,7 +178,7 @@ The current workspace is not a Git repository. You can:
                 'Yes',
                 'No'
               );
-              
+
               if (confirm === 'Yes') {
                 await this.initializeRepository(validatedPath);
               }
@@ -229,7 +229,7 @@ The current workspace is not a Git repository. You can:
     try {
       const validatedPath = this.validateWorkspacePath(folderPath);
       await this.executeGitCommand(['init'], validatedPath);
-      
+
       await vscode.window.showInformationMessage(
         `Git repository initialized in ${validatedPath}. You may want to create an initial commit.`
       );
@@ -258,10 +258,10 @@ The current workspace is not a Git repository. You can:
   private async createInitialCommit(folderPath: string): Promise<void> {
     try {
       const validatedPath = this.validateWorkspacePath(folderPath);
-      
+
       // Create a basic .gitignore if it doesn't exist
       const gitignorePath = path.join(validatedPath, '.gitignore');
-      
+
       try {
         await vscode.workspace.fs.stat(vscode.Uri.file(gitignorePath));
       } catch {
@@ -287,7 +287,7 @@ build/
 out/
 `;
         await vscode.workspace.fs.writeFile(
-          vscode.Uri.file(gitignorePath), 
+          vscode.Uri.file(gitignorePath),
           Buffer.from(gitignoreContent, 'utf8')
         );
       }
@@ -295,7 +295,7 @@ out/
       // Add and commit using secure git commands
       await this.executeGitCommand(['add', '.'], validatedPath);
       await this.executeGitCommand(['commit', '-m', 'Initial commit'], validatedPath);
-      
+
       await vscode.window.showInformationMessage('Initial commit created successfully!');
 
     } catch (error) {
@@ -311,9 +311,9 @@ out/
   public async showGitStatusDetails(): Promise<void> {
     try {
       const gitStatus = await this.getGitStatus();
-      
+
       let message = 'Git Status for Gadugi Extension\n\n';
-      
+
       if (gitStatus.hasGit) {
         message += '✅ Git is installed and available\n';
       } else {
@@ -322,7 +322,7 @@ out/
 
       if (gitStatus.workspaceFolder) {
         message += `📁 Workspace: ${gitStatus.workspaceFolder}\n`;
-        
+
         if (gitStatus.hasRepository) {
           message += '✅ Git repository detected\n';
           message += '\n🎉 All prerequisites met! Gadugi is ready to use.';
@@ -393,7 +393,7 @@ out/
 
     // Resolve and normalize the path
     const resolvedPath = path.resolve(inputPath);
-    
+
     // Ensure path is within workspace boundaries
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
     if (!workspaceRoot) {
@@ -404,7 +404,7 @@ out/
     if (!resolvedPath.startsWith(normalizedWorkspaceRoot)) {
       throw new Error('Path outside workspace boundary');
     }
-    
+
     return resolvedPath;
   }
 

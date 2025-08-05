@@ -22,22 +22,22 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Initialize Git setup service first (needed for all validations)
     gitSetupService = new GitSetupService(context);
-    
+
     // Validate prerequisites
     const validation = await validateExtensionPrerequisites();
     if (validation.issues.length > 0) {
       ErrorUtils.logWarning(`Extension prerequisites not fully met: ${validation.issues.join(', ')}`, 'extension-activation');
-      
+
       // Show git setup guidance for git-related issues instead of generic error
-      const hasGitIssues = validation.issues.some(issue => 
+      const hasGitIssues = validation.issues.some(issue =>
         issue.includes('Git') || issue.includes('git repository')
       );
-      
+
       if (hasGitIssues && gitSetupService) {
         // Show helpful guidance instead of error message
         await gitSetupService.showGitSetupGuidance();
       }
-      
+
       // Only prevent activation for critical non-git issues
       if (!validation.canContinue && !hasGitIssues) {
         await ErrorUtils.showErrorMessage(
@@ -233,7 +233,7 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
       if (monitorPanel) {
         await monitorPanel.refresh();
       }
-      
+
       // Update git status when workspace changes
       if (gitSetupService) {
         await gitSetupService.updateStatusBar();

@@ -65,7 +65,7 @@ agents:
     description: "Creates high-quality structured prompts for development workflows"
     category: "productivity"
     required_tools: ["Read", "Write", "Grep", "LS", "WebSearch", "TodoWrite"]
-    
+
   - name: "readme-agent"
     file: ".claude/agents/readme-agent.md"
     version: "1.0.0"

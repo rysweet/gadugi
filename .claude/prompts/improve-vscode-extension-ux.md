@@ -20,7 +20,7 @@ The Gadugi VS Code extension currently fails silently when opened in a non-git r
    - "Open Folder" - Opens folder picker to select an existing git repository
    - "Dismiss" - Closes dialog
 
-3. **Improved Activation**: 
+3. **Improved Activation**:
    - Show limited UI even without git (e.g., setup instructions view)
    - Add status bar item showing git repository status
    - Provide clear visual feedback about missing prerequisites
