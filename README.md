@@ -106,6 +106,7 @@ Once installed, invoke agents as needed:
 - `/agent:orchestrator-agent` - For parallel task execution
 - `/agent:code-reviewer` - For code review tasks
 - `/agent:prompt-writer` - For creating structured prompts
+- `/agent:readme-agent` - For README management and maintenance
 
 ## Available Agents
 
@@ -122,6 +123,7 @@ Once installed, invoke agents as needed:
 
 ### Productivity
 - **prompt-writer** - Creates high-quality structured prompts for complex tasks
+- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
 
 ### Infrastructure
 - **agent-manager** - Manages external agent repositories with version control

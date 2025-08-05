@@ -65,6 +65,13 @@ agents:
     description: "Creates high-quality structured prompts for development workflows"
     category: "productivity"
     required_tools: ["Read", "Write", "Grep", "LS", "WebSearch", "TodoWrite"]
+    
+  - name: "readme-agent"
+    file: ".claude/agents/readme-agent.md"
+    version: "1.0.0"
+    description: "Manages and maintains README.md files on behalf of the Product Manager"
+    category: "productivity"
+    required_tools: ["Read", "Write", "Edit", "Bash", "Grep", "LS"]
 
   # Infrastructure Agents
   - name: "agent-manager"
@@ -85,7 +92,7 @@ categories:
 
   - name: "productivity"
     description: "Agents that enhance developer productivity"
-    agents: ["prompt-writer"]
+    agents: ["prompt-writer", "readme-agent"]
 
   - name: "infrastructure"
     description: "Agents that manage other agents and infrastructure"
