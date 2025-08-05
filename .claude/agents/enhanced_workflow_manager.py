@@ -114,7 +114,7 @@ class EnhancedWorkflowManager:
             self.task_tracker = TaskTracker()
             self.phase_tracker = WorkflowPhaseTracker()
             self.github_ops = GitHubOperations()
-        except:
+        except Exception:
             # Fallback for basic functionality
             self.error_handler = None
             self.state_manager = None
