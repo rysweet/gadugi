@@ -964,7 +964,6 @@ class TestWorkflowReliabilityContextManager:
         with monitor_workflow(workflow_id, workflow_context, mock_manager) as manager:
             assert manager == mock_manager
             # Simulate successful workflow execution
-            pass
         
         # Verify monitoring lifecycle
         mock_manager.start_workflow_monitoring.assert_called_once_with(workflow_id, workflow_context)
