@@ -13,9 +13,26 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
+from unittest.mock import MagicMock, Mock, call, patch
+
+# For type checking only
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from claude.shared.task_tracking import (
+        Task,
+        TaskError,
+        TaskList,
+        TaskMetrics,
+        TaskPriority,
+        TaskStatus,
+        TaskTracker,
+        TaskValidationError,
+        TodoWriteIntegration,
+        WorkflowPhaseTracker,
+    )
 
 # Fix imports for pyright
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -502,17 +519,17 @@ class TestTaskPriority:
 class TestTask:
     """Test Task class."""
 
-    def test_task_creation_minimal(self):
+    def test_task_creation_minimal(self) -> None:
         """Test creating a task with minimal parameters."""
-        task = Task("1", "Test task")
+        task: Task = Task("1", "Test task")
         assert task.id == "1"
         assert task.content == "Test task"
         assert task.status == TaskStatus.PENDING
         assert task.priority == TaskPriority.MEDIUM
 
-    def test_task_creation_full(self):
+    def test_task_creation_full(self) -> None:
         """Test creating a task with all parameters."""
-        task = Task(
+        task: Task = Task(
             id="task-123",
             content="Critical task",
             status=TaskStatus.IN_PROGRESS,
@@ -523,10 +540,10 @@ class TestTask:
         assert task.status == TaskStatus.IN_PROGRESS
         assert task.priority == TaskPriority.CRITICAL
 
-    def test_task_to_dict(self):
+    def test_task_to_dict(self) -> None:
         """Test converting task to dictionary."""
-        task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
-        task_dict = task.to_dict()
+        task: Task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
+        task_dict: Dict[str, Any] = task.to_dict()
 
         expected = {
             "id": "1",
@@ -536,15 +553,15 @@ class TestTask:
         }
         assert task_dict == expected
 
-    def test_task_from_dict(self):
+    def test_task_from_dict(self) -> None:
         """Test creating task from dictionary."""
-        task_dict = {
+        task_dict: Dict[str, Any] = {
             "id": "2",
             "content": "From dict task",
             "status": "in_progress",
             "priority": "low",
         }
-        task = Task.from_dict(task_dict)
+        task: Task = Task.from_dict(task_dict)
 
         assert task.id == "2"
         assert task.content == "From dict task"
@@ -586,20 +603,20 @@ class TestTask:
         task.status = TaskStatus.CANCELLED
         assert not task.is_active()
 
-    def test_task_validation(self):
+    def test_task_validation(self) -> None:
         """Test task validation."""
         # Valid task
-        task = Task("valid-id", "Valid content")
+        task: Task = Task("valid-id", "Valid content")
         task.validate()  # Should not raise
 
         # Invalid ID
         with pytest.raises(TaskValidationError):
-            invalid_task = Task("", "Content")
+            invalid_task: Task = Task("", "Content")
             invalid_task.validate()
 
         # Invalid content
         with pytest.raises(TaskValidationError):
-            invalid_task = Task("id", "")
+            invalid_task: Task = Task("id", "")
             invalid_task.validate()
 
     def test_task_estimated_duration(self):
@@ -1258,14 +1275,14 @@ class TestTaskTracker:
         assert isinstance(tracker.phase_tracker, WorkflowPhaseTracker)
         assert isinstance(tracker.metrics, TaskMetrics)
 
-    def test_create_task(self):
+    def test_create_task(self) -> None:
         """Test creating a task through tracker."""
-        tracker = TaskTracker()
+        tracker: TaskTracker = TaskTracker()
 
         with patch.object(tracker.todowrite, "add_task") as mock_add:
             mock_add.return_value = {"success": True}
 
-            task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
+            task: Task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
 
             assert task.content == "Test task"
             assert task.priority == TaskPriority.HIGH

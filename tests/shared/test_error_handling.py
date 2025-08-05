@@ -11,9 +11,28 @@ import sys
 import time
 from datetime import datetime
 from typing import Any, Dict
-from unittest.mock import Mock, call, patch
 
 import pytest
+from unittest.mock import Mock, call, patch
+
+# For type checking only
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from claude.shared.utils.error_handling import (
+        CircuitBreaker,
+        ErrorContext,
+        ErrorHandler,
+        ErrorSeverity,
+        GadugiError,
+        NonRecoverableError,
+        RecoverableError,
+        RetryStrategy,
+        graceful_degradation,
+        handle_with_fallback,
+        retry,
+        validate_input,
+    )
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -300,14 +319,14 @@ except ImportError:
 class TestErrorSeverity:
     """Test ErrorSeverity enum."""
 
-    def test_error_severity_values(self):
+    def test_error_severity_values(self) -> None:
         """Test error severity enum values."""
         assert ErrorSeverity.LOW.value == "low"
         assert ErrorSeverity.MEDIUM.value == "medium"
         assert ErrorSeverity.HIGH.value == "high"
         assert ErrorSeverity.CRITICAL.value == "critical"
 
-    def test_error_severity_ordering(self):
+    def test_error_severity_ordering(self) -> None:
         """Test that we can compare severities."""
         severities = [
             ErrorSeverity.LOW,

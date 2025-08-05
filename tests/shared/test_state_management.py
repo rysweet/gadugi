@@ -13,9 +13,22 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import Mock, call, patch
 
 import pytest
+from unittest.mock import Mock, call, patch
+
+# For type checking only
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from claude.shared.state_management import (
+        CheckpointManager,
+        StateError,
+        StateManager,
+        StateValidationError,
+        TaskState,
+        WorkflowPhase,
+    )
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -395,7 +408,7 @@ except ImportError as e:
 class TestTaskState:
     """Test suite for TaskState data class."""
 
-    def test_task_state_creation(self):
+    def test_task_state_creation(self) -> None:
         """Test TaskState creation with minimal data."""
         state = TaskState(
             task_id="test-task-001", prompt_file="test-feature.md", status="pending"

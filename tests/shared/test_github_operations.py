@@ -11,9 +11,15 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
-from unittest.mock import Mock, call, patch
 
 import pytest
+from unittest.mock import Mock, call, patch
+
+# For type checking only
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from github_operations import GitHubError, GitHubOperations, RateLimitError
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
