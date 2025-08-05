@@ -246,6 +246,9 @@ except ImportError as e:
         def add_task(self, task: Task) -> Dict[str, Any]:
             if self.current_task_list is None:
                 self.current_task_list = TaskList()
+            # Raise TaskValidationError if task is invalid
+            if not task.id or not task.content:
+                raise TaskValidationError("Task ID and content cannot be empty")
             self.current_task_list.add_task(task)
             self.call_count += 1
             return {"success": True, "task_id": task.id}
