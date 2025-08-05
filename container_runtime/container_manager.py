@@ -75,7 +75,7 @@ class ContainerManager:
     def __init__(self, docker_client: Optional[docker.DockerClient] = None):
         """Initialize container manager."""
         self.client = docker_client or docker.from_env()
-        self.active_containers: Dict[str, docker.models.containers.Container] = {}
+        self.active_containers: Dict[str, Any] = {}
         self.execution_history: List[ContainerResult] = []
 
         # Verify Docker daemon is accessible
