@@ -195,7 +195,7 @@ policies:
     network: "none"
     readonly: true
     tmpfs: ["/tmp"]
-    
+
   node:
     image: "gadugi/node:18-alpine"
     memory: "256m"

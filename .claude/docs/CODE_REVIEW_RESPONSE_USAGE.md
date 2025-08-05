@@ -167,7 +167,7 @@ When feedback is ambiguous:
 
 ### "Cannot implement suggestion"
 - Explain technical limitation clearly
-- Suggest alternative approach if possible  
+- Suggest alternative approach if possible
 - Document for future enhancement
 - Thank reviewer for the valuable input
 

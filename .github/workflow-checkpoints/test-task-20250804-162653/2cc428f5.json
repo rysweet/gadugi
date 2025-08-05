@@ -1,0 +1,21 @@
+{
+  "checkpoint_id": "2cc428f5",
+  "description": "Test workflow state checkpoint",
+  "created_at": "2025-08-04T23:26:53.651584+00:00Z",
+  "state": {
+    "task_id": "test-task-20250804-162653",
+    "prompt_file": "test-feature.md",
+    "status": "in_progress",
+    "branch": null,
+    "issue_number": null,
+    "pr_number": null,
+    "current_phase": 0,
+    "current_phase_name": "Task Initialization & Resumption Check",
+    "created_at": "2025-08-04T23:26:53.648113+00:00Z",
+    "updated_at": "2025-08-04T23:26:53.648117+00:00Z",
+    "context": {
+      "state_directory": ".github/workflow-states/test-task-20250804-162653"
+    },
+    "error_info": {}
+  }
+}

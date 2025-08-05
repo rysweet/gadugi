@@ -60,13 +60,13 @@ echo "--------------------------------"
 
 for name in "${!WORKTREES[@]}"; do
     worktree="${WORKTREES[$name]}"
-    
+
     # Create AppleScript command
     osascript -e "
     tell application \"Visual Studio Code\"
         activate
     end tell
-    
+
     tell application \"System Events\"
         keystroke \"\`\" using {command down}
         delay 0.5
@@ -74,7 +74,7 @@ for name in "${!WORKTREES[@]}"; do
         keystroke return
         delay 0.5
     end tell" 2>/dev/null || echo "  - Failed to create terminal for $name"
-    
+
     echo "  ✓ Created terminal for $name"
     sleep 1
 done

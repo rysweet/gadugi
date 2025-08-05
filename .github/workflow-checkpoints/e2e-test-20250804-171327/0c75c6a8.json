@@ -1,0 +1,21 @@
+{
+  "checkpoint_id": "0c75c6a8",
+  "description": "Test parallel execution checkpoint",
+  "created_at": "2025-08-05T00:13:27.830777+00:00Z",
+  "state": {
+    "task_id": "e2e-test-20250804-171327",
+    "prompt_file": "orchestration.md",
+    "status": "in_progress",
+    "branch": null,
+    "issue_number": null,
+    "pr_number": null,
+    "current_phase": 1,
+    "current_phase_name": "Initial Setup",
+    "created_at": "2025-08-05T00:13:27.828674+00:00Z",
+    "updated_at": "2025-08-05T00:13:27.828676+00:00Z",
+    "context": {
+      "parallel_tasks": 2
+    },
+    "error_info": {}
+  }
+}

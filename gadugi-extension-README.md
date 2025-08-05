@@ -66,7 +66,7 @@ Real-time monitoring panel in the VS Code sidebar showing worktrees and Claude p
 ### Monitor Panel Usage
 1. **View Worktrees**: See all git worktrees with their current branch and status
 2. **Monitor Processes**: Track Claude Code processes with live runtime duration
-3. **Quick Actions**: 
+3. **Quick Actions**:
    - Click 🔄 to refresh data
    - Right-click worktrees for context menu options
    - Click ⚡ to launch Claude in a specific worktree
@@ -123,7 +123,7 @@ The extension can be configured through VS Code settings:
 📁 Worktrees (3)
 ├── 🏠 main (main)
 │   └── ⚡ Claude: 1234 (Running)
-├── 🌿 feature-branch (feature-branch)  
+├── 🌿 feature-branch (feature-branch)
 │   └── ⚡ Claude: 5678 (Running)
 └── 🔧 hotfix-123 (hotfix-123)
     └── ❌ No Claude process
@@ -151,7 +151,7 @@ The extension can be configured through VS Code settings:
 
 ### Cross-Platform Support
 - **Windows**: Uses `tasklist` for process monitoring
-- **macOS/Linux**: Uses `ps` for process monitoring  
+- **macOS/Linux**: Uses `ps` for process monitoring
 - **Path Handling**: Automatic platform-specific path normalization
 - **Shell Integration**: Platform-appropriate shell and terminal handling
 
@@ -214,7 +214,7 @@ Use `Gadugi: Show Output` to view detailed logs including:
 
 Run `Gadugi: Validate Setup` to check:
 - ✅ VS Code version compatibility
-- ✅ Workspace folder availability  
+- ✅ Workspace folder availability
 - ✅ Git installation and repository status
 - ✅ Claude Code CLI accessibility
 - ✅ Terminal creation capabilities

@@ -21,7 +21,7 @@ for i in "${!WORKTREES[@]}"; do
     worktree="${WORKTREES[$i]}"
     name=$(basename "$worktree")
     branch=$(cd "$worktree" && git branch --show-current 2>/dev/null || echo "unknown")
-    
+
     echo "Terminal $((i+1)) - $name [$branch]:"
     echo "  cd \"$worktree\" && claude"
     echo ""

@@ -19,7 +19,7 @@ __author__ = "Gadugi AI System"
 
 __all__ = [
     "PRBacklogManager",
-    "ReadinessAssessor", 
+    "ReadinessAssessor",
     "DelegationCoordinator",
-    "GitHubActionsIntegration"
+    "GitHubActionsIntegration",
 ]

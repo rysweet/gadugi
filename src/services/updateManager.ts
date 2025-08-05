@@ -59,7 +59,7 @@ export class UpdateManager {
    */
   subscribe(callback: () => Promise<void>): () => void {
     this.subscribers.add(callback);
-    
+
     return () => {
       this.subscribers.delete(callback);
     };
@@ -95,10 +95,10 @@ export class UpdateManager {
       });
 
       await Promise.all(updatePromises);
-      
+
       this.lastUpdateTime = new Date();
       const duration = Date.now() - startTime;
-      
+
       if (duration > 1000) {
         ErrorUtils.logWarning(`Slow update cycle: ${duration}ms`, 'update-manager');
       }
@@ -176,11 +176,11 @@ export class UpdateManager {
 
     return async () => {
       const now = Date.now();
-      
+
       if (now - lastCall >= interval && !pending) {
         lastCall = now;
         pending = true;
-        
+
         try {
           await callback();
         } finally {
@@ -198,7 +198,7 @@ export class UpdateManager {
     delay: number
   ): () => void {
     let timeoutId: NodeJS.Timeout;
-    
+
     return () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(async () => {
@@ -218,7 +218,7 @@ export class UpdateManager {
   setupFromConfiguration(): void {
     const config = vscode.workspace.getConfiguration('gadugi');
     const interval = config.get<number>('updateInterval', 3000);
-    
+
     this.updateConfig({
       interval,
       enabled: true
@@ -272,15 +272,15 @@ export class UpdateManager {
    */
   enablePerformanceMonitoring(): void {
     const originalPerformUpdate = this.performUpdate.bind(this);
-    
+
     this.performUpdate = async () => {
       const startTime = Date.now();
-      
+
       try {
         await originalPerformUpdate();
       } finally {
         const duration = Date.now() - startTime;
-        
+
         if (duration > 2000) {
           ErrorUtils.logWarning(`Very slow update cycle: ${duration}ms`, 'update-manager-performance');
         }
@@ -301,7 +301,7 @@ export class UpdateManager {
    */
   static fromConfiguration(): UpdateManager {
     const interval = UpdateManager.getIntervalFromConfig();
-    
+
     const manager = new UpdateManager({
       interval,
       enabled: true

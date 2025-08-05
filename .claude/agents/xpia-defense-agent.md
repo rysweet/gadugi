@@ -178,7 +178,7 @@ This agent will provide critical security infrastructure for the Gadugi multi-ag
 
 ---
 
-**Tools Required**: 
+**Tools Required**:
 - Read (for analyzing threat patterns and existing code)
 - Write (for implementing defense engine and configuration)
 - Edit (for integrating with existing agent infrastructure)

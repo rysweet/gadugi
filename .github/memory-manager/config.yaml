@@ -19,7 +19,7 @@ content_rules:
   normalize_task_format: true
   optional_sections:
   - "Completed Tasks"
-  - "Reflections" 
+  - "Reflections"
   - "Important Context"
   - "Code Review Summary"
   pending_patterns:
@@ -93,7 +93,7 @@ pruning:
       consolidate_similar: true
       max_age_days: 30
 
-# Synchronization configuration  
+# Synchronization configuration
 sync:
   api_delay_seconds: 0.1
   auto_close_completed: true

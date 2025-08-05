@@ -16,7 +16,7 @@ This document catalogues design problems, inconsistencies, and architectural con
 - Some combine both approaches inconsistently
 - No clear pattern for when to use markdown vs Python implementation
 
-**Impact**: 
+**Impact**:
 - Difficult to understand which agents are purely instructional vs executable
 - Maintenance burden when updating agent capabilities
 - Confusion about agent invocation patterns
@@ -72,7 +72,7 @@ This document catalogues design problems, inconsistencies, and architectural con
 **Problem**: Container execution environment not fully integrated with all agents.
 
 **Details**:
-- Container runtime exists in `container_runtime/` 
+- Container runtime exists in `container_runtime/`
 - Many agents still reference shell execution directly
 - Migration path from shell to container unclear
 - Some agents have both shell and container code paths

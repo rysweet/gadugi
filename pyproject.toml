@@ -1,0 +1,99 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gadugi"
+description = "Multi-Agent System for AI-Assisted Coding"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Gadugi Contributors", email = "noreply@example.com"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "PyYAML>=6.0",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/rysweet/gadugi"
+Repository = "https://github.com/rysweet/gadugi"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "ruff>=0.4.4",
+]
+test = [
+    "pytest>=7.0",
+    "pytest-mock>=3.10",
+    "pytest-asyncio>=0.21",
+    "docker>=6.0",
+    "psutil>=5.9",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "gadugi.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gadugi*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+]
+markers = [
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    ".claude/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+extend-exclude = [
+    ".git",
+    ".venv",
+    ".claude",
+    "__pycache__",
+]
+lint.select = ["ALL"]
+lint.ignore = [
+    "D", "ANN", "FA", "I", "E501", "W293", "T201", "Q000", "PLR", "PT", "C", "RET", "BLE", "S", "UP", "COM", "W292", "EXE001",
+    "E402", "F841", "ARG", "PLC", "PTH", "PLW", "TRY", "EM", "B", "RUF", "A", "DTZ", "SLF", "PERF",
+    "FBT", "TD", "FIX", "G004", "SIM", "E712", "F401", "INP001",
+    "F821", "W291", "PIE810", "ERA001", "F811"
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 88
+line-ending = "auto"

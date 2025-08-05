@@ -58,7 +58,7 @@ Claude:
 - **program-manager**: Complex GitHub operations and analysis
   - Backend: `src/agents/program_manager.py`
   - Handles issue triage, priority management, README updates
-  
+
 - **pr-backlog-manager**: PR delegation and coordination
   - Backend: `src/agents/pr_backlog_manager/`
   - Complex state management and delegation logic
@@ -99,7 +99,7 @@ Create `src/agents/my_agent.py` for complex operations:
 class MyAgent:
     def __init__(self):
         self.memory = AgentMemoryInterface("agent-001", "my-agent")
-    
+
     def perform_complex_task(self):
         # Implementation here
         pass

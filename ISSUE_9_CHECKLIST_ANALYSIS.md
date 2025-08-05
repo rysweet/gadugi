@@ -7,16 +7,16 @@
   - [ ] Create XPIA defense sub-agent with extensible filter interface
   - [ ] Build simple prompt-based XPIA filter
   - [ ] Build Azure Foundry PromptShields XPIA filter using Azure CLI REST
-  
+
 - [ ] **Container Execution Environment**
   - [ ] Run subagents in Docker containers
   - [ ] Run subagents in cloud containers
-  
+
 - [ ] **Memory Management Refactoring**
   - [ ] Replace Memory.md with GitHub issue-based Project Memory
   - [ ] Update Claude.md and all files referencing Memory.md
   - [ ] Create MemoryManagerAgent for pruning, curation, and consolidation
-  
+
 - [ ] **Task Analysis Enhancement**
   - [ ] Create TaskBoundsEval Agent for task understanding evaluation
   - [ ] Create TaskDecomposer for breaking tasks into subtasks
@@ -35,16 +35,16 @@
   - [ ] Implement task ID management in code
   - [ ] Reduce dependency on shell approval requirements
   - [ ] Save/manage orchestrator agent state
-  
+
 - [ ] **Team Intelligence System**
   - [ ] Create TeamCoach agent for execution review and reflection
   - [ ] Create Agent Creator for new subagents based on TeamCoach guidance
   - [ ] Create Ephemeral Agent Creator for disposable task-specific agents
-  
+
 - [ ] **Documentation and Translation**
   - [ ] Create SpecMaintainer for /specs directory requirements and design management
   - [ ] Create AgentTeamHostTranslator for Roo Code and GitHub Copilot translation
-  
+
 - [ ] **Claude-Code Hooks Integration**
   - [ ] PreTool hooks for WebFetch/WebSearch XPIA wrapping
   - [ ] PostTool hooks for WebFetch/WebSearch XPIA filtering

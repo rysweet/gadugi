@@ -89,15 +89,15 @@ Create `.devcontainer/devcontainer.json`:
 {
   "name": "Gadugi PR Backlog Manager",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  
+
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {},
     "ghcr.io/devcontainers/features/python:1": {"version": "3.11"},
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
-  
+
   "postCreateCommand": ".devcontainer/setup.sh",
-  
+
   "containerEnv": {
     "CLAUDE_AUTO_APPROVE": "true",
     "CLAUDE_GITHUB_ACTIONS": "true"
@@ -132,20 +132,20 @@ jobs:
       pull-requests: write
       issues: write
       checks: read
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Claude Code CLI
         run: |
           curl -fsSL https://claude.ai/cli/install.sh | bash
           echo "$HOME/.claude/bin" >> $GITHUB_PATH
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-      
+
       - name: Run PR Backlog Manager
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -177,7 +177,7 @@ Configure the following secrets in your repository:
 
 Evaluate PR #42 for readiness and apply appropriate labels based on:
 - Merge conflict status
-- CI passing status  
+- CI passing status
 - Code review completion
 - Branch synchronization with main
 
@@ -263,7 +263,7 @@ The PR Backlog Manager includes comprehensive security constraints:
 # Auto-approve safety validation
 RESTRICTED_OPERATIONS = [
     'force_push',
-    'delete_branch', 
+    'delete_branch',
     'close_issue',
     'merge_pr'
 ]
@@ -271,7 +271,7 @@ RESTRICTED_OPERATIONS = [
 # Event type restrictions
 ALLOWED_AUTO_APPROVE_EVENTS = [
     'pull_request',
-    'schedule', 
+    'schedule',
     'workflow_dispatch'
 ]
 ```
@@ -407,7 +407,7 @@ pytest tests/agents/pr_backlog_manager/test_integration.py -v
 The test suite includes:
 
 - **Core Functionality**: 50+ tests covering PR processing and assessment
-- **Readiness Assessment**: 40+ tests for all evaluation criteria  
+- **Readiness Assessment**: 40+ tests for all evaluation criteria
 - **Delegation Coordination**: 35+ tests for task creation and execution
 - **GitHub Actions Integration**: 30+ tests for event handling and artifacts
 - **Integration Tests**: 20+ tests for end-to-end workflows
@@ -465,7 +465,7 @@ Minimum required permissions:
 ```yaml
 permissions:
   contents: read        # Read repository contents
-  pull-requests: write  # Update PR labels and comments  
+  pull-requests: write  # Update PR labels and comments
   issues: write        # Update linked issues
   checks: read         # Read CI status
   metadata: read       # Read repository metadata
@@ -507,7 +507,7 @@ class CustomReadinessAssessor(ReadinessAssessor):
         # Implement custom assessment logic
         pass
 
-# Custom delegation targets  
+# Custom delegation targets
 class CustomDelegationCoordinator(DelegationCoordinator):
     def __init__(self):
         super().__init__()

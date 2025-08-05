@@ -44,7 +44,7 @@ if command -v jq &> /dev/null; then
         ]
       },
       {
-        "matcher": "WebSearch", 
+        "matcher": "WebSearch",
         "hooks": [
           {
             "type": "command",
@@ -96,7 +96,7 @@ else
         ]
       },
       {
-        "matcher": "WebSearch", 
+        "matcher": "WebSearch",
         "hooks": [
           {
             "type": "command",

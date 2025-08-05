@@ -7,6 +7,7 @@ workflow optimization, and strategic planning for multi-agent teams.
 
 from typing import Dict, Any
 
+
 def get_phase3_info() -> Dict[str, Any]:
     """Get information about Phase 3 components."""
     return {
@@ -15,7 +16,7 @@ def get_phase3_info() -> Dict[str, Any]:
             "CoachingEngine - Performance coaching and recommendations",
             "ConflictResolver - Detect and resolve agent conflicts",
             "WorkflowOptimizer - Optimize team workflows",
-            "StrategicPlanner - Long-term strategic planning"
+            "StrategicPlanner - Long-term strategic planning",
         ],
-        "status": "Active Development"
+        "status": "Active Development",
     }

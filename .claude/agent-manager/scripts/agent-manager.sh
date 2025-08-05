@@ -14,7 +14,7 @@ source "$SCRIPT_DIR/setup-hooks.sh"
 main() {
     local command="${1:-help}"
     shift || true
-    
+
     case "$command" in
         setup-hooks)
             setup_startup_hooks "$@"

@@ -27,8 +27,8 @@ Test Agents (New):
 Usage:
     /agent:test-solver
     Context: Analyze and resolve failing test: tests/test_module.py::test_function
-    
-    /agent:test-writer  
+
+    /agent:test-writer
     Context: Create tests for src/module.py with TDD alignment
 """
 
@@ -43,8 +43,8 @@ except ImportError:
     pass
 
 __all__ = [
-    'TestSolverAgent',
-    'TestWriterAgent', 
-    'SharedTestInstructions',
-    'EnhancedWorkflowMaster'
+    "TestSolverAgent",
+    "TestWriterAgent",
+    "SharedTestInstructions",
+    "EnhancedWorkflowMaster",
 ]

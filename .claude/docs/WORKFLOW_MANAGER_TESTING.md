@@ -61,44 +61,44 @@ import os
 
 class TestWorkflowManagerIntegration:
     """Integration tests for WorkflowManager sub-agent."""
-    
+
     def setup_method(self):
         """Set up test environment."""
         self.test_prompt = "test_feature.md"
         self.test_branch = None
         self.test_issue = None
-        
+
     def teardown_method(self):
         """Clean up test artifacts."""
         # Clean up test branch if created
         if self.test_branch:
             subprocess.run(["git", "checkout", "main"])
             subprocess.run(["git", "branch", "-D", self.test_branch])
-            
+
     def test_workflow_execution(self):
         """Test complete workflow execution."""
         # 1. Create test prompt
         self._create_test_prompt()
-        
+
         # 2. Invoke WorkflowManager
         # Note: This would be done through Claude Code
         # For testing, we verify each phase manually
-        
+
         # 3. Verify issue creation
         assert self._verify_issue_created()
-        
+
         # 4. Verify branch creation
         assert self._verify_branch_created()
-        
+
         # 5. Verify implementation
         assert self._verify_files_created()
-        
+
         # 6. Verify tests
         assert self._verify_tests_created()
-        
+
         # 7. Verify PR creation
         assert self._verify_pr_created()
-        
+
     def test_prompt_validation(self):
         """Test prompt validation mechanism."""
         # Create invalid prompt (missing sections)
@@ -106,10 +106,10 @@ class TestWorkflowManagerIntegration:
         # Invalid Prompt
         This prompt is missing required sections.
         """
-        
+
         # Verify WorkflowManager detects invalid prompt
         # and invokes PromptWriter
-        
+
     def test_task_structure_validation(self):
         """Test TodoWrite task structure validation."""
         # Test with invalid task structure
@@ -117,7 +117,7 @@ class TestWorkflowManagerIntegration:
             {"content": "Missing required fields"},
             {"id": "1", "status": "pending"},  # Missing content and priority
         ]
-        
+
         # Verify validation catches these issues
 ```
 

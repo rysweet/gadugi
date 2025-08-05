@@ -50,7 +50,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Initialize services
     terminalService = new TerminalService();
-    
+
     // Setup terminal event listeners
     const terminalDisposables = terminalService.setupEventListeners();
     context.subscriptions.push(...terminalDisposables);
@@ -70,14 +70,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
     // Show activation success
     ErrorUtils.logInfo('Gadugi VS Code extension activated successfully', 'extension-activation');
-    
+
     // Show welcome message on first activation
     await showWelcomeMessage(context);
 
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     ErrorUtils.logError(err, ErrorUtils.createErrorContext('extension-activation'));
-    
+
     await ErrorUtils.showErrorMessage(
       'Failed to activate Gadugi extension. Check the output for details.',
       'Show Output'
@@ -120,9 +120,9 @@ export function deactivate() {
 /**
  * Validate extension prerequisites
  */
-async function validateExtensionPrerequisites(): Promise<{ 
-  canContinue: boolean; 
-  issues: string[] 
+async function validateExtensionPrerequisites(): Promise<{
+  canContinue: boolean;
+  issues: string[]
 }> {
   const issues: string[] = [];
 
@@ -141,8 +141,8 @@ async function validateExtensionPrerequisites(): Promise<{
     issues.push(...dependencyIssues);
 
     // Determine if extension can continue with warnings
-    const criticalIssues = issues.filter(issue => 
-      issue.includes('No workspace folder') || 
+    const criticalIssues = issues.filter(issue =>
+      issue.includes('No workspace folder') ||
       issue.includes('Git is not installed')
     );
 
@@ -229,7 +229,7 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.workspace.onDidChangeWorkspaceFolders(async () => {
       ErrorUtils.logInfo('Workspace folders changed', 'extension-events');
-      
+
       if (monitorPanel) {
         await monitorPanel.refresh();
       }
@@ -246,7 +246,7 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('gadugi')) {
         ErrorUtils.logInfo('Gadugi configuration changed', 'extension-events');
-        
+
         if (monitorPanel) {
           monitorPanel.refresh();
         }
@@ -259,7 +259,7 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
     vscode.window.onDidChangeWindowState((windowState) => {
       if (windowState.focused) {
         ErrorUtils.logInfo('VS Code window focused', 'extension-events');
-        
+
         // Refresh monitor panel when window regains focus
         if (monitorPanel && monitorPanel.isVisible()) {
           monitorPanel.refresh();
@@ -276,7 +276,7 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
  */
 async function showWelcomeMessage(context: vscode.ExtensionContext): Promise<void> {
   const hasShownWelcome = context.globalState.get<boolean>('gadugi.hasShownWelcome', false);
-  
+
   if (!hasShownWelcome) {
     const message = 'Welcome to Gadugi! This extension helps manage git worktrees and Claude Code instances for parallel development.';
     const action = await vscode.window.showInformationMessage(
@@ -342,9 +342,9 @@ async function validateAndShowSetup(): Promise<void> {
   try {
     const validation = await validateExtensionPrerequisites();
     const dependencyIssues = await ErrorUtils.validateDependencies();
-    
+
     let message = 'Gadugi Extension Setup Validation\\n\\n';
-    
+
     if (validation.canContinue && dependencyIssues.length === 0) {
       message += '✅ All prerequisites met!\\n\\n';
       message += '• Workspace folder is open\\n';
@@ -352,12 +352,12 @@ async function validateAndShowSetup(): Promise<void> {
       message += '• Extension is ready to use';
     } else {
       message += '⚠️  Some issues found:\\n\\n';
-      
+
       const allIssues = [...validation.issues, ...dependencyIssues];
       for (const issue of allIssues) {
         message += `• ${issue}\\n`;
       }
-      
+
       message += '\\nSome features may not work correctly.';
     }
 
@@ -436,7 +436,7 @@ export const extensionMetadata = {
   description: 'Multi-agent development workflow management with git worktree and Claude Code integration',
   features: [
     'Bloom Command - Auto-setup Claude in all worktrees',
-    'Monitor Panel - Real-time process and worktree monitoring', 
+    'Monitor Panel - Real-time process and worktree monitoring',
     'Terminal Management - Streamlined terminal creation',
     'Process Monitoring - Track Claude Code instances'
   ]
