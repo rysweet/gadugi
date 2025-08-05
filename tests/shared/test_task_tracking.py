@@ -160,6 +160,9 @@ except ImportError as e:
             self._task_dict: Dict[str, Task] = {}
 
         def add_task(self, task: Task) -> None:
+            # Raise TaskValidationError if task is invalid
+            if not task.id or not task.content:
+                raise TaskValidationError("Task ID and content cannot be empty")
             if task.id in self._task_dict:
                 raise TaskError(f"Task with ID {task.id} already exists")
             self.tasks.append(task)
