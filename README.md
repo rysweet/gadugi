@@ -129,11 +129,34 @@ Once installed, invoke agents as needed:
 - `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
 - `/agent:program-manager` - For project health and issue lifecycle management
 - `/agent:team-coach` - For team coordination and performance optimization
+- `/agent:readme-agent` - For README management and maintenance
 
 #### Development Tools
 - `/agent:test-solver` - For diagnosing and fixing failing tests
 - `/agent:test-writer` - For creating comprehensive test suites
 - `/agent:pr-backlog-manager` - For managing PR readiness and backlogs
+
+### Important: Hook Limitations
+
+**Claude Code hooks cannot directly invoke agents using `/agent:agent-name` syntax.**
+
+Hooks execute in shell environments where the `/agent:` syntax is not recognized, resulting in "No such file or directory" errors. Instead:
+
+**❌ This fails in hooks:**
+```json
+{
+  "command": "/agent:agent-manager check-and-update-agents"
+}
+```
+
+**✅ Use hooks for notifications:**
+```json
+{
+  "command": "echo 'Use \"/agent:agent-manager check-and-update-agents\" to check for updates'"
+}
+```
+
+Then manually invoke agents in Claude Code sessions as needed.
 
 ## Available Agents
 
@@ -166,7 +189,7 @@ Once installed, invoke agents as needed:
 
 ### Productivity & Content Creation
 - **prompt-writer** - Creates high-quality structured prompts for development workflows
-
+- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
 ### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
 - **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks

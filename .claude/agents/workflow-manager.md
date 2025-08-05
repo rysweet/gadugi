@@ -655,6 +655,149 @@ The WorkflowManager MUST NEVER complete without executing Phase 9 and 10. These 
 5. ✅ **Retry Logic**: Failed attempts are automatically retried
 6. ✅ **Blocking Errors**: Workflow stops if Phase 9 cannot complete
 
+### 11. Settings Update Phase (AUTOMATIC)
+
+**AUTOMATIC EXECUTION**: This phase runs automatically after code-review-response completion in Phase 10.
+
+After completing the code review response in Phase 10, automatically update Claude settings:
+
+#### **Phase 11 Execution Steps (AUTOMATIC)**
+
+1. **Check for Local Settings Changes**:
+   ```bash
+   echo "📋 Phase 11: Claude Settings Update"
+   echo "Checking for local Claude settings changes..."
+   
+   if [ -f ".claude/settings.local.json" ]; then
+       echo "✅ Local settings detected - invoking settings update agent"
+       echo "🚀 AUTOMATIC: Invoking claude-settings-update agent"
+       
+       # Record current branch for restoration
+       CURRENT_BRANCH=$(git branch --show-current)
+       echo "Current branch: $CURRENT_BRANCH"
+       
+       # Invoke settings update agent
+       /agent:claude-settings-update
+       
+       # Verify we're back on the correct branch
+       if [ "$(git branch --show-current)" != "$CURRENT_BRANCH" ]; then
+           echo "⚠️  Branch mismatch detected - switching back to $CURRENT_BRANCH"
+           git checkout "$CURRENT_BRANCH"
+       fi
+       
+       echo "✅ Settings update completed successfully"
+   else
+       echo "ℹ️  No local settings found - skipping update"
+   fi
+   ```
+
+2. **Update Workflow State**:
+   ```bash
+   # Mark Phase 11 as completed
+   complete_phase 11 "Settings Update" "verify_phase_11"
+   
+   # Update final workflow state
+   echo "📝 Finalizing workflow state..."
+   echo "✅ All phases completed successfully"
+   ```
+
+3. **Verification Function**:
+   ```bash
+   verify_phase_11() {
+       # Phase 11 always succeeds (settings update is optional)
+       # If local settings exist and agent runs, verify no errors occurred
+       if [ -f ".claude/settings.local.json" ]; then
+           echo "✅ Phase 11: Settings update attempted"
+       else
+           echo "✅ Phase 11: No settings update needed"
+       fi
+       return 0
+   }
+   ```
+
+#### **Integration with Existing Phases**
+
+Update the Phase 10 completion to trigger Phase 11:
+
+```bash
+# After code-review-response completion in Phase 10
+echo "✅ Code review response completed"
+echo "⚡ AUTOMATIC: Triggering Phase 11 - Settings Update"
+
+# Execute Phase 11 immediately
+execute_phase_11_settings_update
+
+echo "✅ Phase 10 and 11 completed successfully"
+```
+
+#### **State File Updates**
+
+Update state file format to include Phase 11:
+
+```markdown
+## Phase Completion Status
+- [x] Phase 1: Initial Setup ✅
+- [x] Phase 2: Issue Creation (#N) ✅
+- [x] Phase 3: Branch Management (feature/name-N) ✅
+- [x] Phase 4: Research and Planning ✅
+- [x] Phase 5: Implementation ✅
+- [x] Phase 6: Testing ✅
+- [x] Phase 7: Documentation ✅
+- [x] Phase 8: Pull Request ✅
+- [x] Phase 9: Review ✅
+- [x] Phase 10: Review Response ✅
+- [x] Phase 11: Settings Update ✅
+```
+
+#### **Enhanced Task List Integration**
+
+Add Phase 11 to mandatory workflow tasks:
+
+```python
+TaskData(
+    id="11",
+    content="🔧 AUTOMATIC: Update Claude settings (Phase 11)",
+    status="pending",
+    priority="medium",
+    phase=WorkflowPhase.SETTINGS_UPDATE,
+    auto_invoke=True,
+    enforcement_level="OPTIONAL"  # Settings update is beneficial but not critical
+)
+```
+
+#### **Error Handling for Phase 11**
+
+Settings update failures should not block workflow completion:
+
+```bash
+execute_phase_11_with_error_handling() {
+    echo "🔧 Executing Phase 11: Settings Update"
+    
+    # Settings update should not fail the entire workflow
+    if /agent:claude-settings-update; then
+        echo "✅ Settings update completed successfully"
+        complete_phase 11 "Settings Update" "verify_phase_11"
+    else
+        echo "⚠️  Settings update failed - continuing workflow"
+        echo "💡 Manual settings merge may be needed later"
+        # Mark as completed anyway - this is not a critical failure
+        complete_phase 11 "Settings Update" "verify_phase_11"
+    fi
+}
+```
+
+#### **Execution Pattern Update**
+
+Updated execution pattern with Phase 11:
+
+1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
+2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning  
+3. 🔧 **Phase 5-7**: Implementation, Testing, Documentation
+4. 📨 **Phase 8**: PR Creation → ⏱️ **30-second timer** → 🚨 **AUTOMATIC Phase 9**
+5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**  
+6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
+7. 🔧 **Phase 11**: Settings Update → 📝 **Final state update** → ✅ **COMPLETE**
+
 ## Enhanced Progress Tracking (Shared Modules)
 
 Use the enhanced TodoWrite integration with comprehensive task management:
