@@ -14,43 +14,50 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
-    from memory_parser import MemoryDocument, MemoryParser, MemorySection, Task, TaskStatus
+    from memory_parser import (
+        MemoryDocument,
+        MemoryParser,
+        MemorySection,
+        Task,
+        TaskStatus,
+    )
 except ImportError:
     # Fallback for development environments without memory_parser
     import warnings
+
     warnings.warn("memory_parser module not found. Some functionality may be limited.")
-    
+
     class MemoryDocument:
         def __init__(self, sections=None, **kwargs):
             self.sections = sections or []
-    
+
     class MemorySection:
         def __init__(self, name, content, **kwargs):
             self.name = name
             self.content = content
-    
+
     class MemoryParser:
         def parse_file(self, file_path):
             # Simple fallback parser
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
             return self._parse_basic(content)
-        
+
         def _parse_basic(self, content):
             sections = []
             current_section = None
-            
-            for line in content.split('\n'):
-                if line.startswith('## '):
+
+            for line in content.split("\n"):
+                if line.startswith("## "):
                     if current_section:
                         sections.append(current_section)
-                    current_section = MemorySection(line[3:].strip(), '')
+                    current_section = MemorySection(line[3:].strip(), "")
                 elif current_section:
-                    current_section.content += line + '\n'
-            
+                    current_section.content += line + "\n"
+
             if current_section:
                 sections.append(current_section)
-            
+
             return MemoryDocument(sections=sections)
 
 
@@ -147,7 +154,10 @@ class MemoryCompactor:
         )
 
         self.rules = rules or self.DEFAULT_RULES.copy()
-        self.size_thresholds = {**self.DEFAULT_SIZE_THRESHOLDS, **(size_thresholds or {})}
+        self.size_thresholds = {
+            **self.DEFAULT_SIZE_THRESHOLDS,
+            **(size_thresholds or {}),
+        }
 
         try:
             self.parser = MemoryParser()
@@ -178,8 +188,10 @@ class MemoryCompactor:
                 "current_chars": char_count,
                 "threshold_lines": self.size_thresholds["max_lines"],
                 "threshold_chars": self.size_thresholds["max_chars"],
-                "exceeds_line_threshold": line_count > self.size_thresholds["max_lines"],
-                "exceeds_char_threshold": char_count > self.size_thresholds["max_chars"],
+                "exceeds_line_threshold": line_count
+                > self.size_thresholds["max_lines"],
+                "exceeds_char_threshold": char_count
+                > self.size_thresholds["max_chars"],
                 "last_modified": datetime.fromtimestamp(
                     self.memory_path.stat().st_mtime
                 ).isoformat(),
@@ -255,7 +267,10 @@ class MemoryCompactor:
         except ValueError as e:
             return {"success": False, "error": f"Invalid input: {e}"}
         except Exception as e:
-            return {"success": False, "error": f"Unexpected error during compaction: {e}"}
+            return {
+                "success": False,
+                "error": f"Unexpected error during compaction: {e}",
+            }
 
     def _create_compaction_plan(self, memory_doc: MemoryDocument) -> Dict[str, Any]:
         """Create a plan for what content to compact"""
@@ -321,8 +336,8 @@ class MemoryCompactor:
             # Apply max_items limit if specified
             if rule.max_items and len(items_to_preserve) > rule.max_items:
                 # Keep most recent items (those that should be preserved)
-                excess_items = items_to_preserve[rule.max_items:]
-                items_to_preserve = items_to_preserve[:rule.max_items]
+                excess_items = items_to_preserve[rule.max_items :]
+                items_to_preserve = items_to_preserve[: rule.max_items]
                 items_to_archive.extend(excess_items)
                 chars_to_archive += sum(len(item) for item in excess_items)
 
@@ -346,7 +361,9 @@ class MemoryCompactor:
 
             # Check if this starts a new TOP-LEVEL item (bullet point, number, etc.)
             # Only treat as new item if it's at the start of line (not indented)
-            if line.startswith(('-', '*', '+', '•')) and re.match(r"^[-*+•]\s+", stripped_line):
+            if line.startswith(("-", "*", "+", "•")) and re.match(
+                r"^[-*+•]\s+", stripped_line
+            ):
                 if current_item:
                     items.append("\n".join(current_item))
                 current_item = [line]  # Keep original indentation
@@ -404,12 +421,12 @@ class MemoryCompactor:
         if "weeks ago" in item.lower():
             return 21  # Assume 3 weeks
         if "days ago" in item.lower():
-            return 7   # Assume a week
-            
+            return 7  # Assume a week
+
         # Default: assume old if no date found and contains "Old" or similar
         if re.search(r"\b(old|months ago|weeks ago)\b", item.lower()):
             return 60  # Assume 2 months old
-            
+
         return 0  # Recent if no indicators
 
     def _execute_compaction(
@@ -444,7 +461,7 @@ class MemoryCompactor:
                     backup_content = f.read()
                 with open(self.memory_path, "w", encoding="utf-8") as f:
                     f.write(backup_content)
-            except:
+            except Exception:
                 pass  # Don't mask the original error
             raise RuntimeError(f"Failed to write compacted file: {e}") from e
 
@@ -473,7 +490,9 @@ class MemoryCompactor:
         # Prepare archive content
         timestamp = datetime.now().isoformat()
         archive_section = f"\n\n## Memory Compaction Archive - {timestamp}\n\n"
-        archive_section += "The following items were archived during automatic compaction:\n\n"
+        archive_section += (
+            "The following items were archived during automatic compaction:\n\n"
+        )
 
         for item in items_to_archive:
             archive_section += f"{item}\n\n"
@@ -488,7 +507,7 @@ class MemoryCompactor:
                 header = f"""# AI Assistant Long-Term Memory Details
 Last Updated: {timestamp}
 
-This file contains detailed historical context and implementation details archived from Memory.md. 
+This file contains detailed historical context and implementation details archived from Memory.md.
 For current status, see `.github/Memory.md`.
 
 ## Automatic Compaction System
@@ -519,19 +538,20 @@ Last Updated: {timestamp}
 
         # Build section mapping for easier lookup
         sections_to_compact = {
-            section["section_name"]: section for section in compaction_plan["sections_to_compact"]
+            section["section_name"]: section
+            for section in compaction_plan["sections_to_compact"]
         }
-        
+
         # Use the preserved items directly from the compaction plan
         # Group preserved items by section
         section_preserved_items = {}
-        
+
         # Build mapping from the compaction plan results
         for section_info in compaction_plan["sections_to_compact"]:
             section_name = section_info["section_name"]
             # Get preserved items for this section from the plan
             section_preserved_items[section_name] = []
-            
+
         # Re-analyze each section to get current preserved items
         # (This ensures we get the exact same logic that was used in planning)
         for section in memory_doc.sections:
@@ -539,16 +559,18 @@ Last Updated: {timestamp}
                 section_analysis = self._analyze_section_for_compaction(
                     section, self.rules.get(section.name), datetime.now()
                 )
-                section_preserved_items[section.name] = section_analysis["items_to_preserve"]
+                section_preserved_items[section.name] = section_analysis[
+                    "items_to_preserve"
+                ]
 
         # Rebuild each section
         for section in memory_doc.sections:
             compacted += f"## {section.name}\n"
-            
+
             if section.name in sections_to_compact:
                 # Add preserved items for this section
                 preserved_items = section_preserved_items.get(section.name, [])
-                
+
                 for item in preserved_items:
                     compacted += f"{item}\n"
 
@@ -559,26 +581,26 @@ Last Updated: {timestamp}
             else:
                 # Preserve section as-is if not being compacted
                 compacted += f"{section.content}"
-            
+
             compacted += "\n"
 
         # Add reference footer
         compacted += "\n---\n*For detailed history and implementation details, see `.github/LongTermMemoryDetails.md`*\n"
 
         return compacted
-    
+
     def _validate_path(self, path_str: str) -> Path:
         """Validate and sanitize file paths for security"""
         if not path_str:
             raise ValueError("Path cannot be empty")
-        
+
         # Convert to Path object
         path = Path(path_str)
-        
+
         # Check for directory traversal attempts before resolving
         if ".." in str(path) or "~" in str(path):
             raise ValueError(f"Directory traversal not allowed: {path_str}")
-        
+
         # For testing, just return the path without full resolution
         # In production, we'd resolve it fully
         try:
@@ -625,7 +647,9 @@ def main():
                 print(f"Compaction plan: {result['compaction_plan']}")
             else:
                 print("Compaction completed successfully")
-                print(f"Size reduction: {result['result']['reduction_percentage']:.1f}%")
+                print(
+                    f"Size reduction: {result['result']['reduction_percentage']:.1f}%"
+                )
                 print(f"Archived items: {result['result']['archived_items']}")
         else:
             print(f"Compaction failed: {result['error']}")

@@ -31,7 +31,7 @@ class CompactionConfig:
     enable_auto_compaction: bool = True
     create_backup: bool = True
     details_file_name: str = "LongTermMemoryDetails.md"
-    
+
     # Section-specific compaction rules
     section_rules: Dict[str, Dict[str, Any]] = field(
         default_factory=lambda: {

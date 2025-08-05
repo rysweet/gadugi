@@ -394,12 +394,12 @@ compaction:
   max_chars: 50000                  # Trigger at character count
   target_lines: 80                  # Target size after compaction
   min_benefit: 0.2                  # Minimum 20% reduction to proceed
-  
+
   # Behavior settings
   enable_auto_compaction: true      # Enable automatic compaction
   create_backup: true               # Create backup files
   details_file_name: "LongTermMemoryDetails.md"
-  
+
   # Custom section rules
   section_rules:
     "Custom Section":
@@ -490,7 +490,7 @@ grep -A 3 -B 3 "specific content" LongTermMemoryDetails.md >> Memory.md
 ### Benefits
 
 - **Optimal AI Performance**: Keeps Memory.md at ideal size for AI processing
-- **Complete History Preservation**: No information loss through intelligent archiving  
+- **Complete History Preservation**: No information loss through intelligent archiving
 - **Automatic Maintenance**: Zero manual intervention required
 - **Configurable Behavior**: Customizable rules for different project needs
 - **Workflow Integration**: Seamlessly integrated into development workflows

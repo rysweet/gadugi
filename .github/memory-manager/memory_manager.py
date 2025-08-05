@@ -40,7 +40,9 @@ class MemoryManager:
             str(memory_path), str(self.repo_path), self.config.sync
         )
         # Initialize memory compactor with config-based thresholds
-        details_path = self.repo_path / ".github" / self.config.compaction.details_file_name
+        details_path = (
+            self.repo_path / ".github" / self.config.compaction.details_file_name
+        )
         self.compactor = MemoryCompactor(
             str(memory_path),
             str(details_path),
@@ -49,7 +51,7 @@ class MemoryManager:
                 "max_chars": self.config.compaction.max_chars,
                 "target_lines": self.config.compaction.target_lines,
                 "min_compaction_benefit": self.config.compaction.min_benefit,
-            }
+            },
         )
 
     def status(self) -> Dict[str, Any]:
@@ -153,18 +155,18 @@ class MemoryManager:
         try:
             # Check if compaction is needed
             needs_compaction, analysis = self.compactor.needs_compaction()
-            
+
             if not needs_compaction:
                 return {
                     "success": True,
                     "compaction_needed": False,
                     "analysis": analysis,
-                    "message": "Memory.md is within size limits - no compaction needed"
+                    "message": "Memory.md is within size limits - no compaction needed",
                 }
 
             # Perform compaction
             result = self.compactor.compact_memory(dry_run=dry_run)
-            
+
             if result["success"] and not dry_run and result.get("compaction_executed"):
                 # Update the status to reflect successful compaction
                 result["message"] = (
@@ -172,7 +174,7 @@ class MemoryManager:
                     f"Size reduced by {result['result']['reduction_percentage']:.1f}%. "
                     f"{result['result']['archived_items']} items archived to LongTermMemoryDetails.md"
                 )
-            
+
             return result
 
         except Exception as e:
@@ -182,18 +184,18 @@ class MemoryManager:
         """Automatically compact memory if it exceeds thresholds"""
         try:
             needs_compaction, analysis = self.compactor.needs_compaction()
-            
+
             if not needs_compaction:
                 return {
                     "success": True,
                     "auto_compaction_triggered": False,
-                    "analysis": analysis
+                    "analysis": analysis,
                 }
 
             # Perform automatic compaction
             result = self.compact_memory(dry_run=False)
             result["auto_compaction_triggered"] = True
-            
+
             return result
 
         except Exception as e:
@@ -307,7 +309,8 @@ def main():
 
     # Compact command
     compact_parser = subparsers.add_parser(
-        "compact", help="Automatically compact Memory.md with archiving to LongTermMemoryDetails.md"
+        "compact",
+        help="Automatically compact Memory.md with archiving to LongTermMemoryDetails.md",
     )
     compact_parser.add_argument(
         "--dry-run", action="store_true", help="Preview compaction without applying"
@@ -318,7 +321,8 @@ def main():
 
     # Auto-compact command
     auto_compact_parser = subparsers.add_parser(
-        "auto-compact", help="Check and automatically compact if thresholds are exceeded"
+        "auto-compact",
+        help="Check and automatically compact if thresholds are exceeded",
     )
 
     # Create issues command
@@ -393,7 +397,7 @@ def main():
         elif args.command == "prune":
             result = manager.prune(args.dry_run)
             print(json.dumps(result, indent=2))
-            
+
             if result.get("success") and result.get("compaction_executed"):
                 print("✅ Memory compaction completed successfully")
             elif result.get("success") and not result.get("compaction_needed"):
@@ -405,16 +409,20 @@ def main():
                 result = manager.compactor.compact_memory(dry_run=args.dry_run)
             else:
                 result = manager.compact_memory(dry_run=args.dry_run)
-            
+
             print(json.dumps(result, indent=2))
-            
+
             if result.get("success"):
                 if result.get("compaction_executed"):
                     print("✅ Memory compaction completed successfully")
                     if not args.dry_run:
-                        reduction = result.get("result", {}).get("reduction_percentage", 0)
+                        reduction = result.get("result", {}).get(
+                            "reduction_percentage", 0
+                        )
                         archived = result.get("result", {}).get("archived_items", 0)
-                        print(f"📊 Size reduced by {reduction:.1f}%, {archived} items archived")
+                        print(
+                            f"📊 Size reduced by {reduction:.1f}%, {archived} items archived"
+                        )
                 elif result.get("compaction_needed") is False:
                     print("ℹ️  No compaction needed - Memory.md is within size limits")
             else:
@@ -424,7 +432,7 @@ def main():
         elif args.command == "auto-compact":
             result = manager.auto_compact_if_needed()
             print(json.dumps(result, indent=2))
-            
+
             if result.get("success"):
                 if result.get("auto_compaction_triggered"):
                     print("✅ Automatic compaction completed successfully")

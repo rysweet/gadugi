@@ -14,7 +14,9 @@ from unittest.mock import MagicMock, mock_open, patch
 import sys
 
 # Add the memory-manager directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../.github/memory-manager"))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "../../.github/memory-manager")
+)
 
 from memory_compactor import CompactionRule, MemoryCompactor
 
@@ -29,9 +31,9 @@ class TestCompactionRule(unittest.TestCase):
             max_age_days=7,
             max_items=10,
             preserve_patterns=["CRITICAL", "HIGH"],
-            priority_preserve=True
+            priority_preserve=True,
         )
-        
+
         self.assertEqual(rule.section_name, "Test Section")
         self.assertEqual(rule.max_age_days, 7)
         self.assertEqual(rule.max_items, 10)
@@ -41,34 +43,34 @@ class TestCompactionRule(unittest.TestCase):
     def test_should_preserve_age_limit(self):
         """Test preservation based on age limits"""
         rule = CompactionRule("Test", max_age_days=7)
-        
+
         # Recent content should be preserved
         self.assertTrue(rule.should_preserve("Some content", age_days=3))
-        
+
         # Old content should not be preserved
         self.assertFalse(rule.should_preserve("Some content", age_days=10))
 
     def test_should_preserve_patterns(self):
         """Test preservation based on patterns"""
         rule = CompactionRule("Test", preserve_patterns=[r"CRITICAL", r"#\d+"])
-        
+
         # Content matching patterns should be preserved
         self.assertTrue(rule.should_preserve("CRITICAL issue found", age_days=100))
         self.assertTrue(rule.should_preserve("Issue #123 resolved", age_days=100))
-        
+
         # Content not matching patterns should not be preserved
         self.assertFalse(rule.should_preserve("Normal content", age_days=100))
 
     def test_should_preserve_priority(self):
         """Test preservation based on priority markers"""
         rule = CompactionRule("Test", priority_preserve=True)
-        
+
         # High priority content should be preserved
         self.assertTrue(rule.should_preserve("CRITICAL: System failure", age_days=100))
         self.assertTrue(rule.should_preserve("HIGH priority task", age_days=100))
         self.assertTrue(rule.should_preserve("URGENT fix needed", age_days=100))
         self.assertTrue(rule.should_preserve("IMPORTANT update", age_days=100))
-        
+
         # Normal content should not be preserved
         self.assertFalse(rule.should_preserve("Regular task", age_days=100))
 
@@ -81,7 +83,7 @@ class TestMemoryCompactor(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.memory_path = os.path.join(self.temp_dir, "Memory.md")
         self.details_path = os.path.join(self.temp_dir, "LongTermMemoryDetails.md")
-        
+
         # Sample Memory.md content
         self.sample_memory_content = """# AI Assistant Memory
 Last Updated: 2025-08-05T10:00:00-08:00
@@ -122,6 +124,7 @@ Last Updated: 2025-08-05T10:00:00-08:00
     def tearDown(self):
         """Clean up test fixtures"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _create_memory_file(self, content=None):
@@ -132,7 +135,7 @@ Last Updated: 2025-08-05T10:00:00-08:00
     def test_compactor_initialization(self):
         """Test MemoryCompactor initialization"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         self.assertEqual(compactor.memory_path, Path(self.memory_path))
         self.assertEqual(compactor.details_path, Path(self.details_path))
         self.assertIsNotNone(compactor.rules)
@@ -145,13 +148,11 @@ Last Updated: 2025-08-05T10:00:00-08:00
             "max_chars": 25000,
             "target_lines": 40,
         }
-        
+
         compactor = MemoryCompactor(
-            self.memory_path, 
-            self.details_path,
-            size_thresholds=custom_thresholds
+            self.memory_path, self.details_path, size_thresholds=custom_thresholds
         )
-        
+
         self.assertEqual(compactor.size_thresholds["max_lines"], 50)
         self.assertEqual(compactor.size_thresholds["max_chars"], 25000)
         self.assertEqual(compactor.size_thresholds["target_lines"], 40)
@@ -159,9 +160,9 @@ Last Updated: 2025-08-05T10:00:00-08:00
     def test_needs_compaction_file_not_exists(self):
         """Test needs_compaction when file doesn't exist"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         needs_compaction, analysis = compactor.needs_compaction()
-        
+
         self.assertFalse(needs_compaction)
         self.assertIn("error", analysis)
 
@@ -177,10 +178,10 @@ Last Updated: 2025-08-05T10:00:00-08:00
 - Write more tests
 """
         self._create_memory_file(small_content)
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
         needs_compaction, analysis = compactor.needs_compaction()
-        
+
         self.assertFalse(needs_compaction)
         self.assertIn("current_lines", analysis)
         self.assertIn("current_chars", analysis)
@@ -192,10 +193,10 @@ Last Updated: 2025-08-05T10:00:00-08:00
         # Create large Memory.md file (exceed line threshold)
         large_content = "\n".join([f"Line {i}" for i in range(150)])
         self._create_memory_file(large_content)
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
         needs_compaction, analysis = compactor.needs_compaction()
-        
+
         self.assertTrue(needs_compaction)
         self.assertTrue(analysis["exceeds_line_threshold"])
         self.assertEqual(analysis["current_lines"], 150)
@@ -203,16 +204,16 @@ Last Updated: 2025-08-05T10:00:00-08:00
     def test_extract_section_items(self):
         """Test extracting items from section content"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         section_content = """- First item
 - Second item with
   continuation
 - Third item
   - Nested item
 - Fourth item"""
-        
+
         items = compactor._extract_section_items(section_content)
-        
+
         self.assertEqual(len(items), 4)
         self.assertEqual(items[0], "- First item")
         self.assertIn("continuation", items[1])
@@ -222,12 +223,12 @@ Last Updated: 2025-08-05T10:00:00-08:00
         """Test estimating item age from content"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
         current_date = datetime(2025, 8, 5)
-        
+
         # Test with explicit date
         item_with_date = "Fixed bug on 2025-08-01"
         age = compactor._estimate_item_age(item_with_date, current_date)
         self.assertEqual(age, 4)  # 4 days ago
-        
+
         # Test with no date (should return 0)
         item_no_date = "Fixed some bug"
         age = compactor._estimate_item_age(item_no_date, current_date)
@@ -238,10 +239,10 @@ Last Updated: 2025-08-05T10:00:00-08:00
         # Create small file
         small_content = "# Small Memory\n\n## Goals\n- Test"
         self._create_memory_file(small_content)
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
         result = compactor.compact_memory(dry_run=False)
-        
+
         self.assertTrue(result["success"])
         self.assertFalse(result["compaction_needed"])
         self.assertIn("No compaction needed", result["message"])
@@ -251,10 +252,10 @@ Last Updated: 2025-08-05T10:00:00-08:00
         # Create large file
         large_content = "\n".join([f"# Section {i}\n- Item {i}" for i in range(60)])
         self._create_memory_file(large_content)
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
         result = compactor.compact_memory(dry_run=True)
-        
+
         self.assertTrue(result["success"])
         self.assertTrue(result["compaction_needed"])
         self.assertTrue(result["dry_run"])
@@ -268,42 +269,42 @@ Last Updated: 2025-08-05T10:00:00-08:00
         # Mock file system operations
         mock_exists.return_value = True
         mock_stat.return_value.st_mtime = datetime.now().timestamp()
-        
+
         # Mock file content
         large_content = "\n".join([f"# Section {i}\n- Item {i}" for i in range(60)])
         mock_file.return_value.read.return_value = large_content
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         # Mock the parser to avoid file system dependencies
-        with patch.object(compactor.parser, 'parse_file') as mock_parse:
+        with patch.object(compactor.parser, "parse_file") as mock_parse:
             mock_doc = MagicMock()
             mock_doc.sections = []
             mock_parse.return_value = mock_doc
-            
+
             result = compactor.compact_memory(dry_run=False)
-            
+
             # Should succeed even with mocked data
             self.assertTrue(result["success"])
 
     def test_archive_items_new_file(self):
         """Test archiving items to new LongTermMemoryDetails.md"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         items_to_archive = [
             "- Old task completed (2025-07-01)",
             "- Another old task (2025-06-15)",
         ]
-        
+
         archived_count = compactor._archive_items(items_to_archive)
-        
+
         self.assertEqual(archived_count, 2)
         self.assertTrue(os.path.exists(self.details_path))
-        
+
         # Check archive file content
         with open(self.details_path, "r", encoding="utf-8") as f:
             content = f.read()
-            
+
         self.assertIn("Long-Term Memory Details", content)
         self.assertIn("Old task completed", content)
         self.assertIn("Another old task", content)
@@ -314,18 +315,18 @@ Last Updated: 2025-08-05T10:00:00-08:00
         existing_content = "# Existing Details\n\nSome existing content\n"
         with open(self.details_path, "w", encoding="utf-8") as f:
             f.write(existing_content)
-        
+
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         items_to_archive = ["- New archived item"]
         archived_count = compactor._archive_items(items_to_archive)
-        
+
         self.assertEqual(archived_count, 1)
-        
+
         # Check that existing content is preserved
         with open(self.details_path, "r", encoding="utf-8") as f:
             content = f.read()
-            
+
         self.assertIn("Existing Details", content)
         self.assertIn("Some existing content", content)
         self.assertIn("New archived item", content)
@@ -333,26 +334,27 @@ Last Updated: 2025-08-05T10:00:00-08:00
     def test_create_compacted_memory(self):
         """Test creating compacted memory content"""
         compactor = MemoryCompactor(self.memory_path, self.details_path)
-        
+
         # Mock memory document
         mock_doc = MagicMock()
         mock_section = MagicMock()
         mock_section.name = "Test Section"
         mock_section.content = "Some content"
         mock_doc.sections = [mock_section]
-        
+
         # Mock compaction plan
         compaction_plan = {
-            "sections_to_compact": [{
-                "section_name": "Test Section",
-                "items_to_archive": 2
-            }],
+            "sections_to_compact": [
+                {"section_name": "Test Section", "items_to_archive": 2}
+            ],
             "items_to_preserve": ["- Important item"],
-            "items_to_archive": ["- Old item 1", "- Old item 2"]
+            "items_to_archive": ["- Old item 1", "- Old item 2"],
         }
-        
-        compacted_content = compactor._create_compacted_memory(mock_doc, compaction_plan)
-        
+
+        compacted_content = compactor._create_compacted_memory(
+            mock_doc, compaction_plan
+        )
+
         self.assertIn("AI Assistant Memory", compacted_content)
         self.assertIn("Test Section", compacted_content)
         self.assertIn("2 items archived", compacted_content)
@@ -371,12 +373,14 @@ class TestMemoryCompactorIntegration(unittest.TestCase):
     def tearDown(self):
         """Clean up integration test fixtures"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_full_compaction_workflow(self):
         """Test complete compaction workflow end-to-end"""
         # Create realistic Memory.md that needs compaction
-        large_memory_content = """# AI Assistant Memory
+        large_memory_content = (
+            """# AI Assistant Memory
 Last Updated: 2025-08-05T10:00:00-08:00
 
 ## Current Goals
@@ -385,13 +389,28 @@ Last Updated: 2025-08-05T10:00:00-08:00
 - 🔄 Integrate with workflow manager
 
 ## Completed Tasks
-""" + "\n".join([f"- ✅ Task {i} completed on 2025-07-{i:02d}" for i in range(1, 51)]) + """
+"""
+            + "\n".join(
+                [f"- ✅ Task {i} completed on 2025-07-{i:02d}" for i in range(1, 51)]
+            )
+            + """
 
 ## Recent Accomplishments
-""" + "\n".join([f"- Accomplishment {i} from project phase {i}" for i in range(1, 31)]) + """
+"""
+            + "\n".join(
+                [f"- Accomplishment {i} from project phase {i}" for i in range(1, 31)]
+            )
+            + """
 
 ## Reflections
-""" + "\n".join([f"- Reflection {i}: Learned about system design patterns" for i in range(1, 26)]) + """
+"""
+            + "\n".join(
+                [
+                    f"- Reflection {i}: Learned about system design patterns"
+                    for i in range(1, 26)
+                ]
+            )
+            + """
 
 ## Important Context
 - CRITICAL: Memory management is essential for AI performance
@@ -404,19 +423,27 @@ Last Updated: 2025-08-05T10:00:00-08:00
 - Create comprehensive documentation
 - Submit for code review
 """
+        )
 
         # Write the large memory file
         with open(self.memory_path, "w", encoding="utf-8") as f:
             f.write(large_memory_content)
 
         # Create compactor with smaller thresholds to ensure compaction is needed
-        test_thresholds = {"max_lines": 100, "max_chars": 5000, "target_lines": 80, "min_compaction_benefit": 0.1}
-        compactor = MemoryCompactor(self.memory_path, self.details_path, size_thresholds=test_thresholds)
+        test_thresholds = {
+            "max_lines": 100,
+            "max_chars": 5000,
+            "target_lines": 80,
+            "min_compaction_benefit": 0.1,
+        }
+        compactor = MemoryCompactor(
+            self.memory_path, self.details_path, size_thresholds=test_thresholds
+        )
 
         # Check that compaction is needed
         needs_compaction, analysis = compactor.needs_compaction()
         original_lines = analysis["current_lines"]
-        
+
         self.assertTrue(needs_compaction)
         self.assertGreater(original_lines, 100)
 
@@ -454,7 +481,8 @@ Last Updated: 2025-08-05T10:00:00-08:00
 
     def test_compaction_preserves_essential_content(self):
         """Test that compaction preserves essential current content"""
-        essential_content = """# AI Assistant Memory
+        essential_content = (
+            """# AI Assistant Memory
 Last Updated: 2025-08-05T10:00:00-08:00
 
 ## Current Goals
@@ -473,15 +501,25 @@ Last Updated: 2025-08-05T10:00:00-08:00
 - User feedback incorporated into design
 
 ## Completed Tasks
-""" + "\n".join([f"- ✅ Old task {i} from months ago" for i in range(1, 51)]) + """
 """
+            + "\n".join([f"- ✅ Old task {i} from months ago" for i in range(1, 51)])
+            + """
+"""
+        )
 
         with open(self.memory_path, "w", encoding="utf-8") as f:
             f.write(essential_content)
 
         # Use smaller thresholds for this test to force compaction
-        test_thresholds = {"max_lines": 50, "max_chars": 2000, "target_lines": 40, "min_compaction_benefit": 0.1}
-        compactor = MemoryCompactor(self.memory_path, self.details_path, size_thresholds=test_thresholds)
+        test_thresholds = {
+            "max_lines": 50,
+            "max_chars": 2000,
+            "target_lines": 40,
+            "min_compaction_benefit": 0.1,
+        }
+        compactor = MemoryCompactor(
+            self.memory_path, self.details_path, size_thresholds=test_thresholds
+        )
         result = compactor.compact_memory(dry_run=False)
 
         self.assertTrue(result["success"])
@@ -498,7 +536,7 @@ Last Updated: 2025-08-05T10:00:00-08:00
 
         # Verify old tasks were archived
         self.assertNotIn("Old task 1 from months ago", compacted_content)
-        
+
         # Verify reference to archive
         self.assertIn("LongTermMemoryDetails.md", compacted_content)
 
