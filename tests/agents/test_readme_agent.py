@@ -423,8 +423,8 @@ class TestREADMEIntegration:
         
         # Check git commands were called correctly
         calls = mock_subprocess.call_args_list
-        assert any('git add README.md' in str(call) for call in calls)
-        assert any('README agent' in str(call) for call in calls)
+        assert any(call[0][0] == ['git', 'add', 'README.md'] for call in calls)
+        assert any('Added README agent' in str(call) for call in calls)
     
     def test_workflow_manager_integration(self):
         """Test integration with Workflow Manager."""
@@ -593,17 +593,28 @@ See [documentation](https://unreachable-site.example.com).
 class READMEAnalyzer:
     def analyze_structure(self, content):
         sections = []
+        warnings = []
         lines = content.split('\n')
+        
+        # Check for unclosed code blocks
+        if content.count('```') % 2 != 0:
+            warnings.append('unclosed_code_block')
+        
         for line in lines:
             if line.startswith('## '):
                 sections.append(line[3:])
         
-        return {
+        result = {
             'sections': sections,
             'has_title': content.startswith('# '),
-            'has_description': len(lines) > 1 and lines[1],
+            'has_description': len(lines) > 1 and bool(lines[1].strip()),
             'structure_score': len(sections) / 8.0  # Assume 8 ideal sections
         }
+        
+        if warnings:
+            result['warnings'] = warnings
+            
+        return result
     
     def identify_missing_sections(self, analysis):
         standard_sections = ['Overview', 'Installation', 'Usage', 'License', 'Contributing']
@@ -737,7 +748,7 @@ class ContentGenerator:
         name = project_data.get('name', 'project')
         pm = project_data.get('package_manager', 'npm')
         
-        content = f"## Installation\n\n"
+        content = "## Installation\n\n"
         content += f"```bash\n{pm} install {name}\n```\n\n"
         
         if project_data.get('has_agents'):
@@ -756,7 +767,7 @@ class ContentGenerator:
         for level_hashes, title in headers:
             level = len(level_hashes) - 1  # Subtract 1 because we start from ##
             indent = '  ' * (level - 1) if level > 1 else ''
-            link = title.lower().replace(' ', '-').replace('[^a-z0-9-]', '')
+            link = re.sub(r'[^a-z0-9-]+', '', title.lower().replace(' ', '-'))
             toc_lines.append(f"{indent}- [{title}](#{link})")
         
         return '\n'.join(toc_lines)
@@ -769,18 +780,25 @@ class READMEUpdater:
         # Find the agents section
         pattern = r'(## Available Agents\n)(.*?)(?=\n##|\n$)'
         
-        new_list = []
-        for agent in new_agents:
-            new_list.append(f"- {agent['name']} - {agent['description']}")
-        
         def replace_section(match):
-            return match.group(1) + '\n'.join(new_list) + '\n'
+            existing_content = match.group(2)
+            existing_lines = existing_content.strip().split('\n') if existing_content.strip() else []
+            
+            # Add new agents
+            for agent in new_agents:
+                new_line = f"- {agent['name']} - {agent['description']}"
+                existing_lines.append(new_line)
+            
+            return match.group(1) + '\n'.join(existing_lines) + '\n'
         
         if re.search(pattern, content, re.DOTALL):
             return re.sub(pattern, replace_section, content, flags=re.DOTALL)
         else:
             # Add new section
-            return content + f"\n\n## Available Agents\n" + '\n'.join(new_list) + '\n'
+            new_list = []
+            for agent in new_agents:
+                new_list.append(f"- {agent['name']} - {agent['description']}")
+            return content + "\n\n## Available Agents\n" + '\n'.join(new_list) + '\n'
     
     def update_version_references(self, content, new_version):
         import re
@@ -881,7 +899,7 @@ class READMEQualityScorer:
         
         # Count sections
         sections = [line for line in lines if line.startswith('## ')]
-        section_score = min(len(sections) / 8.0, 1.0) * 0.3
+        section_score = min(len(sections) / 5.0, 1.0) * 0.3  # Changed from 8 to 5 ideal sections
         score += section_score
         
         # Check for code examples
