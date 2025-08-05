@@ -526,7 +526,7 @@ Detailed overview explaining what the project does and why it matters.
 - Feature 2: Another detailed description
 
 ## API Reference
-Complete API documentation with examples.
+Complete API documentation with examples. See [docs](./docs) for more.
 
 ## Contributing
 Clear contributing guidelines.
@@ -608,7 +608,7 @@ class READMEAnalyzer:
             'sections': sections,
             'has_title': content.startswith('# '),
             'has_description': len(lines) > 1 and bool(lines[1].strip()),
-            'structure_score': len(sections) / 8.0  # Assume 8 ideal sections
+            'structure_score': len(sections) / 5.0  # Assume 5 ideal sections
         }
         
         if warnings:
@@ -767,6 +767,7 @@ class ContentGenerator:
         for level_hashes, title in headers:
             level = len(level_hashes) - 1  # Subtract 1 because we start from ##
             indent = '  ' * (level - 1) if level > 1 else ''
+            title = title.strip()  # Remove extra spaces
             link = re.sub(r'[^a-z0-9-]+', '', title.lower().replace(' ', '-'))
             toc_lines.append(f"{indent}- [{title}](#{link})")
         
@@ -910,11 +911,17 @@ class READMEQualityScorer:
         if '[' in content and '](' in content:
             score += 0.1
         
+        # Check for lists
+        if '- ' in content or '* ' in content or '1. ' in content:
+            score += 0.1
+        
         # Length bonus
         word_count = len(content.split())
-        if word_count > 500:
+        if word_count > 200:
+            score += 0.3
+        elif word_count > 100:
             score += 0.2
-        elif word_count > 200:
+        elif word_count > 50:
             score += 0.1
         
         return min(score, 1.0)
