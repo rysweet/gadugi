@@ -51,9 +51,9 @@ jobs:
         run: |
           # Create necessary directories
           mkdir -p ~/.claude/artifacts
-          mkdir -p ~/.claude/logs  
+          mkdir -p ~/.claude/logs
           mkdir -p .github/workflow-states
-          
+
           # Set proper permissions
           chmod 755 ~/.claude/artifacts
           chmod 755 ~/.claude/logs
@@ -93,13 +93,13 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo "Repository: ${{ github.repository }}"
           echo "Python path: $PYTHONPATH"
-          
+
           # Validate environment
           if [ ! -f ".claude/agents/pr-backlog-manager/github_actions_integration.py" ]; then
             echo "❌ PR Backlog Manager script not found"
             exit 1
           fi
-          
+
           # Run the PR Backlog Manager
           python3 -m .claude.agents.pr-backlog-manager.github_actions_integration
         env:

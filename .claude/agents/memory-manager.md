@@ -37,7 +37,7 @@ PRUNING_RULES = {
         "keep_recent_count": 10
     },
     "reflections": {
-        "age_threshold": "30 days", 
+        "age_threshold": "30 days",
         "consolidate_similar": True
     },
     "context_items": {
@@ -77,7 +77,7 @@ The MemoryManagerAgent can be invoked automatically:
 Task: Prune and sync Memory.md
 Options:
 - Prune completed tasks older than 7 days
-- Sync with GitHub Issues 
+- Sync with GitHub Issues
 - Resolve any conflicts
 - Update cross-references
 ```
@@ -98,12 +98,12 @@ memory_sync:
   auto_close_completed: true
   conflict_resolution: manual  # manual, memory_wins, github_wins, latest_wins
   sync_frequency: "5 minutes"
-  
+
 issue_creation:
   labels: ["memory-sync", "ai-assistant"]
   template: "memory-task"
   priority_labeling: true
-  
+
 pruning:
   completed_task_age: "7 days"
   reflection_age: "30 days"
@@ -118,12 +118,12 @@ content_rules:
     required: ["Current Goals", "Recent Accomplishments", "Next Steps"]
     optional: ["Reflections", "Important Context", "Code Review Summary"]
     max_items_per_section: 50
-  
+
   task_patterns:
     completed: ["✅", "[x]"]
     pending: ["[ ]", "- [ ]"]
     priority_markers: ["**CRITICAL**", "**HIGH**", "**URGENT**"]
-  
+
   preservation:
     keep_issue_references: true
     maintain_chronological_order: true
@@ -180,7 +180,7 @@ Pruning ← Curator ← Conflict Resolution ← Sync Engine ← Issue Changes
 - Coordinates pruning after workflow completion
 - Maintains workflow history and outcomes
 
-### With Code-Reviewer  
+### With Code-Reviewer
 - Preserves code review summaries and insights
 - Maintains PR history and architectural learnings
 - Consolidates review patterns and recommendations
@@ -197,7 +197,7 @@ Pruning ← Curator ← Conflict Resolution ← Sync Engine ← Issue Changes
 # Automated daily maintenance
 agent_actions = [
     "parse_memory_file",
-    "identify_pruning_candidates", 
+    "identify_pruning_candidates",
     "backup_current_state",
     "prune_old_completed_tasks",
     "consolidate_similar_accomplishments",
@@ -213,7 +213,7 @@ agent_actions = [
 # Handle synchronization conflicts
 conflict_resolution = {
     "task_modified_both_places": "prompt_user_choice",
-    "task_completed_memory_open_github": "close_github_issue", 
+    "task_completed_memory_open_github": "close_github_issue",
     "task_reopened_github_completed_memory": "reopen_memory_task",
     "content_diverged": "merge_with_manual_review"
 }
@@ -264,7 +264,7 @@ conflict_resolution = {
 ### Workflow Extensions
 - Integration with CI/CD pipeline status
 - Code coverage and quality metric tracking
-- Automated reporting and dashboard generation  
+- Automated reporting and dashboard generation
 - Team collaboration features for shared memory
 
 ---

@@ -22,5 +22,5 @@ __all__ = [
     "TaskAgentMatcher",
     "TeamCompositionOptimizer",
     "RecommendationEngine",
-    "RealtimeAssignment"
+    "RealtimeAssignment",
 ]

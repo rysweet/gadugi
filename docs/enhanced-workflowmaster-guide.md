@@ -87,7 +87,7 @@ Enhanced WorkflowMaster
    ```bash
    # Create security policies directory
    mkdir -p container_runtime/config
-   
+
    # Copy security policies (if not already present)
    cp container_runtime/config/security_policies.yaml.example \
       container_runtime/config/security_policies.yaml
@@ -96,14 +96,14 @@ Enhanced WorkflowMaster
 4. **Initialize WorkflowMaster**:
    ```python
    from .claude.agents.workflow_master_enhanced import EnhancedWorkflowMaster
-   
+
    # Basic configuration
    config = {
        'autonomous_mode': True,
        'security_policy': 'standard',
        'optimization_enabled': True
    }
-   
+
    wm = EnhancedWorkflowMaster(config)
    ```
 
@@ -140,21 +140,21 @@ advanced_config = {
     # Autonomous operation
     'autonomous_mode': True,
     'auto_apply_optimizations': False,
-    
+
     # Security settings
     'security_policy': 'hardened',
     'audit_enabled': True,
-    
+
     # Performance tuning
     'optimization_enabled': True,
     'learning_enabled': True,
     'max_parallel_tasks': 4,
-    
+
     # Error handling
     'circuit_breaker_threshold': 5,
     'max_retry_attempts': 3,
     'retry_backoff_strategy': 'exponential',
-    
+
     # Resource limits
     'default_timeout_seconds': 300,
     'max_memory_mb': 1024,
@@ -200,7 +200,7 @@ for rec in recommendations[:3]:  # Apply top 3
 orphaned = wm.detect_orphaned_workflows()
 if orphaned:
     print(f"Found {len(orphaned)} orphaned workflows")
-    
+
     for workflow in orphaned:
         if wm.should_resume_workflow(workflow):
             print(f"Resuming workflow {workflow.task_id}")
@@ -344,7 +344,7 @@ config = {
 
 # Decisions are made automatically based on:
 # - Task priority and retry count
-# - Error pattern analysis  
+# - Error pattern analysis
 # - Workflow progress assessment
 # - System health evaluation
 ```
@@ -363,21 +363,21 @@ For backward compatibility during migration:
 ```python
 class CompatibilityWorkflowMaster:
     """Compatibility layer for legacy WorkflowMaster usage."""
-    
+
     def __init__(self):
         self.enhanced_wm = EnhancedWorkflowMaster({
             'autonomous_mode': False,  # Disable for compatibility
             'security_policy': 'standard'
         })
-    
+
     def execute_legacy_workflow(self, prompt_file: str):
         """Execute workflow with legacy behavior."""
         workflow = self.enhanced_wm.initialize_workflow(prompt_file)
-        
+
         # Disable autonomous decisions for compatibility
         for task in workflow.tasks:
             task.max_retries = 1  # No automatic retries
-        
+
         return self.enhanced_wm.execute_workflow(workflow)
 ```
 

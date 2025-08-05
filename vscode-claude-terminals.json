@@ -6,7 +6,7 @@
       "icon": "terminal"
     },
     "Claude - Memory GitHub": {
-      "path": "bash", 
+      "path": "bash",
       "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/memory-github-pr14-20250801-142454 && claude"],
       "icon": "terminal"
     },

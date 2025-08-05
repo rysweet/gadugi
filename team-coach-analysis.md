@@ -49,14 +49,14 @@ The fundamental issue is architectural:
 ### Proper Implementation
 For a simple reflection loop that improves prompts and agents:
 
-1. **Log-based approach**: 
+1. **Log-based approach**:
    - Hooks write performance data to log files
    - Separate analysis process reads logs periodically
-   
+
 2. **Lightweight analysis**:
    - Hooks perform simple metrics collection
    - Store results in JSON/CSV for later analysis
-   
+
 3. **Manual trigger**:
    - Create a dedicated command/script for team analysis
    - Run it manually when needed, not automatically

@@ -302,7 +302,7 @@ If these tools are configured in the project environment, they can be used durin
 black --check .
 flake8 .
 
-# Run tests with coverage  
+# Run tests with coverage
 pytest --cov=gadugi tests/
 
 # Additional tools (if available):

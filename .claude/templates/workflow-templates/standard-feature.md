@@ -63,15 +63,15 @@ class TestFeature(unittest.TestCase):
     def setUp(self):
         # Test setup
         pass
-    
+
     def test_happy_path(self):
         # Normal operation
         pass
-    
+
     def test_edge_cases(self):
         # Boundary conditions
         pass
-    
+
     def test_error_handling(self):
         # Error scenarios
         pass

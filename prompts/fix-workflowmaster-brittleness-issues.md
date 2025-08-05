@@ -30,7 +30,7 @@ WorkflowManager exhibits brittleness in several areas that impact reliability:
 - **Rollback Capabilities**: Ability to cleanly rollback partial workflows
 - **Resource Monitoring**: Monitor and adapt to resource constraints
 
-### Reliability Requirements  
+### Reliability Requirements
 - **Network Resilience**: Handle network failures and API limitations gracefully
 - **Partial Success Handling**: Continue workflows when some operations fail
 - **Checkpoint System**: Save progress at key workflow points
@@ -57,7 +57,7 @@ def create_github_issue(title, body):
 
 #### 2. Git Operations
 ```python
-# Current fragile pattern  
+# Current fragile pattern
 def create_branch(branch_name):
     subprocess.run(['git', 'checkout', '-b', branch_name])  # No error checking
     # No validation of git state, conflict handling, or cleanup
@@ -81,7 +81,7 @@ class RobustWorkflowManager:
         self.retry_config = RetryConfig()
         self.state_manager = WorkflowStateManager()
         self.recovery_engine = RecoveryEngine()
-        
+
     def execute_phase_with_resilience(self, phase):
         try:
             return self.execute_phase(phase)
@@ -105,7 +105,7 @@ class WorkflowStateManager:
             'checksum': calculate_checksum(data)
         }
         self.atomic_write(checkpoint)
-        
+
     def recover_from_checkpoint(self, target_phase):
         # Validate and recover from last known good state
         checkpoint = self.load_latest_checkpoint()
@@ -123,7 +123,7 @@ class WorkflowStateManager:
 - Temporary file system issues
 - Resource contention
 
-#### 2. Permanent Failures  
+#### 2. Permanent Failures
 - Invalid credentials or permissions
 - Repository configuration issues
 - Conflicting git state
@@ -232,7 +232,7 @@ class RetryStrategy:
         self.max_attempts = max_attempts
         self.base_delay = base_delay
         self.max_delay = max_delay
-    
+
     def execute_with_retry(self, operation, *args, **kwargs):
         """Execute operation with exponential backoff retry"""
         for attempt in range(self.max_attempts):
@@ -241,7 +241,7 @@ class RetryStrategy:
             except TransientError as e:
                 if attempt == self.max_attempts - 1:
                     raise PermanentFailureError(f"Max retries exceeded: {e}")
-                
+
                 delay = min(self.base_delay * (2 ** attempt), self.max_delay)
                 self.log_retry_attempt(attempt + 1, delay, e)
                 time.sleep(delay)
@@ -255,7 +255,7 @@ class WorkflowCheckpointer:
     def __init__(self, workflow_id):
         self.workflow_id = workflow_id
         self.checkpoint_dir = f".gadugi/checkpoints/{workflow_id}"
-        
+
     def save_checkpoint(self, phase, state_data):
         """Save workflow state at checkpoint"""
         checkpoint = {
@@ -266,14 +266,14 @@ class WorkflowCheckpointer:
             'git_hash': self.get_current_git_hash(),
             'checksum': self.calculate_checksum(state_data)
         }
-        
+
         # Atomic write
         temp_file = f"{self.checkpoint_dir}/checkpoint_{phase}.tmp"
         final_file = f"{self.checkpoint_dir}/checkpoint_{phase}.json"
-        
+
         with open(temp_file, 'w') as f:
             json.dump(checkpoint, f, indent=2)
-        
+
         os.rename(temp_file, final_file)
         self.log_checkpoint_saved(phase)
 ```
@@ -283,19 +283,19 @@ class WorkflowCheckpointer:
 class RecoveryEngine:
     def attempt_recovery(self, failed_phase, error):
         """Attempt to recover from workflow failure"""
-        
+
         # Analyze failure type
         failure_type = self.classify_failure(error)
-        
+
         # Find appropriate recovery strategy
         recovery_strategy = self.get_recovery_strategy(failure_type, failed_phase)
-        
+
         if recovery_strategy:
             self.log_recovery_attempt(failed_phase, failure_type)
             return recovery_strategy.execute(failed_phase, error)
         else:
             return self.initiate_manual_recovery(failed_phase, error)
-    
+
     def get_recovery_strategy(self, failure_type, phase):
         """Get appropriate recovery strategy for failure"""
         strategies = {
@@ -315,20 +315,20 @@ class RecoveryEngine:
 class WorkflowHealthMonitor:
     def monitor_workflow_health(self, workflow):
         """Monitor workflow execution health"""
-        
+
         health_metrics = {
             'execution_time': self.measure_execution_time(workflow),
             'error_rate': self.calculate_error_rate(workflow),
             'resource_usage': self.monitor_resource_usage(workflow),
             'api_response_times': self.monitor_api_performance(workflow)
         }
-        
+
         # Check for health issues
         alerts = self.check_health_thresholds(health_metrics)
-        
+
         if alerts:
             self.send_alerts(alerts)
-        
+
         return health_metrics
 ```
 
@@ -346,16 +346,16 @@ class WorkflowHealthMonitor:
 class GitHubRateLimitHandler:
     def handle_rate_limit(self, operation, *args, **kwargs):
         """Handle GitHub API rate limiting gracefully"""
-        
+
         # Check current rate limit status
         rate_limit = self.check_rate_limit()
-        
+
         if rate_limit.remaining < 10:
             # Wait for rate limit reset
             wait_time = rate_limit.reset_time - time.time()
             self.log_rate_limit_wait(wait_time)
             time.sleep(wait_time + 1)
-        
+
         return operation(*args, **kwargs)
 ```
 
@@ -364,17 +364,17 @@ class GitHubRateLimitHandler:
 class GitConflictResolver:
     def resolve_conflicts_automatically(self, conflict_files):
         """Attempt automatic resolution of git conflicts"""
-        
+
         resolution_strategies = [
             self.try_auto_merge,
             self.try_template_resolution,
             self.try_metadata_resolution
         ]
-        
+
         for strategy in resolution_strategies:
             if strategy(conflict_files):
                 return True
-        
+
         # If automatic resolution fails, provide guidance
         return self.provide_manual_resolution_guidance(conflict_files)
 ```

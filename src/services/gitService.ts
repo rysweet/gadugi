@@ -65,13 +65,13 @@ export class GitService {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('worktree ')) {
         // Save previous worktree if it exists
         if (currentWorktree.path) {
           worktrees.push(this.completeWorktreeInfo(currentWorktree));
         }
-        
+
         // Start new worktree
         currentWorktree = {
           path: trimmed.substring('worktree '.length)
@@ -161,7 +161,7 @@ export class GitService {
     try {
       const worktreePath = path || PathUtils.join(this.workspaceRoot, '.worktrees', branch);
       const command = `worktree add "${worktreePath}" ${branch}`;
-      
+
       return await this.executeGitCommand(command);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));

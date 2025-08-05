@@ -15,20 +15,20 @@ This file combines generic Claude Code best practices with project-specific inst
 
 1. **DO NOT manually execute workflow phases**
 2. **Use the proper agent hierarchy**:
-   
+
    **For multiple tasks or when parallelization is possible**:
    ```
    /agent:orchestrator-agent
-   
+
    Execute these specific prompts in parallel:
    - prompt-file-1.md
    - prompt-file-2.md
    ```
-   
+
    **For single sequential tasks**:
    ```
    /agent:workflow-manager
-   
+
    Task: Execute workflow for /prompts/[prompt-file].md
    ```
 
@@ -39,7 +39,7 @@ This file combines generic Claude Code best practices with project-specific inst
 
 4. **Automated Workflow Handling**:
    - Issue creation
-   - Branch management  
+   - Branch management
    - Implementation tracking
    - PR creation
    - Code review invocation (Phase 9)
@@ -84,8 +84,8 @@ Use worktrees for:
 1. **Creation Phase**:
    ```
    /agent:worktree-manager
-   
-   Create a new git worktree for issue [number]. 
+
+   Create a new git worktree for issue [number].
    Branch name: [type]/issue-[number]-[description]
    ```
    - Creates isolated worktree in `.worktrees/issue-[number]/`
