@@ -1,7 +1,7 @@
 {
-  "checkpoint_id": "7f011972",
+  "checkpoint_id": "be36b048",
   "description": "Test issue creation checkpoint",
-  "created_at": "2025-08-04T23:22:26.337376+00:00Z",
+  "created_at": "2025-08-05T00:05:25.026877+00:00Z",
   "state": {
     "task_id": "test-issue-creation",
     "prompt_file": "test-issue.md",
@@ -11,8 +11,8 @@
     "pr_number": null,
     "current_phase": 2,
     "current_phase_name": "Issue Creation",
-    "created_at": "2025-08-04T23:22:26.337168+00:00Z",
-    "updated_at": "2025-08-04T23:22:26.337169+00:00Z",
+    "created_at": "2025-08-05T00:05:25.026709+00:00Z",
+    "updated_at": "2025-08-05T00:05:25.026710+00:00Z",
     "context": {
       "issue_url": "https://github.com/test/repo/issues/123"
     },

@@ -11,8 +11,13 @@ import os
 import tempfile
 from datetime import datetime
 import pytest
+import shutil
 
 
+@pytest.mark.skipif(
+    shutil.which("claude") is None,
+    reason="Claude CLI not available in CI environment"
+)
 def test_teamcoach_hook_integration():
     """Test that TeamCoach hooks are actually triggered during Claude Code execution."""
 
@@ -98,9 +103,9 @@ This is a simple task to test hook execution.
         print(f"   • Duration: {duration:.2f}s")
 
         # Test results for validation - pytest tests should not return values
-        assert (
-            result.returncode == 0 or len(found_indicators) > 0
-        ), "Test task should complete successfully or show hook indicators"
+        assert result.returncode == 0 or len(found_indicators) > 0, (
+            "Test task should complete successfully or show hook indicators"
+        )
 
 
 @pytest.mark.skip(

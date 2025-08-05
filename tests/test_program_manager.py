@@ -305,9 +305,8 @@ with multiple lines"""
             memory_dir = os.path.join(temp_dir, ".memory", "project")
             os.makedirs(memory_dir, exist_ok=True)
 
-            # Also create the alternative path structure that might be used
-            alt_memory_dir = os.path.join(temp_dir, "../../.memory/project")
-            os.makedirs(os.path.dirname(alt_memory_dir), exist_ok=True)
+            # Skip creating alternative path structure that goes outside temp_dir
+            # as it causes permission errors in CI environments
 
             # Patch the memory directory path
             with patch("os.path.dirname") as mock_dirname:
@@ -317,16 +316,11 @@ with multiple lines"""
 
                 self.assertTrue(result)
 
-                # Check priority file was created (try both possible locations)
+                # Check priority file was created
                 priority_file = os.path.join(memory_dir, "priorities.md")
-                alt_priority_file = os.path.join(
-                    os.path.dirname(temp_dir), ".memory", "project", "priorities.md"
-                )
 
                 # Create the directories and file if not exists
-                if not os.path.exists(priority_file) and not os.path.exists(
-                    alt_priority_file
-                ):
+                if not os.path.exists(priority_file):
                     # Mock the file creation since the actual method creates it
                     os.makedirs(os.path.dirname(priority_file), exist_ok=True)
                     with open(priority_file, "w") as f:
@@ -353,14 +347,7 @@ with multiple lines"""
 - ⚠️ **Stale ready issues**: 1 issues ready for >2 weeks
 """)
 
-                file_exists = os.path.exists(priority_file) or os.path.exists(
-                    alt_priority_file
-                )
-                priority_file = (
-                    priority_file
-                    if os.path.exists(priority_file)
-                    else alt_priority_file
-                )
+                file_exists = os.path.exists(priority_file)
                 self.assertTrue(file_exists)
 
                 # Read and verify content

@@ -140,13 +140,15 @@ class TestGitHubContext:
             "GITHUB_RUN_ATTEMPT": "1",
         }
 
-        with patch.dict(os.environ, env_vars):
-            context = GitHubContext.from_environment()
+        with patch.dict(os.environ, env_vars, clear=True):
+            # Also need to ensure GITHUB_EVENT_PATH doesn't exist or points to empty file
+            with patch.dict(os.environ, {"GITHUB_EVENT_PATH": ""}, clear=False):
+                context = GitHubContext.from_environment()
 
-            assert context.event_type == GitHubEventType.SCHEDULE
-            assert context.repository == "user/scheduled-repo"
-            assert context.pr_number is None
-            assert context.actor == "github-actions[bot]"
+                assert context.event_type == GitHubEventType.SCHEDULE
+                assert context.repository == "user/scheduled-repo"
+                assert context.pr_number is None
+                assert context.actor == "github-actions[bot]"
 
     def test_extract_pr_number_from_event(self):
         """Test PR number extraction from GitHub event payload."""
