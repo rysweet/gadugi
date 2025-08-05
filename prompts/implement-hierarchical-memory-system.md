@@ -725,7 +725,7 @@ class SecurityManager:
         # Secrets scanning
         # Content sanitization
         # Format validation
-        
+
     def check_agent_permissions(self, agent_id: str, memory_path: str, operation: str) -> bool:
         """Validate agent permissions for memory access"""
         # Agent permission matrix

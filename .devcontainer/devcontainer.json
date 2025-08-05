@@ -1,7 +1,7 @@
 {
   "name": "Gadugi PR Backlog Manager",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  
+
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
@@ -20,9 +20,9 @@
       "installDirectlyFromGitHubRelease": true
     }
   },
-  
+
   "postCreateCommand": ".devcontainer/setup.sh",
-  
+
   "customizations": {
     "vscode": {
       "extensions": [
@@ -42,25 +42,25 @@
       }
     }
   },
-  
+
   "containerEnv": {
     "CLAUDE_AUTO_APPROVE": "true",
     "CLAUDE_GITHUB_ACTIONS": "true",
     "PYTHONPATH": "/workspaces/gadugi/.claude/shared"
   },
-  
+
   "mounts": [
     "source=${localWorkspaceFolder}/.claude,target=/workspaces/gadugi/.claude,type=bind,consistency=cached"
   ],
-  
+
   "workspaceFolder": "/workspaces/gadugi",
-  
+
   "portsAttributes": {
     "8000": {
       "label": "Development Server",
       "onAutoForward": "notify"
     }
   },
-  
+
   "remoteUser": "vscode"
 }

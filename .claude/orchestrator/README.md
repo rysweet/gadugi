@@ -109,7 +109,7 @@ for task_id, result in results.items():
    git --version
    ```
 
-3. **Python Dependencies**: 
+3. **Python Dependencies**:
    ```bash
    pip install psutil  # For system resource monitoring
    ```
@@ -142,7 +142,7 @@ python components/task_analyzer.py --prompts-dir ../../../prompts/
 
 # The analyzer identifies these parallelizable tasks:
 # - test-definition-node.md (32.09% → 80% coverage)
-# - test-relationship-creator.md (32.50% → 80% coverage)  
+# - test-relationship-creator.md (32.50% → 80% coverage)
 # - test-documentation-linker.md (15.65% → 80% coverage)
 
 # Expected result: 3x speed improvement (180 minutes → 60 minutes)
@@ -164,7 +164,7 @@ python components/task_analyzer.py --prompts-dir ../../../prompts/
 
 ```bash
 # Smart scheduling handles dependencies automatically:
-# - Phase 1: Parallel tasks (A, B, C) 
+# - Phase 1: Parallel tasks (A, B, C)
 # - Phase 2: Sequential task D (depends on A)
 # - Phase 3: Parallel tasks (E, F) (depend on D)
 
@@ -219,7 +219,7 @@ def custom_branch_name(task_id, task_name):
 - **Parallel execution**: 60 minutes (longest task duration)
 - **Speed improvement**: 3.0x
 
-### Mixed Workload Scenario  
+### Mixed Workload Scenario
 - **Sequential execution**: 240 minutes (8 tasks with varying complexity)
 - **Parallel execution**: 90 minutes (3 parallel phases)
 - **Speed improvement**: 2.7x

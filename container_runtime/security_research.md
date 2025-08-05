@@ -28,7 +28,7 @@ resources:
   memory: "512Mi"
   cpu: "500m"
   ephemeral-storage: "1Gi"
-  
+
 limits:
   memory: "1Gi"
   cpu: "1000m"

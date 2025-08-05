@@ -2,7 +2,7 @@
 
 ## Required Context
 
-**CRITICAL - MUST DO AT START OF EVERY SESSION**: 
+**CRITICAL - MUST DO AT START OF EVERY SESSION**:
 1. **READ** `.github/Memory.md` for current context
 2. **UPDATE** `.github/Memory.md` after completing any significant task
 3. **COMMIT** Memory.md changes regularly to preserve context
@@ -282,6 +282,6 @@ New specialized agents can be added to `.github/agents/` or `.claude/agents/` fo
 - **Include co-authorship for AI-generated commits**:
   ```
   🤖 Generated with [Claude Code](https://claude.ai/code)
-  
+
   Co-Authored-By: Claude <noreply@anthropic.com>
   ```

@@ -76,7 +76,7 @@ Execute these specific prompts in parallel:
 - test-documentation-linker.md
 ```
 
-**Important**: 
+**Important**:
 - Do NOT scan the entire `/prompts/` directory
 - Only process the specific files provided by the user
 - Skip any prompts marked as IMPLEMENTED or COMPLETED
@@ -164,7 +164,7 @@ def analyze_tasks_enhanced(prompt_files):
     # Initialize enhanced analysis tracking
     performance_analyzer.record_phase_start("enhanced_task_analysis")
     task_tracker.update_phase(WorkflowPhase.ANALYSIS, "in_progress")
-    
+
     # Step 1: Initial task analysis with enhanced capabilities
     analysis_result = retry_manager.execute_with_retry(
         lambda: invoke_enhanced_task_analyzer(prompt_files, {
@@ -176,7 +176,7 @@ def analyze_tasks_enhanced(prompt_files):
         max_attempts=3,
         backoff_strategy="exponential"
     )
-    
+
     # Step 2: Process decomposition results
     enhanced_tasks = []
     for task in analysis_result.tasks:
@@ -188,19 +188,19 @@ def analyze_tasks_enhanced(prompt_files):
             )
         else:
             enhanced_tasks.append(task)
-    
+
     # Step 3: Apply ML-based optimizations
     ml_optimizations = apply_ml_optimizations(enhanced_tasks)
     for task in enhanced_tasks:
         task.apply_optimizations(ml_optimizations.get(task.id, []))
-    
+
     # Step 4: Update execution plan with enhanced insights
     enhanced_execution_plan = generate_enhanced_execution_plan(
         enhanced_tasks,
         analysis_result.dependency_graph,
         analysis_result.performance_predictions
     )
-    
+
     # Track enhanced analysis completion
     performance_analyzer.record_phase_completion("enhanced_task_analysis", {
         'original_task_count': len(prompt_files),
@@ -209,7 +209,7 @@ def analyze_tasks_enhanced(prompt_files):
         'research_required': sum(1 for t in analysis_result.tasks if t.requires_research),
         'ml_classifications': len([t for t in enhanced_tasks if hasattr(t, 'ml_classification')])
     })
-    
+
     return enhanced_execution_plan
 
 def invoke_enhanced_task_analyzer(prompt_files, config):
@@ -219,19 +219,19 @@ def invoke_enhanced_task_analyzer(prompt_files, config):
     # - TaskDecomposer for intelligent decomposition
     # - TaskResearchAgent for research requirements
     # - ML classification for pattern recognition
-    
+
     analyzer_prompt = f"""
     /agent:task-analyzer
-    
+
     Perform enhanced analysis with Task Decomposition Analyzer integration:
     Prompt files: {', '.join(prompt_files)}
-    
+
     Enhanced Configuration:
     - Task Decomposition Analyzer integration: {config['enable_decomposition']}
     - Machine learning classification: {config['ml_classification']}
     - Pattern recognition system: {config['pattern_recognition']}
     - Historical analysis: {config['historical_analysis']}
-    
+
     Required Analysis:
     1. Evaluate task bounds and complexity for each prompt
     2. Apply intelligent decomposition where beneficial
@@ -239,10 +239,10 @@ def invoke_enhanced_task_analyzer(prompt_files, config):
     4. Perform ML-based classification and pattern recognition
     5. Generate optimized parallel execution plan
     6. Provide comprehensive risk assessment
-    
+
     Return enhanced analysis with all coordination results included.
     """
-    
+
     return execute_claude_agent_invocation(analyzer_prompt)
 ```
 
@@ -263,12 +263,12 @@ def setup_environments(task_data):
         phase=WorkflowPhase.ENVIRONMENT_SETUP,
         tasks=task_data.tasks
     )
-    
+
     # Save state with backup
     state_manager.save_state(orchestration_state)
     backup_manager = StateBackupRestore(state_manager)
     backup_manager.create_backup(orchestration_state.task_id)
-    
+
     # Setup worktrees with error handling
     for task in task_data.tasks:
         try:
@@ -295,7 +295,7 @@ def execute_parallel_tasks(tasks):
     # Initialize parallel execution monitoring
     execution_metrics = PerformanceMetrics()
     performance_analyzer.start_parallel_execution_tracking(len(tasks))
-    
+
     # Execute with circuit breaker protection
     results = []
     for task in tasks:
@@ -309,7 +309,7 @@ def execute_parallel_tasks(tasks):
             # Fallback to sequential execution
             error_handler.log_warning("Circuit breaker open, falling back to sequential")
             return execute_sequential_fallback(tasks)
-    
+
     return results
 ```
 
@@ -326,20 +326,20 @@ def integrate_results(execution_results):
         execution_results,
         baseline_sequential_time=estimate_sequential_time(tasks)
     )
-    
+
     # GitHub operations with batch processing
     successful_tasks = [r for r in execution_results if r.success]
     github_manager.batch_merge_pull_requests([
         t.pr_number for t in successful_tasks
     ])
-    
+
     # Create comprehensive performance report
     report = generate_orchestration_report(performance_metrics)
-    
+
     # Clean up with state persistence
     cleanup_orchestration_resources(execution_results)
     state_manager.mark_orchestration_complete(orchestration_state.task_id)
-    
+
     return report
 ```
 
@@ -386,14 +386,14 @@ def analyze_file_conflicts(tasks):
     \"\"\"Detect tasks that modify the same files\"\"\"
     file_map = {}
     conflicts = []
-    
+
     for task in tasks:
         target_files = extract_target_files(task.prompt_content)
         for file_path in target_files:
             if file_path in file_map:
                 conflicts.append((task.id, file_map[file_path]))
             file_map[file_path] = task.id
-    
+
     return conflicts
 ```
 
@@ -403,13 +403,13 @@ def analyze_import_dependencies(file_path):
     \"\"\"Map Python import relationships\"\"\"
     with open(file_path, 'r') as f:
         content = f.read()
-    
+
     imports = []
     # Parse import statements
     for line in content.split('\\n'):
         if line.strip().startswith(('import ', 'from ')):
             imports.append(parse_import_statement(line))
-    
+
     return imports
 ```
 
@@ -424,11 +424,11 @@ def handle_resource_constraints():
     if performance_analyzer.detect_resource_exhaustion():
         # Automatically reduce parallelism
         reduce_concurrent_tasks()
-        
+
     # Circuit breaker for disk space
     if disk_circuit_breaker.is_open():
         cleanup_temporary_files()
-        
+
     # Memory pressure handling
     if memory_monitor.pressure_detected():
         switch_to_sequential_execution()
@@ -450,13 +450,13 @@ def handle_task_failure(task_id, error):
         system_state=get_system_state(),
         recovery_suggestions=generate_recovery_plan(error)
     )
-    
+
     # Isolate failure with shared error handling
     error_handler.handle_error(error_context)
-    
+
     # Clean up with state preservation
     cleanup_failed_task(task_id, preserve_state=True)
-    
+
     # Continue with remaining tasks
     continue_with_healthy_tasks()
 ```
@@ -473,15 +473,15 @@ class OrchestrationRecoveryManager:
     def __init__(self):
         self.recovery_manager = RecoveryManager()
         self.backup_restore = StateBackupRestore()
-        
+
     def handle_critical_failure(self, orchestration_id):
         # Immediate damage control
         stop_all_parallel_executions()
-        
+
         # Restore from last known good state
         last_checkpoint = self.backup_restore.get_latest_backup(orchestration_id)
         self.recovery_manager.restore_from_checkpoint(last_checkpoint)
-        
+
         # Generate comprehensive failure report
         failure_report = generate_failure_analysis(orchestration_id)
         github_manager.create_failure_issue(failure_report)
@@ -547,7 +547,7 @@ class OrchestrationRecoveryManager:
 # Identify test coverage tasks
 prompts=(
     "test-definition-node.md"
-    "test-relationship-creator.md" 
+    "test-relationship-creator.md"
     "test-documentation-linker.md"
     "test-concept-extractor.md"
 )

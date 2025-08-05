@@ -140,7 +140,7 @@ python3 .github/memory-manager/memory_manager.py sync
 # Memory.md to GitHub only
 python3 .github/memory-manager/memory_manager.py sync --direction memory_to_github
 
-# GitHub to Memory.md only  
+# GitHub to Memory.md only
 python3 .github/memory-manager/memory_manager.py sync --direction github_to_memory
 
 # Dry run (preview changes)
@@ -176,7 +176,7 @@ Use the MemoryManagerAgent for integrated workflow operations:
 Task: Sync Memory.md with GitHub Issues
 Options:
 - Perform bidirectional synchronization
-- Prune completed tasks older than 7 days  
+- Prune completed tasks older than 7 days
 - Resolve any pending conflicts
 - Update cross-references and metadata
 ```
@@ -212,7 +212,7 @@ The integration preserves the existing Memory.md format while adding optional me
 - **HIGH**: High priority task
 - [ ] Task with issue reference #123
 
-## Completed Tasks  
+## Completed Tasks
 - ✅ Finished feature A
 - [x] Alternative completed format
 - **COMPLETED**: Major milestone
@@ -220,7 +220,7 @@ The integration preserves the existing Memory.md format while adding optional me
 
 ### Enhanced Format (Optional)
 
-```markdown  
+```markdown
 ## Current Goals
 - [ ] Implement feature X <!-- issue:456 sync:2025-01-01T12:00:00Z -->
 - ✅ Fix bug Y <!-- issue:457 completed:2025-01-01T11:00:00Z -->
@@ -256,7 +256,7 @@ Each Memory.md task becomes a GitHub Issue with:
 
 ### Issue Template
 
-```markdown  
+```markdown
 # Memory.md Task
 
 Implement user authentication system
@@ -268,7 +268,7 @@ Implement user authentication system
 - **Line**: 15
 
 ## Context
-This issue was automatically created from a Memory.md task to enable better 
+This issue was automatically created from a Memory.md task to enable better
 project visibility and collaboration.
 
 ## AI Assistant Attribution
@@ -281,7 +281,7 @@ project visibility and collaboration.
 ### Synchronization Behavior
 
 - **New Task in Memory.md**: Creates new GitHub Issue
-- **Task Completed in Memory.md**: Closes corresponding GitHub Issue  
+- **Task Completed in Memory.md**: Closes corresponding GitHub Issue
 - **Issue Closed in GitHub**: Marks task as completed in Memory.md
 - **Issue Reopened in GitHub**: Marks task as pending in Memory.md
 - **Content Changes**: Updates both systems (with conflict detection)
@@ -293,7 +293,7 @@ The system detects and handles various conflict scenarios:
 ### Conflict Types
 
 1. **Content Mismatch**: Task content differs significantly between systems
-2. **Status Mismatch**: Task completion status differs  
+2. **Status Mismatch**: Task completion status differs
 3. **Simultaneous Updates**: Both systems modified at the same time
 4. **Missing References**: Referenced issues or tasks no longer exist
 
@@ -301,7 +301,7 @@ The system detects and handles various conflict scenarios:
 
 - **Manual**: Queue conflicts for user review and decision
 - **Memory Wins**: Prioritize Memory.md content over GitHub Issues
-- **GitHub Wins**: Prioritize GitHub Issues over Memory.md content  
+- **GitHub Wins**: Prioritize GitHub Issues over Memory.md content
 - **Latest Wins**: Use most recently modified content
 - **Auto Merge**: Attempt intelligent merging of changes
 
@@ -557,7 +557,7 @@ python3 .github/memory-manager/memory_manager.py init
 python3 .github/memory-manager/memory_manager.py status
 python3 .github/memory-manager/memory_manager.py sync
 
-# Maintenance  
+# Maintenance
 python3 .github/memory-manager/memory_manager.py prune
 python3 .github/memory-manager/memory_manager.py validate
 ```
@@ -576,7 +576,7 @@ Task: Daily Memory.md maintenance
 ### Configuration Files
 
 - **Main Config**: `.github/memory-manager/config.yaml`
-- **Memory File**: `.github/Memory.md` 
+- **Memory File**: `.github/Memory.md`
 - **State Directory**: `.github/memory-sync-state/`
 - **Logs**: `.github/memory-sync-state/memory-sync.log`
 

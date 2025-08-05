@@ -1,0 +1,21 @@
+{
+  "checkpoint_id": "8978922d",
+  "description": "Test PR creation checkpoint",
+  "created_at": "2025-08-04T23:40:42.287179+00:00Z",
+  "state": {
+    "task_id": "test-pr-creation",
+    "prompt_file": "test-pr.md",
+    "status": "pending",
+    "branch": "feature/test-feature-123",
+    "issue_number": 123,
+    "pr_number": 456,
+    "current_phase": 8,
+    "current_phase_name": "Pull Request",
+    "created_at": "2025-08-04T23:40:42.286939+00:00Z",
+    "updated_at": "2025-08-04T23:40:42.286941+00:00Z",
+    "context": {
+      "pr_url": "https://github.com/test/repo/pull/456"
+    },
+    "error_info": {}
+  }
+}

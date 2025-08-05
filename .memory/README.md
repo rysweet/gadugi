@@ -7,7 +7,7 @@ This directory contains the hierarchical Markdown-based memory system for the Ga
 ```
 .memory/
 ├── project/              # Project-level memories (all agents need to know)
-├── team/                # Coding team memories (workflow, guidelines)  
+├── team/                # Coding team memories (workflow, guidelines)
 ├── agents/              # Agent-specific memories (individual agent knowledge)
 ├── organization/        # Cross-project organizational knowledge
 ├── knowledge/           # Reference documentation and troubleshooting

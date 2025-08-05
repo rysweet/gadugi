@@ -1,5 +1,5 @@
 # Security Policies for Gadugi Container Execution Environment
-# 
+#
 # This file defines custom security policies for different execution contexts.
 # Policies control resource limits, security constraints, and access controls.
 
@@ -30,7 +30,7 @@ policies:
       - "alpine:latest"
     blocked_commands:
       - "sudo"
-      - "su" 
+      - "su"
       - "passwd"
       - "systemctl"
     environment_whitelist:

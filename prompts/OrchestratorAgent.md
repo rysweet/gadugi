@@ -142,27 +142,27 @@ OrchestratorAgent
 ```python
 def analyze_file_dependencies(prompts):
     dependency_graph = {}
-    
+
     for prompt in prompts:
         # Extract target files from prompt content
         target_files = extract_target_files(prompt)
-        
+
         # Analyze import relationships
         imports = analyze_imports(target_files)
-        
+
         # Check test file relationships
         test_dependencies = map_test_dependencies(target_files)
-        
+
         # Build conflict matrix
         conflicts = detect_file_conflicts(target_files, existing_tasks)
-        
+
         dependency_graph[prompt.id] = {
             'files': target_files,
             'imports': imports,
             'tests': test_dependencies,
             'conflicts': conflicts
         }
-    
+
     return build_execution_plan(dependency_graph)
 ```
 
@@ -394,10 +394,10 @@ def retry_failed_task(task, attempt=1):
     if attempt > 3:
         mark_permanent_failure(task)
         return False
-    
+
     wait_time = 2 ** attempt  # Exponential backoff
     time.sleep(wait_time)
-    
+
     if is_transient_failure(task.last_error):
         return retry_task_execution(task, attempt + 1)
     else:

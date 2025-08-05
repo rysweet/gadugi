@@ -72,7 +72,7 @@ Analyze prompt file: `/prompts/implement-neural-task-classifier.md`
 
 ### Complexity Dimensions
 
-**Technical Complexity**: 
+**Technical Complexity**:
 - Algorithm complexity
 - Integration challenges
 - Performance requirements
@@ -156,16 +156,16 @@ def requires_research(task):
 def analyze_complexity(task):
     # Technical complexity scoring
     tech_score = assess_technical_complexity(task)
-    
-    # Domain complexity scoring  
+
+    # Domain complexity scoring
     domain_score = assess_domain_complexity(task)
-    
+
     # Integration complexity scoring
     integration_score = assess_integration_complexity(task)
-    
+
     # Knowledge complexity scoring
     knowledge_score = assess_knowledge_complexity(task)
-    
+
     return ComplexityAssessment(
         technical=tech_score,
         domain=domain_score,
@@ -185,19 +185,19 @@ def analyze_complexity(task):
 ```python
 def assess_risks(task):
     risks = []
-    
+
     # Technical risks
     if task.uses_new_technology():
         risks.append(Risk("NEW_TECH", "Learning curve for new technology", "HIGH"))
-    
+
     # Dependency risks
     if task.has_external_dependencies():
         risks.append(Risk("EXTERNAL_DEPS", "Third-party service reliability", "MEDIUM"))
-    
+
     # Complexity risks
     if task.complexity_score() > HIGH_THRESHOLD:
         risks.append(Risk("COMPLEXITY", "High complexity may cause delays", "MEDIUM"))
-    
+
     return risks
 ```
 
@@ -230,7 +230,7 @@ Return structured analysis in JSON format:
     "should_decompose": true,
     "suggested_breakdown": [
       "Research existing ML approaches for code analysis",
-      "Design training data collection system", 
+      "Design training data collection system",
       "Implement base ML model",
       "Create API interface",
       "Integrate with existing task analysis pipeline"
@@ -289,7 +289,7 @@ class TaskBoundsEvaluator:
         self.task_tracker = TaskTracker()
         self.state_manager = StateManager()
         self.circuit_breaker = CircuitBreaker()
-    
+
     @circuit_breaker.protect
     def evaluate_task_bounds(self, task_data):
         return self.retry_manager.execute_with_retry(
@@ -305,15 +305,15 @@ For advanced pattern recognition:
 ```python
 class TaskComplexityPredictor:
     """ML-based task complexity prediction"""
-    
+
     def __init__(self):
         self.model = None  # Load pre-trained model
         self.feature_extractor = TaskFeatureExtractor()
-    
+
     def predict_complexity(self, task_description):
         features = self.feature_extractor.extract(task_description)
         return self.model.predict(features)
-    
+
     def predict_decomposition_benefit(self, task_description):
         features = self.feature_extractor.extract(task_description)
         return self.model.predict_decomposition_score(features)

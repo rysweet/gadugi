@@ -102,12 +102,12 @@ export class PathUtils {
   static areSamePath(path1: string, path2: string): boolean {
     const normalized1 = PathUtils.normalize(PathUtils.resolve(path1));
     const normalized2 = PathUtils.normalize(PathUtils.resolve(path2));
-    
+
     // Case-insensitive comparison on Windows
     if (os.platform() === 'win32') {
       return normalized1.toLowerCase() === normalized2.toLowerCase();
     }
-    
+
     return normalized1 === normalized2;
   }
 
@@ -116,12 +116,12 @@ export class PathUtils {
    */
   static getWorktreeName(worktreePath: string): string {
     const basename = PathUtils.getBasename(worktreePath);
-    
+
     // If it's in a .worktrees directory, use the basename
     if (worktreePath.includes('.worktrees')) {
       return basename;
     }
-    
+
     // If it's the main worktree, use 'main' or the directory name
     return basename || 'main';
   }

@@ -45,12 +45,12 @@ You MUST follow the shared test instruction framework:
        """Analyze code to understand testing requirements."""
        # Read the code to be tested
        code_content = read_file(code_path)
-       
+
        # Identify functions, classes, and public interfaces
        public_methods = extract_public_methods(code_content)
        edge_cases = identify_edge_cases(code_content)
        dependencies = extract_dependencies(code_content)
-       
+
        return {
            'public_methods': public_methods,
            'edge_cases': edge_cases,
@@ -93,12 +93,12 @@ You MUST follow the shared test instruction framework:
            'setup_requirements': [],
            'cleanup_requirements': []
        }
-       
+
        # Plan test hierarchy
        for component in functionality_analysis['public_methods']:
            test_class = design_test_class(component)
            test_plan['test_classes'].append(test_class)
-       
+
        return test_plan
    ```
 
@@ -108,13 +108,13 @@ You MUST follow the shared test instruction framework:
        """Validate test design against shared instructions."""
        # Check for idempotency considerations
        idempotency_check = check_idempotency_design(test_plan)
-       
+
        # Check for parallel safety
        parallel_safety = check_parallel_safety_design(test_plan)
-       
+
        # Check for resource management
        resource_management = check_resource_management_design(test_plan)
-       
+
        return {
            'idempotent': idempotency_check,
            'parallel_safe': parallel_safety,
@@ -127,12 +127,12 @@ You MUST follow the shared test instruction framework:
    def plan_fixtures(test_plan, existing_fixtures):
        """Plan fixture usage and creation."""
        recommendations = SharedTestInstructions.recommend_shared_fixtures(
-           test_plan['setup_requirements'], 
+           test_plan['setup_requirements'],
            existing_fixtures
        )
-       
+
        new_fixtures_needed = identify_new_fixtures_needed(test_plan)
-       
+
        return {
            'use_existing': recommendations,
            'create_new': new_fixtures_needed
@@ -149,14 +149,14 @@ You MUST follow the shared test instruction framework:
    class Test{class_name}:
        """
        Comprehensive test suite for {class_name}.
-       
+
        Tests validate:
        - Core functionality and public interface
-       - Error handling and edge cases  
+       - Error handling and edge cases
        - Integration with dependencies
        - Performance characteristics
        """
-       
+
        @pytest.fixture(autouse=True)
        def setup_and_cleanup(self):
            """Setup test environment and ensure cleanup."""
@@ -164,7 +164,7 @@ You MUST follow the shared test instruction framework:
            yield
            # Cleanup code here
        '''
-       
+
        return test_class_template
    ```
 
@@ -172,40 +172,40 @@ You MUST follow the shared test instruction framework:
    ```python
    def create_test_method(method_name, purpose, requirements):
        """Create individual test method with clear intent."""
-       
+
        # Analyze purpose to guide test structure
        analysis = SharedTestInstructions.analyze_test_purpose("", purpose)
-       
+
        test_method = f'''
    def test_{method_name}(self, shared_fixture_name):
        """
        Test {purpose}.
-       
+
        Requirements:
        {format_requirements(requirements)}
-       
+
        Expected Behavior:
        - {analysis.expected_outcome}
-       
+
        Test Strategy:
        - Setup: {describe_setup()}
        - Action: {describe_action()}
        - Verification: {describe_verification()}
        """
-       
+
        # Arrange
        {generate_setup_code()}
-       
+
        # Act
        {generate_action_code()}
-       
+
        # Assert
        {generate_assertion_code()}
-       
+
        # Verify idempotency (run again to ensure same result)
        {generate_idempotency_check()}
    '''
-       
+
        return test_method
    ```
 
@@ -213,28 +213,28 @@ You MUST follow the shared test instruction framework:
    ```python
    def enhance_test_with_shared_instructions(test_code):
        """Apply shared instruction framework to test code."""
-       
+
        # Ensure idempotency
        idempotent_code = SharedTestInstructions.ensure_test_idempotency(test_code)
-       
+
        # Ensure resource cleanup
        cleanup_code = SharedTestInstructions.ensure_resource_cleanup(idempotent_code)
-       
+
        # Validate structure
        is_valid, issues = SharedTestInstructions.validate_test_structure(cleanup_code)
        if not is_valid:
            cleanup_code = fix_structure_issues(cleanup_code, issues)
-       
+
        # Validate dependency management
        deps_valid, dep_issues = SharedTestInstructions.validate_dependency_management(cleanup_code)
        if not deps_valid:
            cleanup_code = fix_dependency_issues(cleanup_code, dep_issues)
-       
+
        # Validate parallel safety
        parallel_safe, parallel_issues = SharedTestInstructions.validate_parallel_safety(cleanup_code)
        if not parallel_safe:
            cleanup_code = fix_parallel_safety_issues(cleanup_code, parallel_issues)
-       
+
        return cleanup_code
    ```
 
@@ -244,16 +244,16 @@ You MUST follow the shared test instruction framework:
    ```python
    def create_design_guidance_tests(interface_spec):
        """Create tests that guide implementation design."""
-       
+
        # Test expected interfaces exist
        interface_tests = create_interface_existence_tests(interface_spec)
-       
+
        # Test expected behaviors
        behavior_tests = create_behavior_specification_tests(interface_spec)
-       
+
        # Test error conditions guide robust implementation
        error_handling_tests = create_error_handling_tests(interface_spec)
-       
+
        return interface_tests + behavior_tests + error_handling_tests
    ```
 
@@ -261,16 +261,16 @@ You MUST follow the shared test instruction framework:
    ```python
    def create_implementation_validation_tests(design_context):
        """Create tests that validate implementation against design."""
-       
+
        # Test contracts and invariants
        contract_tests = create_contract_tests(design_context)
-       
+
        # Test performance requirements
        performance_tests = create_performance_tests(design_context)
-       
+
        # Test integration requirements
        integration_tests = create_integration_tests(design_context)
-       
+
        return contract_tests + performance_tests + integration_tests
    ```
 
@@ -280,27 +280,27 @@ You MUST follow the shared test instruction framework:
    ```python
    def document_test_intent(test_code, requirements, context):
        """Add comprehensive documentation to tests."""
-       
+
        documented_code = f'''
    """
    Test Module: {extract_module_name(test_code)}
-   
-   Purpose: 
+
+   Purpose:
    {context.get('purpose', 'Validate functionality and behavior')}
-   
+
    Coverage Areas:
    {format_coverage_areas(requirements)}
-   
+
    Test Strategy:
    {describe_test_strategy(test_code)}
-   
+
    Maintenance Notes:
    {generate_maintenance_notes(test_code)}
    """
-   
+
    {test_code}
    '''
-       
+
        return documented_code
    ```
 
@@ -308,7 +308,7 @@ You MUST follow the shared test instruction framework:
    ```python
    def validate_complete_test_suite(test_suite_code):
        """Perform final validation of complete test suite."""
-       
+
        validation_results = {
            'structure_valid': True,
            'idempotent': True,
@@ -317,16 +317,16 @@ You MUST follow the shared test instruction framework:
            'fixtures_appropriate': True,
            'coverage_complete': True
        }
-       
+
        # Run all shared instruction validations
        for test_method in extract_test_methods(test_suite_code):
            # Validate each test individually
            method_validation = validate_individual_test(test_method)
-           
+
            # Aggregate results
            for key in validation_results:
                validation_results[key] &= method_validation.get(key, True)
-       
+
        return validation_results
    ```
 
@@ -341,10 +341,10 @@ def test_{function_name}_happy_path(sample_input_fixture):
     """Test {function_name} with valid inputs."""
     # Arrange
     expected_result = calculate_expected_result(sample_input_fixture)
-    
+
     # Act
     actual_result = {function_name}(sample_input_fixture)
-    
+
     # Assert
     assert actual_result == expected_result
     assert validate_result_properties(actual_result)
@@ -353,7 +353,7 @@ def test_{function_name}_error_conditions(invalid_input_fixture):
     """Test {function_name} error handling."""
     with pytest.raises(ExpectedExceptionType) as exc_info:
         {function_name}(invalid_input_fixture)
-    
+
     assert "expected error message" in str(exc_info.value)
 
 def test_{function_name}_edge_cases(edge_case_fixtures):
@@ -374,10 +374,10 @@ def test_{component_name}_integration(mock_dependencies):
     # Arrange
     component = {component_name}()
     setup_mock_dependencies(mock_dependencies)
-    
+
     # Act
     result = component.perform_integrated_operation()
-    
+
     # Assert
     assert result.success
     verify_dependency_interactions(mock_dependencies)
@@ -393,13 +393,13 @@ def create_performance_test(operation_name, performance_requirements):
 def test_{operation_name}_performance(performance_fixtures):
     """Test {operation_name} meets performance requirements."""
     import time
-    
+
     # Arrange
     start_time = time.time()
-    
+
     # Act
     result = perform_{operation_name}(performance_fixtures.large_dataset)
-    
+
     # Assert
     execution_time = time.time() - start_time
     assert execution_time < {performance_requirements.max_time_seconds}
@@ -419,7 +419,7 @@ def test_with_shared_fixtures(temp_dir, mock_config, sample_data):
     # temp_dir: Temporary directory for file operations
     # mock_config: Standard configuration mock
     # sample_data: Representative test data
-    
+
     # Test implementation using shared fixtures
     pass
 '''
@@ -435,16 +435,16 @@ def create_new_fixture(fixture_name, purpose):
 def {fixture_name}():
     """
     {purpose}
-    
+
     Provides: {describe_fixture_provides()}
     Cleanup: {describe_cleanup_behavior()}
     Scope: function (default for isolation)
     """
     # Setup
     resource = create_test_resource()
-    
+
     yield resource
-    
+
     # Cleanup
     cleanup_test_resource(resource)
 '''
@@ -458,18 +458,18 @@ def comprehensive_error_testing(function_spec):
     error_tests = f'''
 class TestErrorConditions:
     """Comprehensive error condition testing."""
-    
+
     def test_invalid_input_types(self):
         """Test behavior with invalid input types."""
         invalid_inputs = [None, "", [], {}, object()]
-        
+
         for invalid_input in invalid_inputs:
             with pytest.raises((TypeError, ValueError)) as exc_info:
                 target_function(invalid_input)
-            
+
             # Verify error messages are helpful
             assert len(str(exc_info.value)) > 10
-    
+
     def test_boundary_conditions(self):
         """Test behavior at boundaries."""
         boundary_cases = [
@@ -478,7 +478,7 @@ class TestErrorConditions:
             (just_below_minimum, "below minimum"),
             (just_above_maximum, "above maximum")
         ]
-        
+
         for value, description in boundary_cases:
             if is_valid_boundary(value):
                 result = target_function(value)
@@ -486,15 +486,15 @@ class TestErrorConditions:
             else:
                 with pytest.raises(ValueError):
                     target_function(value)
-    
+
     def test_external_dependency_failures(self, mock_dependencies):
         """Test behavior when external dependencies fail."""
         # Simulate various failure modes
         mock_dependencies.setup_failure_scenarios()
-        
+
         with pytest.raises(ExternalServiceError):
             target_function_with_dependencies()
-        
+
         # Verify graceful degradation
         assert system_state_remains_consistent()
 '''

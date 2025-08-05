@@ -1,0 +1,18 @@
+{
+  "task_id": "perf-test-2",
+  "prompt_file": "test.md",
+  "status": "in_progress",
+  "branch": null,
+  "issue_number": null,
+  "pr_number": null,
+  "current_phase": 0,
+  "current_phase_name": "Task Initialization & Resumption Check",
+  "created_at": "2025-08-02T17:34:15.146288+00:00Z",
+  "updated_at": "2025-08-02T17:34:15.146289+00:00Z",
+  "context": {
+    "task_id": "perf-test-2",
+    "iteration": 2,
+    "timestamp": "2025-08-02T10:34:15.146281"
+  },
+  "error_info": {}
+}

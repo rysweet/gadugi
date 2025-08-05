@@ -68,7 +68,7 @@ export class ProcessUtils {
       return [];
     }
 
-    return result.processes.filter(process => 
+    return result.processes.filter(process =>
       ProcessUtils.isClaudeProcess(process.command)
     );
   }
@@ -84,8 +84,8 @@ export class ProcessUtils {
     ];
 
     const lowerCommand = command.toLowerCase();
-    return claudeIndicators.some(indicator => 
-      lowerCommand.includes(indicator.toLowerCase()) && 
+    return claudeIndicators.some(indicator =>
+      lowerCommand.includes(indicator.toLowerCase()) &&
       (lowerCommand.includes('--resume') || lowerCommand.includes('code'))
     );
   }
@@ -106,7 +106,7 @@ export class ProcessUtils {
         if (columns.length < 5) {continue;}
 
         const [imageName, pid, , , memUsage] = columns;
-        
+
         processes.push({
           pid: parseInt(pid.replace(/"/g, ''), 10),
           ppid: 0, // Not easily available from tasklist
@@ -178,7 +178,7 @@ export class ProcessUtils {
 
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         inQuotes = !inQuotes;
       } else if (char === ',' && !inQuotes) {
@@ -188,7 +188,7 @@ export class ProcessUtils {
         current += char;
       }
     }
-    
+
     result.push(current);
     return result;
   }
@@ -204,7 +204,7 @@ export class ProcessUtils {
 
     const [, numStr, unit] = match;
     const num = parseInt(numStr.replace(/,/g, ''), 10);
-    
+
     switch (unit.toUpperCase()) {
       case 'K': return num * 1024;
       case 'M': return num * 1024 * 1024;
@@ -288,8 +288,8 @@ export class ProcessUtils {
    * Start a new process
    */
   static async startProcess(
-    command: string, 
-    args: string[], 
+    command: string,
+    args: string[],
     workingDirectory?: string
   ): Promise<{ success: boolean; pid?: number; error?: string }> {
     try {
@@ -320,7 +320,7 @@ export class ProcessUtils {
   static async isProcessRunning(pid: number): Promise<boolean> {
     try {
       const platform = os.platform();
-      
+
       if (platform === 'win32') {
         return new Promise((resolve) => {
           exec(`tasklist /fi "PID eq ${pid}"`, (error, stdout) => {

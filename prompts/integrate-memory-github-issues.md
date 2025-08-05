@@ -168,7 +168,7 @@ Memory Parser  Conflict     Issue Manager
 ```markdown
 # Detect different task formats
 - [ ] Pending task
-- ✅ Completed task  
+- ✅ Completed task
 - [x] Alternative completed format
 - [ ] Task with **priority** or *emphasis*
 - [ ] Task with issue reference #123
@@ -214,11 +214,11 @@ sync_policy:
   direction: bidirectional  # memory-to-github, github-to-memory, bidirectional
   frequency: 5m             # How often to check for changes
   batch_size: 10            # Max issues to process at once
-  
+
 conflict_resolution:
   strategy: manual          # auto, manual, memory-wins, github-wins
   notification: comment     # comment, label, none
-  
+
 issue_creation:
   auto_create: true
   template: "memory-task"

@@ -24,7 +24,7 @@ This creates security vulnerabilities, coordination inefficiencies, and poor use
 - **Bash Commands**: Container execution routing for untrusted operations
 - **File Operations**: Security policy enforcement
 
-#### 2. PostTool Hooks  
+#### 2. PostTool Hooks
 - **WebFetch/WebSearch**: Pass data through XPIA agent for analysis
 - **Bash Commands**: Result validation and cleanup
 - **State Updates**: Automatic state persistence
@@ -32,7 +32,7 @@ This creates security vulnerabilities, coordination inefficiencies, and poor use
 #### 3. Event Hooks
 - **SubagentStop**: Invoke TeamCoach for performance analysis
 - **Stop**: Invoke TeamCoach and SpecMaintainer
-- **SessionStart**: Agent team rehydration and state recovery  
+- **SessionStart**: Agent team rehydration and state recovery
 - **SessionStop**: Memory Manager invocation and state persistence
 
 ### Integration Points

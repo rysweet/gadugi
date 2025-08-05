@@ -12,7 +12,7 @@ export class MonitorPanel {
 
   constructor(context: vscode.ExtensionContext) {
     this.treeDataProvider = new MonitorTreeProvider();
-    
+
     // Create tree view
     this.treeView = vscode.window.createTreeView('gadugi.monitor', {
       treeDataProvider: this.treeDataProvider,
@@ -22,10 +22,10 @@ export class MonitorPanel {
 
     // Setup tree view
     this.setupTreeView();
-    
+
     // Register commands
     MonitorTreeProvider.registerCommands(context, this.treeDataProvider);
-    
+
     // Setup event listeners
     this.setupEventListeners();
 
@@ -104,7 +104,7 @@ export class MonitorPanel {
     if (selection.length > 0) {
       const item = selection[0];
       ErrorUtils.logInfo(`Selected tree item: ${item.label} (${item.contextValue})`, 'monitor-panel');
-      
+
       // Update status bar or show additional info based on selection
       this.updateStatusForSelection(item);
     }
@@ -115,7 +115,7 @@ export class MonitorPanel {
    */
   private handleVisibilityChange(visible: boolean): void {
     ErrorUtils.logInfo(`Monitor panel visibility changed: ${visible}`, 'monitor-panel');
-    
+
     if (visible) {
       // Panel became visible - might want to refresh data
       this.treeDataProvider.refresh();
@@ -145,7 +145,7 @@ export class MonitorPanel {
     try {
       const stats = this.treeDataProvider.getStats();
       const title = `Worktrees: ${stats.activeWorktrees}/${stats.totalWorktrees} | Processes: ${stats.runningProcesses}/${stats.totalProcesses}`;
-      
+
       this.treeView.title = title;
       this.treeView.description = `Last update: ${stats.lastUpdateTime}`;
     } catch (error) {
@@ -159,7 +159,7 @@ export class MonitorPanel {
    */
   private updateStatusForSelection(item: any): void {
     let statusText = '';
-    
+
     switch (item.contextValue) {
       case 'worktree':
         statusText = `Worktree: ${item.label}`;
@@ -287,7 +287,7 @@ export class MonitorPanel {
 
       // Check git repository
       // This could be expanded with more validation
-      
+
     } catch (error) {
       issues.push('Failed to validate prerequisites');
     }
@@ -303,13 +303,13 @@ export class MonitorPanel {
    */
   dispose(): void {
     this.treeDataProvider.dispose();
-    
+
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
-    
+
     this.disposables = [];
-    
+
     ErrorUtils.logInfo('Monitor panel disposed', 'monitor-panel');
   }
 
@@ -318,10 +318,10 @@ export class MonitorPanel {
    */
   static create(context: vscode.ExtensionContext): MonitorPanel {
     const panel = new MonitorPanel(context);
-    
+
     // Add to context subscriptions for automatic disposal
     context.subscriptions.push(panel);
-    
+
     return panel;
   }
 }

@@ -123,7 +123,7 @@ PromptWriter creates prompts with this structure:
 ### Phase 1: [Foundation]
 [Basic infrastructure and setup]
 
-### Phase 2: [Core Features] 
+### Phase 2: [Core Features]
 [Main functionality implementation]
 
 ### Phase 3: [Advanced Features]

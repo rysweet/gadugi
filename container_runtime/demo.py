@@ -7,7 +7,6 @@ with various security policies and execution scenarios.
 """
 
 import sys
-import time
 import logging
 from pathlib import Path
 
@@ -22,17 +21,17 @@ def setup_logging():
     """Setup logging for the demo."""
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
 
 def demo_python_execution():
     """Demonstrate Python code execution."""
     print("=== Python Code Execution Demo ===")
-    
+
     try:
         engine = ContainerExecutionEngine()
-        
+
         python_code = """
 import sys
 import os
@@ -54,30 +53,28 @@ print("\\nEnvironment variables:")
 for key in sorted(os.environ.keys()):
     print(f"  {key}={os.environ[key]}")
 """
-        
+
         print("Executing Python code with 'standard' security policy...")
         response = engine.execute_python_code(
-            code=python_code,
-            security_policy="standard",
-            timeout=60
+            code=python_code, security_policy="standard", timeout=60
         )
-        
+
         print(f"Exit code: {response.exit_code}")
         print(f"Execution time: {response.execution_time:.2f} seconds")
         print(f"Success: {response.success}")
-        
+
         if response.stdout:
             print("Output:")
             print(response.stdout)
-        
+
         if response.stderr:
             print("Errors:")
             print(response.stderr)
-        
+
         print(f"Resource usage: {response.resource_usage}")
-        
+
         engine.shutdown()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -85,7 +82,7 @@ for key in sorted(os.environ.keys()):
 def demo_security_policies():
     """Demonstrate different security policies."""
     print("\n=== Security Policy Demo ===")
-    
+
     policies_to_test = ["minimal", "standard", "hardened"]
     test_code = """
 import os
@@ -110,31 +107,29 @@ try:
 except:
     print("  Root write: BLOCKED (Good!)")
 """
-    
+
     try:
         engine = ContainerExecutionEngine()
-        
+
         for policy in policies_to_test:
             print(f"\n--- Testing '{policy}' policy ---")
-            
+
             response = engine.execute_python_code(
-                code=test_code,
-                security_policy=policy,
-                timeout=30
+                code=test_code, security_policy=policy, timeout=30
             )
-            
+
             print(f"Exit code: {response.exit_code}")
             print(f"Execution time: {response.execution_time:.2f}s")
-            
+
             if response.stdout:
                 # Print only the first few lines to keep output manageable
-                lines = response.stdout.split('\n')[:10]
+                lines = response.stdout.split("\n")[:10]
                 print("Output (first 10 lines):")
                 for line in lines:
                     print(f"  {line}")
-        
+
         engine.shutdown()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -142,10 +137,10 @@ except:
 def demo_shell_execution():
     """Demonstrate shell script execution."""
     print("\n=== Shell Script Execution Demo ===")
-    
+
     try:
         executor = AgentContainerExecutor(default_policy="standard")
-        
+
         shell_script = """
 #!/bin/sh
 echo "Shell Script Execution Demo"
@@ -176,28 +171,26 @@ if touch /tmp/test_file 2>/dev/null; then echo "YES"; rm -f /tmp/test_file; else
 echo -n "  Can write to root: "
 if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_file; else echo "NO (Good!)"; fi
 """
-        
+
         print("Executing shell script...")
         result = executor.execute_shell_script(
-            script=shell_script,
-            security_policy="standard",
-            timeout=60
+            script=shell_script, security_policy="standard", timeout=60
         )
-        
+
         print(f"Exit code: {result['exit_code']}")
         print(f"Execution time: {result['execution_time']:.2f} seconds")
         print(f"Success: {result['success']}")
-        
-        if result['stdout']:
+
+        if result["stdout"]:
             print("Output:")
-            print(result['stdout'])
-        
-        if result['stderr']:
+            print(result["stdout"])
+
+        if result["stderr"]:
             print("Errors:")
-            print(result['stderr'])
-        
+            print(result["stderr"])
+
         executor.shutdown()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -205,10 +198,10 @@ if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_
 def demo_node_execution():
     """Demonstrate Node.js code execution."""
     print("\n=== Node.js Code Execution Demo ===")
-    
+
     try:
         engine = ContainerExecutionEngine()
-        
+
         node_code = """
 console.log("Node.js Execution Environment:");
 console.log("  Node version:", process.version);
@@ -252,28 +245,26 @@ try {
     console.log("  Root write: BLOCKED (Good!) -", error.message);
 }
 """
-        
+
         print("Executing Node.js code...")
         response = engine.execute_node_code(
-            code=node_code,
-            security_policy="standard",
-            timeout=60
+            code=node_code, security_policy="standard", timeout=60
         )
-        
+
         print(f"Exit code: {response.exit_code}")
         print(f"Execution time: {response.execution_time:.2f} seconds")
         print(f"Success: {response.success}")
-        
+
         if response.stdout:
             print("Output:")
             print(response.stdout)
-        
+
         if response.stderr:
             print("Errors:")
             print(response.stderr)
-        
+
         engine.shutdown()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -281,37 +272,37 @@ try {
 def demo_system_status():
     """Demonstrate system status and monitoring."""
     print("\n=== System Status and Monitoring Demo ===")
-    
+
     try:
         engine = ContainerExecutionEngine()
-        
+
         # Get system statistics
         stats = engine.get_execution_statistics()
-        
+
         print("System Status:")
         print(f"  Active executions: {stats['active_executions']}")
         print(f"  Available policies: {stats['available_policies']}")
-        
-        if 'system_usage' in stats:
-            system = stats['system_usage']
+
+        if "system_usage" in stats:
+            system = stats["system_usage"]
             print(f"  System CPU: {system.get('cpu_percent', 'N/A')}%")
             print(f"  System memory: {system.get('memory_percent', 'N/A')}%")
             print(f"  Active containers: {system.get('active_containers', 'N/A')}")
             print(f"  Max containers: {system.get('max_containers', 'N/A')}")
-        
-        if 'security_summary' in stats:
-            security = stats['security_summary']
+
+        if "security_summary" in stats:
+            security = stats["security_summary"]
             print(f"  Total images: {security.get('total_images', 'N/A')}")
             print(f"  Scanned images: {security.get('scanned_images', 'N/A')}")
             print(f"  Scanner available: {security.get('scanner_available', 'N/A')}")
-        
+
         # Test resource cleanup
         print("\nTesting resource cleanup...")
         cleanup_stats = engine.cleanup_resources()
         print(f"Cleanup results: {cleanup_stats}")
-        
+
         engine.shutdown()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 
@@ -320,12 +311,13 @@ def main():
     """Run all demos."""
     print("Gadugi Container Execution Environment Demo")
     print("=" * 50)
-    
+
     setup_logging()
-    
+
     # Check if Docker is available
     try:
         import docker
+
         client = docker.from_env()
         client.ping()
         print("✓ Docker is available and accessible")
@@ -334,7 +326,7 @@ def main():
         print("This demo requires Docker to be installed and running.")
         print("Please install Docker and ensure it's accessible.")
         return 1
-    
+
     try:
         # Run demos in sequence
         demo_python_execution()
@@ -342,7 +334,7 @@ def main():
         demo_shell_execution()
         demo_node_execution()
         demo_system_status()
-        
+
         print("\n" + "=" * 50)
         print("Demo completed successfully!")
         print("\nKey features demonstrated:")
@@ -353,15 +345,16 @@ def main():
         print("✓ System monitoring and resource management")
         print("✓ Comprehensive audit logging")
         print("✓ Resource cleanup and management")
-        
+
         return 0
-        
+
     except KeyboardInterrupt:
         print("\nDemo interrupted by user")
         return 1
     except Exception as e:
         print(f"\nDemo failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

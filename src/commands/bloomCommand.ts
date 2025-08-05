@@ -71,7 +71,7 @@ export class BloomCommand {
       // Step 2: Discover worktrees
       progress.report({ message: 'Discovering git worktrees...', increment: 20 });
       const worktrees = await this.gitService.getWorktrees();
-      
+
       if (worktrees.length === 0) {
         result.errors.push('No git worktrees found in the current workspace');
         return result;
@@ -81,10 +81,10 @@ export class BloomCommand {
 
       // Step 3: Get Claude command
       const claudeCommand = this.claudeService.getClaudeCommand();
-      
+
       // Step 4: Create terminals for each worktree
       progress.report({ message: `Creating terminals for ${worktrees.length} worktrees...`, increment: 30 });
-      
+
       let terminalsCreated = 0;
       let claudeInstancesStarted = 0;
       const errors: string[] = [];
@@ -92,8 +92,8 @@ export class BloomCommand {
       for (let i = 0; i < worktrees.length; i++) {
         const worktree = worktrees[i];
         const worktreeName = this.gitService.getWorktreeDisplayName(worktree);
-        
-        progress.report({ 
+
+        progress.report({
           message: `Setting up terminal for ${worktreeName} (${i + 1}/${worktrees.length})...`,
           increment: 40 / worktrees.length
         });
@@ -193,30 +193,30 @@ export class BloomCommand {
   private async showCompletionMessage(result: BloomCommandResult): Promise<void> {
     if (result.success) {
       const message = `Bloom completed successfully! Created ${result.terminalsCreated} terminals and started ${result.claudeInstancesStarted} Claude instances.`;
-      
+
       if (result.errors.length > 0) {
         const action = await ErrorUtils.showWarningMessage(
           `${message} However, ${result.errors.length} issues were encountered.`,
           'Show Details',
           'Dismiss'
         );
-        
+
         if (action === 'Show Details') {
           ErrorUtils.showOutput();
         }
       } else {
         await ErrorUtils.showInfoMessage(message);
       }
-      
+
       ErrorUtils.logInfo(`Bloom command completed: ${result.terminalsCreated} terminals, ${result.claudeInstancesStarted} Claude instances`, 'bloom-command');
     } else {
       const message = `Bloom command failed. ${result.errors.length} error(s) occurred.`;
       const action = await ErrorUtils.showErrorMessage(message, 'Show Details', 'Dismiss');
-      
+
       if (action === 'Show Details') {
         ErrorUtils.showOutput();
       }
-      
+
       ErrorUtils.logError(new Error('Bloom command failed'), ErrorUtils.createErrorContext('bloom-command-completion', result));
     }
   }
@@ -276,7 +276,7 @@ export class BloomCommand {
 
     const message = `Bloom will create ${preview.worktreeCount} terminals for these worktrees:\n${preview.worktreeNames.join(', ')}\n\nCommand: ${preview.claudeCommand}`;
     const action = await vscode.window.showInformationMessage(message, 'Execute', 'Cancel');
-    
+
     return action === 'Execute';
   }
 
@@ -285,7 +285,7 @@ export class BloomCommand {
    */
   static register(_context: vscode.ExtensionContext): vscode.Disposable {
     const bloomCommand = new BloomCommand();
-    
+
     return vscode.commands.registerCommand('gadugi.bloom', async () => {
       try {
         ErrorUtils.logInfo('Bloom command invoked', 'bloom-command');

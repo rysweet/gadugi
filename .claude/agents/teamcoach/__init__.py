@@ -15,7 +15,7 @@ Core Capabilities:
 
 Architecture:
 - Phase 1: Performance Analytics Foundation
-- Phase 2: Intelligent Task Assignment  
+- Phase 2: Intelligent Task Assignment
 - Phase 3: Coaching and Optimization
 - Phase 4: Learning and Adaptation
 """
@@ -47,25 +47,22 @@ __author__ = "Claude Code AI Agent"
 __all__ = [
     # Phase 1 - Performance Analytics Foundation
     "AgentPerformanceAnalyzer",
-    "CapabilityAssessment", 
+    "CapabilityAssessment",
     "MetricsCollector",
     "ReportingSystem",
-    
     # Phase 2 - Intelligent Task Assignment
     "TaskAgentMatcher",
-    "TeamCompositionOptimizer", 
+    "TeamCompositionOptimizer",
     "RecommendationEngine",
     "RealtimeAssignment",
-    
     # Phase 3 - Coaching and Optimization
     "CoachingEngine",
     "AgentConflictResolver",
-    "WorkflowOptimizer", 
+    "WorkflowOptimizer",
     "StrategicTeamPlanner",
-    
     # Phase 4 - Learning and Adaptation (temporarily disabled until implementation complete)
     # "TeamPerformanceLearner",
-    # "AdaptiveTeamManager", 
+    # "AdaptiveTeamManager",
     # "MLModels",
     # "ContinuousImprovement"
 ]

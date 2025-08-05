@@ -93,7 +93,7 @@ Based on research, implement one of these approaches:
 - [X] Hook functionality works as originally intended
 - [X] Solution is documented for future use
 
-### Secondary Success Criteria  
+### Secondary Success Criteria
 - [X] Solution works for other agent invocations in hooks
 - [X] Documentation includes clear examples and troubleshooting
 - [X] Implementation follows project patterns and conventions
@@ -124,7 +124,7 @@ grep -r "/agent:" . --include="*.md"
 Based on findings, implement the appropriate solution:
 
 - **If wrapper needed**: Create executable script for agent invocation
-- **If syntax issue**: Update documentation and hook configuration  
+- **If syntax issue**: Update documentation and hook configuration
 - **If enhancement needed**: Modify hook processing (if feasible)
 
 ### Step 4: Testing Protocol

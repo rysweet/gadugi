@@ -29,7 +29,7 @@ This document explains the agent hierarchy for executing development workflows i
             ├─── Invokes → ExecutionMonitor (parallel tracking)
             │
             └─── Spawns multiple ↓
-                        
+
 ┌─────────────────────────┐
 │    WorkflowManager      │ ← Or start here for single tasks
 │  (Workflow Executor)    │
