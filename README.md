@@ -190,7 +190,6 @@ Then manually invoke agents in Claude Code sessions as needed.
 ### Productivity & Content Creation
 - **prompt-writer** - Creates high-quality structured prompts for development workflows
 - **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
-
 ### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
 - **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks
