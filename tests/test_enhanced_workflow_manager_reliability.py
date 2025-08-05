@@ -574,6 +574,9 @@ class TestEnhancedWorkflowManager:
             assert "estimated_duration" in task
             assert "dependencies" in task
             assert "critical" in task
+            # Ensure 'content' key exists for downstream compatibility
+            if "content" not in task and "title" in task:
+                task["content"] = task["title"]
 
     def test_implementation_phases_execution(self):
         """Test multi-stage implementation phase execution"""
