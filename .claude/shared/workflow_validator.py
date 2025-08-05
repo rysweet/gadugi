@@ -28,9 +28,26 @@ try:
 except ImportError:
     # Minimal definitions if workflow_engine not available
     from enum import Enum, auto
+    from dataclasses import dataclass
+    from typing import Dict, Any, Optional
+    
     class WorkflowPhase(Enum):
         INIT = auto()
         PROMPT_VALIDATION = auto()
+    
+    @dataclass
+    class WorkflowState:
+        """Minimal WorkflowState for when workflow_engine is not available"""
+        prompt_file: str = ""
+        current_phase: Optional[WorkflowPhase] = None
+        phases_completed: Dict[str, bool] = None
+        context: Dict[str, Any] = None
+        
+        def __post_init__(self):
+            if self.phases_completed is None:
+                self.phases_completed = {}
+            if self.context is None:
+                self.context = {}
 
 
 class ValidationLevel(Enum):
