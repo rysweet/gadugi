@@ -1,4 +1,7 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import { spawn } from 'child_process';
+import { promisify } from 'util';
 import { ErrorUtils } from '../utils/errorUtils';
 
 /**
@@ -71,20 +74,16 @@ export class GitSetupService {
 
     // Check if git is installed
     try {
-      const { execSync } = require('child_process');
-      execSync('git --version', { stdio: 'ignore' });
-      hasGit = true;
+      hasGit = await this.checkGitInstalled();
     } catch {
       // Git not available
     }
 
     // Check if we're in a git repository
     if (hasGit && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-      workspaceFolder = vscode.workspace.workspaceFolders[0].uri.fsPath;
+      workspaceFolder = this.validateWorkspacePath(vscode.workspace.workspaceFolders[0].uri.fsPath);
       try {
-        const { execSync } = require('child_process');
-        execSync('git rev-parse --git-dir', { cwd: workspaceFolder, stdio: 'ignore' });
-        hasRepository = true;
+        hasRepository = await this.checkGitRepository(workspaceFolder);
       } catch {
         // Not a git repository
       }
@@ -171,15 +170,21 @@ The current workspace is not a Git repository. You can:
 
         case 'Initialize Repository':
           if (gitStatus.workspaceFolder) {
-            const confirm = await vscode.window.showInformationMessage(
-              `Initialize a Git repository in ${gitStatus.workspaceFolder}?`,
-              { modal: true },
-              'Yes',
-              'No'
-            );
-            
-            if (confirm === 'Yes') {
-              await this.initializeRepository(gitStatus.workspaceFolder);
+            try {
+              const validatedPath = this.validateWorkspacePath(gitStatus.workspaceFolder);
+              const confirm = await vscode.window.showInformationMessage(
+                `Initialize a Git repository in ${validatedPath}?`,
+                { modal: true },
+                'Yes',
+                'No'
+              );
+              
+              if (confirm === 'Yes') {
+                await this.initializeRepository(validatedPath);
+              }
+            } catch (error) {
+              const err = error instanceof Error ? error : new Error(String(error));
+              await vscode.window.showErrorMessage(`Invalid workspace path: ${err.message}`);
             }
           } else {
             await vscode.window.showErrorMessage('No workspace folder available to initialize');
@@ -222,11 +227,11 @@ The current workspace is not a Git repository. You can:
    */
   private async initializeRepository(folderPath: string): Promise<void> {
     try {
-      const { execSync } = require('child_process');
-      execSync('git init', { cwd: folderPath });
+      const validatedPath = this.validateWorkspacePath(folderPath);
+      await this.executeGitCommand(['init'], validatedPath);
       
       await vscode.window.showInformationMessage(
-        `Git repository initialized in ${folderPath}. You may want to create an initial commit.`
+        `Git repository initialized in ${validatedPath}. You may want to create an initial commit.`
       );
 
       // Offer to create initial commit
@@ -237,7 +242,7 @@ The current workspace is not a Git repository. You can:
       );
 
       if (createCommit === 'Yes') {
-        await this.createInitialCommit(folderPath);
+        await this.createInitialCommit(validatedPath);
       }
 
     } catch (error) {
@@ -252,14 +257,15 @@ The current workspace is not a Git repository. You can:
    */
   private async createInitialCommit(folderPath: string): Promise<void> {
     try {
-      const { execSync } = require('child_process');
+      const validatedPath = this.validateWorkspacePath(folderPath);
       
       // Create a basic .gitignore if it doesn't exist
-      const fs = require('fs');
-      const path = require('path');
-      const gitignorePath = path.join(folderPath, '.gitignore');
+      const gitignorePath = path.join(validatedPath, '.gitignore');
       
-      if (!fs.existsSync(gitignorePath)) {
+      try {
+        await vscode.workspace.fs.stat(vscode.Uri.file(gitignorePath));
+      } catch {
+        // File doesn't exist, create it
         const gitignoreContent = `# VS Code
 .vscode/
 
@@ -280,12 +286,15 @@ dist/
 build/
 out/
 `;
-        fs.writeFileSync(gitignorePath, gitignoreContent);
+        await vscode.workspace.fs.writeFile(
+          vscode.Uri.file(gitignorePath), 
+          Buffer.from(gitignoreContent, 'utf8')
+        );
       }
 
-      // Add and commit
-      execSync('git add .', { cwd: folderPath });
-      execSync('git commit -m "Initial commit"', { cwd: folderPath });
+      // Add and commit using secure git commands
+      await this.executeGitCommand(['add', '.'], validatedPath);
+      await this.executeGitCommand(['commit', '-m', 'Initial commit'], validatedPath);
       
       await vscode.window.showInformationMessage('Initial commit created successfully!');
 
@@ -370,5 +379,133 @@ out/
     if (this.statusBarItem) {
       this.statusBarItem.dispose();
     }
+  }
+
+  // Private security and utility methods
+
+  /**
+   * Validate and sanitize workspace path to prevent path traversal
+   */
+  private validateWorkspacePath(inputPath: string): string {
+    if (!inputPath) {
+      throw new Error('Path cannot be empty');
+    }
+
+    // Resolve and normalize the path
+    const resolvedPath = path.resolve(inputPath);
+    
+    // Ensure path is within workspace boundaries
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+    if (!workspaceRoot) {
+      throw new Error('No workspace folder available');
+    }
+
+    const normalizedWorkspaceRoot = path.resolve(workspaceRoot);
+    if (!resolvedPath.startsWith(normalizedWorkspaceRoot)) {
+      throw new Error('Path outside workspace boundary');
+    }
+    
+    return resolvedPath;
+  }
+
+  /**
+   * Securely check if git is installed
+   */
+  private async checkGitInstalled(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const gitProcess = spawn('git', ['--version'], {
+        stdio: 'ignore',
+        timeout: 5000
+      });
+
+      gitProcess.on('close', (code) => {
+        resolve(code === 0);
+      });
+
+      gitProcess.on('error', () => {
+        resolve(false);
+      });
+
+      // Handle timeout
+      setTimeout(() => {
+        gitProcess.kill();
+        resolve(false);
+      }, 5000);
+    });
+  }
+
+  /**
+   * Securely check if directory is a git repository
+   */
+  private async checkGitRepository(workspaceFolder: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const gitProcess = spawn('git', ['rev-parse', '--git-dir'], {
+        cwd: workspaceFolder,
+        stdio: 'ignore',
+        timeout: 5000
+      });
+
+      gitProcess.on('close', (code) => {
+        resolve(code === 0);
+      });
+
+      gitProcess.on('error', () => {
+        resolve(false);
+      });
+
+      // Handle timeout
+      setTimeout(() => {
+        gitProcess.kill();
+        resolve(false);
+      }, 5000);
+    });
+  }
+
+  /**
+   * Execute git command securely with proper argument separation
+   */
+  private async executeGitCommand(args: string[], cwd: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Validate all arguments to prevent injection
+      const sanitizedArgs = args.map(arg => {
+        if (typeof arg !== 'string') {
+          throw new Error('Git command arguments must be strings');
+        }
+        // Basic argument validation - no shell metacharacters
+        if (arg.includes(';') || arg.includes('&') || arg.includes('|') || arg.includes('`')) {
+          throw new Error('Invalid characters in git command argument');
+        }
+        return arg;
+      });
+
+      const gitProcess = spawn('git', sanitizedArgs, {
+        cwd: cwd,
+        stdio: 'pipe',
+        timeout: 30000
+      });
+
+      let stderr = '';
+      gitProcess.stderr?.on('data', (data) => {
+        stderr += data.toString();
+      });
+
+      gitProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(`Git command failed with code ${code}: ${stderr}`));
+        }
+      });
+
+      gitProcess.on('error', (error) => {
+        reject(new Error(`Git command error: ${error.message}`));
+      });
+
+      // Handle timeout
+      setTimeout(() => {
+        gitProcess.kill();
+        reject(new Error('Git command timed out after 30 seconds'));
+      }, 30000);
+    });
   }
 }

