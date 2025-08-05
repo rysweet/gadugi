@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Orphaned PR Detection and Recovery Utility
-# 
+#
 # This script detects and automatically fixes PRs that are missing mandatory code reviews.
 # It's used by WorkflowManager to ensure 100% Phase 9 compliance.
 #
@@ -72,49 +72,49 @@ fi
 # Function to check if a PR has reviews
 has_reviews() {
     local pr_number="$1"
-    
+
     local review_count
     review_count=$(gh pr view "$pr_number" --json reviews --jq '.reviews | length' 2>/dev/null || echo "0")
-    
+
     [ "$review_count" -gt 0 ]
 }
 
 # Function to check if a PR is created by AI/WorkflowManager
 is_workflow_pr() {
     local pr_number="$1"
-    
+
     # Check PR description for AI-generated markers
     local pr_body
     pr_body=$(gh pr view "$pr_number" --json body --jq '.body' 2>/dev/null || echo "")
-    
+
     # Look for AI-generated markers in PR body
     if echo "$pr_body" | grep -q "Generated with.*Claude Code\|AI agent"; then
         return 0
     fi
-    
+
     # Check if PR title suggests it's from WorkflowManager
     local pr_title
     pr_title=$(gh pr view "$pr_number" --json title --jq '.title' 2>/dev/null || echo "")
-    
+
     if echo "$pr_title" | grep -q "Implementation\|Feature.*Implementation\|Fix.*Implementation"; then
         return 0
     fi
-    
+
     return 1
 }
 
 # Function to invoke code-reviewer for a PR
 invoke_code_reviewer() {
     local pr_number="$1"
-    
+
     log "INFO" "Invoking code-reviewer for PR #$pr_number"
-    
+
     if [ "$DRY_RUN" = true ]; then
         log "INFO" "[DRY RUN] Would invoke: /agent:code-reviewer for PR #$pr_number"
         log "INFO" "[DRY RUN] Would set context: Orphaned PR recovery - mandatory Phase 9 enforcement"
         return 0
     fi
-    
+
     # Create a comment on the PR to document the automatic review invocation
     local comment_body="🚨 **Automatic Phase 9 Enforcement**
 
@@ -125,21 +125,21 @@ This PR was detected as missing the mandatory code review (Phase 9). The code-re
 **Action**: Invoking code-reviewer agent now.
 
 *Note: This action was performed automatically by the WorkflowManager consistency enforcement system.*"
-    
+
     # Post comment to PR
     if gh pr comment "$pr_number" --body "$comment_body"; then
         log "INFO" "Posted automatic enforcement comment to PR #$pr_number"
     else
         log "WARN" "Failed to post comment to PR #$pr_number, but continuing with review invocation"
     fi
-    
+
     # Set environment variable for code-reviewer
     export PR_NUMBER="$pr_number"
     export ORPHANED_PR_RECOVERY=true
-    
+
     # Invoke code-reviewer agent using Claude CLI
     log "INFO" "Executing: claude -p '/agent:code-reviewer' for PR #$pr_number"
-    
+
     # Build the agent invocation prompt
     local agent_prompt="/agent:code-reviewer
 
@@ -155,7 +155,7 @@ Please conduct a thorough code review focusing on:
 5. Performance impact
 
 This review is being automatically invoked by the WorkflowManager consistency enforcement system."
-    
+
     # Execute Claude CLI to invoke the code-reviewer agent
     if claude -p "$agent_prompt"; then
         log "INFO" "Code-reviewer invocation completed successfully for PR #$pr_number"
@@ -163,7 +163,7 @@ This review is being automatically invoked by the WorkflowManager consistency en
         log "ERROR" "Code-reviewer invocation failed for PR #$pr_number"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -185,48 +185,48 @@ get_threshold_timestamp() {
 # Main detection and recovery function
 detect_and_fix_orphaned_prs() {
     log "INFO" "Scanning for orphaned PRs..."
-    
+
     local threshold_timestamp
     threshold_timestamp=$(get_threshold_timestamp)
     log "INFO" "Considering PRs older than: $threshold_timestamp"
-    
+
     # Get open PRs without reviews, older than threshold
     local orphaned_prs
     orphaned_prs=$(gh pr list --state open --json number,title,author,createdAt,reviews | \
         jq -r --arg threshold "$threshold_timestamp" \
         '.[] | select(.createdAt < $threshold and (.reviews | length == 0)) | "\(.number)|\(.title)|\(.author.login)|\(.createdAt)"' 2>/dev/null || true)
-    
+
     if [ -z "$orphaned_prs" ]; then
         log "INFO" "No orphaned PRs found"
         return 0
     fi
-    
+
     local fixed_count=0
     local skipped_count=0
-    
+
     # Process each orphaned PR
     while IFS='|' read -r pr_number pr_title pr_author pr_created_at; do
         if [ -z "$pr_number" ]; then
             continue
         fi
-        
+
         log "INFO" "Found potential orphaned PR #$pr_number: $pr_title (by $pr_author, created $pr_created_at)"
-        
+
         # Double-check that it actually has no reviews
         if has_reviews "$pr_number"; then
             log "INFO" "PR #$pr_number has reviews now, skipping"
             continue
         fi
-        
+
         # Check if it's a workflow-managed PR
         if ! is_workflow_pr "$pr_number"; then
             log "INFO" "PR #$pr_number doesn't appear to be workflow-managed, skipping"
             skipped_count=$((skipped_count + 1))
             continue
         fi
-        
+
         log "WARN" "ORPHANED PR DETECTED: #$pr_number ($pr_title)"
-        
+
         # Attempt to fix by invoking code-reviewer
         if invoke_code_reviewer "$pr_number"; then
             log "INFO" "Successfully invoked code-reviewer for PR #$pr_number"
@@ -234,11 +234,11 @@ detect_and_fix_orphaned_prs() {
         else
             log "ERROR" "Failed to invoke code-reviewer for PR #$pr_number"
         fi
-        
+
     done <<< "$orphaned_prs"
-    
+
     log "INFO" "Orphaned PR recovery completed: $fixed_count fixed, $skipped_count skipped"
-    
+
     if [ $fixed_count -gt 0 ]; then
         log "INFO" "Fixed $fixed_count orphaned PRs by invoking code-reviewer"
         return 0
@@ -260,7 +260,7 @@ cleanup_logs() {
 main() {
     # Clean up old logs
     cleanup_logs
-    
+
     # Run detection and recovery
     if detect_and_fix_orphaned_prs; then
         log "INFO" "Orphaned PR recovery completed successfully"

@@ -36,9 +36,9 @@ Review PR $PR_NUMBER which was automatically created by WorkflowManager."
 # In WorkflowManager Phase 9
 invoke_code_reviewer() {
     local pr_number="$1"
-    
+
     echo "Invoking code-reviewer agent for PR #$pr_number"
-    
+
     # Build the prompt
     local prompt="/agent:code-reviewer
 
@@ -69,7 +69,7 @@ Focus on:
 # Orphaned PR recovery
 recover_orphaned_pr() {
     local pr_number="$1"
-    
+
     claude -p "/agent:code-reviewer
 
 Review PR #$pr_number which appears to be missing mandatory code review.
@@ -97,16 +97,16 @@ Phase 9 code review. Please conduct a thorough review."
 # Phase 9: Mandatory Code Review
 execute_phase_9() {
     local pr_number="$1"
-    
+
     # Check if review already exists
     if gh pr view "$pr_number" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
         echo "Review already exists for PR #$pr_number"
         return 0
     fi
-    
+
     # Invoke code-reviewer agent
     echo "🚨 ENFORCING Phase 9: Invoking code-reviewer for PR #$pr_number"
-    
+
     local prompt="/agent:code-reviewer
 
 MANDATORY Phase 9 Review for PR #$pr_number
@@ -115,11 +115,11 @@ This is an automated invocation by WorkflowManager to ensure 100% Phase 9 compli
 The PR must receive a comprehensive code review before the workflow can proceed.
 
 Please review all changes and provide feedback."
-    
+
     # Execute with timeout
     timeout 300 claude -p "$prompt"
     local exit_code=$?
-    
+
     if [ $exit_code -eq 124 ]; then
         echo "ERROR: Code review timed out after 5 minutes"
         return 1
@@ -127,7 +127,7 @@ Please review all changes and provide feedback."
         echo "ERROR: Code review invocation failed with exit code $exit_code"
         return 1
     fi
-    
+
     # Verify review was posted
     sleep 10
     if gh pr view "$pr_number" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then

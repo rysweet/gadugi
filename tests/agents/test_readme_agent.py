@@ -159,7 +159,7 @@ Internal link to [agent](/.claude/agents/test-agent.md).
 npm install test-project
 ```
 
-## Usage  
+## Usage
 ```javascript
 const project = require('test-project');
 project.init();
@@ -302,7 +302,7 @@ class TestContentGenerator:
 ## Overview
 Content here
 
-## Installation  
+## Installation
 Install instructions
 
 ## Usage
