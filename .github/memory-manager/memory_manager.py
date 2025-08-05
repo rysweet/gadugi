@@ -20,6 +20,7 @@ from github_integration import GitHubIntegration
 # Import our components
 from memory_parser import MemoryDocument, MemoryParser, TaskStatus
 from sync_engine import ConflictResolution, SyncDirection, SyncEngine
+from memory_compactor import MemoryCompactor
 
 
 class MemoryManager:
@@ -37,6 +38,18 @@ class MemoryManager:
         self.github = GitHubIntegration(str(self.repo_path))
         self.sync_engine = SyncEngine(
             str(memory_path), str(self.repo_path), self.config.sync
+        )
+        # Initialize memory compactor with config-based thresholds
+        details_path = self.repo_path / ".github" / self.config.compaction.details_file_name
+        self.compactor = MemoryCompactor(
+            str(memory_path),
+            str(details_path),
+            size_thresholds={
+                "max_lines": self.config.compaction.max_lines,
+                "max_chars": self.config.compaction.max_chars,
+                "target_lines": self.config.compaction.target_lines,
+                "min_compaction_benefit": self.config.compaction.min_benefit,
+            }
         )
 
     def status(self) -> Dict[str, Any]:
@@ -127,39 +140,61 @@ class MemoryManager:
             return {"success": False, "error": str(e)}
 
     def prune(self, dry_run: bool = False) -> Dict[str, Any]:
-        """Prune old entries from Memory.md"""
+        """Prune old entries from Memory.md using automatic compaction"""
         try:
-            memory_path = self.repo_path / self.config.memory_file_path
+            # Use the memory compactor for intelligent pruning
+            return self.compact_memory(dry_run=dry_run)
 
-            if not memory_path.exists():
-                return {"error": "Memory.md file not found"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
-            # Parse current Memory.md
-            memory_doc = self.parser.parse_file(str(memory_path))
+    def compact_memory(self, dry_run: bool = False) -> Dict[str, Any]:
+        """Perform automatic memory compaction with LongTermMemoryDetails.md archiving"""
+        try:
+            # Check if compaction is needed
+            needs_compaction, analysis = self.compactor.needs_compaction()
+            
+            if not needs_compaction:
+                return {
+                    "success": True,
+                    "compaction_needed": False,
+                    "analysis": analysis,
+                    "message": "Memory.md is within size limits - no compaction needed"
+                }
 
-            # Calculate what would be pruned
-            pruning_stats = {
-                "total_tasks_before": len(memory_doc.tasks),
-                "completed_tasks": len(
-                    memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
-                ),
-                "tasks_to_prune": 0,
-                "sections_affected": [],
-            }
+            # Perform compaction
+            result = self.compactor.compact_memory(dry_run=dry_run)
+            
+            if result["success"] and not dry_run and result.get("compaction_executed"):
+                # Update the status to reflect successful compaction
+                result["message"] = (
+                    f"Memory compaction completed successfully. "
+                    f"Size reduced by {result['result']['reduction_percentage']:.1f}%. "
+                    f"{result['result']['archived_items']} items archived to LongTermMemoryDetails.md"
+                )
+            
+            return result
 
-            # This is a simplified pruning preview
-            # Full implementation would modify the Memory.md content
-            completed_tasks = memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
-            old_tasks = []  # Would calculate based on age
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
-            pruning_stats["tasks_to_prune"] = len(old_tasks)
+    def auto_compact_if_needed(self) -> Dict[str, Any]:
+        """Automatically compact memory if it exceeds thresholds"""
+        try:
+            needs_compaction, analysis = self.compactor.needs_compaction()
+            
+            if not needs_compaction:
+                return {
+                    "success": True,
+                    "auto_compaction_triggered": False,
+                    "analysis": analysis
+                }
 
-            if not dry_run:
-                # TODO: Implement actual pruning logic
-                # This would modify the Memory.md file
-                pass
-
-            return {"success": True, "dry_run": dry_run, "pruning_stats": pruning_stats}
+            # Perform automatic compaction
+            result = self.compact_memory(dry_run=False)
+            result["auto_compaction_triggered"] = True
+            
+            return result
 
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -262,12 +297,28 @@ def main():
         "--dry-run", action="store_true", help="Preview changes without applying"
     )
 
-    # Prune command
+    # Prune command (legacy alias for compact)
     prune_parser = subparsers.add_parser(
-        "prune", help="Prune old entries from Memory.md"
+        "prune", help="Prune old entries from Memory.md (alias for compact)"
     )
     prune_parser.add_argument(
         "--dry-run", action="store_true", help="Preview changes without applying"
+    )
+
+    # Compact command
+    compact_parser = subparsers.add_parser(
+        "compact", help="Automatically compact Memory.md with archiving to LongTermMemoryDetails.md"
+    )
+    compact_parser.add_argument(
+        "--dry-run", action="store_true", help="Preview compaction without applying"
+    )
+    compact_parser.add_argument(
+        "--force", action="store_true", help="Force compaction even if not needed"
+    )
+
+    # Auto-compact command
+    auto_compact_parser = subparsers.add_parser(
+        "auto-compact", help="Check and automatically compact if thresholds are exceeded"
     )
 
     # Create issues command
@@ -342,6 +393,46 @@ def main():
         elif args.command == "prune":
             result = manager.prune(args.dry_run)
             print(json.dumps(result, indent=2))
+            
+            if result.get("success") and result.get("compaction_executed"):
+                print("✅ Memory compaction completed successfully")
+            elif result.get("success") and not result.get("compaction_needed"):
+                print("ℹ️  No compaction needed - Memory.md is within size limits")
+
+        elif args.command == "compact":
+            # Force compaction if requested, otherwise use normal logic
+            if args.force:
+                result = manager.compactor.compact_memory(dry_run=args.dry_run)
+            else:
+                result = manager.compact_memory(dry_run=args.dry_run)
+            
+            print(json.dumps(result, indent=2))
+            
+            if result.get("success"):
+                if result.get("compaction_executed"):
+                    print("✅ Memory compaction completed successfully")
+                    if not args.dry_run:
+                        reduction = result.get("result", {}).get("reduction_percentage", 0)
+                        archived = result.get("result", {}).get("archived_items", 0)
+                        print(f"📊 Size reduced by {reduction:.1f}%, {archived} items archived")
+                elif result.get("compaction_needed") is False:
+                    print("ℹ️  No compaction needed - Memory.md is within size limits")
+            else:
+                print("❌ Memory compaction failed")
+                sys.exit(1)
+
+        elif args.command == "auto-compact":
+            result = manager.auto_compact_if_needed()
+            print(json.dumps(result, indent=2))
+            
+            if result.get("success"):
+                if result.get("auto_compaction_triggered"):
+                    print("✅ Automatic compaction completed successfully")
+                else:
+                    print("ℹ️  No automatic compaction needed")
+            else:
+                print("❌ Automatic compaction failed")
+                sys.exit(1)
 
         elif args.command == "create-issues":
             result = manager.create_issues(args.section, args.dry_run)

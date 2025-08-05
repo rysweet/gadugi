@@ -11,6 +11,7 @@ This integration transforms the existing Memory.md workflow by automatically cre
 - **Bidirectional Synchronization**: Automatic sync between Memory.md tasks and GitHub Issues
 - **Intelligent Parsing**: Extracts tasks, priorities, and status from Memory.md content
 - **Conflict Resolution**: Handles simultaneous updates to both systems
+- **Automatic Compaction**: Intelligent size management with archiving to LongTermMemoryDetails.md
 - **Content Curation**: Automated pruning and organization of Memory.md content
 - **Configuration Management**: Flexible configuration for sync policies and behavior
 - **Comprehensive Testing**: Full test suite ensuring reliability and data integrity
@@ -28,9 +29,10 @@ MemoryManager ← ConfigManager ← ConflictResolver ← API Client
 1. **MemoryParser** (`memory_parser.py`): Parses Memory.md and extracts structured data
 2. **GitHubIntegration** (`github_integration.py`): Manages GitHub Issues via CLI
 3. **SyncEngine** (`sync_engine.py`): Orchestrates bidirectional synchronization
-4. **ConfigManager** (`config.py`): Manages configuration and policies
-5. **MemoryManager** (`memory_manager.py`): Main CLI interface
-6. **MemoryManagerAgent** (`.claude/agents/memory-manager.md`): Agent interface
+4. **MemoryCompactor** (`memory_compactor.py`): Automatic Memory.md compaction with archiving
+5. **ConfigManager** (`config.py`): Manages configuration and policies
+6. **MemoryManager** (`memory_manager.py`): Main CLI interface
+7. **MemoryManagerAgent** (`.claude/agents/memory-manager.md`): Agent interface
 
 ## Installation and Setup
 
@@ -95,10 +97,35 @@ content_rules:
   maintain_chronological_order: true
   preserve_context_links: true
 
+compaction:
+  max_lines: 100                      # Trigger compaction at 100 lines
+  max_chars: 50000                    # Trigger compaction at 50K characters
+  target_lines: 80                    # Target size after compaction
+  min_benefit: 0.2                    # Minimum 20% size reduction required
+  enable_auto_compaction: true        # Enable automatic compaction
+  create_backup: true                 # Create backup before compaction
+  details_file_name: "LongTermMemoryDetails.md"
+  section_rules:
+    "Current Goals":
+      preserve_all: true
+      max_age_days: null
+    "Completed Tasks":
+      max_age_days: 7
+      max_items: 15
+    "Recent Accomplishments":
+      max_age_days: 14
+      max_items: 20
+    "Reflections":
+      max_age_days: 30
+      max_items: 10
+    "Important Context":
+      max_items: 15
+      preserve_high_priority: true
+
 pruning:
-  completed_task_age_days: 7          # Remove completed tasks older than N days
-  max_accomplishments: 20             # Keep only recent accomplishments
-  preserve_high_priority: true       # Always keep high-priority items
+  completed_task_age_days: 7          # Remove completed tasks older than N days (legacy)
+  max_accomplishments: 20             # Keep only recent accomplishments (legacy)
+  preserve_high_priority: true       # Always keep high-priority items (legacy)
 ```
 
 ### GitHub Issues
@@ -155,7 +182,17 @@ python3 .github/memory-manager/memory_manager.py create-issues
 # Create issues for specific section only
 python3 .github/memory-manager/memory_manager.py create-issues --section "Current Goals"
 
-# Prune old entries from Memory.md
+# Automatic memory compaction
+python3 .github/memory-manager/memory_manager.py auto-compact
+
+# Manual compaction (dry run first)
+python3 .github/memory-manager/memory_manager.py compact --dry-run
+python3 .github/memory-manager/memory_manager.py compact
+
+# Force compaction even if not needed
+python3 .github/memory-manager/memory_manager.py compact --force
+
+# Prune old entries from Memory.md (alias for compact)
 python3 .github/memory-manager/memory_manager.py prune --dry-run
 python3 .github/memory-manager/memory_manager.py prune
 ```
@@ -285,6 +322,178 @@ project visibility and collaboration.
 - **Issue Closed in GitHub**: Marks task as completed in Memory.md
 - **Issue Reopened in GitHub**: Marks task as pending in Memory.md
 - **Content Changes**: Updates both systems (with conflict detection)
+
+## Automatic Memory Compaction System
+
+The Memory Manager includes an intelligent compaction system that automatically maintains Memory.md at an optimal size for AI processing while preserving important historical context.
+
+### How Compaction Works
+
+#### Automatic Triggers
+
+Compaction automatically runs when Memory.md exceeds configured thresholds:
+- **Line Count**: Default 100 lines
+- **Character Count**: Default 50,000 characters
+- **Workflow Integration**: Phase 12 in WorkflowManager workflows
+
+#### Intelligent Content Analysis
+
+The compactor uses sophisticated rules to determine what content to preserve vs. archive:
+
+**Always Preserved:**
+- Current Goals (active items with 🔄, ⏳ markers)
+- Next Steps (all content considered current)
+- High Priority Items (CRITICAL, HIGH, URGENT, IMPORTANT markers)
+- Recent content within configured age limits
+
+**Section-Specific Rules:**
+- **Completed Tasks**: Preserves last 7 days, maximum 15 items
+- **Recent Accomplishments**: Preserves last 14 days, maximum 20 items
+- **Reflections**: Preserves last 30 days, maximum 10 items
+- **Important Context**: Preserves maximum 15 items, prioritizes high-priority content
+
+#### Archive Process
+
+1. **Backup Creation**: Automatically creates `Memory.md.backup`
+2. **Content Archiving**: Moves selected content to `LongTermMemoryDetails.md`
+3. **Structured Archive**: Timestamps and organizes archived content
+4. **Compacted Memory**: Creates streamlined Memory.md with essential information
+5. **Reference Links**: Adds references to archived content in compacted file
+
+### LongTermMemoryDetails.md Structure
+
+The archive file is automatically created and maintained with this structure:
+
+```markdown
+# AI Assistant Long-Term Memory Details
+Last Updated: 2025-08-05T22:38:00-08:00
+
+This file contains detailed historical context archived from Memory.md.
+
+## Automatic Compaction System
+
+This file is automatically maintained by the Memory Compactor system.
+
+## Memory Compaction Archive - 2025-08-05T22:38:00-08:00
+
+The following items were archived during automatic compaction:
+
+- ✅ Historical task from July 15th
+- Previous reflection about system architecture
+- Completed accomplishment from earlier phase
+```
+
+### Compaction Configuration
+
+Customize compaction behavior through `.github/memory-manager/config.yaml`:
+
+```yaml
+compaction:
+  # Size thresholds
+  max_lines: 100                    # Trigger at line count
+  max_chars: 50000                  # Trigger at character count
+  target_lines: 80                  # Target size after compaction
+  min_benefit: 0.2                  # Minimum 20% reduction to proceed
+  
+  # Behavior settings
+  enable_auto_compaction: true      # Enable automatic compaction
+  create_backup: true               # Create backup files
+  details_file_name: "LongTermMemoryDetails.md"
+  
+  # Custom section rules
+  section_rules:
+    "Custom Section":
+      max_age_days: 14              # Archive content older than 14 days
+      max_items: 20                 # Keep maximum 20 items
+      preserve_patterns:            # Always preserve content matching patterns
+        - "IMPORTANT"
+        - "#\\d+"                   # Issue references
+      priority_preserve: true       # Preserve high-priority markers
+```
+
+### Command Line Usage
+
+```bash
+# Check if compaction is needed
+python3 .github/memory-manager/memory_manager.py auto-compact
+
+# Preview compaction changes
+python3 .github/memory-manager/memory_manager.py compact --dry-run
+
+# Execute compaction
+python3 .github/memory-manager/memory_manager.py compact
+
+# Force compaction even if under thresholds
+python3 .github/memory-manager/memory_manager.py compact --force
+```
+
+### Compaction Results
+
+Example output from successful compaction:
+
+```json
+{
+  "success": true,
+  "compaction_executed": true,
+  "result": {
+    "backup_created": "/path/to/Memory.md.backup",
+    "archived_items": 25,
+    "original_size": 15432,
+    "new_size": 12847,
+    "size_reduction": 2585,
+    "reduction_percentage": 16.8,
+    "compacted_file": "/path/to/Memory.md",
+    "archive_file": "/path/to/LongTermMemoryDetails.md"
+  }
+}
+```
+
+### WorkflowManager Integration
+
+Compaction is automatically integrated as Phase 12 in all WorkflowManager workflows:
+
+1. **Automatic Execution**: Runs after Phase 11 (Settings Update)
+2. **Non-Blocking**: Failures don't prevent workflow completion
+3. **Intelligent Timing**: Only runs when thresholds are exceeded
+4. **State Tracking**: Compaction status tracked in workflow state
+
+### Recovery and Troubleshooting
+
+#### Restore from Backup
+
+If compaction removes important content:
+
+```bash
+# Restore original Memory.md
+cp Memory.md.backup Memory.md
+
+# Or merge specific content back from archive
+grep -A 3 -B 3 "specific content" LongTermMemoryDetails.md >> Memory.md
+```
+
+#### Common Issues
+
+**Content Unexpectedly Archived:**
+- Add preservation patterns to section rules
+- Use priority markers (CRITICAL, HIGH, etc.)
+- Adjust `max_age_days` settings
+
+**Compaction Not Triggering:**
+- Check `enable_auto_compaction: true` in config
+- Verify size thresholds are appropriate
+- Run manual compaction to test
+
+**Performance Issues:**
+- Large files (>500 lines) may take 5-10 seconds
+- Consider reducing `max_lines` threshold for very active repos
+
+### Benefits
+
+- **Optimal AI Performance**: Keeps Memory.md at ideal size for AI processing
+- **Complete History Preservation**: No information loss through intelligent archiving  
+- **Automatic Maintenance**: Zero manual intervention required
+- **Configurable Behavior**: Customizable rules for different project needs
+- **Workflow Integration**: Seamlessly integrated into development workflows
 
 ## Conflict Resolution
 
@@ -430,21 +639,26 @@ python3 .github/memory-manager/memory_manager.py sync
 # Run comprehensive test suite
 python3 .github/memory-manager/test_memory_integration.py
 
+# Run compaction tests
+python3 tests/memory_manager/test_memory_compactor.py
+
 # Run specific test categories
 python3 -m unittest test_memory_integration.TestMemoryParser
 python3 -m unittest test_memory_integration.TestGitHubIntegration
 python3 -m unittest test_memory_integration.TestSyncEngine
+python3 -m unittest tests.memory_manager.test_memory_compactor.TestMemoryCompactor
 ```
 
 ### Test Coverage
 
 The test suite includes:
 
-- **Unit Tests**: Individual component functionality
+- **Unit Tests**: Individual component functionality (compaction rules, parsers, integrations)
 - **Integration Tests**: Component interaction and data flow
-- **End-to-End Tests**: Complete workflow scenarios
-- **Performance Tests**: Sync speed and resource usage
+- **End-to-End Tests**: Complete workflow scenarios including compaction
+- **Performance Tests**: Sync speed, compaction performance, and resource usage
 - **Error Handling Tests**: Recovery from various failure conditions
+- **Compaction Tests**: Comprehensive testing of automatic memory compaction system
 
 ### Mock Testing
 
@@ -556,8 +770,10 @@ python3 .github/memory-manager/memory_manager.py init
 # Daily operations
 python3 .github/memory-manager/memory_manager.py status
 python3 .github/memory-manager/memory_manager.py sync
+python3 .github/memory-manager/memory_manager.py auto-compact
 
 # Maintenance
+python3 .github/memory-manager/memory_manager.py compact
 python3 .github/memory-manager/memory_manager.py prune
 python3 .github/memory-manager/memory_manager.py validate
 ```
@@ -569,6 +785,7 @@ python3 .github/memory-manager/memory_manager.py validate
 
 Task: Daily Memory.md maintenance
 - Sync with GitHub Issues
+- Perform automatic compaction if needed
 - Prune old completed tasks
 - Resolve any conflicts
 ```
