@@ -101,7 +101,7 @@ except ImportError as e:
             self.result = kwargs.get("result")
             self.error = kwargs.get("error")
             # Additional attributes needed by tests
-            current_phase = kwargs.get("current_phase", WorkflowPhase.PLANNING)
+            current_phase = kwargs.get("current_phase", WorkflowPhase.INITIALIZATION)
             if isinstance(current_phase, int):
                 self.current_phase = current_phase
             else:
