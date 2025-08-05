@@ -1,5 +1,5 @@
 #!/bin/bash
-# agent-manager.sh - Main script for Claude Code Agent Manager
+# agent-manager.sh - Main script for Claude Code Agent Updater
 
 set -euo pipefail
 
@@ -24,7 +24,7 @@ main() {
             check_for_updates "$@"
             ;;
         help|--help|-h)
-            echo "Agent Manager - Manage Claude Code agents"
+            echo "Agent Updater - Automatically check and manage agent updates"
             echo ""
             echo "Usage: agent-manager.sh <command> [options]"
             echo ""

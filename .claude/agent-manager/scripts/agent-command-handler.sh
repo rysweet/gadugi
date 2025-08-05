@@ -10,15 +10,15 @@ AGENT_MANAGER_ROOT="$(dirname "$SCRIPT_DIR")"
 # Function to parse and execute agent-manager commands
 handle_agent_command() {
     local full_command="$*"
-    
+
     # Extract the command from various formats
     # Format 1: /agent:agent-manager check-updates
     # Format 2: check-updates
     # Format 3: "check for updates"
-    
+
     local command=""
     local args=""
-    
+
     # Check if it's a direct command
     if [[ "$full_command" =~ ^(check-updates|setup-hooks|status|help)(\s+.*)?$ ]]; then
         command="${BASH_REMATCH[1]}"
@@ -33,7 +33,7 @@ handle_agent_command() {
     elif [[ "$full_command" =~ help ]]; then
         command="help"
     fi
-    
+
     # If no command matched, try to be helpful
     if [ -z "$command" ]; then
         echo "🤔 I couldn't understand the command: '$full_command'"
@@ -48,15 +48,16 @@ handle_agent_command() {
         echo "  /agent:agent-manager check-updates"
         return 1
     fi
-    
+
     # Execute the command
     "$SCRIPT_DIR/agent-manager.sh" "$command" $args
 }
 
 # Main entry point
 if [ $# -eq 0 ]; then
-    # No arguments, show help
-    "$SCRIPT_DIR/agent-manager.sh" help
+    # No arguments, automatically check for updates
+    echo "🔍 Automatically checking for agent updates..."
+    "$SCRIPT_DIR/agent-manager.sh" check-updates
 else
     handle_agent_command "$@"
 fi

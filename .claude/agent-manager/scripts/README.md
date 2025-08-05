@@ -1,11 +1,11 @@
-# Agent Manager Scripts
+# Agent Updater Scripts
 
-This directory contains the implementation scripts for the Agent Manager functionality.
+This directory contains the implementation scripts for the Agent Updater functionality.
 
 ## Scripts
 
-### agent-manager.sh
-Main entry point for the agent-manager commands. Provides the following commands:
+### agent-updater.sh
+Main entry point for the agent-updater commands. Provides the following commands:
 - `setup-hooks`: Configure Claude Code startup hooks in settings.json
 - `check-updates`: Check for available agent updates
 - `help`: Display help information
@@ -28,40 +28,40 @@ Provides intuitive command parsing for natural language inputs:
 Configures startup hooks for Claude Code:
 - Manages .gitignore entries
 - Sets up automatic agent update checks on session start
-- Configures agent-manager integration with Claude Code settings
+- Configures agent-updater integration with Claude Code settings
 
 ## Usage
 
 ### Direct Command Line
 ```bash
 # Check for updates
-.claude/agent-manager/scripts/agent-manager.sh check-updates
+.claude/agent-updater/scripts/agent-updater.sh check-updates
 
 # Force update check
-.claude/agent-manager/scripts/agent-manager.sh check-updates --force
+.claude/agent-updater/scripts/agent-updater.sh check-updates --force
 
 # Setup hooks
-.claude/agent-manager/scripts/agent-manager.sh setup-hooks
+.claude/agent-updater/scripts/agent-updater.sh setup-hooks
 ```
 
 ### From Claude Code
 ```
-/agent:agent-manager check-updates
-/agent:agent-manager setup-hooks
+/agent:agent-updater check-updates
+/agent:agent-updater setup-hooks
 ```
 
 ### Natural Language
 The agent-command-handler.sh supports natural language commands:
 ```bash
-.claude/agent-manager/scripts/agent-command-handler.sh "check for updates"
-.claude/agent-manager/scripts/agent-command-handler.sh "setup hooks"
+.claude/agent-updater/scripts/agent-command-handler.sh "check for updates"
+.claude/agent-updater/scripts/agent-command-handler.sh "setup hooks"
 ```
 
 ## Implementation Details
 
 ### Cache Management
-- Agent registry cached in `.claude/agent-manager/cache/agent-registry.json`
-- Last check timestamp stored in `.claude/agent-manager/cache/last-check-timestamp`
+- Agent registry cached in `.claude/agent-updater/cache/agent-registry.json`
+- Last check timestamp stored in `.claude/agent-updater/cache/last-check-timestamp`
 - Default check interval: 24 hours (configurable)
 
 ### Version Comparison
