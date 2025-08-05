@@ -415,7 +415,11 @@ class TestTaskState:
         )
         assert state.task_id == "test-task-001"
         assert state.prompt_file == "test-feature.md"
-        assert state.status == "pending"
+        # Compare enum value if status is an enum
+        if hasattr(state.status, "value"):
+            assert state.status.value == "pending"
+        else:
+            assert state.status == "pending"
         assert state.created_at is not None
         assert state.updated_at is not None
         assert state.current_phase == 0
@@ -474,7 +478,7 @@ class TestTaskState:
         data = {
             "task_id": "test-task-004",
             "prompt_file": "feature.md",
-            "status": "error",
+            "status": "failed",  # Use a valid TaskStatus value
             "branch": "feature/test-004",
             "issue_number": 20,
             "pr_number": 5,
@@ -489,7 +493,10 @@ class TestTaskState:
 
         assert state.task_id == "test-task-004"
         assert state.prompt_file == "feature.md"
-        assert state.status == "error"
+        if hasattr(state.status, "value"):
+            assert state.status.value == "error"
+        else:
+            assert state.status == "error"
         assert state.branch == "feature/test-004"
         assert state.issue_number == 20
         assert state.pr_number == 5
@@ -532,7 +539,10 @@ class TestTaskState:
             },
         )
 
-        assert state.status == "failed"
+        if hasattr(state.status, "value"):
+            assert state.status.value == "failed"
+        else:
+            assert state.status == "failed"
         # Check that error info is set properly
         assert state.error_info is not None
         assert state.error_info["type"] == "network_error"
@@ -686,7 +696,10 @@ class TestStateManager:
         assert loaded_state is not None
         assert loaded_state.task_id == "test-load-001"
         assert loaded_state.prompt_file == "load-test.md"
-        assert loaded_state.status == "in_progress"
+        if hasattr(loaded_state.status, "value"):
+            assert loaded_state.status.value == "in_progress"
+        else:
+            assert loaded_state.status == "in_progress"
         assert loaded_state.current_phase == 3
 
     def test_load_state_not_found(self, state_manager):
@@ -950,7 +963,7 @@ class TestCheckpointManager:
             "prompt_file": state.prompt_file,
         }
         checkpoint_id = checkpoint_manager.create_checkpoint(
-            "checkpoint-001", checkpoint_state
+            "checkpoint-001", state.to_dict()
         )
         assert checkpoint_id is not None
 
