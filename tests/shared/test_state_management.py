@@ -422,7 +422,10 @@ class TestTaskState:
             assert state.status == "pending"
         assert state.created_at is not None
         assert state.updated_at is not None
-        assert state.current_phase == 0
+        if hasattr(state.current_phase, "value"):
+            assert state.current_phase.value == 0
+        else:
+            assert state.current_phase == 0
         assert state.context == {}
 
     def test_task_state_creation_complete(self):
@@ -444,7 +447,10 @@ class TestTaskState:
         assert state.branch == "feature/test-002"
         assert state.issue_number == 42
         assert state.pr_number == 15
-        assert state.current_phase == 3
+        if hasattr(state.current_phase, "value"):
+            assert state.current_phase.value == 3
+        else:
+            assert state.current_phase == 3
         assert state.context == context
         assert (
             state.error_info is not None
@@ -861,7 +867,10 @@ class TestStateManager:
         restored_state = state_manager.load_task_state("restore-test")
         assert restored_state is not None
         assert restored_state.status == "in_progress"
-        assert restored_state.current_phase == 3
+        if hasattr(restored_state.current_phase, "value"):
+            assert restored_state.current_phase.value == 3
+        else:
+            assert restored_state.current_phase == 3
 
     def test_get_state_history(self, state_manager):
         """Test retrieving state history."""
