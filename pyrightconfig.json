@@ -31,7 +31,6 @@
   "defineConstant": {
     "DEBUG": true
   },
-  "stubPath": "typings",
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.13",
