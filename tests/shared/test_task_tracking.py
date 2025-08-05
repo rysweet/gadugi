@@ -121,7 +121,11 @@ except ImportError as e:
             self.priority = new_priority
 
         def is_active(self) -> bool:
-            return self.status in (TaskStatus.PENDING, TaskStatus.IN_PROGRESS)
+            return self.status in (
+                TaskStatus.PENDING,
+                TaskStatus.IN_PROGRESS,
+                TaskStatus.BLOCKED,
+            )
 
         def validate(self) -> None:
             if not self.id:
