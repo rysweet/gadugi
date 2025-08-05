@@ -993,9 +993,9 @@ class TestTodoWriteIntegration:
             mock_call.return_value = {"success": True}
 
             updates = [
-                {"id": "1", "status": TaskStatus.COMPLETED},
-                {"id": "2", "status": TaskStatus.IN_PROGRESS},
-                {"id": "3", "priority": TaskPriority.HIGH},
+                {"task_id": "1", "status": TaskStatus.COMPLETED},
+                {"task_id": "2", "status": TaskStatus.IN_PROGRESS},
+                {"task_id": "3", "priority": TaskPriority.HIGH},
             ]
 
             result = integration.batch_update(updates)
