@@ -312,13 +312,13 @@ with multiple lines"""
             # The code does: os.path.dirname(__file__) + "/../../.memory/project"
             # So we'll patch os.path.join to redirect this specific path
             original_join = os.path.join
-            
+
             def mock_join(*args):
                 # If joining with "../../.memory/project", redirect to temp dir
                 if len(args) >= 2 and "../../.memory/project" in args[-1]:
                     return os.path.join(temp_dir, ".memory", "project")
                 return original_join(*args)
-            
+
             with patch("os.path.join", side_effect=mock_join):
                 result = self.pm.update_project_priorities()
                 self.assertTrue(result)
