@@ -467,7 +467,7 @@ except ImportError as e:
         ) -> TaskList:
             phase_task_list = TaskList()
             for i, task_data in enumerate(tasks):
-                task_id = f"{phase_name}-{i+1}"
+                task_id = f"{phase_name}-{i + 1}"
                 task = Task(
                     task_id,
                     task_data["content"],
