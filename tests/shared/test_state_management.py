@@ -506,7 +506,10 @@ class TestTaskState:
         assert state.branch == "feature/test-004"
         assert state.issue_number == 20
         assert state.pr_number == 5
-        assert state.current_phase == 5
+        if hasattr(state.current_phase, "value"):
+            assert state.current_phase.value == 5
+        else:
+            assert state.current_phase == 5
         assert state.context == {"priority": "medium"}
         assert state.error_info == {"error": "Test failed"}
 
