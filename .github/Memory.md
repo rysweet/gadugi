@@ -26,6 +26,7 @@ Last Updated: 2025-08-05T16:00:00-08:00
 ## Active Work
 - 🔍 **Pyright Type Checking** (Issue #101): 6,794 type errors identified
 - 🚨 **Orchestrator Implementation Gap** (Issue #102): Orchestrator contains only pseudo-code
+- 🔄 **Orchestration Architecture** (Issue #27): Comprehensive DAR design proposed
 - 🛠️ **Type Fix Campaign**: Need to create type-fix agent and fix all type errors
 
 ## Next Actions
@@ -43,6 +44,7 @@ Last Updated: 2025-08-05T16:00:00-08:00
 - **Performance**: Maintaining 3-5x parallel execution with additional 5-10% optimization
 - **Orchestrator Gap**: Orchestrator-agent.md contains only documentation/pseudo-code, actual Python components exist but aren't invoked
 - **Type Safety**: Project has 6,794 type issues - need systematic approach with specialized agent
+- **Issues #27 & #102 Connected**: Both identify orchestration gaps - #27 proposes DAR architecture, #102 identifies missing implementation
 
 ---
 *For detailed history and implementation details, see `.github/LongTermMemoryDetails.md`*
