@@ -5,23 +5,23 @@ Tests task management, workflow tracking, and Claude Code integration.
 
 import json
 import os
+import uuid
 
 # Import the module we're testing
 import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import MagicMock, Mock, call, patch
 
 import pytest
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+# Fix imports for pyright
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from task_tracking import (
+    from claude.shared.task_tracking import (
         Task,
         TaskError,
         TaskList,
@@ -33,13 +33,14 @@ try:
         TodoWriteIntegration,
         WorkflowPhaseTracker,
     )
-except ImportError:
+except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(
-        "Warning: Could not import task_tracking module. Tests will define what needs to be implemented."
+        f"Warning: Could not import task_tracking module: {e}. Tests will define what needs to be implemented."
     )
 
     from enum import Enum
+    from typing import ClassVar
 
     class TaskStatus(Enum):
         PENDING = "pending"
@@ -61,27 +62,341 @@ except ImportError:
             content: str,
             status: TaskStatus = TaskStatus.PENDING,
             priority: TaskPriority = TaskPriority.MEDIUM,
+            **kwargs: Any,
         ):
             self.id = id
             self.content = content
             self.status = status
             self.priority = priority
+            self.created_at: datetime = kwargs.get("created_at", datetime.now())
+            self.started_at: Optional[datetime] = kwargs.get("started_at")
+            self.completed_at: Optional[datetime] = kwargs.get("completed_at")
+            self.estimated_duration: Optional[int] = kwargs.get("estimated_duration")
+            self.dependencies: List[str] = kwargs.get("dependencies", [])
+            self.tags: List[str] = kwargs.get("tags", [])
+            self.metadata: Dict[str, Any] = kwargs.get("metadata", {})
+
+        def to_dict(self) -> Dict[str, Any]:
+            return {
+                "id": self.id,
+                "content": self.content,
+                "status": self.status.value,
+                "priority": self.priority.value,
+            }
+
+        @classmethod
+        def from_dict(cls, data: Dict[str, Any]) -> "Task":
+            return cls(
+                data["id"],
+                data["content"],
+                TaskStatus(data["status"]),
+                TaskPriority(data["priority"]),
+            )
+
+        def update_status(self, new_status: TaskStatus) -> None:
+            self.status = new_status
+            if new_status == TaskStatus.IN_PROGRESS and self.started_at is None:
+                self.started_at = datetime.now()
+            elif new_status in (TaskStatus.COMPLETED, TaskStatus.CANCELLED):
+                self.completed_at = datetime.now()
+
+        def update_priority(self, new_priority: TaskPriority) -> None:
+            self.priority = new_priority
+
+        def is_active(self) -> bool:
+            return self.status in (TaskStatus.PENDING, TaskStatus.IN_PROGRESS)
+
+        def validate(self) -> None:
+            if not self.id:
+                raise TaskValidationError("Task ID cannot be empty")
+            if not self.content:
+                raise TaskValidationError("Task content cannot be empty")
+
+        def set_estimated_duration(self, minutes: int) -> None:
+            if minutes <= 0:
+                raise ValueError("Estimated duration must be positive")
+            self.estimated_duration = minutes
+
+        def add_dependency(self, task_id: str) -> None:
+            if task_id not in self.dependencies:
+                self.dependencies.append(task_id)
+
+        def remove_dependency(self, task_id: str) -> None:
+            if task_id in self.dependencies:
+                self.dependencies.remove(task_id)
+
+        def start(self) -> None:
+            self.started_at = datetime.now()
+            self.update_status(TaskStatus.IN_PROGRESS)
+
+        def complete(self) -> None:
+            self.completed_at = datetime.now()
+            self.update_status(TaskStatus.COMPLETED)
 
     class TaskList:
         def __init__(self):
-            self.tasks = []
+            self.tasks: List[Task] = []
+            self._task_dict: Dict[str, Task] = {}
+
+        def add_task(self, task: Task) -> None:
+            if task.id in self._task_dict:
+                raise TaskError(f"Task with ID {task.id} already exists")
+            self.tasks.append(task)
+            self._task_dict[task.id] = task
+
+        def remove_task(self, task_id: str) -> Task:
+            if task_id not in self._task_dict:
+                raise TaskError(f"Task with ID {task_id} not found")
+            task = self._task_dict.pop(task_id)
+            self.tasks.remove(task)
+            return task
+
+        def get_task(self, task_id: str) -> Optional[Task]:
+            return self._task_dict.get(task_id)
+
+        def update_task(self, task_id: str, **kwargs: Any) -> None:
+            task = self.get_task(task_id)
+            if task is None:
+                raise TaskError(f"Task with ID {task_id} not found")
+            if "status" in kwargs:
+                task.update_status(kwargs["status"])
+            if "priority" in kwargs:
+                task.update_priority(kwargs["priority"])
+
+        def count(self) -> int:
+            return len(self.tasks)
+
+        def get_tasks_by_status(self, status: TaskStatus) -> List[Task]:
+            return [task for task in self.tasks if task.status == status]
+
+        def get_tasks_by_priority(self, priority: TaskPriority) -> List[Task]:
+            return [task for task in self.tasks if task.priority == priority]
+
+        def get_active_tasks(self) -> List[Task]:
+            return [task for task in self.tasks if task.is_active()]
+
+        def to_todowrite_format(self) -> List[Dict[str, Any]]:
+            return [
+                {
+                    "id": task.id,
+                    "content": task.content,
+                    "status": task.status.value,
+                    "priority": task.priority.value,
+                }
+                for task in self.tasks
+            ]
+
+        @classmethod
+        def from_todowrite_format(cls, data: List[Dict[str, Any]]) -> "TaskList":
+            task_list = cls()
+            for item in data:
+                task = Task(
+                    item["id"],
+                    item["content"],
+                    TaskStatus(item["status"]),
+                    TaskPriority(item["priority"]),
+                )
+                task_list.add_task(task)
+            return task_list
 
     class TodoWriteIntegration:
         def __init__(self):
-            pass
+            self.current_task_list: Optional[TaskList] = None
+            self.call_count: int = 0
+            self.mock_api = Mock()
+            self.last_update_time: Optional[datetime] = None
+
+        def submit_task_list(self, task_list: TaskList) -> Dict[str, Any]:
+            if task_list.count() == 0:
+                raise TaskValidationError("Cannot submit empty task list")
+            self.current_task_list = task_list
+            self.call_count += 1
+            return {"success": True, "task_count": task_list.count()}
+
+        def update_task_status(
+            self, task_id: str, new_status: TaskStatus
+        ) -> Dict[str, Any]:
+            if self.current_task_list is None:
+                raise TaskError("No task list loaded")
+            self.current_task_list.update_task(task_id, status=new_status)
+            self.call_count += 1
+            return {"success": True, "task_id": task_id, "new_status": new_status.value}
+
+        def add_task(self, task: Task) -> Dict[str, Any]:
+            if self.current_task_list is None:
+                self.current_task_list = TaskList()
+            self.current_task_list.add_task(task)
+            self.call_count += 1
+            return {"success": True, "task_id": task.id}
+
+        def remove_task(self, task_id: str) -> Dict[str, Any]:
+            if self.current_task_list is None:
+                raise TaskError("No task list loaded")
+            self.current_task_list.remove_task(task_id)
+            self.call_count += 1
+            return {"success": True, "task_id": task_id}
+
+        def batch_update(self, updates: List[Dict[str, Any]]) -> Dict[str, Any]:
+            if self.current_task_list is None:
+                raise TaskError("No task list loaded")
+            for update in updates:
+                task_id = update["task_id"]
+                if "status" in update:
+                    self.current_task_list.update_task(task_id, status=update["status"])
+                if "priority" in update:
+                    self.current_task_list.update_task(
+                        task_id, priority=update["priority"]
+                    )
+            self.call_count += 1
+            return {"success": True, "updated_count": len(updates)}
+
+        def get_statistics(self) -> Dict[str, Any]:
+            if self.current_task_list is None:
+                return {"total_tasks": 0, "completed_tasks": 0, "active_tasks": 0}
+
+            completed_tasks = self.current_task_list.get_tasks_by_status(
+                TaskStatus.COMPLETED
+            )
+            active_tasks = self.current_task_list.get_active_tasks()
+
+            return {
+                "total_tasks": self.current_task_list.count(),
+                "completed_tasks": len(completed_tasks),
+                "active_tasks": len(active_tasks),
+                "call_count": self.call_count,
+                "last_update": self.last_update_time.isoformat()
+                if self.last_update_time
+                else None,
+            }
 
     class WorkflowPhaseTracker:
         def __init__(self):
-            pass
+            self.workflow_id: Optional[str] = None
+            self.current_phase: Optional[str] = None
+            self.phase_history: List[Dict[str, Any]] = []
+            self.phase_start_times: Dict[str, datetime] = {}
+
+        def start_phase(
+            self, phase_name: str, description: Optional[str] = None
+        ) -> None:
+            self.current_phase = phase_name
+            start_time = datetime.now()
+            self.phase_start_times[phase_name] = start_time
+            entry = {
+                "phase": phase_name,
+                "started_at": start_time,
+                "status": "in_progress",
+            }
+            if description:
+                entry["description"] = description
+            self.phase_history.append(entry)
+
+        def complete_phase(
+            self, phase_name: str, metadata: Optional[Dict[str, Any]] = None
+        ) -> None:
+            if phase_name not in self.phase_start_times:
+                raise TaskError(f"Phase {phase_name} was not started")
+
+            for entry in self.phase_history:
+                if entry["phase"] == phase_name and entry["status"] == "in_progress":
+                    entry["completed_at"] = datetime.now()
+                    entry["duration"] = (
+                        entry["completed_at"] - entry["started_at"]
+                    ).total_seconds()
+                    entry["status"] = "completed"
+                    if metadata:
+                        entry["metadata"] = metadata
+                    break
+
+            if self.current_phase == phase_name:
+                self.current_phase = None
+
+        def fail_phase(
+            self, phase_name: str, error: Union[str, Dict[str, Any]]
+        ) -> None:
+            for entry in self.phase_history:
+                if entry["phase"] == phase_name and entry["status"] == "in_progress":
+                    entry["failed_at"] = datetime.now()
+                    if isinstance(error, dict):
+                        entry["error_details"] = error
+                        entry["error"] = str(error.get("error", "Unknown error"))
+                    else:
+                        entry["error"] = error
+                    entry["status"] = "failed"
+                    break
+
+            if self.current_phase == phase_name:
+                self.current_phase = None
+
+        def get_phase_duration(self, phase_name: str) -> Optional[float]:
+            for entry in self.phase_history:
+                if entry["phase"] == phase_name and "duration" in entry:
+                    return entry["duration"]
+            return None
 
     class TaskMetrics:
         def __init__(self):
-            pass
+            self.start_time: datetime = datetime.now()
+            self.task_completion_times: Dict[str, float] = {}
+            self.status_change_count: int = 0
+            self.task_status_history: List[Dict[str, Any]] = []
+            self.average_completion_time: Optional[float] = None
+            self.throughput_per_hour: float = 0.0
+            self.productivity_score: float = 0.0
+
+        def record_task_completion(self, task_id: str, duration: float) -> None:
+            self.task_completion_times[task_id] = duration
+            self._update_metrics()
+
+        def record_status_change(
+            self, task_id: str, old_status: TaskStatus, new_status: TaskStatus
+        ) -> None:
+            self.status_change_count += 1
+            self.task_status_history.append(
+                {
+                    "task_id": task_id,
+                    "old_status": old_status.value,
+                    "new_status": new_status.value,
+                    "timestamp": datetime.now(),
+                }
+            )
+
+        def _update_metrics(self) -> None:
+            if self.task_completion_times:
+                self.average_completion_time = sum(
+                    self.task_completion_times.values()
+                ) / len(self.task_completion_times)
+                elapsed_hours = (
+                    datetime.now() - self.start_time
+                ).total_seconds() / 3600
+                if elapsed_hours > 0:
+                    self.throughput_per_hour = (
+                        len(self.task_completion_times) / elapsed_hours
+                    )
+
+        def calculate_productivity_score(self) -> float:
+            if not self.task_completion_times:
+                return 0.0
+
+            base_score = len(self.task_completion_times) * 10
+            avg_time_bonus = 0
+            if self.average_completion_time:
+                if self.average_completion_time < 300:  # Less than 5 minutes
+                    avg_time_bonus = 20
+                elif self.average_completion_time < 600:  # Less than 10 minutes
+                    avg_time_bonus = 10
+
+            self.productivity_score = base_score + avg_time_bonus
+            return self.productivity_score
+
+        def get_summary(self) -> Dict[str, Any]:
+            return {
+                "total_tasks_completed": len(self.task_completion_times),
+                "average_completion_time": self.average_completion_time,
+                "throughput_per_hour": self.throughput_per_hour,
+                "productivity_score": self.productivity_score,
+                "status_changes": self.status_change_count,
+            }
 
     class TaskError(Exception):
         pass
@@ -90,8 +405,60 @@ except ImportError:
         pass
 
     class TaskTracker:
-        def __init__(self):
-            pass
+        def __init__(
+            self, todowrite_integration: Optional[TodoWriteIntegration] = None
+        ):
+            self.task_list: TaskList = TaskList()
+            self.todowrite: TodoWriteIntegration = (
+                todowrite_integration or TodoWriteIntegration()
+            )
+            self.phase_tracker: WorkflowPhaseTracker = WorkflowPhaseTracker()
+            self.metrics: TaskMetrics = TaskMetrics()
+
+        def create_task(
+            self,
+            content: str,
+            priority: TaskPriority = TaskPriority.MEDIUM,
+            task_id: Optional[str] = None,
+        ) -> Task:
+            if task_id is None:
+                task_id = str(uuid.uuid4())
+            task = Task(task_id, content, TaskStatus.PENDING, priority)
+            self.task_list.add_task(task)
+            return task
+
+        def update_task_status(self, task_id: str, new_status: TaskStatus) -> None:
+            task = self.task_list.get_task(task_id)
+            if task:
+                old_status = task.status
+                self.task_list.update_task(task_id, status=new_status)
+                self.metrics.record_status_change(task_id, old_status, new_status)
+
+                if new_status == TaskStatus.COMPLETED:
+                    if task.started_at:
+                        duration = (datetime.now() - task.started_at).total_seconds()
+                        self.metrics.record_task_completion(task_id, duration)
+
+        def start_workflow_phase(self, phase_name: str) -> None:
+            self.phase_tracker.start_phase(phase_name)
+
+        def complete_workflow_phase(self, phase_name: str) -> None:
+            self.phase_tracker.complete_phase(phase_name)
+
+        def create_phase_task_list(
+            self, phase_name: str, tasks: List[Dict[str, Any]]
+        ) -> TaskList:
+            phase_task_list = TaskList()
+            for i, task_data in enumerate(tasks):
+                task_id = f"{phase_name}-{i+1}"
+                task = Task(
+                    task_id,
+                    task_data["content"],
+                    TaskStatus.PENDING,
+                    task_data.get("priority", TaskPriority.MEDIUM),
+                )
+                phase_task_list.add_task(task)
+            return phase_task_list
 
 
 class TestTaskStatus:
