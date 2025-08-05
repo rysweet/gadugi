@@ -308,12 +308,19 @@ with multiple lines"""
             # Skip creating alternative path structure that goes outside temp_dir
             # as it causes permission errors in CI environments
 
-            # Patch the memory directory path
-            with patch("os.path.dirname") as mock_dirname:
-                mock_dirname.return_value = temp_dir
-
+            # We need to patch where the program manager creates its memory directory
+            # The code does: os.path.dirname(__file__) + "/../../.memory/project"
+            # So we'll patch os.path.join to redirect this specific path
+            original_join = os.path.join
+            
+            def mock_join(*args):
+                # If joining with "../../.memory/project", redirect to temp dir
+                if len(args) >= 2 and "../../.memory/project" in args[-1]:
+                    return os.path.join(temp_dir, ".memory", "project")
+                return original_join(*args)
+            
+            with patch("os.path.join", side_effect=mock_join):
                 result = self.pm.update_project_priorities()
-
                 self.assertTrue(result)
 
                 # Check priority file was created
