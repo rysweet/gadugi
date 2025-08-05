@@ -1,0 +1,222 @@
+name: System Design Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    # Only run on PRs that modify code files
+    paths:
+      - '**.py'
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '.claude/agents/**'
+      - '.claude/shared/**'
+      - 'src/**'
+      - 'gadugi/**'
+
+# Ensure only one review runs per PR at a time
+concurrency:
+  group: system-design-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  system-design-review:
+    name: Architectural Review
+    runs-on: ubuntu-latest
+    
+    # Skip review for draft PRs and dependabot
+    if: >
+      github.event.pull_request.draft == false && 
+      github.actor != 'dependabot[bot]' &&
+      github.actor != 'github-actions[bot]'
+    
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+    
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch full history for accurate change analysis
+          fetch-depth: 0
+          # Ensure we have both base and head branches
+          ref: ${{ github.event.pull_request.head.sha }}
+      
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install minimal dependencies for AST parsing
+          pip install pathlib typing-extensions dataclasses-json
+      
+      - name: Validate PR size
+        id: pr-size
+        run: |
+          # Count changed files
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l)
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          
+          # Skip review if PR is too large (>500 files)
+          if [ $CHANGED_FILES -gt 500 ]; then
+            echo "skip_review=true" >> $GITHUB_OUTPUT
+            echo "PR too large for automated review ($CHANGED_FILES files)"
+          else
+            echo "skip_review=false" >> $GITHUB_OUTPUT
+            echo "PR size acceptable for review ($CHANGED_FILES files)"
+          fi
+      
+      - name: Run System Design Review
+        if: steps.pr-size.outputs.skip_review == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Create temporary script to run the system design reviewer
+          cat > run_design_review.py << 'EOF'
+          import os
+          import sys
+          sys.path.insert(0, '.')
+          
+          try:
+              from .claude.agents.system_design_reviewer import SystemDesignReviewer
+              
+              # Initialize reviewer
+              reviewer = SystemDesignReviewer()
+              
+              # Get PR number from environment
+              pr_number = os.environ.get('PR_NUMBER')
+              if not pr_number:
+                  print("Error: PR_NUMBER not set")
+                  sys.exit(1)
+              
+              print(f"Starting architectural review for PR #{pr_number}")
+              
+              # Run the review
+              result = reviewer.review_pr(pr_number)
+              
+              if result.status.value == 'completed':
+                  print(f"✅ Review completed successfully")
+                  print(f"Architectural impact: {result.architectural_impact.value}")
+                  print(f"Changes detected: {len(result.changes_detected)}")
+                  print(f"ADRs generated: {len(result.adrs_generated)}")
+                  print(f"Documentation updates: {len(result.documentation_updates)}")
+              else:
+                  print(f"❌ Review failed: {result.status.value}")
+                  sys.exit(1)
+                  
+          except ImportError as e:
+              print(f"Import error: {e}")
+              print("System Design Reviewer not available, skipping review")
+              
+              # Create a simple review comment as fallback
+              import subprocess
+              import json
+              
+              pr_number = os.environ.get('PR_NUMBER')
+              review_body = """## System Design Review Summary
+              
+          **Status**: Automated review temporarily unavailable
+          
+          *Note: This notification was created by the System Design Review workflow.*
+          
+          The System Design Review Agent is currently being deployed. Manual architectural review recommended for:
+          - New classes or modules
+          - Changes to public interfaces
+          - Security or performance modifications
+          - Integration point changes
+          
+          Once deployment is complete, automated architectural reviews will resume.
+          """
+              
+              try:
+                  subprocess.run([
+                      'gh', 'pr', 'comment', pr_number, 
+                      '--body', review_body
+                  ], check=True, env=os.environ)
+                  print("Posted fallback review comment")
+              except subprocess.CalledProcessError as e:
+                  print(f"Failed to post fallback comment: {e}")
+                  
+          except Exception as e:
+              print(f"Unexpected error during review: {e}")
+              
+              # Post error comment
+              import subprocess
+              pr_number = os.environ.get('PR_NUMBER')
+              error_body = f"""## System Design Review Error
+              
+          **Status**: Review failed due to technical error
+          
+          *Note: This error notification was created by the System Design Review workflow.*
+          
+          Error details:
+          ```
+          {str(e)}
+          ```
+          
+          Please review architectural changes manually or contact the development team.
+          """
+              
+              try:
+                  subprocess.run([
+                      'gh', 'pr', 'comment', pr_number,
+                      '--body', error_body
+                  ], env=os.environ)
+              except:
+                  pass  # Don't fail the workflow if comment posting fails
+              
+              sys.exit(1)
+          EOF
+          
+          # Run the review script
+          python run_design_review.py
+      
+      - name: Handle large PR
+        if: steps.pr-size.outputs.skip_review == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # Post comment explaining why review was skipped
+          gh pr comment $PR_NUMBER --body "## System Design Review - PR Too Large
+
+**Status**: Automated review skipped
+
+*Note: This notification was created by the System Design Review workflow.*
+
+This PR contains ${{ steps.pr-size.outputs.changed_files }} changed files, which exceeds the automated review limit (500 files).
+
+**Manual Review Recommended:**
+- Focus on architectural changes in core components
+- Review new patterns or frameworks introduced
+- Validate security and performance implications
+- Ensure documentation updates accompany significant changes
+
+To enable automated review, consider splitting this PR into smaller, focused changes."
+      
+      - name: Upload review artifacts
+        if: steps.pr-size.outputs.skip_review == 'false'
+        uses: actions/upload-artifact@v3
+        with:
+          name: system-design-review-${{ github.event.pull_request.number }}
+          path: |
+            docs/adr/ADR-*.md
+            ARCHITECTURE.md
+            .github/workflow-states/system-design-reviewer/
+          retention-days: 30
+          if-no-files-found: ignore
