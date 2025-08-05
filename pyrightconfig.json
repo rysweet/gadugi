@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json.schemastore.org/pyrightconfig.json",
+  "include": [
+    ".claude/shared",
+    "gadugi",
+    "container_runtime",
+    "tests",
+    ".github/memory-manager",
+    "src/agents"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.mypy_cache",
+    "**/.ruff_cache",
+    "**/node_modules",
+    ".git",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".worktrees",
+    "htmlcov",
+    ".benchmarks"
+  ],
+  "ignore": [
+    "test_*.py",
+    "*_test.py"
+  ],
+  "defineConstant": {
+    "DEBUG": true
+  },
+  "stubPath": "typings",
+  "venvPath": ".",
+  "venv": ".venv",
+  "pythonVersion": "3.13",
+  "pythonPlatform": "All",
+  "executionEnvironments": [
+    {
+      "root": ".claude/shared",
+      "pythonVersion": "3.13",
+      "extraPaths": [
+        ".claude"
+      ]
+    },
+    {
+      "root": "gadugi",
+      "pythonVersion": "3.13"
+    },
+    {
+      "root": "container_runtime",
+      "pythonVersion": "3.13"
+    },
+    {
+      "root": "tests",
+      "pythonVersion": "3.13",
+      "extraPaths": [
+        ".claude",
+        "."
+      ]
+    }
+  ],
+  "typeCheckingMode": "standard",
+  "useLibraryCodeForTypes": true,
+  "autoImportCompletions": true,
+  "strictListInference": true,
+  "strictDictionaryInference": true,
+  "strictSetInference": true,
+  "analyzeUnannotatedFunctions": true,
+  "strictParameterNoneValue": true,
+  "enableTypeIgnoreComments": true,
+  "reportMissingImports": "error",
+  "reportMissingTypeStubs": "warning",
+  "reportImportCycles": "error",
+  "reportUnusedImport": "warning",
+  "reportUnusedClass": "warning",
+  "reportUnusedFunction": "warning",
+  "reportUnusedVariable": "warning",
+  "reportDuplicateImport": "warning",
+  "reportWildcardImportFromLibrary": "warning",
+  "reportOptionalSubscript": "warning",
+  "reportOptionalMemberAccess": "warning",
+  "reportOptionalCall": "warning",
+  "reportOptionalIterable": "warning",
+  "reportOptionalContextManager": "warning",
+  "reportOptionalOperand": "warning",
+  "reportTypedDictNotRequiredAccess": "warning",
+  "reportPrivateImportUsage": "warning",
+  "reportConstantRedefinition": "warning",
+  "reportIncompatibleMethodOverride": "error",
+  "reportIncompatibleVariableOverride": "error",
+  "reportInconsistentConstructor": "warning",
+  "reportOverlappingOverloads": "error",
+  "reportMissingSuperCall": "warning",
+  "reportUninitializedInstanceVariable": "warning",
+  "reportInvalidStringEscapeSequence": "error",
+  "reportUnknownParameterType": "warning",
+  "reportUnknownArgumentType": "warning",
+  "reportUnknownLambdaType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnknownMemberType": "warning",
+  "reportMissingParameterType": "warning",
+  "reportMissingTypeArgument": "warning",
+  "reportInvalidTypeVarUse": "warning",
+  "reportCallInDefaultInitializer": "warning",
+  "reportUnnecessaryIsInstance": "information",
+  "reportUnnecessaryCast": "warning",
+  "reportUnnecessaryComparison": "warning",
+  "reportUnnecessaryContains": "warning",
+  "reportAssertAlwaysTrue": "warning",
+  "reportSelfClsParameterName": "warning",
+  "reportImplicitStringConcatenation": "warning",
+  "reportInvalidStubStatement": "warning",
+  "reportIncompleteStub": "warning",
+  "reportUndefinedVariable": "error",
+  "reportUnboundVariable": "error",
+  "reportInvalidTypeForm": "error",
+  "reportGeneralTypeIssues": "error"
+}

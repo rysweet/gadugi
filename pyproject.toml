@@ -26,6 +26,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
     "ruff>=0.4.4",
+    "pyright>=1.1.350",
 ]
 test = [
     "pytest>=7.0",
@@ -97,3 +98,8 @@ lint.ignore = [
 docstring-code-format = true
 docstring-code-line-length = 88
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.403",
+]

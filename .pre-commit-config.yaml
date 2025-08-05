@@ -27,14 +27,12 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with mypy (disabled for now)
-  # Uncomment this section when ready to enable type checking
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.13.0
-  #   hooks:
-  #     - id: mypy
-  #       additional_dependencies: [types-all]
-  #       args: [--ignore-missing-imports]
+  # Type checking with pyright
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.350
+    hooks:
+      - id: pyright
+        additional_dependencies: [PyYAML>=6.0]
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets
