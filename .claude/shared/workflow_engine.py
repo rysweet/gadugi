@@ -32,6 +32,29 @@ try:
 except ImportError:
     # Fallback for testing or standalone usage
     print("Warning: Some shared modules not available, using fallback implementations")
+    
+    # Define minimal fallback types
+    class StateManager:
+        def save_state(self, state): pass
+        def load_state(self, task_id): return None
+    
+    class GitHubOperations:
+        def create_issue(self, title, body): return None
+        def create_pr(self, title, body, base, head): return None
+    
+    class TaskTracker:
+        def start_task(self, task_id): pass
+        def complete_task(self, task_id): pass
+    
+    class ErrorHandler:
+        def handle_error(self, error, category=None, severity=None): 
+            print(f"Error: {error}")
+    
+    class ErrorCategory:
+        WORKFLOW_EXECUTION = "workflow_execution"
+    
+    class ErrorSeverity:
+        HIGH = "high"
 
 
 class WorkflowPhase(Enum):
@@ -608,31 +631,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     
     def _create_minimal_state_manager(self):
         """Create minimal state manager if not provided"""
-        class MinimalStateManager:
-            def save_state(self, state): pass
-            def load_state(self, task_id): return None
-        return MinimalStateManager()
+        return StateManager()
 
     def _create_minimal_github_ops(self):
         """Create minimal GitHub operations if not provided"""
-        class MinimalGitHubOps:
-            def create_issue(self, title, body): return None
-            def create_pr(self, title, body, base, head): return None
-        return MinimalGitHubOps()
+        return GitHubOperations()
 
     def _create_minimal_task_tracker(self):
         """Create minimal task tracker if not provided"""
-        class MinimalTaskTracker:
-            def start_task(self, task_id): pass
-            def complete_task(self, task_id): pass
-        return MinimalTaskTracker()
+        return TaskTracker()
 
     def _create_minimal_error_handler(self):
         """Create minimal error handler if not provided"""
-        class MinimalErrorHandler:
-            def handle_error(self, error, category=None, severity=None): 
-                print(f"Error: {error}")
-        return MinimalErrorHandler()
+        return ErrorHandler()
 
 
 # Convenience function for standalone usage
