@@ -147,6 +147,226 @@ Enhanced initialization features:
 4. **Backup System**: Automatic backup creation for recovery scenarios
 5. **Orphaned Workflow Detection**: Smart detection of incomplete workflows
 
+## UV Virtual Environment Management
+
+⚠️ **CRITICAL: UV PROJECT ENVIRONMENT SETUP** ⚠️
+
+**WorkflowManager MUST properly handle UV virtual environments when working in worktrees.**
+
+### UV Environment Detection and Setup
+
+Before executing any Python-related commands (phases 5-6), verify and setup UV environment:
+
+```bash
+# MANDATORY: Check for UV project and setup environment
+setup_workflow_uv_environment() {
+    echo "🔍 Checking for UV project configuration..."
+    
+    # Detect UV project
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "✅ UV project detected"
+        
+        # Source shared UV setup script
+        if [ -f ".claude/scripts/setup-uv-env.sh" ]; then
+            source .claude/scripts/setup-uv-env.sh
+            
+            # Setup UV environment
+            if setup_uv_environment_if_needed; then
+                echo "✅ UV virtual environment ready"
+                return 0
+            else
+                echo "❌ UV environment setup failed"
+                return 1
+            fi
+        else
+            echo "❌ UV setup script not found, manual setup required"
+            # Fallback to manual setup
+            if uv sync --all-extras && source .venv/bin/activate; then
+                echo "✅ Manual UV setup successful"
+                return 0
+            else
+                echo "❌ Manual UV setup failed"
+                return 1
+            fi
+        fi
+    else
+        echo "ℹ️ Not a UV project, using standard Python environment"
+        return 0
+    fi
+}
+```
+
+### UV Command Execution Pattern
+
+**ALL Python commands in phases 5-7 MUST use UV run prefix for UV projects:**
+
+```bash
+# Phase 5: Implementation - Python commands
+execute_python_implementation() {
+    # Check if UV project
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "Using UV commands for Python execution..."
+        
+        # Use uv run for all Python commands
+        uv run python script.py
+        uv run python -m module
+        uv run python -c "import package; print('test')"
+    else
+        # Traditional Python execution
+        python script.py
+        python -m module
+        python -c "import package; print('test')"
+    fi
+}
+
+# Phase 6: Testing - Test execution
+execute_testing_phase() {
+    # Check if UV project
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "Running tests with UV..."
+        
+        # Use uv run for test commands
+        uv run pytest tests/
+        uv run pytest tests/ --cov=.
+        uv run python -m pytest tests/specific_test.py
+    else
+        # Traditional test execution
+        pytest tests/
+        pytest tests/ --cov=.
+        python -m pytest tests/specific_test.py
+    fi
+}
+
+# Code quality and formatting
+execute_code_quality_checks() {
+    # Check if UV project
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "Running code quality checks with UV..."
+        
+        # Use uv run for linting and formatting
+        uv run ruff format .
+        uv run ruff check .
+        uv run python -m mypy . || true  # Don't fail on type errors
+    else
+        # Traditional quality checks
+        ruff format .
+        ruff check .
+        python -m mypy . || true
+    fi
+}
+```
+
+### UV Integration in Workflow Phases
+
+**Phase 5: Implementation** - Setup UV before any Python work:
+```bash
+# MANDATORY: Setup UV environment before implementation
+if ! setup_workflow_uv_environment; then
+    echo "🚨 CRITICAL: Cannot proceed without proper Python environment"
+    exit 1
+fi
+
+# Now safe to execute Python commands with proper UV handling
+execute_python_implementation
+```
+
+**Phase 6: Testing** - Use UV for all test execution:
+```bash
+# MANDATORY: Verify UV environment before testing
+if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+    if [ -z "${VIRTUAL_ENV:-}" ]; then
+        echo "🚨 UV environment not active, activating..."
+        source .venv/bin/activate
+    fi
+fi
+
+# Execute tests with proper UV handling
+execute_testing_phase
+execute_code_quality_checks
+```
+
+### UV Environment Verification
+
+```bash
+# Verify UV environment is properly configured
+verify_uv_environment() {
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "📋 UV Environment Status:"
+        
+        # Check virtual environment
+        if [ -n "${VIRTUAL_ENV:-}" ]; then
+            echo "✅ Virtual environment active: $VIRTUAL_ENV"
+        else
+            echo "❌ Virtual environment not active"
+            return 1
+        fi
+        
+        # Check Python executable
+        local python_path=$(which python)
+        echo "🐍 Python executable: $python_path"
+        
+        # Verify UV can run commands
+        if uv run python --version > /dev/null 2>&1; then
+            echo "✅ UV commands working"
+            echo "🔍 Python version: $(uv run python --version)"
+        else
+            echo "❌ UV commands not working"
+            return 1
+        fi
+        
+        return 0
+    else
+        echo "ℹ️ Not a UV project, standard environment"
+        return 0
+    fi
+}
+```
+
+### UV Error Handling
+
+```bash
+# Handle UV-specific errors gracefully
+handle_uv_errors() {
+    local exit_code=$1
+    local command="$2"
+    
+    if [ $exit_code -ne 0 ]; then
+        echo "❌ UV command failed: $command"
+        echo "🔍 Troubleshooting UV environment..."
+        
+        # Common UV fixes
+        echo "1. Checking UV installation..."
+        if ! command -v uv &> /dev/null; then
+            echo "   UV not installed, install with: curl -LsSf https://astral.sh/uv/install.sh | sh"
+            return 1
+        fi
+        
+        echo "2. Checking virtual environment..."
+        if [ ! -d ".venv" ]; then
+            echo "   Virtual environment missing, running uv sync..."
+            uv sync --all-extras
+        fi
+        
+        echo "3. Checking dependencies..."
+        if ! uv sync --all-extras; then
+            echo "   Dependency sync failed, check pyproject.toml"
+            return 1
+        fi
+        
+        echo "4. Retrying command..."
+        if eval "$command"; then
+            echo "✅ Retry successful"
+            return 0
+        else
+            echo "❌ Retry failed, manual intervention needed"
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+```
+
 You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase

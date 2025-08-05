@@ -416,6 +416,164 @@ Escalate to system maintainers when:
 
 Remember: The goal is to maintain development velocity while preserving quality and safety standards.
 
+## UV Virtual Environment Management for Worktrees
+
+⚠️ **CRITICAL: UV PROJECT REQUIREMENT** ⚠️
+
+**ALL agents working in worktrees on UV-managed Python projects MUST properly set up virtual environments.**
+
+This project uses UV for dependency management. When agents work in isolated worktrees, they must establish proper virtual environments to ensure consistent dependency access.
+
+### UV Project Detection
+
+A project uses UV when it has:
+- `pyproject.toml` with UV-style dependencies
+- `uv.lock` file present in the repository
+- Dependencies managed through UV commands
+
+### Required UV Setup in Worktrees
+
+**When entering ANY worktree for a UV project, agents MUST:**
+
+1. **Sync Dependencies and Activate Virtual Environment**:
+   ```bash
+   # REQUIRED: Run this command when entering worktree
+   uv sync --all-extras && source .venv/bin/activate
+   ```
+
+2. **Use UV Run for ALL Python Commands**:
+   ```bash
+   # CORRECT: Use uv run prefix
+   uv run python script.py
+   uv run pytest tests/
+   uv run ruff format .
+   uv run ruff check .
+   uv run python -m module
+   
+   # INCORRECT: Direct commands (will fail in worktree)
+   python script.py
+   pytest tests/
+   ruff format .
+   ```
+
+### Agent Implementation Pattern
+
+All agents must follow this pattern when working with Python in worktrees:
+
+```bash
+# 1. Detect UV project
+if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+    echo "UV project detected, setting up virtual environment..."
+    
+    # 2. Setup UV environment
+    uv sync --all-extras && source .venv/bin/activate
+    
+    # 3. Verify setup
+    if [ $? -eq 0 ]; then
+        echo "✅ UV virtual environment ready"
+    else
+        echo "❌ UV setup failed, check UV installation and project configuration"
+        exit 1
+    fi
+fi
+
+# 4. Use uv run for all Python commands
+uv run python your_script.py
+uv run pytest tests/
+```
+
+### Common UV Commands for Agents
+
+| Task | UV Command |
+|------|------------|
+| Run Python script | `uv run python script.py` |
+| Run tests | `uv run pytest tests/` |
+| Format code | `uv run ruff format .` |
+| Lint code | `uv run ruff check .` |
+| Run module | `uv run python -m module` |
+| Install dependencies | `uv sync --all-extras` |
+| Add new dependency | `uv add package-name` |
+
+### Shared UV Setup Script
+
+Agents can source the shared setup script for consistent UV handling:
+
+```bash
+# Source shared UV setup (creates function)
+source .claude/scripts/setup-uv-env.sh
+
+# Use setup function in worktree
+setup_uv_environment_if_needed
+```
+
+### Integration with Agent Workflow
+
+**Worktree Manager Integration**:
+- Must setup UV environment during worktree creation
+- Should verify UV setup success before proceeding
+- Must document UV setup in worktree task metadata
+
+**Workflow Manager Integration**:
+- Must check for UV project early in workflow
+- Should setup UV environment before any Python operations
+- Must use `uv run` for all Python command executions
+
+**Other Agent Integration**:
+- Any agent executing Python code must use `uv run` prefix
+- Should fail gracefully if UV setup is not available
+- Must document UV requirements in agent instructions
+
+### Troubleshooting UV Setup
+
+**Common Issues**:
+
+1. **UV Not Installed**:
+   ```bash
+   # Check UV installation
+   which uv || echo "UV not installed"
+   
+   # Install UV if missing
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+2. **Virtual Environment Not Activated**:
+   ```bash
+   # Check if venv is active
+   echo $VIRTUAL_ENV
+   
+   # Reactivate if needed
+   source .venv/bin/activate
+   ```
+
+3. **Dependencies Not Synced**:
+   ```bash
+   # Force sync dependencies
+   uv sync --all-extras --force
+   ```
+
+4. **Lock File Issues**:
+   ```bash
+   # Regenerate lock file
+   rm uv.lock && uv lock && uv sync --all-extras
+   ```
+
+### Agent Compliance Requirements
+
+**All agents MUST**:
+- Detect UV projects before executing Python code
+- Setup UV virtual environment in worktrees
+- Use `uv run` prefix for all Python commands
+- Handle UV setup failures gracefully
+- Document UV usage in error messages
+
+**Failure to comply will result in**:
+- Import errors in worktree environments
+- Inconsistent dependency versions
+- Failed test runs and builds
+- Broken CI/CD pipelines
+
+For detailed UV usage patterns, see `docs/uv-cheat-sheet.md`.
+
 ## Memories and Best Practices
 
 - Remember to not use artificial dev timescales in planning or estimating.

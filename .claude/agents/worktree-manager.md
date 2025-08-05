@@ -92,16 +92,65 @@ setup_worktree_environment() {
 
     cd "$WORKTREE_PATH"
 
-    # Python projects: Set up virtual environment
-    if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    # CRITICAL: UV Project Setup
+    # Check for UV project and setup virtual environment accordingly
+    if [ -f "pyproject.toml" ] && [ -f "uv.lock" ]; then
+        echo "UV project detected, setting up UV virtual environment..."
+        
+        # Source shared UV setup script
+        if [ -f "../.claude/scripts/setup-uv-env.sh" ]; then
+            source ../.claude/scripts/setup-uv-env.sh
+            
+            # Setup UV environment
+            if setup_uv_environment_if_needed; then
+                echo "✅ UV virtual environment setup complete"
+                
+                # Record UV setup in task metadata
+                echo "uv" > .task/python_manager
+                echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" > .task/uv_setup_time
+            else
+                echo "❌ UV virtual environment setup failed"
+                echo "Check UV installation and project configuration"
+                return 1
+            fi
+        else
+            echo "❌ UV setup script not found, attempting manual setup"
+            # Fallback manual UV setup
+            if command -v uv &> /dev/null; then
+                uv sync --all-extras && source .venv/bin/activate
+                if [ $? -eq 0 ]; then
+                    echo "✅ Manual UV setup successful"
+                    echo "uv" > .task/python_manager
+                else
+                    echo "❌ Manual UV setup failed"
+                    return 1
+                fi
+            else
+                echo "❌ UV not installed, cannot setup virtual environment"
+                return 1
+            fi
+        fi
+    # Traditional Python projects with requirements.txt
+    elif [ -f "requirements.txt" ]; then
+        echo "Traditional Python project detected, setting up venv..."
         python -m venv .venv
         source .venv/bin/activate
-        pip install -e . || pip install -r requirements.txt
+        pip install -r requirements.txt
+        echo "pip" > .task/python_manager
+    # Python projects with pyproject.toml but no UV
+    elif [ -f "pyproject.toml" ]; then
+        echo "Python project with pyproject.toml detected, setting up venv..."
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -e .
+        echo "pip" > .task/python_manager
     fi
 
     # Node projects: Install dependencies
     if [ -f "package.json" ]; then
+        echo "Node.js project detected, installing dependencies..."
         npm install
+        echo "npm" > .task/node_manager
     fi
 
     # Copy any necessary config files
@@ -112,6 +161,17 @@ setup_worktree_environment() {
     # Set up git config for this worktree
     git config user.name "WorkflowManager-$TASK_ID"
     git config user.email "workflow@ai-agent.local"
+    
+    # Create task environment info
+    cat > .task/environment_info <<EOF
+Worktree Environment Setup - $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+Task ID: $TASK_ID
+Working Directory: $(pwd)
+Python Manager: $(cat .task/python_manager 2>/dev/null || echo "none")
+Node Manager: $(cat .task/node_manager 2>/dev/null || echo "none")
+Virtual Environment: ${VIRTUAL_ENV:-none}
+Python Path: $(which python 2>/dev/null || echo "none")
+EOF
 }
 ```
 
@@ -241,10 +301,61 @@ Your worktree management enables:
 ## Best Practices
 
 1. **Always Validate**: Check prerequisites before operations
-2. **Clean Shutdown**: Ensure proper cleanup even on errors
-3. **State Preservation**: Save important data before removal
-4. **Resource Limits**: Monitor disk space and worktree count
-5. **Error Recovery**: Handle partial failures gracefully
+2. **UV Environment Setup**: Always setup UV virtual environment for UV projects
+3. **Clean Shutdown**: Ensure proper cleanup even on errors
+4. **State Preservation**: Save important data before removal
+5. **Resource Limits**: Monitor disk space and worktree count
+6. **Error Recovery**: Handle partial failures gracefully
+
+## UV Project Management
+
+### UV Environment Requirements
+
+When working with UV projects (detected by `pyproject.toml` + `uv.lock`):
+
+1. **MUST setup UV virtual environment** during worktree creation
+2. **MUST use `uv run` prefix** for all Python commands
+3. **MUST document UV setup** in task metadata
+4. **SHOULD verify UV installation** before proceeding
+
+### UV Commands in Worktrees
+
+```bash
+# Correct UV usage in worktrees
+cd .worktrees/task-123/
+
+# Source UV setup script for helper functions
+source ../.claude/scripts/setup-uv-env.sh
+
+# Run Python commands
+uv run python script.py
+uv run pytest tests/
+uv run ruff format .
+uv run ruff check .
+
+# Use helper functions
+run_python script.py
+run_pytest tests/
+run_ruff_format .
+```
+
+### UV Environment Verification
+
+```bash
+# Check UV environment status
+show_uv_status
+
+# Verify virtual environment
+if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    echo "✅ Virtual environment active: $VIRTUAL_ENV"
+else
+    echo "❌ Virtual environment not active"
+fi
+
+# Check task metadata
+cat .task/python_manager  # Should show "uv"
+cat .task/uv_setup_time   # Shows when UV was setup
+```
 
 ## Error Handling
 

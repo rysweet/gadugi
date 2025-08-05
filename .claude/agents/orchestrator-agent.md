@@ -320,13 +320,29 @@ def setup_environments(task_data):
     backup_manager = StateBackupRestore(state_manager)
     backup_manager.create_backup(orchestration_state.task_id)
 
+    # CRITICAL: UV Project Detection and Coordination
+    uv_project_detected = detect_uv_project()
+    if uv_project_detected:
+        log_info("UV project detected - coordinating UV environment setup across all worktrees")
+        orchestration_state.python_manager = "uv"
+        orchestration_state.requires_uv_setup = True
+    else:
+        log_info("Traditional Python project or non-Python project")
+        orchestration_state.python_manager = "standard"
+        orchestration_state.requires_uv_setup = False
+
     # CRITICAL: Setup worktrees for ALL tasks - this is MANDATORY
     # The orchestrator MUST ALWAYS use worktree-manager for isolation
     for task in task_data.tasks:
         try:
-            # ALWAYS invoke worktree manager - no exceptions
-            worktree_result = invoke_worktree_manager(task)
+            # ALWAYS invoke worktree manager with UV coordination - no exceptions
+            worktree_result = invoke_worktree_manager_with_uv_support(task, orchestration_state)
             task_tracker.update_task_status(task.id, "worktree_ready")
+            
+            # Verify UV setup if required
+            if orchestration_state.requires_uv_setup:
+                verify_uv_setup_in_worktree(task, worktree_result.worktree_path)
+                
         except Exception as e:
             error_handler.handle_error(ErrorContext(
                 error=e,
@@ -334,6 +350,76 @@ def setup_environments(task_data):
                 phase="environment_setup",
                 recovery_action="retry_worktree_creation"
             ))
+
+def detect_uv_project():
+    """Detect if the main repository is a UV project"""
+    return os.path.exists("pyproject.toml") and os.path.exists("uv.lock")
+
+def invoke_worktree_manager_with_uv_support(task, orchestration_state):
+    """Invoke worktree-manager with UV project awareness"""
+    log_info(f"Creating worktree for task {task.id} with UV support: {orchestration_state.requires_uv_setup}")
+    
+    # Standard worktree creation
+    worktree_result = invoke_worktree_manager(task)
+    
+    # Additional UV coordination if needed
+    if orchestration_state.requires_uv_setup and worktree_result.success:
+        coordinate_uv_setup_across_worktrees(task, worktree_result.worktree_path)
+    
+    return worktree_result
+
+def coordinate_uv_setup_across_worktrees(task, worktree_path):
+    """Coordinate UV environment setup across multiple worktrees"""
+    log_info(f"Coordinating UV setup for task {task.id} in {worktree_path}")
+    
+    # Ensure UV setup script is available in worktree
+    uv_setup_script = ".claude/scripts/setup-uv-env.sh"
+    worktree_uv_script = f"{worktree_path}/{uv_setup_script}"
+    
+    if not os.path.exists(worktree_uv_script):
+        log_warning(f"UV setup script not found in worktree {worktree_path}")
+        # Copy from main repository
+        main_uv_script = uv_setup_script
+        if os.path.exists(main_uv_script):
+            import shutil
+            os.makedirs(os.path.dirname(worktree_uv_script), exist_ok=True)
+            shutil.copy2(main_uv_script, worktree_uv_script)
+            log_success(f"UV setup script copied to worktree {worktree_path}")
+        else:
+            log_error("UV setup script not found in main repository")
+            raise Exception("UV setup script unavailable for worktree coordination")
+
+def verify_uv_setup_in_worktree(task, worktree_path):
+    """Verify UV environment is properly set up in worktree"""
+    log_info(f"Verifying UV setup for task {task.id} in {worktree_path}")
+    
+    # Check for UV project files in worktree
+    pyproject_path = f"{worktree_path}/pyproject.toml"
+    uv_lock_path = f"{worktree_path}/uv.lock"
+    
+    if not (os.path.exists(pyproject_path) and os.path.exists(uv_lock_path)):
+        log_error(f"UV project files missing in worktree {worktree_path}")
+        raise Exception("UV project files not properly copied to worktree")
+    
+    # Check for task metadata about UV setup
+    uv_setup_metadata = f"{worktree_path}/.task/python_manager"
+    if os.path.exists(uv_setup_metadata):
+        with open(uv_setup_metadata, 'r') as f:
+            python_manager = f.read().strip()
+        if python_manager == "uv":
+            log_success(f"UV environment verified for task {task.id}")
+        else:
+            log_warning(f"Task {task.id} using {python_manager} instead of UV")
+    else:
+        log_warning(f"UV setup metadata missing for task {task.id}")
+```
+
+**UV Project Coordination Features**:
+1. **Automatic UV Detection**: Detects UV projects in main repository
+2. **Cross-Worktree Coordination**: Ensures UV setup consistency across all parallel worktrees
+3. **UV Script Distribution**: Copies UV setup scripts to all worktrees
+4. **Environment Verification**: Validates UV setup in each worktree before execution
+5. **Metadata Tracking**: Tracks UV setup status for coordination and debugging
 ```
 
 1. Create comprehensive orchestration state tracking
