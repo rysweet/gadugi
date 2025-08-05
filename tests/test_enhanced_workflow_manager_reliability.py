@@ -494,7 +494,7 @@ class TestEnhancedWorkflowManager:
 
         # Verify monitoring methods were called
         mock_reliability.update_workflow_stage.assert_called_once_with(
-            manager.workflow_id, WorkflowStage.INITIALIZATION, mock.ANY
+            manager.workflow_id, WorkflowStage.INITIALIZATION, ANY
         )
 
     def test_phase_execution_with_retry_on_failure(self):
