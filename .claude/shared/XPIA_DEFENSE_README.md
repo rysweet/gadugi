@@ -7,7 +7,7 @@ The XPIA Defense System provides comprehensive protection against Cross-Prompt I
 ## Key Features
 
 - **Real-time Threat Detection**: Identifies injection attacks, role manipulation, command injection, and information extraction attempts
-- **Content Sanitization**: Removes or neutralizes malicious content while preserving legitimate functionality  
+- **Content Sanitization**: Removes or neutralizes malicious content while preserving legitimate functionality
 - **Transparent Integration**: Works seamlessly with existing agents through middleware hooks
 - **Performance Optimized**: <100ms processing time for typical content validation
 - **Comprehensive Logging**: Full audit trail of all security decisions and threat detections
@@ -328,29 +328,6 @@ logging.getLogger('xpia_middleware_security').setLevel(logging.DEBUG)
 - **Cloud Integration**: Integration with cloud security services
 - **Team Collaboration**: Shared threat intelligence across teams
 - **Compliance Reporting**: Automated compliance and audit reporting
-
-## Claude Code Hook Integration
-
-### Web Operations Protection
-XPIA now includes Claude Code hooks for protecting web operations:
-
-#### Quick Setup
-```bash
-# Run the setup script
-bash .claude/hooks/setup_xpia_web_hooks.sh
-```
-
-#### Protected Operations
-- **WebFetch**: URLs and prompts validated before fetching
-- **WebSearch**: Search queries validated before execution  
-- **PostToolUse**: Returned web content sanitized
-
-#### Hook Implementation
-The hooks use Claude Code's PreToolUse and PostToolUse events:
-- `xpia_web_validator.py`: Main validation logic
-- `setup_xpia_web_hooks.sh`: Automated setup script
-
-See `.claude/hooks/` for complete implementation details.
 
 ## Support and Maintenance
 

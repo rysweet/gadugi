@@ -92,7 +92,7 @@ Thank you for this question. I chose the factory pattern here for several reason
    elif node_type == "function":
        node = FunctionNode(name, path, level, params, returns)
    # ... 6 more conditions
-   
+
    # Factory pattern:
    node = NodeFactory.create(node_type, **node_data)
    ```
@@ -128,7 +128,7 @@ I appreciate your suggestion about using regex. I've carefully considered it, an
    result = text.strip()
    result = result.replace('\t', ' ')
    result = result.replace('  ', ' ')
-   
+
    # Regex approach (requires regex knowledge):
    result = re.sub(r'\s+', ' ', text.strip())
    ```
@@ -211,7 +211,7 @@ Minor: Variable name 'calc_result' could be more descriptive
 
 ### Agent Response
 ```markdown
-Good point! I've renamed `calc_result` to `monthly_revenue_total` to better reflect what it represents. 
+Good point! I've renamed `calc_result` to `monthly_revenue_total` to better reflect what it represents.
 
 Also updated the related test to use the new name. Thanks for helping improve code clarity!
 

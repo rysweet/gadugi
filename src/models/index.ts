@@ -1,10 +1,10 @@
-import { 
-  Worktree, 
-  ClaudeProcess, 
-  MonitorPanelState, 
-  WorktreeStatus, 
+import {
+  Worktree,
+  ClaudeProcess,
+  MonitorPanelState,
+  WorktreeStatus,
   ProcessStatus,
-  MonitorTreeItem 
+  MonitorTreeItem
 } from '../types';
 import { TimeUtils } from '../utils/timeUtils';
 import { PathUtils } from '../utils/pathUtils';
@@ -73,11 +73,11 @@ export class WorktreeModel implements Worktree {
    */
   getTooltip(): string {
     let tooltip = `Path: ${this.path}\nBranch: ${this.branch}\nStatus: ${this.status}`;
-    
+
     if (this.hasClaudeProcess && this.claudeProcessId) {
       tooltip += `\nClaude Process: ${this.claudeProcessId}`;
     }
-    
+
     return tooltip;
   }
 
@@ -184,7 +184,7 @@ export class ClaudeProcessModel implements ClaudeProcess {
    */
   getMemoryDisplay(): string {
     if (!this.memoryUsage) {return '';}
-    
+
     const mb = this.memoryUsage / (1024 * 1024);
     return `${mb.toFixed(1)} MB`;
   }
@@ -194,19 +194,19 @@ export class ClaudeProcessModel implements ClaudeProcess {
    */
   getTooltip(): string {
     let tooltip = `PID: ${this.pid}\nCommand: ${this.command}\nRuntime: ${this.getRuntime()}\nStatus: ${this.status}`;
-    
+
     if (this.workingDirectory) {
       tooltip += `\nWorking Directory: ${this.workingDirectory}`;
     }
-    
+
     if (this.associatedWorktree) {
       tooltip += `\nWorktree: ${this.associatedWorktree}`;
     }
-    
+
     if (this.memoryUsage) {
       tooltip += `\nMemory: ${this.getMemoryDisplay()}`;
     }
-    
+
     return tooltip;
   }
 
@@ -273,11 +273,11 @@ export class MonitorPanelStateModel implements MonitorPanelState {
    */
   updateWorktrees(worktrees: Worktree[]): void {
     this.worktrees.clear();
-    
+
     for (const worktree of worktrees) {
       this.worktrees.set(worktree.id, new WorktreeModel(worktree));
     }
-    
+
     this.lastUpdate = new Date();
   }
 
@@ -286,11 +286,11 @@ export class MonitorPanelStateModel implements MonitorPanelState {
    */
   updateProcesses(processes: ClaudeProcess[]): void {
     this.processes.clear();
-    
+
     for (const process of processes) {
       this.processes.set(process.id, new ClaudeProcessModel(process));
     }
-    
+
     this.lastUpdate = new Date();
   }
 

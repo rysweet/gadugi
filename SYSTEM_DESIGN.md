@@ -56,7 +56,7 @@ Gadugi is a multi-agent orchestration platform designed to accelerate software d
             ├─── Invokes → ExecutionMonitor (parallel tracking)
             │
             └─── Spawns multiple ↓
-                        
+
 ┌─────────────────────────┐
 │    WorkflowManager      │ ← Executes individual workflows
 │  (Workflow Executor)    │

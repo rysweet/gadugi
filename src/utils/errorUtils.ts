@@ -13,14 +13,14 @@ export class ErrorUtils {
   static logError(error: Error, context: ErrorContext): void {
     const timestamp = context.timestamp.toISOString();
     const message = `[${timestamp}] ERROR in ${context.operation}: ${error.message}`;
-    
+
     console.error(message, error);
     ErrorUtils.outputChannel.appendLine(message);
-    
+
     if (context.details) {
       ErrorUtils.outputChannel.appendLine(`Details: ${JSON.stringify(context.details, null, 2)}`);
     }
-    
+
     ErrorUtils.outputChannel.appendLine(`Stack: ${error.stack || 'No stack trace available'}`);
     ErrorUtils.outputChannel.appendLine('---');
   }
@@ -31,7 +31,7 @@ export class ErrorUtils {
   static logWarning(message: string, operation?: string): void {
     const timestamp = new Date().toISOString();
     const logMessage = `[${timestamp}] WARNING${operation ? ` in ${operation}` : ''}: ${message}`;
-    
+
     console.warn(logMessage);
     ErrorUtils.outputChannel.appendLine(logMessage);
   }
@@ -42,7 +42,7 @@ export class ErrorUtils {
   static logInfo(message: string, operation?: string): void {
     const timestamp = new Date().toISOString();
     const logMessage = `[${timestamp}] INFO${operation ? ` in ${operation}` : ''}: ${message}`;
-    
+
     console.log(logMessage);
     ErrorUtils.outputChannel.appendLine(logMessage);
   }
@@ -77,7 +77,7 @@ export class ErrorUtils {
     if (showToUser) {
       const userMessage = ErrorUtils.getUserFriendlyMessage(error, context);
       const action = await ErrorUtils.showErrorMessage(userMessage, 'Show Details', 'Dismiss');
-      
+
       if (action === 'Show Details') {
         ErrorUtils.outputChannel.show();
       }
@@ -138,7 +138,7 @@ export class ErrorUtils {
     return async (...args: Parameters<T>) => {
       const startTime = Date.now();
       let success = false;
-      
+
       try {
         const result = await func(...args);
         success = true;
@@ -151,7 +151,7 @@ export class ErrorUtils {
           timestamp: new Date(),
           success
         };
-        
+
         ErrorUtils.logPerformanceMetrics(metrics);
       }
     };
@@ -162,7 +162,7 @@ export class ErrorUtils {
    */
   private static logPerformanceMetrics(metrics: PerformanceMetrics): void {
     const message = `[PERF] ${metrics.operationName}: ${metrics.duration}ms (${metrics.success ? 'SUCCESS' : 'FAILED'})`;
-    
+
     if (metrics.duration > 1000) {
       ErrorUtils.logWarning(`Slow operation detected: ${message}`, 'performance-monitoring');
     } else {

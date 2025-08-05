@@ -10,7 +10,7 @@ Gadugi provides a collection of reusable AI agents that work together (and in pa
 
 The Cherokee concept of Gadugi represents:
 - **ᎦᏚᎩ (Gadugi) - Communal Work**: Agents working together for mutual benefit
-- **ᎠᏓᏅᏙ (Adanvdo) - Collective Wisdom**: Sharing patterns and knowledge  
+- **ᎠᏓᏅᏙ (Adanvdo) - Collective Wisdom**: Sharing patterns and knowledge
 - **ᎠᎵᏍᏕᎸᏗ (Alisgelvdi) - Mutual Support**: Agents helping each other
 - **ᎤᏂᎦᏚ (Unigadv) - Shared Resources**: Pooling tools and capabilities
 
@@ -40,6 +40,40 @@ gadugi/
 ```
 
 ## Quick Start
+
+### Prerequisites
+
+Gadugi uses [UV (Ultraviolet)](https://github.com/astral-sh/uv) for fast Python dependency management. Install UV first:
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or using pip
+pip install uv
+```
+
+### Environment Setup
+
+1. **Clone and set up the repository**:
+   ```bash
+   git clone https://github.com/rysweet/gadugi.git
+   cd gadugi
+
+   # Install dependencies (creates .venv automatically)
+   uv sync --extra dev
+
+   # Verify installation
+   uv run python -c "import gadugi; print(f'Gadugi {gadugi.get_version()} ready!')"
+   ```
+
+2. **Run tests to verify setup**:
+   ```bash
+   uv run pytest tests/ -v
+   ```
 
 ### Bootstrap Agent Manager
 
@@ -93,6 +127,46 @@ Once installed, invoke agents as needed:
 
 ### Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
+
+## Development Setup
+
+### Working with UV
+
+Gadugi uses UV for fast, reliable Python dependency management:
+
+```bash
+# Install dependencies
+uv sync --extra dev              # Development dependencies
+uv sync                          # Production only
+
+# Run commands
+uv run pytest tests/             # Run tests
+uv run ruff format .             # Format code
+uv run ruff check .              # Lint code
+
+# Manage dependencies
+uv add requests                  # Add dependency
+uv add --group dev mypy          # Add dev dependency
+uv remove package                # Remove dependency
+```
+
+### Performance Benefits
+
+UV provides significant performance improvements over pip:
+- **10-100x faster** package installation
+- **Automatic virtual environment** management
+- **Reproducible builds** with `uv.lock`
+- **Better dependency resolution**
+
+### Development Workflow
+
+1. **Setup**: `uv sync --extra dev`
+2. **Test**: `uv run pytest tests/`
+3. **Format**: `uv run ruff format .`
+4. **Lint**: `uv run ruff check .`
+5. **Add deps**: `uv add package`
+
+See [docs/uv-migration-guide.md](docs/uv-migration-guide.md) for detailed instructions.
 
 ## Version Management
 

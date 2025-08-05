@@ -11,7 +11,7 @@ suite('TimeUtils Test Suite', () => {
   test('calculateDuration should compute time differences', () => {
     const start = new Date('2024-01-01T10:00:00Z');
     const end = new Date('2024-01-01T10:01:30Z');
-    
+
     const duration = TimeUtils.calculateDuration(start, end);
     assert.strictEqual(duration, 90000); // 1.5 minutes in ms
   });
@@ -19,7 +19,7 @@ suite('TimeUtils Test Suite', () => {
   test('getProcessRuntime should format process runtime', () => {
     const startTime = new Date(Date.now() - 90000); // 1.5 minutes ago
     const runtime = TimeUtils.getProcessRuntime(startTime);
-    
+
     assert.ok(runtime.includes(':'));
     assert.ok(runtime.match(/\d{2}:\d{2}/));
   });
@@ -27,10 +27,10 @@ suite('TimeUtils Test Suite', () => {
   test('parseProcessStartTime should handle various formats', () => {
     const isoDate = '2024-01-01T10:00:00Z';
     const timestamp = '1704110400';
-    
+
     const parsed1 = TimeUtils.parseProcessStartTime(isoDate);
     const parsed2 = TimeUtils.parseProcessStartTime(timestamp);
-    
+
     assert.ok(parsed1 instanceof Date);
     assert.ok(parsed2 instanceof Date);
   });
@@ -39,7 +39,7 @@ suite('TimeUtils Test Suite', () => {
     const now = new Date();
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
-    
+
     assert.ok(TimeUtils.isWithinLastMinutes(fiveMinutesAgo, 7));
     assert.ok(!TimeUtils.isWithinLastMinutes(tenMinutesAgo, 7));
   });

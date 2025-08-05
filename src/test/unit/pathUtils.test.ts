@@ -5,7 +5,7 @@ suite('PathUtils Test Suite', () => {
   test('normalize should handle different path formats', () => {
     const windowsPath = 'C:\\Users\\test\\project';
     const unixPath = '/home/test/project';
-    
+
     assert.ok(PathUtils.normalize(windowsPath));
     assert.ok(PathUtils.normalize(unixPath));
   });
@@ -19,7 +19,7 @@ suite('PathUtils Test Suite', () => {
   test('getDisplayPath should truncate long paths', () => {
     const longPath = '/very/long/path/that/should/be/truncated/to/show/only/end';
     const displayPath = PathUtils.getDisplayPath(longPath, 20);
-    
+
     assert.ok(displayPath.length <= 20);
     assert.ok(displayPath.includes('...'));
   });
@@ -33,7 +33,7 @@ suite('PathUtils Test Suite', () => {
   test('sanitizeForIdentifier should clean path for identifiers', () => {
     const dirtyPath = '/path/with spaces/and-symbols!@#';
     const clean = PathUtils.sanitizeForIdentifier(dirtyPath);
-    
+
     assert.ok(/^[a-zA-Z0-9\-_]+$/.test(clean));
     assert.ok(!clean.includes(' '));
   });

@@ -106,7 +106,7 @@ export class TimeUtils {
   static getRelativeTime(date: Date): string {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -131,7 +131,7 @@ export class TimeUtils {
     delay: number
   ): (...args: Parameters<T>) => void {
     let timeoutId: NodeJS.Timeout;
-    
+
     return (...args: Parameters<T>) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => func(...args), delay);
@@ -146,7 +146,7 @@ export class TimeUtils {
     limit: number
   ): (...args: Parameters<T>) => void {
     let inThrottle: boolean;
-    
+
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
         func(...args);

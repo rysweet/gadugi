@@ -248,7 +248,7 @@ Track effectiveness through:
 
 1. **Triggered by**: Code review completion
 2. **Inputs**: Review feedback from code-reviewer or human reviewers
-3. **Outputs**: 
+3. **Outputs**:
    - Updated code with changes
    - Professional responses to all feedback
    - Updated todo list

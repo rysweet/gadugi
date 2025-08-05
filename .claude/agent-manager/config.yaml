@@ -33,17 +33,17 @@ settings:
   auto_update: true
   check_interval: "24h"
   update_on_startup: true
-  
+
   # Cache settings
   cache_ttl: "7d"
   max_cache_size: "100MB"
   offline_mode: false
-  
+
   # Security settings
   verify_checksums: true
   allow_unsigned: false
   scan_agents: true
-  
+
   # Logging
   log_level: "info"
   log_retention: "30d"
