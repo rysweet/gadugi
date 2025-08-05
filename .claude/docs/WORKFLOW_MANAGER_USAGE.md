@@ -4,6 +4,10 @@
 
 WorkflowManager is a specialized sub-agent that orchestrates complete development workflows from prompt files. It ensures consistent execution of all development phases from issue creation through PR review.
 
+**🚨 NEW: Enhanced Consistency and Phase 9 Enforcement**
+
+WorkflowManager now includes multiple enforcement mechanisms to ensure 100% reliable code review execution and prevent early workflow termination. See [WORKFLOW_MANAGER_CONSISTENCY.md](./WORKFLOW_MANAGER_CONSISTENCY.md) for complete details.
+
 ## Invocation
 
 ```
