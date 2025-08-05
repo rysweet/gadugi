@@ -140,5 +140,6 @@ env/
 # pipenv
 Pipfile.lock
 
-# Workflow states
+# Workflow states and checkpoints
 .github/workflow-states/
+.github/workflow-checkpoints/

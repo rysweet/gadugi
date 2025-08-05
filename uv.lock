@@ -233,6 +233,7 @@ wheels = [
 name = "gadugi"
 source = { editable = "." }
 dependencies = [
+    { name = "psutil" },
     { name = "pyyaml" },
 ]
 
@@ -254,6 +255,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "docker", marker = "extra == 'test'", specifier = ">=6.0" },
+    { name = "psutil", specifier = ">=7.0.0" },
     { name = "psutil", marker = "extra == 'test'", specifier = ">=5.9" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0" },
