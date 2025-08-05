@@ -295,14 +295,22 @@ except ImportError as e:
             return [
                 s
                 for s in self.list_task_states()
-                if s.status in ["pending", "in_progress"]
+                if (getattr(s.status, "value", s.status) in ["pending", "in_progress"])
             ]
 
         def get_completed_states(self) -> List[TaskState]:
-            return [s for s in self.list_task_states() if s.status == "completed"]
+            return [
+                s
+                for s in self.list_task_states()
+                if getattr(s.status, "value", s.status) == "completed"
+            ]
 
         def get_failed_states(self) -> List[TaskState]:
-            return [s for s in self.list_task_states() if s.status == "failed"]
+            return [
+                s
+                for s in self.list_task_states()
+                if getattr(s.status, "value", s.status) == "failed"
+            ]
 
         def backup_state(self, backup_dir: str) -> None:
             backup_path = Path(backup_dir)
