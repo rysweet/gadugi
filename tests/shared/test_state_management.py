@@ -500,7 +500,7 @@ class TestTaskState:
         assert state.task_id == "test-task-004"
         assert state.prompt_file == "feature.md"
         if hasattr(state.status, "value"):
-            assert state.status.value == "error"
+            assert state.status.value == "failed"
         else:
             assert state.status == "error"
         assert state.branch == "feature/test-004"
