@@ -284,7 +284,7 @@ except ImportError as e:
                 "total_tasks": self.current_task_list.count(),
                 "completed_tasks": len(completed_tasks),
                 "active_tasks": len(active_tasks),
-                "call_count": self.call_count,
+                "total_calls": self.call_count,
                 "last_update": self.last_update_time.isoformat()
                 if self.last_update_time
                 else None,
