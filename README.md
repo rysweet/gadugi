@@ -19,24 +19,40 @@ The Cherokee concept of Gadugi represents:
 ```
 gadugi/
 ├── .claude/
-│   ├── agents/                 # All agents stored here
-│   │   ├── workflow-master.md      # Orchestrates development workflows
-│   │   ├── orchestrator-agent.md   # Manages parallel execution
-│   │   ├── code-reviewer.md        # Automated code review
-│   │   ├── code-review-response.md # Processes review feedback
-│   │   ├── prompt-writer.md        # Creates structured prompts
-│   │   ├── agent-manager.md        # Manages agent synchronization
-│   │   ├── task-analyzer.md        # Analyzes task dependencies
-│   │   ├── worktree-manager.md     # Manages git worktrees
-│   │   └── execution-monitor.md    # Monitors parallel execution
-│   ├── agent-manager/          # Agent manager configuration
-│   ├── orchestrator/           # Orchestrator components
-│   ├── docs/                   # Additional documentation
-│   └── templates/              # Workflow templates
-├── prompts/                    # Prompt templates
-├── manifest.yaml              # Agent registry and versions
-├── LICENSE                    # MIT License
-└── README.md                  # This file
+│   ├── agents/                     # All agents stored here
+│   │   ├── workflow-manager.md         # Main workflow orchestrator
+│   │   ├── orchestrator-agent.md       # Parallel execution coordinator
+│   │   ├── code-reviewer.md            # Code review automation
+│   │   ├── code-review-response.md     # Review feedback processing
+│   │   ├── prompt-writer.md            # Structured prompt creation
+│   │   ├── agent-manager.md            # Agent repository management
+│   │   ├── task-analyzer.md            # Task dependency analysis
+│   │   ├── task-bounds-eval.md         # Task complexity evaluation
+│   │   ├── task-decomposer.md          # Task breakdown specialist
+│   │   ├── task-research-agent.md      # Research and planning
+│   │   ├── worktree-manager.md         # Git worktree lifecycle
+│   │   ├── execution-monitor.md        # Parallel execution tracking
+│   │   ├── team-coach.md               # Team coordination & optimization
+│   │   ├── teamcoach-agent.md          # Alternative team coaching
+│   │   ├── pr-backlog-manager.md       # PR readiness management
+│   │   ├── program-manager.md          # Project health & strategy
+│   │   ├── memory-manager.md           # Memory.md synchronization
+│   │   ├── test-solver.md              # Test failure diagnosis
+│   │   ├── test-writer.md              # Test suite creation
+│   │   ├── xpia-defense-agent.md       # Security protection
+│   │   └── workflow-manager-phase9-enforcement.md  # Review enforcement
+│   ├── shared/                     # Shared utilities and modules
+│   ├── docs/                       # Additional documentation
+│   └── templates/                  # Workflow templates
+├── .github/
+│   ├── Memory.md                   # AI assistant persistent memory
+│   └── workflows/                  # GitHub Actions workflows
+├── prompts/                        # Prompt templates
+├── manifest.yaml                   # Agent registry and versions
+├── CLAUDE.md                       # Project-specific AI instructions
+├── claude-generic-instructions.md  # Generic Claude Code best practices
+├── LICENSE                         # MIT License
+└── README.md                       # This file
 ```
 
 ## Quick Start
@@ -102,31 +118,108 @@ The agent-manager will handle all necessary configuration updates.
 ### Using Agents
 
 Once installed, invoke agents as needed:
-- `/agent:workflow-manager` - For complete development workflows
-- `/agent:orchestrator-agent` - For parallel task execution
-- `/agent:code-reviewer` - For code review tasks
+
+#### Primary Orchestrators
+- `/agent:orchestrator-agent` - For coordinating multiple parallel workflows
+- `/agent:workflow-manager` - For complete development workflows (issue → code → PR)
+
+#### Specialized Agents
+- `/agent:code-reviewer` - For comprehensive code reviews
 - `/agent:prompt-writer` - For creating structured prompts
-- `/agent:readme-agent` - For README management and maintenance
+- `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
+- `/agent:program-manager` - For project health and issue lifecycle management
+- `/agent:team-coach` - For team coordination and performance optimization
+
+#### Development Tools
+- `/agent:test-solver` - For diagnosing and fixing failing tests
+- `/agent:test-writer` - For creating comprehensive test suites
+- `/agent:pr-backlog-manager` - For managing PR readiness and backlogs
+
+### Important: Hook Limitations
+
+**Claude Code hooks cannot directly invoke agents using `/agent:agent-name` syntax.**
+
+Hooks execute in shell environments where the `/agent:` syntax is not recognized, resulting in "No such file or directory" errors. Instead:
+
+**❌ This fails in hooks:**
+```json
+{
+  "command": "/agent:agent-manager check-and-update-agents"
+}
+```
+
+**✅ Use hooks for notifications:**
+```json
+{
+  "command": "echo 'Use \"/agent:agent-manager check-and-update-agents\" to check for updates'"
+}
+```
+
+Then manually invoke agents in Claude Code sessions as needed.
 
 ## Available Agents
 
 ### Workflow Management
-- **workflow-master** - Orchestrates complete development workflows from issue to PR
-- **orchestrator-agent** - Enables parallel execution of multiple agents
-- **task-analyzer** - Analyzes prompt files for dependencies and parallelization
-- **worktree-manager** - Manages git worktree lifecycle for isolated execution
-- **execution-monitor** - Monitors parallel executions and tracks progress
+- **workflow-manager** - Orchestrates complete development workflows from issue creation to PR review
+- **orchestrator-agent** - Coordinates parallel execution of multiple WorkflowManagers
+- **task-analyzer** - Analyzes prompt files to identify dependencies and parallelization opportunities
+- **worktree-manager** - Manages git worktree lifecycle for isolated parallel execution
+- **execution-monitor** - Monitors parallel Claude Code CLI executions and tracks progress
 
-### Code Quality
+### Task Analysis & Decomposition
+- **task-bounds-eval** - Evaluates task complexity and scope boundaries
+- **task-decomposer** - Breaks down complex tasks into manageable subtasks
+- **task-research-agent** - Conducts research for task planning and implementation
+
+### Code Quality & Review
 - **code-reviewer** - Performs comprehensive code reviews on pull requests
-- **code-review-response** - Processes and responds to code review feedback
+- **code-review-response** - Processes code review feedback and implements changes
+- **test-solver** - Diagnoses and fixes failing tests
+- **test-writer** - Creates comprehensive test suites
 
-### Productivity
-- **prompt-writer** - Creates high-quality structured prompts for complex tasks
-- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
+### Team Coordination & Optimization
+- **team-coach** - Provides intelligent multi-agent team coordination with performance analytics
+- **teamcoach-agent** - Alternative implementation of team coaching functionality
+- **pr-backlog-manager** - Manages PR backlogs by ensuring readiness for review and merge
 
-### Infrastructure
+### Project Management
+- **program-manager** - Manages project health, issue lifecycle, and strategic direction
+- **memory-manager** - Maintains and synchronizes Memory.md with GitHub Issues
+
+### Productivity & Content Creation
+- **prompt-writer** - Creates high-quality structured prompts for development workflows
+
+### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
+- **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks
+
+### Specialized Enforcement
+- **workflow-manager-phase9-enforcement** - Ensures Phase 9 code review enforcement in workflows
+
+## Agent Hierarchy and Coordination
+
+### Primary Orchestrators
+- **orchestrator-agent** → Coordinates multiple **workflow-manager** instances for parallel execution
+- **workflow-manager** → Main workflow orchestrator that invokes specialized agents as needed
+
+### Agent Dependencies
+- **orchestrator-agent** uses:
+  - **task-analyzer** - To analyze dependencies and plan parallel execution
+  - **worktree-manager** - To create isolated development environments
+  - **execution-monitor** - To track progress of parallel executions
+- **workflow-manager** integrates with:
+  - **code-reviewer** - For automated code review (Phase 9)
+  - **memory-manager** - For state persistence and GitHub sync
+  - **pr-backlog-manager** - For PR lifecycle management
+- **team-coach** provides optimization for:
+  - **orchestrator-agent** - Performance analytics and team coordination
+  - **workflow-manager** - Intelligent task assignment and coaching
+
+### Usage Patterns
+- **For multiple related tasks**: Use **orchestrator-agent** to coordinate parallel **workflow-manager** instances
+- **For single complex workflows**: Use **workflow-manager** directly
+- **For specialized tasks**: Invoke specific agents (code-reviewer, test-solver, etc.) directly
+- **For project management**: Use **program-manager** for issue lifecycle and strategic direction
 
 ## Development Setup
 
