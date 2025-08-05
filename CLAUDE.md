@@ -11,49 +11,60 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## CRITICAL: Workflow Execution Pattern
 
-**For ANY development task that requires multiple phases (issue, branch, code, PR):**
+⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
 
-1. **DO NOT manually execute workflow phases**
-2. **Use the proper agent hierarchy**:
+**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
 
-   **For multiple tasks or when parallelization is possible**:
+This ensures:
+- Proper worktree isolation for all changes
+- Consistent branch management
+- Complete workflow tracking
+- Parallel execution when possible
+- Professional development practices
+
+**For ANY task that modifies code, configuration, or documentation files:**
+
+1. **NEVER manually edit files directly**
+2. **ALWAYS use the orchestrator agent as the entry point**:
+
    ```
    /agent:orchestrator-agent
 
-   Execute these specific prompts in parallel:
-   - prompt-file-1.md
-   - prompt-file-2.md
+   Execute the following task:
+   - [description of changes needed]
    ```
 
-   **For single sequential tasks**:
-   ```
-   /agent:workflow-manager
+3. **The Orchestrator will automatically**:
+   - Invoke the worktree-manager to create isolated environments
+   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
+   - Coordinate parallel execution when multiple tasks exist
+   - Ensure proper branch creation and PR workflow
 
-   Task: Execute workflow for /prompts/[prompt-file].md
-   ```
-
-3. **Agent Hierarchy**:
-   - **OrchestratorAgent**: Top-level coordinator for parallel execution
+4. **Agent Hierarchy**:
+   - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
+   - **WorktreeManager**: Automatically invoked by orchestrator for isolation
    - **WorkflowManager**: Handles individual workflow execution
    - **Code-Reviewer**: Executes Phase 9 reviews
 
-4. **Automated Workflow Handling**:
+5. **Automated Workflow Handling**:
    - Issue creation
-   - Branch management
+   - Worktree and branch management
    - Implementation tracking
    - PR creation
    - Code review invocation (Phase 9)
    - State management
 
 **Only execute manual steps for**:
-- Quick fixes that don't need full workflow
-- Investigations or analysis
-- Direct user requests for specific actions
+- Read-only operations (searching, viewing files)
+- Answering questions about the codebase
+- Running tests or builds without changes
+- Direct user requests for specific read-only actions
 
-**Before ANY development task, ask yourself**:
+**Before ANY task, ask yourself**:
+- Will this change version-controlled files? → MUST use OrchestratorAgent
 - Multiple related tasks? → Use OrchestratorAgent
-- Single complex task? → Use WorkflowManager
-- Need an issue/branch/PR? → Use agents, not manual execution
+- Single task with code changes? → Use OrchestratorAgent
+- Read-only investigation? → Can execute manually
 
 ---
 
