@@ -196,8 +196,10 @@ class ImageManager:
 
                 # Log build output
                 for log in build_logs:
-                    if "stream" in log:
-                        logger.debug(log["stream"].strip())
+                    if isinstance(log, dict) and "stream" in log:
+                        stream_content = log["stream"]
+                        if isinstance(stream_content, str):
+                            logger.debug(stream_content.strip())
 
             # Update registry
             self._register_image(image, context.runtime)
@@ -209,10 +211,12 @@ class ImageManager:
             logger.info(f"Successfully created image {full_name}")
             return full_name
 
-        except docker.errors.BuildError as e:
-            raise GadugiError(f"Failed to build image: {e}")
         except Exception as e:
-            raise GadugiError(f"Unexpected error creating image: {e}")
+            # Handle docker build errors and other exceptions
+            if hasattr(e, "__class__") and "BuildError" in str(type(e)):
+                raise GadugiError(f"Failed to build image: {e}")
+            else:
+                raise GadugiError(f"Unexpected error creating image: {e}")
 
     def _generate_image_tag(self, context: BuildContext) -> str:
         """Generate deterministic image tag based on context."""
@@ -384,8 +388,12 @@ CMD ["/bin/bash"]
         try:
             self.client.images.get(image_name)
             return True
-        except docker.errors.ImageNotFound:
-            return False
+        except Exception as e:
+            # Handle ImageNotFound and other exceptions
+            if "ImageNotFound" in str(type(e)) or "not found" in str(e).lower():
+                return False
+            # Re-raise other exceptions
+            raise
 
     def _register_image(self, image, runtime: str) -> None:
         """Register image in local registry."""
@@ -554,10 +562,11 @@ CMD ["/bin/bash"]
 
                 if created_date < cutoff_date:
                     # Check if image is in use
-                    if not self._image_in_use(image.id):
+                    image_id = getattr(image, "id", None)
+                    if image_id and not self._image_in_use(image_id):
                         try:
-                            image_name = image.tags[0] if image.tags else image.id
-                            self.client.images.remove(image.id, force=True)
+                            image_name = image.tags[0] if image.tags else image_id
+                            self.client.images.remove(image_id, force=True)
 
                             # Remove from registry
                             if image_name in self.image_registry:

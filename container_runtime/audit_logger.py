@@ -158,6 +158,8 @@ class AuditLogger:
 
     def _write_raw_entry(self, data: Dict[str, Any]) -> None:
         """Write raw data entry to log file."""
+        if self.current_log_file is None:
+            return
         try:
             with open(self.current_log_file, "a", encoding="utf-8") as f:
                 json_line = json.dumps(data, default=str) + "\n"
@@ -535,6 +537,13 @@ class AuditLogger:
             return {"integrity_enabled": False, "status": "skipped"}
 
         file_to_verify = log_file or self.current_log_file
+
+        if file_to_verify is None:
+            return {
+                "integrity_enabled": True,
+                "status": "error",
+                "message": "No log file available for verification",
+            }
 
         try:
             events_verified = 0
