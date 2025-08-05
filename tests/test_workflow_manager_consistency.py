@@ -374,8 +374,11 @@ class TestOrphanedPRDetection(unittest.TestCase):
     """Test orphaned PR detection and recovery mechanisms"""
 
     def setUp(self):
-        self.script_path = (
-            "/Users/ryan/src/gadugi3/gadugi/.claude/utils/orphaned_pr_recovery.sh"
+        # Get the path relative to the test file
+        test_dir = Path(__file__).parent
+        project_root = test_dir.parent
+        self.script_path = str(
+            project_root / ".claude" / "utils" / "orphaned_pr_recovery.sh"
         )
 
     @patch("subprocess.run")
