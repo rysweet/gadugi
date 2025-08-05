@@ -385,13 +385,13 @@ Last Updated: 2025-08-05T10:00:00-08:00
 - 🔄 Integrate with workflow manager
 
 ## Completed Tasks
-""" + "\n".join([f"- ✅ Task {i} completed on 2025-07-{i:02d}" for i in range(1, 31)]) + """
+""" + "\n".join([f"- ✅ Task {i} completed on 2025-07-{i:02d}" for i in range(1, 51)]) + """
 
 ## Recent Accomplishments
-""" + "\n".join([f"- Accomplishment {i} from project phase {i}" for i in range(1, 21)]) + """
+""" + "\n".join([f"- Accomplishment {i} from project phase {i}" for i in range(1, 31)]) + """
 
 ## Reflections
-""" + "\n".join([f"- Reflection {i}: Learned about system design patterns" for i in range(1, 16)]) + """
+""" + "\n".join([f"- Reflection {i}: Learned about system design patterns" for i in range(1, 26)]) + """
 
 ## Important Context
 - CRITICAL: Memory management is essential for AI performance
@@ -409,8 +409,9 @@ Last Updated: 2025-08-05T10:00:00-08:00
         with open(self.memory_path, "w", encoding="utf-8") as f:
             f.write(large_memory_content)
 
-        # Create compactor and run full workflow
-        compactor = MemoryCompactor(self.memory_path, self.details_path)
+        # Create compactor with smaller thresholds to ensure compaction is needed
+        test_thresholds = {"max_lines": 100, "max_chars": 5000, "target_lines": 80, "min_compaction_benefit": 0.1}
+        compactor = MemoryCompactor(self.memory_path, self.details_path, size_thresholds=test_thresholds)
 
         # Check that compaction is needed
         needs_compaction, analysis = compactor.needs_compaction()
@@ -478,7 +479,9 @@ Last Updated: 2025-08-05T10:00:00-08:00
         with open(self.memory_path, "w", encoding="utf-8") as f:
             f.write(essential_content)
 
-        compactor = MemoryCompactor(self.memory_path, self.details_path)
+        # Use smaller thresholds for this test to force compaction
+        test_thresholds = {"max_lines": 50, "max_chars": 2000, "target_lines": 40, "min_compaction_benefit": 0.1}
+        compactor = MemoryCompactor(self.memory_path, self.details_path, size_thresholds=test_thresholds)
         result = compactor.compact_memory(dry_run=False)
 
         self.assertTrue(result["success"])
