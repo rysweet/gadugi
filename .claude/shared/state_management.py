@@ -39,6 +39,7 @@ class WorkflowPhase(Enum):
     """Workflow phases enumeration."""
     INITIALIZATION = 0
     INITIAL_SETUP = 1
+    ENVIRONMENT_SETUP = 1  # Alias for compatibility
     ISSUE_CREATION = 2
     BRANCH_MANAGEMENT = 3
     RESEARCH_PLANNING = 4
@@ -614,7 +615,7 @@ class CheckpointManager:
             config: Configuration dictionary or StateManager instance for backward compatibility
         """
         # Handle backward compatibility where StateManager was passed
-        if hasattr(config, 'config_dir'):  # This is a StateManager
+        if hasattr(config, 'state_dir'):  # This is a StateManager
             self.state_manager = config
             self.config = {}
         else:

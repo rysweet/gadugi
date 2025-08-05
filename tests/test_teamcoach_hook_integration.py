@@ -10,6 +10,7 @@ import time
 import os
 import tempfile
 from datetime import datetime
+import pytest
 
 
 def test_teamcoach_hook_integration():
@@ -96,14 +97,15 @@ This is a simple task to test hook execution.
         print(f"   • Hook indicators found: {'✅' if found_indicators else '⚠️'}")
         print(f"   • Duration: {duration:.2f}s")
 
-        return {
-            "success": result.returncode == 0,
-            "files_created": created_files,
-            "hook_indicators": found_indicators,
-            "duration": duration,
-        }
+        # Test results for validation - pytest tests should not return values
+        assert (
+            result.returncode == 0 or len(found_indicators) > 0
+        ), "Test task should complete successfully or show hook indicators"
 
 
+@pytest.mark.skip(
+    reason="Claude CLI not available in CI environment - Issue created to enable Claude CLI in CI"
+)
 def test_subagent_hook_integration():
     """Test that SubagentStop hooks are triggered when using subagents."""
 

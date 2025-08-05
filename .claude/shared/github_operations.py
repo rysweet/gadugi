@@ -735,3 +735,44 @@ class GitHubOperations:
                           limit: int = 30) -> Dict[str, Any]:
         """Alias for list_prs method."""
         return self.list_prs(state, base, limit)
+
+    def batch_merge_pull_requests(self, pr_numbers: List[int], merge_method: str = 'squash') -> List[Dict[str, Any]]:
+        """
+        Merge multiple pull requests in batch.
+
+        Args:
+            pr_numbers: List of PR numbers to merge
+            merge_method: Merge method ('merge', 'squash', 'rebase')
+
+        Returns:
+            List of result dictionaries for each PR
+        """
+        results = []
+        for pr_number in pr_numbers:
+            try:
+                result = self.merge_pr(pr_number, merge_method)
+                results.append(result)
+            except Exception as e:
+                results.append({
+                    'success': False,
+                    'error': str(e),
+                    'pr_number': pr_number
+                })
+        return results
+
+    def verify_pull_request_exists(self, pr_number: int) -> Dict[str, Any]:
+        """
+        Verify that a pull request exists.
+
+        Args:
+            pr_number: PR number to verify
+
+        Returns:
+            Dictionary with verification result
+        """
+        result = self.get_pr(pr_number)
+        return {
+            'exists': result['success'] and result.get('data') is not None,
+            'pr_number': pr_number,
+            'data': result.get('data', {}) if result['success'] else None
+        }

@@ -1,0 +1,25 @@
+{
+  "checkpoint_id": "9e2bddef",
+  "description": "Checkpoint for integration-test-20250804-162703",
+  "created_at": "2025-08-04T23:27:03.555025+00:00Z",
+  "state": {
+    "task_id": "integration-test-20250804-162703",
+    "prompt_file": "workflow.md",
+    "status": "in_progress",
+    "branch": null,
+    "issue_number": null,
+    "pr_number": null,
+    "current_phase": 0,
+    "current_phase_name": "Task Initialization & Resumption Check",
+    "created_at": "2025-08-04T23:27:03.553225+00:00Z",
+    "updated_at": "2025-08-04T23:27:03.553226+00:00Z",
+    "context": {
+      "task_id": "integration-test-20250804-162703",
+      "phase": "executing_integration-test-20250804-162703-task-2",
+      "started_at": "2025-08-04T16:27:03.540526",
+      "tasks": [],
+      "github_operations": []
+    },
+    "error_info": {}
+  }
+}

@@ -518,6 +518,17 @@ class WorkflowPhaseTracker:
 
         return task_list
 
+    def start_workflow_phase(self, phase_name: str, description: str = "") -> None:
+        """Start a new workflow phase (alias for start_phase)."""
+        self.start_phase(phase_name, description)
+
+    def get_phase_status(self, phase_name: str) -> str:
+        """Get the status of a specific phase."""
+        for phase_record in self.phase_history:
+            if phase_record.get('phase_name') == phase_name:
+                return phase_record.get('status', 'not_started')
+        return 'not_started'
+
 
 class TaskMetrics:
     """Collects and analyzes task performance metrics."""
@@ -590,6 +601,50 @@ class TaskMetrics:
     def record_phase_start(self, phase_name: str) -> None:
         """Record the start of a workflow phase."""
         self.start_workflow_phase(phase_name)
+
+    def start_parallel_execution_tracking(self, task_ids: List[str]) -> None:
+        """Start tracking parallel execution of multiple tasks."""
+        self.parallel_tasks = task_ids
+        self.parallel_start_time = datetime.now()
+        logger.info(f"Started parallel execution tracking for {len(task_ids)} tasks")
+
+    def detect_resource_exhaustion(self) -> Dict[str, Any]:
+        """Detect if system resources are being exhausted."""
+        import psutil
+        try:
+            cpu_percent = psutil.cpu_percent(interval=1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+
+            return {
+                'cpu_exhausted': cpu_percent > 80,
+                'memory_exhausted': memory.percent > 85,
+                'disk_exhausted': disk.percent > 90,
+                'cpu_percent': cpu_percent,
+                'memory_percent': memory.percent,
+                'disk_percent': disk.percent
+            }
+        except ImportError:
+            # psutil not available, return safe defaults
+            return {
+                'cpu_exhausted': False,
+                'memory_exhausted': False,
+                'disk_exhausted': False,
+                'cpu_percent': 0,
+                'memory_percent': 0,
+                'disk_percent': 0
+            }
+
+    def record_phase_completion(self, phase_name: str) -> None:
+        """Record the completion of a workflow phase."""
+        if hasattr(self, 'current_phase') and self.current_phase == phase_name:
+            if hasattr(self, 'phase_start_time'):
+                duration = (datetime.now() - self.phase_start_time).total_seconds()
+                logger.info(f"Completed workflow phase: {phase_name} in {duration:.1f}s")
+            else:
+                logger.info(f"Completed workflow phase: {phase_name}")
+        else:
+            logger.info(f"Completed workflow phase: {phase_name}")
 
 
 class TaskTracker:
@@ -751,3 +806,18 @@ class TaskTracker:
             data["todowrite_history"] = self.todowrite.call_history
 
         return data
+
+    def initialize_task_list(self, tasks: List[Dict[str, Any]], workflow_id: str) -> None:
+        """Initialize task list with given tasks."""
+        self.task_list = TaskList()
+        for task_data in tasks:
+            task = Task(
+                id=task_data.get('id', str(uuid.uuid4())[:8]),
+                content=task_data['content'],
+                priority=TaskPriority(task_data.get('priority', 'medium').lower()),
+                status=TaskStatus(task_data.get('status', 'pending').lower())
+            )
+            if 'dependencies' in task_data:
+                task.dependencies = task_data['dependencies']
+            self.task_list.add_task(task)
+        logger.info(f"Initialized task list with {len(tasks)} tasks for workflow {workflow_id}")
