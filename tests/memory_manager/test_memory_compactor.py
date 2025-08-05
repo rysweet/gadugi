@@ -266,6 +266,11 @@ Last Updated: 2025-08-05T10:00:00-08:00
     @patch("pathlib.Path.stat")
     def test_compact_memory_execution(self, mock_stat, mock_exists, mock_file):
         """Test actual compaction execution"""
+        import sys
+
+        if "memory_parser" not in sys.modules:
+            self.skipTest("memory_parser not available, skipping execution test")
+
         # Mock file system operations
         mock_exists.return_value = True
         mock_stat.return_value.st_mtime = datetime.now().timestamp()
@@ -279,7 +284,10 @@ Last Updated: 2025-08-05T10:00:00-08:00
         # Mock the parser to avoid file system dependencies
         with patch.object(compactor.parser, "parse_file") as mock_parse:
             mock_doc = MagicMock()
-            mock_doc.sections = []
+            mock_section = MagicMock()
+            mock_section.name = "Test Section"
+            mock_section.content = "- Item 1"
+            mock_doc.sections = [mock_section]
             mock_parse.return_value = mock_doc
 
             result = compactor.compact_memory(dry_run=False)

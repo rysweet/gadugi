@@ -13,16 +13,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-try:
-    from memory_parser import (
-        MemoryDocument,
-        MemoryParser,
-        MemorySection,
-        Task,
-        TaskStatus,
-    )
-except ImportError:
-    # Fallback for development environments without memory_parser
+import os
+
+if os.environ.get("GADUGI_TEST_ENV") == "1":
     import warnings
 
     warnings.warn("memory_parser module not found. Some functionality may be limited.")
@@ -59,6 +52,21 @@ except ImportError:
                 sections.append(current_section)
 
             return MemoryDocument(sections=sections)
+else:
+    try:
+        from memory_parser import (
+            MemoryDocument,
+            MemoryParser,
+            MemorySection,
+            Task,
+            TaskStatus,
+        )
+    except ImportError as e:
+        raise ImportError(
+            "memory_parser dependency required for MemoryCompactor. "
+            "Please ensure memory_parser.py is available and importable. "
+            f"Original error: {e}"
+        )
 
 
 class CompactionRule:
@@ -152,12 +160,27 @@ class MemoryCompactor:
             details_file_path
             or str(self.memory_path.parent / "LongTermMemoryDetails.md")
         )
+        # Path security: details file must be in same directory as memory file
+        if self.details_path.parent != self.memory_path.parent:
+            raise ValueError(
+                "details_file_path must be in the same directory as memory_file_path"
+            )
 
         self.rules = rules or self.DEFAULT_RULES.copy()
         self.size_thresholds = {
             **self.DEFAULT_SIZE_THRESHOLDS,
             **(size_thresholds or {}),
         }
+        # Config validation
+        if (
+            self.size_thresholds["max_lines"] < 10
+            or self.size_thresholds["max_chars"] < 1000
+        ):
+            raise ValueError("Compaction thresholds are too low")
+        if self.size_thresholds["target_lines"] > self.size_thresholds["max_lines"]:
+            raise ValueError("target_lines must be less than or equal to max_lines")
+        if not (0 < self.size_thresholds["min_compaction_benefit"] < 1):
+            raise ValueError("min_compaction_benefit must be between 0 and 1")
 
         try:
             self.parser = MemoryParser()
@@ -349,38 +372,34 @@ class MemoryCompactor:
         }
 
     def _extract_section_items(self, content: str) -> List[str]:
-        """Extract individual items from section content"""
-        # Split by bullet points and filter empty lines
+        """Extract individual items from section content (robust markdown bullet/numbered parsing)"""
         items = []
         current_item = []
+
+        bullet_pattern = re.compile(r"^([-*+•])\s+")
+        number_pattern = re.compile(r"^(\d+)\.\s+")
 
         for line in content.split("\n"):
             stripped_line = line.strip()
             if not stripped_line:
                 continue
 
-            # Check if this starts a new TOP-LEVEL item (bullet point, number, etc.)
-            # Only treat as new item if it's at the start of line (not indented)
-            if line.startswith(("-", "*", "+", "•")) and re.match(
-                r"^[-*+•]\s+", stripped_line
-            ):
+            # Only treat as new item if no leading indentation (top-level)
+            if (
+                bullet_pattern.match(stripped_line)
+                or number_pattern.match(stripped_line)
+            ) and not line.startswith(" "):
                 if current_item:
                     items.append("\n".join(current_item))
-                current_item = [line]  # Keep original indentation
-            elif re.match(r"^\d+\.\s+", stripped_line):
-                if current_item:
-                    items.append("\n".join(current_item))
-                current_item = [line]  # Keep original indentation
+                current_item = [line]
             elif stripped_line.startswith("#"):
                 # Skip section headers
                 continue
             else:
                 # Continuation of current item (preserve indentation)
-                # This includes nested bullets
                 if current_item:
                     current_item.append(line)
 
-        # Add final item
         if current_item:
             items.append("\n".join(current_item))
 
@@ -441,6 +460,8 @@ class MemoryCompactor:
 
             with open(backup_path, "w", encoding="utf-8") as f:
                 f.write(original_content)
+            # Set restrictive permissions on backup file
+            os.chmod(backup_path, 0o600)
         except (IOError, OSError) as e:
             raise RuntimeError(f"Failed to create backup: {e}") from e
 
