@@ -144,3 +144,5 @@ Pipfile.lock
 .github/workflow-states/
 .github/workflow-checkpoints/
 .task/
+
+.task/
