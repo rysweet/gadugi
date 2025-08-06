@@ -711,10 +711,11 @@ except ImportError as e:
                 phase_task_list.add_task(task)
             return phase_task_list
 
-    # Add claude_function_call for stub implementation
-    def claude_function_call(tool_name: str, **parameters) -> Dict[str, Any]:
-        """Stub implementation of claude_function_call for testing."""
-        return {"success": True, "result": parameters}
+
+# Add claude_function_call for stub implementation
+def claude_function_call(tool_name: str, **parameters) -> Dict[str, Any]:
+    """Stub implementation of claude_function_call for testing."""
+    return {"success": True, "result": parameters}
 
 
 class TestTaskStatus:

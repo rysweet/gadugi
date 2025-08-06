@@ -216,13 +216,13 @@ except ImportError as e:
             self._locks = {}
             self.state_dir.mkdir(parents=True, exist_ok=True)
 
-        def save_task_state(self, state: TaskState) -> None:
+        def save_state(self, state: TaskState) -> None:
             self._states[state.task_id] = state
             state_file = self.state_dir / f"{state.task_id}.json"
             with open(state_file, "w") as f:
                 json.dump(state.to_dict(), f, indent=2)
 
-        def load_task_state(self, task_id: str) -> Optional[TaskState]:
+        def load_state(self, task_id: str) -> Optional[TaskState]:
             if task_id in self._states:
                 return self._states[task_id]
             state_file = self.state_dir / f"{task_id}.json"
@@ -238,7 +238,7 @@ except ImportError as e:
                     return None
             return None
 
-        def delete_task_state(self, task_id: str) -> None:
+        def delete_state(self, task_id: str) -> None:
             if task_id in self._states:
                 del self._states[task_id]
             state_file = self.state_dir / f"{task_id}.json"
@@ -256,17 +256,17 @@ except ImportError as e:
                     pass
             return states
 
-        def update_task_state(self, task_id: str, **updates) -> TaskState:
-            state = self.load_task_state(task_id)
+        def update_state(self, task_id: str, **updates) -> TaskState:
+            state = self.load_state(task_id)
             if state is None:
                 raise StateError(
-                    f"Task state {task_id} not found", operation="update_task_state"
+                    f"Task state {task_id} not found", operation="update_state"
                 )
 
             for key, value in updates.items():
                 setattr(state, key, value)
             state.updated_at = datetime.now()
-            self.save_task_state(state)
+            self.save_state(state)
             return state
 
         def acquire_lock(self, resource_id: str, timeout: int = 30) -> bool:
@@ -577,26 +577,26 @@ class TestTaskState:
         }
 
         state.set_error(
-            "network_error",
-            "Connection failed",
             {
+                "error_type": "network_error",
+                "error_message": "Connection failed",
                 "phase": 2,
                 "retry_count": 3,
-            },
+            }
         )
 
         if hasattr(state.status, "value"):
-            assert state.status.value == "failed"
+            assert state.status.value == "error"
         else:
-            assert state.status == "failed"
+            assert state.status == "error"
         # Check that error info is set properly
         assert state.error_info is not None
-        assert state.error_info["type"] == "network_error"
-        assert state.error_info["message"] == "Connection failed"
-        assert state.error_info["details"]["phase"] == 2
-        assert state.error_info["details"]["retry_count"] == 3
+        assert state.error_info["error_type"] == "network_error"
+        assert state.error_info["error_message"] == "Connection failed"
+        assert state.error_info["phase"] == 2
+        assert state.error_info["retry_count"] == 3
         # Check that timestamp was added
-        assert "timestamp" in state.error_info
+        assert "error_timestamp" in state.error_info
 
     def test_task_state_clear_error(self):
         """Test clearing error information."""
@@ -612,7 +612,7 @@ class TestTaskState:
         assert state.status == "pending" or hasattr(
             state, "status"
         )  # Status may not be changed by clear_error
-        assert state.error_info is None
+        assert state.error_info == {}
 
     def test_task_state_validation(self):
         """Test task state validation."""
@@ -645,16 +645,18 @@ class TestWorkflowPhase:
         """Test workflow phase enumeration."""
         assert WorkflowPhase.INITIALIZATION.value == 0
         assert WorkflowPhase.ISSUE_CREATION.value == 2
-        assert WorkflowPhase.IMPLEMENTATION.value == 3
-        assert WorkflowPhase.REVIEW.value == 5
+        assert WorkflowPhase.IMPLEMENTATION.value == 5
+        assert WorkflowPhase.REVIEW.value == 9
 
     def test_workflow_phase_names(self):
         """Test workflow phase name mapping."""
-        assert WorkflowPhase.get_phase_name(0) == "initialization"
-        assert WorkflowPhase.get_phase_name(2) == "issue-creation"
-        assert WorkflowPhase.get_phase_name(3) == "implementation"
-        assert WorkflowPhase.get_phase_name(5) == "review"
-        assert WorkflowPhase.get_phase_name(99) == "unknown"
+        assert (
+            WorkflowPhase.get_phase_name(0) == "Task Initialization & Resumption Check"
+        )
+        assert WorkflowPhase.get_phase_name(2) == "Issue Creation"
+        assert WorkflowPhase.get_phase_name(5) == "Implementation"
+        assert WorkflowPhase.get_phase_name(9) == "Review"
+        assert WorkflowPhase.get_phase_name(99) == "Unknown Phase"
 
     def test_workflow_phase_validation(self):
         """Test workflow phase validation."""
@@ -679,29 +681,31 @@ class TestStateManager:
     def state_manager(self, temp_state_dir):
         """Create StateManager instance for testing."""
         # Create a StateManager with the temp directory as state_dir
-        return StateManager(
-            state_dir=str(temp_state_dir),
-            backup_enabled=True,
-            cleanup_after_days=7,
-            max_states_per_task=10,
-        )
+        config = {
+            "state_dir": str(temp_state_dir),
+            "backup_enabled": True,
+            "cleanup_after_days": 7,
+            "max_states_per_task": 10,
+        }
+        return StateManager(config=config)
 
     def test_state_manager_init_default(self):
         """Test StateManager initialization with default config."""
         sm = StateManager()
-        assert sm.state_dir == Path(".claude/state")
+        assert sm.state_dir == Path(".github/workflow-states")
         assert sm.backup_enabled is True
-        assert sm.cleanup_after_days == 7
-        assert sm.max_states_per_task == 100
+        assert sm.cleanup_after_days == 30
+        assert sm.max_states_per_task == 20
 
     def test_state_manager_init_custom(self, temp_state_dir):
         """Test StateManager initialization with custom config."""
-        sm = StateManager(
-            state_dir=str(temp_state_dir),
-            backup_enabled=False,
-            cleanup_after_days=14,
-            max_states_per_task=5,
-        )
+        config = {
+            "state_dir": str(temp_state_dir),
+            "backup_enabled": False,
+            "cleanup_after_days": 14,
+            "max_states_per_task": 5,
+        }
+        sm = StateManager(config=config)
         assert sm.state_dir == Path(temp_state_dir)
         assert sm.backup_enabled is False
         assert sm.cleanup_after_days == 14
@@ -713,10 +717,10 @@ class TestStateManager:
             task_id="test-save-001", prompt_file="test.md", status="pending"
         )
 
-        state_manager.save_task_state(state)
+        state_manager.save_state(state)
 
         # Verify file exists
-        state_file = state_manager.state_dir / "test-save-001.json"
+        state_file = state_manager.state_dir / "test-save-001" / "state.json"
         assert state_file.exists()
 
         # Verify content
@@ -734,10 +738,10 @@ class TestStateManager:
             status="in_progress",
             current_phase=3,
         )
-        state_manager.save_task_state(original_state)
+        state_manager.save_state(original_state)
 
         # Load the state
-        loaded_state = state_manager.load_task_state("test-load-001")
+        loaded_state = state_manager.load_state("test-load-001")
 
         assert loaded_state is not None
         assert loaded_state.task_id == "test-load-001"
@@ -750,7 +754,7 @@ class TestStateManager:
 
     def test_load_state_not_found(self, state_manager):
         """Test loading non-existent state."""
-        loaded_state = state_manager.load_task_state("non-existent-task")
+        loaded_state = state_manager.load_state("non-existent-task")
         assert loaded_state is None
 
     def test_update_state_success(self, state_manager):
@@ -759,15 +763,16 @@ class TestStateManager:
         state = TaskState(
             task_id="test-update-001", prompt_file="update-test.md", status="pending"
         )
-        state_manager.save_task_state(state)
+        state_manager.save_state(state)
 
         # Update the state
-        updated_state = state_manager.update_task_state(
-            "test-update-001", status="in_progress", current_phase=2, issue_number=42
-        )
+        state.status = "in_progress"
+        state.current_phase = 2
+        state.issue_number = 42
+        updated_state = state_manager.update_state(state)
 
         # Verify update
-        loaded_state = state_manager.load_task_state("test-update-001")
+        loaded_state = state_manager.load_state("test-update-001")
         assert loaded_state.status == "in_progress"
         assert loaded_state.current_phase == 2
         assert loaded_state.issue_number == 42
@@ -778,16 +783,16 @@ class TestStateManager:
         state = TaskState(
             task_id="test-delete-001", prompt_file="delete-test.md", status="completed"
         )
-        state_manager.save_task_state(state)
+        state_manager.save_state(state)
 
         # Verify it exists
-        assert state_manager.load_task_state("test-delete-001") is not None
+        assert state_manager.load_state("test-delete-001") is not None
 
         # Delete it
-        state_manager.delete_task_state("test-delete-001")
+        state_manager.delete_state("test-delete-001")
 
         # Verify deletion
-        assert state_manager.load_task_state("test-delete-001") is None
+        assert state_manager.load_state("test-delete-001") is None
 
     def test_list_active_states(self, state_manager):
         """Test listing active states."""
@@ -800,7 +805,7 @@ class TestStateManager:
         ]
 
         for state in states:
-            state_manager.save_task_state(state)
+            state_manager.save_state(state)
 
         # List all active states (pending + in_progress)
         active_states = state_manager.get_active_states()
@@ -825,7 +830,7 @@ class TestStateManager:
         ]
 
         for state in states:
-            state_manager.save_task_state(state)
+            state_manager.save_state(state)
 
         # Filter by completed
         completed_states = state_manager.get_completed_states()
@@ -854,23 +859,23 @@ class TestStateManager:
         recent_state.created_at = recent_time
         recent_state.updated_at = recent_time
 
-        state_manager.save_task_state(old_state)
-        state_manager.save_task_state(recent_state)
+        state_manager.save_state(old_state)
+        state_manager.save_state(recent_state)
 
         # Cleanup with 7-day threshold
         cleaned_count = state_manager.cleanup_old_states(days=7)
         assert cleaned_count == 1
 
         # Verify only recent state remains
-        assert state_manager.load_task_state("old-task") is None
-        assert state_manager.load_task_state("recent-task") is not None
+        assert state_manager.load_state("old-task") is None
+        assert state_manager.load_state("recent-task") is not None
 
     def test_backup_state(self, state_manager):
         """Test state backup functionality."""
         state = TaskState(
             task_id="backup-test", prompt_file="backup.md", status="in_progress"
         )
-        state_manager.save_task_state(state)
+        state_manager.save_state(state)
 
         # Create backup
         temp_backup_dir = state_manager.state_dir.parent / "backup_test"
@@ -893,18 +898,19 @@ class TestStateManager:
             status="in_progress",
             current_phase=3,
         )
-        state_manager.save_task_state(original_state)
+        state_manager.save_state(original_state)
         temp_backup_dir = state_manager.state_dir.parent / "restore_backup_test"
         state_manager.backup_state(str(temp_backup_dir))
 
         # Modify current state
-        state_manager.update_task_state(
-            "restore-test", status="failed", current_phase=5
-        )
+        current_state = state_manager.load_state("restore-test")
+        current_state.status = "failed"
+        current_state.current_phase = 5
+        state_manager.update_state(current_state)
 
         # Restore from backup
         state_manager.restore_state(str(temp_backup_dir))
-        restored_state = state_manager.load_task_state("restore-test")
+        restored_state = state_manager.load_state("restore-test")
         assert restored_state is not None
         # Handle both enum and string status
         if hasattr(restored_state.status, "value"):
@@ -923,18 +929,19 @@ class TestStateManager:
         )
 
         # Save initial state
-        state_manager.save_task_state(state)
+        state_manager.save_state(state)
 
         # Update state multiple times
         for i in range(3):
             current_phase = i + 1
             status = "in_progress" if i < 2 else "completed"
-            state_manager.update_task_state(
-                "history-test", current_phase=current_phase, status=status
-            )
+            current_state = state_manager.load_state("history-test")
+            current_state.current_phase = current_phase
+            current_state.status = status
+            state_manager.update_state(current_state)
 
         # Verify state was updated
-        final_state = state_manager.load_task_state("history-test")
+        final_state = state_manager.load_state("history-test")
         assert final_state is not None
         assert final_state.current_phase == 3
         assert final_state.status == "completed"
@@ -945,7 +952,7 @@ class TestStateManager:
         valid_state = TaskState(
             task_id="valid-integrity", prompt_file="valid.md", status="pending"
         )
-        state_manager.save_task_state(valid_state)
+        state_manager.save_state(valid_state)
 
         errors = state_manager.validate_state_consistency()
         assert len(errors) == 0
@@ -959,7 +966,7 @@ class TestStateManager:
         corrupt_file.write_text('{"invalid": json, content}')
 
         # Try to load corrupted state
-        result = state_manager.load_task_state("corrupt-task")
+        result = state_manager.load_state("corrupt-task")
         # The stub implementation might return None instead of raising an exception
         assert result is None
 
@@ -998,7 +1005,8 @@ class TestCheckpointManager:
     @pytest.fixture
     def checkpoint_manager(self, temp_checkpoint_dir):
         """Create CheckpointManager instance for testing."""
-        return CheckpointManager(checkpoint_dir=str(temp_checkpoint_dir))
+        config = {"checkpoint_dir": str(temp_checkpoint_dir)}
+        return CheckpointManager(config=config)
 
     def test_create_checkpoint(self, checkpoint_manager):
         """Test checkpoint creation."""
@@ -1159,14 +1167,14 @@ class TestStateManagementIntegration:
         """Setup for integration tests."""
         temp_dir = Path(tempfile.mkdtemp())
 
-        state_manager = StateManager(
-            state_dir=str(temp_dir / "states"),
-            backup_enabled=True,
-            cleanup_after_days=7,
-        )
-        checkpoint_manager = CheckpointManager(
-            checkpoint_dir=str(temp_dir / "checkpoints")
-        )
+        state_config = {
+            "state_dir": str(temp_dir / "states"),
+            "backup_enabled": True,
+            "cleanup_after_days": 7,
+        }
+        state_manager = StateManager(config=state_config)
+        checkpoint_config = {"checkpoint_dir": str(temp_dir / "checkpoints")}
+        checkpoint_manager = CheckpointManager(config=checkpoint_config)
 
         yield state_manager, checkpoint_manager, temp_dir
 
@@ -1186,7 +1194,7 @@ class TestStateManagementIntegration:
 
         # Phase 1: Initial Setup
         task_state.update_phase(WorkflowPhase.PLANNING)
-        state_manager.save_task_state(task_state)
+        state_manager.save_state(task_state)
         checkpoint_manager.create_checkpoint(
             "integration-workflow", task_state.to_dict()
         )
@@ -1194,22 +1202,13 @@ class TestStateManagementIntegration:
         # Phase 2: Issue Creation
         task_state.update_phase(WorkflowPhase.ISSUE_CREATION)
         task_state.issue_number = 42
-        state_manager.update_task_state(
-            "integration-workflow",
-            issue_number=42,
-            current_phase=WorkflowPhase.ISSUE_CREATION,
-        )
+        state_manager.update_state(task_state)
 
         # Phase 3: Implementation
         task_state.update_phase(WorkflowPhase.IMPLEMENTATION)
         task_state.branch = "feature/integration-test-42"
         task_state.status = "in_progress"
-        state_manager.update_task_state(
-            "integration-workflow",
-            branch="feature/integration-test-42",
-            status="in_progress",
-            current_phase=WorkflowPhase.IMPLEMENTATION,
-        )
+        state_manager.update_state(task_state)
         checkpoint_manager.create_checkpoint(
             "integration-workflow", task_state.to_dict()
         )
@@ -1218,15 +1217,10 @@ class TestStateManagementIntegration:
         task_state.update_phase(WorkflowPhase.REVIEW)
         task_state.pr_number = 15
         task_state.status = "completed"
-        state_manager.update_task_state(
-            "integration-workflow",
-            pr_number=15,
-            status="completed",
-            current_phase=WorkflowPhase.REVIEW,
-        )
+        state_manager.update_state(task_state)
 
         # Verify final state
-        final_state = state_manager.load_task_state("integration-workflow")
+        final_state = state_manager.load_state("integration-workflow")
         assert final_state.status == "completed"
         assert final_state.current_phase == WorkflowPhase.REVIEW
         assert final_state.issue_number == 42
@@ -1249,7 +1243,7 @@ class TestStateManagementIntegration:
             status="in_progress",
         )
         # Save the initial task state
-        state_manager.save_task_state(task_state)
+        state_manager.save_state(task_state)
 
         # Progress through phases with checkpoints
         phases = [
@@ -1259,25 +1253,27 @@ class TestStateManagementIntegration:
         ]
         for phase in phases:
             task_state.update_phase(phase)
-            state_manager.update_task_state("error-recovery-test", current_phase=phase)
+            state_manager.update_state(task_state)
             checkpoint_manager.create_checkpoint(
                 "error-recovery-test", task_state.to_dict()
             )
 
         # Simulate error in implementation phase
-        task_state.set_error("test_failure", "Unit tests failed", {"retry_count": 1})
-        state_manager.update_task_state(
-            "error-recovery-test", status="failed", error_info=task_state.error_info
+        task_state.set_error(
+            {
+                "error_type": "test_failure",
+                "error_message": "Unit tests failed",
+                "retry_count": 1,
+            }
         )
+        state_manager.update_state(task_state)
 
         # Recovery: clear error and continue
         task_state.clear_error()
-        state_manager.update_task_state(
-            "error-recovery-test", status="pending", error_info=None
-        )
+        state_manager.update_state(task_state)
 
         # Verify recovery
-        current_state = state_manager.load_task_state("error-recovery-test")
+        current_state = state_manager.load_state("error-recovery-test")
         assert current_state.status == "pending"  # Error cleared
         assert current_state.error_info is None
 
@@ -1296,7 +1292,7 @@ class TestStateManagementIntegration:
                 current_phase=i + 1,
             )
             tasks.append(task)
-            state_manager.save_task_state(task)
+            state_manager.save_state(task)
             checkpoint_manager.create_checkpoint(task.task_id, task.to_dict())
 
         # Verify all tasks are tracked
@@ -1305,9 +1301,9 @@ class TestStateManagementIntegration:
 
         # Complete some tasks
         for i in [0, 2, 4]:
-            state_manager.update_task_state(
-                tasks[i].task_id, status="completed", current_phase=WorkflowPhase.REVIEW
-            )
+            tasks[i].status = "completed"
+            tasks[i].current_phase = WorkflowPhase.REVIEW
+            state_manager.update_state(tasks[i])
 
         # Verify final states
         completed_states = state_manager.get_completed_states()

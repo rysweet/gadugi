@@ -622,7 +622,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -634,7 +634,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -944,7 +944,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -962,7 +962,7 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 result = "success"
 
@@ -976,7 +976,7 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as ctx:
                     raise ValueError("Test error")
@@ -1004,7 +1004,7 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", cleanup_func=failing_cleanup):
                     raise ValueError("Test error")
