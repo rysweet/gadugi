@@ -192,62 +192,37 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                 self.fail(f"Settings file should be valid JSON: {e}")
 
     def test_hooks_configuration_exists(self):
-        """Test that hooks configuration exists."""
+        """Test that hooks configuration has been removed (fix for Issue #89)."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        self.assertIn("hooks", settings, "Settings should contain hooks configuration")
-        hooks = settings["hooks"]
-
-        # Check for Stop hook
-        self.assertIn("Stop", hooks, "Should have Stop hook configured")
-        stop_hooks = hooks["Stop"]
-        self.assertIsInstance(stop_hooks, list, "Stop hooks should be a list")
-        self.assertTrue(len(stop_hooks) > 0, "Should have at least one Stop hook")
-
-        # Check for SubagentStop hook
-        self.assertIn("SubagentStop", hooks, "Should have SubagentStop hook configured")
-        subagent_hooks = hooks["SubagentStop"]
-        self.assertIsInstance(
-            subagent_hooks, list, "SubagentStop hooks should be a list"
-        )
-        self.assertTrue(
-            len(subagent_hooks) > 0, "Should have at least one SubagentStop hook"
-        )
+        # Hooks should be removed to prevent infinite loops (Issue #89)
+        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
 
     def test_hook_configurations_have_required_fields(self):
-        """Test that hook configurations have required fields."""
+        """Test that hook configurations have been removed (fix for Issue #89)."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        hooks = settings["hooks"]
-
-        # Test Stop hook configuration
-        stop_hook = hooks["Stop"][0]["hooks"][0]
-        self.assertEqual(stop_hook["type"], "command")
-        self.assertIn("teamcoach-stop.py", stop_hook["command"])
-        self.assertEqual(stop_hook["timeout"], 300)  # 5 minutes
-
-        # Test SubagentStop hook configuration
-        subagent_hook = hooks["SubagentStop"][0]["hooks"][0]
-        self.assertEqual(subagent_hook["type"], "command")
-        self.assertIn("teamcoach-subagent-stop.py", subagent_hook["command"])
-        self.assertEqual(subagent_hook["timeout"], 180)  # 3 minutes
+        # Hooks should be removed to prevent infinite loops (Issue #89)
+        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
+        
+        # Verify that TeamCoach hooks are replaced with new reflection system
+        # Check that workflow reflection components exist as replacement
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        reflection_template = os.path.join(base_dir, ".claude", "templates", "workflow-reflection-template.md")
+        reflection_collector = os.path.join(base_dir, ".claude", "agents", "workflow-reflection-collector.py")
+        
+        self.assertTrue(os.path.exists(reflection_template), "Workflow reflection template should exist as hook replacement")
+        self.assertTrue(os.path.exists(reflection_collector), "Workflow reflection collector should exist as hook replacement")
 
     def test_hook_commands_use_project_relative_paths(self):
-        """Test that hook commands use project-relative paths."""
+        """Test that hook commands have been removed (fix for Issue #89)."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        hooks = settings["hooks"]
-
-        # Check Stop hook path
-        stop_command = hooks["Stop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", stop_command)
-
-        # Check SubagentStop hook path
-        subagent_command = hooks["SubagentStop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", subagent_command)
+        # Hooks should be removed to prevent infinite loops (Issue #89)
+        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
 
 
 class TestTeamCoachHookIntegration(unittest.TestCase):

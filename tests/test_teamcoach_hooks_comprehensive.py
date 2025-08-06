@@ -266,7 +266,7 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
     """Integration tests for TeamCoach hooks."""
 
     def test_settings_json_configuration(self):
-        """Test that settings.json has correct hook configuration."""
+        """Test that settings.json has hooks removed (fix for Issue #89)."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
         )
@@ -274,27 +274,11 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
         with open(settings_path, "r") as f:
             settings = json.load(f)
 
-        # Check hooks section exists
-        self.assertIn("hooks", settings)
-        hooks = settings["hooks"]
-
-        # Check Stop hook
-        self.assertIn("Stop", hooks)
-        stop_hooks = hooks["Stop"][0]["hooks"]
-        self.assertEqual(len(stop_hooks), 1)
-        stop_hook = stop_hooks[0]
-        self.assertEqual(stop_hook["type"], "command")
-        self.assertIn("teamcoach-stop.py", stop_hook["command"])
-        self.assertEqual(stop_hook["timeout"], 300)
-
-        # Check SubagentStop hook
-        self.assertIn("SubagentStop", hooks)
-        subagent_hooks = hooks["SubagentStop"][0]["hooks"]
-        self.assertEqual(len(subagent_hooks), 1)
-        subagent_hook = subagent_hooks[0]
-        self.assertEqual(subagent_hook["type"], "command")
-        self.assertIn("teamcoach-subagent-stop.py", subagent_hook["command"])
-        self.assertEqual(subagent_hook["timeout"], 180)
+        # Hooks should be removed to prevent infinite loops (Issue #89)
+        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
+        
+        # Verify permissions are still present (these should remain)
+        self.assertIn("permissions", settings, "Permissions should still be configured")
 
     def test_hook_end_to_end_execution(self):
         """Test end-to-end hook execution (without actually calling TeamCoach)."""
@@ -416,7 +400,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
             self.assertFalse(mode & 0o002, f"{hook_file} should not be world-writable")
 
     def test_settings_json_uses_environment_variables(self):
-        """Test that settings.json uses environment variables for paths."""
+        """Test that settings.json hooks have been removed (fix for Issue #89)."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
         )
@@ -424,12 +408,13 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
         with open(settings_path, "r") as f:
             settings = json.load(f)
 
-        # Check that hook commands use $CLAUDE_PROJECT_DIR
-        stop_command = settings["hooks"]["Stop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", stop_command)
-
-        subagent_command = settings["hooks"]["SubagentStop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", subagent_command)
+        # Hooks should be removed to prevent infinite loops (Issue #89)
+        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
+        
+        # Verify that new workflow reflection system components exist as replacement
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        reflection_agent = os.path.join(base_dir, ".claude", "agents", "workflow-phase-reflection.md")
+        self.assertTrue(os.path.exists(reflection_agent), "Workflow reflection agent should exist as hook replacement")
 
 
 class TestTeamCoachHookErrorHandling(unittest.TestCase):
