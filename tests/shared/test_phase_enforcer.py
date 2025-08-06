@@ -490,12 +490,14 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.PR_CREATION,
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
             pr_number=123,
-            branch_name="test-branch"
+            branch_name="test-branch",
         )
-        
+
         # Mock successful subprocess calls for both phases
         mock_subprocess.side_effect = [
-            Mock(returncode=0, stdout="Code review completed successfully", stderr=""),  # Phase 9
+            Mock(
+                returncode=0, stdout="Code review completed successfully", stderr=""
+            ),  # Phase 9
             Mock(returncode=0, stdout='{"reviews": []}', stderr=""),  # Phase 10 check
         ]
 
@@ -509,7 +511,9 @@ class TestPhaseEnforcer:
 
     @patch("time.sleep")
     @patch("subprocess.run")
-    def test_enforce_critical_phases_failure_stops_chain(self, mock_subprocess, mock_sleep):
+    def test_enforce_critical_phases_failure_stops_chain(
+        self, mock_subprocess, mock_sleep
+    ):
         """Test that critical phase failure stops dependent phases"""
         # Create workflow state without critical phases completed
         workflow_state = WorkflowState(
@@ -518,9 +522,9 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.PR_CREATION,
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
             pr_number=123,
-            branch_name="test-branch"
+            branch_name="test-branch",
         )
-        
+
         # Mock all subprocess calls to fail
         mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Failed")
         # Mock sleep to prevent timeout
@@ -533,7 +537,9 @@ class TestPhaseEnforcer:
         assert len(results) == 1
         result_keys = [k.name if hasattr(k, "name") else k for k in results]
         assert "CODE_REVIEW" in result_keys
-        key = next(k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW")
+        key = next(
+            k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW"
+        )
         assert results[key].success is False
         assert "REVIEW_RESPONSE" not in result_keys
 
