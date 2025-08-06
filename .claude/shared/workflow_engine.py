@@ -32,27 +32,27 @@ try:
 except ImportError:
     # Fallback for testing or standalone usage
     print("Warning: Some shared modules not available, using fallback implementations")
-    
+
     # Define minimal fallback types
     class StateManager:
         def save_state(self, state): pass
         def load_state(self, task_id): return None
-    
+
     class GitHubOperations:
         def create_issue(self, title, body): return None
         def create_pr(self, title, body, base, head): return None
-    
+
     class TaskTracker:
         def start_task(self, task_id): pass
         def complete_task(self, task_id): pass
-    
+
     class ErrorHandler:
-        def handle_error(self, error, category=None, severity=None): 
+        def handle_error(self, error, category=None, severity=None):
             print(f"Error: {error}")
-    
+
     class ErrorCategory:
         WORKFLOW_EXECUTION = "workflow_execution"
-    
+
     class ErrorSeverity:
         HIGH = "high"
 
@@ -117,24 +117,24 @@ class WorkflowEngine:
     of all phases in the correct order.
     """
 
-    def __init__(self, 
+    def __init__(self,
                  state_manager: Optional[StateManager] = None,
                  github_ops: Optional[GitHubOperations] = None,
                  task_tracker: Optional[TaskTracker] = None,
                  error_handler: Optional[ErrorHandler] = None):
         """Initialize the workflow engine with shared modules"""
-        
+
         # Initialize shared modules (create minimal implementations if not provided)
         self.state_manager = state_manager or self._create_minimal_state_manager()
         self.github_ops = github_ops or self._create_minimal_github_ops()
         self.task_tracker = task_tracker or self._create_minimal_task_tracker()
         self.error_handler = error_handler or self._create_minimal_error_handler()
-        
+
         # Workflow configuration
         self.max_retries = 3
         self.checkpoint_interval = 5  # Save state every 5 phases
         self.timeout_per_phase = 300  # 5 minutes per phase
-        
+
         # State tracking
         self.workflow_state: Optional[WorkflowState] = None
         self.execution_log: List[PhaseResult] = []
@@ -142,26 +142,26 @@ class WorkflowEngine:
     def execute_workflow(self, prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Execute the complete workflow for a given prompt file.
-        
+
         Args:
             prompt_file: Path to the prompt file to execute
             task_id: Optional task ID for tracking (auto-generated if not provided)
-            
+
         Returns:
             Dictionary containing execution results and metrics
         """
-        
+
         # Initialize workflow state
         if task_id is None:
             task_id = f"workflow-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-            
+
         self.workflow_state = WorkflowState(
             task_id=task_id,
             prompt_file=prompt_file,
             current_phase=WorkflowPhase.INIT,
             completed_phases=[]
         )
-        
+
         try:
             # Execute all phases in deterministic order
             phases_to_execute = [
@@ -179,35 +179,35 @@ class WorkflowEngine:
                 WorkflowPhase.REVIEW_RESPONSE,
                 WorkflowPhase.FINALIZATION
             ]
-            
+
             for phase in phases_to_execute:
                 result = self._execute_phase(phase)
                 self.execution_log.append(result)
-                
+
                 if not result.success:
                     return self._create_failure_result(f"Phase {phase.name} failed: {result.message}")
-                
+
                 # Update state
                 self.workflow_state.current_phase = phase
                 self.workflow_state.completed_phases.append(phase)
                 self.workflow_state.last_checkpoint = datetime.now()
-                
+
                 # Save checkpoint periodically
                 if len(self.workflow_state.completed_phases) % self.checkpoint_interval == 0:
                     self._save_checkpoint()
-            
+
             return self._create_success_result()
-            
+
         except Exception as e:
             self.error_handler.handle_error(e, ErrorCategory.WORKFLOW_EXECUTION, ErrorSeverity.HIGH)
             return self._create_failure_result(f"Workflow execution failed: {str(e)}")
 
     def _execute_phase(self, phase: WorkflowPhase) -> PhaseResult:
         """Execute a specific workflow phase with retry logic"""
-        
+
         start_time = time.time()
         retry_count = 0
-        
+
         while retry_count <= self.max_retries:
             try:
                 # Dispatch to phase-specific implementation
@@ -239,9 +239,9 @@ class WorkflowEngine:
                     success, message, data = self._phase_finalization()
                 else:
                     success, message, data = False, f"Unknown phase: {phase}", {}
-                
+
                 execution_time = time.time() - start_time
-                
+
                 return PhaseResult(
                     phase=phase,
                     success=success,
@@ -250,7 +250,7 @@ class WorkflowEngine:
                     execution_time=execution_time,
                     retry_count=retry_count
                 )
-                
+
             except Exception as e:
                 retry_count += 1
                 if retry_count > self.max_retries:
@@ -262,28 +262,28 @@ class WorkflowEngine:
                         execution_time=execution_time,
                         retry_count=retry_count
                     )
-                
+
                 # Wait before retry (exponential backoff)
                 time.sleep(2 ** retry_count)
 
     # Phase Implementation Methods
-    
+
     def _phase_init(self) -> Tuple[bool, str, Dict[str, Any]]:
         """Initialize workflow execution environment"""
         try:
             # Validate prompt file exists
             if not os.path.exists(self.workflow_state.prompt_file):
                 return False, f"Prompt file not found: {self.workflow_state.prompt_file}", {}
-            
+
             # Initialize task tracking
             if hasattr(self.task_tracker, 'start_task'):
                 self.task_tracker.start_task(self.workflow_state.task_id)
-            
+
             return True, "Workflow initialization successful", {
                 "task_id": self.workflow_state.task_id,
                 "prompt_file": self.workflow_state.prompt_file
             }
-            
+
         except Exception as e:
             return False, f"Initialization failed: {str(e)}", {}
 
@@ -292,19 +292,19 @@ class WorkflowEngine:
         try:
             with open(self.workflow_state.prompt_file, 'r') as f:
                 content = f.read()
-            
+
             # Basic validation checks
             if len(content.strip()) < 50:
                 return False, "Prompt file content too short", {}
-            
+
             if not content.startswith('#'):
                 return False, "Prompt file should start with markdown header", {}
-            
+
             return True, "Prompt validation successful", {
                 "content_length": len(content),
                 "has_title": content.startswith('#')
             }
-            
+
         except Exception as e:
             return False, f"Prompt validation failed: {str(e)}", {}
 
@@ -313,7 +313,7 @@ class WorkflowEngine:
         try:
             # Extract issue number from prompt file name or generate
             prompt_filename = os.path.basename(self.workflow_state.prompt_file)
-            
+
             # Try to extract issue number from filename
             import re
             issue_match = re.search(r'issue-(\d+)', prompt_filename)
@@ -326,28 +326,28 @@ class WorkflowEngine:
                     first_line = f.readline().strip()
                 title_slug = re.sub(r'[^a-zA-Z0-9\s-]', '', first_line.replace('#', '').strip())
                 title_slug = re.sub(r'\s+', '-', title_slug).lower()[:50]
-                
+
                 # Use timestamp for uniqueness
                 timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
                 branch_name = f"feature/{title_slug}-{timestamp}"
-            
+
             # Create branch
-            result = subprocess.run(['git', 'checkout', '-b', branch_name], 
+            result = subprocess.run(['git', 'checkout', '-b', branch_name],
                                   capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 # Branch might already exist, try to switch to it
-                result = subprocess.run(['git', 'checkout', branch_name], 
+                result = subprocess.run(['git', 'checkout', branch_name],
                                       capture_output=True, text=True)
                 if result.returncode != 0:
                     return False, f"Failed to create/switch to branch: {result.stderr}", {}
-            
+
             self.workflow_state.branch_name = branch_name
-            
+
             return True, f"Branch created successfully: {branch_name}", {
                 "branch_name": branch_name
             }
-            
+
         except Exception as e:
             return False, f"Branch creation failed: {str(e)}", {}
 
@@ -357,7 +357,7 @@ class WorkflowEngine:
             # For now, skip prompt writer invocation as it's optional
             # In the future, this could invoke the prompt-writer agent
             return True, "Prompt writer phase completed (skipped)", {}
-            
+
         except Exception as e:
             return False, f"Prompt writer phase failed: {str(e)}", {}
 
@@ -367,29 +367,29 @@ class WorkflowEngine:
             # Extract title from prompt file
             with open(self.workflow_state.prompt_file, 'r') as f:
                 content = f.read()
-            
+
             title_line = content.split('\n')[0].replace('#', '').strip()
-            
+
             # Create issue using GitHub CLI
             result = subprocess.run([
                 'gh', 'issue', 'create',
                 '--title', title_line,
                 '--body', f"Implementation of workflow improvements as specified in {self.workflow_state.prompt_file}\n\n*Note: This issue was created by an AI agent on behalf of the repository owner.*"
             ], capture_output=True, text=True)
-            
+
             if result.returncode == 0:
                 # Extract issue number from output
                 issue_url = result.stdout.strip()
                 issue_number = issue_url.split('/')[-1]
                 self.workflow_state.issue_number = int(issue_number)
-                
+
                 return True, f"Issue created successfully: #{issue_number}", {
                     "issue_number": issue_number,
                     "issue_url": issue_url
                 }
             else:
                 return False, f"Failed to create issue: {result.stderr}", {}
-            
+
         except Exception as e:
             return False, f"Issue management failed: {str(e)}", {}
 
@@ -398,7 +398,7 @@ class WorkflowEngine:
         try:
             # For now, this is a placeholder - development planning is embedded in the prompt
             return True, "Development planning completed", {}
-            
+
         except Exception as e:
             return False, f"Development planning failed: {str(e)}", {}
 
@@ -408,7 +408,7 @@ class WorkflowEngine:
             # This is where the actual implementation would happen
             # For this specific case, we're implementing the workflow engine itself
             return True, "Implementation phase completed", {}
-            
+
         except Exception as e:
             return False, f"Implementation failed: {str(e)}", {}
 
@@ -419,12 +419,12 @@ class WorkflowEngine:
             result = subprocess.run(['git', 'add', '.'], capture_output=True, text=True)
             if result.returncode != 0:
                 return False, f"Failed to add changes: {result.stderr}", {}
-            
+
             # Create commit message
             commit_message = f"""feat: implement deterministic WorkflowEngine for consistent execution
 
 - Add WorkflowEngine class with deterministic phase execution
-- Implement PhaseEnforcer for automatic Phase 9/10 execution  
+- Implement PhaseEnforcer for automatic Phase 9/10 execution
 - Create WorkflowValidator for validation and integrity checks
 - Reduce WorkflowManager complexity from prompt-heavy to code-heavy design
 
@@ -435,18 +435,18 @@ code-based enforcement mechanisms.
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
-            
+
             # Commit changes
-            result = subprocess.run(['git', 'commit', '-m', commit_message], 
+            result = subprocess.run(['git', 'commit', '-m', commit_message],
                                   capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 return False, f"Failed to commit changes: {result.stderr}", {}
-            
+
             return True, "Changes committed successfully", {
                 "commit_message": commit_message
             }
-            
+
         except Exception as e:
             return False, f"Commit failed: {str(e)}", {}
 
@@ -456,18 +456,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             branch_name = self.workflow_state.branch_name
             if not branch_name:
                 return False, "No branch name available for push", {}
-            
+
             # Push branch to remote
-            result = subprocess.run(['git', 'push', '-u', 'origin', branch_name], 
+            result = subprocess.run(['git', 'push', '-u', 'origin', branch_name],
                                   capture_output=True, text=True)
-            
+
             if result.returncode != 0:
                 return False, f"Failed to push to remote: {result.stderr}", {}
-            
+
             return True, f"Pushed to remote successfully: {branch_name}", {
                 "branch_name": branch_name
             }
-            
+
         except Exception as e:
             return False, f"Push to remote failed: {str(e)}", {}
 
@@ -477,9 +477,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             # Extract title from prompt file
             with open(self.workflow_state.prompt_file, 'r') as f:
                 content = f.read()
-            
+
             title_line = content.split('\n')[0].replace('#', '').strip()
-            
+
             pr_body = f"""## Summary
 Implementation of deterministic WorkflowEngine to fix WorkflowManager repeatability and consistency issues.
 
@@ -507,7 +507,7 @@ Closes #{self.workflow_state.issue_number if self.workflow_state.issue_number el
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"""
-            
+
             # Create PR using GitHub CLI
             result = subprocess.run([
                 'gh', 'pr', 'create',
@@ -515,19 +515,19 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 '--title', title_line,
                 '--body', pr_body
             ], capture_output=True, text=True)
-            
+
             if result.returncode == 0:
                 pr_url = result.stdout.strip()
                 pr_number = pr_url.split('/')[-1]
                 self.workflow_state.pr_number = int(pr_number)
-                
+
                 return True, f"PR created successfully: #{pr_number}", {
                     "pr_number": pr_number,
                     "pr_url": pr_url
                 }
             else:
                 return False, f"Failed to create PR: {result.stderr}", {}
-            
+
         except Exception as e:
             return False, f"PR creation failed: {str(e)}", {}
 
@@ -536,14 +536,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         try:
             if not self.workflow_state.pr_number:
                 return False, "No PR number available for code review", {}
-            
+
             # This would invoke the code-reviewer agent
             # For now, we'll simulate successful review invocation
             return True, f"Code review initiated for PR #{self.workflow_state.pr_number}", {
                 "pr_number": self.workflow_state.pr_number,
                 "review_requested": True
             }
-            
+
         except Exception as e:
             return False, f"Code review failed: {str(e)}", {}
 
@@ -553,7 +553,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             # This would handle code review responses and implement fixes
             # For now, we'll mark it as completed
             return True, "Review response phase completed", {}
-            
+
         except Exception as e:
             return False, f"Review response failed: {str(e)}", {}
 
@@ -563,30 +563,30 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             # Update task tracking
             if hasattr(self.task_tracker, 'complete_task'):
                 self.task_tracker.complete_task(self.workflow_state.task_id)
-            
+
             # Clean up temporary files
             self._cleanup_temp_files()
-            
+
             return True, "Workflow finalization completed", {
                 "total_phases": len(self.workflow_state.completed_phases),
                 "execution_time": (datetime.now() - self.workflow_state.start_time).total_seconds()
             }
-            
+
         except Exception as e:
             return False, f"Finalization failed: {str(e)}", {}
 
     # Helper Methods
-    
+
     def _save_checkpoint(self):
         """Save workflow state as checkpoint"""
         try:
             checkpoint_data = asdict(self.workflow_state)
             checkpoint_data['timestamp'] = datetime.now().isoformat()
-            
+
             checkpoint_file = f".workflow_checkpoint_{self.workflow_state.task_id}.json"
             with open(checkpoint_file, 'w') as f:
                 json.dump(checkpoint_data, f, indent=2, default=str)
-                
+
         except Exception as e:
             print(f"Warning: Failed to save checkpoint: {e}")
 
@@ -602,7 +602,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     def _create_success_result(self) -> Dict[str, Any]:
         """Create successful execution result"""
         total_time = (datetime.now() - self.workflow_state.start_time).total_seconds()
-        
+
         return {
             "success": True,
             "task_id": self.workflow_state.task_id,
@@ -617,7 +617,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     def _create_failure_result(self, error_message: str) -> Dict[str, Any]:
         """Create failure execution result"""
         total_time = (datetime.now() - self.workflow_state.start_time).total_seconds()
-        
+
         return {
             "success": False,
             "error": error_message,
@@ -628,7 +628,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         }
 
     # Minimal fallback implementations for shared modules
-    
+
     def _create_minimal_state_manager(self):
         """Create minimal state manager if not provided"""
         return StateManager()
@@ -650,11 +650,11 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 def execute_workflow(prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
     """
     Convenience function to execute a workflow with default configuration
-    
+
     Args:
         prompt_file: Path to the prompt file to execute
         task_id: Optional task ID for tracking
-        
+
     Returns:
         Workflow execution results
     """
@@ -664,16 +664,16 @@ def execute_workflow(prompt_file: str, task_id: Optional[str] = None) -> Dict[st
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python workflow_engine.py <prompt_file> [task_id]")
         sys.exit(1)
-    
+
     prompt_file = sys.argv[1]
     task_id = sys.argv[2] if len(sys.argv) > 2 else None
-    
+
     result = execute_workflow(prompt_file, task_id)
-    
+
     if result["success"]:
         print(f"✅ Workflow completed successfully in {result['execution_time']:.2f}s")
         print(f"📋 Phases completed: {result['total_phases']}")
@@ -682,6 +682,6 @@ if __name__ == "__main__":
     else:
         print(f"❌ Workflow failed: {result['error']}")
         print(f"📋 Phases completed: {result['completed_phases']}")
-    
+
     print(f"\n📊 Detailed results:")
     print(json.dumps(result, indent=2, default=str))

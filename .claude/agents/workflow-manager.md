@@ -274,7 +274,7 @@ Enhanced issue creation features:
   uv run pytest tests/
   uv run pytest tests/ --cov=. --cov-report=html
   uv run python -m pytest tests/specific_test.py
-  
+
   # NEVER run directly in UV projects (will fail)
   pytest tests/        # ❌ Wrong
   python -m pytest    # ❌ Wrong
