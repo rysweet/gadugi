@@ -269,7 +269,7 @@ except ImportError as e:
             self.save_state(state)
             return state
 
-        def acquire_lock(self, resource_id: str, timeout: int = 30) -> bool:
+        def _acquire_lock(self, resource_id: str, timeout: int = 30) -> bool:
             # Simplified lock implementation
             if resource_id not in self._locks:
                 self._locks[resource_id] = True
@@ -977,19 +977,19 @@ class TestStateManager:
         )
 
         # Test basic lock acquire/release functionality
-        lock_acquired = state_manager.acquire_lock("test-resource")
-        assert lock_acquired is True
+        lock_fd = state_manager._acquire_lock("test-resource")
+        assert lock_fd is not None
 
         # Try to acquire the same lock again
-        lock_acquired_again = state_manager.acquire_lock("test-resource")
-        assert lock_acquired_again is False
+        lock_fd_again = state_manager._acquire_lock("test-resource")
+        assert lock_fd_again is None  # Should fail due to existing lock
 
         # Release the lock
-        state_manager.release_lock("test-resource")
+        state_manager._release_lock(lock_fd)
 
         # Should be able to acquire again after release
-        lock_acquired_after_release = state_manager.acquire_lock("test-resource")
-        assert lock_acquired_after_release is True
+        lock_fd_after_release = state_manager._acquire_lock("test-resource")
+        assert lock_fd_after_release is not None
 
 
 class TestCheckpointManager:
