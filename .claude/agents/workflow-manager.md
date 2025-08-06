@@ -151,6 +151,22 @@ You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase
 - Read and analyze the prompt file thoroughly
+- **Detect project type**: Check if working in UV project (`pyproject.toml` + `uv.lock`)
+  ```bash
+  # UV project detection
+  if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+      echo "🐍 UV project detected - will use UV commands"
+      export UV_PROJECT=true
+      # Ensure UV environment is set up
+      if ! uv run python -c "import sys"; then
+          echo "Setting up UV environment..."
+          uv sync --all-extras
+      fi
+  else
+      echo "📦 Standard Python project - will use pip/python commands"
+      export UV_PROJECT=false
+  fi
+  ```
 - Validate prompt structure - MUST contain these sections:
   - Overview or Introduction
   - Problem Statement or Requirements
@@ -251,6 +267,18 @@ Enhanced issue creation features:
 - Write comprehensive tests for new functionality
 - Ensure test isolation and idempotency
 - Mock external dependencies appropriately
+- **For UV projects**: Use `uv run` prefix for all Python commands:
+  ```bash
+  # Correct testing commands for UV projects
+  uv run pytest tests/
+  uv run pytest tests/ --cov=. --cov-report=html
+  uv run python -m pytest tests/specific_test.py
+  
+  # NEVER run directly in UV projects (will fail)
+  pytest tests/        # ❌ Wrong
+  python -m pytest    # ❌ Wrong
+  ```
+- **For non-UV projects**: Use standard Python commands
 - Run test suite to verify all tests pass
 - Check coverage meets project standards
 
