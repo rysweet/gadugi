@@ -80,7 +80,7 @@ def main() -> None:
     sys.path.insert(0, ".")
 
     try:
-        from .claude.agents.system_design_reviewer.core import SystemDesignReviewer  # type: ignore
+        from .claude.agents.system_design_reviewer.core import SystemDesignReviewer  # type: ignore[import]
     except ImportError as exc:
         print(f"Import error: {exc}")
         print("System Design Reviewer not available, skipping review.")
