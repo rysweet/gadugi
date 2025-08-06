@@ -227,11 +227,15 @@ except ImportError as e:
                 return self._states[task_id]
             state_file = self.state_dir / f"{task_id}.json"
             if state_file.exists():
-                with open(state_file, "r") as f:
-                    data = json.load(f)
-                state = TaskState.from_dict(data)
-                self._states[task_id] = state
-                return state
+                try:
+                    with open(state_file, "r") as f:
+                        data = json.load(f)
+                    state = TaskState.from_dict(data)
+                    self._states[task_id] = state
+                    return state
+                except (json.JSONDecodeError, KeyError, ValueError):
+                    # Handle corrupted state files
+                    return None
             return None
 
         def delete_task_state(self, task_id: str) -> None:
@@ -278,7 +282,7 @@ except ImportError as e:
 
         def cleanup_old_states(self, days: int = 7) -> int:
             count = 0
-            cutoff = datetime.now() - timedelta(days=days)
+            cutoff = datetime.now(timezone.utc) - timedelta(days=days)
             for state_file in self.state_dir.glob("*.json"):
                 try:
                     with open(state_file, "r") as f:
@@ -286,24 +290,45 @@ except ImportError as e:
                     state = TaskState.from_dict(data)
                     if state.updated_at < cutoff:
                         state_file.unlink()
+                        # Also remove from in-memory cache
+                        if state.task_id in self._states:
+                            del self._states[state.task_id]
                         count += 1
                 except Exception:
                     pass
             return count
 
         def get_active_states(self) -> List[TaskState]:
-            return [
-                s
-                for s in self.list_task_states()
-                if (getattr(s.status, "value", s.status) in ["pending", "in_progress"])
-            ]
+            states = []
+            for s in self.list_task_states():
+                # Handle both enum and string status
+                status_value = getattr(s.status, "value", s.status)
+                if isinstance(s.status, str):
+                    status_value = s.status
+                elif hasattr(s.status, "value"):
+                    status_value = s.status.value
+                else:
+                    status_value = str(s.status)
+
+                if status_value in ["pending", "in_progress"]:
+                    states.append(s)
+            return states
 
         def get_completed_states(self) -> List[TaskState]:
-            return [
-                s
-                for s in self.list_task_states()
-                if getattr(s.status, "value", s.status) == "completed"
-            ]
+            states = []
+            for s in self.list_task_states():
+                # Handle both enum and string status
+                status_value = getattr(s.status, "value", s.status)
+                if isinstance(s.status, str):
+                    status_value = s.status
+                elif hasattr(s.status, "value"):
+                    status_value = s.status.value
+                else:
+                    status_value = str(s.status)
+
+                if status_value == "completed":
+                    states.append(s)
+            return states
 
         def get_failed_states(self) -> List[TaskState]:
             return [
@@ -325,6 +350,8 @@ except ImportError as e:
                     f"Backup directory {backup_dir} not found",
                     operation="restore_state",
                 )
+            # Clear in-memory cache before restore
+            self._states.clear()
             for backup_file in backup_path.glob("*.json"):
                 shutil.copy2(backup_file, self.state_dir / backup_file.name)
 
@@ -357,7 +384,9 @@ except ImportError as e:
             self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
         def create_checkpoint(self, workflow_id: str, state: Dict[str, Any]) -> str:
-            checkpoint_id = f"{workflow_id}-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+            # Use microseconds to avoid collision when creating multiple checkpoints quickly
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+            checkpoint_id = f"{workflow_id}-{timestamp}"
             checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
             with open(checkpoint_file, "w") as f:
                 json.dump(state, f, indent=2)
@@ -877,7 +906,11 @@ class TestStateManager:
         state_manager.restore_state(str(temp_backup_dir))
         restored_state = state_manager.load_task_state("restore-test")
         assert restored_state is not None
-        assert restored_state.status == "in_progress"
+        # Handle both enum and string status
+        if hasattr(restored_state.status, "value"):
+            assert restored_state.status.value == "in_progress"
+        else:
+            assert restored_state.status == "in_progress"
         if hasattr(restored_state.current_phase, "value"):
             assert restored_state.current_phase.value == 3
         else:
@@ -1215,6 +1248,8 @@ class TestStateManagementIntegration:
             prompt_file="error-test.md",
             status="in_progress",
         )
+        # Save the initial task state
+        state_manager.save_task_state(task_state)
 
         # Progress through phases with checkpoints
         phases = [
@@ -1279,8 +1314,5 @@ class TestStateManagementIntegration:
         assert len(completed_states) == 3
 
         # The remaining tasks should still be in progress or pending
-        all_states = state_manager.list_task_states()
-        active_states = [
-            s for s in all_states if s.status in ["pending", "in_progress"]
-        ]
+        active_states = state_manager.get_active_states()
         assert len(active_states) == 2

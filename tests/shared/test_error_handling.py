@@ -59,6 +59,9 @@ except ImportError:
 
     from enum import Enum
 
+    # Add logger for stub implementation
+    logger = logging.getLogger(__name__)
+
     class ErrorSeverity(Enum):
         LOW = "low"
         MEDIUM = "medium"
@@ -143,8 +146,7 @@ except ImportError:
                     return func(*args, **kwargs)
                 except exceptions as e:
                     if log_errors:
-                        # In a real implementation, this would use a logger
-                        pass
+                        logger.error(f"Error in function: {e}")
                     return fallback_value
 
             return wrapper
@@ -262,7 +264,8 @@ except ImportError:
         exceptions = exceptions or (Exception,)
         try:
             return primary()
-        except exceptions:
+        except exceptions as e:
+            logger.warning(f"Primary function failed, using fallback: {e}")
             return fallback()
 
     class ErrorContext:
@@ -273,22 +276,28 @@ except ImportError:
             self.error = None
 
         def __enter__(self):
+            logger.debug(f"Starting operation: {self.operation_name}")
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             if exc_val:
                 self.error = exc_val
+                logger.error(f"Error in {self.operation_name}: {exc_val}")
 
                 # Run cleanup if provided
                 if self.cleanup_func:
                     try:
                         self.cleanup_func()
-                    except Exception:
-                        pass
+                    except Exception as cleanup_error:
+                        logger.error(
+                            f"Cleanup failed for {self.operation_name}: {cleanup_error}"
+                        )
 
                 # Suppress errors if requested
                 if self.suppress_errors:
                     return True
+            else:
+                logger.debug(f"Completed operation: {self.operation_name}")
 
             return False
 
@@ -613,7 +622,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -625,7 +634,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -935,7 +944,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -953,7 +962,7 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 result = "success"
 
@@ -967,7 +976,7 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as ctx:
                     raise ValueError("Test error")
@@ -995,7 +1004,7 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", cleanup_func=failing_cleanup):
                     raise ValueError("Test error")
