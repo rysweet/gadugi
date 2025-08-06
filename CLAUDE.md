@@ -43,8 +43,10 @@ This ensures:
 4. **Agent Hierarchy**:
    - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
    - **WorktreeManager**: Automatically invoked by orchestrator for isolation
-   - **WorkflowManager**: Handles individual workflow execution
+   - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
    - **Code-Reviewer**: Executes Phase 9 reviews
+
+**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
 
 5. **Automated Workflow Handling**:
    - Issue creation
@@ -53,6 +55,19 @@ This ensures:
    - PR creation
    - Code review invocation (Phase 9)
    - State management
+
+6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
+   - Phase 1: Initial Setup
+   - Phase 2: Issue Creation
+   - Phase 3: Branch Management
+   - Phase 4: Research and Planning
+   - Phase 5: Implementation
+   - Phase 6: Testing
+   - Phase 7: Documentation
+   - Phase 8: Pull Request
+   - Phase 9: Review (code-reviewer invocation)
+   - Phase 10: Review Response
+   - Phase 11: Settings Update
 
 **Only execute manual steps for**:
 - Read-only operations (searching, viewing files)
@@ -65,6 +80,20 @@ This ensures:
 - Multiple related tasks? → Use OrchestratorAgent
 - Single task with code changes? → Use OrchestratorAgent
 - Read-only investigation? → Can execute manually
+
+**Workflow Validation Requirements**:
+- Orchestrator MUST delegate ALL tasks to WorkflowManager
+- ALL 11 workflow phases MUST be executed for every task
+- NO direct execution bypassing workflow phases
+- State tracking MUST be maintained throughout all phases
+- Quality gates MUST be validated at each phase transition
+
+**Enforcement Examples**:
+- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
+- ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
+- ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
+- ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
 
 ### Emergency Procedures (Critical Production Issues)
 
