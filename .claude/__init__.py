@@ -1,1 +1,1 @@
-# Make .claude a Python package to enable imports
+# Package marker for claude
