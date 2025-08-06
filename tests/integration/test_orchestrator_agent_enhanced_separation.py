@@ -456,9 +456,9 @@ class TestOrchestratorAgentPerformance:
         speedup = sequential_time / parallel_time
 
         # Validate speedup is in expected range
-        assert (
-            3.0 <= speedup <= 5.5
-        ), f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
+        assert 3.0 <= speedup <= 5.5, (
+            f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
+        )
 
         # Test with different parallelization scenarios
         test_scenarios = [
@@ -473,9 +473,9 @@ class TestOrchestratorAgentPerformance:
             par_time = max(durations)
             actual_speedup = seq_time / par_time
 
-            assert (
-                actual_speedup >= expected_min
-            ), f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
+            assert actual_speedup >= expected_min, (
+                f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
+            )
 
     def test_shared_module_performance_overhead(self):
         """Test that shared modules don't add significant performance overhead"""
@@ -512,9 +512,9 @@ class TestOrchestratorAgentPerformance:
         state_ops_time = time.time() - start_time
 
         # Performance should be reasonable (< 1 second for 10 operations each)
-        assert (
-            github_ops_time < 1.0
-        ), f"GitHub operations too slow: {github_ops_time:.3f}s"
+        assert github_ops_time < 1.0, (
+            f"GitHub operations too slow: {github_ops_time:.3f}s"
+        )
         assert state_ops_time < 1.0, f"State operations too slow: {state_ops_time:.3f}s"
 
 
