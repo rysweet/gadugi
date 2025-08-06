@@ -334,18 +334,31 @@ def handle_with_fallback(
 
 
 class ErrorContext:
-    """Context manager for error handling with cleanup."""
+    """Context manager for error handling with cleanup.
+
+    Extended to accept additional metadata (error, details, workflow_id)
+    while remaining backward-compatible with previous positional signature.
+    """
 
     def __init__(
         self,
-        operation_name: str,
+        operation: str,
         cleanup_func: Optional[Callable] = None,
         suppress_errors: bool = False,
+        error: Optional[Exception] = None,
+        details: Optional[Dict[str, Any]] = None,
+        workflow_id: Optional[str] = None,
+        **kwargs,
     ):
-        self.operation_name = operation_name
+        # Backward-compatibility alias
+        self.operation_name = operation
+        self.operation = operation
         self.cleanup_func = cleanup_func
         self.suppress_errors = suppress_errors
-        self.error = None
+        # Store supplied error metadata (may be None)
+        self.error = error
+        self.details = details or {}
+        self.workflow_id = workflow_id
 
     def __enter__(self):
         logger.debug(f"Starting operation: {self.operation_name}")

@@ -17,6 +17,7 @@ import shutil
 @pytest.mark.skipif(
     shutil.which("claude") is None, reason="Claude CLI not available in CI environment"
 )
+@pytest.mark.skip(reason="TeamCoach hook integration test dropped per user request")
 def test_teamcoach_hook_integration():
     """Test that TeamCoach hooks are actually triggered during Claude Code execution."""
 
