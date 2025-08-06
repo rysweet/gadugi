@@ -85,10 +85,10 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 4. **Commit with clear emergency attribution**:
    ```bash
    git commit -m "EMERGENCY: fix critical [issue description]
-   
+
    Emergency hotfix bypassing normal orchestrator workflow
    due to production impact. Full workflow to follow.
-   
+
    Fixes: [issue-number]"
    ```
 5. **Immediately create follow-up issue** for proper workflow implementation
@@ -424,7 +424,7 @@ free -h  # Memory (Linux) or vm_stat (macOS)
 2. Use WorkflowManager directly for single tasks:
    ```
    /agent:workflow-manager
-   
+
    Task: Execute workflow for /prompts/[single-prompt].md
    ```
 3. Execute critical tasks manually as last resort (document as emergency)
