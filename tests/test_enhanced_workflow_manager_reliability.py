@@ -425,7 +425,11 @@ class TestEnhancedWorkflowManager:
             patch.object(
                 manager.github_ops,
                 "create_issue",
-                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+                return_value={
+                    "success": True,
+                    "issue_number": 123,
+                    "issue_url": "https://github.com/test/repo/issues/123",
+                },
             ),
             patch.object(
                 manager.github_ops,
@@ -435,7 +439,11 @@ class TestEnhancedWorkflowManager:
             patch.object(
                 manager.github_ops,
                 "create_pull_request",
-                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
+                return_value={
+                    "success": True,
+                    "pr_number": 456,
+                    "pr_url": "https://github.com/test/repo/pull/456",
+                },
             ),
         ):
             result = manager.execute_workflow(str(self.test_prompt_file))
@@ -814,7 +822,11 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             patch.object(
                 manager.github_ops,
                 "create_issue",
-                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+                return_value={
+                    "success": True,
+                    "issue_number": 123,
+                    "issue_url": "https://github.com/test/repo/issues/123",
+                },
             ),
             patch.object(
                 manager.github_ops,
@@ -824,7 +836,11 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             patch.object(
                 manager.github_ops,
                 "create_pull_request",
-                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
+                return_value={
+                    "success": True,
+                    "pr_number": 456,
+                    "pr_url": "https://github.com/test/repo/pull/456",
+                },
             ),
         ):
             # Mock healthy system
@@ -1107,7 +1123,11 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             patch.object(
                 manager.github_ops,
                 "create_issue",
-                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+                return_value={
+                    "success": True,
+                    "issue_number": 123,
+                    "issue_url": "https://github.com/test/repo/issues/123",
+                },
             ),
             patch.object(
                 manager.github_ops,
@@ -1117,7 +1137,11 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             patch.object(
                 manager.github_ops,
                 "create_pull_request",
-                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
+                return_value={
+                    "success": True,
+                    "pr_number": 456,
+                    "pr_url": "https://github.com/test/repo/pull/456",
+                },
             ),
         ):
             result = manager.execute_workflow(str(self.test_prompt_file))
