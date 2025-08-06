@@ -56,6 +56,12 @@ This is a simple task to test hook execution.
         # Look for evidence of TeamCoach hook execution
         print("\n🔍 Checking for TeamCoach hook execution...")
 
+        # Detect Claude rate-limit message and skip test gracefully
+        if "usage limit reached" in result.stdout.lower():
+            pytest.skip(
+                "Claude CLI usage limit reached – skipping TeamCoach integration test"
+            )
+
         # Check stdout for TeamCoach invocation messages
         if "TeamCoach" in result.stdout:
             print("✅ Found TeamCoach references in stdout")

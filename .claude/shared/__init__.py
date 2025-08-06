@@ -1,1 +1,1 @@
-# Make shared a Python package
+# Package marker for claude.shared

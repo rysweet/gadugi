@@ -522,7 +522,7 @@ requires-dist = [
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.10" },
     { name = "pytest-mock", marker = "extra == 'test'", specifier = ">=3.10" },
     { name = "pyyaml", specifier = ">=6.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4.4" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.12.7" },
 ]
 provides-extras = ["dev", "test"]
 
