@@ -521,7 +521,7 @@ class TestTaskState:
         data = {
             "task_id": "test-task-004",
             "prompt_file": "feature.md",
-            "status": "failed",  # Use a valid TaskStatus value
+            "status": "error",  # Use a valid TaskStatus value
             "branch": "feature/test-004",
             "issue_number": 20,
             "pr_number": 5,
@@ -537,7 +537,7 @@ class TestTaskState:
         assert state.task_id == "test-task-004"
         assert state.prompt_file == "feature.md"
         if hasattr(state.status, "value"):
-            assert state.status.value == "failed"
+            assert state.status.value == "error"
         else:
             assert state.status == "error"
         assert state.branch == "feature/test-004"
@@ -560,7 +560,7 @@ class TestTaskState:
         state.update_phase(WorkflowPhase.IMPLEMENTATION)
 
         assert state.current_phase == WorkflowPhase.IMPLEMENTATION
-        assert state.current_phase_name == "implementation"
+        assert state.current_phase_name == "Implementation"
         assert state.updated_at > original_updated
 
     def test_task_state_set_error(self):
@@ -801,14 +801,14 @@ class TestStateManager:
             TaskState(task_id="task-001", prompt_file="test1.md", status="pending"),
             TaskState(task_id="task-002", prompt_file="test2.md", status="in_progress"),
             TaskState(task_id="task-003", prompt_file="test3.md", status="completed"),
-            TaskState(task_id="task-004", prompt_file="test4.md", status="failed"),
+            TaskState(task_id="task-004", prompt_file="test4.md", status="error"),
         ]
 
         for state in states:
             state_manager.save_state(state)
 
         # List all active states (pending + in_progress)
-        active_states = state_manager.get_active_states()
+        active_states = state_manager.list_active_states()
         assert len(active_states) == 2
 
         task_ids = [s.task_id for s in active_states]
@@ -833,7 +833,7 @@ class TestStateManager:
             state_manager.save_state(state)
 
         # Filter by completed
-        completed_states = state_manager.get_completed_states()
+        completed_states = state_manager.list_states_by_status("completed")
         assert len(completed_states) == 1
         assert completed_states[0].task_id == "complete-001"
 
@@ -954,8 +954,8 @@ class TestStateManager:
         )
         state_manager.save_state(valid_state)
 
-        errors = state_manager.validate_state_consistency()
-        assert len(errors) == 0
+        is_consistent = state_manager.validate_state_consistency(valid_state)
+        assert is_consistent is True
 
     def test_state_corruption_detection(self, state_manager):
         """Test detection of corrupted state files."""
@@ -1306,9 +1306,9 @@ class TestStateManagementIntegration:
             state_manager.update_state(tasks[i])
 
         # Verify final states
-        completed_states = state_manager.get_completed_states()
+        completed_states = state_manager.list_states_by_status("completed")
         assert len(completed_states) == 3
 
         # The remaining tasks should still be in progress or pending
-        active_states = state_manager.get_active_states()
+        active_states = state_manager.list_active_states()
         assert len(active_states) == 2
