@@ -1,8 +1,9 @@
 import sys
 from pathlib import Path
+
 # Add .claude directory to sys.path if not already present
 project_root = Path(__file__).resolve().parent.parent
-claude_path = project_root / '.claude'
+claude_path = project_root / ".claude"
 if str(claude_path) not in sys.path:
     sys.path.insert(0, str(claude_path))
 """

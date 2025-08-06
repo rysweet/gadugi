@@ -13,7 +13,7 @@ from .adr_generator import ADRGenerator
 __version__ = "1.0.0"
 __all__ = [
     "SystemDesignReviewer",
-    "ASTParserFactory", 
+    "ASTParserFactory",
     "ArchitecturalElement",
     "ArchitecturalChange",
     "DocumentationManager",

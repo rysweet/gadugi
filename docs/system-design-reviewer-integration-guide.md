@@ -354,7 +354,7 @@ For parallel execution scenarios:
 
 Execute these agents in parallel:
 - /agent:code-reviewer
-- /agent:system-design-reviewer 
+- /agent:system-design-reviewer
 - /agent:test-writer
 ```
 

@@ -78,28 +78,28 @@ class ArchitecturalChange:
 
 class ASTParser(ABC):
     """Base class for language-specific AST parsers"""
-    
+
     @abstractmethod
     def parse_file(self, file_path: str) -> List[ArchitecturalElement]:
         """Parse file and extract architectural elements"""
         pass
-    
+
     @abstractmethod
-    def analyze_changes(self, old_elements: List[ArchitecturalElement], 
+    def analyze_changes(self, old_elements: List[ArchitecturalElement],
                        new_elements: List[ArchitecturalElement]) -> List[ArchitecturalChange]:
         """Analyze changes between old and new elements"""
         pass
 
 class PythonASTParser(ASTParser):
     """Python-specific AST parser"""
-    
+
     def parse_file(self, file_path: str) -> List[ArchitecturalElement]:
         # Implementation for Python AST parsing
         pass
-    
-    def analyze_changes(self, old_elements: List[ArchitecturalElement], 
+
+    def analyze_changes(self, old_elements: List[ArchitecturalElement],
                        new_elements: List[ArchitecturalElement]) -> List[ArchitecturalChange]:
-        # Implementation for change analysis 
+        # Implementation for change analysis
         pass
 
 class TypeScriptASTParser(ASTParser):
@@ -112,13 +112,13 @@ class TypeScriptASTParser(ASTParser):
 
 ```python
 from .claude.shared.github_operations import GitHubOperations
-from .claude.shared.state_management import StateManager  
+from .claude.shared.state_management import StateManager
 from .claude.shared.error_handling import ErrorHandler
 from .claude.shared.task_tracking import TaskTracker
 
 class SystemDesignReviewer:
     """Main system design review agent"""
-    
+
     def __init__(self):
         self.github_ops = GitHubOperations()
         self.state_manager = SystemDesignStateManager()
@@ -129,7 +129,7 @@ class SystemDesignReviewer:
             'typescript': TypeScriptASTParser(),
             # Add more as needed
         }
-    
+
     def review_pr(self, pr_number: str) -> ReviewResult:
         """Main entry point for PR review"""
         # Implementation
@@ -160,7 +160,7 @@ The agent maintains a comprehensive architecture document with these sections:
 ## Security Architecture
 [Security boundaries and mechanisms]
 
-## Performance Architecture  
+## Performance Architecture
 [Performance characteristics and optimizations]
 
 ## Integration Points
@@ -193,7 +193,7 @@ Generate ADRs for significant architectural changes:
 ## Decision
 {What architectural decision was made}
 
-## Rationale  
+## Rationale
 {Why this decision was made}
 
 ## Consequences
@@ -237,7 +237,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Need full history for analysis
-      
+
       - name: Run System Design Review
         run: |
           # Invoke the system design review agent
@@ -267,7 +267,7 @@ Post structured reviews using GitHub's review API:
 
 #### Design Pattern Compliance
 - ✅ **Enhanced Separation**: Properly uses shared modules
-- ✅ **Agent Patterns**: Follows established agent conventions  
+- ✅ **Agent Patterns**: Follows established agent conventions
 - ⚠️ **Performance**: {specific concerns if any}
 
 #### Architecture Decision Records
@@ -287,7 +287,7 @@ Post structured reviews using GitHub's review API:
 - [ ] {Action item if changes requested}
 - [ ] {Additional action if needed}
 
-#### Suggestions  
+#### Suggestions
 - {Optional improvement suggestion}
 - {Performance optimization opportunity}
 
@@ -366,7 +366,7 @@ graph TD
 /agent:system-design-reviewer analyze-pr 123 --update-architecture
 ```
 
-#### Documentation Updates  
+#### Documentation Updates
 ```bash
 # Update architecture documentation
 /agent:system-design-reviewer update-architecture
@@ -444,7 +444,7 @@ graph TD
 
 ### Pattern Recognition Enhancement
 - Learn from review feedback and corrections
-- Adapt to project-specific architectural patterns  
+- Adapt to project-specific architectural patterns
 - Refine change impact assessment algorithms
 - Improve documentation template effectiveness
 
