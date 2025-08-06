@@ -1,19 +1,23 @@
 name: System Design Review
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-    # Only run on PRs that modify code files
-    paths:
-      - '**.py'
-      - '**.ts'
-      - '**.tsx'
-      - '**.js'
-      - '**.jsx'
-      - '.claude/agents/**'
-      - '.claude/shared/**'
-      - 'src/**'
-      - 'gadugi/**'
+# System Design Review workflow is now disabled for CI cost reasons.
+# The agent should be invoked by the Workflow Manager, not from CI.
+# To re-enable, restore the 'on:' block below and update as needed.
+
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened]
+#     # Only run on PRs that modify code files
+#     paths:
+#       - '**.py'
+#       - '**.ts'
+#       - '**.tsx'
+#       - '**.js'
+#       - '**.jsx'
+#       - '.claude/agents/**'
+#       - '.claude/shared/**'
+#       - 'src/**'
+#       - 'gadugi/**'
 
 # Ensure only one review runs per PR at a time
 concurrency:
