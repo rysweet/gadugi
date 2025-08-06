@@ -26,28 +26,32 @@ from enum import Enum, auto
 try:
     from .workflow_engine import WorkflowPhase, WorkflowState
 except ImportError:
-    # Minimal definitions if workflow_engine not available
-    from enum import Enum, auto
-    from dataclasses import dataclass
-    from typing import Dict, Any, Optional
-    
-    class WorkflowPhase(Enum):
-        INIT = auto()
-        PROMPT_VALIDATION = auto()
-    
-    @dataclass
-    class WorkflowState:
-        """Minimal WorkflowState for when workflow_engine is not available"""
-        prompt_file: str = ""
-        current_phase: Optional[WorkflowPhase] = None
-        phases_completed: Dict[str, bool] = None
-        context: Dict[str, Any] = None
+    try:
+        # Try absolute import if relative import fails
+        from workflow_engine import WorkflowPhase, WorkflowState
+    except ImportError:
+        # Minimal definitions if workflow_engine not available
+        from enum import Enum, auto
+        from dataclasses import dataclass
+        from typing import Dict, Any, Optional
         
-        def __post_init__(self):
-            if self.phases_completed is None:
-                self.phases_completed = {}
-            if self.context is None:
-                self.context = {}
+        class WorkflowPhase(Enum):
+            INIT = auto()
+            PROMPT_VALIDATION = auto()
+        
+        @dataclass
+        class WorkflowState:
+            """Minimal WorkflowState for when workflow_engine is not available"""
+            prompt_file: str = ""
+            current_phase: Optional[WorkflowPhase] = None
+            phases_completed: Dict[str, bool] = None
+            context: Dict[str, Any] = None
+            
+            def __post_init__(self):
+                if self.phases_completed is None:
+                    self.phases_completed = {}
+                if self.context is None:
+                    self.context = {}
 
 
 class ValidationLevel(Enum):
@@ -613,13 +617,17 @@ class WorkflowValidator:
         
         # Check for sequence violations
         for i, phase in enumerate(completed_phases):
-            if i < len(expected_sequence) and phase != expected_sequence[i]:
-                issues.append(f'Phase {phase.name} completed out of sequence at position {i}')
+            if i < len(expected_sequence):
+                if phase != expected_sequence[i]:
+                    issues.append(f'Expected phase {expected_sequence[i].name} at position {i}, got {phase.name}')
+            else:
+                # Phase beyond expected sequence
+                issues.append(f'Unexpected phase {phase.name} at position {i} (beyond expected sequence)')
         
-        # Check for skipped phases
-        for i, expected_phase in enumerate(expected_sequence):
-            if i < len(completed_phases) and completed_phases[i] != expected_phase:
-                issues.append(f'Expected phase {expected_phase.name} at position {i}, got {completed_phases[i].name if i < len(completed_phases) else "none"}')
+        # Check if any expected phases are missing
+        if len(completed_phases) < len(expected_sequence):
+            for i in range(len(completed_phases), len(expected_sequence)):
+                issues.append(f'Missing expected phase {expected_sequence[i].name} at position {i}')
         
         passed = len(issues) == 0
         message = 'Phase sequence is correct' if passed else f'Phase sequence issues: {"; ".join(issues)}'

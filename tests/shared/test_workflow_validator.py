@@ -67,6 +67,14 @@ identifies issues and provides useful feedback for workflow improvements.
 3. Test git state validation
 4. Verify GitHub integration checks
 
+## Code Example
+```python
+# Example validation code
+def validate_workflow(state):
+    validator = WorkflowValidator()
+    return validator.validate(state)
+```
+
 ## Success Criteria
 - All validation tests pass successfully
 - Proper error messages are generated
