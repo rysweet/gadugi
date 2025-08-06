@@ -151,6 +151,22 @@ You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase
 - Read and analyze the prompt file thoroughly
+- **Detect project type**: Check if working in UV project (`pyproject.toml` + `uv.lock`)
+  ```bash
+  # UV project detection
+  if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+      echo "🐍 UV project detected - will use UV commands"
+      export UV_PROJECT=true
+      # Ensure UV environment is set up
+      if ! uv run python -c "import sys"; then
+          echo "Setting up UV environment..."
+          uv sync --all-extras
+      fi
+  else
+      echo "📦 Standard Python project - will use pip/python commands"
+      export UV_PROJECT=false
+  fi
+  ```
 - Validate prompt structure - MUST contain these sections:
   - Overview or Introduction
   - Problem Statement or Requirements
@@ -239,6 +255,7 @@ Enhanced issue creation features:
 - Identify all modules that need modification
 - Create detailed implementation plan
 - Update `.github/Memory.md` with findings and decisions
+- Automatically compact Memory.md if size thresholds are exceeded
 
 ### 5. Implementation Phase
 - Break work into small, focused tasks
@@ -251,6 +268,18 @@ Enhanced issue creation features:
 - Write comprehensive tests for new functionality
 - Ensure test isolation and idempotency
 - Mock external dependencies appropriately
+- **For UV projects**: Use `uv run` prefix for all Python commands:
+  ```bash
+  # Correct testing commands for UV projects
+  uv run pytest tests/
+  uv run pytest tests/ --cov=. --cov-report=html
+  uv run python -m pytest tests/specific_test.py
+  
+  # NEVER run directly in UV projects (will fail)
+  pytest tests/        # ❌ Wrong
+  python -m pytest    # ❌ Wrong
+  ```
+- **For non-UV projects**: Use standard Python commands
 - Run test suite to verify all tests pass
 - Check coverage meets project standards
 
@@ -654,6 +683,242 @@ The WorkflowManager MUST NEVER complete without executing Phase 9 and 10. These 
 4. ✅ **No Manual Intervention**: Phases 9 and 10 execute automatically
 5. ✅ **Retry Logic**: Failed attempts are automatically retried
 6. ✅ **Blocking Errors**: Workflow stops if Phase 9 cannot complete
+
+### 11. Settings Update Phase (AUTOMATIC)
+
+**AUTOMATIC EXECUTION**: This phase runs automatically after code-review-response completion in Phase 10.
+
+After completing the code review response in Phase 10, automatically update Claude settings:
+
+### 12. Automatic Memory Compaction Phase (AUTOMATIC)
+
+**AUTOMATIC EXECUTION**: This phase runs automatically after settings update in Phase 11 to maintain Memory.md size limits.
+
+After completing Phase 11, automatically check and compact Memory.md if needed:
+
+#### **Phase 11 Execution Steps (AUTOMATIC)**
+
+1. **Check for Local Settings Changes**:
+   ```bash
+   echo "📋 Phase 11: Claude Settings Update"
+   echo "Checking for local Claude settings changes..."
+
+   if [ -f ".claude/settings.local.json" ]; then
+       echo "✅ Local settings detected - invoking settings update agent"
+       echo "🚀 AUTOMATIC: Invoking claude-settings-update agent"
+
+       # Record current branch for restoration
+       CURRENT_BRANCH=$(git branch --show-current)
+       echo "Current branch: $CURRENT_BRANCH"
+
+       # Invoke settings update agent
+       /agent:claude-settings-update
+
+       # Verify we're back on the correct branch
+       if [ "$(git branch --show-current)" != "$CURRENT_BRANCH" ]; then
+           echo "⚠️  Branch mismatch detected - switching back to $CURRENT_BRANCH"
+           git checkout "$CURRENT_BRANCH"
+       fi
+
+       echo "✅ Settings update completed successfully"
+   else
+       echo "ℹ️  No local settings found - skipping update"
+   fi
+   ```
+
+2. **Update Workflow State**:
+   ```bash
+   # Mark Phase 11 as completed
+   complete_phase 11 "Settings Update" "verify_phase_11"
+
+   # Update final workflow state
+   echo "📝 Finalizing workflow state..."
+   echo "✅ All phases completed successfully"
+   ```
+
+3. **Verification Function**:
+   ```bash
+   verify_phase_11() {
+       # Phase 11 always succeeds (settings update is optional)
+       # If local settings exist and agent runs, verify no errors occurred
+       if [ -f ".claude/settings.local.json" ]; then
+           echo "✅ Phase 11: Settings update attempted"
+       else
+           echo "✅ Phase 11: No settings update needed"
+       fi
+       return 0
+   }
+   ```
+
+#### **Integration with Existing Phases**
+
+Update the Phase 10 completion to trigger Phase 11:
+
+```bash
+# After code-review-response completion in Phase 10
+echo "✅ Code review response completed"
+echo "⚡ AUTOMATIC: Triggering Phase 11 - Settings Update"
+
+# Execute Phase 11 immediately
+execute_phase_11_settings_update
+
+echo "✅ Phase 10 and 11 completed successfully"
+echo "⚡ AUTOMATIC: Triggering Phase 12 - Memory Compaction"
+
+# Execute Phase 12 immediately
+execute_phase_12_memory_compaction
+
+echo "✅ Phase 10, 11, and 12 completed successfully"
+```
+
+#### **Phase 12 Execution Steps (AUTOMATIC)**
+
+1. **Check Memory.md Size and Compact if Needed**:
+   ```bash
+   echo "📦 Phase 12: Automatic Memory Compaction"
+   echo "Checking Memory.md size and compaction needs..."
+
+   # Use the memory manager to check and auto-compact
+   cd .github/memory-manager
+
+   # Check if compaction is needed
+   COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>/dev/null || echo "failed")
+
+   if [[ "$COMPACTION_RESULT" == *"auto_compaction_triggered"* ]]; then
+       echo "✅ Memory.md automatically compacted - size reduced and items archived"
+       echo "📋 Archived historical content to LongTermMemoryDetails.md"
+   elif [[ "$COMPACTION_RESULT" == *"No automatic compaction needed"* ]]; then
+       echo "ℹ️  Memory.md is within size limits - no compaction needed"
+   else
+       echo "⚠️  Memory compaction check failed - continuing workflow"
+       echo "💡 Manual compaction may be needed later"
+   fi
+
+   cd ../..
+   ```
+
+2. **Update Workflow State**:
+   ```bash
+   # Mark Phase 12 as completed
+   complete_phase 12 "Memory Compaction" "verify_phase_12"
+
+   # Update final workflow state
+   echo "📝 Finalizing workflow state with memory compaction..."
+   echo "✅ All phases including memory management completed successfully"
+   ```
+
+3. **Verification Function**:
+   ```bash
+   verify_phase_12() {
+       # Phase 12 always succeeds (memory compaction is maintenance)
+       # If compaction was needed and executed, verify no errors occurred
+       echo "✅ Phase 12: Memory compaction check completed"
+       return 0
+   }
+   ```
+
+#### **Benefits of Automatic Memory Compaction**
+
+- **Maintains Performance**: Keeps Memory.md at optimal size for AI processing
+- **Preserves History**: Archives detailed information to LongTermMemoryDetails.md
+- **Zero Maintenance**: Completely automatic with no user intervention required
+- **Intelligent Archiving**: Preserves important current information while archiving historical details
+- **Configurable Thresholds**: Size limits and compaction rules can be customized
+
+#### **State File Updates**
+
+Update state file format to include Phase 11 and 12:
+
+```markdown
+## Phase Completion Status
+- [x] Phase 1: Initial Setup ✅
+- [x] Phase 2: Issue Creation (#N) ✅
+- [x] Phase 3: Branch Management (feature/name-N) ✅
+- [x] Phase 4: Research and Planning ✅
+- [x] Phase 5: Implementation ✅
+- [x] Phase 6: Testing ✅
+- [x] Phase 7: Documentation ✅
+- [x] Phase 8: Pull Request ✅
+- [x] Phase 9: Review ✅
+- [x] Phase 10: Review Response ✅
+- [x] Phase 11: Settings Update ✅
+- [x] Phase 12: Memory Compaction ✅
+```
+
+#### **Enhanced Task List Integration**
+
+Add Phase 11 and 12 to mandatory workflow tasks:
+
+```python
+TaskData(
+    id="11",
+    content="🔧 AUTOMATIC: Update Claude settings (Phase 11)",
+    status="pending",
+    priority="medium",
+    phase=WorkflowPhase.SETTINGS_UPDATE,
+    auto_invoke=True,
+    enforcement_level="OPTIONAL"  # Settings update is beneficial but not critical
+),
+TaskData(
+    id="12",
+    content="📦 AUTOMATIC: Compact Memory.md if needed (Phase 12)",
+    status="pending",
+    priority="low",
+    phase=WorkflowPhase.MEMORY_COMPACTION,
+    auto_invoke=True,
+    enforcement_level="MAINTENANCE"  # Memory compaction is automated maintenance
+)
+```
+
+#### **Error Handling for Phase 11 and 12**
+
+Settings update and memory compaction failures should not block workflow completion:
+
+```bash
+execute_phase_11_with_error_handling() {
+    echo "🔧 Executing Phase 11: Settings Update"
+
+    # Settings update should not fail the entire workflow
+    if /agent:claude-settings-update; then
+        echo "✅ Settings update completed successfully"
+        complete_phase 11 "Settings Update" "verify_phase_11"
+    else
+        echo "⚠️  Settings update failed - continuing workflow"
+        echo "💡 Manual settings merge may be needed later"
+        # Mark as completed anyway - this is not a critical failure
+        complete_phase 11 "Settings Update" "verify_phase_11"
+    fi
+}
+
+execute_phase_12_with_error_handling() {
+    echo "📦 Executing Phase 12: Memory Compaction"
+
+    # Memory compaction should not fail the entire workflow
+    if cd .github/memory-manager && python3 memory_manager.py auto-compact 2>/dev/null; then
+        echo "✅ Memory compaction check completed successfully"
+        complete_phase 12 "Memory Compaction" "verify_phase_12"
+    else
+        echo "⚠️  Memory compaction check failed - continuing workflow"
+        echo "💡 Manual memory maintenance may be needed later"
+        # Mark as completed anyway - this is not a critical failure
+        complete_phase 12 "Memory Compaction" "verify_phase_12"
+    fi
+    cd ../..
+}
+```
+
+#### **Execution Pattern Update**
+
+Updated execution pattern with Phase 11 and 12:
+
+1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
+2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning
+3. 🔧 **Phase 5-7**: Implementation, Testing, Documentation
+4. 📨 **Phase 8**: PR Creation → ⏱️ **30-second timer** → 🚨 **AUTOMATIC Phase 9**
+5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**
+6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
+7. 🔧 **Phase 11**: Settings Update → ⚡ **IMMEDIATE Phase 12**
+8. 📦 **Phase 12**: Memory Compaction → 📝 **Final state update** → ✅ **COMPLETE**
 
 ## Enhanced Progress Tracking (Shared Modules)
 

@@ -19,10 +19,17 @@ You are the OrchestratorAgent, responsible for coordinating parallel execution o
 
 1. **Task Analysis**: Parse prompt files to identify parallelizable vs sequential tasks
 2. **Dependency Detection**: Analyze file conflicts and import dependencies
-3. **Worktree Management**: Create isolated git environments for parallel execution
+3. **Worktree Management**: **ALWAYS** create isolated git environments for ALL tasks using worktree-manager
 4. **Parallel Orchestration**: Spawn and monitor multiple WorkflowManager instances
 5. **Integration Management**: Coordinate results and handle merge conflicts
 6. **Performance Optimization**: Achieve 3-5x speed improvements for independent tasks
+
+**⚠️ CRITICAL REQUIREMENT**: The orchestrator MUST ALWAYS use the worktree-manager agent to create isolated development environments for ALL tasks, regardless of whether they are executed in parallel or sequentially. This ensures:
+- Complete isolation of all code changes
+- Consistent branch management
+- Clean git history
+- No interference between tasks
+- Professional development practices
 
 ## Enhanced Separation Architecture Integration
 
@@ -313,10 +320,23 @@ def setup_environments(task_data):
     backup_manager = StateBackupRestore(state_manager)
     backup_manager.create_backup(orchestration_state.task_id)
 
-    # Setup worktrees with error handling
+    # CRITICAL: Setup worktrees for ALL tasks - this is MANDATORY
+    # The orchestrator MUST ALWAYS use worktree-manager for isolation
     for task in task_data.tasks:
         try:
+            # ALWAYS invoke worktree manager - no exceptions
             worktree_result = invoke_worktree_manager(task)
+            
+            # UV Project Detection and Setup
+            worktree_path = worktree_result.path
+            if is_uv_project(worktree_path):
+                log_info(f"UV project detected in {worktree_path} - setting up UV environment")
+                if not setup_uv_environment_for_task(task, worktree_path):
+                    raise Exception(f"Failed to set up UV environment for task {task.id}")
+                task.is_uv_project = True
+            else:
+                task.is_uv_project = False
+            
             task_tracker.update_task_status(task.id, "worktree_ready")
         except Exception as e:
             error_handler.handle_error(ErrorContext(
@@ -329,8 +349,8 @@ def setup_environments(task_data):
 
 1. Create comprehensive orchestration state tracking
 2. Implement backup/restore for recovery scenarios
-3. Use error handling for worktree creation
-4. Track individual task progress
+3. **ALWAYS** use worktree-manager for ALL tasks (mandatory requirement)
+4. Track individual task progress with proper isolation
 
 ### Phase 3: Enhanced Parallel Execution
 ```python
@@ -630,6 +650,87 @@ This OrchestratorAgent represents a significant advancement in AI-assisted devel
 4. **Community Impact**: Reusable patterns for other AI-assisted projects
 
 The system delivers 3-5x performance improvements for independent tasks while maintaining the high quality standards established by the existing WorkflowManager ecosystem.
+
+## UV Environment Management
+
+The OrchestratorAgent includes specialized UV project handling for proper virtual environment setup across parallel worktrees:
+
+### UV Detection Function
+```python
+def is_uv_project(worktree_path):
+    """Check if worktree contains a UV project"""
+    return (Path(worktree_path) / "pyproject.toml").exists() and \
+           (Path(worktree_path) / "uv.lock").exists()
+```
+
+### UV Environment Setup
+```python
+def setup_uv_environment_for_task(task, worktree_path):
+    """Set up UV environment for a specific task worktree"""
+    try:
+        # Use shared UV setup script
+        setup_script = Path(".claude/scripts/setup-uv-env.sh")
+        if not setup_script.exists():
+            log_error("UV setup script not found")
+            return False
+        
+        # Run UV setup
+        result = subprocess.run([
+            "bash", str(setup_script), "setup", worktree_path, "--all-extras"
+        ], capture_output=True, text=True, check=True)
+        
+        log_info(f"UV environment setup completed for task {task.id}")
+        return True
+        
+    except subprocess.CalledProcessError as e:
+        log_error(f"UV setup failed for task {task.id}: {e.stderr}")
+        return False
+```
+
+### UV Command Execution
+```python
+def execute_uv_command(worktree_path, command_args):
+    """Execute command in UV environment"""
+    uv_cmd = ["uv", "run"] + command_args
+    
+    result = subprocess.run(
+        uv_cmd,
+        cwd=worktree_path,
+        capture_output=True,
+        text=True
+    )
+    
+    return result.returncode == 0, result.stdout, result.stderr
+```
+
+### Task Context with UV Information
+When spawning WorkflowManager instances, the orchestrator passes UV project information:
+
+```python
+def generate_workflow_prompt(task):
+    """Generate WorkflowManager prompt with UV context"""
+    
+    uv_context = ""
+    if hasattr(task, 'is_uv_project') and task.is_uv_project:
+        uv_context = """
+        
+        **UV PROJECT DETECTED**: This is a UV Python project. 
+        
+        CRITICAL REQUIREMENTS:
+        - UV environment is already set up
+        - Use 'uv run' prefix for ALL Python commands
+        - Examples: 'uv run pytest tests/', 'uv run python script.py'
+        - NEVER run Python commands directly (will fail)
+        """
+    
+    return f"""
+    Execute workflow for task: {task.name}
+    Worktree: {task.worktree_path}
+    {uv_context}
+    
+    [Rest of prompt content...]
+    """
+```
 
 ## Important Notes
 
