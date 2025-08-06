@@ -2,26 +2,36 @@ name: System Design Review
 
 # System Design Review workflow is now disabled for CI cost reasons.
 # The agent should be invoked by the Workflow Manager, not from CI.
-# To re-enable, restore the 'on:' block below and update as needed.
+# To re-enable, uncomment the pull_request trigger below and remove workflow_dispatch.
 
-# on:
-#   pull_request:
-#     types: [opened, synchronize, reopened]
-#     # Only run on PRs that modify code files
-#     paths:
-#       - '**.py'
-#       - '**.ts'
-#       - '**.tsx'
-#       - '**.js'
-#       - '**.jsx'
-#       - '.claude/agents/**'
-#       - '.claude/shared/**'
-#       - 'src/**'
-#       - 'gadugi/**'
+on:
+  # Disabled - using workflow_dispatch as a placeholder to prevent CI errors
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'This workflow is disabled. Use Workflow Manager instead.'
+        required: false
+        type: string
+        default: 'disabled'
+  
+  # Original trigger (disabled):
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  #   # Only run on PRs that modify code files
+  #   paths:
+  #     - '**.py'
+  #     - '**.ts'
+  #     - '**.tsx'
+  #     - '**.js'
+  #     - '**.jsx'
+  #     - '.claude/agents/**'
+  #     - '.claude/shared/**'
+  #     - 'src/**'
+  #     - 'gadugi/**'
 
-# Ensure only one review runs per PR at a time
+# Concurrency control (for when workflow is re-enabled)
 concurrency:
-  group: system-design-review-${{ github.event.pull_request.number }}
+  group: system-design-review-manual
   cancel-in-progress: true
 
 jobs:
@@ -29,11 +39,8 @@ jobs:
     name: Architectural Review
     runs-on: ubuntu-latest
 
-    # Skip review for draft PRs and dependabot
-    if: >
-      github.event.pull_request.draft == false &&
-      github.actor != 'dependabot[bot]' &&
-      github.actor != 'github-actions[bot]'
+    # This workflow is disabled - only runs on manual dispatch
+    if: github.event_name == 'workflow_dispatch'
 
     permissions:
       contents: read
@@ -43,86 +50,19 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          # Fetch full history for accurate change analysis
-          fetch-depth: 0
-          # Ensure we have both base and head branches
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      - name: Fetch base branch
+      - name: Workflow Disabled Notice
         run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }}:${{ github.event.pull_request.base.ref }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # Install minimal dependencies for AST parsing
-          pip install pathlib typing-extensions dataclasses-json
-
-      - name: Validate PR size
-        id: pr-size
-        run: |
-          # Count changed files
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | wc -l)
-          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
-
-          # Skip review if PR is too large (>500 files)
-          if [ $CHANGED_FILES -gt 500 ]; then
-            echo "skip_review=true" >> $GITHUB_OUTPUT
-            echo "PR too large for automated review ($CHANGED_FILES files)"
-          else
-            echo "skip_review=false" >> $GITHUB_OUTPUT
-            echo "PR size acceptable for review ($CHANGED_FILES files)"
-          fi
-
-      - name: Run System Design Review
-        if: steps.pr-size.outputs.skip_review == 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          python .github/scripts/run_system_design_review.py
-
-      - name: Handle large PR
-        if: steps.pr-size.outputs.skip_review == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          # Post comment explaining why review was skipped
-          gh pr comment $PR_NUMBER --body-file - <<'COMMENT'
-          ## System Design Review - PR Too Large
-
-          **Status**: Automated review skipped
-
-          *Note: This notification was created by the System Design Review workflow.*
-
-          This PR contains ${{ steps.pr-size.outputs.changed_files }} changed files, which exceeds the automated review limit (500 files).
-
-          **Manual Review Recommended:**
-          - Focus on architectural changes in core components
-          - Review new patterns or frameworks introduced
-          - Validate security and performance implications
-          - Ensure documentation updates accompany significant changes
-
-          To enable automated review, consider splitting this PR into smaller, focused changes.
-          COMMENT
-
-      - name: Upload review artifacts
-        if: steps.pr-size.outputs.skip_review == 'false'
-        uses: actions/upload-artifact@v3
-        with:
-          name: system-design-review-${{ github.event.pull_request.number }}
-          path: |
-            docs/adr/ADR-*.md
-            ARCHITECTURE.md
-            .github/workflow-states/system-design-reviewer/
-          retention-days: 30
-          if-no-files-found: ignore
+          echo "================================"
+          echo "System Design Review is DISABLED"
+          echo "================================"
+          echo ""
+          echo "This workflow has been disabled for CI cost optimization."
+          echo "The System Design Review Agent should be invoked by the Workflow Manager instead."
+          echo ""
+          echo "To manually run a system design review, use:"
+          echo "  /agent:system-design-reviewer analyze-pr <PR_NUMBER>"
+          echo ""
+          echo "To re-enable CI-based reviews:"
+          echo "  1. Uncomment the pull_request trigger in this workflow"
+          echo "  2. Remove the workflow_dispatch trigger"
+          echo "  3. Restore the original job steps"
