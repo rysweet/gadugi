@@ -29,32 +29,11 @@ try:
     from .state_management import StateManager
     from .task_tracking import TaskTracker
     from .utils.error_handling import ErrorHandler, ErrorCategory, ErrorSeverity
-except ImportError:
-    # Fallback for testing or standalone usage
-    print("Warning: Some shared modules not available, using fallback implementations")
-    
-    # Define minimal fallback types
-    class StateManager:
-        def save_state(self, state): pass
-        def load_state(self, task_id): return None
-    
-    class GitHubOperations:
-        def create_issue(self, title, body): return None
-        def create_pr(self, title, body, base, head): return None
-    
-    class TaskTracker:
-        def start_task(self, task_id): pass
-        def complete_task(self, task_id): pass
-    
-    class ErrorHandler:
-        def handle_error(self, error, category=None, severity=None): 
-            print(f"Error: {error}")
-    
-    class ErrorCategory:
-        WORKFLOW_EXECUTION = "workflow_execution"
-    
-    class ErrorSeverity:
-        HIGH = "high"
+except ImportError as e:
+    raise ImportError(
+        "workflow_engine requires all shared modules to be importable. "
+        "Ensure claude/shared/github_operations.py, state_management.py, task_tracking.py, and utils/error_handling.py are available."
+    ) from e
 
 
 class WorkflowPhase(Enum):
