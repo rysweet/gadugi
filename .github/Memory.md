@@ -8,6 +8,7 @@
 - 🔄 **Phase 5 Ready**: Final housekeeping tasks and system optimization
 - 🔄 **Distributed Agent Runtime (DAR)**: Continue staged implementation based on Issue #27
 - ✅ **EMERGENCY COMPLETE**: TeamCoach Reflection Loop Fix (Issue #89, PR #149): Fixed infinite loops, implemented safe phase-based reflection
+- ✅ **COMPLETED**: Event-Driven Agent Invocation (Issue #115, PR #151): Comprehensive event service with GitHub webhooks, local events, and automated agent triggers
 
 ## Current Context
 - **Branch**: feature/vscode-extension-ux-improvement (PR #99)
@@ -67,6 +68,18 @@
   - ✅ Created separate PR mechanism for settings updates
   - ✅ Comprehensive test suite with 457 lines of test coverage
   - ✅ Complete documentation and usage guide
+- ✅ **COMPLETED**: Event-Driven Agent Invocation Service (Issue #115, PR #151)
+  - ✅ Implemented comprehensive event-driven architecture for automated agent invocation
+  - ✅ Created GitHub webhook integration with signature verification and API polling fallback
+  - ✅ Built Unix socket interface for local event submission and processing
+  - ✅ Designed flexible event filtering system with patterns, metadata, and GitHub-specific filters
+  - ✅ Integrated multiple agent invocation methods (Claude CLI, direct Python, subprocess)
+  - ✅ Created Gadugi agent (/agent:gadugi) for easy installation and service management
+  - ✅ Added comprehensive CLI interface for service lifecycle management
+  - ✅ Implemented 39 comprehensive tests covering events, handlers, and filtering
+  - ✅ Created complete documentation with user guide, examples, and best practices
+  - ✅ Added protobuf event definitions for type safety and future extensibility
+  - ✅ Built service management features (start/stop/status/logs/health checks)
 - ✅ **EMERGENCY COMPLETE**: TeamCoach Reflection Loop Fix (Issue #89/147, PR #149)
   - ✅ Fixed critical infinite loops caused by TeamCoach hooks in .claude/settings.json
   - ✅ Removed problematic hook configurations causing cascading Claude sessions
