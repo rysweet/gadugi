@@ -315,7 +315,7 @@ def setup_environments(task_data):
         try:
             # ALWAYS invoke worktree manager - no exceptions
             worktree_result = invoke_worktree_manager(task)
-            
+
             # UV Project Detection and Setup
             worktree_path = worktree_result.path
             if is_uv_project(worktree_path):
@@ -325,7 +325,7 @@ def setup_environments(task_data):
                 task.is_uv_project = True
             else:
                 task.is_uv_project = False
-            
+
             task_tracker.update_task_status(task.id, "worktree_ready")
         except Exception as e:
             error_handler.handle_error(ErrorContext(
@@ -355,7 +355,7 @@ def execute_parallel_tasks(tasks):
         try:
             # CRITICAL GOVERNANCE VALIDATION: Ensure task follows proper workflow
             validate_workflow_compliance(task)
-            
+
             # MANDATORY: ALL tasks must execute through WorkflowManager
             task_result = execution_circuit_breaker.call(
                 lambda: execute_workflow_manager(task)
@@ -622,22 +622,22 @@ Before executing any task, the orchestrator MUST validate:
 ```python
 def validate_workflow_compliance(task):
     """Ensure task will be executed through proper WorkflowManager workflow"""
-    
+
     # Check 1: Verify WorkflowManager will be used
     if not task.uses_workflow_manager:
         raise InvalidExecutionMethodError(task.id)
-    
+
     # Check 2: Verify complete workflow phases will be followed
-    required_phases = ['setup', 'issue_creation', 'branch_creation', 'implementation', 
+    required_phases = ['setup', 'issue_creation', 'branch_creation', 'implementation',
                       'testing', 'documentation', 'pr_creation', 'review']
     missing_phases = [phase for phase in required_phases if phase not in task.planned_phases]
     if missing_phases:
         raise IncompleteWorkflowError(task.id, missing_phases)
-    
+
     # Check 3: Verify no direct execution bypass
     if task.execution_method in ['direct', 'claude_-p', 'shell_script']:
         raise DirectExecutionError(task.id, task.execution_method)
-    
+
     return True
 ```
 
@@ -669,15 +669,15 @@ def setup_uv_environment_for_task(task, worktree_path):
         if not setup_script.exists():
             log_error("UV setup script not found")
             return False
-        
+
         # Run UV setup
         result = subprocess.run([
             "bash", str(setup_script), "setup", worktree_path, "--all-extras"
         ], capture_output=True, text=True, check=True)
-        
+
         log_info(f"UV environment setup completed for task {task.id}")
         return True
-        
+
     except subprocess.CalledProcessError as e:
         log_error(f"UV setup failed for task {task.id}: {e.stderr}")
         return False
@@ -688,14 +688,14 @@ def setup_uv_environment_for_task(task, worktree_path):
 def execute_uv_command(worktree_path, command_args):
     """Execute command in UV environment"""
     uv_cmd = ["uv", "run"] + command_args
-    
+
     result = subprocess.run(
         uv_cmd,
         cwd=worktree_path,
         capture_output=True,
         text=True
     )
-    
+
     return result.returncode == 0, result.stdout, result.stderr
 ```
 
@@ -705,25 +705,25 @@ When spawning WorkflowManager instances, the orchestrator passes UV project info
 ```python
 def generate_workflow_prompt(task):
     """Generate WorkflowManager prompt with UV context"""
-    
+
     uv_context = ""
     if hasattr(task, 'is_uv_project') and task.is_uv_project:
         uv_context = """
-        
-        **UV PROJECT DETECTED**: This is a UV Python project. 
-        
+
+        **UV PROJECT DETECTED**: This is a UV Python project.
+
         CRITICAL REQUIREMENTS:
         - UV environment is already set up
         - Use 'uv run' prefix for ALL Python commands
         - Examples: 'uv run pytest tests/', 'uv run python script.py'
         - NEVER run Python commands directly (will fail)
         """
-    
+
     return f"""
     Execute workflow for task: {task.name}
     Worktree: {task.worktree_path}
     {uv_context}
-    
+
     [Rest of prompt content...]
     """
 ```
