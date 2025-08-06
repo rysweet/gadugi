@@ -129,6 +129,7 @@ Once installed, invoke agents as needed:
 - `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
 - `/agent:program-manager` - For project health and issue lifecycle management
 - `/agent:team-coach` - For team coordination and performance optimization
+- `/agent:readme-agent` - For README management and maintenance
 
 #### Development Tools
 - `/agent:test-solver` - For diagnosing and fixing failing tests
@@ -166,7 +167,7 @@ Once installed, invoke agents as needed:
 
 ### Productivity & Content Creation
 - **prompt-writer** - Creates high-quality structured prompts for development workflows
-
+- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
 ### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
 - **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks

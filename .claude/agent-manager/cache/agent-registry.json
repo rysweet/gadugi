@@ -1,11 +1,20 @@
 {
-  "version": "1.0.0",
-  "last_updated": "2025-08-01T03:30:00Z",
-  "repositories": {},
-  "agents": {},
-  "metadata": {
-    "total_repositories": 0,
-    "total_agents": 0,
-    "last_sync": null
-  }
+  "agents": {
+    "workflow-master": {
+      "latest_version": "2.0.0",
+      "description": "Master workflow orchestration agent",
+      "release_date": "2024-03-15"
+    },
+    "code-reviewer": {
+      "latest_version": "1.5.0",
+      "description": "Automated code review agent",
+      "release_date": "2024-03-10"
+    },
+    "task-analyzer": {
+      "latest_version": "1.2.0",
+      "description": "Task analysis and decomposition agent",
+      "release_date": "2024-03-05"
+    }
+  },
+  "last_updated": "2025-08-05T19:32:43Z"
 }

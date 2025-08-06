@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { BloomCommand } from './commands/bloomCommand';
 import { MonitorPanel } from './panels/monitorPanel';
 import { TerminalService } from './services/terminalService';
+import { GitSetupService } from './services/gitSetupService';
 import { ErrorUtils } from './utils/errorUtils';
 
 /**
@@ -10,6 +11,7 @@ import { ErrorUtils } from './utils/errorUtils';
 
 let monitorPanel: MonitorPanel | undefined;
 let terminalService: TerminalService | undefined;
+let gitSetupService: GitSetupService | undefined;
 
 /**
  * Extension activation function
@@ -18,13 +20,26 @@ export async function activate(context: vscode.ExtensionContext) {
   try {
     ErrorUtils.logInfo('Gadugi VS Code extension is activating...', 'extension-activation');
 
+    // Initialize Git setup service first (needed for all validations)
+    gitSetupService = new GitSetupService(context);
+
     // Validate prerequisites
     const validation = await validateExtensionPrerequisites();
     if (validation.issues.length > 0) {
       ErrorUtils.logWarning(`Extension prerequisites not fully met: ${validation.issues.join(', ')}`, 'extension-activation');
 
-      // Show warning but continue activation for basic functionality
-      if (!validation.canContinue) {
+      // Show git setup guidance for git-related issues instead of generic error
+      const hasGitIssues = validation.issues.some(issue =>
+        issue.includes('Git') || issue.includes('git repository')
+      );
+
+      if (hasGitIssues && gitSetupService) {
+        // Show helpful guidance instead of error message
+        await gitSetupService.showGitSetupGuidance();
+      }
+
+      // Only prevent activation for critical non-git issues
+      if (!validation.canContinue && !hasGitIssues) {
         await ErrorUtils.showErrorMessage(
           `Gadugi extension cannot start: ${validation.issues.join(', ')}`,
           'Show Details'
@@ -87,6 +102,12 @@ export function deactivate() {
     if (terminalService) {
       // Terminal service cleanup is handled by VS Code automatically
       terminalService = undefined;
+    }
+
+    // Cleanup git setup service
+    if (gitSetupService) {
+      gitSetupService.dispose();
+      gitSetupService = undefined;
     }
 
     ErrorUtils.logInfo('Gadugi VS Code extension deactivated', 'extension-deactivation');
@@ -172,6 +193,31 @@ function registerAdditionalCommands(context: vscode.ExtensionContext): void {
     })
   );
 
+  // Git setup commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand('gadugi.showGitStatus', async () => {
+      if (gitSetupService) {
+        await gitSetupService.showGitStatusDetails();
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('gadugi.showGitSetup', async () => {
+      if (gitSetupService) {
+        await gitSetupService.showGitSetupGuidance();
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('gadugi.resetGitSetupGuidance', async () => {
+      if (gitSetupService) {
+        await gitSetupService.resetDismissPreference();
+      }
+    })
+  );
+
   ErrorUtils.logInfo('Additional commands registered', 'extension-commands');
 }
 
@@ -186,6 +232,11 @@ function setupExtensionEventListeners(context: vscode.ExtensionContext): void {
 
       if (monitorPanel) {
         await monitorPanel.refresh();
+      }
+
+      // Update git status when workspace changes
+      if (gitSetupService) {
+        await gitSetupService.updateStatusBar();
       }
     })
   );
@@ -367,9 +418,12 @@ export function getExtensionAPI() {
   return {
     getMonitorPanel: () => monitorPanel,
     getTerminalService: () => terminalService,
+    getGitSetupService: () => gitSetupService,
     executeBloom: () => vscode.commands.executeCommand('gadugi.bloom'),
     refreshMonitor: () => monitorPanel?.refresh(),
-    showOutput: () => ErrorUtils.showOutput()
+    showOutput: () => ErrorUtils.showOutput(),
+    showGitSetup: () => gitSetupService?.showGitSetupGuidance(),
+    updateGitStatus: () => gitSetupService?.updateStatusBar()
   };
 }
 

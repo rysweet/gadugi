@@ -11,49 +11,125 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## CRITICAL: Workflow Execution Pattern
 
-**For ANY development task that requires multiple phases (issue, branch, code, PR):**
+⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
 
-1. **DO NOT manually execute workflow phases**
-2. **Use the proper agent hierarchy**:
+**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
 
-   **For multiple tasks or when parallelization is possible**:
+This ensures:
+- Proper worktree isolation for all changes
+- Consistent branch management
+- Complete workflow tracking
+- Parallel execution when possible
+- Professional development practices
+
+**For ANY task that modifies code, configuration, or documentation files:**
+
+1. **NEVER manually edit files directly**
+2. **ALWAYS use the orchestrator agent as the entry point**:
+
    ```
    /agent:orchestrator-agent
 
-   Execute these specific prompts in parallel:
-   - prompt-file-1.md
-   - prompt-file-2.md
+   Execute the following task:
+   - [description of changes needed]
    ```
 
-   **For single sequential tasks**:
-   ```
-   /agent:workflow-manager
+3. **The Orchestrator will automatically**:
+   - Invoke the worktree-manager to create isolated environments
+   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
+   - Coordinate parallel execution when multiple tasks exist
+   - Ensure proper branch creation and PR workflow
 
-   Task: Execute workflow for /prompts/[prompt-file].md
-   ```
-
-3. **Agent Hierarchy**:
-   - **OrchestratorAgent**: Top-level coordinator for parallel execution
-   - **WorkflowManager**: Handles individual workflow execution
+4. **Agent Hierarchy**:
+   - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
+   - **WorktreeManager**: Automatically invoked by orchestrator for isolation
+   - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
    - **Code-Reviewer**: Executes Phase 9 reviews
 
-4. **Automated Workflow Handling**:
+**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
+
+5. **Automated Workflow Handling**:
    - Issue creation
-   - Branch management
+   - Worktree and branch management
    - Implementation tracking
    - PR creation
    - Code review invocation (Phase 9)
    - State management
 
-**Only execute manual steps for**:
-- Quick fixes that don't need full workflow
-- Investigations or analysis
-- Direct user requests for specific actions
+6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
+   - Phase 1: Initial Setup
+   - Phase 2: Issue Creation
+   - Phase 3: Branch Management
+   - Phase 4: Research and Planning
+   - Phase 5: Implementation
+   - Phase 6: Testing
+   - Phase 7: Documentation
+   - Phase 8: Pull Request
+   - Phase 9: Review (code-reviewer invocation)
+   - Phase 10: Review Response
+   - Phase 11: Settings Update
 
-**Before ANY development task, ask yourself**:
+**Only execute manual steps for**:
+- Read-only operations (searching, viewing files)
+- Answering questions about the codebase
+- Running tests or builds without changes
+- Direct user requests for specific read-only actions
+
+**Before ANY task, ask yourself**:
+- Will this change version-controlled files? → MUST use OrchestratorAgent
 - Multiple related tasks? → Use OrchestratorAgent
-- Single complex task? → Use WorkflowManager
-- Need an issue/branch/PR? → Use agents, not manual execution
+- Single task with code changes? → Use OrchestratorAgent
+- Read-only investigation? → Can execute manually
+
+**Workflow Validation Requirements**:
+- Orchestrator MUST delegate ALL tasks to WorkflowManager
+- ALL 11 workflow phases MUST be executed for every task
+- NO direct execution bypassing workflow phases
+- State tracking MUST be maintained throughout all phases
+- Quality gates MUST be validated at each phase transition
+
+**Enforcement Examples**:
+- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
+- ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
+- ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
+- ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
+
+### Emergency Procedures (Critical Production Issues)
+
+⚠️ **EMERGENCY HOTFIX EXCEPTION** ⚠️
+
+For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabilities, system downtime, data corruption), you may bypass the orchestrator requirement:
+
+**Emergency Criteria** (ALL must be true):
+- Production system is down or compromised
+- Issue poses immediate security risk or data loss
+- Fix is simple and well-understood (< 10 lines of code)
+- No time for full workflow due to business impact
+
+**Emergency Procedure**:
+1. **Document the emergency**: Create issue with `emergency` label
+2. **Work directly on main branch** (exception to normal branching)
+3. **Make minimal, focused changes only**
+4. **Commit with clear emergency attribution**:
+   ```bash
+   git commit -m "EMERGENCY: fix critical [issue description]
+
+   Emergency hotfix bypassing normal orchestrator workflow
+   due to production impact. Full workflow to follow.
+
+   Fixes: [issue-number]"
+   ```
+5. **Immediately create follow-up issue** for proper workflow implementation
+6. **Return to orchestrator requirement** for all subsequent changes
+
+**Post-Emergency Actions**:
+- Conduct immediate post-mortem
+- Implement proper tests via orchestrator workflow
+- Update documentation to prevent recurrence
+- Review emergency decision in next team meeting
+
+**Important**: Emergency exception should be used < 1% of the time. If used frequently, reassess development practices.
 
 ---
 
@@ -162,6 +238,383 @@ The worktree-manager agent handles:
 - Integration with orchestrator for parallel work
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
+
+## UV Virtual Environment Setup for Agents
+
+**CRITICAL**: All agents working in worktrees on UV Python projects MUST properly set up virtual environments.
+
+### UV Project Detection
+
+Agents must detect UV projects by checking for both:
+- `pyproject.toml` file
+- `uv.lock` file
+
+### Required UV Setup in Worktrees
+
+When agents create or work in worktrees for UV projects, they MUST:
+
+1. **Always run UV sync after entering worktree**:
+   ```bash
+   cd .worktrees/task-*/
+   uv sync --all-extras
+   ```
+
+2. **Use `uv run` prefix for all Python commands**:
+   ```bash
+   # Correct UV usage
+   uv run python script.py
+   uv run pytest tests/
+   uv run ruff check .
+   uv run black .
+   
+   # NEVER run directly (will fail in UV projects)
+   python script.py     # ❌ Wrong
+   pytest tests/        # ❌ Wrong
+   ```
+
+### UV Setup Script for Agents
+
+All agents should use the shared UV setup script: `.claude/scripts/setup-uv-env.sh`
+
+#### Basic Usage for Agents:
+```bash
+# Set up UV environment in current worktree
+source .claude/scripts/setup-uv-env.sh
+setup_uv_environment "$(pwd)" "--all-extras"
+
+# Check if environment is healthy
+check_uv_environment "$(pwd)"
+
+# Run commands with UV
+uv_run "$(pwd)" pytest tests/
+uv_run_python "$(pwd)" script.py
+```
+
+#### Agent Integration Pattern:
+```bash
+# In agent scripts - always check for UV project first
+if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+    echo "UV project detected - setting up virtual environment"
+    source .claude/scripts/setup-uv-env.sh
+    
+    if setup_uv_environment "$(pwd)" "--all-extras"; then
+        echo "UV environment ready"
+        # Use uv_run for all subsequent Python commands
+        uv_run_pytest "$(pwd)" tests/
+    else
+        echo "Failed to set up UV environment"
+        exit 1
+    fi
+else
+    echo "Not a UV project - using standard Python setup"
+    # Standard Python setup for non-UV projects
+fi
+```
+
+### Agent-Specific UV Requirements
+
+#### WorktreeManager Agent
+- MUST run `uv sync --all-extras` in `setup_worktree_environment()` function
+- Should detect UV projects and set up virtual environment automatically
+- Must update environment setup documentation
+
+#### WorkflowManager Agent  
+- MUST check for UV project when starting any workflow
+- MUST use `uv run` prefix for all Python commands in UV projects
+- Should validate UV environment before running tests or scripts
+
+#### OrchestratorAgent
+- MUST coordinate UV setup across all parallel worktrees
+- Should pass UV project status to sub-agents
+- Must ensure consistent UV environment setup across all workers
+
+### UV Environment Commands Reference
+
+| Task | UV Command | Notes |
+|------|------------|-------|
+| Setup environment | `uv sync --all-extras` | Run once per worktree |
+| Run Python script | `uv run python script.py` | Always use uv run |
+| Run tests | `uv run pytest tests/` | Never run pytest directly |
+| Format code | `uv run ruff format .` | UV manages tool versions |
+| Lint code | `uv run ruff check .` | Consistent tool versions |
+| Add dependency | `uv add package` | Updates pyproject.toml |
+| Add dev dependency | `uv add --group dev package` | For development tools |
+
+### Troubleshooting UV Issues
+
+#### "Module not found" errors in agents:
+```bash
+# Always check if you're using uv run
+uv run python script.py  # ✅ Correct
+python script.py         # ❌ Wrong - will fail
+
+# Ensure environment is synced
+uv sync --all-extras
+```
+
+#### "uv: command not found" in worktrees:
+```bash
+# Check UV installation
+which uv
+uv --version
+
+# Install UV if missing
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+#### Virtual environment not found:
+```bash
+# Re-run setup
+uv sync --all-extras
+
+# Check environment health
+source .claude/scripts/setup-uv-env.sh
+check_uv_environment "$(pwd)"
+```
+
+### UV Environment Validation
+
+Agents should validate UV environments before executing Python code:
+
+```bash
+# Validation checklist for agents
+validate_uv_environment() {
+    local worktree_path="$1"
+    cd "$worktree_path"
+    
+    # Check UV project files
+    if [[ ! -f "pyproject.toml" || ! -f "uv.lock" ]]; then
+        echo "Not a UV project"
+        return 1
+    fi
+    
+    # Check UV installation
+    if ! command -v uv &> /dev/null; then
+        echo "UV not installed"
+        return 1
+    fi
+    
+    # Check virtual environment
+    if [[ ! -d ".venv" ]]; then
+        echo "Virtual environment not found - running uv sync"
+        uv sync --all-extras
+    fi
+    
+    # Test Python access
+    if ! uv run python -c "import sys; print('Python ready')"; then
+        echo "UV environment not working"
+        return 1
+    fi
+    
+    return 0
+}
+```
+
+## Troubleshooting: Orchestrator and Worktree Failures
+
+When the mandatory orchestrator workflow encounters issues, use these troubleshooting procedures:
+
+### Common Orchestrator Failures
+
+#### 1. Orchestrator Agent Not Found
+**Symptoms**: `/agent:orchestrator-agent` returns "agent not found" error
+**Solution**:
+```bash
+# Check if orchestrator files exist
+ls -la .claude/agents/orchestrator-agent.md
+ls -la src/orchestrator/
+
+# If missing, restore from main branch
+git checkout main -- .claude/agents/orchestrator-agent.md
+git checkout main -- src/orchestrator/
+```
+
+#### 2. Orchestrator Hangs or Times Out
+**Symptoms**: Orchestrator starts but never completes, no progress updates
+**Solution**:
+```bash
+# Kill hung orchestrator processes
+pkill -f "claude.*orchestrator"
+pkill -f "python.*orchestrator"
+
+# Check system resources
+df -h  # Disk space
+free -h  # Memory (Linux) or vm_stat (macOS)
+
+# Restart with verbose logging
+/agent:orchestrator-agent
+# Add troubleshooting flag if available
+```
+
+#### 3. Task Analysis Fails
+**Symptoms**: Orchestrator fails during task decomposition phase
+**Fallback Procedure**:
+1. Try simpler task breakdown manually
+2. Use WorkflowManager directly for single tasks:
+   ```
+   /agent:workflow-manager
+
+   Task: Execute workflow for /prompts/[single-prompt].md
+   ```
+3. Execute critical tasks manually as last resort (document as emergency)
+
+### Common Worktree Failures
+
+#### 1. Worktree Creation Fails
+**Symptoms**: "fatal: cannot create worktree" or permission errors
+**Solution**:
+```bash
+# Check git repository status
+git status
+git worktree list
+
+# Clean up existing worktrees if needed
+git worktree prune
+
+# Check disk space and permissions
+df -h
+ls -la .worktrees/
+
+# Create worktree manually as fallback
+git worktree add .worktrees/manual-fix-$(date +%s) -b manual-fix-branch
+```
+
+#### 2. Worktree Branch Conflicts
+**Symptoms**: Branch already exists or checkout fails
+**Solution**:
+```bash
+# List existing branches
+git branch -a
+
+# Remove conflicting remote branch
+git push origin --delete conflicting-branch-name
+
+# Clean up local references
+git worktree prune
+git branch -D conflicting-branch-name
+
+# Try worktree creation again
+```
+
+#### 3. Worktree Cleanup Issues
+**Symptoms**: Cannot remove worktree, "worktree locked" errors
+**Solution**:
+```bash
+# Force unlock worktree
+git worktree unlock .worktrees/stuck-worktree/
+
+# Force remove worktree
+git worktree remove --force .worktrees/stuck-worktree/
+
+# Manual cleanup if needed
+rm -rf .worktrees/stuck-worktree/
+git worktree prune
+```
+
+### Fallback Strategies
+
+#### 1. Orchestrator Unavailable - Use WorkflowManager
+When orchestrator completely fails, use WorkflowManager for individual tasks:
+```
+/agent:workflow-manager
+
+Task: [describe specific task]
+Emergency fallback from orchestrator failure: [brief reason]
+```
+
+#### 2. WorkflowManager Unavailable - Manual Workflow
+When both orchestrator and WorkflowManager fail:
+1. **Document the failure** in an issue immediately
+2. **Work in a regular branch** (not main):
+   ```bash
+   git checkout -b emergency-manual-fix-$(date +%s)
+   ```
+3. **Follow manual workflow**:
+   - Make minimal, focused changes
+   - Test thoroughly
+   - Create PR with detailed explanation
+   - Tag as `emergency` and `manual-workflow`
+
+#### 3. Complete Agent System Failure
+For extreme cases where all agents are unavailable:
+1. **Create emergency issue** documenting the system failure
+2. **Work carefully on feature branch** with manual procedures
+3. **Document all steps taken** for post-incident analysis
+4. **Restore agent system** before continuing normal development
+5. **Conduct post-mortem** to prevent recurrence
+
+### Recovery Procedures
+
+#### 1. State Recovery
+If orchestrator fails mid-execution:
+```bash
+# Check for state files
+find . -name "*.orchestrator.state" -o -name "*.workflow.state"
+
+# Review partial progress
+cat .task/progress.json  # If exists
+
+# Clean up partial work
+git worktree list
+# Remove failed worktrees as needed
+```
+
+#### 2. Resource Recovery
+Clean up after failed orchestrator runs:
+```bash
+# Clean up processes
+pkill -f "claude.*orchestrator"
+pkill -f "python.*orchestrator"
+
+# Clean up temporary files
+find /tmp -name "*orchestrator*" -mtime +1 -delete
+find /tmp -name "*worktree*" -mtime +1 -delete
+
+# Clean up git worktrees
+git worktree prune
+```
+
+#### 3. System Health Check
+Before retrying failed operations:
+```bash
+# Check system resources
+df -h                    # Disk space
+ps aux | grep claude     # Running processes
+git status              # Repository state
+git worktree list       # Active worktrees
+
+# Test basic agent functionality
+/agent:task-analyzer
+Simple test task analysis
+```
+
+### Prevention Measures
+
+1. **Regular Maintenance**:
+   - Run `git worktree prune` weekly
+   - Monitor disk space before large operations
+   - Keep agents updated with latest versions
+
+2. **Monitoring**:
+   - Watch for repeated failures in similar scenarios
+   - Document failure patterns for system improvements
+   - Monitor system resource usage during orchestration
+
+3. **Backup Strategies**:
+   - Keep known-good versions of agent files
+   - Maintain manual procedure documentation
+   - Regular testing of fallback procedures
+
+### When to Escalate
+
+Escalate to system maintainers when:
+- Same failure occurs > 3 times
+- Worktree system becomes completely unusable
+- Agent files appear corrupted or missing
+- System resource issues prevent normal operation
+- Manual fallbacks also fail consistently
+
+Remember: The goal is to maintain development velocity while preserving quality and safety standards.
 
 ## Memories and Best Practices
 
