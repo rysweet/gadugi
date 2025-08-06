@@ -10,11 +10,10 @@ import tempfile
 import os
 from pathlib import Path
 from datetime import datetime
-
-from .claude.agents.system_design_reviewer.documentation_manager import (
+from agents.system_design_reviewer.documentation_manager import (
     DocumentationManager, DocumentationUpdate
 )
-from .claude.agents.system_design_reviewer.ast_parser import (
+from agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange, ArchitecturalElement, ElementType, ChangeType, ImpactLevel
 )
 

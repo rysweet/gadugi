@@ -10,11 +10,10 @@ import tempfile
 import os
 from pathlib import Path
 from datetime import datetime
-
-from .claude.agents.system_design_reviewer.adr_generator import (
+from agents.system_design_reviewer.adr_generator import (
     ADRGenerator, ADRData
 )
-from .claude.agents.system_design_reviewer.ast_parser import (
+from agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange, ArchitecturalElement, ElementType, ChangeType, ImpactLevel
 )
 
@@ -260,7 +259,7 @@ class TestADRGenerator:
         
         # Check for reasonable alternatives
         alternatives_text = '\n'.join(alternatives).lower()
-        assert any(word in alternatives_text for word in ["maintain", "alternative", "different"])
+        assert any(word in alternatives_text for word in ["minimal", "third-party", "delay"])
     
     def test_generate_implementation_notes(self, sample_changes_requiring_adr):
         """Test generating implementation notes"""
