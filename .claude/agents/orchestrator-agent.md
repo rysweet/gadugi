@@ -326,7 +326,7 @@ def setup_environments(task_data):
         try:
             # ALWAYS invoke worktree manager - no exceptions
             worktree_result = invoke_worktree_manager(task)
-            
+
             # UV Project Detection and Setup
             worktree_path = worktree_result.path
             if is_uv_project(worktree_path):
@@ -336,7 +336,7 @@ def setup_environments(task_data):
                 task.is_uv_project = True
             else:
                 task.is_uv_project = False
-            
+
             task_tracker.update_task_status(task.id, "worktree_ready")
         except Exception as e:
             error_handler.handle_error(ErrorContext(
@@ -673,15 +673,15 @@ def setup_uv_environment_for_task(task, worktree_path):
         if not setup_script.exists():
             log_error("UV setup script not found")
             return False
-        
+
         # Run UV setup
         result = subprocess.run([
             "bash", str(setup_script), "setup", worktree_path, "--all-extras"
         ], capture_output=True, text=True, check=True)
-        
+
         log_info(f"UV environment setup completed for task {task.id}")
         return True
-        
+
     except subprocess.CalledProcessError as e:
         log_error(f"UV setup failed for task {task.id}: {e.stderr}")
         return False
@@ -692,14 +692,14 @@ def setup_uv_environment_for_task(task, worktree_path):
 def execute_uv_command(worktree_path, command_args):
     """Execute command in UV environment"""
     uv_cmd = ["uv", "run"] + command_args
-    
+
     result = subprocess.run(
         uv_cmd,
         cwd=worktree_path,
         capture_output=True,
         text=True
     )
-    
+
     return result.returncode == 0, result.stdout, result.stderr
 ```
 
@@ -709,25 +709,25 @@ When spawning WorkflowManager instances, the orchestrator passes UV project info
 ```python
 def generate_workflow_prompt(task):
     """Generate WorkflowManager prompt with UV context"""
-    
+
     uv_context = ""
     if hasattr(task, 'is_uv_project') and task.is_uv_project:
         uv_context = """
-        
-        **UV PROJECT DETECTED**: This is a UV Python project. 
-        
+
+        **UV PROJECT DETECTED**: This is a UV Python project.
+
         CRITICAL REQUIREMENTS:
         - UV environment is already set up
         - Use 'uv run' prefix for ALL Python commands
         - Examples: 'uv run pytest tests/', 'uv run python script.py'
         - NEVER run Python commands directly (will fail)
         """
-    
+
     return f"""
     Execute workflow for task: {task.name}
     Worktree: {task.worktree_path}
     {uv_context}
-    
+
     [Rest of prompt content...]
     """
 ```

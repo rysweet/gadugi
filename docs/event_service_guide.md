@@ -105,13 +105,13 @@ handlers:
       method: claude_cli
       prompt_template: |
         New issue #{number}: {title}
-        
+
         Repository: {repository}
         Author: {actor}
         Labels: {labels}
-        
+
         {body}
-        
+
         Analyze and create workflow for this issue.
 
   - name: pr-code-review
@@ -134,11 +134,11 @@ handlers:
       method: claude_cli
       prompt_template: |
         Review PR #{number}: {title}
-        
+
         Repository: {repository}
         Author: {actor}
         Status: {state}
-        
+
         Perform comprehensive code review.
 
   - name: main-merge-memory-update
@@ -159,7 +159,7 @@ handlers:
       method: claude_cli
       prompt_template: |
         Update Memory.md after merge to main: {ref}
-        
+
         Repository: {repository}
         Synchronize project memory with latest changes.
 ```
@@ -258,7 +258,7 @@ invocation:
   method: claude_cli
   prompt_template: |
     Handle event: {event_type}
-    
+
     Event details:
     - Repository: {repository}
     - Action: {action}
@@ -432,7 +432,7 @@ handlers:
       method: claude_cli
       prompt_template: |
         Files changed: {files_changed}
-        
+
         Generate tests for the modified Python files.
 ```
 
@@ -504,12 +504,12 @@ handlers:
       timeout_seconds: 1200  # Extended timeout
       prompt_template: |
         SECURITY ALERT: {title}
-        
+
         Repository: {repository}
         Reporter: {actor}
-        
+
         {body}
-        
+
         Perform immediate security analysis and create response plan.
 
   - name: dependency-update-handler
@@ -525,7 +525,7 @@ handlers:
       method: claude_cli
       prompt_template: |
         Dependency update PR: {title}
-        
+
         Review and validate dependency changes.
         Check for breaking changes and security issues.
 ```

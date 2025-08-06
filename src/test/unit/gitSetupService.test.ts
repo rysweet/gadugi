@@ -12,7 +12,7 @@ suite('GitSetupService Tests', () => {
 
   setup(() => {
     sandbox = sinon.createSandbox();
-    
+
     // Create mock extension context
     mockContext = {
       subscriptions: [],
@@ -299,23 +299,23 @@ suite('GitSetupService Tests', () => {
       mockProcess.stderr = new EventEmitter();
       const spawnStub = sandbox.stub(require('child_process'), 'spawn');
       spawnStub.returns(mockProcess);
-      
+
       const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
-      
+
       // Mock user selections
       showMessageStub.onCall(0).resolves('Initialize Repository');
       showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
       showMessageStub.onCall(2).resolves('No'); // Skip initial commit
 
       const promise = gitSetupService.showGitSetupGuidance();
-      
+
       setTimeout(() => {
         mockProcess.emit('close', 0); // git init succeeds
       }, 10);
-      
+
       await promise;
 
-      assert.ok(spawnStub.calledWith('git', ['init']), 
+      assert.ok(spawnStub.calledWith('git', ['init']),
         'Should execute git init command with spawn');
     });
 
@@ -362,7 +362,7 @@ suite('GitSetupService Tests', () => {
       mockProcess.stderr = new EventEmitter();
       const spawnStub = sandbox.stub(require('child_process'), 'spawn');
       spawnStub.returns(mockProcess);
-      
+
       // Mock VS Code workspace fs API
       const mockFs = {
         stat: sandbox.stub().rejects(new Error('File not found')), // .gitignore doesn't exist
@@ -384,18 +384,18 @@ suite('GitSetupService Tests', () => {
       showMessageStub.onCall(2).resolves('Yes'); // Create initial commit
 
       const promise = gitSetupService.showGitSetupGuidance();
-      
+
       // Simulate successful git commands
       setTimeout(() => {
         mockProcess.emit('close', 0); // git init succeeds
         setTimeout(() => {
-          mockProcess.emit('close', 0); // git add succeeds  
+          mockProcess.emit('close', 0); // git add succeeds
           setTimeout(() => {
             mockProcess.emit('close', 0); // git commit succeeds
           }, 10);
         }, 10);
       }, 10);
-      
+
       await promise;
 
       assert.ok(spawnStub.calledWith('git', ['init']), 'Should execute git init');
@@ -413,7 +413,7 @@ suite('GitSetupService Tests', () => {
 
       const showErrorStub = sandbox.stub(vscode.window, 'showErrorMessage').resolves();
       const showMessageStub = sandbox.stub(vscode.window, 'showInformationMessage');
-      
+
       sandbox.stub(gitSetupService, 'getGitStatus').resolves({
         hasGit: true,
         hasRepository: false,
@@ -424,12 +424,12 @@ suite('GitSetupService Tests', () => {
       showMessageStub.onCall(1).resolves('Yes'); // Confirm initialization
 
       const promise = gitSetupService.showGitSetupGuidance();
-      
+
       setTimeout(() => {
         mockProcess.stderr.emit('data', 'Git init failed');
         mockProcess.emit('close', 1); // git init fails
       }, 10);
-      
+
       await promise;
 
       assert.ok(showErrorStub.calledOnce, 'Should show error message on git init failure');
@@ -529,7 +529,7 @@ suite('GitSetupService Tests', () => {
     test('should prevent command injection in git arguments', async () => {
       // Mock malicious git arguments
       const maliciousArgs = ['init', '; rm -rf /'];
-      
+
       let errorThrown = false;
       try {
         // Access the private method for testing (in real implementation, we'd use a test helper)
@@ -540,9 +540,9 @@ suite('GitSetupService Tests', () => {
       } catch (error) {
         errorThrown = true;
         assert.ok(error instanceof Error);
-        assert.ok(error.message.includes('Invalid characters'), 'Should reject malicious arguments');  
+        assert.ok(error.message.includes('Invalid characters'), 'Should reject malicious arguments');
       }
-      
+
       assert.ok(errorThrown, 'Should throw error for malicious arguments');
     });
 
@@ -565,10 +565,10 @@ suite('GitSetupService Tests', () => {
         } catch (error) {
           errorThrown = true;
           assert.ok(error instanceof Error);
-          assert.ok(error.message.includes('Invalid characters'), 
+          assert.ok(error.message.includes('Invalid characters'),
             `Should reject malicious arguments: ${args.join(' ')}`);
         }
-        
+
         assert.ok(errorThrown, `Should reject malicious arguments: ${args.join(' ')}`);
       }
     });
@@ -589,13 +589,13 @@ suite('GitSetupService Tests', () => {
       const method = (gitSetupService as any).executeGitCommand;
       if (method) {
         const promise = method.call(gitSetupService, ['init'], '/test/workspace');
-        
+
         setTimeout(() => {
           mockProcess.emit('close', 0);
         }, 10);
-        
+
         await promise;
-        
+
         assert.ok(spawnStub.calledOnce, 'Should call spawn');
         const spawnArgs = spawnStub.getCall(0).args;
         assert.strictEqual(spawnArgs[0], 'git', 'Should call git command');
@@ -630,10 +630,10 @@ suite('GitSetupService Tests', () => {
         } catch (error) {
           errorThrown = true;
           assert.ok(error instanceof Error);
-          assert.ok(error.message.includes('outside workspace boundary'), 
+          assert.ok(error.message.includes('outside workspace boundary'),
             `Should reject path traversal: ${maliciousPath}`);
         }
-        
+
         assert.ok(errorThrown, `Should reject path traversal: ${maliciousPath}`);
       }
     });
@@ -708,17 +708,17 @@ suite('GitSetupService Tests', () => {
         let errorThrown = false;
         try {
           const promise = method.call(gitSetupService, ['init'], '/test/workspace');
-          
+
           // Don't emit close event to simulate hanging process
           // The timeout should trigger
-          
+
           await promise;
         } catch (error) {
           errorThrown = true;
           assert.ok(error instanceof Error);
           assert.ok(error.message.includes('timed out'), 'Should timeout hanging process');
         }
-        
+
         assert.ok(errorThrown, 'Should throw timeout error');
         assert.ok(mockProcess.kill.called, 'Should kill hanging process');
       }
@@ -741,19 +741,19 @@ suite('GitSetupService Tests', () => {
         let errorThrown = false;
         try {
           const promise = method.call(gitSetupService, ['init'], '/test/workspace');
-          
+
           setTimeout(() => {
             mockProcess.stderr.emit('data', 'Git command failed');
             mockProcess.emit('close', 1); // Non-zero exit code
           }, 10);
-          
+
           await promise;
         } catch (error) {
           errorThrown = true;
           assert.ok(error instanceof Error);
           assert.ok(error.message.includes('Git command failed'), 'Should include stderr output');
         }
-        
+
         assert.ok(errorThrown, 'Should throw error for failed git command');
       }
     });
@@ -774,18 +774,18 @@ suite('GitSetupService Tests', () => {
         let errorThrown = false;
         try {
           const promise = method.call(gitSetupService, ['init'], '/test/workspace');
-          
+
           setTimeout(() => {
             mockProcess.emit('error', new Error('spawn ENOENT'));
           }, 10);
-          
+
           await promise;
         } catch (error) {
           errorThrown = true;
           assert.ok(error instanceof Error);
           assert.ok(error.message.includes('Git command error'));
         }
-        
+
         assert.ok(errorThrown, 'Should handle spawn errors');
       }
     });
@@ -810,10 +810,10 @@ suite('GitSetupService Tests', () => {
           } catch (error) {
             errorThrown = true;
             assert.ok(error instanceof Error);
-            assert.ok(error.message.includes('must be strings'), 
+            assert.ok(error.message.includes('must be strings'),
               `Should reject non-string arguments: ${JSON.stringify(args)}`);
           }
-          
+
           assert.ok(errorThrown, `Should reject non-string arguments: ${JSON.stringify(args)}`);
         }
       }
@@ -835,7 +835,7 @@ suite('GitSetupService Tests', () => {
 
       // Verify that we delegate to VS Code's built-in git.clone command
       // rather than handling URLs ourselves (prevents URL injection)
-      assert.ok(executeCommandSpy.calledWith('git.clone'), 
+      assert.ok(executeCommandSpy.calledWith('git.clone'),
         'Should delegate to VS Code git.clone to prevent URL injection');
     });
   });
@@ -869,7 +869,7 @@ suite('GitSetupService Tests', () => {
 
       // Start the test
       const promise = gitSetupService.showGitSetupGuidance();
-      
+
       setTimeout(() => {
         mockProcess.emit('close', 0); // git init succeeds
         setTimeout(() => {

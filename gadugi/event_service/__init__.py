@@ -15,13 +15,13 @@ from .events import Event, GitHubEvent, LocalEvent, AgentEvent
 
 __all__ = [
     "GadugiEventService",
-    "EventHandler", 
+    "EventHandler",
     "EventFilter",
     "ServiceConfig",
     "load_config",
     "save_config",
     "Event",
     "GitHubEvent",
-    "LocalEvent", 
+    "LocalEvent",
     "AgentEvent",
 ]

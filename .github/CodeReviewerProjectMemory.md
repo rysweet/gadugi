@@ -68,7 +68,7 @@
 
 #### Patterns to Watch
 - **Security First**: Always verify integrity of downloaded scripts before execution
-- **Shell Consistency**: Standardize on either bash or sh throughout the codebase  
+- **Shell Consistency**: Standardize on either bash or sh throughout the codebase
 - **Test Evolution**: Direct script execution is much cleaner than function extraction
 - **Gitignore Maintenance**: New comprehensive .gitignore needs ongoing maintenance
 

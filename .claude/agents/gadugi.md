@@ -33,25 +33,25 @@ Installs and configures the Gadugi event service:
 ```python
 def install_gadugi_service():
     """Install Gadugi event service with all dependencies"""
-    
+
     # 1. Check system requirements
     check_system_requirements()
-    
+
     # 2. Install Python dependencies
     install_python_dependencies()
-    
+
     # 3. Setup service configuration
     setup_service_config()
-    
+
     # 4. Initialize event handlers
     setup_default_event_handlers()
-    
+
     # 5. Configure GitHub webhook (optional)
     configure_github_webhook()
-    
+
     # 6. Create systemd service (Linux) or launchd service (macOS)
     create_system_service()
-    
+
     # 7. Validate installation
     validate_installation()
 ```
@@ -63,19 +63,19 @@ Automatically configures GitHub webhooks:
 ```python
 def setup_github_webhook():
     """Setup GitHub webhook for repository"""
-    
+
     # 1. Check GitHub token permissions
     verify_github_token()
-    
+
     # 2. Create webhook endpoint
     webhook_url = create_webhook_endpoint()
-    
+
     # 3. Configure webhook secret
     webhook_secret = generate_webhook_secret()
-    
+
     # 4. Install webhook via GitHub API
     install_github_webhook(webhook_url, webhook_secret)
-    
+
     # 5. Test webhook delivery
     test_webhook_delivery()
 ```
@@ -87,19 +87,19 @@ Manages event handler configuration:
 ```python
 def manage_configuration():
     """Manage Gadugi service configuration"""
-    
+
     # 1. Load current configuration
     config = load_service_config()
-    
+
     # 2. Interactive configuration wizard
     config = configuration_wizard(config)
-    
+
     # 3. Validate configuration
     validate_configuration(config)
-    
+
     # 4. Save configuration
     save_service_config(config)
-    
+
     # 5. Restart service if needed
     restart_service_if_running()
 ```
@@ -111,7 +111,7 @@ Controls the Gadugi event service:
 ```python
 def manage_service(action: str):
     """Manage Gadugi service lifecycle"""
-    
+
     if action == "start":
         start_service()
     elif action == "stop":
@@ -290,19 +290,19 @@ The agent includes comprehensive validation:
 ```python
 def validate_installation():
     """Validate Gadugi service installation"""
-    
+
     # 1. Check service is running
     assert_service_running()
-    
+
     # 2. Test GitHub webhook (if configured)
     test_github_webhook()
-    
+
     # 3. Test local event submission
     test_local_events()
-    
+
     # 4. Validate event handler execution
     test_event_handlers()
-    
+
     # 5. Check log file creation
     verify_logging_system()
 ```

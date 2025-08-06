@@ -37,16 +37,16 @@ handlers:
       method: claude_cli
       prompt_template: |
         New issue #{number}: {title}
-        
+
         Repository: {repository}
         Author: {actor}
         Labels: {labels}
         Assignees: {assignees}
         Milestone: {milestone}
-        
+
         Issue Description:
         {body}
-        
+
         Analyze and create comprehensive workflow for this issue.
         Consider:
         1. Issue complexity and scope
@@ -76,15 +76,15 @@ handlers:
       method: claude_cli
       prompt_template: |
         Review PR #{number}: {title}
-        
+
         Repository: {repository}
         Author: {actor}
         Status: {state}
         Labels: {labels}
-        
+
         PR Description:
         {body}
-        
+
         Perform comprehensive code review focusing on:
         1. Code quality and style
         2. Security vulnerabilities
@@ -111,11 +111,11 @@ handlers:
       method: claude_cli
       prompt_template: |
         Update Memory.md after merge to main branch
-        
+
         Repository: {repository}
         Reference: {ref}
         Author: {actor}
-        
+
         Synchronize project memory with latest changes:
         1. Update completed tasks and milestones
         2. Archive finished features
@@ -144,14 +144,14 @@ handlers:
       method: claude_cli
       prompt_template: |
         BUG REPORT: {title}
-        
+
         Repository: {repository}
         Reporter: {actor}
         Priority: {labels}
-        
+
         Bug Description:
         {body}
-        
+
         Analyze bug report and create action plan:
         1. Reproduce the issue
         2. Identify root cause
@@ -181,14 +181,14 @@ handlers:
       method: claude_cli
       prompt_template: |
         SECURITY ALERT: {title}
-        
+
         Repository: {repository}
         Reporter: {actor}
         Severity: {labels}
-        
+
         Vulnerability Report:
         {body}
-        
+
         IMMEDIATE SECURITY ANALYSIS REQUIRED:
         1. Assess threat level and impact
         2. Identify affected systems/users
@@ -218,13 +218,13 @@ handlers:
       method: claude_cli
       prompt_template: |
         Dependency Update PR: {title}
-        
+
         Repository: {repository}
         Bot: {actor}
-        
+
         Update Details:
         {body}
-        
+
         Review dependency update:
         1. Check for breaking changes
         2. Review security vulnerabilities fixed
@@ -251,13 +251,13 @@ handlers:
       method: claude_cli
       prompt_template: |
         New Release Published: {title}
-        
+
         Repository: {repository}
         Version: {title}
-        
+
         Release Notes:
         {body}
-        
+
         Post-release tasks:
         1. Update documentation
         2. Notify stakeholders
@@ -286,13 +286,13 @@ handlers:
       method: claude_cli
       prompt_template: |
         Feature Request: {title}
-        
+
         Repository: {repository}
         Requestor: {actor}
-        
+
         Request Details:
         {body}
-        
+
         Analyze feature request:
         1. Assess feasibility and complexity
         2. Identify requirements and constraints
@@ -316,9 +316,9 @@ handlers:
       method: claude_cli
       prompt_template: |
         Python files changed: {files_changed}
-        
+
         Working directory: {working_directory}
-        
+
         Generate/update tests for modified Python files:
         1. Analyze code changes
         2. Identify testing gaps
@@ -341,11 +341,11 @@ handlers:
       method: claude_cli
       prompt_template: |
         Agent Event: {agent_name} - {status}
-        
+
         Task ID: {task_id}
         Phase: {phase}
         Message: {message}
-        
+
         Coordinate workflow continuation:
         1. Update task status
         2. Trigger next phase if completed
@@ -374,10 +374,10 @@ handlers:
       method: claude_cli
       prompt_template: |
         Documentation updates merged to main
-        
+
         Repository: {repository}
         Reference: {ref}
-        
+
         Post-merge documentation tasks:
         1. Rebuild documentation site
         2. Update API references

@@ -22,18 +22,18 @@ Add Phase 10 to the WorkflowManager execution sequence:
 # Phase 10: Reflection and Continuous Improvement
 def execute_phase_10_reflection(self):
     """Execute reflection phase for continuous improvement."""
-    
+
     print("\\n=== Phase 10: Reflection and Continuous Improvement ===")
-    
+
     # Collect session metrics
     session_id = self.generate_session_id()
     reflection_collector = WorkflowReflectionCollector(self.project_root)
-    
+
     try:
         # Collect session data
         metrics = reflection_collector.collect_session_metrics(session_id)
         print(f"✅ Collected session metrics for {session_id}")
-        
+
         # Generate reflection (if enough data exists)
         data_files = list(reflection_collector.data_dir.glob("session-*-metrics.json"))
         if len(data_files) >= 3:  # Minimum data for meaningful reflection
@@ -44,11 +44,11 @@ def execute_phase_10_reflection(self):
                         session_data.append(json.load(f))
                 except Exception as e:
                     print(f"⚠️ Error reading {data_file}: {e}")
-            
+
             if session_data:
                 reflection_file = reflection_collector.generate_reflection(session_data)
                 print(f"✅ Generated reflection: {reflection_file}")
-                
+
                 # Create improvement issues (limit to prevent spam)
                 if self.should_create_improvement_issues():
                     issues = reflection_collector.create_improvement_issues(reflection_file)
@@ -57,9 +57,9 @@ def execute_phase_10_reflection(self):
                     print("⏭️ Skipping improvement issue creation (throttled)")
         else:
             print(f"📊 Collected metrics ({len(data_files)} sessions) - need 3+ for reflection")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"⚠️ Reflection phase encountered error: {e}")
         # Don't fail the workflow for reflection issues
@@ -82,29 +82,29 @@ def generate_session_id(self) -> str:
 ```python
 def should_create_improvement_issues(self) -> bool:
     """Determine if improvement issues should be created (throttling)."""
-    
+
     # Check for recent improvement issues to prevent spam
     try:
         result = subprocess.run([
-            "gh", "issue", "list", 
+            "gh", "issue", "list",
             "--label", "improvement,reflection",
             "--state", "open",
             "--json", "createdAt"
         ], capture_output=True, text=True, timeout=30)
-        
+
         if result.returncode == 0:
             issues = json.loads(result.stdout)
             recent_issues = [
                 issue for issue in issues
                 if self._is_recent_issue(issue.get("createdAt", ""))
             ]
-            
+
             # Don't create new issues if 3+ created in last 24 hours
             return len(recent_issues) < 3
-        
+
     except Exception:
         pass
-    
+
     # Default to creating issues if check fails
     return True
 
@@ -138,12 +138,12 @@ python3 .claude/agents/workflow-reflection-collector.py --create-improvement-iss
 ```python
 def execute_post_orchestration_reflection(self):
     """Execute reflection after orchestration completes."""
-    
+
     for task_id, result in self.completed_tasks.items():
         # Collect metrics for each completed task
         reflection_collector = WorkflowReflectionCollector()
         reflection_collector.collect_session_metrics(f"orchestrated-{task_id}")
-    
+
     # Generate aggregated reflection
     self._generate_orchestration_reflection()
 ```
@@ -226,12 +226,12 @@ Custom templates should maintain the same variable structure for compatibility.
 def test_reflection_collector():
     """Test reflection data collection."""
     collector = WorkflowReflectionCollector("/tmp/test-project")
-    
+
     # Test metrics collection
     metrics = collector.collect_session_metrics("test-session")
     assert "session_id" in metrics
     assert "git_metrics" in metrics
-    
+
     # Test reflection generation
     session_data = [metrics]
     reflection_file = collector.generate_reflection(session_data)
@@ -244,14 +244,14 @@ def test_reflection_collector():
 def test_workflow_manager_phase_10():
     """Test Phase 10 integration with WorkflowManager."""
     workflow = WorkflowManager("test-task")
-    
+
     # Mock session data
     workflow._setup_reflection_test_data()
-    
+
     # Execute Phase 10
     result = workflow.execute_phase_10_reflection()
     assert result is True
-    
+
     # Verify metrics collection
     assert workflow.reflection_data_exists()
 ```

@@ -85,10 +85,10 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 4. **Commit with clear emergency attribution**:
    ```bash
    git commit -m "EMERGENCY: fix critical [issue description]
-   
+
    Emergency hotfix bypassing normal orchestrator workflow
    due to production impact. Full workflow to follow.
-   
+
    Fixes: [issue-number]"
    ```
 5. **Immediately create follow-up issue** for proper workflow implementation
@@ -237,7 +237,7 @@ When agents create or work in worktrees for UV projects, they MUST:
    uv run pytest tests/
    uv run ruff check .
    uv run black .
-   
+
    # NEVER run directly (will fail in UV projects)
    python script.py     # ❌ Wrong
    pytest tests/        # ❌ Wrong
@@ -267,7 +267,7 @@ uv_run_python "$(pwd)" script.py
 if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
     echo "UV project detected - setting up virtual environment"
     source .claude/scripts/setup-uv-env.sh
-    
+
     if setup_uv_environment "$(pwd)" "--all-extras"; then
         echo "UV environment ready"
         # Use uv_run for all subsequent Python commands
@@ -289,7 +289,7 @@ fi
 - Should detect UV projects and set up virtual environment automatically
 - Must update environment setup documentation
 
-#### WorkflowManager Agent  
+#### WorkflowManager Agent
 - MUST check for UV project when starting any workflow
 - MUST use `uv run` prefix for all Python commands in UV projects
 - Should validate UV environment before running tests or scripts
@@ -352,31 +352,31 @@ Agents should validate UV environments before executing Python code:
 validate_uv_environment() {
     local worktree_path="$1"
     cd "$worktree_path"
-    
+
     # Check UV project files
     if [[ ! -f "pyproject.toml" || ! -f "uv.lock" ]]; then
         echo "Not a UV project"
         return 1
     fi
-    
+
     # Check UV installation
     if ! command -v uv &> /dev/null; then
         echo "UV not installed"
         return 1
     fi
-    
+
     # Check virtual environment
     if [[ ! -d ".venv" ]]; then
         echo "Virtual environment not found - running uv sync"
         uv sync --all-extras
     fi
-    
+
     # Test Python access
     if ! uv run python -c "import sys; print('Python ready')"; then
         echo "UV environment not working"
         return 1
     fi
-    
+
     return 0
 }
 ```
@@ -424,7 +424,7 @@ free -h  # Memory (Linux) or vm_stat (macOS)
 2. Use WorkflowManager directly for single tasks:
    ```
    /agent:workflow-manager
-   
+
    Task: Execute workflow for /prompts/[single-prompt].md
    ```
 3. Execute critical tasks manually as last resort (document as emergency)

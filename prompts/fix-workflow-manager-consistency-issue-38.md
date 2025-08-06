@@ -39,19 +39,19 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 1. **Add Explicit Phase 9 Enforcement**:
    ```markdown
    ### CRITICAL: Phase 9 Enforcement
-   
+
    **PHASE 9 IS ABSOLUTELY MANDATORY - ENFORCEMENT MECHANISMS:**
-   
+
    1. **Automatic Invocation After PR Creation**:
       - IMMEDIATELY after PR creation success, add code review task
       - Set a 30-second timer to invoke code-reviewer
       - Log CRITICAL error if review not invoked
-   
+
    2. **Task List Requirements**:
       - ALWAYS include "Invoke code-reviewer agent" as task #8
       - ALWAYS include "Process review with code-review-response" as task #9
       - Mark both as HIGH priority
-   
+
    3. **State Validation**:
       - Before marking workflow complete, VERIFY review exists
       - If no review found, FORCE code-reviewer invocation
@@ -80,7 +80,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
                auto_invoke=True  # Flag for automatic execution
            ),
            TaskData(
-               id="10", 
+               id="10",
                content="MANDATORY: Process review with code-review-response agent",
                status="pending",
                priority="critical",
@@ -93,14 +93,14 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 3. **Add Phase Transition Hooks**:
    ```markdown
    ### Automatic Phase Transitions
-   
+
    **CRITICAL: These transitions MUST happen automatically:**
-   
+
    1. **Phase 8 → Phase 9**:
       - After PR creation confirmation
       - Maximum 30-second delay
       - No user intervention required
-   
+
    2. **Phase 9 → Phase 10**:
       - After review posted confirmation
       - Immediate invocation of code-review-response
@@ -112,12 +112,12 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 1. **Prevent Early Termination**:
    ```markdown
    ### Execution Completion Requirements
-   
+
    **NEVER terminate WorkflowManager until:**
    1. All 10 phases are complete OR
    2. An unrecoverable error occurs OR
    3. User explicitly cancels
-   
+
    **After creating task list:**
    - IMMEDIATELY start Phase 1 execution
    - Do NOT wait for user confirmation
@@ -127,7 +127,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 2. **Add Progress Checkpoints**:
    ```markdown
    ### Progress Verification Checkpoints
-   
+
    After each phase, verify:
    1. Expected artifacts exist (issue, branch, PR, review)
    2. State file is updated
@@ -142,7 +142,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
    # Add to WorkflowManager initialization
    detect_and_fix_orphaned_prs() {
        echo "Scanning for PRs missing reviews..."
-       
+
        gh pr list --author "@me" --state open --json number,createdAt | \
        jq -r '.[] | select((now - (.createdAt | fromdateiso8601)) > 300) | .number' | \
        while read -r pr_num; do
@@ -158,16 +158,16 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
    ```python
    def repair_incomplete_workflows():
        """Fix workflows that stopped prematurely"""
-       
+
        for state_file in glob(".github/workflow-states/*/state.md"):
            state = parse_state_file(state_file)
-           
+
            # Check if implementation was planned but not executed
            if state.phase == "planning_complete" and not state.implementation_started:
                print(f"Found stalled workflow: {state.task_id}")
                print("Resuming from Phase 4: Implementation")
                resume_workflow(state.task_id, start_phase=4)
-           
+
            # Check if PR created but review missing
            elif state.pr_number and not state.review_complete:
                print(f"Found PR #{state.pr_number} missing review")
@@ -179,14 +179,14 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 1. **Add Execution Commitment**:
    ```markdown
    ## Execution Commitment
-   
+
    When invoked with a prompt file, you MUST:
    1. Parse the prompt completely
    2. Generate full task list (including review tasks)
    3. BEGIN EXECUTION IMMEDIATELY
    4. Continue through ALL phases
    5. Only stop for unrecoverable errors
-   
+
    NEVER:
    - Stop after planning
    - Wait for user confirmation between phases
@@ -197,7 +197,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 2. **Add TodoWrite Enforcement**:
    ```markdown
    ## TodoWrite Requirements
-   
+
    Your task list MUST ALWAYS include:
    - Task for each of the 10 workflow phases
    - "Invoke code-reviewer agent" as a CRITICAL priority task
