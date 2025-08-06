@@ -543,16 +543,16 @@ class WorkflowReliabilityManager:
 
             # Create comprehensive error context
             error_context = ErrorContext(
-                error=error,
-                operation=f"workflow_stage_{current_stage.value}",
-                details={
-                    'workflow_id': workflow_id,
-                    'stage': current_stage.value,
-                    'recovery_context': recovery_context or {},
-                    'timestamp': datetime.now().isoformat()
-                },
-                workflow_id=workflow_id
+                operation_name=f"workflow_stage_{current_stage.value}"
             )
+            # Store error information separately
+            error_details = {
+                'error': error,
+                'workflow_id': workflow_id,
+                'stage': current_stage.value,
+                'recovery_context': recovery_context or {},
+                'timestamp': datetime.now().isoformat()
+            }
 
             # Log error with full context
             self.workflow_logger.error(
@@ -569,7 +569,9 @@ class WorkflowReliabilityManager:
             )
 
             # Handle error through Enhanced Separation error handler
-            self.error_handler.handle_error(error_context)
+            # ErrorContext is a context manager, not for passing error info
+            # Pass the error details directly to handle_error
+            self.error_handler.handle_error(error_details)
 
             # Determine recovery strategy based on error type and stage
             recovery_result = self._execute_recovery_strategy(

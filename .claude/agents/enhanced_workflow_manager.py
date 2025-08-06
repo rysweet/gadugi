@@ -522,6 +522,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '1',
                 'title': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
+                'content': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
                 'phase': WorkflowStage.ISSUE_CREATION.value,
                 'estimated_duration': 120,  # seconds
                 'dependencies': [],
@@ -530,6 +531,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '2',
                 'title': 'Create and checkout feature branch',
+                'content': 'Create and checkout feature branch',
                 'phase': WorkflowStage.BRANCH_SETUP.value,
                 'estimated_duration': 60,
                 'dependencies': ['1'],
@@ -538,6 +540,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '3',
                 'title': 'Research existing implementation and patterns',
+                'content': 'Research existing implementation and patterns',
                 'phase': WorkflowStage.RESEARCH_PLANNING.value,
                 'estimated_duration': 300,
                 'dependencies': ['2'],
@@ -546,6 +549,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '4',
                 'title': 'Implement core functionality',
+                'content': 'Implement core functionality',
                 'phase': WorkflowStage.IMPLEMENTATION_PROGRESS.value,
                 'estimated_duration': prompt_data.get('complexity_estimate', 1800),
                 'dependencies': ['3'],
@@ -554,6 +558,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '5',
                 'title': 'Write comprehensive tests',
+                'content': 'Write comprehensive tests',
                 'phase': WorkflowStage.TESTING_START.value,
                 'estimated_duration': 600,
                 'dependencies': ['4'],
@@ -562,6 +567,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '6',
                 'title': 'Update documentation',
+                'content': 'Update documentation',
                 'phase': WorkflowStage.DOCUMENTATION_UPDATE.value,
                 'estimated_duration': 300,
                 'dependencies': ['4'],
@@ -570,6 +576,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '7',
                 'title': 'Create pull request',
+                'content': 'Create pull request',
                 'phase': WorkflowStage.PR_CREATION.value,
                 'estimated_duration': 120,
                 'dependencies': ['5', '6'],
@@ -578,6 +585,7 @@ class EnhancedWorkflowManager:
             {
                 'id': '8',
                 'title': 'Process code review',
+                'content': 'Process code review',
                 'phase': WorkflowStage.REVIEW_PROCESSING.value,
                 'estimated_duration': 300,
                 'dependencies': ['7'],
