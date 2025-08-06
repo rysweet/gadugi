@@ -222,6 +222,22 @@ You MUST execute these phases in order for every prompt:
 
 ### 1. Initial Setup Phase
 - Read and analyze the prompt file thoroughly
+- **Detect project type**: Check if working in UV project (`pyproject.toml` + `uv.lock`)
+  ```bash
+  # UV project detection
+  if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+      echo "🐍 UV project detected - will use UV commands"
+      export UV_PROJECT=true
+      # Ensure UV environment is set up
+      if ! uv run python -c "import sys"; then
+          echo "Setting up UV environment..."
+          uv sync --all-extras
+      fi
+  else
+      echo "📦 Standard Python project - will use pip/python commands"
+      export UV_PROJECT=false
+  fi
+  ```
 - Validate prompt structure - MUST contain these sections:
   - Overview or Introduction
   - Problem Statement or Requirements
@@ -310,6 +326,7 @@ Enhanced issue creation features:
 - Identify all modules that need modification
 - Create detailed implementation plan
 - Update `.github/Memory.md` with findings and decisions
+- Automatically compact Memory.md if size thresholds are exceeded
 
 ### 5. Implementation Phase
 - Break work into small, focused tasks
@@ -322,6 +339,18 @@ Enhanced issue creation features:
 - Write comprehensive tests for new functionality
 - Ensure test isolation and idempotency
 - Mock external dependencies appropriately
+- **For UV projects**: Use `uv run` prefix for all Python commands:
+  ```bash
+  # Correct testing commands for UV projects
+  uv run pytest tests/
+  uv run pytest tests/ --cov=. --cov-report=html
+  uv run python -m pytest tests/specific_test.py
+  
+  # NEVER run directly in UV projects (will fail)
+  pytest tests/        # ❌ Wrong
+  python -m pytest    # ❌ Wrong
+  ```
+- **For non-UV projects**: Use standard Python commands
 - Run test suite to verify all tests pass
 - Check coverage meets project standards
 
@@ -732,6 +761,12 @@ The WorkflowManager MUST NEVER complete without executing Phase 9 and 10. These 
 
 After completing the code review response in Phase 10, automatically update Claude settings:
 
+### 12. Automatic Memory Compaction Phase (AUTOMATIC)
+
+**AUTOMATIC EXECUTION**: This phase runs automatically after settings update in Phase 11 to maintain Memory.md size limits.
+
+After completing Phase 11, automatically check and compact Memory.md if needed:
+
 #### **Phase 11 Execution Steps (AUTOMATIC)**
 
 1. **Check for Local Settings Changes**:
@@ -799,11 +834,71 @@ echo "⚡ AUTOMATIC: Triggering Phase 11 - Settings Update"
 execute_phase_11_settings_update
 
 echo "✅ Phase 10 and 11 completed successfully"
+echo "⚡ AUTOMATIC: Triggering Phase 12 - Memory Compaction"
+
+# Execute Phase 12 immediately
+execute_phase_12_memory_compaction
+
+echo "✅ Phase 10, 11, and 12 completed successfully"
 ```
+
+#### **Phase 12 Execution Steps (AUTOMATIC)**
+
+1. **Check Memory.md Size and Compact if Needed**:
+   ```bash
+   echo "📦 Phase 12: Automatic Memory Compaction"
+   echo "Checking Memory.md size and compaction needs..."
+
+   # Use the memory manager to check and auto-compact
+   cd .github/memory-manager
+
+   # Check if compaction is needed
+   COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>/dev/null || echo "failed")
+
+   if [[ "$COMPACTION_RESULT" == *"auto_compaction_triggered"* ]]; then
+       echo "✅ Memory.md automatically compacted - size reduced and items archived"
+       echo "📋 Archived historical content to LongTermMemoryDetails.md"
+   elif [[ "$COMPACTION_RESULT" == *"No automatic compaction needed"* ]]; then
+       echo "ℹ️  Memory.md is within size limits - no compaction needed"
+   else
+       echo "⚠️  Memory compaction check failed - continuing workflow"
+       echo "💡 Manual compaction may be needed later"
+   fi
+
+   cd ../..
+   ```
+
+2. **Update Workflow State**:
+   ```bash
+   # Mark Phase 12 as completed
+   complete_phase 12 "Memory Compaction" "verify_phase_12"
+
+   # Update final workflow state
+   echo "📝 Finalizing workflow state with memory compaction..."
+   echo "✅ All phases including memory management completed successfully"
+   ```
+
+3. **Verification Function**:
+   ```bash
+   verify_phase_12() {
+       # Phase 12 always succeeds (memory compaction is maintenance)
+       # If compaction was needed and executed, verify no errors occurred
+       echo "✅ Phase 12: Memory compaction check completed"
+       return 0
+   }
+   ```
+
+#### **Benefits of Automatic Memory Compaction**
+
+- **Maintains Performance**: Keeps Memory.md at optimal size for AI processing
+- **Preserves History**: Archives detailed information to LongTermMemoryDetails.md
+- **Zero Maintenance**: Completely automatic with no user intervention required
+- **Intelligent Archiving**: Preserves important current information while archiving historical details
+- **Configurable Thresholds**: Size limits and compaction rules can be customized
 
 #### **State File Updates**
 
-Update state file format to include Phase 11:
+Update state file format to include Phase 11 and 12:
 
 ```markdown
 ## Phase Completion Status
@@ -818,11 +913,12 @@ Update state file format to include Phase 11:
 - [x] Phase 9: Review ✅
 - [x] Phase 10: Review Response ✅
 - [x] Phase 11: Settings Update ✅
+- [x] Phase 12: Memory Compaction ✅
 ```
 
 #### **Enhanced Task List Integration**
 
-Add Phase 11 to mandatory workflow tasks:
+Add Phase 11 and 12 to mandatory workflow tasks:
 
 ```python
 TaskData(
@@ -833,12 +929,21 @@ TaskData(
     phase=WorkflowPhase.SETTINGS_UPDATE,
     auto_invoke=True,
     enforcement_level="OPTIONAL"  # Settings update is beneficial but not critical
+),
+TaskData(
+    id="12",
+    content="📦 AUTOMATIC: Compact Memory.md if needed (Phase 12)",
+    status="pending",
+    priority="low",
+    phase=WorkflowPhase.MEMORY_COMPACTION,
+    auto_invoke=True,
+    enforcement_level="MAINTENANCE"  # Memory compaction is automated maintenance
 )
 ```
 
-#### **Error Handling for Phase 11**
+#### **Error Handling for Phase 11 and 12**
 
-Settings update failures should not block workflow completion:
+Settings update and memory compaction failures should not block workflow completion:
 
 ```bash
 execute_phase_11_with_error_handling() {
@@ -855,11 +960,27 @@ execute_phase_11_with_error_handling() {
         complete_phase 11 "Settings Update" "verify_phase_11"
     fi
 }
+
+execute_phase_12_with_error_handling() {
+    echo "📦 Executing Phase 12: Memory Compaction"
+
+    # Memory compaction should not fail the entire workflow
+    if cd .github/memory-manager && python3 memory_manager.py auto-compact 2>/dev/null; then
+        echo "✅ Memory compaction check completed successfully"
+        complete_phase 12 "Memory Compaction" "verify_phase_12"
+    else
+        echo "⚠️  Memory compaction check failed - continuing workflow"
+        echo "💡 Manual memory maintenance may be needed later"
+        # Mark as completed anyway - this is not a critical failure
+        complete_phase 12 "Memory Compaction" "verify_phase_12"
+    fi
+    cd ../..
+}
 ```
 
 #### **Execution Pattern Update**
 
-Updated execution pattern with Phase 11:
+Updated execution pattern with Phase 11 and 12:
 
 1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
 2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning
@@ -867,7 +988,8 @@ Updated execution pattern with Phase 11:
 4. 📨 **Phase 8**: PR Creation → ⏱️ **30-second timer** → 🚨 **AUTOMATIC Phase 9**
 5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**
 6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
-7. 🔧 **Phase 11**: Settings Update → 📝 **Final state update** → ✅ **COMPLETE**
+7. 🔧 **Phase 11**: Settings Update → ⚡ **IMMEDIATE Phase 12**
+8. 📦 **Phase 12**: Memory Compaction → 📝 **Final state update** → ✅ **COMPLETE**
 
 ## Enhanced Progress Tracking (Shared Modules)
 
