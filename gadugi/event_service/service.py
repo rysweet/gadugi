@@ -442,7 +442,7 @@ class GadugiEventService:
 
         # Create main event
         event = Event(
-            event_id=f"github-{int(time.time())}-{hash(str(webhook_data)) & 0x7fffffff}",
+            event_id=f"github-{int(time.time())}-{hash(str(webhook_data)) & 0x7FFFFFFF}",
             event_type=f"github.{event_type}.{action}",
             timestamp=int(time.time()),
             source="github",
