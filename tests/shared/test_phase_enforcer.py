@@ -46,6 +46,7 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
             pr_number=self.test_pr_number,
+            branch_name="test-branch",  # Add branch_name for branch_pushed condition
         )
 
     def test_phase_enforcer_initialization(self):
@@ -296,15 +297,15 @@ class TestPhaseEnforcer:
     def test_enforce_code_review_github_cli_fallback(self, mock_subprocess):
         """Test code review enforcement fallback to GitHub CLI"""
         # Mock all previous methods failing, GitHub CLI succeeding
+        # With os.path.exists returning False, script method is skipped, so only 2 calls
         mock_subprocess.side_effect = [
             Mock(returncode=1, stdout="", stderr="Claude failed"),  # Claude fails
-            Mock(returncode=1, stdout="", stderr="Script failed"),  # Script fails
             Mock(
                 returncode=0, stdout="Review posted", stderr=""
-            ),  # GitHub CLI succeeds
+            ),  # GitHub CLI review succeeds (no script call since file doesn't exist)
         ]
 
-        # Mock script file not existing
+        # Mock script file not existing (skips script method)
         with patch("os.path.exists", return_value=False):
             success, message, details = self.enforcer._enforce_code_review(
                 self.workflow_state, {}
@@ -318,12 +319,12 @@ class TestPhaseEnforcer:
     def test_enforce_code_review_comment_fallback(self, mock_subprocess):
         """Test code review enforcement final fallback to comment"""
         # Mock all methods failing except final comment
+        # With os.path.exists returning False, script method is skipped, so only 3 calls
         mock_subprocess.side_effect = [
             Mock(returncode=1, stdout="", stderr="Claude failed"),  # Claude fails
-            Mock(returncode=1, stdout="", stderr="Script failed"),  # Script fails
             Mock(
                 returncode=1, stdout="", stderr="Review failed"
-            ),  # GitHub review fails
+            ),  # GitHub review fails (no script call since file doesn't exist)
             Mock(returncode=0, stdout="Comment added", stderr=""),  # Comment succeeds
         ]
 
@@ -479,17 +480,26 @@ class TestPhaseEnforcer:
         assert "required conditions not met" in result.error_message.lower()
         assert "pr_exists" in result.error_message
 
-    def test_enforce_critical_phases_success(self):
+    @patch("subprocess.run")
+    def test_enforce_critical_phases_success(self, mock_subprocess):
         """Test enforcement of all critical phases"""
-        # Mock successful enforcement methods
-        self.enforcer._enforce_code_review = Mock(
-            return_value=(True, "Code review successful", {"method": "mock"})
+        # Create workflow state without critical phases completed
+        workflow_state = WorkflowState(
+            task_id="test-critical",
+            prompt_file="test.md",
+            current_phase=WorkflowPhase.PR_CREATION,
+            completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
+            pr_number=123,
+            branch_name="test-branch"
         )
-        self.enforcer._enforce_review_response = Mock(
-            return_value=(True, "Review response successful", {"method": "mock"})
-        )
+        
+        # Mock successful subprocess calls for both phases
+        mock_subprocess.side_effect = [
+            Mock(returncode=0, stdout="Code review completed successfully", stderr=""),  # Phase 9
+            Mock(returncode=0, stdout='{"reviews": []}', stderr=""),  # Phase 10 check
+        ]
 
-        results = self.enforcer.enforce_critical_phases(self.workflow_state)
+        results = self.enforcer.enforce_critical_phases(workflow_state)
 
         assert len(results) == 2
         result_keys = [k.name if hasattr(k, "name") else k for k in results]
@@ -497,14 +507,27 @@ class TestPhaseEnforcer:
         assert "REVIEW_RESPONSE" in result_keys
         assert all(result.success for result in results.values())
 
-    def test_enforce_critical_phases_failure_stops_chain(self):
+    @patch("time.sleep")
+    @patch("subprocess.run")
+    def test_enforce_critical_phases_failure_stops_chain(self, mock_subprocess, mock_sleep):
         """Test that critical phase failure stops dependent phases"""
-        # Mock code review failure
-        self.enforcer._enforce_code_review = Mock(
-            return_value=(False, "Code review failed", {})
+        # Create workflow state without critical phases completed
+        workflow_state = WorkflowState(
+            task_id="test-critical-fail",
+            prompt_file="test.md",
+            current_phase=WorkflowPhase.PR_CREATION,
+            completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
+            pr_number=123,
+            branch_name="test-branch"
         )
+        
+        # Mock all subprocess calls to fail
+        mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Failed")
+        # Mock sleep to prevent timeout
+        mock_sleep.return_value = None
 
-        results = self.enforcer.enforce_critical_phases(self.workflow_state)
+        with patch("os.path.exists", return_value=False):
+            results = self.enforcer.enforce_critical_phases(workflow_state)
 
         # Should only have CODE_REVIEW result (REVIEW_RESPONSE not attempted)
         assert len(results) == 1
@@ -661,11 +684,14 @@ class TestConvenienceFunctions:
 
         assert result is True
 
+    @patch("time.sleep")
     @patch("subprocess.run")
-    def test_enforce_phase_9_failure(self, mock_subprocess):
+    def test_enforce_phase_9_failure(self, mock_subprocess, mock_sleep):
         """Test enforce_phase_9 convenience function failure"""
         # Mock all methods failing
         mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Failed")
+        # Mock sleep to prevent timeout
+        mock_sleep.return_value = None
 
         with patch("os.path.exists", return_value=False):
             result = enforce_phase_9(123)
@@ -685,11 +711,14 @@ class TestConvenienceFunctions:
 
         assert result is True
 
+    @patch("time.sleep")
     @patch("subprocess.run")
-    def test_enforce_phase_10_failure(self, mock_subprocess):
+    def test_enforce_phase_10_failure(self, mock_subprocess, mock_sleep):
         """Test enforce_phase_10 convenience function failure"""
         # Mock GitHub CLI failure
         mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Failed")
+        # Mock sleep to prevent timeout
+        mock_sleep.return_value = None
 
         result = enforce_phase_10(123)
 

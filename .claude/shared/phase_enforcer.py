@@ -242,8 +242,11 @@ class PhaseEnforcer:
                 result = self.enforce_phase(phase, workflow_state)
                 results[phase.name] = result
                 
-                # If phase failed, don't continue with dependent phases
-                if not result.success:
+                # If phase succeeded, mark it as completed for dependent phases
+                if result.success:
+                    workflow_state.completed_phases.append(phase)
+                else:
+                    # If phase failed, don't continue with dependent phases
                     break
         
         return results
@@ -595,7 +598,8 @@ def enforce_phase_9(pr_number: int) -> bool:
         prompt_file="",
         current_phase=WorkflowPhase.CODE_REVIEW,
         completed_phases=[],
-        pr_number=pr_number
+        pr_number=pr_number,
+        branch_name="main"  # Set default branch for enforcement
     )
     
     result = enforcer.enforce_phase(WorkflowPhase.CODE_REVIEW, workflow_state)
