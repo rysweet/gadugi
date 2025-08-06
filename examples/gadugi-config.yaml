@@ -1,0 +1,386 @@
+# Example Gadugi Event Service Configuration
+# Save as ~/.gadugi/config.yaml
+
+service_name: gadugi-event-service
+bind_address: 127.0.0.1
+bind_port: 8080
+socket_path: ~/.gadugi/events.sock
+poll_interval_seconds: 300
+github_token: ${GITHUB_TOKEN}  # Use environment variable
+webhook_secret: ${GADUGI_WEBHOOK_SECRET}  # Use environment variable
+
+log_config:
+  level: INFO
+  format: text
+  output: file
+  file_path: ~/.gadugi/logs/gadugi-service.log
+  enable_audit: true
+  audit_file_path: ~/.gadugi/logs/gadugi-audit.log
+
+handlers:
+  # New Issue Workflow
+  - name: new-issue-workflow
+    enabled: true
+    priority: 100
+    timeout_seconds: 600
+    async_execution: false
+    filter:
+      event_types:
+        - github.issues.opened
+      github_filter:
+        webhook_events:
+          - issues
+        actions:
+          - opened
+    invocation:
+      agent_name: workflow-manager
+      method: claude_cli
+      prompt_template: |
+        New issue #{number}: {title}
+        
+        Repository: {repository}
+        Author: {actor}
+        Labels: {labels}
+        Assignees: {assignees}
+        Milestone: {milestone}
+        
+        Issue Description:
+        {body}
+        
+        Analyze and create comprehensive workflow for this issue.
+        Consider:
+        1. Issue complexity and scope
+        2. Required skills and resources
+        3. Dependencies and blockers
+        4. Timeline estimation
+        5. Testing requirements
+
+  # Pull Request Code Review
+  - name: pr-code-review
+    enabled: true
+    priority: 90
+    timeout_seconds: 900
+    async_execution: true
+    filter:
+      event_types:
+        - github.pull_request.opened
+        - github.pull_request.synchronize
+      github_filter:
+        webhook_events:
+          - pull_request
+        actions:
+          - opened
+          - synchronize
+    invocation:
+      agent_name: code-reviewer
+      method: claude_cli
+      prompt_template: |
+        Review PR #{number}: {title}
+        
+        Repository: {repository}
+        Author: {actor}
+        Status: {state}
+        Labels: {labels}
+        
+        PR Description:
+        {body}
+        
+        Perform comprehensive code review focusing on:
+        1. Code quality and style
+        2. Security vulnerabilities
+        3. Performance implications
+        4. Test coverage
+        5. Documentation updates
+
+  # Memory Updates on Main Branch Merges
+  - name: main-merge-memory-update
+    enabled: true
+    priority: 80
+    timeout_seconds: 300
+    async_execution: false
+    filter:
+      event_types:
+        - github.push
+      github_filter:
+        webhook_events:
+          - push
+        refs:
+          - refs/heads/main
+    invocation:
+      agent_name: memory-manager
+      method: claude_cli
+      prompt_template: |
+        Update Memory.md after merge to main branch
+        
+        Repository: {repository}
+        Reference: {ref}
+        Author: {actor}
+        
+        Synchronize project memory with latest changes:
+        1. Update completed tasks and milestones
+        2. Archive finished features
+        3. Update current context and goals
+        4. Sync with GitHub Issues
+        5. Prune outdated information
+
+  # Bug Report Handler
+  - name: bug-report-handler
+    enabled: true
+    priority: 110  # Higher priority than normal issues
+    timeout_seconds: 600
+    async_execution: false
+    filter:
+      event_types:
+        - github.issues.opened
+        - github.issues.labeled
+      github_filter:
+        webhook_events:
+          - issues
+        labels:
+          - bug
+          - critical
+    invocation:
+      agent_name: bug-analyzer
+      method: claude_cli
+      prompt_template: |
+        BUG REPORT: {title}
+        
+        Repository: {repository}
+        Reporter: {actor}
+        Priority: {labels}
+        
+        Bug Description:
+        {body}
+        
+        Analyze bug report and create action plan:
+        1. Reproduce the issue
+        2. Identify root cause
+        3. Assess impact and priority
+        4. Create fix strategy
+        5. Generate test cases
+
+  # Security Vulnerability Handler
+  - name: security-vulnerability-handler
+    enabled: true
+    priority: 200  # Highest priority
+    timeout_seconds: 1200
+    async_execution: false
+    filter:
+      event_types:
+        - github.issues.opened
+        - github.issues.labeled
+      github_filter:
+        webhook_events:
+          - issues
+        labels:
+          - security
+          - vulnerability
+          - cve
+    invocation:
+      agent_name: security-analyzer
+      method: claude_cli
+      prompt_template: |
+        SECURITY ALERT: {title}
+        
+        Repository: {repository}
+        Reporter: {actor}
+        Severity: {labels}
+        
+        Vulnerability Report:
+        {body}
+        
+        IMMEDIATE SECURITY ANALYSIS REQUIRED:
+        1. Assess threat level and impact
+        2. Identify affected systems/users
+        3. Create mitigation strategy
+        4. Develop patch timeline
+        5. Prepare security advisory
+        6. Coordinate response team
+
+  # Dependency Update Handler
+  - name: dependency-update-handler
+    enabled: true
+    priority: 70
+    timeout_seconds: 600
+    async_execution: true
+    filter:
+      event_types:
+        - github.pull_request.opened
+      github_filter:
+        webhook_events:
+          - pull_request
+        actors:
+          - dependabot[bot]
+          - renovate[bot]
+          - greenkeeper[bot]
+    invocation:
+      agent_name: dependency-reviewer
+      method: claude_cli
+      prompt_template: |
+        Dependency Update PR: {title}
+        
+        Repository: {repository}
+        Bot: {actor}
+        
+        Update Details:
+        {body}
+        
+        Review dependency update:
+        1. Check for breaking changes
+        2. Review security vulnerabilities fixed
+        3. Validate compatibility
+        4. Run automated tests
+        5. Approve if safe or flag for review
+
+  # Release Handler
+  - name: release-handler
+    enabled: true
+    priority: 85
+    timeout_seconds: 900
+    async_execution: false
+    filter:
+      event_types:
+        - github.release.published
+      github_filter:
+        webhook_events:
+          - release
+        actions:
+          - published
+    invocation:
+      agent_name: release-manager
+      method: claude_cli
+      prompt_template: |
+        New Release Published: {title}
+        
+        Repository: {repository}
+        Version: {title}
+        
+        Release Notes:
+        {body}
+        
+        Post-release tasks:
+        1. Update documentation
+        2. Notify stakeholders
+        3. Update deployment status
+        4. Monitor for issues
+        5. Update project roadmap
+
+  # Feature Request Handler
+  - name: feature-request-handler
+    enabled: true
+    priority: 60
+    timeout_seconds: 600
+    async_execution: true
+    filter:
+      event_types:
+        - github.issues.opened
+      github_filter:
+        webhook_events:
+          - issues
+        labels:
+          - enhancement
+          - feature
+          - feature-request
+    invocation:
+      agent_name: feature-analyzer
+      method: claude_cli
+      prompt_template: |
+        Feature Request: {title}
+        
+        Repository: {repository}
+        Requestor: {actor}
+        
+        Request Details:
+        {body}
+        
+        Analyze feature request:
+        1. Assess feasibility and complexity
+        2. Identify requirements and constraints
+        3. Estimate development effort
+        4. Check alignment with roadmap
+        5. Create implementation strategy
+
+  # Local File Change Handler
+  - name: local-file-change-handler
+    enabled: true
+    priority: 50
+    timeout_seconds: 300
+    async_execution: true
+    filter:
+      event_types:
+        - local.file_changed
+      metadata_match:
+        file_type: python
+    invocation:
+      agent_name: test-writer
+      method: claude_cli
+      prompt_template: |
+        Python files changed: {files_changed}
+        
+        Working directory: {working_directory}
+        
+        Generate/update tests for modified Python files:
+        1. Analyze code changes
+        2. Identify testing gaps
+        3. Generate unit tests
+        4. Update integration tests
+        5. Ensure coverage targets
+
+  # Agent Completion Handler (Event Chaining)
+  - name: agent-completion-handler
+    enabled: true
+    priority: 40
+    timeout_seconds: 180
+    async_execution: true
+    filter:
+      event_types:
+        - agent.workflow-manager.completed
+        - agent.*.failed
+    invocation:
+      agent_name: workflow-coordinator
+      method: claude_cli
+      prompt_template: |
+        Agent Event: {agent_name} - {status}
+        
+        Task ID: {task_id}
+        Phase: {phase}
+        Message: {message}
+        
+        Coordinate workflow continuation:
+        1. Update task status
+        2. Trigger next phase if completed
+        3. Handle failures and retries
+        4. Update project tracking
+        5. Notify stakeholders if needed
+
+  # Documentation Update Handler
+  - name: docs-update-handler
+    enabled: true
+    priority: 30
+    timeout_seconds: 600
+    async_execution: true
+    filter:
+      event_types:
+        - github.push
+      github_filter:
+        webhook_events:
+          - push
+        refs:
+          - refs/heads/main
+      metadata_match:
+        docs_changed: "true"
+    invocation:
+      agent_name: docs-updater
+      method: claude_cli
+      prompt_template: |
+        Documentation updates merged to main
+        
+        Repository: {repository}
+        Reference: {ref}
+        
+        Post-merge documentation tasks:
+        1. Rebuild documentation site
+        2. Update API references
+        3. Check link validity
+        4. Update version numbers
+        5. Deploy to documentation hosting

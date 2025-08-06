@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package gadugi.events;
+
+option go_package = "github.com/gadugi/proto/events";
+option java_package = "com.gadugi.proto.events";
+option java_outer_classname = "EventsProto";
+
+// Base event structure for all Gadugi system events
+message Event {
+  string event_id = 1;          // Unique identifier for this event
+  string event_type = 2;        // Type of event (e.g., "github.issue.opened")
+  int64 timestamp = 3;          // Unix timestamp when event occurred
+  string source = 4;            // Source of the event (e.g., "github", "local", "agent")
+  map<string, string> metadata = 5;  // Additional event-specific metadata
+  oneof payload {
+    GitHubEvent github_event = 10;
+    LocalEvent local_event = 11;
+    AgentEvent agent_event = 12;
+  }
+}
+
+// GitHub webhook events
+message GitHubEvent {
+  string webhook_event = 1;     // GitHub webhook event type
+  string repository = 2;        // Repository full name (owner/repo)
+  int64 number = 3;             // Issue/PR number (if applicable)
+  string action = 4;            // GitHub action (opened, closed, synchronize, etc.)
+  string actor = 5;             // GitHub user who triggered the event
+  string ref = 6;               // Git reference (for push events)
+  repeated string labels = 7;   // Labels on issue/PR
+  string title = 8;             // Title of issue/PR
+  string body = 9;              // Body content of issue/PR
+  string state = 10;            // State (open, closed, merged, etc.)
+  string milestone = 11;        // Milestone name
+  repeated string assignees = 12; // Assigned users
+}
+
+// Local system events
+message LocalEvent {
+  string event_name = 1;        // Custom event name
+  string working_directory = 2; // Working directory context
+  map<string, string> environment = 3; // Environment variables
+  repeated string files_changed = 4;    // Changed files (if applicable)
+}
+
+// Agent-generated events
+message AgentEvent {
+  string agent_name = 1;        // Name of the agent that generated the event
+  string task_id = 2;           // Task identifier
+  string phase = 3;             // Current phase/stage
+  string status = 4;            // Status (started, completed, failed, etc.)
+  string message = 5;           // Human-readable message
+  map<string, string> context = 6; // Agent-specific context
+}
+
+// Event handler configuration
+message EventHandler {
+  string name = 1;              // Handler name
+  EventFilter filter = 2;       // Filter criteria
+  AgentInvocation invocation = 3; // Agent to invoke
+  bool enabled = 4;             // Whether handler is active
+  int32 priority = 5;           // Execution priority (higher = first)
+  int32 timeout_seconds = 6;    // Timeout for agent execution
+  bool async = 7;               // Whether to run asynchronously
+}
+
+// Event filtering criteria
+message EventFilter {
+  repeated string event_types = 1;     // Match specific event types
+  repeated string sources = 2;         // Match specific sources
+  map<string, string> metadata_match = 3; // Match metadata key-value pairs
+  GitHubFilter github_filter = 4;      // GitHub-specific filters
+}
+
+// GitHub event filtering
+message GitHubFilter {
+  repeated string repositories = 1;    // Match specific repositories
+  repeated string webhook_events = 2;  // Match webhook event types
+  repeated string actions = 3;         // Match GitHub actions
+  repeated string labels = 4;          // Match issue/PR labels
+  repeated string actors = 5;          // Match GitHub users
+  repeated string refs = 6;            // Match git references
+  repeated string milestones = 7;      // Match milestones
+}
+
+// Agent invocation specification
+message AgentInvocation {
+  string agent_name = 1;        // Name of agent to invoke
+  string method = 2;            // Invocation method ("claude_cli", "direct", "subprocess")
+  map<string, string> parameters = 3; // Parameters to pass to agent
+  string working_directory = 4; // Working directory for agent
+  map<string, string> environment = 5; // Environment variables
+  string prompt_template = 6;   // Template for generating agent prompt
+}
+
+// Service configuration
+message ServiceConfig {
+  string service_name = 1;      // Name of the service instance
+  string bind_address = 2;      // Address to bind HTTP server (for webhooks)
+  int32 bind_port = 3;          // Port to bind HTTP server
+  string socket_path = 4;       // Unix socket path for local events
+  int32 poll_interval_seconds = 5; // Polling interval for GitHub API
+  string github_token = 6;      // GitHub token for API access
+  string webhook_secret = 7;    // GitHub webhook secret
+  repeated EventHandler handlers = 8; // Event handlers
+  LogConfig log_config = 9;     // Logging configuration
+}
+
+// Logging configuration
+message LogConfig {
+  string level = 1;             // Log level (debug, info, warn, error)
+  string format = 2;            // Log format (json, text)
+  string output = 3;            // Log output (stdout, stderr, file)
+  string file_path = 4;         // Log file path (if output=file)
+  bool enable_audit = 5;        // Enable audit logging
+  string audit_file_path = 6;   // Audit log file path
+}
