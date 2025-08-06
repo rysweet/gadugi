@@ -622,7 +622,11 @@ class EnhancedWorkflowManager:
             # Create issue with retry logic through Enhanced Separation
             @retry(max_attempts=3, initial_delay=2.0)
             def create_issue_with_retry():
-                return self.github_ops.create_issue(issue_data)
+                return self.github_ops.create_issue(
+                    title=issue_data['title'],
+                    body=issue_data['body'],
+                    labels=issue_data.get('labels')
+                )
 
             result = create_issue_with_retry()
 
