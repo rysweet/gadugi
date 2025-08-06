@@ -275,8 +275,12 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
             settings = json.load(f)
 
         # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
-        
+        self.assertNotIn(
+            "hooks",
+            settings,
+            "Settings should not contain hooks configuration to prevent infinite loops",
+        )
+
         # Verify permissions are still present (these should remain)
         self.assertIn("permissions", settings, "Permissions should still be configured")
 
@@ -409,12 +413,21 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
             settings = json.load(f)
 
         # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
-        
+        self.assertNotIn(
+            "hooks",
+            settings,
+            "Settings should not contain hooks configuration to prevent infinite loops",
+        )
+
         # Verify that new workflow reflection system components exist as replacement
         base_dir = os.path.dirname(os.path.dirname(__file__))
-        reflection_agent = os.path.join(base_dir, ".claude", "agents", "workflow-phase-reflection.md")
-        self.assertTrue(os.path.exists(reflection_agent), "Workflow reflection agent should exist as hook replacement")
+        reflection_agent = os.path.join(
+            base_dir, ".claude", "agents", "workflow-phase-reflection.md"
+        )
+        self.assertTrue(
+            os.path.exists(reflection_agent),
+            "Workflow reflection agent should exist as hook replacement",
+        )
 
 
 class TestTeamCoachHookErrorHandling(unittest.TestCase):

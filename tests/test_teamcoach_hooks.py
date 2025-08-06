@@ -197,7 +197,11 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             settings = json.load(f)
 
         # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
+        self.assertNotIn(
+            "hooks",
+            settings,
+            "Settings should not contain hooks configuration to prevent infinite loops",
+        )
 
     def test_hook_configurations_have_required_fields(self):
         """Test that hook configurations have been removed (fix for Issue #89)."""
@@ -205,16 +209,30 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             settings = json.load(f)
 
         # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
-        
+        self.assertNotIn(
+            "hooks",
+            settings,
+            "Settings should not contain hooks configuration to prevent infinite loops",
+        )
+
         # Verify that TeamCoach hooks are replaced with new reflection system
         # Check that workflow reflection components exist as replacement
         base_dir = os.path.dirname(os.path.dirname(__file__))
-        reflection_template = os.path.join(base_dir, ".claude", "templates", "workflow-reflection-template.md")
-        reflection_collector = os.path.join(base_dir, ".claude", "agents", "workflow-reflection-collector.py")
-        
-        self.assertTrue(os.path.exists(reflection_template), "Workflow reflection template should exist as hook replacement")
-        self.assertTrue(os.path.exists(reflection_collector), "Workflow reflection collector should exist as hook replacement")
+        reflection_template = os.path.join(
+            base_dir, ".claude", "templates", "workflow-reflection-template.md"
+        )
+        reflection_collector = os.path.join(
+            base_dir, ".claude", "agents", "workflow-reflection-collector.py"
+        )
+
+        self.assertTrue(
+            os.path.exists(reflection_template),
+            "Workflow reflection template should exist as hook replacement",
+        )
+        self.assertTrue(
+            os.path.exists(reflection_collector),
+            "Workflow reflection collector should exist as hook replacement",
+        )
 
     def test_hook_commands_use_project_relative_paths(self):
         """Test that hook commands have been removed (fix for Issue #89)."""
@@ -222,7 +240,11 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             settings = json.load(f)
 
         # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn("hooks", settings, "Settings should not contain hooks configuration to prevent infinite loops")
+        self.assertNotIn(
+            "hooks",
+            settings,
+            "Settings should not contain hooks configuration to prevent infinite loops",
+        )
 
 
 class TestTeamCoachHookIntegration(unittest.TestCase):
