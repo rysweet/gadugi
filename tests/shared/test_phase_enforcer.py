@@ -17,11 +17,9 @@ from datetime import datetime
 # Import the module under test
 import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+# sys.path manipulation removed to ensure consistent package imports
 
-from phase_enforcer import (
+from claude.shared.phase_enforcer import (
     PhaseEnforcer,
     EnforcementRule,
     EnforcementResult,
@@ -30,7 +28,7 @@ from phase_enforcer import (
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from workflow_engine import WorkflowPhase, WorkflowState
+from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
 
 
 class TestPhaseEnforcer:
@@ -55,11 +53,11 @@ class TestPhaseEnforcer:
         enforcer = PhaseEnforcer()
 
         # Check default enforcement rules exist
-        assert WorkflowPhase.CODE_REVIEW in enforcer.enforcement_rules
-        assert WorkflowPhase.REVIEW_RESPONSE in enforcer.enforcement_rules
+        assert "CODE_REVIEW" in enforcer.enforcement_rules
+        assert "REVIEW_RESPONSE" in enforcer.enforcement_rules
 
         # Check code review rule configuration
-        code_review_rule = enforcer.enforcement_rules[WorkflowPhase.CODE_REVIEW]
+        code_review_rule = enforcer.enforcement_rules["CODE_REVIEW"]
         assert code_review_rule.phase == WorkflowPhase.CODE_REVIEW
         assert code_review_rule.max_attempts == 3
         assert code_review_rule.timeout_seconds == 900
@@ -67,7 +65,7 @@ class TestPhaseEnforcer:
         assert "branch_pushed" in code_review_rule.required_conditions
 
         # Check review response rule configuration
-        review_rule = enforcer.enforcement_rules[WorkflowPhase.REVIEW_RESPONSE]
+        review_rule = enforcer.enforcement_rules["REVIEW_RESPONSE"]
         assert review_rule.phase == WorkflowPhase.REVIEW_RESPONSE
         assert review_rule.max_attempts == 3
         assert code_review_rule.timeout_seconds == 900
@@ -494,8 +492,9 @@ class TestPhaseEnforcer:
         results = self.enforcer.enforce_critical_phases(self.workflow_state)
 
         assert len(results) == 2
-        assert WorkflowPhase.CODE_REVIEW in results
-        assert WorkflowPhase.REVIEW_RESPONSE in results
+        result_keys = [k.name if hasattr(k, "name") else k for k in results]
+        assert "CODE_REVIEW" in result_keys
+        assert "REVIEW_RESPONSE" in result_keys
         assert all(result.success for result in results.values())
 
     def test_enforce_critical_phases_failure_stops_chain(self):
@@ -509,9 +508,11 @@ class TestPhaseEnforcer:
 
         # Should only have CODE_REVIEW result (REVIEW_RESPONSE not attempted)
         assert len(results) == 1
-        assert WorkflowPhase.CODE_REVIEW in results
-        assert results[WorkflowPhase.CODE_REVIEW].success is False
-        assert WorkflowPhase.REVIEW_RESPONSE not in results
+        result_keys = [k.name if hasattr(k, "name") else k for k in results]
+        assert "CODE_REVIEW" in result_keys
+        key = next(k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW")
+        assert results[key].success is False
+        assert "REVIEW_RESPONSE" not in result_keys
 
     def test_add_enforcement_rule(self):
         """Test adding custom enforcement rule"""
@@ -525,8 +526,8 @@ class TestPhaseEnforcer:
 
         self.enforcer.add_enforcement_rule(custom_rule)
 
-        assert WorkflowPhase.INIT in self.enforcer.enforcement_rules
-        added_rule = self.enforcer.enforcement_rules[WorkflowPhase.INIT]
+        assert "INIT" in self.enforcer.enforcement_rules
+        added_rule = self.enforcer.enforcement_rules["INIT"]
         assert added_rule.max_attempts == 10
         assert added_rule.timeout_seconds == 300
         assert added_rule.retry_delay_seconds == 15
