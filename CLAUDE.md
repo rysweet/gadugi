@@ -88,6 +88,13 @@ This ensures:
 - State tracking MUST be maintained throughout all phases
 - Quality gates MUST be validated at each phase transition
 
+**Enforcement Examples**:
+- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
+- ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
+- ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
+- ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
+
 ### Emergency Procedures (Critical Production Issues)
 
 ⚠️ **EMERGENCY HOTFIX EXCEPTION** ⚠️

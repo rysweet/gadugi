@@ -249,7 +249,17 @@ def analyze_tasks_enhanced(prompt_files):
     for task in enhanced_tasks:
         task.apply_optimizations(ml_optimizations.get(task.id, []))
 
-    # Step 4: Update execution plan with enhanced insights
+    # Step 4: Pre-validate all tasks for governance compliance
+    for task in enhanced_tasks:
+        try:
+            validate_workflow_compliance(task)
+            task.governance_validated = True
+        except WorkflowComplianceError as e:
+            error_handler.log_error(f"Task {task.id} failed governance validation: {e}")
+            task.governance_validated = False
+            task.compliance_errors = str(e)
+
+    # Step 5: Update execution plan with enhanced insights and validated tasks
     enhanced_execution_plan = generate_enhanced_execution_plan(
         enhanced_tasks,
         analysis_result.dependency_graph,
@@ -345,7 +355,7 @@ def setup_environments(task_data):
 3. **ALWAYS** use worktree-manager for ALL tasks (mandatory requirement)
 4. Track individual task progress with proper isolation
 
-### Phase 3: Enhanced Parallel Execution
+### Phase 3: Enhanced Parallel Execution with Governance Validation
 ```python
 @error_handler.with_graceful_degradation(fallback_sequential_execution)
 def execute_parallel_tasks(tasks):
@@ -357,12 +367,20 @@ def execute_parallel_tasks(tasks):
     results = []
     for task in tasks:
         try:
+            # CRITICAL GOVERNANCE VALIDATION: Ensure task follows proper workflow
+            validate_workflow_compliance(task)
+            
             # MANDATORY: ALL tasks must execute through WorkflowManager
             task_result = execution_circuit_breaker.call(
                 lambda: execute_workflow_manager(task)
             )
             results.append(task_result)
             task_tracker.update_task_status(task.id, "completed")
+        except WorkflowComplianceError as e:
+            # Log governance violation and fail task
+            error_handler.log_error(f"Governance violation for task {task.id}: {e}")
+            task_tracker.update_task_status(task.id, "governance_violation")
+            raise e
         except CircuitBreakerOpenError:
             # Fallback to sequential execution
             error_handler.log_warning("Circuit breaker open, falling back to sequential")
@@ -663,6 +681,42 @@ The system delivers 3-5x performance improvements for independent tasks while ma
 10. **Phase 10**: Review Response
 11. **Phase 11**: Settings Update
 
+### Governance Exception Types
+
+```python
+class WorkflowComplianceError(Exception):
+    """Raised when a task violates governance requirements for workflow execution"""
+    
+    def __init__(self, message, task_id=None, violation_type=None):
+        super().__init__(message)
+        self.task_id = task_id
+        self.violation_type = violation_type
+        self.timestamp = datetime.now()
+
+class DirectExecutionError(WorkflowComplianceError):
+    """Raised when direct execution bypasses WorkflowManager"""
+    
+    def __init__(self, task_id, execution_method):
+        message = f"Direct execution method '{execution_method}' bypasses WorkflowManager - PROHIBITED"
+        super().__init__(message, task_id, "direct_execution")
+        self.execution_method = execution_method
+
+class IncompleteWorkflowError(WorkflowComplianceError):
+    """Raised when a task is missing required workflow phases"""
+    
+    def __init__(self, task_id, missing_phases):
+        message = f"Task missing required workflow phases: {', '.join(missing_phases)}"
+        super().__init__(message, task_id, "incomplete_workflow")
+        self.missing_phases = missing_phases
+
+class InvalidExecutionMethodError(WorkflowComplianceError):
+    """Raised when task doesn't specify WorkflowManager execution"""
+    
+    def __init__(self, task_id):
+        message = "Task must specify WorkflowManager execution method"
+        super().__init__(message, task_id, "invalid_execution_method")
+```
+
 ### Validation Checks
 
 Before executing any task, the orchestrator MUST validate:
@@ -673,17 +727,18 @@ def validate_workflow_compliance(task):
     
     # Check 1: Verify WorkflowManager will be used
     if not task.uses_workflow_manager:
-        raise WorkflowComplianceError("Task must use WorkflowManager for execution")
+        raise InvalidExecutionMethodError(task.id)
     
     # Check 2: Verify complete workflow phases will be followed
     required_phases = ['setup', 'issue_creation', 'branch_creation', 'implementation', 
                       'testing', 'documentation', 'pr_creation', 'review']
-    if not all(phase in task.planned_phases for phase in required_phases):
-        raise WorkflowComplianceError("Task missing required workflow phases")
+    missing_phases = [phase for phase in required_phases if phase not in task.planned_phases]
+    if missing_phases:
+        raise IncompleteWorkflowError(task.id, missing_phases)
     
     # Check 3: Verify no direct execution bypass
     if task.execution_method in ['direct', 'claude_-p', 'shell_script']:
-        raise WorkflowComplianceError("Direct execution bypasses workflow - PROHIBITED")
+        raise DirectExecutionError(task.id, task.execution_method)
     
     return True
 ```
@@ -705,5 +760,176 @@ def validate_workflow_compliance(task):
 - **COORDINATE** with other sub-agents appropriately
 - **MONITOR** system resources and scale appropriately
 - **ENFORCE** WorkflowManager usage for ALL tasks (NO EXCEPTIONS)
+
+## Governance Validation Test Coverage
+
+### Unit Tests for Validation Logic
+
+```python
+import unittest
+from unittest.mock import Mock
+from datetime import datetime
+
+class TestWorkflowGovernanceValidation(unittest.TestCase):
+    """Comprehensive test coverage for orchestrator governance validation"""
+    
+    def setUp(self):
+        """Set up test fixtures"""
+        self.valid_task = Mock()
+        self.valid_task.id = "task-20250106-test"
+        self.valid_task.uses_workflow_manager = True
+        self.valid_task.planned_phases = [
+            'setup', 'issue_creation', 'branch_creation', 'implementation', 
+            'testing', 'documentation', 'pr_creation', 'review'
+        ]
+        self.valid_task.execution_method = 'workflow_manager'
+    
+    def test_validate_workflow_compliance_success(self):
+        """Test successful validation of compliant task"""
+        result = validate_workflow_compliance(self.valid_task)
+        self.assertTrue(result)
+    
+    def test_invalid_execution_method_raises_error(self):
+        """Test that tasks not using WorkflowManager raise InvalidExecutionMethodError"""
+        self.valid_task.uses_workflow_manager = False
+        
+        with self.assertRaises(InvalidExecutionMethodError) as context:
+            validate_workflow_compliance(self.valid_task)
+        
+        self.assertEqual(context.exception.task_id, "task-20250106-test")
+        self.assertEqual(context.exception.violation_type, "invalid_execution_method")
+    
+    def test_incomplete_workflow_phases_raises_error(self):
+        """Test that missing workflow phases raise IncompleteWorkflowError"""
+        self.valid_task.planned_phases = ['setup', 'implementation']  # Missing critical phases
+        
+        with self.assertRaises(IncompleteWorkflowError) as context:
+            validate_workflow_compliance(self.valid_task)
+        
+        self.assertEqual(context.exception.task_id, "task-20250106-test")
+        self.assertIn('issue_creation', context.exception.missing_phases)
+        self.assertIn('testing', context.exception.missing_phases)
+        self.assertIn('review', context.exception.missing_phases)
+    
+    def test_direct_execution_bypass_raises_error(self):
+        """Test that direct execution methods raise DirectExecutionError"""
+        test_cases = ['direct', 'claude_-p', 'shell_script']
+        
+        for execution_method in test_cases:
+            with self.subTest(execution_method=execution_method):
+                self.valid_task.execution_method = execution_method
+                
+                with self.assertRaises(DirectExecutionError) as context:
+                    validate_workflow_compliance(self.valid_task)
+                
+                self.assertEqual(context.exception.task_id, "task-20250106-test")
+                self.assertEqual(context.exception.execution_method, execution_method)
+                self.assertEqual(context.exception.violation_type, "direct_execution")
+    
+    def test_exception_hierarchy(self):
+        """Test that all governance exceptions inherit from WorkflowComplianceError"""
+        self.assertTrue(issubclass(DirectExecutionError, WorkflowComplianceError))
+        self.assertTrue(issubclass(IncompleteWorkflowError, WorkflowComplianceError))
+        self.assertTrue(issubclass(InvalidExecutionMethodError, WorkflowComplianceError))
+    
+    def test_exception_metadata(self):
+        """Test that exceptions include proper metadata"""
+        self.valid_task.uses_workflow_manager = False
+        
+        try:
+            validate_workflow_compliance(self.valid_task)
+        except WorkflowComplianceError as e:
+            self.assertEqual(e.task_id, "task-20250106-test")
+            self.assertIsInstance(e.timestamp, datetime)
+            self.assertIsNotNone(e.violation_type)
+
+class TestGovernanceIntegration(unittest.TestCase):
+    """Test governance validation integration with orchestration flow"""
+    
+    def test_validation_integration_in_execution(self):
+        """Test that validation is called during task execution"""
+        # Mock the components
+        task = Mock()
+        task.id = "test-task"
+        task.uses_workflow_manager = False  # Will trigger validation error
+        
+        error_handler = Mock()
+        task_tracker = Mock()
+        
+        # Test that governance violation is caught and handled
+        with self.assertRaises(WorkflowComplianceError):
+            # This simulates the execution flow with validation
+            validate_workflow_compliance(task)
+            execute_workflow_manager(task)  # Should never reach this
+    
+    def test_governance_violation_logging(self):
+        """Test that governance violations are properly logged"""
+        task = Mock()
+        task.id = "test-task"
+        task.uses_workflow_manager = False
+        
+        error_handler = Mock()
+        task_tracker = Mock()
+        
+        try:
+            validate_workflow_compliance(task)
+        except WorkflowComplianceError as e:
+            # Verify proper error handling would occur
+            self.assertIn("invalid_execution_method", str(e.violation_type))
+            self.assertEqual(e.task_id, "test-task")
+
+if __name__ == '__main__':
+    unittest.main()
+```
+
+### Integration Test Scenarios
+
+```python
+class TestOrchestrationGovernanceIntegration(unittest.TestCase):
+    """Integration tests for governance enforcement in orchestration"""
+    
+    def test_parallel_execution_with_governance_validation(self):
+        """Test that parallel execution validates all tasks"""
+        valid_task = create_valid_task("task-1")
+        invalid_task = create_invalid_task("task-2")  # Missing workflow phases
+        
+        tasks = [valid_task, invalid_task]
+        
+        # Execution should fail on governance validation
+        with self.assertRaises(IncompleteWorkflowError):
+            execute_parallel_tasks(tasks)
+    
+    def test_task_analysis_phase_governance_prevalidation(self):
+        """Test that task analysis phase includes governance pre-validation"""
+        prompt_files = ["test-prompt-1.md", "test-prompt-2.md"]
+        
+        # Mock tasks with governance issues
+        mock_tasks = [
+            create_task_with_governance_issue("task-1", "missing_phases"),
+            create_valid_task("task-2")
+        ]
+        
+        # Analysis should mark governance validation status
+        result = analyze_tasks_enhanced(prompt_files)
+        
+        self.assertFalse(result.tasks[0].governance_validated)
+        self.assertTrue(result.tasks[1].governance_validated)
+        self.assertIsNotNone(result.tasks[0].compliance_errors)
+    
+    def test_performance_impact_of_governance_validation(self):
+        """Test that governance validation has minimal performance impact"""
+        import time
+        
+        task = create_valid_task("perf-test")
+        
+        start_time = time.time()
+        for _ in range(1000):
+            validate_workflow_compliance(task)
+        end_time = time.time()
+        
+        # Validation should complete in under 1ms per task on average
+        avg_time_per_validation = (end_time - start_time) / 1000
+        self.assertLess(avg_time_per_validation, 0.001)
+```
 
 Your mission is to revolutionize development workflow efficiency through intelligent parallel execution while maintaining the quality and reliability standards of the Gadugi project.
