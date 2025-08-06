@@ -44,7 +44,7 @@ check_uv_available() {
         log_info "Install UV with: curl -LsSf https://astral.sh/uv/install.sh | sh"
         return 1
     fi
-    
+
     log_info "UV version: $(uv --version)"
     return 0
 }
@@ -53,32 +53,32 @@ check_uv_available() {
 setup_uv_environment() {
     local working_dir="${1:-$(pwd)}"
     local sync_args="${2:---all-extras}"
-    
+
     log_info "Setting up UV environment in: $working_dir"
-    
+
     # Change to the working directory
     cd "$working_dir"
-    
+
     # Verify this is a UV project
     if ! is_uv_project; then
         log_error "Not a UV project (missing pyproject.toml or uv.lock)"
         return 1
     fi
-    
+
     # Check UV availability
     if ! check_uv_available; then
         return 1
     fi
-    
+
     # Run UV sync with specified arguments
     log_info "Running: uv sync $sync_args"
     if uv sync $sync_args; then
         log_success "UV environment setup completed"
-        
+
         # Verify virtual environment was created
         if [[ -d ".venv" ]]; then
             log_success "Virtual environment created at .venv/"
-            
+
             # Show Python interpreter path
             local python_path
             if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
@@ -86,7 +86,7 @@ setup_uv_environment() {
             else
                 python_path=".venv/bin/python"
             fi
-            
+
             if [[ -f "$python_path" ]]; then
                 log_info "Python interpreter: $python_path"
                 log_info "Python version: $($python_path --version 2>&1)"
@@ -94,7 +94,7 @@ setup_uv_environment() {
         else
             log_warning "Virtual environment directory not found"
         fi
-        
+
         return 0
     else
         log_error "UV sync failed"
@@ -105,14 +105,14 @@ setup_uv_environment() {
 # Activate UV virtual environment (source this function)
 activate_uv_environment() {
     local working_dir="${1:-$(pwd)}"
-    
+
     cd "$working_dir"
-    
+
     if ! is_uv_project; then
         log_error "Not a UV project"
         return 1
     fi
-    
+
     # Determine activation script path based on OS
     local activate_script
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
@@ -120,7 +120,7 @@ activate_uv_environment() {
     else
         activate_script=".venv/bin/activate"
     fi
-    
+
     if [[ -f "$activate_script" ]]; then
         log_info "Activating UV virtual environment"
         source "$activate_script"
@@ -139,14 +139,14 @@ uv_run() {
     local working_dir="$1"
     shift # Remove working_dir from arguments
     local command="$@"
-    
+
     cd "$working_dir"
-    
+
     if ! is_uv_project; then
         log_error "Not a UV project"
         return 1
     fi
-    
+
     log_info "Running in UV environment: $command"
     uv run $command
 }
@@ -156,7 +156,7 @@ uv_run_python() {
     local working_dir="$1"
     shift
     local python_args="$@"
-    
+
     uv_run "$working_dir" python $python_args
 }
 
@@ -165,7 +165,7 @@ uv_run_pytest() {
     local working_dir="$1"
     shift
     local pytest_args="${@:-tests/}"
-    
+
     uv_run "$working_dir" pytest $pytest_args
 }
 
@@ -174,20 +174,20 @@ uv_add_package() {
     local working_dir="$1"
     local package="$2"
     local dev_flag="${3:-}"
-    
+
     cd "$working_dir"
-    
+
     if ! is_uv_project; then
         log_error "Not a UV project"
         return 1
     fi
-    
+
     local cmd="uv add"
     if [[ "$dev_flag" == "--dev" || "$dev_flag" == "--group=dev" ]]; then
         cmd="$cmd --group dev"
     fi
     cmd="$cmd $package"
-    
+
     log_info "Installing package: $cmd"
     $cmd
 }
@@ -195,28 +195,28 @@ uv_add_package() {
 # Check UV environment health
 check_uv_environment() {
     local working_dir="${1:-$(pwd)}"
-    
+
     cd "$working_dir"
-    
+
     log_info "Checking UV environment health in: $working_dir"
-    
+
     # Check if UV project
     if ! is_uv_project; then
         log_error "Not a UV project (missing pyproject.toml or uv.lock)"
         return 1
     fi
-    
+
     # Check UV availability
     if ! check_uv_available; then
         return 1
     fi
-    
+
     # Check virtual environment
     if [[ ! -d ".venv" ]]; then
         log_warning "Virtual environment not found - run setup_uv_environment"
         return 1
     fi
-    
+
     # Check if environment is in sync
     log_info "Checking if environment is in sync..."
     if uv sync --check; then
@@ -224,7 +224,7 @@ check_uv_environment() {
     else
         log_warning "Environment is not in sync - consider running 'uv sync'"
     fi
-    
+
     # Test basic Python functionality
     if uv run python -c "import sys; print(f'Python {sys.version} ready')"; then
         log_success "UV environment is healthy"
@@ -238,17 +238,17 @@ check_uv_environment() {
 # Clean up UV environment
 cleanup_uv_environment() {
     local working_dir="${1:-$(pwd)}"
-    
+
     cd "$working_dir"
-    
+
     log_info "Cleaning up UV environment in: $working_dir"
-    
+
     if [[ -d ".venv" ]]; then
         log_info "Removing virtual environment"
         rm -rf ".venv"
         log_success "Virtual environment removed"
     fi
-    
+
     # Optionally clean UV cache (commented out by default)
     # log_info "Cleaning UV cache"
     # uv cache clean
@@ -257,15 +257,15 @@ cleanup_uv_environment() {
 # Show UV environment information
 show_uv_info() {
     local working_dir="${1:-$(pwd)}"
-    
+
     cd "$working_dir"
-    
+
     log_info "UV Environment Information for: $working_dir"
     echo "=================================="
-    
+
     if is_uv_project; then
         echo "✅ UV Project: Yes"
-        
+
         if [[ -f "pyproject.toml" ]]; then
             echo "📄 pyproject.toml: Found"
             # Show project name if available
@@ -275,12 +275,12 @@ show_uv_info() {
                 echo "📦 Project Name: $project_name"
             fi
         fi
-        
+
         if [[ -f "uv.lock" ]]; then
             echo "🔒 uv.lock: Found"
             echo "📊 Lock file size: $(du -h uv.lock | cut -f1)"
         fi
-        
+
         if [[ -d ".venv" ]]; then
             echo "🐍 Virtual Environment: Found (.venv/)"
             local python_path
@@ -289,7 +289,7 @@ show_uv_info() {
             else
                 python_path=".venv/bin/python"
             fi
-            
+
             if [[ -f "$python_path" ]]; then
                 echo "🎯 Python: $($python_path --version 2>&1)"
                 echo "📍 Python Path: $python_path"
@@ -297,17 +297,17 @@ show_uv_info() {
         else
             echo "❌ Virtual Environment: Not found"
         fi
-        
+
         if command -v uv &> /dev/null; then
             echo "⚡ UV Version: $(uv --version)"
         else
             echo "❌ UV: Not installed"
         fi
-        
+
     else
         echo "❌ UV Project: No (missing pyproject.toml or uv.lock)"
     fi
-    
+
     echo "=================================="
 }
 
@@ -315,7 +315,7 @@ show_uv_info() {
 main() {
     local command="${1:-help}"
     local working_dir="${2:-$(pwd)}"
-    
+
     case "$command" in
         "setup")
             setup_uv_environment "$working_dir" "${3:---all-extras}"

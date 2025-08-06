@@ -7,8 +7,8 @@ imports: |
   from ..shared.workflow_engine import WorkflowEngine, execute_workflow
   from ..shared.phase_enforcer import PhaseEnforcer, enforce_phase_9, enforce_phase_10
   from ..shared.workflow_validator import WorkflowValidator, validate_workflow
-  
-  # Enhanced Separation Architecture - Shared Modules  
+
+  # Enhanced Separation Architecture - Shared Modules
   from ..shared.github_operations import GitHubOperations
   from ..shared.state_management import WorkflowStateManager, CheckpointManager
   from ..shared.error_handling import ErrorHandler, RecoveryManager
@@ -27,7 +27,7 @@ You are the WorkflowManager agent, now redesigned with deterministic code-based 
 ### Core Components
 
 1. **WorkflowEngine** (`.claude/shared/workflow_engine.py`): Deterministic phase execution
-2. **PhaseEnforcer** (`.claude/shared/phase_enforcer.py`): Guaranteed Phase 9/10 execution  
+2. **PhaseEnforcer** (`.claude/shared/phase_enforcer.py`): Guaranteed Phase 9/10 execution
 3. **WorkflowValidator** (`.claude/shared/workflow_validator.py`): Validation and integrity checks
 
 ## Primary Workflow Execution
@@ -79,7 +79,7 @@ The WorkflowEngine automatically executes these phases in order:
 1. **INIT**: Environment initialization and validation
 2. **PROMPT_VALIDATION**: Prompt file format and content validation
 3. **BRANCH_CREATION**: Git branch creation with proper naming
-4. **PROMPT_WRITER**: Optional prompt enhancement (configurable)  
+4. **PROMPT_WRITER**: Optional prompt enhancement (configurable)
 5. **ISSUE_MANAGEMENT**: GitHub issue creation/updating
 6. **DEVELOPMENT_PLANNING**: Implementation strategy planning
 7. **IMPLEMENTATION**: Code changes and file modifications
@@ -128,7 +128,7 @@ validator = WorkflowValidator(ValidationLevel.STANDARD)
 # Pre-execution validation
 prompt_report = validator.validate_prompt_file(prompt_file)
 
-# Post-execution validation  
+# Post-execution validation
 workflow_report = validator.validate_end_to_end(prompt_file, workflow_state)
 
 # Quality gates prevent progression with validation failures
@@ -142,7 +142,7 @@ Task: Execute workflow for prompts/implement-feature-xyz.md
 ```
 
 ### Workflow with Validation
-```  
+```
 Task: Execute workflow for prompts/fix-bug-abc.md with strict validation
 ```
 
@@ -154,7 +154,7 @@ Task: Enforce Phase 9 and 10 for existing PR #123
 ## Success Criteria
 
 ✅ **100% Phase Execution**: All phases complete without manual intervention
-✅ **Deterministic Behavior**: Identical results for identical inputs  
+✅ **Deterministic Behavior**: Identical results for identical inputs
 ✅ **Zero Phase Skipping**: Automatic enforcement prevents phase omission
 ✅ **Error Recovery**: Comprehensive retry and fallback mechanisms
 ✅ **Quality Assurance**: Validation gates ensure workflow integrity
@@ -163,7 +163,7 @@ Task: Enforce Phase 9 and 10 for existing PR #123
 
 ### Shared Module Integration:
 - **GitHubOperations**: Issue/PR creation and management
-- **StateManager**: Workflow state persistence and recovery  
+- **StateManager**: Workflow state persistence and recovery
 - **ErrorHandler**: Centralized error handling and retry logic
 - **TaskTracker**: Progress tracking and productivity metrics
 
@@ -196,7 +196,7 @@ python .claude/shared/workflow_engine.py <prompt_file>
 # Phase enforcement
 python .claude/shared/phase_enforcer.py 9 <pr_number>
 
-# Validation check  
+# Validation check
 python .claude/shared/workflow_validator.py <prompt_file>
 ```
 
