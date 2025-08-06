@@ -421,6 +421,22 @@ class TestEnhancedWorkflowManager:
                 "create_workflow_persistence",
                 return_value=True,
             ),
+            # Mock GitHub operations to prevent actual API calls
+            patch.object(
+                manager.github_ops,
+                "create_issue",
+                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_branch",
+                return_value={"success": True, "branch_name": "test-branch"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_pull_request",
+                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
+            ),
         ):
             result = manager.execute_workflow(str(self.test_prompt_file))
 
@@ -794,6 +810,22 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 "stop_workflow_monitoring",
                 return_value=True,
             ),
+            # Mock GitHub operations to prevent actual API calls
+            patch.object(
+                manager.github_ops,
+                "create_issue",
+                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_branch",
+                return_value={"success": True, "branch_name": "test-branch"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_pull_request",
+                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
+            ),
         ):
             # Mock healthy system
             mock_health.return_value = SystemHealthCheck(
@@ -1070,6 +1102,22 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 manager.reliability_manager,
                 "stop_workflow_monitoring",
                 return_value=True,
+            ),
+            # Mock GitHub operations to prevent actual API calls
+            patch.object(
+                manager.github_ops,
+                "create_issue",
+                return_value={"success": True, "issue_number": 123, "issue_url": "https://github.com/test/repo/issues/123"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_branch",
+                return_value={"success": True, "branch_name": "test-branch"},
+            ),
+            patch.object(
+                manager.github_ops,
+                "create_pull_request",
+                return_value={"success": True, "pr_number": 456, "pr_url": "https://github.com/test/repo/pull/456"},
             ),
         ):
             result = manager.execute_workflow(str(self.test_prompt_file))
