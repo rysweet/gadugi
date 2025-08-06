@@ -1222,13 +1222,13 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("3", "Task 3"))
         integration.current_task_list = task_list
 
-        with patch("tests.shared.test_task_tracking.claude_function_call") as mock_call:
+        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             updates = [
-                {"task_id": "1", "status": TaskStatus.COMPLETED},
-                {"task_id": "2", "status": TaskStatus.IN_PROGRESS},
-                {"task_id": "3", "priority": TaskPriority.HIGH},
+                {"id": "1", "status": TaskStatus.COMPLETED},
+                {"id": "2", "status": TaskStatus.IN_PROGRESS},
+                {"id": "3", "priority": TaskPriority.HIGH},
             ]
 
             result = integration.batch_update(updates)
