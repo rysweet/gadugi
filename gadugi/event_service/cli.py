@@ -294,8 +294,11 @@ Examples:
                         else:
                             print("Gadugi Event Service Status: UNHEALTHY")
                             return 1
-                except:
+                except aiohttp.ClientError:
                     print("Gadugi Event Service Status: NOT RUNNING")
+                    return 1
+                except Exception as e:
+                    print(f"Unexpected error checking service status: {e}")
                     return 1
         except Exception as e:
             print(f"Could not check status: {e}")
@@ -382,8 +385,15 @@ Examples:
             if args.data:
                 event_data = json.loads(args.data)
             elif args.file:
-                with open(args.file, "r") as f:
-                    event_data = json.load(f)
+                import aiofiles
+                import asyncio
+
+                async def read_json_file(path):
+                    async with aiofiles.open(path, "r") as f:
+                        content = await f.read()
+                        return json.loads(content)
+
+                event_data = await read_json_file(args.file)
 
             # Create event
             event = create_local_event(
@@ -431,12 +441,15 @@ Examples:
                 # Follow log file
                 import subprocess
 
-                subprocess.run(["tail", "-f", log_file])
+                # Use asyncio.create_subprocess_exec for non-blocking tail
+                process = await asyncio.create_subprocess_exec("tail", "-f", log_file)
+                await process.wait()
             else:
                 # Show last N lines
-                import subprocess
-
-                subprocess.run(["tail", "-n", str(args.lines), log_file])
+                process = await asyncio.create_subprocess_exec(
+                    "tail", "-n", str(args.lines), log_file
+                )
+                await process.wait()
 
             return 0
 

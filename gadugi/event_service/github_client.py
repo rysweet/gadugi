@@ -297,12 +297,21 @@ class GitHubClient:
         try:
             import subprocess
 
-            result = subprocess.run(
-                ["git", "remote", "get-url", "origin"],
-                capture_output=True,
-                text=True,
-                timeout=10,
+            import asyncio
+
+            process = await asyncio.create_subprocess_exec(
+                "git",
+                "remote",
+                "get-url",
+                "origin",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
+            stdout, _ = await process.communicate()
+            if process.returncode == 0:
+                remote_url = stdout.decode().strip()
+                return await self.parse_repository_url(remote_url)
+            return None
 
             if result.returncode == 0:
                 remote_url = result.stdout.strip()

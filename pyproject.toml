@@ -93,16 +93,10 @@ extend-exclude = [
 ]
 lint.select = ["ALL"]
 lint.ignore = [
-    # Existing disabled families
     "D", "ANN", "FA", "I", "E501", "W293", "T201", "Q000", "PLR", "PT", "C", "RET", "BLE", "S", "UP", "COM", "W292", "EXE001",
     "E402", "F841", "ARG", "PLC", "PTH", "PLW", "TRY", "EM", "B", "RUF", "A", "DTZ", "SLF", "PERF",
     "FBT", "TD", "FIX", "G004", "SIM", "E712", "F401", "INP001",
-    "F821", "W291", "PIE810", "ERA001", "F811",
-    # Newly ignored to unblock CI
-    "E722",          # bare except (allowed for quick pragmatic handlers)
-    "ASYNC110",      # while-sleep polling pattern in long-running servers
-    "ASYNC221",      # subprocess.run in CLI helpers (acceptable blocking in CLI)
-    "ASYNC230"       # blocking file open in small async CLI utility
+    "F821", "W291", "PIE810", "ERA001", "F811"
 ]
 
 [tool.ruff.format]

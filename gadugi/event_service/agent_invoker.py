@@ -50,7 +50,7 @@ class AgentInvoker:
         """Check if a file exists and is executable."""
         try:
             return Path(path).is_file() and os.access(path, os.X_OK)
-        except:
+        except Exception:
             return False
 
     async def invoke_agent(
@@ -234,8 +234,11 @@ class AgentInvoker:
                 # Clean up temporary file
                 try:
                     os.unlink(prompt_file)
-                except:
+                except FileNotFoundError:
+                    # File may already be deleted, ignore
                     pass
+                except Exception as e:
+                    logger.warning(f"Error deleting temp prompt file: {e}")
 
         except Exception as e:
             logger.error(

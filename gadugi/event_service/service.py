@@ -206,8 +206,9 @@ class GadugiEventService:
         )
 
         try:
-            while self.running:
-                await asyncio.sleep(1)
+            # Use an event to wait for shutdown instead of polling with sleep
+            shutdown_event = self._shutdown_event
+            await shutdown_event.wait()
         finally:
             await runner.cleanup()
 
@@ -233,8 +234,8 @@ class GadugiEventService:
         logger.info(f"Unix socket server listening on {socket_path}")
 
         try:
-            while self.running:
-                await asyncio.sleep(1)
+            shutdown_event = self._shutdown_event
+            await shutdown_event.wait()
         finally:
             server.close()
             await server.wait_closed()
@@ -250,10 +251,23 @@ class GadugiEventService:
         while self.running:
             try:
                 await self._poll_github_events()
-                await asyncio.sleep(self.config.poll_interval_seconds)
+                # Wait for either shutdown or poll interval
+                try:
+                    await asyncio.wait_for(
+                        self._shutdown_event.wait(),
+                        timeout=self.config.poll_interval_seconds,
+                    )
+                except asyncio.TimeoutError:
+                    pass
             except Exception as e:
                 logger.error(f"Error during GitHub polling: {e}")
-                await asyncio.sleep(min(self.config.poll_interval_seconds, 60))
+                try:
+                    await asyncio.wait_for(
+                        self._shutdown_event.wait(),
+                        timeout=min(self.config.poll_interval_seconds, 60),
+                    )
+                except asyncio.TimeoutError:
+                    pass
 
     async def _handle_github_webhook(self, request: web.Request) -> web.Response:
         """Handle incoming GitHub webhook."""
