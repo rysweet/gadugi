@@ -23,7 +23,7 @@ The agent runs automatically in **Phase 11** of the WorkflowManager process:
 ```bash
 # Automatic execution flow:
 # Phase 8: PR Creation
-# Phase 9: Code Review  
+# Phase 9: Code Review
 # Phase 10: Review Response
 # Phase 11: Settings Update (AUTOMATIC) ← claude-settings-update runs here
 ```
@@ -66,7 +66,7 @@ You can invoke the agent manually when needed:
 
 # Expected output when changes detected:
 # Merging Claude settings...
-# Changes detected - creating PR...  
+# Changes detected - creating PR...
 # Settings update PR created: chore/update-claude-settings-20250805-143022
 
 # Expected output when no changes:
@@ -156,7 +156,7 @@ After agent processing:
       {
         "hooks": [
           {
-            "type": "command", 
+            "type": "command",
             "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/cleanup.py",
             "timeout": 300
           }
@@ -172,7 +172,7 @@ After agent processing:
 ### Deep Merging Rules
 
 1. **Local Precedence**: Local settings always override global settings
-2. **Deep Merge**: Nested objects are merged recursively  
+2. **Deep Merge**: Nested objects are merged recursively
 3. **Array Handling**: Special logic for `allow` arrays (merge + deduplicate + sort)
 4. **Preservation**: Global settings not in local are preserved
 
@@ -202,7 +202,7 @@ After agent processing:
   "Start": [{"command": "start1"}]
 }
 
-// Local settings  
+// Local settings
 "hooks": {
   "Stop": [{"command": "stop2"}]  // ← will override
 }
@@ -255,7 +255,7 @@ Different projects need different permissions:
   }
 }
 
-// For Node.js projects  
+// For Node.js projects
 {
   "permissions": {
     "allow": [
@@ -347,10 +347,10 @@ from collections import OrderedDict
 
 with open('.claude/settings.json') as f:
     global_settings = json.load(f)
-    
+
 with open('.claude/settings.local.json') as f:
     local_settings = json.load(f)
-    
+
 print('Global:', json.dumps(global_settings, indent=2))
 print('Local:', json.dumps(local_settings, indent=2))
 "
@@ -389,16 +389,16 @@ print('Local:', json.dumps(local_settings, indent=2))
   "permissions": {
     "allow": [
       // Group related commands together with comments
-      
+
       // Git operations
       "Bash(git add:*)",
-      "Bash(git commit:*)", 
+      "Bash(git commit:*)",
       "Bash(git push:*)",
-      
+
       // GitHub CLI
       "Bash(gh pr create:*)",
       "Bash(gh issue create:*)",
-      
+
       // Development tools
       "Bash(python:*)",
       "Bash(npm:*)",
@@ -502,19 +502,19 @@ from collections import OrderedDict
 
 def custom_merge(global_settings, local_settings):
     """Custom merge with additional validation rules."""
-    
+
     # Basic deep merge
     result = deep_merge(global_settings, local_settings)
-    
+
     # Custom validation rules
     dangerous_commands = ['rm -rf', 'sudo', 'dd if=']
     allow_list = result.get('permissions', {}).get('allow', [])
-    
+
     for cmd in allow_list:
         for dangerous in dangerous_commands:
             if dangerous in cmd:
                 print(f"⚠️  WARNING: Potentially dangerous command detected: {cmd}")
-    
+
     return result
 
 def deep_merge(global_dict, local_dict):
@@ -526,12 +526,12 @@ if __name__ == '__main__':
     # Use custom merge logic before calling agent
     with open('.claude/settings.json') as f:
         global_settings = json.load(f)
-    
+
     with open('.claude/settings.local.json') as f:
         local_settings = json.load(f)
-    
+
     merged = custom_merge(global_settings, local_settings)
-    
+
     # Proceed with agent invocation
     os.system('/agent:claude-settings-update')
 ```
@@ -544,14 +544,14 @@ if __name__ == '__main__':
 
 PROJECTS=(
     "/path/to/project1"
-    "/path/to/project2" 
+    "/path/to/project2"
     "/path/to/project3"
 )
 
 for project in "${PROJECTS[@]}"; do
     echo "Processing $project..."
     cd "$project"
-    
+
     if [ -f ".claude/settings.local.json" ]; then
         /agent:claude-settings-update
     else

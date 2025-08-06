@@ -18,8 +18,37 @@ from sync_engine import ConflictResolution, SyncDirection
 
 
 @dataclass
+class CompactionConfig:
+    """Configuration for automatic Memory.md compaction"""
+
+    # Size thresholds for triggering compaction
+    max_lines: int = 100  # Maximum lines before compaction
+    max_chars: int = 50000  # Maximum characters before compaction
+    target_lines: int = 80  # Target lines after compaction
+    min_benefit: float = 0.2  # Minimum reduction percentage to proceed
+
+    # Compaction behavior
+    enable_auto_compaction: bool = True
+    create_backup: bool = True
+    details_file_name: str = "LongTermMemoryDetails.md"
+
+    # Section-specific compaction rules
+    section_rules: Dict[str, Dict[str, Any]] = field(
+        default_factory=lambda: {
+            "Current Goals": {"preserve_all": True, "max_age_days": None},
+            "Next Steps": {"preserve_all": True, "max_age_days": None},
+            "Completed Tasks": {"max_age_days": 7, "max_items": 15},
+            "Recent Accomplishments": {"max_age_days": 14, "max_items": 20},
+            "Reflections": {"max_age_days": 30, "max_items": 10},
+            "Important Context": {"max_items": 15, "preserve_high_priority": True},
+            "Code Review Summary": {"max_age_days": 21, "max_items": 5},
+        }
+    )
+
+
+@dataclass
 class PruningConfig:
-    """Configuration for Memory.md content pruning"""
+    """Configuration for Memory.md content pruning (legacy - use CompactionConfig)"""
 
     completed_task_age_days: int = 7
     reflection_age_days: int = 30
@@ -155,6 +184,7 @@ class MemoryManagerConfig:
     """Complete configuration for Memory Manager"""
 
     # Core components
+    compaction: CompactionConfig = field(default_factory=CompactionConfig)
     pruning: PruningConfig = field(default_factory=PruningConfig)
     sync: SyncConfig = field(default_factory=SyncConfig)
     issue_creation: IssueCreationConfig = field(default_factory=IssueCreationConfig)
@@ -208,6 +238,8 @@ class MemoryManagerConfig:
         # Convert nested dictionaries back to dataclasses
         config = cls()
 
+        if "compaction" in data:
+            config.compaction = CompactionConfig(**data["compaction"])
         if "pruning" in data:
             config.pruning = PruningConfig(**data["pruning"])
         if "sync" in data:

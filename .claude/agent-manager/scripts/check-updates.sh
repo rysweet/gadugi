@@ -42,16 +42,16 @@ update_check_timestamp() {
 # Check if we should perform an update check (default: every 24 hours)
 should_check_updates() {
     local last_check=$(get_last_check_timestamp)
-    
+
     if [ "$last_check" = "never" ]; then
         return 0
     fi
-    
+
     # Check if 24 hours have passed since last check
     local last_timestamp=$(date -d "$last_check" +%s 2>/dev/null || echo 0)
     local current_timestamp=$(date +%s)
     local hours_passed=$(( (current_timestamp - last_timestamp) / 3600 ))
-    
+
     if [ $hours_passed -ge 24 ]; then
         return 0
     else
@@ -69,10 +69,10 @@ version_to_number() {
 compare_versions() {
     local version1=$1
     local version2=$2
-    
+
     local num1=$(version_to_number "$version1")
     local num2=$(version_to_number "$version2")
-    
+
     if [ "$num1" -gt "$num2" ]; then
         echo "1"  # version1 is newer
     elif [ "$num1" -lt "$num2" ]; then
@@ -100,7 +100,7 @@ get_installed_agents() {
 get_agent_version() {
     local agent_name=$1
     local metadata_file="$AGENT_MANAGER_ROOT/../agents/$agent_name.md"
-    
+
     if [ -f "$metadata_file" ]; then
         # Look for version in frontmatter
         local version=$(grep -m1 "^version:" "$metadata_file" 2>/dev/null | sed 's/version: *//')
@@ -117,7 +117,7 @@ get_agent_version() {
 # Fetch latest registry information
 fetch_registry() {
     ensure_cache_dir
-    
+
     # For now, use a mock registry. In a real implementation, this would fetch from a remote source
     cat > "$REGISTRY_FILE" <<EOF
 {
@@ -147,20 +147,20 @@ EOF
 check_agent_update() {
     local agent_name=$1
     local current_version=$2
-    
+
     if [ ! -f "$REGISTRY_FILE" ]; then
         return 1
     fi
-    
+
     # Extract latest version from registry
     local latest_version=$(jq -r ".agents[\"$agent_name\"].latest_version // \"unknown\"" "$REGISTRY_FILE" 2>/dev/null || echo "unknown")
-    
+
     if [ "$latest_version" = "unknown" ]; then
         return 1
     fi
-    
+
     local comparison=$(compare_versions "$current_version" "$latest_version")
-    
+
     if [ "$comparison" = "-1" ]; then
         echo "$latest_version"
         return 0
@@ -172,7 +172,7 @@ check_agent_update() {
 # Main function to check for updates
 check_for_updates() {
     local force_check=false
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -185,9 +185,9 @@ check_for_updates() {
                 ;;
         esac
     done
-    
+
     echo -e "${BLUE}🔍 Checking for agent updates...${NC}"
-    
+
     # Check if we should perform update check
     if [ "$force_check" = false ] && ! should_check_updates; then
         local last_check=$(get_last_check_timestamp)
@@ -195,26 +195,26 @@ check_for_updates() {
         echo -e "${YELLOW}   Use --force to check anyway${NC}"
         return 0
     fi
-    
+
     # Fetch latest registry
     echo "📥 Fetching latest agent registry..."
     fetch_registry
-    
+
     # Update timestamp
     update_check_timestamp
-    
+
     # Check installed agents
     echo -e "\n${BLUE}📦 Installed agents:${NC}"
-    
+
     local updates_available=0
     local agents_checked=0
-    
+
     # Check each installed agent
     while IFS= read -r agent_name; do
         if [ -n "$agent_name" ]; then
             ((agents_checked++))
             local current_version=$(get_agent_version "$agent_name")
-            
+
             if [ "$current_version" = "not_found" ]; then
                 echo -e "  ${RED}❌ $agent_name - not found${NC}"
             elif [ "$current_version" = "unknown" ]; then
@@ -230,17 +230,17 @@ check_for_updates() {
             fi
         fi
     done < <(get_installed_agents)
-    
+
     # Summary
     echo -e "\n${BLUE}📊 Summary:${NC}"
     echo "  • Agents checked: $agents_checked"
     echo "  • Updates available: $updates_available"
-    
+
     if [ $updates_available -gt 0 ]; then
         echo -e "\n${YELLOW}💡 To update agents, use:${NC}"
         echo "  /agent:agent-manager update <agent-name>"
     fi
-    
+
     return 0
 }
 

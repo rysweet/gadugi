@@ -114,10 +114,10 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 4. **Commit with clear emergency attribution**:
    ```bash
    git commit -m "EMERGENCY: fix critical [issue description]
-   
+
    Emergency hotfix bypassing normal orchestrator workflow
    due to production impact. Full workflow to follow.
-   
+
    Fixes: [issue-number]"
    ```
 5. **Immediately create follow-up issue** for proper workflow implementation
@@ -239,6 +239,177 @@ The worktree-manager agent handles:
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
 
+## UV Virtual Environment Setup for Agents
+
+**CRITICAL**: All agents working in worktrees on UV Python projects MUST properly set up virtual environments.
+
+### UV Project Detection
+
+Agents must detect UV projects by checking for both:
+- `pyproject.toml` file
+- `uv.lock` file
+
+### Required UV Setup in Worktrees
+
+When agents create or work in worktrees for UV projects, they MUST:
+
+1. **Always run UV sync after entering worktree**:
+   ```bash
+   cd .worktrees/task-*/
+   uv sync --all-extras
+   ```
+
+2. **Use `uv run` prefix for all Python commands**:
+   ```bash
+   # Correct UV usage
+   uv run python script.py
+   uv run pytest tests/
+   uv run ruff check .
+   uv run black .
+   
+   # NEVER run directly (will fail in UV projects)
+   python script.py     # ❌ Wrong
+   pytest tests/        # ❌ Wrong
+   ```
+
+### UV Setup Script for Agents
+
+All agents should use the shared UV setup script: `.claude/scripts/setup-uv-env.sh`
+
+#### Basic Usage for Agents:
+```bash
+# Set up UV environment in current worktree
+source .claude/scripts/setup-uv-env.sh
+setup_uv_environment "$(pwd)" "--all-extras"
+
+# Check if environment is healthy
+check_uv_environment "$(pwd)"
+
+# Run commands with UV
+uv_run "$(pwd)" pytest tests/
+uv_run_python "$(pwd)" script.py
+```
+
+#### Agent Integration Pattern:
+```bash
+# In agent scripts - always check for UV project first
+if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+    echo "UV project detected - setting up virtual environment"
+    source .claude/scripts/setup-uv-env.sh
+    
+    if setup_uv_environment "$(pwd)" "--all-extras"; then
+        echo "UV environment ready"
+        # Use uv_run for all subsequent Python commands
+        uv_run_pytest "$(pwd)" tests/
+    else
+        echo "Failed to set up UV environment"
+        exit 1
+    fi
+else
+    echo "Not a UV project - using standard Python setup"
+    # Standard Python setup for non-UV projects
+fi
+```
+
+### Agent-Specific UV Requirements
+
+#### WorktreeManager Agent
+- MUST run `uv sync --all-extras` in `setup_worktree_environment()` function
+- Should detect UV projects and set up virtual environment automatically
+- Must update environment setup documentation
+
+#### WorkflowManager Agent  
+- MUST check for UV project when starting any workflow
+- MUST use `uv run` prefix for all Python commands in UV projects
+- Should validate UV environment before running tests or scripts
+
+#### OrchestratorAgent
+- MUST coordinate UV setup across all parallel worktrees
+- Should pass UV project status to sub-agents
+- Must ensure consistent UV environment setup across all workers
+
+### UV Environment Commands Reference
+
+| Task | UV Command | Notes |
+|------|------------|-------|
+| Setup environment | `uv sync --all-extras` | Run once per worktree |
+| Run Python script | `uv run python script.py` | Always use uv run |
+| Run tests | `uv run pytest tests/` | Never run pytest directly |
+| Format code | `uv run ruff format .` | UV manages tool versions |
+| Lint code | `uv run ruff check .` | Consistent tool versions |
+| Add dependency | `uv add package` | Updates pyproject.toml |
+| Add dev dependency | `uv add --group dev package` | For development tools |
+
+### Troubleshooting UV Issues
+
+#### "Module not found" errors in agents:
+```bash
+# Always check if you're using uv run
+uv run python script.py  # ✅ Correct
+python script.py         # ❌ Wrong - will fail
+
+# Ensure environment is synced
+uv sync --all-extras
+```
+
+#### "uv: command not found" in worktrees:
+```bash
+# Check UV installation
+which uv
+uv --version
+
+# Install UV if missing
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+#### Virtual environment not found:
+```bash
+# Re-run setup
+uv sync --all-extras
+
+# Check environment health
+source .claude/scripts/setup-uv-env.sh
+check_uv_environment "$(pwd)"
+```
+
+### UV Environment Validation
+
+Agents should validate UV environments before executing Python code:
+
+```bash
+# Validation checklist for agents
+validate_uv_environment() {
+    local worktree_path="$1"
+    cd "$worktree_path"
+    
+    # Check UV project files
+    if [[ ! -f "pyproject.toml" || ! -f "uv.lock" ]]; then
+        echo "Not a UV project"
+        return 1
+    fi
+    
+    # Check UV installation
+    if ! command -v uv &> /dev/null; then
+        echo "UV not installed"
+        return 1
+    fi
+    
+    # Check virtual environment
+    if [[ ! -d ".venv" ]]; then
+        echo "Virtual environment not found - running uv sync"
+        uv sync --all-extras
+    fi
+    
+    # Test Python access
+    if ! uv run python -c "import sys; print('Python ready')"; then
+        echo "UV environment not working"
+        return 1
+    fi
+    
+    return 0
+}
+```
+
 ## Troubleshooting: Orchestrator and Worktree Failures
 
 When the mandatory orchestrator workflow encounters issues, use these troubleshooting procedures:
@@ -282,7 +453,7 @@ free -h  # Memory (Linux) or vm_stat (macOS)
 2. Use WorkflowManager directly for single tasks:
    ```
    /agent:workflow-manager
-   
+
    Task: Execute workflow for /prompts/[single-prompt].md
    ```
 3. Execute critical tasks manually as last resort (document as emergency)

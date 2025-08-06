@@ -44,7 +44,7 @@ log_warning() {
 # Cross-platform date helper function
 get_date_minutes_ago() {
     local minutes_ago="$1"
-    
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS - use date -v
         date -v-"${minutes_ago}M" -Iseconds
@@ -58,10 +58,10 @@ get_date_minutes_ago() {
 run_test() {
     local test_name="$1"
     local test_function="$2"
-    
+
     TESTS_RUN=$((TESTS_RUN + 1))
     log_info "Running test: $test_name"
-    
+
     if $test_function; then
         TESTS_PASSED=$((TESTS_PASSED + 1))
         log_success "$test_name"
@@ -77,7 +77,7 @@ run_test() {
 setup_gh_mock() {
     local mock_response="$1"
     local mock_script="/tmp/gh_mock_$$.sh"
-    
+
     cat > "$mock_script" << EOF
 #!/bin/bash
 # Mock GitHub CLI for testing
@@ -104,7 +104,7 @@ case "\$1 \$2 \$3" in
         ;;
 esac
 EOF
-    
+
     chmod +x "$mock_script"
     export PATH="/tmp:$PATH"
     ln -fs "$mock_script" "/tmp/gh"
@@ -135,15 +135,15 @@ test_dry_run_option() {
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Run in dry-run mode
     local output
     output=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 2>&1)
-    
+
     cleanup_gh_mock
-    
+
     # Verify dry-run output
     echo "$output" | grep -q "DRY RUN" && echo "$output" | grep -q "Would invoke"
 }
@@ -160,21 +160,21 @@ test_orphaned_pr_detection() {
         },
         {
             "number": 124,
-            "title": "Recent Feature Implementation", 
+            "title": "Recent Feature Implementation",
             "author": {"login": "test-user"},
             "createdAt": "'$(get_date_minutes_ago 2)'",
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Run detection
     local output
     output=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 2>&1)
-    
+
     cleanup_gh_mock
-    
+
     # Should detect PR 123 (old) but not PR 124 (recent)
     echo "$output" | grep -q "PR #123" && ! echo "$output" | grep -q "PR #124"
 }
@@ -184,7 +184,7 @@ test_workflow_pr_identification() {
     local mock_prs='[
         {
             "number": 125,
-            "title": "Feature Implementation", 
+            "title": "Feature Implementation",
             "author": {"login": "test-user"},
             "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
@@ -192,20 +192,20 @@ test_workflow_pr_identification() {
         {
             "number": 126,
             "title": "Manual Bug Fix",
-            "author": {"login": "test-user"}, 
+            "author": {"login": "test-user"},
             "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Run detection
     local output
     output=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 2>&1)
-    
+
     cleanup_gh_mock
-    
+
     # Should identify PR 125 as workflow PR, skip PR 126
     echo "$output" | grep -q "PR #125" && echo "$output" | grep -q "workflow-managed"
 }
@@ -217,23 +217,23 @@ test_max_age_parameter() {
             "number": 127,
             "title": "Feature Implementation",
             "author": {"login": "test-user"},
-            "createdAt": "'$(get_date_minutes_ago 3)'", 
+            "createdAt": "'$(get_date_minutes_ago 3)'",
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Test with max-age=2 (should detect)
     local output1
     output1=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=2 2>&1)
-    
+
     # Test with max-age=5 (should not detect)
-    local output2  
+    local output2
     output2=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 2>&1)
-    
+
     cleanup_gh_mock
-    
+
     # PR should be detected with max-age=2 but not max-age=5
     echo "$output1" | grep -q "PR #127" && ! echo "$output2" | grep -q "PR #127"
 }
@@ -241,7 +241,7 @@ test_max_age_parameter() {
 test_error_handling() {
     # Test with invalid GitHub CLI (simulate gh not available)
     export PATH="/nonexistent:$PATH"
-    
+
     local output
     if output=$("$RECOVERY_SCRIPT" --dry-run 2>&1); then
         return 1  # Should fail when gh is not available
@@ -256,19 +256,19 @@ test_logging_functionality() {
         {
             "number": 128,
             "title": "Feature Implementation",
-            "author": {"login": "test-user"}, 
+            "author": {"login": "test-user"},
             "createdAt": "'$(get_date_minutes_ago 10)'",
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Run script and check log file
     "$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 &>/dev/null
-    
+
     cleanup_gh_mock
-    
+
     # Verify log file was created and contains expected entries
     local log_file="/tmp/orphaned_pr_recovery.log"
     [ -f "$log_file" ] && grep -q "Starting orphaned PR detection" "$log_file"
@@ -279,9 +279,9 @@ test_state_file_integration() {
     local temp_state_dir="/tmp/test_workflow_states"
     local test_task_id="test-task-123"
     local state_file="$temp_state_dir/$test_task_id/state.md"
-    
+
     mkdir -p "$(dirname "$state_file")"
-    
+
     # Create a state file indicating PR created but no Phase 9
     cat > "$state_file" << EOF
 # WorkflowManager State
@@ -291,10 +291,10 @@ Task ID: $test_task_id
 - [x] Phase 8: Pull Request
 - [ ] Phase 9: Review
 
-## Active Workflow  
+## Active Workflow
 - **PR Number**: #129
 EOF
-    
+
     # Create mock for this specific PR
     local mock_prs='[
         {
@@ -305,16 +305,16 @@ EOF
             "reviews": []
         }
     ]'
-    
+
     setup_gh_mock "$mock_prs"
-    
+
     # Run recovery
     local output
     output=$("$RECOVERY_SCRIPT" --dry-run --max-age-minutes=5 2>&1)
-    
+
     cleanup_gh_mock
     rm -rf "$temp_state_dir"
-    
+
     # Should detect the PR from state file context
     echo "$output" | grep -q "PR #129"
 }
@@ -323,16 +323,16 @@ EOF
 main() {
     log_info "Starting Orphaned PR Recovery Tests"
     log_info "Recovery script: $RECOVERY_SCRIPT"
-    
+
     # Verify prerequisites
     if ! command -v jq &>/dev/null; then
         log_error "jq is required for tests but not installed"
         exit 1
     fi
-    
+
     # Run all tests
     run_test "Script exists and is executable" test_script_exists
-    run_test "Help option works" test_help_option  
+    run_test "Help option works" test_help_option
     run_test "Dry run option works" test_dry_run_option
     run_test "Orphaned PR detection logic" test_orphaned_pr_detection
     run_test "Workflow PR identification" test_workflow_pr_identification
@@ -340,13 +340,13 @@ main() {
     run_test "Error handling for missing dependencies" test_error_handling
     run_test "Logging functionality" test_logging_functionality
     run_test "State file integration" test_state_file_integration
-    
+
     # Test summary
     log_info ""
     log_info "Test Summary:"
     log_info "  Tests run: $TESTS_RUN"
     log_success "  Passed: $TESTS_PASSED"
-    
+
     if [ $TESTS_FAILED -gt 0 ]; then
         log_error "  Failed: $TESTS_FAILED"
         exit 1

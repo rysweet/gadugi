@@ -11,12 +11,12 @@ The WorkflowManager agent MUST use the Task tool to invoke the code-reviewer age
 def enforce_phase_9(pr_number):
     print(f"🚨 PHASE 8 COMPLETE: PR #{pr_number} created")
     print("⏱️ Starting 30-second timer for mandatory Phase 9...")
-    
+
     # Wait 30 seconds for PR to propagate
     time.sleep(30)
-    
+
     print(f"🚨 ENFORCING PHASE 9: Invoking code-reviewer for PR #{pr_number}")
-    
+
     # Use the Task tool to invoke code-reviewer
     task_prompt = f"""Review PR #{pr_number}: [PR Title]
 
@@ -25,7 +25,7 @@ This is the MANDATORY Phase 9 code review required by WorkflowManager.
 Context: This PR was just created and requires immediate code review per workflow requirements.
 
 Please conduct a thorough review of all changes."""
-    
+
     # CRITICAL: Actually invoke the Task tool
     invoke_task_tool(
         subagent_type="code-reviewer",
