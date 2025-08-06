@@ -5,7 +5,11 @@ Tests the ReadinessAssessor class and related assessment functionality
 including conflict analysis, CI status evaluation, and metadata checking.
 """
 
-import pytest
+try:
+    import pytest
+except ImportError:
+    from test_stubs import pytest
+
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
@@ -36,9 +40,16 @@ try:
         CIFailureType,
     )
 except ImportError:
-    # Fallback for testing without full module setup
-    pytest.skip(
-        "PR Backlog Manager modules not available for testing", allow_module_level=True
+    # Use stubs for type checking and testing
+    from test_stubs import (
+        ReadinessAssessor,
+        ConflictAssessment,
+        CIAssessment,
+        ReviewAssessment,
+        SyncAssessment,
+        MetadataAssessment,
+        ConflictComplexity,
+        CIFailureType,
     )
 
 
