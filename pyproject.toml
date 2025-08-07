@@ -93,7 +93,7 @@ extend-exclude = [
 ]
 [tool.ruff.lint]
 select = ["E", "F", "W"]  # Basic errors and warnings only
-ignore = ["E501"]  # Allow line-too-long, will be handled by formatter
+ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by formatter
 
 # Ignore async-related rules in test files since they often use subprocess for git setup
 [tool.ruff.lint.per-file-ignores]
