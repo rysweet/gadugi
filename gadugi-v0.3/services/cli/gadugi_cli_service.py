@@ -16,11 +16,11 @@ import shutil
 import subprocess
 import sys
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Protocol, Union
 
 import psutil
 
@@ -30,14 +30,16 @@ CLICK_AVAILABLE = importlib.util.find_spec("click") is not None
 # Check for rich availability using importlib
 RICH_AVAILABLE = importlib.util.find_spec("rich") is not None
 
+
+# Rich components (conditional imports with type ignores for runtime compatibility)
 if RICH_AVAILABLE:
-    from rich.console import Console
-    from rich.panel import Panel
-    from rich.progress import Progress, SpinnerColumn, TextColumn
-    from rich.prompt import Confirm, Prompt
-    from rich.syntax import Syntax
-    from rich.table import Table
-    from rich.tree import Tree
+    from rich.console import Console  # type: ignore[misc]
+    from rich.panel import Panel  # type: ignore[misc]
+    from rich.progress import Progress, SpinnerColumn, TextColumn  # type: ignore[misc]
+    from rich.prompt import Confirm, Prompt  # type: ignore[misc]
+    from rich.syntax import Syntax  # type: ignore[misc]
+    from rich.table import Table  # type: ignore[misc]
+    from rich.tree import Tree  # type: ignore[misc]
 else:
     # Mock rich components if not available
     class Console:
@@ -45,6 +47,7 @@ else:
 
         def print(self, *args: Any, **kwargs: Any) -> None:
             """Mock print method."""
+            print(*args)  # Use builtin print
 
         def input(self, prompt: str) -> str:
             """Mock input method."""
@@ -52,18 +55,42 @@ else:
 
     class Table:
         """Mock Table class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize table."""
+            pass
+        
+        def add_column(self, *args: Any, **kwargs: Any) -> None:
+            """Mock add_column method."""
+            pass
+        
+        def add_row(self, *args: Any, **kwargs: Any) -> None:
+            """Mock add_row method."""
+            pass
 
     class Panel:
         """Mock Panel class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize panel."""
+            pass
 
     class Progress:
         """Mock Progress class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize progress."""
+            pass
 
     class SpinnerColumn:
         """Mock SpinnerColumn class for when rich is not available."""
 
     class TextColumn:
         """Mock TextColumn class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize text column."""
+            pass
 
     class Prompt:
         """Mock Prompt class for when rich is not available."""
@@ -71,7 +98,8 @@ else:
         @staticmethod
         def ask(prompt: str, default: str | None = None) -> str:
             """Mock ask method."""
-            return input(f"{prompt} [{default}]: ") or default
+            response = input(f"{prompt} [{default}]: " if default else f"{prompt}: ")
+            return response or default or ""
 
     class Confirm:
         """Mock Confirm class for when rich is not available."""
@@ -83,9 +111,17 @@ else:
 
     class Syntax:
         """Mock Syntax class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize syntax."""
+            pass
 
     class Tree:
         """Mock Tree class for when rich is not available."""
+        
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            """Initialize tree."""
+            pass
 
 
 class ServiceType(Enum):
@@ -130,8 +166,8 @@ class CommandResult:
     message: str
     data: Any = None
     execution_time: float = 0.0
-    warnings: list[str] = None
-    errors: list[str] = None
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.warnings is None:
@@ -163,7 +199,7 @@ class AgentInfo:
     path: str
     description: str
     category: str
-    dependencies: list[str] = None
+    dependencies: list[str] = field(default_factory=list)
     last_used: datetime | None = None
 
     def __post_init__(self):

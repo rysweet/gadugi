@@ -5,7 +5,6 @@ and integration scenarios.
 """
 
 import json
-import os
 import sys
 import tempfile
 from datetime import datetime
@@ -14,7 +13,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from workflow_manager_engine import (
     PhaseExecutor,

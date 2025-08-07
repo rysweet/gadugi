@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """Tests for Team Coach Engine."""
 
-import os
 
-# Add src to path for imports
+
 import sys
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from team_coach_engine import (
     LearningEngine,

@@ -2,7 +2,6 @@
 """Tests for MCP (Memory and Context Persistence) Service."""
 
 import asyncio
-import os
 import sqlite3
 import sys
 import tempfile
@@ -11,7 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add services directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "services", "mcp"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "services" / "mcp"))
 
 from mcp_service import (
     ContextManager,

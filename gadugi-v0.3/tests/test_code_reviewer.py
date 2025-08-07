@@ -5,7 +5,6 @@ and review workflow integration.
 """
 
 import json
-import os
 import sys
 import tempfile
 from pathlib import Path
@@ -13,7 +12,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+# Add the src directory to the Python path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from code_reviewer_engine import (
     BanditAnalyzer,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Tests for Agent Generator Engine."""
 
-import os
+
 import shutil
 import sys
 import tempfile
@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from agent_generator_engine import (
     AgentGeneratorEngine,

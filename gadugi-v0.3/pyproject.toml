@@ -95,3 +95,7 @@ ignore = [
     "DTZ005",   # datetime without timezone (acceptable in tests)
     "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
 ]
+[tool.pyright]
+extraPaths = ["src/orchestrator", "services/cli", "services/mcp", "services/neo4j-graph", "services/llm-proxy", "services/event-router"]
+pythonVersion = "3.9"
+pythonPlatform = "All"

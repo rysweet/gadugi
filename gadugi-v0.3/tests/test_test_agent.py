@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Tests for Test Agent Agent Engine."""
 
-import os
+
 import sys
 import unittest
+from pathlib import Path
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from test_agent_engine import TestAgentEngine, TestAgentRequest, TestAgentResponse
 

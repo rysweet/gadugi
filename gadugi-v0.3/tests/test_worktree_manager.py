@@ -5,7 +5,6 @@ monitoring, and cleanup operations.
 """
 
 import asyncio
-import os
 import shutil
 import subprocess
 import sys
@@ -17,7 +16,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from worktree_manager_engine import (
     CleanupResult,

@@ -7,7 +7,6 @@ backup operations, and configuration management.
 """
 
 import json
-import os
 import shutil
 import sqlite3
 import sys
@@ -20,7 +19,7 @@ import pytest
 import yaml
 
 # Add the src directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from gadugi_engine import (
     AgentInfo,
