@@ -74,6 +74,8 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+.coverage
+htmlcov/
 
 # nyc test coverage
 .nyc_output
@@ -95,6 +97,9 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+tmp-*
+*.bak
+*-checkpoint.md
 
 # Python
 __pycache__/
