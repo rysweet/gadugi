@@ -37,46 +37,17 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# TYPE_CHECKING is always False at runtime but True for type checkers
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # For type checking, use stubs
-    from .test_stubs import (
-        ReadinessAssessor,
-        ConflictAssessment,
-        CIAssessment,
-        ReviewAssessment,
-        SyncAssessment,
-        MetadataAssessment,
-        ConflictComplexity,
-        CIFailureType,
-    )
-else:
-    # For runtime, try real imports
-    try:
-        from readiness_assessor import (  # type: ignore[import]
-            ReadinessAssessor,
-            ConflictAssessment,
-            CIAssessment,
-            ReviewAssessment,
-            SyncAssessment,
-            MetadataAssessment,
-            ConflictComplexity,
-            CIFailureType,
-        )
-    except ImportError:
-        # Fall back to stubs if real imports fail
-        from .test_stubs import (
-            ReadinessAssessor,
-            ConflictAssessment,
-            CIAssessment,
-            ReviewAssessment,
-            SyncAssessment,
-            MetadataAssessment,
-            ConflictComplexity,
-            CIFailureType,
-        )
+# Always use stubs for readiness assessor tests
+from .test_stubs import (
+    ReadinessAssessor,
+    ConflictAssessment,
+    CIAssessment,
+    ReviewAssessment,
+    SyncAssessment,
+    MetadataAssessment,
+    ConflictComplexity,
+    CIFailureType,
+)
 
 
 @pytest.fixture

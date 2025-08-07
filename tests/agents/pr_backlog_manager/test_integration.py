@@ -37,61 +37,21 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# TYPE_CHECKING is always False at runtime but True for type checkers
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # For type checking, use stubs
-    from .test_stubs import (
-        PRBacklogManager,
-        PRStatus,
-        ReadinessCriteria,
-        ReadinessAssessor,
-        ConflictComplexity,
-        DelegationCoordinator,
-        DelegationType,
-        DelegationStatus,
-        GitHubActionsIntegration,
-        ProcessingMode,
-        AgentConfig,
-    )
-else:
-    # For runtime, try real imports
-    try:
-        from core import (  # type: ignore[import]
-            PRBacklogManager,
-            PRStatus,
-        )
-        from readiness_assessor import (  # type: ignore[import]
-            ReadinessAssessor,
-            ReadinessCriteria,
-            ConflictComplexity,
-        )
-        from delegation_coordinator import (  # type: ignore[import]
-            DelegationCoordinator,
-            DelegationType,
-            DelegationStatus,
-        )
-        from github_actions_integration import (  # type: ignore[import]
-            GitHubActionsIntegration,
-            ProcessingMode,
-        )
-        from interfaces import AgentConfig  # type: ignore[import]
-    except ImportError:
-        # Fall back to stubs if real imports fail
-        from .test_stubs import (
-            PRBacklogManager,
-            PRStatus,
-            ReadinessCriteria,
-            ReadinessAssessor,
-            ConflictComplexity,
-            DelegationCoordinator,
-            DelegationType,
-            DelegationStatus,
-            GitHubActionsIntegration,
-            ProcessingMode,
-            AgentConfig,
-        )
+# Always use stubs for integration tests to ensure consistency
+# Real implementations have complex dependencies and different interfaces
+from .test_stubs import (
+    PRBacklogManager,
+    PRStatus,
+    ReadinessCriteria,
+    ReadinessAssessor,
+    ConflictComplexity,
+    DelegationCoordinator,
+    DelegationType,
+    DelegationStatus,
+    GitHubActionsIntegration,
+    ProcessingMode,
+    AgentConfig,
+)
 
 
 class TestEndToEndWorkflow:

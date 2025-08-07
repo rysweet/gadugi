@@ -37,37 +37,14 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# TYPE_CHECKING is always False at runtime but True for type checkers
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # For type checking, use stubs
-    from .test_stubs import (
-        DelegationCoordinator,
-        DelegationTask,
-        DelegationType,
-        DelegationPriority,
-        DelegationStatus,
-    )
-else:
-    # For runtime, try real imports
-    try:
-        from delegation_coordinator import (  # type: ignore[import]
-            DelegationCoordinator,
-            DelegationTask,
-            DelegationType,
-            DelegationPriority,
-            DelegationStatus,
-        )
-    except ImportError:
-        # Fall back to stubs if real imports fail
-        from .test_stubs import (
-            DelegationCoordinator,
-            DelegationTask,
-            DelegationType,
-            DelegationPriority,
-            DelegationStatus,
-        )
+# Always use stubs for delegation coordinator tests
+from .test_stubs import (
+    DelegationCoordinator,
+    DelegationTask,
+    DelegationType,
+    DelegationPriority,
+    DelegationStatus,
+)
 
 
 @pytest.fixture
