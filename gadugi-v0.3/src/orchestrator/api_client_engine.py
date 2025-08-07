@@ -36,7 +36,6 @@ class ApiClientEngine:
     def __init__(self):
         """Initialize the api_client engine."""
         self.logger = self._setup_logging()
-                pass
     
     def _setup_logging(self) -> logging.Logger:
         """Set up logging for the api_client engine."""

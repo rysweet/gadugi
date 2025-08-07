@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch, MagicMock
 from pathlib import Path
 
 # Add the src directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src', 'orchestrator'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from architect_engine import (
     ArchitectEngine,
@@ -25,7 +25,7 @@ from architect_engine import (
     DesignScope,
     TechnicalPreferences,
     ArchitectureComponent,
-    ArchitectureResponse
+    ArchitectureResponse,
 )
 
 
@@ -44,34 +44,34 @@ class TestArchitectEngine:
                     "User authentication",
                     "Product catalog",
                     "Shopping cart",
-                    "Order processing"
+                    "Order processing",
                 ],
                 "constraints": [
                     "Handle 1000 concurrent users",
-                    "Response time < 300ms"
+                    "Response time < 300ms",
                 ],
-                "scale": "medium"
+                "scale": "medium",
             },
             "design_scope": {
                 "focus_area": "full_system",
                 "complexity_level": "moderate",
-                "timeline": "production"
+                "timeline": "production",
             },
             "technical_preferences": {
                 "languages": ["python"],
                 "frameworks": ["fastapi"],
                 "databases": ["postgresql"],
-                "deployment": "cloud"
-            }
+                "deployment": "cloud",
+            },
         }
 
     def test_architect_engine_initialization(self):
         """Test ArchitectEngine initialization."""
         assert self.architect is not None
-        assert hasattr(self.architect, 'logger')
-        assert hasattr(self.architect, 'system_patterns')
-        assert hasattr(self.architect, 'integration_patterns')
-        assert hasattr(self.architect, 'technology_recommendations')
+        assert hasattr(self.architect, "logger")
+        assert hasattr(self.architect, "system_patterns")
+        assert hasattr(self.architect, "integration_patterns")
+        assert hasattr(self.architect, "technology_recommendations")
 
     def test_architecture_enums(self):
         """Test architecture enumeration values."""
@@ -100,7 +100,7 @@ class TestArchitectEngine:
             "description": "Test description",
             "requirements": ["req1", "req2"],
             "constraints": ["constraint1"],
-            "scale": "large"
+            "scale": "large",
         }
 
         context = self.architect._parse_project_context(context_data)
@@ -128,7 +128,7 @@ class TestArchitectEngine:
         scope_data = {
             "focus_area": "backend",
             "complexity_level": "complex",
-            "timeline": "mvp"
+            "timeline": "mvp",
         }
 
         scope = self.architect._parse_design_scope(scope_data)
@@ -153,7 +153,7 @@ class TestArchitectEngine:
             "languages": ["python", "javascript"],
             "frameworks": ["fastapi", "react"],
             "databases": ["postgresql", "redis"],
-            "deployment": "hybrid"
+            "deployment": "hybrid",
         }
 
         tech_prefs = self.architect._parse_tech_preferences(tech_data)
@@ -184,21 +184,23 @@ class TestArchitectEngine:
             description="Simple application",
             requirements=["basic auth"],
             constraints=[],
-            scale=ArchitectureScale.SMALL
+            scale=ArchitectureScale.SMALL,
         )
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.SIMPLE,
-            timeline="prototype"
+            timeline="prototype",
         )
         tech_prefs = TechnicalPreferences(
             languages=["python"],
             frameworks=[],
             databases=["sqlite"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
-        pattern = self.architect._select_architecture_pattern(context, scope, tech_prefs)
+        pattern = self.architect._select_architecture_pattern(
+            context, scope, tech_prefs
+        )
 
         assert pattern == "monolithic"
 
@@ -209,21 +211,23 @@ class TestArchitectEngine:
             description="Complex distributed application",
             requirements=["scalability", "fault tolerance"],
             constraints=["high availability"],
-            scale=ArchitectureScale.LARGE
+            scale=ArchitectureScale.LARGE,
         )
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.COMPLEX,
-            timeline="production"
+            timeline="production",
         )
         tech_prefs = TechnicalPreferences(
             languages=["python", "go"],
             frameworks=["fastapi"],
             databases=["postgresql", "redis"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
-        pattern = self.architect._select_architecture_pattern(context, scope, tech_prefs)
+        pattern = self.architect._select_architecture_pattern(
+            context, scope, tech_prefs
+        )
 
         assert pattern == "microservices"
 
@@ -234,21 +238,23 @@ class TestArchitectEngine:
             description="Large enterprise system",
             requirements=["legacy integration", "governance"],
             constraints=["compliance", "enterprise policies"],
-            scale=ArchitectureScale.ENTERPRISE
+            scale=ArchitectureScale.ENTERPRISE,
         )
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.ENTERPRISE,
-            timeline="enterprise"
+            timeline="enterprise",
         )
         tech_prefs = TechnicalPreferences(
             languages=["java"],
             frameworks=["spring_boot"],
             databases=["oracle"],
-            deployment="on_premise"
+            deployment="on_premise",
         )
 
-        pattern = self.architect._select_architecture_pattern(context, scope, tech_prefs)
+        pattern = self.architect._select_architecture_pattern(
+            context, scope, tech_prefs
+        )
 
         assert pattern == "service_oriented"
 
@@ -275,13 +281,13 @@ class TestArchitectEngine:
             description="Simple monolithic application",
             requirements=["user management", "data processing"],
             constraints=[],
-            scale=ArchitectureScale.SMALL
+            scale=ArchitectureScale.SMALL,
         )
         tech_prefs = TechnicalPreferences(
             languages=["python"],
             frameworks=["flask"],
             databases=["postgresql"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
         components = self.architect._design_monolithic_components(context, tech_prefs)
@@ -304,13 +310,13 @@ class TestArchitectEngine:
             description="Distributed microservices application",
             requirements=["scalability", "independence"],
             constraints=["high availability"],
-            scale=ArchitectureScale.LARGE
+            scale=ArchitectureScale.LARGE,
         )
         tech_prefs = TechnicalPreferences(
             languages=["python"],
             frameworks=["fastapi"],
             databases=["postgresql"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
         components = self.architect._design_microservice_components(context, tech_prefs)
@@ -333,13 +339,13 @@ class TestArchitectEngine:
             description="Traditional layered application",
             requirements=["separation of concerns", "maintainability"],
             constraints=[],
-            scale=ArchitectureScale.MEDIUM
+            scale=ArchitectureScale.MEDIUM,
         )
         tech_prefs = TechnicalPreferences(
             languages=["python"],
             frameworks=["django"],
             databases=["postgresql"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
         components = self.architect._design_layered_components(context, tech_prefs)
@@ -351,7 +357,9 @@ class TestArchitectEngine:
         assert "data_layer" in component_names
 
         # Verify layer dependencies
-        presentation = next(comp for comp in components if comp.name == "presentation_layer")
+        presentation = next(
+            comp for comp in components if comp.name == "presentation_layer"
+        )
         assert "business_layer" in presentation.interfaces.dependencies
 
         business = next(comp for comp in components if comp.name == "business_layer")
@@ -364,13 +372,13 @@ class TestArchitectEngine:
             description="Service-oriented architecture system",
             requirements=["service reuse", "governance"],
             constraints=["enterprise compliance"],
-            scale=ArchitectureScale.ENTERPRISE
+            scale=ArchitectureScale.ENTERPRISE,
         )
         tech_prefs = TechnicalPreferences(
             languages=["java"],
             frameworks=["spring_boot"],
             databases=["oracle"],
-            deployment="on_premise"
+            deployment="on_premise",
         )
 
         components = self.architect._design_soa_components(context, tech_prefs)
@@ -382,7 +390,9 @@ class TestArchitectEngine:
         assert "business_service" in component_names
 
         # Verify SOA-specific components
-        service_registry = next(comp for comp in components if comp.name == "service_registry")
+        service_registry = next(
+            comp for comp in components if comp.name == "service_registry"
+        )
         assert "Service registration" in service_registry.responsibilities
         assert service_registry.technology_stack.framework == "consul"
 
@@ -395,7 +405,7 @@ class TestArchitectEngine:
                 purpose="API gateway",
                 responsibilities=[],
                 interfaces=None,
-                technology_stack=None
+                technology_stack=None,
             )
         ]
 
@@ -421,16 +431,18 @@ class TestArchitectEngine:
                 purpose="test",
                 responsibilities=[],
                 interfaces=None,
-                technology_stack=None
+                technology_stack=None,
             )
         ]
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.COMPLEX,
-            timeline="production"
+            timeline="production",
         )
 
-        patterns = self.architect._select_integration_patterns(components, "microservices", scope)
+        patterns = self.architect._select_integration_patterns(
+            components, "microservices", scope
+        )
 
         assert len(patterns) == 3
         pattern_names = [pattern.pattern_name for pattern in patterns]
@@ -444,10 +456,12 @@ class TestArchitectEngine:
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.ENTERPRISE,
-            timeline="enterprise"
+            timeline="enterprise",
         )
 
-        patterns = self.architect._select_integration_patterns(components, "service_oriented", scope)
+        patterns = self.architect._select_integration_patterns(
+            components, "service_oriented", scope
+        )
 
         assert len(patterns) == 2
         pattern_names = [pattern.pattern_name for pattern in patterns]
@@ -462,27 +476,27 @@ class TestArchitectEngine:
                 purpose="test",
                 responsibilities=[],
                 interfaces=None,
-                technology_stack=None
+                technology_stack=None,
             ),
             ArchitectureComponent(
                 name="comp2",
                 purpose="test",
                 responsibilities=[],
                 interfaces=None,
-                technology_stack=None
-            )
+                technology_stack=None,
+            ),
         ]
         context = ProjectContext(
             name="Test Project",
             description="Test",
             requirements=[],
             constraints=[],
-            scale=ArchitectureScale.MEDIUM
+            scale=ArchitectureScale.MEDIUM,
         )
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.MODERATE,
-            timeline="production"
+            timeline="production",
         )
 
         plan = self.architect._create_implementation_plan(components, context, scope)
@@ -510,17 +524,19 @@ class TestArchitectEngine:
             languages=["python"],
             frameworks=["fastapi"],
             databases=["postgresql"],
-            deployment="cloud"
+            deployment="cloud",
         )
         context = ProjectContext(
             name="Test Project",
             description="Test",
             requirements=[],
             constraints=[],
-            scale=ArchitectureScale.MEDIUM
+            scale=ArchitectureScale.MEDIUM,
         )
 
-        specs = self.architect._generate_technical_specifications(components, tech_prefs, context)
+        specs = self.architect._generate_technical_specifications(
+            components, tech_prefs, context
+        )
 
         # Verify API design
         assert specs.api_design.base_url == "https://api.example.com"
@@ -545,12 +561,12 @@ class TestArchitectEngine:
             description="Test",
             requirements=[],
             constraints=[],
-            scale=ArchitectureScale.SMALL
+            scale=ArchitectureScale.SMALL,
         )
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.SIMPLE,
-            timeline="production"
+            timeline="production",
         )
 
         qa_small = self.architect._define_quality_attributes(context_small, scope)
@@ -562,10 +578,12 @@ class TestArchitectEngine:
             description="Test",
             requirements=[],
             constraints=[],
-            scale=ArchitectureScale.ENTERPRISE
+            scale=ArchitectureScale.ENTERPRISE,
         )
 
-        qa_enterprise = self.architect._define_quality_attributes(context_enterprise, scope)
+        qa_enterprise = self.architect._define_quality_attributes(
+            context_enterprise, scope
+        )
         assert "50ms" in qa_enterprise.performance.requirements
         assert "database_sharding" in qa_enterprise.performance.strategies
 
@@ -575,26 +593,29 @@ class TestArchitectEngine:
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.SIMPLE,
-            timeline="production"
+            timeline="production",
         )
         tech_prefs = TechnicalPreferences(
-            languages=["python"],
-            frameworks=[],
-            databases=[],
-            deployment="cloud"
+            languages=["python"], frameworks=[], databases=[], deployment="cloud"
         )
 
-        recommendations = self.architect._generate_recommendations("microservices", components, scope, tech_prefs)
+        recommendations = self.architect._generate_recommendations(
+            "microservices", components, scope, tech_prefs
+        )
 
         assert len(recommendations) >= 2
-        
+
         # Check for pattern recommendation for simple complexity
-        pattern_rec = next((r for r in recommendations if r.category == "architecture"), None)
+        pattern_rec = next(
+            (r for r in recommendations if r.category == "architecture"), None
+        )
         if pattern_rec:
             assert "monolithic" in pattern_rec.recommendation
 
         # Check for technology recommendation
-        tech_rec = next((r for r in recommendations if r.category == "technology"), None)
+        tech_rec = next(
+            (r for r in recommendations if r.category == "technology"), None
+        )
         if tech_rec:
             assert "FastAPI" in tech_rec.recommendation
 
@@ -604,17 +625,19 @@ class TestArchitectEngine:
         scope = DesignScope(
             focus_area="full_system",
             complexity_level=ArchitectureComplexity.COMPLEX,
-            timeline="production"
+            timeline="production",
         )
         context = ProjectContext(
             name="Test App",
             description="Test",
             requirements=[],
             constraints=[],
-            scale=ArchitectureScale.LARGE
+            scale=ArchitectureScale.LARGE,
         )
 
-        risks = self.architect._assess_risks("microservices", components, scope, context)
+        risks = self.architect._assess_risks(
+            "microservices", components, scope, context
+        )
 
         assert len(risks) >= 3
         risk_types = [risk.risk for risk in risks]
@@ -623,7 +646,9 @@ class TestArchitectEngine:
         assert any("security" in risk_type.lower() for risk_type in risk_types)
 
         # Check for database performance risk for large scale
-        db_risk = next((risk for risk in risks if "database" in risk.risk.lower()), None)
+        db_risk = next(
+            (risk for risk in risks if "database" in risk.risk.lower()), None
+        )
         if db_risk:
             assert db_risk.impact == "high"
             assert "replicas" in db_risk.mitigation.lower()
@@ -669,13 +694,13 @@ class TestArchitectEngine:
             "requirements": [
                 "User registration",
                 "Authentication",
-                "Profile management"
+                "Profile management",
             ],
             "technical_preferences": {
                 "languages": ["python"],
                 "frameworks": ["fastapi"],
-                "databases": ["postgresql"]
-            }
+                "databases": ["postgresql"],
+            },
         }
 
         response = self.architect.design_component(component_request)
@@ -692,13 +717,8 @@ class TestArchitectEngine:
         """Test database component design."""
         component_request = {
             "component_name": "user_database",
-            "requirements": [
-                "Data persistence",
-                "High availability"
-            ],
-            "technical_preferences": {
-                "databases": ["postgresql"]
-            }
+            "requirements": ["Data persistence", "High availability"],
+            "technical_preferences": {"databases": ["postgresql"]},
         }
 
         response = self.architect.design_component(component_request)
@@ -712,11 +732,15 @@ class TestArchitectEngine:
     def test_design_component_with_error(self):
         """Test component design error handling."""
         # Mock an error in the design process
-        with patch.object(self.architect, '_design_specific_component', side_effect=Exception("Test error")):
+        with patch.object(
+            self.architect,
+            "_design_specific_component",
+            side_effect=Exception("Test error"),
+        ):
             component_request = {
                 "component_name": "test_component",
                 "requirements": [],
-                "technical_preferences": {}
+                "technical_preferences": {},
             }
 
             response = self.architect.design_component(component_request)
@@ -731,8 +755,8 @@ class TestArchitectEngine:
             "integration_requirements": [
                 "Real-time communication",
                 "Data consistency",
-                "Error handling"
-            ]
+                "Error handling",
+            ],
         }
 
         response = self.architect.create_integration_plan(integration_request)
@@ -746,11 +770,12 @@ class TestArchitectEngine:
 
     def test_create_integration_plan_with_error(self):
         """Test integration plan creation error handling."""
-        with patch.object(self.architect, '_create_integration_plan', side_effect=Exception("Integration error")):
-            integration_request = {
-                "components": [],
-                "integration_requirements": []
-            }
+        with patch.object(
+            self.architect,
+            "_create_integration_plan",
+            side_effect=Exception("Integration error"),
+        ):
+            integration_request = {"components": [], "integration_requirements": []}
 
             response = self.architect.create_integration_plan(integration_request)
 
@@ -765,8 +790,8 @@ class TestArchitectEngine:
                 "scalability",
                 "security",
                 "maintainability",
-                "performance"
-            ]
+                "performance",
+            ],
         }
 
         response = self.architect.review_architecture(review_request)
@@ -793,7 +818,7 @@ class TestArchitectEngine:
             "scalability_assessment": "Excellent scalability design",
             "security_assessment": "Excellent security measures",
             "maintainability_assessment": "Excellent code structure",
-            "performance_assessment": "Excellent performance optimization"
+            "performance_assessment": "Excellent performance optimization",
         }
 
         score = self.architect._calculate_architecture_score(excellent_results)
@@ -804,7 +829,7 @@ class TestArchitectEngine:
             "scalability_assessment": "Good scalability approach",
             "security_assessment": "Needs improvement in security",
             "maintainability_assessment": "Good maintainability",
-            "performance_assessment": "Poor performance design"
+            "performance_assessment": "Poor performance design",
         }
 
         score = self.architect._calculate_architecture_score(mixed_results)
@@ -812,10 +837,14 @@ class TestArchitectEngine:
 
     def test_review_architecture_with_error(self):
         """Test architecture review error handling."""
-        with patch.object(self.architect, '_perform_architecture_review', side_effect=Exception("Review error")):
+        with patch.object(
+            self.architect,
+            "_perform_architecture_review",
+            side_effect=Exception("Review error"),
+        ):
             review_request = {
                 "architecture_description": "Test architecture",
-                "review_criteria": []
+                "review_criteria": [],
             }
 
             response = self.architect.review_architecture(review_request)
@@ -828,7 +857,7 @@ class TestArchitectEngine:
         component = self.architect._design_specific_component(
             "test_api_service",
             ["API handling", "Business logic"],
-            TechnicalPreferences(["python"], ["fastapi"], ["postgresql"], "cloud")
+            TechnicalPreferences(["python"], ["fastapi"], ["postgresql"], "cloud"),
         )
 
         assert component.name == "test_api_service"
@@ -842,7 +871,7 @@ class TestArchitectEngine:
         component = self.architect._design_specific_component(
             "user_storage",
             ["Data persistence", "Backup"],
-            TechnicalPreferences([], [], ["mongodb"], "cloud")
+            TechnicalPreferences([], [], ["mongodb"], "cloud"),
         )
 
         assert component.name == "user_storage"
@@ -856,7 +885,7 @@ class TestArchitectEngine:
         component = self.architect._design_specific_component(
             "message_processor",
             ["Message processing", "Queue management"],
-            TechnicalPreferences(["go"], ["gin"], [], "cloud")
+            TechnicalPreferences(["go"], ["gin"], [], "cloud"),
         )
 
         assert component.name == "message_processor"
@@ -872,7 +901,7 @@ class TestArchitectEngine:
             purpose="Testing",
             responsibilities=["Testing"],
             interfaces=None,
-            technology_stack=None
+            technology_stack=None,
         )
 
         recommendations = self.architect._generate_component_recommendations(component)
@@ -889,7 +918,7 @@ class TestArchitectEngine:
             purpose="Critical functionality",
             responsibilities=["Critical processing"],
             interfaces=None,
-            technology_stack=None
+            technology_stack=None,
         )
 
         risks = self.architect._assess_component_risks(component)
@@ -902,7 +931,9 @@ class TestArchitectEngine:
     def test_integration_recommendations(self):
         """Test integration-specific recommendations."""
         components = ["service1", "service2", "service3"]
-        recommendations = self.architect._generate_integration_recommendations(components)
+        recommendations = self.architect._generate_integration_recommendations(
+            components
+        )
 
         assert len(recommendations) >= 2
         rec_types = [rec.category for rec in recommendations]
@@ -910,7 +941,10 @@ class TestArchitectEngine:
         assert "monitoring" in rec_types
 
         # Check for API versioning recommendation
-        api_rec = next((r for r in recommendations if "versioning" in r.recommendation.lower()), None)
+        api_rec = next(
+            (r for r in recommendations if "versioning" in r.recommendation.lower()),
+            None,
+        )
         assert api_rec is not None
 
     def test_integration_risks(self):
@@ -920,8 +954,12 @@ class TestArchitectEngine:
 
         assert len(risks) >= 2
         risk_descriptions = [risk.risk for risk in risks]
-        assert any("integration" in risk_desc.lower() for risk_desc in risk_descriptions)
-        assert any("data format" in risk_desc.lower() for risk_desc in risk_descriptions)
+        assert any(
+            "integration" in risk_desc.lower() for risk_desc in risk_descriptions
+        )
+        assert any(
+            "data format" in risk_desc.lower() for risk_desc in risk_descriptions
+        )
 
     def test_system_patterns_catalog(self):
         """Test system patterns catalog completeness."""
@@ -974,12 +1012,12 @@ class TestArchitectEngine:
         assert self.architect.logger.name == "architect_engine"
         assert self.architect.logger.level == 20  # INFO level
 
-    @patch('architect_engine.logging.StreamHandler')
+    @patch("architect_engine.logging.StreamHandler")
     def test_logging_handler_setup(self, mock_handler):
         """Test logging handler setup."""
         # Create new architect to trigger logging setup
         new_architect = ArchitectEngine()
-        
+
         assert new_architect.logger is not None
         # Verify logger was configured (handler count may vary in test environment)
 
@@ -999,7 +1037,7 @@ class TestArchitectEngine:
                     "Payment processing",
                     "Order fulfillment",
                     "Analytics and reporting",
-                    "Mobile API support"
+                    "Mobile API support",
                 ],
                 "constraints": [
                     "Handle 100,000 concurrent users",
@@ -1007,26 +1045,30 @@ class TestArchitectEngine:
                     "Response time < 100ms",
                     "PCI DSS compliance",
                     "GDPR compliance",
-                    "Global deployment"
+                    "Global deployment",
                 ],
-                "scale": "enterprise"
+                "scale": "enterprise",
             },
             "design_scope": {
                 "focus_area": "full_system",
                 "complexity_level": "enterprise",
-                "timeline": "enterprise"
+                "timeline": "enterprise",
             },
             "existing_systems": {
                 "current_architecture": "Legacy monolithic system",
                 "legacy_systems": ["Old inventory system", "Legacy payment gateway"],
-                "integration_points": ["ERP system", "CRM system", "Third-party logistics"]
+                "integration_points": [
+                    "ERP system",
+                    "CRM system",
+                    "Third-party logistics",
+                ],
             },
             "technical_preferences": {
                 "languages": ["python", "javascript", "go"],
                 "frameworks": ["fastapi", "react", "gin"],
                 "databases": ["postgresql", "redis", "elasticsearch"],
-                "deployment": "cloud"
-            }
+                "deployment": "cloud",
+            },
         }
 
         response = self.architect.design_system_architecture(complex_request)
@@ -1059,7 +1101,7 @@ class TestArchitectEngine:
         # Test with minimal/empty request
         minimal_request = {}
         response = self.architect.design_system_architecture(minimal_request)
-        
+
         # Should handle gracefully with defaults
         assert response.success is True  # Should succeed with defaults
         assert response.architecture is not None
@@ -1067,9 +1109,9 @@ class TestArchitectEngine:
         # Test with invalid enum values (should be handled by parsing)
         invalid_enum_request = {
             "project_context": {"scale": "medium"},  # Valid value
-            "design_scope": {"complexity_level": "moderate"}  # Valid value
+            "design_scope": {"complexity_level": "moderate"},  # Valid value
         }
-        
+
         response = self.architect.design_system_architecture(invalid_enum_request)
         assert response.success is True  # Should succeed with valid enums
 
@@ -1084,7 +1126,7 @@ class TestDataClasses:
             description="Test Description",
             requirements=["req1", "req2"],
             constraints=["constraint1"],
-            scale=ArchitectureScale.MEDIUM
+            scale=ArchitectureScale.MEDIUM,
         )
 
         assert context.name == "Test Project"
@@ -1098,7 +1140,7 @@ class TestDataClasses:
         scope = DesignScope(
             focus_area="backend",
             complexity_level=ArchitectureComplexity.COMPLEX,
-            timeline="production"
+            timeline="production",
         )
 
         assert scope.focus_area == "backend"
@@ -1111,7 +1153,7 @@ class TestDataClasses:
             languages=["python", "go"],
             frameworks=["fastapi", "gin"],
             databases=["postgresql", "redis"],
-            deployment="cloud"
+            deployment="cloud",
         )
 
         assert len(tech_prefs.languages) == 2
@@ -1129,13 +1171,11 @@ class TestDataClasses:
         interfaces = ComponentInterface(
             inputs=["HTTP requests"],
             outputs=["HTTP responses"],
-            dependencies=["database"]
+            dependencies=["database"],
         )
 
         tech_stack = TechnologyStack(
-            language="python",
-            framework="fastapi",
-            database="postgresql"
+            language="python", framework="fastapi", database="postgresql"
         )
 
         component = ArchitectureComponent(
@@ -1143,7 +1183,7 @@ class TestDataClasses:
             purpose="Testing component creation",
             responsibilities=["Handle requests", "Process data"],
             interfaces=interfaces,
-            technology_stack=tech_stack
+            technology_stack=tech_stack,
         )
 
         assert component.name == "test_component"
@@ -1154,14 +1194,19 @@ class TestDataClasses:
 
     def test_architecture_response_creation(self):
         """Test ArchitectureResponse data class creation."""
-        from architect_engine import Architecture, ImplementationPlan, TechnicalSpecifications, QualityAttributes
+        from architect_engine import (
+            Architecture,
+            ImplementationPlan,
+            TechnicalSpecifications,
+            QualityAttributes,
+        )
 
         # Create minimal objects for testing
         architecture = Architecture(
             overview="Test architecture",
             components=[],
             data_flow=None,
-            integration_patterns=[]
+            integration_patterns=[],
         )
 
         response = ArchitectureResponse(
@@ -1171,7 +1216,7 @@ class TestDataClasses:
             technical_specifications=None,
             quality_attributes=None,
             recommendations=[],
-            risks_and_mitigations=[]
+            risks_and_mitigations=[],
         )
 
         assert response.success is True
