@@ -14,6 +14,129 @@ The Cherokee concept of Gadugi represents:
 - **ᎠᎵᏍᏕᎸᏗ (Alisgelvdi) - Mutual Support**: Agents helping each other
 - **ᎤᏂᎦᏚ (Unigadv) - Shared Resources**: Pooling tools and capabilities
 
+## Architecture
+
+### Multi-Agent System Overview
+
+Gadugi implements a sophisticated multi-agent architecture with four distinct layers, each serving specific roles in the development workflow:
+
+```mermaid
+graph TD
+    subgraph "🔵 Orchestration Layer"
+        direction TB
+        OA[orchestrator-agent<br/>🎯 Main Coordinator<br/>Parallel execution planning]
+        TA[task-analyzer<br/>🧠 Dependency Analysis<br/>Task decomposition]
+        WM[worktree-manager<br/>🌿 Environment Isolation<br/>Git worktree lifecycle]
+        EM[execution-monitor<br/>📊 Progress Tracking<br/>Parallel monitoring]
+
+        OA --> TA
+        OA --> WM
+        OA --> EM
+    end
+
+    subgraph "🟢 Implementation Layer"
+        direction TB
+        WF[workflow-manager<br/>⚡ 11-Phase Executor<br/>Complete workflows]
+        PW[prompt-writer<br/>📝 Structured Prompts<br/>Template creation]
+        TW[test-writer<br/>🧪 Test Generation<br/>Comprehensive suites]
+        TS[test-solver<br/>🔧 Test Diagnosis<br/>Failure resolution]
+        TFA[type-fix-agent<br/>🔍 Type Resolution<br/>Error correction]
+    end
+
+    subgraph "🟣 Review Layer"
+        direction TB
+        CR[code-reviewer<br/>👥 PR Reviews<br/>Quality assurance]
+        CRR[code-review-response<br/>💬 Feedback Processing<br/>Change implementation]
+        SDR[system-design-reviewer<br/>🏗️ Architecture Review<br/>Design validation]
+    end
+
+    subgraph "🟠 Maintenance Layer"
+        direction TB
+        PBM[pr-backlog-manager<br/>📋 PR Queue Management<br/>Readiness assessment]
+        AU[agent-updater<br/>🔄 Version Management<br/>Agent updates]
+        MM[memory-manager<br/>🧠 Memory Curation<br/>State synchronization]
+        RA[readme-agent<br/>📄 Documentation<br/>README maintenance]
+        CSU[claude-settings-update<br/>⚙️ Configuration<br/>Settings merger]
+    end
+
+    %% Inter-layer connections
+    OA -.-> WF
+    WF -.-> CR
+    CR -.-> CRR
+    WF -.-> MM
+
+    %% Styling
+    classDef orchestration fill:#3498db,stroke:#2980b9,color:#fff,stroke-width:2px
+    classDef implementation fill:#2ecc71,stroke:#27ae60,color:#fff,stroke-width:2px
+    classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff,stroke-width:2px
+    classDef maintenance fill:#e67e22,stroke:#d35400,color:#fff,stroke-width:2px
+
+    class OA,TA,WM,EM orchestration
+    class WF,PW,TW,TS,TFA implementation
+    class CR,CRR,SDR review
+    class PBM,AU,MM,RA,CSU maintenance
+```
+
+### Comprehensive Workflow Process
+
+The WorkflowManager orchestrates a complete 11-phase development lifecycle, ensuring consistent quality and delivery:
+
+```mermaid
+flowchart TD
+    Start([🚀 Workflow Start]) --> P1[📋 Phase 1: Initial Setup<br/>Environment validation<br/>Task initialization]
+
+    P1 --> P2[🎫 Phase 2: Issue Creation<br/>GitHub issue generation<br/>Milestone assignment]
+
+    P2 --> P3[🌿 Phase 3: Branch Management<br/>Feature branch creation<br/>Git worktree setup]
+
+    P3 --> P4[🔍 Phase 4: Research & Planning<br/>Codebase analysis<br/>Implementation strategy]
+
+    P4 --> P5[⚡ Phase 5: Implementation<br/>Code changes<br/>Feature development]
+
+    P5 --> P6{🧪 Phase 6: Testing<br/>Quality Gates}
+    P6 -->|Tests Pass| P7[📚 Phase 7: Documentation<br/>Updates & comments<br/>API documentation]
+    P6 -->|Tests Fail| P6Fix[🔧 Fix Tests<br/>Debug failures<br/>Resolve issues]
+    P6Fix --> P6
+
+    P7 --> P8[📨 Phase 8: Pull Request<br/>PR creation<br/>Detailed description]
+
+    P8 --> Timer[⏱️ 30-Second Timer<br/>PR propagation delay]
+    Timer --> P9[👥 Phase 9: Code Review<br/>🚨 MANDATORY<br/>Automated reviewer invocation]
+
+    P9 --> P9Check{Review Posted?}
+    P9Check -->|Yes| P10[💬 Phase 10: Review Response<br/>Feedback processing<br/>Change implementation]
+    P9Check -->|No| P9Retry[🔄 Retry Review<br/>Force reviewer invocation]
+    P9Retry --> P9
+
+    P10 --> P11[⚙️ Phase 11: Settings Update<br/>Configuration sync<br/>Claude settings merge]
+
+    P11 --> Complete([✅ Workflow Complete<br/>Feature delivered<br/>Issues closed])
+
+    %% Styling
+    classDef setup fill:#3498db,stroke:#2980b9,color:#fff,stroke-width:2px
+    classDef development fill:#2ecc71,stroke:#27ae60,color:#fff,stroke-width:2px
+    classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff,stroke-width:2px
+    classDef finalization fill:#e67e22,stroke:#d35400,color:#fff,stroke-width:2px
+    classDef mandatory fill:#e74c3c,stroke:#c0392b,color:#fff,stroke-width:3px
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff,stroke-width:2px
+
+    class P1,P2,P3 setup
+    class P4,P5,P6,P6Fix,P7 development
+    class P8,P9,P9Retry,P10 review
+    class P11,Complete finalization
+    class P9,P9Check mandatory
+    class Timer,P6,P9Check decision
+```
+
+### Key Architecture Principles
+
+- **🔵 Orchestration Layer**: Coordinates parallel execution and manages system-wide concerns
+- **🟢 Implementation Layer**: Handles core development tasks and code generation
+- **🟣 Review Layer**: Ensures quality through automated and systematic reviews
+- **🟠 Maintenance Layer**: Manages system health, updates, and administrative tasks
+
+**Mandatory Phase 9 Enforcement**: The system includes multiple mechanisms to ensure code review is never skipped, including automatic timers, validation checks, and retry logic.
+
 ## Repository Structure
 
 ```
@@ -354,6 +477,60 @@ The extension serves as a visual frontend for:
 - **team-coach**: Display team performance metrics and coaching insights
 
 This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
+
+## Quick Reference: Common Workflows
+
+### Task Execution Decision Tree
+
+```mermaid
+flowchart TD
+    Task[📋 New Task or Request] --> TaskType{Task Type?}
+
+    TaskType -->|Multiple Independent Tasks| Orchestrator[🎯 Use orchestrator-agent<br/>Parallel execution<br/>Optimal efficiency]
+
+    TaskType -->|Single Complex Workflow| WorkflowMgr[⚡ Use workflow-manager<br/>11-phase execution<br/>Complete lifecycle]
+
+    TaskType -->|Code Review Needed| CodeReview[👥 Use code-reviewer<br/>PR quality assurance<br/>Automated feedback]
+
+    TaskType -->|Failed Tests| TestSolver[🔧 Use test-solver<br/>Diagnostic analysis<br/>Fix implementation]
+
+    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure optimization]
+
+    TaskType -->|Project Planning| ProgramMgr[🏗️ Use program-manager<br/>Issue lifecycle<br/>Strategic direction]
+
+    %% Detailed workflows
+    Orchestrator --> |Delegates to| WorkflowMgr
+    WorkflowMgr --> |Invokes| CodeReview
+    CodeReview --> |Response via| ReviewResponse[💬 code-review-response<br/>Feedback processing]
+
+    %% Styling
+    classDef start fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef orchestration fill:#3498db,stroke:#2980b9,color:#fff
+    classDef implementation fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff
+    classDef maintenance fill:#e67e22,stroke:#d35400,color:#fff
+
+    class Task start
+    class TaskType decision
+    class Orchestrator orchestration
+    class WorkflowMgr,TestSolver implementation
+    class CodeReview,ReviewResponse review
+    class ReadmeAgent,ProgramMgr maintenance
+```
+
+### Quick Usage Commands
+
+| Use Case | Command | Purpose |
+|----------|---------|---------|
+| **Multiple Tasks** | `/agent:orchestrator-agent` | Parallel execution of independent workflows |
+| **Single Workflow** | `/agent:workflow-manager` | Complete issue-to-PR workflow |
+| **Code Review** | `/agent:code-reviewer` | Automated PR review and feedback |
+| **Fix Tests** | `/agent:test-solver` | Diagnose and fix failing tests |
+| **Create Tests** | `/agent:test-writer` | Generate comprehensive test suites |
+| **Update README** | `/agent:readme-agent` | Documentation management |
+| **Project Planning** | `/agent:program-manager` | Issue lifecycle and strategy |
+| **Team Optimization** | `/agent:team-coach` | Performance analytics and coordination |
 
 ## Available Agents
 
