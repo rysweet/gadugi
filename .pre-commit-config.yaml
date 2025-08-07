@@ -27,14 +27,17 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with mypy (disabled for now)
-  # Uncomment this section when ready to enable type checking
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.13.0
-  #   hooks:
-  #     - id: mypy
-  #       additional_dependencies: [types-all]
-  #       args: [--ignore-missing-imports]
+  # Type checking with pyright (using local hook for now)
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright type checker
+        entry: pyright container_runtime/
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]  # Run on push to avoid slowing down commits
+        # Scoped to container_runtime/ initially for phased rollout
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets

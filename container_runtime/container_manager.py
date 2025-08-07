@@ -2,13 +2,25 @@
 Container Manager for secure container lifecycle management.
 """
 
-import docker
 import logging
 import time
 import uuid
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
+
+if TYPE_CHECKING:
+    import docker
+else:
+    docker = None
+
+# Runtime import attempt
+try:
+    import docker  # type: ignore[import-untyped]
+
+    docker_available = True
+except ImportError:
+    docker_available = False
 
 # Import Enhanced Separation shared modules
 import sys
@@ -72,9 +84,12 @@ class ContainerManager:
     with comprehensive security controls and resource management.
     """
 
-    def __init__(self, docker_client: Optional[docker.DockerClient] = None):
+    def __init__(self, docker_client: Optional[Any] = None):
         """Initialize container manager."""
-        self.client = docker_client or docker.from_env()
+        if not docker_available:
+            raise GadugiError("Docker is not available. Please install docker package.")
+
+        self.client = docker_client or docker.from_env()  # type: ignore[attr-defined]
         self.active_containers: Dict[str, Any] = {}
         self.execution_history: List[ContainerResult] = []
 
@@ -120,8 +135,8 @@ class ContainerManager:
                 "volumes": config.volumes or {},
                 "tmpfs": {"/tmp": "rw,noexec,nosuid,size=100m"},
                 "ulimits": [
-                    docker.types.Ulimit(name="nproc", soft=1024, hard=1024),
-                    docker.types.Ulimit(name="nofile", soft=1024, hard=1024),
+                    docker.types.Ulimit(name="nproc", soft=1024, hard=1024),  # type: ignore[attr-defined]
+                    docker.types.Ulimit(name="nofile", soft=1024, hard=1024),  # type: ignore[attr-defined]
                 ],
             }
 
@@ -132,7 +147,7 @@ class ContainerManager:
             logger.info(f"Container created: {container_id[:8]} ({container.name})")
             return container_id
 
-        except docker.errors.APIError as e:
+        except docker.errors.APIError as e:  # type: ignore[attr-defined]
             raise GadugiError(f"Docker API error creating container: {e}")
         except Exception as e:
             raise GadugiError(f"Unexpected error creating container: {e}")
@@ -155,7 +170,7 @@ class ContainerManager:
             container.start()
             logger.info(f"Container started: {container_id[:8]}")
 
-        except docker.errors.APIError as e:
+        except docker.errors.APIError as e:  # type: ignore[attr-defined]
             raise GadugiError(f"Docker API error starting container: {e}")
         except Exception as e:
             raise GadugiError(f"Unexpected error starting container: {e}")
@@ -264,7 +279,7 @@ class ContainerManager:
                 container.stop(timeout=timeout)
                 logger.info(f"Container stopped: {container_id[:8]}")
 
-        except docker.errors.NotFound:
+        except docker.errors.NotFound:  # type: ignore[attr-defined]
             logger.info(f"Container {container_id[:8]} already removed")
         except Exception as e:
             logger.error(f"Error stopping container {container_id[:8]}: {e}")
@@ -291,7 +306,7 @@ class ContainerManager:
                 container.remove(force=True)
                 logger.info(f"Container cleaned up: {container_id[:8]}")
 
-            except docker.errors.NotFound:
+            except docker.errors.NotFound:  # type: ignore[attr-defined]
                 logger.info(f"Container {container_id[:8]} already removed")
             except Exception as e:
                 logger.warning(f"Error during container cleanup: {e}")
