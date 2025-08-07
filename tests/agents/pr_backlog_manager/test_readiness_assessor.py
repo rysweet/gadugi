@@ -40,29 +40,17 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-try:
-    from readiness_assessor import (  # type: ignore[import]
-        ReadinessAssessor,
-        ConflictAssessment,
-        CIAssessment,
-        ReviewAssessment,
-        SyncAssessment,
-        MetadataAssessment,
-        ConflictComplexity,
-        CIFailureType,
-    )
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        ReadinessAssessor,
-        ConflictAssessment,
-        CIAssessment,
-        ReviewAssessment,
-        SyncAssessment,
-        MetadataAssessment,
-        ConflictComplexity,
-        CIFailureType,
-    )
+# Always use stubs for type checking consistency
+from test_stubs import (
+    ReadinessAssessor,
+    ConflictAssessment,
+    CIAssessment,
+    ReviewAssessment,
+    SyncAssessment,
+    MetadataAssessment,
+    ConflictComplexity,
+    CIFailureType,
+)
 
 
 @pytest.fixture

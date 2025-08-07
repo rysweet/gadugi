@@ -40,27 +40,16 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-try:
-    from core import (  # type: ignore[import]
-        PRBacklogManager,
-        PRAssessment,
-        PRStatus,
-        ReadinessCriteria,
-        BacklogMetrics,
-        GadugiError,
-    )
-    from interfaces import AgentConfig  # type: ignore[import]
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        PRBacklogManager,
-        PRAssessment,
-        PRStatus,
-        ReadinessCriteria,
-        BacklogMetrics,
-        GadugiError,
-        AgentConfig,
-    )
+# Always use stubs for type checking consistency
+from test_stubs import (
+    PRBacklogManager,
+    PRAssessment,
+    PRStatus,
+    ReadinessCriteria,
+    BacklogMetrics,
+    GadugiError,
+    AgentConfig,
+)
 
 
 class TestPRBacklogManager:

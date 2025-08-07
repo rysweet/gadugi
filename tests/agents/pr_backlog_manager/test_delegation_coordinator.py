@@ -40,23 +40,14 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-try:
-    from delegation_coordinator import (  # type: ignore[import]
-        DelegationCoordinator,
-        DelegationTask,
-        DelegationType,
-        DelegationPriority,
-        DelegationStatus,
-    )
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        DelegationCoordinator,
-        DelegationTask,
-        DelegationType,
-        DelegationPriority,
-        DelegationStatus,
-    )
+# Always use stubs for type checking consistency
+from test_stubs import (
+    DelegationCoordinator,
+    DelegationTask,
+    DelegationType,
+    DelegationPriority,
+    DelegationStatus,
+)
 
 
 @pytest.fixture

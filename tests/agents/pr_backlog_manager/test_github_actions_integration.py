@@ -40,23 +40,14 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-try:
-    from github_actions_integration import (  # type: ignore[import]
-        GitHubActionsIntegration,
-        GitHubContext,
-        SecurityConstraints,
-        GitHubEventType,
-        ProcessingMode,
-    )
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        GitHubActionsIntegration,
-        GitHubContext,
-        SecurityConstraints,
-        GitHubEventType,
-        ProcessingMode,
-    )
+# Always use stubs for type checking consistency
+from test_stubs import (
+    GitHubActionsIntegration,
+    GitHubContext,
+    SecurityConstraints,
+    GitHubEventType,
+    ProcessingMode,
+)
 
 
 @pytest.fixture
