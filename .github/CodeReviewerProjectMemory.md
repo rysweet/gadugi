@@ -574,3 +574,100 @@ The task ID traceability feature provides immediate value for debugging and moni
 - Priority system updated to include over-engineering as critical priority (affects team velocity)
 - Comprehensive test coverage (22 tests) validates both detection accuracy and false positive avoidance
 - Context-aware assessment prevents inappropriate complexity requirements for different project stages
+
+
+### PR #168: feat: implement containerized orchestrator with proper Claude CLI automation
+
+#### What I Learned
+- **Containerized Execution Architecture**: Sophisticated transition from subprocess.Popen to Docker container isolation for true parallel task execution
+- **Claude CLI Integration Patterns**: Proper automation flags (`--dangerously-skip-permissions`, `--verbose`, `--max-turns`, `--output-format=json`) essential for unattended execution
+- **Docker SDK Integration**: Python Docker SDK provides comprehensive container lifecycle management with proper resource limits and monitoring
+- **Real-time Monitoring Infrastructure**: WebSocket-based dashboard for live container monitoring and log streaming during parallel execution
+- **Placeholder Implementation Pattern**: Dockerfiles with placeholder installations require careful documentation to distinguish POC from production code
+
+#### Critical Issues Identified
+- **Non-functional Claude CLI**: Dockerfile contains placeholder script that echoes instead of actual Claude CLI installation
+- **Silent Authentication Failures**: CLAUDE_API_KEY passed without validation could cause silent container failures
+- **Command Construction Vulnerabilities**: Path handling in container command construction needs proper escaping for special characters
+- **Resource Validation Missing**: Container resource limits not validated against host availability before creation
+- **Generic Error Handling**: Container failures lose important error categorization needed for debugging
+
+#### Architectural Insights Discovered
+- **Container-Based Orchestration**: Docker provides true process isolation superior to subprocess ThreadPoolExecutor approach
+- **Fallback Strategy Design**: Graceful degradation from containerized to subprocess execution maintains system reliability
+- **Monitoring Separation**: Real-time monitoring dashboard operates independently from core orchestration preventing monitoring failures from affecting execution
+- **Resource Management Excellence**: Proper CPU limits, memory limits, timeouts, and cleanup demonstrate production-ready container management
+- **Template-Based Service Creation**: Docker Compose template pattern enables dynamic container service creation
+
+#### Docker Integration Patterns
+- **Container Lifecycle**: Proper create → start → monitor → cleanup cycle with auto-remove and resource limits
+- **Volume Mount Strategy**: Worktree paths mounted as `/workspace` with read-write access for file operations
+- **Environment Variable Passing**: Task context and API credentials properly isolated within container environment
+- **Health Check Implementation**: Container health checks ensure proper startup before task execution begins
+- **Network Isolation**: Bridge networking provides container isolation while enabling monitoring communication
+
+#### Performance & Monitoring Architecture
+- **Real-time Output Streaming**: WebSocket-based log streaming provides live visibility into containerized task execution
+- **Resource Usage Tracking**: CPU, memory, and network statistics collection for each container instance
+- **Parallel Execution Tracking**: Statistics tracking differentiates containerized vs subprocess task execution modes
+- **Performance Claims**: 3-5x speedup claimed but needs benchmarking validation with real workloads
+- **Dashboard Integration**: HTML/JavaScript dashboard with container status, resource usage, and live logs
+
+#### Security Considerations Analyzed
+- **Container Isolation**: Proper Docker security with resource limits prevents container escape and resource exhaustion
+- **API Key Handling**: Environment variable approach for Claude API key needs validation before container creation
+- **Volume Mount Security**: Read-write workspace mounting limited to specific worktree paths maintains file system isolation
+- **Network Security**: Bridge networking isolates containers while enabling necessary communication
+- **Resource Exhaustion Protection**: CPU and memory limits prevent individual containers from affecting system stability
+
+#### Testing Architecture Assessment
+- **Comprehensive Mocking**: Tests use Docker SDK mocks to validate container operation logic without requiring actual Docker
+- **Missing Integration Tests**: No tests validate actual Docker container creation and Claude CLI execution
+- **Error Scenario Coverage**: Tests cover container failures, timeouts, and resource issues through mocking
+- **Performance Testing Gaps**: No benchmarking tests to validate claimed 3-5x performance improvements
+- **Test Isolation**: Proper test setup/teardown with temporary directories and mock cleanup
+
+#### Code Quality Observations
+- **Type Safety Excellence**: Comprehensive type hints throughout with proper dataclass usage for ContainerConfig and ContainerResult
+- **Error Handling Patterns**: Try-catch blocks with proper resource cleanup in finally blocks throughout container operations
+- **Logging Integration**: Appropriate debug/info/warning logging for container lifecycle events and errors
+- **Configuration Management**: Flexible ContainerConfig dataclass allows customization of image, resources, and Claude CLI flags
+- **Documentation Quality**: Comprehensive docstrings and inline comments explaining container operation logic
+
+#### Production Readiness Gaps
+- **Placeholder Claude CLI**: Dockerfile uses echo placeholder instead of actual Claude CLI installation
+- **Resource Validation Missing**: No pre-flight checks for available CPU, memory before container creation
+- **Error Categorization Needed**: Generic "failed" status should differentiate timeout, authentication, resource, and other failure types
+- **Setup Documentation**: Missing Docker installation requirements, API key setup, and troubleshooting guide
+- **Integration Test Suite**: Need tests with actual containers to validate end-to-end functionality
+
+#### Monitoring & Observability Excellence
+- **WebSocket Dashboard**: Real-time HTML dashboard showing container status, resource usage, and live logs
+- **Container State Tracking**: Comprehensive monitoring of container lifecycle, resource consumption, and output
+- **Audit Trail**: Complete logging of container creation, execution, and cleanup for debugging
+- **Performance Metrics**: CPU percentage, memory usage, network I/O tracking for all running containers
+- **Health Check Integration**: Container health checks provide early failure detection
+
+#### Docker Compose Orchestration
+- **Multi-Service Architecture**: Monitor service, template service, and dynamic task services with proper networking
+- **Volume Management**: Shared volumes for worktrees, results, and monitoring data
+- **Service Templates**: Template pattern for creating dynamic container services for parallel tasks
+- **Health Check Integration**: Service health checks ensure proper startup ordering and failure detection
+- **Network Isolation**: Dedicated orchestrator network provides container communication while maintaining isolation
+
+#### Patterns to Watch
+- **Placeholder Documentation**: Clearly distinguish proof-of-concept placeholders from production-ready components
+- **Resource Validation First**: Always validate system resources before creating containers to prevent runtime failures
+- **Error Categorization**: Provide specific error types (timeout, auth, resource, network) rather than generic failures
+- **Container Command Construction**: Proper path escaping essential for file paths with spaces or special characters
+- **Thread Synchronization**: Output streaming across threads requires proper synchronization to prevent corruption
+
+#### Strategic Impact Assessment
+- **Orchestration Evolution**: Transforms orchestrator from over-engineered planning system to actual containerized execution engine
+- **True Parallelism Achievement**: Docker containers provide genuine process isolation superior to threading approaches
+- **Production Architecture**: Container-based approach with monitoring provides enterprise-ready parallel task execution
+- **Claude CLI Integration**: Proper automation flags enable unattended Claude CLI execution in containerized environment
+- **Scalability Foundation**: Container orchestration architecture ready for multi-node deployment and advanced scaling
+
+This PR demonstrates sophisticated containerization architecture with excellent Docker integration patterns. The critical issues are primarily around replacing placeholder components with production implementations and adding resource validation, rather than fundamental design flaws. Once addressed, this provides the true containerized parallel execution that was missing from the original orchestrator implementation.
+
