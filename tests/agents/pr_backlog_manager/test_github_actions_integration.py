@@ -8,7 +8,7 @@ functionality including event handling, security validation, and workflow artifa
 try:
     import pytest  # type: ignore[import]
 except ImportError:
-    from test_stubs import pytest
+    from .test_stubs import pytest
 
 import os
 import json
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 # Always use stubs for type checking consistency
-from test_stubs import (
+from .test_stubs import (
     GitHubActionsIntegration,
     GitHubContext,
     SecurityConstraints,

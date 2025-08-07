@@ -8,7 +8,7 @@ including conflict analysis, CI status evaluation, and metadata checking.
 try:
     import pytest  # type: ignore[import]
 except ImportError:
-    from test_stubs import pytest
+    from .test_stubs import pytest
 
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 # Always use stubs for type checking consistency
-from test_stubs import (
+from .test_stubs import (
     ReadinessAssessor,
     ConflictAssessment,
     CIAssessment,
