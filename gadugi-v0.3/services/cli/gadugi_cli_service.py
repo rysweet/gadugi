@@ -22,15 +22,15 @@ from typing import Any
 
 import psutil
 
-try:
-    import click
+import importlib.util
 
-    CLICK_AVAILABLE = True
-except ImportError:
-    CLICK_AVAILABLE = False
+# Check for click availability using importlib
+CLICK_AVAILABLE = importlib.util.find_spec("click") is not None
 
-try:
-    import rich
+# Check for rich availability using importlib  
+RICH_AVAILABLE = importlib.util.find_spec("rich") is not None
+
+if RICH_AVAILABLE:
     from rich.console import Console
     from rich.panel import Panel
     from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -38,48 +38,68 @@ try:
     from rich.syntax import Syntax
     from rich.table import Table
     from rich.tree import Tree
-
-    RICH_AVAILABLE = True
-except ImportError:
-    RICH_AVAILABLE = False
-
-    # Mock rich components
+else:
+    # Mock rich components if not available
     class Console:
-        def print(self, *args, **kwargs) -> None:
+        """Mock Console class for when rich is not available."""
+        
+        def print(self, *args: Any, **kwargs: Any) -> None:
+            """Mock print method."""
             pass
 
-        def input(self, prompt):
+        def input(self, prompt: str) -> str:
+            """Mock input method."""
             return input(prompt)
 
     class Table:
+        """Mock Table class for when rich is not available."""
+        
         pass
 
     class Panel:
+        """Mock Panel class for when rich is not available."""
+        
         pass
 
     class Progress:
+        """Mock Progress class for when rich is not available."""
+        
         pass
 
     class SpinnerColumn:
+        """Mock SpinnerColumn class for when rich is not available."""
+        
         pass
 
     class TextColumn:
+        """Mock TextColumn class for when rich is not available."""
+        
         pass
 
     class Prompt:
+        """Mock Prompt class for when rich is not available."""
+        
         @staticmethod
-        def ask(prompt, default=None):
+        def ask(prompt: str, default: str | None = None) -> str:
+            """Mock ask method."""
             return input(f"{prompt} [{default}]: ") or default
 
     class Confirm:
+        """Mock Confirm class for when rich is not available."""
+        
         @staticmethod
-        def ask(prompt):
+        def ask(prompt: str) -> bool:
+            """Mock ask method for confirmation."""
             return input(f"{prompt} (y/n): ").lower().startswith("y")
 
     class Syntax:
+        """Mock Syntax class for when rich is not available."""
+        
         pass
 
     class Tree:
+        """Mock Tree class for when rich is not available."""
+        
         pass
 
 
