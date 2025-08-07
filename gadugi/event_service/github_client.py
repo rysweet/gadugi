@@ -312,10 +312,6 @@ class GitHubClient:
                 remote_url = stdout.decode().strip()
                 return await self.parse_repository_url(remote_url)
             return None
-
-            if result.returncode == 0:
-                remote_url = result.stdout.strip()
-                return await self.parse_repository_url(remote_url)
         except Exception as e:
             logger.debug(f"Could not auto-detect repository: {e}")
 

@@ -8,7 +8,11 @@ import unittest
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
-from integration_test_agent_engine import IntegrationTestAgentEngine
+from integration_test_agent_engine import (
+    IntegrationTestAgentEngine,
+    IntegrationTestAgentRequest,
+    IntegrationTestAgentResponse,
+)
 
 
 class TestIntegrationTestAgentEngine(unittest.TestCase):

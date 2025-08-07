@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for Test Writer Engine."""
 
+import ast
 import os
 import sys
 import tempfile
