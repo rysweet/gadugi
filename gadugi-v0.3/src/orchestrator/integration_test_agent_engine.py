@@ -59,7 +59,7 @@ class IntegrationTestAgentEngine:
         self.logger = self._setup_logging()
         self.state = IntegrationTestAgentState.IDLE
         self.metrics = PerformanceMetrics(last_updated=datetime.now())
-        self.cache = {{}}
+        self.cache = {}
 
         # Advanced initialization
         self.operation_history = []
