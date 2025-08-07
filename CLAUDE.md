@@ -135,7 +135,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 ## Generic Claude Code Instructions
 
-@docs/ai-instructions/claude-generic-instructions.md
+@claude-generic-instructions.md
 
 ## Project-Specific Instructions
 
