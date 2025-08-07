@@ -141,7 +141,7 @@ class SimpleMemoryManager:
             self.lock_reason = self.DEFAULT_LOCK_REASON
 
         # Initialize GitHub operations using shared module
-        self.github = GitHubOperations()
+        self.github = GitHubOperations(task_id=getattr(self, "task_id", None))
 
         # Get or create the main memory issue
         self.memory_issue_number = self._get_or_create_memory_issue()

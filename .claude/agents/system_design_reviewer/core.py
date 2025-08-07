@@ -114,7 +114,7 @@ class SystemDesignReviewer:
         self.config = config or {}
 
         # Initialize shared modules from Enhanced Separation architecture
-        self.github_ops = GitHubOperations()
+        self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
         self.error_handler = ErrorHandler("system-design-reviewer")
         self.task_tracker = TaskTracker("system-design-reviewer")

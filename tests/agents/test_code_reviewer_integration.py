@@ -153,11 +153,11 @@ class TaskOrchestrator:
     Complexity justified by genuine requirements:
     - Distributed execution, fault tolerance, load balancing
     """
-    
+
     def __init__(self, worker_nodes: List[str]):
         self.worker_nodes = worker_nodes
         self.active_tasks: Dict[str, Task] = {}
-        
+
     async def execute_workflow(self, tasks: List[Task]) -> WorkflowResult:
         # Complex orchestration logic - justified by requirements
         return await self._coordinate_distributed_execution(tasks)
@@ -248,7 +248,7 @@ class PaymentProcessor(ABC):
 class CreditCardProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool: return self._charge_card(amount)
 
-class PayPalProcessor(PaymentProcessor): 
+class PayPalProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool: return self._paypal_call(amount)
 
 class BankTransferProcessor(PaymentProcessor):
@@ -285,7 +285,7 @@ class ReportGenerator(ABC):
     def generate(self) -> str: pass
 
 class PDFReportGenerator(ReportGenerator):
-    def generate(self) -> str: 
+    def generate(self) -> str:
         return "PDF content"  # Only implementation
 """
 
@@ -306,7 +306,7 @@ class PersonBuilder:
     def name(self, name): self._name = name; return self
     def age(self, age): self._age = age; return self
     def build(self): return Person(self._name, self._age)
-    
+
 # For a simple 2-field data class
 """
 

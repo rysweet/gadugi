@@ -33,8 +33,9 @@ class ErrorSeverity(Enum):
 class GitHubOperations:
     """Fallback GitHub operations implementation"""
 
-    def __init__(self):
+    def __init__(self, task_id=None):
         self.cache = {}
+        self.task_id = task_id
 
     def get_pr_details(self, pr_number: str) -> Dict[str, Any]:
         """Get PR details using GitHub CLI"""

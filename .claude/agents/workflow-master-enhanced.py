@@ -142,7 +142,7 @@ class EnhancedWorkflowMaster:
             audit_enabled=True,
         )
 
-        self.github_ops = GitHubOperations()
+        self.github_ops = GitHubOperations(task_id=self.current_task_id)
         self.state_manager = StateManager()
         self.task_tracker = TaskTracker()
         self.task_metrics = TaskMetrics()

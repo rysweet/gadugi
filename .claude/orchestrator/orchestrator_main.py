@@ -165,7 +165,7 @@ class OrchestratorCoordinator:
 
         # Initialize Enhanced Separation components
         try:
-            self.github_ops = GitHubOperations()
+            self.github_ops = GitHubOperations(task_id=self.orchestration_id)
             self.state_manager = StateManager()
             self.checkpoint_manager = CheckpointManager(self.state_manager)
             self.error_handler = ErrorHandler()

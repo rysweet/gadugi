@@ -364,7 +364,7 @@ After each prompt creation:
 
 ## Remember
 
-Your goal is to create prompts that result in successful, high-quality feature implementations. Every prompt should be comprehensive enough that a developer (or WorkflowManager) can execute it from start to finish without needing additional clarification. 
+Your goal is to create prompts that result in successful, high-quality feature implementations. Every prompt should be comprehensive enough that a developer (or WorkflowManager) can execute it from start to finish without needing additional clarification.
 
 Key priorities:
 - **GitHub Integration**: Automatically create issues (unless disabled) and include issue numbers in frontmatter

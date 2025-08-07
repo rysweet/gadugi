@@ -48,7 +48,7 @@ class GitHubOperations:
     """
 
     def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None,
-                 config: Optional[Dict[str, Any]] = None):
+                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None):
         """
         Initialize GitHub operations.
 
@@ -56,9 +56,11 @@ class GitHubOperations:
             repo: Optional repository in format 'owner/name'
             retry_config: Configuration for retry behavior
             config: General configuration dictionary
+            task_id: Optional task ID for traceability (format: task-YYYYMMDD-HHMMSS-XXXX)
         """
         self.repo = repo
         self.config = config or {}
+        self.task_id = task_id
         self.retry_config = retry_config or {
             'max_retries': 3,
             'initial_delay': 1,
@@ -74,6 +76,18 @@ class GitHubOperations:
             'max_wait_time': 3600,  # 1 hour max wait
             'backoff_multiplier': 1.5
         }
+
+    def _format_task_id_metadata(self) -> str:
+        """
+        Format task ID metadata for inclusion in GitHub updates.
+
+        Returns:
+            Formatted task ID string to append to body text
+        """
+        if not self.task_id:
+            return ""
+
+        return f"\n\n---\n**Task ID**: `{self.task_id}`"
 
     def __enter__(self):
         """Context manager entry."""
@@ -189,7 +203,10 @@ class GitHubOperations:
         if not title.strip():
             raise ValueError("Title cannot be empty")
 
-        args = ['issue', 'create', '--title', title, '--body', body]
+        # Append task ID metadata to body if available
+        body_with_task_id = body + self._format_task_id_metadata()
+
+        args = ['issue', 'create', '--title', title, '--body', body_with_task_id]
 
         if labels:
             args.extend(['--label', ','.join(labels)])
@@ -202,6 +219,8 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created issue #{result['data']['number']}: {title}")
+            if self.task_id:
+                self.logger.debug(f"Issue created with task ID: {self.task_id}")
 
         return result
 
@@ -223,7 +242,10 @@ class GitHubOperations:
         if not title.strip():
             raise ValueError("Title cannot be empty")
 
-        args = ['pr', 'create', '--title', title, '--body', body, '--base', base]
+        # Append task ID metadata to body if available
+        body_with_task_id = body + self._format_task_id_metadata()
+
+        args = ['pr', 'create', '--title', title, '--body', body_with_task_id, '--base', base]
 
         if head:
             args.extend(['--head', head])
@@ -236,6 +258,8 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created PR #{result['data']['number']}: {title}")
+            if self.task_id:
+                self.logger.debug(f"PR created with task ID: {self.task_id}")
 
         return result
 
@@ -339,12 +363,17 @@ class GitHubOperations:
         if not body.strip():
             raise ValueError("Comment body cannot be empty")
 
-        args = ['issue', 'comment', str(issue_number), '--body', body]
+        # Append task ID metadata to body if available
+        body_with_task_id = body + self._format_task_id_metadata()
+
+        args = ['issue', 'comment', str(issue_number), '--body', body_with_task_id]
 
         result = self._execute_gh_command(args)
 
         if result['success']:
             self.logger.info(f"Added comment to issue #{issue_number}")
+            if self.task_id:
+                self.logger.debug(f"Comment added with task ID: {self.task_id}")
 
         return result
 
