@@ -192,28 +192,65 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                 self.fail(f"Settings file should be valid JSON: {e}")
 
     def test_hooks_configuration_exists(self):
-        """Test that hooks configuration has been removed (fix for Issue #89)."""
+        """Test that dangerous hooks have been removed but safe hooks are allowed."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn(
-            "hooks",
-            settings,
-            "Settings should not contain hooks configuration to prevent infinite loops",
-        )
+        # If hooks exist, verify they don't contain dangerous TeamCoach hooks
+        if "hooks" in settings:
+            # Check that no hooks spawn Claude sessions (Issue #89)
+            for hook_type in [
+                "PreToolUse",
+                "PostToolUse",
+                "sessionStart",
+                "sessionStop",
+            ]:
+                if hook_type in settings["hooks"]:
+                    for matcher, hook_config in (
+                        settings["hooks"][hook_type].items()
+                        if isinstance(settings["hooks"][hook_type], dict)
+                        else enumerate(settings["hooks"][hook_type])
+                    ):
+                        if isinstance(hook_config, dict) and "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # Ensure no TeamCoach hooks that spawn Claude sessions
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    command.lower(),
+                                    "TeamCoach hooks should not be present to prevent infinite loops",
+                                )
+                                self.assertNotIn(
+                                    "claude /agent",
+                                    command.lower(),
+                                    "Hooks should not spawn new Claude sessions",
+                                )
 
     def test_hook_configurations_have_required_fields(self):
-        """Test that hook configurations have been removed (fix for Issue #89)."""
+        """Test that if hooks exist, they are properly configured."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn(
-            "hooks",
-            settings,
-            "Settings should not contain hooks configuration to prevent infinite loops",
-        )
+        # If hooks exist, verify they are safe (no TeamCoach hooks)
+        if "hooks" in settings:
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                # Verify hook has required fields
+                                self.assertIn(
+                                    "type", hook, "Hook should have type field"
+                                )
+                                self.assertIn(
+                                    "command", hook, "Hook should have command field"
+                                )
+                                # Ensure no dangerous hooks
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    hook["command"].lower(),
+                                    "No TeamCoach hooks allowed",
+                                )
 
         # Verify that TeamCoach hooks are replaced with new reflection system
         # Check that workflow reflection components exist as replacement
@@ -235,16 +272,31 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
         )
 
     def test_hook_commands_use_project_relative_paths(self):
-        """Test that hook commands have been removed (fix for Issue #89)."""
+        """Test that if hooks exist, they use relative paths."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn(
-            "hooks",
-            settings,
-            "Settings should not contain hooks configuration to prevent infinite loops",
-        )
+        # If hooks exist, verify they use relative paths
+        if "hooks" in settings:
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # Check for relative paths (should start with . or not have /)
+                                if ".claude/hooks/" in command:
+                                    # Should be relative, not absolute
+                                    self.assertFalse(
+                                        command.startswith("/"),
+                                        f"Hook command should use relative path: {command}",
+                                    )
+                                # Ensure no TeamCoach hooks
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    command.lower(),
+                                    "No TeamCoach hooks allowed",
+                                )
 
 
 class TestTeamCoachHookIntegration(unittest.TestCase):
