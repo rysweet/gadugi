@@ -192,62 +192,111 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                 self.fail(f"Settings file should be valid JSON: {e}")
 
     def test_hooks_configuration_exists(self):
-        """Test that hooks configuration exists."""
+        """Test that dangerous hooks have been removed but safe hooks are allowed."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        self.assertIn("hooks", settings, "Settings should contain hooks configuration")
-        hooks = settings["hooks"]
-
-        # Check for Stop hook
-        self.assertIn("Stop", hooks, "Should have Stop hook configured")
-        stop_hooks = hooks["Stop"]
-        self.assertIsInstance(stop_hooks, list, "Stop hooks should be a list")
-        self.assertTrue(len(stop_hooks) > 0, "Should have at least one Stop hook")
-
-        # Check for SubagentStop hook
-        self.assertIn("SubagentStop", hooks, "Should have SubagentStop hook configured")
-        subagent_hooks = hooks["SubagentStop"]
-        self.assertIsInstance(
-            subagent_hooks, list, "SubagentStop hooks should be a list"
-        )
-        self.assertTrue(
-            len(subagent_hooks) > 0, "Should have at least one SubagentStop hook"
-        )
+        # If hooks exist, verify they don't contain dangerous TeamCoach hooks
+        if "hooks" in settings:
+            # Check that no hooks spawn Claude sessions (Issue #89)
+            for hook_type in [
+                "PreToolUse",
+                "PostToolUse",
+                "sessionStart",
+                "sessionStop",
+            ]:
+                if hook_type in settings["hooks"]:
+                    for matcher, hook_config in (
+                        settings["hooks"][hook_type].items()
+                        if isinstance(settings["hooks"][hook_type], dict)
+                        else enumerate(settings["hooks"][hook_type])
+                    ):
+                        if isinstance(hook_config, dict) and "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # Ensure no TeamCoach hooks that spawn Claude sessions
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    command.lower(),
+                                    "TeamCoach hooks should not be present to prevent infinite loops",
+                                )
+                                self.assertNotIn(
+                                    "claude /agent",
+                                    command.lower(),
+                                    "Hooks should not spawn new Claude sessions",
+                                )
 
     def test_hook_configurations_have_required_fields(self):
-        """Test that hook configurations have required fields."""
+        """Test that if hooks exist, they are properly configured."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        hooks = settings["hooks"]
+        # If hooks exist, verify they are safe (no TeamCoach hooks)
+        if "hooks" in settings:
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                # Verify hook has required fields
+                                self.assertIn(
+                                    "type", hook, "Hook should have type field"
+                                )
+                                self.assertIn(
+                                    "command", hook, "Hook should have command field"
+                                )
+                                # Ensure no dangerous hooks
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    hook["command"].lower(),
+                                    "No TeamCoach hooks allowed",
+                                )
 
-        # Test Stop hook configuration
-        stop_hook = hooks["Stop"][0]["hooks"][0]
-        self.assertEqual(stop_hook["type"], "command")
-        self.assertIn("teamcoach-stop.py", stop_hook["command"])
-        self.assertEqual(stop_hook["timeout"], 300)  # 5 minutes
+        # Verify that TeamCoach hooks are replaced with new reflection system
+        # Check that workflow reflection components exist as replacement
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        reflection_template = os.path.join(
+            base_dir, ".claude", "templates", "workflow-reflection-template.md"
+        )
+        reflection_collector = os.path.join(
+            base_dir, ".claude", "agents", "workflow-reflection-collector.py"
+        )
 
-        # Test SubagentStop hook configuration
-        subagent_hook = hooks["SubagentStop"][0]["hooks"][0]
-        self.assertEqual(subagent_hook["type"], "command")
-        self.assertIn("teamcoach-subagent-stop.py", subagent_hook["command"])
-        self.assertEqual(subagent_hook["timeout"], 180)  # 3 minutes
+        self.assertTrue(
+            os.path.exists(reflection_template),
+            "Workflow reflection template should exist as hook replacement",
+        )
+        self.assertTrue(
+            os.path.exists(reflection_collector),
+            "Workflow reflection collector should exist as hook replacement",
+        )
 
     def test_hook_commands_use_project_relative_paths(self):
-        """Test that hook commands use project-relative paths."""
+        """Test that if hooks exist, they use relative paths."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
 
-        hooks = settings["hooks"]
-
-        # Check Stop hook path
-        stop_command = hooks["Stop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", stop_command)
-
-        # Check SubagentStop hook path
-        subagent_command = hooks["SubagentStop"][0]["hooks"][0]["command"]
-        self.assertIn("$CLAUDE_PROJECT_DIR", subagent_command)
+        # If hooks exist, verify they use relative paths
+        if "hooks" in settings:
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # Check for relative paths (should start with . or not have /)
+                                if ".claude/hooks/" in command:
+                                    # Should be relative, not absolute
+                                    self.assertFalse(
+                                        command.startswith("/"),
+                                        f"Hook command should use relative path: {command}",
+                                    )
+                                # Ensure no TeamCoach hooks
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    command.lower(),
+                                    "No TeamCoach hooks allowed",
+                                )
 
 
 class TestTeamCoachHookIntegration(unittest.TestCase):

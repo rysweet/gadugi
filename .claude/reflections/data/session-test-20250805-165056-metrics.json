@@ -1,0 +1,84 @@
+{
+  "session_id": "test-20250805-165056",
+  "timestamp": "2025-08-05T16:50:56.666610",
+  "git_metrics": {
+    "recent_commits": 0,
+    "current_branch": "feature/issue-89-team-coach-reflection-fix",
+    "diff_stats": "prompts/fix-types-pr-backlog-manager-workflow.md   |  165 +++\n tests/agents/pr_backlog_manager/test_core.py       |   18 +-\n .../test_delegation_coordinator.py                 |   16 +-\n .../test_github_actions_integration.py             |   16 +-\n .../agents/pr_backlog_manager/test_integration.py  |   22 +-\n .../pr_backlog_manager/test_readiness_assessor.py  |   19 +-\n tests/agents/pr_backlog_manager/test_stubs.py      | 1163 ++++++++++++++++++++\n 7 files changed, 1400 insertions(+), 19 deletions(-)",
+    "repository_status": "dirty"
+  },
+  "file_metrics": {
+    "python_files": 134,
+    "test_files": 52,
+    "markdown_files": 125,
+    "test_coverage_ratio": 0.3880597014925373
+  },
+  "test_metrics": {
+    "total_tests": 0,
+    "pytest_available": true,
+    "collection_successful": true
+  },
+  "issue_metrics": {
+    "recent_issues": 5,
+    "recent_prs": 5,
+    "issues_data": [
+      {
+        "number": 148,
+        "state": "OPEN",
+        "title": "Enforce: Orchestrator must use WorkflowManager for all task initiation"
+      },
+      {
+        "number": 147,
+        "state": "OPEN",
+        "title": "EMERGENCY: Fix team coach reflection loop (Issue #89)"
+      },
+      {
+        "number": 144,
+        "state": "OPEN",
+        "title": "whenever any agent starts working in a worktree on a python uv project, they need to setup the venv"
+      },
+      {
+        "number": 140,
+        "state": "OPEN",
+        "title": "consistency: rename all agents to use CamelCase names."
+      },
+      {
+        "number": 138,
+        "state": "OPEN",
+        "title": "Implement technical enforcement for mandatory orchestrator usage"
+      }
+    ],
+    "prs_data": [
+      {
+        "number": 146,
+        "state": "OPEN",
+        "title": "feat: implement UV virtual environment setup for agents in worktrees"
+      },
+      {
+        "number": 141,
+        "state": "OPEN",
+        "title": "fix: reduce type errors in shared module tests by 89%"
+      },
+      {
+        "number": 137,
+        "state": "OPEN",
+        "title": "Fix WorkflowManager Repeatability and Consistency Issues"
+      },
+      {
+        "number": 135,
+        "state": "OPEN",
+        "title": "fix: enhance WorkflowManager reliability with comprehensive monitoring and recovery"
+      },
+      {
+        "number": 123,
+        "state": "OPEN",
+        "title": "feat: automatic Memory.md compaction with LongTermMemoryDetails.md archiving"
+      }
+    ]
+  },
+  "performance_metrics": {
+    "disk_free_gb": 171.74971389770508,
+    "project_size_mb": 11.341118812561035,
+    "timestamp": "2025-08-05T16:51:07.900773"
+  }
+}

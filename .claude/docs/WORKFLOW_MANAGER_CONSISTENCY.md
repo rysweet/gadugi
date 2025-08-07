@@ -54,16 +54,16 @@ PHASE_9_ENFORCEMENT=true
 # CRITICAL VALIDATION - Workflow CANNOT complete without this
 verify_phase_9_completion() {
     local PR_NUMBER="$1"
-    
+
     if ! gh pr view "$PR_NUMBER" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
         echo "🚨 CRITICAL ERROR: Workflow marked complete but NO REVIEW FOUND!"
         echo "📋 ENFORCING Phase 9: Invoking code-reviewer agent immediately"
-        
+
         # FORCE code review invocation
         MUST_INVOKE_CODE_REVIEWER=true
         return 1
     fi
-    
+
     echo "✅ Phase 9 validation passed: Review exists for PR #$PR_NUMBER"
     return 0
 }
@@ -87,7 +87,7 @@ TaskData(
     enforcement_level="CRITICAL"  # New enforcement level
 ),
 TaskData(
-    id="10", 
+    id="10",
     content="🚨 MANDATORY: Process review with code-review-response agent",
     status="pending",
     priority="high",  # Maximum priority
@@ -309,7 +309,7 @@ tail -f /tmp/orphaned_pr_recovery.log
 The enhanced WorkflowManager consistency mechanisms provide:
 
 - **100% reliability** for Phase 9 (code review) execution
-- **Automatic recovery** from orphaned PRs and state inconsistencies  
+- **Automatic recovery** from orphaned PRs and state inconsistencies
 - **Complete automation** with no manual intervention required
 - **Comprehensive testing** to ensure all mechanisms work correctly
 - **Detailed monitoring** and troubleshooting capabilities

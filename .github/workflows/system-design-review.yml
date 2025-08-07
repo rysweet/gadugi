@@ -1,0 +1,68 @@
+name: System Design Review
+
+# System Design Review workflow is now disabled for CI cost reasons.
+# The agent should be invoked by the Workflow Manager, not from CI.
+# To re-enable, uncomment the pull_request trigger below and remove workflow_dispatch.
+
+on:
+  # Disabled - using workflow_dispatch as a placeholder to prevent CI errors
+  workflow_dispatch:
+    inputs:
+      note:
+        description: 'This workflow is disabled. Use Workflow Manager instead.'
+        required: false
+        type: string
+        default: 'disabled'
+
+  # Original trigger (disabled):
+  # pull_request:
+  #   types: [opened, synchronize, reopened]
+  #   # Only run on PRs that modify code files
+  #   paths:
+  #     - '**.py'
+  #     - '**.ts'
+  #     - '**.tsx'
+  #     - '**.js'
+  #     - '**.jsx'
+  #     - '.claude/agents/**'
+  #     - '.claude/shared/**'
+  #     - 'src/**'
+  #     - 'gadugi/**'
+
+# Concurrency control (for when workflow is re-enabled)
+concurrency:
+  group: system-design-review-manual
+  cancel-in-progress: true
+
+jobs:
+  system-design-review:
+    name: Architectural Review
+    runs-on: ubuntu-latest
+
+    # This workflow is disabled - only runs on manual dispatch
+    if: github.event_name == 'workflow_dispatch'
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+
+    timeout-minutes: 10
+
+    steps:
+      - name: Workflow Disabled Notice
+        run: |
+          echo "================================"
+          echo "System Design Review is DISABLED"
+          echo "================================"
+          echo ""
+          echo "This workflow has been disabled for CI cost optimization."
+          echo "The System Design Review Agent should be invoked by the Workflow Manager instead."
+          echo ""
+          echo "To manually run a system design review, use:"
+          echo "  /agent:system-design-reviewer analyze-pr <PR_NUMBER>"
+          echo ""
+          echo "To re-enable CI-based reviews:"
+          echo "  1. Uncomment the pull_request trigger in this workflow"
+          echo "  2. Remove the workflow_dispatch trigger"
+          echo "  3. Restore the original job steps"

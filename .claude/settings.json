@@ -1,4 +1,46 @@
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/xpia_web_validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/xpia_web_validator.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "WebFetch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/xpia_web_validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/xpia_web_validator.py"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "additionalDirectories": [
       "/tmp"
@@ -108,29 +150,5 @@
       "WebFetch(domain:github.com)"
     ],
     "deny": []
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/teamcoach-stop.py",
-            "timeout": 300
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/teamcoach-subagent-stop.py",
-            "timeout": 180
-          }
-        ]
-      }
-    ]
   }
 }

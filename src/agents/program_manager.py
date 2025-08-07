@@ -4,7 +4,7 @@ import os
 import re
 import subprocess
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 import sys
@@ -24,7 +24,11 @@ sys.path.insert(
 )
 
 try:
-    from memory_utils.agent_interface import AgentMemoryInterface
+    from memory_utils.agent_interface import (
+        AgentMemoryInterface as BaseAgentMemoryInterface,
+    )
+
+    AgentMemoryInterface = BaseAgentMemoryInterface
 except ImportError:
     # Fallback if memory_utils not available
     class AgentMemoryInterface:
@@ -472,7 +476,7 @@ class ProgramManager:
             f"{conversion_stats['converted']} converted, {label_stats['fixed']} labels fixed",
         )
 
-    def get_milestone_info(self) -> Dict[str, any]:
+    def get_milestone_info(self) -> Dict[str, Any]:
         """Get information about project milestones"""
         success, output = self.run_gh_command(
             ["api", "/repos/{owner}/{repo}/milestones", "--jq", "."]
@@ -498,7 +502,7 @@ class ProgramManager:
         except json.JSONDecodeError:
             return {}
 
-    def analyze_ready_issues(self) -> List[Dict[str, any]]:
+    def analyze_ready_issues(self) -> List[Dict[str, Any]]:
         """Analyze issues that are ready for implementation"""
         ready_issues = self.get_issues_by_label("ready")
 
@@ -682,7 +686,7 @@ class ProgramManager:
             print(f"✗ Failed to update priorities: {e}")
             return False
 
-    def get_recent_merged_prs(self, days: int = 7) -> List[Dict[str, any]]:
+    def get_recent_merged_prs(self, days: int = 7) -> List[Dict[str, Any]]:
         """Get recently merged pull requests"""
         since_date = (datetime.now() - timedelta(days=days)).isoformat()
 
@@ -709,7 +713,7 @@ class ProgramManager:
         except json.JSONDecodeError:
             return []
 
-    def extract_features_from_pr(self, pr: Dict[str, any]) -> List[str]:
+    def extract_features_from_pr(self, pr: Dict[str, Any]) -> List[str]:
         """Extract feature descriptions from a PR"""
         features = []
 
@@ -849,9 +853,9 @@ class ProgramManager:
                     )
 
         # Write updated README
+        backup_path = readme_path + ".backup"
         try:
             # Create backup
-            backup_path = readme_path + ".backup"
             with open(backup_path, "w") as f:
                 f.write(readme_content)
 
