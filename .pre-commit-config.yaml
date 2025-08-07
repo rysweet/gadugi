@@ -32,11 +32,12 @@ repos:
     hooks:
       - id: pyright
         name: pyright type checker
-        entry: pyright
+        entry: pyright container_runtime/
         language: system
         types: [python]
         pass_filenames: false
         stages: [pre-push]  # Run on push to avoid slowing down commits
+        # Scoped to container_runtime/ initially for phased rollout
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets

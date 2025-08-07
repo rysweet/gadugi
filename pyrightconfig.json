@@ -19,7 +19,7 @@
     "htmlcov"
   ],
   "typeCheckingMode": "standard",
-  "pythonVersion": "3.11",
+  "pythonVersion": "3.13",
   "pythonPlatform": "All",
   "reportMissingImports": "warning",
   "reportMissingTypeStubs": "none",
