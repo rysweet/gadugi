@@ -63,6 +63,14 @@ Save your analysis and learnings about the project structure in `.github/CodeRev
 - [ ] SOLID principles applied appropriately
 - [ ] Error handling is comprehensive and appropriate
 
+#### Design Simplicity (Issue #104)
+- [ ] Solution complexity matches problem complexity
+- [ ] No abstractions without multiple use cases
+- [ ] YAGNI principle followed (no speculative features)
+- [ ] Minimal cognitive load to understand the code
+- [ ] No over-engineering patterns detected
+- [ ] Context-appropriate level of sophistication
+
 #### Python-Specific Checks
 - [ ] Type hints provided for function signatures
 - [ ] No mypy errors (`mypy .` or `mypy gadugi/`)
@@ -151,6 +159,14 @@ EOF
 - **[File:Line]**: [Description of improvement]
   - **Rationale**: [Why this would be better]
   - **Suggestion**: [Specific change recommended]
+
+### Design Simplicity Assessment 🎯
+- **Complexity Level**: [Appropriate / Over-engineered / Under-engineered]
+- **YAGNI Compliance**: [Good / Concerns noted]
+- **Abstraction Quality**: [Appropriate / Too abstract / Too concrete]
+- **Simplification Opportunities**:
+  - [Specific suggestion for reducing complexity]
+  - [Alternative simpler approach]
 
 ### Questions ❓
 - [Clarification needed about design choice]
@@ -259,7 +275,135 @@ gh pr view "$PR_NUMBER" --json reviews | jq '.reviews[-1]'
 
 5. **Update Memory**: Document any patterns or insights in CodeReviewerProjectMemory.md
 
-### 8. Special Focus Areas for Gadugi
+### 8. Design Simplicity and Over-Engineering Detection (Issue #104)
+
+**Important**: Carefully evaluate design simplicity and avoid over-engineering in all code reviews.
+
+This section provides comprehensive guidance for identifying when code is over-engineered
+and suggests practical alternatives. The goal is to maintain appropriate complexity that
+matches the actual problem being solved, while avoiding both under-engineering and
+over-engineering extremes.
+
+#### Design Simplicity Evaluation Criteria
+
+**Abstraction Appropriateness**:
+- [ ] Abstractions match the actual complexity of the problem
+- [ ] No abstractions created for problems that don't exist yet
+- [ ] Each abstraction has clear responsibilities and boundaries
+- [ ] Interfaces have multiple implementations or clear future need
+- [ ] Generic solutions are justified by real variability
+
+**YAGNI (You Aren't Gonna Need It) Compliance**:
+- [ ] Features solve current, actual requirements (not imagined future ones)
+- [ ] Configuration options have clear, documented use cases
+- [ ] Code complexity matches actual problem complexity
+- [ ] No speculative generalization without concrete need
+- [ ] Extensions are added only when needed
+
+**Cognitive Load Assessment**:
+- [ ] Code can be understood without excessive mental modeling
+- [ ] Minimal indirection levels (avoid deeply nested abstractions)
+- [ ] Clear data flow and control flow paths
+- [ ] Minimal dependencies to understand any given function
+- [ ] Self-contained units that can be reasoned about independently
+
+**Solution-Problem Fit Analysis**:
+- [ ] Solution complexity is proportional to problem complexity
+- [ ] Simple problems use simple solutions
+- [ ] Complex problems justify complex solutions
+- [ ] No over-architecting for small, stable domains
+- [ ] Architecture matches the team size and experience level
+
+#### Over-Engineering Detection Patterns
+
+Watch for these common over-engineering patterns:
+
+**Generic Interfaces with Single Implementation**:
+- Abstract base classes or interfaces with only one concrete implementation
+- Strategy patterns for single strategies
+- Factory patterns for single product types
+- Command patterns for simple operations
+
+**Configuration Without Clear Use Cases**:
+- Configuration files with options never changed in practice
+- Environment variables for values that are truly constant
+- Settings that exist "just in case" without actual scenarios
+- Complex configuration hierarchies for simple use cases
+
+**Design Patterns Applied to Simple Logic**:
+- Observer pattern for simple callbacks
+- State machines for linear processes
+- Visitor pattern for straightforward operations
+- Builder pattern for simple data structures
+
+**Excessive Layering and Indirection**:
+- Service layers that just delegate to data layers
+- Multiple abstraction layers with no clear separation of concerns
+- Wrapper classes that add no functionality
+- Proxy patterns without actual proxying needs
+
+**Complex Inheritance for Simple Variations**:
+- Deep inheritance hierarchies for small behavioral differences
+- Abstract classes with mostly concrete implementations
+- Multiple inheritance for simple mixins
+- Template method patterns for minor variations
+
+**Premature Optimization**:
+- Performance optimizations without measurement
+- Complex caching for infrequently accessed data
+- Micro-optimizations that reduce readability
+- Resource pooling for non-scarce resources
+
+#### Simplicity Recommendations
+
+When reviewing code, provide specific suggestions for simplification:
+
+**When to Inline vs. Abstract**:
+- Inline: Used in 1-2 places, simple logic, unlikely to change
+- Abstract: Used in 3+ places, complex logic, likely to evolve
+- Inline: Team is small and communication is easy
+- Abstract: Multiple teams, formal interfaces needed
+
+**Reducing Cognitive Load**:
+- Suggest extracting complex conditions into well-named boolean functions
+- Recommend breaking large functions into smaller, focused ones
+- Encourage reducing nesting levels through early returns
+- Suggest eliminating unnecessary variables and intermediate steps
+
+**Incremental Complexity Introduction**:
+- Start with the simplest solution that works
+- Add complexity only when current solution proves insufficient
+- Refactor toward complexity, don't architect for it upfront
+- Provide clear upgrade paths when simplifying
+
+**Practical Alternatives to Complex Patterns**:
+- Simple functions instead of single-method interfaces
+- Direct calls instead of event systems for synchronous operations
+- Plain data classes instead of builders for simple structures
+- Switch statements instead of strategy patterns for stable sets
+- Direct conditionals instead of state machines for simple logic
+
+#### Context-Aware Assessment
+
+**Early-Stage vs. Mature Project Context**:
+- Early-stage: Favor simplicity, direct solutions, minimal abstraction
+- Mature: Consider consistency with existing patterns, team conventions
+- Prototype: Accept higher coupling, focus on functionality
+- Production: Balance maintainability with established patterns
+
+**High-Change vs. Stable Domains**:
+- High-change areas: Design for flexibility and easy modification
+- Stable domains: Prioritize simplicity and clarity
+- API boundaries: Consider stability contracts and versioning
+- Internal implementations: Optimize for current needs
+
+**Team and Complexity Context**:
+- Junior teams: Emphasize simple, explicit solutions
+- Senior teams: Can handle appropriate complexity when justified
+- Cross-team boundaries: Prefer simple, well-documented interfaces
+- Single-owner modules: Allow more sophisticated internal structure
+
+### 9. Special Focus Areas for Gadugi
 
 #### Graph Operations
 - Verify node and relationship creation follows patterns
@@ -288,10 +432,12 @@ gh pr view "$PR_NUMBER" --json reviews | jq '.reviews[-1]'
 
 1. **Security vulnerabilities** - Must fix immediately
 2. **Data corruption risks** - Critical to address
-3. **Performance regressions** - Important for large codebases
-4. **Test coverage gaps** - Needed for reliability
-5. **Code clarity issues** - Important for maintenance
-6. **Style inconsistencies** - Nice to fix but lower priority
+3. **Over-engineering issues** - Critical for maintainability and team velocity
+4. **Performance regressions** - Important for large codebases
+5. **Design simplicity violations** - Important for long-term maintainability
+6. **Test coverage gaps** - Needed for reliability
+7. **Code clarity issues** - Important for maintenance
+8. **Style inconsistencies** - Nice to fix but lower priority
 
 ## Tools and Commands
 
