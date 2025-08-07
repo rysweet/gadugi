@@ -27,8 +27,7 @@ from pathlib import Path
 from typing import Any
 
 try:
-    import redis
-
+    # import redis  # Commented out to fix unused import lint error
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False

@@ -41,8 +41,7 @@ except ImportError:
     ANTHROPIC_AVAILABLE = False
 
 try:
-    import requests
-
+    # import requests  # Commented out to fix unused import lint error
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False

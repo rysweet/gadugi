@@ -225,7 +225,10 @@ class RuffAnalyzer(AnalysisTool):
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
                 result = subprocess.CompletedProcess(
-                    cmd, process.returncode, stdout.decode(), stderr.decode(),
+                    cmd,
+                    process.returncode,
+                    stdout.decode(),
+                    stderr.decode(),
                 )
             except asyncio.TimeoutError:
                 process.terminate()

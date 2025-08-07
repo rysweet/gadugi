@@ -700,7 +700,9 @@ class TestWorktreeIntegration:
         # Initialize git repository
         subprocess.run(["git", "init"], check=False, capture_output=True)
         subprocess.run(
-            ["git", "config", "user.name", "Test User"], check=False, capture_output=True,
+            ["git", "config", "user.name", "Test User"],
+            check=False,
+            capture_output=True,
         )
         subprocess.run(
             ["git", "config", "user.email", "test@example.com"],

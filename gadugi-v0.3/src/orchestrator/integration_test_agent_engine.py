@@ -164,7 +164,10 @@ class IntegrationTestAgentEngine:
         return cache_age.total_seconds() < self.config.cache_ttl
 
     def _update_metrics(
-        self, start_time: datetime, cache_hit: bool = False, error: bool = False,
+        self,
+        start_time: datetime,
+        cache_hit: bool = False,
+        error: bool = False,
     ) -> None:
         """Update performance metrics."""
         processing_time = (datetime.now() - start_time).total_seconds()

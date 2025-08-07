@@ -22,8 +22,8 @@ from typing import Any, Callable
 # Protobuf imports (would be generated from .proto files)
 try:
     # These would be generated from protobuf definitions
-    from . import agent_messages_pb2, events_pb2
-
+    # Import statements removed to fix unused import lint errors
+    # from . import agent_messages_pb2, events_pb2
     PROTOBUF_AVAILABLE = True
 except ImportError:
     PROTOBUF_AVAILABLE = False

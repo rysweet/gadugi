@@ -17,8 +17,10 @@ from enum import Enum
 from typing import Any
 
 try:
-    from neo4j import GraphDatabase, ManagedTransaction, Transaction
-    from neo4j.exceptions import ServiceUnavailable, TransientError
+    from neo4j import GraphDatabase
+    # Unused imports commented out to fix lint errors:
+    # from neo4j import ManagedTransaction, Transaction
+    # from neo4j.exceptions import ServiceUnavailable, TransientError
 
     NEO4J_AVAILABLE = True
 except ImportError:

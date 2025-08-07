@@ -482,7 +482,8 @@ class PhaseExecutor:
             await process3.communicate()
             if process3.returncode != 0:
                 raise subprocess.CalledProcessError(
-                    process3.returncode, f"git checkout -b {self.state.branch_name}",
+                    process3.returncode,
+                    f"git checkout -b {self.state.branch_name}",
                 )
 
             return True

@@ -758,7 +758,9 @@ class WorktreeManagerEngine:
         self._load_registry()
 
     async def _run_command_async(
-        self, cmd: list[str], timeout: int = 30,
+        self,
+        cmd: list[str],
+        timeout: int = 30,
     ) -> subprocess.CompletedProcess:
         """Run command asynchronously and return result."""
         try:

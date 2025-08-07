@@ -92,13 +92,8 @@ extend-exclude = [
     "__pycache__",
 ]
 [tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "D", "ANN", "FA", "I", "E501", "W293", "T201", "Q000", "PLR", "PT", "C", "RET", "BLE", "S", "UP", "COM", "W292", "EXE001",
-    "E402", "F841", "ARG", "PLC", "PTH", "PLW", "TRY", "EM", "B", "RUF", "A", "DTZ", "SLF", "PERF",
-    "FBT", "TD", "FIX", "G004", "SIM", "E712", "F401", "INP001",
-    "F821", "W291", "PIE810", "ERA001", "F811", "ISC001"
-]
+select = ["E", "F", "W"]  # Basic errors and warnings
+ignore = []  # Fix issues rather than ignore them
 
 # Ignore async-related rules in test files since they often use subprocess for git setup
 [tool.ruff.lint.per-file-ignores]

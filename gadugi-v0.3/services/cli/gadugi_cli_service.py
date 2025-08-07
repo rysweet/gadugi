@@ -1097,7 +1097,8 @@ Examples:
         except ImportError:
             if RICH_AVAILABLE:
                 self.console.print(
-                    "[yellow]System resource monitoring unavailable (psutil not installed)[/yellow]",
+                    "[yellow]System resource monitoring unavailable "
+                    "(psutil not installed)[/yellow]",
                 )
             else:
                 pass
@@ -1207,7 +1208,8 @@ Examples:
         except subprocess.CalledProcessError:
             if RICH_AVAILABLE:
                 self.console.print(
-                    "[yellow]Could not install development dependencies (requirements-dev.txt not found)[/yellow]",
+                    "[yellow]Could not install development dependencies "
+                    "(requirements-dev.txt not found)[/yellow]",
                 )
             else:
                 pass
@@ -1240,7 +1242,10 @@ Examples:
             )
             stdout, stderr = await process.communicate()
             result = subprocess.CompletedProcess(
-                cmd, process.returncode, stdout.decode(), stderr.decode(),
+                cmd,
+                process.returncode,
+                stdout.decode(),
+                stderr.decode(),
             )
 
             if RICH_AVAILABLE:
