@@ -138,7 +138,7 @@ class Feline(Carnivore):
 class Cat(Feline):
     def make_sound(self):
         return "meow"
-        
+
     def purr(self):
         return "purr"
 """
@@ -157,19 +157,19 @@ class PersonBuilder:
         self._name = None
         self._age = None
         self._email = None
-    
+
     def name(self, name):
         self._name = name
         return self
-    
+
     def age(self, age):
         self._age = age
         return self
-    
+
     def email(self, email):
         self._email = email
         return self
-    
+
     def build(self):
         return Person(self._name, self._age, self._email)
 
@@ -211,7 +211,7 @@ class DistributedTaskOrchestrator:
     """
     Manages distributed execution of tasks across multiple workers
     with fault tolerance, load balancing, and result aggregation.
-    
+
     This complexity is justified by the genuinely complex requirements:
     - Distributed execution across multiple nodes
     - Fault tolerance and retry logic
@@ -219,15 +219,15 @@ class DistributedTaskOrchestrator:
     - Real-time monitoring and health checks
     - Result aggregation and consistency
     """
-    
+
     def __init__(self, worker_nodes: List[str], retry_count: int = 3):
         self.worker_nodes = worker_nodes
         self.retry_count = retry_count
         self.active_tasks: Dict[str, TaskResult] = {}
         self.worker_health: Dict[str, bool] = {}
-        
+
     async def execute_distributed_workflow(
-        self, 
+        self,
         tasks: List[Callable],
         dependency_graph: Dict[str, List[str]]
     ) -> Dict[str, TaskResult]:
@@ -253,18 +253,18 @@ class UserManager:
         self.permission_engine = PermissionEngine()  # Overkill for current needs
         self.notification_queue = NotificationQueue()  # Future feature
         self.metrics_collector = MetricsCollector()   # Not needed yet
-        
+
     def create_user(self, username: str, email: str):
         # Simple user creation with unnecessary enterprise overhead
         user = User(username, email)
-        
+
         # All this complexity for simple user creation:
         self._cache_user(user)           # Not needed yet
         self._log_user_creation(user)    # Not required
         self._check_permissions(user)    # No permissions system yet
         self._queue_notification(user)   # No notifications yet
         self._collect_metrics(user)      # No metrics requirement
-        
+
         return user
 """
         filepath = self.create_test_file("yagni_violation.py", yagni_violation_code)
@@ -303,7 +303,7 @@ def process_user_update(email):
 def validate_email_format(email):
     return "@" in email and "." in email
 
-# Used in: registration, update, password_reset, newsletter_signup, 
+# Used in: registration, update, password_reset, newsletter_signup,
 # contact_form, admin_user_creation, bulk_import
 """
         # Should accept abstraction as justified
@@ -385,7 +385,7 @@ def calculate_shipping(weight, distance):
 class ShippingCalculator:
     def __init__(self, rate_config: ShippingRateConfig):
         self.rate_config = rate_config
-    
+
     def calculate(self, shipment: Shipment) -> Decimal:
         calculator = self._get_calculator_for_region(shipment.destination)
         return calculator.calculate_rate(shipment)
