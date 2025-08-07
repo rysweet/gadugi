@@ -5,14 +5,14 @@ This test suite validates all core functionality of the ArchitectEngine includin
 system design, component design, integration planning, and architecture review.
 """
 
-import os
 import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 # Add the src directory to the Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from architect_engine import (
     ArchitectEngine,

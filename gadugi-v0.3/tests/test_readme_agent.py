@@ -2,7 +2,6 @@
 """Tests for README Agent Engine."""
 
 import json
-import os
 import sys
 import tempfile
 import unittest
@@ -10,7 +9,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from readme_agent_engine import (
     AudienceType,

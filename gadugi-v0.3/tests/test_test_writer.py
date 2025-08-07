@@ -2,13 +2,13 @@
 """Tests for Test Writer Engine."""
 
 import ast
-import os
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from test_writer_engine import (
     AssertionStyle,
@@ -715,6 +715,7 @@ async def fetch_data():
         code = """
 import os
 import sys
+from pathlib import Path
 from typing import Dict, List
 from .local_module import LocalClass
 """

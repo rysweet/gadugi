@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Tests for Execution Monitor Engine."""
 
-import os
 import sys
 import threading
 import time
 import unittest
 from datetime import datetime, timedelta
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 # Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src" / "orchestrator"))
 
 from execution_monitor_engine import (
     Alert,

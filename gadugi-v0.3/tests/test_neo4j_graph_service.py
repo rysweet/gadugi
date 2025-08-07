@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """Tests for Neo4j Graph Database Service."""
 
-import os
 import sys
 import unittest
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 # Add services directory to path
-sys.path.insert(
-    0,
-    os.path.join(os.path.dirname(__file__), "..", "services", "neo4j-graph"),
-)
+sys.path.insert(0, str(Path(__file__).parent.parent / "services" / "neo4j-graph"))
 
 from neo4j_graph_service import (
     GraphDatabaseService,
