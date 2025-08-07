@@ -21,7 +21,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         Dict with stdout, stderr, returncode, and success status
     """
     
-    # Special case: task-decomposer uses Python implementation for reliability
+    # Special cases: agents with Python implementations for reliability
     if agent_name == "task-decomposer":
         try:
             import json
@@ -49,6 +49,42 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "task": task_description,
                 "stdout": "",
                 "stderr": f"Task decomposer error: {str(e)}",
+                "returncode": -1,
+                "success": False
+            }
+    
+    # Special case: prompt-writer uses Python implementation
+    if agent_name == "prompt-writer":
+        try:
+            import json
+            import sys
+            
+            # Add current directory to path for import
+            script_dir = Path(__file__).parent
+            if str(script_dir) not in sys.path:
+                sys.path.insert(0, str(script_dir))
+            
+            from prompt_writer_engine import generate_prompt_for_task
+            
+            result = generate_prompt_for_task(task_description or "Generic development task")
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": result["markdown"],
+                "stderr": "",
+                "returncode": 0,
+                "success": True,
+                "metadata": {
+                    "suggested_filename": result["suggested_filename"],
+                    "prompt_data": result["prompt_data"]
+                }
+            }
+        except Exception as e:
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": "",
+                "stderr": f"Prompt writer error: {str(e)}",
                 "returncode": -1,
                 "success": False
             }
