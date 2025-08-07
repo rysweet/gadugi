@@ -993,7 +993,7 @@ class TestErrorContext:
             cleanup_called = True
 
         with pytest.raises(ValueError):
-            with ErrorContext("test operation", cleanup_func=cleanup_func):
+            with ErrorContext("test operation", cleanup_func):
                 raise ValueError("Test error")
 
         assert cleanup_called
@@ -1006,7 +1006,7 @@ class TestErrorContext:
 
         with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
-                with ErrorContext("test operation", cleanup_func=failing_cleanup):
+                with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")
 
             # Should log both the original error and cleanup failure
@@ -1014,7 +1014,7 @@ class TestErrorContext:
 
     def test_error_context_suppress_errors(self):
         """Test ErrorContext with error suppression."""
-        with ErrorContext("test operation", suppress_errors=True) as ctx:
+        with ErrorContext("test operation", None, True) as ctx:
             raise ValueError("Test error")
 
         assert isinstance(ctx.error, ValueError)
