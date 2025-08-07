@@ -10,12 +10,11 @@ if str(claude_path) not in sys.path:
 Pytest configuration and shared fixtures for Gadugi tests.
 """
 
-import os
 import shutil
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
