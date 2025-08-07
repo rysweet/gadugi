@@ -6,9 +6,9 @@
 
 ### v0.1.0 - Initial Release (January 2025)
 
-This inaugural release establishes Gadugi as a comprehensive multi-agent system for AI-assisted software development. With 47 issues completed, v0.1 delivers a production-ready orchestrator that coordinates parallel task execution across isolated git worktrees, enabling 3-5x faster development workflows. The release features a complete 11-phase development process from issue creation through code review, ensuring professional quality standards at every step.
+This initial release of Gadugi provides a multi-agent system for AI-assisted software development. The v0.1 milestone includes 27 completed issues establishing core functionality. The system uses an orchestrator to coordinate task execution across isolated git worktrees. Development follows an 11-phase process from issue creation through code review.
 
-Key capabilities include seamless VS Code integration, automated GitHub workflow management, UV Python project support with integrated testing gates, and intelligent task decomposition for optimal parallelization. The system provides specialized agents for every aspect of development - from writing prompts and tests to conducting architectural reviews - all working together through the orchestrator's coordination. With built-in pre-commit hooks, type checking, and automated quality assurance, Gadugi transforms how AI assists in software development by bringing structure, repeatability, and professional practices to AI-powered coding.
+The release includes VS Code integration, GitHub workflow automation, and support for UV Python projects with testing integration. Multiple specialized agents handle different development tasks - writing prompts, creating tests, and reviewing code. The system includes pre-commit hooks and automated testing to help maintain code quality.
 
 ## Overview
 
