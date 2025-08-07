@@ -380,29 +380,129 @@ def execute_parallel_tasks(tasks):
 3. Automatic fallback to sequential execution on errors
 4. Comprehensive task status tracking
 
-### Phase 4: Result Integration with Performance Analytics
+### Phase 4: Result Integration with Test Validation and Performance Analytics
 ```python
 def integrate_results(execution_results):
+    # Step 1: MANDATORY TEST VALIDATION - All tasks must have passing tests
+    validated_results = []
+    failed_test_validation = []
+
+    for result in execution_results:
+        if result.success:
+            # Validate that WorkflowManager completed Phase 6 (Testing) successfully
+            test_validation = validate_task_test_results(result)
+
+            if test_validation.all_tests_passed:
+                validated_results.append(result)
+                log_info(f"✅ Task {result.task_id} passed all quality gates")
+            else:
+                failed_test_validation.append({
+                    'task_id': result.task_id,
+                    'test_failures': test_validation.failures,
+                    'lint_failures': test_validation.lint_failures
+                })
+                log_error(f"❌ Task {result.task_id} failed quality gates: {test_validation.failures}")
+        else:
+            # Task failed during execution
+            failed_test_validation.append({
+                'task_id': result.task_id,
+                'execution_error': result.error,
+                'test_failures': ['Task failed during execution, tests not run']
+            })
+
+    # Step 2: Handle test validation failures (CRITICAL)
+    if failed_test_validation:
+        error_report = generate_test_validation_error_report(failed_test_validation)
+        log_critical("TEST VALIDATION FAILURES DETECTED - Orchestrator will not proceed")
+
+        # Save state for recovery
+        state_manager.save_partial_completion_state(validated_results, failed_test_validation)
+
+        # Return early with failure report
+        return OrchestrationResult(
+            success=False,
+            completed_tasks=len(validated_results),
+            failed_tasks=len(failed_test_validation),
+            test_validation_failures=failed_test_validation,
+            error_message="One or more tasks failed test validation requirements"
+        )
+
+    # Step 3: Continue with validated results only
     # Analyze performance improvements achieved
     performance_metrics = performance_analyzer.calculate_speedup(
-        execution_results,
+        validated_results,
         baseline_sequential_time=estimate_sequential_time(tasks)
     )
 
-    # GitHub operations with batch processing
-    successful_tasks = [r for r in execution_results if r.success]
+    # GitHub operations with batch processing (only for test-validated tasks)
+    successful_tasks = validated_results  # All validated_results passed tests
     github_manager.batch_merge_pull_requests([
         t.pr_number for t in successful_tasks
     ])
 
-    # Create comprehensive performance report
-    report = generate_orchestration_report(performance_metrics)
+    # Create comprehensive performance report including test validation metrics
+    report = generate_orchestration_report(performance_metrics, {
+        'test_validation_passed': len(validated_results),
+        'test_validation_failed': len(failed_test_validation),
+        'quality_gate_success_rate': len(validated_results) / len(execution_results)
+    })
 
     # Clean up with state persistence
-    cleanup_orchestration_resources(execution_results)
+    cleanup_orchestration_resources(validated_results)
     state_manager.mark_orchestration_complete(orchestration_state.task_id)
 
     return report
+
+def validate_task_test_results(task_result):
+    """Validate that a task completed all testing requirements"""
+
+    # Check for Phase 6 completion marker in WorkflowManager results
+    workflow_state = load_workflow_state(task_result.task_id)
+
+    test_validation = TestValidationResult()
+
+    if not workflow_state.phases['phase_6_testing'].completed:
+        test_validation.failures.append("Phase 6 (Testing) was not completed")
+        test_validation.all_tests_passed = False
+        return test_validation
+
+    # Verify test execution results from WorkflowManager
+    test_results = workflow_state.phases['phase_6_testing'].test_results
+
+    if test_results:
+        # Check pytest results
+        if test_results.get('pytest_exit_code', 1) != 0:
+            test_validation.failures.append(f"Pytest failed with exit code: {test_results['pytest_exit_code']}")
+            test_validation.all_tests_passed = False
+
+        # Check pre-commit hook results
+        if test_results.get('precommit_exit_code', 1) != 0:
+            test_validation.lint_failures.append(f"Pre-commit hooks failed with exit code: {test_results['precommit_exit_code']}")
+            test_validation.all_tests_passed = False
+
+        # Verify no test skips (unless justified)
+        if test_results.get('skipped_tests', 0) > 0:
+            test_validation.failures.append(f"Tests were skipped: {test_results['skipped_tests']} tests")
+            # Note: This could be a warning rather than failure depending on policy
+
+        # Check coverage if configured
+        if 'coverage_percentage' in test_results:
+            min_coverage = get_project_coverage_threshold()  # Default: 80%
+            if test_results['coverage_percentage'] < min_coverage:
+                test_validation.failures.append(
+                    f"Coverage below threshold: {test_results['coverage_percentage']}% < {min_coverage}%"
+                )
+    else:
+        test_validation.failures.append("No test results found - Phase 6 may not have run tests")
+        test_validation.all_tests_passed = False
+
+    # Final validation check
+    test_validation.all_tests_passed = (
+        len(test_validation.failures) == 0 and
+        len(test_validation.lint_failures) == 0
+    )
+
+    return test_validation
 ```
 
 1. Calculate and report actual performance improvements
