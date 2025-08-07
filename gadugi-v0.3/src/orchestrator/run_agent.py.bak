@@ -291,51 +291,25 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         }
 
 
-def main():
+def main() -> None:
     """Command line interface for testing the runner."""
-    import argparse
-    
-    # Get available agents
-    available_agents = []
-    if AGENTS_DIR.exists():
-        available_agents = sorted([d.name for d in AGENTS_DIR.iterdir() if d.is_dir()])
-    
-    parser = argparse.ArgumentParser(
-        description="Run a Gadugi v0.3 agent",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"""
-Environment:
-  GADUGI_HOME={GADUGI_BASE}
-  
-Available agents:
-  {', '.join(available_agents) if available_agents else 'No agents found'}
-  
-Examples:
-  gadugi-orchestrator orchestrator --task "Build an API"
-  gadugi-orchestrator task-decomposer --task "Create authentication"
-  export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator test-agent
-        """
-    )
-    
-    parser.add_argument("agent", help="Name of the agent to run")
-    parser.add_argument("--task", help="Task description", default="")
-    parser.add_argument("--json", action="store_true", help="Output as JSON")
-    
-    args = parser.parse_args()
-    
-    result = run_agent(args.agent, args.task)
-    
-    if args.json:
-        import json
-        print(json.dumps(result, indent=2))
-    else:
-        if result["stdout"]:
-            print(result["stdout"])
-        if result["stderr"]:
-            print(result["stderr"], file=sys.stderr)
-    
-    return result.get("returncode", 0)
+    if len(sys.argv) < 2:
+        sys.exit(1)
+
+    agent_name = sys.argv[1]
+    task_description = sys.argv[2] if len(sys.argv) > 2 else ""
+
+    if task_description:
+        pass
+
+    result = run_agent(agent_name, task_description)
+
+    if result["stdout"]:
+        pass
+
+    if result["stderr"]:
+        pass
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
