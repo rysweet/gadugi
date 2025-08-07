@@ -74,7 +74,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     """
     # Special cases: agents with Python implementations for reliability
-    if agent_name == "task-decomposer":
+    if agent_name == "TaskDecomposer":
         try:
             import json
             import sys
@@ -106,7 +106,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
 
     # Special case: prompt-writer uses Python implementation
-    if agent_name == "prompt-writer":
+    if agent_name == "PromptWriter":
         try:
             import json
             import sys
@@ -144,7 +144,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
 
     # Special case: code-writer uses Python implementation
-    if agent_name == "code-writer":
+    if agent_name == "CodeWriter":
         try:
             import json
             import sys
@@ -312,8 +312,8 @@ Available agents:
   
 Examples:
   gadugi-orchestrator orchestrator --task "Build an API"
-  gadugi-orchestrator task-decomposer --task "Create authentication"
-  export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator test-agent
+  gadugi-orchestrator TaskDecomposer --task "Create authentication"
+  export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator TestAgent
         """
     )
     

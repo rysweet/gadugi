@@ -1,0 +1,59 @@
+{
+    "include": [
+        "src",
+        "agents",
+        "services",
+        "tests"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.venv",
+        "**/venv",
+        "**/build",
+        "**/dist",
+        "**/*.pyc"
+    ],
+    "reportMissingImports": "error",
+    "reportMissingTypeStubs": "warning",
+    "reportUndefinedVariable": "error",
+    "reportUnusedImport": "warning",
+    "reportUnusedClass": "information",
+    "reportUnusedFunction": "information",
+    "reportUnusedVariable": "information",
+    "reportDuplicateImport": "warning",
+    "reportOptionalMemberAccess": "warning",
+    "reportOptionalCall": "warning",
+    "reportOptionalOperand": "warning",
+    "reportOptionalContextManager": "warning",
+    "reportOptionalSubscript": "warning",
+    "reportPrivateImportUsage": "information",
+    "reportConstantRedefinition": "warning",
+    "reportIncompatibleMethodOverride": "error",
+    "reportIncompatibleVariableOverride": "error",
+    "reportInconsistentConstructor": "error",
+    "reportOverlappingOverloads": "error",
+    "reportMissingSuperCall": "warning",
+    "reportUninitializedInstanceVariable": "warning",
+    "reportInvalidStringEscapeSequence": "error",
+    "reportUnknownParameterType": "information",
+    "reportUnknownArgumentType": "information",
+    "reportUnknownLambdaType": "information",
+    "reportUnknownMemberType": "information",
+    "reportUnknownVariableType": "information",
+    "reportCallInDefaultInitializer": "warning",
+    "reportUnnecessaryIsInstance": "information",
+    "reportUnnecessaryCast": "information",
+    "reportUnnecessaryComparison": "information",
+    "reportUnnecessaryContains": "information",
+    "reportAssertAlwaysTrue": "warning",
+    "reportSelfClsParameterName": "error",
+    "reportImplicitStringConcatenation": "warning",
+    "pythonVersion": "3.9",
+    "pythonPlatform": "All",
+    "executionEnvironments": [
+        {
+            "root": "."
+        }
+    ]
+}

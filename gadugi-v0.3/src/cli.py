@@ -5,22 +5,31 @@ import os
 import sys
 import argparse
 from pathlib import Path
+from typing import Optional, Dict, Any
 
 # Ensure we can import from orchestrator
 sys.path.insert(0, str(Path(__file__).parent))
 
-def main():
+from version import get_version_string, __version__
+
+def main() -> int:
     """Main CLI entry point for Gadugi v0.3."""
     parser = argparse.ArgumentParser(
-        description="Gadugi v0.3 - Multi-agent development framework",
+        description=f"{get_version_string()} - Multi-agent development framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   gadugi-v3 run orchestrator --task "Build an API"
-  gadugi-v3 run task-decomposer --task "Create user authentication"
+  gadugi-v3 run TaskDecomposer --task "Create user authentication"
   gadugi-v3 status
   gadugi-v3 serve
         """
+    )
+    
+    parser.add_argument(
+        "--version", "-V", 
+        action="version", 
+        version=get_version_string()
     )
     
     parser.add_argument(
@@ -76,7 +85,7 @@ Examples:
     elif args.command == "status":
         from orchestrator.run_agent import GADUGI_BASE, AGENTS_DIR, SERVICES_DIR
         
-        print(f"Gadugi v0.3 Status")
+        print(f"{get_version_string()} Status")
         print(f"==================")
         print(f"Base Directory: {GADUGI_BASE}")
         print(f"Agents Directory: {AGENTS_DIR}")
