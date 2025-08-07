@@ -376,7 +376,7 @@ class PhaseExecutor:
             process = await asyncio.create_subprocess_exec(
                 "gh", "--version",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
@@ -451,16 +451,16 @@ class PhaseExecutor:
             process1 = await asyncio.create_subprocess_exec(
                 "git", "checkout", "main",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             await process1.communicate()
             if process1.returncode != 0:
                 raise subprocess.CalledProcessError(process1.returncode, "git checkout main")
-            
+
             process2 = await asyncio.create_subprocess_exec(
                 "git", "pull",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             await process2.communicate()
             if process2.returncode != 0:
@@ -470,7 +470,7 @@ class PhaseExecutor:
             process3 = await asyncio.create_subprocess_exec(
                 "git", "checkout", "-b", self.state.branch_name,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             await process3.communicate()
             if process3.returncode != 0:

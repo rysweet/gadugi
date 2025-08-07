@@ -322,7 +322,7 @@ class BanditAnalyzer(AnalysisTool):
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
 
@@ -407,7 +407,7 @@ class MypyAnalyzer(AnalysisTool):
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
 
@@ -1140,7 +1140,7 @@ Recommendations:
                 process = await asyncio.create_subprocess_exec(
                     tool_name, "--version",
                     stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
+                    stderr=asyncio.subprocess.PIPE,
                 )
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
                 if process.returncode == 0:
@@ -1172,7 +1172,7 @@ Recommendations:
                 process = await asyncio.create_subprocess_exec(
                     tool, "--version",
                     stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
+                    stderr=asyncio.subprocess.PIPE,
                 )
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
 

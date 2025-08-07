@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import importlib.util
 import json
 import logging
 import shutil
@@ -22,12 +23,10 @@ from typing import Any
 
 import psutil
 
-import importlib.util
-
 # Check for click availability using importlib
 CLICK_AVAILABLE = importlib.util.find_spec("click") is not None
 
-# Check for rich availability using importlib  
+# Check for rich availability using importlib
 RICH_AVAILABLE = importlib.util.find_spec("rich") is not None
 
 if RICH_AVAILABLE:
@@ -42,10 +41,9 @@ else:
     # Mock rich components if not available
     class Console:
         """Mock Console class for when rich is not available."""
-        
+
         def print(self, *args: Any, **kwargs: Any) -> None:
             """Mock print method."""
-            pass
 
         def input(self, prompt: str) -> str:
             """Mock input method."""
@@ -53,32 +51,27 @@ else:
 
     class Table:
         """Mock Table class for when rich is not available."""
-        
-        pass
+
 
     class Panel:
         """Mock Panel class for when rich is not available."""
-        
-        pass
+
 
     class Progress:
         """Mock Progress class for when rich is not available."""
-        
-        pass
+
 
     class SpinnerColumn:
         """Mock SpinnerColumn class for when rich is not available."""
-        
-        pass
+
 
     class TextColumn:
         """Mock TextColumn class for when rich is not available."""
-        
-        pass
+
 
     class Prompt:
         """Mock Prompt class for when rich is not available."""
-        
+
         @staticmethod
         def ask(prompt: str, default: str | None = None) -> str:
             """Mock ask method."""
@@ -86,7 +79,7 @@ else:
 
     class Confirm:
         """Mock Confirm class for when rich is not available."""
-        
+
         @staticmethod
         def ask(prompt: str) -> bool:
             """Mock ask method for confirmation."""
@@ -94,13 +87,11 @@ else:
 
     class Syntax:
         """Mock Syntax class for when rich is not available."""
-        
-        pass
+
 
     class Tree:
         """Mock Tree class for when rich is not available."""
-        
-        pass
+
 
 
 class ServiceType(Enum):
