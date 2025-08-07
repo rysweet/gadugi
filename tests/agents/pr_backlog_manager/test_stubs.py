@@ -227,6 +227,11 @@ class ReviewAssessment:
             self.pending_requests = []
         if self.requested_changes is None:
             self.requested_changes = []
+        # Calculate is_review_complete if not explicitly set
+        if not hasattr(self, "_is_review_complete_set"):
+            self.is_review_complete = (
+                self.has_approved_review and self.ai_review_complete
+            )
 
 
 @dataclass
@@ -508,7 +513,7 @@ Resolve merge conflicts for PR #{pr_number}.
 
 ## Steps
 1. Fetch the latest changes from main branch
-2. Rebase PR branch against latest main
+2. Rebase against latest main
 3. Resolve any merge conflicts
 4. Ensure all tests pass
 5. Push the resolved changes
@@ -837,12 +842,25 @@ class PRBacklogManager:
     """PR backlog manager implementation."""
 
     def __init__(
-        self, config: Optional[AgentConfig] = None, auto_approve: bool = False
+        self,
+        config: Optional[AgentConfig] = None,
+        auto_approve: bool = False,
+        github_ops: Any = None,
     ):
         self.config = config or AgentConfig(
             agent_id="pr-backlog", name="PR Backlog Manager"
         )
         self.auto_approve = auto_approve
+        # If github_ops not provided, try to create one (for test compatibility)
+        if github_ops is None:
+            try:
+                from core import GitHubOperations
+
+                self.github_ops = GitHubOperations()
+            except ImportError:
+                self.github_ops = None
+        else:
+            self.github_ops = github_ops
         self.session_id = f"pr-backlog-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         self.metrics = BacklogMetrics()
 
@@ -1421,7 +1439,7 @@ class ReadinessAssessor:
 
         if not assessments["sync"].is_up_to_date:
             behind_by = assessments["sync"].commits_behind
-            blocking_factors.append(f"Branch behind main by {behind_by} commits")
+            blocking_factors.append(f"behind by {behind_by}")
 
         # Check metadata completeness - use has_description as a fallback indicator
         metadata = assessments["metadata"]
