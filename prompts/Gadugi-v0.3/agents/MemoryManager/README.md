@@ -1,13 +1,11 @@
 # MemoryManager
 
-**Category**: Infrastructure  
-**Description**: Manages Memory.md and GitHub Issues synchronization
+This directory contains the memory-manager agent definition.
 
-## Structure
+## Files
 
-- `MemoryManager.md` - Main agent specification
-- `src/` - Python code modules
-- `tests/` - Agent tests (to be added)
+- `MemoryManager.md` - The agent definition (this IS the agent)
+- `src/` - Extracted Python code modules
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:memory-manager
 ```
 
-## Contract
+## Note
 
-**Purpose**: Manages Memory.md and GitHub Issues synchronization
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Read, Grep
+The `MemoryManager.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

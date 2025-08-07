@@ -1,13 +1,11 @@
 # CodeReviewer
 
-**Category**: Development  
-**Description**: Conducts thorough code reviews on pull requests
+This directory contains the code-reviewer agent definition.
 
-## Structure
+## Files
 
-- `CodeReviewer.md` - Main agent specification
+- `CodeReviewer.md` - The agent definition (this IS the agent)
 
-- `tests/` - Agent tests (to be added)
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:code-reviewer
 ```
 
-## Contract
+## Note
 
-**Purpose**: Conducts thorough code reviews on pull requests
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read, Write, Grep
+The `CodeReviewer.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

@@ -1,13 +1,11 @@
 # ReadmeAgent
 
-**Category**: Documentation  
-**Description**: Manages and maintains README.md files
+This directory contains the readme-agent agent definition.
 
-## Structure
+## Files
 
-- `ReadmeAgent.md` - Main agent specification
-- `src/` - Python code modules
-- `tests/` - Agent tests (to be added)
+- `ReadmeAgent.md` - The agent definition (this IS the agent)
+- `src/` - Extracted Python code modules
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:readme-agent
 ```
 
-## Contract
+## Note
 
-**Purpose**: Manages and maintains README.md files
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read, Write, Edit, Grep
+The `ReadmeAgent.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

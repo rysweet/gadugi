@@ -1,13 +1,11 @@
 # PromptWriter
 
-**Category**: Development  
-**Description**: Creates high-quality structured prompt files
+This directory contains the prompt-writer agent definition.
 
-## Structure
+## Files
 
-- `PromptWriter.md` - Main agent specification
+- `PromptWriter.md` - The agent definition (this IS the agent)
 
-- `tests/` - Agent tests (to be added)
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:prompt-writer
 ```
 
-## Contract
+## Note
 
-**Purpose**: Creates high-quality structured prompt files
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Read, Write, Grep
+The `PromptWriter.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

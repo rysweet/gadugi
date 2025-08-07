@@ -1,13 +1,11 @@
 # WorktreeManager
 
-**Category**: Infrastructure  
-**Description**: Manages git worktree lifecycle for parallel execution
+This directory contains the worktree-manager agent definition.
 
-## Structure
+## Files
 
-- `WorktreeManager.md` - Main agent specification
+- `WorktreeManager.md` - The agent definition (this IS the agent)
 
-- `tests/` - Agent tests (to be added)
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:worktree-manager
 ```
 
-## Contract
+## Note
 
-**Purpose**: Manages git worktree lifecycle for parallel execution
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read, Write, Grep
+The `WorktreeManager.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

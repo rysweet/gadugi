@@ -1,13 +1,11 @@
 # Gadugi
 
-**Category**: Infrastructure  
-**Description**: Main Gadugi agent for system management
+This directory contains the gadugi agent definition.
 
-## Structure
+## Files
 
-- `Gadugi.md` - Main agent specification
-- `src/` - Python code modules
-- `tests/` - Agent tests (to be added)
+- `Gadugi.md` - The agent definition (this IS the agent)
+- `src/` - Extracted Python code modules
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:gadugi
 ```
 
-## Contract
+## Note
 
-**Purpose**: Main Gadugi agent for system management
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read, Write, Edit, Grep
+The `Gadugi.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

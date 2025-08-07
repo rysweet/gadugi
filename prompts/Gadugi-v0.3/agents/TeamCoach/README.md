@@ -1,13 +1,11 @@
 # TeamCoach
 
-**Category**: Coordination  
-**Description**: Intelligent multi-agent coordination and optimization
+This directory contains the team-coach agent definition.
 
-## Structure
+## Files
 
-- `TeamCoach.md` - Main agent specification
-- `src/` - Python code modules
-- `tests/` - Agent tests (to be added)
+- `TeamCoach.md` - The agent definition (this IS the agent)
+- `src/` - Extracted Python code modules
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:team-coach
 ```
 
-## Contract
+## Note
 
-**Purpose**: Intelligent multi-agent coordination and optimization
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read
+The `TeamCoach.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.

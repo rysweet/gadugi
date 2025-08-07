@@ -1,13 +1,11 @@
 # CodeReviewResponse
 
-**Category**: Development  
-**Description**: Processes code review feedback and implements changes
+This directory contains the code-review-response agent definition.
 
-## Structure
+## Files
 
-- `CodeReviewResponse.md` - Main agent specification
-- `src/` - Python code modules
-- `tests/` - Agent tests (to be added)
+- `CodeReviewResponse.md` - The agent definition (this IS the agent)
+- `src/` - Extracted Python code modules
 
 ## Usage
 
@@ -16,14 +14,7 @@ This agent can be invoked using:
 /agent:code-review-response
 ```
 
-## Contract
+## Note
 
-**Purpose**: Processes code review feedback and implements changes
-
-**Inputs**: See agent specification
-
-**Outputs**: See agent specification
-
-**Side Effects**: See agent specification
-
-**Dependencies**: Bash, Read, Write, Edit, Grep
+The `CodeReviewResponse.md` file is not documentation ABOUT the agent - it IS the agent itself.
+It contains the complete instructions and logic that Claude Code uses when this agent is invoked.
