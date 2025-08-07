@@ -59,7 +59,12 @@ if str(SRC_DIR) not in sys.path:
 if str(SRC_DIR / 'orchestrator') not in sys.path:
     sys.path.insert(0, str(SRC_DIR / 'orchestrator'))
 
-print(f"Gadugi v0.3 initialized with base: {GADUGI_BASE}", file=sys.stderr)
+# Import version after path setup
+try:
+    from version import get_version_string
+    print(f"{get_version_string()} initialized with base: {GADUGI_BASE}", file=sys.stderr)
+except ImportError:
+    print(f"Gadugi v0.3 initialized with base: {GADUGI_BASE}", file=sys.stderr)
 
 
 def run_agent(agent_name: str, task_description: str = "") -> dict:
