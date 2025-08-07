@@ -1,13 +1,13 @@
 """
-Compatibility shim for legacy `task_tracking` imports.
+Compatibility shim for legacy `interfaces` imports.
 
 This module dynamically loads and re-exports the canonical implementation
-located at `.claude/shared/task_tracking.py`.  Existing code that does:
+located at `.claude/shared/interfaces.py`.  Existing code that does:
 
-    from task_tracking import Task, TaskTracker
+    from interfaces import AgentInterface
 
-continues to work unchanged while the authoritative implementation lives
-under the Enhanced Separation directory.
+continues to work unchanged, while the single source-of-truth remains under
+the Enhanced Separation directory.
 """
 
 from __future__ import annotations
@@ -17,12 +17,14 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
-_IMPL_PATH = Path(__file__).resolve().parent / ".claude" / "shared" / "task_tracking.py"
+_IMPL_PATH = (
+    Path(__file__).resolve().parent.parent / ".claude" / "shared" / "interfaces.py"
+)
 
 if not _IMPL_PATH.is_file():  # pragma: no cover
     raise ImportError(f"Canonical implementation not found at {_IMPL_PATH}")
 
-_spec = importlib.util.spec_from_file_location("_gadugi_task_tracking_impl", _IMPL_PATH)
+_spec = importlib.util.spec_from_file_location("_gadugi_interfaces_impl", _IMPL_PATH)
 if _spec is None or _spec.loader is None:  # pragma: no cover
     raise ImportError(f"Unable to load spec for {_IMPL_PATH}")
 

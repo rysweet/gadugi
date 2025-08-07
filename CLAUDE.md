@@ -135,11 +135,11 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 ## Generic Claude Code Instructions
 
-@claude-generic-instructions.md
+@docs/ai-instructions/claude-generic-instructions.md
 
 ## Project-Specific Instructions
 
-@claude-project-specific.md
+Note: Project-specific instructions are integrated directly into this file above.
 
 ---
 

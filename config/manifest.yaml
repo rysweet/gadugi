@@ -100,7 +100,7 @@ categories:
 
 instructions:
   - name: "claude-generic-instructions"
-    file: "claude-generic-instructions.md"
+    file: "docs/ai-instructions/claude-generic-instructions.md"
     version: "1.0.0"
     description: "Generic best practices and instructions for Claude Code"
 
