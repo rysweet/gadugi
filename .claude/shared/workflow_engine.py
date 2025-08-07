@@ -121,8 +121,12 @@ class WorkflowEngine:
                  state_manager: Optional[StateManager] = None,
                  github_ops: Optional[GitHubOperations] = None,
                  task_tracker: Optional[TaskTracker] = None,
-                 error_handler: Optional[ErrorHandler] = None):
+                 error_handler: Optional[ErrorHandler] = None,
+                 task_id: Optional[str] = None):
         """Initialize the workflow engine with shared modules"""
+
+        # Store task_id for GitHub operations
+        self.task_id = task_id
 
         # Initialize shared modules (create minimal implementations if not provided)
         self.state_manager = state_manager or self._create_minimal_state_manager()
@@ -154,6 +158,13 @@ class WorkflowEngine:
         # Initialize workflow state
         if task_id is None:
             task_id = f"workflow-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+
+        # Update task_id for this workflow
+        self.task_id = task_id
+
+        # If github_ops was already created, update its task_id
+        if hasattr(self.github_ops, 'task_id'):
+            self.github_ops.task_id = task_id
 
         self.workflow_state = WorkflowState(
             task_id=task_id,
@@ -635,7 +646,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
     def _create_minimal_github_ops(self):
         """Create minimal GitHub operations if not provided"""
-        return GitHubOperations()
+        return GitHubOperations(task_id=self.task_id)
 
     def _create_minimal_task_tracker(self):
         """Create minimal task tracker if not provided"""

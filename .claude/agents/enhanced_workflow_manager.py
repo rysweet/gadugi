@@ -94,11 +94,12 @@ class EnhancedWorkflowManager:
     """
 
     def __init__(self, config: Optional[WorkflowConfiguration] = None,
-                 project_root: str = "."):
+                 project_root: str = ".", task_id: Optional[str] = None):
         """Initialize the enhanced workflow manager"""
         self.config = config or WorkflowConfiguration()
         self.project_root = Path(project_root).resolve()
-        self.workflow_id: Optional[str] = None
+        self.workflow_id: Optional[str] = task_id
+        self.task_id = task_id
 
         # Initialize reliability components
         self.reliability_manager = create_reliability_manager({
@@ -113,7 +114,7 @@ class EnhancedWorkflowManager:
             self.state_manager = StateManager()
             self.task_tracker = TaskTracker()
             self.phase_tracker = WorkflowPhaseTracker()
-            self.github_ops = GitHubOperations()
+            self.github_ops = GitHubOperations(task_id=task_id)
         except Exception:
             # Fallback for basic functionality
             self.error_handler = None
