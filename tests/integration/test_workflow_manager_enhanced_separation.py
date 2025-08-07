@@ -272,7 +272,9 @@ class TestWorkflowManagerIntegration:
                 )
 
                 # Test phase completion
-                self.phase_tracker.complete_phase(WorkflowPhase.PULL_REQUEST_CREATION.value)
+                self.phase_tracker.complete_phase(
+                    WorkflowPhase.PULL_REQUEST_CREATION.value
+                )
                 self.task_metrics.record_phase_completion("pr_creation")
 
     def test_enhanced_task_tracking_with_dependencies(self):
