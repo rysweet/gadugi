@@ -5,10 +5,7 @@ Tests the GitHubActionsIntegration class and GitHub Actions-specific
 functionality including event handling, security validation, and workflow artifacts.
 """
 
-try:
-    import pytest  # type: ignore[import]
-except ImportError:
-    from .test_stubs import pytest
+import pytest  # type: ignore[import]
 
 import os
 import json
@@ -40,14 +37,37 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# Always use stubs for type checking consistency
-from .test_stubs import (
-    GitHubActionsIntegration,
-    GitHubContext,
-    SecurityConstraints,
-    GitHubEventType,
-    ProcessingMode,
-)
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
+        GitHubActionsIntegration,
+        GitHubContext,
+        SecurityConstraints,
+        GitHubEventType,
+        ProcessingMode,
+    )
+else:
+    # For runtime, try real imports
+    try:
+        from github_actions_integration import (  # type: ignore[import]
+            GitHubActionsIntegration,
+            GitHubContext,
+            SecurityConstraints,
+            GitHubEventType,
+            ProcessingMode,
+        )
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            GitHubActionsIntegration,
+            GitHubContext,
+            SecurityConstraints,
+            GitHubEventType,
+            ProcessingMode,
+        )
 
 
 @pytest.fixture

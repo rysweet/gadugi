@@ -5,10 +5,7 @@ Tests the complete end-to-end workflow of PR Backlog Manager
 including component integration and real-world scenarios.
 """
 
-try:
-    import pytest  # type: ignore[import]
-except ImportError:
-    from .test_stubs import pytest
+import pytest  # type: ignore[import]
 
 import os
 from unittest.mock import Mock, patch
@@ -40,20 +37,61 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# Always use stubs for type checking consistency
-from .test_stubs import (
-    PRBacklogManager,
-    PRStatus,
-    ReadinessCriteria,
-    ReadinessAssessor,
-    ConflictComplexity,
-    DelegationCoordinator,
-    DelegationType,
-    DelegationStatus,
-    GitHubActionsIntegration,
-    ProcessingMode,
-    AgentConfig,
-)
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
+        PRBacklogManager,
+        PRStatus,
+        ReadinessCriteria,
+        ReadinessAssessor,
+        ConflictComplexity,
+        DelegationCoordinator,
+        DelegationType,
+        DelegationStatus,
+        GitHubActionsIntegration,
+        ProcessingMode,
+        AgentConfig,
+    )
+else:
+    # For runtime, try real imports
+    try:
+        from core import (  # type: ignore[import]
+            PRBacklogManager,
+            PRStatus,
+        )
+        from readiness_assessor import (  # type: ignore[import]
+            ReadinessAssessor,
+            ReadinessCriteria,
+            ConflictComplexity,
+        )
+        from delegation_coordinator import (  # type: ignore[import]
+            DelegationCoordinator,
+            DelegationType,
+            DelegationStatus,
+        )
+        from github_actions_integration import (  # type: ignore[import]
+            GitHubActionsIntegration,
+            ProcessingMode,
+        )
+        from interfaces import AgentConfig  # type: ignore[import]
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            PRBacklogManager,
+            PRStatus,
+            ReadinessCriteria,
+            ReadinessAssessor,
+            ConflictComplexity,
+            DelegationCoordinator,
+            DelegationType,
+            DelegationStatus,
+            GitHubActionsIntegration,
+            ProcessingMode,
+            AgentConfig,
+        )
 
 
 class TestEndToEndWorkflow:

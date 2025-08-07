@@ -5,10 +5,7 @@ Tests the main PRBacklogManager class including PR discovery, assessment,
 and overall backlog management workflows.
 """
 
-try:
-    import pytest  # type: ignore[import]
-except ImportError:
-    from .test_stubs import pytest
+import pytest  # type: ignore[import]
 
 import os
 from unittest.mock import Mock, patch
@@ -40,16 +37,43 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# Always use stubs for type checking consistency
-from .test_stubs import (
-    PRBacklogManager,
-    PRAssessment,
-    PRStatus,
-    ReadinessCriteria,
-    BacklogMetrics,
-    GadugiError,
-    AgentConfig,
-)
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
+        PRBacklogManager,
+        PRAssessment,
+        PRStatus,
+        ReadinessCriteria,
+        BacklogMetrics,
+        GadugiError,
+        AgentConfig,
+    )
+else:
+    # For runtime, try real imports
+    try:
+        from core import (  # type: ignore[import]
+            PRBacklogManager,
+            PRAssessment,
+            PRStatus,
+            ReadinessCriteria,
+            BacklogMetrics,
+            GadugiError,
+        )
+        from interfaces import AgentConfig  # type: ignore[import]
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            PRBacklogManager,
+            PRAssessment,
+            PRStatus,
+            ReadinessCriteria,
+            BacklogMetrics,
+            GadugiError,
+            AgentConfig,
+        )
 
 
 class TestPRBacklogManager:

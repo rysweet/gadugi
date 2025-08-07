@@ -5,10 +5,7 @@ Tests the DelegationCoordinator class and delegation functionality
 including task creation, execution, and coordination with other agents.
 """
 
-try:
-    import pytest  # type: ignore[import]
-except ImportError:
-    from .test_stubs import pytest
+import pytest  # type: ignore[import]
 
 from unittest.mock import Mock, patch, mock_open
 from datetime import datetime, timedelta
@@ -40,14 +37,37 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# Always use stubs for type checking consistency
-from .test_stubs import (
-    DelegationCoordinator,
-    DelegationTask,
-    DelegationType,
-    DelegationPriority,
-    DelegationStatus,
-)
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
+        DelegationCoordinator,
+        DelegationTask,
+        DelegationType,
+        DelegationPriority,
+        DelegationStatus,
+    )
+else:
+    # For runtime, try real imports
+    try:
+        from delegation_coordinator import (  # type: ignore[import]
+            DelegationCoordinator,
+            DelegationTask,
+            DelegationType,
+            DelegationPriority,
+            DelegationStatus,
+        )
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            DelegationCoordinator,
+            DelegationTask,
+            DelegationType,
+            DelegationPriority,
+            DelegationStatus,
+        )
 
 
 @pytest.fixture

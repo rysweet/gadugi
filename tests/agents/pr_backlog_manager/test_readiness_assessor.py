@@ -5,10 +5,7 @@ Tests the ReadinessAssessor class and related assessment functionality
 including conflict analysis, CI status evaluation, and metadata checking.
 """
 
-try:
-    import pytest  # type: ignore[import]
-except ImportError:
-    from .test_stubs import pytest
+import pytest  # type: ignore[import]
 
 from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
@@ -40,17 +37,46 @@ shared_path = os.path.join(
 )
 sys.path.insert(0, shared_path)
 
-# Always use stubs for type checking consistency
-from .test_stubs import (
-    ReadinessAssessor,
-    ConflictAssessment,
-    CIAssessment,
-    ReviewAssessment,
-    SyncAssessment,
-    MetadataAssessment,
-    ConflictComplexity,
-    CIFailureType,
-)
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
+        ReadinessAssessor,
+        ConflictAssessment,
+        CIAssessment,
+        ReviewAssessment,
+        SyncAssessment,
+        MetadataAssessment,
+        ConflictComplexity,
+        CIFailureType,
+    )
+else:
+    # For runtime, try real imports
+    try:
+        from readiness_assessor import (  # type: ignore[import]
+            ReadinessAssessor,
+            ConflictAssessment,
+            CIAssessment,
+            ReviewAssessment,
+            SyncAssessment,
+            MetadataAssessment,
+            ConflictComplexity,
+            CIFailureType,
+        )
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            ReadinessAssessor,
+            ConflictAssessment,
+            CIAssessment,
+            ReviewAssessment,
+            SyncAssessment,
+            MetadataAssessment,
+            ConflictComplexity,
+            CIFailureType,
+        )
 
 
 @pytest.fixture
