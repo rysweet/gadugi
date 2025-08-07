@@ -68,8 +68,10 @@ class WorkflowPhase(Enum):
         return phase_names.get(phase_number, 'Unknown Phase')
 
     @classmethod
-    def is_valid_phase(cls, phase_number: int) -> bool:
+    def is_valid_phase(cls, phase_number: Union[int, 'WorkflowPhase']) -> bool:
         """Check if phase number is valid."""
+        if isinstance(phase_number, cls):
+            phase_number = phase_number.value
         return 0 <= phase_number <= 9
 
 
@@ -145,10 +147,13 @@ class TaskState:
 
         return cls(**data)
 
-    def update_phase(self, phase: int, phase_name: Optional[str] = None):
+    def update_phase(self, phase: Union[int, WorkflowPhase], phase_name: Optional[str] = None):
         """Update current phase and timestamp."""
-        self.current_phase = phase
-        self.current_phase_name = phase_name or WorkflowPhase.get_phase_name(phase)
+        if isinstance(phase, WorkflowPhase):
+            self.current_phase = phase.value
+        else:
+            self.current_phase = phase
+        self.current_phase_name = phase_name or WorkflowPhase.get_phase_name(self.current_phase)
         self.updated_at = datetime.now(timezone.utc)
 
     def set_error(self, error_info: Dict[str, Any]):
@@ -598,6 +603,39 @@ class StateManager:
                 return False
             return True
         except Exception:
+            return False
+
+    def restore_state(self, backup_path: str) -> bool:
+        """
+        Restore all state files from backup directory.
+
+        Args:
+            backup_path: Path to backup directory containing state files
+
+        Returns:
+            bool: True if restore successful, False otherwise
+        """
+        try:
+            backup_dir = Path(backup_path)
+            if not backup_dir.exists():
+                self.logger.error(f"Backup directory does not exist: {backup_path}")
+                return False
+
+            # Restore all .json files from backup
+            restored_count = 0
+            for backup_file in backup_dir.glob("*.json"):
+                # Extract task_id from filename (e.g., "restore-test.json" -> "restore-test")
+                task_id = backup_file.stem
+                target_file = self._get_state_file(task_id)
+                shutil.copy2(backup_file, target_file)
+                restored_count += 1
+                self.logger.debug(f"Restored state file for task {task_id}: {target_file}")
+
+            self.logger.info(f"Restored {restored_count} state files from backup")
+            return True
+
+        except Exception as e:
+            self.logger.error(f"Failed to restore state from backup {backup_path}: {e}")
             return False
 
 

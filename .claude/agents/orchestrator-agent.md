@@ -645,8 +645,6 @@ def validate_workflow_compliance(task):
 
 - **Direct Execution**: Orchestrator should use `claude -p /agent:workflow-manager` or `/agent:workflow-manager` invocation
 - **State Tracking**: Monitor workflow progress through proper state management
-
-=======
 ## UV Environment Management
 
 The OrchestratorAgent includes specialized UV project handling for proper virtual environment setup across parallel worktrees:

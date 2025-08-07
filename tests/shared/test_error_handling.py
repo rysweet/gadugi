@@ -9,17 +9,35 @@ import os
 # Import the module we're testing
 import sys
 import time
+from datetime import datetime
 from typing import Any, Dict
-from unittest.mock import Mock, call, patch
 
 import pytest
+from unittest.mock import Mock, call, patch
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+# For type checking only
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from claude.shared.utils.error_handling import (
+        CircuitBreaker,
+        ErrorContext,
+        ErrorHandler,
+        ErrorSeverity,
+        GadugiError,
+        NonRecoverableError,
+        RecoverableError,
+        RetryStrategy,
+        graceful_degradation,
+        handle_with_fallback,
+        retry,
+        validate_input,
+    )
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from utils.error_handling import (
+    from claude.shared.utils.error_handling import (
         CircuitBreaker,
         ErrorContext,
         ErrorHandler,
@@ -39,13 +57,18 @@ except ImportError:
         "Warning: Could not import error_handling module. Tests will define what needs to be implemented."
     )
 
-    class ErrorSeverity:
+    from enum import Enum
+
+    # Add logger for stub implementation
+    logger = logging.getLogger(__name__)
+
+    class ErrorSeverity(Enum):
         LOW = "low"
         MEDIUM = "medium"
         HIGH = "high"
         CRITICAL = "critical"
 
-    class RetryStrategy:
+    class RetryStrategy(Enum):
         EXPONENTIAL = "exponential"
         LINEAR = "linear"
         FIXED = "fixed"
@@ -63,15 +86,70 @@ except ImportError:
         def __init__(self, message, context=None):
             super().__init__(message, ErrorSeverity.CRITICAL, context)
 
-    def retry(*args, **kwargs):
+    def retry(
+        max_attempts=3,
+        initial_delay=1.0,
+        strategy=None,
+        backoff_factor=2.0,
+        exceptions=None,
+        on_retry=None,
+    ):
         def decorator(func):
-            return func
+            def wrapper(*args, **kwargs):
+                last_exception = None
+                delay = initial_delay
+
+                for attempt in range(max_attempts):
+                    try:
+                        return func(*args, **kwargs)
+                    except Exception as e:
+                        last_exception = e
+
+                        # Check if we should retry this exception
+                        if exceptions and not isinstance(e, exceptions):
+                            raise
+
+                        # Call on_retry callback if provided
+                        if on_retry:
+                            on_retry(attempt + 1, e)
+
+                        # Don't sleep on the last attempt
+                        if attempt < max_attempts - 1:
+                            time.sleep(delay)
+
+                            # Calculate next delay based on strategy
+                            if strategy == RetryStrategy.EXPONENTIAL:
+                                delay = delay * backoff_factor
+                            elif strategy == RetryStrategy.LINEAR:
+                                delay = initial_delay + initial_delay * (
+                                    backoff_factor - 1
+                                ) * (attempt + 1)
+                            elif strategy == RetryStrategy.FIXED:
+                                delay = initial_delay
+
+                # All attempts failed
+                if last_exception:
+                    raise last_exception
+                else:
+                    raise RuntimeError("No exception captured")
+
+            return wrapper
 
         return decorator
 
-    def graceful_degradation(*args, **kwargs):
+    def graceful_degradation(fallback_value=None, exceptions=None, log_errors=True):
+        exceptions = exceptions or (Exception,)
+
         def decorator(func):
-            return func
+            def wrapper(*args, **kwargs):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    if log_errors:
+                        logger.error(f"Error in function: {e}")
+                    return fallback_value
+
+            return wrapper
 
         return decorator
 
@@ -81,20 +159,168 @@ except ImportError:
             self.recovery_strategies = {}
             self.error_history = []
 
-    class CircuitBreaker:
-        def __init__(self, *args, **kwargs):
-            pass
+        def register_recovery_strategy(self, error_type, strategy):
+            self.recovery_strategies[error_type] = strategy
 
-    def handle_with_fallback(*args, **kwargs):
-        pass
+        def handle_error(self, error, context=None):
+            # Updated signature to match test usage
+            if isinstance(error, Exception):
+                error_type = type(error)
+                error_key = f"{error_type.__name__}:{str(error)}"
+
+                # Update error counts
+                self.error_counts[error_key] = self.error_counts.get(error_key, 0) + 1
+
+                # Add to history
+                history_entry = {
+                    "error_type": error_type.__name__,
+                    "error_message": str(error),
+                    "context": context or {},
+                    "count": self.error_counts[error_key],
+                    "timestamp": datetime.now(),
+                }
+                self.error_history.append(history_entry)
+
+                # Try recovery strategy
+                if error_type in self.recovery_strategies:
+                    return self.recovery_strategies[error_type](error, context)
+                else:
+                    raise error
+            else:
+                # Handle ErrorContext objects
+                error_type = type(error.error).__name__
+                self.error_history.append(error)
+                if error_type in self.recovery_strategies:
+                    return self.recovery_strategies[error_type](error)
+
+        def get_error_statistics(self):
+            total_errors = sum(self.error_counts.values())
+            unique_errors = len(self.error_counts)
+            top_errors = sorted(
+                self.error_counts.items(), key=lambda x: x[1], reverse=True
+            )
+            recent_errors = self.error_history[-10:]
+
+            return {
+                "total_errors": total_errors,
+                "unique_errors": unique_errors,
+                "top_errors": top_errors,
+                "recent_errors": recent_errors,
+            }
+
+        def reset_statistics(self):
+            self.error_counts.clear()
+            self.error_history.clear()
+
+    class CircuitBreaker:
+        def __init__(self, failure_threshold=5, recovery_timeout=60.0, *args, **kwargs):
+            self.failure_threshold = failure_threshold
+            self.recovery_timeout = recovery_timeout
+            self.failure_count = 0
+            self.last_failure_time = None
+            self.is_open = False
+
+        def __call__(self, func):
+            def wrapper(*args, **kwargs):
+                if self.is_open:
+                    # Check if we should try to recover
+                    if self.last_failure_time:
+                        elapsed = (
+                            datetime.now() - self.last_failure_time
+                        ).total_seconds()
+                        if elapsed >= self.recovery_timeout:
+                            # Try to recover
+                            self.is_open = False
+                            self.failure_count = 0
+                            self.last_failure_time = None
+                        else:
+                            raise NonRecoverableError("Circuit breaker open")
+                    else:
+                        raise NonRecoverableError("Circuit breaker open")
+
+                try:
+                    result = func(*args, **kwargs)
+                    # Success resets failure count
+                    self.failure_count = 0
+                    self.last_failure_time = None
+                    return result
+                except Exception as e:
+                    self.failure_count += 1
+                    self.last_failure_time = datetime.now()
+
+                    if self.failure_count >= self.failure_threshold:
+                        self.is_open = True
+
+                    raise
+
+            return wrapper
+
+        def reset(self):
+            self.failure_count = 0
+            self.last_failure_time = None
+            self.is_open = False
+
+    def handle_with_fallback(primary, fallback, exceptions=None):
+        exceptions = exceptions or (Exception,)
+        try:
+            return primary()
+        except exceptions as e:
+            logger.warning(f"Primary function failed, using fallback: {e}")
+            return fallback()
 
     class ErrorContext:
-        def __init__(self, *args, **kwargs):
-            pass
+        def __init__(self, operation_name, cleanup_func=None, suppress_errors=False):
+            self.operation_name = operation_name
+            self.cleanup_func = cleanup_func
+            self.suppress_errors = suppress_errors
+            self.error = None
 
-    def validate_input(*args, **kwargs):
+        def __enter__(self):
+            logger.debug(f"Starting operation: {self.operation_name}")
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if exc_val:
+                self.error = exc_val
+                logger.error(f"Error in {self.operation_name}: {exc_val}")
+
+                # Run cleanup if provided
+                if self.cleanup_func:
+                    try:
+                        self.cleanup_func()
+                    except Exception as cleanup_error:
+                        logger.error(
+                            f"Cleanup failed for {self.operation_name}: {cleanup_error}"
+                        )
+
+                # Suppress errors if requested
+                if self.suppress_errors:
+                    return True
+            else:
+                logger.debug(f"Completed operation: {self.operation_name}")
+
+            return False
+
+    def validate_input(validators):
         def decorator(func):
-            return func
+            def wrapper(*args, **kwargs):
+                # Get function signature info
+                import inspect
+
+                sig = inspect.signature(func)
+                bound_args = sig.bind(*args, **kwargs)
+                bound_args.apply_defaults()
+
+                # Validate each parameter
+                for param_name, validator in validators.items():
+                    if param_name in bound_args.arguments:
+                        value = bound_args.arguments[param_name]
+                        if not validator(value):
+                            raise ValueError(f"Invalid value for {param_name}: {value}")
+
+                return func(*args, **kwargs)
+
+            return wrapper
 
         return decorator
 
@@ -102,14 +328,14 @@ except ImportError:
 class TestErrorSeverity:
     """Test ErrorSeverity enum."""
 
-    def test_error_severity_values(self):
+    def test_error_severity_values(self) -> None:
         """Test error severity enum values."""
         assert ErrorSeverity.LOW.value == "low"
         assert ErrorSeverity.MEDIUM.value == "medium"
         assert ErrorSeverity.HIGH.value == "high"
         assert ErrorSeverity.CRITICAL.value == "critical"
 
-    def test_error_severity_ordering(self):
+    def test_error_severity_ordering(self) -> None:
         """Test that we can compare severities."""
         severities = [
             ErrorSeverity.LOW,
@@ -396,7 +622,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -408,7 +634,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -718,7 +944,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -736,7 +962,7 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 result = "success"
 
@@ -750,7 +976,7 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as ctx:
                     raise ValueError("Test error")
@@ -778,7 +1004,7 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("utils.error_handling.logger") as mock_logger:
+        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")

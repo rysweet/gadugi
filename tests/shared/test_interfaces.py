@@ -67,6 +67,14 @@ except ImportError:
         def save_state(self, state_id: str, data: Dict[str, Any]) -> bool:
             pass
 
+        @abstractmethod
+        def load_state(self, state_id: str) -> Optional[Dict[str, Any]]:
+            pass
+
+        @abstractmethod
+        def delete_state(self, state_id: str) -> bool:
+            pass
+
     class GitHubOperationsInterface(ABC):
         @abstractmethod
         def create_issue(self, title: str, body: str) -> Dict[str, Any]:
@@ -131,12 +139,28 @@ except ImportError:
 
     # Configuration schemas
     class AgentConfigSchema:
-        def validate(self, config: Dict[str, Any]) -> bool:
-            return True
+        def validate(self, config: Dict[str, Any]) -> "ValidationResult":
+            errors = []
+
+            # Check required fields
+            if "agent_id" not in config:
+                errors.append("agent_id is required")
+            if "name" not in config:
+                errors.append("name is required")
+
+            return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
     class WorkflowConfigSchema:
-        def validate(self, config: Dict[str, Any]) -> bool:
-            return True
+        def validate(self, config: Dict[str, Any]) -> "ValidationResult":
+            errors = []
+
+            # Check required fields
+            if "workflow_id" not in config:
+                errors.append("workflow_id is required")
+            if "phases" not in config or not config["phases"]:
+                errors.append("phases are required and cannot be empty")
+
+            return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
     # Result types
     @dataclass
@@ -225,15 +249,6 @@ class TestStateManagerInterface:
             def save_state(self, state_id: str, data: Dict[str, Any]) -> bool:
                 self.states[state_id] = data
                 return True
-
-            def load_state(self, state_id: str) -> Optional[Dict[str, Any]]:
-                return self.states.get(state_id)
-
-            def delete_state(self, state_id: str) -> bool:
-                if state_id in self.states:
-                    del self.states[state_id]
-                    return True
-                return False
 
             def load_state(self, state_id: str) -> Optional[Dict[str, Any]]:
                 return self.states.get(state_id)

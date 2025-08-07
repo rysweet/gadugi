@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-08-05T08:52:12.740687",
+  "processes": {
+    "fix-types-pr-backlog-manager": {
+      "task_id": "fix-types-pr-backlog-manager",
+      "task_name": "Fix Type Errors in PR Backlog Manager Tests",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-pr-backlog-manager",
+      "created_at": "2025-08-05T08:50:12.369872",
+      "prompt_file": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-pr-backlog-manager/prompts/fix-types-pr-backlog-manager-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-05T08:50:12.385763",
+      "completed_at": "2025-08-05T08:52:12.737979",
+      "last_heartbeat": "2025-08-05T08:52:12.737949",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "fix-types-container-runtime": {
+      "task_id": "fix-types-container-runtime",
+      "task_name": "Fix Type Errors in Container Runtime",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-container-runtime",
+      "created_at": "2025-08-05T08:50:12.373385",
+      "prompt_file": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-container-runtime/prompts/fix-types-container-runtime-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-05T08:50:12.386008",
+      "completed_at": "2025-08-05T08:52:12.739487",
+      "last_heartbeat": "2025-08-05T08:52:12.739484",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "fix-types-integration-tests": {
+      "task_id": "fix-types-integration-tests",
+      "task_name": "Fix Type Errors in Integration Tests",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-integration-tests",
+      "created_at": "2025-08-05T08:50:12.375418",
+      "prompt_file": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-integration-tests/prompts/fix-types-integration-tests-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-05T08:50:12.386195",
+      "completed_at": "2025-08-05T08:52:12.740138",
+      "last_heartbeat": "2025-08-05T08:52:12.740136",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "fix-types-misc-files": {
+      "task_id": "fix-types-misc-files",
+      "task_name": "Fix Type Errors in Miscellaneous Files",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-misc-files",
+      "created_at": "2025-08-05T08:50:12.382911",
+      "prompt_file": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-misc-files/prompts/fix-types-misc-files-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-05T08:50:12.386473",
+      "completed_at": "2025-08-05T08:52:12.740686",
+      "last_heartbeat": "2025-08-05T08:52:12.740685",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    }
+  }
+}

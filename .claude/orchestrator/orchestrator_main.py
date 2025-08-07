@@ -232,8 +232,8 @@ class OrchestratorCoordinator:
             # Phase 4: Result Integration
             logger.info("Phase 4: Integrating results and cleanup...")
             result.task_results = execution_results
-            result.successful_tasks = len([r for r in execution_results if r.success])
-            result.failed_tasks = len([r for r in execution_results if not r.success])
+            result.successful_tasks = len([r for r in execution_results if r.status == 'success'])
+            result.failed_tasks = len([r for r in execution_results if r.status != 'success'])
 
             # Calculate performance metrics
             result.execution_time_seconds = time.time() - start_time
@@ -342,10 +342,13 @@ class OrchestratorCoordinator:
             # Create task executor
             executor = TaskExecutor(
                 task_id=task_info.id,
-                task_name=task_info.name,
+                worktree_path=worktree_info.worktree_path,
                 prompt_file=workflow_prompt,
-                working_directory=str(worktree_info.worktree_path),
-                timeout_seconds=self.config.execution_timeout_hours * 3600
+                task_context={
+                    'task_name': task_info.name,
+                    'working_directory': str(worktree_info.worktree_path),
+                    'timeout_seconds': self.config.execution_timeout_hours * 3600
+                }
             )
 
             task_executors.append(executor)
@@ -379,15 +382,23 @@ class OrchestratorCoordinator:
                 try:
                     result = future.result()
                     results.append(result)
-                    logger.info(f"Task completed: {task_executor.task_id}, success={result.success}")
+                    logger.info(f"Task completed: {task_executor.task_id}, status={result.status}")
                 except Exception as e:
                     logger.error(f"Task execution failed: {task_executor.task_id}, error={e}")
                     # Create failed result
                     failed_result = ExecutionResult(
                         task_id=task_executor.task_id,
-                        success=False,
+                        task_name=task_executor.task_context.get('task_name', 'Unknown'),
+                        status='failed',
+                        start_time=datetime.now(),
+                        end_time=datetime.now(),
+                        duration=0.0,
+                        exit_code=1,
+                        stdout='',
+                        stderr=str(e),
+                        output_file=None,
                         error_message=str(e),
-                        execution_time=0.0
+                        resource_usage={}
                     )
                     results.append(failed_result)
 
@@ -408,12 +419,12 @@ class OrchestratorCoordinator:
             )
 
         try:
-            # Use execution engine to run the task
-            result = self.execution_engine.execute_task(task_executor)
+            # Use TaskExecutor directly to run the task
+            result = task_executor.execute(timeout=task_executor.task_context.get('timeout_seconds'))
 
             # Update process status based on result
             if self.process_registry and ProcessStatus:
-                if result.success:
+                if result.status == 'success':
                     self.process_registry.update_process_status(
                         task_executor.task_id,
                         ProcessStatus.COMPLETED
@@ -441,9 +452,17 @@ class OrchestratorCoordinator:
             # Return failed result
             return ExecutionResult(
                 task_id=task_executor.task_id,
-                success=False,
+                task_name=task_executor.task_context.get('task_name', 'Unknown'),
+                status='failed',
+                start_time=datetime.now(),
+                end_time=datetime.now(),
+                duration=0.0,
+                exit_code=1,
+                stdout='',
+                stderr=str(e),
+                output_file=None,
                 error_message=str(e),
-                execution_time=0.0
+                resource_usage={}
             )
 
     def _start_monitoring(self):
