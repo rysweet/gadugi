@@ -838,7 +838,7 @@ class TestDelegationManagement:
         assert metrics["in_progress_tasks"] == 1
         assert metrics["success_rate"] == 50.0  # 2 completed out of 4 total
         assert metrics["average_completion_time_seconds"] == pytest.approx(
-            450.0, abs_tol=1e-3
+            450.0, abs=1e-3
         )  # 7.5 minutes average (5+10)/2
 
         # Check task type breakdown
