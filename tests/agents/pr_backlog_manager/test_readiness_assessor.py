@@ -6,7 +6,7 @@ including conflict analysis, CI status evaluation, and metadata checking.
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import]
 except ImportError:
     from test_stubs import pytest
 
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 try:
-    from readiness_assessor import (
+    from readiness_assessor import (  # type: ignore[import]
         ReadinessAssessor,
         ConflictAssessment,
         CIAssessment,

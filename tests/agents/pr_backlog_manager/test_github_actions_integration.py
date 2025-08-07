@@ -6,7 +6,7 @@ functionality including event handling, security validation, and workflow artifa
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import]
 except ImportError:
     from test_stubs import pytest
 
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 try:
-    from github_actions_integration import (
+    from github_actions_integration import (  # type: ignore[import]
         GitHubActionsIntegration,
         GitHubContext,
         SecurityConstraints,
@@ -105,12 +105,19 @@ class TestGitHubContext:
     def test_github_context_creation(self):
         """Test GitHubContext manual creation."""
         context = GitHubContext(
-            event_type=GitHubEventType.PULL_REQUEST,
-            repository="user/repo",
-            pr_number=123,
+            event_name="pull_request",
+            event_path="/github/workflow/event.json",
+            workspace="/github/workspace",
+            run_id="123456789",
+            run_number=1,
             actor="developer",
+            repository="user/repo",
             ref="refs/pull/123/merge",
             sha="abc123",
+            token="test-token",
+            # Optional test attributes
+            event_type=GitHubEventType.PULL_REQUEST,
+            pr_number=123,
             workflow_run_id="456789",
             run_attempt=1,
         )
@@ -179,7 +186,7 @@ class TestGitHubContext:
             patch("builtins.open", mock_open(read_data=json.dumps(event_data))),
             patch.dict(os.environ, {"GITHUB_EVENT_PATH": "/path/to/event.json"}),
         ):
-            pr_number = GitHubContext._extract_pr_number()
+            pr_number = GitHubContext._extract_pr_number("refs/pull/456/merge")
             assert pr_number == 456
 
     def test_extract_pr_number_from_ref(self):
@@ -188,7 +195,7 @@ class TestGitHubContext:
             patch.dict(os.environ, {"GITHUB_REF": "refs/pull/789/merge"}),
             patch("os.path.exists", return_value=False),
         ):
-            pr_number = GitHubContext._extract_pr_number()
+            pr_number = GitHubContext._extract_pr_number("refs/pull/789/merge")
             assert pr_number == 789
 
     def test_extract_pr_number_none(self):
@@ -197,7 +204,7 @@ class TestGitHubContext:
             patch.dict(os.environ, {"GITHUB_REF": "refs/heads/main"}, clear=True),
             patch("os.path.exists", return_value=False),
         ):
-            pr_number = GitHubContext._extract_pr_number()
+            pr_number = GitHubContext._extract_pr_number("refs/heads/main")
             assert pr_number is None
 
 
@@ -214,6 +221,7 @@ class TestSecurityConstraints:
         )
 
         assert constraints.auto_approve_enabled is True
+        assert constraints.restricted_operations is not None
         assert "delete_repository" in constraints.restricted_operations
         assert constraints.max_processing_time == 300
         assert constraints.rate_limit_threshold == 25
@@ -232,6 +240,7 @@ class TestSecurityConstraints:
             assert constraints.auto_approve_enabled is True
             assert constraints.max_processing_time == 600
             assert constraints.rate_limit_threshold == 30
+            assert constraints.restricted_operations is not None
             assert "delete_repository" in constraints.restricted_operations
 
     def test_from_environment_no_auto_approve(self):

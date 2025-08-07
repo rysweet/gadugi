@@ -6,7 +6,7 @@ including task creation, execution, and coordination with other agents.
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import]
 except ImportError:
     from test_stubs import pytest
 
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 try:
-    from delegation_coordinator import (
+    from delegation_coordinator import (  # type: ignore[import]
         DelegationCoordinator,
         DelegationTask,
         DelegationType,

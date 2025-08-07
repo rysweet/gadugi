@@ -6,7 +6,7 @@ and overall backlog management workflows.
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import]
 except ImportError:
     from test_stubs import pytest
 
@@ -41,7 +41,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 try:
-    from core import (
+    from core import (  # type: ignore[import]
         PRBacklogManager,
         PRAssessment,
         PRStatus,
@@ -49,7 +49,7 @@ try:
         BacklogMetrics,
         GadugiError,
     )
-    from interfaces import AgentConfig
+    from interfaces import AgentConfig  # type: ignore[import]
 except ImportError:
     # Use stubs for type checking and testing
     from test_stubs import (

@@ -6,7 +6,7 @@ including component integration and real-world scenarios.
 """
 
 try:
-    import pytest
+    import pytest  # type: ignore[import]
 except ImportError:
     from test_stubs import pytest
 
@@ -41,15 +41,15 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 try:
-    from core import PRBacklogManager, PRStatus, ReadinessCriteria
-    from readiness_assessor import ReadinessAssessor, ConflictComplexity
-    from delegation_coordinator import (
+    from core import PRBacklogManager, PRStatus, ReadinessCriteria  # type: ignore[import]
+    from readiness_assessor import ReadinessAssessor, ConflictComplexity  # type: ignore[import]
+    from delegation_coordinator import (  # type: ignore[import]
         DelegationCoordinator,
         DelegationType,
         DelegationStatus,
     )
-    from github_actions_integration import GitHubActionsIntegration, ProcessingMode
-    from interfaces import AgentConfig
+    from github_actions_integration import GitHubActionsIntegration, ProcessingMode  # type: ignore[import]
+    from interfaces import AgentConfig  # type: ignore[import]
 except ImportError:
     # Use stubs for type checking and testing
     from test_stubs import (
