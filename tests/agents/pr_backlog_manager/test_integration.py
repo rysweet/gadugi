@@ -14,10 +14,11 @@ import os
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-# Add the source directory to the Python path for imports
+# Add the source directories to the Python path for imports
 import sys
 
-source_path = os.path.join(
+# Add pr-backlog-manager directory
+pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
     "..",
@@ -26,7 +27,18 @@ source_path = os.path.join(
     "agents",
     "pr-backlog-manager",
 )
-sys.path.insert(0, source_path)
+sys.path.insert(0, pr_backlog_path)
+
+# Add shared directory for interfaces
+shared_path = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    ".claude",
+    "shared",
+)
+sys.path.insert(0, shared_path)
 
 try:
     from core import PRBacklogManager, PRStatus, ReadinessCriteria

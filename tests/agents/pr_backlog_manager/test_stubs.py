@@ -7,7 +7,7 @@ cannot be imported during type checking.
 
 import os
 from enum import Enum
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, Union
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
@@ -17,7 +17,7 @@ class PytestStub:
     """Pytest stub for type checking."""
 
     @staticmethod
-    def fixture(func: Callable = None, **kwargs) -> Callable:
+    def fixture(func: Optional[Callable] = None, **kwargs) -> Callable:
         """Fixture decorator stub."""
 
         def decorator(f):
@@ -45,6 +45,22 @@ class PytestStub:
     @staticmethod
     def main(args: List[str]):
         """Main function stub."""
+
+    @staticmethod
+    def approx(value: float, abs_tol: float = 1e-6, rel_tol: float = 1e-6):
+        """Approximate comparison stub."""
+        import builtins
+
+        class ApproxValue:
+            def __init__(self, value, abs_tol, rel_tol):
+                self.value = value
+                self.abs_tol = abs_tol
+                self.rel_tol = rel_tol
+
+            def __eq__(self, other):
+                return builtins.abs(self.value - other) <= self.abs_tol
+
+        return ApproxValue(value, abs_tol, rel_tol)
 
 
 # Create pytest alias for import compatibility
@@ -164,12 +180,12 @@ class CIAssessment:
     """CI status assessment."""
 
     all_passing: bool
-    failed_checks: List[str] = None
-    pending_checks: List[str] = None
+    failed_checks: Optional[List[str]] = None
+    pending_checks: Optional[List[str]] = None
     last_run: Optional[datetime] = None
-    failing_checks: List[Dict[str, Any]] = None
-    retriable_failures: List[str] = None
-    blocking_failures: List[str] = None
+    failing_checks: Optional[List[Dict[str, Any]]] = None
+    retriable_failures: Optional[List[str]] = None
+    blocking_failures: Optional[List[str]] = None
     can_auto_retry: bool = False
 
     def __post_init__(self):
@@ -190,12 +206,12 @@ class ReviewAssessment:
     """Review status assessment."""
 
     human_approved: bool = False
-    human_reviewers: List[str] = None
+    human_reviewers: Optional[List[str]] = None
     changes_requested: bool = False
     ai_review_complete: bool = False
     has_approved_review: bool = False
-    pending_requests: List[str] = None
-    requested_changes: List[str] = None
+    pending_requests: Optional[List[str]] = None
+    requested_changes: Optional[List[str]] = None
     is_review_complete: bool = False
     review_coverage_score: float = 0.0
 
@@ -237,8 +253,131 @@ class MetadataAssessment:
     completeness_score: float = 100.0
 
 
+class DelegationType(Enum):
+    """Types of delegation tasks."""
+
+    MERGE_CONFLICT_RESOLUTION = "merge_conflict_resolution"
+    CI_FAILURE_FIX = "ci_failure_fix"
+    BRANCH_UPDATE = "branch_update"
+    AI_CODE_REVIEW = "ai_code_review"
+    METADATA_IMPROVEMENT = "metadata_improvement"
+
+
+class DelegationPriority(Enum):
+    """Priority levels for delegation tasks."""
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class DelegationStatus(Enum):
+    """Status of delegation tasks."""
+
+    PENDING = "pending"
+    DELEGATED = "delegated"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+@dataclass
+class DelegationTask:
+    """A task to be delegated to another agent."""
+
+    task_id: str
+    pr_number: int
+    task_type: DelegationType
+    priority: DelegationPriority
+    agent_target: str
+    prompt_template: str
+    context: Dict[str, Any]
+    created_at: datetime
+    status: DelegationStatus
+    retry_count: int = 0
+    last_attempt: Optional[datetime] = None
+    completion_time: Optional[datetime] = None
+    error_message: Optional[str] = None
+
+
 class GadugiError(Exception):
     """Base exception for Gadugi operations."""
+
+
+class DelegationCoordinator:
+    """Delegation coordinator implementation."""
+
+    def __init__(self, github_ops, auto_approve: bool = False):
+        self.github_ops = github_ops
+        self.auto_approve = auto_approve
+        self.active_delegations: Dict[str, DelegationTask] = {}
+        self.config = {
+            "max_retries": 3,
+            "workflow_master_timeout": 300,
+            "code_reviewer_timeout": 180,
+            "enable_parallel_delegation": True,
+            "auto_delegate_simple_tasks": True,
+        }
+        self.agent_capabilities = {
+            "workflow-master": [
+                DelegationType.MERGE_CONFLICT_RESOLUTION,
+                DelegationType.CI_FAILURE_FIX,
+                DelegationType.BRANCH_UPDATE,
+                DelegationType.METADATA_IMPROVEMENT,
+            ],
+            "code-reviewer": [DelegationType.AI_CODE_REVIEW],
+        }
+
+    def _classify_issue_type(self, issue: str) -> DelegationType:
+        """Classify issue type."""
+        return DelegationType.CI_FAILURE_FIX
+
+    def _assess_issue_priority(
+        self, issue: str, pr_context: Dict[str, Any]
+    ) -> DelegationPriority:
+        """Assess issue priority."""
+        return DelegationPriority.MEDIUM
+
+    def delegate_issue_resolution(
+        self, pr_number: int, issues: List[str], pr_context: Dict[str, Any]
+    ) -> List[DelegationTask]:
+        """Delegate issue resolution."""
+        return []
+
+    def create_delegation_task(
+        self, pr_number: int, issue: str, pr_context: Dict[str, Any]
+    ) -> DelegationTask:
+        """Create a delegation task."""
+        task_type = self._classify_issue_type(issue)
+        priority = self._assess_issue_priority(issue, pr_context)
+        return DelegationTask(
+            task_id=f"task-{pr_number}-{datetime.now().timestamp()}",
+            pr_number=pr_number,
+            task_type=task_type,
+            priority=priority,
+            agent_target="workflow-master",
+            prompt_template="Test prompt",
+            context=pr_context,
+            created_at=datetime.now(),
+            status=DelegationStatus.PENDING,
+        )
+
+    def execute_delegation(self, task: DelegationTask) -> bool:
+        """Execute a delegation task."""
+        return True
+
+    def monitor_delegations(self) -> Dict[str, DelegationTask]:
+        """Monitor active delegations."""
+        return self.active_delegations
+
+    def retry_failed_delegations(self) -> int:
+        """Retry failed delegations."""
+        return 0
+
+    def cleanup_completed_delegations(self) -> int:
+        """Clean up completed delegations."""
+        return 0
 
 
 class PRBacklogManager:
@@ -751,134 +890,8 @@ class ReadinessAssessor:
         return recommendations
 
 
-class DelegationType(Enum):
-    """Delegation types."""
-
-    WORKFLOW_MASTER = "workflow_master"
-    CODE_REVIEWER = "code_reviewer"
-    GITHUB_ACTIONS = "github_actions"
-    MERGE_CONFLICT_RESOLVER = "merge_conflict_resolver"
-    CI_RETRY = "ci_retry"
-
-
-class DelegationPriority(Enum):
-    """Delegation priorities."""
-
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    URGENT = "urgent"
-
-
-class DelegationStatus(Enum):
-    """Delegation status."""
-
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-@dataclass
-class DelegationTask:
-    """Delegation task data."""
-
-    id: str
-    pr_number: int
-    delegation_type: DelegationType
-    priority: DelegationPriority
-    status: DelegationStatus = DelegationStatus.PENDING
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    agent_id: Optional[str] = None
-    task_data: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error_message: Optional[str] = None
-
-    def __post_init__(self):
-        if self.created_at is None:
-            self.created_at = datetime.now()
-        if self.updated_at is None:
-            self.updated_at = datetime.now()
-        if self.task_data is None:
-            self.task_data = {}
-
-
-class DelegationCoordinator:
-    """Delegation coordination component."""
-
-    def __init__(self, config: Optional[AgentConfig] = None):
-        self.config = config or AgentConfig(
-            agent_id="delegation", name="Delegation Coordinator"
-        )
-        self.active_tasks: Dict[str, DelegationTask] = {}
-
-    def delegate_resolution(
-        self, pr_number: int, blocking_issues: List[str]
-    ) -> List[str]:
-        """Delegate issue resolution."""
-        return []
-
-    def create_delegation_task(
-        self,
-        pr_number: int,
-        delegation_type: DelegationType,
-        priority: DelegationPriority = DelegationPriority.MEDIUM,
-        task_data: Optional[Dict[str, Any]] = None,
-    ) -> DelegationTask:
-        """Create delegation task."""
-        task = DelegationTask(
-            id=f"task-{pr_number}-{delegation_type.value}-{datetime.now().timestamp()}",
-            pr_number=pr_number,
-            delegation_type=delegation_type,
-            priority=priority,
-            task_data=task_data or {},
-        )
-        self.active_tasks[task.id] = task
-        return task
-
-    def execute_delegation_task(self, task: DelegationTask) -> bool:
-        """Execute delegation task."""
-        task.status = DelegationStatus.IN_PROGRESS
-        # Mock execution
-        task.status = DelegationStatus.COMPLETED
-        task.result = {"success": True}
-        return True
-
-    def get_task_status(self, task_id: str) -> Optional[DelegationStatus]:
-        """Get task status."""
-        task = self.active_tasks.get(task_id)
-        return task.status if task else None
-
-    def cancel_task(self, task_id: str) -> bool:
-        """Cancel task."""
-        task = self.active_tasks.get(task_id)
-        if task and task.status == DelegationStatus.PENDING:
-            task.status = DelegationStatus.CANCELLED
-            return True
-        return False
-
-    def get_active_tasks_for_pr(self, pr_number: int) -> List[DelegationTask]:
-        """Get active tasks for PR."""
-        return [
-            task
-            for task in self.active_tasks.values()
-            if task.pr_number == pr_number
-            and task.status in [DelegationStatus.PENDING, DelegationStatus.IN_PROGRESS]
-        ]
-
-    def _delegate_to_workflow_master(self, pr_number: int, issue_type: str) -> str:
-        """Delegate to WorkflowMaster."""
-        return f"Delegated to WorkflowMaster for PR {pr_number}"
-
-    def _delegate_to_code_reviewer(self, pr_number: int) -> str:
-        """Delegate to code reviewer."""
-        return f"Delegated to code-reviewer for PR {pr_number}"
-
-    def _delegate_to_github_actions(self, pr_number: int, action_type: str) -> str:
-        """Delegate to GitHub Actions."""
-        return f"Delegated to GitHub Actions for PR {pr_number}"
+# Removed duplicate DelegationType, DelegationPriority, DelegationStatus, and DelegationTask definitions
+# These are already defined earlier in the file starting at line 240
 
 
 class MetricsCollector:
@@ -1071,6 +1084,37 @@ class GitHubContext:
     ref: str
     sha: str
     token: str
+    # Additional test attributes
+    event_type: Optional[GitHubEventType] = None
+    pr_number: Optional[int] = None
+    workflow_run_id: Optional[str] = None
+    run_attempt: Optional[int] = None
+
+    @classmethod
+    def from_environment(cls) -> "GitHubContext":
+        """Create context from environment variables."""
+        return cls(
+            event_name=os.environ.get("GITHUB_EVENT_NAME", "pull_request"),
+            event_path=os.environ.get(
+                "GITHUB_EVENT_PATH", "/github/workflow/event.json"
+            ),
+            workspace=os.environ.get("GITHUB_WORKSPACE", "/github/workspace"),
+            run_id=os.environ.get("GITHUB_RUN_ID", "123456789"),
+            run_number=int(os.environ.get("GITHUB_RUN_NUMBER", "1")),
+            actor=os.environ.get("GITHUB_ACTOR", "test-actor"),
+            repository=os.environ.get("GITHUB_REPOSITORY", "owner/repo"),
+            ref=os.environ.get("GITHUB_REF", "refs/pull/123/merge"),
+            sha=os.environ.get("GITHUB_SHA", "abc123def456"),
+            token=os.environ.get("GITHUB_TOKEN", "test-token"),
+        )
+
+    @staticmethod
+    def _extract_pr_number(ref: str) -> Optional[int]:
+        """Extract PR number from ref."""
+        import re
+
+        match = re.match(r"refs/pull/(\d+)/", ref)
+        return int(match.group(1)) if match else None
 
 
 @dataclass
