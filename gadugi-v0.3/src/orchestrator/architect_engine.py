@@ -268,10 +268,10 @@ class ArchitectureResponse:
     """Complete architecture response."""
 
     success: bool
-    architecture: Architecture
-    implementation_plan: ImplementationPlan
-    technical_specifications: TechnicalSpecifications
-    quality_attributes: QualityAttributes
+    architecture: Architecture | None
+    implementation_plan: ImplementationPlan | None
+    technical_specifications: TechnicalSpecifications | None
+    quality_attributes: QualityAttributes | None
     recommendations: list[Recommendation]
     risks_and_mitigations: list[Risk]
     error_message: str | None = None
