@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Test the task-decomposer vertical slice."""
+"""Test the TaskDecomposer vertical slice."""
 
 import json
 import sys
@@ -13,8 +13,8 @@ from orchestrator.run_agent import run_agent  # noqa: E402
 
 
 def test_task_decomposer_basic() -> None:
-    """Test that task-decomposer returns valid JSON."""
-    result = run_agent("task-decomposer", "Build a simple web app")
+    """Test that TaskDecomposer returns valid JSON."""
+    result = run_agent("TaskDecomposer", "Build a simple web app")
 
     assert result["success"] is True, f"Decomposer failed: {result['stderr']}"
     assert result["returncode"] == 0, f"Non-zero return code: {result['returncode']}"
@@ -34,7 +34,7 @@ def test_task_decomposer_basic() -> None:
 
 def test_task_decomposer_api_pattern() -> None:
     """Test that API tasks get appropriate decomposition."""
-    result = run_agent("task-decomposer", "Build a REST API with authentication")
+    result = run_agent("TaskDecomposer", "Build a REST API with authentication")
 
     assert result["success"] is True
     tasks_data = json.loads(result["stdout"])
@@ -42,15 +42,15 @@ def test_task_decomposer_api_pattern() -> None:
     # Should have multiple tasks for API projects
     assert len(tasks_data["tasks"]) >= 3, "API projects should have multiple tasks"
 
-    # Should include code-writer and test-writer agents
+    # Should include CodeWriter and TestWriter agents
     agent_types = [task["agent"] for task in tasks_data["tasks"]]
-    assert "code-writer" in agent_types, "Should include code-writer agent"
-    assert "test-writer" in agent_types, "Should include test-writer agent"
+    assert "CodeWriter" in agent_types, "Should include CodeWriter agent"
+    assert "TestWriter" in agent_types, "Should include TestWriter agent"
 
 
 def test_task_decomposer_dependencies() -> None:
     """Test that dependencies are properly structured."""
-    result = run_agent("task-decomposer", "Create a todo app")
+    result = run_agent("TaskDecomposer", "Create a todo app")
 
     assert result["success"] is True
     tasks_data = json.loads(result["stdout"])
@@ -74,9 +74,9 @@ def test_task_decomposer_dependencies() -> None:
 
 
 def test_orchestrator_task_decomposer_integration() -> None:
-    """Test the full orchestrator -> task-decomposer workflow."""
+    """Test the full orchestrator -> TaskDecomposer workflow."""
     # This tests the integration that architect recommended
-    result = run_agent("task-decomposer", "Build a mobile app")
+    result = run_agent("TaskDecomposer", "Build a mobile app")
 
     assert result["success"] is True, "Integration should work"
 
