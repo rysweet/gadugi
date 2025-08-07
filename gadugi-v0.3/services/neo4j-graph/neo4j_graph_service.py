@@ -11,13 +11,13 @@ import asyncio
 import logging
 import time
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any
 
 try:
-    from neo4j import GraphDatabase
+    from neo4j import GraphDatabase  # type: ignore[misc]
     # Unused imports commented out to fix lint errors:
     # from neo4j import ManagedTransaction, Transaction
     # from neo4j.exceptions import ServiceUnavailable, TransientError
@@ -143,9 +143,9 @@ class GraphNode:
     id: str
     type: NodeType
     properties: dict[str, Any]
-    labels: list[str] = None
-    created_at: datetime = None
-    updated_at: datetime = None
+    labels: list[str] = field(default_factory=list)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     def __post_init__(self):
         if self.labels is None:
@@ -165,7 +165,7 @@ class GraphRelationship:
     source_id: str
     target_id: str
     properties: dict[str, Any]
-    created_at: datetime = None
+    created_at: datetime | None = None
     strength: float = 1.0
 
     def __post_init__(self):
@@ -185,8 +185,8 @@ class QueryResult:
     aggregations: dict[str, Any]
     metadata: dict[str, Any]
     execution_time: float
-    warnings: list[str] = None
-    errors: list[str] = None
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.warnings is None:
@@ -201,10 +201,10 @@ class GraphStats:
 
     total_nodes: int = 0
     total_relationships: int = 0
-    nodes_by_type: dict[str, int] = None
-    relationships_by_type: dict[str, int] = None
+    nodes_by_type: dict[str, int] = field(default_factory=dict)
+    relationships_by_type: dict[str, int] = field(default_factory=dict)
     database_size: int = 0
-    last_updated: datetime = None
+    last_updated: datetime | None = None
 
     def __post_init__(self):
         if self.nodes_by_type is None:
@@ -222,9 +222,9 @@ class RecommendationRequest:
     source_node_id: str
     recommendation_type: str
     max_results: int = 10
-    filters: dict[str, Any] = None
-    weights: dict[str, float] = None
-    exclude_ids: list[str] = None
+    filters: dict[str, Any] = field(default_factory=dict)
+    weights: dict[str, float] = field(default_factory=dict)
+    exclude_ids: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.filters is None:
