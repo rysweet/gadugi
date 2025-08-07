@@ -508,12 +508,12 @@ class TestEnhancedSeparationCodeReduction:
         print(f"Duplication reduction: {duplication_reduction_percentage:.1f}%")
 
         # Should achieve significant duplication reduction (>70% of duplication eliminated)
-        assert (
-            duplication_reduction_percentage > 70.0
-        ), f"Expected >70% duplication reduction, got {duplication_reduction_percentage:.1f}%"
-        assert (
-            duplication_eliminated > 500
-        ), f"Expected >500 duplication lines eliminated, got {duplication_eliminated:.0f}"
+        assert duplication_reduction_percentage > 70.0, (
+            f"Expected >70% duplication reduction, got {duplication_reduction_percentage:.1f}%"
+        )
+        assert duplication_eliminated > 500, (
+            f"Expected >500 duplication lines eliminated, got {duplication_eliminated:.0f}"
+        )
 
         print(
             f"✅ Enhanced Separation eliminates {duplication_reduction_percentage:.1f}% of code duplication"
