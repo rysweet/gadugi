@@ -9,10 +9,7 @@ import pytest
 import tempfile
 import os
 import json
-import subprocess
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 # Import the module under test
 import sys

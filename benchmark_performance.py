@@ -5,10 +5,9 @@ Compares GitHub operations performance between shared module and individual impl
 """
 
 import os
-import statistics
 import sys
 import time
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Add shared modules to path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".claude", "shared"))

@@ -1,6 +1,5 @@
 """Tests for event handlers and filtering."""
 
-import pytest
 
 from gadugi.event_service.events import (
     Event,

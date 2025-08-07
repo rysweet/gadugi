@@ -7,7 +7,6 @@ command construction fix resolves issue #1.
 """
 
 import os
-import shutil
 import sys
 import tempfile
 from pathlib import Path

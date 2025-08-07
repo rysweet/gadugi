@@ -1,0 +1,34 @@
+# Include all agent definitions and related files
+recursive-include agents *.md *.yaml *.json *.txt
+recursive-include agents/*/workflows *
+recursive-include agents/*/knowledge *
+recursive-include agents/*/memories *
+recursive-include agents/*/templates *
+
+# Include all service files
+recursive-include services *.py *.json *.yaml *.yml *.proto
+recursive-include services/*/templates *
+recursive-include services/*/config *
+
+# Include source code
+recursive-include src *.py *.json *.yaml
+recursive-include src/orchestrator *.py
+
+# Include tests
+recursive-include tests *.py *.json *.yaml *.md
+
+# Include configuration
+include pyproject.toml
+include setup.py
+include README.md
+include LICENSE
+
+# Include gadugi configuration
+recursive-include .gadugi *.json *.yaml
+
+# Exclude compiled Python files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .git
+global-exclude .gitignore

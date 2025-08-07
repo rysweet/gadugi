@@ -1,6 +1,6 @@
 """Type stub for agent memory interface."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 
 class AgentMemoryInterface:

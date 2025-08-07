@@ -6,12 +6,10 @@ This module handles configuration for the Memory.md to GitHub Issues integration
 including sync policies, pruning rules, and operational parameters.
 """
 
-import json
 import os
 from dataclasses import asdict, dataclass, field
-from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import yaml
 from sync_engine import ConflictResolution, SyncDirection

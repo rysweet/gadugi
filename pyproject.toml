@@ -91,12 +91,35 @@ extend-exclude = [
     ".claude",
     "__pycache__",
 ]
-lint.select = ["ALL"]
-lint.ignore = [
-    "D", "ANN", "FA", "I", "E501", "W293", "T201", "Q000", "PLR", "PT", "C", "RET", "BLE", "S", "UP", "COM", "W292", "EXE001",
-    "E402", "F841", "ARG", "PLC", "PTH", "PLW", "TRY", "EM", "B", "RUF", "A", "DTZ", "SLF", "PERF",
-    "FBT", "TD", "FIX", "G004", "SIM", "E712", "F401", "INP001",
-    "F821", "W291", "PIE810", "ERA001", "F811", "ISC001"
+[tool.ruff.lint]
+select = ["E", "F", "W"]  # Basic errors and warnings only
+ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by formatter
+
+# Ignore async-related rules in test files since they often use subprocess for git setup
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
+]
+"tests/*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
+]
+"test_*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
 ]
 
 [tool.ruff.format]

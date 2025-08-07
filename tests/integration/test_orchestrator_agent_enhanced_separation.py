@@ -16,14 +16,12 @@ Validates that the Enhanced Separation architecture maintains:
 - Robust task tracking and analytics
 """
 
-import asyncio
 import os
 import shutil
 import sys
 import tempfile
-from datetime import datetime, timedelta
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -37,8 +35,6 @@ from state_management import CheckpointManager, StateManager, TaskState, Workflo
 from task_tracking import (
     TaskMetrics,
     TaskTracker,
-    TodoWriteIntegration,
-    WorkflowPhaseTracker,
 )
 from utils.error_handling import CircuitBreaker, ErrorHandler
 

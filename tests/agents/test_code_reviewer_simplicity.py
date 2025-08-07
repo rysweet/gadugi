@@ -6,7 +6,6 @@ CodeReviewer agent identify over-engineering patterns and suggest simpler altern
 """
 
 import unittest
-from unittest.mock import patch, Mock
 import tempfile
 import os
 

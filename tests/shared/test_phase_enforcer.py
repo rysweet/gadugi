@@ -6,16 +6,12 @@ execution without manual intervention.
 """
 
 import pytest
-import tempfile
 import os
 import json
-import subprocess
 import time
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import Mock, patch
 
 # Import the module under test
-import sys
 
 # sys.path manipulation removed to ensure consistent package imports
 
