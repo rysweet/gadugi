@@ -21,6 +21,38 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         Dict with stdout, stderr, returncode, and success status
     """
     
+    # Special case: task-decomposer uses Python implementation for reliability
+    if agent_name == "task-decomposer":
+        try:
+            import json
+            import sys
+            
+            # Add current directory to path for import
+            script_dir = Path(__file__).parent
+            if str(script_dir) not in sys.path:
+                sys.path.insert(0, str(script_dir))
+            
+            from simple_decomposer import decompose_task
+            
+            result = decompose_task(task_description or "Generic task")
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": json.dumps(result, indent=2),
+                "stderr": "",
+                "returncode": 0,
+                "success": True
+            }
+        except Exception as e:
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": "",
+                "stderr": f"Task decomposer error: {str(e)}",
+                "returncode": -1,
+                "success": False
+            }
+    
     # Find the agent file
     # Look relative to this script's directory
     script_dir = Path(__file__).parent
