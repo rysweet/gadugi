@@ -4,6 +4,7 @@
 Provides provider abstraction and unified access to multiple LLM providers.
 Handles load balancing, failover, rate limiting, caching, and cost optimization.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -228,9 +229,7 @@ class RateLimiter:
 
             # Remove old entries
             self.request_times = [t for t in self.request_times if t > cutoff]
-            self.token_usage = [
-                (t, tokens) for t, tokens in self.token_usage if t > cutoff
-            ]
+            self.token_usage = [(t, tokens) for t, tokens in self.token_usage if t > cutoff]
 
             # Check request rate limit
             if len(self.request_times) >= self.requests_per_minute:
@@ -265,17 +264,15 @@ class LLMProviderBase(ABC):
 
     @abstractmethod
     async def generate_streaming_completion(
-        self, request: LLMRequest,
+        self,
+        request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion for the request."""
         ...
 
     def can_handle_request(self, request: LLMRequest) -> bool:
         """Check if provider can handle the request."""
-        if (
-            request.type == RequestType.FUNCTION_CALL
-            and not self.config.supports_functions
-        ):
+        if request.type == RequestType.FUNCTION_CALL and not self.config.supports_functions:
             return False
 
         if request.stream and not self.config.supports_streaming:
@@ -305,8 +302,7 @@ class LLMProviderBase(ABC):
             # Update average response time
             if self.stats.total_requests > 0:
                 self.stats.average_response_time = (
-                    self.stats.average_response_time
-                    * (self.stats.successful_requests - 1)
+                    self.stats.average_response_time * (self.stats.successful_requests - 1)
                     + response.response_time
                 ) / self.stats.successful_requests
         else:
@@ -314,9 +310,7 @@ class LLMProviderBase(ABC):
 
         # Update error rate
         if self.stats.total_requests > 0:
-            self.stats.error_rate = (
-                self.stats.failed_requests / self.stats.total_requests
-            )
+            self.stats.error_rate = self.stats.failed_requests / self.stats.total_requests
 
 
 class OpenAIProvider(LLMProviderBase):
@@ -413,7 +407,8 @@ class OpenAIProvider(LLMProviderBase):
             raise
 
     async def generate_streaming_completion(
-        self, request: LLMRequest,
+        self,
+        request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion using OpenAI API."""
         if not self.client:
@@ -481,8 +476,7 @@ class AnthropicProvider(LLMProviderBase):
 
             response = await self.client.messages.create(
                 model=self.config.model_name,
-                messages=messages
-                or [{"role": "user", "content": request.prompt or ""}],
+                messages=messages or [{"role": "user", "content": request.prompt or ""}],
                 max_tokens=request.max_tokens or 1000,
                 temperature=request.temperature,
                 top_p=request.top_p,
@@ -500,8 +494,7 @@ class AnthropicProvider(LLMProviderBase):
                 usage={
                     "prompt_tokens": response.usage.input_tokens,
                     "completion_tokens": response.usage.output_tokens,
-                    "total_tokens": response.usage.input_tokens
-                    + response.usage.output_tokens,
+                    "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
                 },
                 finish_reason=response.stop_reason,
                 response_time=response_time,
@@ -529,7 +522,8 @@ class AnthropicProvider(LLMProviderBase):
             raise
 
     async def generate_streaming_completion(
-        self, request: LLMRequest,
+        self,
+        request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion using Anthropic API."""
         if not self.client:
@@ -547,8 +541,7 @@ class AnthropicProvider(LLMProviderBase):
 
             stream = await self.client.messages.create(
                 model=self.config.model_name,
-                messages=messages
-                or [{"role": "user", "content": request.prompt or ""}],
+                messages=messages or [{"role": "user", "content": request.prompt or ""}],
                 max_tokens=request.max_tokens or 1000,
                 temperature=request.temperature,
                 stream=True,
@@ -595,7 +588,8 @@ class MockProvider(LLMProviderBase):
         return llm_response
 
     async def generate_streaming_completion(
-        self, request: LLMRequest,
+        self,
+        request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate mock streaming completion."""
         content = "This is a mock streaming response. "
@@ -661,7 +655,10 @@ class ResponseCache:
             return entry.response
 
     def put(
-        self, request: LLMRequest, response: LLMResponse, ttl: int | None = None,
+        self,
+        request: LLMRequest,
+        response: LLMResponse,
+        ttl: int | None = None,
     ) -> None:
         """Cache response."""
         if request.stream:  # Don't cache streaming requests
@@ -673,7 +670,10 @@ class ResponseCache:
         with self.lock:
             # Create cache entry
             entry = CacheEntry(
-                key=key, response=response, created_at=datetime.now(), ttl=ttl,
+                key=key,
+                response=response,
+                created_at=datetime.now(),
+                ttl=ttl,
             )
 
             self.cache[key] = entry
@@ -687,9 +687,7 @@ class ResponseCache:
     def clear_expired(self) -> None:
         """Clear expired cache entries."""
         with self.lock:
-            expired_keys = [
-                key for key, entry in self.cache.items() if entry.is_expired
-            ]
+            expired_keys = [key for key, entry in self.cache.items() if entry.is_expired]
 
             for key in expired_keys:
                 del self.cache[key]
@@ -703,9 +701,7 @@ class ResponseCache:
                 "size": len(self.cache),
                 "max_size": self.max_size,
                 "hit_ratio": 0.0,  # Would need to track hits/misses
-                "expired_entries": sum(
-                    1 for entry in self.cache.values() if entry.is_expired
-                ),
+                "expired_entries": sum(1 for entry in self.cache.values() if entry.is_expired),
             }
 
 
@@ -728,18 +724,14 @@ class LoadBalancer:
             return None
 
         # Filter providers that can handle the request
-        available_providers = [
-            p for p in self.providers if p.can_handle_request(request)
-        ]
+        available_providers = [p for p in self.providers if p.can_handle_request(request)]
 
         if not available_providers:
             return None
 
         with self.lock:
             if self.strategy == LoadBalanceStrategy.ROUND_ROBIN:
-                provider = available_providers[
-                    self.current_index % len(available_providers)
-                ]
+                provider = available_providers[self.current_index % len(available_providers)]
                 self.current_index += 1
                 return provider
 
@@ -991,7 +983,8 @@ class LLMProxyService:
         raise last_exception or Exception("All retry attempts failed")
 
     async def generate_streaming_completion(
-        self, request: LLMRequest,
+        self,
+        request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion for request."""
         self.request_count += 1
@@ -1111,15 +1104,9 @@ class LLMProxyService:
             health_info["providers"] = provider_health
 
             # Overall status
-            if all(
-                p["status"] in ["healthy", "available"]
-                for p in provider_health.values()
-            ):
+            if all(p["status"] in ["healthy", "available"] for p in provider_health.values()):
                 health_info["status"] = "healthy"
-            elif any(
-                p["status"] in ["healthy", "available"]
-                for p in provider_health.values()
-            ):
+            elif any(p["status"] in ["healthy", "available"] for p in provider_health.values()):
                 health_info["status"] = "degraded"
             else:
                 health_info["status"] = "unhealthy"
@@ -1220,21 +1207,25 @@ async def main() -> None:
 
         # Test completion request
         request = create_completion_request(
-            "What is artificial intelligence?", model="mock-model", max_tokens=100,
+            "What is artificial intelligence?",
+            model="mock-model",
+            max_tokens=100,
         )
 
         await service.generate_completion(request)
 
         # Test chat request
         chat_request = create_chat_request(
-            [{"role": "user", "content": "Hello, how are you?"}], model="mock-model",
+            [{"role": "user", "content": "Hello, how are you?"}],
+            model="mock-model",
         )
 
         await service.generate_completion(chat_request)
 
         # Test streaming
         stream_request = create_completion_request(
-            "Tell me a short story", model="mock-model",
+            "Tell me a short story",
+            model="mock-model",
         )
         stream_request.stream = True
 

@@ -46,12 +46,10 @@ def demo_memory_manager():
 - Test coverage ensures reliability across operations
 """
 
-
     status_request = {"action": "status", "memory_content": sample_memory}
 
     status_result = run_memory_manager(status_request)
     status_result["statistics"]
-
 
     update_request = {
         "action": "update",
@@ -87,7 +85,6 @@ def demo_memory_manager():
     # Get updated memory
     updated_memory = update_result["updated_memory"]
 
-
     prune_request = {
         "action": "prune",
         "memory_content": updated_memory,
@@ -99,7 +96,6 @@ def demo_memory_manager():
         pass
     else:
         pass
-
 
     sync_request = {
         "action": "sync",
@@ -119,7 +115,6 @@ def demo_memory_manager():
             if action["action"] == "created_issue" or action["action"] == "closed_issue":
                 pass
 
-
     final_memory = prune_result["updated_memory"]
     lines = final_memory.split("\n")
 
@@ -129,7 +124,6 @@ def demo_memory_manager():
 
     if len(lines) > 25:
         pass
-
 
     return {
         "status_result": status_result,

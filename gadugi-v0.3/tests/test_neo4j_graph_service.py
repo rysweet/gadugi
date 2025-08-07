@@ -9,7 +9,8 @@ from unittest.mock import Mock, patch
 
 # Add services directory to path
 sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "services", "neo4j-graph"),
+    0,
+    os.path.join(os.path.dirname(__file__), "..", "services", "neo4j-graph"),
 )
 
 from neo4j_graph_service import (
@@ -404,9 +405,7 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         target_data = {"id": "agent-001", "name": "Test Agent"}
 
         mock_record.__getitem__ = Mock(
-            side_effect=lambda key: {"r": rel_data, "a": source_data, "b": target_data}[
-                key
-            ],
+            side_effect=lambda key: {"r": rel_data, "a": source_data, "b": target_data}[key],
         )
 
         mock_graph_db.driver.return_value = mock_driver
@@ -446,7 +445,9 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         self.service.connected = True
 
         result = await self.service.find_nodes(
-            node_type=NodeType.AGENT, properties={"status": "active"}, limit=10,
+            node_type=NodeType.AGENT,
+            properties={"status": "active"},
+            limit=10,
         )
 
         assert result.success
@@ -479,7 +480,8 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         self.service.connected = True
 
         result = await self.service.find_relationships(
-            source_id="task-001", relationship_type=RelationType.ASSIGNED_TO,
+            source_id="task-001",
+            relationship_type=RelationType.ASSIGNED_TO,
         )
 
         assert result.success
@@ -686,7 +688,8 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         self.service.connected = True
 
         result = await self.service.search_content(
-            "test query", node_types=[NodeType.DOCUMENT, NodeType.CONCEPT],
+            "test query",
+            node_types=[NodeType.DOCUMENT, NodeType.CONCEPT],
         )
 
         assert result.success
@@ -712,9 +715,7 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         self.service.driver = mock_driver
         self.service.connected = True
 
-        custom_query = (
-            "MATCH (n) RETURN n.name as node_name, COUNT(*) as relationship_count"
-        )
+        custom_query = "MATCH (n) RETURN n.name as node_name, COUNT(*) as relationship_count"
         result = await self.service.execute_cypher(custom_query, {"param1": "value1"})
 
         assert result.success
@@ -794,7 +795,9 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
             mock_create.return_value = mock_result
 
             result = await self.service.create_agent_node(
-                "agent-123", "Test Agent", {"skill": "analysis"},
+                "agent-123",
+                "Test Agent",
+                {"skill": "analysis"},
             )
 
             assert result.success
@@ -815,7 +818,9 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
             mock_create.return_value = mock_result
 
             result = await self.service.create_workflow_node(
-                "workflow-456", "Test Workflow", "running",
+                "workflow-456",
+                "Test Workflow",
+                "running",
             )
 
             assert result.success
@@ -836,7 +841,9 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
             mock_create.return_value = mock_result
 
             result = await self.service.create_dependency_relationship(
-                "task-1", "task-2", "blocks",
+                "task-1",
+                "task-2",
+                "blocks",
             )
 
             assert result.success
@@ -852,7 +859,10 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
     def test_create_concept_node_utility(self) -> None:
         """Test utility function for creating concept nodes."""
         node = create_concept_node(
-            "concept-123", "Machine Learning", "technology", "AI and ML concepts",
+            "concept-123",
+            "Machine Learning",
+            "technology",
+            "AI and ML concepts",
         )
 
         assert node.id == "concept-123"
@@ -865,7 +875,10 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         """Test utility function for creating document nodes."""
         content = "This is a test document with some content for testing purposes."
         node = create_document_node(
-            "doc-456", "Test Document", "/docs/test.md", content,
+            "doc-456",
+            "Test Document",
+            "/docs/test.md",
+            content,
         )
 
         assert node.id == "doc-456"
@@ -878,7 +891,10 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
     def test_create_task_node_utility(self) -> None:
         """Test utility function for creating task nodes."""
         node = create_task_node(
-            "task-789", "Implement Feature X", "high", "in_progress",
+            "task-789",
+            "Implement Feature X",
+            "high",
+            "in_progress",
         )
 
         assert node.id == "task-789"

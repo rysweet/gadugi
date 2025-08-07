@@ -90,7 +90,8 @@ class TestWorktreeEnvironmentSetup:
         """Set up test fixtures."""
         self.setup = WorktreeEnvironmentSetup()
         self.requirements = WorktreeRequirements(
-            uv_project=True, development_tools=["pytest", "ruff"],
+            uv_project=True,
+            development_tools=["pytest", "ruff"],
         )
 
     @pytest.mark.asyncio
@@ -102,7 +103,9 @@ class TestWorktreeEnvironmentSetup:
             subprocess.run(["git", "init"], check=False, capture_output=True)
             subprocess.run(["git", "config", "user.name", "Test"], check=False, capture_output=True)
             subprocess.run(
-                ["git", "config", "user.email", "test@example.com"], check=False, capture_output=True,
+                ["git", "config", "user.email", "test@example.com"],
+                check=False,
+                capture_output=True,
             )
 
             with (
@@ -129,7 +132,9 @@ class TestWorktreeEnvironmentSetup:
             subprocess.run(["git", "init"], check=False, capture_output=True)
             subprocess.run(["git", "config", "user.name", "Test"], check=False, capture_output=True)
             subprocess.run(
-                ["git", "config", "user.email", "test@example.com"], check=False, capture_output=True,
+                ["git", "config", "user.email", "test@example.com"],
+                check=False,
+                capture_output=True,
             )
 
             status = await self.setup._check_git_status()
@@ -154,7 +159,9 @@ class TestWorktreeEnvironmentSetup:
             assert result
 
             mock_run.assert_called_with(
-                ["uv", "--version"], capture_output=True, check=True,
+                ["uv", "--version"],
+                capture_output=True,
+                check=True,
             )
 
     @pytest.mark.asyncio
@@ -207,7 +214,9 @@ class TestWorktreeHealthMonitor:
             subprocess.run(["git", "init"], check=False, capture_output=True)
             subprocess.run(["git", "config", "user.name", "Test"], check=False, capture_output=True)
             subprocess.run(
-                ["git", "config", "user.email", "test@example.com"], check=False, capture_output=True,
+                ["git", "config", "user.email", "test@example.com"],
+                check=False,
+                capture_output=True,
             )
 
             health = await self.monitor._check_git_health(temp_dir)
@@ -282,14 +291,17 @@ class TestWorktreeCleanupManager:
         with (
             patch.object(self.cleanup_manager, "_is_task_completed") as mock_completed,
             patch.object(
-                self.cleanup_manager, "_has_uncommitted_changes",
+                self.cleanup_manager,
+                "_has_uncommitted_changes",
             ) as mock_changes,
         ):
             mock_completed.return_value = True
             mock_changes.return_value = False
 
             to_cleanup = await self.cleanup_manager._select_worktrees_for_cleanup(
-                worktrees, "completed_tasks", 7,
+                worktrees,
+                "completed_tasks",
+                7,
             )
 
             assert len(to_cleanup) == 1
@@ -303,14 +315,17 @@ class TestWorktreeCleanupManager:
         with (
             patch.object(self.cleanup_manager, "_is_task_completed") as mock_completed,
             patch.object(
-                self.cleanup_manager, "_has_uncommitted_changes",
+                self.cleanup_manager,
+                "_has_uncommitted_changes",
             ) as mock_changes,
         ):
             mock_completed.return_value = True
             mock_changes.return_value = True  # Has uncommitted changes
 
             to_cleanup = await self.cleanup_manager._select_worktrees_for_cleanup(
-                worktrees, "completed_tasks", 7,
+                worktrees,
+                "completed_tasks",
+                7,
             )
 
             assert len(to_cleanup) == 0  # Should be preserved
@@ -321,12 +336,16 @@ class TestWorktreeCleanupManager:
         worktrees = [self.old_worktree, self.new_worktree]
 
         with patch.object(
-            self.cleanup_manager, "_select_worktrees_for_cleanup",
+            self.cleanup_manager,
+            "_select_worktrees_for_cleanup",
         ) as mock_select:
             mock_select.return_value = [self.old_worktree]
 
             result = await self.cleanup_manager.cleanup_worktrees(
-                worktrees, "completed_tasks", 7, dry_run=True,
+                worktrees,
+                "completed_tasks",
+                7,
+                dry_run=True,
             )
 
             assert result.removed_count == 1
@@ -342,7 +361,9 @@ class TestWorktreeCleanupManager:
             subprocess.run(["git", "init"], check=False, capture_output=True)
             subprocess.run(["git", "config", "user.name", "Test"], check=False, capture_output=True)
             subprocess.run(
-                ["git", "config", "user.email", "test@example.com"], check=False, capture_output=True,
+                ["git", "config", "user.email", "test@example.com"],
+                check=False,
+                capture_output=True,
             )
 
             # Clean repository
@@ -363,7 +384,8 @@ class TestWorktreeCleanupManager:
     async def test_remove_worktree_with_uncommitted_changes(self) -> None:
         """Test worktree removal is blocked by uncommitted changes."""
         with patch.object(
-            self.cleanup_manager, "_has_uncommitted_changes",
+            self.cleanup_manager,
+            "_has_uncommitted_changes",
         ) as mock_changes:
             mock_changes.return_value = True  # Has uncommitted changes
 
@@ -404,7 +426,8 @@ class TestWorktreeManagerEngine:
         with (
             patch.object(self.manager, "_create_git_worktree") as mock_git,
             patch.object(
-                self.manager.environment_setup, "setup_environment",
+                self.manager.environment_setup,
+                "setup_environment",
             ) as mock_env,
         ):
             mock_git.return_value = True
@@ -415,7 +438,9 @@ class TestWorktreeManagerEngine:
             }
 
             result = await self.manager.create_worktree(
-                "test-task", "feature/test-task", "main",
+                "test-task",
+                "feature/test-task",
+                "main",
             )
 
             assert result.task_id == "test-task"
@@ -440,7 +465,9 @@ class TestWorktreeManagerEngine:
         self.manager.worktrees["test-task"] = existing
 
         result = await self.manager.create_worktree(
-            "test-task", "feature/test-task", "main",
+            "test-task",
+            "feature/test-task",
+            "main",
         )
 
         assert "already exists" in result.error_message
@@ -463,7 +490,9 @@ class TestWorktreeManagerEngine:
             self.manager.worktrees[f"task-{i}"] = metadata
 
         result = await self.manager.create_worktree(
-            "overflow-task", "feature/overflow-task", "main",
+            "overflow-task",
+            "feature/overflow-task",
+            "main",
         )
 
         assert result.status == "error"
@@ -542,7 +571,8 @@ class TestWorktreeManagerEngine:
         self.manager.worktrees["old-task"] = old_metadata
 
         with patch.object(
-            self.manager.cleanup_manager, "cleanup_worktrees",
+            self.manager.cleanup_manager,
+            "cleanup_worktrees",
         ) as mock_cleanup:
             mock_cleanup.return_value = CleanupResult(
                 removed_count=1,
@@ -573,7 +603,8 @@ class TestWorktreeManagerEngine:
         self.manager.worktrees["test-task"] = metadata
 
         with patch.object(
-            self.manager.health_monitor, "check_worktree_health",
+            self.manager.health_monitor,
+            "check_worktree_health",
         ) as mock_health:
             mock_health.return_value = {
                 "status": "healthy",
@@ -606,7 +637,8 @@ class TestWorktreeManagerEngine:
             self.manager.worktrees[f"task-{i}"] = metadata
 
         with patch.object(
-            self.manager.health_monitor, "check_worktree_health",
+            self.manager.health_monitor,
+            "check_worktree_health",
         ) as mock_health:
             mock_health.return_value = {
                 "status": "healthy",
@@ -667,9 +699,13 @@ class TestWorktreeIntegration:
 
         # Initialize git repository
         subprocess.run(["git", "init"], check=False, capture_output=True)
-        subprocess.run(["git", "config", "user.name", "Test User"], check=False, capture_output=True)
         subprocess.run(
-            ["git", "config", "user.email", "test@example.com"], check=False, capture_output=True,
+            ["git", "config", "user.name", "Test User"], check=False, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"],
+            check=False,
+            capture_output=True,
         )
 
         # Create initial commit
@@ -704,7 +740,8 @@ class TestWorktreeIntegration:
 
         # Create worktree
         requirements = WorktreeRequirements(
-            uv_project=False, development_tools=["pytest"],
+            uv_project=False,
+            development_tools=["pytest"],
         )
 
         with (
@@ -719,7 +756,10 @@ class TestWorktreeIntegration:
             mock_git.return_value = True
 
             result = await manager.create_worktree(
-                "integration-test", "feature/integration-test", "main", requirements,
+                "integration-test",
+                "feature/integration-test",
+                "main",
+                requirements,
             )
 
             assert result.status == "ready"
@@ -732,7 +772,8 @@ class TestWorktreeIntegration:
 
         # Health check (mock since worktree path doesn't actually exist)
         with patch.object(
-            manager.health_monitor, "check_worktree_health",
+            manager.health_monitor,
+            "check_worktree_health",
         ) as mock_health:
             mock_health.return_value = {"status": "healthy", "issues": []}
             health = await manager.health_check("integration-test")
@@ -762,7 +803,9 @@ class TestWorktreePerformance:
             tasks = []
             for i in range(5):
                 task = manager.create_worktree(
-                    f"perf-task-{i}", f"feature/perf-task-{i}", "main",
+                    f"perf-task-{i}",
+                    f"feature/perf-task-{i}",
+                    "main",
                 )
                 tasks.append(task)
 
@@ -791,7 +834,8 @@ class TestWorktreePerformance:
             manager.worktrees[f"perf-task-{i}"] = metadata
 
         with patch.object(
-            manager.health_monitor, "check_worktree_health",
+            manager.health_monitor,
+            "check_worktree_health",
         ) as mock_health:
             mock_health.return_value = {"status": "healthy", "issues": []}
 

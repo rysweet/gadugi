@@ -159,7 +159,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated_file = self.engine._generate_engine_file(
-            self.test_spec, self.test_template_options, output_dir,
+            self.test_spec,
+            self.test_template_options,
+            output_dir,
         )
 
         # Check file was generated
@@ -189,7 +191,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated_file = self.engine._generate_engine_file(
-            self.test_spec, minimal_options, output_dir,
+            self.test_spec,
+            minimal_options,
+            output_dir,
         )
 
         # Check file was generated
@@ -215,7 +219,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated_file = self.engine._generate_engine_file(
-            self.test_spec, advanced_options, output_dir,
+            self.test_spec,
+            advanced_options,
+            output_dir,
         )
 
         # Check file was generated
@@ -326,31 +332,28 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         )
 
         recommendations = self.engine._generate_recommendations(
-            complex_spec, self.test_template_options,
+            complex_spec,
+            self.test_template_options,
         )
 
         # Should recommend splitting due to many capabilities
-        arch_recommendations = [
-            r for r in recommendations if r.category == "architecture"
-        ]
+        arch_recommendations = [r for r in recommendations if r.category == "architecture"]
         assert len(arch_recommendations) > 0
 
         # Test with minimal template
         minimal_options = TemplateOptions(
-            base_template=TemplateType.MINIMAL, include_tests=False,
+            base_template=TemplateType.MINIMAL,
+            include_tests=False,
         )
 
         recommendations = self.engine._generate_recommendations(
-            self.test_spec, minimal_options,
+            self.test_spec,
+            minimal_options,
         )
 
         # Should recommend upgrading template and adding tests
-        feature_recommendations = [
-            r for r in recommendations if r.category == "features"
-        ]
-        quality_recommendations = [
-            r for r in recommendations if r.category == "quality"
-        ]
+        feature_recommendations = [r for r in recommendations if r.category == "features"]
+        quality_recommendations = [r for r in recommendations if r.category == "quality"]
 
         assert len(feature_recommendations) > 0
         assert len(quality_recommendations) > 0
@@ -358,7 +361,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
     def test_create_agent_success(self) -> None:
         """Test successful agent creation."""
         response = self.engine.create_agent(
-            self.test_spec, self.test_template_options, self.test_generation_options,
+            self.test_spec,
+            self.test_template_options,
+            self.test_generation_options,
         )
 
         assert isinstance(response, AgentGeneratorResponse)
@@ -397,7 +402,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         )
 
         response = self.engine.create_agent(
-            invalid_spec, self.test_template_options, self.test_generation_options,
+            invalid_spec,
+            self.test_template_options,
+            self.test_generation_options,
         )
 
         assert not response.success
@@ -408,7 +415,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
     def test_create_agent_file_error(self, mock_open) -> None:
         """Test agent creation with file system error."""
         response = self.engine.create_agent(
-            self.test_spec, self.test_template_options, self.test_generation_options,
+            self.test_spec,
+            self.test_template_options,
+            self.test_generation_options,
         )
 
         assert not response.success
@@ -473,7 +482,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         generated_file = self.engine._generate_engine_file(
-            self.test_spec, self.test_template_options, output_dir,
+            self.test_spec,
+            self.test_template_options,
+            output_dir,
         )
 
         with open(generated_file.path) as f:
@@ -528,7 +539,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
     def test_integration_points_generation(self) -> None:
         """Test generation of integration points."""
         response = self.engine.create_agent(
-            self.test_spec, self.test_template_options, self.test_generation_options,
+            self.test_spec,
+            self.test_template_options,
+            self.test_generation_options,
         )
 
         assert response.success
@@ -541,9 +554,7 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         assert len(orchestrator_integration) > 0
 
         # Check for gadugi integration
-        gadugi_integration = [
-            ip for ip in response.integration_points if ip.component == "gadugi"
-        ]
+        gadugi_integration = [ip for ip in response.integration_points if ip.component == "gadugi"]
         assert len(gadugi_integration) > 0
 
     def test_agent_type_enum(self) -> None:
@@ -563,7 +574,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
     def test_dataclass_serialization(self) -> None:
         """Test that dataclasses can be serialized to dictionaries."""
         response = self.engine.create_agent(
-            self.test_spec, self.test_template_options, self.test_generation_options,
+            self.test_spec,
+            self.test_template_options,
+            self.test_generation_options,
         )
 
         # Test that response can be converted to dict (via asdict)
@@ -628,7 +641,9 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         )
 
         response = self.engine.create_agent(
-            full_spec, full_template_options, full_generation_options,
+            full_spec,
+            full_template_options,
+            full_generation_options,
         )
 
         # Verify successful generation
@@ -667,9 +682,7 @@ class TestAgentGeneratorEngine(unittest.TestCase):
         assert "def test_engine_initialization" in test_content
 
         # Verify README file
-        readme_file = next(
-            f for f in response.generated_files if f.type == "documentation"
-        )
+        readme_file = next(f for f in response.generated_files if f.type == "documentation")
         with open(readme_file.path) as f:
             readme_content = f.read()
 

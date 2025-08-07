@@ -53,7 +53,9 @@ class TestWorkflowData:
     def test_resource_usage_creation(self) -> None:
         """Test ResourceUsage creation."""
         resource_usage = ResourceUsage(
-            peak_memory_mb=512.0, cpu_time_seconds=120.0, disk_io_mb=25.5,
+            peak_memory_mb=512.0,
+            cpu_time_seconds=120.0,
+            disk_io_mb=25.5,
         )
 
         assert resource_usage.peak_memory_mb == 512.0
@@ -193,7 +195,12 @@ class TestPatternRecognizer:
                     agents_used=["orchestrator", "code-writer", "test-writer"],
                     task_sequence=[
                         WorkflowStep(
-                            "orchestrator", "coordinate", 15, True, {}, base_time,
+                            "orchestrator",
+                            "coordinate",
+                            15,
+                            True,
+                            {},
+                            base_time,
                         ),
                         WorkflowStep(
                             "code-writer",
@@ -228,7 +235,12 @@ class TestPatternRecognizer:
                     agents_used=["orchestrator", "code-writer"],
                     task_sequence=[
                         WorkflowStep(
-                            "orchestrator", "coordinate", 15, True, {}, base_time,
+                            "orchestrator",
+                            "coordinate",
+                            15,
+                            True,
+                            {},
+                            base_time,
                         ),
                         WorkflowStep(
                             "code-writer",
@@ -334,7 +346,12 @@ class TestLearningEngine:
                 ["workflow1", "workflow2"],
             ),
             Pattern(
-                "failure", "Test failure pattern", 0.3, "medium", 0.7, ["workflow3"],
+                "failure",
+                "Test failure pattern",
+                0.3,
+                "medium",
+                0.7,
+                ["workflow3"],
             ),
             Pattern(
                 "optimization",
@@ -365,7 +382,8 @@ class TestLearningEngine:
     def test_extract_learning_insights(self) -> None:
         """Test extraction of learning insights."""
         insights = self.learning_engine.extract_learning_insights(
-            self.sample_workflows, self.sample_patterns,
+            self.sample_workflows,
+            self.sample_patterns,
         )
 
         assert isinstance(insights, list)
@@ -455,7 +473,9 @@ class TestRecommendationEngine:
     def test_generate_recommendations(self) -> None:
         """Test recommendation generation."""
         recommendations = self.recommendation_engine.generate_recommendations(
-            self.sample_metrics, self.sample_patterns, self.sample_insights,
+            self.sample_metrics,
+            self.sample_patterns,
+            self.sample_insights,
         )
 
         assert isinstance(recommendations, list)
@@ -473,21 +493,15 @@ class TestRecommendationEngine:
 
     def test_generate_performance_recommendations(self) -> None:
         """Test performance-based recommendations."""
-        recommendations = (
-            self.recommendation_engine._generate_performance_recommendations(
-                self.sample_metrics,
-            )
+        recommendations = self.recommendation_engine._generate_performance_recommendations(
+            self.sample_metrics,
         )
 
         assert isinstance(recommendations, list)
-        assert (
-            len(recommendations) > 0
-        )  # Should generate recommendations for low scores
+        assert len(recommendations) > 0  # Should generate recommendations for low scores
 
         # Should recommend resource optimization (score is 5.0, below threshold)
-        resource_recs = [
-            r for r in recommendations if "resource" in r.description.lower()
-        ]
+        resource_recs = [r for r in recommendations if "resource" in r.description.lower()]
         assert len(resource_recs) > 0
 
     def test_generate_pattern_recommendations(self) -> None:
@@ -499,9 +513,7 @@ class TestRecommendationEngine:
         assert isinstance(recommendations, list)
 
         # Should recommend bottleneck resolution
-        bottleneck_recs = [
-            r for r in recommendations if "bottleneck" in r.description.lower()
-        ]
+        bottleneck_recs = [r for r in recommendations if "bottleneck" in r.description.lower()]
         assert len(bottleneck_recs) > 0
 
     def test_generate_insight_recommendations(self) -> None:
@@ -516,7 +528,9 @@ class TestRecommendationEngine:
     def test_recommendation_sorting(self) -> None:
         """Test that recommendations are properly sorted."""
         recommendations = self.recommendation_engine.generate_recommendations(
-            self.sample_metrics, self.sample_patterns, self.sample_insights,
+            self.sample_metrics,
+            self.sample_patterns,
+            self.sample_insights,
         )
 
         if len(recommendations) > 1:
@@ -546,7 +560,12 @@ class TestTeamCoachEngine:
             agents_used=["orchestrator", "code-writer"],
             task_sequence=[
                 WorkflowStep(
-                    "orchestrator", "coordinate", 15, True, {}, datetime.now(),
+                    "orchestrator",
+                    "coordinate",
+                    15,
+                    True,
+                    {},
+                    datetime.now(),
                 ),
                 WorkflowStep(
                     "code-writer",
@@ -601,9 +620,7 @@ class TestTeamCoachEngine:
         trends = self.engine._calculate_performance_trends(workflows)
 
         assert isinstance(trends, dict)
-        assert (
-            "insufficient_data" in trends
-        )  # Single workflow should indicate insufficient data
+        assert "insufficient_data" in trends  # Single workflow should indicate insufficient data
 
     def test_score_to_label(self) -> None:
         """Test score to label conversion."""

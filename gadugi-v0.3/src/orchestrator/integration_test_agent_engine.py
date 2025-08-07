@@ -8,6 +8,7 @@ This agent includes advanced features like:
 - Error recovery
 - Configuration management
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -60,7 +61,7 @@ class IntegrationTestAgentEngine:
         self.metrics = PerformanceMetrics(last_updated=datetime.now())
         self.cache = {{}}
 
-                # Advanced initialization
+        # Advanced initialization
         self.operation_history = []
         self.error_count = 0
         self.performance_tracker = {}
@@ -99,10 +100,12 @@ class IntegrationTestAgentEngine:
             result = await self._process_request_async(request)
 
             # Cache result
-            self.cache[cache_key] = {{
-                "data": result,
-                "timestamp": datetime.now(),
-            }}
+            self.cache[cache_key] = {
+                {
+                    "data": result,
+                    "timestamp": datetime.now(),
+                },
+            }
 
             self._update_metrics(start_time, cache_hit=False)
             self.state = IntegrationTestAgentState.IDLE
@@ -114,11 +117,13 @@ class IntegrationTestAgentEngine:
             self.logger.exception("Error in async operation: {e}")
             self._update_metrics(start_time, error=True)
 
-            return {{
-                "success": False,
-                "error": str(e),
-                "timestamp": datetime.now().isoformat(),
-            }}
+            return {
+                {
+                    "success": False,
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat(),
+                },
+            }
 
     async def _process_request_async(self, request: dict[str, Any]) -> dict[str, Any]:
         """Process request asynchronously."""
@@ -130,20 +135,24 @@ class IntegrationTestAgentEngine:
         self.logger.info(f"Advanced processing: {operation}")
 
         # Record operation
-        self.operation_history.append({
-            "operation": operation,
-            "timestamp": datetime.now(),
-            "parameters": request.get("parameters", {}),
-        })
+        self.operation_history.append(
+            {
+                "operation": operation,
+                "timestamp": datetime.now(),
+                "parameters": request.get("parameters", {}),
+            },
+        )
 
         # Process with monitoring
 
-        return {{
-            "success": True,
-            "operation": request.get("operation", "unknown"),
-            "results": {{"processed": True}},
-            "timestamp": datetime.now().isoformat(),
-        }}
+        return {
+            {
+                "success": True,
+                "operation": request.get("operation", "unknown"),
+                "results": {{"processed": True}},
+                "timestamp": datetime.now().isoformat(),
+            },
+        }
 
     def _generate_cache_key(self, request: dict[str, Any]) -> str:
         """Generate cache key for request."""
@@ -154,7 +163,9 @@ class IntegrationTestAgentEngine:
         cache_age = datetime.now() - cached_item["timestamp"]
         return cache_age.total_seconds() < self.config.cache_ttl
 
-    def _update_metrics(self, start_time: datetime, cache_hit: bool = False, error: bool = False) -> None:
+    def _update_metrics(
+        self, start_time: datetime, cache_hit: bool = False, error: bool = False,
+    ) -> None:
         """Update performance metrics."""
         processing_time = (datetime.now() - start_time).total_seconds()
 
@@ -165,9 +176,9 @@ class IntegrationTestAgentEngine:
             self.metrics.average_processing_time = processing_time
         else:
             self.metrics.average_processing_time = (
-                (self.metrics.average_processing_time * (self.metrics.operations_count - 1) + processing_time)
-                / self.metrics.operations_count
-            )
+                self.metrics.average_processing_time * (self.metrics.operations_count - 1)
+                + processing_time
+            ) / self.metrics.operations_count
 
         # Update error rate
         if error:
@@ -183,12 +194,14 @@ class IntegrationTestAgentEngine:
 
     def get_metrics(self) -> dict[str, Any]:
         """Get current performance metrics."""
-        return {{
-            "state": self.state.value,
-            "metrics": asdict(self.metrics),
-            "cache_size": len(self.cache),
-            "config": asdict(self.config),
-        }}
+        return {
+            {
+                "state": self.state.value,
+                "metrics": asdict(self.metrics),
+                "cache_size": len(self.cache),
+                "config": asdict(self.config),
+            },
+        }
 
     def cleanup_cache(self) -> None:
         """Clean up expired cache entries."""
@@ -212,7 +225,6 @@ class IntegrationTestAgentEngine:
         self.logger.info("integration_test_agent agent shutting down gracefully")
 
 
-
 class IntegrationTestAgentManager:
     """Manager class for integration-test-agent operations."""
 
@@ -233,4 +245,3 @@ class IntegrationTestAgentManager:
     def get_operation_status(self, operation_id: str) -> dict[str, Any]:
         """Get status of submitted operation."""
         return self.active_operations.get(operation_id, {"error": "Operation not found"})
-

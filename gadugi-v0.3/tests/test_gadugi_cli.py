@@ -137,7 +137,9 @@ class TestGadugiCLI(unittest.IsolatedAsyncioTestCase):
         # Mock service manager
         mock_services = [
             ServiceInfo(
-                "event-router", ServiceType.EVENT_ROUTER, ServiceStatus.RUNNING,
+                "event-router",
+                ServiceType.EVENT_ROUTER,
+                ServiceStatus.RUNNING,
             ),
             ServiceInfo("mcp", ServiceType.MCP, ServiceStatus.STOPPED),
         ]
@@ -201,7 +203,8 @@ class TestGadugiCLI(unittest.IsolatedAsyncioTestCase):
 
         assert result == 0
         self.cli.agent_manager.invoke_agent.assert_called_once_with(
-            "orchestrator", "test prompt",
+            "orchestrator",
+            "test prompt",
         )
         mock_print.assert_called_once_with(mock_result)
 
@@ -549,7 +552,9 @@ class TestCLIFormatting(unittest.TestCase):
     def test_print_command_result_success(self) -> None:
         """Test printing successful command result."""
         result = CommandResult(
-            success=True, message="Operation completed successfully", execution_time=1.5,
+            success=True,
+            message="Operation completed successfully",
+            execution_time=1.5,
         )
 
         # Should not raise any exceptions
@@ -644,7 +649,9 @@ class TestCLIIntegration(unittest.IsolatedAsyncioTestCase):
         # Mock service manager
         mock_services = [
             ServiceInfo(
-                "event-router", ServiceType.EVENT_ROUTER, ServiceStatus.STOPPED,
+                "event-router",
+                ServiceType.EVENT_ROUTER,
+                ServiceStatus.STOPPED,
             ),
             ServiceInfo("mcp", ServiceType.MCP, ServiceStatus.STOPPED),
         ]

@@ -3,6 +3,7 @@
 
 REST API client agent
 """
+
 from __future__ import annotations
 
 import logging

@@ -3,6 +3,7 @@
 
 Manages AI assistant memory, context persistence, and GitHub Issues synchronization.
 """
+
 from __future__ import annotations
 
 import json
@@ -174,19 +175,16 @@ class MemoryManager:
         """Determine the priority of a memory item."""
         line_lower = line.lower()
 
-        if any(
-            marker in line_lower
-            for marker in ["critical", "urgent", "high priority", "major"]
-        ):
+        if any(marker in line_lower for marker in ["critical", "urgent", "high priority", "major"]):
             return "high"
-        if any(
-            marker in line_lower for marker in ["low priority", "minor", "nice to have"]
-        ):
+        if any(marker in line_lower for marker in ["low priority", "minor", "nice to have"]):
             return "low"
         return "medium"
 
     def update_memory(
-        self, sections: dict[str, MemorySection], updates: list[dict[str, Any]],
+        self,
+        sections: dict[str, MemorySection],
+        updates: list[dict[str, Any]],
     ) -> dict[str, MemorySection]:
         """Update memory sections with new content."""
         updated_sections = sections.copy()
@@ -216,7 +214,9 @@ class MemoryManager:
             else:
                 # Create new section if needed
                 updated_sections[target_section] = MemorySection(
-                    name=target_section, content=[], items=[new_item],
+                    name=target_section,
+                    content=[],
+                    items=[new_item],
                 )
 
         return updated_sections
@@ -357,7 +357,8 @@ class GitHubSync:
                     "--json",
                     "number,title,body,state,labels,url",
                 ],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=30,
             )
@@ -404,7 +405,8 @@ class GitHubSync:
                     "--label",
                     ",".join(labels),
                 ],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=30,
             )
@@ -509,14 +511,16 @@ class GitHubSync:
             if new_state in {"completed", "closed"}:
                 result = subprocess.run(
                     ["gh", "issue", "close", str(issue.number)],
-                    check=False, capture_output=True,
+                    check=False,
+                    capture_output=True,
                     text=True,
                     timeout=30,
                 )
             elif new_state == "open" and issue.state == "closed":
                 result = subprocess.run(
                     ["gh", "issue", "reopen", str(issue.number)],
-                    check=False, capture_output=True,
+                    check=False,
+                    capture_output=True,
                     text=True,
                     timeout=30,
                 )
@@ -620,7 +624,9 @@ class MemoryManagerEngine:
         preserve_critical = prune_options.get("preserve_critical", True)
 
         pruned_sections = self.memory_manager.prune_memory(
-            sections, days_threshold, preserve_critical,
+            sections,
+            days_threshold,
+            preserve_critical,
         )
 
         pruned_items = sum(len(section.items) for section in pruned_sections.values())
@@ -697,7 +703,8 @@ class MemoryManagerEngine:
                                 item.type == "accomplishment" or "✅" in item.content
                             ):
                                 if self.github_sync.update_issue_status(
-                                    issue, "closed",
+                                    issue,
+                                    "closed",
                                 ):
                                     actions_taken.append(
                                         {
@@ -749,9 +756,7 @@ class MemoryManagerEngine:
             for section in sections.values():
                 for item in section.items:
                     type_counts[item.type] = type_counts.get(item.type, 0) + 1
-                    priority_counts[item.priority] = (
-                        priority_counts.get(item.priority, 0) + 1
-                    )
+                    priority_counts[item.priority] = priority_counts.get(item.priority, 0) + 1
 
             statistics.update(
                 {"items_by_type": type_counts, "items_by_priority": priority_counts},

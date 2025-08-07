@@ -4,6 +4,7 @@
 Generates comprehensive test suites, test cases, and testing strategies.
 Supports multiple programming languages and testing frameworks.
 """
+
 from __future__ import annotations
 
 import ast
@@ -281,12 +282,14 @@ class TestWriterEngine:
                 else:
                     self.logger.error(f"No analyzer available for {language.value}")
                     return self._create_error_result(
-                        "No analyzer available", "generate",
+                        "No analyzer available",
+                        "generate",
                     )
 
             if not source_info:
                 return self._create_error_result(
-                    "No valid source files to analyze", "generate",
+                    "No valid source files to analyze",
+                    "generate",
                 )
 
             # Generate tests for each source file
@@ -302,7 +305,11 @@ class TestWriterEngine:
 
             for file_info in source_info:
                 test_file_info = generator.generate_test_file(
-                    file_info, test_directory, test_requirements, configuration, options,
+                    file_info,
+                    test_directory,
+                    test_requirements,
+                    configuration,
+                    options,
                 )
 
                 if test_file_info:
@@ -311,7 +318,10 @@ class TestWriterEngine:
 
             # Generate test infrastructure
             infrastructure = self._generate_test_infrastructure(
-                test_directory, language, configuration, options,
+                test_directory,
+                language,
+                configuration,
+                options,
             )
 
             # Analyze test coverage and gaps
@@ -374,11 +384,15 @@ class TestWriterEngine:
 
         if language == TestLanguage.PYTHON:
             self._generate_python_infrastructure(
-                test_directory, configuration, infrastructure,
+                test_directory,
+                configuration,
+                infrastructure,
             )
         elif language in [TestLanguage.JAVASCRIPT, TestLanguage.TYPESCRIPT]:
             self._generate_javascript_infrastructure(
-                test_directory, configuration, infrastructure,
+                test_directory,
+                configuration,
+                infrastructure,
             )
 
         return infrastructure
@@ -445,7 +459,9 @@ class TestWriterEngine:
             infrastructure["fixtures_created"].append("setup.js")
 
     def _analyze_test_coverage(
-        self, source_info: list[SourceFileInfo], test_files: list[TestFileInfo],
+        self,
+        source_info: list[SourceFileInfo],
+        test_files: list[TestFileInfo],
     ) -> dict[str, Any]:
         """Analyze test coverage and identify gaps."""
         total_functions = sum(
@@ -453,9 +469,7 @@ class TestWriterEngine:
             for info in source_info
         )
 
-        tested_functions = sum(
-            tf.test_count for tf in test_files
-        )  # Simplified estimate
+        tested_functions = sum(tf.test_count for tf in test_files)  # Simplified estimate
 
         # Identify test gaps (simplified)
         test_gaps = []
@@ -479,15 +493,19 @@ class TestWriterEngine:
         }
 
     def _calculate_quality_metrics(
-        self, test_files: list[TestFileInfo], source_info: list[SourceFileInfo],
+        self,
+        test_files: list[TestFileInfo],
+        source_info: list[SourceFileInfo],
     ) -> QualityMetrics:
         """Calculate quality metrics for generated tests."""
         # Simplified quality calculation
         avg_tests_per_file = sum(tf.test_count for tf in test_files) / max(
-            len(test_files), 1,
+            len(test_files),
+            1,
         )
         sum(info.complexity_score for info in source_info) / max(
-            len(source_info), 1,
+            len(source_info),
+            1,
         )
 
         base_quality = 75.0
@@ -508,7 +526,9 @@ class TestWriterEngine:
         )
 
     def _generate_recommendations(
-        self, analysis: dict[str, Any], quality: QualityMetrics,
+        self,
+        analysis: dict[str, Any],
+        quality: QualityMetrics,
     ) -> list[dict[str, str]]:
         """Generate recommendations for test improvement."""
         recommendations = []
@@ -546,7 +566,9 @@ class TestWriterEngine:
         return recommendations
 
     def _estimate_coverage(
-        self, source_info: list[SourceFileInfo], test_files: list[TestFileInfo],
+        self,
+        source_info: list[SourceFileInfo],
+        test_files: list[TestFileInfo],
     ) -> float:
         """Estimate test coverage percentage."""
         if not source_info or not test_files:
@@ -561,7 +583,9 @@ class TestWriterEngine:
         return round(estimated_coverage, 1)
 
     def _create_error_result(
-        self, error_message: str, operation: str,
+        self,
+        error_message: str,
+        operation: str,
     ) -> TestGenerationResult:
         """Create error result."""
         return TestGenerationResult(
@@ -613,9 +637,7 @@ class TestWriterEngine:
         language = TestLanguage(target.get("language", "python"))
 
         # Parse test requirements
-        test_types = [
-            TestType(t) for t in requirements_data.get("test_types", ["unit"])
-        ]
+        test_types = [TestType(t) for t in requirements_data.get("test_types", ["unit"])]
         requirements = TestRequirements(
             test_types=test_types,
             coverage_target=requirements_data.get("coverage_target", 95.0),
@@ -623,7 +645,8 @@ class TestWriterEngine:
             include_edge_cases=requirements_data.get("include_edge_cases", True),
             include_error_cases=requirements_data.get("include_error_cases", True),
             include_performance_tests=requirements_data.get(
-                "include_performance_tests", False,
+                "include_performance_tests",
+                False,
             ),
         )
 
@@ -651,7 +674,12 @@ class TestWriterEngine:
         )
 
         result = self.generate_tests(
-            source_files, test_directory, language, requirements, configuration, options,
+            source_files,
+            test_directory,
+            language,
+            requirements,
+            configuration,
+            options,
         )
 
         return asdict(result)
@@ -1167,7 +1195,8 @@ class PythonCodeAnalyzer:
             if isinstance(decorator, ast.Name):
                 decorators.append(decorator.id)
             elif isinstance(decorator, ast.Call) and isinstance(
-                decorator.func, ast.Name,
+                decorator.func,
+                ast.Name,
             ):
                 decorators.append(decorator.func.id)
 
@@ -1230,13 +1259,18 @@ class PythonCodeAnalyzer:
         complexity = 1  # Base complexity
 
         for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler, ast.And, ast.Or)):
+            if isinstance(
+                child,
+                (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler, ast.And, ast.Or),
+            ):
                 complexity += 1
 
         return complexity
 
     def _calculate_complexity_score(
-        self, functions: list[FunctionInfo], classes: list[ClassInfo],
+        self,
+        functions: list[FunctionInfo],
+        classes: list[ClassInfo],
     ) -> float:
         """Calculate overall complexity score for the file."""
         total_complexity = sum(func.complexity for func in functions)
@@ -1388,7 +1422,10 @@ class PytestGenerator:
 
         # Generate test content
         test_content = self._generate_pytest_content(
-            file_info, requirements, configuration, options,
+            file_info,
+            requirements,
+            configuration,
+            options,
         )
 
         # Write test file
@@ -1398,8 +1435,7 @@ class PytestGenerator:
 
         # Calculate metrics
         test_count = (
-            len(file_info.functions) * 3
-            + sum(len(cls.methods) for cls in file_info.classes) * 3
+            len(file_info.functions) * 3 + sum(len(cls.methods) for cls in file_info.classes) * 3
         )
         coverage_estimate = min(95.0, test_count * 5)  # Simplified estimate
 
@@ -1463,9 +1499,7 @@ class PytestGenerator:
         if options.include_setup_teardown:
             lines.append("    def setup_method(self):")
             lines.append('        """Set up test fixtures before each test method."""')
-            init_params = ", ".join(
-                f'"{p}"' for p in cls.init_parameters[:3]
-            )  # Limit params
+            init_params = ", ".join(f'"{p}"' for p in cls.init_parameters[:3])  # Limit params
             lines.append(f"        self.instance = {cls.name}({init_params})")
             lines.append("")
 
@@ -1485,7 +1519,9 @@ class PytestGenerator:
         return lines
 
     def _generate_method_tests(
-        self, method: FunctionInfo, options: TestOptions,
+        self,
+        method: FunctionInfo,
+        options: TestOptions,
     ) -> list[str]:
         """Generate tests for a method."""
         lines = []
@@ -1514,7 +1550,9 @@ class PytestGenerator:
         return lines
 
     def _generate_function_tests(
-        self, func: FunctionInfo, options: TestOptions,
+        self,
+        func: FunctionInfo,
+        options: TestOptions,
     ) -> list[str]:
         """Generate tests for a function."""
         lines = []
@@ -1574,7 +1612,10 @@ class JestGenerator:
 
         # Generate test content
         test_content = self._generate_jest_content(
-            file_info, requirements, configuration, options,
+            file_info,
+            requirements,
+            configuration,
+            options,
         )
 
         # Write test file
@@ -1584,8 +1625,7 @@ class JestGenerator:
 
         # Calculate metrics
         test_count = (
-            len(file_info.functions) * 2
-            + sum(len(cls.methods) for cls in file_info.classes) * 2
+            len(file_info.functions) * 2 + sum(len(cls.methods) for cls in file_info.classes) * 2
         )
         coverage_estimate = min(90.0, test_count * 4)
 
@@ -1634,7 +1674,9 @@ class JestGenerator:
         return "\n".join(lines)
 
     def _generate_jest_class_tests(
-        self, cls: ClassInfo, options: TestOptions,
+        self,
+        cls: ClassInfo,
+        options: TestOptions,
     ) -> list[str]:
         """Generate Jest tests for a class."""
         lines = []
@@ -1683,7 +1725,9 @@ class JestGenerator:
         return lines
 
     def _generate_jest_function_tests(
-        self, func: FunctionInfo, options: TestOptions,
+        self,
+        func: FunctionInfo,
+        options: TestOptions,
     ) -> list[str]:
         """Generate Jest tests for a function."""
         lines = []

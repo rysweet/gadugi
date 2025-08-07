@@ -126,9 +126,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 if result["integration_notes"]:
                     output += f"\nIntegration: {result['integration_notes']}"
             else:
-                output = (
-                    f"Code generation failed: {result.get('error', 'Unknown error')}"
-                )
+                output = f"Code generation failed: {result.get('error', 'Unknown error')}"
 
             return {
                 "agent": agent_name,
@@ -193,7 +191,8 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         # Run claude with a simple non-interactive command
         result = subprocess.run(
             ["claude", "-p", simple_prompt],
-            check=False, capture_output=True,
+            check=False,
+            capture_output=True,
             text=True,
             timeout=30,  # Reduced timeout
         )
@@ -250,7 +249,6 @@ def main() -> None:
         pass
 
     result = run_agent(agent_name, task_description)
-
 
     if result["stdout"]:
         pass

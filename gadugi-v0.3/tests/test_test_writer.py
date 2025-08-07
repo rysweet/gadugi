@@ -95,7 +95,9 @@ class TestTestWriterEngine(unittest.TestCase):
 
         # Sample options
         self.sample_options = TestOptions(
-            generate_fixtures=True, include_setup_teardown=True, add_docstrings=True,
+            generate_fixtures=True,
+            include_setup_teardown=True,
+            add_docstrings=True,
         )
 
     def tearDown(self) -> None:
@@ -325,7 +327,10 @@ class TestTestWriterEngine(unittest.TestCase):
 
         config = TestConfiguration(testing_framework=TestFramework.JEST)
         infrastructure = self.engine._generate_test_infrastructure(
-            test_dir, TestLanguage.JAVASCRIPT, config, self.sample_options,
+            test_dir,
+            TestLanguage.JAVASCRIPT,
+            config,
+            self.sample_options,
         )
 
         # Check infrastructure files
@@ -350,7 +355,8 @@ class TestTestWriterEngine(unittest.TestCase):
         ]
 
         analysis = self.engine._analyze_test_coverage(
-            [self.sample_source_info], test_files,
+            [self.sample_source_info],
+            test_files,
         )
 
         assert "functions_tested" in analysis
@@ -376,7 +382,8 @@ class TestTestWriterEngine(unittest.TestCase):
         ]
 
         metrics = self.engine._calculate_quality_metrics(
-            test_files, [self.sample_source_info],
+            test_files,
+            [self.sample_source_info],
         )
 
         assert isinstance(metrics, QualityMetrics)
@@ -424,9 +431,7 @@ class TestTestWriterEngine(unittest.TestCase):
         assert len(quality_recs) > 0
 
         # Should recommend maintainability improvements (quality score < 80)
-        maintainability_recs = [
-            r for r in recommendations if r["category"] == "maintainability"
-        ]
+        maintainability_recs = [r for r in recommendations if r["category"] == "maintainability"]
         assert len(maintainability_recs) > 0
 
     def test_estimate_coverage(self) -> None:
@@ -870,9 +875,7 @@ class AdvancedCalculator extends Calculator {
         assert "AdvancedCalculator" in class_names
 
         # Check inheritance
-        advanced_calc = next(
-            c for c in result.classes if c.name == "AdvancedCalculator"
-        )
+        advanced_calc = next(c for c in result.classes if c.name == "AdvancedCalculator")
         assert "Calculator" in advanced_calc.base_classes
 
     def test_analyze_imports(self) -> None:
@@ -999,7 +1002,8 @@ class TestPytestGenerator(unittest.TestCase):
     def test_generate_class_tests(self) -> None:
         """Test generating tests for a class."""
         tests = self.generator._generate_class_tests(
-            self.sample_class, self.sample_options,
+            self.sample_class,
+            self.sample_options,
         )
 
         assert isinstance(tests, list)
@@ -1014,7 +1018,8 @@ class TestPytestGenerator(unittest.TestCase):
     def test_generate_function_tests(self) -> None:
         """Test generating tests for a function."""
         tests = self.generator._generate_function_tests(
-            self.sample_function, self.sample_options,
+            self.sample_function,
+            self.sample_options,
         )
 
         assert isinstance(tests, list)
@@ -1146,7 +1151,8 @@ class TestJestGenerator(unittest.TestCase):
     def test_generate_jest_class_tests(self) -> None:
         """Test generating Jest tests for a class."""
         tests = self.generator._generate_jest_class_tests(
-            self.sample_class, self.sample_options,
+            self.sample_class,
+            self.sample_options,
         )
 
         assert isinstance(tests, list)
@@ -1161,7 +1167,8 @@ class TestJestGenerator(unittest.TestCase):
     def test_generate_jest_function_tests(self) -> None:
         """Test generating Jest tests for a function."""
         tests = self.generator._generate_jest_function_tests(
-            self.sample_function, self.sample_options,
+            self.sample_function,
+            self.sample_options,
         )
 
         assert isinstance(tests, list)

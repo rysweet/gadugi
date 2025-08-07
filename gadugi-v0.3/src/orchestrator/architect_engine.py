@@ -4,6 +4,7 @@
 This engine implements comprehensive system architecture design capabilities
 including component design, integration planning, and technical documentation.
 """
+
 from __future__ import annotations
 
 import logging
@@ -443,7 +444,8 @@ class ArchitectEngine:
         return logger
 
     def design_system_architecture(
-        self, request: dict[str, Any],
+        self,
+        request: dict[str, Any],
     ) -> ArchitectureResponse:
         """Design a complete system architecture based on requirements."""
         try:
@@ -461,12 +463,17 @@ class ArchitectEngine:
 
             # Select architecture pattern
             architecture_pattern = self._select_architecture_pattern(
-                project_context, design_scope, tech_preferences,
+                project_context,
+                design_scope,
+                tech_preferences,
             )
 
             # Design components
             components = self._design_components(
-                project_context, design_scope, tech_preferences, architecture_pattern,
+                project_context,
+                design_scope,
+                tech_preferences,
+                architecture_pattern,
             )
 
             # Design data flow
@@ -474,32 +481,45 @@ class ArchitectEngine:
 
             # Select integration patterns
             integration_patterns = self._select_integration_patterns(
-                components, architecture_pattern, design_scope,
+                components,
+                architecture_pattern,
+                design_scope,
             )
 
             # Create implementation plan
             implementation_plan = self._create_implementation_plan(
-                components, project_context, design_scope,
+                components,
+                project_context,
+                design_scope,
             )
 
             # Generate technical specifications
             technical_specs = self._generate_technical_specifications(
-                components, tech_preferences, project_context,
+                components,
+                tech_preferences,
+                project_context,
             )
 
             # Define quality attributes
             quality_attributes = self._define_quality_attributes(
-                project_context, design_scope,
+                project_context,
+                design_scope,
             )
 
             # Generate recommendations
             recommendations = self._generate_recommendations(
-                architecture_pattern, components, design_scope, tech_preferences,
+                architecture_pattern,
+                components,
+                design_scope,
+                tech_preferences,
             )
 
             # Assess risks
             risks = self._assess_risks(
-                architecture_pattern, components, design_scope, project_context,
+                architecture_pattern,
+                components,
+                design_scope,
+                project_context,
             )
 
             # Build architecture
@@ -557,7 +577,8 @@ class ArchitectEngine:
         )
 
     def _parse_tech_preferences(
-        self, tech_data: dict[str, Any],
+        self,
+        tech_data: dict[str, Any],
     ) -> TechnicalPreferences:
         """Parse technical preferences from request data."""
         return TechnicalPreferences(
@@ -609,7 +630,9 @@ class ArchitectEngine:
         return components
 
     def _design_monolithic_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+        self,
+        context: ProjectContext,
+        tech_prefs: TechnicalPreferences,
     ) -> list[ArchitectureComponent]:
         """Design components for monolithic architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
@@ -633,7 +656,9 @@ class ArchitectEngine:
                     dependencies=["database", "external_apis"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db,
+                    language=primary_lang,
+                    framework=framework,
+                    database=primary_db,
                 ),
             ),
             ArchitectureComponent(
@@ -651,13 +676,17 @@ class ArchitectEngine:
                     dependencies=[],
                 ),
                 technology_stack=TechnologyStack(
-                    language="sql", framework="", database=primary_db,
+                    language="sql",
+                    framework="",
+                    database=primary_db,
                 ),
             ),
         ]
 
     def _design_microservice_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+        self,
+        context: ProjectContext,
+        tech_prefs: TechnicalPreferences,
     ) -> list[ArchitectureComponent]:
         """Design components for microservices architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
@@ -680,7 +709,9 @@ class ArchitectEngine:
                     dependencies=["authentication_service", "microservices"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="kong", database="redis",
+                    language=primary_lang,
+                    framework="kong",
+                    database="redis",
                 ),
             ),
             ArchitectureComponent(
@@ -698,7 +729,9 @@ class ArchitectEngine:
                     dependencies=["user_database"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db,
+                    language=primary_lang,
+                    framework=framework,
+                    database=primary_db,
                 ),
             ),
             ArchitectureComponent(
@@ -716,13 +749,17 @@ class ArchitectEngine:
                     dependencies=["business_database", "message_queue"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db,
+                    language=primary_lang,
+                    framework=framework,
+                    database=primary_db,
                 ),
             ),
         ]
 
     def _design_layered_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+        self,
+        context: ProjectContext,
+        tech_prefs: TechnicalPreferences,
     ) -> list[ArchitectureComponent]:
         """Design components for layered architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
@@ -745,7 +782,8 @@ class ArchitectEngine:
                     dependencies=["business_layer"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework,
+                    language=primary_lang,
+                    framework=framework,
                 ),
             ),
             ArchitectureComponent(
@@ -763,7 +801,8 @@ class ArchitectEngine:
                     dependencies=["data_layer"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework,
+                    language=primary_lang,
+                    framework=framework,
                 ),
             ),
             ArchitectureComponent(
@@ -781,13 +820,17 @@ class ArchitectEngine:
                     dependencies=["database"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="sqlalchemy", database=primary_db,
+                    language=primary_lang,
+                    framework="sqlalchemy",
+                    database=primary_db,
                 ),
             ),
         ]
 
     def _design_soa_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+        self,
+        context: ProjectContext,
+        tech_prefs: TechnicalPreferences,
     ) -> list[ArchitectureComponent]:
         """Design components for service-oriented architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "java"
@@ -810,7 +853,8 @@ class ArchitectEngine:
                     dependencies=[],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="consul",
+                    language=primary_lang,
+                    framework="consul",
                 ),
             ),
             ArchitectureComponent(
@@ -828,7 +872,8 @@ class ArchitectEngine:
                     dependencies=["message_broker"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="apache_camel",
+                    language=primary_lang,
+                    framework="apache_camel",
                 ),
             ),
             ArchitectureComponent(
@@ -846,7 +891,9 @@ class ArchitectEngine:
                     dependencies=["service_database", "esb"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db,
+                    language=primary_lang,
+                    framework=framework,
+                    database=primary_db,
                 ),
             ),
         ]
@@ -867,7 +914,9 @@ class ArchitectEngine:
         return framework_map.get(language, "unknown")
 
     def _design_data_flow(
-        self, components: list[ArchitectureComponent], pattern: str,
+        self,
+        components: list[ArchitectureComponent],
+        pattern: str,
     ) -> DataFlow:
         """Design data flow between components."""
         if pattern == "microservices":
@@ -886,7 +935,10 @@ class ArchitectEngine:
         return DataFlow(description=description, diagrams=diagrams)
 
     def _select_integration_patterns(
-        self, components: list[ArchitectureComponent], pattern: str, scope: DesignScope,
+        self,
+        components: list[ArchitectureComponent],
+        pattern: str,
+        scope: DesignScope,
     ) -> list[IntegrationPattern]:
         """Select appropriate integration patterns."""
         patterns = []
@@ -1022,9 +1074,7 @@ class ArchitectEngine:
             in [ArchitectureComplexity.SIMPLE, ArchitectureComplexity.MODERATE]
             else 2
         )
-        total_duration = (
-            f"{sum(int(phase.duration.split()[0]) for phase in phases)} weeks"
-        )
+        total_duration = f"{sum(int(phase.duration.split()[0]) for phase in phases)} weeks"
 
         return ImplementationPlan(
             phases=phases,
@@ -1034,7 +1084,9 @@ class ArchitectEngine:
                 "component_integration",
             ],
             resource_requirements=ResourceRequirements(
-                developers=developer_count, devops=devops_count, timeline=total_duration,
+                developers=developer_count,
+                devops=devops_count,
+                timeline=total_duration,
             ),
         )
 
@@ -1088,7 +1140,9 @@ class ArchitectEngine:
                         constraints=["unique", "not_null"],
                     ),
                     DatabaseColumn(
-                        name="created_at", type="timestamp", constraints=["not_null"],
+                        name="created_at",
+                        type="timestamp",
+                        constraints=["not_null"],
                     ),
                 ],
                 relationships=[],
@@ -1117,7 +1171,9 @@ class ArchitectEngine:
         )
 
     def _define_quality_attributes(
-        self, context: ProjectContext, scope: DesignScope,
+        self,
+        context: ProjectContext,
+        scope: DesignScope,
     ) -> QualityAttributes:
         """Define quality attributes and requirements."""
         # Performance requirements based on scale
@@ -1141,7 +1197,8 @@ class ArchitectEngine:
 
         return QualityAttributes(
             performance=QualityAttribute(
-                requirements=perf_req, strategies=perf_strategies,
+                requirements=perf_req,
+                strategies=perf_strategies,
             ),
             scalability=QualityAttribute(
                 requirements=f"handle {context.scale.value} scale requirements",
@@ -1168,10 +1225,7 @@ class ArchitectEngine:
         recommendations = []
 
         # Pattern-specific recommendations
-        if (
-            pattern == "microservices"
-            and scope.complexity_level == ArchitectureComplexity.SIMPLE
-        ):
+        if pattern == "microservices" and scope.complexity_level == ArchitectureComplexity.SIMPLE:
             recommendations.append(
                 Recommendation(
                     category="architecture",
@@ -1240,9 +1294,7 @@ class ArchitectEngine:
             )
 
         # Scale-specific risks
-        if (
-            context.scale in (ArchitectureScale.LARGE, ArchitectureScale.ENTERPRISE)
-        ):
+        if context.scale in (ArchitectureScale.LARGE, ArchitectureScale.ENTERPRISE):
             risks.append(
                 Risk(
                     risk="Database performance bottleneck",
@@ -1277,7 +1329,9 @@ class ArchitectEngine:
 
             # Design specific component
             component = self._design_specific_component(
-                component_name, requirements, tech_prefs,
+                component_name,
+                requirements,
+                tech_prefs,
             )
 
             return {
@@ -1292,7 +1346,10 @@ class ArchitectEngine:
             return {"success": False, "error_message": str(e)}
 
     def _design_specific_component(
-        self, name: str, requirements: list[str], tech_prefs: TechnicalPreferences,
+        self,
+        name: str,
+        requirements: list[str],
+        tech_prefs: TechnicalPreferences,
     ) -> ArchitectureComponent:
         """Design a specific component based on name and requirements."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
@@ -1303,7 +1360,13 @@ class ArchitectEngine:
             return ArchitectureComponent(
                 name=name,
                 purpose=f"API service for {name} functionality",
-                responsibilities=["HTTP request handling", "Business logic processing", "Data validation", "Response formatting", *requirements],
+                responsibilities=[
+                    "HTTP request handling",
+                    "Business logic processing",
+                    "Data validation",
+                    "Response formatting",
+                    *requirements,
+                ],
                 interfaces=ComponentInterface(
                     inputs=["HTTP requests", "Database queries"],
                     outputs=["HTTP responses", "Database updates"],
@@ -1312,16 +1375,20 @@ class ArchitectEngine:
                 technology_stack=TechnologyStack(
                     language=primary_lang,
                     framework=framework,
-                    database=tech_prefs.databases[0]
-                    if tech_prefs.databases
-                    else "postgresql",
+                    database=tech_prefs.databases[0] if tech_prefs.databases else "postgresql",
                 ),
             )
         if "database" in name.lower() or "storage" in name.lower():
             return ArchitectureComponent(
                 name=name,
                 purpose=f"Data storage and persistence for {name}",
-                responsibilities=["Data persistence", "Query processing", "Data integrity", "Backup management", *requirements],
+                responsibilities=[
+                    "Data persistence",
+                    "Query processing",
+                    "Data integrity",
+                    "Backup management",
+                    *requirements,
+                ],
                 interfaces=ComponentInterface(
                     inputs=["SQL queries", "Data operations"],
                     outputs=["Query results", "Operation confirmations"],
@@ -1330,29 +1397,27 @@ class ArchitectEngine:
                 technology_stack=TechnologyStack(
                     language="sql",
                     framework="",
-                    database=tech_prefs.databases[0]
-                    if tech_prefs.databases
-                    else "postgresql",
+                    database=tech_prefs.databases[0] if tech_prefs.databases else "postgresql",
                 ),
             )
         return ArchitectureComponent(
             name=name,
             purpose=f"Custom component for {name} functionality",
-            responsibilities=requirements
-            if requirements
-            else [f"{name} processing"],
+            responsibilities=requirements if requirements else [f"{name} processing"],
             interfaces=ComponentInterface(
                 inputs=["Component inputs"],
                 outputs=["Component outputs"],
                 dependencies=["external_dependencies"],
             ),
             technology_stack=TechnologyStack(
-                language=primary_lang, framework=framework,
+                language=primary_lang,
+                framework=framework,
             ),
         )
 
     def _generate_component_recommendations(
-        self, component: ArchitectureComponent,
+        self,
+        component: ArchitectureComponent,
     ) -> list[Recommendation]:
         """Generate recommendations for a specific component."""
         return [
@@ -1414,7 +1479,9 @@ class ArchitectEngine:
             return {"success": False, "error_message": str(e)}
 
     def _create_integration_plan(
-        self, components: list[str], requirements: list[str],
+        self,
+        components: list[str],
+        requirements: list[str],
     ) -> dict[str, Any]:
         """Create detailed integration plan."""
         return {
@@ -1434,7 +1501,8 @@ class ArchitectEngine:
         }
 
     def _generate_integration_recommendations(
-        self, components: list[str],
+        self,
+        components: list[str],
     ) -> list[Recommendation]:
         """Generate integration-specific recommendations."""
         return [
@@ -1481,7 +1549,8 @@ class ArchitectEngine:
 
             # Perform architecture review
             review_results = self._perform_architecture_review(
-                architecture_description, review_criteria,
+                architecture_description,
+                review_criteria,
             )
 
             return {
@@ -1499,7 +1568,9 @@ class ArchitectEngine:
             return {"success": False, "error_message": str(e)}
 
     def _perform_architecture_review(
-        self, description: str, criteria: list[str],
+        self,
+        description: str,
+        criteria: list[str],
     ) -> dict[str, Any]:
         """Perform detailed architecture review."""
         return {
@@ -1535,15 +1606,15 @@ class ArchitectEngine:
         return min(100, score)
 
     def _generate_review_recommendations(
-        self, review_results: dict[str, Any],
+        self,
+        review_results: dict[str, Any],
     ) -> list[Recommendation]:
         """Generate recommendations based on review results."""
         recommendations = []
 
         if (
             "security" in review_results.get("security_assessment", "").lower()
-            and "needs improvement"
-            in review_results.get("security_assessment", "").lower()
+            and "needs improvement" in review_results.get("security_assessment", "").lower()
         ):
             recommendations.append(
                 Recommendation(

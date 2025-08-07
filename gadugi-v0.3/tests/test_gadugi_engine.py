@@ -534,9 +534,7 @@ class TestGadugiEngine:
 
         assert result.success is True
         assert result.operation == "stop"
-        assert (
-            "stopped_services" in result.results or "stopped_agents" in result.results
-        )
+        assert "stopped_services" in result.results or "stopped_agents" in result.results
 
     @patch("gadugi_engine.psutil.cpu_percent")
     @patch("gadugi_engine.psutil.virtual_memory")
@@ -547,7 +545,9 @@ class TestGadugiEngine:
         # Mock system resource data
         mock_cpu.return_value = 25.5
         mock_memory.return_value = Mock(
-            percent=60.0, used=8000000000, total=16000000000,
+            percent=60.0,
+            used=8000000000,
+            total=16000000000,
         )
         mock_disk.return_value = Mock(used=500000000000, total=1000000000000)
         mock_net.return_value = Mock(bytes_sent=1000000, bytes_recv=2000000)
@@ -706,7 +706,8 @@ class TestGadugiEngine:
         """Test backup creation failure."""
         # Mock file operations to raise exception
         with patch(
-            "gadugi_engine.tarfile.open", side_effect=Exception("Backup failed"),
+            "gadugi_engine.tarfile.open",
+            side_effect=Exception("Backup failed"),
         ):
             backup_file = self.gadugi._create_backup("full", True, True)
             assert backup_file is None
@@ -802,13 +803,8 @@ class TestGadugiEngine:
 
             assert "optimizations_applied" in results
             assert len(results["optimizations_applied"]) >= 2
-            assert any(
-                "memory cleanup" in opt.lower()
-                for opt in results["optimizations_applied"]
-            )
-            assert any(
-                "log files" in opt.lower() for opt in results["optimizations_applied"]
-            )
+            assert any("memory cleanup" in opt.lower() for opt in results["optimizations_applied"])
+            assert any("log files" in opt.lower() for opt in results["optimizations_applied"])
 
     def test_cleanup_old_logs(self) -> None:
         """Test old log cleanup."""
@@ -833,9 +829,7 @@ class TestGadugiEngine:
                 recent_stat = Mock()
                 recent_stat.st_mtime = 9999999999  # Very recent
 
-                mock_stat.side_effect = (
-                    lambda: old_stat if "old.log" in str(self) else recent_stat
-                )
+                mock_stat.side_effect = lambda: old_stat if "old.log" in str(self) else recent_stat
 
                 cleaned = self.gadugi._cleanup_old_logs()
 
@@ -889,14 +883,18 @@ class TestGadugiEngine:
         """Test logging system events."""
         details = {"component": "test", "action": "test_action"}
         self.gadugi._log_system_event(
-            "test_event", "test_component", "Test message", details,
+            "test_event",
+            "test_component",
+            "Test message",
+            details,
         )
 
         # Verify database entry
         with sqlite3.connect(self.gadugi.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM system_events WHERE event_type = ?", ("test_event",),
+                "SELECT * FROM system_events WHERE event_type = ?",
+                ("test_event",),
             )
             result = cursor.fetchone()
 
@@ -1097,10 +1095,14 @@ class TestGadugiEngine:
         with (
             patch.object(backup_path, "exists", return_value=True),
             patch.object(
-                self.gadugi, "_get_backup_checksum", return_value="test_checksum",
+                self.gadugi,
+                "_get_backup_checksum",
+                return_value="test_checksum",
             ),
             patch.object(
-                self.gadugi, "_calculate_file_checksum", return_value="test_checksum",
+                self.gadugi,
+                "_calculate_file_checksum",
+                return_value="test_checksum",
             ),
             patch("gadugi_engine.tarfile.open") as mock_tarfile,
         ):
@@ -1131,7 +1133,9 @@ class TestGadugiEngine:
         with (
             patch.object(backup_path, "exists", return_value=True),
             patch.object(
-                self.gadugi, "_get_backup_checksum", return_value="stored_checksum",
+                self.gadugi,
+                "_get_backup_checksum",
+                return_value="stored_checksum",
             ),
             patch.object(
                 self.gadugi,
@@ -1149,7 +1153,9 @@ class TestGadugiEngine:
 
         # Mock an exception in status handling
         with patch.object(
-            self.gadugi, "_handle_status", side_effect=Exception("Test error"),
+            self.gadugi,
+            "_handle_status",
+            side_effect=Exception("Test error"),
         ):
             result = self.gadugi.execute_operation(request)
 

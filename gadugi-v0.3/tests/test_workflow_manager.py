@@ -490,9 +490,7 @@ class TestWorkflowManagerEngine:
                 await self.engine._save_checkpoint(state)
 
                 # Verify checkpoint file was created
-                checkpoint_file = (
-                    Path(".gadugi/checkpoints") / f"{self.task.task_id}.json"
-                )
+                checkpoint_file = Path(".gadugi/checkpoints") / f"{self.task.task_id}.json"
                 assert checkpoint_file.exists()
 
                 # Verify checkpoint content

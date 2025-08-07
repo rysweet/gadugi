@@ -32,7 +32,6 @@ def test_task_decomposer_basic() -> None:
     assert "parallel_groups" in tasks_data
 
 
-
 def test_task_decomposer_api_pattern() -> None:
     """Test that API tasks get appropriate decomposition."""
     result = run_agent("task-decomposer", "Build a REST API with authentication")
@@ -47,7 +46,6 @@ def test_task_decomposer_api_pattern() -> None:
     agent_types = [task["agent"] for task in tasks_data["tasks"]]
     assert "code-writer" in agent_types, "Should include code-writer agent"
     assert "test-writer" in agent_types, "Should include test-writer agent"
-
 
 
 def test_task_decomposer_dependencies() -> None:
@@ -72,10 +70,7 @@ def test_task_decomposer_dependencies() -> None:
     all_task_ids = {task["id"] for task in tasks_data["tasks"]}
     for group in tasks_data["parallel_groups"]:
         for task_id in group:
-            assert task_id in all_task_ids, (
-                f"Parallel group references unknown task: {task_id}"
-            )
-
+            assert task_id in all_task_ids, f"Parallel group references unknown task: {task_id}"
 
 
 def test_orchestrator_task_decomposer_integration() -> None:
@@ -100,7 +95,6 @@ def main() -> None:
         test_task_decomposer_api_pattern()
         test_task_decomposer_dependencies()
         test_orchestrator_task_decomposer_integration()
-
 
     except Exception:
         sys.exit(1)

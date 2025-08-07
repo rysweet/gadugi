@@ -4,6 +4,7 @@
 Real-time event-driven communication system with protobuf support.
 Handles event routing, filtering, and agent coordination across the platform.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -176,7 +177,8 @@ class EventQueue:
             # Remove oldest low priority event to make space
             try:
                 await asyncio.wait_for(
-                    self._queues[EventPriority.LOW].get(), timeout=0.1,
+                    self._queues[EventPriority.LOW].get(),
+                    timeout=0.1,
                 )
                 self._total_size -= 1
             except asyncio.TimeoutError:
@@ -197,7 +199,8 @@ class EventQueue:
         ]:
             try:
                 event = await asyncio.wait_for(
-                    self._queues[priority].get(), timeout=0.1,
+                    self._queues[priority].get(),
+                    timeout=0.1,
                 )
                 with self._lock:
                     self._total_size -= 1
@@ -324,9 +327,7 @@ class EventRouterService:
 
         # Wait for tasks to complete
         tasks = [
-            task
-            for task in [self.server_task, self.processor_task, self.cleanup_task]
-            if task
+            task for task in [self.server_task, self.processor_task, self.cleanup_task] if task
         ]
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -340,7 +341,9 @@ class EventRouterService:
         """Run the event server."""
         try:
             server = await asyncio.start_server(
-                self._handle_client, self.host, self.port,
+                self._handle_client,
+                self.host,
+                self.port,
             )
 
             self.logger.info(f"Server listening on {self.host}:{self.port}")
@@ -354,7 +357,9 @@ class EventRouterService:
             self.logger.exception(f"Server error: {e}")
 
     async def _handle_client(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter,
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
     ) -> None:
         """Handle client connections."""
         client_addr = writer.get_extra_info("peername")
@@ -455,7 +460,8 @@ class EventRouterService:
 
             # Send acknowledgment
             await self._send_to_client(
-                client_id, {"type": "ack", "event_id": event.id, "status": "queued"},
+                client_id,
+                {"type": "ack", "event_id": event.id, "status": "queued"},
             )
 
         except Exception as e:
@@ -473,9 +479,7 @@ class EventRouterService:
                 event_types=[EventType(t) for t in filter_data.get("event_types", [])],
                 sources=filter_data.get("sources"),
                 targets=filter_data.get("targets"),
-                priorities=[
-                    EventPriority(p) for p in filter_data.get("priorities", [])
-                ],
+                priorities=[EventPriority(p) for p in filter_data.get("priorities", [])],
                 pattern=filter_data.get("pattern"),
             )
 
@@ -530,7 +534,8 @@ class EventRouterService:
                     )
             else:
                 await self._send_to_client(
-                    client_id, {"type": "error", "message": "Subscription not found"},
+                    client_id,
+                    {"type": "error", "message": "Subscription not found"},
                 )
 
         except Exception as e:
@@ -539,7 +544,8 @@ class EventRouterService:
     async def _handle_ping(self, client_id: str) -> None:
         """Handle ping request."""
         await self._send_to_client(
-            client_id, {"type": "pong", "timestamp": datetime.now().isoformat()},
+            client_id,
+            {"type": "pong", "timestamp": datetime.now().isoformat()},
         )
 
     async def _send_to_client(self, client_id: str, message: dict[str, Any]) -> None:
@@ -642,7 +648,9 @@ class EventRouterService:
         return matching
 
     def _event_matches_filter(
-        self, event: Event, event_filter: EventFilter | None,
+        self,
+        event: Event,
+        event_filter: EventFilter | None,
     ) -> bool:
         """Check if event matches filter criteria."""
         if not event_filter:
@@ -657,11 +665,7 @@ class EventRouterService:
             return False
 
         # Check targets
-        if (
-            event_filter.targets
-            and event.target
-            and event.target not in event_filter.targets
-        ):
+        if event_filter.targets and event.target and event.target not in event_filter.targets:
             return False
 
         # Check priorities
@@ -693,7 +697,9 @@ class EventRouterService:
             if subscription.callback:
                 # Direct callback
                 await asyncio.get_event_loop().run_in_executor(
-                    self.executor, subscription.callback, event,
+                    self.executor,
+                    subscription.callback,
+                    event,
                 )
             elif subscription.endpoint:
                 # Send to client endpoint
@@ -718,28 +724,20 @@ class EventRouterService:
 
         # Update by type
         event_type = event.type.value
-        self.stats.events_by_type[event_type] = (
-            self.stats.events_by_type.get(event_type, 0) + 1
-        )
+        self.stats.events_by_type[event_type] = self.stats.events_by_type.get(event_type, 0) + 1
 
         # Update by priority
         priority = event.priority.value
-        self.stats.events_by_priority[priority] = (
-            self.stats.events_by_priority.get(priority, 0) + 1
-        )
+        self.stats.events_by_priority[priority] = self.stats.events_by_priority.get(priority, 0) + 1
 
         # Update by source
         source = event.source
-        self.stats.events_by_source[source] = (
-            self.stats.events_by_source.get(source, 0) + 1
-        )
+        self.stats.events_by_source[source] = self.stats.events_by_source.get(source, 0) + 1
 
         # Update average processing time
         current_avg = self.stats.average_processing_time
         total = self.stats.total_events
-        self.stats.average_processing_time = (
-            current_avg * (total - 1) + processing_time
-        ) / total
+        self.stats.average_processing_time = (current_avg * (total - 1) + processing_time) / total
 
         # Update active subscriptions count
         self.stats.active_subscriptions = len(
@@ -893,7 +891,8 @@ class EventRouterClient:
         """Connect to the event router service."""
         try:
             self.reader, self.writer = await asyncio.open_connection(
-                self.host, self.port,
+                self.host,
+                self.port,
             )
             self.connected = True
 
@@ -951,17 +950,13 @@ class EventRouterClient:
             filter_dict = {}
             if event_filter:
                 if event_filter.event_types:
-                    filter_dict["event_types"] = [
-                        t.value for t in event_filter.event_types
-                    ]
+                    filter_dict["event_types"] = [t.value for t in event_filter.event_types]
                 if event_filter.sources:
                     filter_dict["sources"] = event_filter.sources
                 if event_filter.targets:
                     filter_dict["targets"] = event_filter.targets
                 if event_filter.priorities:
-                    filter_dict["priorities"] = [
-                        p.value for p in event_filter.priorities
-                    ]
+                    filter_dict["priorities"] = [p.value for p in event_filter.priorities]
                 if event_filter.pattern:
                     filter_dict["pattern"] = event_filter.pattern
 

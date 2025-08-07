@@ -3,6 +3,7 @@
 
 A test agent for unit testing
 """
+
 from __future__ import annotations
 
 import logging

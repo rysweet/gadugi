@@ -17,7 +17,6 @@ def demo_prompt_writer() -> bool:
     else:
         pass
 
-
     # Test 2: Show integration with task decomposition
 
     high_level_task = "Build a todo list application with user authentication"
@@ -32,7 +31,6 @@ def demo_prompt_writer() -> bool:
             for task in tasks_json["tasks"]:
                 pass
 
-
             # Now generate prompts for each subtask
 
             for _i, task in enumerate(tasks_json["tasks"][:2], 1):  # Limit to 2 for demo
@@ -44,7 +42,8 @@ def demo_prompt_writer() -> bool:
                     # Show a snippet of the generated prompt
                     lines = prompt_result["stdout"].split("\n")
                     next(
-                        (line for line in lines if line.startswith("# ")), "No title",
+                        (line for line in lines if line.startswith("# ")),
+                        "No title",
                     )
                     overview_start = None
                     for j, line in enumerate(lines):
@@ -53,9 +52,7 @@ def demo_prompt_writer() -> bool:
                             break
 
                     if overview_start and overview_start < len(lines):
-                        (
-                            lines[overview_start] if overview_start < len(lines) else ""
-                        )
+                        (lines[overview_start] if overview_start < len(lines) else "")
 
                 else:
                     pass
@@ -64,7 +61,6 @@ def demo_prompt_writer() -> bool:
             pass
     else:
         pass
-
 
     return True
 

@@ -24,21 +24,16 @@ def demo_complete_workflow() -> bool:
         tasks_json = json.loads(decomposer_result["stdout"])
 
         for task in tasks_json["tasks"]:
-            (
-                f" (depends on: {task['dependencies']})" if task["dependencies"] else ""
-            )
-
+            (f" (depends on: {task['dependencies']})" if task["dependencies"] else "")
 
     except json.JSONDecodeError:
         return False
-
 
     # Step 2: Prompt Generation for each subtask
 
     generated_prompts = []
 
     for _i, task in enumerate(tasks_json["tasks"][:2], 1):  # Limit to first 2 for demo
-
         prompt_result = run_agent("prompt-writer", task["task"])
 
         if prompt_result["success"]:
@@ -50,7 +45,6 @@ def demo_complete_workflow() -> bool:
         else:
             pass
 
-
     # Step 3: Code Generation
 
     generated_code = []
@@ -61,7 +55,6 @@ def demo_complete_workflow() -> bool:
         code_result = run_agent("code-writer", task["task"])
 
         if code_result["success"]:
-
             # Show files that would be created
             code_data = code_result["metadata"]["code_result"]
             for _file_info in code_data["files"][:1]:  # Show first file
@@ -71,14 +64,9 @@ def demo_complete_workflow() -> bool:
         else:
             pass
 
-
     # Step 4: Workflow Summary
 
-
-
-
     if generated_code:
-
         # Show what would happen next in a full implementation
         pass
 
@@ -92,11 +80,9 @@ def demo_individual_agents() -> None:
     agents = ["task-decomposer", "prompt-writer", "code-writer"]
 
     for agent in agents:
-
         result = run_agent(agent, test_task)
 
         if result["success"]:
-
             # Show key output depending on agent type
             if agent == "task-decomposer":
                 with contextlib.suppress(Exception):
@@ -119,14 +105,11 @@ def demo_individual_agents() -> None:
 
 
 if __name__ == "__main__":
-
     # Run complete workflow demo
     success = demo_complete_workflow()
 
     # Run individual agent demos
     demo_individual_agents()
 
-
     if success:
         pass
-

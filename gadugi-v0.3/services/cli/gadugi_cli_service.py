@@ -4,6 +4,7 @@
 Unified command-line interface for all Gadugi operations.
 Provides comprehensive CLI commands, service management, and user interaction.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,22 +53,17 @@ else:
     class Table:
         """Mock Table class for when rich is not available."""
 
-
     class Panel:
         """Mock Panel class for when rich is not available."""
-
 
     class Progress:
         """Mock Progress class for when rich is not available."""
 
-
     class SpinnerColumn:
         """Mock SpinnerColumn class for when rich is not available."""
 
-
     class TextColumn:
         """Mock TextColumn class for when rich is not available."""
-
 
     class Prompt:
         """Mock Prompt class for when rich is not available."""
@@ -88,10 +84,8 @@ else:
     class Syntax:
         """Mock Syntax class for when rich is not available."""
 
-
     class Tree:
         """Mock Tree class for when rich is not available."""
-
 
 
 class ServiceType(Enum):
@@ -401,9 +395,7 @@ class ServiceManager:
                         # Calculate uptime
                         create_time = datetime.fromtimestamp(process.create_time())
                         uptime = datetime.now() - create_time
-                        service_info.uptime = str(uptime).split(".")[
-                            0
-                        ]  # Remove microseconds
+                        service_info.uptime = str(uptime).split(".")[0]  # Remove microseconds
                     else:
                         service_info.status = ServiceStatus.STOPPED
                         service_info.pid = None
@@ -419,9 +411,7 @@ class ServiceManager:
         if config:
             return ServiceInfo(
                 name=service_name,
-                type=ServiceType(service_name)
-                if service_name != "all"
-                else ServiceType.ALL,
+                type=ServiceType(service_name) if service_name != "all" else ServiceType.ALL,
                 status=ServiceStatus.STOPPED,
                 description=config["description"],
             )
@@ -531,7 +521,10 @@ class AgentManager:
         return sorted(categories)
 
     async def invoke_agent(
-        self, agent_name: str, prompt: str, **kwargs,
+        self,
+        agent_name: str,
+        prompt: str,
+        **kwargs,
     ) -> CommandResult:
         """Invoke an agent."""
         start_time = time.time()
@@ -550,7 +543,9 @@ class AgentManager:
             cmd = ["claude", f"/agent:{agent_name}", prompt]
 
             process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
 
             stdout, stderr = await process.communicate()
@@ -628,7 +623,10 @@ Examples:
         )
 
         parser.add_argument(
-            "--verbose", "-v", action="store_true", help="Enable verbose output",
+            "--verbose",
+            "-v",
+            action="store_true",
+            help="Enable verbose output",
         )
 
         parser.add_argument(
@@ -655,18 +653,23 @@ Examples:
 
         # service restart
         restart_parser = service_subparsers.add_parser(
-            "restart", help="Restart a service",
+            "restart",
+            help="Restart a service",
         )
         restart_parser.add_argument(
-            "service_name", help="Name of the service to restart",
+            "service_name",
+            help="Name of the service to restart",
         )
 
         # service status
         status_parser = service_subparsers.add_parser(
-            "status", help="Get service status",
+            "status",
+            help="Get service status",
         )
         status_parser.add_argument(
-            "service_name", nargs="?", help="Name of the service",
+            "service_name",
+            nargs="?",
+            help="Name of the service",
         )
 
         # service list
@@ -697,7 +700,9 @@ Examples:
         run_parser = workflow_subparsers.add_parser("run", help="Run a workflow")
         run_parser.add_argument("prompt_file", help="Path to prompt file")
         run_parser.add_argument(
-            "--parallel", action="store_true", help="Enable parallel execution",
+            "--parallel",
+            action="store_true",
+            help="Enable parallel execution",
         )
 
         # workflow status
@@ -827,12 +832,14 @@ Examples:
             if args.parallel:
                 prompt = f"Execute workflow from {args.prompt_file} in parallel"
                 result = await self.agent_manager.invoke_agent(
-                    "orchestrator-agent", prompt,
+                    "orchestrator-agent",
+                    prompt,
                 )
             else:
                 prompt = f"Execute workflow from {args.prompt_file}"
                 result = await self.agent_manager.invoke_agent(
-                    "workflow-manager", prompt,
+                    "workflow-manager",
+                    prompt,
                 )
 
             self._print_command_result(result)
@@ -898,7 +905,6 @@ Examples:
             if self.verbose:
                 self.console.print(f"Execution time: {result.execution_time:.2f}s")
         else:
-
             if result.warnings:
                 for warning in result.warnings:
                     pass
@@ -1002,9 +1008,7 @@ Examples:
 
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M")
-                    if agent.last_used
-                    else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
                 )
                 table.add_row(
                     agent.name,
@@ -1019,9 +1023,7 @@ Examples:
         else:
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M")
-                    if agent.last_used
-                    else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
                 )
 
     def _print_agent_info(self, agent: AgentInfo) -> None:
@@ -1109,7 +1111,9 @@ Examples:
             pass
 
         # Python version
-        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        python_version = (
+            f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        )
 
         # Platform info
         import platform
@@ -1180,13 +1184,22 @@ Examples:
         # Install development dependencies
         try:
             process = await asyncio.create_subprocess_exec(
-                sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt",
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "-r",
+                "requirements-dev.txt",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
-                raise subprocess.CalledProcessError(process.returncode, [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"], stderr)
+                raise subprocess.CalledProcessError(
+                    process.returncode,
+                    [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"],
+                    stderr,
+                )
             if RICH_AVAILABLE:
                 self.console.print("[green]Development dependencies installed[/green]")
             else:
@@ -1226,7 +1239,9 @@ Examples:
                 stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
-            result = subprocess.CompletedProcess(cmd, process.returncode, stdout.decode(), stderr.decode())
+            result = subprocess.CompletedProcess(
+                cmd, process.returncode, stdout.decode(), stderr.decode(),
+            )
 
             if RICH_AVAILABLE:
                 if result.returncode == 0:

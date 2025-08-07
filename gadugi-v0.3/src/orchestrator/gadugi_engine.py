@@ -4,6 +4,7 @@
 This engine implements comprehensive system bootstrap, installation, configuration
 management, and system health monitoring for the Gadugi multi-agent platform.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -480,7 +481,10 @@ class GadugiEngine:
             )
 
     def _handle_install(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle install operations."""
         results = {}
@@ -531,7 +535,10 @@ class GadugiEngine:
         )
 
     def _handle_configure(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle configuration operations."""
         results = {}
@@ -559,7 +566,10 @@ class GadugiEngine:
         )
 
     def _handle_start(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle start operations."""
         results = {}
@@ -607,7 +617,10 @@ class GadugiEngine:
         )
 
     def _handle_stop(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle stop operations."""
         results = {}
@@ -649,7 +662,10 @@ class GadugiEngine:
         )
 
     def _handle_status(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle status operations."""
         results = {}
@@ -675,7 +691,10 @@ class GadugiEngine:
         )
 
     def _handle_health(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle health check operations."""
         results = {}
@@ -742,7 +761,10 @@ class GadugiEngine:
         )
 
     def _handle_backup(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle backup operations."""
         results = {}
@@ -777,7 +799,10 @@ class GadugiEngine:
         )
 
     def _handle_restore(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle restore operations."""
         results = {}
@@ -819,7 +844,10 @@ class GadugiEngine:
         )
 
     def _handle_update(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle update operations."""
         results = {}
@@ -840,7 +868,10 @@ class GadugiEngine:
         )
 
     def _handle_optimize(
-        self, target: TargetType, parameters: dict, options: dict,
+        self,
+        target: TargetType,
+        parameters: dict,
+        options: dict,
     ) -> OperationResult:
         """Handle optimization operations."""
         results = {}
@@ -898,7 +929,10 @@ class GadugiEngine:
         return results
 
     def _install_service(
-        self, service_name: str, parameters: dict, options: dict,
+        self,
+        service_name: str,
+        parameters: dict,
+        options: dict,
     ) -> dict[str, Any]:
         """Install a specific service."""
         results = {"installed_service": service_name}
@@ -915,7 +949,10 @@ class GadugiEngine:
         return results
 
     def _install_agent(
-        self, agent_name: str, parameters: dict, options: dict,
+        self,
+        agent_name: str,
+        parameters: dict,
+        options: dict,
     ) -> dict[str, Any]:
         """Install a specific agent."""
         results = {"installed_agent": agent_name}
@@ -978,7 +1015,10 @@ class GadugiEngine:
         return results
 
     def _configure_service(
-        self, service_name: str, parameters: dict, options: dict,
+        self,
+        service_name: str,
+        parameters: dict,
+        options: dict,
     ) -> dict[str, Any]:
         """Configure a specific service."""
         results = {"configured_service": service_name}
@@ -1000,7 +1040,10 @@ class GadugiEngine:
         return results
 
     def _configure_agent(
-        self, agent_name: str, parameters: dict, options: dict,
+        self,
+        agent_name: str,
+        parameters: dict,
+        options: dict,
     ) -> dict[str, Any]:
         """Configure a specific agent."""
         results = {"configured_agent": agent_name}
@@ -1053,7 +1096,9 @@ class GadugiEngine:
 
             # Update database
             self._update_service_in_db(
-                service_name, ServiceStatus.STARTING, process.pid,
+                service_name,
+                ServiceStatus.STARTING,
+                process.pid,
             )
 
             # Give service time to start
@@ -1063,7 +1108,9 @@ class GadugiEngine:
             if process.poll() is None:
                 self.services[service_name]["status"] = ServiceStatus.RUNNING
                 self._update_service_in_db(
-                    service_name, ServiceStatus.RUNNING, process.pid,
+                    service_name,
+                    ServiceStatus.RUNNING,
+                    process.pid,
                 )
                 self.logger.info(f"Service {service_name} started successfully")
                 return True
@@ -1197,9 +1244,7 @@ class GadugiEngine:
 
         for service_name in self.core_services:
             if (
-                self.config.get("services", {})
-                .get(service_name, {})
-                .get("enabled", True)
+                self.config.get("services", {}).get(service_name, {}).get("enabled", True)
             ) and self._start_service(service_name):
                 started.append(service_name)
 
@@ -1443,9 +1488,7 @@ class GadugiEngine:
         for service_name in self.core_services:
             service_health = {
                 "name": service_name,
-                "status": "healthy"
-                if self._is_service_running(service_name)
-                else "unhealthy",
+                "status": "healthy" if self._is_service_running(service_name) else "unhealthy",
                 "response_time": "N/A",
             }
 
@@ -1460,9 +1503,7 @@ class GadugiEngine:
         for agent_name in self.available_agents:
             agent_health = {
                 "name": agent_name,
-                "status": "healthy"
-                if self._is_agent_running(agent_name)
-                else "unhealthy",
+                "status": "healthy" if self._is_agent_running(agent_name) else "unhealthy",
                 "last_heartbeat": "N/A",
             }
 
@@ -1497,7 +1538,10 @@ class GadugiEngine:
         return health_data
 
     def _create_backup(
-        self, backup_type: str, compress: bool, include_data: bool,
+        self,
+        backup_type: str,
+        compress: bool,
+        include_data: bool,
     ) -> str | None:
         """Create a system backup."""
         try:
@@ -1679,7 +1723,9 @@ class GadugiEngine:
                     if not self._is_service_running(service_name):
                         self.services[service_name]["status"] = ServiceStatus.STOPPED
                         self._update_service_in_db(
-                            service_name, ServiceStatus.STOPPED, None,
+                            service_name,
+                            ServiceStatus.STOPPED,
+                            None,
                         )
 
                 # Update agent status
@@ -1714,7 +1760,10 @@ class GadugiEngine:
                 time.sleep(interval)
 
     def _update_service_in_db(
-        self, service_name: str, status: ServiceStatus, pid: int | None,
+        self,
+        service_name: str,
+        status: ServiceStatus,
+        pid: int | None,
     ) -> None:
         """Update service status in database."""
         try:
@@ -1751,7 +1800,8 @@ class GadugiEngine:
                     (
                         agent_name,
                         self.available_agents.get(agent_name, {}).get(
-                            "version", "0.3.0",
+                            "version",
+                            "0.3.0",
                         ),
                         status,
                         pid,
@@ -1765,7 +1815,11 @@ class GadugiEngine:
             self.logger.exception(f"Error updating agent in database: {e}")
 
     def _log_system_event(
-        self, event_type: str, component: str, message: str, details: dict[str, Any],
+        self,
+        event_type: str,
+        component: str,
+        message: str,
+        details: dict[str, Any],
     ) -> None:
         """Log a system event."""
         try:

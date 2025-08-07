@@ -145,7 +145,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_overview_section(self) -> None:
         """Test overview section generation."""
         content = self.engine._generate_overview_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "# test-project" in content
@@ -157,7 +159,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_installation_section(self) -> None:
         """Test installation section generation."""
         content = self.engine._generate_installation_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## Installation" in content
@@ -169,7 +173,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_usage_section(self) -> None:
         """Test usage section generation."""
         content = self.engine._generate_usage_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## Usage" in content
@@ -181,7 +187,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_api_section(self) -> None:
         """Test API reference section generation."""
         content = self.engine._generate_api_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## API Reference" in content
@@ -193,7 +201,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_contributing_section(self) -> None:
         """Test contributing section generation."""
         content = self.engine._generate_contributing_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## Contributing" in content
@@ -206,7 +216,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_license_section(self) -> None:
         """Test license section generation."""
         content = self.engine._generate_license_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## License" in content
@@ -216,7 +228,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_features_section(self) -> None:
         """Test features section generation."""
         content = self.engine._generate_features_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## Features" in content
@@ -229,7 +243,9 @@ class TestReadmeAgentEngine(unittest.TestCase):
     def test_generate_configuration_section(self) -> None:
         """Test configuration section generation."""
         content = self.engine._generate_configuration_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir,
+            self.test_metadata,
+            self.test_content_requirements,
+            self.temp_dir,
         )
 
         assert "## Configuration" in content
@@ -302,7 +318,11 @@ class TestReadmeAgentEngine(unittest.TestCase):
         ]
 
         result = self.engine._apply_template(
-            template, self.test_metadata, sections, badges, self.test_generation_options,
+            template,
+            self.test_metadata,
+            sections,
+            badges,
+            self.test_generation_options,
         )
 
         assert "test-project" in result
@@ -350,12 +370,8 @@ More content."""
         assert "- [Section 1](#section-1)" in result
         # TOC should be inserted after title
         lines = result.split("\n")
-        toc_index = next(
-            i for i, line in enumerate(lines) if "Table of Contents" in line
-        )
-        title_index = next(
-            i for i, line in enumerate(lines) if line.startswith("# Main Title")
-        )
+        toc_index = next(i for i, line in enumerate(lines) if "Table of Contents" in line)
+        title_index = next(i for i, line in enumerate(lines) if line.startswith("# Main Title"))
         assert toc_index > title_index
 
     def test_calculate_complexity_score(self) -> None:
@@ -389,7 +405,8 @@ def complex_function():
         requested_sections = ["overview", "installation", "usage", "api_reference"]
 
         completeness = self.engine._calculate_completeness(
-            sections_generated, requested_sections,
+            sections_generated,
+            requested_sections,
         )
 
         assert completeness == 75.0  # 3 of 4 sections
@@ -414,10 +431,12 @@ Requirements are listed below.
         low_quality_content = "## Installation\n\nInstall it."
 
         high_score = self.engine._calculate_section_quality(
-            high_quality_content, "installation",
+            high_quality_content,
+            "installation",
         )
         low_score = self.engine._calculate_section_quality(
-            low_quality_content, "installation",
+            low_quality_content,
+            "installation",
         )
 
         assert high_score > low_score
@@ -429,7 +448,11 @@ Requirements are listed below.
         sections = [
             SectionInfo("overview", 50, True, 40.0, "short content"),  # Low quality
             SectionInfo(
-                "installation", 200, True, 85.0, "good content",
+                "installation",
+                200,
+                True,
+                85.0,
+                "good content",
             ),  # Good quality
         ]
 
@@ -442,7 +465,8 @@ Requirements are listed below.
         )
 
         suggestions = self.engine._generate_improvement_suggestions(
-            sections, quality_metrics,
+            sections,
+            quality_metrics,
         )
 
         assert isinstance(suggestions, list)
@@ -454,9 +478,7 @@ Requirements are listed below.
         assert overview_suggestions[0].priority == "high"
 
         # Should suggest adding missing sections due to low completeness
-        completeness_suggestions = [
-            s for s in suggestions if "missing" in s.suggestion.lower()
-        ]
+        completeness_suggestions = [s for s in suggestions if "missing" in s.suggestion.lower()]
         assert len(completeness_suggestions) > 0
 
     def test_generate_readme_success(self) -> None:

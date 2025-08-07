@@ -23,7 +23,6 @@ def test_agent_runner_basic() -> None:
     )
 
 
-
 def test_agent_runner_invalid_agent() -> None:
     """Test that the agent runner handles invalid agents gracefully."""
     result = run_agent("nonexistent-agent", "This should fail")
@@ -35,7 +34,6 @@ def test_agent_runner_invalid_agent() -> None:
     assert "stderr" in result
 
 
-
 def test_orchestrator_via_claude() -> None:
     """Test that the orchestrator agent can be called directly."""
     try:
@@ -45,7 +43,8 @@ def test_orchestrator_via_claude() -> None:
                 "-p",
                 "/agent:orchestrator\n\nRun agent: test-agent\nTask: Verify orchestrator works",
             ],
-            check=False, capture_output=True,
+            check=False,
+            capture_output=True,
             text=True,
             timeout=120,
         )
@@ -65,7 +64,6 @@ def main() -> None:
         test_agent_runner_basic()
         test_agent_runner_invalid_agent()
         test_orchestrator_via_claude()
-
 
     except Exception:
         sys.exit(1)

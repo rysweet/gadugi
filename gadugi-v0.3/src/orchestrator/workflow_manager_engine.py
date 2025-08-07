@@ -3,6 +3,7 @@
 This engine manages the entire development workflow from issue creation through
 PR completion, ensuring all 11 mandatory phases are executed systematically.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -17,6 +18,7 @@ from enum import Enum
 # Try to import aiofiles for async file operations, fallback to sync if not available
 try:
     import aiofiles
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     AIOFILES_AVAILABLE = False
@@ -154,7 +156,9 @@ class WorkflowStateMachine:
         return True
 
     def complete_phase(
-        self, phase: WorkflowPhase, checkpoint_data: dict[str, Any] | None = None,
+        self,
+        phase: WorkflowPhase,
+        checkpoint_data: dict[str, Any] | None = None,
     ) -> None:
         """Mark a phase as completed."""
         if phase not in self.state.phases_completed:
@@ -317,7 +321,6 @@ class PhaseExecutor:
         # Update documentation
         return await self._update_documentation()
 
-
     async def _execute_pull_request(self) -> dict[str, Any]:
         """Phase 8: Pull Request."""
         self.logger.info("Executing pull request phase")
@@ -344,7 +347,6 @@ class PhaseExecutor:
         # Invoke code reviewer agent
         return await self._invoke_code_reviewer()
 
-
     async def _execute_review_response(self) -> dict[str, Any]:
         """Phase 10: Review Response."""
         self.logger.info("Executing review response phase")
@@ -352,14 +354,12 @@ class PhaseExecutor:
         # Process reviewer feedback
         return await self._process_review_feedback()
 
-
     async def _execute_settings_update(self) -> dict[str, Any]:
         """Phase 11: Settings Update."""
         self.logger.info("Executing settings update phase")
 
         # Update project settings
         return await self._update_project_settings()
-
 
     # Helper methods
 
@@ -374,7 +374,8 @@ class PhaseExecutor:
         # Check GitHub CLI
         try:
             process = await asyncio.create_subprocess_exec(
-                "gh", "--version",
+                "gh",
+                "--version",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -449,7 +450,9 @@ class PhaseExecutor:
         try:
             # Ensure we're on main and up to date
             process1 = await asyncio.create_subprocess_exec(
-                "git", "checkout", "main",
+                "git",
+                "checkout",
+                "main",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -458,7 +461,8 @@ class PhaseExecutor:
                 raise subprocess.CalledProcessError(process1.returncode, "git checkout main")
 
             process2 = await asyncio.create_subprocess_exec(
-                "git", "pull",
+                "git",
+                "pull",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -468,13 +472,18 @@ class PhaseExecutor:
 
             # Create feature branch
             process3 = await asyncio.create_subprocess_exec(
-                "git", "checkout", "-b", self.state.branch_name,
+                "git",
+                "checkout",
+                "-b",
+                self.state.branch_name,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
             await process3.communicate()
             if process3.returncode != 0:
-                raise subprocess.CalledProcessError(process3.returncode, f"git checkout -b {self.state.branch_name}")
+                raise subprocess.CalledProcessError(
+                    process3.returncode, f"git checkout -b {self.state.branch_name}",
+                )
 
             return True
         except subprocess.CalledProcessError as e:
@@ -490,7 +499,8 @@ class PhaseExecutor:
         }
 
     async def _create_implementation_plan(
-        self, analysis: dict[str, Any],
+        self,
+        analysis: dict[str, Any],
     ) -> dict[str, Any]:
         """Create detailed implementation plan."""
         return {
@@ -756,9 +766,7 @@ class WorkflowManagerEngine:
         implementation_data = state.checkpoint_data.get("implementation_result", {})
         artifacts = {
             "implementation_files": state.task.target_files,
-            "test_files": [
-                f"tests/test_{Path(f).stem}.py" for f in state.task.target_files
-            ],
+            "test_files": [f"tests/test_{Path(f).stem}.py" for f in state.task.target_files],
             "documentation": ["README.md"],
         }
 
@@ -799,13 +807,19 @@ async def main() -> None:
     parser.add_argument("--title", required=True, help="Task title")
     parser.add_argument("--description", required=True, help="Task description")
     parser.add_argument(
-        "--target-files", required=True, help="Comma-separated list of target files",
+        "--target-files",
+        required=True,
+        help="Comma-separated list of target files",
     )
     parser.add_argument(
-        "--priority", default="medium", choices=["high", "medium", "low"],
+        "--priority",
+        default="medium",
+        choices=["high", "medium", "low"],
     )
     parser.add_argument(
-        "--effort", default="medium", choices=["small", "medium", "large"],
+        "--effort",
+        default="medium",
+        choices=["small", "medium", "large"],
     )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
@@ -814,7 +828,8 @@ async def main() -> None:
     # Configure logging
     log_level = logging.DEBUG if args.debug else logging.INFO
     logging.basicConfig(
-        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=log_level,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     # Create task from CLI arguments

@@ -26,14 +26,10 @@ def demo_multi_agent_workflow(high_level_task: str) -> bool:
         tasks_json = json.loads(decomposer_result["stdout"])
 
         for task in tasks_json["tasks"]:
-            (
-                f" (depends on: {task['dependencies']})" if task["dependencies"] else ""
-            )
-
+            (f" (depends on: {task['dependencies']})" if task["dependencies"] else "")
 
     except json.JSONDecodeError:
         return False
-
 
     # Demonstrate what could happen next
     for _group_num, group in enumerate(tasks_json["parallel_groups"], 1):

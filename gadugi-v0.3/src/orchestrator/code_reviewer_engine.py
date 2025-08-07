@@ -3,6 +3,7 @@
 This engine performs multi-dimensional code analysis including quality, security,
 performance, and maintainability assessment with configurable quality gates.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -24,6 +25,7 @@ import yaml
 # Try to import aiofiles for async file operations, fallback to sync if not available
 try:
     import aiofiles
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     AIOFILES_AVAILABLE = False
@@ -174,7 +176,8 @@ class AnalysisTool:
         """Check if tool is available."""
         try:
             process = await asyncio.create_subprocess_exec(
-                self.name, "--version",
+                self.name,
+                "--version",
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
@@ -221,7 +224,9 @@ class RuffAnalyzer(AnalysisTool):
             )
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
-                result = subprocess.CompletedProcess(cmd, process.returncode, stdout.decode(), stderr.decode())
+                result = subprocess.CompletedProcess(
+                    cmd, process.returncode, stdout.decode(), stderr.decode(),
+                )
             except asyncio.TimeoutError:
                 process.terminate()
                 await process.wait()
@@ -379,7 +384,8 @@ class BanditAnalyzer(AnalysisTool):
         }
 
         return suggestions.get(
-            test_id, "Review security implications and follow OWASP guidelines",
+            test_id,
+            "Review security implications and follow OWASP guidelines",
         )
 
     def _map_severity_score(self, severity: str) -> int:
@@ -477,9 +483,7 @@ class QualityGateValidator:
         if "min_test_coverage" in self.quality_gates:
             min_coverage = self.quality_gates["min_test_coverage"]
             actual_coverage = review_result.quality_metrics.test_coverage
-            results["coverage_check"] = (
-                "passed" if actual_coverage >= min_coverage else "failed"
-            )
+            results["coverage_check"] = "passed" if actual_coverage >= min_coverage else "failed"
 
         # Complexity validation
         if "max_cyclomatic_complexity" in self.quality_gates:
@@ -515,9 +519,7 @@ class QualityGateValidator:
                 for issue in fr.issues
                 if issue.category == IssueCategory.SECURITY and issue.severity >= 5
             )
-            results["security_check"] = (
-                "passed" if high_severity_security == 0 else "failed"
-            )
+            results["security_check"] = "passed" if high_severity_security == 0 else "failed"
 
         # Style validation
         style_errors = sum(
@@ -602,7 +604,9 @@ class CodeReviewerEngine:
         return {}
 
     async def review_files(
-        self, files: list[str], review_config: dict[str, Any] | None = None,
+        self,
+        files: list[str],
+        review_config: dict[str, Any] | None = None,
     ) -> ReviewResult:
         """Review a list of files."""
         start_time = time.time()
@@ -675,7 +679,9 @@ class CodeReviewerEngine:
         return result
 
     async def _filter_files(
-        self, files: list[str], config: dict[str, Any],
+        self,
+        files: list[str],
+        config: dict[str, Any],
     ) -> list[str]:
         """Filter and validate files for analysis."""
         valid_files = []
@@ -821,7 +827,9 @@ class CodeReviewerEngine:
         return file_reviews
 
     def _find_file_for_issue(
-        self, issue: ReviewIssue, files: list[str],
+        self,
+        issue: ReviewIssue,
+        files: list[str],
     ) -> str | None:
         """Find which file an issue belongs to."""
         # This is a simplified implementation
@@ -848,13 +856,13 @@ class CodeReviewerEngine:
         return max(0, score)
 
     def _determine_file_status(
-        self, score: int, issues: list[ReviewIssue],
+        self,
+        score: int,
+        issues: list[ReviewIssue],
     ) -> ReviewStatus:
         """Determine review status for a file."""
         # Check for critical issues
-        critical_issues = [
-            i for i in issues if i.type == IssueType.ERROR and i.severity >= 4
-        ]
+        critical_issues = [i for i in issues if i.type == IssueType.ERROR and i.severity >= 4]
         if critical_issues:
             return ReviewStatus.REJECTED
 
@@ -874,7 +882,8 @@ class CodeReviewerEngine:
             return 0
 
     async def _calculate_quality_metrics(
-        self, file_reviews: list[FileReview],
+        self,
+        file_reviews: list[FileReview],
     ) -> QualityMetrics:
         """Calculate overall quality metrics."""
         total_issues = sum(len(fr.issues) for fr in file_reviews)
@@ -912,7 +921,9 @@ class CodeReviewerEngine:
         )
 
     def _generate_summary(
-        self, file_reviews: list[FileReview], total_lines: int,
+        self,
+        file_reviews: list[FileReview],
+        total_lines: int,
     ) -> ReviewSummary:
         """Generate review summary."""
         total_issues = sum(len(fr.issues) for fr in file_reviews)
@@ -921,12 +932,10 @@ class CodeReviewerEngine:
             for fr in file_reviews
         )
         warnings = sum(
-            len([i for i in fr.issues if i.type == IssueType.WARNING])
-            for fr in file_reviews
+            len([i for i in fr.issues if i.type == IssueType.WARNING]) for fr in file_reviews
         )
         suggestions = sum(
-            len([i for i in fr.issues if i.type == IssueType.SUGGESTION])
-            for fr in file_reviews
+            len([i for i in fr.issues if i.type == IssueType.SUGGESTION]) for fr in file_reviews
         )
 
         return ReviewSummary(
@@ -939,7 +948,9 @@ class CodeReviewerEngine:
         )
 
     def _calculate_overall_score(
-        self, file_reviews: list[FileReview], quality_metrics: QualityMetrics,
+        self,
+        file_reviews: list[FileReview],
+        quality_metrics: QualityMetrics,
     ) -> int:
         """Calculate overall review score."""
         if not file_reviews:
@@ -988,7 +999,9 @@ class CodeReviewerEngine:
         return ReviewStatus.REJECTED
 
     def _generate_recommendations(
-        self, file_reviews: list[FileReview], quality_metrics: QualityMetrics,
+        self,
+        file_reviews: list[FileReview],
+        quality_metrics: QualityMetrics,
     ) -> list[str]:
         """Generate actionable recommendations."""
         recommendations = []
@@ -1026,8 +1039,7 @@ class CodeReviewerEngine:
 
         # Style recommendations
         style_issues = sum(
-            len([i for i in fr.issues if i.category == IssueCategory.STYLE])
-            for fr in file_reviews
+            len([i for i in fr.issues if i.category == IssueCategory.STYLE]) for fr in file_reviews
         )
         if style_issues > 5:
             recommendations.append("Apply consistent code formatting and style")
@@ -1046,16 +1058,22 @@ async def main() -> None:
     # Review command
     review_parser = subparsers.add_parser("review", help="Review files")
     review_parser.add_argument(
-        "--files", required=True, help="Comma-separated list of files",
+        "--files",
+        required=True,
+        help="Comma-separated list of files",
     )
     review_parser.add_argument(
-        "--language", help="Primary language (python, javascript, etc.)",
+        "--language",
+        help="Primary language (python, javascript, etc.)",
     )
     review_parser.add_argument(
-        "--quality-gates", help="Quality gates profile (strict, standard, lenient)",
+        "--quality-gates",
+        help="Quality gates profile (strict, standard, lenient)",
     )
     review_parser.add_argument(
-        "--output-format", choices=["json", "yaml", "text"], default="json",
+        "--output-format",
+        choices=["json", "yaml", "text"],
+        default="json",
     )
     review_parser.add_argument("--output-file", help="Output file path")
 
@@ -1130,7 +1148,6 @@ Recommendations:
     elif args.command == "health-check":
         reviewer = CodeReviewerEngine()
 
-
         # Check Python tools
         python_tools = ["ruff", "mypy", "bandit", "black"]
         available_tools = []
@@ -1138,7 +1155,8 @@ Recommendations:
         for tool_name in python_tools:
             try:
                 process = await asyncio.create_subprocess_exec(
-                    tool_name, "--version",
+                    tool_name,
+                    "--version",
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
@@ -1157,7 +1175,6 @@ Recommendations:
             pass
 
     elif args.command == "tools":
-
         tools_info = {
             "ruff": "Ultra-fast Python linter",
             "mypy": "Static type checker for Python",
@@ -1170,7 +1187,8 @@ Recommendations:
         for tool in tools_info:
             with contextlib.suppress(FileNotFoundError):
                 process = await asyncio.create_subprocess_exec(
-                    tool, "--version",
+                    tool,
+                    "--version",
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )

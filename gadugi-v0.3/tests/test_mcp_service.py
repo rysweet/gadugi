@@ -373,7 +373,8 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         await self.service.start()
 
         result = await self.service.save_context(
-            self.test_context, PersistenceLevel.SESSION,
+            self.test_context,
+            PersistenceLevel.SESSION,
         )
 
         assert result.success
@@ -387,7 +388,8 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
 
         # Save context first
         save_result = await self.service.save_context(
-            self.test_context, PersistenceLevel.SESSION,
+            self.test_context,
+            PersistenceLevel.SESSION,
         )
         assert save_result.success
 
@@ -428,7 +430,8 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
 
         for context in contexts:
             save_result = await self.service.save_context(
-                context, PersistenceLevel.PERMANENT,
+                context,
+                PersistenceLevel.PERMANENT,
             )
             assert save_result.success
 
@@ -444,9 +447,7 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         session_result = await self.service.list_contexts(ContextType.SESSION)
 
         assert session_result.success
-        session_contexts = [
-            c for c in session_result.data if c.type == ContextType.SESSION
-        ]
+        session_contexts = [c for c in session_result.data if c.type == ContextType.SESSION]
         assert len(session_contexts) >= 1
 
     async def test_delete_context_success(self) -> None:
@@ -455,7 +456,8 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
 
         # Save context first
         save_result = await self.service.save_context(
-            self.test_context, PersistenceLevel.PERMANENT,
+            self.test_context,
+            PersistenceLevel.PERMANENT,
         )
         assert save_result.success
 
@@ -504,7 +506,9 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         }
 
         result = await self.service.store_semantic_memory(
-            knowledge, category="technology", importance=0.8,
+            knowledge,
+            category="technology",
+            importance=0.8,
         )
 
         assert result.success
@@ -529,7 +533,9 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         }
 
         result = await self.service.save_session_context(
-            "session_456", context_data, expires_in_hours=12,
+            "session_456",
+            context_data,
+            expires_in_hours=12,
         )
 
         assert result.success
@@ -629,7 +635,9 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         }
 
         memory = create_semantic_memory(
-            knowledge, category="software_engineering", importance=0.7,
+            knowledge,
+            category="software_engineering",
+            importance=0.7,
         )
 
         assert memory.type == MemoryType.SEMANTIC
@@ -648,7 +656,9 @@ class TestMCPService(unittest.IsolatedAsyncioTestCase):
         }
 
         context = create_session_context(
-            "session_abc", context_data, expires_in_hours=6,
+            "session_abc",
+            context_data,
+            expires_in_hours=6,
         )
 
         assert context.type == ContextType.SESSION
@@ -955,7 +965,8 @@ class TestContextManager(unittest.TestCase):
         """Test context saving and loading."""
         # Save context
         save_result = self.manager.save_context(
-            self.test_context, PersistenceLevel.PERMANENT,
+            self.test_context,
+            PersistenceLevel.PERMANENT,
         )
         assert save_result.success
 
@@ -980,7 +991,8 @@ class TestContextManager(unittest.TestCase):
         )
 
         save_result = self.manager.save_context(
-            large_context, PersistenceLevel.PERMANENT,
+            large_context,
+            PersistenceLevel.PERMANENT,
         )
         assert save_result.success
         assert save_result.metadata.get("compressed", False)
@@ -1021,9 +1033,7 @@ class TestContextManager(unittest.TestCase):
         session_result = self.manager.list_contexts(ContextType.SESSION)
         assert session_result.success
 
-        session_contexts = [
-            c for c in session_result.data if c.type == ContextType.SESSION
-        ]
+        session_contexts = [c for c in session_result.data if c.type == ContextType.SESSION]
         assert len(session_contexts) >= 1
 
 

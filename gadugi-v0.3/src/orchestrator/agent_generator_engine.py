@@ -590,9 +590,7 @@ class {AGENT_CLASS_NAME}Engine:
                 "file_structure": {
                     "agent_file": str(agent_file.path),
                     "engine_file": str(engine_file.path),
-                    "test_file": str(generated_files[2].path)
-                    if len(generated_files) > 2
-                    else None,
+                    "test_file": str(generated_files[2].path) if len(generated_files) > 2 else None,
                     "readme_file": str(generated_files[-1].path)
                     if template_options.include_documentation
                     else None,
@@ -676,7 +674,9 @@ class {AGENT_CLASS_NAME}Engine:
         directory.mkdir(parents=True, exist_ok=True)
 
     def _generate_agent_file(
-        self, spec: AgentSpecification, output_dir: Path,
+        self,
+        spec: AgentSpecification,
+        output_dir: Path,
     ) -> GeneratedFile:
         """Generate agent specification file."""
         agent_content = f"""# {spec.name.title().replace("-", " ").replace("_", " ")}
@@ -751,9 +751,7 @@ This agent integrates with the Gadugi ecosystem through:
         template = self.templates[template_options.base_template.value]
 
         # Generate class name (PascalCase)
-        class_name = "".join(
-            word.title() for word in spec.name.replace("-", "_").split("_")
-        )
+        class_name = "".join(word.title() for word in spec.name.replace("-", "_").split("_"))
 
         # Generate template variables
         variables = {
@@ -791,12 +789,12 @@ This agent integrates with the Gadugi ecosystem through:
         )
 
     def _generate_test_file(
-        self, spec: AgentSpecification, output_dir: Path,
+        self,
+        spec: AgentSpecification,
+        output_dir: Path,
     ) -> GeneratedFile:
         """Generate test file for agent."""
-        class_name = "".join(
-            word.title() for word in spec.name.replace("-", "_").split("_")
-        )
+        class_name = "".join(word.title() for word in spec.name.replace("-", "_").split("_"))
 
         test_content = f'''#!/usr/bin/env python3
 """
@@ -910,7 +908,9 @@ if __name__ == '__main__':
         )
 
     def _generate_readme_file(
-        self, spec: AgentSpecification, output_dir: Path,
+        self,
+        spec: AgentSpecification,
+        output_dir: Path,
     ) -> GeneratedFile:
         """Generate README file for agent."""
         readme_content = f"""# {spec.name.title().replace("-", " ").replace("_", " ")} Agent
@@ -1194,7 +1194,9 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
 '''
 
     def _generate_recommendations(
-        self, spec: AgentSpecification, template_options: TemplateOptions,
+        self,
+        spec: AgentSpecification,
+        template_options: TemplateOptions,
     ) -> list[Recommendation]:
         """Generate recommendations for the agent."""
         recommendations = []
@@ -1257,11 +1259,13 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     ),
                     include_tests=template_opts_data.get("include_tests", True),
                     include_documentation=template_opts_data.get(
-                        "include_documentation", True,
+                        "include_documentation",
+                        True,
                     ),
                     include_examples=template_opts_data.get("include_examples", True),
                     integration_level=template_opts_data.get(
-                        "integration_level", "basic",
+                        "integration_level",
+                        "basic",
                     ),
                 )
 
@@ -1271,7 +1275,8 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     output_directory=gen_opts_data.get("output_directory", "./agents"),
                     overwrite_existing=gen_opts_data.get("overwrite_existing", False),
                     validate_before_creation=gen_opts_data.get(
-                        "validate_before_creation", True,
+                        "validate_before_creation",
+                        True,
                     ),
                     auto_register=gen_opts_data.get("auto_register", True),
                     auto_deploy=gen_opts_data.get("auto_deploy", False),

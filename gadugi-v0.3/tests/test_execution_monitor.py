@@ -48,12 +48,16 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Sample resource limits
         self.test_limits = ResourceLimits(
-            cpu_limit="100m", memory_limit="256MB", timeout=30,
+            cpu_limit="100m",
+            memory_limit="256MB",
+            timeout=30,
         )
 
         # Sample alert thresholds
         self.test_thresholds = AlertThresholds(
-            cpu_threshold=50.0, memory_threshold=128.0, error_rate_threshold=10.0,
+            cpu_threshold=50.0,
+            memory_threshold=128.0,
+            error_rate_threshold=10.0,
         )
 
     def tearDown(self) -> None:
@@ -84,7 +88,9 @@ class TestExecutionMonitorEngine(unittest.TestCase):
     def test_monitoring_configuration(self) -> None:
         """Test monitoring configuration."""
         config = MonitoringConfiguration(
-            monitoring_interval=5, collect_metrics=False, auto_restart=False,
+            monitoring_interval=5,
+            collect_metrics=False,
+            auto_restart=False,
         )
 
         assert config.monitoring_interval == 5
@@ -95,7 +101,10 @@ class TestExecutionMonitorEngine(unittest.TestCase):
     def test_resource_limits_dataclass(self) -> None:
         """Test ResourceLimits dataclass."""
         limits = ResourceLimits(
-            cpu_limit="200m", memory_limit="512MB", timeout=600, disk_limit="1GB",
+            cpu_limit="200m",
+            memory_limit="512MB",
+            timeout=600,
+            disk_limit="1GB",
         )
 
         assert limits.cpu_limit == "200m"
@@ -244,7 +253,8 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Stop monitoring
         stop_result = self.engine.stop_process_monitoring(
-            self.test_process_id, cleanup_resources=True,
+            self.test_process_id,
+            cleanup_resources=True,
         )
 
         assert stop_result["success"]
@@ -276,7 +286,9 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Get status
         status = self.engine.get_process_status(
-            process_id=self.test_process_id, include_metrics=True, include_history=False,
+            process_id=self.test_process_id,
+            include_metrics=True,
+            include_history=False,
         )
 
         assert status["success"]
@@ -304,7 +316,9 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Get status of all processes
         status = self.engine.get_process_status(
-            process_id=None, include_metrics=False, include_history=False,
+            process_id=None,
+            include_metrics=False,
+            include_history=False,
         )
 
         assert status["success"]
@@ -383,7 +397,8 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             rss=134217728,
         )  # 128MB
         mock_process_instance.io_counters.return_value = MagicMock(
-            read_bytes=1000, write_bytes=2000,
+            read_bytes=1000,
+            write_bytes=2000,
         )
         mock_process_instance.num_threads.return_value = 5
         mock_process_instance.num_fds.return_value = 10

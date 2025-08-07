@@ -4,6 +4,7 @@
 Generates, maintains, and updates comprehensive README documentation.
 Provides intelligent content discovery and quality assessment capabilities.
 """
+
 from __future__ import annotations
 
 import json
@@ -221,7 +222,8 @@ class ReadmeAgentEngine:
             # Discover project information
             if options.auto_discover:
                 metadata = self.content_discoverer.discover_project_info(
-                    repository_path, project_name,
+                    repository_path,
+                    project_name,
                 )
             else:
                 metadata = ProjectMetadata(
@@ -242,9 +244,7 @@ class ReadmeAgentEngine:
             template_name = options.template_name
             if template_name not in self.templates:
                 template_name = (
-                    project_type.value
-                    if project_type.value in self.templates
-                    else "standard"
+                    project_type.value if project_type.value in self.templates else "standard"
                 )
 
             template = self.templates[template_name]
@@ -272,7 +272,11 @@ class ReadmeAgentEngine:
 
             # Apply template
             readme_content = self._apply_template(
-                template, metadata, readme_sections, badges, options,
+                template,
+                metadata,
+                readme_sections,
+                badges,
+                options,
             )
 
             # Generate table of contents if requested
@@ -286,14 +290,16 @@ class ReadmeAgentEngine:
                 "reading_time": f"{max(1, len(readme_content.split()) // 200)} minutes",
                 "complexity_score": self._calculate_complexity_score(readme_content),
                 "completeness": self._calculate_completeness(
-                    sections_generated, content_requirements.sections,
+                    sections_generated,
+                    content_requirements.sections,
                 ),
                 "generated_at": datetime.now().isoformat(),
             }
 
             # Assess quality
             quality_metrics = self.quality_assessor.assess_quality(
-                readme_content, sections_generated,
+                readme_content,
+                sections_generated,
             )
 
             # Generate analysis
@@ -311,7 +317,8 @@ class ReadmeAgentEngine:
                     if section not in content_requirements.sections
                 ],
                 "improvement_suggestions": self._generate_improvement_suggestions(
-                    sections_generated, quality_metrics,
+                    sections_generated,
+                    quality_metrics,
                 ),
                 "quality_metrics": asdict(quality_metrics),
             }
@@ -372,7 +379,9 @@ class ReadmeAgentEngine:
 
         if section_name in generators:
             content = generators[section_name](
-                metadata, content_requirements, repository_path,
+                metadata,
+                content_requirements,
+                repository_path,
             )
         else:
             content = self._generate_generic_section(section_name, metadata)
@@ -730,7 +739,9 @@ class ReadmeAgentEngine:
         return "\n".join(content)
 
     def _generate_generic_section(
-        self, section_name: str, metadata: ProjectMetadata,
+        self,
+        section_name: str,
+        metadata: ProjectMetadata,
     ) -> str:
         """Generate a generic section."""
         section_title = section_name.replace("_", " ").title()
@@ -743,7 +754,9 @@ class ReadmeAgentEngine:
         return "\n".join(content)
 
     def _generate_badges(
-        self, metadata: ProjectMetadata, repository_path: str,
+        self,
+        metadata: ProjectMetadata,
+        repository_path: str,
     ) -> list[Badge]:
         """Generate badges for the project."""
         badges = []
@@ -804,7 +817,8 @@ class ReadmeAgentEngine:
             # Try to get remote URL from git
             result = subprocess.run(
                 ["git", "config", "--get", "remote.origin.url"],
-                check=False, cwd=repository_path,
+                check=False,
+                cwd=repository_path,
                 capture_output=True,
                 text=True,
             )
@@ -818,12 +832,14 @@ class ReadmeAgentEngine:
                     if remote_url.startswith("git@"):
                         # SSH: git@github.com:user/repo.git
                         match = re.search(
-                            r"github\.com:([^/]+)/(.+?)(?:\.git)?$", remote_url,
+                            r"github\.com:([^/]+)/(.+?)(?:\.git)?$",
+                            remote_url,
                         )
                     else:
                         # HTTPS: https://github.com/user/repo.git
                         match = re.search(
-                            r"github\.com/([^/]+)/(.+?)(?:\.git)?$", remote_url,
+                            r"github\.com/([^/]+)/(.+?)(?:\.git)?$",
+                            remote_url,
                         )
 
                     if match:
@@ -858,22 +874,24 @@ class ReadmeAgentEngine:
             "BADGES": badges_section,
             "BRIEF_DESCRIPTION": metadata.description
             or f"A {metadata.languages[0] if metadata.languages else ''} project",
-            "PROJECT_DESCRIPTION": metadata.description
-            or f"Description for {metadata.name}",
+            "PROJECT_DESCRIPTION": metadata.description or f"Description for {metadata.name}",
             "FEATURE_LIST": sections.get("features", "- Feature 1\n- Feature 2"),
             "INSTALLATION_INSTRUCTIONS": sections.get(
-                "installation", "Installation instructions",
+                "installation",
+                "Installation instructions",
             ),
             "USAGE_EXAMPLES": sections.get("usage", "Usage examples"),
             "API_DOCUMENTATION": sections.get("api_reference", "API documentation"),
             "CONTRIBUTING_GUIDELINES": sections.get(
-                "contributing", "Contributing guidelines",
+                "contributing",
+                "Contributing guidelines",
             ),
             "LICENSE_INFORMATION": sections.get("license", "License information"),
             "QUICK_START_EXAMPLE": self._generate_quick_start(metadata),
             "CONFIGURATION_GUIDE": sections.get("configuration", "Configuration guide"),
             "TROUBLESHOOTING_GUIDE": sections.get(
-                "troubleshooting", "Troubleshooting guide",
+                "troubleshooting",
+                "Troubleshooting guide",
             ),
         }
 
@@ -925,9 +943,7 @@ console.log(result);
                 heading = line.lstrip("# ").strip()
 
                 # Create anchor link
-                anchor = (
-                    heading.lower().replace(" ", "-").replace(".", "").replace(",", "")
-                )
+                anchor = heading.lower().replace(" ", "-").replace(".", "").replace(",", "")
                 anchor = re.sub(r"[^\w\-]", "", anchor)
 
                 # Add to TOC with proper indentation
@@ -981,7 +997,9 @@ console.log(result);
         return round(complexity, 1)
 
     def _calculate_completeness(
-        self, sections_generated: list[SectionInfo], requested_sections: list[str],
+        self,
+        sections_generated: list[SectionInfo],
+        requested_sections: list[str],
     ) -> float:
         """Calculate completeness percentage."""
         generated_names = {section.name for section in sections_generated}
@@ -1034,7 +1052,9 @@ console.log(result);
         return min(100.0, score)
 
     def _generate_improvement_suggestions(
-        self, sections_generated: list[SectionInfo], quality_metrics: QualityMetrics,
+        self,
+        sections_generated: list[SectionInfo],
+        quality_metrics: QualityMetrics,
     ) -> list[ImprovementSuggestion]:
         """Generate suggestions for improving documentation."""
         suggestions = []
@@ -1076,7 +1096,9 @@ console.log(result);
         return suggestions
 
     def analyze_readme(
-        self, readme_path: str, analysis_depth: str = "detailed",
+        self,
+        readme_path: str,
+        analysis_depth: str = "detailed",
     ) -> DocumentationResult:
         """Analyze an existing README file."""
         try:
@@ -1097,7 +1119,8 @@ console.log(result);
                 "sections_found": list(sections.keys()),
                 "missing_sections": self._identify_missing_sections(sections),
                 "improvement_suggestions": self._generate_improvement_suggestions(
-                    [], quality_metrics,
+                    [],
+                    quality_metrics,
                 ),
                 "quality_metrics": asdict(quality_metrics),
                 "structure_analysis": self._analyze_structure(content),
@@ -1167,7 +1190,8 @@ console.log(result);
         return sections
 
     def _identify_missing_sections(
-        self, existing_sections: dict[str, str],
+        self,
+        existing_sections: dict[str, str],
     ) -> list[str]:
         """Identify missing standard sections."""
         standard_sections = [
@@ -1181,9 +1205,7 @@ console.log(result);
         ]
 
         existing_keys = set(existing_sections.keys())
-        return [
-            section for section in standard_sections if section not in existing_keys
-        ]
+        return [section for section in standard_sections if section not in existing_keys]
 
     def _analyze_structure(self, content: str) -> dict[str, Any]:
         """Analyze document structure."""
@@ -1295,7 +1317,11 @@ console.log(result);
         )
 
         result = self.generate_readme(
-            repository_path, project_name, project_type, content_requirements, options,
+            repository_path,
+            project_name,
+            project_type,
+            content_requirements,
+            options,
         )
 
         return asdict(result)
@@ -1305,7 +1331,8 @@ console.log(result);
         target = request_data.get("target", {})
         readme_path = target.get("readme_path", "README.md")
         analysis_depth = request_data.get("analysis_options", {}).get(
-            "depth", "detailed",
+            "depth",
+            "detailed",
         )
 
         result = self.analyze_readme(readme_path, analysis_depth)
@@ -1475,7 +1502,9 @@ class ContentDiscoverer:
     """Discovers project information from codebase."""
 
     def discover_project_info(
-        self, repository_path: str, project_name: str,
+        self,
+        repository_path: str,
+        project_name: str,
     ) -> ProjectMetadata:
         """Discover project information from repository."""
         metadata = ProjectMetadata(
@@ -1605,16 +1634,14 @@ class ContentDiscoverer:
             logging.warning(f"Could not parse pyproject.toml: {e}")
 
     def _parse_requirements_txt(
-        self, requirements_txt: Path, metadata: ProjectMetadata,
+        self,
+        requirements_txt: Path,
+        metadata: ProjectMetadata,
     ) -> None:
         """Parse requirements.txt for dependencies."""
         try:
             with open(requirements_txt) as f:
-                deps = [
-                    line.strip()
-                    for line in f
-                    if line.strip() and not line.startswith("#")
-                ]
+                deps = [line.strip() for line in f if line.strip() and not line.startswith("#")]
             metadata.dependencies["runtime"] = deps
         except Exception as e:
             logging.warning(f"Could not parse requirements.txt: {e}")
@@ -1673,7 +1700,9 @@ class QualityAssessor:
     """Assesses documentation quality."""
 
     def assess_quality(
-        self, content: str, sections: list[SectionInfo],
+        self,
+        content: str,
+        sections: list[SectionInfo],
     ) -> QualityMetrics:
         """Assess overall quality of documentation."""
         clarity = self._assess_clarity(content)
@@ -1715,9 +1744,7 @@ class QualityAssessor:
 
         # Standard sections bonus
         standard_sections = ["installation", "usage", "api", "contributing", "license"]
-        found_sections = sum(
-            1 for section in standard_sections if section in content.lower()
-        )
+        found_sections = sum(1 for section in standard_sections if section in content.lower())
 
         completeness_bonus = (found_sections / len(standard_sections)) * 30
 
@@ -1791,7 +1818,6 @@ def main() -> None:
     response = engine.process_request(test_request)
 
     if response["success"]:
-
         # Print generated README (truncated)
         readme_content = response["readme_content"]
         if readme_content:

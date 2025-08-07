@@ -3,6 +3,7 @@
 
 Launches individual Gadugi services as separate processes.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -18,7 +19,11 @@ class ServiceLauncher:
     """Launches and manages individual Gadugi services."""
 
     def __init__(
-        self, service_name: str, module_path: str, class_name: str, port: int | None = None,
+        self,
+        service_name: str,
+        module_path: str,
+        class_name: str,
+        port: int | None = None,
     ) -> None:
         self.service_name = service_name
         self.module_path = module_path

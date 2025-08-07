@@ -4,6 +4,7 @@
 Provides shared memory persistence and graph-based relationships for multi-agent systems.
 Handles knowledge graphs, agent interactions, workflow dependencies, and complex data relationships.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -506,7 +507,9 @@ class GraphDatabaseService:
             )
 
     async def update_node(
-        self, node_id: str, properties: dict[str, Any],
+        self,
+        node_id: str,
+        properties: dict[str, Any],
     ) -> QueryResult:
         """Update node properties."""
         start_time = time.time()
@@ -751,7 +754,8 @@ class GraphDatabaseService:
                 prop_conditions = [
                     f"n.{key} = ${param_name}"
                     for key, param_name in zip(
-                        properties.keys(), [f"prop_{k}" for k in properties],
+                        properties.keys(),
+                        [f"prop_{k}" for k in properties],
                     )
                 ]
                 where_clause = "WHERE " + " AND ".join(prop_conditions)
@@ -785,9 +789,7 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "node_type": node_type.value if node_type else None,
-                        "filter_properties": list(properties.keys())
-                        if properties
-                        else [],
+                        "filter_properties": list(properties.keys()) if properties else [],
                         "result_count": len(nodes),
                         "limit": limit,
                     },
@@ -893,9 +895,7 @@ class GraphDatabaseService:
                     metadata={
                         "source_id": source_id,
                         "target_id": target_id,
-                        "relationship_type": relationship_type.value
-                        if relationship_type
-                        else None,
+                        "relationship_type": relationship_type.value if relationship_type else None,
                         "result_count": len(relationships),
                         "limit": limit,
                     },
@@ -1141,7 +1141,8 @@ class GraphDatabaseService:
                             "node": dict(record["recommended"]),
                             "score": record.get("score", 1.0),
                             "reason": record.get(
-                                "reason", "Graph-based recommendation",
+                                "reason",
+                                "Graph-based recommendation",
                             ),
                         },
                     )
@@ -1217,7 +1218,8 @@ class GraphDatabaseService:
         """
 
     def _build_generic_recommendation_query(
-        self, request: RecommendationRequest,
+        self,
+        request: RecommendationRequest,
     ) -> str:
         """Build generic recommendation query."""
         return f"""
@@ -1232,7 +1234,8 @@ class GraphDatabaseService:
         """
 
     def _build_recommendation_params(
-        self, request: RecommendationRequest,
+        self,
+        request: RecommendationRequest,
     ) -> dict[str, Any]:
         """Build parameters for recommendation queries."""
         return {
@@ -1259,9 +1262,7 @@ class GraphDatabaseService:
             for key, query in queries.items():
                 result = tx.run(query)
                 if key in ["node_types", "relationship_types"]:
-                    results[key] = {
-                        record["type"]: record["count"] for record in result
-                    }
+                    results[key] = {record["type"]: record["count"] for record in result}
                 else:
                     results[key] = result.single()["count"]
 
@@ -1312,7 +1313,9 @@ class GraphDatabaseService:
     # Full-text Search
 
     async def search_content(
-        self, query: str, node_types: list[NodeType] | None = None,
+        self,
+        query: str,
+        node_types: list[NodeType] | None = None,
     ) -> QueryResult:
         """Perform full-text search across node content."""
         start_time = time.time()
@@ -1330,8 +1333,7 @@ class GraphDatabaseService:
 
                 if type_queries:
                     full_query = (
-                        " UNION ".join(type_queries)
-                        + " YIELD node RETURN DISTINCT node LIMIT 50"
+                        " UNION ".join(type_queries) + " YIELD node RETURN DISTINCT node LIMIT 50"
                     )
                 else:
                     # Fallback to property search
@@ -1386,9 +1388,7 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "search_query": query,
-                        "node_types": [nt.value for nt in node_types]
-                        if node_types
-                        else None,
+                        "node_types": [nt.value for nt in node_types] if node_types else None,
                         "result_count": len(nodes),
                     },
                     execution_time=execution_time,
@@ -1413,7 +1413,9 @@ class GraphDatabaseService:
     # Custom Cypher Queries
 
     async def execute_cypher(
-        self, query: str, parameters: dict[str, Any] | None = None,
+        self,
+        query: str,
+        parameters: dict[str, Any] | None = None,
     ) -> QueryResult:
         """Execute custom Cypher query."""
         if parameters is None:
@@ -1439,7 +1441,8 @@ class GraphDatabaseService:
                         if hasattr(value, "labels") and hasattr(value, "items"):  # Node
                             nodes.append(dict(value))
                         elif hasattr(value, "type") and hasattr(
-                            value, "start_node",
+                            value,
+                            "start_node",
                         ):  # Relationship
                             relationships.append(dict(value))
                         else:
@@ -1488,9 +1491,7 @@ class GraphDatabaseService:
 
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
-        avg_query_time = (
-            self.total_query_time / self.query_count if self.query_count > 0 else 0
-        )
+        avg_query_time = self.total_query_time / self.query_count if self.query_count > 0 else 0
 
         return {
             "connected": self.connected,
@@ -1540,7 +1541,10 @@ class GraphDatabaseService:
     # High-level convenience methods
 
     async def create_agent_node(
-        self, agent_id: str, name: str, properties: dict[str, Any] | None = None,
+        self,
+        agent_id: str,
+        name: str,
+        properties: dict[str, Any] | None = None,
     ) -> QueryResult:
         """Convenience method to create an agent node."""
         if properties is None:
@@ -1553,7 +1557,10 @@ class GraphDatabaseService:
         return await self.create_node(node)
 
     async def create_workflow_node(
-        self, workflow_id: str, name: str, status: str = "created",
+        self,
+        workflow_id: str,
+        name: str,
+        status: str = "created",
     ) -> QueryResult:
         """Convenience method to create a workflow node."""
         properties = {"name": name, "status": status, "type": "workflow"}
@@ -1563,7 +1570,10 @@ class GraphDatabaseService:
         return await self.create_node(node)
 
     async def create_dependency_relationship(
-        self, source_id: str, target_id: str, dependency_type: str = "requires",
+        self,
+        source_id: str,
+        target_id: str,
+        dependency_type: str = "requires",
     ) -> QueryResult:
         """Convenience method to create a dependency relationship."""
         relationship = GraphRelationship(
@@ -1581,7 +1591,10 @@ class GraphDatabaseService:
 
 
 def create_concept_node(
-    concept_id: str, name: str, category: str, description: str | None = None,
+    concept_id: str,
+    name: str,
+    category: str,
+    description: str | None = None,
 ) -> GraphNode:
     """Create a concept node."""
     properties = {"name": name, "category": category, "type": "concept"}
@@ -1593,7 +1606,10 @@ def create_concept_node(
 
 
 def create_document_node(
-    doc_id: str, title: str, path: str, content: str | None = None,
+    doc_id: str,
+    title: str,
+    path: str,
+    content: str | None = None,
 ) -> GraphNode:
     """Create a document node."""
     properties = {"title": title, "path": path, "type": "document"}
@@ -1606,7 +1622,10 @@ def create_document_node(
 
 
 def create_task_node(
-    task_id: str, name: str, priority: str = "normal", status: str = "pending",
+    task_id: str,
+    name: str,
+    priority: str = "normal",
+    status: str = "pending",
 ) -> GraphNode:
     """Create a task node."""
     properties = {"name": name, "priority": priority, "status": status, "type": "task"}
@@ -1624,7 +1643,6 @@ async def main() -> None:
         if not connected:
             return
 
-
         # Create some test nodes
         agent_node = GraphNode(
             id="agent-001",
@@ -1641,7 +1659,6 @@ async def main() -> None:
         # Create nodes
         await service.create_node(agent_node)
         await service.create_node(task_node)
-
 
         # Create relationship
         relationship = GraphRelationship(

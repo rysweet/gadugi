@@ -77,46 +77,25 @@ class TestMemoryManager:
     def test_determine_item_type(self) -> None:
         """Test item type determination."""
         # Accomplishment markers
-        assert (
-            self.memory_manager._determine_item_type("- ✅ Completed task")
-            == "accomplishment"
-        )
+        assert self.memory_manager._determine_item_type("- ✅ Completed task") == "accomplishment"
         assert self.memory_manager._determine_item_type("- Fixed the bug") == "context"
-        assert (
-            self.memory_manager._determine_item_type("- Implemented feature")
-            == "context"
-        )
+        assert self.memory_manager._determine_item_type("- Implemented feature") == "context"
 
         # Todo markers
-        assert (
-            self.memory_manager._determine_item_type("- 🔄 Working on feature")
-            == "todo"
-        )
-        assert (
-            self.memory_manager._determine_item_type("- Need to implement X") == "todo"
-        )
+        assert self.memory_manager._determine_item_type("- 🔄 Working on feature") == "todo"
+        assert self.memory_manager._determine_item_type("- Need to implement X") == "todo"
 
         # Goal markers
+        assert self.memory_manager._determine_item_type("- Goal: Complete project") == "goal"
         assert (
-            self.memory_manager._determine_item_type("- Goal: Complete project")
-            == "goal"
-        )
-        assert (
-            self.memory_manager._determine_item_type("- Objective: Improve performance")
-            == "goal"
+            self.memory_manager._determine_item_type("- Objective: Improve performance") == "goal"
         )
 
     def test_determine_priority(self) -> None:
         """Test priority determination."""
-        assert (
-            self.memory_manager._determine_priority("- Critical bug fix needed")
-            == "high"
-        )
+        assert self.memory_manager._determine_priority("- Critical bug fix needed") == "high"
         assert self.memory_manager._determine_priority("- High priority task") == "high"
-        assert (
-            self.memory_manager._determine_priority("- Minor documentation update")
-            == "low"
-        )
+        assert self.memory_manager._determine_priority("- Minor documentation update") == "low"
         assert self.memory_manager._determine_priority("- Regular task") == "medium"
 
     def test_update_memory(self) -> None:
@@ -169,7 +148,9 @@ class TestMemoryManager:
 
         # Prune with 7-day threshold
         pruned_sections = self.memory_manager.prune_memory(
-            sections, days_threshold=7, preserve_critical=True,
+            sections,
+            days_threshold=7,
+            preserve_critical=True,
         )
 
         # Should have fewer items after pruning
@@ -198,10 +179,7 @@ class TestMemoryManager:
     def test_get_target_section(self) -> None:
         """Test section targeting for different item types."""
         assert self.memory_manager._get_target_section("goal") == "Active Goals"
-        assert (
-            self.memory_manager._get_target_section("accomplishment")
-            == "Recent Accomplishments"
-        )
+        assert self.memory_manager._get_target_section("accomplishment") == "Recent Accomplishments"
         assert self.memory_manager._get_target_section("context") == "Important Context"
         assert self.memory_manager._get_target_section("todo") == "Active Goals"
         assert self.memory_manager._get_target_section("reflection") == "Reflections"
@@ -315,7 +293,8 @@ class TestGitHubSync:
         """Test creating GitHub issue for memory item."""
         # Mock successful issue creation
         mock_run.return_value = MagicMock(
-            returncode=0, stdout="https://github.com/test/repo/issues/456",
+            returncode=0,
+            stdout="https://github.com/test/repo/issues/456",
         )
         self.github_sync.gh_available = True
 
@@ -418,7 +397,8 @@ class TestMemoryManagerEngine:
     def test_handle_status(self) -> None:
         """Test handling status requests."""
         request = MemoryManagerRequest(
-            action="status", memory_content=self.sample_memory,
+            action="status",
+            memory_content=self.sample_memory,
         )
 
         response = self.engine.process_request(request)

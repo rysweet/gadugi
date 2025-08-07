@@ -197,7 +197,9 @@ class TestArchitectEngine:
         )
 
         pattern = self.architect._select_architecture_pattern(
-            context, scope, tech_prefs,
+            context,
+            scope,
+            tech_prefs,
         )
 
         assert pattern == "monolithic"
@@ -224,7 +226,9 @@ class TestArchitectEngine:
         )
 
         pattern = self.architect._select_architecture_pattern(
-            context, scope, tech_prefs,
+            context,
+            scope,
+            tech_prefs,
         )
 
         assert pattern == "microservices"
@@ -251,7 +255,9 @@ class TestArchitectEngine:
         )
 
         pattern = self.architect._select_architecture_pattern(
-            context, scope, tech_prefs,
+            context,
+            scope,
+            tech_prefs,
         )
 
         assert pattern == "service_oriented"
@@ -355,9 +361,7 @@ class TestArchitectEngine:
         assert "data_layer" in component_names
 
         # Verify layer dependencies
-        presentation = next(
-            comp for comp in components if comp.name == "presentation_layer"
-        )
+        presentation = next(comp for comp in components if comp.name == "presentation_layer")
         assert "business_layer" in presentation.interfaces.dependencies
 
         business = next(comp for comp in components if comp.name == "business_layer")
@@ -388,9 +392,7 @@ class TestArchitectEngine:
         assert "business_service" in component_names
 
         # Verify SOA-specific components
-        service_registry = next(
-            comp for comp in components if comp.name == "service_registry"
-        )
+        service_registry = next(comp for comp in components if comp.name == "service_registry")
         assert "Service registration" in service_registry.responsibilities
         assert service_registry.technology_stack.framework == "consul"
 
@@ -439,7 +441,9 @@ class TestArchitectEngine:
         )
 
         patterns = self.architect._select_integration_patterns(
-            components, "microservices", scope,
+            components,
+            "microservices",
+            scope,
         )
 
         assert len(patterns) == 3
@@ -458,7 +462,9 @@ class TestArchitectEngine:
         )
 
         patterns = self.architect._select_integration_patterns(
-            components, "service_oriented", scope,
+            components,
+            "service_oriented",
+            scope,
         )
 
         assert len(patterns) == 2
@@ -533,7 +539,9 @@ class TestArchitectEngine:
         )
 
         specs = self.architect._generate_technical_specifications(
-            components, tech_prefs, context,
+            components,
+            tech_prefs,
+            context,
         )
 
         # Verify API design
@@ -580,7 +588,8 @@ class TestArchitectEngine:
         )
 
         qa_enterprise = self.architect._define_quality_attributes(
-            context_enterprise, scope,
+            context_enterprise,
+            scope,
         )
         assert "50ms" in qa_enterprise.performance.requirements
         assert "database_sharding" in qa_enterprise.performance.strategies
@@ -594,25 +603,33 @@ class TestArchitectEngine:
             timeline="production",
         )
         tech_prefs = TechnicalPreferences(
-            languages=["python"], frameworks=[], databases=[], deployment="cloud",
+            languages=["python"],
+            frameworks=[],
+            databases=[],
+            deployment="cloud",
         )
 
         recommendations = self.architect._generate_recommendations(
-            "microservices", components, scope, tech_prefs,
+            "microservices",
+            components,
+            scope,
+            tech_prefs,
         )
 
         assert len(recommendations) >= 2
 
         # Check for pattern recommendation for simple complexity
         pattern_rec = next(
-            (r for r in recommendations if r.category == "architecture"), None,
+            (r for r in recommendations if r.category == "architecture"),
+            None,
         )
         if pattern_rec:
             assert "monolithic" in pattern_rec.recommendation
 
         # Check for technology recommendation
         tech_rec = next(
-            (r for r in recommendations if r.category == "technology"), None,
+            (r for r in recommendations if r.category == "technology"),
+            None,
         )
         if tech_rec:
             assert "FastAPI" in tech_rec.recommendation
@@ -634,7 +651,10 @@ class TestArchitectEngine:
         )
 
         risks = self.architect._assess_risks(
-            "microservices", components, scope, context,
+            "microservices",
+            components,
+            scope,
+            context,
         )
 
         assert len(risks) >= 3
@@ -645,7 +665,8 @@ class TestArchitectEngine:
 
         # Check for database performance risk for large scale
         db_risk = next(
-            (risk for risk in risks if "database" in risk.risk.lower()), None,
+            (risk for risk in risks if "database" in risk.risk.lower()),
+            None,
         )
         if db_risk:
             assert db_risk.impact == "high"
@@ -952,12 +973,8 @@ class TestArchitectEngine:
 
         assert len(risks) >= 2
         risk_descriptions = [risk.risk for risk in risks]
-        assert any(
-            "integration" in risk_desc.lower() for risk_desc in risk_descriptions
-        )
-        assert any(
-            "data format" in risk_desc.lower() for risk_desc in risk_descriptions
-        )
+        assert any("integration" in risk_desc.lower() for risk_desc in risk_descriptions)
+        assert any("data format" in risk_desc.lower() for risk_desc in risk_descriptions)
 
     def test_system_patterns_catalog(self) -> None:
         """Test system patterns catalog completeness."""
@@ -1173,7 +1190,9 @@ class TestDataClasses:
         )
 
         tech_stack = TechnologyStack(
-            language="python", framework="fastapi", database="postgresql",
+            language="python",
+            framework="fastapi",
+            database="postgresql",
         )
 
         component = ArchitectureComponent(

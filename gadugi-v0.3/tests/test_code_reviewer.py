@@ -510,11 +510,14 @@ class TestCodeReviewerEngine:
 
         # Mock quality metrics
         quality_metrics = QualityMetrics(
-            technical_debt_ratio=8.0, cyclomatic_complexity=12.0, test_coverage=65.0,
+            technical_debt_ratio=8.0,
+            cyclomatic_complexity=12.0,
+            test_coverage=65.0,
         )
 
         recommendations = self.engine._generate_recommendations(
-            file_reviews, quality_metrics,
+            file_reviews,
+            quality_metrics,
         )
 
         # Should include security, debt, complexity, coverage, and style recommendations
@@ -616,9 +619,7 @@ def function_{i}():
 
                 # When no analyzers available, no file reviews are created
                 # but total_lines should still reflect the files processed
-                assert (
-                    result.summary.total_lines > 0
-                )  # Files were processed for line count
+                assert result.summary.total_lines > 0  # Files were processed for line count
                 assert result.status == ReviewStatus.APPROVED
 
         finally:

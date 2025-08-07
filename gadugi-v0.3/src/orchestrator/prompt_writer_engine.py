@@ -2,6 +2,7 @@
 """Prompt Writer Engine - Core logic for generating structured prompts.
 This provides programmatic access to prompt generation capabilities.
 """
+
 from __future__ import annotations
 
 import re
@@ -41,7 +42,9 @@ class PromptWriterEngine:
         }
 
     def generate_prompt(
-        self, task_description: str, context: dict | None = None,
+        self,
+        task_description: str,
+        context: dict | None = None,
     ) -> dict:
         """Generate a structured prompt based on task description.
 
@@ -74,7 +77,6 @@ class PromptWriterEngine:
             },
         }
 
-
     def _analyze_task(self, task_description: str) -> dict:
         """Analyze task description to extract key information."""
         return {
@@ -102,31 +104,19 @@ class PromptWriterEngine:
             title = title[0].upper() + title[1:]
             # Capitalize after spaces for better formatting
             words = title.split()
-            title = " ".join(
-                word.capitalize() if len(word) > 2 else word for word in words
-            )
+            title = " ".join(word.capitalize() if len(word) > 2 else word for word in words)
 
-        return (
-            f"{title} Implementation" if not title.endswith("Implementation") else title
-        )
+        return f"{title} Implementation" if not title.endswith("Implementation") else title
 
     def _determine_task_type(self, task_description: str) -> str:
         """Determine the type of task based on description."""
         description_lower = task_description.lower()
 
-        if any(
-            word in description_lower
-            for word in ["implement", "add", "create", "build"]
-        ):
+        if any(word in description_lower for word in ["implement", "add", "create", "build"]):
             return "feature_implementation"
-        if any(
-            word in description_lower for word in ["fix", "bug", "error", "issue"]
-        ):
+        if any(word in description_lower for word in ["fix", "bug", "error", "issue"]):
             return "bug_fix"
-        if any(
-            word in description_lower
-            for word in ["enhance", "improve", "optimize", "update"]
-        ):
+        if any(word in description_lower for word in ["enhance", "improve", "optimize", "update"]):
             return "enhancement"
         if any(
             word in description_lower
@@ -202,9 +192,7 @@ class PromptWriterEngine:
             "by",
         }
         words = re.findall(r"\w+", task_description.lower())
-        keywords = [
-            word for word in words if len(word) > 3 and word not in common_words
-        ]
+        keywords = [word for word in words if len(word) > 3 and word not in common_words]
         return keywords[:10]  # Limit to 10 keywords
 
     def _generate_overview(self, analysis: dict) -> str:

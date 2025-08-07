@@ -2,6 +2,7 @@
 """Code Writer Engine - Core logic for generating source code.
 This provides programmatic access to code generation capabilities.
 """
+
 from __future__ import annotations
 
 import re
@@ -58,7 +59,9 @@ class CodeWriterEngine:
         }
 
     def generate_code(
-        self, task_description: str, context: dict | None = None,
+        self,
+        task_description: str,
+        context: dict | None = None,
     ) -> dict:
         """Generate source code based on task description.
 
@@ -94,7 +97,6 @@ class CodeWriterEngine:
             },
         }
 
-
     def _analyze_code_task(self, task_description: str, context: dict) -> dict:
         """Analyze the task to determine what code to generate."""
         description_lower = task_description.lower()
@@ -121,7 +123,6 @@ class CodeWriterEngine:
             "dependencies": self._suggest_dependencies(description_lower, language),
         }
 
-
     def _detect_language(self, description: str) -> str:
         """Detect programming language from task description."""
         # Look for explicit language mentions (more specific first)
@@ -129,15 +130,9 @@ class CodeWriterEngine:
             word in description for word in ["rest"]
         ):
             return "typescript"
-        if any(
-            word in description
-            for word in ["python", "py", "flask", "django", "fastapi"]
-        ):
+        if any(word in description for word in ["python", "py", "flask", "django", "fastapi"]):
             return "python"
-        if any(
-            word in description
-            for word in ["javascript", "js", "node", "express", "react"]
-        ):
+        if any(word in description for word in ["javascript", "js", "node", "express", "react"]):
             return "javascript"
         if any(word in description for word in ["angular", "vue"]):
             return "typescript"
@@ -155,9 +150,7 @@ class CodeWriterEngine:
             and "api" not in description
         ):
             return "authentication"
-        if any(
-            word in description for word in ["model", "database", "data", "schema"]
-        ):
+        if any(word in description for word in ["model", "database", "data", "schema"]):
             return "data_model"
         if any(word in description for word in ["test", "testing", "unit test"]):
             return "test_class"
@@ -926,7 +919,8 @@ if (require.main === module) {{
 
 
 def generate_code_for_task(
-    task_description: str, context: dict | None = None,
+    task_description: str,
+    context: dict | None = None,
 ) -> dict:
     """Main function to generate code for a given task.
 
@@ -975,7 +969,6 @@ if __name__ == "__main__":
     result = generate_code_for_task(task_description)
 
     if result["success"]:
-
         for _file_info in result["files"]:
             pass
 

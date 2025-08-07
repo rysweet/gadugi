@@ -3,6 +3,7 @@
 This engine manages git worktree lifecycle, environment setup, monitoring,
 and cleanup to enable safe concurrent development on multiple tasks.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -107,7 +108,9 @@ class WorktreeEnvironmentSetup:
         }
 
     async def setup_environment(
-        self, worktree_path: str, requirements: WorktreeRequirements,
+        self,
+        worktree_path: str,
+        requirements: WorktreeRequirements,
     ) -> dict[str, Any]:
         """Set up complete development environment in worktree."""
         self.logger.info(f"Setting up environment in {worktree_path}")
@@ -132,9 +135,9 @@ class WorktreeEnvironmentSetup:
                 result["uv_env_ready"] = await self._setup_uv_environment(requirements)
 
             # Install development tools
-            result[
-                "development_tools_installed"
-            ] = await self._install_development_tools(requirements.development_tools)
+            result["development_tools_installed"] = await self._install_development_tools(
+                requirements.development_tools,
+            )
 
             # Set up git configuration
             await self._setup_git_config()
@@ -209,7 +212,8 @@ class WorktreeEnvironmentSetup:
                 for tool in tools:
                     result = subprocess.run(
                         ["uv", "add", "--group", "dev", tool],
-                        check=False, capture_output=True,
+                        check=False,
+                        capture_output=True,
                         text=True,
                     )
                     if result.returncode != 0:
@@ -238,23 +242,29 @@ class WorktreeEnvironmentSetup:
         try:
             # Set up basic git config if not already set
             result = subprocess.run(
-                ["git", "config", "user.name"], check=False, capture_output=True, text=True,
+                ["git", "config", "user.name"],
+                check=False,
+                capture_output=True,
+                text=True,
             )
 
             if result.returncode != 0:
                 subprocess.run(
-                    ["git", "config", "user.name", "Gadugi Agent"], check=True,
+                    ["git", "config", "user.name", "Gadugi Agent"],
+                    check=True,
                 )
 
                 subprocess.run(
-                    ["git", "config", "user.email", "gadugi@example.com"], check=True,
+                    ["git", "config", "user.email", "gadugi@example.com"],
+                    check=True,
                 )
 
             # Set up commit template if available
             template_path = Path(".github/git-templates/commit-template.txt")
             if template_path.exists():
                 subprocess.run(
-                    ["git", "config", "commit.template", str(template_path)], check=True,
+                    ["git", "config", "commit.template", str(template_path)],
+                    check=True,
                 )
 
         except subprocess.CalledProcessError as e:
@@ -307,9 +317,7 @@ class WorktreeHealthMonitor:
             metadata.disk_usage_mb = disk_usage["usage_mb"]
 
             # Check if inactive
-            inactive_hours = (
-                datetime.now() - metadata.last_accessed
-            ).total_seconds() / 3600
+            inactive_hours = (datetime.now() - metadata.last_accessed).total_seconds() / 3600
             health["metrics"]["inactive_hours"] = inactive_hours
 
             if inactive_hours > self.config["inactive_threshold"] / 3600:
@@ -341,7 +349,10 @@ class WorktreeHealthMonitor:
 
             # Check if git repository
             result = subprocess.run(
-                ["git", "rev-parse", "--git-dir"], check=False, capture_output=True, text=True,
+                ["git", "rev-parse", "--git-dir"],
+                check=False,
+                capture_output=True,
+                text=True,
             )
 
             if result.returncode != 0:
@@ -352,7 +363,8 @@ class WorktreeHealthMonitor:
             # Check for conflicts
             result = subprocess.run(
                 ["git", "diff", "--name-only", "--diff-filter=U"],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
             )
 
@@ -362,7 +374,10 @@ class WorktreeHealthMonitor:
 
             # Check branch status
             result = subprocess.run(
-                ["git", "status", "--porcelain"], check=False, capture_output=True, text=True,
+                ["git", "status", "--porcelain"],
+                check=False,
+                capture_output=True,
+                text=True,
             )
 
             health["uncommitted_changes"] = bool(result.stdout.strip())
@@ -423,7 +438,8 @@ class WorktreeHealthMonitor:
             # Test UV command
             result = subprocess.run(
                 ["uv", "run", "python", "-c", "import sys; print(sys.version)"],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=10,
             )
@@ -474,12 +490,18 @@ class WorktreeCleanupManager:
         )
 
         result = CleanupResult(
-            removed_count=0, preserved_count=0, disk_freed_mb=0, errors=[], summary={},
+            removed_count=0,
+            preserved_count=0,
+            disk_freed_mb=0,
+            errors=[],
+            summary={},
         )
 
         # Determine which worktrees to clean
         to_cleanup = await self._select_worktrees_for_cleanup(
-            worktrees, policy, retention_days,
+            worktrees,
+            policy,
+            retention_days,
         )
 
         result.summary["total_evaluated"] = len(worktrees)
@@ -525,7 +547,10 @@ class WorktreeCleanupManager:
         return result
 
     async def _select_worktrees_for_cleanup(
-        self, worktrees: list[WorktreeMetadata], policy: str, retention_days: int,
+        self,
+        worktrees: list[WorktreeMetadata],
+        policy: str,
+        retention_days: int,
     ) -> list[WorktreeMetadata]:
         """Select worktrees for cleanup based on policy."""
         to_cleanup = []
@@ -585,7 +610,8 @@ class WorktreeCleanupManager:
             # Check if branch exists on origin
             result = subprocess.run(
                 ["git", "ls-remote", "--heads", "origin", worktree.branch_name],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
             )
 
@@ -604,7 +630,8 @@ class WorktreeCleanupManager:
                     "--left-right",
                     f"origin/{worktree.base_branch}...{worktree.branch_name}",
                 ],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
             )
 
@@ -632,7 +659,10 @@ class WorktreeCleanupManager:
 
             # Check for uncommitted changes
             result = subprocess.run(
-                ["git", "status", "--porcelain"], check=False, capture_output=True, text=True,
+                ["git", "status", "--porcelain"],
+                check=False,
+                capture_output=True,
+                text=True,
             )
 
             return bool(result.stdout.strip())
@@ -660,7 +690,8 @@ class WorktreeCleanupManager:
             # Remove git worktree
             result = subprocess.run(
                 ["git", "worktree", "remove", "--force", worktree.worktree_path],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
             )
 
@@ -689,9 +720,7 @@ class WorktreeCleanupManager:
             backup_dir = Path(".gadugi/backups/worktrees")
             backup_dir.mkdir(parents=True, exist_ok=True)
 
-            backup_name = (
-                f"{worktree.task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
-            )
+            backup_name = f"{worktree.task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
             backup_path = backup_dir / backup_name
 
             import tarfile
@@ -728,7 +757,9 @@ class WorktreeManagerEngine:
         self.worktrees: dict[str, WorktreeMetadata] = {}
         self._load_registry()
 
-    async def _run_command_async(self, cmd: list[str], timeout: int = 30) -> subprocess.CompletedProcess:
+    async def _run_command_async(
+        self, cmd: list[str], timeout: int = 30,
+    ) -> subprocess.CompletedProcess:
         """Run command asynchronously and return result."""
         try:
             process = await asyncio.create_subprocess_exec(
@@ -883,7 +914,8 @@ class WorktreeManagerEngine:
 
             # Set up environment
             environment = await self.environment_setup.setup_environment(
-                worktree_path, requirements,
+                worktree_path,
+                requirements,
             )
 
             # Update status
@@ -961,7 +993,9 @@ class WorktreeManagerEngine:
             return False
 
     def _create_result(
-        self, metadata: WorktreeMetadata, error_message: str | None = None,
+        self,
+        metadata: WorktreeMetadata,
+        error_message: str | None = None,
     ) -> WorktreeResult:
         """Create WorktreeResult from metadata."""
         return WorktreeResult(
@@ -1006,7 +1040,10 @@ class WorktreeManagerEngine:
 
         worktree_list = await self.list_worktrees()
         result = await self.cleanup_manager.cleanup_worktrees(
-            worktree_list, policy, retention_days, dry_run,
+            worktree_list,
+            policy,
+            retention_days,
+            dry_run,
         )
 
         # Update registry to remove cleaned worktrees
@@ -1046,9 +1083,7 @@ class WorktreeManagerEngine:
                 "total_worktrees": total_count,
                 "healthy": healthy_count,
                 "unhealthy": total_count - healthy_count,
-                "disk_usage_mb": sum(
-                    m.disk_usage_mb for m in self.worktrees.values()
-                ),
+                "disk_usage_mb": sum(m.disk_usage_mb for m in self.worktrees.values()),
             },
             "worktrees": results,
         }
@@ -1068,7 +1103,9 @@ async def main() -> None:
     create_parser.add_argument("--branch-name", required=True, help="Branch name")
     create_parser.add_argument("--base-branch", default="main", help="Base branch")
     create_parser.add_argument(
-        "--uv-project", action="store_true", help="Set up UV project",
+        "--uv-project",
+        action="store_true",
+        help="Set up UV project",
     )
     create_parser.add_argument("--tools", help="Comma-separated development tools")
 
@@ -1090,7 +1127,9 @@ async def main() -> None:
     health_parser = subparsers.add_parser("health", help="Check worktree health")
     health_parser.add_argument("--task-id", help="Check specific task")
     health_parser.add_argument(
-        "--format", choices=["summary", "detailed"], default="summary",
+        "--format",
+        choices=["summary", "detailed"],
+        default="summary",
     )
 
     args = parser.parse_args()
@@ -1106,15 +1145,15 @@ async def main() -> None:
     if args.command == "create":
         requirements = WorktreeRequirements(
             uv_project=args.uv_project,
-            development_tools=args.tools.split(",")
-            if args.tools
-            else ["pytest", "ruff"],
+            development_tools=args.tools.split(",") if args.tools else ["pytest", "ruff"],
         )
 
         result = await manager.create_worktree(
-            args.task_id, args.branch_name, args.base_branch, requirements,
+            args.task_id,
+            args.branch_name,
+            args.base_branch,
+            requirements,
         )
-
 
     elif args.command == "list":
         worktrees = await manager.list_worktrees()
@@ -1132,7 +1171,9 @@ async def main() -> None:
 
     elif args.command == "cleanup":
         result = await manager.cleanup_worktrees(
-            args.policy, args.retention_days, args.dry_run,
+            args.policy,
+            args.retention_days,
+            args.dry_run,
         )
 
         if result.errors:
