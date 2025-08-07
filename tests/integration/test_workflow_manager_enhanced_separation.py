@@ -156,7 +156,7 @@ class TestWorkflowManagerIntegration:
         }
 
         # Test phase tracking
-        self.phase_tracker.start_phase(WorkflowPhase.ISSUE_CREATION)
+        self.phase_tracker.start_phase(WorkflowPhase.ISSUE_CREATION.value)
         self.task_metrics.record_phase_start("issue_creation")
 
         # Mock successful issue creation
@@ -194,7 +194,7 @@ class TestWorkflowManagerIntegration:
             )
 
             # Test phase completion tracking
-            self.phase_tracker.complete_phase(WorkflowPhase.ISSUE_CREATION)
+            self.phase_tracker.complete_phase(WorkflowPhase.ISSUE_CREATION.value)
             self.task_metrics.record_phase_completion("issue_creation")
 
     def test_enhanced_pull_request_phase(self):
@@ -219,7 +219,7 @@ class TestWorkflowManagerIntegration:
         }
 
         # Test phase tracking
-        self.phase_tracker.start_phase(WorkflowPhase.PULL_REQUEST_CREATION)
+        self.phase_tracker.start_phase(WorkflowPhase.PULL_REQUEST_CREATION.value)
         self.task_metrics.record_phase_start("pr_creation")
 
         # Mock successful PR creation
@@ -272,7 +272,7 @@ class TestWorkflowManagerIntegration:
                 )
 
                 # Test phase completion
-                self.phase_tracker.complete_phase(WorkflowPhase.PULL_REQUEST_CREATION)
+                self.phase_tracker.complete_phase(WorkflowPhase.PULL_REQUEST_CREATION.value)
                 self.task_metrics.record_phase_completion("pr_creation")
 
     def test_enhanced_task_tracking_with_dependencies(self):
