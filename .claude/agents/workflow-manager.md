@@ -335,24 +335,67 @@ Enhanced issue creation features:
 - Maintain code quality standards
 - Update TodoWrite task status as you progress
 
-### 6. Testing Phase
-- Write comprehensive tests for new functionality
-- Ensure test isolation and idempotency
-- Mock external dependencies appropriately
-- **For UV projects**: Use `uv run` prefix for all Python commands:
-  ```bash
-  # Correct testing commands for UV projects
-  uv run pytest tests/
-  uv run pytest tests/ --cov=. --cov-report=html
-  uv run python -m pytest tests/specific_test.py
+### 6. Testing Phase - **MANDATORY BEFORE PR CREATION**
 
-  # NEVER run directly in UV projects (will fail)
-  pytest tests/        # ❌ Wrong
-  python -m pytest    # ❌ Wrong
-  ```
-- **For non-UV projects**: Use standard Python commands
-- Run test suite to verify all tests pass
-- Check coverage meets project standards
+⚠️ **CRITICAL REQUIREMENT**: ALL tests must pass before proceeding to Phase 7 (Documentation) and Phase 8 (PR Creation). This is a quality gate that cannot be bypassed.
+
+**Phase 6 Execution Steps (MANDATORY):**
+
+1. **Write comprehensive tests for new functionality**
+   - Ensure test isolation and idempotency
+   - Mock external dependencies appropriately
+   - Follow project testing patterns and conventions
+
+2. **Execute mandatory test suite**
+   - **For UV projects**: Use `uv run` prefix for all Python commands:
+     ```bash
+     # Correct testing commands for UV projects
+     uv run pytest tests/
+     uv run pytest tests/ --cov=. --cov-report=html
+     uv run python -m pytest tests/specific_test.py
+
+     # NEVER run directly in UV projects (will fail)
+     pytest tests/        # ❌ Wrong
+     python -m pytest    # ❌ Wrong
+     ```
+   - **For non-UV projects**: Use standard Python commands:
+     ```bash
+     pytest tests/
+     python -m pytest tests/
+     ```
+
+3. **Mandatory test validation (CANNOT PROCEED WITHOUT PASSING)**
+   - ✅ All tests must pass (no failures, no errors)
+   - ✅ No test skips unless explicitly justified
+   - ✅ Coverage meets project standards (if configured)
+   - ✅ Pre-commit hooks must pass (includes linting, formatting)
+
+4. **Pre-commit hook validation**
+   ```bash
+   # Install pre-commit hooks if not already installed
+   # For UV projects:
+   uv run pre-commit install
+   
+   # For standard Python projects:
+   pre-commit install
+
+   # Run pre-commit hooks on all files
+   # For UV projects:
+   uv run pre-commit run --all-files
+   
+   # For standard Python projects:
+   pre-commit run --all-files
+   ```
+
+5. **Quality gate enforcement**
+   - If ANY test fails → STOP workflow, fix tests before continuing
+   - If pre-commit hooks fail → STOP workflow, fix issues before continuing
+   - Only proceed to Phase 7 when ALL quality checks pass
+
+**Error Handling:**
+- Test failures are logged and reported clearly
+- Workflow state is saved to allow resumption after fixes
+- No automatic bypassing of test failures is allowed
 
 ### 7. Documentation Phase
 - Update relevant documentation files

@@ -410,6 +410,275 @@ validate_uv_environment() {
 }
 ```
 
+## Testing and Quality Assurance Requirements for Agents
+
+All agents working in development workflows MUST follow these testing and quality assurance requirements. This is a mandatory part of all workflow phases, especially Phase 6 (Testing).
+
+### Mandatory Testing Commands by Project Type
+
+#### For UV Python Projects (Recommended - Most Projects)
+
+All agents MUST detect UV projects and use the appropriate commands:
+
+```bash
+# Detection: Check for both pyproject.toml and uv.lock
+if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+    echo "UV project detected"
+
+    # 1. Setup UV environment (required in all worktrees)
+    uv sync --all-extras
+
+    # 2. Run tests (MANDATORY - must pass to continue workflow)
+    uv run pytest tests/ -v
+    uv run pytest tests/ --cov=. --cov-report=html  # With coverage
+
+    # 3. Run linting and formatting (MANDATORY)
+    uv run ruff check .                    # Linting
+    uv run ruff format .                   # Formatting
+
+    # 4. Type checking (if configured)
+    uv run mypy . --ignore-missing-imports  # Optional but recommended
+
+    # 5. Pre-commit hooks (MANDATORY before PR creation)
+    uv run pre-commit install             # One-time setup
+    uv run pre-commit run --all-files     # MUST pass before PR
+fi
+```
+
+#### For Standard Python Projects (Legacy)
+
+```bash
+# For non-UV projects (discouraged but supported)
+if [[ ! -f "uv.lock" ]]; then
+    echo "Standard Python project"
+
+    # Activate virtual environment if available
+    if [[ -f "venv/bin/activate" ]]; then
+        source venv/bin/activate
+    fi
+
+    # Run tests (MANDATORY)
+    pytest tests/ -v
+    pytest tests/ --cov=. --cov-report=html
+
+    # Run linting and formatting (MANDATORY)
+    ruff check .
+    ruff format .
+
+    # Pre-commit hooks (MANDATORY)
+    pre-commit run --all-files  # Standard Python projects don't use 'uv run' prefix
+fi
+```
+
+### Agent Testing Responsibilities by Phase
+
+#### Phase 6: Testing Phase (ALL AGENTS MUST IMPLEMENT)
+
+Every agent that executes workflows MUST implement these mandatory checks:
+
+```bash
+# Phase 6 Testing Implementation for Agents
+execute_phase_6_testing() {
+    local worktree_path="$1"
+    cd "$worktree_path" || exit 1
+
+    echo "🧪 PHASE 6: MANDATORY TESTING STARTED"
+
+    # Step 1: Environment validation
+    if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+        echo "✅ UV project detected"
+        uv sync --all-extras || {
+            echo "❌ UV environment setup failed"
+            return 1
+        }
+        TEST_CMD="uv run pytest"
+        LINT_CMD="uv run ruff"
+    else
+        echo "⚠️  Standard Python project (legacy mode)"
+        TEST_CMD="pytest"
+        LINT_CMD="ruff"
+    fi
+
+    # Step 2: Run tests (CANNOT PROCEED WITHOUT PASSING)
+    echo "Running test suite..."
+    $TEST_CMD tests/ -v --tb=short || {
+        echo "❌ TESTS FAILED - Workflow cannot continue"
+        echo "Fix all test failures before proceeding to Phase 7"
+        return 1
+    }
+
+    # Step 3: Code quality checks (CANNOT PROCEED WITHOUT PASSING)
+    echo "Running code quality checks..."
+    $LINT_CMD check . || {
+        echo "❌ LINTING FAILED - Workflow cannot continue"
+        echo "Fix all linting issues before proceeding to Phase 7"
+        return 1
+    }
+
+    $LINT_CMD format . --check || {
+        echo "⚠️  Code formatting issues detected, auto-fixing..."
+        $LINT_CMD format .
+    }
+
+    # Step 4: Pre-commit hooks (CANNOT PROCEED WITHOUT PASSING)
+    echo "Running pre-commit hooks..."
+    if [[ ! -f ".git/hooks/pre-commit" ]]; then
+        echo "Installing pre-commit hooks..."
+        if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+            uv run pre-commit install
+        else
+            pre-commit install
+        fi
+    fi
+
+    if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
+        uv run pre-commit run --all-files || {
+    else
+        pre-commit run --all-files || {
+    fi
+        echo "❌ PRE-COMMIT HOOKS FAILED - Workflow cannot continue"
+        echo "Fix all pre-commit issues before proceeding to Phase 7"
+        return 1
+    }
+
+    echo "✅ PHASE 6: ALL QUALITY GATES PASSED"
+    echo "✅ Tests passed, linting passed, formatting passed, pre-commit passed"
+
+    # Record test results for OrchestratorAgent validation
+    echo "Recording test results..."
+    record_phase_6_results "$worktree_path" "success"
+
+    return 0
+}
+
+# Record Phase 6 results for orchestrator validation
+record_phase_6_results() {
+    local worktree_path="$1"
+    local status="$2"
+
+    local state_file="$worktree_path/.task/phase_6_testing.json"
+    mkdir -p "$(dirname "$state_file")"
+
+    cat > "$state_file" << EOF
+{
+    "phase_6_testing": {
+        "completed": true,
+        "status": "$status",
+        "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+        "test_results": {
+            "pytest_exit_code": 0,
+            "precommit_exit_code": 0,
+            "lint_exit_code": 0,
+            "format_exit_code": 0,
+            "skipped_tests": 0,
+            "quality_gates_passed": true
+        }
+    }
+}
+EOF
+}
+```
+
+#### Pre-PR Creation Validation (Phase 8)
+
+Before creating any PR, agents MUST verify Phase 6 completion:
+
+```bash
+# Validate Phase 6 completion before PR creation
+validate_pre_pr_requirements() {
+    local worktree_path="$1"
+
+    local phase_6_file="$worktree_path/.task/phase_6_testing.json"
+
+    if [[ ! -f "$phase_6_file" ]]; then
+        echo "❌ Phase 6 (Testing) was not completed - cannot create PR"
+        echo "Run Phase 6 testing first"
+        return 1
+    fi
+
+    local phase_6_status=$(jq -r '.phase_6_testing.status' "$phase_6_file")
+    if [[ "$phase_6_status" != "success" ]]; then
+        echo "❌ Phase 6 (Testing) failed - cannot create PR"
+        echo "Fix all test failures before creating PR"
+        return 1
+    fi
+
+    echo "✅ Phase 6 validation passed - ready for PR creation"
+    return 0
+}
+```
+
+### Quality Gate Enforcement
+
+#### WorkflowManager Requirements
+
+- MUST call `execute_phase_6_testing()` before Phase 7 (Documentation)
+- MUST call `validate_pre_pr_requirements()` before Phase 8 (PR Creation)
+- MUST NOT proceed if any quality gate fails
+- MUST save test results for OrchestratorAgent validation
+
+#### OrchestratorAgent Requirements
+
+- MUST validate `phase_6_testing.json` exists for all completed tasks
+- MUST check `test_results.quality_gates_passed` is true
+- MUST NOT merge PRs from tasks that failed testing
+- MUST report test validation failures clearly
+
+### Pre-commit Configuration Validation
+
+Agents should verify that `.pre-commit-config.yaml` includes these essential hooks:
+
+```yaml
+# Required pre-commit configuration
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest  # or pytest for non-UV projects
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+```
+
+### Error Handling and Recovery
+
+When testing fails, agents should:
+
+1. **Log detailed error information** including which specific tests/checks failed
+2. **Save workflow state** to allow resumption after fixes
+3. **Provide clear guidance** on how to fix the failures
+4. **NEVER bypass testing requirements** - no automatic skips allowed
+5. **Wait for manual fixes** before continuing workflow
+
+### Testing Documentation Requirements
+
+All agents MUST document:
+- Which testing commands they run
+- How they detect UV vs standard Python projects
+- What constitutes a "passing" test result
+- How they record test results for validation
+- What happens when tests fail
+
+This ensures consistent, high-quality development practices across all agents and workflows.
+
 ## Troubleshooting: Orchestrator and Worktree Failures
 
 When the mandatory orchestrator workflow encounters issues, use these troubleshooting procedures:
