@@ -1,0 +1,18 @@
+{
+  "orchestration_id": "orchestration-20250807-155035",
+  "timestamp": "2025-08-07 15:50:35.482570",
+  "total_processes": 9,
+  "status_breakdown": {
+    "failed": 7,
+    "completed": 1,
+    "running": 1
+  },
+  "active_processes": [
+    {
+      "task_id": "test-simple",
+      "task_name": "echo \"Test task completed successfully\"",
+      "status": "running",
+      "runtime_seconds": 0.004587
+    }
+  ]
+}

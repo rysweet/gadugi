@@ -609,7 +609,12 @@ class OrchestratorCoordinator:
 
         # Clean up any remaining resources
         try:
-            self.worktree_manager.cleanup_all()
+            # Cleanup all worktrees
+            for worktree_info in self.worktree_manager.list_worktrees():
+                try:
+                    self.worktree_manager.cleanup_worktree(worktree_info.task_id)
+                except Exception as cleanup_error:
+                    logger.warning(f"Failed to cleanup worktree {worktree_info.task_id}: {cleanup_error}")
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
 

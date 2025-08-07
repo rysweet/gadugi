@@ -49,7 +49,11 @@ class WorktreeManager:
         print(f"🌳 Creating worktree for task: {task_id}")
 
         # Generate unique branch and directory names
-        branch_name = f"feature/parallel-{task_name.lower().replace(' ', '-')}-{task_id}"
+        # Sanitize task_name for branch name (remove special chars, limit length)
+        import re
+        safe_task_name = re.sub(r'[^a-zA-Z0-9-]', '-', task_name.lower())[:30]
+        safe_task_name = re.sub(r'-+', '-', safe_task_name).strip('-')
+        branch_name = f"feature/parallel-{safe_task_name}-{task_id}"
         worktree_path = self.worktrees_dir / f"task-{task_id}"
 
         # Clean up if worktree already exists

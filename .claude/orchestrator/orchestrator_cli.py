@@ -47,9 +47,10 @@ class OrchestrationCLI:
         self.project_root = Path(project_root).resolve()
         self.prompts_dir = self.project_root / "prompts"
 
-        # Validate environment
+        # Create prompts directory if it doesn't exist
         if not self.prompts_dir.exists():
-            raise FileNotFoundError(f"Prompts directory not found: {self.prompts_dir}")
+            logger.warning(f"Prompts directory not found at {self.prompts_dir}, creating it")
+            self.prompts_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"OrchestrationCLI initialized for project: {self.project_root}")
 
@@ -124,13 +125,34 @@ class OrchestrationCLI:
             if not prompt_file.endswith('.md'):
                 prompt_file += '.md'
 
-            # Check if file exists
-            prompt_path = self.prompts_dir / prompt_file
-            if prompt_path.exists():
-                validated_files.append(prompt_file)
-                logger.info(f"Validated prompt file: {prompt_file}")
-            else:
-                logger.warning(f"Prompt file not found: {prompt_file} (path: {prompt_path})")
+            # Try multiple locations for the file
+            found = False
+            
+            # 1. Check absolute path
+            if os.path.isabs(prompt_file):
+                if Path(prompt_file).exists():
+                    validated_files.append(prompt_file)
+                    logger.info(f"Validated absolute path: {prompt_file}")
+                    found = True
+            
+            if not found:
+                # 2. Check relative to current directory
+                current_path = Path.cwd() / prompt_file
+                if current_path.exists():
+                    validated_files.append(str(current_path))
+                    logger.info(f"Validated relative path: {prompt_file}")
+                    found = True
+            
+            if not found:
+                # 3. Check in prompts directory
+                prompt_path = self.prompts_dir / prompt_file
+                if prompt_path.exists():
+                    validated_files.append(prompt_file)
+                    logger.info(f"Validated in prompts dir: {prompt_file}")
+                    found = True
+            
+            if not found:
+                logger.warning(f"Prompt file not found in any location: {prompt_file}")
 
         return validated_files
 

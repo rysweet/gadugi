@@ -1,0 +1,17 @@
+{
+  "orchestration_id": "orchestration-20250807-144123",
+  "timestamp": "2025-08-07 14:42:54.243373",
+  "total_processes": 7,
+  "status_breakdown": {
+    "failed": 6,
+    "running": 1
+  },
+  "active_processes": [
+    {
+      "task_id": "fix-test-pyright-errors",
+      "task_name": "Fix ALL Test File Pyright Errors (150+ errors)",
+      "status": "running",
+      "runtime_seconds": 90.071457
+    }
+  ]
+}

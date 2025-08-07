@@ -1,22 +1,21 @@
 #!/bin/bash
-"""
-Orchestrator Agent Entry Point Script
-
-This script serves as the entry point for Claude agent invocations of the format:
-/agent:orchestrator-agent
-
-It bridges the gap between Claude's agent invocation system and the Python
-orchestrator implementation, enabling actual parallel execution.
-
-Usage:
-  ./run_orchestrator.sh                    # Interactive mode
-  ./run_orchestrator.sh --stdin            # Agent invocation mode (reads from stdin)
-  ./run_orchestrator.sh file1.md file2.md  # Direct file specification
-"""
+# Orchestrator Agent Entry Point Script
+#
+# This script serves as the entry point for Claude agent invocations of the format:
+# /agent:orchestrator-agent
+#
+# It bridges the gap between Claude's agent invocation system and the Python
+# orchestrator implementation, enabling actual parallel execution.
+#
+# Usage:
+#   ./run_orchestrator.sh                    # Interactive mode
+#   ./run_orchestrator.sh --stdin            # Agent invocation mode (reads from stdin)
+#   ./run_orchestrator.sh file1.md file2.md  # Direct file specification
 
 # Get the directory containing this script
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+# PROJECT_ROOT should be the gadugi directory (2 levels up from .claude/orchestrator)
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # Change to project root directory
 cd "$PROJECT_ROOT" || {

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-07T15:59:54.997768",
+  "timestamp": "2025-08-07T15:59:36.744272",
   "processes": {
     "fix-types-pr-backlog-manager": {
       "task_id": "fix-types-pr-backlog-manager",
@@ -135,14 +135,14 @@
       "status": "failed",
       "command": "claude /agent:workflow-manager",
       "working_directory": "/Users/ryan/gadugi7/gadugi/.worktrees/task-test-simple",
-      "created_at": "2025-08-07T15:59:54.968679",
+      "created_at": "2025-08-07T15:53:03.730824",
       "prompt_file": "/Users/ryan/gadugi7/gadugi/.worktrees/task-test-simple/prompts/test-simple-workflow.md",
       "pid": null,
-      "started_at": "2025-08-07T15:59:54.970120",
-      "completed_at": "2025-08-07T15:59:54.997764",
-      "last_heartbeat": "2025-08-07T15:59:54.997761",
+      "started_at": "2025-08-07T15:53:03.739867",
+      "completed_at": "2025-08-07T15:59:31.740554",
+      "last_heartbeat": "2025-08-07T15:59:31.740551",
       "exit_code": null,
-      "error_message": "/bin/sh: line 3: -: command not found\n/bin/sh: line 4: -: command not found\n/bin/sh: line 5: -: command not found\n/bin/sh: line 6: -: command not found\n/bin/sh: line 10: See: command not found\n/bin/sh: line 14: See: command not found\n/bin/sh: line 18: Follow: command not found\n/bin/sh: line 22: Complete: command not found\n/bin/sh: line 26: **CRITICAL**:: command not found\n/bin/sh: line 28: 1.: command not found\n/bin/sh: -c: line 29: syntax error near unexpected token `('\n/bin/sh: -c: line 29: `   - Phase 1: Initial Setup (analyze this prompt)'\n",
+      "error_message": "Process became unresponsive (heartbeat timeout)",
       "resource_usage": null
     }
   }
