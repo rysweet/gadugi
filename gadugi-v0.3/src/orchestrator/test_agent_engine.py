@@ -36,7 +36,6 @@ class TestAgentEngine:
     def __init__(self):
         """Initialize the test_agent engine."""
         self.logger = self._setup_logging()
-                pass
     
     def _setup_logging(self) -> logging.Logger:
         """Set up logging for the test_agent engine."""
@@ -56,9 +55,9 @@ class TestAgentEngine:
     def execute_operation(self, request: TestAgentRequest) -> TestAgentResponse:
         """Execute test_agent operation based on request."""
         try:
-            self.logger.info(f"Executing test_agent operation: {{request.operation}}")
+            self.logger.info(f"Executing test_agent operation: {request.operation}")
             
-                        if request.operation == "data_processing":
+            if request.operation == "data_processing":
                 return self._handle_data_processing(request)
             if request.operation == "validation":
                 return self._handle_validation(request)
@@ -70,22 +69,22 @@ class TestAgentEngine:
             return TestAgentResponse(
                 success=True,
                 operation=request.operation,
-                results={{"message": "Operation completed successfully"}},
+                results={"message": "Operation completed successfully"},
                 warnings=[],
                 errors=[]
             )
             
         except Exception as e:
-            self.logger.error(f"Error executing test_agent operation: {{e}}")
+            self.logger.error(f"Error executing test_agent operation: {e}")
             return TestAgentResponse(
                 success=False,
                 operation=request.operation,
-                results={{}},
+                results={},
                 warnings=[],
                 errors=[str(e)]
             )
     
-        def _handle_data_processing(self, request: TestAgentRequest) -> TestAgentResponse:
+    def _handle_data_processing(self, request: TestAgentRequest) -> TestAgentResponse:
         """Handle data processing operation."""
         try:
             # Implement data_processing logic here
@@ -162,17 +161,17 @@ def main():
     # Test request
     test_request = TestAgentRequest(
         operation="test",
-        parameters={{"test_parameter": "test_value"}},
-        options={{}}
+        parameters={"test_parameter": "test_value"},
+        options={}
     )
     
     response = engine.execute_operation(test_request)
     
     if response.success:
         print(f"test_agent operation completed successfully!")
-        print(f"Results: {{response.results}}")
+        print(f"Results: {response.results}")
     else:
-        print(f"test_agent operation failed: {{response.errors}}")
+        print(f"test_agent operation failed: {response.errors}")
 
 
 if __name__ == "__main__":

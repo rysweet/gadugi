@@ -55,9 +55,9 @@ class ApiClientEngine:
     def execute_operation(self, request: ApiClientRequest) -> ApiClientResponse:
         """Execute api_client operation based on request."""
         try:
-            self.logger.info(f"Executing api_client operation: {{request.operation}}")
+            self.logger.info(f"Executing api_client operation: {request.operation}")
             
-                        if request.operation == "http_requests":
+            if request.operation == "http_requests":
                 return self._handle_http_requests(request)
             if request.operation == "response_parsing":
                 return self._handle_response_parsing(request)
@@ -69,22 +69,22 @@ class ApiClientEngine:
             return ApiClientResponse(
                 success=True,
                 operation=request.operation,
-                results={{"message": "Operation completed successfully"}},
+                results={"message": "Operation completed successfully"},
                 warnings=[],
                 errors=[]
             )
             
         except Exception as e:
-            self.logger.error(f"Error executing api_client operation: {{e}}")
+            self.logger.error(f"Error executing api_client operation: {e}")
             return ApiClientResponse(
                 success=False,
                 operation=request.operation,
-                results={{}},
+                results={},
                 warnings=[],
                 errors=[str(e)]
             )
     
-        def _handle_http_requests(self, request: ApiClientRequest) -> ApiClientResponse:
+    def _handle_http_requests(self, request: ApiClientRequest) -> ApiClientResponse:
         """Handle http requests operation."""
         try:
             # Implement http_requests logic here
@@ -161,17 +161,17 @@ def main():
     # Test request
     test_request = ApiClientRequest(
         operation="test",
-        parameters={{"test_parameter": "test_value"}},
-        options={{}}
+        parameters={"test_parameter": "test_value"},
+        options={}
     )
     
     response = engine.execute_operation(test_request)
     
     if response.success:
         print(f"api_client operation completed successfully!")
-        print(f"Results: {{response.results}}")
+        print(f"Results: {response.results}")
     else:
-        print(f"api_client operation failed: {{response.errors}}")
+        print(f"api_client operation failed: {response.errors}")
 
 
 if __name__ == "__main__":
