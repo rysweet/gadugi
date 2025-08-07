@@ -89,6 +89,64 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "success": False
             }
     
+    # Special case: code-writer uses Python implementation
+    if agent_name == "code-writer":
+        try:
+            import json
+            import sys
+            
+            # Add current directory to path for import
+            script_dir = Path(__file__).parent
+            if str(script_dir) not in sys.path:
+                sys.path.insert(0, str(script_dir))
+            
+            from code_writer_engine import generate_code_for_task
+            
+            result = generate_code_for_task(task_description or "Generic code generation task")
+            
+            # Format output for orchestrator consumption
+            if result["success"]:
+                # Create a summary of generated files
+                files_summary = []
+                for file_info in result["files"]:
+                    files_summary.append(f"📁 {file_info['filename']}: {file_info['description']}")
+                
+                output = f"Code Generation Results:\n"
+                output += f"Task: {result['task']}\n"
+                output += f"Language: {result['metadata']['language']}\n"
+                output += f"Files Generated:\n" + "\n".join(files_summary)
+                
+                if result["dependencies"]:
+                    output += f"\nDependencies: {', '.join(result['dependencies'])}"
+                
+                if result["integration_notes"]:
+                    output += f"\nIntegration: {result['integration_notes']}"
+            else:
+                output = f"Code generation failed: {result.get('error', 'Unknown error')}"
+            
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": output,
+                "stderr": "" if result["success"] else result.get("error", ""),
+                "returncode": 0 if result["success"] else -1,
+                "success": result["success"],
+                "metadata": {
+                    "code_result": result,
+                    "language": result.get("metadata", {}).get("language", "unknown"),
+                    "code_type": result.get("metadata", {}).get("code_type", "unknown")
+                }
+            }
+        except Exception as e:
+            return {
+                "agent": agent_name,
+                "task": task_description,
+                "stdout": "",
+                "stderr": f"Code writer error: {str(e)}",
+                "returncode": -1,
+                "success": False
+            }
+    
     # Find the agent file
     # Look relative to this script's directory
     script_dir = Path(__file__).parent
