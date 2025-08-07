@@ -5,19 +5,17 @@ Tests the main PRBacklogManager class including PR discovery, assessment,
 and overall backlog management workflows.
 """
 
-try:
-    import pytest
-except ImportError:
-    from test_stubs import pytest
+import pytest  # type: ignore[import]
 
 import os
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-# Add the source directory to the Python path for imports
+# Add the source directories to the Python path for imports
 import sys
 
-source_path = os.path.join(
+# Add pr-backlog-manager directory
+pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
     "..",
@@ -26,21 +24,25 @@ source_path = os.path.join(
     "agents",
     "pr-backlog-manager",
 )
-sys.path.insert(0, source_path)
+sys.path.insert(0, pr_backlog_path)
 
-try:
-    from core import (
-        PRBacklogManager,
-        PRAssessment,
-        PRStatus,
-        ReadinessCriteria,
-        BacklogMetrics,
-        GadugiError,
-    )
-    from interfaces import AgentConfig
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
+# Add shared directory for interfaces
+shared_path = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    ".claude",
+    "shared",
+)
+sys.path.insert(0, shared_path)
+
+# TYPE_CHECKING is always False at runtime but True for type checkers
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # For type checking, use stubs
+    from .test_stubs import (
         PRBacklogManager,
         PRAssessment,
         PRStatus,
@@ -49,6 +51,29 @@ except ImportError:
         GadugiError,
         AgentConfig,
     )
+else:
+    # For runtime, try real imports
+    try:
+        from core import (  # type: ignore[import]
+            PRBacklogManager,
+            PRAssessment,
+            PRStatus,
+            ReadinessCriteria,
+            BacklogMetrics,
+            GadugiError,
+        )
+        from interfaces import AgentConfig  # type: ignore[import]
+    except ImportError:
+        # Fall back to stubs if real imports fail
+        from .test_stubs import (
+            PRBacklogManager,
+            PRAssessment,
+            PRStatus,
+            ReadinessCriteria,
+            BacklogMetrics,
+            GadugiError,
+            AgentConfig,
+        )
 
 
 class TestPRBacklogManager:

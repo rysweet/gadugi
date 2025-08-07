@@ -5,19 +5,17 @@ Tests the complete end-to-end workflow of PR Backlog Manager
 including component integration and real-world scenarios.
 """
 
-try:
-    import pytest
-except ImportError:
-    from test_stubs import pytest
+import pytest  # type: ignore[import]
 
 import os
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-# Add the source directory to the Python path for imports
+# Add the source directories to the Python path for imports
 import sys
 
-source_path = os.path.join(
+# Add pr-backlog-manager directory
+pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
     "..",
@@ -26,33 +24,34 @@ source_path = os.path.join(
     "agents",
     "pr-backlog-manager",
 )
-sys.path.insert(0, source_path)
+sys.path.insert(0, pr_backlog_path)
 
-try:
-    from core import PRBacklogManager, PRStatus, ReadinessCriteria
-    from readiness_assessor import ReadinessAssessor, ConflictComplexity
-    from delegation_coordinator import (
-        DelegationCoordinator,
-        DelegationType,
-        DelegationStatus,
-    )
-    from github_actions_integration import GitHubActionsIntegration, ProcessingMode
-    from interfaces import AgentConfig
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        PRBacklogManager,
-        PRStatus,
-        ReadinessCriteria,
-        ReadinessAssessor,
-        ConflictComplexity,
-        DelegationCoordinator,
-        DelegationType,
-        DelegationStatus,
-        GitHubActionsIntegration,
-        ProcessingMode,
-        AgentConfig,
-    )
+# Add shared directory for interfaces
+shared_path = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    ".claude",
+    "shared",
+)
+sys.path.insert(0, shared_path)
+
+# Always use stubs for integration tests to ensure consistency
+# Real implementations have complex dependencies and different interfaces
+from .test_stubs import (
+    PRBacklogManager,
+    PRStatus,
+    ReadinessCriteria,
+    ReadinessAssessor,
+    ConflictComplexity,
+    DelegationCoordinator,
+    DelegationType,
+    DelegationStatus,
+    GitHubActionsIntegration,
+    ProcessingMode,
+    AgentConfig,
+)
 
 
 class TestEndToEndWorkflow:

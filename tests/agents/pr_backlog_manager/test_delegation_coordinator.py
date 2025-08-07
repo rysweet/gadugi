@@ -5,19 +5,17 @@ Tests the DelegationCoordinator class and delegation functionality
 including task creation, execution, and coordination with other agents.
 """
 
-try:
-    import pytest
-except ImportError:
-    from test_stubs import pytest
+import pytest  # type: ignore[import]
 
 from unittest.mock import Mock, patch, mock_open
 from datetime import datetime, timedelta
 
-# Add the source directory to the Python path for imports
+# Add the source directories to the Python path for imports
 import sys
 import os
 
-source_path = os.path.join(
+# Add pr-backlog-manager directory
+pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
     "..",
@@ -26,25 +24,27 @@ source_path = os.path.join(
     "agents",
     "pr-backlog-manager",
 )
-sys.path.insert(0, source_path)
+sys.path.insert(0, pr_backlog_path)
 
-try:
-    from delegation_coordinator import (
-        DelegationCoordinator,
-        DelegationTask,
-        DelegationType,
-        DelegationPriority,
-        DelegationStatus,
-    )
-except ImportError:
-    # Use stubs for type checking and testing
-    from test_stubs import (
-        DelegationCoordinator,
-        DelegationTask,
-        DelegationType,
-        DelegationPriority,
-        DelegationStatus,
-    )
+# Add shared directory for interfaces
+shared_path = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
+    ".claude",
+    "shared",
+)
+sys.path.insert(0, shared_path)
+
+# Always use stubs for delegation coordinator tests
+from .test_stubs import (
+    DelegationCoordinator,
+    DelegationTask,
+    DelegationType,
+    DelegationPriority,
+    DelegationStatus,
+)
 
 
 @pytest.fixture
