@@ -21,12 +21,13 @@ class TestCodeReviewerSimplicityDetection(unittest.TestCase):
     def tearDown(self):
         """Clean up test fixtures."""
         import shutil
+
         shutil.rmtree(self.test_cases_dir, ignore_errors=True)
 
     def create_test_file(self, filename: str, content: str) -> str:
         """Create a test file with the given content."""
         filepath = os.path.join(self.test_cases_dir, filename)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(content)
         return filepath
 
@@ -46,7 +47,7 @@ class CreditCardProcessor(PaymentProcessor):
         return True
 """
         filepath = self.create_test_file("over_engineered.py", over_engineered_code)
-        
+
         # The CodeReviewer should identify this as over-engineered
         # since there's only one implementation of the abstract class
         self.assertTrue(os.path.exists(filepath))
@@ -74,7 +75,7 @@ class BankTransferProcessor(PaymentProcessor):
         return self._initiate_bank_transfer(amount)
 """
         filepath = self.create_test_file("appropriate.py", appropriate_code)
-        
+
         # This should NOT be flagged as over-engineered since there are
         # multiple implementations justifying the abstraction
         self.assertTrue(os.path.exists(filepath))
@@ -95,7 +96,7 @@ class DatabaseConfig:
         # ... 20 more config options that are never actually configured
 """
         filepath = self.create_test_file("over_configured.py", over_configured_code)
-        
+
         # Should detect excessive configuration without variation
         self.assertTrue(os.path.exists(filepath))
 
@@ -111,7 +112,7 @@ def apply_discount(total, discount_percent):
     return total * (1 - discount_percent / 100)
 '''
         filepath = self.create_test_file("simple.py", simple_code)
-        
+
         # Simple, direct code should be accepted without simplicity concerns
         self.assertTrue(os.path.exists(filepath))
 
@@ -141,8 +142,10 @@ class Cat(Feline):
     def purr(self):
         return "purr"
 """
-        filepath = self.create_test_file("complex_inheritance.py", complex_inheritance_code)
-        
+        filepath = self.create_test_file(
+            "complex_inheritance.py", complex_inheritance_code
+        )
+
         # Should detect unnecessarily deep inheritance hierarchy
         self.assertTrue(os.path.exists(filepath))
 
@@ -176,8 +179,10 @@ class Person:
         self.age = age
         self.email = email
 """
-        filepath = self.create_test_file("over_engineered_builder.py", over_engineered_builder)
-        
+        filepath = self.create_test_file(
+            "over_engineered_builder.py", over_engineered_builder
+        )
+
         # Builder pattern is overkill for a simple 3-field data class
         self.assertTrue(os.path.exists(filepath))
 
@@ -229,8 +234,10 @@ class DistributedTaskOrchestrator:
         # Complex orchestration logic justified by genuine complexity
         pass
 '''
-        filepath = self.create_test_file("justified_complexity.py", complex_but_justified_code)
-        
+        filepath = self.create_test_file(
+            "justified_complexity.py", complex_but_justified_code
+        )
+
         # This complex code is justified by genuinely complex requirements
         self.assertTrue(os.path.exists(filepath))
 
@@ -261,7 +268,7 @@ class UserManager:
         return user
 """
         filepath = self.create_test_file("yagni_violation.py", yagni_violation_code)
-        
+
         # Should detect features built for imagined future requirements
         self.assertTrue(os.path.exists(filepath))
 
@@ -273,7 +280,7 @@ class TestSimplicityRecommendations(unittest.TestCase):
         """Test guidance on when to inline vs. abstract."""
         # These test cases would validate that the CodeReviewer
         # provides appropriate guidance on abstraction decisions
-        
+
         # Case 1: Code used in only 2 places - suggest inline
         duplicate_code = """
 def validate_email_format(email):
@@ -290,7 +297,7 @@ def process_user_update(email):
     # ... rest of update
 """
         # Should suggest inlining since it's only used in 2 places
-        
+
         # Case 2: Code used in 5+ places - abstraction is justified
         justified_abstraction = """
 def validate_email_format(email):
@@ -300,7 +307,7 @@ def validate_email_format(email):
 # contact_form, admin_user_creation, bulk_import
 """
         # Should accept abstraction as justified
-        
+
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_cognitive_load_reduction_suggestions(self):
@@ -348,7 +355,7 @@ def send_notification(user, message):
     server.send(user.email, message)
     server.quit()
 """
-        
+
         # Mature project: consider consistency with existing patterns
         mature_project_code = """
 # In mature codebase with established notification system
@@ -357,7 +364,7 @@ def send_notification(user, message):
     notification_service = NotificationService()
     notification_service.send_email(user.email, message)
 """
-        
+
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_team_size_context(self):
@@ -371,7 +378,7 @@ def calculate_shipping(weight, distance):
     distance_factor = distance * 0.10
     return base_rate + weight_factor + distance_factor
 """
-        
+
         # Large team: more sophisticated patterns may be warranted
         large_team_code = """
 # Large team - structured approach for maintainability
@@ -383,9 +390,9 @@ class ShippingCalculator:
         calculator = self._get_calculator_for_region(shipment.destination)
         return calculator.calculate_rate(shipment)
 """
-        
+
         self.assertTrue(True)  # Placeholder for actual implementation
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
