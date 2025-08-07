@@ -39,6 +39,8 @@ except ImportError:
         def load_state(self, task_id): return None
 
     class GitHubOperations:
+        def __init__(self, task_id=None):
+            self.task_id = task_id
         def create_issue(self, title, body): return None
         def create_pr(self, title, body, base, head): return None
 
