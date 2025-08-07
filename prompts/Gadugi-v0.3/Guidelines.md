@@ -165,48 +165,12 @@ Push for extreme simplicity in these areas:
 
 ### Zero BS Principle
 
-Complete implementation without shortcuts or deception:
+- **No stubs, no TODOs**: If it's in the code, it works completely
+- **Real data only**: No fake responses, mock data, or hardcoded results
+- **Full implementation**: Every requirement in the spec gets built, not just the easy parts
+- **Complete or don't ship**: Half-built features are worse than no features
 
-#### No Half-Measures
-- **No stubs or placeholders**: Every function must be fully implemented
-- **No TODO comments**: If it needs doing, do it now or don't include it
-- **No "exercise for the reader"**: Complete all functionality as specified
-- **No partial features**: Ship complete or don't ship at all
-
-#### Genuine Implementation
-- **Real data only**: Never fake API responses or database results
-- **Actual integration**: Connect to real services, not mock endpoints in production code
-- **True functionality**: If a button says "Save", it must actually persist data
-- **Honest status**: Loading states, error messages, and success confirmations must reflect reality
-
-#### Complete Specifications
-- **Every requirement matters**: Implement ALL requirements in the spec, not just the easy ones
-- **No selective implementation**: Can't skip the hard parts or boring parts
-- **Full error handling**: Handle all failure modes, not just the happy path
-- **Proper edge cases**: If the spec mentions it, implement it fully
-
-#### The Balance
-This complements our simplicity principle:
-- **Simple AND complete**: The simplest solution that fully works
-- **No over-engineering**: Don't build what's not needed
-- **No under-engineering**: Don't skip what IS needed
-- **Honest complexity**: If something is genuinely complex, implement it properly rather than pretending it's simple
-
-#### Examples of Zero BS
-
-**Good**: A fully working authentication system with real token validation
-**Bad**: A login form that always returns success regardless of credentials
-
-**Good**: An API client that handles all documented endpoints and errors
-**Bad**: An API client with half the endpoints as "// TODO: implement later"
-
-**Good**: A simple search that actually queries the database
-**Bad**: A search box that returns hardcoded results
-
-**Good**: Admitting "this needs research" and doing the research
-**Bad**: Implementing a guess and adding "// TODO: verify this works"
-
-The Zero BS principle means we respect both our users and ourselves enough to do the job properly. Every line of code should work as advertised, every feature should do what it claims, and every implementation should be complete according to its specification
+This works with our simplicity principle: build the simplest thing that *actually works*. Don't fake it, don't skip the hard parts, don't leave holes. If something is genuinely complex, implement it properly rather than pretending it's simple
 
 ### Practical Examples
 
