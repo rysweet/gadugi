@@ -266,7 +266,7 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
     """Integration tests for TeamCoach hooks."""
 
     def test_settings_json_configuration(self):
-        """Test that settings.json has hooks removed (fix for Issue #89)."""
+        """Test that settings.json has safe hooks only (no TeamCoach hooks)."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
         )
@@ -274,12 +274,26 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
         with open(settings_path, "r") as f:
             settings = json.load(f)
 
-        # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn(
-            "hooks",
-            settings,
-            "Settings should not contain hooks configuration to prevent infinite loops",
-        )
+        # If hooks exist, verify they don't contain dangerous TeamCoach hooks
+        if "hooks" in settings:
+            # Check all hook configurations
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # Ensure no TeamCoach hooks that spawn Claude sessions
+                                self.assertNotIn(
+                                    "teamcoach",
+                                    command.lower(),
+                                    "TeamCoach hooks should not be present (Issue #89)",
+                                )
+                                self.assertNotIn(
+                                    "claude /agent",
+                                    command.lower(),
+                                    "Hooks should not spawn new Claude sessions",
+                                )
 
         # Verify permissions are still present (these should remain)
         self.assertIn("permissions", settings, "Permissions should still be configured")
@@ -404,7 +418,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
             self.assertFalse(mode & 0o002, f"{hook_file} should not be world-writable")
 
     def test_settings_json_uses_environment_variables(self):
-        """Test that settings.json hooks have been removed (fix for Issue #89)."""
+        """Test that if hooks exist, they are safe and properly configured."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
         )
@@ -412,12 +426,29 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
         with open(settings_path, "r") as f:
             settings = json.load(f)
 
-        # Hooks should be removed to prevent infinite loops (Issue #89)
-        self.assertNotIn(
-            "hooks",
-            settings,
-            "Settings should not contain hooks configuration to prevent infinite loops",
-        )
+        # If hooks exist, verify they are safe (no TeamCoach or environment variable issues)
+        if "hooks" in settings:
+            for hook_type in settings["hooks"]:
+                if isinstance(settings["hooks"][hook_type], list):
+                    for hook_config in settings["hooks"][hook_type]:
+                        if "hooks" in hook_config:
+                            for hook in hook_config["hooks"]:
+                                command = hook.get("command", "")
+                                # XPIA hooks are allowed, TeamCoach hooks are not
+                                if "xpia" in command.lower():
+                                    # XPIA hooks should use relative paths
+                                    self.assertIn(
+                                        ".claude/hooks/",
+                                        command,
+                                        "XPIA hooks should use relative paths",
+                                    )
+                                else:
+                                    # No TeamCoach hooks allowed
+                                    self.assertNotIn(
+                                        "teamcoach",
+                                        command.lower(),
+                                        "TeamCoach hooks not allowed (Issue #89)",
+                                    )
 
         # Verify that new workflow reflection system components exist as replacement
         base_dir = os.path.dirname(os.path.dirname(__file__))
