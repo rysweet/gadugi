@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-05T08:52:12.740687",
+  "timestamp": "2025-08-07T14:39:54.581583",
   "processes": {
     "fix-types-pr-backlog-manager": {
       "task_id": "fix-types-pr-backlog-manager",
@@ -63,6 +63,38 @@
       "last_heartbeat": "2025-08-05T08:52:12.740685",
       "exit_code": null,
       "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "add-v0.1-release-notes": {
+      "task_id": "add-v0.1-release-notes",
+      "task_name": "Add v0.1 Release Notes to README",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-add-v0.1-release-notes",
+      "created_at": "2025-08-07T14:39:54.553349",
+      "prompt_file": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-add-v0.1-release-notes/prompts/add-v0.1-release-notes-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-07T14:39:54.581227",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-07T14:39:54.581224",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    },
+    "update-orchestrator-self-reinvoke": {
+      "task_id": "update-orchestrator-self-reinvoke",
+      "task_name": "Update Orchestrator Agent for Self-Reinvocation",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-update-orchestrator-self-reinvoke",
+      "created_at": "2025-08-07T14:39:54.576769",
+      "prompt_file": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-update-orchestrator-self-reinvoke/prompts/update-orchestrator-self-reinvoke-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-07T14:39:54.581582",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-07T14:39:54.581579",
+      "exit_code": null,
+      "error_message": null,
       "resource_usage": null
     }
   }

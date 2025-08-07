@@ -1,27 +1,30 @@
 # AI Assistant Memory
-Last Updated: 2025-08-07T15:30:00Z
+Last Updated: 2025-08-07T16:45:00Z
 
 ## Current Goals
-- Resolve issue #90: Add comprehensive VS Code extension documentation to README.md
+- Update orchestrator agent to self-reinvoke when called without Task tool
 
 ## Todo List
-- [ ] Execute workflow for issue #90 - VS Code extension documentation
-- [ ] Add extension overview section to README.md
-- [ ] Document installation instructions (Marketplace, VSIX, Development)
-- [ ] Include configuration and setup documentation
-- [ ] Add usage examples and feature documentation
-- [ ] Include troubleshooting section
-- [ ] Ensure proper placement between "Getting Started" and "Architecture" sections
+- [ ] Execute workflow for orchestrator self-reinvocation enhancement
+- [ ] Create GitHub issue for tracking this enhancement
+- [ ] Set up isolated worktree and branch
+- [ ] Update `.claude/agents/orchestrator-agent.md` with self-reinvocation logic
+- [ ] Add detection for direct invocation without Task tool
+- [ ] Implement automatic re-invocation using Task tool when needed
+- [ ] Test to ensure no infinite loops
+- [ ] Run quality checks and create pull request
+- [ ] Follow full 11-phase workflow process
 
 ## Recent Accomplishments
-- Session started for issue #90 resolution
-- Memory.md initialized with current task context
+- Updated Memory.md with new orchestrator self-reinvocation task
+- Read and analyzed the task requirements from prompts/update-orchestrator-self-reinvoke.md
 
 ## Important Context
-- Issue #90 requires comprehensive VS Code extension documentation
-- Documentation should be added to README.md in specific location
-- Must follow full 11-phase workflow process
-- Need to maintain consistency with existing README style
+- Task involves updating orchestrator agent to detect direct invocation via `/agent:orchestrator-agent` syntax
+- Need to add self-reinvocation logic at the beginning of orchestrator agent instructions
+- Must prevent infinite loops while ensuring proper Task tool usage
+- Should improve context management and state tracking across agent invocations
+- Task defined in /Users/ryan/src/gadugi6/gadugi/prompts/update-orchestrator-self-reinvoke.md
 
 ## Reflections
-- Starting fresh session focused on VS Code extension documentation task
+- Switching to new task focused on orchestrator agent self-reinvocation enhancement

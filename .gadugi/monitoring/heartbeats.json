@@ -1,4 +1,21 @@
 {
-  "timestamp": "2025-08-05T08:52:12.741290",
-  "active_processes": []
+  "timestamp": "2025-08-07T14:40:24.545048",
+  "active_processes": [
+    {
+      "task_id": "add-v0.1-release-notes",
+      "task_name": "Add v0.1 Release Notes to README",
+      "status": "running",
+      "pid": null,
+      "last_heartbeat": "2025-08-07T14:39:54.581224",
+      "resource_usage": null
+    },
+    {
+      "task_id": "update-orchestrator-self-reinvoke",
+      "task_name": "Update Orchestrator Agent for Self-Reinvocation",
+      "status": "running",
+      "pid": null,
+      "last_heartbeat": "2025-08-07T14:39:54.581579",
+      "resource_usage": null
+    }
+  ]
 }
