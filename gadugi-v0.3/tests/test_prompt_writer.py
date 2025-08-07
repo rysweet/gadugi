@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""
-Tests for the prompt-writer agent functionality.
-"""
+"""Tests for the prompt-writer agent functionality."""
 
-import json
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 # Add src directory to path for imports
@@ -14,8 +11,8 @@ sys.path.insert(0, str(src_path))
 
 from prompt_writer_engine import (
     PromptWriterEngine,
-    generate_prompt_for_task,
     _generate_filename,
+    generate_prompt_for_task,
 )
 from run_agent import run_agent
 
@@ -23,29 +20,29 @@ from run_agent import run_agent
 class TestPromptWriterEngine(unittest.TestCase):
     """Test the core prompt writer engine functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.engine = PromptWriterEngine()
 
-    def test_engine_initialization(self):
+    def test_engine_initialization(self) -> None:
         """Test that the engine initializes with proper structure."""
-        self.assertIsInstance(self.engine.template_structure, dict)
-        self.assertIn("overview", self.engine.template_structure)
-        self.assertIn("workflow_steps", self.engine.template_structure)
-        self.assertIsInstance(self.engine.template_structure["workflow_steps"], list)
+        assert isinstance(self.engine.template_structure, dict)
+        assert "overview" in self.engine.template_structure
+        assert "workflow_steps" in self.engine.template_structure
+        assert isinstance(self.engine.template_structure["workflow_steps"], list)
 
-    def test_task_analysis(self):
+    def test_task_analysis(self) -> None:
         """Test task analysis functionality."""
         task = "Implement user authentication system"
         analysis = self.engine._analyze_task(task)
 
-        self.assertIn("original_task", analysis)
-        self.assertIn("title", analysis)
-        self.assertIn("task_type", analysis)
-        self.assertIn("complexity", analysis)
-        self.assertEqual(analysis["original_task"], task)
-        self.assertEqual(analysis["task_type"], "feature_implementation")
+        assert "original_task" in analysis
+        assert "title" in analysis
+        assert "task_type" in analysis
+        assert "complexity" in analysis
+        assert analysis["original_task"] == task
+        assert analysis["task_type"] == "feature_implementation"
 
-    def test_title_extraction(self):
+    def test_title_extraction(self) -> None:
         """Test title extraction from task descriptions."""
         test_cases = [
             ("implement user authentication", "User Authentication Implementation"),
@@ -56,9 +53,9 @@ class TestPromptWriterEngine(unittest.TestCase):
 
         for task, expected_title in test_cases:
             title = self.engine._extract_title(task)
-            self.assertEqual(title, expected_title)
+            assert title == expected_title
 
-    def test_task_type_detection(self):
+    def test_task_type_detection(self) -> None:
         """Test task type detection."""
         test_cases = [
             ("implement user auth", "feature_implementation"),
@@ -70,9 +67,9 @@ class TestPromptWriterEngine(unittest.TestCase):
 
         for task, expected_type in test_cases:
             task_type = self.engine._determine_task_type(task)
-            self.assertEqual(task_type, expected_type)
+            assert task_type == expected_type
 
-    def test_complexity_estimation(self):
+    def test_complexity_estimation(self) -> None:
         """Test complexity estimation."""
         test_cases = [
             ("fix simple button color", "low"),
@@ -83,19 +80,19 @@ class TestPromptWriterEngine(unittest.TestCase):
 
         for task, expected_complexity in test_cases:
             complexity = self.engine._estimate_complexity(task)
-            self.assertEqual(complexity, expected_complexity)
+            assert complexity == expected_complexity
 
-    def test_component_identification(self):
+    def test_component_identification(self) -> None:
         """Test component identification."""
         task = "build web API with database authentication"
         components = self.engine._identify_components(task)
 
-        self.assertIn("web", components)
-        self.assertIn("api", components)
-        self.assertIn("database", components)
-        self.assertIn("auth", components)
+        assert "web" in components
+        assert "api" in components
+        assert "database" in components
+        assert "auth" in components
 
-    def test_prompt_generation(self):
+    def test_prompt_generation(self) -> None:
         """Test full prompt generation."""
         task = "Add user registration with email verification"
         prompt_data = self.engine.generate_prompt(task)
@@ -113,64 +110,64 @@ class TestPromptWriterEngine(unittest.TestCase):
         ]
 
         for section in required_sections:
-            self.assertIn(section, prompt_data)
+            assert section in prompt_data
 
         # Check requirements structure
-        self.assertIn("functional", prompt_data["requirements"])
-        self.assertIn("technical", prompt_data["requirements"])
-        self.assertIsInstance(prompt_data["requirements"]["functional"], list)
-        self.assertIsInstance(prompt_data["requirements"]["technical"], list)
+        assert "functional" in prompt_data["requirements"]
+        assert "technical" in prompt_data["requirements"]
+        assert isinstance(prompt_data["requirements"]["functional"], list)
+        assert isinstance(prompt_data["requirements"]["technical"], list)
 
         # Check implementation plan structure
-        self.assertIn("phase1", prompt_data["implementation_plan"])
-        self.assertIn("phase2", prompt_data["implementation_plan"])
+        assert "phase1" in prompt_data["implementation_plan"]
+        assert "phase2" in prompt_data["implementation_plan"]
 
         # Check metadata
-        self.assertIn("generated_at", prompt_data["metadata"])
-        self.assertIn("task_type", prompt_data["metadata"])
+        assert "generated_at" in prompt_data["metadata"]
+        assert "task_type" in prompt_data["metadata"]
 
-    def test_markdown_formatting(self):
+    def test_markdown_formatting(self) -> None:
         """Test markdown formatting of prompts."""
         task = "Create simple todo list"
         prompt_data = self.engine.generate_prompt(task)
         markdown = self.engine.format_as_markdown(prompt_data)
 
         # Check markdown structure
-        self.assertTrue(markdown.startswith("# "))
-        self.assertIn("## Overview", markdown)
-        self.assertIn("## Problem Statement", markdown)
-        self.assertIn("## Requirements", markdown)
-        self.assertIn("## Implementation Plan", markdown)
-        self.assertIn("## Success Criteria", markdown)
-        self.assertIn("## Workflow Steps", markdown)
+        assert markdown.startswith("# ")
+        assert "## Overview" in markdown
+        assert "## Problem Statement" in markdown
+        assert "## Requirements" in markdown
+        assert "## Implementation Plan" in markdown
+        assert "## Success Criteria" in markdown
+        assert "## Workflow Steps" in markdown
 
         # Check for proper markdown formatting
-        self.assertIn("### Functional Requirements", markdown)
-        self.assertIn("### Technical Requirements", markdown)
+        assert "### Functional Requirements" in markdown
+        assert "### Technical Requirements" in markdown
 
         # Should contain numbered workflow steps
-        self.assertIn("1. Create GitHub issue", markdown)
+        assert "1. Create GitHub issue" in markdown
 
 
 class TestPromptWriterIntegration(unittest.TestCase):
     """Test integration with orchestrator system."""
 
-    def test_generate_prompt_for_task(self):
+    def test_generate_prompt_for_task(self) -> None:
         """Test the main generation function."""
         task = "Add user authentication"
         result = generate_prompt_for_task(task, save_to_file=False)
 
-        self.assertTrue(result["success"])
-        self.assertIn("prompt_data", result)
-        self.assertIn("markdown", result)
-        self.assertIn("suggested_filename", result)
+        assert result["success"]
+        assert "prompt_data" in result
+        assert "markdown" in result
+        assert "suggested_filename" in result
 
         # Check filename generation
         filename = result["suggested_filename"]
-        self.assertTrue(filename.endswith(".md"))
-        self.assertTrue(filename.startswith("implement-"))
+        assert filename.endswith(".md")
+        assert filename.startswith("implement-")
 
-    def test_filename_generation(self):
+    def test_filename_generation(self) -> None:
         """Test filename generation."""
         test_cases = [
             (
@@ -186,71 +183,71 @@ class TestPromptWriterIntegration(unittest.TestCase):
 
         for task, expected_pattern in test_cases:
             filename = _generate_filename(task)
-            self.assertTrue(filename.endswith(".md"))
+            assert filename.endswith(".md")
             # Check that it starts with expected prefix
             expected_prefix = expected_pattern.split("-")[0]
-            self.assertTrue(filename.startswith(expected_prefix))
+            assert filename.startswith(expected_prefix)
 
-    def test_run_agent_integration(self):
+    def test_run_agent_integration(self) -> None:
         """Test integration with run_agent system."""
         task = "Create simple API endpoint"
         result = run_agent("prompt-writer", task)
 
-        self.assertTrue(result["success"])
-        self.assertEqual(result["agent"], "prompt-writer")
-        self.assertEqual(result["task"], task)
-        self.assertEqual(result["returncode"], 0)
+        assert result["success"]
+        assert result["agent"] == "prompt-writer"
+        assert result["task"] == task
+        assert result["returncode"] == 0
 
         # Check that stdout contains a proper markdown prompt
         stdout = result["stdout"]
-        self.assertIn("# ", stdout)  # Should have title
-        self.assertIn("## Overview", stdout)
-        self.assertIn("## Requirements", stdout)
-        self.assertIn("## Implementation Plan", stdout)
+        assert "# " in stdout  # Should have title
+        assert "## Overview" in stdout
+        assert "## Requirements" in stdout
+        assert "## Implementation Plan" in stdout
 
         # Check metadata is included
-        self.assertIn("metadata", result)
-        self.assertIn("suggested_filename", result["metadata"])
+        assert "metadata" in result
+        assert "suggested_filename" in result["metadata"]
 
 
 class TestPromptWriterErrorHandling(unittest.TestCase):
     """Test error handling and edge cases."""
 
-    def test_empty_task_description(self):
+    def test_empty_task_description(self) -> None:
         """Test handling of empty task description."""
         result = generate_prompt_for_task("", save_to_file=False)
-        self.assertTrue(result["success"])
+        assert result["success"]
 
         # Should generate generic prompt
         markdown = result["markdown"]
-        self.assertIn("# ", markdown)
+        assert "# " in markdown
 
-    def test_very_long_task_description(self):
+    def test_very_long_task_description(self) -> None:
         """Test handling of very long task descriptions."""
         long_task = "implement " + "very complex system " * 20
         result = generate_prompt_for_task(long_task, save_to_file=False)
 
-        self.assertTrue(result["success"])
+        assert result["success"]
         # Filename should be truncated
         filename = result["suggested_filename"]
-        self.assertTrue(len(filename) < 100)  # Reasonable limit
+        assert len(filename) < 100  # Reasonable limit
 
-    def test_special_characters_in_task(self):
+    def test_special_characters_in_task(self) -> None:
         """Test handling of special characters."""
         task = "implement user auth w/ OAuth2.0 & JWT tokens!"
         result = generate_prompt_for_task(task, save_to_file=False)
 
-        self.assertTrue(result["success"])
+        assert result["success"]
         filename = result["suggested_filename"]
         # Should clean special characters from filename
-        self.assertNotIn("!", filename)
-        self.assertNotIn("&", filename)
+        assert "!" not in filename
+        assert "&" not in filename
 
-    def test_run_agent_error_handling(self):
+    def test_run_agent_error_handling(self) -> None:
         """Test error handling in run_agent integration."""
         # This should still work with empty task
         result = run_agent("prompt-writer", "")
-        self.assertTrue(result["success"])
+        assert result["success"]
 
         # Check error case by testing with invalid import (simulated)
         # This is harder to test without modifying the import system
@@ -259,7 +256,7 @@ class TestPromptWriterErrorHandling(unittest.TestCase):
 class TestPromptWriterQuality(unittest.TestCase):
     """Test the quality and completeness of generated prompts."""
 
-    def test_feature_implementation_quality(self):
+    def test_feature_implementation_quality(self) -> None:
         """Test quality of feature implementation prompts."""
         task = "Add user authentication with email and password"
         result = generate_prompt_for_task(task)
@@ -267,30 +264,30 @@ class TestPromptWriterQuality(unittest.TestCase):
 
         # Should have comprehensive requirements
         functional_reqs = prompt_data["requirements"]["functional"]
-        self.assertGreater(len(functional_reqs), 2)
+        assert len(functional_reqs) > 2
 
         technical_reqs = prompt_data["requirements"]["technical"]
-        self.assertGreater(len(technical_reqs), 2)
+        assert len(technical_reqs) > 2
 
         # Should have phased implementation plan
         plan = prompt_data["implementation_plan"]
-        self.assertIn("phase1", plan)
-        self.assertIn("phase2", plan)
-        self.assertIn("phase3", plan)
-        self.assertIn("phase4", plan)
+        assert "phase1" in plan
+        assert "phase2" in plan
+        assert "phase3" in plan
+        assert "phase4" in plan
 
         # Success criteria should be specific
         success_criteria = prompt_data["success_criteria"]
-        self.assertGreater(len(success_criteria), 3)
+        assert len(success_criteria) > 3
 
-    def test_bug_fix_quality(self):
+    def test_bug_fix_quality(self) -> None:
         """Test quality of bug fix prompts."""
         task = "Fix login redirect issue after authentication"
         result = generate_prompt_for_task(task)
         prompt_data = result["prompt_data"]
 
         # Should be identified as bug fix
-        self.assertEqual(prompt_data["metadata"]["task_type"], "bug_fix")
+        assert prompt_data["metadata"]["task_type"] == "bug_fix"
 
         # Should have appropriate requirements for bug fix
         functional_reqs = prompt_data["requirements"]["functional"]
@@ -299,11 +296,9 @@ class TestPromptWriterQuality(unittest.TestCase):
         # Bug fixes should mention testing and root cause
         all_reqs = functional_reqs + technical_reqs
         req_text = " ".join(all_reqs).lower()
-        self.assertTrue(
-            any(word in req_text for word in ["test", "root cause", "regression"])
-        )
+        assert any(word in req_text for word in ["test", "root cause", "regression"])
 
-    def test_workflow_completeness(self):
+    def test_workflow_completeness(self) -> None:
         """Test that workflow steps are complete."""
         task = "Create user dashboard"
         result = generate_prompt_for_task(task)
@@ -323,10 +318,7 @@ class TestPromptWriterQuality(unittest.TestCase):
         ]
 
         for element in essential_elements:
-            self.assertTrue(
-                element in workflow_text,
-                f"Workflow missing essential element: {element}",
-            )
+            assert element in workflow_text, f"Workflow missing essential element: {element}"
 
 
 if __name__ == "__main__":

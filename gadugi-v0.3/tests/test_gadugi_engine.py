@@ -1,47 +1,47 @@
 #!/usr/bin/env python3
-"""
-Comprehensive tests for the Gadugi Engine.
+"""Comprehensive tests for the Gadugi Engine.
 
 This test suite validates all core functionality of the GadugiEngine including
 system management, service control, agent management, health monitoring,
 backup operations, and configuration management.
 """
 
-import pytest
 import json
-import sys
 import os
-import tempfile
 import shutil
 import sqlite3
-import yaml
-from unittest.mock import Mock, patch, MagicMock, call
-from pathlib import Path
+import sys
+import tempfile
 from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
+import yaml
 
 # Add the src directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from gadugi_engine import (
-    GadugiEngine,
-    OperationType,
-    TargetType,
-    Environment,
-    ServiceStatus,
-    HealthStatus,
-    SystemStatus,
-    ServiceInfo,
     AgentInfo,
-    Recommendation,
     BackupInfo,
+    Environment,
+    GadugiEngine,
+    HealthStatus,
     OperationResult,
+    OperationType,
+    Recommendation,
+    ServiceInfo,
+    ServiceStatus,
+    SystemStatus,
+    TargetType,
 )
 
 
 class TestGadugiEngine:
     """Test cases for the GadugiEngine class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures."""
         # Create temporary directory for testing
         self.temp_dir = Path(tempfile.mkdtemp())
@@ -66,7 +66,7 @@ class TestGadugiEngine:
         # Initialize database
         self.gadugi._init_database()
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         """Clean up test fixtures."""
         # Stop any running monitoring
         if hasattr(self.gadugi, "is_monitoring") and self.gadugi.is_monitoring:
@@ -76,7 +76,7 @@ class TestGadugiEngine:
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
-    def test_gadugi_engine_initialization(self):
+    def test_gadugi_engine_initialization(self) -> None:
         """Test GadugiEngine initialization."""
         assert self.gadugi is not None
         assert hasattr(self.gadugi, "logger")
@@ -93,7 +93,7 @@ class TestGadugiEngine:
         # Check that database was initialized
         assert self.gadugi.db_path.exists()
 
-    def test_operation_enums(self):
+    def test_operation_enums(self) -> None:
         """Test operation enumeration values."""
         # Test OperationType enum
         assert OperationType.INSTALL.value == "install"
@@ -119,7 +119,7 @@ class TestGadugiEngine:
         assert Environment.PRODUCTION.value == "production"
         assert Environment.TESTING.value == "testing"
 
-    def test_database_initialization(self):
+    def test_database_initialization(self) -> None:
         """Test database initialization and schema creation."""
         # Check if database file exists
         assert self.gadugi.db_path.exists()
@@ -130,29 +130,29 @@ class TestGadugiEngine:
 
             # Check services table
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='services'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='services'",
             )
             assert cursor.fetchone() is not None
 
             # Check agents table
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='agents'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='agents'",
             )
             assert cursor.fetchone() is not None
 
             # Check system_events table
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='system_events'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='system_events'",
             )
             assert cursor.fetchone() is not None
 
             # Check backups table
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='backups'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='backups'",
             )
             assert cursor.fetchone() is not None
 
-    def test_core_services_configuration(self):
+    def test_core_services_configuration(self) -> None:
         """Test core services configuration."""
         expected_services = [
             "event-router",
@@ -171,7 +171,7 @@ class TestGadugiEngine:
             assert "health_check" in service_config
             assert "dependencies" in service_config
 
-    def test_available_agents_configuration(self):
+    def test_available_agents_configuration(self) -> None:
         """Test available agents configuration."""
         expected_agents = [
             "orchestrator",
@@ -195,7 +195,7 @@ class TestGadugiEngine:
             assert "executable" in agent_config
             assert "args" in agent_config
 
-    def test_execute_operation_status(self):
+    def test_execute_operation_status(self) -> None:
         """Test executing status operation."""
         request = {
             "command": "status",
@@ -223,7 +223,7 @@ class TestGadugiEngine:
             assert result.status is not None
             assert len(result.errors) == 0
 
-    def test_execute_operation_invalid_command(self):
+    def test_execute_operation_invalid_command(self) -> None:
         """Test executing invalid operation."""
         request = {
             "command": "invalid_command",
@@ -241,7 +241,7 @@ class TestGadugiEngine:
             or "unsupported" in result.errors[0].lower()
         )
 
-    def test_handle_install_system(self):
+    def test_handle_install_system(self) -> None:
         """Test system installation."""
         request = {
             "command": "install",
@@ -263,7 +263,7 @@ class TestGadugiEngine:
             mock_deps.assert_called_once()
             mock_config.assert_called_once()
 
-    def test_handle_install_service(self):
+    def test_handle_install_service(self) -> None:
         """Test service installation."""
         request = {
             "command": "install",
@@ -279,7 +279,7 @@ class TestGadugiEngine:
         assert "installed_service" in result.results
         assert result.results["installed_service"] == "event-router"
 
-    def test_handle_install_agent(self):
+    def test_handle_install_agent(self) -> None:
         """Test agent installation."""
         request = {
             "command": "install",
@@ -295,7 +295,7 @@ class TestGadugiEngine:
         assert "installed_agent" in result.results
         assert result.results["installed_agent"] == "orchestrator"
 
-    def test_handle_install_unknown_service(self):
+    def test_handle_install_unknown_service(self) -> None:
         """Test installation of unknown service."""
         request = {
             "command": "install",
@@ -310,7 +310,7 @@ class TestGadugiEngine:
         assert len(result.errors) > 0
         assert "unknown service" in result.errors[0].lower()
 
-    def test_handle_configure_system(self):
+    def test_handle_configure_system(self) -> None:
         """Test system configuration."""
         request = {
             "command": "configure",
@@ -326,7 +326,7 @@ class TestGadugiEngine:
         assert "configured_components" in result.results
         assert self.gadugi.config["gadugi"]["environment"] == "production"
 
-    def test_handle_configure_service(self):
+    def test_handle_configure_service(self) -> None:
         """Test service configuration."""
         request = {
             "command": "configure",
@@ -342,7 +342,7 @@ class TestGadugiEngine:
         assert "configured_service" in result.results
         assert result.results["configured_service"] == "event-router"
 
-    def test_handle_configure_agent(self):
+    def test_handle_configure_agent(self) -> None:
         """Test agent configuration."""
         request = {
             "command": "configure",
@@ -359,7 +359,7 @@ class TestGadugiEngine:
         assert result.results["configured_agent"] == "orchestrator"
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_start_service_success(self, mock_popen):
+    def test_start_service_success(self, mock_popen) -> None:
         """Test successful service start."""
         # Mock process
         mock_process = Mock()
@@ -375,7 +375,7 @@ class TestGadugiEngine:
         assert self.gadugi.services["event-router"]["status"] == ServiceStatus.RUNNING
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_start_service_failure(self, mock_popen):
+    def test_start_service_failure(self, mock_popen) -> None:
         """Test service start failure."""
         # Mock failed process
         mock_process = Mock()
@@ -387,13 +387,13 @@ class TestGadugiEngine:
 
         assert result is False
 
-    def test_start_unknown_service(self):
+    def test_start_unknown_service(self) -> None:
         """Test starting unknown service."""
         result = self.gadugi._start_service("unknown-service")
         assert result is False
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_stop_service_success(self, mock_popen):
+    def test_stop_service_success(self, mock_popen) -> None:
         """Test successful service stop."""
         # Setup running service
         mock_process = Mock()
@@ -413,13 +413,13 @@ class TestGadugiEngine:
         mock_process.terminate.assert_called_once()
         assert self.gadugi.services["event-router"]["status"] == ServiceStatus.STOPPED
 
-    def test_stop_non_running_service(self):
+    def test_stop_non_running_service(self) -> None:
         """Test stopping non-running service."""
         result = self.gadugi._stop_service("non-existent-service")
         assert result is True  # Should succeed (no-op)
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_start_agent_success(self, mock_popen):
+    def test_start_agent_success(self, mock_popen) -> None:
         """Test successful agent start."""
         # Mock process
         mock_process = Mock()
@@ -435,7 +435,7 @@ class TestGadugiEngine:
         assert self.gadugi.agents["orchestrator"]["status"] == "active"
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_start_agent_failure(self, mock_popen):
+    def test_start_agent_failure(self, mock_popen) -> None:
         """Test agent start failure."""
         # Mock failed process
         mock_process = Mock()
@@ -447,13 +447,13 @@ class TestGadugiEngine:
 
         assert result is False
 
-    def test_start_unknown_agent(self):
+    def test_start_unknown_agent(self) -> None:
         """Test starting unknown agent."""
         result = self.gadugi._start_agent("unknown-agent")
         assert result is False
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_stop_agent_success(self, mock_popen):
+    def test_stop_agent_success(self, mock_popen) -> None:
         """Test successful agent stop."""
         # Setup running agent
         mock_process = Mock()
@@ -473,13 +473,13 @@ class TestGadugiEngine:
         mock_process.terminate.assert_called_once()
         assert self.gadugi.agents["orchestrator"]["status"] == "stopped"
 
-    def test_stop_non_running_agent(self):
+    def test_stop_non_running_agent(self) -> None:
         """Test stopping non-running agent."""
         result = self.gadugi._stop_agent("non-existent-agent")
         assert result is True  # Should succeed (no-op)
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_handle_start_all(self, mock_popen):
+    def test_handle_start_all(self, mock_popen) -> None:
         """Test starting all services and agents."""
         # Mock successful processes
         mock_process = Mock()
@@ -497,7 +497,7 @@ class TestGadugiEngine:
         assert "started_agents" in result.results
 
     @patch("gadugi_engine.subprocess.Popen")
-    def test_handle_start_specific_service(self, mock_popen):
+    def test_handle_start_specific_service(self, mock_popen) -> None:
         """Test starting specific service."""
         # Mock successful process
         mock_process = Mock()
@@ -519,7 +519,7 @@ class TestGadugiEngine:
         assert "started_services" in result.results
         assert "event-router" in result.results["started_services"]
 
-    def test_handle_stop_all(self):
+    def test_handle_stop_all(self) -> None:
         """Test stopping all services and agents."""
         # Setup some running services and agents
         self.gadugi.services["event-router"] = {
@@ -542,12 +542,12 @@ class TestGadugiEngine:
     @patch("gadugi_engine.psutil.virtual_memory")
     @patch("gadugi_engine.psutil.disk_usage")
     @patch("gadugi_engine.psutil.net_io_counters")
-    def test_get_resource_usage(self, mock_net, mock_disk, mock_memory, mock_cpu):
+    def test_get_resource_usage(self, mock_net, mock_disk, mock_memory, mock_cpu) -> None:
         """Test resource usage collection."""
         # Mock system resource data
         mock_cpu.return_value = 25.5
         mock_memory.return_value = Mock(
-            percent=60.0, used=8000000000, total=16000000000
+            percent=60.0, used=8000000000, total=16000000000,
         )
         mock_disk.return_value = Mock(used=500000000000, total=1000000000000)
         mock_net.return_value = Mock(bytes_sent=1000000, bytes_recv=2000000)
@@ -562,7 +562,7 @@ class TestGadugiEngine:
 
     @patch("gadugi_engine.psutil.cpu_percent")
     @patch("gadugi_engine.psutil.virtual_memory")
-    def test_get_resource_usage_error(self, mock_memory, mock_cpu):
+    def test_get_resource_usage_error(self, mock_memory, mock_cpu) -> None:
         """Test resource usage collection with error."""
         mock_cpu.side_effect = Exception("CPU error")
         mock_memory.side_effect = Exception("Memory error")
@@ -574,7 +574,7 @@ class TestGadugiEngine:
         assert usage["memory_percent"] == 0
         assert usage["disk_percent"] == 0
 
-    def test_get_system_info(self):
+    def test_get_system_info(self) -> None:
         """Test system information collection."""
         info = self.gadugi._get_system_info()
 
@@ -584,7 +584,7 @@ class TestGadugiEngine:
         assert "pid" in info
         assert "working_directory" in info
 
-    def test_get_services_status(self):
+    def test_get_services_status(self) -> None:
         """Test getting services status."""
         # Add some services
         self.gadugi.services["event-router"] = {
@@ -603,7 +603,7 @@ class TestGadugiEngine:
         assert event_router is not None
         assert event_router["status"] == ServiceStatus.RUNNING.value
 
-    def test_get_agents_status(self):
+    def test_get_agents_status(self) -> None:
         """Test getting agents status."""
         # Add some agents
         self.gadugi.agents["orchestrator"] = {
@@ -624,7 +624,7 @@ class TestGadugiEngine:
 
     @patch("gadugi_engine.psutil.cpu_percent")
     @patch("gadugi_engine.psutil.virtual_memory")
-    def test_handle_health_check(self, mock_memory, mock_cpu):
+    def test_handle_health_check(self, mock_memory, mock_cpu) -> None:
         """Test health check operation."""
         mock_cpu.return_value = 15.0
         mock_memory.return_value = Mock(percent=45.0)
@@ -645,7 +645,7 @@ class TestGadugiEngine:
 
     @patch("gadugi_engine.psutil.cpu_percent")
     @patch("gadugi_engine.psutil.virtual_memory")
-    def test_handle_health_check_high_cpu(self, mock_memory, mock_cpu):
+    def test_handle_health_check_high_cpu(self, mock_memory, mock_cpu) -> None:
         """Test health check with high CPU usage."""
         mock_cpu.return_value = 85.0  # High CPU
         mock_memory.return_value = Mock(percent=45.0)
@@ -666,7 +666,7 @@ class TestGadugiEngine:
 
     @patch("gadugi_engine.psutil.cpu_percent")
     @patch("gadugi_engine.psutil.virtual_memory")
-    def test_handle_health_check_high_memory(self, mock_memory, mock_cpu):
+    def test_handle_health_check_high_memory(self, mock_memory, mock_cpu) -> None:
         """Test health check with high memory usage."""
         mock_cpu.return_value = 15.0
         mock_memory.return_value = Mock(percent=90.0)  # High memory
@@ -686,7 +686,7 @@ class TestGadugiEngine:
         assert any("memory" in warning.lower() for warning in result.warnings)
 
     @patch("gadugi_engine.tarfile.open")
-    def test_create_backup_success(self, mock_tarfile):
+    def test_create_backup_success(self, mock_tarfile) -> None:
         """Test successful backup creation."""
         mock_tar = Mock()
         mock_tarfile.return_value.__enter__.return_value = mock_tar
@@ -702,16 +702,16 @@ class TestGadugiEngine:
                 assert "gadugi_backup_full" in backup_file
                 assert backup_file.endswith(".tar.gz")
 
-    def test_create_backup_failure(self):
+    def test_create_backup_failure(self) -> None:
         """Test backup creation failure."""
         # Mock file operations to raise exception
         with patch(
-            "gadugi_engine.tarfile.open", side_effect=Exception("Backup failed")
+            "gadugi_engine.tarfile.open", side_effect=Exception("Backup failed"),
         ):
             backup_file = self.gadugi._create_backup("full", True, True)
             assert backup_file is None
 
-    def test_handle_backup_operation(self):
+    def test_handle_backup_operation(self) -> None:
         """Test backup operation handling."""
         request = {
             "command": "backup",
@@ -736,7 +736,7 @@ class TestGadugiEngine:
                 assert "backup_created" in result.results
                 assert result.results["backup_created"] == "test_backup.tar.gz"
 
-    def test_handle_restore_operation(self):
+    def test_handle_restore_operation(self) -> None:
         """Test restore operation handling."""
         request = {
             "command": "restore",
@@ -754,7 +754,7 @@ class TestGadugiEngine:
             assert result.operation == "restore"
             assert "restored_from" in result.results
 
-    def test_handle_restore_no_backup_file(self):
+    def test_handle_restore_no_backup_file(self) -> None:
         """Test restore operation without backup file."""
         request = {
             "command": "restore",
@@ -769,7 +769,7 @@ class TestGadugiEngine:
         assert len(result.errors) > 0
         assert "backup file not specified" in result.errors[0].lower()
 
-    def test_handle_optimize_operation(self):
+    def test_handle_optimize_operation(self) -> None:
         """Test optimization operation."""
         request = {
             "command": "optimize",
@@ -780,7 +780,7 @@ class TestGadugiEngine:
 
         with patch.object(self.gadugi, "_optimize_system") as mock_optimize:
             mock_optimize.return_value = {
-                "optimizations_applied": ["test optimization"]
+                "optimizations_applied": ["test optimization"],
             }
 
             result = self.gadugi.execute_operation(request)
@@ -791,7 +791,7 @@ class TestGadugiEngine:
             assert len(result.recommendations) > 0
 
     @patch("gadugi_engine.gc.collect")
-    def test_optimize_system(self, mock_gc):
+    def test_optimize_system(self, mock_gc) -> None:
         """Test system optimization."""
         mock_gc.return_value = 100  # Objects collected
 
@@ -810,7 +810,7 @@ class TestGadugiEngine:
                 "log files" in opt.lower() for opt in results["optimizations_applied"]
             )
 
-    def test_cleanup_old_logs(self):
+    def test_cleanup_old_logs(self) -> None:
         """Test old log cleanup."""
         # Create some test log files
         old_log = self.gadugi.log_dir / "old.log"
@@ -842,7 +842,7 @@ class TestGadugiEngine:
                 # Should have attempted to clean some files
                 assert isinstance(cleaned, int)
 
-    def test_system_monitoring_start_stop(self):
+    def test_system_monitoring_start_stop(self) -> None:
         """Test starting and stopping system monitoring."""
         assert self.gadugi.is_monitoring is False
 
@@ -855,7 +855,7 @@ class TestGadugiEngine:
         self.gadugi._stop_monitoring()
         assert self.gadugi.is_monitoring is False
 
-    def test_update_service_in_db(self):
+    def test_update_service_in_db(self) -> None:
         """Test updating service status in database."""
         self.gadugi._update_service_in_db("test-service", ServiceStatus.RUNNING, 12345)
 
@@ -870,7 +870,7 @@ class TestGadugiEngine:
             assert result[1] == ServiceStatus.RUNNING.value  # status
             assert result[2] == 12345  # pid
 
-    def test_update_agent_in_db(self):
+    def test_update_agent_in_db(self) -> None:
         """Test updating agent status in database."""
         self.gadugi._update_agent_in_db("test-agent", "active", 54321)
 
@@ -885,18 +885,18 @@ class TestGadugiEngine:
             assert result[2] == "active"  # status
             assert result[3] == 54321  # pid
 
-    def test_log_system_event(self):
+    def test_log_system_event(self) -> None:
         """Test logging system events."""
         details = {"component": "test", "action": "test_action"}
         self.gadugi._log_system_event(
-            "test_event", "test_component", "Test message", details
+            "test_event", "test_component", "Test message", details,
         )
 
         # Verify database entry
         with sqlite3.connect(self.gadugi.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT * FROM system_events WHERE event_type = ?", ("test_event",)
+                "SELECT * FROM system_events WHERE event_type = ?", ("test_event",),
             )
             result = cursor.fetchone()
 
@@ -905,7 +905,7 @@ class TestGadugiEngine:
             assert result[3] == "test_component"  # component
             assert result[4] == "Test message"  # message
 
-    def test_calculate_file_checksum(self):
+    def test_calculate_file_checksum(self) -> None:
         """Test file checksum calculation."""
         # Create test file
         test_file = self.temp_dir / "test.txt"
@@ -917,7 +917,7 @@ class TestGadugiEngine:
         assert isinstance(checksum, str)
         assert len(checksum) == 64  # SHA256 hex digest length
 
-    def test_get_file_size_formatting(self):
+    def test_get_file_size_formatting(self) -> None:
         """Test file size formatting."""
         # Create test file
         test_file = self.gadugi.backup_dir / "test.txt"
@@ -926,13 +926,13 @@ class TestGadugiEngine:
         size_str = self.gadugi._get_file_size("test.txt")
         assert "KB" in size_str or "B" in size_str
 
-    def test_list_backups_empty(self):
+    def test_list_backups_empty(self) -> None:
         """Test listing backups when none exist."""
         backups = self.gadugi.list_backups()
         assert isinstance(backups, list)
         assert len(backups) == 0
 
-    def test_list_backups_with_data(self):
+    def test_list_backups_with_data(self) -> None:
         """Test listing backups with data."""
         # Insert test backup data
         with sqlite3.connect(self.gadugi.db_path) as conn:
@@ -960,14 +960,14 @@ class TestGadugiEngine:
         assert backups[0].backup_type == "full"
         assert backups[0].compressed is True
 
-    def test_format_size(self):
+    def test_format_size(self) -> None:
         """Test size formatting."""
         assert "B" in self.gadugi._format_size(512)
         assert "KB" in self.gadugi._format_size(1024)
         assert "MB" in self.gadugi._format_size(1024 * 1024)
         assert "GB" in self.gadugi._format_size(1024 * 1024 * 1024)
 
-    def test_shutdown(self):
+    def test_shutdown(self) -> None:
         """Test graceful shutdown."""
         # Setup some running components
         self.gadugi.services["test-service"] = {
@@ -988,7 +988,7 @@ class TestGadugiEngine:
             mock_stop_services.assert_called_once()
             mock_stop_agents.assert_called_once()
 
-    def test_is_service_running_true(self):
+    def test_is_service_running_true(self) -> None:
         """Test service running check - positive case."""
         mock_process = Mock()
         mock_process.poll.return_value = None  # Process running
@@ -997,7 +997,7 @@ class TestGadugiEngine:
 
         assert self.gadugi._is_service_running("test-service") is True
 
-    def test_is_service_running_false(self):
+    def test_is_service_running_false(self) -> None:
         """Test service running check - negative case."""
         mock_process = Mock()
         mock_process.poll.return_value = 1  # Process not running
@@ -1006,11 +1006,11 @@ class TestGadugiEngine:
 
         assert self.gadugi._is_service_running("test-service") is False
 
-    def test_is_service_running_not_exists(self):
+    def test_is_service_running_not_exists(self) -> None:
         """Test service running check - service doesn't exist."""
         assert self.gadugi._is_service_running("non-existent") is False
 
-    def test_is_agent_running_true(self):
+    def test_is_agent_running_true(self) -> None:
         """Test agent running check - positive case."""
         mock_process = Mock()
         mock_process.poll.return_value = None  # Process running
@@ -1019,7 +1019,7 @@ class TestGadugiEngine:
 
         assert self.gadugi._is_agent_running("test-agent") is True
 
-    def test_is_agent_running_false(self):
+    def test_is_agent_running_false(self) -> None:
         """Test agent running check - negative case."""
         mock_process = Mock()
         mock_process.poll.return_value = 1  # Process not running
@@ -1028,11 +1028,11 @@ class TestGadugiEngine:
 
         assert self.gadugi._is_agent_running("test-agent") is False
 
-    def test_is_agent_running_not_exists(self):
+    def test_is_agent_running_not_exists(self) -> None:
         """Test agent running check - agent doesn't exist."""
         assert self.gadugi._is_agent_running("non-existent") is False
 
-    def test_perform_health_check_healthy(self):
+    def test_perform_health_check_healthy(self) -> None:
         """Test health check - healthy system."""
         # Mock running services and agents
         self.gadugi.services = {"event-router": {"status": ServiceStatus.RUNNING}}
@@ -1051,7 +1051,7 @@ class TestGadugiEngine:
             assert len(health["services"]) > 0
             assert len(health["agents"]) > 0
 
-    def test_perform_health_check_critical(self):
+    def test_perform_health_check_critical(self) -> None:
         """Test health check - critical system."""
         # Mock all services down
         with (
@@ -1066,7 +1066,7 @@ class TestGadugiEngine:
             assert health["overall_status"] == "critical"
             assert len(health["errors"]) > 0
 
-    def test_get_backup_checksum_exists(self):
+    def test_get_backup_checksum_exists(self) -> None:
         """Test getting backup checksum when it exists."""
         # Insert test backup
         with sqlite3.connect(self.gadugi.db_path) as conn:
@@ -1083,12 +1083,12 @@ class TestGadugiEngine:
         checksum = self.gadugi._get_backup_checksum("test.tar.gz")
         assert checksum == "test_checksum"
 
-    def test_get_backup_checksum_not_exists(self):
+    def test_get_backup_checksum_not_exists(self) -> None:
         """Test getting backup checksum when it doesn't exist."""
         checksum = self.gadugi._get_backup_checksum("nonexistent.tar.gz")
         assert checksum is None
 
-    def test_restore_backup_success(self):
+    def test_restore_backup_success(self) -> None:
         """Test successful backup restoration."""
         # Create test backup file
         backup_file = "test_backup.tar.gz"
@@ -1097,10 +1097,10 @@ class TestGadugiEngine:
         with (
             patch.object(backup_path, "exists", return_value=True),
             patch.object(
-                self.gadugi, "_get_backup_checksum", return_value="test_checksum"
+                self.gadugi, "_get_backup_checksum", return_value="test_checksum",
             ),
             patch.object(
-                self.gadugi, "_calculate_file_checksum", return_value="test_checksum"
+                self.gadugi, "_calculate_file_checksum", return_value="test_checksum",
             ),
             patch("gadugi_engine.tarfile.open") as mock_tarfile,
         ):
@@ -1117,13 +1117,13 @@ class TestGadugiEngine:
                 assert result is True
                 mock_tar.extractall.assert_called_once()
 
-    def test_restore_backup_not_found(self):
+    def test_restore_backup_not_found(self) -> None:
         """Test backup restoration when file doesn't exist."""
         backup_file = "nonexistent_backup.tar.gz"
         result = self.gadugi._restore_backup(backup_file)
         assert result is False
 
-    def test_restore_backup_checksum_mismatch(self):
+    def test_restore_backup_checksum_mismatch(self) -> None:
         """Test backup restoration with checksum mismatch."""
         backup_file = "test_backup.tar.gz"
         backup_path = self.gadugi.backup_dir / backup_file
@@ -1131,7 +1131,7 @@ class TestGadugiEngine:
         with (
             patch.object(backup_path, "exists", return_value=True),
             patch.object(
-                self.gadugi, "_get_backup_checksum", return_value="stored_checksum"
+                self.gadugi, "_get_backup_checksum", return_value="stored_checksum",
             ),
             patch.object(
                 self.gadugi,
@@ -1143,13 +1143,13 @@ class TestGadugiEngine:
 
             assert result is False
 
-    def test_error_handling_in_execute_operation(self):
+    def test_error_handling_in_execute_operation(self) -> None:
         """Test error handling in execute_operation."""
         request = {"command": "status", "target": "system"}
 
         # Mock an exception in status handling
         with patch.object(
-            self.gadugi, "_handle_status", side_effect=Exception("Test error")
+            self.gadugi, "_handle_status", side_effect=Exception("Test error"),
         ):
             result = self.gadugi.execute_operation(request)
 
@@ -1157,7 +1157,7 @@ class TestGadugiEngine:
             assert len(result.errors) > 0
             assert "test error" in result.errors[0].lower()
 
-    def test_load_config_with_file(self):
+    def test_load_config_with_file(self) -> None:
         """Test loading configuration from file."""
         # Create test config file
         config_file = self.temp_dir / "test_config.yaml"
@@ -1171,7 +1171,7 @@ class TestGadugiEngine:
         assert config["gadugi"]["version"] == "0.4.0"
         assert config["gadugi"]["environment"] == "testing"
 
-    def test_load_config_file_not_exists(self):
+    def test_load_config_file_not_exists(self) -> None:
         """Test loading configuration when file doesn't exist."""
         config = self.gadugi._load_config("nonexistent_config.yaml")
 
@@ -1179,7 +1179,7 @@ class TestGadugiEngine:
         assert "gadugi" in config
         assert config["gadugi"]["version"] == "0.3.0"
 
-    def test_load_config_invalid_yaml(self):
+    def test_load_config_invalid_yaml(self) -> None:
         """Test loading configuration with invalid YAML."""
         # Create invalid YAML file
         config_file = self.temp_dir / "invalid_config.yaml"
@@ -1195,7 +1195,7 @@ class TestGadugiEngine:
 class TestDataClasses:
     """Test the data classes used by the Gadugi engine."""
 
-    def test_system_status_creation(self):
+    def test_system_status_creation(self) -> None:
         """Test SystemStatus data class creation."""
         status = SystemStatus(
             system_status=HealthStatus.HEALTHY,
@@ -1213,7 +1213,7 @@ class TestDataClasses:
         assert len(status.services_stopped) == 1
         assert status.agents_active == 5
 
-    def test_service_info_creation(self):
+    def test_service_info_creation(self) -> None:
         """Test ServiceInfo data class creation."""
         service = ServiceInfo(
             name="event-router",
@@ -1230,7 +1230,7 @@ class TestDataClasses:
         assert service.port == 8080
         assert service.pid == 12345
 
-    def test_agent_info_creation(self):
+    def test_agent_info_creation(self) -> None:
         """Test AgentInfo data class creation."""
         agent = AgentInfo(
             name="orchestrator",
@@ -1246,7 +1246,7 @@ class TestDataClasses:
         assert agent.status == "active"
         assert len(agent.capabilities) == 2
 
-    def test_recommendation_creation(self):
+    def test_recommendation_creation(self) -> None:
         """Test Recommendation data class creation."""
         rec = Recommendation(
             priority="high",
@@ -1259,7 +1259,7 @@ class TestDataClasses:
         assert rec.category == "performance"
         assert "cpu" in rec.message.lower()
 
-    def test_backup_info_creation(self):
+    def test_backup_info_creation(self) -> None:
         """Test BackupInfo data class creation."""
         backup = BackupInfo(
             filename="backup_20240115.tar.gz",
@@ -1274,7 +1274,7 @@ class TestDataClasses:
         assert backup.backup_type == "full"
         assert backup.compressed is True
 
-    def test_operation_result_creation(self):
+    def test_operation_result_creation(self) -> None:
         """Test OperationResult data class creation."""
         result = OperationResult(
             success=True,

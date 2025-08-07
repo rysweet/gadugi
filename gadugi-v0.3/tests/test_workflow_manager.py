@@ -1,40 +1,38 @@
-"""
-Tests for WorkflowManager Engine
+"""Tests for WorkflowManager Engine.
 
 Comprehensive test suite covering all workflow phases, error handling,
 and integration scenarios.
 """
 
-import asyncio
 import json
-import pytest
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime
-
-import sys
 import os
+import sys
+import tempfile
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from workflow_manager_engine import (
-    WorkflowManagerEngine,
-    WorkflowTask,
-    WorkflowState,
-    WorkflowStatus,
-    WorkflowPhase,
-    WorkflowStateMachine,
     PhaseExecutor,
     QualityGateValidator,
+    WorkflowManagerEngine,
+    WorkflowPhase,
+    WorkflowState,
+    WorkflowStateMachine,
+    WorkflowStatus,
+    WorkflowTask,
 )
 
 
 class TestWorkflowTask:
-    """Test WorkflowTask data class"""
+    """Test WorkflowTask data class."""
 
-    def test_task_creation(self):
-        """Test basic task creation"""
+    def test_task_creation(self) -> None:
+        """Test basic task creation."""
         task = WorkflowTask(
             task_id="task-123",
             task_type="feature",
@@ -49,8 +47,8 @@ class TestWorkflowTask:
         assert task.dependencies == []
         assert task.priority == "medium"
 
-    def test_task_with_dependencies(self):
-        """Test task creation with dependencies"""
+    def test_task_with_dependencies(self) -> None:
+        """Test task creation with dependencies."""
         task = WorkflowTask(
             task_id="task-456",
             task_type="bugfix",
@@ -66,10 +64,10 @@ class TestWorkflowTask:
 
 
 class TestWorkflowStateMachine:
-    """Test workflow state machine logic"""
+    """Test workflow state machine logic."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.task = WorkflowTask(
             task_id="test-task",
             task_type="feature",
@@ -87,23 +85,23 @@ class TestWorkflowStateMachine:
 
         self.state_machine = WorkflowStateMachine(self.state)
 
-    def test_initial_state(self):
-        """Test initial state machine state"""
+    def test_initial_state(self) -> None:
+        """Test initial state machine state."""
         assert self.state.status == WorkflowStatus.PENDING
         assert self.state.current_phase == WorkflowPhase.SETUP
         assert len(self.state.phases_completed) == 0
 
-    def test_can_execute_setup_phase(self):
-        """Test can execute setup phase initially"""
+    def test_can_execute_setup_phase(self) -> None:
+        """Test can execute setup phase initially."""
         assert self.state_machine.can_execute_phase(WorkflowPhase.SETUP)
 
-    def test_cannot_execute_later_phase_without_dependencies(self):
-        """Test cannot execute later phases without dependencies"""
+    def test_cannot_execute_later_phase_without_dependencies(self) -> None:
+        """Test cannot execute later phases without dependencies."""
         assert not self.state_machine.can_execute_phase(WorkflowPhase.IMPLEMENTATION)
         assert not self.state_machine.can_execute_phase(WorkflowPhase.PULL_REQUEST)
 
-    def test_can_execute_phase_after_dependencies_completed(self):
-        """Test can execute phase after dependencies are completed"""
+    def test_can_execute_phase_after_dependencies_completed(self) -> None:
+        """Test can execute phase after dependencies are completed."""
         # Complete setup phase
         self.state.phases_completed.append(WorkflowPhase.SETUP)
 
@@ -113,8 +111,8 @@ class TestWorkflowStateMachine:
         # But still cannot execute later phases
         assert not self.state_machine.can_execute_phase(WorkflowPhase.IMPLEMENTATION)
 
-    def test_phase_completion_sequence(self):
-        """Test proper phase completion sequence"""
+    def test_phase_completion_sequence(self) -> None:
+        """Test proper phase completion sequence."""
         phases_to_complete = [
             WorkflowPhase.SETUP,
             WorkflowPhase.ISSUE_CREATION,
@@ -130,13 +128,13 @@ class TestWorkflowStateMachine:
         # Now should be able to execute implementation
         assert self.state_machine.can_execute_phase(WorkflowPhase.IMPLEMENTATION)
 
-    def test_cannot_execute_already_completed_phase(self):
-        """Test cannot execute already completed phase"""
+    def test_cannot_execute_already_completed_phase(self) -> None:
+        """Test cannot execute already completed phase."""
         self.state.phases_completed.append(WorkflowPhase.SETUP)
         assert not self.state_machine.can_execute_phase(WorkflowPhase.SETUP)
 
-    def test_workflow_failure(self):
-        """Test workflow failure handling"""
+    def test_workflow_failure(self) -> None:
+        """Test workflow failure handling."""
         error_msg = "Test error"
         self.state_machine.fail_workflow(error_msg)
 
@@ -144,8 +142,8 @@ class TestWorkflowStateMachine:
         assert self.state.error_message == error_msg
         assert self.state.end_time is not None
 
-    def test_workflow_completion(self):
-        """Test workflow completion"""
+    def test_workflow_completion(self) -> None:
+        """Test workflow completion."""
         self.state_machine.complete_workflow()
 
         assert self.state.status == WorkflowStatus.COMPLETED
@@ -153,10 +151,10 @@ class TestWorkflowStateMachine:
 
 
 class TestPhaseExecutor:
-    """Test individual phase execution"""
+    """Test individual phase execution."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.task = WorkflowTask(
             task_id="test-task",
             task_type="feature",
@@ -176,8 +174,8 @@ class TestPhaseExecutor:
         self.executor = PhaseExecutor(self.state_machine)
 
     @pytest.mark.asyncio
-    async def test_setup_phase_execution(self):
-        """Test setup phase execution"""
+    async def test_setup_phase_execution(self) -> None:
+        """Test setup phase execution."""
         with patch.object(self.executor, "_validate_prerequisites") as mock_validate:
             mock_validate.return_value = {"valid": True, "errors": []}
 
@@ -189,8 +187,8 @@ class TestPhaseExecutor:
             assert "task-" in self.state.branch_name
 
     @pytest.mark.asyncio
-    async def test_setup_phase_failure_on_invalid_prerequisites(self):
-        """Test setup phase failure when prerequisites are invalid"""
+    async def test_setup_phase_failure_on_invalid_prerequisites(self) -> None:
+        """Test setup phase failure when prerequisites are invalid."""
         with patch.object(self.executor, "_validate_prerequisites") as mock_validate:
             mock_validate.return_value = {"valid": False, "errors": ["Git not found"]}
 
@@ -201,8 +199,8 @@ class TestPhaseExecutor:
             assert "Prerequisites not met" in self.state.error_message
 
     @pytest.mark.asyncio
-    async def test_issue_creation_phase(self):
-        """Test issue creation phase"""
+    async def test_issue_creation_phase(self) -> None:
+        """Test issue creation phase."""
         # Complete setup first
         self.state.phases_completed.append(WorkflowPhase.SETUP)
 
@@ -216,11 +214,11 @@ class TestPhaseExecutor:
             assert self.state.issue_number == 1234
 
     @pytest.mark.asyncio
-    async def test_branch_management_phase(self):
-        """Test branch management phase"""
+    async def test_branch_management_phase(self) -> None:
+        """Test branch management phase."""
         # Complete prerequisites
         self.state.phases_completed.extend(
-            [WorkflowPhase.SETUP, WorkflowPhase.ISSUE_CREATION]
+            [WorkflowPhase.SETUP, WorkflowPhase.ISSUE_CREATION],
         )
         self.state.branch_name = "feature/test-branch"
 
@@ -233,8 +231,8 @@ class TestPhaseExecutor:
             assert WorkflowPhase.BRANCH_MANAGEMENT in self.state.phases_completed
 
     @pytest.mark.asyncio
-    async def test_implementation_phase(self):
-        """Test implementation phase"""
+    async def test_implementation_phase(self) -> None:
+        """Test implementation phase."""
         # Complete prerequisites
         self.state.phases_completed.extend(
             [
@@ -242,7 +240,7 @@ class TestPhaseExecutor:
                 WorkflowPhase.ISSUE_CREATION,
                 WorkflowPhase.BRANCH_MANAGEMENT,
                 WorkflowPhase.RESEARCH_PLANNING,
-            ]
+            ],
         )
 
         with patch.object(self.executor, "_implement_changes") as mock_implement:
@@ -259,8 +257,8 @@ class TestPhaseExecutor:
             assert WorkflowPhase.IMPLEMENTATION in self.state.phases_completed
 
     @pytest.mark.asyncio
-    async def test_testing_phase(self):
-        """Test testing phase execution"""
+    async def test_testing_phase(self) -> None:
+        """Test testing phase execution."""
         # Complete prerequisites
         self.state.phases_completed.extend(
             [
@@ -269,7 +267,7 @@ class TestPhaseExecutor:
                 WorkflowPhase.BRANCH_MANAGEMENT,
                 WorkflowPhase.RESEARCH_PLANNING,
                 WorkflowPhase.IMPLEMENTATION,
-            ]
+            ],
         )
 
         with patch.object(self.executor, "_run_tests") as mock_tests:
@@ -286,8 +284,8 @@ class TestPhaseExecutor:
             assert WorkflowPhase.TESTING in self.state.phases_completed
 
     @pytest.mark.asyncio
-    async def test_pull_request_phase(self):
-        """Test pull request creation phase"""
+    async def test_pull_request_phase(self) -> None:
+        """Test pull request creation phase."""
         # Complete prerequisites
         self.state.phases_completed.extend(
             [
@@ -298,7 +296,7 @@ class TestPhaseExecutor:
                 WorkflowPhase.IMPLEMENTATION,
                 WorkflowPhase.TESTING,
                 WorkflowPhase.DOCUMENTATION,
-            ]
+            ],
         )
         self.state.issue_number = 1234
 
@@ -312,8 +310,8 @@ class TestPhaseExecutor:
             assert self.state.pr_number == 567
 
     @pytest.mark.asyncio
-    async def test_phase_execution_error_handling(self):
-        """Test phase execution error handling"""
+    async def test_phase_execution_error_handling(self) -> None:
+        """Test phase execution error handling."""
         # Complete setup
         self.state.phases_completed.append(WorkflowPhase.SETUP)
 
@@ -326,8 +324,8 @@ class TestPhaseExecutor:
             assert self.state.status == WorkflowStatus.FAILED
             assert "GitHub API error" in self.state.error_message
 
-    def test_generate_issue_body(self):
-        """Test issue body generation"""
+    def test_generate_issue_body(self) -> None:
+        """Test issue body generation."""
         self.state.task.dependencies = ["task-456"]
         body = self.executor._generate_issue_body()
 
@@ -337,8 +335,8 @@ class TestPhaseExecutor:
         assert "src/feature.py" in body
         assert "task-456" in body
 
-    def test_generate_pr_body(self):
-        """Test PR body generation"""
+    def test_generate_pr_body(self) -> None:
+        """Test PR body generation."""
         self.state.issue_number = 1234
         body = self.executor._generate_pr_body()
 
@@ -347,16 +345,16 @@ class TestPhaseExecutor:
         assert self.state.task.task_id in body
         assert "WorkflowManager Agent" in body
 
-    def test_get_issue_labels(self):
-        """Test issue label generation"""
+    def test_get_issue_labels(self) -> None:
+        """Test issue label generation."""
         labels = self.executor._get_issue_labels()
 
         assert "gadugi-v0.3" in labels
         assert "workflow-manager" in labels
         assert "enhancement" in labels  # for feature type
 
-    def test_get_issue_labels_for_bugfix(self):
-        """Test issue labels for bugfix task"""
+    def test_get_issue_labels_for_bugfix(self) -> None:
+        """Test issue labels for bugfix task."""
         self.state.task.task_type = "bugfix"
         self.state.task.priority = "high"
 
@@ -367,40 +365,40 @@ class TestPhaseExecutor:
 
 
 class TestQualityGateValidator:
-    """Test quality gate validation"""
+    """Test quality gate validation."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.validator = QualityGateValidator()
 
-    def test_default_config(self):
-        """Test default configuration"""
+    def test_default_config(self) -> None:
+        """Test default configuration."""
         config = self.validator._default_config()
 
         assert config["min_test_coverage"] == 90
         assert config["require_documentation"]
         assert config["enforce_code_style"]
 
-    def test_validate_implementation_success(self):
-        """Test successful implementation validation"""
+    def test_validate_implementation_success(self) -> None:
+        """Test successful implementation validation."""
         result = {"success": True, "files_modified": ["src/test.py"]}
 
         assert self.validator.validate_implementation(result)
 
-    def test_validate_implementation_failure(self):
-        """Test failed implementation validation"""
+    def test_validate_implementation_failure(self) -> None:
+        """Test failed implementation validation."""
         result = {"success": False, "error": "Compilation failed"}
 
         assert not self.validator.validate_implementation(result)
 
-    def test_validate_tests_success(self):
-        """Test successful test validation"""
+    def test_validate_tests_success(self) -> None:
+        """Test successful test validation."""
         result = {"passed": True, "coverage": 95.0, "total_tests": 20}
 
         assert self.validator.validate_tests(result)
 
-    def test_validate_tests_low_coverage(self):
-        """Test test validation with low coverage"""
+    def test_validate_tests_low_coverage(self) -> None:
+        """Test test validation with low coverage."""
         result = {
             "passed": True,
             "coverage": 85.0,  # Below minimum of 90%
@@ -409,18 +407,18 @@ class TestQualityGateValidator:
 
         assert not self.validator.validate_tests(result)
 
-    def test_validate_tests_failing(self):
-        """Test test validation with failing tests"""
+    def test_validate_tests_failing(self) -> None:
+        """Test test validation with failing tests."""
         result = {"passed": False, "coverage": 95.0, "total_tests": 20}
 
         assert not self.validator.validate_tests(result)
 
 
 class TestWorkflowManagerEngine:
-    """Test main workflow manager engine"""
+    """Test main workflow manager engine."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.engine = WorkflowManagerEngine()
         self.task = WorkflowTask(
             task_id="engine-test-task",
@@ -431,8 +429,8 @@ class TestWorkflowManagerEngine:
         )
 
     @pytest.mark.asyncio
-    async def test_complete_workflow_execution(self):
-        """Test complete workflow execution"""
+    async def test_complete_workflow_execution(self) -> None:
+        """Test complete workflow execution."""
         # Mock all external dependencies
         with (
             patch("subprocess.run") as mock_subprocess,
@@ -456,8 +454,8 @@ class TestWorkflowManagerEngine:
             assert "duration_seconds" in result.metrics
 
     @pytest.mark.asyncio
-    async def test_workflow_execution_with_failure(self):
-        """Test workflow execution with failure"""
+    async def test_workflow_execution_with_failure(self) -> None:
+        """Test workflow execution with failure."""
         with (
             patch("subprocess.run") as mock_subprocess,
             patch("pathlib.Path.exists") as mock_exists,
@@ -474,8 +472,8 @@ class TestWorkflowManagerEngine:
             assert len(result.phases_completed) < 11  # Not all phases completed
 
     @pytest.mark.asyncio
-    async def test_checkpoint_saving(self):
-        """Test checkpoint saving functionality"""
+    async def test_checkpoint_saving(self) -> None:
+        """Test checkpoint saving functionality."""
         state = WorkflowState(
             task=self.task,
             status=WorkflowStatus.IN_PROGRESS,
@@ -509,8 +507,8 @@ class TestWorkflowManagerEngine:
             finally:
                 os.chdir(original_cwd)
 
-    def test_result_generation(self):
-        """Test workflow result generation"""
+    def test_result_generation(self) -> None:
+        """Test workflow result generation."""
         state = WorkflowState(
             task=self.task,
             status=WorkflowStatus.COMPLETED,
@@ -544,11 +542,11 @@ class TestWorkflowManagerEngine:
 
 
 class TestWorkflowIntegration:
-    """Integration tests for complete workflow scenarios"""
+    """Integration tests for complete workflow scenarios."""
 
     @pytest.mark.asyncio
-    async def test_feature_development_workflow(self):
-        """Test complete feature development workflow"""
+    async def test_feature_development_workflow(self) -> None:
+        """Test complete feature development workflow."""
         task = WorkflowTask(
             task_id="feature-test",
             task_type="feature",
@@ -576,8 +574,8 @@ class TestWorkflowIntegration:
             assert result.test_results["passed"]
 
     @pytest.mark.asyncio
-    async def test_bugfix_workflow(self):
-        """Test bugfix workflow"""
+    async def test_bugfix_workflow(self) -> None:
+        """Test bugfix workflow."""
         task = WorkflowTask(
             task_id="bugfix-test",
             task_type="bugfix",
@@ -603,8 +601,8 @@ class TestWorkflowIntegration:
             assert result.status == "completed"
 
     @pytest.mark.asyncio
-    async def test_workflow_with_dependencies(self):
-        """Test workflow execution with task dependencies"""
+    async def test_workflow_with_dependencies(self) -> None:
+        """Test workflow execution with task dependencies."""
         task = WorkflowTask(
             task_id="dependent-task",
             task_type="enhancement",

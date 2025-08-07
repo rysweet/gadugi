@@ -1,48 +1,43 @@
 #!/usr/bin/env python3
-"""
-Tests for Test Writer Engine
-"""
+"""Tests for Test Writer Engine."""
 
-import unittest
-import json
-import tempfile
 import os
 import sys
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+import tempfile
+import unittest
 
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from test_writer_engine import (
-    TestWriterEngine,
-    TestLanguage,
-    TestFramework,
-    TestType,
-    TestStyle,
     AssertionStyle,
-    TestRequirements,
-    TestConfiguration,
-    TestOptions,
-    FunctionInfo,
     ClassInfo,
-    SourceFileInfo,
-    TestFileInfo,
-    TestGap,
-    QualityMetrics,
-    TestGenerationResult,
-    PythonCodeAnalyzer,
+    FunctionInfo,
     JavaScriptCodeAnalyzer,
-    TypeScriptCodeAnalyzer,
-    PytestGenerator,
     JestGenerator,
+    PytestGenerator,
+    PythonCodeAnalyzer,
+    QualityMetrics,
+    SourceFileInfo,
+    TestConfiguration,
+    TestFileInfo,
+    TestFramework,
+    TestGap,
+    TestGenerationResult,
+    TestLanguage,
+    TestOptions,
+    TestRequirements,
+    TestStyle,
+    TestType,
+    TestWriterEngine,
+    TypeScriptCodeAnalyzer,
 )
 
 
 class TestTestWriterEngine(unittest.TestCase):
     """Test cases for Test Writer Engine."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.engine = TestWriterEngine()
 
@@ -99,94 +94,90 @@ class TestTestWriterEngine(unittest.TestCase):
 
         # Sample options
         self.sample_options = TestOptions(
-            generate_fixtures=True, include_setup_teardown=True, add_docstrings=True
+            generate_fixtures=True, include_setup_teardown=True, add_docstrings=True,
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_engine_initialization(self):
+    def test_engine_initialization(self) -> None:
         """Test engine initializes properly."""
-        self.assertIsNotNone(self.engine)
-        self.assertIsNotNone(self.engine.logger)
-        self.assertIsNotNone(self.engine.templates)
-        self.assertIsNotNone(self.engine.analyzers)
-        self.assertIsNotNone(self.engine.generators)
+        assert self.engine is not None
+        assert self.engine.logger is not None
+        assert self.engine.templates is not None
+        assert self.engine.analyzers is not None
+        assert self.engine.generators is not None
 
-    def test_templates_loading(self):
+    def test_templates_loading(self) -> None:
         """Test that templates are loaded correctly."""
         templates = self.engine.templates
 
         # Check pytest templates
-        self.assertIn(TestFramework.PYTEST.value, templates)
+        assert TestFramework.PYTEST.value in templates
         pytest_templates = templates[TestFramework.PYTEST.value]
-        self.assertIn("unit_class", pytest_templates)
-        self.assertIn("unit_function", pytest_templates)
-        self.assertIn("integration", pytest_templates)
-        self.assertIn("fixture", pytest_templates)
+        assert "unit_class" in pytest_templates
+        assert "unit_function" in pytest_templates
+        assert "integration" in pytest_templates
+        assert "fixture" in pytest_templates
 
         # Check jest templates
-        self.assertIn(TestFramework.JEST.value, templates)
+        assert TestFramework.JEST.value in templates
         jest_templates = templates[TestFramework.JEST.value]
-        self.assertIn("unit_class", jest_templates)
-        self.assertIn("unit_function", jest_templates)
+        assert "unit_class" in jest_templates
+        assert "unit_function" in jest_templates
 
-    def test_analyzers_setup(self):
+    def test_analyzers_setup(self) -> None:
         """Test analyzers are set up correctly."""
         analyzers = self.engine.analyzers
 
-        self.assertIn(TestLanguage.PYTHON.value, analyzers)
-        self.assertIn(TestLanguage.JAVASCRIPT.value, analyzers)
-        self.assertIn(TestLanguage.TYPESCRIPT.value, analyzers)
+        assert TestLanguage.PYTHON.value in analyzers
+        assert TestLanguage.JAVASCRIPT.value in analyzers
+        assert TestLanguage.TYPESCRIPT.value in analyzers
 
-        self.assertIsInstance(analyzers[TestLanguage.PYTHON.value], PythonCodeAnalyzer)
-        self.assertIsInstance(
-            analyzers[TestLanguage.JAVASCRIPT.value], JavaScriptCodeAnalyzer
-        )
-        self.assertIsInstance(
-            analyzers[TestLanguage.TYPESCRIPT.value], TypeScriptCodeAnalyzer
-        )
+        assert isinstance(analyzers[TestLanguage.PYTHON.value], PythonCodeAnalyzer)
+        assert isinstance(analyzers[TestLanguage.JAVASCRIPT.value], JavaScriptCodeAnalyzer)
+        assert isinstance(analyzers[TestLanguage.TYPESCRIPT.value], TypeScriptCodeAnalyzer)
 
-    def test_generators_setup(self):
+    def test_generators_setup(self) -> None:
         """Test generators are set up correctly."""
         generators = self.engine.generators
 
-        self.assertIn(TestFramework.PYTEST.value, generators)
-        self.assertIn(TestFramework.JEST.value, generators)
+        assert TestFramework.PYTEST.value in generators
+        assert TestFramework.JEST.value in generators
 
-        self.assertIsInstance(generators[TestFramework.PYTEST.value], PytestGenerator)
-        self.assertIsInstance(generators[TestFramework.JEST.value], JestGenerator)
+        assert isinstance(generators[TestFramework.PYTEST.value], PytestGenerator)
+        assert isinstance(generators[TestFramework.JEST.value], JestGenerator)
 
-    def test_enum_values(self):
+    def test_enum_values(self) -> None:
         """Test enum values are correct."""
         # TestLanguage
-        self.assertEqual(TestLanguage.PYTHON.value, "python")
-        self.assertEqual(TestLanguage.JAVASCRIPT.value, "javascript")
-        self.assertEqual(TestLanguage.TYPESCRIPT.value, "typescript")
+        assert TestLanguage.PYTHON.value == "python"
+        assert TestLanguage.JAVASCRIPT.value == "javascript"
+        assert TestLanguage.TYPESCRIPT.value == "typescript"
 
         # TestFramework
-        self.assertEqual(TestFramework.PYTEST.value, "pytest")
-        self.assertEqual(TestFramework.JEST.value, "jest")
-        self.assertEqual(TestFramework.UNITTEST.value, "unittest")
+        assert TestFramework.PYTEST.value == "pytest"
+        assert TestFramework.JEST.value == "jest"
+        assert TestFramework.UNITTEST.value == "unittest"
 
         # TestType
-        self.assertEqual(TestType.UNIT.value, "unit")
-        self.assertEqual(TestType.INTEGRATION.value, "integration")
-        self.assertEqual(TestType.E2E.value, "e2e")
+        assert TestType.UNIT.value == "unit"
+        assert TestType.INTEGRATION.value == "integration"
+        assert TestType.E2E.value == "e2e"
 
         # TestStyle
-        self.assertEqual(TestStyle.COMPREHENSIVE.value, "comprehensive")
-        self.assertEqual(TestStyle.MINIMAL.value, "minimal")
+        assert TestStyle.COMPREHENSIVE.value == "comprehensive"
+        assert TestStyle.MINIMAL.value == "minimal"
 
         # AssertionStyle
-        self.assertEqual(AssertionStyle.ASSERT.value, "assert")
-        self.assertEqual(AssertionStyle.EXPECT.value, "expect")
+        assert AssertionStyle.ASSERT.value == "assert"
+        assert AssertionStyle.EXPECT.value == "expect"
 
-    def test_function_info_dataclass(self):
+    def test_function_info_dataclass(self) -> None:
         """Test FunctionInfo dataclass functionality."""
         func = FunctionInfo(
             name="test_func",
@@ -199,14 +190,14 @@ class TestTestWriterEngine(unittest.TestCase):
             decorators=["property", "staticmethod"],
         )
 
-        self.assertEqual(func.name, "test_func")
-        self.assertEqual(len(func.parameters), 2)
-        self.assertEqual(func.return_type, "str")
-        self.assertTrue(func.is_async)
-        self.assertIn("property", func.decorators)
-        self.assertEqual(func.complexity, 3)
+        assert func.name == "test_func"
+        assert len(func.parameters) == 2
+        assert func.return_type == "str"
+        assert func.is_async
+        assert "property" in func.decorators
+        assert func.complexity == 3
 
-    def test_class_info_dataclass(self):
+    def test_class_info_dataclass(self) -> None:
         """Test ClassInfo dataclass functionality."""
         method = FunctionInfo(
             name="method1",
@@ -226,13 +217,13 @@ class TestTestWriterEngine(unittest.TestCase):
             line_number=5,
         )
 
-        self.assertEqual(cls.name, "TestClass")
-        self.assertEqual(len(cls.methods), 1)
-        self.assertEqual(cls.methods[0].name, "method1")
-        self.assertIn("param1", cls.init_parameters)
-        self.assertIn("BaseClass", cls.base_classes)
+        assert cls.name == "TestClass"
+        assert len(cls.methods) == 1
+        assert cls.methods[0].name == "method1"
+        assert "param1" in cls.init_parameters
+        assert "BaseClass" in cls.base_classes
 
-    def test_source_file_info_dataclass(self):
+    def test_source_file_info_dataclass(self) -> None:
         """Test SourceFileInfo dataclass functionality."""
         info = SourceFileInfo(
             filepath="/test/file.py",
@@ -243,14 +234,14 @@ class TestTestWriterEngine(unittest.TestCase):
             complexity_score=5.0,
         )
 
-        self.assertEqual(info.filepath, "/test/file.py")
-        self.assertEqual(info.language, TestLanguage.PYTHON)
-        self.assertEqual(len(info.functions), 1)
-        self.assertEqual(len(info.classes), 1)
-        self.assertIn("os", info.imports)
-        self.assertEqual(info.complexity_score, 5.0)
+        assert info.filepath == "/test/file.py"
+        assert info.language == TestLanguage.PYTHON
+        assert len(info.functions) == 1
+        assert len(info.classes) == 1
+        assert "os" in info.imports
+        assert info.complexity_score == 5.0
 
-    def test_test_requirements_dataclass(self):
+    def test_test_requirements_dataclass(self) -> None:
         """Test TestRequirements dataclass functionality."""
         requirements = TestRequirements(
             test_types=[TestType.UNIT, TestType.INTEGRATION],
@@ -261,14 +252,14 @@ class TestTestWriterEngine(unittest.TestCase):
             include_performance_tests=True,
         )
 
-        self.assertEqual(len(requirements.test_types), 2)
-        self.assertIn(TestType.UNIT, requirements.test_types)
-        self.assertEqual(requirements.coverage_target, 90.0)
-        self.assertEqual(requirements.test_style, TestStyle.FOCUSED)
-        self.assertFalse(requirements.include_edge_cases)
-        self.assertTrue(requirements.include_performance_tests)
+        assert len(requirements.test_types) == 2
+        assert TestType.UNIT in requirements.test_types
+        assert requirements.coverage_target == 90.0
+        assert requirements.test_style == TestStyle.FOCUSED
+        assert not requirements.include_edge_cases
+        assert requirements.include_performance_tests
 
-    def test_test_configuration_dataclass(self):
+    def test_test_configuration_dataclass(self) -> None:
         """Test TestConfiguration dataclass functionality."""
         config = TestConfiguration(
             testing_framework=TestFramework.JEST,
@@ -278,12 +269,12 @@ class TestTestWriterEngine(unittest.TestCase):
             output_format="feature_based",
         )
 
-        self.assertEqual(config.testing_framework, TestFramework.JEST)
-        self.assertEqual(config.assertion_style, AssertionStyle.EXPECT)
-        self.assertEqual(config.mock_library, "sinon")
-        self.assertEqual(config.output_format, "feature_based")
+        assert config.testing_framework == TestFramework.JEST
+        assert config.assertion_style == AssertionStyle.EXPECT
+        assert config.mock_library == "sinon"
+        assert config.output_format == "feature_based"
 
-    def test_test_options_dataclass(self):
+    def test_test_options_dataclass(self) -> None:
         """Test TestOptions dataclass functionality."""
         options = TestOptions(
             generate_fixtures=False,
@@ -294,13 +285,13 @@ class TestTestWriterEngine(unittest.TestCase):
             validate_generated_tests=False,
         )
 
-        self.assertFalse(options.generate_fixtures)
-        self.assertFalse(options.include_setup_teardown)
-        self.assertTrue(options.add_docstrings)
-        self.assertTrue(options.use_parametrized_tests)
-        self.assertFalse(options.create_test_data)
+        assert not options.generate_fixtures
+        assert not options.include_setup_teardown
+        assert options.add_docstrings
+        assert options.use_parametrized_tests
+        assert not options.create_test_data
 
-    def test_generate_test_infrastructure_python(self):
+    def test_generate_test_infrastructure_python(self) -> None:
         """Test Python test infrastructure generation."""
         test_dir = os.path.join(self.temp_dir, "tests")
 
@@ -312,39 +303,39 @@ class TestTestWriterEngine(unittest.TestCase):
         )
 
         # Check directory was created
-        self.assertTrue(os.path.exists(test_dir))
+        assert os.path.exists(test_dir)
 
         # Check infrastructure files
-        self.assertIn("fixtures_created", infrastructure)
-        self.assertIn("configuration_files", infrastructure)
+        assert "fixtures_created" in infrastructure
+        assert "configuration_files" in infrastructure
 
         # Check specific files
-        self.assertIn("conftest.py", infrastructure["configuration_files"])
-        self.assertIn("pytest.ini", infrastructure["configuration_files"])
-        self.assertIn("fixtures.py", infrastructure["fixtures_created"])
+        assert "conftest.py" in infrastructure["configuration_files"]
+        assert "pytest.ini" in infrastructure["configuration_files"]
+        assert "fixtures.py" in infrastructure["fixtures_created"]
 
         # Verify files exist
-        self.assertTrue(os.path.exists(os.path.join(test_dir, "conftest.py")))
-        self.assertTrue(os.path.exists(os.path.join(test_dir, "fixtures.py")))
+        assert os.path.exists(os.path.join(test_dir, "conftest.py"))
+        assert os.path.exists(os.path.join(test_dir, "fixtures.py"))
 
-    def test_generate_test_infrastructure_javascript(self):
+    def test_generate_test_infrastructure_javascript(self) -> None:
         """Test JavaScript test infrastructure generation."""
         test_dir = os.path.join(self.temp_dir, "tests")
 
         config = TestConfiguration(testing_framework=TestFramework.JEST)
         infrastructure = self.engine._generate_test_infrastructure(
-            test_dir, TestLanguage.JAVASCRIPT, config, self.sample_options
+            test_dir, TestLanguage.JAVASCRIPT, config, self.sample_options,
         )
 
         # Check infrastructure files
-        self.assertIn("fixtures_created", infrastructure)
-        self.assertIn("configuration_files", infrastructure)
+        assert "fixtures_created" in infrastructure
+        assert "configuration_files" in infrastructure
 
         # Check specific files for Jest
-        self.assertIn("jest.config.js", infrastructure["configuration_files"])
-        self.assertIn("setup.js", infrastructure["fixtures_created"])
+        assert "jest.config.js" in infrastructure["configuration_files"]
+        assert "setup.js" in infrastructure["fixtures_created"]
 
-    def test_analyze_test_coverage(self):
+    def test_analyze_test_coverage(self) -> None:
         """Test test coverage analysis."""
         test_files = [
             TestFileInfo(
@@ -354,23 +345,23 @@ class TestTestWriterEngine(unittest.TestCase):
                 test_types=[TestType.UNIT],
                 file_size="2KB",
                 source_file="calc.py",
-            )
+            ),
         ]
 
         analysis = self.engine._analyze_test_coverage(
-            [self.sample_source_info], test_files
+            [self.sample_source_info], test_files,
         )
 
-        self.assertIn("functions_tested", analysis)
-        self.assertIn("functions_untested", analysis)
-        self.assertIn("edge_cases_covered", analysis)
-        self.assertIn("error_scenarios", analysis)
-        self.assertIn("test_gaps", analysis)
+        assert "functions_tested" in analysis
+        assert "functions_untested" in analysis
+        assert "edge_cases_covered" in analysis
+        assert "error_scenarios" in analysis
+        assert "test_gaps" in analysis
 
-        self.assertIsInstance(analysis["test_gaps"], list)
-        self.assertGreaterEqual(analysis["functions_tested"], 0)
+        assert isinstance(analysis["test_gaps"], list)
+        assert analysis["functions_tested"] >= 0
 
-    def test_calculate_quality_metrics(self):
+    def test_calculate_quality_metrics(self) -> None:
         """Test quality metrics calculation."""
         test_files = [
             TestFileInfo(
@@ -380,26 +371,26 @@ class TestTestWriterEngine(unittest.TestCase):
                 test_types=[TestType.UNIT],
                 file_size="3KB",
                 source_file="calc.py",
-            )
+            ),
         ]
 
         metrics = self.engine._calculate_quality_metrics(
-            test_files, [self.sample_source_info]
+            test_files, [self.sample_source_info],
         )
 
-        self.assertIsInstance(metrics, QualityMetrics)
-        self.assertGreater(metrics.test_maintainability, 0)
-        self.assertGreater(metrics.test_readability, 0)
-        self.assertGreater(metrics.assertion_quality, 0)
-        self.assertGreater(metrics.test_organization, 0)
+        assert isinstance(metrics, QualityMetrics)
+        assert metrics.test_maintainability > 0
+        assert metrics.test_readability > 0
+        assert metrics.assertion_quality > 0
+        assert metrics.test_organization > 0
 
         # All metrics should be between 0 and 100
-        self.assertLessEqual(metrics.test_maintainability, 100)
-        self.assertLessEqual(metrics.test_readability, 100)
-        self.assertLessEqual(metrics.assertion_quality, 100)
-        self.assertLessEqual(metrics.test_organization, 100)
+        assert metrics.test_maintainability <= 100
+        assert metrics.test_readability <= 100
+        assert metrics.assertion_quality <= 100
+        assert metrics.test_organization <= 100
 
-    def test_generate_recommendations(self):
+    def test_generate_recommendations(self) -> None:
         """Test recommendation generation."""
         analysis = {
             "functions_tested": 5,
@@ -407,7 +398,7 @@ class TestTestWriterEngine(unittest.TestCase):
             "edge_cases_covered": 10,
             "error_scenarios": 3,
             "test_gaps": [
-                TestGap("complex_func", ["edge_case"], "high", "Complex function")
+                TestGap("complex_func", ["edge_case"], "high", "Complex function"),
             ],
         }
 
@@ -420,24 +411,24 @@ class TestTestWriterEngine(unittest.TestCase):
 
         recommendations = self.engine._generate_recommendations(analysis, quality)
 
-        self.assertIsInstance(recommendations, list)
-        self.assertGreater(len(recommendations), 0)
+        assert isinstance(recommendations, list)
+        assert len(recommendations) > 0
 
         # Should recommend testing untested functions
         coverage_recs = [r for r in recommendations if r["category"] == "coverage"]
-        self.assertGreater(len(coverage_recs), 0)
+        assert len(coverage_recs) > 0
 
         # Should recommend addressing test gaps
         quality_recs = [r for r in recommendations if r["category"] == "quality"]
-        self.assertGreater(len(quality_recs), 0)
+        assert len(quality_recs) > 0
 
         # Should recommend maintainability improvements (quality score < 80)
         maintainability_recs = [
             r for r in recommendations if r["category"] == "maintainability"
         ]
-        self.assertGreater(len(maintainability_recs), 0)
+        assert len(maintainability_recs) > 0
 
-    def test_estimate_coverage(self):
+    def test_estimate_coverage(self) -> None:
         """Test coverage estimation."""
         test_files = [
             TestFileInfo(
@@ -447,27 +438,27 @@ class TestTestWriterEngine(unittest.TestCase):
                 test_types=[TestType.UNIT],
                 file_size="2KB",
                 source_file="calc.py",
-            )
+            ),
         ]
 
         coverage = self.engine._estimate_coverage([self.sample_source_info], test_files)
 
-        self.assertIsInstance(coverage, float)
-        self.assertGreaterEqual(coverage, 0.0)
-        self.assertLessEqual(coverage, 95.0)  # Max estimate is 95%
+        assert isinstance(coverage, float)
+        assert coverage >= 0.0
+        assert coverage <= 95.0  # Max estimate is 95%
 
-    def test_create_error_result(self):
+    def test_create_error_result(self) -> None:
         """Test error result creation."""
         error_msg = "Test error message"
         result = self.engine._create_error_result(error_msg, "generate")
 
-        self.assertIsInstance(result, TestGenerationResult)
-        self.assertFalse(result.success)
-        self.assertEqual(result.operation, "generate")
-        self.assertIn(error_msg, result.errors)
-        self.assertEqual(len(result.warnings), 0)
+        assert isinstance(result, TestGenerationResult)
+        assert not result.success
+        assert result.operation == "generate"
+        assert error_msg in result.errors
+        assert len(result.warnings) == 0
 
-    def test_process_request_generate(self):
+    def test_process_request_generate(self) -> None:
         """Test processing generate request."""
         # Create a simple Python file for testing
         source_file = os.path.join(self.temp_dir, "calculator.py")
@@ -480,7 +471,7 @@ def add(a, b):
 class Calculator:
     def __init__(self):
         pass
-    
+
     def multiply(self, x, y):
         return x * y
 """)
@@ -508,24 +499,24 @@ class Calculator:
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertEqual(response["operation"], "generate")
-        self.assertIn("test_suite", response)
-        self.assertIn("test_analysis", response)
-        self.assertIn("recommendations", response)
-        self.assertIn("test_infrastructure", response)
-        self.assertIn("quality_metrics", response)
+        assert response["success"]
+        assert response["operation"] == "generate"
+        assert "test_suite" in response
+        assert "test_analysis" in response
+        assert "recommendations" in response
+        assert "test_infrastructure" in response
+        assert "quality_metrics" in response
 
-    def test_process_request_unsupported_operation(self):
+    def test_process_request_unsupported_operation(self) -> None:
         """Test processing unsupported operation."""
         request = {"operation": "unsupported_operation"}
 
         response = self.engine.process_request(request)
 
-        self.assertFalse(response["success"])
-        self.assertIn("Unsupported operation", response["error"])
+        assert not response["success"]
+        assert "Unsupported operation" in response["error"]
 
-    def test_process_request_unimplemented_operations(self):
+    def test_process_request_unimplemented_operations(self) -> None:
         """Test unimplemented operations return appropriate errors."""
         operations = ["analyze", "enhance", "refactor", "validate"]
 
@@ -533,89 +524,89 @@ class Calculator:
             request = {"operation": operation}
             response = self.engine.process_request(request)
 
-            self.assertFalse(response["success"])
-            self.assertIn("not yet implemented", response["error"])
+            assert not response["success"]
+            assert "not yet implemented" in response["error"]
 
-    def test_template_methods(self):
+    def test_template_methods(self) -> None:
         """Test template methods return valid templates."""
         # Test pytest templates
         unit_class = self.engine._get_pytest_unit_class_template()
-        self.assertIn("class Test{CLASS_NAME}:", unit_class)
-        self.assertIn("def setup_method(self):", unit_class)
+        assert "class Test{CLASS_NAME}:" in unit_class
+        assert "def setup_method(self):" in unit_class
 
         unit_function = self.engine._get_pytest_unit_function_template()
-        self.assertIn("def test_{FUNCTION_NAME}_success():", unit_function)
-        self.assertIn("@pytest.mark.parametrize", unit_function)
+        assert "def test_{FUNCTION_NAME}_success():" in unit_function
+        assert "@pytest.mark.parametrize" in unit_function
 
         integration = self.engine._get_pytest_integration_template()
-        self.assertIn("Integration tests", integration)
-        self.assertIn("@requests_mock.Mocker()", integration)
+        assert "Integration tests" in integration
+        assert "@requests_mock.Mocker()" in integration
 
         fixture = self.engine._get_pytest_fixture_template()
-        self.assertIn("@pytest.fixture", fixture)
+        assert "@pytest.fixture" in fixture
 
         # Test Jest templates
         jest_class = self.engine._get_jest_unit_class_template()
-        self.assertIn("describe('{CLASS_NAME}'", jest_class)
-        self.assertIn("beforeEach(() => {", jest_class)
+        assert "describe('{CLASS_NAME}'" in jest_class
+        assert "beforeEach(() => {" in jest_class
 
         jest_function = self.engine._get_jest_unit_function_template()
-        self.assertIn("it('should handle valid input correctly'", jest_function)
-        self.assertIn("test.each([", jest_function)
+        assert "it('should handle valid input correctly'" in jest_function
+        assert "test.each([" in jest_function
 
-    def test_infrastructure_templates(self):
+    def test_infrastructure_templates(self) -> None:
         """Test infrastructure template methods."""
         # Test conftest template
         conftest = self.engine._get_conftest_template()
-        self.assertIn("@pytest.fixture", conftest)
-        self.assertIn("def pytest_configure", conftest)
+        assert "@pytest.fixture" in conftest
+        assert "def pytest_configure" in conftest
 
         # Test pytest.ini template
         pytest_ini = self.engine._get_pytest_ini_template()
-        self.assertIn("[tool:pytest]", pytest_ini)
-        self.assertIn("testpaths = tests", pytest_ini)
+        assert "[tool:pytest]" in pytest_ini
+        assert "testpaths = tests" in pytest_ini
 
         # Test common fixtures template
         fixtures = self.engine._get_common_fixtures_template()
-        self.assertIn("def mock_database", fixtures)
-        self.assertIn("def sample_user", fixtures)
+        assert "def mock_database" in fixtures
+        assert "def sample_user" in fixtures
 
         # Test Jest config template
         jest_config = self.engine._get_jest_config_template()
-        self.assertIn("module.exports", jest_config)
-        self.assertIn("testEnvironment:", jest_config)
+        assert "module.exports" in jest_config
+        assert "testEnvironment:" in jest_config
 
         # Test Jest setup template
         jest_setup = self.engine._get_jest_setup_template()
-        self.assertIn("process.env.NODE_ENV", jest_setup)
-        self.assertIn("global.createMockUser", jest_setup)
+        assert "process.env.NODE_ENV" in jest_setup
+        assert "global.createMockUser" in jest_setup
 
-    def test_logging_setup(self):
+    def test_logging_setup(self) -> None:
         """Test that logging is set up correctly."""
-        self.assertIsNotNone(self.engine.logger)
-        self.assertEqual(self.engine.logger.name, "test_writer")
+        assert self.engine.logger is not None
+        assert self.engine.logger.name == "test_writer"
 
         import logging
 
-        self.assertEqual(self.engine.logger.level, logging.INFO)
+        assert self.engine.logger.level == logging.INFO
 
 
 class TestPythonCodeAnalyzer(unittest.TestCase):
     """Test cases for Python Code Analyzer."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.analyzer = PythonCodeAnalyzer()
         self.temp_dir = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_analyze_simple_function(self):
+    def test_analyze_simple_function(self) -> None:
         """Test analyzing a simple function."""
         code = '''
 def add(a, b):
@@ -629,26 +620,26 @@ def add(a, b):
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(result.language, TestLanguage.PYTHON)
-        self.assertEqual(len(result.functions), 1)
-        self.assertEqual(result.functions[0].name, "add")
-        self.assertEqual(len(result.functions[0].parameters), 2)
-        self.assertIn("a", result.functions[0].parameters)
-        self.assertEqual(result.functions[0].docstring, "Add two numbers.")
+        assert result.language == TestLanguage.PYTHON
+        assert len(result.functions) == 1
+        assert result.functions[0].name == "add"
+        assert len(result.functions[0].parameters) == 2
+        assert "a" in result.functions[0].parameters
+        assert result.functions[0].docstring == "Add two numbers."
 
-    def test_analyze_class_with_methods(self):
+    def test_analyze_class_with_methods(self) -> None:
         """Test analyzing a class with methods."""
         code = '''
 class Calculator:
     """A simple calculator."""
-    
+
     def __init__(self, precision=2):
         self.precision = precision
-    
+
     def add(self, a, b):
         """Add two numbers."""
         return round(a + b, self.precision)
-    
+
     def _private_method(self):
         pass
 '''
@@ -659,21 +650,21 @@ class Calculator:
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(len(result.classes), 1)
+        assert len(result.classes) == 1
 
         calc_class = result.classes[0]
-        self.assertEqual(calc_class.name, "Calculator")
-        self.assertEqual(calc_class.docstring, "A simple calculator.")
-        self.assertEqual(len(calc_class.methods), 3)  # __init__, add, _private_method
-        self.assertIn("precision", calc_class.init_parameters)
+        assert calc_class.name == "Calculator"
+        assert calc_class.docstring == "A simple calculator."
+        assert len(calc_class.methods) == 3  # __init__, add, _private_method
+        assert "precision" in calc_class.init_parameters
 
         # Check method analysis
         add_method = next(m for m in calc_class.methods if m.name == "add")
-        self.assertEqual(add_method.docstring, "Add two numbers.")
-        self.assertIn("a", add_method.parameters)
-        self.assertIn("b", add_method.parameters)
+        assert add_method.docstring == "Add two numbers."
+        assert "a" in add_method.parameters
+        assert "b" in add_method.parameters
 
-    def test_analyze_function_with_decorators(self):
+    def test_analyze_function_with_decorators(self) -> None:
         """Test analyzing function with decorators."""
         code = """
 @property
@@ -688,13 +679,13 @@ def get_value():
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(len(result.functions), 1)
+        assert len(result.functions) == 1
         func = result.functions[0]
-        self.assertEqual(func.name, "get_value")
-        self.assertIn("property", func.decorators)
-        self.assertIn("staticmethod", func.decorators)
+        assert func.name == "get_value"
+        assert "property" in func.decorators
+        assert "staticmethod" in func.decorators
 
-    def test_analyze_async_function(self):
+    def test_analyze_async_function(self) -> None:
         """Test analyzing async function."""
         code = '''
 async def fetch_data():
@@ -708,12 +699,12 @@ async def fetch_data():
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(len(result.functions), 1)
+        assert len(result.functions) == 1
         func = result.functions[0]
-        self.assertEqual(func.name, "fetch_data")
-        self.assertTrue(func.is_async)
+        assert func.name == "fetch_data"
+        assert func.is_async
 
-    def test_analyze_imports(self):
+    def test_analyze_imports(self) -> None:
         """Test analyzing import statements."""
         code = """
 import os
@@ -728,13 +719,13 @@ from .local_module import LocalClass
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertIn("os", result.imports)
-        self.assertIn("sys", result.imports)
-        self.assertIn("typing.Dict", result.imports)
-        self.assertIn("typing.List", result.imports)
-        self.assertIn(".local_module.LocalClass", result.imports)
+        assert "os" in result.imports
+        assert "sys" in result.imports
+        assert "typing.Dict" in result.imports
+        assert "typing.List" in result.imports
+        assert ".local_module.LocalClass" in result.imports
 
-    def test_calculate_function_complexity(self):
+    def test_calculate_function_complexity(self) -> None:
         """Test function complexity calculation."""
         # Simple function (complexity = 1)
         simple_code = """
@@ -744,7 +735,7 @@ def simple():
         tree = ast.parse(simple_code)
         simple_func = tree.body[0]
         simple_complexity = self.analyzer._calculate_function_complexity(simple_func)
-        self.assertEqual(simple_complexity, 1)
+        assert simple_complexity == 1
 
         # Complex function with branches
         complex_code = """
@@ -761,7 +752,7 @@ def complex(x, y):
             return x / y
         except ZeroDivisionError:
             return 0
-    
+
     for i in range(10):
         if i % 2 == 0:
             continue
@@ -769,9 +760,9 @@ def complex(x, y):
         tree = ast.parse(complex_code)
         complex_func = tree.body[0]
         complex_complexity = self.analyzer._calculate_function_complexity(complex_func)
-        self.assertGreater(complex_complexity, simple_complexity)
+        assert complex_complexity > simple_complexity
 
-    def test_syntax_error_handling(self):
+    def test_syntax_error_handling(self) -> None:
         """Test handling of syntax errors in source code."""
         invalid_code = """
 def invalid_function(
@@ -786,27 +777,27 @@ def invalid_function(
         result = self.analyzer.analyze_file(source_file)
 
         # Should return empty result for invalid syntax
-        self.assertEqual(len(result.functions), 0)
-        self.assertEqual(len(result.classes), 0)
-        self.assertEqual(result.complexity_score, 0.0)
+        assert len(result.functions) == 0
+        assert len(result.classes) == 0
+        assert result.complexity_score == 0.0
 
 
 class TestJavaScriptCodeAnalyzer(unittest.TestCase):
     """Test cases for JavaScript Code Analyzer."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.analyzer = JavaScriptCodeAnalyzer()
         self.temp_dir = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_analyze_functions(self):
+    def test_analyze_functions(self) -> None:
         """Test analyzing JavaScript functions."""
         code = """
 function add(a, b) {
@@ -829,29 +820,29 @@ function complexFunction(param1, param2, param3) {
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(result.language, TestLanguage.JAVASCRIPT)
-        self.assertEqual(len(result.functions), 3)
+        assert result.language == TestLanguage.JAVASCRIPT
+        assert len(result.functions) == 3
 
         # Check function names
         function_names = [f.name for f in result.functions]
-        self.assertIn("add", function_names)
-        self.assertIn("multiply", function_names)
-        self.assertIn("complexFunction", function_names)
+        assert "add" in function_names
+        assert "multiply" in function_names
+        assert "complexFunction" in function_names
 
         # Check parameters
         add_func = next(f for f in result.functions if f.name == "add")
-        self.assertEqual(len(add_func.parameters), 2)
-        self.assertIn("a", add_func.parameters)
-        self.assertIn("b", add_func.parameters)
+        assert len(add_func.parameters) == 2
+        assert "a" in add_func.parameters
+        assert "b" in add_func.parameters
 
-    def test_analyze_classes(self):
+    def test_analyze_classes(self) -> None:
         """Test analyzing JavaScript classes."""
         code = """
 class Calculator {
     constructor(precision) {
         this.precision = precision;
     }
-    
+
     add(a, b) {
         return a + b;
     }
@@ -870,20 +861,20 @@ class AdvancedCalculator extends Calculator {
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertEqual(len(result.classes), 2)
+        assert len(result.classes) == 2
 
         # Check class names
         class_names = [c.name for c in result.classes]
-        self.assertIn("Calculator", class_names)
-        self.assertIn("AdvancedCalculator", class_names)
+        assert "Calculator" in class_names
+        assert "AdvancedCalculator" in class_names
 
         # Check inheritance
         advanced_calc = next(
             c for c in result.classes if c.name == "AdvancedCalculator"
         )
-        self.assertIn("Calculator", advanced_calc.base_classes)
+        assert "Calculator" in advanced_calc.base_classes
 
-    def test_analyze_imports(self):
+    def test_analyze_imports(self) -> None:
         """Test analyzing JavaScript imports."""
         code = """
 import { add, subtract } from './math';
@@ -898,16 +889,16 @@ import React from 'react';
 
         result = self.analyzer.analyze_file(source_file)
 
-        self.assertIn("./math", result.imports)
-        self.assertIn("./Calculator", result.imports)
-        self.assertIn("./operations", result.imports)
-        self.assertIn("react", result.imports)
+        assert "./math" in result.imports
+        assert "./Calculator" in result.imports
+        assert "./operations" in result.imports
+        assert "react" in result.imports
 
 
 class TestPytestGenerator(unittest.TestCase):
     """Test cases for Pytest Generator."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.generator = PytestGenerator()
         self.temp_dir = tempfile.mkdtemp()
@@ -944,14 +935,14 @@ class TestPytestGenerator(unittest.TestCase):
         self.sample_configuration = TestConfiguration()
         self.sample_options = TestOptions()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_generate_test_file(self):
+    def test_generate_test_file(self) -> None:
         """Test generating a pytest test file."""
         test_dir = os.path.join(self.temp_dir, "tests")
 
@@ -963,25 +954,25 @@ class TestPytestGenerator(unittest.TestCase):
             self.sample_options,
         )
 
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, TestFileInfo)
-        self.assertTrue(result.path.endswith("test_calculator.py"))
-        self.assertGreater(result.test_count, 0)
-        self.assertGreater(result.coverage_estimate, 0)
+        assert result is not None
+        assert isinstance(result, TestFileInfo)
+        assert result.path.endswith("test_calculator.py")
+        assert result.test_count > 0
+        assert result.coverage_estimate > 0
 
         # Check that file was actually created
-        self.assertTrue(os.path.exists(result.path))
+        assert os.path.exists(result.path)
 
         # Check file contents
-        with open(result.path, "r") as f:
+        with open(result.path) as f:
             content = f.read()
 
-        self.assertIn("import pytest", content)
-        self.assertIn("from unittest.mock import Mock, patch", content)
-        self.assertIn("class TestCalculator:", content)
-        self.assertIn("def test_calculate_success(self):", content)
+        assert "import pytest" in content
+        assert "from unittest.mock import Mock, patch" in content
+        assert "class TestCalculator:" in content
+        assert "def test_calculate_success(self):" in content
 
-    def test_generate_pytest_content(self):
+    def test_generate_pytest_content(self) -> None:
         """Test generating pytest content."""
         content = self.generator._generate_pytest_content(
             self.sample_source_info,
@@ -991,50 +982,50 @@ class TestPytestGenerator(unittest.TestCase):
         )
 
         # Check imports
-        self.assertIn("import pytest", content)
-        self.assertIn("from calculator import Calculator, calculate", content)
+        assert "import pytest" in content
+        assert "from calculator import Calculator, calculate" in content
 
         # Check class test structure
-        self.assertIn("class TestCalculator:", content)
-        self.assertIn("def setup_method(self):", content)
-        self.assertIn("def teardown_method(self):", content)
+        assert "class TestCalculator:" in content
+        assert "def setup_method(self):" in content
+        assert "def teardown_method(self):" in content
 
         # Check function tests
-        self.assertIn("def test_calculate_success():", content)
-        self.assertIn("def test_calculate_edge_cases():", content)
-        self.assertIn("def test_calculate_error_handling():", content)
+        assert "def test_calculate_success():" in content
+        assert "def test_calculate_edge_cases():" in content
+        assert "def test_calculate_error_handling():" in content
 
-    def test_generate_class_tests(self):
+    def test_generate_class_tests(self) -> None:
         """Test generating tests for a class."""
         tests = self.generator._generate_class_tests(
-            self.sample_class, self.sample_options
+            self.sample_class, self.sample_options,
         )
 
-        self.assertIsInstance(tests, list)
-        self.assertGreater(len(tests), 0)
+        assert isinstance(tests, list)
+        assert len(tests) > 0
 
         test_content = "\n".join(tests)
-        self.assertIn("class TestCalculator:", test_content)
-        self.assertIn("def setup_method(self):", test_content)
-        self.assertIn("self.instance = Calculator", test_content)
-        self.assertIn("def test_calculate_success(self):", test_content)
+        assert "class TestCalculator:" in test_content
+        assert "def setup_method(self):" in test_content
+        assert "self.instance = Calculator" in test_content
+        assert "def test_calculate_success(self):" in test_content
 
-    def test_generate_function_tests(self):
+    def test_generate_function_tests(self) -> None:
         """Test generating tests for a function."""
         tests = self.generator._generate_function_tests(
-            self.sample_function, self.sample_options
+            self.sample_function, self.sample_options,
         )
 
-        self.assertIsInstance(tests, list)
-        self.assertGreater(len(tests), 0)
+        assert isinstance(tests, list)
+        assert len(tests) > 0
 
         test_content = "\n".join(tests)
-        self.assertIn("def test_calculate_success():", test_content)
-        self.assertIn("def test_calculate_edge_cases():", test_content)
-        self.assertIn("def test_calculate_error_handling():", test_content)
-        self.assertIn("with pytest.raises(Exception):", test_content)
+        assert "def test_calculate_success():" in test_content
+        assert "def test_calculate_edge_cases():" in test_content
+        assert "def test_calculate_error_handling():" in test_content
+        assert "with pytest.raises(Exception):" in test_content
 
-    def test_empty_source_file(self):
+    def test_empty_source_file(self) -> None:
         """Test handling empty source file."""
         empty_source_info = SourceFileInfo(
             filepath="empty.py",
@@ -1053,13 +1044,13 @@ class TestPytestGenerator(unittest.TestCase):
             self.sample_options,
         )
 
-        self.assertIsNone(result)
+        assert result is None
 
 
 class TestJestGenerator(unittest.TestCase):
     """Test cases for Jest Generator."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.generator = JestGenerator()
         self.temp_dir = tempfile.mkdtemp()
@@ -1094,18 +1085,18 @@ class TestJestGenerator(unittest.TestCase):
 
         self.sample_requirements = TestRequirements([TestType.UNIT])
         self.sample_configuration = TestConfiguration(
-            testing_framework=TestFramework.JEST
+            testing_framework=TestFramework.JEST,
         )
         self.sample_options = TestOptions()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_generate_test_file(self):
+    def test_generate_test_file(self) -> None:
         """Test generating a Jest test file."""
         test_dir = os.path.join(self.temp_dir, "tests")
 
@@ -1117,23 +1108,23 @@ class TestJestGenerator(unittest.TestCase):
             self.sample_options,
         )
 
-        self.assertIsNotNone(result)
-        self.assertIsInstance(result, TestFileInfo)
-        self.assertTrue(result.path.endswith("calculator.test.js"))
-        self.assertGreater(result.test_count, 0)
+        assert result is not None
+        assert isinstance(result, TestFileInfo)
+        assert result.path.endswith("calculator.test.js")
+        assert result.test_count > 0
 
         # Check that file was actually created
-        self.assertTrue(os.path.exists(result.path))
+        assert os.path.exists(result.path)
 
         # Check file contents
-        with open(result.path, "r") as f:
+        with open(result.path) as f:
             content = f.read()
 
-        self.assertIn("import { Calculator, calculate }", content)
-        self.assertIn("describe('Calculator'", content)
-        self.assertIn("describe('calculate'", content)
+        assert "import { Calculator, calculate }" in content
+        assert "describe('Calculator'" in content
+        assert "describe('calculate'" in content
 
-    def test_generate_jest_content(self):
+    def test_generate_jest_content(self) -> None:
         """Test generating Jest content."""
         content = self.generator._generate_jest_content(
             self.sample_source_info,
@@ -1143,44 +1134,44 @@ class TestJestGenerator(unittest.TestCase):
         )
 
         # Check imports
-        self.assertIn("import { Calculator, calculate }", content)
+        assert "import { Calculator, calculate }" in content
 
         # Check test structure
-        self.assertIn("describe('Calculator'", content)
-        self.assertIn("beforeEach(() => {", content)
-        self.assertIn("afterEach(() => {", content)
-        self.assertIn("jest.clearAllMocks()", content)
+        assert "describe('Calculator'" in content
+        assert "beforeEach(() => {" in content
+        assert "afterEach(() => {" in content
+        assert "jest.clearAllMocks()" in content
 
-    def test_generate_jest_class_tests(self):
+    def test_generate_jest_class_tests(self) -> None:
         """Test generating Jest tests for a class."""
         tests = self.generator._generate_jest_class_tests(
-            self.sample_class, self.sample_options
+            self.sample_class, self.sample_options,
         )
 
-        self.assertIsInstance(tests, list)
-        self.assertGreater(len(tests), 0)
+        assert isinstance(tests, list)
+        assert len(tests) > 0
 
         test_content = "\n".join(tests)
-        self.assertIn("describe('Calculator'", test_content)
-        self.assertIn("beforeEach(() => {", test_content)
-        self.assertIn("calculator = new Calculator()", test_content)
-        self.assertIn("describe('calculate'", test_content)
+        assert "describe('Calculator'" in test_content
+        assert "beforeEach(() => {" in test_content
+        assert "calculator = new Calculator()" in test_content
+        assert "describe('calculate'" in test_content
 
-    def test_generate_jest_function_tests(self):
+    def test_generate_jest_function_tests(self) -> None:
         """Test generating Jest tests for a function."""
         tests = self.generator._generate_jest_function_tests(
-            self.sample_function, self.sample_options
+            self.sample_function, self.sample_options,
         )
 
-        self.assertIsInstance(tests, list)
-        self.assertGreater(len(tests), 0)
+        assert isinstance(tests, list)
+        assert len(tests) > 0
 
         test_content = "\n".join(tests)
-        self.assertIn("describe('calculate'", test_content)
-        self.assertIn("it('should work with valid input'", test_content)
-        self.assertIn("it('should handle invalid input'", test_content)
-        self.assertIn("expect(() => {", test_content)
-        self.assertIn("}).toThrow()", test_content)
+        assert "describe('calculate'" in test_content
+        assert "it('should work with valid input'" in test_content
+        assert "it('should handle invalid input'" in test_content
+        assert "expect(() => {" in test_content
+        assert "}).toThrow()" in test_content
 
 
 if __name__ == "__main__":

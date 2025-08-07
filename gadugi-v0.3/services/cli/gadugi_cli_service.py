@@ -1,27 +1,25 @@
 #!/usr/bin/env python3
-"""
-Gadugi CLI Service for Gadugi v0.3
+"""Gadugi CLI Service for Gadugi v0.3.
 
 Unified command-line interface for all Gadugi operations.
 Provides comprehensive CLI commands, service management, and user interaction.
 """
+from __future__ import annotations
 
-import asyncio
 import argparse
+import asyncio
 import json
 import logging
-import os
+import shutil
 import subprocess
 import sys
 import time
-import shutil
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable
-from dataclasses import dataclass, asdict
 from enum import Enum
-import importlib.util
-import signal
+from pathlib import Path
+from typing import Any
+
 import psutil
 
 try:
@@ -34,11 +32,11 @@ except ImportError:
 try:
     import rich
     from rich.console import Console
-    from rich.table import Table
     from rich.panel import Panel
     from rich.progress import Progress, SpinnerColumn, TextColumn
-    from rich.prompt import Prompt, Confirm
+    from rich.prompt import Confirm, Prompt
     from rich.syntax import Syntax
+    from rich.table import Table
     from rich.tree import Tree
 
     RICH_AVAILABLE = True
@@ -47,8 +45,8 @@ except ImportError:
 
     # Mock rich components
     class Console:
-        def print(self, *args, **kwargs):
-            print(*args)
+        def print(self, *args, **kwargs) -> None:
+            pass
 
         def input(self, prompt):
             return input(prompt)
@@ -127,8 +125,8 @@ class CommandResult:
     message: str
     data: Any = None
     execution_time: float = 0.0
-    warnings: List[str] = None
-    errors: List[str] = None
+    warnings: list[str] = None
+    errors: list[str] = None
 
     def __post_init__(self):
         if self.warnings is None:
@@ -144,11 +142,11 @@ class ServiceInfo:
     name: str
     type: ServiceType
     status: ServiceStatus
-    pid: Optional[int] = None
-    port: Optional[int] = None
-    uptime: Optional[str] = None
-    memory_usage: Optional[str] = None
-    cpu_usage: Optional[float] = None
+    pid: int | None = None
+    port: int | None = None
+    uptime: str | None = None
+    memory_usage: str | None = None
+    cpu_usage: float | None = None
     description: str = ""
 
 
@@ -160,8 +158,8 @@ class AgentInfo:
     path: str
     description: str
     category: str
-    dependencies: List[str] = None
-    last_used: Optional[datetime] = None
+    dependencies: list[str] = None
+    last_used: datetime | None = None
 
     def __post_init__(self):
         if self.dependencies is None:
@@ -171,9 +169,9 @@ class AgentInfo:
 class ServiceManager:
     """Manages Gadugi services."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("service_manager")
-        self.services: Dict[str, ServiceInfo] = {}
+        self.services: dict[str, ServiceInfo] = {}
         self.service_configs = {
             "event-router": {
                 "module": "services.event-router.event_router_service",
@@ -267,20 +265,19 @@ class ServiceManager:
                     data={"pid": process.pid, "port": config["port"]},
                     execution_time=time.time() - start_time,
                 )
-            else:
-                stdout, stderr = await process.communicate()
-                return CommandResult(
-                    success=False,
-                    message=f"Failed to start service {service_name}",
-                    execution_time=time.time() - start_time,
-                    errors=[stderr.decode() if stderr else "Unknown error"],
-                )
-
-        except Exception as e:
-            self.logger.error(f"Error starting service {service_name}: {e}")
+            stdout, stderr = await process.communicate()
             return CommandResult(
                 success=False,
-                message=f"Error starting service {service_name}: {str(e)}",
+                message=f"Failed to start service {service_name}",
+                execution_time=time.time() - start_time,
+                errors=[stderr.decode() if stderr else "Unknown error"],
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Error starting service {service_name}: {e}")
+            return CommandResult(
+                success=False,
+                message=f"Error starting service {service_name}: {e!s}",
                 execution_time=time.time() - start_time,
                 errors=[str(e)],
             )
@@ -342,10 +339,10 @@ class ServiceManager:
                 )
 
         except Exception as e:
-            self.logger.error(f"Error stopping service {service_name}: {e}")
+            self.logger.exception(f"Error stopping service {service_name}: {e}")
             return CommandResult(
                 success=False,
-                message=f"Error stopping service {service_name}: {str(e)}",
+                message=f"Error stopping service {service_name}: {e!s}",
                 execution_time=time.time() - start_time,
                 errors=[str(e)],
             )
@@ -425,11 +422,11 @@ class ServiceManager:
             description="Unknown service",
         )
 
-    async def list_services(self) -> List[ServiceInfo]:
+    async def list_services(self) -> list[ServiceInfo]:
         """List all available services."""
         services = []
 
-        for service_name in self.service_configs.keys():
+        for service_name in self.service_configs:
             service_info = await self.get_service_status(service_name)
             services.append(service_info)
 
@@ -439,12 +436,12 @@ class ServiceManager:
 class AgentManager:
     """Manages Gadugi agents."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger("agent_manager")
-        self.agents: Dict[str, AgentInfo] = {}
+        self.agents: dict[str, AgentInfo] = {}
         self._discover_agents()
 
-    def _discover_agents(self):
+    def _discover_agents(self) -> None:
         """Discover available agents."""
         # Look for agents in standard locations
         agent_paths = [
@@ -456,7 +453,7 @@ class AgentManager:
             if agent_dir.exists():
                 self._scan_agent_directory(agent_dir)
 
-    def _scan_agent_directory(self, directory: Path):
+    def _scan_agent_directory(self, directory: Path) -> None:
         """Scan directory for agent files."""
         for agent_file in directory.glob("**/*.md"):
             try:
@@ -466,7 +463,7 @@ class AgentManager:
             except Exception as e:
                 self.logger.warning(f"Error parsing agent file {agent_file}: {e}")
 
-    def _parse_agent_file(self, agent_file: Path) -> Optional[AgentInfo]:
+    def _parse_agent_file(self, agent_file: Path) -> AgentInfo | None:
         """Parse an agent file to extract information."""
         try:
             content = agent_file.read_text()
@@ -505,10 +502,10 @@ class AgentManager:
             )
 
         except Exception as e:
-            self.logger.error(f"Error parsing agent file {agent_file}: {e}")
+            self.logger.exception(f"Error parsing agent file {agent_file}: {e}")
             return None
 
-    def list_agents(self, category: Optional[str] = None) -> List[AgentInfo]:
+    def list_agents(self, category: str | None = None) -> list[AgentInfo]:
         """List available agents."""
         agents = list(self.agents.values())
 
@@ -517,13 +514,13 @@ class AgentManager:
 
         return sorted(agents, key=lambda x: x.name)
 
-    def get_agent_categories(self) -> List[str]:
+    def get_agent_categories(self) -> list[str]:
         """Get list of agent categories."""
-        categories = set(agent.category for agent in self.agents.values())
-        return sorted(list(categories))
+        categories = {agent.category for agent in self.agents.values()}
+        return sorted(categories)
 
     async def invoke_agent(
-        self, agent_name: str, prompt: str, **kwargs
+        self, agent_name: str, prompt: str, **kwargs,
     ) -> CommandResult:
         """Invoke an agent."""
         start_time = time.time()
@@ -542,7 +539,7 @@ class AgentManager:
             cmd = ["claude", f"/agent:{agent_name}", prompt]
 
             process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
             )
 
             stdout, stderr = await process.communicate()
@@ -557,19 +554,18 @@ class AgentManager:
                     data=stdout.decode(),
                     execution_time=time.time() - start_time,
                 )
-            else:
-                return CommandResult(
-                    success=False,
-                    message=f"Agent {agent_name} execution failed",
-                    execution_time=time.time() - start_time,
-                    errors=[stderr.decode() if stderr else "Unknown error"],
-                )
-
-        except Exception as e:
-            self.logger.error(f"Error invoking agent {agent_name}: {e}")
             return CommandResult(
                 success=False,
-                message=f"Error invoking agent {agent_name}: {str(e)}",
+                message=f"Agent {agent_name} execution failed",
+                execution_time=time.time() - start_time,
+                errors=[stderr.decode() if stderr else "Unknown error"],
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Error invoking agent {agent_name}: {e}")
+            return CommandResult(
+                success=False,
+                message=f"Error invoking agent {agent_name}: {e!s}",
                 execution_time=time.time() - start_time,
                 errors=[str(e)],
             )
@@ -578,7 +574,7 @@ class AgentManager:
 class GadugiCLI:
     """Main Gadugi CLI interface."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.console = Console() if RICH_AVAILABLE else Console()
         self.service_manager = ServiceManager()
         self.agent_manager = AgentManager()
@@ -596,7 +592,7 @@ class GadugiCLI:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
@@ -621,7 +617,7 @@ Examples:
         )
 
         parser.add_argument(
-            "--verbose", "-v", action="store_true", help="Enable verbose output"
+            "--verbose", "-v", action="store_true", help="Enable verbose output",
         )
 
         parser.add_argument(
@@ -648,18 +644,18 @@ Examples:
 
         # service restart
         restart_parser = service_subparsers.add_parser(
-            "restart", help="Restart a service"
+            "restart", help="Restart a service",
         )
         restart_parser.add_argument(
-            "service_name", help="Name of the service to restart"
+            "service_name", help="Name of the service to restart",
         )
 
         # service status
         status_parser = service_subparsers.add_parser(
-            "status", help="Get service status"
+            "status", help="Get service status",
         )
         status_parser.add_argument(
-            "service_name", nargs="?", help="Name of the service"
+            "service_name", nargs="?", help="Name of the service",
         )
 
         # service list
@@ -690,7 +686,7 @@ Examples:
         run_parser = workflow_subparsers.add_parser("run", help="Run a workflow")
         run_parser.add_argument("prompt_file", help="Path to prompt file")
         run_parser.add_argument(
-            "--parallel", action="store_true", help="Enable parallel execution"
+            "--parallel", action="store_true", help="Enable parallel execution",
         )
 
         # workflow status
@@ -722,7 +718,7 @@ Examples:
 
         return parser
 
-    async def run(self, args: Optional[List[str]] = None) -> int:
+    async def run(self, args: list[str] | None = None) -> int:
         """Run the CLI with given arguments."""
         parser = self.create_parser()
         parsed_args = parser.parse_args(args)
@@ -733,23 +729,22 @@ Examples:
         try:
             if parsed_args.command == "service":
                 return await self._handle_service_command(parsed_args)
-            elif parsed_args.command == "agent":
+            if parsed_args.command == "agent":
                 return await self._handle_agent_command(parsed_args)
-            elif parsed_args.command == "workflow":
+            if parsed_args.command == "workflow":
                 return await self._handle_workflow_command(parsed_args)
-            elif parsed_args.command == "system":
+            if parsed_args.command == "system":
                 return await self._handle_system_command(parsed_args)
-            elif parsed_args.command == "dev":
+            if parsed_args.command == "dev":
                 return await self._handle_dev_command(parsed_args)
-            else:
-                parser.print_help()
-                return 0
+            parser.print_help()
+            return 0
 
         except KeyboardInterrupt:
             self.console.print("\n[red]Interrupted by user[/red]")
             return 1
         except Exception as e:
-            self.console.print(f"[red]Error: {str(e)}[/red]")
+            self.console.print(f"[red]Error: {e!s}[/red]")
             if self.verbose:
                 import traceback
 
@@ -763,20 +758,20 @@ Examples:
             self._print_command_result(result)
             return 0 if result.success else 1
 
-        elif args.service_action == "stop":
+        if args.service_action == "stop":
             result = await self.service_manager.stop_service(args.service_name)
             self._print_command_result(result)
             return 0 if result.success else 1
 
-        elif args.service_action == "restart":
+        if args.service_action == "restart":
             result = await self.service_manager.restart_service(args.service_name)
             self._print_command_result(result)
             return 0 if result.success else 1
 
-        elif args.service_action == "status":
+        if args.service_action == "status":
             if args.service_name:
                 service_info = await self.service_manager.get_service_status(
-                    args.service_name
+                    args.service_name,
                 )
                 self._print_service_info(service_info)
             else:
@@ -784,7 +779,7 @@ Examples:
                 self._print_services_list(services)
             return 0
 
-        elif args.service_action == "list":
+        if args.service_action == "list":
             services = await self.service_manager.list_services()
             self._print_services_list(services)
             return 0
@@ -798,20 +793,19 @@ Examples:
             self._print_agents_list(agents)
             return 0
 
-        elif args.agent_action == "invoke":
+        if args.agent_action == "invoke":
             result = await self.agent_manager.invoke_agent(args.agent_name, args.prompt)
             self._print_command_result(result)
             return 0 if result.success else 1
 
-        elif args.agent_action == "info":
+        if args.agent_action == "info":
             agents = self.agent_manager.list_agents()
             agent = next((a for a in agents if a.name == args.agent_name), None)
             if agent:
                 self._print_agent_info(agent)
                 return 0
-            else:
-                self.console.print(f"[red]Agent not found: {args.agent_name}[/red]")
-                return 1
+            self.console.print(f"[red]Agent not found: {args.agent_name}[/red]")
+            return 1
 
         return 0
 
@@ -822,20 +816,20 @@ Examples:
             if args.parallel:
                 prompt = f"Execute workflow from {args.prompt_file} in parallel"
                 result = await self.agent_manager.invoke_agent(
-                    "orchestrator-agent", prompt
+                    "orchestrator-agent", prompt,
                 )
             else:
                 prompt = f"Execute workflow from {args.prompt_file}"
                 result = await self.agent_manager.invoke_agent(
-                    "workflow-manager", prompt
+                    "workflow-manager", prompt,
                 )
 
             self._print_command_result(result)
             return 0 if result.success else 1
 
-        elif args.workflow_action == "status":
+        if args.workflow_action == "status":
             self.console.print(
-                "[yellow]Workflow status tracking not yet implemented[/yellow]"
+                "[yellow]Workflow status tracking not yet implemented[/yellow]",
             )
             return 0
 
@@ -847,7 +841,7 @@ Examples:
             await self._check_system_health()
             return 0
 
-        elif args.system_action == "info":
+        if args.system_action == "info":
             await self._show_system_info()
             return 0
 
@@ -859,17 +853,17 @@ Examples:
             await self._setup_development_environment()
             return 0
 
-        elif args.dev_action == "test":
+        if args.dev_action == "test":
             await self._run_tests(args.module)
             return 0
 
-        elif args.dev_action == "build":
+        if args.dev_action == "build":
             await self._build_project()
             return 0
 
         return 0
 
-    def _print_command_result(self, result: CommandResult):
+    def _print_command_result(self, result: CommandResult) -> None:
         """Print command result."""
         if self.output_format == "json":
             self.console.print(json.dumps(asdict(result), indent=2, default=str))
@@ -893,18 +887,16 @@ Examples:
             if self.verbose:
                 self.console.print(f"Execution time: {result.execution_time:.2f}s")
         else:
-            status = "✓" if result.success else "✗"
-            print(f"{status} {result.message}")
 
             if result.warnings:
                 for warning in result.warnings:
-                    print(f"⚠ {warning}")
+                    pass
 
             if result.errors:
                 for error in result.errors:
-                    print(f"✗ {error}")
+                    pass
 
-    def _print_service_info(self, service: ServiceInfo):
+    def _print_service_info(self, service: ServiceInfo) -> None:
         """Print service information."""
         if self.output_format == "json":
             self.console.print(json.dumps(asdict(service), indent=2, default=str))
@@ -940,20 +932,16 @@ Examples:
             )
             self.console.print(panel)
         else:
-            print(f"Service: {service.name}")
-            print(f"  Status: {service.status.value}")
-            print(f"  Type: {service.type.value}")
-            print(f"  Description: {service.description}")
             if service.pid:
-                print(f"  PID: {service.pid}")
+                pass
             if service.port:
-                print(f"  Port: {service.port}")
+                pass
 
-    def _print_services_list(self, services: List[ServiceInfo]):
+    def _print_services_list(self, services: list[ServiceInfo]) -> None:
         """Print list of services."""
         if self.output_format == "json":
             self.console.print(
-                json.dumps([asdict(s) for s in services], indent=2, default=str)
+                json.dumps([asdict(s) for s in services], indent=2, default=str),
             )
         elif self.output_format == "rich" and RICH_AVAILABLE:
             table = Table(title="Gadugi Services")
@@ -985,18 +973,14 @@ Examples:
 
             self.console.print(table)
         else:
-            print("Gadugi Services:")
-            print("-" * 80)
             for service in services:
-                print(
-                    f"{service.name:<20} {service.status.value:<10} {str(service.pid or '-'):<8} {str(service.port or '-'):<8} {service.description}"
-                )
+                pass
 
-    def _print_agents_list(self, agents: List[AgentInfo]):
+    def _print_agents_list(self, agents: list[AgentInfo]) -> None:
         """Print list of agents."""
         if self.output_format == "json":
             self.console.print(
-                json.dumps([asdict(a) for a in agents], indent=2, default=str)
+                json.dumps([asdict(a) for a in agents], indent=2, default=str),
             )
         elif self.output_format == "rich" and RICH_AVAILABLE:
             table = Table(title="Gadugi Agents")
@@ -1022,19 +1006,14 @@ Examples:
 
             self.console.print(table)
         else:
-            print("Gadugi Agents:")
-            print("-" * 80)
             for agent in agents:
                 last_used = (
                     agent.last_used.strftime("%Y-%m-%d %H:%M")
                     if agent.last_used
                     else "Never"
                 )
-                print(
-                    f"{agent.name:<25} {agent.category:<15} {last_used:<16} {agent.description}"
-                )
 
-    def _print_agent_info(self, agent: AgentInfo):
+    def _print_agent_info(self, agent: AgentInfo) -> None:
         """Print agent information."""
         if self.output_format == "json":
             self.console.print(json.dumps(asdict(agent), indent=2, default=str))
@@ -1050,7 +1029,7 @@ Examples:
 
             if agent.last_used:
                 panel_content.append(
-                    f"Last Used: {agent.last_used.strftime('%Y-%m-%d %H:%M:%S')}"
+                    f"Last Used: {agent.last_used.strftime('%Y-%m-%d %H:%M:%S')}",
                 )
 
             panel = Panel(
@@ -1059,22 +1038,16 @@ Examples:
                 border_style="blue",
             )
             self.console.print(panel)
-        else:
-            print(f"Agent: {agent.name}")
-            print(f"  Category: {agent.category}")
-            print(f"  Path: {agent.path}")
-            print(f"  Description: {agent.description}")
-            if agent.dependencies:
-                print(f"  Dependencies: {', '.join(agent.dependencies)}")
+        elif agent.dependencies:
+            pass
 
-    async def _check_system_health(self):
+    async def _check_system_health(self) -> None:
         """Check system health."""
         if RICH_AVAILABLE:
             self.console.print("[bold]System Health Check[/bold]")
             self.console.print()
         else:
-            print("System Health Check")
-            print("-" * 20)
+            pass
 
         # Check services
         services = await self.service_manager.list_services()
@@ -1082,17 +1055,17 @@ Examples:
 
         if RICH_AVAILABLE:
             self.console.print(
-                f"Services: {len(running_services)}/{len(services)} running"
+                f"Services: {len(running_services)}/{len(services)} running",
             )
         else:
-            print(f"Services: {len(running_services)}/{len(services)} running")
+            pass
 
         # Check agents
         agents = self.agent_manager.list_agents()
         if RICH_AVAILABLE:
             self.console.print(f"Agents: {len(agents)} available")
         else:
-            print(f"Agents: {len(agents)} available")
+            pass
 
         # Check system resources
         try:
@@ -1107,25 +1080,22 @@ Examples:
                 self.console.print(f"Memory Usage: {memory.percent:.1f}%")
                 self.console.print(f"Disk Usage: {disk.percent:.1f}%")
             else:
-                print(f"CPU Usage: {cpu_percent:.1f}%")
-                print(f"Memory Usage: {memory.percent:.1f}%")
-                print(f"Disk Usage: {disk.percent:.1f}%")
+                pass
         except ImportError:
             if RICH_AVAILABLE:
                 self.console.print(
-                    "[yellow]System resource monitoring unavailable (psutil not installed)[/yellow]"
+                    "[yellow]System resource monitoring unavailable (psutil not installed)[/yellow]",
                 )
             else:
-                print("System resource monitoring unavailable (psutil not installed)")
+                pass
 
-    async def _show_system_info(self):
+    async def _show_system_info(self) -> None:
         """Show system information."""
         if RICH_AVAILABLE:
             self.console.print("[bold]System Information[/bold]")
             self.console.print()
         else:
-            print("System Information")
-            print("-" * 18)
+            pass
 
         # Python version
         python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
@@ -1165,21 +1135,19 @@ Examples:
             )
             self.console.print(gadugi_panel)
         else:
-            print("System:")
-            for k, v in system_info.items():
-                print(f"  {k}: {v}")
-            print("\nGadugi:")
-            for k, v in gadugi_info.items():
-                print(f"  {k}: {v}")
+            for _k, _v in system_info.items():
+                pass
+            for _k, _v in gadugi_info.items():
+                pass
 
-    async def _setup_development_environment(self):
+    async def _setup_development_environment(self) -> None:
         """Set up development environment."""
         if RICH_AVAILABLE:
             self.console.print(
-                "[bold]Setting up Gadugi development environment...[/bold]"
+                "[bold]Setting up Gadugi development environment...[/bold]",
             )
         else:
-            print("Setting up Gadugi development environment...")
+            pass
 
         # Check for required tools
         required_tools = ["git", "python", "pip"]
@@ -1192,10 +1160,10 @@ Examples:
         if missing_tools:
             if RICH_AVAILABLE:
                 self.console.print(
-                    f"[red]Missing required tools: {', '.join(missing_tools)}[/red]"
+                    f"[red]Missing required tools: {', '.join(missing_tools)}[/red]",
                 )
             else:
-                print(f"Missing required tools: {', '.join(missing_tools)}")
+                pass
             return
 
         # Install development dependencies
@@ -1203,7 +1171,7 @@ Examples:
             process = await asyncio.create_subprocess_exec(
                 sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
@@ -1211,28 +1179,26 @@ Examples:
             if RICH_AVAILABLE:
                 self.console.print("[green]Development dependencies installed[/green]")
             else:
-                print("Development dependencies installed")
+                pass
         except subprocess.CalledProcessError:
             if RICH_AVAILABLE:
                 self.console.print(
-                    "[yellow]Could not install development dependencies (requirements-dev.txt not found)[/yellow]"
+                    "[yellow]Could not install development dependencies (requirements-dev.txt not found)[/yellow]",
                 )
             else:
-                print(
-                    "Could not install development dependencies (requirements-dev.txt not found)"
-                )
+                pass
 
         if RICH_AVAILABLE:
             self.console.print("[green]Development environment setup complete![/green]")
         else:
-            print("Development environment setup complete!")
+            pass
 
-    async def _run_tests(self, module: Optional[str] = None):
+    async def _run_tests(self, module: str | None = None) -> None:
         """Run tests."""
         if RICH_AVAILABLE:
             self.console.print("[bold]Running tests...[/bold]")
         else:
-            print("Running tests...")
+            pass
 
         cmd = [sys.executable, "-m", "pytest"]
         if module:
@@ -1246,7 +1212,7 @@ Examples:
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
             result = subprocess.CompletedProcess(cmd, process.returncode, stdout.decode(), stderr.decode())
@@ -1261,34 +1227,32 @@ Examples:
                     self.console.print(result.stdout)
                 if result.stderr:
                     self.console.print(f"[red]{result.stderr}[/red]")
-            else:
-                print(result.stdout)
-                if result.stderr:
-                    print(result.stderr)
+            elif result.stderr:
+                pass
 
         except FileNotFoundError:
             if RICH_AVAILABLE:
                 self.console.print(
-                    "[red]pytest not found. Install with: pip install pytest[/red]"
+                    "[red]pytest not found. Install with: pip install pytest[/red]",
                 )
             else:
-                print("pytest not found. Install with: pip install pytest")
+                pass
 
-    async def _build_project(self):
+    async def _build_project(self) -> None:
         """Build the project."""
         if RICH_AVAILABLE:
             self.console.print("[bold]Building project...[/bold]")
         else:
-            print("Building project...")
+            pass
 
         # Run basic checks
         try:
             # Python syntax check
-            cmd = [sys.executable, "-m", "py_compile"] + [str(f) for f in Path(".").rglob("*.py")]
+            cmd = [sys.executable, "-m", "py_compile"] + [str(f) for f in Path().rglob("*.py")]
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
@@ -1297,17 +1261,17 @@ Examples:
             if RICH_AVAILABLE:
                 self.console.print("[green]Python syntax check passed[/green]")
             else:
-                print("Python syntax check passed")
+                pass
         except subprocess.CalledProcessError:
             if RICH_AVAILABLE:
                 self.console.print("[red]Python syntax check failed[/red]")
             else:
-                print("Python syntax check failed")
+                pass
 
         if RICH_AVAILABLE:
             self.console.print("[green]Build complete![/green]")
         else:
-            print("Build complete!")
+            pass
 
 
 async def main():
@@ -1321,10 +1285,8 @@ def cli_entry():
     try:
         return asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nInterrupted by user")
         return 1
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception:
         return 1
 
 

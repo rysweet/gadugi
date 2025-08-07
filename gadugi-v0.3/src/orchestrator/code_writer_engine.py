@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-"""
-Code Writer Engine - Core logic for generating source code.
+"""Code Writer Engine - Core logic for generating source code.
 This provides programmatic access to code generation capabilities.
 """
+from __future__ import annotations
 
-import json
 import re
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
 
 
 class CodeWriterEngine:
     """Engine for generating source code from task descriptions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.language_patterns = {
             "python": {
                 "extensions": [".py"],
@@ -61,10 +58,9 @@ class CodeWriterEngine:
         }
 
     def generate_code(
-        self, task_description: str, context: Optional[Dict] = None
-    ) -> Dict:
-        """
-        Generate source code based on task description.
+        self, task_description: str, context: dict | None = None,
+    ) -> dict:
+        """Generate source code based on task description.
 
         Args:
             task_description: Description of what code to generate
@@ -72,6 +68,7 @@ class CodeWriterEngine:
 
         Returns:
             Dictionary containing generated code and metadata
+
         """
         context = context or {}
 
@@ -81,7 +78,7 @@ class CodeWriterEngine:
         # Generate the code
         code_result = self._generate_code_implementation(analysis)
 
-        result = {
+        return {
             "success": True,
             "task": task_description,
             "analysis": analysis,
@@ -97,9 +94,8 @@ class CodeWriterEngine:
             },
         }
 
-        return result
 
-    def _analyze_code_task(self, task_description: str, context: Dict) -> Dict:
+    def _analyze_code_task(self, task_description: str, context: dict) -> dict:
         """Analyze the task to determine what code to generate."""
         description_lower = task_description.lower()
 
@@ -115,7 +111,7 @@ class CodeWriterEngine:
         # Determine complexity
         complexity = self._estimate_code_complexity(description_lower)
 
-        analysis = {
+        return {
             "original_task": task_description,
             "language": language,
             "code_type": code_type,
@@ -125,7 +121,6 @@ class CodeWriterEngine:
             "dependencies": self._suggest_dependencies(description_lower, language),
         }
 
-        return analysis
 
     def _detect_language(self, description: str) -> str:
         """Detect programming language from task description."""
@@ -134,17 +129,17 @@ class CodeWriterEngine:
             word in description for word in ["rest"]
         ):
             return "typescript"
-        elif any(
+        if any(
             word in description
             for word in ["python", "py", "flask", "django", "fastapi"]
         ):
             return "python"
-        elif any(
+        if any(
             word in description
             for word in ["javascript", "js", "node", "express", "react"]
         ):
             return "javascript"
-        elif any(word in description for word in ["angular", "vue"]):
+        if any(word in description for word in ["angular", "vue"]):
             return "typescript"
 
         # Default to Python for general tasks (including REST API)
@@ -155,25 +150,24 @@ class CodeWriterEngine:
         # Check API first since it's more specific than auth
         if any(word in description for word in ["api", "endpoint", "rest", "route"]):
             return "api_endpoint"
-        elif (
+        if (
             any(word in description for word in ["auth", "login", "authentication"])
             and "api" not in description
         ):
             return "authentication"
-        elif any(
+        if any(
             word in description for word in ["model", "database", "data", "schema"]
         ):
             return "data_model"
-        elif any(word in description for word in ["test", "testing", "unit test"]):
+        if any(word in description for word in ["test", "testing", "unit test"]):
             return "test_class"
-        elif any(word in description for word in ["class", "service", "handler"]):
+        if any(word in description for word in ["class", "service", "handler"]):
             return "service_class"
-        elif any(word in description for word in ["component", "ui", "interface"]):
+        if any(word in description for word in ["component", "ui", "interface"]):
             return "component"
-        else:
-            return "general_class"
+        return "general_class"
 
-    def _extract_entities(self, task_description: str) -> List[str]:
+    def _extract_entities(self, task_description: str) -> list[str]:
         """Extract key entities (classes, functions, etc.) from description."""
         entities = []
 
@@ -235,7 +229,7 @@ class CodeWriterEngine:
 
         return f"{clean_desc}{extension}"
 
-    def _suggest_dependencies(self, description: str, language: str) -> List[str]:
+    def _suggest_dependencies(self, description: str, language: str) -> list[str]:
         """Suggest dependencies based on description and language."""
         dependencies = []
 
@@ -259,36 +253,32 @@ class CodeWriterEngine:
 
         return list(set(dependencies))
 
-    def _generate_code_implementation(self, analysis: Dict) -> Dict:
+    def _generate_code_implementation(self, analysis: dict) -> dict:
         """Generate the actual code implementation."""
         language = analysis["language"]
-        code_type = analysis["code_type"]
+        analysis["code_type"]
 
         if language == "python":
             return self._generate_python_code(analysis)
-        elif language in ["javascript", "typescript"]:
+        if language in ["javascript", "typescript"]:
             return self._generate_js_code(analysis)
-        else:
-            return self._generate_generic_code(analysis)
+        return self._generate_generic_code(analysis)
 
-    def _generate_python_code(self, analysis: Dict) -> Dict:
+    def _generate_python_code(self, analysis: dict) -> dict:
         """Generate Python code based on analysis."""
         code_type = analysis["code_type"]
-        task = analysis["original_task"]
-        entities = analysis["entities"]
+        analysis["original_task"]
+        analysis["entities"]
 
         if code_type == "authentication":
             return self._create_python_auth_code(analysis)
-        elif code_type == "api_endpoint":
+        if code_type == "api_endpoint":
             return self._create_python_api_code(analysis)
-        elif code_type == "data_model":
+        if code_type in {"data_model", "test_class"}:
             return self._create_python_generic_code(analysis)  # Use generic for now
-        elif code_type == "test_class":
-            return self._create_python_generic_code(analysis)  # Use generic for now
-        else:
-            return self._create_python_generic_code(analysis)
+        return self._create_python_generic_code(analysis)
 
-    def _create_python_auth_code(self, analysis: Dict) -> Dict:
+    def _create_python_auth_code(self, analysis: dict) -> dict:
         """Create Python authentication code."""
         filename = analysis["suggested_filename"]
 
@@ -317,96 +307,96 @@ class User:
 class UserAuthenticator:
     """
     Handles user authentication with secure password management.
-    
+
     Features:
     - Secure password hashing with salt
     - Email validation
     - User session management
     """
-    
+
     def __init__(self, user_store: Optional[Dict[str, User]] = None):
         """Initialize authenticator with optional user store."""
         self.users = user_store or {}
-    
+
     def hash_password(self, password: str, salt: str = None) -> tuple[str, str]:
         """
         Hash password with salt for secure storage.
-        
+
         Args:
             password: Plain text password
             salt: Optional salt (generated if not provided)
-            
+
         Returns:
             Tuple of (password_hash, salt)
         """
         if salt is None:
             salt = secrets.token_hex(32)
-        
+
         password_hash = hashlib.pbkdf2_hmac(
             'sha256',
             password.encode('utf-8'),
             salt.encode('utf-8'),
             100000  # iterations
         )
-        
+
         return password_hash.hex(), salt
-    
+
     def create_user(self, email: str, password: str, user_id: int = None) -> Optional[User]:
         """
         Create new user with email and password.
-        
+
         Args:
             email: User email address
             password: Plain text password
             user_id: Optional user ID
-            
+
         Returns:
             User object if creation successful, None otherwise
         """
         if not self._validate_email(email):
             raise ValueError("Invalid email format")
-        
+
         if email in self.users:
             raise ValueError("User already exists")
-        
+
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters")
-        
+
         password_hash, salt = self.hash_password(password)
         user_id = user_id or len(self.users) + 1
-        
+
         user = User(
             id=user_id,
             email=email,
             password_hash=password_hash,
             salt=salt
         )
-        
+
         self.users[email] = user
         return user
-    
+
     def authenticate(self, email: str, password: str) -> Optional[User]:
         """
         Authenticate user with email and password.
-        
+
         Args:
             email: User email
             password: Plain text password
-            
+
         Returns:
             User object if authentication successful, None otherwise
         """
         user = self.users.get(email)
         if not user or not user.is_active:
             return None
-        
+
         password_hash, _ = self.hash_password(password, user.salt)
-        
+
         if password_hash == user.password_hash:
             return user
-        
+
         return None
-    
+
     def _validate_email(self, email: str) -> bool:
         """Basic email validation."""
         return '@' in email and '.' in email.split('@')[1]
@@ -415,19 +405,19 @@ class UserAuthenticator:
 def main():
     """Example usage of the authentication system."""
     auth = UserAuthenticator()
-    
+
     try:
         # Create user
         user = auth.create_user("user@example.com", "secure_password123")
         print(f"✅ Created user: {user.email}")
-        
+
         # Authenticate
         authenticated_user = auth.authenticate("user@example.com", "secure_password123")
         if authenticated_user:
             print(f"✅ Authentication successful for {authenticated_user.email}")
         else:
             print("❌ Authentication failed")
-            
+
     except ValueError as e:
         print(f"❌ Error: {e}")
 
@@ -443,14 +433,14 @@ if __name__ == "__main__":
                     "content": code,
                     "language": "python",
                     "description": "User authentication system with secure password handling",
-                }
+                },
             ],
             "dependencies": ["hashlib", "secrets", "typing", "dataclasses"],
             "integration_notes": "Can be integrated with web frameworks like Flask/FastAPI. User store can be replaced with database integration.",
             "usage_examples": "auth = UserAuthenticator(); user = auth.create_user('user@example.com', 'password')",
         }
 
-    def _create_python_api_code(self, analysis: Dict) -> Dict:
+    def _create_python_api_code(self, analysis: dict) -> dict:
         """Create Python API endpoint code."""
         filename = analysis["suggested_filename"]
         entities = analysis["entities"]
@@ -517,11 +507,11 @@ async def health_check():
 async def get_{api_name}(skip: int = 0, limit: int = 100):
     """
     Get list of {api_name}.
-    
+
     Args:
         skip: Number of records to skip
         limit: Maximum number of records to return
-        
+
     Returns:
         List of {api_name}
     """
@@ -532,20 +522,20 @@ async def get_{api_name}(skip: int = 0, limit: int = 100):
 async def get_{api_name[:-1]}(item_id: int):
     """
     Get a specific {api_name[:-1]} by ID.
-    
+
     Args:
         item_id: The ID of the {api_name[:-1]} to retrieve
-        
+
     Returns:
         The requested {api_name[:-1]}
-        
+
     Raises:
         HTTPException: If {api_name[:-1]} not found
     """
     for item in {api_name}_store:
         if item.id == item_id:
             return item
-    
+
     raise HTTPException(status_code=404, detail="{api_name[:-1].title()} not found")
 
 
@@ -553,15 +543,15 @@ async def get_{api_name[:-1]}(item_id: int):
 async def create_{api_name[:-1]}(item: {api_name[:-1].title()}Create):
     """
     Create a new {api_name[:-1]}.
-    
+
     Args:
         item: The {api_name[:-1]} data to create
-        
+
     Returns:
         The created {api_name[:-1]}
     """
     global next_id
-    
+
     now = datetime.now()
     new_item = {api_name[:-1].title()}Response(
         id=next_id,
@@ -570,10 +560,10 @@ async def create_{api_name[:-1]}(item: {api_name[:-1].title()}Create):
         created_at=now,
         updated_at=now
     )
-    
+
     {api_name}_store.append(new_item)
     next_id += 1
-    
+
     return new_item
 
 
@@ -581,14 +571,14 @@ async def create_{api_name[:-1]}(item: {api_name[:-1].title()}Create):
 async def update_{api_name[:-1]}(item_id: int, item: {api_name[:-1].title()}Create):
     """
     Update an existing {api_name[:-1]}.
-    
+
     Args:
         item_id: The ID of the {api_name[:-1]} to update
         item: The updated {api_name[:-1]} data
-        
+
     Returns:
         The updated {api_name[:-1]}
-        
+
     Raises:
         HTTPException: If {api_name[:-1]} not found
     """
@@ -603,7 +593,7 @@ async def update_{api_name[:-1]}(item_id: int, item: {api_name[:-1].title()}Crea
             )
             {api_name}_store[i] = updated_item
             return updated_item
-    
+
     raise HTTPException(status_code=404, detail="{api_name[:-1].title()} not found")
 
 
@@ -611,13 +601,13 @@ async def update_{api_name[:-1]}(item_id: int, item: {api_name[:-1].title()}Crea
 async def delete_{api_name[:-1]}(item_id: int):
     """
     Delete a {api_name[:-1]} by ID.
-    
+
     Args:
         item_id: The ID of the {api_name[:-1]} to delete
-        
+
     Returns:
         Success message
-        
+
     Raises:
         HTTPException: If {api_name[:-1]} not found
     """
@@ -625,7 +615,7 @@ async def delete_{api_name[:-1]}(item_id: int):
         if item.id == item_id:
             deleted_item = {api_name}_store.pop(i)
             return {{"message": f"{api_name[:-1].title()} {{deleted_item.name}} deleted successfully"}}
-    
+
     raise HTTPException(status_code=404, detail="{api_name[:-1].title()} not found")
 
 
@@ -646,14 +636,14 @@ if __name__ == "__main__":
                     "content": code,
                     "language": "python",
                     "description": f"REST API endpoints for {api_name} using FastAPI",
-                }
+                },
             ],
             "dependencies": ["fastapi", "uvicorn", "pydantic", "python-multipart"],
             "integration_notes": "Install dependencies: pip install fastapi uvicorn. Run with: uvicorn filename:app --reload",
             "usage_examples": "GET /items, POST /items, PUT /items/{id}, DELETE /items/{id}",
         }
 
-    def _create_python_generic_code(self, analysis: Dict) -> Dict:
+    def _create_python_generic_code(self, analysis: dict) -> dict:
         """Create generic Python code."""
         filename = analysis["suggested_filename"]
         task = analysis["original_task"]
@@ -677,55 +667,55 @@ from datetime import datetime
 class {class_name}:
     """
     Main class for handling: {task}
-    
+
     This class provides the core functionality for the requested task.
     """
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
         Initialize the {class_name}.
-        
+
         Args:
             config: Optional configuration dictionary
         """
         self.config = config or {{}}
         self.created_at = datetime.now()
         self._data = {{}}
-    
+
     def process(self, input_data: Any) -> Dict[str, Any]:
         """
         Main processing method for the task.
-        
+
         Args:
             input_data: The input data to process
-            
+
         Returns:
             Dictionary containing the processing results
         """
         try:
             # Process the input data
             result = self._handle_input(input_data)
-            
+
             return {{
                 "success": True,
                 "result": result,
                 "processed_at": datetime.now().isoformat()
             }}
-            
+
         except Exception as e:
             return {{
                 "success": False,
                 "error": str(e),
                 "processed_at": datetime.now().isoformat()
             }}
-    
+
     def _handle_input(self, input_data: Any) -> Any:
         """
         Internal method to handle input data processing.
-        
+
         Args:
             input_data: The data to process
-            
+
         Returns:
             Processed result
         """
@@ -738,11 +728,11 @@ class {class_name}:
             return list(input_data.keys())
         else:
             return str(input_data)
-    
+
     def get_status(self) -> Dict[str, Any]:
         """
         Get the current status of the handler.
-        
+
         Returns:
             Dictionary containing status information
         """
@@ -757,11 +747,11 @@ class {class_name}:
 def main():
     """Example usage of the {class_name}."""
     handler = {class_name}()
-    
+
     # Example processing
     test_data = "sample input data"
     result = handler.process(test_data)
-    
+
     print(f"Processing result: {{result}}")
     print(f"Handler status: {{handler.get_status()}}")
 
@@ -777,19 +767,19 @@ if __name__ == "__main__":
                     "content": code,
                     "language": "python",
                     "description": f"Generic Python class for: {task}",
-                }
+                },
             ],
             "dependencies": ["typing", "datetime"],
             "integration_notes": "This is a generic implementation. Customize the _handle_input method for specific requirements.",
             "usage_examples": f"handler = {class_name}(); result = handler.process(data); print(handler.get_status())",
         }
 
-    def _generate_js_code(self, analysis: Dict) -> Dict:
+    def _generate_js_code(self, analysis: dict) -> dict:
         """Generate JavaScript/TypeScript code."""
         # Placeholder for JS/TS code generation
         return self._create_js_generic_code(analysis)
 
-    def _create_js_generic_code(self, analysis: Dict) -> Dict:
+    def _create_js_generic_code(self, analysis: dict) -> dict:
         """Create generic JavaScript code."""
         filename = analysis["suggested_filename"]
         task = analysis["original_task"]
@@ -804,7 +794,7 @@ class TaskHandler {{
         this.createdAt = new Date();
         this._data = {{}};
     }}
-    
+
     /**
      * Main processing method for the task
      * @param {{any}} inputData - The input data to process
@@ -813,7 +803,7 @@ class TaskHandler {{
     async process(inputData) {{
         try {{
             const result = await this._handleInput(inputData);
-            
+
             return {{
                 success: true,
                 result,
@@ -827,7 +817,7 @@ class TaskHandler {{
             }};
         }}
     }}
-    
+
     /**
      * Internal method to handle input processing
      * @param {{any}} inputData - The data to process
@@ -845,7 +835,7 @@ class TaskHandler {{
             return String(inputData);
         }}
     }}
-    
+
     /**
      * Get current status
      * @returns {{Object}} Status information
@@ -864,7 +854,7 @@ class TaskHandler {{
 async function main() {{
     const handler = new TaskHandler();
     const result = await handler.process("sample input data");
-    
+
     console.log("Processing result:", result);
     console.log("Handler status:", handler.getStatus());
 }}
@@ -889,14 +879,14 @@ if (require.main === module) {{
                     "content": code,
                     "language": "javascript",
                     "description": f"Generic JavaScript class for: {task}",
-                }
+                },
             ],
             "dependencies": [],
             "integration_notes": "Can be used in Node.js or browser environments. Supports both CommonJS and ES6 modules.",
             "usage_examples": "const handler = new TaskHandler(); await handler.process(data);",
         }
 
-    def _generate_generic_code(self, analysis: Dict) -> Dict:
+    def _generate_generic_code(self, analysis: dict) -> dict:
         """Generate generic code for unsupported languages."""
         return {
             "files": [
@@ -905,7 +895,7 @@ if (require.main === module) {{
                     "content": f"Code generation requested for: {analysis['original_task']}\nLanguage: {analysis['language']}\nType: {analysis['code_type']}",
                     "language": "text",
                     "description": "Generic code output",
-                }
+                },
             ],
             "dependencies": [],
             "integration_notes": "Language not fully supported yet",
@@ -913,33 +903,32 @@ if (require.main === module) {{
         }
 
     # Template methods
-    def _get_python_auth_template(self):
+    def _get_python_auth_template(self) -> None:
         pass
 
-    def _get_python_api_template(self):
+    def _get_python_api_template(self) -> None:
         pass
 
-    def _get_python_model_template(self):
+    def _get_python_model_template(self) -> None:
         pass
 
-    def _get_python_test_template(self):
+    def _get_python_test_template(self) -> None:
         pass
 
-    def _get_js_api_template(self):
+    def _get_js_api_template(self) -> None:
         pass
 
-    def _get_js_component_template(self):
+    def _get_js_component_template(self) -> None:
         pass
 
-    def _get_js_service_template(self):
+    def _get_js_service_template(self) -> None:
         pass
 
 
 def generate_code_for_task(
-    task_description: str, context: Optional[Dict] = None
-) -> Dict:
-    """
-    Main function to generate code for a given task.
+    task_description: str, context: dict | None = None,
+) -> dict:
+    """Main function to generate code for a given task.
 
     Args:
         task_description: Description of the coding task
@@ -947,6 +936,7 @@ def generate_code_for_task(
 
     Returns:
         Dictionary containing the generated code and metadata
+
     """
     engine = CodeWriterEngine()
 
@@ -955,8 +945,7 @@ def generate_code_for_task(
         if not task_description or not task_description.strip():
             task_description = "Generic code task"
 
-        result = engine.generate_code(task_description, context)
-        return result
+        return engine.generate_code(task_description, context)
 
     except Exception as e:
         return {
@@ -980,35 +969,24 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python code_writer_engine.py <task_description>")
-        print(
-            "Example: python code_writer_engine.py 'Create user authentication class'"
-        )
         sys.exit(1)
 
     task_description = " ".join(sys.argv[1:])
     result = generate_code_for_task(task_description)
 
     if result["success"]:
-        print("Generated Code:")
-        print("=" * 50)
 
-        for file_info in result["files"]:
-            print(f"\n📁 File: {file_info['filename']}")
-            print(f"📝 Description: {file_info['description']}")
-            print(f"🔤 Language: {file_info['language']}")
-            print("\n" + "─" * 40)
-            print(file_info["content"])
-            print("─" * 40)
+        for _file_info in result["files"]:
+            pass
 
         if result["dependencies"]:
-            print(f"\n📦 Dependencies: {', '.join(result['dependencies'])}")
+            pass
 
         if result["integration_notes"]:
-            print(f"\n🔧 Integration Notes: {result['integration_notes']}")
+            pass
 
         if result["usage_examples"]:
-            print(f"\n💡 Usage Examples: {result['usage_examples']}")
+            pass
 
     else:
-        print(f"❌ Error generating code: {result.get('error', 'Unknown error')}")
+        pass

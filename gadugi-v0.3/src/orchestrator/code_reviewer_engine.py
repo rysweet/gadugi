@@ -1,30 +1,36 @@
-"""
-CodeReviewer Engine - Comprehensive automated code review
+"""CodeReviewer Engine - Comprehensive automated code review.
 
 This engine performs multi-dimensional code analysis including quality, security,
 performance, and maintainability assessment with configurable quality gates.
 """
+from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
-import subprocess
-import tempfile
-import time
-import os
 import re
-import shutil
-from dataclasses import dataclass, asdict, field
+import subprocess
+import sys
+import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Any
+
 import yaml
-import sys
+
+# Try to import aiofiles for async file operations, fallback to sync if not available
+try:
+    import aiofiles
+    AIOFILES_AVAILABLE = True
+except ImportError:
+    AIOFILES_AVAILABLE = False
 
 
 class ReviewStatus(Enum):
-    """Review status enumeration"""
+    """Review status enumeration."""
 
     APPROVED = "approved"
     NEEDS_CHANGES = "needs_changes"
@@ -32,7 +38,7 @@ class ReviewStatus(Enum):
 
 
 class IssueType(Enum):
-    """Issue type classification"""
+    """Issue type classification."""
 
     ERROR = "error"
     WARNING = "warning"
@@ -41,7 +47,7 @@ class IssueType(Enum):
 
 
 class IssueCategory(Enum):
-    """Issue category classification"""
+    """Issue category classification."""
 
     STYLE = "style"
     QUALITY = "quality"
@@ -54,7 +60,7 @@ class IssueCategory(Enum):
 
 @dataclass
 class ReviewIssue:
-    """Individual code review issue"""
+    """Individual code review issue."""
 
     line: int
     column: int
@@ -65,7 +71,7 @@ class ReviewIssue:
     rule_id: str
     severity: int = 1  # 1-5, where 5 is most severe
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "line": self.line,
             "column": self.column,
@@ -80,15 +86,15 @@ class ReviewIssue:
 
 @dataclass
 class FileReview:
-    """Review results for a single file"""
+    """Review results for a single file."""
 
     file_path: str
     status: ReviewStatus
     score: int
-    issues: List[ReviewIssue] = field(default_factory=list)
-    metrics: Dict[str, Any] = field(default_factory=dict)
+    issues: list[ReviewIssue] = field(default_factory=list)
+    metrics: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "file_path": self.file_path,
             "status": self.status.value,
@@ -100,7 +106,7 @@ class FileReview:
 
 @dataclass
 class QualityMetrics:
-    """Code quality metrics"""
+    """Code quality metrics."""
 
     maintainability_index: float = 0.0
     cyclomatic_complexity: float = 0.0
@@ -114,7 +120,7 @@ class QualityMetrics:
 
 @dataclass
 class ReviewSummary:
-    """Overall review summary"""
+    """Overall review summary."""
 
     total_files: int
     total_lines: int
@@ -123,25 +129,25 @@ class ReviewSummary:
     warnings: int
     suggestions: int
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 
 @dataclass
 class ReviewResult:
-    """Complete review result"""
+    """Complete review result."""
 
     review_id: str
     status: ReviewStatus
     overall_score: int
     summary: ReviewSummary
     quality_metrics: QualityMetrics
-    file_reviews: List[FileReview]
-    recommendations: List[str]
-    quality_gates: Dict[str, str]
+    file_reviews: list[FileReview]
+    recommendations: list[str]
+    quality_gates: dict[str, str]
     execution_time: float = 0.0
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "review_id": self.review_id,
             "status": self.status.value,
@@ -156,21 +162,21 @@ class ReviewResult:
 
 
 class AnalysisTool:
-    """Base class for analysis tools"""
+    """Base class for analysis tools."""
 
-    def __init__(self, name: str, language: str, config: Dict[str, Any] = None):
+    def __init__(self, name: str, language: str, config: dict[str, Any] | None = None) -> None:
         self.name = name
         self.language = language
         self.config = config or {}
         self.logger = logging.getLogger(f"{__name__}.{name}")
 
     async def is_available(self) -> bool:
-        """Check if tool is available"""
+        """Check if tool is available."""
         try:
             process = await asyncio.create_subprocess_exec(
                 self.name, "--version",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10.0)
@@ -186,31 +192,32 @@ class AnalysisTool:
         ):
             return False
 
-    async def analyze(self, files: List[str]) -> List[ReviewIssue]:
-        """Analyze files and return issues"""
-        raise NotImplementedError("Subclasses must implement analyze method")
+    async def analyze(self, files: list[str]) -> list[ReviewIssue]:
+        """Analyze files and return issues."""
+        msg = "Subclasses must implement analyze method"
+        raise NotImplementedError(msg)
 
 
 class RuffAnalyzer(AnalysisTool):
-    """Python ruff linter integration"""
+    """Python ruff linter integration."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         super().__init__("ruff", "python", config)
 
-    async def analyze(self, files: List[str]) -> List[ReviewIssue]:
-        """Analyze Python files with ruff"""
+    async def analyze(self, files: list[str]) -> list[ReviewIssue]:
+        """Analyze Python files with ruff."""
         if not files:
             return []
 
         try:
-            cmd = ["ruff", "check", "--format", "json"] + files
+            cmd = ["ruff", "check", "--format", "json", *files]
             if self.config.get("args"):
                 cmd.extend(self.config["args"])
 
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
@@ -230,31 +237,31 @@ class RuffAnalyzer(AnalysisTool):
                                 line=item.get("location", {}).get("row", 0),
                                 column=item.get("location", {}).get("column", 0),
                                 type=self._map_severity(
-                                    item.get("severity", "warning")
+                                    item.get("severity", "warning"),
                                 ),
                                 category=self._map_category(item.get("code", "")),
                                 message=item.get("message", ""),
                                 suggestion=self._generate_suggestion(item),
                                 rule_id=item.get("code", ""),
                                 severity=self._severity_score(
-                                    item.get("severity", "warning")
+                                    item.get("severity", "warning"),
                                 ),
-                            )
+                            ),
                         )
                 except json.JSONDecodeError:
-                    self.logger.error("Failed to parse ruff output")
+                    self.logger.exception("Failed to parse ruff output")
 
             return issues
 
         except subprocess.TimeoutExpired:
-            self.logger.error("Ruff analysis timed out")
+            self.logger.exception("Ruff analysis timed out")
             return []
         except Exception as e:
-            self.logger.error(f"Ruff analysis failed: {str(e)}")
+            self.logger.exception(f"Ruff analysis failed: {e!s}")
             return []
 
     def _map_severity(self, severity: str) -> IssueType:
-        """Map ruff severity to IssueType"""
+        """Map ruff severity to IssueType."""
         mapping = {
             "error": IssueType.ERROR,
             "warning": IssueType.WARNING,
@@ -263,63 +270,66 @@ class RuffAnalyzer(AnalysisTool):
         return mapping.get(severity.lower(), IssueType.WARNING)
 
     def _map_category(self, code: str) -> IssueCategory:
-        """Map ruff error code to category"""
+        """Map ruff error code to category."""
         if code.startswith(("E", "W")):
             return IssueCategory.STYLE
-        elif code.startswith("F"):
+        if code.startswith("F"):
             return IssueCategory.QUALITY
-        elif code.startswith("S"):
+        if code.startswith("S"):
             return IssueCategory.SECURITY
-        elif code.startswith("C"):
+        if code.startswith("C"):
             return IssueCategory.MAINTAINABILITY
-        elif code.startswith("T"):
+        if code.startswith("T"):
             return IssueCategory.TESTING
-        else:
-            return IssueCategory.QUALITY
+        return IssueCategory.QUALITY
 
-    def _generate_suggestion(self, item: Dict[str, Any]) -> str:
-        """Generate helpful suggestion from ruff result"""
+    def _generate_suggestion(self, item: dict[str, Any]) -> str:
+        """Generate helpful suggestion from ruff result."""
         code = item.get("code", "")
         message = item.get("message", "")
 
         # Generate context-aware suggestions
         if "line too long" in message.lower():
             return "Consider breaking the line at a logical point"
-        elif "unused import" in message.lower():
+        if "unused import" in message.lower():
             return "Remove the unused import statement"
-        elif "undefined name" in message.lower():
+        if "undefined name" in message.lower():
             return "Check spelling or add necessary import"
-        else:
-            return f"See ruff documentation for {code}"
+        return f"See ruff documentation for {code}"
 
     def _severity_score(self, severity: str) -> int:
-        """Convert severity to numeric score"""
+        """Convert severity to numeric score."""
         mapping = {"error": 4, "warning": 2, "note": 1}
         return mapping.get(severity.lower(), 2)
 
 
 class BanditAnalyzer(AnalysisTool):
-    """Python security analyzer using bandit"""
+    """Python security analyzer using bandit."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         super().__init__("bandit", "python", config)
 
-    async def analyze(self, files: List[str]) -> List[ReviewIssue]:
-        """Analyze Python files for security issues"""
+    async def analyze(self, files: list[str]) -> list[ReviewIssue]:
+        """Analyze Python files for security issues."""
         if not files:
             return []
 
         try:
-            cmd = ["bandit", "-r", "-f", "json"] + files
+            cmd = ["bandit", "-r", "-f", "json", *files]
             if self.config.get("args"):
                 cmd.extend(self.config["args"])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
 
             issues = []
-            if result.stdout:
+            if stdout:
                 try:
-                    bandit_data = json.loads(result.stdout)
+                    bandit_data = json.loads(stdout.decode())
                     results = bandit_data.get("results", [])
 
                     for item in results:
@@ -335,24 +345,24 @@ class BanditAnalyzer(AnalysisTool):
                                 suggestion=self._generate_security_suggestion(item),
                                 rule_id=item.get("test_id", ""),
                                 severity=self._map_severity_score(
-                                    item.get("issue_severity", "MEDIUM")
+                                    item.get("issue_severity", "MEDIUM"),
                                 ),
-                            )
+                            ),
                         )
                 except json.JSONDecodeError:
-                    self.logger.error("Failed to parse bandit output")
+                    self.logger.exception("Failed to parse bandit output")
 
             return issues
 
         except subprocess.TimeoutExpired:
-            self.logger.error("Bandit analysis timed out")
+            self.logger.exception("Bandit analysis timed out")
             return []
         except Exception as e:
-            self.logger.error(f"Bandit analysis failed: {str(e)}")
+            self.logger.exception(f"Bandit analysis failed: {e!s}")
             return []
 
-    def _generate_security_suggestion(self, item: Dict[str, Any]) -> str:
-        """Generate security-focused suggestions"""
+    def _generate_security_suggestion(self, item: dict[str, Any]) -> str:
+        """Generate security-focused suggestions."""
         test_id = item.get("test_id", "")
 
         suggestions = {
@@ -369,36 +379,41 @@ class BanditAnalyzer(AnalysisTool):
         }
 
         return suggestions.get(
-            test_id, "Review security implications and follow OWASP guidelines"
+            test_id, "Review security implications and follow OWASP guidelines",
         )
 
     def _map_severity_score(self, severity: str) -> int:
-        """Map bandit severity to numeric score"""
+        """Map bandit severity to numeric score."""
         mapping = {"HIGH": 5, "MEDIUM": 3, "LOW": 1}
         return mapping.get(severity, 3)
 
 
 class MypyAnalyzer(AnalysisTool):
-    """Python type checking with mypy"""
+    """Python type checking with mypy."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         super().__init__("mypy", "python", config)
 
-    async def analyze(self, files: List[str]) -> List[ReviewIssue]:
-        """Analyze Python files for type issues"""
+    async def analyze(self, files: list[str]) -> list[ReviewIssue]:
+        """Analyze Python files for type issues."""
         if not files:
             return []
 
         try:
-            cmd = ["mypy", "--show-column-numbers", "--show-error-codes"] + files
+            cmd = ["mypy", "--show-column-numbers", "--show-error-codes", *files]
             if self.config.get("args"):
                 cmd.extend(self.config["args"])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300)
 
             issues = []
-            if result.stdout:
-                for line in result.stdout.splitlines():
+            if stdout:
+                for line in stdout.decode().splitlines():
                     issue = self._parse_mypy_line(line)
                     if issue:
                         issues.append(issue)
@@ -406,14 +421,14 @@ class MypyAnalyzer(AnalysisTool):
             return issues
 
         except subprocess.TimeoutExpired:
-            self.logger.error("Mypy analysis timed out")
+            self.logger.exception("Mypy analysis timed out")
             return []
         except Exception as e:
-            self.logger.error(f"Mypy analysis failed: {str(e)}")
+            self.logger.exception(f"Mypy analysis failed: {e!s}")
             return []
 
-    def _parse_mypy_line(self, line: str) -> Optional[ReviewIssue]:
-        """Parse mypy output line"""
+    def _parse_mypy_line(self, line: str) -> ReviewIssue | None:
+        """Parse mypy output line."""
         # Format: file.py:line:column: error: message [error-code]
         pattern = r"^(.+):(\d+):(\d+): (\w+): (.+?)(?:\s+\[(.+)\])?$"
         match = re.match(pattern, line)
@@ -434,29 +449,28 @@ class MypyAnalyzer(AnalysisTool):
             severity=3 if level == "error" else 2,
         )
 
-    def _generate_type_suggestion(self, message: str, error_code: Optional[str]) -> str:
-        """Generate type-related suggestions"""
+    def _generate_type_suggestion(self, message: str, error_code: str | None) -> str:
+        """Generate type-related suggestions."""
         if "incompatible types" in message.lower():
             return "Check type compatibility and add type annotations"
-        elif "has no attribute" in message.lower():
+        if "has no attribute" in message.lower():
             return "Verify attribute exists or add proper type guards"
-        elif "missing positional argument" in message.lower():
+        if "missing positional argument" in message.lower():
             return "Check function signature and provide required arguments"
-        elif "too many arguments" in message.lower():
+        if "too many arguments" in message.lower():
             return "Check function signature and remove extra arguments"
-        else:
-            return "Add proper type annotations and check type compatibility"
+        return "Add proper type annotations and check type compatibility"
 
 
 class QualityGateValidator:
-    """Validates code quality against configured thresholds"""
+    """Validates code quality against configured thresholds."""
 
-    def __init__(self, quality_gates: Dict[str, Any]):
+    def __init__(self, quality_gates: dict[str, Any]) -> None:
         self.quality_gates = quality_gates
         self.logger = logging.getLogger(__name__)
 
-    def validate(self, review_result: ReviewResult) -> Dict[str, str]:
-        """Validate quality gates and return results"""
+    def validate(self, review_result: ReviewResult) -> dict[str, str]:
+        """Validate quality gates and return results."""
         results = {}
 
         # Test coverage validation
@@ -525,16 +539,16 @@ class QualityGateValidator:
 
 
 class CodeReviewerEngine:
-    """Main code reviewer engine"""
+    """Main code reviewer engine."""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         self.config = config or self._load_default_config()
         self.logger = logging.getLogger(__name__)
-        self.analyzers: Dict[str, List[AnalysisTool]] = {}
+        self.analyzers: dict[str, list[AnalysisTool]] = {}
         self._initialize_analyzers()
 
-    def _load_default_config(self) -> Dict[str, Any]:
-        """Load default configuration"""
+    def _load_default_config(self) -> dict[str, Any]:
+        """Load default configuration."""
         return {
             "quality_gates": {
                 "min_test_coverage": 80,
@@ -547,14 +561,14 @@ class CodeReviewerEngine:
                     {"name": "ruff", "enabled": True},
                     {"name": "mypy", "enabled": True},
                     {"name": "bandit", "enabled": True},
-                ]
+                ],
             },
             "analysis_timeout": 600,  # 10 minutes
             "max_file_size_mb": 10,
         }
 
-    def _initialize_analyzers(self):
-        """Initialize analysis tools"""
+    def _initialize_analyzers(self) -> None:
+        """Initialize analysis tools."""
         # Python analyzers
         python_tools = []
 
@@ -566,21 +580,21 @@ class CodeReviewerEngine:
 
         if self._is_tool_enabled("python", "bandit"):
             python_tools.append(
-                BanditAnalyzer(self._get_tool_config("python", "bandit"))
+                BanditAnalyzer(self._get_tool_config("python", "bandit")),
             )
 
         self.analyzers["python"] = python_tools
 
     def _is_tool_enabled(self, language: str, tool_name: str) -> bool:
-        """Check if analysis tool is enabled"""
+        """Check if analysis tool is enabled."""
         tools = self.config.get("tools", {}).get(language, [])
         for tool in tools:
             if tool.get("name") == tool_name:
                 return tool.get("enabled", True)
         return False
 
-    def _get_tool_config(self, language: str, tool_name: str) -> Dict[str, Any]:
-        """Get configuration for specific tool"""
+    def _get_tool_config(self, language: str, tool_name: str) -> dict[str, Any]:
+        """Get configuration for specific tool."""
         tools = self.config.get("tools", {}).get(language, [])
         for tool in tools:
             if tool.get("name") == tool_name:
@@ -588,9 +602,9 @@ class CodeReviewerEngine:
         return {}
 
     async def review_files(
-        self, files: List[str], review_config: Dict[str, Any] = None
+        self, files: list[str], review_config: dict[str, Any] | None = None,
     ) -> ReviewResult:
-        """Review a list of files"""
+        """Review a list of files."""
         start_time = time.time()
         review_id = f"review-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
@@ -655,15 +669,15 @@ class CodeReviewerEngine:
 
         self.logger.info(
             f"Code review {review_id} completed: {result.status.value} "
-            f"(score: {overall_score}, time: {result.execution_time:.1f}s)"
+            f"(score: {overall_score}, time: {result.execution_time:.1f}s)",
         )
 
         return result
 
     async def _filter_files(
-        self, files: List[str], config: Dict[str, Any]
-    ) -> List[str]:
-        """Filter and validate files for analysis"""
+        self, files: list[str], config: dict[str, Any],
+    ) -> list[str]:
+        """Filter and validate files for analysis."""
         valid_files = []
         max_size = config.get("max_file_size_mb", 10) * 1024 * 1024
 
@@ -682,8 +696,13 @@ class CodeReviewerEngine:
 
             # Check if file is text-based
             try:
-                with open(path, "r", encoding="utf-8") as f:
-                    f.read(1024)  # Read first 1KB to test
+                if AIOFILES_AVAILABLE:
+                    async with aiofiles.open(path, encoding="utf-8") as f:
+                        await f.read(1024)  # Read first 1KB to test
+                else:
+                    # Fallback to sync operations if aiofiles not available
+                    with open(path, encoding="utf-8") as f:
+                        f.read(1024)  # Read first 1KB to test
                 valid_files.append(file_path)
             except (UnicodeDecodeError, PermissionError):
                 self.logger.warning(f"Cannot read file, skipping: {file_path}")
@@ -691,8 +710,8 @@ class CodeReviewerEngine:
 
         return valid_files
 
-    def _group_files_by_language(self, files: List[str]) -> Dict[str, List[str]]:
-        """Group files by detected language"""
+    def _group_files_by_language(self, files: list[str]) -> dict[str, list[str]]:
+        """Group files by detected language."""
         groups = {
             "python": [],
             "javascript": [],
@@ -718,8 +737,8 @@ class CodeReviewerEngine:
         # Remove empty groups
         return {lang: files for lang, files in groups.items() if files}
 
-    async def _analyze_files(self, language: str, files: List[str]) -> List[FileReview]:
-        """Analyze files with language-specific tools"""
+    async def _analyze_files(self, language: str, files: list[str]) -> list[FileReview]:
+        """Analyze files with language-specific tools."""
         file_reviews = []
         analyzers = self.analyzers.get(language, [])
 
@@ -734,7 +753,7 @@ class CodeReviewerEngine:
                         score=100,
                         issues=[],
                         metrics={"analyzer": "none"},
-                    )
+                    ),
                 )
             return file_reviews
 
@@ -764,10 +783,10 @@ class CodeReviewerEngine:
                 issues = await asyncio.wait_for(task, timeout=300)
                 all_issues[analyzer_name] = issues
             except asyncio.TimeoutError:
-                self.logger.error(f"Analyzer {analyzer_name} timed out")
+                self.logger.exception(f"Analyzer {analyzer_name} timed out")
                 all_issues[analyzer_name] = []
             except Exception as e:
-                self.logger.error(f"Analyzer {analyzer_name} failed: {str(e)}")
+                self.logger.exception(f"Analyzer {analyzer_name} failed: {e!s}")
                 all_issues[analyzer_name] = []
 
         # Group issues by file
@@ -796,21 +815,21 @@ class CodeReviewerEngine:
                         "lines_of_code": self._count_lines(file_path),
                         "analyzers_used": list(all_issues.keys()),
                     },
-                )
+                ),
             )
 
         return file_reviews
 
     def _find_file_for_issue(
-        self, issue: ReviewIssue, files: List[str]
-    ) -> Optional[str]:
-        """Find which file an issue belongs to"""
+        self, issue: ReviewIssue, files: list[str],
+    ) -> str | None:
+        """Find which file an issue belongs to."""
         # This is a simplified implementation
         # In a real implementation, analyzers would include file path in issues
         return files[0] if files else None
 
-    def _calculate_file_score(self, issues: List[ReviewIssue], file_path: str) -> int:
-        """Calculate quality score for a file"""
+    def _calculate_file_score(self, issues: list[ReviewIssue], file_path: str) -> int:
+        """Calculate quality score for a file."""
         if not issues:
             return 100
 
@@ -829,9 +848,9 @@ class CodeReviewerEngine:
         return max(0, score)
 
     def _determine_file_status(
-        self, score: int, issues: List[ReviewIssue]
+        self, score: int, issues: list[ReviewIssue],
     ) -> ReviewStatus:
-        """Determine review status for a file"""
+        """Determine review status for a file."""
         # Check for critical issues
         critical_issues = [
             i for i in issues if i.type == IssueType.ERROR and i.severity >= 4
@@ -842,23 +861,22 @@ class CodeReviewerEngine:
         # Check score thresholds
         if score >= 85:
             return ReviewStatus.APPROVED
-        elif score >= 60:
+        if score >= 60:
             return ReviewStatus.NEEDS_CHANGES
-        else:
-            return ReviewStatus.REJECTED
+        return ReviewStatus.REJECTED
 
     def _count_lines(self, file_path: str) -> int:
-        """Count lines of code in file"""
+        """Count lines of code in file."""
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 return len([line for line in f if line.strip()])
         except Exception:
             return 0
 
     async def _calculate_quality_metrics(
-        self, file_reviews: List[FileReview]
+        self, file_reviews: list[FileReview],
     ) -> QualityMetrics:
-        """Calculate overall quality metrics"""
+        """Calculate overall quality metrics."""
         total_issues = sum(len(fr.issues) for fr in file_reviews)
         total_lines = sum(fr.metrics.get("lines_of_code", 0) for fr in file_reviews)
 
@@ -894,9 +912,9 @@ class CodeReviewerEngine:
         )
 
     def _generate_summary(
-        self, file_reviews: List[FileReview], total_lines: int
+        self, file_reviews: list[FileReview], total_lines: int,
     ) -> ReviewSummary:
-        """Generate review summary"""
+        """Generate review summary."""
         total_issues = sum(len(fr.issues) for fr in file_reviews)
         critical_issues = sum(
             len([i for i in fr.issues if i.type == IssueType.ERROR and i.severity >= 4])
@@ -921,9 +939,9 @@ class CodeReviewerEngine:
         )
 
     def _calculate_overall_score(
-        self, file_reviews: List[FileReview], quality_metrics: QualityMetrics
+        self, file_reviews: list[FileReview], quality_metrics: QualityMetrics,
     ) -> int:
-        """Calculate overall review score"""
+        """Calculate overall review score."""
         if not file_reviews:
             return 100
 
@@ -950,10 +968,10 @@ class CodeReviewerEngine:
     def _determine_status(
         self,
         overall_score: int,
-        file_reviews: List[FileReview],
+        file_reviews: list[FileReview],
         quality_metrics: QualityMetrics,
     ) -> ReviewStatus:
-        """Determine overall review status"""
+        """Determine overall review status."""
         # Check for critical security issues
         if quality_metrics.security_score < 50:
             return ReviewStatus.REJECTED
@@ -965,15 +983,14 @@ class CodeReviewerEngine:
         # Check overall score
         if overall_score >= 85:
             return ReviewStatus.APPROVED
-        elif overall_score >= 60:
+        if overall_score >= 60:
             return ReviewStatus.NEEDS_CHANGES
-        else:
-            return ReviewStatus.REJECTED
+        return ReviewStatus.REJECTED
 
     def _generate_recommendations(
-        self, file_reviews: List[FileReview], quality_metrics: QualityMetrics
-    ) -> List[str]:
-        """Generate actionable recommendations"""
+        self, file_reviews: list[FileReview], quality_metrics: QualityMetrics,
+    ) -> list[str]:
+        """Generate actionable recommendations."""
         recommendations = []
 
         # Security recommendations
@@ -990,13 +1007,13 @@ class CodeReviewerEngine:
 
         if quality_metrics.cyclomatic_complexity > 10:
             recommendations.append(
-                "Simplify complex functions to improve maintainability"
+                "Simplify complex functions to improve maintainability",
             )
 
         # Test recommendations
         if quality_metrics.test_coverage < 80:
             recommendations.append(
-                "Increase test coverage to improve quality assurance"
+                "Increase test coverage to improve quality assurance",
             )
 
         # Documentation recommendations
@@ -1019,8 +1036,8 @@ class CodeReviewerEngine:
 
 
 # CLI Interface
-async def main():
-    """Main CLI entry point"""
+async def main() -> None:
+    """Main CLI entry point."""
     import argparse
 
     parser = argparse.ArgumentParser(description="CodeReviewer Agent")
@@ -1029,24 +1046,24 @@ async def main():
     # Review command
     review_parser = subparsers.add_parser("review", help="Review files")
     review_parser.add_argument(
-        "--files", required=True, help="Comma-separated list of files"
+        "--files", required=True, help="Comma-separated list of files",
     )
     review_parser.add_argument(
-        "--language", help="Primary language (python, javascript, etc.)"
+        "--language", help="Primary language (python, javascript, etc.)",
     )
     review_parser.add_argument(
-        "--quality-gates", help="Quality gates profile (strict, standard, lenient)"
+        "--quality-gates", help="Quality gates profile (strict, standard, lenient)",
     )
     review_parser.add_argument(
-        "--output-format", choices=["json", "yaml", "text"], default="json"
+        "--output-format", choices=["json", "yaml", "text"], default="json",
     )
     review_parser.add_argument("--output-file", help="Output file path")
 
     # Health check command
-    health_parser = subparsers.add_parser("health-check", help="Check system health")
+    subparsers.add_parser("health-check", help="Check system health")
 
     # Tool availability command
-    tools_parser = subparsers.add_parser("tools", help="Check tool availability")
+    subparsers.add_parser("tools", help="Check tool availability")
 
     args = parser.parse_args()
 
@@ -1097,10 +1114,15 @@ Recommendations:
             """.strip()
 
         if args.output_file:
-            with open(args.output_file, "w") as f:
-                f.write(output)
+            if AIOFILES_AVAILABLE:
+                async with aiofiles.open(args.output_file, "w") as f:
+                    await f.write(output)
+            else:
+                # Fallback to sync operations if aiofiles not available
+                with open(args.output_file, "w") as f:
+                    f.write(output)
         else:
-            print(output)
+            pass
 
         # Exit with appropriate code
         sys.exit(0 if result.status == ReviewStatus.APPROVED else 1)
@@ -1108,8 +1130,6 @@ Recommendations:
     elif args.command == "health-check":
         reviewer = CodeReviewerEngine()
 
-        print("CodeReviewer Health Check")
-        print("=" * 24)
 
         # Check Python tools
         python_tools = ["ruff", "mypy", "bandit", "black"]
@@ -1117,30 +1137,26 @@ Recommendations:
 
         for tool_name in python_tools:
             try:
-                result = subprocess.run(
-                    [tool_name, "--version"], capture_output=True, timeout=5
+                process = await asyncio.create_subprocess_exec(
+                    tool_name, "--version",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
                 )
-                if result.returncode == 0:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+                if process.returncode == 0:
                     available_tools.append(tool_name)
-                    print(f"✓ {tool_name} available")
                 else:
-                    print(f"✗ {tool_name} not working")
+                    pass
             except (FileNotFoundError, subprocess.TimeoutExpired):
-                print(f"✗ {tool_name} not found")
+                pass
 
         # Overall status
         if len(available_tools) >= len(python_tools) // 2:
-            print("\nSystem Status: HEALTHY")
-            print("Ready for code review operations.")
+            pass
         else:
-            print("\nSystem Status: DEGRADED")
-            print(
-                "Some tools are missing. Install missing tools for full functionality."
-            )
+            pass
 
     elif args.command == "tools":
-        print("Available Analysis Tools")
-        print("=" * 24)
 
         tools_info = {
             "ruff": "Ultra-fast Python linter",
@@ -1151,15 +1167,14 @@ Recommendations:
             "prettier": "JavaScript/TypeScript formatter",
         }
 
-        for tool, description in tools_info.items():
-            try:
-                result = subprocess.run(
-                    [tool, "--version"], capture_output=True, timeout=5
+        for tool in tools_info:
+            with contextlib.suppress(FileNotFoundError):
+                process = await asyncio.create_subprocess_exec(
+                    tool, "--version",
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
                 )
-                status = "✓" if result.returncode == 0 else "✗"
-                print(f"{status} {tool}: {description}")
-            except FileNotFoundError:
-                print(f"✗ {tool}: {description} (not installed)")
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
 
     else:
         parser.print_help()

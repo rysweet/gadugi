@@ -1,46 +1,41 @@
-"""
-Tests for CodeReviewer Engine
+"""Tests for CodeReviewer Engine.
 
 Comprehensive test suite covering code analysis, quality metrics,
 and review workflow integration.
 """
 
-import asyncio
 import json
-import pytest
-import tempfile
-import subprocess
-from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime
-
-import sys
 import os
+import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from code_reviewer_engine import (
-    CodeReviewerEngine,
-    ReviewIssue,
-    FileReview,
-    ReviewResult,
-    ReviewStatus,
-    IssueType,
-    IssueCategory,
-    QualityMetrics,
-    ReviewSummary,
-    RuffAnalyzer,
     BanditAnalyzer,
+    CodeReviewerEngine,
+    FileReview,
+    IssueCategory,
+    IssueType,
     MypyAnalyzer,
     QualityGateValidator,
+    QualityMetrics,
+    ReviewIssue,
+    ReviewResult,
+    ReviewStatus,
+    RuffAnalyzer,
 )
 
 
 class TestReviewIssue:
-    """Test ReviewIssue data class"""
+    """Test ReviewIssue data class."""
 
-    def test_issue_creation(self):
-        """Test basic issue creation"""
+    def test_issue_creation(self) -> None:
+        """Test basic issue creation."""
         issue = ReviewIssue(
             line=45,
             column=12,
@@ -57,8 +52,8 @@ class TestReviewIssue:
         assert issue.category == IssueCategory.STYLE
         assert issue.severity == 2
 
-    def test_issue_to_dict(self):
-        """Test issue serialization"""
+    def test_issue_to_dict(self) -> None:
+        """Test issue serialization."""
         issue = ReviewIssue(
             line=10,
             column=5,
@@ -79,10 +74,10 @@ class TestReviewIssue:
 
 
 class TestFileReview:
-    """Test FileReview data class"""
+    """Test FileReview data class."""
 
-    def test_file_review_creation(self):
-        """Test file review creation"""
+    def test_file_review_creation(self) -> None:
+        """Test file review creation."""
         issues = [
             ReviewIssue(
                 line=1,
@@ -93,7 +88,7 @@ class TestFileReview:
                 suggestion="Fix it",
                 rule_id="TEST",
                 severity=1,
-            )
+            ),
         ]
 
         review = FileReview(
@@ -109,8 +104,8 @@ class TestFileReview:
         assert review.score == 75
         assert len(review.issues) == 1
 
-    def test_file_review_to_dict(self):
-        """Test file review serialization"""
+    def test_file_review_to_dict(self) -> None:
+        """Test file review serialization."""
         review = FileReview(
             file_path="example.py",
             status=ReviewStatus.APPROVED,
@@ -128,15 +123,15 @@ class TestFileReview:
 
 
 class TestRuffAnalyzer:
-    """Test Ruff analyzer integration"""
+    """Test Ruff analyzer integration."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.analyzer = RuffAnalyzer()
 
     @pytest.mark.asyncio
-    async def test_is_available_tool_present(self):
-        """Test tool availability check when tool is present"""
+    async def test_is_available_tool_present(self) -> None:
+        """Test tool availability check when tool is present."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = Mock(returncode=0)
 
@@ -145,8 +140,8 @@ class TestRuffAnalyzer:
             mock_run.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_is_available_tool_missing(self):
-        """Test tool availability check when tool is missing"""
+    async def test_is_available_tool_missing(self) -> None:
+        """Test tool availability check when tool is missing."""
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = FileNotFoundError()
 
@@ -154,8 +149,8 @@ class TestRuffAnalyzer:
             assert not available
 
     @pytest.mark.asyncio
-    async def test_analyze_with_issues(self):
-        """Test analysis with ruff issues"""
+    async def test_analyze_with_issues(self) -> None:
+        """Test analysis with ruff issues."""
         mock_output = json.dumps(
             [
                 {
@@ -163,8 +158,8 @@ class TestRuffAnalyzer:
                     "severity": "error",
                     "message": "Line too long (89 > 88 characters)",
                     "code": "E501",
-                }
-            ]
+                },
+            ],
         )
 
         with patch("subprocess.run") as mock_run:
@@ -181,22 +176,22 @@ class TestRuffAnalyzer:
             assert issue.rule_id == "E501"
 
     @pytest.mark.asyncio
-    async def test_analyze_no_issues(self):
-        """Test analysis with no issues"""
+    async def test_analyze_no_issues(self) -> None:
+        """Test analysis with no issues."""
         with patch("subprocess.run") as mock_run:
             mock_run.return_value = Mock(returncode=0, stdout="", stderr="")
 
             issues = await self.analyzer.analyze(["test.py"])
             assert len(issues) == 0
 
-    def test_map_severity(self):
-        """Test severity mapping"""
+    def test_map_severity(self) -> None:
+        """Test severity mapping."""
         assert self.analyzer._map_severity("error") == IssueType.ERROR
         assert self.analyzer._map_severity("warning") == IssueType.WARNING
         assert self.analyzer._map_severity("note") == IssueType.INFO
 
-    def test_map_category(self):
-        """Test category mapping"""
+    def test_map_category(self) -> None:
+        """Test category mapping."""
         assert self.analyzer._map_category("E501") == IssueCategory.STYLE
         assert self.analyzer._map_category("F401") == IssueCategory.QUALITY
         assert self.analyzer._map_category("S101") == IssueCategory.SECURITY
@@ -204,15 +199,15 @@ class TestRuffAnalyzer:
 
 
 class TestBanditAnalyzer:
-    """Test Bandit security analyzer"""
+    """Test Bandit security analyzer."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.analyzer = BanditAnalyzer()
 
     @pytest.mark.asyncio
-    async def test_analyze_security_issues(self):
-        """Test security issue detection"""
+    async def test_analyze_security_issues(self) -> None:
+        """Test security issue detection."""
         mock_output = json.dumps(
             {
                 "results": [
@@ -222,9 +217,9 @@ class TestBanditAnalyzer:
                         "issue_severity": "HIGH",
                         "issue_text": "Use of exec detected",
                         "test_id": "B102",
-                    }
-                ]
-            }
+                    },
+                ],
+            },
         )
 
         with patch("subprocess.run") as mock_run:
@@ -240,8 +235,8 @@ class TestBanditAnalyzer:
             assert issue.rule_id == "B102"
             assert issue.severity == 5
 
-    def test_generate_security_suggestion(self):
-        """Test security suggestion generation"""
+    def test_generate_security_suggestion(self) -> None:
+        """Test security suggestion generation."""
         item = {"test_id": "B101"}
         suggestion = self.analyzer._generate_security_suggestion(item)
         assert "assert only for debugging" in suggestion
@@ -252,15 +247,15 @@ class TestBanditAnalyzer:
 
 
 class TestMypyAnalyzer:
-    """Test MyPy type checker integration"""
+    """Test MyPy type checker integration."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.analyzer = MypyAnalyzer()
 
     @pytest.mark.asyncio
-    async def test_analyze_type_errors(self):
-        """Test type error detection"""
+    async def test_analyze_type_errors(self) -> None:
+        """Test type error detection."""
         mock_output = """test.py:15:8: error: Incompatible types in assignment [assignment]
 test.py:20:12: warning: Unused variable 'x' [misc]"""
 
@@ -281,8 +276,8 @@ test.py:20:12: warning: Unused variable 'x' [misc]"""
             assert warning_issue.line == 20
             assert warning_issue.type == IssueType.WARNING
 
-    def test_parse_mypy_line(self):
-        """Test mypy output parsing"""
+    def test_parse_mypy_line(self) -> None:
+        """Test mypy output parsing."""
         line = "test.py:10:5: error: Name 'undefined_var' is not defined [name-defined]"
         issue = self.analyzer._parse_mypy_line(line)
 
@@ -293,18 +288,18 @@ test.py:20:12: warning: Unused variable 'x' [misc]"""
         assert issue.rule_id == "name-defined"
         assert "Name 'undefined_var' is not defined" in issue.message
 
-    def test_parse_invalid_line(self):
-        """Test parsing invalid mypy output"""
+    def test_parse_invalid_line(self) -> None:
+        """Test parsing invalid mypy output."""
         line = "Invalid mypy output line"
         issue = self.analyzer._parse_mypy_line(line)
         assert issue is None
 
 
 class TestQualityGateValidator:
-    """Test quality gate validation"""
+    """Test quality gate validation."""
 
-    def test_coverage_validation_pass(self):
-        """Test coverage validation passing"""
+    def test_coverage_validation_pass(self) -> None:
+        """Test coverage validation passing."""
         gates = {"min_test_coverage": 80}
         validator = QualityGateValidator(gates)
 
@@ -317,8 +312,8 @@ class TestQualityGateValidator:
         validation = validator.validate(result)
         assert validation["coverage_check"] == "passed"
 
-    def test_coverage_validation_fail(self):
-        """Test coverage validation failing"""
+    def test_coverage_validation_fail(self) -> None:
+        """Test coverage validation failing."""
         gates = {"min_test_coverage": 90}
         validator = QualityGateValidator(gates)
 
@@ -330,8 +325,8 @@ class TestQualityGateValidator:
         validation = validator.validate(result)
         assert validation["coverage_check"] == "failed"
 
-    def test_security_validation_strict(self):
-        """Test strict security validation"""
+    def test_security_validation_strict(self) -> None:
+        """Test strict security validation."""
         gates = {"security_level": "strict"}
         validator = QualityGateValidator(gates)
 
@@ -352,20 +347,20 @@ class TestQualityGateValidator:
 
 
 class TestCodeReviewerEngine:
-    """Test main code reviewer engine"""
+    """Test main code reviewer engine."""
 
-    def setup_method(self):
-        """Set up test fixtures"""
+    def setup_method(self) -> None:
+        """Set up test fixtures."""
         self.engine = CodeReviewerEngine()
 
-    def test_initialize_analyzers(self):
-        """Test analyzer initialization"""
+    def test_initialize_analyzers(self) -> None:
+        """Test analyzer initialization."""
         assert "python" in self.engine.analyzers
         python_analyzers = self.engine.analyzers["python"]
         assert len(python_analyzers) > 0
 
-    def test_group_files_by_language(self):
-        """Test file language grouping"""
+    def test_group_files_by_language(self) -> None:
+        """Test file language grouping."""
         files = ["module.py", "script.js", "component.tsx", "main.go", "config.yaml"]
 
         groups = self.engine._group_files_by_language(files)
@@ -381,13 +376,13 @@ class TestCodeReviewerEngine:
         assert "other" in groups
         assert "config.yaml" in groups["other"]
 
-    def test_calculate_file_score_no_issues(self):
-        """Test file score calculation with no issues"""
+    def test_calculate_file_score_no_issues(self) -> None:
+        """Test file score calculation with no issues."""
         score = self.engine._calculate_file_score([], "test.py")
         assert score == 100
 
-    def test_calculate_file_score_with_issues(self):
-        """Test file score calculation with issues"""
+    def test_calculate_file_score_with_issues(self) -> None:
+        """Test file score calculation with issues."""
         issues = [
             ReviewIssue(
                 line=1,
@@ -415,18 +410,18 @@ class TestCodeReviewerEngine:
         # 100 - (3*3) - (2*2) = 100 - 9 - 4 = 87
         assert score == 87
 
-    def test_determine_file_status_approved(self):
-        """Test file status determination - approved"""
+    def test_determine_file_status_approved(self) -> None:
+        """Test file status determination - approved."""
         status = self.engine._determine_file_status(90, [])
         assert status == ReviewStatus.APPROVED
 
-    def test_determine_file_status_needs_changes(self):
-        """Test file status determination - needs changes"""
+    def test_determine_file_status_needs_changes(self) -> None:
+        """Test file status determination - needs changes."""
         status = self.engine._determine_file_status(70, [])
         assert status == ReviewStatus.NEEDS_CHANGES
 
-    def test_determine_file_status_rejected(self):
-        """Test file status determination - rejected"""
+    def test_determine_file_status_rejected(self) -> None:
+        """Test file status determination - rejected."""
         # Low score
         status = self.engine._determine_file_status(30, [])
         assert status == ReviewStatus.REJECTED
@@ -446,8 +441,8 @@ class TestCodeReviewerEngine:
         assert status == ReviewStatus.REJECTED
 
     @pytest.mark.asyncio
-    async def test_filter_files_valid(self):
-        """Test file filtering with valid files"""
+    async def test_filter_files_valid(self) -> None:
+        """Test file filtering with valid files."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("print('hello')")
             temp_file = f.name
@@ -460,13 +455,13 @@ class TestCodeReviewerEngine:
             Path(temp_file).unlink()
 
     @pytest.mark.asyncio
-    async def test_filter_files_nonexistent(self):
-        """Test file filtering with non-existent files"""
+    async def test_filter_files_nonexistent(self) -> None:
+        """Test file filtering with non-existent files."""
         files = await self.engine._filter_files(["nonexistent.py"], {})
         assert len(files) == 0
 
-    def test_generate_recommendations(self):
-        """Test recommendation generation"""
+    def test_generate_recommendations(self) -> None:
+        """Test recommendation generation."""
         # Create mock data with various issues
         file_reviews = []
 
@@ -487,7 +482,7 @@ class TestCodeReviewerEngine:
                 status=ReviewStatus.NEEDS_CHANGES,
                 score=70,
                 issues=[security_issue],
-            )
+            ),
         )
 
         # File with style issues
@@ -510,16 +505,16 @@ class TestCodeReviewerEngine:
                 status=ReviewStatus.NEEDS_CHANGES,
                 score=75,
                 issues=style_issues,
-            )
+            ),
         )
 
         # Mock quality metrics
         quality_metrics = QualityMetrics(
-            technical_debt_ratio=8.0, cyclomatic_complexity=12.0, test_coverage=65.0
+            technical_debt_ratio=8.0, cyclomatic_complexity=12.0, test_coverage=65.0,
         )
 
         recommendations = self.engine._generate_recommendations(
-            file_reviews, quality_metrics
+            file_reviews, quality_metrics,
         )
 
         # Should include security, debt, complexity, coverage, and style recommendations
@@ -531,8 +526,8 @@ class TestCodeReviewerEngine:
         assert any("style" in rec.lower() for rec in recommendations)
 
     @pytest.mark.asyncio
-    async def test_review_files_integration(self):
-        """Test complete file review integration"""
+    async def test_review_files_integration(self) -> None:
+        """Test complete file review integration."""
         # Create temporary Python file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
@@ -562,7 +557,7 @@ if __name__ == "__main__":
                         suggestion="Add function docstring",
                         rule_id="D100",
                         severity=1,
-                    )
+                    ),
                 ]
 
                 result = await self.engine.review_files([temp_file])
@@ -581,11 +576,11 @@ if __name__ == "__main__":
 
 
 class TestReviewIntegration:
-    """Integration tests for complete review workflows"""
+    """Integration tests for complete review workflows."""
 
     @pytest.mark.asyncio
-    async def test_empty_file_list(self):
-        """Test review with empty file list"""
+    async def test_empty_file_list(self) -> None:
+        """Test review with empty file list."""
         engine = CodeReviewerEngine()
         result = await engine.review_files([])
 
@@ -594,8 +589,8 @@ class TestReviewIntegration:
         assert result.overall_score == 100
 
     @pytest.mark.asyncio
-    async def test_multiple_files_review(self):
-        """Test review with multiple files"""
+    async def test_multiple_files_review(self) -> None:
+        """Test review with multiple files."""
         # Create multiple temporary files
         temp_files = []
 
@@ -631,8 +626,8 @@ def function_{i}():
                 Path(temp_file).unlink()
 
     @pytest.mark.asyncio
-    async def test_quality_gates_integration(self):
-        """Test quality gates integration"""
+    async def test_quality_gates_integration(self) -> None:
+        """Test quality gates integration."""
         engine = CodeReviewerEngine()
 
         # Create config with strict quality gates
@@ -641,7 +636,7 @@ def function_{i}():
                 "min_test_coverage": 95,
                 "max_cyclomatic_complexity": 5,
                 "security_level": "strict",
-            }
+            },
         }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
@@ -664,11 +659,11 @@ def function_{i}():
 
 
 class TestPerformanceAndEdgeCases:
-    """Performance and edge case tests"""
+    """Performance and edge case tests."""
 
     @pytest.mark.asyncio
-    async def test_large_file_handling(self):
-        """Test handling of large files"""
+    async def test_large_file_handling(self) -> None:
+        """Test handling of large files."""
         engine = CodeReviewerEngine()
 
         # Create a file just under the size limit
@@ -690,15 +685,15 @@ class TestPerformanceAndEdgeCases:
         finally:
             Path(temp_file).unlink()
 
-    def test_count_lines(self):
-        """Test line counting functionality"""
+    def test_count_lines(self) -> None:
+        """Test line counting functionality."""
         engine = CodeReviewerEngine()
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             content = """
 def hello():
     print("Hello")
-    
+
     return True
 
 # Comment

@@ -1,25 +1,28 @@
 #!/usr/bin/env python3
-"""
-LLM Proxy Service for Gadugi v0.3
+"""LLM Proxy Service for Gadugi v0.3.
 
 Provides provider abstraction and unified access to multiple LLM providers.
 Handles load balancing, failover, rate limiting, caching, and cost optimization.
 """
+from __future__ import annotations
 
 import asyncio
+import contextlib
+import hashlib
 import json
 import logging
+import threading
 import time
 import uuid
-import hashlib
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Callable, AsyncIterator
-from dataclasses import dataclass, asdict
-from enum import Enum
-import threading
 from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 # Optional provider imports with fallbacks
 try:
@@ -97,7 +100,7 @@ class ModelConfig:
 
     provider: LLMProvider
     model_name: str
-    capabilities: List[ModelCapability]
+    capabilities: list[ModelCapability]
     max_tokens: int
     cost_per_token: float
     rate_limit_rpm: int
@@ -105,8 +108,8 @@ class ModelConfig:
     context_window: int
     supports_streaming: bool = True
     supports_functions: bool = False
-    api_endpoint: Optional[str] = None
-    api_key: Optional[str] = None
+    api_endpoint: str | None = None
+    api_key: str | None = None
     weight: float = 1.0
     priority: int = 1
 
@@ -117,20 +120,20 @@ class LLMRequest:
 
     id: str
     type: RequestType
-    provider: Optional[LLMProvider] = None
-    model: Optional[str] = None
-    messages: Optional[List[Dict[str, str]]] = None
-    prompt: Optional[str] = None
-    max_tokens: Optional[int] = None
+    provider: LLMProvider | None = None
+    model: str | None = None
+    messages: list[dict[str, str]] | None = None
+    prompt: str | None = None
+    max_tokens: int | None = None
     temperature: float = 0.7
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
-    stop_sequences: Optional[List[str]] = None
+    stop_sequences: list[str] | None = None
     stream: bool = False
-    functions: Optional[List[Dict[str, Any]]] = None
-    function_call: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    functions: list[dict[str, Any]] | None = None
+    function_call: str | None = None
+    metadata: dict[str, Any] = None
     created_at: datetime = None
 
     def __post_init__(self):
@@ -149,10 +152,10 @@ class LLMResponse:
     provider: LLMProvider
     model: str
     content: str
-    usage: Dict[str, int]
+    usage: dict[str, int]
     finish_reason: str
-    function_calls: Optional[List[Dict[str, Any]]] = None
-    metadata: Dict[str, Any] = None
+    function_calls: list[dict[str, Any]] | None = None
+    metadata: dict[str, Any] = None
     created_at: datetime = None
     response_time: float = 0.0
 
@@ -174,7 +177,7 @@ class ProviderStats:
     total_tokens: int = 0
     total_cost: float = 0.0
     average_response_time: float = 0.0
-    last_request_time: Optional[datetime] = None
+    last_request_time: datetime | None = None
     rate_limit_hits: int = 0
     error_rate: float = 0.0
 
@@ -210,11 +213,11 @@ class CacheEntry:
 class RateLimiter:
     """Rate limiting implementation."""
 
-    def __init__(self, requests_per_minute: int, tokens_per_minute: int):
+    def __init__(self, requests_per_minute: int, tokens_per_minute: int) -> None:
         self.requests_per_minute = requests_per_minute
         self.tokens_per_minute = tokens_per_minute
-        self.request_times: List[datetime] = []
-        self.token_usage: List[Tuple[datetime, int]] = []
+        self.request_times: list[datetime] = []
+        self.token_usage: list[Tuple[datetime, int]] = []
         self.lock = threading.Lock()
 
     def can_make_request(self, estimated_tokens: int = 0) -> bool:
@@ -235,12 +238,9 @@ class RateLimiter:
 
             # Check token rate limit
             total_tokens = sum(tokens for _, tokens in self.token_usage)
-            if total_tokens + estimated_tokens > self.tokens_per_minute:
-                return False
+            return not total_tokens + estimated_tokens > self.tokens_per_minute
 
-            return True
-
-    def record_request(self, tokens_used: int = 0):
+    def record_request(self, tokens_used: int = 0) -> None:
         """Record a request for rate limiting."""
         with self.lock:
             now = datetime.now()
@@ -252,7 +252,7 @@ class RateLimiter:
 class LLMProviderBase(ABC):
     """Abstract base class for LLM providers."""
 
-    def __init__(self, config: ModelConfig):
+    def __init__(self, config: ModelConfig) -> None:
         self.config = config
         self.stats = ProviderStats(provider=config.provider)
         self.rate_limiter = RateLimiter(config.rate_limit_rpm, config.rate_limit_tpm)
@@ -265,7 +265,7 @@ class LLMProviderBase(ABC):
 
     @abstractmethod
     async def generate_streaming_completion(
-        self, request: LLMRequest
+        self, request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion for the request."""
         ...
@@ -289,7 +289,7 @@ class LLMProviderBase(ABC):
 
         return True
 
-    def update_stats(self, request: LLMRequest, response: LLMResponse, success: bool):
+    def update_stats(self, request: LLMRequest, response: LLMResponse, success: bool) -> None:
         """Update provider statistics."""
         self.stats.total_requests += 1
         self.stats.last_request_time = datetime.now()
@@ -322,7 +322,7 @@ class LLMProviderBase(ABC):
 class OpenAIProvider(LLMProviderBase):
     """OpenAI provider implementation."""
 
-    def __init__(self, config: ModelConfig):
+    def __init__(self, config: ModelConfig) -> None:
         super().__init__(config)
         if OPENAI_AVAILABLE:
             self.client = openai.AsyncOpenAI(api_key=config.api_key)
@@ -332,7 +332,8 @@ class OpenAIProvider(LLMProviderBase):
     async def generate_completion(self, request: LLMRequest) -> LLMResponse:
         """Generate completion using OpenAI API."""
         if not self.client:
-            raise Exception("OpenAI client not available")
+            msg = "OpenAI client not available"
+            raise Exception(msg)
 
         start_time = time.time()
 
@@ -395,28 +396,29 @@ class OpenAIProvider(LLMProviderBase):
 
         except Exception as e:
             response_time = time.time() - start_time
-            self.logger.error(f"OpenAI request failed: {e}")
+            self.logger.exception(f"OpenAI request failed: {e}")
 
             error_response = LLMResponse(
                 id=str(uuid.uuid4()),
                 request_id=request.id,
                 provider=self.config.provider,
                 model=self.config.model_name,
-                content=f"Error: {str(e)}",
+                content=f"Error: {e!s}",
                 usage={},
                 finish_reason="error",
                 response_time=response_time,
             )
 
             self.update_stats(request, error_response, False)
-            raise e
+            raise
 
     async def generate_streaming_completion(
-        self, request: LLMRequest
+        self, request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion using OpenAI API."""
         if not self.client:
-            raise Exception("OpenAI client not available")
+            msg = "OpenAI client not available"
+            raise Exception(msg)
 
         try:
             if request.messages:
@@ -445,14 +447,14 @@ class OpenAIProvider(LLMProviderBase):
                         yield chunk.choices[0].text
 
         except Exception as e:
-            self.logger.error(f"OpenAI streaming request failed: {e}")
-            raise e
+            self.logger.exception(f"OpenAI streaming request failed: {e}")
+            raise
 
 
 class AnthropicProvider(LLMProviderBase):
     """Anthropic provider implementation."""
 
-    def __init__(self, config: ModelConfig):
+    def __init__(self, config: ModelConfig) -> None:
         super().__init__(config)
         if ANTHROPIC_AVAILABLE:
             self.client = anthropic.AsyncAnthropic(api_key=config.api_key)
@@ -462,7 +464,8 @@ class AnthropicProvider(LLMProviderBase):
     async def generate_completion(self, request: LLMRequest) -> LLMResponse:
         """Generate completion using Anthropic API."""
         if not self.client:
-            raise Exception("Anthropic client not available")
+            msg = "Anthropic client not available"
+            raise Exception(msg)
 
         start_time = time.time()
 
@@ -473,7 +476,7 @@ class AnthropicProvider(LLMProviderBase):
                 for msg in request.messages:
                     if msg["role"] in ["user", "assistant"]:
                         messages.append(
-                            {"role": msg["role"], "content": msg["content"]}
+                            {"role": msg["role"], "content": msg["content"]},
                         )
 
             response = await self.client.messages.create(
@@ -509,28 +512,29 @@ class AnthropicProvider(LLMProviderBase):
 
         except Exception as e:
             response_time = time.time() - start_time
-            self.logger.error(f"Anthropic request failed: {e}")
+            self.logger.exception(f"Anthropic request failed: {e}")
 
             error_response = LLMResponse(
                 id=str(uuid.uuid4()),
                 request_id=request.id,
                 provider=self.config.provider,
                 model=self.config.model_name,
-                content=f"Error: {str(e)}",
+                content=f"Error: {e!s}",
                 usage={},
                 finish_reason="error",
                 response_time=response_time,
             )
 
             self.update_stats(request, error_response, False)
-            raise e
+            raise
 
     async def generate_streaming_completion(
-        self, request: LLMRequest
+        self, request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion using Anthropic API."""
         if not self.client:
-            raise Exception("Anthropic client not available")
+            msg = "Anthropic client not available"
+            raise Exception(msg)
 
         try:
             messages = []
@@ -538,7 +542,7 @@ class AnthropicProvider(LLMProviderBase):
                 for msg in request.messages:
                     if msg["role"] in ["user", "assistant"]:
                         messages.append(
-                            {"role": msg["role"], "content": msg["content"]}
+                            {"role": msg["role"], "content": msg["content"]},
                         )
 
             stream = await self.client.messages.create(
@@ -555,8 +559,8 @@ class AnthropicProvider(LLMProviderBase):
                     yield chunk.delta.text
 
         except Exception as e:
-            self.logger.error(f"Anthropic streaming request failed: {e}")
-            raise e
+            self.logger.exception(f"Anthropic streaming request failed: {e}")
+            raise
 
 
 class MockProvider(LLMProviderBase):
@@ -591,7 +595,7 @@ class MockProvider(LLMProviderBase):
         return llm_response
 
     async def generate_streaming_completion(
-        self, request: LLMRequest
+        self, request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate mock streaming completion."""
         content = "This is a mock streaming response. "
@@ -605,11 +609,11 @@ class MockProvider(LLMProviderBase):
 class ResponseCache:
     """LRU cache for LLM responses."""
 
-    def __init__(self, max_size: int = 1000, default_ttl: int = 3600):
+    def __init__(self, max_size: int = 1000, default_ttl: int = 3600) -> None:
         self.max_size = max_size
         self.default_ttl = default_ttl
-        self.cache: Dict[str, CacheEntry] = {}
-        self.access_order: List[str] = []
+        self.cache: dict[str, CacheEntry] = {}
+        self.access_order: list[str] = []
         self.lock = threading.Lock()
 
     def _generate_cache_key(self, request: LLMRequest) -> str:
@@ -626,7 +630,7 @@ class ResponseCache:
         key_str = json.dumps(key_data, sort_keys=True)
         return hashlib.sha256(key_str.encode()).hexdigest()
 
-    def get(self, request: LLMRequest) -> Optional[LLMResponse]:
+    def get(self, request: LLMRequest) -> LLMResponse | None:
         """Get cached response if available."""
         if request.stream:  # Don't cache streaming requests
             return None
@@ -657,8 +661,8 @@ class ResponseCache:
             return entry.response
 
     def put(
-        self, request: LLMRequest, response: LLMResponse, ttl: Optional[int] = None
-    ):
+        self, request: LLMRequest, response: LLMResponse, ttl: int | None = None,
+    ) -> None:
         """Cache response."""
         if request.stream:  # Don't cache streaming requests
             return
@@ -669,7 +673,7 @@ class ResponseCache:
         with self.lock:
             # Create cache entry
             entry = CacheEntry(
-                key=key, response=response, created_at=datetime.now(), ttl=ttl
+                key=key, response=response, created_at=datetime.now(), ttl=ttl,
             )
 
             self.cache[key] = entry
@@ -680,7 +684,7 @@ class ResponseCache:
                 lru_key = self.access_order.pop(0)
                 del self.cache[lru_key]
 
-    def clear_expired(self):
+    def clear_expired(self) -> None:
         """Clear expired cache entries."""
         with self.lock:
             expired_keys = [
@@ -692,7 +696,7 @@ class ResponseCache:
                 if key in self.access_order:
                     self.access_order.remove(key)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         with self.lock:
             return {
@@ -708,17 +712,17 @@ class ResponseCache:
 class LoadBalancer:
     """Load balancer for distributing requests across providers."""
 
-    def __init__(self, strategy: LoadBalanceStrategy = LoadBalanceStrategy.ROUND_ROBIN):
+    def __init__(self, strategy: LoadBalanceStrategy = LoadBalanceStrategy.ROUND_ROBIN) -> None:
         self.strategy = strategy
-        self.providers: List[LLMProviderBase] = []
+        self.providers: list[LLMProviderBase] = []
         self.current_index = 0
         self.lock = threading.Lock()
 
-    def add_provider(self, provider: LLMProviderBase):
+    def add_provider(self, provider: LLMProviderBase) -> None:
         """Add provider to load balancer."""
         self.providers.append(provider)
 
-    def select_provider(self, request: LLMRequest) -> Optional[LLMProviderBase]:
+    def select_provider(self, request: LLMRequest) -> LLMProviderBase | None:
         """Select best provider for request."""
         if not self.providers:
             return None
@@ -739,35 +743,34 @@ class LoadBalancer:
                 self.current_index += 1
                 return provider
 
-            elif self.strategy == LoadBalanceStrategy.LEAST_LOADED:
+            if self.strategy == LoadBalanceStrategy.LEAST_LOADED:
                 # Select provider with lowest request count
                 return min(available_providers, key=lambda p: p.stats.total_requests)
 
-            elif self.strategy == LoadBalanceStrategy.FASTEST_RESPONSE:
+            if self.strategy == LoadBalanceStrategy.FASTEST_RESPONSE:
                 # Select provider with fastest average response time
                 return min(
                     available_providers,
                     key=lambda p: p.stats.average_response_time or float("inf"),
                 )
 
-            elif self.strategy == LoadBalanceStrategy.COST_OPTIMIZED:
+            if self.strategy == LoadBalanceStrategy.COST_OPTIMIZED:
                 # Select provider with lowest cost per token
                 return min(available_providers, key=lambda p: p.config.cost_per_token)
 
-            elif self.strategy == LoadBalanceStrategy.WEIGHTED:
+            if self.strategy == LoadBalanceStrategy.WEIGHTED:
                 # Select based on provider weights
                 import random
 
                 weights = [p.config.weight for p in available_providers]
                 return random.choices(available_providers, weights=weights)[0]
 
-            elif self.strategy == LoadBalanceStrategy.RANDOM:
+            if self.strategy == LoadBalanceStrategy.RANDOM:
                 import random
 
                 return random.choice(available_providers)
 
-            else:
-                return available_providers[0]
+            return available_providers[0]
 
 
 class LLMProxyService:
@@ -780,7 +783,7 @@ class LLMProxyService:
         load_balance_strategy: LoadBalanceStrategy = LoadBalanceStrategy.ROUND_ROBIN,
         enable_failover: bool = True,
         max_retries: int = 3,
-    ):
+    ) -> None:
         """Initialize the LLM Proxy Service."""
         self.cache_size = cache_size
         self.cache_ttl = cache_ttl
@@ -794,8 +797,8 @@ class LLMProxyService:
         self.load_balancer = LoadBalancer(load_balance_strategy)
 
         # Provider registry
-        self.providers: Dict[str, LLMProviderBase] = {}
-        self.model_configs: Dict[str, ModelConfig] = {}
+        self.providers: dict[str, LLMProviderBase] = {}
+        self.model_configs: dict[str, ModelConfig] = {}
 
         # Service state
         self.running = False
@@ -807,7 +810,7 @@ class LLMProxyService:
         self.executor = ThreadPoolExecutor(max_workers=50)
 
         # Background tasks
-        self.cleanup_task: Optional[asyncio.Task] = None
+        self.cleanup_task: asyncio.Task | None = None
 
         self.logger.info("LLM Proxy Service initialized")
 
@@ -819,14 +822,14 @@ class LLMProxyService:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the LLM proxy service."""
         if self.running:
             self.logger.warning("LLM proxy service is already running")
@@ -843,7 +846,7 @@ class LLMProxyService:
 
         self.logger.info("LLM proxy service started successfully")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the LLM proxy service."""
         if not self.running:
             return
@@ -854,17 +857,15 @@ class LLMProxyService:
         # Cancel cleanup task
         if self.cleanup_task:
             self.cleanup_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self.cleanup_task
-            except asyncio.CancelledError:
-                pass
 
         # Shutdown executor
         self.executor.shutdown(wait=True)
 
         self.logger.info("LLM proxy service stopped")
 
-    async def _initialize_default_providers(self):
+    async def _initialize_default_providers(self) -> None:
         """Initialize default providers if API keys are available."""
         # OpenAI
         if OPENAI_AVAILABLE:
@@ -921,7 +922,7 @@ class LLMProxyService:
         )
         self.register_model_config("mock-model", mock_config)
 
-    def register_model_config(self, model_id: str, config: ModelConfig):
+    def register_model_config(self, model_id: str, config: ModelConfig) -> None:
         """Register a model configuration."""
         self.model_configs[model_id] = config
 
@@ -961,7 +962,8 @@ class LLMProxyService:
             provider = self.load_balancer.select_provider(request)
 
         if not provider:
-            raise Exception("No available provider for request")
+            msg = "No available provider for request"
+            raise Exception(msg)
 
         # Generate response with retries
         last_exception = None
@@ -989,7 +991,7 @@ class LLMProxyService:
         raise last_exception or Exception("All retry attempts failed")
 
     async def generate_streaming_completion(
-        self, request: LLMRequest
+        self, request: LLMRequest,
     ) -> AsyncIterator[str]:
         """Generate streaming completion for request."""
         self.request_count += 1
@@ -1001,17 +1003,18 @@ class LLMProxyService:
             provider = self.load_balancer.select_provider(request)
 
         if not provider:
-            raise Exception("No available provider for streaming request")
+            msg = "No available provider for streaming request"
+            raise Exception(msg)
 
         # Generate streaming response
         try:
             async for chunk in provider.generate_streaming_completion(request):
                 yield chunk
         except Exception as e:
-            self.logger.error(f"Streaming request failed: {e}")
-            raise e
+            self.logger.exception(f"Streaming request failed: {e}")
+            raise
 
-    def get_available_models(self) -> List[Dict[str, Any]]:
+    def get_available_models(self) -> list[dict[str, Any]]:
         """Get list of available models."""
         models = []
         for model_id, config in self.model_configs.items():
@@ -1026,12 +1029,12 @@ class LLMProxyService:
                     "context_window": config.context_window,
                     "supports_streaming": config.supports_streaming,
                     "supports_functions": config.supports_functions,
-                }
+                },
             )
 
         return models
 
-    def get_provider_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_provider_stats(self) -> dict[str, dict[str, Any]]:
         """Get statistics for all providers."""
         stats = {}
         for model_id, provider in self.providers.items():
@@ -1039,7 +1042,7 @@ class LLMProxyService:
 
         return stats
 
-    def get_service_stats(self) -> Dict[str, Any]:
+    def get_service_stats(self) -> dict[str, Any]:
         """Get service-level statistics."""
         cache_stats = self.response_cache.get_stats()
 
@@ -1055,7 +1058,7 @@ class LLMProxyService:
             "load_balance_strategy": self.load_balancer.strategy.value,
         }
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on the service."""
         health_info = {
             "status": "unknown",
@@ -1085,7 +1088,7 @@ class LLMProxyService:
                         # For mock provider, actually test it
                         if isinstance(provider, MockProvider):
                             test_response = await provider.generate_completion(
-                                test_request
+                                test_request,
                             )
                             provider_health[model_id] = {
                                 "status": "healthy",
@@ -1127,7 +1130,7 @@ class LLMProxyService:
 
         return health_info
 
-    async def _cleanup_loop(self):
+    async def _cleanup_loop(self) -> None:
         """Background cleanup task."""
         self.logger.info("Cleanup loop started")
 
@@ -1144,7 +1147,7 @@ class LLMProxyService:
                     self.logger.debug("Cleared expired cache entries")
 
                 except Exception as e:
-                    self.logger.error(f"Error during cleanup: {e}")
+                    self.logger.exception(f"Error during cleanup: {e}")
 
         except asyncio.CancelledError:
             self.logger.info("Cleanup loop cancelled")
@@ -1154,7 +1157,7 @@ class LLMProxyService:
 
 
 def create_chat_request(
-    messages: List[Dict[str, str]],
+    messages: list[dict[str, str]],
     model: str = "gpt-3.5-turbo",
     temperature: float = 0.7,
     max_tokens: int = 1000,
@@ -1188,8 +1191,8 @@ def create_completion_request(
 
 
 def create_function_call_request(
-    messages: List[Dict[str, str]],
-    functions: List[Dict[str, Any]],
+    messages: list[dict[str, str]],
+    functions: list[dict[str, Any]],
     model: str = "gpt-3.5-turbo",
     temperature: float = 0.0,
 ) -> LLMRequest:
@@ -1204,7 +1207,7 @@ def create_function_call_request(
     )
 
 
-async def main():
+async def main() -> None:
     """Main function for testing the LLM proxy service."""
     service = LLMProxyService(
         cache_size=100,
@@ -1214,47 +1217,38 @@ async def main():
 
     try:
         await service.start()
-        print("LLM Proxy Service started")
 
         # Test completion request
         request = create_completion_request(
-            "What is artificial intelligence?", model="mock-model", max_tokens=100
+            "What is artificial intelligence?", model="mock-model", max_tokens=100,
         )
 
-        print(f"Making completion request: {request.id}")
-        response = await service.generate_completion(request)
-        print(f"Response: {response.content[:100]}...")
+        await service.generate_completion(request)
 
         # Test chat request
         chat_request = create_chat_request(
-            [{"role": "user", "content": "Hello, how are you?"}], model="mock-model"
+            [{"role": "user", "content": "Hello, how are you?"}], model="mock-model",
         )
 
-        print(f"Making chat request: {chat_request.id}")
-        chat_response = await service.generate_completion(chat_request)
-        print(f"Chat response: {chat_response.content[:100]}...")
+        await service.generate_completion(chat_request)
 
         # Test streaming
         stream_request = create_completion_request(
-            "Tell me a short story", model="mock-model"
+            "Tell me a short story", model="mock-model",
         )
         stream_request.stream = True
 
-        print("Testing streaming completion:")
-        async for chunk in service.generate_streaming_completion(stream_request):
-            print(chunk, end="", flush=True)
-        print()
+        async for _chunk in service.generate_streaming_completion(stream_request):
+            pass
 
         # Show statistics
-        stats = service.get_service_stats()
-        print(f"\nService stats: {json.dumps(stats, indent=2)}")
+        service.get_service_stats()
 
         # Health check
-        health = await service.health_check()
-        print(f"Health status: {health['status']}")
+        await service.health_check()
 
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        pass
     finally:
         await service.stop()
 

@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
-"""
-Gadugi Agent Engine for Gadugi v0.3
+"""Gadugi Agent Engine for Gadugi v0.3.
 
 This engine implements comprehensive system bootstrap, installation, configuration
 management, and system health monitoring for the Gadugi multi-agent platform.
 """
+from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
-import sys
-import subprocess
-import shutil
-import tarfile
-import yaml
-import psutil
-import time
-from typing import Dict, List, Any, Optional, Union, Tuple
-from datetime import datetime, timedelta
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from enum import Enum
-import hashlib
 import sqlite3
+import subprocess
+import sys
+import tarfile
 import threading
-from concurrent.futures import ThreadPoolExecutor
+import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+import psutil
+import yaml
 
 
 class OperationType(Enum):
@@ -85,8 +84,8 @@ class SystemStatus:
     """System status information."""
 
     system_status: HealthStatus
-    services_running: List[str]
-    services_stopped: List[str]
+    services_running: list[str]
+    services_stopped: list[str]
     agents_active: int
     memory_usage: str
     cpu_usage: str
@@ -100,11 +99,11 @@ class ServiceInfo:
 
     name: str
     status: ServiceStatus
-    port: Optional[int]
-    pid: Optional[int]
-    uptime: Optional[str]
-    memory_usage: Optional[str]
-    cpu_usage: Optional[str]
+    port: int | None
+    pid: int | None
+    uptime: str | None
+    memory_usage: str | None
+    cpu_usage: str | None
 
 
 @dataclass
@@ -114,8 +113,8 @@ class AgentInfo:
     name: str
     version: str
     status: str
-    capabilities: List[str]
-    resource_usage: Dict[str, str]
+    capabilities: list[str]
+    resource_usage: dict[str, str]
     last_heartbeat: str
 
 
@@ -146,17 +145,17 @@ class OperationResult:
 
     success: bool
     operation: str
-    status: Optional[SystemStatus]
-    results: Dict[str, Any]
-    recommendations: List[Recommendation]
-    warnings: List[str]
-    errors: List[str]
+    status: SystemStatus | None
+    results: dict[str, Any]
+    recommendations: list[Recommendation]
+    warnings: list[str]
+    errors: list[str]
 
 
 class GadugiEngine:
     """Main Gadugi agent engine for system management and bootstrap operations."""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str | None = None) -> None:
         """Initialize the Gadugi engine."""
         self.logger = self._setup_logging()
 
@@ -304,21 +303,21 @@ class GadugiEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    def _ensure_directories(self):
+    def _ensure_directories(self) -> None:
         """Ensure all required directories exist."""
         directories = [self.config_dir, self.data_dir, self.log_dir, self.backup_dir]
 
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def _load_config(self, config_file: Optional[str]) -> Dict[str, Any]:
+    def _load_config(self, config_file: str | None) -> dict[str, Any]:
         """Load system configuration."""
         default_config = {
             "gadugi": {
@@ -359,7 +358,7 @@ class GadugiEngine:
 
         if config_file and Path(config_file).exists():
             try:
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     user_config = yaml.safe_load(f)
                     # Merge with default config
                     default_config.update(user_config)
@@ -368,7 +367,7 @@ class GadugiEngine:
 
         return default_config
 
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Initialize SQLite database for persistent state."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
@@ -425,7 +424,7 @@ class GadugiEngine:
 
             conn.commit()
 
-    def execute_operation(self, request: Dict[str, Any]) -> OperationResult:
+    def execute_operation(self, request: dict[str, Any]) -> OperationResult:
         """Execute a Gadugi operation based on the request."""
         try:
             operation = OperationType(request.get("command", "status"))
@@ -434,43 +433,42 @@ class GadugiEngine:
             options = request.get("options", {})
 
             self.logger.info(
-                f"Executing operation: {operation.value} on {target.value}"
+                f"Executing operation: {operation.value} on {target.value}",
             )
 
             # Route to appropriate handler
             if operation == OperationType.INSTALL:
                 return self._handle_install(target, parameters, options)
-            elif operation == OperationType.CONFIGURE:
+            if operation == OperationType.CONFIGURE:
                 return self._handle_configure(target, parameters, options)
-            elif operation == OperationType.START:
+            if operation == OperationType.START:
                 return self._handle_start(target, parameters, options)
-            elif operation == OperationType.STOP:
+            if operation == OperationType.STOP:
                 return self._handle_stop(target, parameters, options)
-            elif operation == OperationType.STATUS:
+            if operation == OperationType.STATUS:
                 return self._handle_status(target, parameters, options)
-            elif operation == OperationType.UPDATE:
+            if operation == OperationType.UPDATE:
                 return self._handle_update(target, parameters, options)
-            elif operation == OperationType.BACKUP:
+            if operation == OperationType.BACKUP:
                 return self._handle_backup(target, parameters, options)
-            elif operation == OperationType.RESTORE:
+            if operation == OperationType.RESTORE:
                 return self._handle_restore(target, parameters, options)
-            elif operation == OperationType.HEALTH:
+            if operation == OperationType.HEALTH:
                 return self._handle_health(target, parameters, options)
-            elif operation == OperationType.OPTIMIZE:
+            if operation == OperationType.OPTIMIZE:
                 return self._handle_optimize(target, parameters, options)
-            else:
-                return OperationResult(
-                    success=False,
-                    operation=operation.value,
-                    status=None,
-                    results={},
-                    recommendations=[],
-                    warnings=[],
-                    errors=[f"Unsupported operation: {operation.value}"],
-                )
+            return OperationResult(
+                success=False,
+                operation=operation.value,
+                status=None,
+                results={},
+                recommendations=[],
+                warnings=[],
+                errors=[f"Unsupported operation: {operation.value}"],
+            )
 
         except Exception as e:
-            self.logger.error(f"Error executing operation: {e}")
+            self.logger.exception(f"Error executing operation: {e}")
             return OperationResult(
                 success=False,
                 operation=request.get("command", "unknown"),
@@ -482,7 +480,7 @@ class GadugiEngine:
             )
 
     def _handle_install(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle install operations."""
         results = {}
@@ -519,7 +517,7 @@ class GadugiEngine:
                     category="maintenance",
                     message="Consider running health check after installation",
                     action="gadugi health --detailed",
-                )
+                ),
             )
 
         return OperationResult(
@@ -533,7 +531,7 @@ class GadugiEngine:
         )
 
     def _handle_configure(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle configuration operations."""
         results = {}
@@ -561,7 +559,7 @@ class GadugiEngine:
         )
 
     def _handle_start(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle start operations."""
         results = {}
@@ -578,27 +576,25 @@ class GadugiEngine:
                 service_name = parameters.get("component", "all")
                 if service_name == "all":
                     results["started_services"] = self._start_all_services()
+                elif self._start_service(service_name):
+                    results["started_services"] = [service_name]
                 else:
-                    if self._start_service(service_name):
-                        results["started_services"] = [service_name]
-                    else:
-                        errors.append(f"Failed to start service: {service_name}")
+                    errors.append(f"Failed to start service: {service_name}")
             elif target == TargetType.AGENT:
                 agent_name = parameters.get("component", "all")
                 if agent_name == "all":
                     results["started_agents"] = self._start_enabled_agents()
+                elif self._start_agent(agent_name):
+                    results["started_agents"] = [agent_name]
                 else:
-                    if self._start_agent(agent_name):
-                        results["started_agents"] = [agent_name]
-                    else:
-                        errors.append(f"Failed to start agent: {agent_name}")
+                    errors.append(f"Failed to start agent: {agent_name}")
 
             # Start monitoring if not already running
             if not self.is_monitoring:
                 self._start_monitoring()
 
         except Exception as e:
-            errors.append(f"Error starting components: {str(e)}")
+            errors.append(f"Error starting components: {e!s}")
 
         return OperationResult(
             success=len(errors) == 0,
@@ -611,7 +607,7 @@ class GadugiEngine:
         )
 
     def _handle_stop(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle stop operations."""
         results = {}
@@ -626,23 +622,21 @@ class GadugiEngine:
                 service_name = parameters.get("component", "all")
                 if service_name == "all":
                     results["stopped_services"] = self._stop_all_services()
+                elif self._stop_service(service_name):
+                    results["stopped_services"] = [service_name]
                 else:
-                    if self._stop_service(service_name):
-                        results["stopped_services"] = [service_name]
-                    else:
-                        errors.append(f"Failed to stop service: {service_name}")
+                    errors.append(f"Failed to stop service: {service_name}")
             elif target == TargetType.AGENT:
                 agent_name = parameters.get("component", "all")
                 if agent_name == "all":
                     results["stopped_agents"] = self._stop_all_agents()
+                elif self._stop_agent(agent_name):
+                    results["stopped_agents"] = [agent_name]
                 else:
-                    if self._stop_agent(agent_name):
-                        results["stopped_agents"] = [agent_name]
-                    else:
-                        errors.append(f"Failed to stop agent: {agent_name}")
+                    errors.append(f"Failed to stop agent: {agent_name}")
 
         except Exception as e:
-            errors.append(f"Error stopping components: {str(e)}")
+            errors.append(f"Error stopping components: {e!s}")
 
         return OperationResult(
             success=len(errors) == 0,
@@ -655,19 +649,19 @@ class GadugiEngine:
         )
 
     def _handle_status(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle status operations."""
         results = {}
 
-        if target == TargetType.SYSTEM or target == TargetType.ALL:
+        if target in (TargetType.SYSTEM, TargetType.ALL):
             results["system_info"] = self._get_system_info()
             results["resource_usage"] = self._get_resource_usage()
 
-        if target == TargetType.SERVICE or target == TargetType.ALL:
+        if target in (TargetType.SERVICE, TargetType.ALL):
             results["services"] = self._get_services_status()
 
-        if target == TargetType.AGENT or target == TargetType.ALL:
+        if target in (TargetType.AGENT, TargetType.ALL):
             results["agents"] = self._get_agents_status()
 
         return OperationResult(
@@ -681,7 +675,7 @@ class GadugiEngine:
         )
 
     def _handle_health(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle health check operations."""
         results = {}
@@ -701,7 +695,7 @@ class GadugiEngine:
                     category="performance",
                     message="System is in degraded state",
                     action="Check resource usage and service logs",
-                )
+                ),
             )
         elif health_data.get("overall_status") == "critical":
             recommendations.append(
@@ -710,7 +704,7 @@ class GadugiEngine:
                     category="security",
                     message="System is in critical state",
                     action="Immediate attention required - check logs and restart services",
-                )
+                ),
             )
 
         # Check resource thresholds
@@ -723,7 +717,7 @@ class GadugiEngine:
                     category="performance",
                     message="High CPU usage detected",
                     action="Consider optimizing or scaling system",
-                )
+                ),
             )
 
         if resource_usage.get("memory_percent", 0) > 85:
@@ -734,7 +728,7 @@ class GadugiEngine:
                     category="performance",
                     message="High memory usage detected",
                     action="Free up memory or add more RAM",
-                )
+                ),
             )
 
         return OperationResult(
@@ -748,7 +742,7 @@ class GadugiEngine:
         )
 
     def _handle_backup(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle backup operations."""
         results = {}
@@ -770,7 +764,7 @@ class GadugiEngine:
                 errors.append("Failed to create backup")
 
         except Exception as e:
-            errors.append(f"Error creating backup: {str(e)}")
+            errors.append(f"Error creating backup: {e!s}")
 
         return OperationResult(
             success=len(errors) == 0,
@@ -783,7 +777,7 @@ class GadugiEngine:
         )
 
     def _handle_restore(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle restore operations."""
         results = {}
@@ -812,7 +806,7 @@ class GadugiEngine:
                 errors.append(f"Failed to restore from backup: {backup_file}")
 
         except Exception as e:
-            errors.append(f"Error restoring backup: {str(e)}")
+            errors.append(f"Error restoring backup: {e!s}")
 
         return OperationResult(
             success=len(errors) == 0,
@@ -825,7 +819,7 @@ class GadugiEngine:
         )
 
     def _handle_update(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle update operations."""
         results = {}
@@ -846,7 +840,7 @@ class GadugiEngine:
         )
 
     def _handle_optimize(
-        self, target: TargetType, parameters: Dict, options: Dict
+        self, target: TargetType, parameters: dict, options: dict,
     ) -> OperationResult:
         """Handle optimization operations."""
         results = {}
@@ -865,11 +859,11 @@ class GadugiEngine:
                     category="performance",
                     message="System optimization completed",
                     action="Monitor performance metrics for improvements",
-                )
+                ),
             )
 
         except Exception as e:
-            errors.append(f"Error during optimization: {str(e)}")
+            errors.append(f"Error during optimization: {e!s}")
 
         return OperationResult(
             success=len(errors) == 0,
@@ -881,7 +875,7 @@ class GadugiEngine:
             errors=errors,
         )
 
-    def _install_system(self, parameters: Dict, options: Dict) -> Dict[str, Any]:
+    def _install_system(self, parameters: dict, options: dict) -> dict[str, Any]:
         """Install the complete Gadugi system."""
         results = {
             "installed_components": [],
@@ -904,8 +898,8 @@ class GadugiEngine:
         return results
 
     def _install_service(
-        self, service_name: str, parameters: Dict, options: Dict
-    ) -> Dict[str, Any]:
+        self, service_name: str, parameters: dict, options: dict,
+    ) -> dict[str, Any]:
         """Install a specific service."""
         results = {"installed_service": service_name}
 
@@ -921,8 +915,8 @@ class GadugiEngine:
         return results
 
     def _install_agent(
-        self, agent_name: str, parameters: Dict, options: Dict
-    ) -> Dict[str, Any]:
+        self, agent_name: str, parameters: dict, options: dict,
+    ) -> dict[str, Any]:
         """Install a specific agent."""
         results = {"installed_agent": agent_name}
 
@@ -937,7 +931,7 @@ class GadugiEngine:
         results["config_file"] = str(config_file)
         return results
 
-    def _install_all(self, parameters: Dict, options: Dict) -> Dict[str, Any]:
+    def _install_all(self, parameters: dict, options: dict) -> dict[str, Any]:
         """Install all system components."""
         results = {
             "installed_services": [],
@@ -946,32 +940,32 @@ class GadugiEngine:
         }
 
         # Install all services
-        for service_name in self.core_services.keys():
+        for service_name in self.core_services:
             self._install_service(service_name, parameters, options)
             results["installed_services"].append(service_name)
 
         # Install enabled agents
-        for agent_name, config in self.available_agents.items():
+        for agent_name in self.available_agents:
             if self.config.get("agents", {}).get(agent_name, {}).get("enabled", True):
                 self._install_agent(agent_name, parameters, options)
                 results["installed_agents"].append(agent_name)
 
         return results
 
-    def _install_dependencies(self):
+    def _install_dependencies(self) -> None:
         """Install system dependencies."""
         # This would install required system packages
         # For now, just log that dependencies are being checked
         self.logger.info("Checking and installing system dependencies")
 
-    def _create_default_configs(self):
+    def _create_default_configs(self) -> None:
         """Create default configuration files."""
         # Create main configuration file
         main_config = self.config_dir / "gadugi.yaml"
         with open(main_config, "w") as f:
             yaml.dump(self.config, f)
 
-    def _configure_system(self, parameters: Dict, options: Dict) -> Dict[str, Any]:
+    def _configure_system(self, parameters: dict, options: dict) -> dict[str, Any]:
         """Configure the system."""
         results = {"configured_components": ["system"]}
 
@@ -984,13 +978,14 @@ class GadugiEngine:
         return results
 
     def _configure_service(
-        self, service_name: str, parameters: Dict, options: Dict
-    ) -> Dict[str, Any]:
+        self, service_name: str, parameters: dict, options: dict,
+    ) -> dict[str, Any]:
         """Configure a specific service."""
         results = {"configured_service": service_name}
 
         if service_name not in self.core_services:
-            raise ValueError(f"Unknown service: {service_name}")
+            msg = f"Unknown service: {service_name}"
+            raise ValueError(msg)
 
         # Apply service-specific configuration
         service_config = self.core_services[service_name].copy()
@@ -1005,13 +1000,14 @@ class GadugiEngine:
         return results
 
     def _configure_agent(
-        self, agent_name: str, parameters: Dict, options: Dict
-    ) -> Dict[str, Any]:
+        self, agent_name: str, parameters: dict, options: dict,
+    ) -> dict[str, Any]:
         """Configure a specific agent."""
         results = {"configured_agent": agent_name}
 
         if agent_name not in self.available_agents:
-            raise ValueError(f"Unknown agent: {agent_name}")
+            msg = f"Unknown agent: {agent_name}"
+            raise ValueError(msg)
 
         # Apply agent-specific configuration
         agent_config = self.available_agents[agent_name].copy()
@@ -1057,7 +1053,7 @@ class GadugiEngine:
 
             # Update database
             self._update_service_in_db(
-                service_name, ServiceStatus.STARTING, process.pid
+                service_name, ServiceStatus.STARTING, process.pid,
             )
 
             # Give service time to start
@@ -1067,16 +1063,15 @@ class GadugiEngine:
             if process.poll() is None:
                 self.services[service_name]["status"] = ServiceStatus.RUNNING
                 self._update_service_in_db(
-                    service_name, ServiceStatus.RUNNING, process.pid
+                    service_name, ServiceStatus.RUNNING, process.pid,
                 )
                 self.logger.info(f"Service {service_name} started successfully")
                 return True
-            else:
-                self.logger.error(f"Service {service_name} failed to start")
-                return False
+            self.logger.error(f"Service {service_name} failed to start")
+            return False
 
         except Exception as e:
-            self.logger.error(f"Error starting service {service_name}: {e}")
+            self.logger.exception(f"Error starting service {service_name}: {e}")
             return False
 
     def _stop_service(self, service_name: str) -> bool:
@@ -1110,7 +1105,7 @@ class GadugiEngine:
             return True
 
         except Exception as e:
-            self.logger.error(f"Error stopping service {service_name}: {e}")
+            self.logger.exception(f"Error stopping service {service_name}: {e}")
             return False
 
     def _start_agent(self, agent_name: str) -> bool:
@@ -1155,12 +1150,11 @@ class GadugiEngine:
                 self._update_agent_in_db(agent_name, "active", process.pid)
                 self.logger.info(f"Agent {agent_name} started successfully")
                 return True
-            else:
-                self.logger.error(f"Agent {agent_name} failed to start")
-                return False
+            self.logger.error(f"Agent {agent_name} failed to start")
+            return False
 
         except Exception as e:
-            self.logger.error(f"Error starting agent {agent_name}: {e}")
+            self.logger.exception(f"Error starting agent {agent_name}: {e}")
             return False
 
     def _stop_agent(self, agent_name: str) -> bool:
@@ -1194,25 +1188,24 @@ class GadugiEngine:
             return True
 
         except Exception as e:
-            self.logger.error(f"Error stopping agent {agent_name}: {e}")
+            self.logger.exception(f"Error stopping agent {agent_name}: {e}")
             return False
 
-    def _start_all_services(self) -> List[str]:
+    def _start_all_services(self) -> list[str]:
         """Start all enabled services."""
         started = []
 
-        for service_name in self.core_services.keys():
+        for service_name in self.core_services:
             if (
                 self.config.get("services", {})
                 .get(service_name, {})
                 .get("enabled", True)
-            ):
-                if self._start_service(service_name):
-                    started.append(service_name)
+            ) and self._start_service(service_name):
+                started.append(service_name)
 
         return started
 
-    def _stop_all_services(self) -> List[str]:
+    def _stop_all_services(self) -> list[str]:
         """Stop all running services."""
         stopped = []
 
@@ -1222,18 +1215,18 @@ class GadugiEngine:
 
         return stopped
 
-    def _start_enabled_agents(self) -> List[str]:
+    def _start_enabled_agents(self) -> list[str]:
         """Start all enabled agents."""
         started = []
 
-        for agent_name in self.available_agents.keys():
+        for agent_name in self.available_agents:
             if self.config.get("agents", {}).get(agent_name, {}).get("enabled", True):
                 if self._start_agent(agent_name):
                     started.append(agent_name)
 
         return started
 
-    def _stop_all_agents(self) -> List[str]:
+    def _stop_all_agents(self) -> list[str]:
         """Stop all running agents."""
         stopped = []
 
@@ -1265,7 +1258,7 @@ class GadugiEngine:
         services_running = []
         services_stopped = []
 
-        for service_name in self.core_services.keys():
+        for service_name in self.core_services:
             if self._is_service_running(service_name):
                 services_running.append(service_name)
             else:
@@ -1273,7 +1266,7 @@ class GadugiEngine:
 
         # Get agent count
         agents_active = len(
-            [name for name in self.agents.keys() if self._is_agent_running(name)]
+            [name for name in self.agents if self._is_agent_running(name)],
         )
 
         # Get resource usage
@@ -1297,7 +1290,7 @@ class GadugiEngine:
             uptime=self._get_system_uptime(),
         )
 
-    def _get_system_info(self) -> Dict[str, Any]:
+    def _get_system_info(self) -> dict[str, Any]:
         """Get system information."""
         return {
             "gadugi_version": self.config.get("gadugi", {}).get("version", "0.3.0"),
@@ -1311,7 +1304,7 @@ class GadugiEngine:
             "log_directory": str(self.log_dir),
         }
 
-    def _get_resource_usage(self) -> Dict[str, Any]:
+    def _get_resource_usage(self) -> dict[str, Any]:
         """Get system resource usage."""
         try:
             # CPU usage
@@ -1349,10 +1342,10 @@ class GadugiEngine:
             }
 
         except Exception as e:
-            self.logger.error(f"Error getting resource usage: {e}")
+            self.logger.exception(f"Error getting resource usage: {e}")
             return {"cpu_percent": 0, "memory_percent": 0, "disk_percent": 0}
 
-    def _get_services_status(self) -> List[Dict[str, Any]]:
+    def _get_services_status(self) -> list[dict[str, Any]]:
         """Get status of all services."""
         services_status = []
 
@@ -1382,12 +1375,12 @@ class GadugiEngine:
                     "auto_start": self.config.get("services", {})
                     .get(service_name, {})
                     .get("auto_start", False),
-                }
+                },
             )
 
         return services_status
 
-    def _get_agents_status(self) -> List[Dict[str, Any]]:
+    def _get_agents_status(self) -> list[dict[str, Any]]:
         """Get status of all agents."""
         agents_status = []
 
@@ -1419,7 +1412,7 @@ class GadugiEngine:
                     "max_instances": self.config.get("agents", {})
                     .get(agent_name, {})
                     .get("max_instances", 1),
-                }
+                },
             )
 
         return agents_status
@@ -1433,7 +1426,7 @@ class GadugiEngine:
         except Exception:
             return "unknown"
 
-    def _perform_health_check(self) -> Dict[str, Any]:
+    def _perform_health_check(self) -> dict[str, Any]:
         """Perform comprehensive health check."""
         health_data = {
             "timestamp": datetime.now().isoformat(),
@@ -1447,7 +1440,7 @@ class GadugiEngine:
 
         # Check services health
         unhealthy_services = 0
-        for service_name in self.core_services.keys():
+        for service_name in self.core_services:
             service_health = {
                 "name": service_name,
                 "status": "healthy"
@@ -1464,7 +1457,7 @@ class GadugiEngine:
 
         # Check agents health
         inactive_agents = 0
-        for agent_name in self.available_agents.keys():
+        for agent_name in self.available_agents:
             agent_health = {
                 "name": agent_name,
                 "status": "healthy"
@@ -1504,8 +1497,8 @@ class GadugiEngine:
         return health_data
 
     def _create_backup(
-        self, backup_type: str, compress: bool, include_data: bool
-    ) -> Optional[str]:
+        self, backup_type: str, compress: bool, include_data: bool,
+    ) -> str | None:
         """Create a system backup."""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1557,7 +1550,7 @@ class GadugiEngine:
                         datetime.now().isoformat(),
                         checksum,
                         json.dumps(
-                            {"compressed": compress, "include_data": include_data}
+                            {"compressed": compress, "include_data": include_data},
                         ),
                     ),
                 )
@@ -1567,7 +1560,7 @@ class GadugiEngine:
             return backup_filename
 
         except Exception as e:
-            self.logger.error(f"Error creating backup: {e}")
+            self.logger.exception(f"Error creating backup: {e}")
             return None
 
     def _restore_backup(self, backup_filename: str) -> bool:
@@ -1585,7 +1578,7 @@ class GadugiEngine:
 
             if stored_checksum and stored_checksum != current_checksum:
                 self.logger.error(
-                    f"Backup checksum verification failed: {backup_filename}"
+                    f"Backup checksum verification failed: {backup_filename}",
                 )
                 return False
 
@@ -1604,10 +1597,10 @@ class GadugiEngine:
             return True
 
         except Exception as e:
-            self.logger.error(f"Error restoring backup: {e}")
+            self.logger.exception(f"Error restoring backup: {e}")
             return False
 
-    def _optimize_system(self) -> Dict[str, Any]:
+    def _optimize_system(self) -> dict[str, Any]:
         """Optimize system performance."""
         results = {"optimizations_applied": [], "performance_improvements": {}}
 
@@ -1618,7 +1611,7 @@ class GadugiEngine:
 
             collected = gc.collect()
             results["optimizations_applied"].append(
-                f"Memory cleanup: {collected} objects collected"
+                f"Memory cleanup: {collected} objects collected",
             )
         except Exception as e:
             self.logger.warning(f"Memory optimization failed: {e}")
@@ -1636,7 +1629,7 @@ class GadugiEngine:
         try:
             log_files_cleaned = self._cleanup_old_logs()
             results["optimizations_applied"].append(
-                f"Log files cleaned: {log_files_cleaned}"
+                f"Log files cleaned: {log_files_cleaned}",
             )
         except Exception as e:
             self.logger.warning(f"Log cleanup failed: {e}")
@@ -1658,7 +1651,7 @@ class GadugiEngine:
 
         return cleaned
 
-    def _start_monitoring(self):
+    def _start_monitoring(self) -> None:
         """Start system monitoring."""
         if self.is_monitoring:
             return
@@ -1668,29 +1661,29 @@ class GadugiEngine:
         self.monitor_thread.start()
         self.logger.info("System monitoring started")
 
-    def _stop_monitoring(self):
+    def _stop_monitoring(self) -> None:
         """Stop system monitoring."""
         self.is_monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=5)
         self.logger.info("System monitoring stopped")
 
-    def _monitor_system(self):
+    def _monitor_system(self) -> None:
         """Monitor system continuously."""
         interval = self.config.get("monitoring", {}).get("interval", 30)
 
         while self.is_monitoring:
             try:
                 # Update service status
-                for service_name in self.services.keys():
+                for service_name in self.services:
                     if not self._is_service_running(service_name):
                         self.services[service_name]["status"] = ServiceStatus.STOPPED
                         self._update_service_in_db(
-                            service_name, ServiceStatus.STOPPED, None
+                            service_name, ServiceStatus.STOPPED, None,
                         )
 
                 # Update agent status
-                for agent_name in self.agents.keys():
+                for agent_name in self.agents:
                     if not self._is_agent_running(agent_name):
                         self.agents[agent_name]["status"] = "stopped"
                         self._update_agent_in_db(agent_name, "stopped", None)
@@ -1706,10 +1699,10 @@ class GadugiEngine:
                                 s
                                 for s in self.services.values()
                                 if s["status"] == ServiceStatus.RUNNING
-                            ]
+                            ],
                         ),
                         "agents_active": len(
-                            [a for a in self.agents.values() if a["status"] == "active"]
+                            [a for a in self.agents.values() if a["status"] == "active"],
                         ),
                     },
                 )
@@ -1717,12 +1710,12 @@ class GadugiEngine:
                 time.sleep(interval)
 
             except Exception as e:
-                self.logger.error(f"Error in system monitoring: {e}")
+                self.logger.exception(f"Error in system monitoring: {e}")
                 time.sleep(interval)
 
     def _update_service_in_db(
-        self, service_name: str, status: ServiceStatus, pid: Optional[int]
-    ):
+        self, service_name: str, status: ServiceStatus, pid: int | None,
+    ) -> None:
         """Update service status in database."""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -1743,9 +1736,9 @@ class GadugiEngine:
                 )
                 conn.commit()
         except Exception as e:
-            self.logger.error(f"Error updating service in database: {e}")
+            self.logger.exception(f"Error updating service in database: {e}")
 
-    def _update_agent_in_db(self, agent_name: str, status: str, pid: Optional[int]):
+    def _update_agent_in_db(self, agent_name: str, status: str, pid: int | None) -> None:
         """Update agent status in database."""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -1758,7 +1751,7 @@ class GadugiEngine:
                     (
                         agent_name,
                         self.available_agents.get(agent_name, {}).get(
-                            "version", "0.3.0"
+                            "version", "0.3.0",
                         ),
                         status,
                         pid,
@@ -1769,11 +1762,11 @@ class GadugiEngine:
                 )
                 conn.commit()
         except Exception as e:
-            self.logger.error(f"Error updating agent in database: {e}")
+            self.logger.exception(f"Error updating agent in database: {e}")
 
     def _log_system_event(
-        self, event_type: str, component: str, message: str, details: Dict[str, Any]
-    ):
+        self, event_type: str, component: str, message: str, details: dict[str, Any],
+    ) -> None:
         """Log a system event."""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -1793,7 +1786,7 @@ class GadugiEngine:
                 )
                 conn.commit()
         except Exception as e:
-            self.logger.error(f"Error logging system event: {e}")
+            self.logger.exception(f"Error logging system event: {e}")
 
     def _calculate_file_checksum(self, file_path: Path) -> str:
         """Calculate SHA256 checksum of a file."""
@@ -1803,7 +1796,7 @@ class GadugiEngine:
                 hash_sha256.update(chunk)
         return hash_sha256.hexdigest()
 
-    def _get_backup_checksum(self, backup_filename: str) -> Optional[str]:
+    def _get_backup_checksum(self, backup_filename: str) -> str | None:
         """Get stored checksum for a backup."""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -1829,7 +1822,7 @@ class GadugiEngine:
         except Exception:
             return "unknown"
 
-    def list_backups(self) -> List[BackupInfo]:
+    def list_backups(self) -> list[BackupInfo]:
         """List available backups."""
         backups = []
         try:
@@ -1852,11 +1845,11 @@ class GadugiEngine:
                             created_at=created_at,
                             backup_type=backup_type,
                             compressed=metadata.get("compressed", False),
-                        )
+                        ),
                     )
 
         except Exception as e:
-            self.logger.error(f"Error listing backups: {e}")
+            self.logger.exception(f"Error listing backups: {e}")
 
         return backups
 
@@ -1868,7 +1861,7 @@ class GadugiEngine:
             size_bytes /= 1024.0
         return f"{size_bytes:.1f} PB"
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shutdown the Gadugi system gracefully."""
         self.logger.info("Initiating Gadugi system shutdown")
 
@@ -1884,7 +1877,7 @@ class GadugiEngine:
         self.logger.info("Gadugi system shutdown completed")
 
 
-def main():
+def main() -> None:
     """Main function for testing the Gadugi engine."""
     gadugi = GadugiEngine()
 
@@ -1899,16 +1892,9 @@ def main():
     result = gadugi.execute_operation(status_request)
 
     if result.success:
-        print("Gadugi System Status:")
-        print(f"System Status: {result.status.system_status.value}")
-        print(f"Services Running: {len(result.status.services_running)}")
-        print(f"Services Stopped: {len(result.status.services_stopped)}")
-        print(f"Agents Active: {result.status.agents_active}")
-        print(f"Memory Usage: {result.status.memory_usage}")
-        print(f"CPU Usage: {result.status.cpu_usage}")
-        print(f"Disk Usage: {result.status.disk_usage}")
+        pass
     else:
-        print(f"Error getting system status: {result.errors}")
+        pass
 
 
 if __name__ == "__main__":

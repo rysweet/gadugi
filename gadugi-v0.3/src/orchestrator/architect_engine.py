@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-"""
-Architect Agent Engine for Gadugi v0.3
+"""Architect Agent Engine for Gadugi v0.3.
 
 This engine implements comprehensive system architecture design capabilities
 including component design, integration planning, and technical documentation.
 """
+from __future__ import annotations
 
-import json
 import logging
-import os
-from typing import Dict, List, Any, Optional, Union
-from datetime import datetime, timedelta
-from pathlib import Path
-import yaml
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import Any
 
 
 class ArchitectureComplexity(Enum):
@@ -50,8 +45,8 @@ class ProjectContext:
 
     name: str
     description: str
-    requirements: List[str]
-    constraints: List[str]
+    requirements: list[str]
+    constraints: list[str]
     scale: ArchitectureScale
 
 
@@ -68,9 +63,9 @@ class DesignScope:
 class TechnicalPreferences:
     """Technical preferences for architecture design."""
 
-    languages: List[str]
-    frameworks: List[str]
-    databases: List[str]
+    languages: list[str]
+    frameworks: list[str]
+    databases: list[str]
     deployment: str
 
 
@@ -78,9 +73,9 @@ class TechnicalPreferences:
 class ComponentInterface:
     """Interface definition for a system component."""
 
-    inputs: List[str]
-    outputs: List[str]
-    dependencies: List[str]
+    inputs: list[str]
+    outputs: list[str]
+    dependencies: list[str]
 
 
 @dataclass
@@ -89,7 +84,7 @@ class TechnologyStack:
 
     language: str
     framework: str
-    database: Optional[str] = None
+    database: str | None = None
 
 
 @dataclass
@@ -98,7 +93,7 @@ class ArchitectureComponent:
 
     name: str
     purpose: str
-    responsibilities: List[str]
+    responsibilities: list[str]
     interfaces: ComponentInterface
     technology_stack: TechnologyStack
 
@@ -108,7 +103,7 @@ class DataFlow:
     """Data flow description."""
 
     description: str
-    diagrams: List[str]
+    diagrams: list[str]
 
 
 @dataclass
@@ -127,8 +122,8 @@ class ImplementationPhase:
     phase_number: int
     name: str
     duration: str
-    deliverables: List[str]
-    dependencies: List[str]
+    deliverables: list[str]
+    dependencies: list[str]
     risk_level: str
 
 
@@ -145,8 +140,8 @@ class ResourceRequirements:
 class ImplementationPlan:
     """Implementation plan definition."""
 
-    phases: List[ImplementationPhase]
-    critical_path: List[str]
+    phases: list[ImplementationPhase]
+    critical_path: list[str]
     resource_requirements: ResourceRequirements
 
 
@@ -157,7 +152,7 @@ class APIEndpoint:
     path: str
     method: str
     description: str
-    parameters: List[str]
+    parameters: list[str]
     response: str
 
 
@@ -167,7 +162,7 @@ class APIDesign:
 
     base_url: str
     authentication: str
-    endpoints: List[APIEndpoint]
+    endpoints: list[APIEndpoint]
 
 
 @dataclass
@@ -176,7 +171,7 @@ class DatabaseColumn:
 
     name: str
     type: str
-    constraints: List[str]
+    constraints: list[str]
 
 
 @dataclass
@@ -184,8 +179,8 @@ class DatabaseSchema:
     """Database schema definition."""
 
     table_name: str
-    columns: List[DatabaseColumn]
-    relationships: List[str]
+    columns: list[DatabaseColumn]
+    relationships: list[str]
 
 
 @dataclass
@@ -193,9 +188,9 @@ class DatabaseDesign:
     """Database design specification."""
 
     type: str
-    schemas: List[DatabaseSchema]
-    indexes: List[str]
-    migrations: List[str]
+    schemas: list[DatabaseSchema]
+    indexes: list[str]
+    migrations: list[str]
 
 
 @dataclass
@@ -204,8 +199,8 @@ class SecurityDesign:
 
     authentication: str
     authorization: str
-    data_protection: List[str]
-    compliance: List[str]
+    data_protection: list[str]
+    compliance: list[str]
 
 
 @dataclass
@@ -222,7 +217,7 @@ class QualityAttribute:
     """Quality attribute definition."""
 
     requirements: str
-    strategies: List[str]
+    strategies: list[str]
 
 
 @dataclass
@@ -262,9 +257,9 @@ class Architecture:
     """Complete architecture definition."""
 
     overview: str
-    components: List[ArchitectureComponent]
+    components: list[ArchitectureComponent]
     data_flow: DataFlow
-    integration_patterns: List[IntegrationPattern]
+    integration_patterns: list[IntegrationPattern]
 
 
 @dataclass
@@ -276,15 +271,15 @@ class ArchitectureResponse:
     implementation_plan: ImplementationPlan
     technical_specifications: TechnicalSpecifications
     quality_attributes: QualityAttributes
-    recommendations: List[Recommendation]
-    risks_and_mitigations: List[Risk]
-    error_message: Optional[str] = None
+    recommendations: list[Recommendation]
+    risks_and_mitigations: list[Risk]
+    error_message: str | None = None
 
 
 class ArchitectEngine:
     """Main architect agent engine for system design and architecture planning."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the architect engine."""
         self.logger = self._setup_logging()
 
@@ -440,7 +435,7 @@ class ArchitectEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
@@ -448,7 +443,7 @@ class ArchitectEngine:
         return logger
 
     def design_system_architecture(
-        self, request: Dict[str, Any]
+        self, request: dict[str, Any],
     ) -> ArchitectureResponse:
         """Design a complete system architecture based on requirements."""
         try:
@@ -456,22 +451,22 @@ class ArchitectEngine:
 
             # Parse request
             project_context = self._parse_project_context(
-                request.get("project_context", {})
+                request.get("project_context", {}),
             )
             design_scope = self._parse_design_scope(request.get("design_scope", {}))
-            existing_systems = request.get("existing_systems", {})
+            request.get("existing_systems", {})
             tech_preferences = self._parse_tech_preferences(
-                request.get("technical_preferences", {})
+                request.get("technical_preferences", {}),
             )
 
             # Select architecture pattern
             architecture_pattern = self._select_architecture_pattern(
-                project_context, design_scope, tech_preferences
+                project_context, design_scope, tech_preferences,
             )
 
             # Design components
             components = self._design_components(
-                project_context, design_scope, tech_preferences, architecture_pattern
+                project_context, design_scope, tech_preferences, architecture_pattern,
             )
 
             # Design data flow
@@ -479,32 +474,32 @@ class ArchitectEngine:
 
             # Select integration patterns
             integration_patterns = self._select_integration_patterns(
-                components, architecture_pattern, design_scope
+                components, architecture_pattern, design_scope,
             )
 
             # Create implementation plan
             implementation_plan = self._create_implementation_plan(
-                components, project_context, design_scope
+                components, project_context, design_scope,
             )
 
             # Generate technical specifications
             technical_specs = self._generate_technical_specifications(
-                components, tech_preferences, project_context
+                components, tech_preferences, project_context,
             )
 
             # Define quality attributes
             quality_attributes = self._define_quality_attributes(
-                project_context, design_scope
+                project_context, design_scope,
             )
 
             # Generate recommendations
             recommendations = self._generate_recommendations(
-                architecture_pattern, components, design_scope, tech_preferences
+                architecture_pattern, components, design_scope, tech_preferences,
             )
 
             # Assess risks
             risks = self._assess_risks(
-                architecture_pattern, components, design_scope, project_context
+                architecture_pattern, components, design_scope, project_context,
             )
 
             # Build architecture
@@ -529,7 +524,7 @@ class ArchitectEngine:
             return response
 
         except Exception as e:
-            self.logger.error(f"Error designing system architecture: {e}")
+            self.logger.exception(f"Error designing system architecture: {e}")
             return ArchitectureResponse(
                 success=False,
                 architecture=None,
@@ -541,7 +536,7 @@ class ArchitectEngine:
                 error_message=str(e),
             )
 
-    def _parse_project_context(self, context_data: Dict[str, Any]) -> ProjectContext:
+    def _parse_project_context(self, context_data: dict[str, Any]) -> ProjectContext:
         """Parse project context from request data."""
         return ProjectContext(
             name=context_data.get("name", "Unnamed Project"),
@@ -551,18 +546,18 @@ class ArchitectEngine:
             scale=ArchitectureScale(context_data.get("scale", "medium")),
         )
 
-    def _parse_design_scope(self, scope_data: Dict[str, Any]) -> DesignScope:
+    def _parse_design_scope(self, scope_data: dict[str, Any]) -> DesignScope:
         """Parse design scope from request data."""
         return DesignScope(
             focus_area=scope_data.get("focus_area", "full_system"),
             complexity_level=ArchitectureComplexity(
-                scope_data.get("complexity_level", "moderate")
+                scope_data.get("complexity_level", "moderate"),
             ),
             timeline=scope_data.get("timeline", "production"),
         )
 
     def _parse_tech_preferences(
-        self, tech_data: Dict[str, Any]
+        self, tech_data: dict[str, Any],
     ) -> TechnicalPreferences:
         """Parse technical preferences from request data."""
         return TechnicalPreferences(
@@ -579,19 +574,17 @@ class ArchitectEngine:
         tech_prefs: TechnicalPreferences,
     ) -> str:
         """Select appropriate architecture pattern based on requirements."""
-
         # Simple pattern selection logic
         if scope.complexity_level == ArchitectureComplexity.SIMPLE:
             return "monolithic"
-        elif scope.complexity_level == ArchitectureComplexity.MODERATE:
+        if scope.complexity_level == ArchitectureComplexity.MODERATE:
             if context.scale in [ArchitectureScale.MEDIUM, ArchitectureScale.LARGE]:
                 return "layered"
-            else:
-                return "monolithic"
-        elif scope.complexity_level == ArchitectureComplexity.COMPLEX:
+            return "monolithic"
+        if scope.complexity_level == ArchitectureComplexity.COMPLEX:
             return "microservices"
-        else:  # Enterprise
-            return "service_oriented"
+        # Enterprise
+        return "service_oriented"
 
     def _design_components(
         self,
@@ -599,7 +592,7 @@ class ArchitectEngine:
         scope: DesignScope,
         tech_prefs: TechnicalPreferences,
         pattern: str,
-    ) -> List[ArchitectureComponent]:
+    ) -> list[ArchitectureComponent]:
         """Design system components based on requirements and pattern."""
         components = []
 
@@ -616,8 +609,8 @@ class ArchitectEngine:
         return components
 
     def _design_monolithic_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences
-    ) -> List[ArchitectureComponent]:
+        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+    ) -> list[ArchitectureComponent]:
         """Design components for monolithic architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
         primary_db = tech_prefs.databases[0] if tech_prefs.databases else "postgresql"
@@ -640,7 +633,7 @@ class ArchitectEngine:
                     dependencies=["database", "external_apis"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db
+                    language=primary_lang, framework=framework, database=primary_db,
                 ),
             ),
             ArchitectureComponent(
@@ -658,14 +651,14 @@ class ArchitectEngine:
                     dependencies=[],
                 ),
                 technology_stack=TechnologyStack(
-                    language="sql", framework="", database=primary_db
+                    language="sql", framework="", database=primary_db,
                 ),
             ),
         ]
 
     def _design_microservice_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences
-    ) -> List[ArchitectureComponent]:
+        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+    ) -> list[ArchitectureComponent]:
         """Design components for microservices architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
         primary_db = tech_prefs.databases[0] if tech_prefs.databases else "postgresql"
@@ -687,7 +680,7 @@ class ArchitectEngine:
                     dependencies=["authentication_service", "microservices"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="kong", database="redis"
+                    language=primary_lang, framework="kong", database="redis",
                 ),
             ),
             ArchitectureComponent(
@@ -705,7 +698,7 @@ class ArchitectEngine:
                     dependencies=["user_database"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db
+                    language=primary_lang, framework=framework, database=primary_db,
                 ),
             ),
             ArchitectureComponent(
@@ -723,14 +716,14 @@ class ArchitectEngine:
                     dependencies=["business_database", "message_queue"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db
+                    language=primary_lang, framework=framework, database=primary_db,
                 ),
             ),
         ]
 
     def _design_layered_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences
-    ) -> List[ArchitectureComponent]:
+        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+    ) -> list[ArchitectureComponent]:
         """Design components for layered architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
         primary_db = tech_prefs.databases[0] if tech_prefs.databases else "postgresql"
@@ -752,7 +745,7 @@ class ArchitectEngine:
                     dependencies=["business_layer"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework
+                    language=primary_lang, framework=framework,
                 ),
             ),
             ArchitectureComponent(
@@ -770,7 +763,7 @@ class ArchitectEngine:
                     dependencies=["data_layer"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework
+                    language=primary_lang, framework=framework,
                 ),
             ),
             ArchitectureComponent(
@@ -788,14 +781,14 @@ class ArchitectEngine:
                     dependencies=["database"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="sqlalchemy", database=primary_db
+                    language=primary_lang, framework="sqlalchemy", database=primary_db,
                 ),
             ),
         ]
 
     def _design_soa_components(
-        self, context: ProjectContext, tech_prefs: TechnicalPreferences
-    ) -> List[ArchitectureComponent]:
+        self, context: ProjectContext, tech_prefs: TechnicalPreferences,
+    ) -> list[ArchitectureComponent]:
         """Design components for service-oriented architecture."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "java"
         primary_db = tech_prefs.databases[0] if tech_prefs.databases else "postgresql"
@@ -817,7 +810,7 @@ class ArchitectEngine:
                     dependencies=[],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="consul"
+                    language=primary_lang, framework="consul",
                 ),
             ),
             ArchitectureComponent(
@@ -835,7 +828,7 @@ class ArchitectEngine:
                     dependencies=["message_broker"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework="apache_camel"
+                    language=primary_lang, framework="apache_camel",
                 ),
             ),
             ArchitectureComponent(
@@ -853,12 +846,12 @@ class ArchitectEngine:
                     dependencies=["service_database", "esb"],
                 ),
                 technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework, database=primary_db
+                    language=primary_lang, framework=framework, database=primary_db,
                 ),
             ),
         ]
 
-    def _select_framework(self, language: str, preferred_frameworks: List[str]) -> str:
+    def _select_framework(self, language: str, preferred_frameworks: list[str]) -> str:
         """Select appropriate framework for given language."""
         if preferred_frameworks:
             return preferred_frameworks[0]
@@ -874,7 +867,7 @@ class ArchitectEngine:
         return framework_map.get(language, "unknown")
 
     def _design_data_flow(
-        self, components: List[ArchitectureComponent], pattern: str
+        self, components: list[ArchitectureComponent], pattern: str,
     ) -> DataFlow:
         """Design data flow between components."""
         if pattern == "microservices":
@@ -893,8 +886,8 @@ class ArchitectEngine:
         return DataFlow(description=description, diagrams=diagrams)
 
     def _select_integration_patterns(
-        self, components: List[ArchitectureComponent], pattern: str, scope: DesignScope
-    ) -> List[IntegrationPattern]:
+        self, components: list[ArchitectureComponent], pattern: str, scope: DesignScope,
+    ) -> list[IntegrationPattern]:
         """Select appropriate integration patterns."""
         patterns = []
 
@@ -916,7 +909,7 @@ class ArchitectEngine:
                         description="Each service owns its data",
                         implementation="Separate PostgreSQL databases for each microservice",
                     ),
-                ]
+                ],
             )
         elif pattern == "service_oriented":
             patterns.extend(
@@ -931,7 +924,7 @@ class ArchitectEngine:
                         description="Service discovery and registry",
                         implementation="Consul or Eureka for service discovery",
                     ),
-                ]
+                ],
             )
         elif pattern == "layered":
             patterns.append(
@@ -939,14 +932,14 @@ class ArchitectEngine:
                     pattern_name="repository_pattern",
                     description="Data access abstraction",
                     implementation="Repository pattern with ORM for data access layer",
-                )
+                ),
             )
 
         return patterns
 
     def _create_implementation_plan(
         self,
-        components: List[ArchitectureComponent],
+        components: list[ArchitectureComponent],
         context: ProjectContext,
         scope: DesignScope,
     ) -> ImplementationPlan:
@@ -967,7 +960,7 @@ class ArchitectEngine:
                 ],
                 dependencies=[],
                 risk_level="low",
-            )
+            ),
         )
 
         # Phase 2: Core Components
@@ -984,7 +977,7 @@ class ArchitectEngine:
                 ],
                 dependencies=["foundation_setup"],
                 risk_level="medium",
-            )
+            ),
         )
 
         # Phase 3: Integration
@@ -1001,7 +994,7 @@ class ArchitectEngine:
                 ],
                 dependencies=["core_components"],
                 risk_level="medium",
-            )
+            ),
         )
 
         # Phase 4: Testing & Deployment
@@ -1018,7 +1011,7 @@ class ArchitectEngine:
                 ],
                 dependencies=["component_integration"],
                 risk_level="high",
-            )
+            ),
         )
 
         # Calculate resource requirements
@@ -1041,18 +1034,17 @@ class ArchitectEngine:
                 "component_integration",
             ],
             resource_requirements=ResourceRequirements(
-                developers=developer_count, devops=devops_count, timeline=total_duration
+                developers=developer_count, devops=devops_count, timeline=total_duration,
             ),
         )
 
     def _generate_technical_specifications(
         self,
-        components: List[ArchitectureComponent],
+        components: list[ArchitectureComponent],
         tech_prefs: TechnicalPreferences,
         context: ProjectContext,
     ) -> TechnicalSpecifications:
         """Generate detailed technical specifications."""
-
         # API Design
         api_endpoints = [
             APIEndpoint(
@@ -1096,11 +1088,11 @@ class ArchitectEngine:
                         constraints=["unique", "not_null"],
                     ),
                     DatabaseColumn(
-                        name="created_at", type="timestamp", constraints=["not_null"]
+                        name="created_at", type="timestamp", constraints=["not_null"],
                     ),
                 ],
                 relationships=[],
-            )
+            ),
         ]
 
         database_design = DatabaseDesign(
@@ -1125,10 +1117,9 @@ class ArchitectEngine:
         )
 
     def _define_quality_attributes(
-        self, context: ProjectContext, scope: DesignScope
+        self, context: ProjectContext, scope: DesignScope,
     ) -> QualityAttributes:
         """Define quality attributes and requirements."""
-
         # Performance requirements based on scale
         if context.scale == ArchitectureScale.SMALL:
             perf_req = "response_time < 500ms"
@@ -1150,7 +1141,7 @@ class ArchitectEngine:
 
         return QualityAttributes(
             performance=QualityAttribute(
-                requirements=perf_req, strategies=perf_strategies
+                requirements=perf_req, strategies=perf_strategies,
             ),
             scalability=QualityAttribute(
                 requirements=f"handle {context.scale.value} scale requirements",
@@ -1169,10 +1160,10 @@ class ArchitectEngine:
     def _generate_recommendations(
         self,
         pattern: str,
-        components: List[ArchitectureComponent],
+        components: list[ArchitectureComponent],
         scope: DesignScope,
         tech_prefs: TechnicalPreferences,
-    ) -> List[Recommendation]:
+    ) -> list[Recommendation]:
         """Generate architecture recommendations."""
         recommendations = []
 
@@ -1188,7 +1179,7 @@ class ArchitectEngine:
                     recommendation="Consider starting with a monolithic architecture",
                     rationale="Microservices add complexity that may not be justified for simple applications",
                     implementation="Begin with monolith and split into services as complexity grows",
-                )
+                ),
             )
 
         # Technology recommendations
@@ -1200,7 +1191,7 @@ class ArchitectEngine:
                     recommendation="Use FastAPI for API development",
                     rationale="FastAPI provides excellent performance and automatic API documentation",
                     implementation="pip install fastapi uvicorn and use for all API endpoints",
-                )
+                ),
             )
 
         # Monitoring recommendation
@@ -1211,7 +1202,7 @@ class ArchitectEngine:
                 recommendation="Implement comprehensive monitoring",
                 rationale="Essential for maintaining system health and performance",
                 implementation="Set up Prometheus, Grafana, and centralized logging",
-            )
+            ),
         )
 
         return recommendations
@@ -1219,10 +1210,10 @@ class ArchitectEngine:
     def _assess_risks(
         self,
         pattern: str,
-        components: List[ArchitectureComponent],
+        components: list[ArchitectureComponent],
         scope: DesignScope,
         context: ProjectContext,
-    ) -> List[Risk]:
+    ) -> list[Risk]:
         """Assess architecture risks and mitigations."""
         risks = []
 
@@ -1235,7 +1226,7 @@ class ArchitectEngine:
                     impact="high",
                     mitigation="Implement circuit breakers and retry mechanisms",
                     monitoring="Service mesh monitoring and distributed tracing",
-                )
+                ),
             )
 
             risks.append(
@@ -1245,13 +1236,12 @@ class ArchitectEngine:
                     impact="medium",
                     mitigation="Implement saga pattern for distributed transactions",
                     monitoring="Transaction monitoring and audit logs",
-                )
+                ),
             )
 
         # Scale-specific risks
         if (
-            context.scale == ArchitectureScale.LARGE
-            or context.scale == ArchitectureScale.ENTERPRISE
+            context.scale in (ArchitectureScale.LARGE, ArchitectureScale.ENTERPRISE)
         ):
             risks.append(
                 Risk(
@@ -1260,7 +1250,7 @@ class ArchitectEngine:
                     impact="high",
                     mitigation="Implement read replicas and database sharding",
                     monitoring="Database performance metrics and query analysis",
-                )
+                ),
             )
 
         # General risks
@@ -1271,23 +1261,23 @@ class ArchitectEngine:
                 impact="high",
                 mitigation="Regular security audits and penetration testing",
                 monitoring="Security monitoring and intrusion detection",
-            )
+            ),
         )
 
         return risks
 
-    def design_component(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def design_component(self, request: dict[str, Any]) -> dict[str, Any]:
         """Design a specific system component."""
         try:
             component_name = request.get("component_name", "unnamed_component")
             requirements = request.get("requirements", [])
             tech_prefs = self._parse_tech_preferences(
-                request.get("technical_preferences", {})
+                request.get("technical_preferences", {}),
             )
 
             # Design specific component
             component = self._design_specific_component(
-                component_name, requirements, tech_prefs
+                component_name, requirements, tech_prefs,
             )
 
             return {
@@ -1298,11 +1288,11 @@ class ArchitectEngine:
             }
 
         except Exception as e:
-            self.logger.error(f"Error designing component: {e}")
+            self.logger.exception(f"Error designing component: {e}")
             return {"success": False, "error_message": str(e)}
 
     def _design_specific_component(
-        self, name: str, requirements: List[str], tech_prefs: TechnicalPreferences
+        self, name: str, requirements: list[str], tech_prefs: TechnicalPreferences,
     ) -> ArchitectureComponent:
         """Design a specific component based on name and requirements."""
         primary_lang = tech_prefs.languages[0] if tech_prefs.languages else "python"
@@ -1313,13 +1303,7 @@ class ArchitectEngine:
             return ArchitectureComponent(
                 name=name,
                 purpose=f"API service for {name} functionality",
-                responsibilities=[
-                    "HTTP request handling",
-                    "Business logic processing",
-                    "Data validation",
-                    "Response formatting",
-                ]
-                + requirements,
+                responsibilities=["HTTP request handling", "Business logic processing", "Data validation", "Response formatting", *requirements],
                 interfaces=ComponentInterface(
                     inputs=["HTTP requests", "Database queries"],
                     outputs=["HTTP responses", "Database updates"],
@@ -1333,17 +1317,11 @@ class ArchitectEngine:
                     else "postgresql",
                 ),
             )
-        elif "database" in name.lower() or "storage" in name.lower():
+        if "database" in name.lower() or "storage" in name.lower():
             return ArchitectureComponent(
                 name=name,
                 purpose=f"Data storage and persistence for {name}",
-                responsibilities=[
-                    "Data persistence",
-                    "Query processing",
-                    "Data integrity",
-                    "Backup management",
-                ]
-                + requirements,
+                responsibilities=["Data persistence", "Query processing", "Data integrity", "Backup management", *requirements],
                 interfaces=ComponentInterface(
                     inputs=["SQL queries", "Data operations"],
                     outputs=["Query results", "Operation confirmations"],
@@ -1357,26 +1335,25 @@ class ArchitectEngine:
                     else "postgresql",
                 ),
             )
-        else:
-            return ArchitectureComponent(
-                name=name,
-                purpose=f"Custom component for {name} functionality",
-                responsibilities=requirements
-                if requirements
-                else [f"{name} processing"],
-                interfaces=ComponentInterface(
-                    inputs=["Component inputs"],
-                    outputs=["Component outputs"],
-                    dependencies=["external_dependencies"],
-                ),
-                technology_stack=TechnologyStack(
-                    language=primary_lang, framework=framework
-                ),
-            )
+        return ArchitectureComponent(
+            name=name,
+            purpose=f"Custom component for {name} functionality",
+            responsibilities=requirements
+            if requirements
+            else [f"{name} processing"],
+            interfaces=ComponentInterface(
+                inputs=["Component inputs"],
+                outputs=["Component outputs"],
+                dependencies=["external_dependencies"],
+            ),
+            technology_stack=TechnologyStack(
+                language=primary_lang, framework=framework,
+            ),
+        )
 
     def _generate_component_recommendations(
-        self, component: ArchitectureComponent
-    ) -> List[Recommendation]:
+        self, component: ArchitectureComponent,
+    ) -> list[Recommendation]:
         """Generate recommendations for a specific component."""
         return [
             Recommendation(
@@ -1395,7 +1372,7 @@ class ArchitectEngine:
             ),
         ]
 
-    def _assess_component_risks(self, component: ArchitectureComponent) -> List[Risk]:
+    def _assess_component_risks(self, component: ArchitectureComponent) -> list[Risk]:
         """Assess risks for a specific component."""
         return [
             Risk(
@@ -1414,7 +1391,7 @@ class ArchitectEngine:
             ),
         ]
 
-    def create_integration_plan(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def create_integration_plan(self, request: dict[str, Any]) -> dict[str, Any]:
         """Create integration plan for system components."""
         try:
             components = request.get("components", [])
@@ -1427,18 +1404,18 @@ class ArchitectEngine:
                 "success": True,
                 "integration_plan": plan,
                 "recommendations": self._generate_integration_recommendations(
-                    components
+                    components,
                 ),
                 "risks": self._assess_integration_risks(components),
             }
 
         except Exception as e:
-            self.logger.error(f"Error creating integration plan: {e}")
+            self.logger.exception(f"Error creating integration plan: {e}")
             return {"success": False, "error_message": str(e)}
 
     def _create_integration_plan(
-        self, components: List[str], requirements: List[str]
-    ) -> Dict[str, Any]:
+        self, components: list[str], requirements: list[str],
+    ) -> dict[str, Any]:
         """Create detailed integration plan."""
         return {
             "overview": "Integration plan for system components",
@@ -1449,7 +1426,7 @@ class ArchitectEngine:
                     "interface_type": "REST API",
                     "data_format": "JSON",
                     "authentication": "JWT",
-                }
+                },
             ],
             "data_flow": "Sequential processing with asynchronous notifications",
             "error_handling": "Circuit breaker pattern with retry mechanisms",
@@ -1457,8 +1434,8 @@ class ArchitectEngine:
         }
 
     def _generate_integration_recommendations(
-        self, components: List[str]
-    ) -> List[Recommendation]:
+        self, components: list[str],
+    ) -> list[Recommendation]:
         """Generate integration-specific recommendations."""
         return [
             Recommendation(
@@ -1477,7 +1454,7 @@ class ArchitectEngine:
             ),
         ]
 
-    def _assess_integration_risks(self, components: List[str]) -> List[Risk]:
+    def _assess_integration_risks(self, components: list[str]) -> list[Risk]:
         """Assess integration-specific risks."""
         return [
             Risk(
@@ -1496,7 +1473,7 @@ class ArchitectEngine:
             ),
         ]
 
-    def review_architecture(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def review_architecture(self, request: dict[str, Any]) -> dict[str, Any]:
         """Review existing architecture and provide recommendations."""
         try:
             architecture_description = request.get("architecture_description", "")
@@ -1504,7 +1481,7 @@ class ArchitectEngine:
 
             # Perform architecture review
             review_results = self._perform_architecture_review(
-                architecture_description, review_criteria
+                architecture_description, review_criteria,
             )
 
             return {
@@ -1512,18 +1489,18 @@ class ArchitectEngine:
                 "review_results": review_results,
                 "score": self._calculate_architecture_score(review_results),
                 "recommendations": self._generate_review_recommendations(
-                    review_results
+                    review_results,
                 ),
                 "action_items": self._generate_action_items(review_results),
             }
 
         except Exception as e:
-            self.logger.error(f"Error reviewing architecture: {e}")
+            self.logger.exception(f"Error reviewing architecture: {e}")
             return {"success": False, "error_message": str(e)}
 
     def _perform_architecture_review(
-        self, description: str, criteria: List[str]
-    ) -> Dict[str, Any]:
+        self, description: str, criteria: list[str],
+    ) -> dict[str, Any]:
         """Perform detailed architecture review."""
         return {
             "scalability_assessment": "Good - architecture supports horizontal scaling",
@@ -1534,7 +1511,7 @@ class ArchitectEngine:
             "overall_assessment": "Architecture is solid with some areas for improvement",
         }
 
-    def _calculate_architecture_score(self, review_results: Dict[str, Any]) -> int:
+    def _calculate_architecture_score(self, review_results: dict[str, Any]) -> int:
         """Calculate overall architecture score."""
         # Simple scoring logic - in real implementation would be more sophisticated
         assessments = [
@@ -1558,8 +1535,8 @@ class ArchitectEngine:
         return min(100, score)
 
     def _generate_review_recommendations(
-        self, review_results: Dict[str, Any]
-    ) -> List[Recommendation]:
+        self, review_results: dict[str, Any],
+    ) -> list[Recommendation]:
         """Generate recommendations based on review results."""
         recommendations = []
 
@@ -1575,12 +1552,12 @@ class ArchitectEngine:
                     recommendation="Implement comprehensive security layers",
                     rationale="Security assessment indicates missing security measures",
                     implementation="Add authentication, authorization, encryption, and monitoring",
-                )
+                ),
             )
 
         return recommendations
 
-    def _generate_action_items(self, review_results: Dict[str, Any]) -> List[str]:
+    def _generate_action_items(self, review_results: dict[str, Any]) -> list[str]:
         """Generate action items from review results."""
         return [
             "Address security vulnerabilities identified in review",
@@ -1590,7 +1567,7 @@ class ArchitectEngine:
         ]
 
 
-def main():
+def main() -> None:
     """Main function for testing the architect engine."""
     architect = ArchitectEngine()
 
@@ -1630,13 +1607,9 @@ def main():
     response = architect.design_system_architecture(test_request)
 
     if response.success:
-        print("Architecture Design Completed Successfully!")
-        print(f"Components: {len(response.architecture.components)}")
-        print(f"Implementation Phases: {len(response.implementation_plan.phases)}")
-        print(f"Recommendations: {len(response.recommendations)}")
-        print(f"Risks Identified: {len(response.risks_and_mitigations)}")
+        pass
     else:
-        print(f"Architecture Design Failed: {response.error_message}")
+        pass
 
 
 if __name__ == "__main__":

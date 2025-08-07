@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-"""
-Prompt Writer Engine - Core logic for generating structured prompts.
+"""Prompt Writer Engine - Core logic for generating structured prompts.
 This provides programmatic access to prompt generation capabilities.
 """
+from __future__ import annotations
 
-import json
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 
 class PromptWriterEngine:
     """Engine for generating structured development prompts."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.template_structure = {
             "overview": "Brief description of the feature and its purpose",
             "problem_statement": "Clear description of what problem this solves",
@@ -43,10 +41,9 @@ class PromptWriterEngine:
         }
 
     def generate_prompt(
-        self, task_description: str, context: Optional[Dict] = None
-    ) -> Dict:
-        """
-        Generate a structured prompt based on task description.
+        self, task_description: str, context: dict | None = None,
+    ) -> dict:
+        """Generate a structured prompt based on task description.
 
         Args:
             task_description: High-level description of what needs to be done
@@ -54,6 +51,7 @@ class PromptWriterEngine:
 
         Returns:
             Dictionary containing the structured prompt content
+
         """
         context = context or {}
 
@@ -61,7 +59,7 @@ class PromptWriterEngine:
         analysis = self._analyze_task(task_description)
 
         # Generate each section of the prompt
-        prompt_data = {
+        return {
             "title": analysis["title"],
             "overview": self._generate_overview(analysis),
             "problem_statement": self._generate_problem_statement(analysis),
@@ -76,11 +74,10 @@ class PromptWriterEngine:
             },
         }
 
-        return prompt_data
 
-    def _analyze_task(self, task_description: str) -> Dict:
+    def _analyze_task(self, task_description: str) -> dict:
         """Analyze task description to extract key information."""
-        analysis = {
+        return {
             "original_task": task_description,
             "title": self._extract_title(task_description),
             "task_type": self._determine_task_type(task_description),
@@ -88,7 +85,6 @@ class PromptWriterEngine:
             "components": self._identify_components(task_description),
             "keywords": self._extract_keywords(task_description),
         }
-        return analysis
 
     def _extract_title(self, task_description: str) -> str:
         """Extract a clean title from task description."""
@@ -123,24 +119,23 @@ class PromptWriterEngine:
             for word in ["implement", "add", "create", "build"]
         ):
             return "feature_implementation"
-        elif any(
+        if any(
             word in description_lower for word in ["fix", "bug", "error", "issue"]
         ):
             return "bug_fix"
-        elif any(
+        if any(
             word in description_lower
             for word in ["enhance", "improve", "optimize", "update"]
         ):
             return "enhancement"
-        elif any(
+        if any(
             word in description_lower
             for word in ["unit test", "testing", "test coverage", "add tests"]
         ):
             return "testing"
-        elif any(word in description_lower for word in ["doc", "document", "readme"]):
+        if any(word in description_lower for word in ["doc", "document", "readme"]):
             return "documentation"
-        else:
-            return "general_development"
+        return "general_development"
 
     def _estimate_complexity(self, task_description: str) -> str:
         """Estimate task complexity based on description."""
@@ -165,7 +160,7 @@ class PromptWriterEngine:
 
         return "medium"  # Default
 
-    def _identify_components(self, task_description: str) -> List[str]:
+    def _identify_components(self, task_description: str) -> list[str]:
         """Identify likely components/technologies mentioned in description."""
         description_lower = task_description.lower()
         components = []
@@ -187,7 +182,7 @@ class PromptWriterEngine:
 
         return components
 
-    def _extract_keywords(self, task_description: str) -> List[str]:
+    def _extract_keywords(self, task_description: str) -> list[str]:
         """Extract important keywords from the task description."""
         # Simple keyword extraction - remove common words
         common_words = {
@@ -212,37 +207,35 @@ class PromptWriterEngine:
         ]
         return keywords[:10]  # Limit to 10 keywords
 
-    def _generate_overview(self, analysis: Dict) -> str:
+    def _generate_overview(self, analysis: dict) -> str:
         """Generate overview section based on analysis."""
         task_type = analysis["task_type"]
         title = analysis["title"]
 
         if task_type == "feature_implementation":
             return f"This prompt guides the implementation of {title.lower()}. The feature will enhance the application's capabilities and provide users with improved functionality."
-        elif task_type == "bug_fix":
+        if task_type == "bug_fix":
             return f"This prompt addresses a specific issue requiring {title.lower()}. The fix will resolve the problem and restore expected functionality."
-        elif task_type == "enhancement":
+        if task_type == "enhancement":
             return f"This prompt focuses on {title.lower()} to improve existing functionality. The enhancement will provide better performance and user experience."
-        else:
-            return f"This prompt provides guidance for {title.lower()}. The work will contribute to the overall quality and functionality of the application."
+        return f"This prompt provides guidance for {title.lower()}. The work will contribute to the overall quality and functionality of the application."
 
-    def _generate_problem_statement(self, analysis: Dict) -> str:
+    def _generate_problem_statement(self, analysis: dict) -> str:
         """Generate problem statement based on analysis."""
         task_type = analysis["task_type"]
         original_task = analysis["original_task"]
 
         if task_type == "feature_implementation":
             return f"The application currently lacks {original_task.lower()}. Users need this functionality to accomplish their goals effectively."
-        elif task_type == "bug_fix":
+        if task_type == "bug_fix":
             return f"There is a reported issue: {original_task}. This problem affects user experience and needs to be resolved."
-        else:
-            return f"The current state requires improvement: {original_task}. This work will address the identified need."
+        return f"The current state requires improvement: {original_task}. This work will address the identified need."
 
-    def _generate_requirements(self, analysis: Dict) -> Dict:
+    def _generate_requirements(self, analysis: dict) -> dict:
         """Generate requirements sections based on analysis."""
         task_type = analysis["task_type"]
         components = analysis["components"]
-        complexity = analysis["complexity"]
+        analysis["complexity"]
 
         functional_reqs = []
         technical_reqs = []
@@ -297,10 +290,10 @@ class PromptWriterEngine:
 
         return {"functional": functional_reqs, "technical": technical_reqs}
 
-    def _generate_implementation_plan(self, analysis: Dict) -> Dict:
+    def _generate_implementation_plan(self, analysis: dict) -> dict:
         """Generate implementation plan based on analysis."""
         complexity = analysis["complexity"]
-        task_type = analysis["task_type"]
+        analysis["task_type"]
 
         if complexity == "high":
             return {
@@ -329,7 +322,7 @@ class PromptWriterEngine:
                     "Prepare rollback procedures",
                 ],
             }
-        elif complexity == "medium":
+        if complexity == "medium":
             return {
                 "phase1": [
                     "Analyze requirements and existing code",
@@ -352,24 +345,24 @@ class PromptWriterEngine:
                     "Verify deployment procedures",
                 ],
             }
-        else:  # low complexity
-            return {
-                "phase1": ["Review existing code and identify changes needed"],
-                "phase2": [
-                    "Implement the required changes",
-                    "Add basic validation and error handling",
-                ],
-                "phase3": [
-                    "Add tests to verify the changes work correctly",
-                    "Test integration with existing functionality",
-                ],
-                "phase4": [
-                    "Update documentation as needed",
-                    "Add comments explaining the changes",
-                ],
-            }
+        # low complexity
+        return {
+            "phase1": ["Review existing code and identify changes needed"],
+            "phase2": [
+                "Implement the required changes",
+                "Add basic validation and error handling",
+            ],
+            "phase3": [
+                "Add tests to verify the changes work correctly",
+                "Test integration with existing functionality",
+            ],
+            "phase4": [
+                "Update documentation as needed",
+                "Add comments explaining the changes",
+            ],
+        }
 
-    def _generate_success_criteria(self, analysis: Dict) -> List[str]:
+    def _generate_success_criteria(self, analysis: dict) -> list[str]:
         """Generate success criteria based on analysis."""
         task_type = analysis["task_type"]
         complexity = analysis["complexity"]
@@ -387,7 +380,7 @@ class PromptWriterEngine:
                     "New functionality works as specified",
                     "User interface is intuitive and accessible",
                     "Feature integrates seamlessly with existing application",
-                ]
+                ],
             )
         elif task_type == "bug_fix":
             base_criteria.extend(
@@ -395,7 +388,7 @@ class PromptWriterEngine:
                     "Reported issue is completely resolved",
                     "Fix does not introduce new issues",
                     "Root cause has been addressed",
-                ]
+                ],
             )
 
         if complexity in ["medium", "high"]:
@@ -404,12 +397,12 @@ class PromptWriterEngine:
                     "Comprehensive documentation is updated",
                     "Performance impact is acceptable",
                     "Security considerations have been addressed",
-                ]
+                ],
             )
 
         return base_criteria
 
-    def format_as_markdown(self, prompt_data: Dict) -> str:
+    def format_as_markdown(self, prompt_data: dict) -> str:
         """Format the prompt data as a markdown document."""
         md = f"# {prompt_data['title']}\n\n"
 
@@ -456,9 +449,8 @@ class PromptWriterEngine:
         return md
 
 
-def generate_prompt_for_task(task_description: str, save_to_file: bool = False) -> Dict:
-    """
-    Main function to generate a prompt for a given task.
+def generate_prompt_for_task(task_description: str, save_to_file: bool = False) -> dict:
+    """Main function to generate a prompt for a given task.
 
     Args:
         task_description: Description of the task
@@ -466,6 +458,7 @@ def generate_prompt_for_task(task_description: str, save_to_file: bool = False) 
 
     Returns:
         Dictionary containing the generated prompt and metadata
+
     """
     engine = PromptWriterEngine()
 
@@ -521,20 +514,12 @@ if __name__ == "__main__":
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python prompt_writer_engine.py <task_description>")
-        print(
-            "Example: python prompt_writer_engine.py 'Add user authentication to web app'"
-        )
         sys.exit(1)
 
     task_description = " ".join(sys.argv[1:])
     result = generate_prompt_for_task(task_description, save_to_file=False)
 
     if result["success"]:
-        print("Generated Prompt:")
-        print("=" * 50)
-        print(result["markdown"])
-        print("=" * 50)
-        print(f"Suggested filename: {result['suggested_filename']}")
+        pass
     else:
-        print(f"Error generating prompt: {result.get('error', 'Unknown error')}")
+        pass

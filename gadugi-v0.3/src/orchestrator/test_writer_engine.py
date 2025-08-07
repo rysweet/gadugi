@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-"""
-Test Writer Engine for Gadugi v0.3
+"""Test Writer Engine for Gadugi v0.3.
 
 Generates comprehensive test suites, test cases, and testing strategies.
 Supports multiple programming languages and testing frameworks.
 """
+from __future__ import annotations
 
 import ast
-import json
 import logging
 import os
 import re
-import subprocess
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class TestLanguage(Enum):
@@ -75,7 +72,7 @@ class AssertionStyle(Enum):
 class TestRequirements:
     """Requirements for test generation."""
 
-    test_types: List[TestType]
+    test_types: list[TestType]
     coverage_target: float = 95.0
     test_style: TestStyle = TestStyle.COMPREHENSIVE
     include_edge_cases: bool = True
@@ -111,13 +108,13 @@ class FunctionInfo:
     """Information about a function to test."""
 
     name: str
-    parameters: List[str]
-    return_type: Optional[str]
-    docstring: Optional[str]
+    parameters: list[str]
+    return_type: str | None
+    docstring: str | None
     complexity: int
     line_number: int
     is_async: bool = False
-    decorators: List[str] = None
+    decorators: list[str] = None
 
     def __post_init__(self):
         if self.decorators is None:
@@ -129,10 +126,10 @@ class ClassInfo:
     """Information about a class to test."""
 
     name: str
-    methods: List[FunctionInfo]
-    init_parameters: List[str]
-    base_classes: List[str]
-    docstring: Optional[str]
+    methods: list[FunctionInfo]
+    init_parameters: list[str]
+    base_classes: list[str]
+    docstring: str | None
     line_number: int
 
     def __post_init__(self):
@@ -146,9 +143,9 @@ class SourceFileInfo:
 
     filepath: str
     language: TestLanguage
-    functions: List[FunctionInfo]
-    classes: List[ClassInfo]
-    imports: List[str]
+    functions: list[FunctionInfo]
+    classes: list[ClassInfo]
+    imports: list[str]
     complexity_score: float
 
 
@@ -159,7 +156,7 @@ class TestFileInfo:
     path: str
     test_count: int
     coverage_estimate: float
-    test_types: List[TestType]
+    test_types: list[TestType]
     file_size: str
     source_file: str
 
@@ -169,7 +166,7 @@ class TestGap:
     """Information about missing test coverage."""
 
     function: str
-    missing_scenarios: List[str]
+    missing_scenarios: list[str]
     priority: str
     reason: str
 
@@ -190,19 +187,19 @@ class TestGenerationResult:
 
     success: bool
     operation: str
-    test_suite: Dict[str, Any]
-    test_analysis: Dict[str, Any]
-    recommendations: List[Dict[str, str]]
-    test_infrastructure: Dict[str, List[str]]
+    test_suite: dict[str, Any]
+    test_analysis: dict[str, Any]
+    recommendations: list[dict[str, str]]
+    test_infrastructure: dict[str, list[str]]
     quality_metrics: QualityMetrics
-    warnings: List[str]
-    errors: List[str]
+    warnings: list[str]
+    errors: list[str]
 
 
 class TestWriterEngine:
     """Engine for generating comprehensive test suites."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Test Writer Engine."""
         self.logger = self._setup_logging()
         self.templates = self._load_templates()
@@ -217,14 +214,14 @@ class TestWriterEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    def _load_templates(self) -> Dict[str, Dict[str, str]]:
+    def _load_templates(self) -> dict[str, dict[str, str]]:
         """Load test templates for different frameworks."""
         return {
             TestFramework.PYTEST.value: {
@@ -241,7 +238,7 @@ class TestWriterEngine:
             },
         }
 
-    def _setup_analyzers(self) -> Dict[str, Any]:
+    def _setup_analyzers(self) -> dict[str, Any]:
         """Set up code analyzers for different languages."""
         return {
             TestLanguage.PYTHON.value: PythonCodeAnalyzer(),
@@ -249,7 +246,7 @@ class TestWriterEngine:
             TestLanguage.TYPESCRIPT.value: TypeScriptCodeAnalyzer(),
         }
 
-    def _setup_generators(self) -> Dict[str, Any]:
+    def _setup_generators(self) -> dict[str, Any]:
         """Set up test generators for different frameworks."""
         return {
             TestFramework.PYTEST.value: PytestGenerator(),
@@ -259,7 +256,7 @@ class TestWriterEngine:
 
     def generate_tests(
         self,
-        source_files: List[str],
+        source_files: list[str],
         test_directory: str,
         language: TestLanguage,
         test_requirements: TestRequirements,
@@ -284,12 +281,12 @@ class TestWriterEngine:
                 else:
                     self.logger.error(f"No analyzer available for {language.value}")
                     return self._create_error_result(
-                        "No analyzer available", "generate"
+                        "No analyzer available", "generate",
                     )
 
             if not source_info:
                 return self._create_error_result(
-                    "No valid source files to analyze", "generate"
+                    "No valid source files to analyze", "generate",
                 )
 
             # Generate tests for each source file
@@ -305,7 +302,7 @@ class TestWriterEngine:
 
             for file_info in source_info:
                 test_file_info = generator.generate_test_file(
-                    file_info, test_directory, test_requirements, configuration, options
+                    file_info, test_directory, test_requirements, configuration, options,
                 )
 
                 if test_file_info:
@@ -314,7 +311,7 @@ class TestWriterEngine:
 
             # Generate test infrastructure
             infrastructure = self._generate_test_infrastructure(
-                test_directory, language, configuration, options
+                test_directory, language, configuration, options,
             )
 
             # Analyze test coverage and gaps
@@ -354,7 +351,7 @@ class TestWriterEngine:
             )
 
         except Exception as e:
-            self.logger.error(f"Error generating tests: {e}")
+            self.logger.exception(f"Error generating tests: {e}")
             return self._create_error_result(str(e), "generate")
 
     def _generate_test_infrastructure(
@@ -363,7 +360,7 @@ class TestWriterEngine:
         language: TestLanguage,
         configuration: TestConfiguration,
         options: TestOptions,
-    ) -> Dict[str, List[str]]:
+    ) -> dict[str, list[str]]:
         """Generate test infrastructure files."""
         infrastructure = {
             "fixtures_created": [],
@@ -377,11 +374,11 @@ class TestWriterEngine:
 
         if language == TestLanguage.PYTHON:
             self._generate_python_infrastructure(
-                test_directory, configuration, infrastructure
+                test_directory, configuration, infrastructure,
             )
         elif language in [TestLanguage.JAVASCRIPT, TestLanguage.TYPESCRIPT]:
             self._generate_javascript_infrastructure(
-                test_directory, configuration, infrastructure
+                test_directory, configuration, infrastructure,
             )
 
         return infrastructure
@@ -390,8 +387,8 @@ class TestWriterEngine:
         self,
         test_directory: str,
         configuration: TestConfiguration,
-        infrastructure: Dict[str, List[str]],
-    ):
+        infrastructure: dict[str, list[str]],
+    ) -> None:
         """Generate Python test infrastructure."""
         # Generate conftest.py for pytest
         if configuration.testing_framework == TestFramework.PYTEST:
@@ -425,8 +422,8 @@ class TestWriterEngine:
         self,
         test_directory: str,
         configuration: TestConfiguration,
-        infrastructure: Dict[str, List[str]],
-    ):
+        infrastructure: dict[str, list[str]],
+    ) -> None:
         """Generate JavaScript test infrastructure."""
         if configuration.testing_framework == TestFramework.JEST:
             # Generate jest.config.js
@@ -448,8 +445,8 @@ class TestWriterEngine:
             infrastructure["fixtures_created"].append("setup.js")
 
     def _analyze_test_coverage(
-        self, source_info: List[SourceFileInfo], test_files: List[TestFileInfo]
-    ) -> Dict[str, Any]:
+        self, source_info: list[SourceFileInfo], test_files: list[TestFileInfo],
+    ) -> dict[str, Any]:
         """Analyze test coverage and identify gaps."""
         total_functions = sum(
             len(info.functions) + sum(len(cls.methods) for cls in info.classes)
@@ -482,15 +479,15 @@ class TestWriterEngine:
         }
 
     def _calculate_quality_metrics(
-        self, test_files: List[TestFileInfo], source_info: List[SourceFileInfo]
+        self, test_files: list[TestFileInfo], source_info: list[SourceFileInfo],
     ) -> QualityMetrics:
         """Calculate quality metrics for generated tests."""
         # Simplified quality calculation
         avg_tests_per_file = sum(tf.test_count for tf in test_files) / max(
-            len(test_files), 1
+            len(test_files), 1,
         )
-        complexity_coverage = sum(info.complexity_score for info in source_info) / max(
-            len(source_info), 1
+        sum(info.complexity_score for info in source_info) / max(
+            len(source_info), 1,
         )
 
         base_quality = 75.0
@@ -511,8 +508,8 @@ class TestWriterEngine:
         )
 
     def _generate_recommendations(
-        self, analysis: Dict[str, Any], quality: QualityMetrics
-    ) -> List[Dict[str, str]]:
+        self, analysis: dict[str, Any], quality: QualityMetrics,
+    ) -> list[dict[str, str]]:
         """Generate recommendations for test improvement."""
         recommendations = []
 
@@ -523,7 +520,7 @@ class TestWriterEngine:
                     "priority": "high",
                     "message": f"Add tests for {analysis['functions_untested']} untested functions",
                     "implementation": "Generate additional unit tests for uncovered functions",
-                }
+                },
             )
 
         if len(analysis["test_gaps"]) > 0:
@@ -533,7 +530,7 @@ class TestWriterEngine:
                     "priority": "medium",
                     "message": f"Address {len(analysis['test_gaps'])} identified test gaps",
                     "implementation": "Focus on edge cases and error scenarios for complex functions",
-                }
+                },
             )
 
         if quality.test_maintainability < 80:
@@ -543,13 +540,13 @@ class TestWriterEngine:
                     "priority": "medium",
                     "message": "Improve test maintainability with better organization",
                     "implementation": "Refactor tests to use more fixtures and reduce code duplication",
-                }
+                },
             )
 
         return recommendations
 
     def _estimate_coverage(
-        self, source_info: List[SourceFileInfo], test_files: List[TestFileInfo]
+        self, source_info: list[SourceFileInfo], test_files: list[TestFileInfo],
     ) -> float:
         """Estimate test coverage percentage."""
         if not source_info or not test_files:
@@ -564,7 +561,7 @@ class TestWriterEngine:
         return round(estimated_coverage, 1)
 
     def _create_error_result(
-        self, error_message: str, operation: str
+        self, error_message: str, operation: str,
     ) -> TestGenerationResult:
         """Create error result."""
         return TestGenerationResult(
@@ -579,32 +576,31 @@ class TestWriterEngine:
             errors=[error_message],
         )
 
-    def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Process test writer requests."""
         try:
             operation = request_data.get("operation", "generate")
 
             if operation == "generate":
                 return self._handle_generate_request(request_data)
-            elif operation == "analyze":
+            if operation == "analyze":
                 return self._handle_analyze_request(request_data)
-            elif operation == "enhance":
+            if operation == "enhance":
                 return self._handle_enhance_request(request_data)
-            elif operation == "refactor":
+            if operation == "refactor":
                 return self._handle_refactor_request(request_data)
-            elif operation == "validate":
+            if operation == "validate":
                 return self._handle_validate_request(request_data)
-            else:
-                return {
-                    "success": False,
-                    "error": f"Unsupported operation: {operation}",
-                }
+            return {
+                "success": False,
+                "error": f"Unsupported operation: {operation}",
+            }
 
         except Exception as e:
-            self.logger.error(f"Error processing request: {e}")
+            self.logger.exception(f"Error processing request: {e}")
             return {"success": False, "error": str(e)}
 
-    def _handle_generate_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_generate_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle test generation request."""
         target = request_data.get("target", {})
         requirements_data = request_data.get("test_requirements", {})
@@ -627,17 +623,17 @@ class TestWriterEngine:
             include_edge_cases=requirements_data.get("include_edge_cases", True),
             include_error_cases=requirements_data.get("include_error_cases", True),
             include_performance_tests=requirements_data.get(
-                "include_performance_tests", False
+                "include_performance_tests", False,
             ),
         )
 
         # Parse configuration
         configuration = TestConfiguration(
             testing_framework=TestFramework(
-                config_data.get("testing_framework", "pytest")
+                config_data.get("testing_framework", "pytest"),
             ),
             assertion_style=AssertionStyle(
-                config_data.get("assertion_style", "assert")
+                config_data.get("assertion_style", "assert"),
             ),
             mock_library=config_data.get("mock_library", "unittest.mock"),
             test_runner=config_data.get("test_runner", "pytest"),
@@ -655,24 +651,24 @@ class TestWriterEngine:
         )
 
         result = self.generate_tests(
-            source_files, test_directory, language, requirements, configuration, options
+            source_files, test_directory, language, requirements, configuration, options,
         )
 
         return asdict(result)
 
-    def _handle_analyze_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_analyze_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle test analysis request."""
         return {"success": False, "error": "Analysis operation not yet implemented"}
 
-    def _handle_enhance_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_enhance_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle test enhancement request."""
         return {"success": False, "error": "Enhancement operation not yet implemented"}
 
-    def _handle_refactor_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_refactor_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle test refactoring request."""
         return {"success": False, "error": "Refactor operation not yet implemented"}
 
-    def _handle_validate_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_validate_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle test validation request."""
         return {"success": False, "error": "Validation operation not yet implemented"}
 
@@ -686,15 +682,15 @@ from {MODULE_PATH} import {CLASS_NAME}
 
 class Test{CLASS_NAME}:
     """Test suite for {CLASS_NAME}."""
-    
+
     def setup_method(self):
         """Set up test fixtures before each test method."""
         self.{INSTANCE_NAME} = {CLASS_NAME}({INIT_PARAMS})
-    
+
     def teardown_method(self):
         """Clean up after each test method."""
         pass
-    
+
 {TEST_METHODS}
 '''
 
@@ -704,10 +700,10 @@ class Test{CLASS_NAME}:
     """Test {FUNCTION_NAME} with valid input."""
     # Arrange
     {ARRANGE_CODE}
-    
+
     # Act
     result = {FUNCTION_CALL}
-    
+
     # Assert
     assert result == {EXPECTED_RESULT}
 
@@ -717,7 +713,7 @@ def test_{FUNCTION_NAME}_edge_cases():
     # Test empty input
     with pytest.raises({EXCEPTION_TYPE}):
         {FUNCTION_NAME}()
-    
+
     # Test boundary values
     {EDGE_CASE_TESTS}
 
@@ -746,21 +742,21 @@ from {MODULE_PATH} import {CLASS_NAME}
 
 class Test{CLASS_NAME}Integration:
     """Integration tests for {CLASS_NAME}."""
-    
+
     @pytest.fixture
     def {FIXTURE_NAME}(self):
         """Create {CLASS_NAME} fixture."""
         return {CLASS_NAME}({INIT_PARAMS})
-    
+
     @requests_mock.Mocker()
     def test_successful_integration(self, m, {FIXTURE_NAME}):
         """Test successful integration."""
         # Arrange
         {MOCK_SETUP}
-        
+
         # Act
         result = {FIXTURE_NAME}.{METHOD_NAME}({PARAMETERS})
-        
+
         # Assert
         assert result == {EXPECTED_RESULT}
 '''
@@ -802,15 +798,15 @@ def mock_{FIXTURE_NAME}():
 
 describe('{CLASS_NAME}', () => {{
   let {INSTANCE_NAME};
-  
+
   beforeEach(() => {{
     {INSTANCE_NAME} = new {CLASS_NAME}({INIT_PARAMS});
   }});
-  
+
   afterEach(() => {{
     jest.clearAllMocks();
   }});
-  
+
 {TEST_METHODS}
 }});
 """
@@ -822,29 +818,29 @@ describe('{CLASS_NAME}', () => {{
       // Arrange
       const input = {TEST_INPUT};
       const expected = {EXPECTED_OUTPUT};
-      
+
       // Act
       const result = {INSTANCE_NAME}.{FUNCTION_NAME}(input);
-      
+
       // Assert
       expect(result).toEqual(expected);
     }});
-    
+
     it('should handle edge cases', () => {{
       // Test empty input
       expect(() => {INSTANCE_NAME}.{FUNCTION_NAME}()).toThrow({ERROR_TYPE});
-      
+
       // Test boundary values
       {EDGE_CASE_TESTS}
     }});
-    
+
     it('should handle errors gracefully', () => {{
       const invalidInput = {INVALID_INPUT};
-      
+
       expect(() => {INSTANCE_NAME}.{FUNCTION_NAME}(invalidInput))
         .toThrow({ERROR_MESSAGE});
     }});
-    
+
     test.each([
       {PARAMETRIZED_TEST_DATA}
     ])('should handle %s input', (input, expected) => {{
@@ -860,18 +856,18 @@ describe('{CLASS_NAME}', () => {{
 
 describe('{CLASS_NAME} Integration', () => {{
   let {INSTANCE_NAME};
-  
+
   beforeEach(() => {{
     {INSTANCE_NAME} = new {CLASS_NAME}();
   }});
-  
+
   it('should integrate with dependencies', async () => {{
     // Mock dependencies
     const mockDependency = jest.fn().mockResolvedValue({MOCK_VALUE});
-    
+
     // Act
     const result = await {INSTANCE_NAME}.{METHOD_NAME}();
-    
+
     // Assert
     expect(result).toEqual({EXPECTED_RESULT});
     expect(mockDependency).toHaveBeenCalledWith({EXPECTED_ARGS});
@@ -921,15 +917,15 @@ def sample_timestamp():
 def mock_environment():
     """Create a mock environment for testing."""
     original_env = os.environ.copy()
-    
+
     # Set test environment variables
     os.environ.update({
         "TEST_MODE": "true",
         "DATABASE_URL": "sqlite:///:memory:"
     })
-    
+
     yield
-    
+
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
@@ -955,7 +951,7 @@ testpaths = tests
 python_files = test_*.py
 python_classes = Test*
 python_functions = test_*
-addopts = 
+addopts =
     --strict-markers
     --strict-config
     --verbose
@@ -1114,7 +1110,7 @@ class PythonCodeAnalyzer:
 
     def analyze_file(self, filepath: str) -> SourceFileInfo:
         """Analyze a Python source file."""
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             source_code = f.read()
 
         try:
@@ -1171,7 +1167,7 @@ class PythonCodeAnalyzer:
             if isinstance(decorator, ast.Name):
                 decorators.append(decorator.id)
             elif isinstance(decorator, ast.Call) and isinstance(
-                decorator.func, ast.Name
+                decorator.func, ast.Name,
             ):
                 decorators.append(decorator.func.id)
 
@@ -1215,7 +1211,7 @@ class PythonCodeAnalyzer:
             line_number=node.lineno,
         )
 
-    def _analyze_import(self, node: Union[ast.Import, ast.ImportFrom]) -> List[str]:
+    def _analyze_import(self, node: ast.Import | ast.ImportFrom) -> list[str]:
         """Analyze import statements."""
         imports = []
 
@@ -1234,17 +1230,13 @@ class PythonCodeAnalyzer:
         complexity = 1  # Base complexity
 
         for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
-                complexity += 1
-            elif isinstance(child, ast.ExceptHandler):
-                complexity += 1
-            elif isinstance(child, (ast.And, ast.Or)):
+            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler, ast.And, ast.Or)):
                 complexity += 1
 
         return complexity
 
     def _calculate_complexity_score(
-        self, functions: List[FunctionInfo], classes: List[ClassInfo]
+        self, functions: list[FunctionInfo], classes: list[ClassInfo],
     ) -> float:
         """Calculate overall complexity score for the file."""
         total_complexity = sum(func.complexity for func in functions)
@@ -1266,7 +1258,7 @@ class JavaScriptCodeAnalyzer:
     def analyze_file(self, filepath: str) -> SourceFileInfo:
         """Analyze a JavaScript source file."""
         # Simplified analysis - would use proper JS parser in production
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             source_code = f.read()
 
         functions = self._extract_functions(source_code)
@@ -1284,7 +1276,7 @@ class JavaScriptCodeAnalyzer:
             complexity_score=complexity_score,
         )
 
-    def _extract_functions(self, source_code: str) -> List[FunctionInfo]:
+    def _extract_functions(self, source_code: str) -> list[FunctionInfo]:
         """Extract function information from JavaScript code."""
         functions = []
 
@@ -1304,7 +1296,7 @@ class JavaScriptCodeAnalyzer:
                     docstring=None,
                     complexity=5,  # Default complexity
                     line_number=source_code[: match.start()].count("\n") + 1,
-                )
+                ),
             )
 
         for match in re.finditer(arrow_function_pattern, source_code):
@@ -1318,12 +1310,12 @@ class JavaScriptCodeAnalyzer:
                     docstring=None,
                     complexity=3,
                     line_number=source_code[: match.start()].count("\n") + 1,
-                )
+                ),
             )
 
         return functions
 
-    def _extract_classes(self, source_code: str) -> List[ClassInfo]:
+    def _extract_classes(self, source_code: str) -> list[ClassInfo]:
         """Extract class information from JavaScript code."""
         classes = []
 
@@ -1341,12 +1333,12 @@ class JavaScriptCodeAnalyzer:
                     base_classes=[base_class] if base_class else [],
                     docstring=None,
                     line_number=source_code[: match.start()].count("\n") + 1,
-                )
+                ),
             )
 
         return classes
 
-    def _extract_imports(self, source_code: str) -> List[str]:
+    def _extract_imports(self, source_code: str) -> list[str]:
         """Extract import statements from JavaScript code."""
         imports = []
 
@@ -1384,7 +1376,7 @@ class PytestGenerator:
         requirements: TestRequirements,
         configuration: TestConfiguration,
         options: TestOptions,
-    ) -> Optional[TestFileInfo]:
+    ) -> TestFileInfo | None:
         """Generate pytest test file."""
         if not file_info.functions and not file_info.classes:
             return None
@@ -1396,7 +1388,7 @@ class PytestGenerator:
 
         # Generate test content
         test_content = self._generate_pytest_content(
-            file_info, requirements, configuration, options
+            file_info, requirements, configuration, options,
         )
 
         # Write test file
@@ -1459,7 +1451,7 @@ class PytestGenerator:
 
         return "\n".join(lines)
 
-    def _generate_class_tests(self, cls: ClassInfo, options: TestOptions) -> List[str]:
+    def _generate_class_tests(self, cls: ClassInfo, options: TestOptions) -> list[str]:
         """Generate tests for a class."""
         lines = []
 
@@ -1493,8 +1485,8 @@ class PytestGenerator:
         return lines
 
     def _generate_method_tests(
-        self, method: FunctionInfo, options: TestOptions
-    ) -> List[str]:
+        self, method: FunctionInfo, options: TestOptions,
+    ) -> list[str]:
         """Generate tests for a method."""
         lines = []
 
@@ -1522,8 +1514,8 @@ class PytestGenerator:
         return lines
 
     def _generate_function_tests(
-        self, func: FunctionInfo, options: TestOptions
-    ) -> List[str]:
+        self, func: FunctionInfo, options: TestOptions,
+    ) -> list[str]:
         """Generate tests for a function."""
         lines = []
 
@@ -1570,7 +1562,7 @@ class JestGenerator:
         requirements: TestRequirements,
         configuration: TestConfiguration,
         options: TestOptions,
-    ) -> Optional[TestFileInfo]:
+    ) -> TestFileInfo | None:
         """Generate Jest test file."""
         if not file_info.functions and not file_info.classes:
             return None
@@ -1582,7 +1574,7 @@ class JestGenerator:
 
         # Generate test content
         test_content = self._generate_jest_content(
-            file_info, requirements, configuration, options
+            file_info, requirements, configuration, options,
         )
 
         # Write test file
@@ -1642,8 +1634,8 @@ class JestGenerator:
         return "\n".join(lines)
 
     def _generate_jest_class_tests(
-        self, cls: ClassInfo, options: TestOptions
-    ) -> List[str]:
+        self, cls: ClassInfo, options: TestOptions,
+    ) -> list[str]:
         """Generate Jest tests for a class."""
         lines = []
 
@@ -1691,8 +1683,8 @@ class JestGenerator:
         return lines
 
     def _generate_jest_function_tests(
-        self, func: FunctionInfo, options: TestOptions
-    ) -> List[str]:
+        self, func: FunctionInfo, options: TestOptions,
+    ) -> list[str]:
         """Generate Jest tests for a function."""
         lines = []
 
@@ -1731,13 +1723,13 @@ class UnittestGenerator:
         requirements: TestRequirements,
         configuration: TestConfiguration,
         options: TestOptions,
-    ) -> Optional[TestFileInfo]:
+    ) -> TestFileInfo | None:
         """Generate unittest test file."""
         # Simplified implementation
         return None
 
 
-def main():
+def main() -> None:
     """Main function for testing the Test Writer Engine."""
     engine = TestWriterEngine()
 
@@ -1773,16 +1765,10 @@ def main():
     response = engine.process_request(test_request)
 
     if response["success"]:
-        print("Test generation completed successfully!")
-        print(f"Generated {response['test_suite']['total_tests']} tests")
-        print(
-            f"Estimated coverage: {response['test_suite']['estimated_coverage']:.1f}%"
-        )
-        print(f"Files generated: {len(response['test_suite']['files_generated'])}")
+        pass
     else:
-        print("Test generation failed:")
-        for error in response["errors"]:
-            print(f"  - {error}")
+        for _error in response["errors"]:
+            pass
 
 
 if __name__ == "__main__":

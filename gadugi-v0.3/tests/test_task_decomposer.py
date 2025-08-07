@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Test the task-decomposer vertical slice.
-"""
+"""Test the task-decomposer vertical slice."""
 
 import json
 import sys
@@ -14,7 +12,7 @@ sys.path.insert(0, str(src_dir))
 from orchestrator.run_agent import run_agent
 
 
-def test_task_decomposer_basic():
+def test_task_decomposer_basic() -> None:
     """Test that task-decomposer returns valid JSON."""
     result = run_agent("task-decomposer", "Build a simple web app")
 
@@ -25,17 +23,17 @@ def test_task_decomposer_basic():
     try:
         tasks_data = json.loads(result["stdout"])
     except json.JSONDecodeError as e:
-        assert False, f"Invalid JSON output: {e}\nOutput: {result['stdout']}"
+        msg = f"Invalid JSON output: {e}\nOutput: {result['stdout']}"
+        raise AssertionError(msg)
 
     # Validate required fields
     assert "original_task" in tasks_data
     assert "tasks" in tasks_data
     assert "parallel_groups" in tasks_data
 
-    print("✓ Task decomposer basic test passed")
 
 
-def test_task_decomposer_api_pattern():
+def test_task_decomposer_api_pattern() -> None:
     """Test that API tasks get appropriate decomposition."""
     result = run_agent("task-decomposer", "Build a REST API with authentication")
 
@@ -50,10 +48,9 @@ def test_task_decomposer_api_pattern():
     assert "code-writer" in agent_types, "Should include code-writer agent"
     assert "test-writer" in agent_types, "Should include test-writer agent"
 
-    print("✓ Task decomposer API pattern test passed")
 
 
-def test_task_decomposer_dependencies():
+def test_task_decomposer_dependencies() -> None:
     """Test that dependencies are properly structured."""
     result = run_agent("task-decomposer", "Create a todo app")
 
@@ -72,19 +69,17 @@ def test_task_decomposer_dependencies():
         assert len(task["task"]) > 10, f"Task too vague: {task['task']}"
 
     # Validate parallel groups reference actual task IDs
-    all_task_ids = set(task["id"] for task in tasks_data["tasks"])
+    all_task_ids = {task["id"] for task in tasks_data["tasks"]}
     for group in tasks_data["parallel_groups"]:
         for task_id in group:
             assert task_id in all_task_ids, (
                 f"Parallel group references unknown task: {task_id}"
             )
 
-    print("✓ Task decomposer dependencies test passed")
 
 
-def test_orchestrator_task_decomposer_integration():
+def test_orchestrator_task_decomposer_integration() -> None:
     """Test the full orchestrator -> task-decomposer workflow."""
-
     # This tests the integration that architect recommended
     result = run_agent("task-decomposer", "Build a mobile app")
 
@@ -96,29 +91,18 @@ def test_orchestrator_task_decomposer_integration():
     assert len(tasks_data["tasks"]) > 0
 
     # This validates the "second functional agent" goal
-    print("✓ Orchestrator-task-decomposer integration test passed")
 
 
-def main():
+def main() -> None:
     """Run all tests."""
-    print("Testing Gadugi v0.3 task-decomposer...")
-    print("=" * 50)
-
     try:
         test_task_decomposer_basic()
         test_task_decomposer_api_pattern()
         test_task_decomposer_dependencies()
         test_orchestrator_task_decomposer_integration()
 
-        print("=" * 50)
-        print("✅ All task-decomposer tests passed!")
-        print("\nThis validates the second vertical slice:")
-        print("- Orchestrator can run multiple agent types")
-        print("- Agents can exchange structured data")
-        print("- Multi-agent workflows are possible")
 
-    except Exception as e:
-        print(f"✗ Test failed: {e}")
+    except Exception:
         sys.exit(1)
 
 

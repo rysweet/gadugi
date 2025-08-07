@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
-"""
-Event Router Service for Gadugi v0.3
+"""Event Router Service for Gadugi v0.3.
 
 Real-time event-driven communication system with protobuf support.
 Handles event routing, filtering, and agent coordination across the platform.
 """
+from __future__ import annotations
 
 import asyncio
 import json
 import logging
-import socket
 import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable, Set
-from dataclasses import dataclass, asdict
 from enum import Enum
-import hashlib
+from typing import Any, Callable
 
 # Protobuf imports (would be generated from .proto files)
 try:
     # These would be generated from protobuf definitions
-    from . import events_pb2
-    from . import agent_messages_pb2
+    from . import agent_messages_pb2, events_pb2
 
     PROTOBUF_AVAILABLE = True
 except ImportError:
@@ -74,12 +70,12 @@ class Event:
     priority: EventPriority
     timestamp: datetime
     source: str
-    target: Optional[str]
-    payload: Dict[str, Any]
-    metadata: Dict[str, Any]
-    correlation_id: Optional[str] = None
+    target: str | None
+    payload: dict[str, Any]
+    metadata: dict[str, Any]
+    correlation_id: str | None = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert event to dictionary."""
         return {
             "id": self.id,
@@ -94,7 +90,7 @@ class Event:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Event":
+    def from_dict(cls, data: dict[str, Any]) -> Event:
         """Create event from dictionary."""
         return cls(
             id=data["id"],
@@ -113,12 +109,12 @@ class Event:
 class EventFilter:
     """Event filtering configuration."""
 
-    event_types: Optional[List[EventType]] = None
-    sources: Optional[List[str]] = None
-    targets: Optional[List[str]] = None
-    priorities: Optional[List[EventPriority]] = None
-    pattern: Optional[str] = None
-    custom_filter: Optional[Callable[[Event], bool]] = None
+    event_types: list[EventType] | None = None
+    sources: list[str] | None = None
+    targets: list[str] | None = None
+    priorities: list[EventPriority] | None = None
+    pattern: str | None = None
+    custom_filter: Callable[[Event], bool] | None = None
 
 
 @dataclass
@@ -128,9 +124,9 @@ class Subscription:
     id: str
     subscriber_id: str
     subscription_type: SubscriptionType
-    filter: Optional[EventFilter]
-    callback: Optional[Callable[[Event], None]]
-    endpoint: Optional[str]
+    filter: EventFilter | None
+    callback: Callable[[Event], None] | None
+    endpoint: str | None
     active: bool = True
     created_at: datetime = None
 
@@ -144,9 +140,9 @@ class EventStats:
     """Event processing statistics."""
 
     total_events: int = 0
-    events_by_type: Dict[str, int] = None
-    events_by_priority: Dict[str, int] = None
-    events_by_source: Dict[str, int] = None
+    events_by_type: dict[str, int] = None
+    events_by_priority: dict[str, int] = None
+    events_by_source: dict[str, int] = None
     average_processing_time: float = 0.0
     failed_deliveries: int = 0
     active_subscriptions: int = 0
@@ -163,7 +159,7 @@ class EventStats:
 class EventQueue:
     """Thread-safe event queue with priority support."""
 
-    def __init__(self, maxsize: int = 10000):
+    def __init__(self, maxsize: int = 10000) -> None:
         self.maxsize = maxsize
         self._queues = {
             EventPriority.CRITICAL: asyncio.Queue(maxsize=maxsize // 4),
@@ -174,13 +170,13 @@ class EventQueue:
         self._lock = threading.Lock()
         self._total_size = 0
 
-    async def put(self, event: Event):
+    async def put(self, event: Event) -> None:
         """Add event to queue."""
         if self._total_size >= self.maxsize:
             # Remove oldest low priority event to make space
             try:
                 await asyncio.wait_for(
-                    self._queues[EventPriority.LOW].get(), timeout=0.1
+                    self._queues[EventPriority.LOW].get(), timeout=0.1,
                 )
                 self._total_size -= 1
             except asyncio.TimeoutError:
@@ -201,7 +197,7 @@ class EventQueue:
         ]:
             try:
                 event = await asyncio.wait_for(
-                    self._queues[priority].get(), timeout=0.1
+                    self._queues[priority].get(), timeout=0.1,
                 )
                 with self._lock:
                     self._total_size -= 1
@@ -241,7 +237,7 @@ class EventRouterService:
         port: int = 9090,
         max_workers: int = 10,
         queue_size: int = 10000,
-    ):
+    ) -> None:
         """Initialize the event router service."""
         self.host = host
         self.port = port
@@ -251,24 +247,24 @@ class EventRouterService:
 
         # Core components
         self.event_queue = EventQueue(maxsize=queue_size)
-        self.subscriptions: Dict[str, Subscription] = {}
+        self.subscriptions: dict[str, Subscription] = {}
         self.stats = EventStats()
 
         # Service state
         self.running = False
-        self.server_task: Optional[asyncio.Task] = None
-        self.processor_task: Optional[asyncio.Task] = None
-        self.cleanup_task: Optional[asyncio.Task] = None
+        self.server_task: asyncio.Task | None = None
+        self.processor_task: asyncio.Task | None = None
+        self.cleanup_task: asyncio.Task | None = None
 
         # Thread pool for blocking operations
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
 
         # Event history (for debugging and replay)
-        self.event_history: List[Event] = []
+        self.event_history: list[Event] = []
         self.max_history_size = 1000
 
         # Connection management
-        self.active_connections: Dict[str, Any] = {}
+        self.active_connections: dict[str, Any] = {}
 
         # Protobuf support
         self.protobuf_enabled = PROTOBUF_AVAILABLE
@@ -283,14 +279,14 @@ class EventRouterService:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the event router service."""
         if self.running:
             self.logger.warning("Event router service is already running")
@@ -310,7 +306,7 @@ class EventRouterService:
 
         self.logger.info("Event router service started successfully")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the event router service."""
         if not self.running:
             return
@@ -340,11 +336,11 @@ class EventRouterService:
 
         self.logger.info("Event router service stopped")
 
-    async def _run_server(self):
+    async def _run_server(self) -> None:
         """Run the event server."""
         try:
             server = await asyncio.start_server(
-                self._handle_client, self.host, self.port
+                self._handle_client, self.host, self.port,
             )
 
             self.logger.info(f"Server listening on {self.host}:{self.port}")
@@ -355,11 +351,11 @@ class EventRouterService:
         except asyncio.CancelledError:
             self.logger.info("Server task cancelled")
         except Exception as e:
-            self.logger.error(f"Server error: {e}")
+            self.logger.exception(f"Server error: {e}")
 
     async def _handle_client(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter,
+    ) -> None:
         """Handle client connections."""
         client_addr = writer.get_extra_info("peername")
         client_id = f"{client_addr[0]}:{client_addr[1]}:{int(time.time())}"
@@ -395,14 +391,14 @@ class EventRouterService:
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            self.logger.error(f"Error handling client {client_id}: {e}")
+            self.logger.exception(f"Error handling client {client_id}: {e}")
         finally:
             writer.close()
             await writer.wait_closed()
             self.active_connections.pop(client_id, None)
             self.logger.info(f"Client disconnected: {client_id}")
 
-    async def _process_client_message(self, client_id: str, message_data: bytes):
+    async def _process_client_message(self, client_id: str, message_data: bytes) -> None:
         """Process message from client."""
         try:
             if self.protobuf_enabled:
@@ -424,19 +420,19 @@ class EventRouterService:
                 await self._handle_ping(client_id)
             else:
                 self.logger.warning(
-                    f"Unknown message type from {client_id}: {message_type}"
+                    f"Unknown message type from {client_id}: {message_type}",
                 )
 
         except Exception as e:
-            self.logger.error(f"Error processing message from {client_id}: {e}")
+            self.logger.exception(f"Error processing message from {client_id}: {e}")
 
-    def _parse_protobuf_message(self, data: bytes) -> Dict[str, Any]:
+    def _parse_protobuf_message(self, data: bytes) -> dict[str, Any]:
         """Parse protobuf message (placeholder)."""
         # In real implementation, this would parse the actual protobuf message
         # For now, fall back to JSON
         return json.loads(data.decode("utf-8"))
 
-    async def _handle_publish_event(self, client_id: str, message: Dict[str, Any]):
+    async def _handle_publish_event(self, client_id: str, message: dict[str, Any]) -> None:
         """Handle event publishing."""
         try:
             event_data = message.get("event", {})
@@ -459,14 +455,14 @@ class EventRouterService:
 
             # Send acknowledgment
             await self._send_to_client(
-                client_id, {"type": "ack", "event_id": event.id, "status": "queued"}
+                client_id, {"type": "ack", "event_id": event.id, "status": "queued"},
             )
 
         except Exception as e:
-            self.logger.error(f"Error handling publish event from {client_id}: {e}")
+            self.logger.exception(f"Error handling publish event from {client_id}: {e}")
             await self._send_to_client(client_id, {"type": "error", "message": str(e)})
 
-    async def _handle_subscription(self, client_id: str, message: Dict[str, Any]):
+    async def _handle_subscription(self, client_id: str, message: dict[str, Any]) -> None:
         """Handle subscription request."""
         try:
             sub_data = message.get("subscription", {})
@@ -494,7 +490,7 @@ class EventRouterService:
 
             self.subscriptions[subscription.id] = subscription
             self.logger.info(
-                f"Created subscription {subscription.id} for client {client_id}"
+                f"Created subscription {subscription.id} for client {client_id}",
             )
 
             # Send acknowledgment
@@ -504,10 +500,10 @@ class EventRouterService:
             )
 
         except Exception as e:
-            self.logger.error(f"Error handling subscription from {client_id}: {e}")
+            self.logger.exception(f"Error handling subscription from {client_id}: {e}")
             await self._send_to_client(client_id, {"type": "error", "message": str(e)})
 
-    async def _handle_unsubscription(self, client_id: str, message: Dict[str, Any]):
+    async def _handle_unsubscription(self, client_id: str, message: dict[str, Any]) -> None:
         """Handle unsubscription request."""
         try:
             subscription_id = message.get("subscription_id")
@@ -517,7 +513,7 @@ class EventRouterService:
                 if subscription.subscriber_id == client_id:
                     del self.subscriptions[subscription_id]
                     self.logger.info(
-                        f"Removed subscription {subscription_id} for client {client_id}"
+                        f"Removed subscription {subscription_id} for client {client_id}",
                     )
 
                     await self._send_to_client(
@@ -534,19 +530,19 @@ class EventRouterService:
                     )
             else:
                 await self._send_to_client(
-                    client_id, {"type": "error", "message": "Subscription not found"}
+                    client_id, {"type": "error", "message": "Subscription not found"},
                 )
 
         except Exception as e:
-            self.logger.error(f"Error handling unsubscription from {client_id}: {e}")
+            self.logger.exception(f"Error handling unsubscription from {client_id}: {e}")
 
-    async def _handle_ping(self, client_id: str):
+    async def _handle_ping(self, client_id: str) -> None:
         """Handle ping request."""
         await self._send_to_client(
-            client_id, {"type": "pong", "timestamp": datetime.now().isoformat()}
+            client_id, {"type": "pong", "timestamp": datetime.now().isoformat()},
         )
 
-    async def _send_to_client(self, client_id: str, message: Dict[str, Any]):
+    async def _send_to_client(self, client_id: str, message: dict[str, Any]) -> None:
         """Send message to specific client."""
         if client_id not in self.active_connections:
             return
@@ -567,17 +563,17 @@ class EventRouterService:
             await writer.drain()
 
         except Exception as e:
-            self.logger.error(f"Error sending message to client {client_id}: {e}")
+            self.logger.exception(f"Error sending message to client {client_id}: {e}")
             # Remove client connection on error
             self.active_connections.pop(client_id, None)
 
-    def _serialize_protobuf_message(self, message: Dict[str, Any]) -> bytes:
+    def _serialize_protobuf_message(self, message: dict[str, Any]) -> bytes:
         """Serialize message to protobuf (placeholder)."""
         # In real implementation, this would serialize to actual protobuf
         # For now, fall back to JSON
         return json.dumps(message).encode("utf-8")
 
-    async def _process_events(self):
+    async def _process_events(self) -> None:
         """Process events from the queue."""
         self.logger.info("Event processor started")
 
@@ -601,12 +597,12 @@ class EventRouterService:
                 except asyncio.TimeoutError:
                     continue
                 except Exception as e:
-                    self.logger.error(f"Error processing event: {e}")
+                    self.logger.exception(f"Error processing event: {e}")
 
         except asyncio.CancelledError:
             self.logger.info("Event processor cancelled")
 
-    async def _route_event(self, event: Event):
+    async def _route_event(self, event: Event) -> None:
         """Route event to subscribers."""
         matching_subscriptions = self._find_matching_subscriptions(event)
 
@@ -629,10 +625,10 @@ class EventRouterService:
 
         if failed_count > 0:
             self.logger.warning(
-                f"Failed to deliver event {event.id} to {failed_count} subscribers"
+                f"Failed to deliver event {event.id} to {failed_count} subscribers",
             )
 
-    def _find_matching_subscriptions(self, event: Event) -> List[Subscription]:
+    def _find_matching_subscriptions(self, event: Event) -> list[Subscription]:
         """Find subscriptions that match the event."""
         matching = []
 
@@ -646,7 +642,7 @@ class EventRouterService:
         return matching
 
     def _event_matches_filter(
-        self, event: Event, event_filter: Optional[EventFilter]
+        self, event: Event, event_filter: EventFilter | None,
     ) -> bool:
         """Check if event matches filter criteria."""
         if not event_filter:
@@ -686,18 +682,18 @@ class EventRouterService:
                 if not event_filter.custom_filter(event):
                     return False
             except Exception as e:
-                self.logger.error(f"Error in custom filter: {e}")
+                self.logger.exception(f"Error in custom filter: {e}")
                 return False
 
         return True
 
-    async def _deliver_event(self, event: Event, subscription: Subscription):
+    async def _deliver_event(self, event: Event, subscription: Subscription) -> None:
         """Deliver event to subscriber."""
         try:
             if subscription.callback:
                 # Direct callback
                 await asyncio.get_event_loop().run_in_executor(
-                    self.executor, subscription.callback, event
+                    self.executor, subscription.callback, event,
                 )
             elif subscription.endpoint:
                 # Send to client endpoint
@@ -711,12 +707,12 @@ class EventRouterService:
                 )
 
         except Exception as e:
-            self.logger.error(
-                f"Error delivering event {event.id} to subscription {subscription.id}: {e}"
+            self.logger.exception(
+                f"Error delivering event {event.id} to subscription {subscription.id}: {e}",
             )
             raise
 
-    def _update_stats(self, event: Event, processing_time: float):
+    def _update_stats(self, event: Event, processing_time: float) -> None:
         """Update event processing statistics."""
         self.stats.total_events += 1
 
@@ -747,10 +743,10 @@ class EventRouterService:
 
         # Update active subscriptions count
         self.stats.active_subscriptions = len(
-            [s for s in self.subscriptions.values() if s.active]
+            [s for s in self.subscriptions.values() if s.active],
         )
 
-    def _add_to_history(self, event: Event):
+    def _add_to_history(self, event: Event) -> None:
         """Add event to history."""
         self.event_history.append(event)
 
@@ -758,7 +754,7 @@ class EventRouterService:
         if len(self.event_history) > self.max_history_size:
             self.event_history = self.event_history[-self.max_history_size :]
 
-    async def _cleanup_loop(self):
+    async def _cleanup_loop(self) -> None:
         """Cleanup loop for expired subscriptions and connections."""
         self.logger.info("Cleanup loop started")
 
@@ -803,7 +799,7 @@ class EventRouterService:
             self.logger.info("Cleanup loop cancelled")
 
     # Public API methods
-    async def publish_event(self, event: Event):
+    async def publish_event(self, event: Event) -> None:
         """Publish an event to the router."""
         await self.event_queue.put(event)
         self.logger.debug(f"Event {event.id} queued for processing")
@@ -811,8 +807,8 @@ class EventRouterService:
     def subscribe(
         self,
         subscriber_id: str,
-        event_filter: Optional[EventFilter] = None,
-        callback: Optional[Callable[[Event], None]] = None,
+        event_filter: EventFilter | None = None,
+        callback: Callable[[Event], None] | None = None,
     ) -> str:
         """Subscribe to events with optional filtering."""
         subscription = Subscription(
@@ -836,16 +832,16 @@ class EventRouterService:
             return True
         return False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get event processing statistics."""
         return asdict(self.stats)
 
-    def get_event_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_event_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent event history."""
         recent_events = self.event_history[-limit:] if limit > 0 else self.event_history
         return [event.to_dict() for event in recent_events]
 
-    def get_active_subscriptions(self) -> List[Dict[str, Any]]:
+    def get_active_subscriptions(self) -> list[dict[str, Any]]:
         """Get list of active subscriptions."""
         active_subs = []
         for subscription in self.subscriptions.values():
@@ -862,13 +858,13 @@ class EventRouterService:
 
         return active_subs
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Get service health information."""
         return {
             "status": "running" if self.running else "stopped",
             "active_connections": len(self.active_connections),
             "active_subscriptions": len(
-                [s for s in self.subscriptions.values() if s.active]
+                [s for s in self.subscriptions.values() if s.active],
             ),
             "queue_size": self.event_queue.qsize(),
             "total_events_processed": self.stats.total_events,
@@ -882,22 +878,22 @@ class EventRouterService:
 class EventRouterClient:
     """Client for connecting to the event router service."""
 
-    def __init__(self, host: str = "localhost", port: int = 9090):
+    def __init__(self, host: str = "localhost", port: int = 9090) -> None:
         """Initialize the event router client."""
         self.host = host
         self.port = port
         self.connected = False
-        self.reader: Optional[asyncio.StreamReader] = None
-        self.writer: Optional[asyncio.StreamWriter] = None
+        self.reader: asyncio.StreamReader | None = None
+        self.writer: asyncio.StreamWriter | None = None
         self.logger = logging.getLogger("event_router_client")
-        self.message_handlers: Dict[str, Callable] = {}
-        self.listener_task: Optional[asyncio.Task] = None
+        self.message_handlers: dict[str, Callable] = {}
+        self.listener_task: asyncio.Task | None = None
 
     async def connect(self) -> bool:
         """Connect to the event router service."""
         try:
             self.reader, self.writer = await asyncio.open_connection(
-                self.host, self.port
+                self.host, self.port,
             )
             self.connected = True
 
@@ -908,10 +904,10 @@ class EventRouterClient:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to connect to event router: {e}")
+            self.logger.exception(f"Failed to connect to event router: {e}")
             return False
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Disconnect from the event router service."""
         if not self.connected:
             return
@@ -939,14 +935,14 @@ class EventRouterClient:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to publish event: {e}")
+            self.logger.exception(f"Failed to publish event: {e}")
             return False
 
     async def subscribe(
         self,
-        event_filter: Optional[EventFilter] = None,
+        event_filter: EventFilter | None = None,
         subscription_type: SubscriptionType = SubscriptionType.FILTERED,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Subscribe to events."""
         if not self.connected:
             return None
@@ -982,13 +978,14 @@ class EventRouterClient:
             return "pending"  # Placeholder
 
         except Exception as e:
-            self.logger.error(f"Failed to subscribe: {e}")
+            self.logger.exception(f"Failed to subscribe: {e}")
             return None
 
-    async def _send_message(self, message: Dict[str, Any]):
+    async def _send_message(self, message: dict[str, Any]) -> None:
         """Send message to server."""
         if not self.writer:
-            raise Exception("Not connected")
+            msg = "Not connected"
+            raise Exception(msg)
 
         message_data = json.dumps(message).encode("utf-8")
         length_prefix = len(message_data).to_bytes(4, byteorder="big")
@@ -996,7 +993,7 @@ class EventRouterClient:
         self.writer.write(length_prefix + message_data)
         await self.writer.drain()
 
-    async def _listen_for_messages(self):
+    async def _listen_for_messages(self) -> None:
         """Listen for messages from server."""
         try:
             while self.connected and self.reader:
@@ -1019,10 +1016,10 @@ class EventRouterClient:
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            self.logger.error(f"Error listening for messages: {e}")
+            self.logger.exception(f"Error listening for messages: {e}")
             self.connected = False
 
-    async def _handle_message(self, message: Dict[str, Any]):
+    async def _handle_message(self, message: dict[str, Any]) -> None:
         """Handle incoming message from server."""
         message_type = message.get("type", "unknown")
 
@@ -1030,11 +1027,11 @@ class EventRouterClient:
             try:
                 await self.message_handlers[message_type](message)
             except Exception as e:
-                self.logger.error(f"Error handling message type {message_type}: {e}")
+                self.logger.exception(f"Error handling message type {message_type}: {e}")
         else:
             self.logger.debug(f"Unhandled message type: {message_type}")
 
-    def set_message_handler(self, message_type: str, handler: Callable):
+    def set_message_handler(self, message_type: str, handler: Callable) -> None:
         """Set handler for specific message type."""
         self.message_handlers[message_type] = handler
 
@@ -1043,10 +1040,10 @@ class EventRouterClient:
 def create_event(
     event_type: EventType,
     source: str,
-    payload: Dict[str, Any],
+    payload: dict[str, Any],
     priority: EventPriority = EventPriority.NORMAL,
-    target: Optional[str] = None,
-    correlation_id: Optional[str] = None,
+    target: str | None = None,
+    correlation_id: str | None = None,
 ) -> Event:
     """Create a new event."""
     return Event(
@@ -1062,7 +1059,7 @@ def create_event(
     )
 
 
-async def main():
+async def main() -> None:
     """Main function for testing the event router service."""
     # Start the service
     service = EventRouterService()
@@ -1076,11 +1073,10 @@ async def main():
 
             # Print stats every 30 seconds
             if int(time.time()) % 30 == 0:
-                health = service.health_check()
-                print(f"Service health: {health}")
+                service.health_check()
 
     except KeyboardInterrupt:
-        print("Shutting down...")
+        pass
     finally:
         await service.stop()
 

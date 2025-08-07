@@ -1,80 +1,77 @@
 #!/usr/bin/env python3
-"""
-Memory Manager Engine for Gadugi v0.3
+"""Memory Manager Engine for Gadugi v0.3.
 
 Manages AI assistant memory, context persistence, and GitHub Issues synchronization.
 """
+from __future__ import annotations
 
 import json
 import re
-import os
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-import tempfile
 import subprocess
-import time
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any
 
 
 @dataclass
 class MemoryItem:
-    """Represents a single memory item"""
+    """Represents a single memory item."""
 
     type: str  # goal, accomplishment, context, todo
     content: str
     priority: str  # high, medium, low
     created: datetime
     updated: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
 class MemorySection:
-    """Represents a section in Memory.md"""
+    """Represents a section in Memory.md."""
 
     name: str
-    content: List[str]
-    items: List[MemoryItem]
+    content: list[str]
+    items: list[MemoryItem]
 
 
 @dataclass
 class GitHubIssue:
-    """Represents a GitHub issue"""
+    """Represents a GitHub issue."""
 
     number: int
     title: str
     body: str
     state: str
-    labels: List[str]
+    labels: list[str]
     url: str
 
 
 @dataclass
 class MemoryManagerRequest:
-    """Request format for memory management operations"""
+    """Request format for memory management operations."""
 
     action: str  # update, prune, sync, archive, status
-    memory_content: Optional[str] = None
-    updates: List[Dict[str, Any]] = None
-    sync_options: Dict[str, bool] = None
-    prune_options: Dict[str, Any] = None
+    memory_content: str | None = None
+    updates: list[dict[str, Any]] = None
+    sync_options: dict[str, bool] = None
+    prune_options: dict[str, Any] = None
 
 
 @dataclass
 class MemoryManagerResponse:
-    """Response format for memory management operations"""
+    """Response format for memory management operations."""
 
     success: bool
-    updated_memory: Optional[str]
-    actions_taken: List[Dict[str, Any]]
-    statistics: Dict[str, int]
-    errors: List[str]
+    updated_memory: str | None
+    actions_taken: list[dict[str, Any]]
+    statistics: dict[str, int]
+    errors: list[str]
 
 
 class MemoryManager:
-    """Core memory management engine"""
+    """Core memory management engine."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.memory_sections = [
             "Active Goals",
             "Current Context",
@@ -89,8 +86,8 @@ class MemoryManager:
             "User Feedback",
         ]
 
-    def parse_memory_content(self, content: str) -> Dict[str, MemorySection]:
-        """Parse Memory.md content into structured sections"""
+    def parse_memory_content(self, content: str) -> dict[str, MemorySection]:
+        """Parse Memory.md content into structured sections."""
         sections = {}
         current_section = None
         current_content = []
@@ -124,8 +121,8 @@ class MemoryManager:
 
         return sections
 
-    def _parse_section_items(self, content: List[str]) -> List[MemoryItem]:
-        """Parse section content into memory items"""
+    def _parse_section_items(self, content: list[str]) -> list[MemoryItem]:
+        """Parse section content into memory items."""
         items = []
         current_item = None
         current_text = []
@@ -162,20 +159,19 @@ class MemoryManager:
         return items
 
     def _determine_item_type(self, line: str) -> str:
-        """Determine the type of a memory item"""
+        """Determine the type of a memory item."""
         line_lower = line.lower()
 
         if any(marker in line for marker in ["✅", "complete", "implemented", "fixed"]):
             return "accomplishment"
-        elif any(marker in line for marker in ["🔄", "todo", "implement", "need to"]):
+        if any(marker in line for marker in ["🔄", "todo", "implement", "need to"]):
             return "todo"
-        elif any(marker in line_lower for marker in ["goal:", "objective:", "target:"]):
+        if any(marker in line_lower for marker in ["goal:", "objective:", "target:"]):
             return "goal"
-        else:
-            return "context"
+        return "context"
 
     def _determine_priority(self, line: str) -> str:
-        """Determine the priority of a memory item"""
+        """Determine the priority of a memory item."""
         line_lower = line.lower()
 
         if any(
@@ -183,17 +179,16 @@ class MemoryManager:
             for marker in ["critical", "urgent", "high priority", "major"]
         ):
             return "high"
-        elif any(
+        if any(
             marker in line_lower for marker in ["low priority", "minor", "nice to have"]
         ):
             return "low"
-        else:
-            return "medium"
+        return "medium"
 
     def update_memory(
-        self, sections: Dict[str, MemorySection], updates: List[Dict[str, Any]]
-    ) -> Dict[str, MemorySection]:
-        """Update memory sections with new content"""
+        self, sections: dict[str, MemorySection], updates: list[dict[str, Any]],
+    ) -> dict[str, MemorySection]:
+        """Update memory sections with new content."""
         updated_sections = sections.copy()
 
         for update in updates:
@@ -221,13 +216,13 @@ class MemoryManager:
             else:
                 # Create new section if needed
                 updated_sections[target_section] = MemorySection(
-                    name=target_section, content=[], items=[new_item]
+                    name=target_section, content=[], items=[new_item],
                 )
 
         return updated_sections
 
     def _get_target_section(self, item_type: str) -> str:
-        """Determine which section an item should go in"""
+        """Determine which section an item should go in."""
         type_mapping = {
             "goal": "Active Goals",
             "accomplishment": "Recent Accomplishments",
@@ -239,11 +234,11 @@ class MemoryManager:
 
     def prune_memory(
         self,
-        sections: Dict[str, MemorySection],
+        sections: dict[str, MemorySection],
         days_threshold: int = 7,
         preserve_critical: bool = True,
-    ) -> Dict[str, MemorySection]:
-        """Remove outdated memory items"""
+    ) -> dict[str, MemorySection]:
+        """Remove outdated memory items."""
         cutoff_date = datetime.now() - timedelta(days=days_threshold)
         pruned_sections = {}
 
@@ -279,15 +274,15 @@ class MemoryManager:
 
         return pruned_sections
 
-    def _items_to_content(self, items: List[MemoryItem]) -> List[str]:
-        """Convert memory items back to content lines"""
+    def _items_to_content(self, items: list[MemoryItem]) -> list[str]:
+        """Convert memory items back to content lines."""
         content = []
         for item in items:
             content.extend(item.content.split("\n"))
         return content
 
-    def render_memory(self, sections: Dict[str, MemorySection]) -> str:
-        """Render sections back to Memory.md format"""
+    def render_memory(self, sections: dict[str, MemorySection]) -> str:
+        """Render sections back to Memory.md format."""
         output = ["# AI Assistant Memory", ""]
 
         # Add required sections first
@@ -332,21 +327,21 @@ class MemoryManager:
 
 
 class GitHubSync:
-    """Handles GitHub Issues synchronization"""
+    """Handles GitHub Issues synchronization."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.gh_available = self._check_gh_cli()
 
     def _check_gh_cli(self) -> bool:
-        """Check if GitHub CLI is available"""
+        """Check if GitHub CLI is available."""
         try:
-            result = subprocess.run(["gh", "--version"], capture_output=True)
+            result = subprocess.run(["gh", "--version"], check=False, capture_output=True)
             return result.returncode == 0
         except FileNotFoundError:
             return False
 
-    def get_memory_issues(self) -> List[GitHubIssue]:
-        """Get existing GitHub issues created from memory sync"""
+    def get_memory_issues(self) -> list[GitHubIssue]:
+        """Get existing GitHub issues created from memory sync."""
         if not self.gh_available:
             return []
 
@@ -362,7 +357,7 @@ class GitHubSync:
                     "--json",
                     "number,title,body,state,labels,url",
                 ],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True,
                 timeout=30,
             )
@@ -381,13 +376,13 @@ class GitHubSync:
                     for issue in issues_data
                 ]
 
-        except Exception as e:
-            print(f"Error getting GitHub issues: {e}")
+        except Exception:
+            pass
 
         return []
 
-    def create_issue_for_item(self, item: MemoryItem) -> Optional[GitHubIssue]:
-        """Create a GitHub issue for a memory item"""
+    def create_issue_for_item(self, item: MemoryItem) -> GitHubIssue | None:
+        """Create a GitHub issue for a memory item."""
         if not self.gh_available or item.type not in ["todo", "goal"]:
             return None
 
@@ -409,7 +404,7 @@ class GitHubSync:
                     "--label",
                     ",".join(labels),
                 ],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True,
                 timeout=30,
             )
@@ -428,13 +423,13 @@ class GitHubSync:
                     url=issue_url,
                 )
 
-        except Exception as e:
-            print(f"Error creating GitHub issue: {e}")
+        except Exception:
+            pass
 
         return None
 
     def _extract_title(self, content: str) -> str:
-        """Extract a title from memory item content"""
+        """Extract a title from memory item content."""
         lines = content.strip().split("\n")
         first_line = lines[0]
 
@@ -449,7 +444,7 @@ class GitHubSync:
         return title
 
     def _format_issue_body(self, item: MemoryItem) -> str:
-        """Format the issue body from memory item"""
+        """Format the issue body from memory item."""
         body_lines = [
             "**Memory Item Details**",
             f"- Type: {item.type}",
@@ -469,20 +464,20 @@ class GitHubSync:
                     json.dumps(item.metadata, indent=2),
                     "```",
                     "",
-                ]
+                ],
             )
 
         body_lines.extend(
             [
                 "---",
                 "*This issue was automatically created from Memory.md by the Memory Manager Agent.*",
-            ]
+            ],
         )
 
         return "\n".join(body_lines)
 
-    def _get_labels_for_item(self, item: MemoryItem) -> List[str]:
-        """Get appropriate labels for a memory item"""
+    def _get_labels_for_item(self, item: MemoryItem) -> list[str]:
+        """Get appropriate labels for a memory item."""
         labels = ["memory-sync", "ai-assistant"]
 
         # Add priority label
@@ -506,22 +501,22 @@ class GitHubSync:
         return labels
 
     def update_issue_status(self, issue: GitHubIssue, new_state: str) -> bool:
-        """Update the status of a GitHub issue"""
+        """Update the status of a GitHub issue."""
         if not self.gh_available:
             return False
 
         try:
-            if new_state == "completed" or new_state == "closed":
+            if new_state in {"completed", "closed"}:
                 result = subprocess.run(
                     ["gh", "issue", "close", str(issue.number)],
-                    capture_output=True,
+                    check=False, capture_output=True,
                     text=True,
                     timeout=30,
                 )
             elif new_state == "open" and issue.state == "closed":
                 result = subprocess.run(
                     ["gh", "issue", "reopen", str(issue.number)],
-                    capture_output=True,
+                    check=False, capture_output=True,
                     text=True,
                     timeout=30,
                 )
@@ -530,39 +525,37 @@ class GitHubSync:
 
             return result.returncode == 0
 
-        except Exception as e:
-            print(f"Error updating issue status: {e}")
+        except Exception:
             return False
 
 
 class MemoryManagerEngine:
-    """Main engine that orchestrates memory management operations"""
+    """Main engine that orchestrates memory management operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.memory_manager = MemoryManager()
         self.github_sync = GitHubSync()
 
     def process_request(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Process a memory management request"""
+        """Process a memory management request."""
         try:
             if request.action == "update":
                 return self._handle_update(request)
-            elif request.action == "prune":
+            if request.action == "prune":
                 return self._handle_prune(request)
-            elif request.action == "sync":
+            if request.action == "sync":
                 return self._handle_sync(request)
-            elif request.action == "archive":
+            if request.action == "archive":
                 return self._handle_archive(request)
-            elif request.action == "status":
+            if request.action == "status":
                 return self._handle_status(request)
-            else:
-                return MemoryManagerResponse(
-                    success=False,
-                    updated_memory=None,
-                    actions_taken=[],
-                    statistics={},
-                    errors=[f"Unknown action: {request.action}"],
-                )
+            return MemoryManagerResponse(
+                success=False,
+                updated_memory=None,
+                actions_taken=[],
+                statistics={},
+                errors=[f"Unknown action: {request.action}"],
+            )
 
         except Exception as e:
             return MemoryManagerResponse(
@@ -570,11 +563,11 @@ class MemoryManagerEngine:
                 updated_memory=None,
                 actions_taken=[],
                 statistics={},
-                errors=[f"Error processing request: {str(e)}"],
+                errors=[f"Error processing request: {e!s}"],
             )
 
     def _handle_update(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Handle memory update requests"""
+        """Handle memory update requests."""
         actions_taken = []
         errors = []
 
@@ -588,7 +581,7 @@ class MemoryManagerEngine:
         if request.updates:
             sections = self.memory_manager.update_memory(sections, request.updates)
             actions_taken.append(
-                {"action": "updated_memory", "items_count": len(request.updates)}
+                {"action": "updated_memory", "items_count": len(request.updates)},
             )
 
         # Render updated memory
@@ -603,7 +596,7 @@ class MemoryManagerEngine:
         )
 
     def _handle_prune(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Handle memory pruning requests"""
+        """Handle memory pruning requests."""
         actions_taken = []
         errors = []
 
@@ -627,14 +620,14 @@ class MemoryManagerEngine:
         preserve_critical = prune_options.get("preserve_critical", True)
 
         pruned_sections = self.memory_manager.prune_memory(
-            sections, days_threshold, preserve_critical
+            sections, days_threshold, preserve_critical,
         )
 
         pruned_items = sum(len(section.items) for section in pruned_sections.values())
         items_removed = original_items - pruned_items
 
         actions_taken.append(
-            {"action": "pruned_memory", "items_removed": items_removed}
+            {"action": "pruned_memory", "items_removed": items_removed},
         )
 
         # Render pruned memory
@@ -649,7 +642,7 @@ class MemoryManagerEngine:
         )
 
     def _handle_sync(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Handle GitHub synchronization requests"""
+        """Handle GitHub synchronization requests."""
         actions_taken = []
         errors = []
         statistics = {"issues_created": 0, "issues_updated": 0, "issues_closed": 0}
@@ -688,7 +681,7 @@ class MemoryManagerEngine:
                                         "issue_number": new_issue.number,
                                         "title": new_issue.title,
                                         "url": new_issue.url,
-                                    }
+                                    },
                                 )
                                 statistics["issues_created"] += 1
 
@@ -704,14 +697,14 @@ class MemoryManagerEngine:
                                 item.type == "accomplishment" or "✅" in item.content
                             ):
                                 if self.github_sync.update_issue_status(
-                                    issue, "closed"
+                                    issue, "closed",
                                 ):
                                     actions_taken.append(
                                         {
                                             "action": "closed_issue",
                                             "issue_number": issue.number,
                                             "title": issue.title,
-                                        }
+                                        },
                                     )
                                     statistics["issues_closed"] += 1
 
@@ -724,7 +717,7 @@ class MemoryManagerEngine:
         )
 
     def _handle_archive(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Handle memory archiving requests"""
+        """Handle memory archiving requests."""
         # TODO: Implement archiving to separate files
         return MemoryManagerResponse(
             success=True,
@@ -735,7 +728,7 @@ class MemoryManagerEngine:
         )
 
     def _handle_status(self, request: MemoryManagerRequest) -> MemoryManagerResponse:
-        """Handle status requests"""
+        """Handle status requests."""
         actions_taken = []
         statistics = {}
 
@@ -761,7 +754,7 @@ class MemoryManagerEngine:
                     )
 
             statistics.update(
-                {"items_by_type": type_counts, "items_by_priority": priority_counts}
+                {"items_by_type": type_counts, "items_by_priority": priority_counts},
             )
 
         return MemoryManagerResponse(
@@ -773,8 +766,8 @@ class MemoryManagerEngine:
         )
 
 
-def run_memory_manager(request_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Entry point for memory manager operations"""
+def run_memory_manager(request_data: dict[str, Any]) -> dict[str, Any]:
+    """Entry point for memory manager operations."""
     try:
         # Parse request
         request = MemoryManagerRequest(**request_data)
@@ -798,7 +791,7 @@ def run_memory_manager(request_data: Dict[str, Any]) -> Dict[str, Any]:
             "updated_memory": None,
             "actions_taken": [],
             "statistics": {},
-            "errors": [f"Memory manager error: {str(e)}"],
+            "errors": [f"Memory manager error: {e!s}"],
         }
 
 
@@ -810,7 +803,7 @@ if __name__ == "__main__":
 - ✅ Complete memory manager implementation
 - 🔄 Implement remaining agents for v0.3
 
-## Current Context  
+## Current Context
 - Branch: feature/v0.3-memory-manager
 - Working on memory management capabilities
 
@@ -829,9 +822,8 @@ if __name__ == "__main__":
                 "content": "✅ Successfully implemented memory manager engine",
                 "priority": "high",
                 "metadata": {"component": "memory-manager"},
-            }
+            },
         ],
     }
 
     result = run_memory_manager(request)
-    print(json.dumps(result, indent=2))

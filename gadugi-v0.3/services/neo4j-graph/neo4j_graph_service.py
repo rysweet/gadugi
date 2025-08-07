@@ -1,25 +1,22 @@
 #!/usr/bin/env python3
-"""
-Neo4j Graph Database Service for Gadugi v0.3
+"""Neo4j Graph Database Service for Gadugi v0.3.
 
 Provides shared memory persistence and graph-based relationships for multi-agent systems.
 Handles knowledge graphs, agent interactions, workflow dependencies, and complex data relationships.
 """
+from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
-import hashlib
+from typing import Any
 
 try:
-    from neo4j import GraphDatabase, Transaction, ManagedTransaction
+    from neo4j import GraphDatabase, ManagedTransaction, Transaction
     from neo4j.exceptions import ServiceUnavailable, TransientError
 
     NEO4J_AVAILABLE = True
@@ -33,14 +30,14 @@ except ImportError:
             return MockDriver()
 
     class MockDriver:
-        def close(self):
+        def close(self) -> None:
             pass
 
         def session(self):
             return MockSession()
 
     class MockSession:
-        def close(self):
+        def close(self) -> None:
             pass
 
         def run(self, *args, **kwargs):
@@ -142,8 +139,8 @@ class GraphNode:
 
     id: str
     type: NodeType
-    properties: Dict[str, Any]
-    labels: List[str] = None
+    properties: dict[str, Any]
+    labels: list[str] = None
     created_at: datetime = None
     updated_at: datetime = None
 
@@ -164,7 +161,7 @@ class GraphRelationship:
     type: RelationType
     source_id: str
     target_id: str
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     created_at: datetime = None
     strength: float = 1.0
 
@@ -179,14 +176,14 @@ class QueryResult:
 
     success: bool
     operation: str
-    nodes: List[Dict[str, Any]]
-    relationships: List[Dict[str, Any]]
-    paths: List[List[Dict[str, Any]]]
-    aggregations: Dict[str, Any]
-    metadata: Dict[str, Any]
+    nodes: list[dict[str, Any]]
+    relationships: list[dict[str, Any]]
+    paths: list[list[dict[str, Any]]]
+    aggregations: dict[str, Any]
+    metadata: dict[str, Any]
     execution_time: float
-    warnings: List[str] = None
-    errors: List[str] = None
+    warnings: list[str] = None
+    errors: list[str] = None
 
     def __post_init__(self):
         if self.warnings is None:
@@ -201,8 +198,8 @@ class GraphStats:
 
     total_nodes: int = 0
     total_relationships: int = 0
-    nodes_by_type: Dict[str, int] = None
-    relationships_by_type: Dict[str, int] = None
+    nodes_by_type: dict[str, int] = None
+    relationships_by_type: dict[str, int] = None
     database_size: int = 0
     last_updated: datetime = None
 
@@ -222,9 +219,9 @@ class RecommendationRequest:
     source_node_id: str
     recommendation_type: str
     max_results: int = 10
-    filters: Dict[str, Any] = None
-    weights: Dict[str, float] = None
-    exclude_ids: List[str] = None
+    filters: dict[str, Any] = None
+    weights: dict[str, float] = None
+    exclude_ids: list[str] = None
 
     def __post_init__(self):
         if self.filters is None:
@@ -247,7 +244,7 @@ class GraphDatabaseService:
         max_pool_size: int = 50,
         connection_timeout: float = 30.0,
         max_transaction_retry_time: float = 30.0,
-    ):
+    ) -> None:
         """Initialize the graph database service."""
         self.uri = uri
         self.username = username
@@ -285,7 +282,7 @@ class GraphDatabaseService:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
@@ -316,18 +313,18 @@ class GraphDatabaseService:
             return True
 
         except Exception as e:
-            self.logger.error(f"Failed to connect to Neo4j: {e}")
+            self.logger.exception(f"Failed to connect to Neo4j: {e}")
             self.connected = False
             return False
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Disconnect from Neo4j database."""
         if self.driver:
             self.driver.close()
             self.connected = False
             self.logger.info("Disconnected from Neo4j database")
 
-    async def _test_connection(self):
+    async def _test_connection(self) -> None:
         """Test the database connection."""
 
         def test_query(tx):
@@ -337,9 +334,10 @@ class GraphDatabaseService:
         with self.driver.session(database=self.database) as session:
             result = session.execute_read(test_query)
             if result != 1:
-                raise Exception("Connection test failed")
+                msg = "Connection test failed"
+                raise Exception(msg)
 
-    async def _initialize_schema(self):
+    async def _initialize_schema(self) -> None:
         """Initialize database schema with constraints and indexes."""
         schema_queries = [
             # Node uniqueness constraints
@@ -364,22 +362,22 @@ class GraphDatabaseService:
             "CREATE FULLTEXT INDEX document_content_idx IF NOT EXISTS FOR (d:Document) ON EACH [d.title, d.content, d.summary]",
         ]
 
-        def create_schema(tx):
+        def create_schema(tx) -> None:
             for query in schema_queries:
                 try:
                     tx.run(query)
                 except Exception as e:
                     # Constraints may already exist, which is fine
                     if "already exists" not in str(e).lower():
-                        raise e
+                        raise
 
         try:
             with self.driver.session(database=self.database) as session:
                 session.execute_write(create_schema)
             self.logger.info("Schema initialized successfully")
         except Exception as e:
-            self.logger.error(f"Schema initialization failed: {e}")
-            raise e
+            self.logger.exception(f"Schema initialization failed: {e}")
+            raise
 
     # Node Operations
 
@@ -398,7 +396,7 @@ class GraphDatabaseService:
                     "id": node.id,
                     "created_at": node.created_at.isoformat(),
                     "updated_at": node.updated_at.isoformat(),
-                }
+                },
             )
 
             query = f"""
@@ -432,7 +430,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to create node {node.id}: {e}")
+            self.logger.exception(f"Failed to create node {node.id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -478,23 +476,22 @@ class GraphDatabaseService:
                         metadata={"node_id": node_id},
                         execution_time=execution_time,
                     )
-                else:
-                    execution_time = time.time() - start_time
-                    return QueryResult(
-                        success=False,
-                        operation="get_node",
-                        nodes=[],
-                        relationships=[],
-                        paths=[],
-                        aggregations={},
-                        metadata={},
-                        execution_time=execution_time,
-                        warnings=[f"Node {node_id} not found"],
-                    )
+                execution_time = time.time() - start_time
+                return QueryResult(
+                    success=False,
+                    operation="get_node",
+                    nodes=[],
+                    relationships=[],
+                    paths=[],
+                    aggregations={},
+                    metadata={},
+                    execution_time=execution_time,
+                    warnings=[f"Node {node_id} not found"],
+                )
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to get node {node_id}: {e}")
+            self.logger.exception(f"Failed to get node {node_id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -509,7 +506,7 @@ class GraphDatabaseService:
             )
 
     async def update_node(
-        self, node_id: str, properties: Dict[str, Any]
+        self, node_id: str, properties: dict[str, Any],
     ) -> QueryResult:
         """Update node properties."""
         start_time = time.time()
@@ -550,23 +547,22 @@ class GraphDatabaseService:
                         },
                         execution_time=execution_time,
                     )
-                else:
-                    execution_time = time.time() - start_time
-                    return QueryResult(
-                        success=False,
-                        operation="update_node",
-                        nodes=[],
-                        relationships=[],
-                        paths=[],
-                        aggregations={},
-                        metadata={},
-                        execution_time=execution_time,
-                        warnings=[f"Node {node_id} not found"],
-                    )
+                execution_time = time.time() - start_time
+                return QueryResult(
+                    success=False,
+                    operation="update_node",
+                    nodes=[],
+                    relationships=[],
+                    paths=[],
+                    aggregations={},
+                    metadata={},
+                    execution_time=execution_time,
+                    warnings=[f"Node {node_id} not found"],
+                )
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to update node {node_id}: {e}")
+            self.logger.exception(f"Failed to update node {node_id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -619,7 +615,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to delete node {node_id}: {e}")
+            self.logger.exception(f"Failed to delete node {node_id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -647,7 +643,7 @@ class GraphDatabaseService:
                     "id": relationship.id,
                     "created_at": relationship.created_at.isoformat(),
                     "strength": relationship.strength,
-                }
+                },
             )
 
             query = f"""
@@ -693,23 +689,22 @@ class GraphDatabaseService:
                         },
                         execution_time=execution_time,
                     )
-                else:
-                    execution_time = time.time() - start_time
-                    return QueryResult(
-                        success=False,
-                        operation="create_relationship",
-                        nodes=[],
-                        relationships=[],
-                        paths=[],
-                        aggregations={},
-                        metadata={},
-                        execution_time=execution_time,
-                        warnings=["One or both nodes not found"],
-                    )
+                execution_time = time.time() - start_time
+                return QueryResult(
+                    success=False,
+                    operation="create_relationship",
+                    nodes=[],
+                    relationships=[],
+                    paths=[],
+                    aggregations={},
+                    metadata={},
+                    execution_time=execution_time,
+                    warnings=["One or both nodes not found"],
+                )
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to create relationship {relationship.id}: {e}")
+            self.logger.exception(f"Failed to create relationship {relationship.id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -727,8 +722,8 @@ class GraphDatabaseService:
 
     async def find_nodes(
         self,
-        node_type: Optional[NodeType] = None,
-        properties: Optional[Dict[str, Any]] = None,
+        node_type: NodeType | None = None,
+        properties: dict[str, Any] | None = None,
         limit: int = 100,
     ) -> QueryResult:
         """Find nodes matching criteria."""
@@ -756,7 +751,7 @@ class GraphDatabaseService:
                 prop_conditions = [
                     f"n.{key} = ${param_name}"
                     for key, param_name in zip(
-                        properties.keys(), [f"prop_{k}" for k in properties.keys()]
+                        properties.keys(), [f"prop_{k}" for k in properties],
                     )
                 ]
                 where_clause = "WHERE " + " AND ".join(prop_conditions)
@@ -801,7 +796,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to find nodes: {e}")
+            self.logger.exception(f"Failed to find nodes: {e}")
 
             return QueryResult(
                 success=False,
@@ -817,9 +812,9 @@ class GraphDatabaseService:
 
     async def find_relationships(
         self,
-        source_id: Optional[str] = None,
-        target_id: Optional[str] = None,
-        relationship_type: Optional[RelationType] = None,
+        source_id: str | None = None,
+        target_id: str | None = None,
+        relationship_type: RelationType | None = None,
         limit: int = 100,
     ) -> QueryResult:
         """Find relationships matching criteria."""
@@ -828,7 +823,6 @@ class GraphDatabaseService:
         def find_relationships_tx(tx):
             # Build query components
             match_parts = []
-            where_clauses = []
             params = {}
 
             if source_id and target_id:
@@ -910,7 +904,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to find relationships: {e}")
+            self.logger.exception(f"Failed to find relationships: {e}")
 
             return QueryResult(
                 success=False,
@@ -929,7 +923,7 @@ class GraphDatabaseService:
         source_id: str,
         target_id: str,
         max_depth: int = 5,
-        relationship_types: Optional[List[RelationType]] = None,
+        relationship_types: list[RelationType] | None = None,
     ) -> QueryResult:
         """Find paths between two nodes."""
         start_time = time.time()
@@ -987,7 +981,7 @@ class GraphDatabaseService:
                             "nodes": path_nodes,
                             "relationships": path_relationships,
                             "length": len(relationships),
-                        }
+                        },
                     )
 
                 execution_time = time.time() - start_time
@@ -1011,7 +1005,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to find paths: {e}")
+            self.logger.exception(f"Failed to find paths: {e}")
 
             return QueryResult(
                 success=False,
@@ -1030,7 +1024,7 @@ class GraphDatabaseService:
     async def get_node_neighbors(
         self,
         node_id: str,
-        relationship_types: Optional[List[RelationType]] = None,
+        relationship_types: list[RelationType] | None = None,
         direction: str = "both",
         depth: int = 1,
     ) -> QueryResult:
@@ -1104,7 +1098,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to get neighbors for {node_id}: {e}")
+            self.logger.exception(f"Failed to get neighbors for {node_id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -1147,9 +1141,9 @@ class GraphDatabaseService:
                             "node": dict(record["recommended"]),
                             "score": record.get("score", 1.0),
                             "reason": record.get(
-                                "reason", "Graph-based recommendation"
+                                "reason", "Graph-based recommendation",
                             ),
-                        }
+                        },
                     )
 
                 execution_time = time.time() - start_time
@@ -1172,7 +1166,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to get recommendations: {e}")
+            self.logger.exception(f"Failed to get recommendations: {e}")
 
             return QueryResult(
                 success=False,
@@ -1191,7 +1185,7 @@ class GraphDatabaseService:
         return f"""
         MATCH (source {{id: $source_id}})
         MATCH (source)-[r1]-(intermediate)-[r2]-(recommended)
-        WHERE recommended.id <> $source_id 
+        WHERE recommended.id <> $source_id
         AND NOT recommended.id IN $exclude_ids
         WITH recommended, COUNT(DISTINCT intermediate) as commonConnections
         RETURN recommended, commonConnections as score, 'Common connections' as reason
@@ -1204,7 +1198,7 @@ class GraphDatabaseService:
         return f"""
         MATCH (source {{id: $source_id}})
         MATCH (source)-[:RELATED_TO|:REFERENCES|:SIMILAR_TO*1..2]-(recommended)
-        WHERE recommended.id <> $source_id 
+        WHERE recommended.id <> $source_id
         AND NOT recommended.id IN $exclude_ids
         WITH recommended, COUNT(*) as connectionCount
         RETURN recommended, connectionCount as score, 'Related content' as reason
@@ -1223,13 +1217,13 @@ class GraphDatabaseService:
         """
 
     def _build_generic_recommendation_query(
-        self, request: RecommendationRequest
+        self, request: RecommendationRequest,
     ) -> str:
         """Build generic recommendation query."""
         return f"""
         MATCH (source {{id: $source_id}})
         MATCH (source)-[*1..3]-(recommended)
-        WHERE recommended.id <> $source_id 
+        WHERE recommended.id <> $source_id
         AND NOT recommended.id IN $exclude_ids
         WITH recommended, COUNT(*) as pathCount
         RETURN recommended, pathCount as score, 'Graph proximity' as reason
@@ -1238,8 +1232,8 @@ class GraphDatabaseService:
         """
 
     def _build_recommendation_params(
-        self, request: RecommendationRequest
-    ) -> Dict[str, Any]:
+        self, request: RecommendationRequest,
+    ) -> dict[str, Any]:
         """Build parameters for recommendation queries."""
         return {
             "source_id": request.source_node_id,
@@ -1301,7 +1295,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to get graph stats: {e}")
+            self.logger.exception(f"Failed to get graph stats: {e}")
 
             return QueryResult(
                 success=False,
@@ -1318,7 +1312,7 @@ class GraphDatabaseService:
     # Full-text Search
 
     async def search_content(
-        self, query: str, node_types: Optional[List[NodeType]] = None
+        self, query: str, node_types: list[NodeType] | None = None,
     ) -> QueryResult:
         """Perform full-text search across node content."""
         start_time = time.time()
@@ -1331,7 +1325,7 @@ class GraphDatabaseService:
                     if node_type in [NodeType.CONCEPT, NodeType.DOCUMENT]:
                         index_name = f"{node_type.value}_content_idx"
                         type_queries.append(
-                            f"CALL db.index.fulltext.queryNodes('{index_name}', $query)"
+                            f"CALL db.index.fulltext.queryNodes('{index_name}', $query)",
                         )
 
                 if type_queries:
@@ -1402,7 +1396,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to search content: {e}")
+            self.logger.exception(f"Failed to search content: {e}")
 
             return QueryResult(
                 success=False,
@@ -1419,7 +1413,7 @@ class GraphDatabaseService:
     # Custom Cypher Queries
 
     async def execute_cypher(
-        self, query: str, parameters: Dict[str, Any] = None
+        self, query: str, parameters: dict[str, Any] | None = None,
     ) -> QueryResult:
         """Execute custom Cypher query."""
         if parameters is None:
@@ -1445,7 +1439,7 @@ class GraphDatabaseService:
                         if hasattr(value, "labels") and hasattr(value, "items"):  # Node
                             nodes.append(dict(value))
                         elif hasattr(value, "type") and hasattr(
-                            value, "start_node"
+                            value, "start_node",
                         ):  # Relationship
                             relationships.append(dict(value))
                         else:
@@ -1471,7 +1465,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to execute cypher query: {e}")
+            self.logger.exception(f"Failed to execute cypher query: {e}")
 
             return QueryResult(
                 success=False,
@@ -1487,12 +1481,12 @@ class GraphDatabaseService:
 
     # Utility Methods
 
-    def _update_query_stats(self, execution_time: float):
+    def _update_query_stats(self, execution_time: float) -> None:
         """Update query performance statistics."""
         self.query_count += 1
         self.total_query_time += execution_time
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
         avg_query_time = (
             self.total_query_time / self.query_count if self.query_count > 0 else 0
@@ -1509,7 +1503,7 @@ class GraphDatabaseService:
             else None,
         }
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on the graph database."""
         health_info = {
             "status": "unknown",
@@ -1546,7 +1540,7 @@ class GraphDatabaseService:
     # High-level convenience methods
 
     async def create_agent_node(
-        self, agent_id: str, name: str, properties: Dict[str, Any] = None
+        self, agent_id: str, name: str, properties: dict[str, Any] | None = None,
     ) -> QueryResult:
         """Convenience method to create an agent node."""
         if properties is None:
@@ -1559,7 +1553,7 @@ class GraphDatabaseService:
         return await self.create_node(node)
 
     async def create_workflow_node(
-        self, workflow_id: str, name: str, status: str = "created"
+        self, workflow_id: str, name: str, status: str = "created",
     ) -> QueryResult:
         """Convenience method to create a workflow node."""
         properties = {"name": name, "status": status, "type": "workflow"}
@@ -1569,7 +1563,7 @@ class GraphDatabaseService:
         return await self.create_node(node)
 
     async def create_dependency_relationship(
-        self, source_id: str, target_id: str, dependency_type: str = "requires"
+        self, source_id: str, target_id: str, dependency_type: str = "requires",
     ) -> QueryResult:
         """Convenience method to create a dependency relationship."""
         relationship = GraphRelationship(
@@ -1587,7 +1581,7 @@ class GraphDatabaseService:
 
 
 def create_concept_node(
-    concept_id: str, name: str, category: str, description: str = None
+    concept_id: str, name: str, category: str, description: str | None = None,
 ) -> GraphNode:
     """Create a concept node."""
     properties = {"name": name, "category": category, "type": "concept"}
@@ -1599,7 +1593,7 @@ def create_concept_node(
 
 
 def create_document_node(
-    doc_id: str, title: str, path: str, content: str = None
+    doc_id: str, title: str, path: str, content: str | None = None,
 ) -> GraphNode:
     """Create a document node."""
     properties = {"title": title, "path": path, "type": "document"}
@@ -1612,7 +1606,7 @@ def create_document_node(
 
 
 def create_task_node(
-    task_id: str, name: str, priority: str = "normal", status: str = "pending"
+    task_id: str, name: str, priority: str = "normal", status: str = "pending",
 ) -> GraphNode:
     """Create a task node."""
     properties = {"name": name, "priority": priority, "status": status, "type": "task"}
@@ -1620,7 +1614,7 @@ def create_task_node(
     return GraphNode(id=task_id, type=NodeType.TASK, properties=properties)
 
 
-async def main():
+async def main() -> None:
     """Main function for testing the Neo4j graph service."""
     service = GraphDatabaseService()
 
@@ -1628,10 +1622,8 @@ async def main():
         # Connect to database
         connected = await service.connect()
         if not connected:
-            print("Failed to connect to Neo4j database")
             return
 
-        print("Connected to Neo4j database")
 
         # Create some test nodes
         agent_node = GraphNode(
@@ -1647,11 +1639,9 @@ async def main():
         )
 
         # Create nodes
-        agent_result = await service.create_node(agent_node)
-        task_result = await service.create_node(task_node)
+        await service.create_node(agent_node)
+        await service.create_node(task_node)
 
-        print(f"Created agent: {agent_result.success}")
-        print(f"Created task: {task_result.success}")
 
         # Create relationship
         relationship = GraphRelationship(
@@ -1662,20 +1652,18 @@ async def main():
             properties={"assigned_at": datetime.now().isoformat()},
         )
 
-        rel_result = await service.create_relationship(relationship)
-        print(f"Created relationship: {rel_result.success}")
+        await service.create_relationship(relationship)
 
         # Query the graph
         stats_result = await service.get_graph_stats()
         if stats_result.success:
-            print(f"Graph stats: {stats_result.aggregations}")
+            pass
 
         # Health check
-        health = await service.health_check()
-        print(f"Health status: {health['status']}")
+        await service.health_check()
 
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        pass
     finally:
         await service.disconnect()
 

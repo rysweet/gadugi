@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
-"""
-MCP (Memory and Context Persistence) Service for Gadugi v0.3
+"""MCP (Memory and Context Persistence) Service for Gadugi v0.3.
 
 Advanced memory management and context persistence for multi-agent systems.
 Handles long-term memory, context switching, session persistence, and intelligent memory retrieval.
 """
+from __future__ import annotations
 
 import asyncio
+import base64
+import contextlib
+import gzip
+import hashlib
 import json
 import logging
 import os
-import pickle
+import sqlite3
+import threading
 import time
 import uuid
-import hashlib
-import threading
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple, Set
-from dataclasses import dataclass, asdict
 from enum import Enum
-import sqlite3
-import gzip
-import base64
+from pathlib import Path
+from typing import Any
 
 try:
     import redis
@@ -34,31 +34,31 @@ except ImportError:
 
     # Mock Redis for development
     class MockRedis:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
-        def get(self, key):
+        def get(self, key) -> None:
             return None
 
-        def set(self, key, value, ex=None):
+        def set(self, key, value, ex=None) -> bool:
             return True
 
-        def delete(self, key):
+        def delete(self, key) -> bool:
             return True
 
-        def exists(self, key):
+        def exists(self, key) -> bool:
             return False
 
         def keys(self, pattern="*"):
             return []
 
-        def flushdb(self):
+        def flushdb(self) -> bool:
             return True
 
-        def ping(self):
+        def ping(self) -> bool:
             return True
 
-        def close(self):
+        def close(self) -> None:
             pass
 
 
@@ -110,15 +110,15 @@ class MemoryEntry:
 
     id: str
     type: MemoryType
-    content: Dict[str, Any]
-    context: Dict[str, Any]
-    metadata: Dict[str, Any]
+    content: dict[str, Any]
+    context: dict[str, Any]
+    metadata: dict[str, Any]
     created_at: datetime
     accessed_at: datetime
     access_count: int = 0
     importance_score: float = 1.0
     decay_rate: float = 0.1
-    tags: List[str] = None
+    tags: list[str] = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -131,10 +131,10 @@ class ContextSnapshot:
 
     id: str
     type: ContextType
-    context_data: Dict[str, Any]
-    metadata: Dict[str, Any]
+    context_data: dict[str, Any]
+    metadata: dict[str, Any]
     created_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     compressed: bool = False
     checksum: str = ""
 
@@ -152,11 +152,11 @@ class ContextSnapshot:
 class RetrievalQuery:
     """Query for memory retrieval operations."""
 
-    query_text: Optional[str] = None
-    memory_types: Optional[List[MemoryType]] = None
-    context_types: Optional[List[ContextType]] = None
-    tags: Optional[List[str]] = None
-    time_range: Optional[Tuple[datetime, datetime]] = None
+    query_text: str | None = None
+    memory_types: list[MemoryType] | None = None
+    context_types: list[ContextType] | None = None
+    tags: list[str] | None = None
+    time_range: tuple[datetime, datetime] | None = None
     importance_threshold: float = 0.0
     max_results: int = 100
     strategy: RetrievalStrategy = RetrievalStrategy.RELEVANCE
@@ -176,9 +176,9 @@ class MemoryStats:
     """Memory system statistics."""
 
     total_memories: int = 0
-    memories_by_type: Dict[str, int] = None
+    memories_by_type: dict[str, int] = None
     total_contexts: int = 0
-    contexts_by_type: Dict[str, int] = None
+    contexts_by_type: dict[str, int] = None
     storage_size: int = 0
     cache_hit_rate: float = 0.0
     average_access_time: float = 0.0
@@ -201,10 +201,10 @@ class OperationResult:
     success: bool
     operation: str
     data: Any = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
     execution_time: float = 0.0
-    warnings: List[str] = None
-    errors: List[str] = None
+    warnings: list[str] = None
+    errors: list[str] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -218,13 +218,13 @@ class OperationResult:
 class MemoryManager:
     """Memory management component of MCP service."""
 
-    def __init__(self, storage_path: str, compression_enabled: bool = True):
+    def __init__(self, storage_path: str, compression_enabled: bool = True) -> None:
         self.storage_path = Path(storage_path)
         self.compression_enabled = compression_enabled
         self.logger = logging.getLogger("mcp_memory")
 
         # In-memory cache
-        self.memory_cache: Dict[str, MemoryEntry] = {}
+        self.memory_cache: dict[str, MemoryEntry] = {}
         self.cache_max_size = 10000
         self.cache_access_order = []
 
@@ -236,7 +236,7 @@ class MemoryManager:
         # Thread safety
         self.lock = threading.RLock()
 
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Initialize SQLite database for memory storage."""
         with sqlite3.connect(str(self.db_path)) as conn:
             conn.execute("""
@@ -295,7 +295,7 @@ class MemoryManager:
                 compressed = False
                 if self.compression_enabled and len(content_json) > 1024:
                     content_json = base64.b64encode(
-                        gzip.compress(content_json.encode())
+                        gzip.compress(content_json.encode()),
                     ).decode()
                     compressed = True
 
@@ -303,8 +303,8 @@ class MemoryManager:
                 with sqlite3.connect(str(self.db_path)) as conn:
                     conn.execute(
                         """
-                        INSERT OR REPLACE INTO memories 
-                        (id, type, content, context, metadata, created_at, accessed_at, 
+                        INSERT OR REPLACE INTO memories
+                        (id, type, content, context, metadata, created_at, accessed_at,
                          access_count, importance_score, decay_rate, tags, compressed)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
@@ -353,7 +353,7 @@ class MemoryManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to store memory {memory.id}: {e}")
+            self.logger.exception(f"Failed to store memory {memory.id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -449,7 +449,7 @@ class MemoryManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to retrieve memory {memory_id}: {e}")
+            self.logger.exception(f"Failed to retrieve memory {memory_id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -479,7 +479,7 @@ class MemoryManager:
                         [
                             query.time_range[0].isoformat(),
                             query.time_range[1].isoformat(),
-                        ]
+                        ],
                     )
 
                 if query.importance_threshold > 0:
@@ -550,7 +550,7 @@ class MemoryManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to query memories: {e}")
+            self.logger.exception(f"Failed to query memories: {e}")
 
             return OperationResult(
                 success=False,
@@ -574,7 +574,7 @@ class MemoryManager:
                 # Remove from database
                 with sqlite3.connect(str(self.db_path)) as conn:
                     cursor = conn.execute(
-                        "DELETE FROM memories WHERE id = ?", (memory_id,)
+                        "DELETE FROM memories WHERE id = ?", (memory_id,),
                     )
 
                     if cursor.rowcount == 0:
@@ -602,7 +602,7 @@ class MemoryManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to delete memory {memory_id}: {e}")
+            self.logger.exception(f"Failed to delete memory {memory_id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -633,7 +633,7 @@ class MemoryManager:
             tags=json.loads(row[10]),
         )
 
-    def _cache_memory(self, memory: MemoryEntry):
+    def _cache_memory(self, memory: MemoryEntry) -> None:
         """Add memory to cache with LRU eviction."""
         self.memory_cache[memory.id] = memory
 
@@ -657,7 +657,7 @@ class MemoryManager:
 
                 # Memories by type
                 cursor = conn.execute(
-                    "SELECT type, COUNT(*) FROM memories GROUP BY type"
+                    "SELECT type, COUNT(*) FROM memories GROUP BY type",
                 )
                 memories_by_type = dict(cursor.fetchall())
 
@@ -676,14 +676,14 @@ class MemoryManager:
                 )
 
         except Exception as e:
-            self.logger.error(f"Failed to get memory stats: {e}")
+            self.logger.exception(f"Failed to get memory stats: {e}")
             return MemoryStats()
 
 
 class ContextManager:
     """Context management component of MCP service."""
 
-    def __init__(self, storage_path: str, redis_url: Optional[str] = None):
+    def __init__(self, storage_path: str, redis_url: str | None = None) -> None:
         self.storage_path = Path(storage_path)
         self.logger = logging.getLogger("mcp_context")
 
@@ -697,7 +697,7 @@ class ContextManager:
                 self.redis_client.ping()  # Test connection
             except Exception as e:
                 self.logger.warning(
-                    f"Redis connection failed, using local storage: {e}"
+                    f"Redis connection failed, using local storage: {e}",
                 )
                 self.redis_client = None
 
@@ -712,7 +712,7 @@ class ContextManager:
         # Thread safety
         self.lock = threading.RLock()
 
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Initialize SQLite database for context storage."""
         with sqlite3.connect(str(self.db_path)) as conn:
             conn.execute("""
@@ -756,7 +756,7 @@ class ContextManager:
                 compressed = False
                 if len(context_json) > 1024:
                     context_json = base64.b64encode(
-                        gzip.compress(context_json.encode())
+                        gzip.compress(context_json.encode()),
                     ).decode()
                     compressed = True
 
@@ -786,7 +786,7 @@ class ContextManager:
                         expire_seconds = 86400  # 24 hours
 
                     self.redis_client.set(
-                        redis_key, json.dumps(redis_data), ex=expire_seconds
+                        redis_key, json.dumps(redis_data), ex=expire_seconds,
                     )
 
                 if persistence_level in [
@@ -832,7 +832,7 @@ class ContextManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to save context {context.id}: {e}")
+            self.logger.exception(f"Failed to save context {context.id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -868,7 +868,7 @@ class ContextManager:
                 # Try database
                 with sqlite3.connect(str(self.db_path)) as conn:
                     cursor = conn.execute(
-                        "SELECT * FROM contexts WHERE id = ?", (context_id,)
+                        "SELECT * FROM contexts WHERE id = ?", (context_id,),
                     )
                     row = cursor.fetchone()
 
@@ -895,7 +895,7 @@ class ContextManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to load context {context_id}: {e}")
+            self.logger.exception(f"Failed to load context {context_id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -905,7 +905,7 @@ class ContextManager:
             )
 
     def list_contexts(
-        self, context_type: Optional[ContextType] = None
+        self, context_type: ContextType | None = None,
     ) -> OperationResult:
         """List available contexts."""
         start_time = time.time()
@@ -972,7 +972,7 @@ class ContextManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to list contexts: {e}")
+            self.logger.exception(f"Failed to list contexts: {e}")
 
             return OperationResult(
                 success=False,
@@ -994,7 +994,7 @@ class ContextManager:
                 # Delete from database
                 with sqlite3.connect(str(self.db_path)) as conn:
                     cursor = conn.execute(
-                        "DELETE FROM contexts WHERE id = ?", (context_id,)
+                        "DELETE FROM contexts WHERE id = ?", (context_id,),
                     )
                     db_deleted = cursor.rowcount > 0
                     conn.commit()
@@ -1011,7 +1011,7 @@ class ContextManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to delete context {context_id}: {e}")
+            self.logger.exception(f"Failed to delete context {context_id}: {e}")
 
             return OperationResult(
                 success=False,
@@ -1033,7 +1033,7 @@ class ContextManager:
                 with sqlite3.connect(str(self.db_path)) as conn:
                     cursor = conn.execute(
                         """
-                        DELETE FROM contexts 
+                        DELETE FROM contexts
                         WHERE expires_at IS NOT NULL AND expires_at < ?
                     """,
                         (current_time.isoformat(),),
@@ -1076,7 +1076,7 @@ class ContextManager:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to cleanup expired contexts: {e}")
+            self.logger.exception(f"Failed to cleanup expired contexts: {e}")
 
             return OperationResult(
                 success=False,
@@ -1132,10 +1132,10 @@ class MCPService:
     def __init__(
         self,
         storage_path: str = "./mcp_data",
-        redis_url: Optional[str] = None,
+        redis_url: str | None = None,
         max_workers: int = 10,
         cleanup_interval: int = 3600,
-    ):
+    ) -> None:
         """Initialize the MCP service."""
         self.storage_path = Path(storage_path)
         self.redis_url = redis_url
@@ -1149,16 +1149,16 @@ class MCPService:
 
         # Initialize managers
         self.memory_manager = MemoryManager(
-            str(self.storage_path / "memory"), compression_enabled=True
+            str(self.storage_path / "memory"), compression_enabled=True,
         )
 
         self.context_manager = ContextManager(
-            str(self.storage_path / "context"), redis_url=redis_url
+            str(self.storage_path / "context"), redis_url=redis_url,
         )
 
         # Service state
         self.running = False
-        self.cleanup_task: Optional[asyncio.Task] = None
+        self.cleanup_task: asyncio.Task | None = None
 
         # Thread pool for blocking operations
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
@@ -1180,14 +1180,14 @@ class MCPService:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    async def start(self):
+    async def start(self) -> None:
         """Start the MCP service."""
         if self.running:
             self.logger.warning("MCP service is already running")
@@ -1201,7 +1201,7 @@ class MCPService:
 
         self.logger.info("MCP service started successfully")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop the MCP service."""
         if not self.running:
             return
@@ -1212,10 +1212,8 @@ class MCPService:
         # Cancel cleanup task
         if self.cleanup_task:
             self.cleanup_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self.cleanup_task
-            except asyncio.CancelledError:
-                pass
 
         # Shutdown executor
         self.executor.shutdown(wait=True)
@@ -1232,7 +1230,7 @@ class MCPService:
         """Store a memory entry."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.memory_manager.store_memory, memory
+            self.executor, self.memory_manager.store_memory, memory,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1241,7 +1239,7 @@ class MCPService:
         """Retrieve a memory entry."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.memory_manager.retrieve_memory, memory_id
+            self.executor, self.memory_manager.retrieve_memory, memory_id,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1250,7 +1248,7 @@ class MCPService:
         """Query memory entries."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.memory_manager.query_memories, query
+            self.executor, self.memory_manager.query_memories, query,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1259,7 +1257,7 @@ class MCPService:
         """Delete a memory entry."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.memory_manager.delete_memory, memory_id
+            self.executor, self.memory_manager.delete_memory, memory_id,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1274,7 +1272,7 @@ class MCPService:
         """Save a context snapshot."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.context_manager.save_context, context, persistence_level
+            self.executor, self.context_manager.save_context, context, persistence_level,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1283,18 +1281,18 @@ class MCPService:
         """Load a context snapshot."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.context_manager.load_context, context_id
+            self.executor, self.context_manager.load_context, context_id,
         )
         self._update_operation_stats(result.execution_time)
         return result
 
     async def list_contexts(
-        self, context_type: Optional[ContextType] = None
+        self, context_type: ContextType | None = None,
     ) -> OperationResult:
         """List available contexts."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.context_manager.list_contexts, context_type
+            self.executor, self.context_manager.list_contexts, context_type,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1303,7 +1301,7 @@ class MCPService:
         """Delete a context snapshot."""
         loop = asyncio.get_event_loop()
         result = await loop.run_in_executor(
-            self.executor, self.context_manager.delete_context, context_id
+            self.executor, self.context_manager.delete_context, context_id,
         )
         self._update_operation_stats(result.execution_time)
         return result
@@ -1311,7 +1309,7 @@ class MCPService:
     # High-level convenience methods
 
     async def store_episodic_memory(
-        self, event_description: str, context: Dict[str, Any], importance: float = 1.0
+        self, event_description: str, context: dict[str, Any], importance: float = 1.0,
     ) -> OperationResult:
         """Store an episodic memory (event-based)."""
         memory = MemoryEntry(
@@ -1332,7 +1330,7 @@ class MCPService:
 
     async def store_semantic_memory(
         self,
-        knowledge: Dict[str, Any],
+        knowledge: dict[str, Any],
         category: str = "general",
         importance: float = 1.0,
     ) -> OperationResult:
@@ -1351,7 +1349,7 @@ class MCPService:
         return await self.store_memory(memory)
 
     async def save_session_context(
-        self, session_id: str, context_data: Dict[str, Any], expires_in_hours: int = 24
+        self, session_id: str, context_data: dict[str, Any], expires_in_hours: int = 24,
     ) -> OperationResult:
         """Save session context with expiration."""
         context = ContextSnapshot(
@@ -1365,7 +1363,7 @@ class MCPService:
         return await self.save_context(context, PersistenceLevel.SESSION)
 
     async def save_workflow_context(
-        self, workflow_id: str, context_data: Dict[str, Any]
+        self, workflow_id: str, context_data: dict[str, Any],
     ) -> OperationResult:
         """Save workflow context permanently."""
         context = ContextSnapshot(
@@ -1386,7 +1384,7 @@ class MCPService:
         try:
             loop = asyncio.get_event_loop()
             memory_stats = await loop.run_in_executor(
-                self.executor, self.memory_manager.get_stats
+                self.executor, self.memory_manager.get_stats,
             )
 
             # Context stats would need to be implemented in ContextManager
@@ -1421,7 +1419,7 @@ class MCPService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.error(f"Failed to get system stats: {e}")
+            self.logger.exception(f"Failed to get system stats: {e}")
 
             return OperationResult(
                 success=False,
@@ -1430,7 +1428,7 @@ class MCPService:
                 errors=[str(e)],
             )
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Perform health check on the MCP service."""
         health_info = {
             "status": "unknown",
@@ -1482,7 +1480,7 @@ class MCPService:
             )
 
             context_result = await self.save_context(
-                test_context, PersistenceLevel.TEMPORARY
+                test_context, PersistenceLevel.TEMPORARY,
             )
             if context_result.success:
                 health_info["components"]["context_manager"] = "healthy"
@@ -1503,7 +1501,7 @@ class MCPService:
 
         return health_info
 
-    async def _cleanup_loop(self):
+    async def _cleanup_loop(self) -> None:
         """Background cleanup task."""
         self.logger.info("Cleanup loop started")
 
@@ -1518,21 +1516,21 @@ class MCPService:
                     # Clean up expired contexts
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.executor, self.context_manager.cleanup_expired_contexts
+                        self.executor, self.context_manager.cleanup_expired_contexts,
                     )
 
                     if result.success and result.data.get("deleted_count", 0) > 0:
                         self.logger.info(
-                            f"Cleaned up {result.data['deleted_count']} expired contexts"
+                            f"Cleaned up {result.data['deleted_count']} expired contexts",
                         )
 
                 except Exception as e:
-                    self.logger.error(f"Error during cleanup: {e}")
+                    self.logger.exception(f"Error during cleanup: {e}")
 
         except asyncio.CancelledError:
             self.logger.info("Cleanup loop cancelled")
 
-    def _update_operation_stats(self, execution_time: float):
+    def _update_operation_stats(self, execution_time: float) -> None:
         """Update operation performance statistics."""
         self.operation_count += 1
         self.total_operation_time += execution_time
@@ -1543,9 +1541,9 @@ class MCPService:
 
 def create_episodic_memory(
     event_description: str,
-    context: Dict[str, Any],
+    context: dict[str, Any],
     importance: float = 1.0,
-    tags: List[str] = None,
+    tags: list[str] | None = None,
 ) -> MemoryEntry:
     """Create an episodic memory entry."""
     if tags is None:
@@ -1569,7 +1567,7 @@ def create_episodic_memory(
 
 
 def create_semantic_memory(
-    knowledge: Dict[str, Any], category: str = "general", importance: float = 1.0
+    knowledge: dict[str, Any], category: str = "general", importance: float = 1.0,
 ) -> MemoryEntry:
     """Create a semantic memory entry."""
     return MemoryEntry(
@@ -1586,7 +1584,7 @@ def create_semantic_memory(
 
 
 def create_session_context(
-    session_id: str, context_data: Dict[str, Any], expires_in_hours: int = 24
+    session_id: str, context_data: dict[str, Any], expires_in_hours: int = 24,
 ) -> ContextSnapshot:
     """Create a session context snapshot."""
     return ContextSnapshot(
@@ -1600,7 +1598,7 @@ def create_session_context(
 
 
 def create_workflow_context(
-    workflow_id: str, context_data: Dict[str, Any]
+    workflow_id: str, context_data: dict[str, Any],
 ) -> ContextSnapshot:
     """Create a workflow context snapshot."""
     return ContextSnapshot(
@@ -1612,7 +1610,7 @@ def create_workflow_context(
     )
 
 
-async def main():
+async def main() -> None:
     """Main function for testing the MCP service."""
     service = MCPService(
         storage_path="./test_mcp_data",
@@ -1621,7 +1619,6 @@ async def main():
 
     try:
         await service.start()
-        print("MCP service started")
 
         # Test memory operations
         episodic_memory = create_episodic_memory(
@@ -1631,8 +1628,7 @@ async def main():
             tags=["feature_request", "user_interaction"],
         )
 
-        result = await service.store_memory(episodic_memory)
-        print(f"Stored episodic memory: {result.success}")
+        await service.store_memory(episodic_memory)
 
         # Test context operations
         session_context = create_session_context(
@@ -1644,8 +1640,7 @@ async def main():
             },
         )
 
-        result = await service.save_context(session_context)
-        print(f"Saved session context: {result.success}")
+        await service.save_context(session_context)
 
         # Test queries
         query = RetrievalQuery(
@@ -1654,21 +1649,18 @@ async def main():
             max_results=10,
         )
 
-        result = await service.query_memories(query)
-        print(f"Query found {len(result.data) if result.success else 0} memories")
+        await service.query_memories(query)
 
         # Health check
-        health = await service.health_check()
-        print(f"Health status: {health['status']}")
+        await service.health_check()
 
         # System stats
         stats_result = await service.get_system_stats()
         if stats_result.success:
-            memory_stats = stats_result.data["memory_stats"]
-            print(f"Total memories: {memory_stats['total_memories']}")
+            stats_result.data["memory_stats"]
 
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        pass
     finally:
         await service.stop()
 

@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
-"""
-README Agent Engine for Gadugi v0.3
+"""README Agent Engine for Gadugi v0.3.
 
 Generates, maintains, and updates comprehensive README documentation.
 Provides intelligent content discovery and quality assessment capabilities.
 """
+from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 import subprocess
-import configparser
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Tuple
-from dataclasses import dataclass, asdict
 from enum import Enum
-import hashlib
+from pathlib import Path
+from typing import Any
 
 
 class ProjectType(Enum):
@@ -53,7 +50,7 @@ class AudienceType(Enum):
 class ContentRequirements:
     """Content requirements for README generation."""
 
-    sections: List[str]
+    sections: list[str]
     style: DocumentationStyle
     audience: AudienceType
     include_api: bool = True
@@ -78,16 +75,16 @@ class ProjectMetadata:
     """Metadata extracted from project."""
 
     name: str
-    version: Optional[str]
-    description: Optional[str]
-    author: Optional[str]
-    license: Optional[str]
-    repository_url: Optional[str]
-    homepage: Optional[str]
-    languages: List[str]
-    frameworks: List[str]
-    dependencies: Dict[str, List[str]]
-    entry_points: List[Dict[str, str]]
+    version: str | None
+    description: str | None
+    author: str | None
+    license: str | None
+    repository_url: str | None
+    homepage: str | None
+    languages: list[str]
+    frameworks: list[str]
+    dependencies: dict[str, list[str]]
+    entry_points: list[dict[str, str]]
 
 
 @dataclass
@@ -129,7 +126,7 @@ class ImprovementSuggestion:
     section: str
     priority: str
     suggestion: str
-    implementation: Optional[str] = None
+    implementation: str | None = None
 
 
 @dataclass
@@ -138,19 +135,19 @@ class DocumentationResult:
 
     success: bool
     operation: str
-    readme_content: Optional[str]
-    sections_generated: List[SectionInfo]
-    metadata: Dict[str, Any]
-    analysis: Dict[str, Any]
-    assets: Dict[str, Any]
-    warnings: List[str]
-    errors: List[str]
+    readme_content: str | None
+    sections_generated: list[SectionInfo]
+    metadata: dict[str, Any]
+    analysis: dict[str, Any]
+    assets: dict[str, Any]
+    warnings: list[str]
+    errors: list[str]
 
 
 class ReadmeAgentEngine:
     """Engine for README generation and management."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the README Agent Engine."""
         self.logger = self._setup_logging()
         self.templates = self._load_templates()
@@ -166,14 +163,14 @@ class ReadmeAgentEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    def _load_templates(self) -> Dict[str, str]:
+    def _load_templates(self) -> dict[str, str]:
         """Load README templates."""
         return {
             "standard": self._get_standard_template(),
@@ -183,7 +180,7 @@ class ReadmeAgentEngine:
             "minimal": self._get_minimal_template(),
         }
 
-    def _setup_badge_providers(self) -> Dict[str, Dict[str, str]]:
+    def _setup_badge_providers(self) -> dict[str, dict[str, str]]:
         """Set up badge providers and templates."""
         return {
             "build_status": {
@@ -201,7 +198,7 @@ class ReadmeAgentEngine:
                 "gem": "https://img.shields.io/gem/v/{package_name}",
             },
             "license": {
-                "github": "https://img.shields.io/github/license/{user}/{repo}"
+                "github": "https://img.shields.io/github/license/{user}/{repo}",
             },
             "downloads": {
                 "pypi": "https://img.shields.io/pypi/dm/{package_name}",
@@ -224,7 +221,7 @@ class ReadmeAgentEngine:
             # Discover project information
             if options.auto_discover:
                 metadata = self.content_discoverer.discover_project_info(
-                    repository_path, project_name
+                    repository_path, project_name,
                 )
             else:
                 metadata = ProjectMetadata(
@@ -275,7 +272,7 @@ class ReadmeAgentEngine:
 
             # Apply template
             readme_content = self._apply_template(
-                template, metadata, readme_sections, badges, options
+                template, metadata, readme_sections, badges, options,
             )
 
             # Generate table of contents if requested
@@ -289,14 +286,14 @@ class ReadmeAgentEngine:
                 "reading_time": f"{max(1, len(readme_content.split()) // 200)} minutes",
                 "complexity_score": self._calculate_complexity_score(readme_content),
                 "completeness": self._calculate_completeness(
-                    sections_generated, content_requirements.sections
+                    sections_generated, content_requirements.sections,
                 ),
                 "generated_at": datetime.now().isoformat(),
             }
 
             # Assess quality
             quality_metrics = self.quality_assessor.assess_quality(
-                readme_content, sections_generated
+                readme_content, sections_generated,
             )
 
             # Generate analysis
@@ -314,7 +311,7 @@ class ReadmeAgentEngine:
                     if section not in content_requirements.sections
                 ],
                 "improvement_suggestions": self._generate_improvement_suggestions(
-                    sections_generated, quality_metrics
+                    sections_generated, quality_metrics,
                 ),
                 "quality_metrics": asdict(quality_metrics),
             }
@@ -339,7 +336,7 @@ class ReadmeAgentEngine:
             )
 
         except Exception as e:
-            self.logger.error(f"Error generating README: {e}")
+            self.logger.exception(f"Error generating README: {e}")
             return DocumentationResult(
                 success=False,
                 operation="generate",
@@ -359,7 +356,7 @@ class ReadmeAgentEngine:
         content_requirements: ContentRequirements,
         options: GenerationOptions,
         repository_path: str,
-    ) -> Tuple[str, SectionInfo]:
+    ) -> tuple[str, SectionInfo]:
         """Generate content for a specific section."""
         generators = {
             "overview": self._generate_overview_section,
@@ -375,7 +372,7 @@ class ReadmeAgentEngine:
 
         if section_name in generators:
             content = generators[section_name](
-                metadata, content_requirements, repository_path
+                metadata, content_requirements, repository_path,
             )
         else:
             content = self._generate_generic_section(section_name, metadata)
@@ -411,7 +408,7 @@ class ReadmeAgentEngine:
         if metadata.languages:
             lang_list = ", ".join(metadata.languages)
             content.append(
-                f"\n{metadata.name} is a {lang_list} project that provides..."
+                f"\n{metadata.name} is a {lang_list} project that provides...",
             )
 
         # Add key benefits
@@ -487,7 +484,7 @@ class ReadmeAgentEngine:
         if "Python" in metadata.languages:
             content.append("\n```python")
             content.append(
-                f"from {metadata.name.lower().replace('-', '_')} import main_function"
+                f"from {metadata.name.lower().replace('-', '_')} import main_function",
             )
             content.append("")
             content.append("# Basic usage example")
@@ -498,12 +495,12 @@ class ReadmeAgentEngine:
         elif "JavaScript" in metadata.languages or "TypeScript" in metadata.languages:
             content.append("\n```javascript")
             content.append(
-                f"const {metadata.name.replace('-', '').title()} = require('{metadata.name.lower()}');"
+                f"const {metadata.name.replace('-', '').title()} = require('{metadata.name.lower()}');",
             )
             content.append("")
             content.append("// Basic usage example")
             content.append(
-                "const result = new {metadata.name.replace('-', '').title()}();"
+                "const result = new {metadata.name.replace('-', '').title()}();",
             )
             content.append("console.log(result);")
             content.append("```")
@@ -518,7 +515,7 @@ class ReadmeAgentEngine:
 
         content.append("\n### Advanced Usage")
         content.append(
-            "\nFor more detailed examples and advanced usage patterns, see the [examples](examples/) directory."
+            "\nFor more detailed examples and advanced usage patterns, see the [examples](examples/) directory.",
         )
 
         return "\n".join(content)
@@ -579,7 +576,7 @@ class ReadmeAgentEngine:
 
         if not content_requirements.include_contributing:
             content.append(
-                "\nContributions are welcome! Please see CONTRIBUTING.md for details."
+                "\nContributions are welcome! Please see CONTRIBUTING.md for details.",
             )
             return "\n".join(content)
 
@@ -596,7 +593,7 @@ class ReadmeAgentEngine:
 
         content.append("\n### Making Changes")
         content.append(
-            "\n1. Create a feature branch: `git checkout -b feature/my-feature`"
+            "\n1. Create a feature branch: `git checkout -b feature/my-feature`",
         )
         content.append("2. Make your changes")
         content.append("3. Add tests for your changes")
@@ -631,7 +628,7 @@ class ReadmeAgentEngine:
 
         if metadata.license:
             content.append(
-                f"\nThis project is licensed under the {metadata.license} License."
+                f"\nThis project is licensed under the {metadata.license} License.",
             )
         else:
             content.append("\nSee the LICENSE file for details.")
@@ -715,13 +712,13 @@ class ReadmeAgentEngine:
         content.append("\n#### Installation Problems")
         content.append("\n**Problem**: Installation fails with permission errors")
         content.append(
-            "\n**Solution**: Use a virtual environment or install with `--user` flag"
+            "\n**Solution**: Use a virtual environment or install with `--user` flag",
         )
 
         content.append("\n#### Runtime Errors")
         content.append("\n**Problem**: Module not found errors")
         content.append(
-            "\n**Solution**: Ensure all dependencies are installed correctly"
+            "\n**Solution**: Ensure all dependencies are installed correctly",
         )
 
         content.append("\n### Getting Help")
@@ -733,21 +730,21 @@ class ReadmeAgentEngine:
         return "\n".join(content)
 
     def _generate_generic_section(
-        self, section_name: str, metadata: ProjectMetadata
+        self, section_name: str, metadata: ProjectMetadata,
     ) -> str:
         """Generate a generic section."""
         section_title = section_name.replace("_", " ").title()
         content = [f"## {section_title}"]
         content.append(f"\n{section_title} information for {metadata.name}.")
         content.append(
-            "\nThis section is automatically generated and should be customized."
+            "\nThis section is automatically generated and should be customized.",
         )
 
         return "\n".join(content)
 
     def _generate_badges(
-        self, metadata: ProjectMetadata, repository_path: str
-    ) -> List[Badge]:
+        self, metadata: ProjectMetadata, repository_path: str,
+    ) -> list[Badge]:
         """Generate badges for the project."""
         badges = []
 
@@ -764,7 +761,7 @@ class ReadmeAgentEngine:
                     url=f"https://img.shields.io/github/actions/workflow/status/{user}/{repo}/ci.yml",
                     alt_text="Build Status",
                     provider="github_actions",
-                )
+                ),
             )
 
             # License badge
@@ -774,7 +771,7 @@ class ReadmeAgentEngine:
                     url=f"https://img.shields.io/github/license/{user}/{repo}",
                     alt_text="License",
                     provider="github",
-                )
+                ),
             )
 
         # Language-specific badges
@@ -787,7 +784,7 @@ class ReadmeAgentEngine:
                     url=f"https://img.shields.io/pypi/v/{package_name}",
                     alt_text="PyPI Version",
                     provider="pypi",
-                )
+                ),
             )
 
             badges.append(
@@ -796,18 +793,18 @@ class ReadmeAgentEngine:
                     url=f"https://img.shields.io/pypi/pyversions/{package_name}",
                     alt_text="Python Versions",
                     provider="pypi",
-                )
+                ),
             )
 
         return badges
 
-    def _extract_repo_info(self, repository_path: str) -> Optional[Tuple[str, str]]:
+    def _extract_repo_info(self, repository_path: str) -> tuple[str, str] | None:
         """Extract GitHub repository user and repo name."""
         try:
             # Try to get remote URL from git
             result = subprocess.run(
                 ["git", "config", "--get", "remote.origin.url"],
-                cwd=repository_path,
+                check=False, cwd=repository_path,
                 capture_output=True,
                 text=True,
             )
@@ -821,12 +818,12 @@ class ReadmeAgentEngine:
                     if remote_url.startswith("git@"):
                         # SSH: git@github.com:user/repo.git
                         match = re.search(
-                            r"github\.com:([^/]+)/(.+?)(?:\.git)?$", remote_url
+                            r"github\.com:([^/]+)/(.+?)(?:\.git)?$", remote_url,
                         )
                     else:
                         # HTTPS: https://github.com/user/repo.git
                         match = re.search(
-                            r"github\.com/([^/]+)/(.+?)(?:\.git)?$", remote_url
+                            r"github\.com/([^/]+)/(.+?)(?:\.git)?$", remote_url,
                         )
 
                     if match:
@@ -842,8 +839,8 @@ class ReadmeAgentEngine:
         self,
         template: str,
         metadata: ProjectMetadata,
-        sections: Dict[str, str],
-        badges: List[Badge],
+        sections: dict[str, str],
+        badges: list[Badge],
         options: GenerationOptions,
     ) -> str:
         """Apply template with metadata and sections."""
@@ -865,18 +862,18 @@ class ReadmeAgentEngine:
             or f"Description for {metadata.name}",
             "FEATURE_LIST": sections.get("features", "- Feature 1\n- Feature 2"),
             "INSTALLATION_INSTRUCTIONS": sections.get(
-                "installation", "Installation instructions"
+                "installation", "Installation instructions",
             ),
             "USAGE_EXAMPLES": sections.get("usage", "Usage examples"),
             "API_DOCUMENTATION": sections.get("api_reference", "API documentation"),
             "CONTRIBUTING_GUIDELINES": sections.get(
-                "contributing", "Contributing guidelines"
+                "contributing", "Contributing guidelines",
             ),
             "LICENSE_INFORMATION": sections.get("license", "License information"),
             "QUICK_START_EXAMPLE": self._generate_quick_start(metadata),
             "CONFIGURATION_GUIDE": sections.get("configuration", "Configuration guide"),
             "TROUBLESHOOTING_GUIDE": sections.get(
-                "troubleshooting", "Troubleshooting guide"
+                "troubleshooting", "Troubleshooting guide",
             ),
         }
 
@@ -906,7 +903,7 @@ import {metadata.name.lower().replace("-", "_")}
 result = {metadata.name.lower().replace("-", "_")}.process()
 print(result)
 ```"""
-        elif "JavaScript" in metadata.languages:
+        if "JavaScript" in metadata.languages:
             return f"""```javascript
 const {metadata.name.replace("-", "")} = require('{metadata.name.lower()}');
 
@@ -914,10 +911,9 @@ const {metadata.name.replace("-", "")} = require('{metadata.name.lower()}');
 const result = {metadata.name.replace("-", "")}.process();
 console.log(result);
 ```"""
-        else:
-            return "Quick start example goes here."
+        return "Quick start example goes here."
 
-    def _generate_toc(self, content: str) -> List[str]:
+    def _generate_toc(self, content: str) -> list[str]:
         """Generate table of contents from content."""
         toc = []
         lines = content.split("\n")
@@ -940,7 +936,7 @@ console.log(result);
 
         return toc
 
-    def _insert_toc(self, content: str, toc: List[str]) -> str:
+    def _insert_toc(self, content: str, toc: list[str]) -> str:
         """Insert table of contents into content."""
         toc_section = "\n## Table of Contents\n\n" + "\n".join(toc) + "\n"
 
@@ -985,7 +981,7 @@ console.log(result);
         return round(complexity, 1)
 
     def _calculate_completeness(
-        self, sections_generated: List[SectionInfo], requested_sections: List[str]
+        self, sections_generated: list[SectionInfo], requested_sections: list[str],
     ) -> float:
         """Calculate completeness percentage."""
         generated_names = {section.name for section in sections_generated}
@@ -1038,8 +1034,8 @@ console.log(result);
         return min(100.0, score)
 
     def _generate_improvement_suggestions(
-        self, sections_generated: List[SectionInfo], quality_metrics: QualityMetrics
-    ) -> List[ImprovementSuggestion]:
+        self, sections_generated: list[SectionInfo], quality_metrics: QualityMetrics,
+    ) -> list[ImprovementSuggestion]:
         """Generate suggestions for improving documentation."""
         suggestions = []
 
@@ -1053,7 +1049,7 @@ console.log(result);
                         priority=priority,
                         suggestion=f"Improve {section.name} section with more detailed content and examples",
                         implementation=f"Add more examples, better explanations, and structured content to {section.name}",
-                    )
+                    ),
                 )
 
         # Overall quality suggestions
@@ -1064,7 +1060,7 @@ console.log(result);
                     priority="medium",
                     suggestion="Improve overall clarity with simpler language and better structure",
                     implementation="Review content for clarity, use simpler terms, improve section organization",
-                )
+                ),
             )
 
         if quality_metrics.completeness < 90:
@@ -1074,20 +1070,20 @@ console.log(result);
                     priority="high",
                     suggestion="Add missing standard sections",
                     implementation="Include sections like troubleshooting, FAQ, or advanced usage",
-                )
+                ),
             )
 
         return suggestions
 
     def analyze_readme(
-        self, readme_path: str, analysis_depth: str = "detailed"
+        self, readme_path: str, analysis_depth: str = "detailed",
     ) -> DocumentationResult:
         """Analyze an existing README file."""
         try:
             self.logger.info(f"Analyzing README at {readme_path}")
 
             # Read existing README
-            with open(readme_path, "r", encoding="utf-8") as f:
+            with open(readme_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse sections
@@ -1101,7 +1097,7 @@ console.log(result);
                 "sections_found": list(sections.keys()),
                 "missing_sections": self._identify_missing_sections(sections),
                 "improvement_suggestions": self._generate_improvement_suggestions(
-                    [], quality_metrics
+                    [], quality_metrics,
                 ),
                 "quality_metrics": asdict(quality_metrics),
                 "structure_analysis": self._analyze_structure(content),
@@ -1132,7 +1128,7 @@ console.log(result);
             )
 
         except Exception as e:
-            self.logger.error(f"Error analyzing README: {e}")
+            self.logger.exception(f"Error analyzing README: {e}")
             return DocumentationResult(
                 success=False,
                 operation="analyze",
@@ -1145,7 +1141,7 @@ console.log(result);
                 errors=[str(e)],
             )
 
-    def _parse_existing_sections(self, content: str) -> Dict[str, str]:
+    def _parse_existing_sections(self, content: str) -> dict[str, str]:
         """Parse existing README content into sections."""
         sections = {}
         lines = content.split("\n")
@@ -1171,8 +1167,8 @@ console.log(result);
         return sections
 
     def _identify_missing_sections(
-        self, existing_sections: Dict[str, str]
-    ) -> List[str]:
+        self, existing_sections: dict[str, str],
+    ) -> list[str]:
         """Identify missing standard sections."""
         standard_sections = [
             "installation",
@@ -1189,7 +1185,7 @@ console.log(result);
             section for section in standard_sections if section not in existing_keys
         ]
 
-    def _analyze_structure(self, content: str) -> Dict[str, Any]:
+    def _analyze_structure(self, content: str) -> dict[str, Any]:
         """Analyze document structure."""
         lines = content.split("\n")
         headings = []
@@ -1206,7 +1202,7 @@ console.log(result);
             "has_proper_hierarchy": self._check_heading_hierarchy(headings),
         }
 
-    def _check_heading_hierarchy(self, headings: List[Dict[str, Any]]) -> bool:
+    def _check_heading_hierarchy(self, headings: list[dict[str, Any]]) -> bool:
         """Check if heading hierarchy is proper."""
         if not headings:
             return False
@@ -1225,7 +1221,7 @@ console.log(result);
 
         return True
 
-    def _analyze_links(self, content: str) -> Dict[str, Any]:
+    def _analyze_links(self, content: str) -> dict[str, Any]:
         """Analyze links in the document."""
         # Find all links
         link_pattern = r"\[([^\]]*)\]\(([^)]*)\)"
@@ -1247,32 +1243,31 @@ console.log(result);
             "broken_links": [],  # Would need actual HTTP checking
         }
 
-    def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Process README agent requests."""
         try:
             operation = request_data.get("operation", "generate")
 
             if operation == "generate":
                 return self._handle_generate_request(request_data)
-            elif operation == "update":
+            if operation == "update":
                 return self._handle_update_request(request_data)
-            elif operation == "analyze":
+            if operation == "analyze":
                 return self._handle_analyze_request(request_data)
-            elif operation == "enhance":
+            if operation == "enhance":
                 return self._handle_enhance_request(request_data)
-            elif operation == "validate":
+            if operation == "validate":
                 return self._handle_validate_request(request_data)
-            else:
-                return {
-                    "success": False,
-                    "error": f"Unsupported operation: {operation}",
-                }
+            return {
+                "success": False,
+                "error": f"Unsupported operation: {operation}",
+            }
 
         except Exception as e:
-            self.logger.error(f"Error processing request: {e}")
+            self.logger.exception(f"Error processing request: {e}")
             return {"success": False, "error": str(e)}
 
-    def _handle_generate_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_generate_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle generate operation request."""
         target = request_data.get("target", {})
         content_req = request_data.get("content_requirements", {})
@@ -1300,31 +1295,31 @@ console.log(result);
         )
 
         result = self.generate_readme(
-            repository_path, project_name, project_type, content_requirements, options
+            repository_path, project_name, project_type, content_requirements, options,
         )
 
         return asdict(result)
 
-    def _handle_analyze_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_analyze_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle analyze operation request."""
         target = request_data.get("target", {})
         readme_path = target.get("readme_path", "README.md")
         analysis_depth = request_data.get("analysis_options", {}).get(
-            "depth", "detailed"
+            "depth", "detailed",
         )
 
         result = self.analyze_readme(readme_path, analysis_depth)
         return asdict(result)
 
-    def _handle_update_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_update_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle update operation request (placeholder)."""
         return {"success": False, "error": "Update operation not yet implemented"}
 
-    def _handle_enhance_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_enhance_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle enhance operation request (placeholder)."""
         return {"success": False, "error": "Enhance operation not yet implemented"}
 
-    def _handle_validate_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_validate_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle validate operation request (placeholder)."""
         return {"success": False, "error": "Validate operation not yet implemented"}
 
@@ -1480,7 +1475,7 @@ class ContentDiscoverer:
     """Discovers project information from codebase."""
 
     def discover_project_info(
-        self, repository_path: str, project_name: str
+        self, repository_path: str, project_name: str,
     ) -> ProjectMetadata:
         """Discover project information from repository."""
         metadata = ProjectMetadata(
@@ -1515,7 +1510,7 @@ class ContentDiscoverer:
 
         return metadata
 
-    def _discover_languages(self, repo_path: Path) -> List[str]:
+    def _discover_languages(self, repo_path: Path) -> list[str]:
         """Discover programming languages used in the project."""
         languages = []
 
@@ -1540,7 +1535,7 @@ class ContentDiscoverer:
 
         return languages
 
-    def _discover_python_info(self, repo_path: Path, metadata: ProjectMetadata):
+    def _discover_python_info(self, repo_path: Path, metadata: ProjectMetadata) -> None:
         """Discover Python project information."""
         # Check setup.py
         setup_py = repo_path / "setup.py"
@@ -1557,10 +1552,10 @@ class ContentDiscoverer:
         if requirements_txt.exists():
             self._parse_requirements_txt(requirements_txt, metadata)
 
-    def _parse_setup_py(self, setup_py: Path, metadata: ProjectMetadata):
+    def _parse_setup_py(self, setup_py: Path, metadata: ProjectMetadata) -> None:
         """Parse setup.py for project information."""
         try:
-            with open(setup_py, "r") as f:
+            with open(setup_py) as f:
                 content = f.read()
 
             # Extract name
@@ -1581,7 +1576,7 @@ class ContentDiscoverer:
         except Exception as e:
             logging.warning(f"Could not parse setup.py: {e}")
 
-    def _parse_pyproject_toml(self, pyproject_toml: Path, metadata: ProjectMetadata):
+    def _parse_pyproject_toml(self, pyproject_toml: Path, metadata: ProjectMetadata) -> None:
         """Parse pyproject.toml for project information."""
         try:
             import tomllib
@@ -1590,7 +1585,7 @@ class ContentDiscoverer:
                 import tomli as tomllib
             except ImportError:
                 logging.warning(
-                    "Cannot parse pyproject.toml: tomllib/tomli not available"
+                    "Cannot parse pyproject.toml: tomllib/tomli not available",
                 )
                 return
 
@@ -1603,18 +1598,18 @@ class ContentDiscoverer:
             metadata.version = project.get("version", metadata.version)
             metadata.description = project.get("description", metadata.description)
 
-            if "authors" in project and project["authors"]:
+            if project.get("authors"):
                 metadata.author = project["authors"][0].get("name")
 
         except Exception as e:
             logging.warning(f"Could not parse pyproject.toml: {e}")
 
     def _parse_requirements_txt(
-        self, requirements_txt: Path, metadata: ProjectMetadata
-    ):
+        self, requirements_txt: Path, metadata: ProjectMetadata,
+    ) -> None:
         """Parse requirements.txt for dependencies."""
         try:
-            with open(requirements_txt, "r") as f:
+            with open(requirements_txt) as f:
                 deps = [
                     line.strip()
                     for line in f
@@ -1624,12 +1619,12 @@ class ContentDiscoverer:
         except Exception as e:
             logging.warning(f"Could not parse requirements.txt: {e}")
 
-    def _discover_nodejs_info(self, repo_path: Path, metadata: ProjectMetadata):
+    def _discover_nodejs_info(self, repo_path: Path, metadata: ProjectMetadata) -> None:
         """Discover Node.js project information."""
         package_json = repo_path / "package.json"
         if package_json.exists():
             try:
-                with open(package_json, "r") as f:
+                with open(package_json) as f:
                     data = json.load(f)
 
                 metadata.name = data.get("name", metadata.name)
@@ -1647,7 +1642,7 @@ class ContentDiscoverer:
             except Exception as e:
                 logging.warning(f"Could not parse package.json: {e}")
 
-    def _discover_license(self, repo_path: Path) -> Optional[str]:
+    def _discover_license(self, repo_path: Path) -> str | None:
         """Discover license from LICENSE file."""
         license_files = ["LICENSE", "LICENSE.txt", "LICENSE.md", "COPYING"]
 
@@ -1655,17 +1650,17 @@ class ContentDiscoverer:
             license_file = repo_path / filename
             if license_file.exists():
                 try:
-                    with open(license_file, "r") as f:
+                    with open(license_file) as f:
                         content = f.read()
 
                     # Simple license detection
                     if "MIT License" in content:
                         return "MIT"
-                    elif "Apache License" in content:
+                    if "Apache License" in content:
                         return "Apache-2.0"
-                    elif "GNU General Public License" in content:
+                    if "GNU General Public License" in content:
                         return "GPL-3.0"
-                    elif "BSD" in content:
+                    if "BSD" in content:
                         return "BSD"
 
                 except Exception:
@@ -1678,7 +1673,7 @@ class QualityAssessor:
     """Assesses documentation quality."""
 
     def assess_quality(
-        self, content: str, sections: List[SectionInfo]
+        self, content: str, sections: list[SectionInfo],
     ) -> QualityMetrics:
         """Assess overall quality of documentation."""
         clarity = self._assess_clarity(content)
@@ -1714,7 +1709,7 @@ class QualityAssessor:
 
         return min(100.0, score)
 
-    def _assess_completeness(self, content: str, sections: List[SectionInfo]) -> float:
+    def _assess_completeness(self, content: str, sections: list[SectionInfo]) -> float:
         """Assess completeness of documentation."""
         base_score = 60.0
 
@@ -1769,7 +1764,7 @@ class QualityAssessor:
         return min(100.0, score)
 
 
-def main():
+def main() -> None:
     """Main function for testing the README Agent Engine."""
     engine = ReadmeAgentEngine()
 
@@ -1796,26 +1791,14 @@ def main():
     response = engine.process_request(test_request)
 
     if response["success"]:
-        print("README generation completed successfully!")
-        print(f"Generated {len(response['sections_generated'])} sections")
-        print(f"Word count: {response['metadata']['word_count']}")
-        print(
-            f"Quality score: {response['analysis']['quality_metrics']['overall_score']:.1f}"
-        )
 
         # Print generated README (truncated)
         readme_content = response["readme_content"]
         if readme_content:
-            print("\n--- Generated README (first 500 chars) ---")
-            print(
-                readme_content[:500] + "..."
-                if len(readme_content) > 500
-                else readme_content
-            )
+            pass
     else:
-        print("README generation failed:")
-        for error in response["errors"]:
-            print(f"  - {error}")
+        for _error in response["errors"]:
+            pass
 
 
 if __name__ == "__main__":

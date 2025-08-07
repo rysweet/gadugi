@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-"""
-Simple task decomposer for testing orchestrator workflow.
+"""Simple task decomposer for testing orchestrator workflow.
 This is a minimal implementation to validate the vertical slice.
 """
 
-import json
 import sys
 
 
 def decompose_task(task_description: str) -> dict:
-    """
-    Simple task decomposition logic.
+    """Simple task decomposition logic.
     For the minimal vertical slice, we'll create some basic patterns.
     """
-
     # Simple pattern matching for common task types
     task_lower = task_description.lower()
 
@@ -49,7 +45,7 @@ def decompose_task(task_description: str) -> dict:
             "parallel_groups": [["1"], ["2"], ["3"], ["4"]],
         }
 
-    elif "todo" in task_lower or "app" in task_lower:
+    if "todo" in task_lower or "app" in task_lower:
         return {
             "original_task": task_description,
             "tasks": [
@@ -102,17 +98,15 @@ def decompose_task(task_description: str) -> dict:
     }
 
 
-def main():
+def main() -> None:
     """Command line interface for testing."""
     if len(sys.argv) < 2:
-        print("Usage: python simple_decomposer.py <task_description>")
         sys.exit(1)
 
     task = " ".join(sys.argv[1:])
-    result = decompose_task(task)
+    decompose_task(task)
 
     # Output JSON only (for orchestrator integration)
-    print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

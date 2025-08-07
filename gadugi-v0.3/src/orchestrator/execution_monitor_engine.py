@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
-"""
-Execution Monitor Engine for Gadugi v0.3
+"""Execution Monitor Engine for Gadugi v0.3.
 
 Real-time monitoring and coordination of parallel agent execution.
 Provides process tracking, resource monitoring, and performance analytics.
 """
+from __future__ import annotations
 
-import asyncio
-import json
 import logging
 import os
-import psutil
-import signal
 import subprocess
 import threading
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-from typing import Dict, List, Any, Optional, Union, Set
 from enum import Enum
 from pathlib import Path
+from typing import Any
+
+import psutil
 
 
 class ProcessState(Enum):
@@ -60,8 +58,8 @@ class ResourceLimits:
     cpu_limit: str = "100m"
     memory_limit: str = "256MB"
     timeout: int = 300
-    disk_limit: Optional[str] = None
-    network_limit: Optional[str] = None
+    disk_limit: str | None = None
+    network_limit: str | None = None
 
 
 @dataclass
@@ -106,8 +104,8 @@ class ProcessProgress:
     current_phase: str
     completion_percentage: float
     estimated_remaining: float
-    milestones_completed: List[str]
-    next_milestone: Optional[str]
+    milestones_completed: list[str]
+    next_milestone: str | None
 
 
 @dataclass
@@ -131,21 +129,21 @@ class MonitoredProcess:
     process_id: str
     agent_type: str
     task_id: str
-    pid: Optional[int]
+    pid: int | None
     state: ProcessState
     health_state: HealthState
     start_time: datetime
-    end_time: Optional[datetime]
-    command: List[str]
+    end_time: datetime | None
+    command: list[str]
     working_directory: str
     resource_limits: ResourceLimits
     alert_thresholds: AlertThresholds
-    resource_usage: Optional[ResourceUsage]
-    performance_metrics: Optional[PerformanceMetrics]
-    progress: Optional[ProcessProgress]
-    alerts: List[Alert]
+    resource_usage: ResourceUsage | None
+    performance_metrics: PerformanceMetrics | None
+    progress: ProcessProgress | None
+    alerts: list[Alert]
     restart_count: int = 0
-    last_heartbeat: Optional[datetime] = None
+    last_heartbeat: datetime | None = None
 
 
 @dataclass
@@ -157,9 +155,9 @@ class MonitoringConfiguration:
     enable_real_time: bool = True
     auto_restart: bool = True
     max_restart_attempts: int = 3
-    notification_channels: List[str] = None
-    alert_config: Optional[Dict[str, Any]] = None
-    resource_config: Optional[Dict[str, Any]] = None
+    notification_channels: list[str] = None
+    alert_config: dict[str, Any] | None = None
+    resource_config: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.notification_channels is None:
@@ -169,19 +167,19 @@ class MonitoringConfiguration:
 class ExecutionMonitorEngine:
     """Engine for monitoring parallel agent execution."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Execution Monitor Engine."""
         self.logger = self._setup_logging()
-        self.monitored_processes: Dict[str, MonitoredProcess] = {}
+        self.monitored_processes: dict[str, MonitoredProcess] = {}
         self.configuration = MonitoringConfiguration()
         self.monitoring_active = False
-        self.monitor_thread: Optional[threading.Thread] = None
+        self.monitor_thread: threading.Thread | None = None
         self.alert_handlers = self._setup_alert_handlers()
-        self.metrics_history: Dict[str, List[Dict[str, Any]]] = {}
+        self.metrics_history: dict[str, list[dict[str, Any]]] = {}
         self.lock = threading.Lock()
 
         # Process management
-        self.process_registry: Dict[str, subprocess.Popen] = {}
+        self.process_registry: dict[str, subprocess.Popen] = {}
         self.shutdown_event = threading.Event()
 
     def _setup_logging(self) -> logging.Logger:
@@ -192,14 +190,14 @@ class ExecutionMonitorEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    def _setup_alert_handlers(self) -> Dict[str, Any]:
+    def _setup_alert_handlers(self) -> dict[str, Any]:
         """Set up alert notification handlers."""
         return {
             "email": self._send_email_alert,
@@ -208,7 +206,7 @@ class ExecutionMonitorEngine:
             "file": self._write_file_alert,
         }
 
-    def start_monitoring(self, configuration: Optional[MonitoringConfiguration] = None):
+    def start_monitoring(self, configuration: MonitoringConfiguration | None = None) -> None:
         """Start the monitoring system."""
         if configuration:
             self.configuration = configuration
@@ -218,13 +216,13 @@ class ExecutionMonitorEngine:
 
         # Start monitoring thread
         self.monitor_thread = threading.Thread(
-            target=self._monitoring_loop, daemon=True
+            target=self._monitoring_loop, daemon=True,
         )
         self.monitor_thread.start()
 
         self.logger.info("Execution monitoring started")
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop the monitoring system."""
         self.monitoring_active = False
         self.shutdown_event.set()
@@ -239,11 +237,11 @@ class ExecutionMonitorEngine:
         process_id: str,
         agent_type: str,
         task_id: str,
-        command: List[str],
+        command: list[str],
         working_directory: str,
-        resource_limits: Optional[ResourceLimits] = None,
-        alert_thresholds: Optional[AlertThresholds] = None,
-    ) -> Dict[str, Any]:
+        resource_limits: ResourceLimits | None = None,
+        alert_thresholds: AlertThresholds | None = None,
+    ) -> dict[str, Any]:
         """Start monitoring a new process."""
         try:
             with self.lock:
@@ -285,7 +283,7 @@ class ExecutionMonitorEngine:
                     self.process_registry[process_id] = process
 
                     self.logger.info(
-                        f"Started monitoring process {process_id} (PID: {process.pid})"
+                        f"Started monitoring process {process_id} (PID: {process.pid})",
                     )
 
                     return {
@@ -294,21 +292,20 @@ class ExecutionMonitorEngine:
                         "pid": process.pid,
                         "status": monitored_process.state.value,
                     }
-                else:
-                    return {
-                        "success": False,
-                        "error": f"Failed to start process {process_id}",
-                    }
+                return {
+                    "success": False,
+                    "error": f"Failed to start process {process_id}",
+                }
 
         except Exception as e:
-            self.logger.error(
-                f"Error starting process monitoring for {process_id}: {e}"
+            self.logger.exception(
+                f"Error starting process monitoring for {process_id}: {e}",
             )
             return {"success": False, "error": str(e)}
 
     def _start_process(
-        self, monitored_process: MonitoredProcess
-    ) -> Optional[subprocess.Popen]:
+        self, monitored_process: MonitoredProcess,
+    ) -> subprocess.Popen | None:
         """Start the actual process."""
         try:
             # Prepare environment
@@ -317,7 +314,7 @@ class ExecutionMonitorEngine:
             env["GADUGI_TASK_ID"] = monitored_process.task_id
 
             # Start process
-            process = subprocess.Popen(
+            return subprocess.Popen(
                 monitored_process.command,
                 cwd=monitored_process.working_directory,
                 env=env,
@@ -326,15 +323,14 @@ class ExecutionMonitorEngine:
                 text=True,
             )
 
-            return process
 
         except Exception as e:
-            self.logger.error(f"Failed to start process: {e}")
+            self.logger.exception(f"Failed to start process: {e}")
             return None
 
     def stop_process_monitoring(
-        self, process_id: str, cleanup_resources: bool = True
-    ) -> Dict[str, Any]:
+        self, process_id: str, cleanup_resources: bool = True,
+    ) -> dict[str, Any]:
         """Stop monitoring a specific process."""
         try:
             with self.lock:
@@ -373,12 +369,12 @@ class ExecutionMonitorEngine:
                 }
 
         except Exception as e:
-            self.logger.error(
-                f"Error stopping process monitoring for {process_id}: {e}"
+            self.logger.exception(
+                f"Error stopping process monitoring for {process_id}: {e}",
             )
             return {"success": False, "error": str(e)}
 
-    def _graceful_shutdown(self, process: subprocess.Popen, timeout: int = 10):
+    def _graceful_shutdown(self, process: subprocess.Popen, timeout: int = 10) -> None:
         """Gracefully shutdown a process."""
         try:
             # Try SIGTERM first
@@ -393,14 +389,14 @@ class ExecutionMonitorEngine:
                 process.wait()
 
         except Exception as e:
-            self.logger.error(f"Error during graceful shutdown: {e}")
+            self.logger.exception(f"Error during graceful shutdown: {e}")
 
     def get_process_status(
         self,
-        process_id: Optional[str] = None,
+        process_id: str | None = None,
         include_metrics: bool = True,
         include_history: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get status of monitored processes."""
         try:
             with self.lock:
@@ -413,31 +409,30 @@ class ExecutionMonitorEngine:
 
                     process = self.monitored_processes[process_id]
                     status = self._build_process_status(
-                        process, include_metrics, include_history
+                        process, include_metrics, include_history,
                     )
 
                     return {"success": True, "process_status": status}
-                else:
-                    # Return status for all processes
-                    all_status = {}
-                    for pid, process in self.monitored_processes.items():
-                        all_status[pid] = self._build_process_status(
-                            process, include_metrics, include_history
-                        )
+                # Return status for all processes
+                all_status = {}
+                for pid, process in self.monitored_processes.items():
+                    all_status[pid] = self._build_process_status(
+                        process, include_metrics, include_history,
+                    )
 
-                    return {
-                        "success": True,
-                        "processes": all_status,
-                        "summary": self._build_system_summary(),
-                    }
+                return {
+                    "success": True,
+                    "processes": all_status,
+                    "summary": self._build_system_summary(),
+                }
 
         except Exception as e:
-            self.logger.error(f"Error getting process status: {e}")
+            self.logger.exception(f"Error getting process status: {e}")
             return {"success": False, "error": str(e)}
 
     def _build_process_status(
-        self, process: MonitoredProcess, include_metrics: bool, include_history: bool
-    ) -> Dict[str, Any]:
+        self, process: MonitoredProcess, include_metrics: bool, include_history: bool,
+    ) -> dict[str, Any]:
         """Build comprehensive status for a process."""
         status = {
             "process_id": process.process_id,
@@ -483,7 +478,7 @@ class ExecutionMonitorEngine:
 
         return status
 
-    def _build_system_summary(self) -> Dict[str, Any]:
+    def _build_system_summary(self) -> dict[str, Any]:
         """Build system-wide monitoring summary."""
         active_processes = len(
             [
@@ -495,7 +490,7 @@ class ExecutionMonitorEngine:
                     ProcessState.INITIALIZING,
                     ProcessState.PAUSED,
                 ]
-            ]
+            ],
         )
 
         total_cpu = sum(
@@ -544,7 +539,7 @@ class ExecutionMonitorEngine:
             else 0,
         }
 
-    def _monitoring_loop(self):
+    def _monitoring_loop(self) -> None:
         """Main monitoring loop that runs in a separate thread."""
         self.logger.info("Monitoring loop started")
 
@@ -558,12 +553,12 @@ class ExecutionMonitorEngine:
                 self.shutdown_event.wait(timeout=self.configuration.monitoring_interval)
 
             except Exception as e:
-                self.logger.error(f"Error in monitoring loop: {e}")
+                self.logger.exception(f"Error in monitoring loop: {e}")
                 time.sleep(1)  # Brief pause on error
 
         self.logger.info("Monitoring loop stopped")
 
-    def _update_all_processes(self):
+    def _update_all_processes(self) -> None:
         """Update status and metrics for all monitored processes."""
         with self.lock:
             for process_id, monitored_process in list(self.monitored_processes.items()):
@@ -576,9 +571,9 @@ class ExecutionMonitorEngine:
                     self._update_process_progress(monitored_process)
 
                 except Exception as e:
-                    self.logger.error(f"Error updating process {process_id}: {e}")
+                    self.logger.exception(f"Error updating process {process_id}: {e}")
 
-    def _update_process_status(self, process: MonitoredProcess):
+    def _update_process_status(self, process: MonitoredProcess) -> None:
         """Update the status of a monitored process."""
         if process.process_id in self.process_registry:
             sys_process = self.process_registry[process.process_id]
@@ -610,7 +605,7 @@ class ExecutionMonitorEngine:
                     ):
                         self._restart_process(process)
 
-    def _collect_process_metrics(self, process: MonitoredProcess):
+    def _collect_process_metrics(self, process: MonitoredProcess) -> None:
         """Collect resource usage and performance metrics for a process."""
         if not process.pid:
             return
@@ -658,7 +653,7 @@ class ExecutionMonitorEngine:
             # Process no longer exists or is not accessible
             process.resource_usage = None
 
-    def _update_process_progress(self, process: MonitoredProcess):
+    def _update_process_progress(self, process: MonitoredProcess) -> None:
         """Update process progress information."""
         # This would typically read from process output or status files
         # For now, we'll estimate progress based on runtime
@@ -668,7 +663,7 @@ class ExecutionMonitorEngine:
             # Simple progress estimation (would be more sophisticated in practice)
             estimated_total = 300  # 5 minutes default
             completion = min(
-                runtime / estimated_total * 100, 95
+                runtime / estimated_total * 100, 95,
             )  # Max 95% until actually complete
 
             process.progress = ProcessProgress(
@@ -699,17 +694,16 @@ class ExecutionMonitorEngine:
 
         if any(critical_conditions):
             return HealthState.CRITICAL
-        elif any(warning_conditions):
+        if any(warning_conditions):
             return HealthState.WARNING
-        else:
-            return HealthState.HEALTHY
+        return HealthState.HEALTHY
 
-    def _check_alerts(self):
+    def _check_alerts(self) -> None:
         """Check all processes for alert conditions."""
         for process in self.monitored_processes.values():
             self._check_process_alerts(process)
 
-    def _check_process_alerts(self, process: MonitoredProcess):
+    def _check_process_alerts(self, process: MonitoredProcess) -> None:
         """Check a specific process for alert conditions."""
         if not process.resource_usage:
             return
@@ -772,7 +766,7 @@ class ExecutionMonitorEngine:
                 self._send_alert(alert)
 
     def _alert_already_exists(
-        self, process: MonitoredProcess, new_alert: Alert
+        self, process: MonitoredProcess, new_alert: Alert,
     ) -> bool:
         """Check if a similar alert already exists for the process."""
         recent_alerts = [
@@ -786,36 +780,36 @@ class ExecutionMonitorEngine:
 
         return len(recent_alerts) > 0
 
-    def _send_alert(self, alert: Alert):
+    def _send_alert(self, alert: Alert) -> None:
         """Send alert through configured notification channels."""
         for channel in self.configuration.notification_channels:
             if channel in self.alert_handlers:
                 try:
                     self.alert_handlers[channel](alert)
                 except Exception as e:
-                    self.logger.error(f"Failed to send alert via {channel}: {e}")
+                    self.logger.exception(f"Failed to send alert via {channel}: {e}")
 
-    def _send_email_alert(self, alert: Alert):
+    def _send_email_alert(self, alert: Alert) -> None:
         """Send alert via email (placeholder)."""
         self.logger.info(f"EMAIL ALERT: {alert.message}")
 
-    def _send_webhook_alert(self, alert: Alert):
+    def _send_webhook_alert(self, alert: Alert) -> None:
         """Send alert via webhook (placeholder)."""
         self.logger.info(f"WEBHOOK ALERT: {alert.message}")
 
-    def _send_slack_alert(self, alert: Alert):
+    def _send_slack_alert(self, alert: Alert) -> None:
         """Send alert via Slack (placeholder)."""
         self.logger.info(f"SLACK ALERT: {alert.message}")
 
-    def _write_file_alert(self, alert: Alert):
+    def _write_file_alert(self, alert: Alert) -> None:
         """Write alert to file."""
         alert_file = Path("alerts.log")
         with open(alert_file, "a") as f:
             f.write(
-                f"{alert.timestamp.isoformat()} - {alert.severity.upper()} - {alert.message}\n"
+                f"{alert.timestamp.isoformat()} - {alert.severity.upper()} - {alert.message}\n",
             )
 
-    def _restart_process(self, process: MonitoredProcess):
+    def _restart_process(self, process: MonitoredProcess) -> None:
         """Restart a failed process."""
         try:
             self.logger.info(f"Attempting to restart process {process.process_id}")
@@ -840,10 +834,10 @@ class ExecutionMonitorEngine:
                 self.logger.error(f"Failed to restart process {process.process_id}")
 
         except Exception as e:
-            self.logger.error(f"Error restarting process {process.process_id}: {e}")
+            self.logger.exception(f"Error restarting process {process.process_id}: {e}")
             process.state = ProcessState.FAILED
 
-    def _cleanup_completed_processes(self):
+    def _cleanup_completed_processes(self) -> None:
         """Clean up processes that have been completed for a while."""
         cleanup_threshold = datetime.now() - timedelta(hours=1)
 
@@ -872,7 +866,7 @@ class ExecutionMonitorEngine:
             if process_id in self.metrics_history:
                 del self.metrics_history[process_id]
 
-    def configure_monitoring(self, new_config: Dict[str, Any]) -> Dict[str, Any]:
+    def configure_monitoring(self, new_config: dict[str, Any]) -> dict[str, Any]:
         """Update monitoring configuration."""
         try:
             # Update configuration
@@ -903,10 +897,10 @@ class ExecutionMonitorEngine:
             return {"success": True, "message": "Configuration updated successfully"}
 
         except Exception as e:
-            self.logger.error(f"Error updating configuration: {e}")
+            self.logger.exception(f"Error updating configuration: {e}")
             return {"success": False, "error": str(e)}
 
-    def generate_dashboard_data(self) -> Dict[str, Any]:
+    def generate_dashboard_data(self) -> dict[str, Any]:
         """Generate real-time dashboard data."""
         with self.lock:
             summary = self._build_system_summary()
@@ -923,7 +917,7 @@ class ExecutionMonitorEngine:
                                 "process_id": process.process_id,
                                 "message": alert.message,
                                 "severity": alert.severity,
-                            }
+                            },
                         )
 
             # Sort by timestamp
@@ -956,34 +950,33 @@ class ExecutionMonitorEngine:
                 "monitoring_config": asdict(self.configuration),
             }
 
-    def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Process monitoring requests."""
         try:
             operation = request_data.get("operation", "status")
 
             if operation == "monitor":
                 return self._handle_monitor_request(request_data)
-            elif operation == "start":
+            if operation == "start":
                 return self._handle_start_request(request_data)
-            elif operation == "stop":
+            if operation == "stop":
                 return self._handle_stop_request(request_data)
-            elif operation == "status":
+            if operation == "status":
                 return self._handle_status_request(request_data)
-            elif operation == "configure":
+            if operation == "configure":
                 return self._handle_configure_request(request_data)
-            elif operation == "alert":
+            if operation == "alert":
                 return self._handle_alert_request(request_data)
-            else:
-                return {
-                    "success": False,
-                    "error": f"Unsupported operation: {operation}",
-                }
+            return {
+                "success": False,
+                "error": f"Unsupported operation: {operation}",
+            }
 
         except Exception as e:
-            self.logger.error(f"Error processing request: {e}")
+            self.logger.exception(f"Error processing request: {e}")
             return {"success": False, "error": str(e)}
 
-    def _handle_monitor_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_monitor_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle monitor operation request."""
         target = request_data.get("target", {})
         parameters = request_data.get("parameters", {})
@@ -1020,7 +1013,7 @@ class ExecutionMonitorEngine:
             alert_thresholds=alert_thresholds,
         )
 
-    def _handle_start_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_start_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle start monitoring request."""
         parameters = request_data.get("parameters", {})
         config = MonitoringConfiguration(**parameters)
@@ -1033,18 +1026,17 @@ class ExecutionMonitorEngine:
             "configuration": asdict(config),
         }
 
-    def _handle_stop_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_stop_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle stop monitoring request."""
         target = request_data.get("target", {})
         process_id = target.get("process_id")
 
         if process_id:
             return self.stop_process_monitoring(process_id)
-        else:
-            self.stop_monitoring()
-            return {"success": True, "message": "Monitoring stopped"}
+        self.stop_monitoring()
+        return {"success": True, "message": "Monitoring stopped"}
 
-    def _handle_status_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_status_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle status request."""
         target = request_data.get("target", {})
         parameters = request_data.get("parameters", {})
@@ -1057,16 +1049,16 @@ class ExecutionMonitorEngine:
 
         return self.get_process_status(process_id, include_metrics, include_history)
 
-    def _handle_configure_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_configure_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle configuration request."""
         parameters = request_data.get("parameters", {})
         return self.configure_monitoring(parameters)
 
-    def _handle_alert_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_alert_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Handle alert request."""
         parameters = request_data.get("parameters", {})
         alert_types = parameters.get(
-            "alert_types", ["resource", "performance", "process"]
+            "alert_types", ["resource", "performance", "process"],
         )
 
         all_alerts = []
@@ -1078,7 +1070,7 @@ class ExecutionMonitorEngine:
                             **asdict(alert),
                             "timestamp": alert.timestamp.isoformat(),
                             "type": alert.type.value,
-                        }
+                        },
                     )
 
         # Sort by timestamp (most recent first)
@@ -1087,7 +1079,7 @@ class ExecutionMonitorEngine:
         return {"success": True, "alerts": all_alerts, "alert_count": len(all_alerts)}
 
 
-def main():
+def main() -> None:
     """Main function for testing the Execution Monitor Engine."""
     engine = ExecutionMonitorEngine()
 
@@ -1122,9 +1114,6 @@ def main():
         response = engine.process_request(test_request)
 
         if response["success"]:
-            print("Process monitoring started successfully!")
-            print(f"Process ID: {response['process_id']}")
-            print(f"PID: {response['pid']}")
 
             # Wait a bit and check status
             time.sleep(10)
@@ -1135,18 +1124,14 @@ def main():
                 "parameters": {"include_metrics": True},
             }
 
-            status_response = engine.process_request(status_request)
-            print("\nProcess Status:")
-            print(json.dumps(status_response, indent=2))
+            engine.process_request(status_request)
 
         else:
-            print("Failed to start process monitoring:")
-            print(f"Error: {response['error']}")
+            pass
 
     finally:
         # Clean up
         engine.stop_monitoring()
-        print("\nMonitoring stopped")
 
 
 if __name__ == "__main__":

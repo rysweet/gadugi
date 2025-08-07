@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
-"""
-Tests for Execution Monitor Engine
-"""
+"""Tests for Execution Monitor Engine."""
 
-import unittest
-import json
-import time
-import tempfile
 import os
 import sys
-import subprocess
 import threading
-from unittest.mock import Mock, patch, MagicMock
+import time
+import unittest
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from execution_monitor_engine import (
-    ExecutionMonitorEngine,
-    ProcessState,
-    HealthState,
-    AlertType,
-    ResourceLimits,
-    AlertThresholds,
-    ResourceUsage,
-    PerformanceMetrics,
-    ProcessProgress,
     Alert,
+    AlertThresholds,
+    AlertType,
+    ExecutionMonitorEngine,
+    HealthState,
     MonitoredProcess,
     MonitoringConfiguration,
+    ProcessState,
+    ResourceLimits,
+    ResourceUsage,
 )
 
 
 class TestExecutionMonitorEngine(unittest.TestCase):
     """Test cases for Execution Monitor Engine."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.engine = ExecutionMonitorEngine()
         self.test_process_id = "test_process_001"
@@ -55,15 +48,15 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Sample resource limits
         self.test_limits = ResourceLimits(
-            cpu_limit="100m", memory_limit="256MB", timeout=30
+            cpu_limit="100m", memory_limit="256MB", timeout=30,
         )
 
         # Sample alert thresholds
         self.test_thresholds = AlertThresholds(
-            cpu_threshold=50.0, memory_threshold=128.0, error_rate_threshold=10.0
+            cpu_threshold=50.0, memory_threshold=128.0, error_rate_threshold=10.0,
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         # Stop monitoring if running
         if self.engine.monitoring_active:
@@ -79,38 +72,38 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             except Exception:
                 pass
 
-    def test_engine_initialization(self):
+    def test_engine_initialization(self) -> None:
         """Test engine initializes properly."""
-        self.assertIsNotNone(self.engine)
-        self.assertIsNotNone(self.engine.logger)
-        self.assertIsInstance(self.engine.monitored_processes, dict)
-        self.assertIsInstance(self.engine.configuration, MonitoringConfiguration)
-        self.assertFalse(self.engine.monitoring_active)
-        self.assertIsNotNone(self.engine.alert_handlers)
+        assert self.engine is not None
+        assert self.engine.logger is not None
+        assert isinstance(self.engine.monitored_processes, dict)
+        assert isinstance(self.engine.configuration, MonitoringConfiguration)
+        assert not self.engine.monitoring_active
+        assert self.engine.alert_handlers is not None
 
-    def test_monitoring_configuration(self):
+    def test_monitoring_configuration(self) -> None:
         """Test monitoring configuration."""
         config = MonitoringConfiguration(
-            monitoring_interval=5, collect_metrics=False, auto_restart=False
+            monitoring_interval=5, collect_metrics=False, auto_restart=False,
         )
 
-        self.assertEqual(config.monitoring_interval, 5)
-        self.assertFalse(config.collect_metrics)
-        self.assertFalse(config.auto_restart)
-        self.assertEqual(config.notification_channels, ["email"])  # Default
+        assert config.monitoring_interval == 5
+        assert not config.collect_metrics
+        assert not config.auto_restart
+        assert config.notification_channels == ["email"]  # Default
 
-    def test_resource_limits_dataclass(self):
+    def test_resource_limits_dataclass(self) -> None:
         """Test ResourceLimits dataclass."""
         limits = ResourceLimits(
-            cpu_limit="200m", memory_limit="512MB", timeout=600, disk_limit="1GB"
+            cpu_limit="200m", memory_limit="512MB", timeout=600, disk_limit="1GB",
         )
 
-        self.assertEqual(limits.cpu_limit, "200m")
-        self.assertEqual(limits.memory_limit, "512MB")
-        self.assertEqual(limits.timeout, 600)
-        self.assertEqual(limits.disk_limit, "1GB")
+        assert limits.cpu_limit == "200m"
+        assert limits.memory_limit == "512MB"
+        assert limits.timeout == 600
+        assert limits.disk_limit == "1GB"
 
-    def test_alert_thresholds_dataclass(self):
+    def test_alert_thresholds_dataclass(self) -> None:
         """Test AlertThresholds dataclass."""
         thresholds = AlertThresholds(
             cpu_threshold=80.0,
@@ -119,47 +112,47 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             response_time_threshold=10.0,
         )
 
-        self.assertEqual(thresholds.cpu_threshold, 80.0)
-        self.assertEqual(thresholds.memory_threshold, 512.0)
-        self.assertEqual(thresholds.error_rate_threshold, 5.0)
-        self.assertEqual(thresholds.response_time_threshold, 10.0)
+        assert thresholds.cpu_threshold == 80.0
+        assert thresholds.memory_threshold == 512.0
+        assert thresholds.error_rate_threshold == 5.0
+        assert thresholds.response_time_threshold == 10.0
 
-    def test_process_state_enum(self):
+    def test_process_state_enum(self) -> None:
         """Test ProcessState enum."""
-        self.assertEqual(ProcessState.INITIALIZING.value, "initializing")
-        self.assertEqual(ProcessState.RUNNING.value, "running")
-        self.assertEqual(ProcessState.COMPLETED.value, "completed")
-        self.assertEqual(ProcessState.FAILED.value, "failed")
+        assert ProcessState.INITIALIZING.value == "initializing"
+        assert ProcessState.RUNNING.value == "running"
+        assert ProcessState.COMPLETED.value == "completed"
+        assert ProcessState.FAILED.value == "failed"
 
-    def test_health_state_enum(self):
+    def test_health_state_enum(self) -> None:
         """Test HealthState enum."""
-        self.assertEqual(HealthState.HEALTHY.value, "healthy")
-        self.assertEqual(HealthState.WARNING.value, "warning")
-        self.assertEqual(HealthState.CRITICAL.value, "critical")
-        self.assertEqual(HealthState.UNKNOWN.value, "unknown")
+        assert HealthState.HEALTHY.value == "healthy"
+        assert HealthState.WARNING.value == "warning"
+        assert HealthState.CRITICAL.value == "critical"
+        assert HealthState.UNKNOWN.value == "unknown"
 
-    def test_alert_type_enum(self):
+    def test_alert_type_enum(self) -> None:
         """Test AlertType enum."""
-        self.assertEqual(AlertType.RESOURCE.value, "resource")
-        self.assertEqual(AlertType.PERFORMANCE.value, "performance")
-        self.assertEqual(AlertType.PROCESS.value, "process")
-        self.assertEqual(AlertType.SYSTEM.value, "system")
+        assert AlertType.RESOURCE.value == "resource"
+        assert AlertType.PERFORMANCE.value == "performance"
+        assert AlertType.PROCESS.value == "process"
+        assert AlertType.SYSTEM.value == "system"
 
-    def test_start_stop_monitoring(self):
+    def test_start_stop_monitoring(self) -> None:
         """Test starting and stopping monitoring system."""
         # Initially not active
-        self.assertFalse(self.engine.monitoring_active)
+        assert not self.engine.monitoring_active
 
         # Start monitoring
         self.engine.start_monitoring(self.test_config)
-        self.assertTrue(self.engine.monitoring_active)
-        self.assertEqual(self.engine.configuration.monitoring_interval, 1)
+        assert self.engine.monitoring_active
+        assert self.engine.configuration.monitoring_interval == 1
 
         # Stop monitoring
         self.engine.stop_monitoring()
-        self.assertFalse(self.engine.monitoring_active)
+        assert not self.engine.monitoring_active
 
-    def test_monitor_process_simple(self):
+    def test_monitor_process_simple(self) -> None:
         """Test monitoring a simple process."""
         # Use a simple command that will complete quickly
         command = ["echo", "Hello World"]
@@ -174,13 +167,13 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             alert_thresholds=self.test_thresholds,
         )
 
-        self.assertTrue(result["success"])
-        self.assertEqual(result["process_id"], self.test_process_id)
-        self.assertIn("pid", result)
+        assert result["success"]
+        assert result["process_id"] == self.test_process_id
+        assert "pid" in result
 
         # Check that process is registered
-        self.assertIn(self.test_process_id, self.engine.monitored_processes)
-        self.assertIn(self.test_process_id, self.engine.process_registry)
+        assert self.test_process_id in self.engine.monitored_processes
+        assert self.test_process_id in self.engine.process_registry
 
         # Wait for process to complete
         time.sleep(1)
@@ -188,9 +181,9 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         # Check process status
         monitored_process = self.engine.monitored_processes[self.test_process_id]
         # Process should complete quickly
-        self.assertIsNotNone(monitored_process)
+        assert monitored_process is not None
 
-    def test_monitor_process_duplicate(self):
+    def test_monitor_process_duplicate(self) -> None:
         """Test monitoring the same process twice."""
         command = ["sleep", "1"]
 
@@ -203,7 +196,7 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             working_directory=".",
         )
 
-        self.assertTrue(result1["success"])
+        assert result1["success"]
 
         # Try to start monitoring same process ID again
         result2 = self.engine.monitor_process(
@@ -214,11 +207,11 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             working_directory=".",
         )
 
-        self.assertFalse(result2["success"])
-        self.assertIn("already being monitored", result2["error"])
+        assert not result2["success"]
+        assert "already being monitored" in result2["error"]
 
     @patch("subprocess.Popen")
-    def test_monitor_process_start_failure(self, mock_popen):
+    def test_monitor_process_start_failure(self, mock_popen) -> None:
         """Test handling process start failure."""
         # Mock subprocess.Popen to raise an exception
         mock_popen.side_effect = FileNotFoundError("Command not found")
@@ -231,10 +224,10 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             working_directory=".",
         )
 
-        self.assertFalse(result["success"])
-        self.assertIn("Failed to start process", result["error"])
+        assert not result["success"]
+        assert "Failed to start process" in result["error"]
 
-    def test_stop_process_monitoring(self):
+    def test_stop_process_monitoring(self) -> None:
         """Test stopping monitoring of a specific process."""
         command = ["sleep", "5"]
 
@@ -247,28 +240,28 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             working_directory=".",
         )
 
-        self.assertTrue(result["success"])
+        assert result["success"]
 
         # Stop monitoring
         stop_result = self.engine.stop_process_monitoring(
-            self.test_process_id, cleanup_resources=True
+            self.test_process_id, cleanup_resources=True,
         )
 
-        self.assertTrue(stop_result["success"])
-        self.assertEqual(stop_result["process_id"], self.test_process_id)
-        self.assertEqual(stop_result["final_state"], ProcessState.TERMINATED.value)
+        assert stop_result["success"]
+        assert stop_result["process_id"] == self.test_process_id
+        assert stop_result["final_state"] == ProcessState.TERMINATED.value
 
         # Process should be removed from monitoring
-        self.assertNotIn(self.test_process_id, self.engine.monitored_processes)
+        assert self.test_process_id not in self.engine.monitored_processes
 
-    def test_stop_process_monitoring_nonexistent(self):
+    def test_stop_process_monitoring_nonexistent(self) -> None:
         """Test stopping monitoring of non-existent process."""
         result = self.engine.stop_process_monitoring("nonexistent_process")
 
-        self.assertFalse(result["success"])
-        self.assertIn("not being monitored", result["error"])
+        assert not result["success"]
+        assert "not being monitored" in result["error"]
 
-    def test_get_process_status_single(self):
+    def test_get_process_status_single(self) -> None:
         """Test getting status of a single process."""
         command = ["sleep", "2"]
 
@@ -283,20 +276,20 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Get status
         status = self.engine.get_process_status(
-            process_id=self.test_process_id, include_metrics=True, include_history=False
+            process_id=self.test_process_id, include_metrics=True, include_history=False,
         )
 
-        self.assertTrue(status["success"])
-        self.assertIn("process_status", status)
+        assert status["success"]
+        assert "process_status" in status
 
         process_status = status["process_status"]
-        self.assertEqual(process_status["process_id"], self.test_process_id)
-        self.assertEqual(process_status["agent_type"], self.test_agent_type)
-        self.assertEqual(process_status["task_id"], self.test_task_id)
-        self.assertIn("state", process_status)
-        self.assertIn("duration", process_status)
+        assert process_status["process_id"] == self.test_process_id
+        assert process_status["agent_type"] == self.test_agent_type
+        assert process_status["task_id"] == self.test_task_id
+        assert "state" in process_status
+        assert "duration" in process_status
 
-    def test_get_process_status_all(self):
+    def test_get_process_status_all(self) -> None:
         """Test getting status of all processes."""
         # Start multiple processes
         for i in range(3):
@@ -311,29 +304,29 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Get status of all processes
         status = self.engine.get_process_status(
-            process_id=None, include_metrics=False, include_history=False
+            process_id=None, include_metrics=False, include_history=False,
         )
 
-        self.assertTrue(status["success"])
-        self.assertIn("processes", status)
-        self.assertIn("summary", status)
+        assert status["success"]
+        assert "processes" in status
+        assert "summary" in status
 
         # Should have 3 processes
-        self.assertEqual(len(status["processes"]), 3)
+        assert len(status["processes"]) == 3
 
         # Check summary
         summary = status["summary"]
-        self.assertIn("total_processes", summary)
-        self.assertIn("agent_breakdown", summary)
+        assert "total_processes" in summary
+        assert "agent_breakdown" in summary
 
-    def test_get_process_status_nonexistent(self):
+    def test_get_process_status_nonexistent(self) -> None:
         """Test getting status of non-existent process."""
         status = self.engine.get_process_status("nonexistent_process")
 
-        self.assertFalse(status["success"])
-        self.assertIn("not found", status["error"])
+        assert not status["success"]
+        assert "not found" in status["error"]
 
-    def test_monitored_process_dataclass(self):
+    def test_monitored_process_dataclass(self) -> None:
         """Test MonitoredProcess dataclass functionality."""
         now = datetime.now()
 
@@ -356,12 +349,12 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             alerts=[],
         )
 
-        self.assertEqual(process.process_id, "test_001")
-        self.assertEqual(process.state, ProcessState.RUNNING)
-        self.assertEqual(process.restart_count, 0)  # Default value
-        self.assertIsNone(process.last_heartbeat)  # Default value
+        assert process.process_id == "test_001"
+        assert process.state == ProcessState.RUNNING
+        assert process.restart_count == 0  # Default value
+        assert process.last_heartbeat is None  # Default value
 
-    def test_alert_dataclass(self):
+    def test_alert_dataclass(self) -> None:
         """Test Alert dataclass functionality."""
         now = datetime.now()
 
@@ -375,22 +368,22 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             process_id="test_001",
         )
 
-        self.assertEqual(alert.type, AlertType.RESOURCE)
-        self.assertEqual(alert.severity, "warning")
-        self.assertEqual(alert.current_value, 85.5)
-        self.assertFalse(alert.acknowledged)  # Default value
+        assert alert.type == AlertType.RESOURCE
+        assert alert.severity == "warning"
+        assert alert.current_value == 85.5
+        assert not alert.acknowledged  # Default value
 
     @patch("psutil.Process")
-    def test_collect_process_metrics(self, mock_psutil_process):
+    def test_collect_process_metrics(self, mock_psutil_process) -> None:
         """Test collection of process metrics."""
         # Mock psutil.Process
         mock_process_instance = MagicMock()
         mock_process_instance.cpu_percent.return_value = 25.5
         mock_process_instance.memory_info.return_value = MagicMock(
-            rss=134217728
+            rss=134217728,
         )  # 128MB
         mock_process_instance.io_counters.return_value = MagicMock(
-            read_bytes=1000, write_bytes=2000
+            read_bytes=1000, write_bytes=2000,
         )
         mock_process_instance.num_threads.return_value = 5
         mock_process_instance.num_fds.return_value = 10
@@ -421,12 +414,12 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         self.engine._collect_process_metrics(monitored_process)
 
         # Check metrics were collected
-        self.assertIsNotNone(monitored_process.resource_usage)
-        self.assertEqual(monitored_process.resource_usage.cpu_usage, 25.5)
-        self.assertEqual(monitored_process.resource_usage.memory_usage, 128.0)  # MB
-        self.assertEqual(monitored_process.resource_usage.threads, 5)
+        assert monitored_process.resource_usage is not None
+        assert monitored_process.resource_usage.cpu_usage == 25.5
+        assert monitored_process.resource_usage.memory_usage == 128.0  # MB
+        assert monitored_process.resource_usage.threads == 5
 
-    def test_determine_health_state(self):
+    def test_determine_health_state(self) -> None:
         """Test health state determination."""
         thresholds = AlertThresholds(cpu_threshold=80.0, memory_threshold=100.0)
 
@@ -451,7 +444,7 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         # Test unknown state (no resource usage)
         health = self.engine._determine_health_state(process)
-        self.assertEqual(health, HealthState.UNKNOWN)
+        assert health == HealthState.UNKNOWN
 
         # Test healthy state
         process.resource_usage = ResourceUsage(
@@ -463,19 +456,19 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             threads=3,
         )
         health = self.engine._determine_health_state(process)
-        self.assertEqual(health, HealthState.HEALTHY)
+        assert health == HealthState.HEALTHY
 
         # Test warning state
         process.resource_usage.cpu_usage = 70.0  # 70% (above 80% * 0.8 = 64%)
         health = self.engine._determine_health_state(process)
-        self.assertEqual(health, HealthState.WARNING)
+        assert health == HealthState.WARNING
 
         # Test critical state
         process.resource_usage.cpu_usage = 90.0  # Above threshold
         health = self.engine._determine_health_state(process)
-        self.assertEqual(health, HealthState.CRITICAL)
+        assert health == HealthState.CRITICAL
 
-    def test_alert_already_exists(self):
+    def test_alert_already_exists(self) -> None:
         """Test checking for duplicate alerts."""
         now = datetime.now()
 
@@ -522,7 +515,7 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         )
 
         duplicate_exists = self.engine._alert_already_exists(process, new_alert)
-        self.assertTrue(duplicate_exists)
+        assert duplicate_exists
 
         # Check for non-duplicate
         different_alert = Alert(
@@ -536,9 +529,9 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         )
 
         duplicate_exists = self.engine._alert_already_exists(process, different_alert)
-        self.assertFalse(duplicate_exists)
+        assert not duplicate_exists
 
-    def test_configure_monitoring(self):
+    def test_configure_monitoring(self) -> None:
         """Test monitoring configuration update."""
         new_config = {
             "monitoring_interval": 10,
@@ -550,15 +543,13 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         result = self.engine.configure_monitoring(new_config)
 
-        self.assertTrue(result["success"])
-        self.assertEqual(self.engine.configuration.monitoring_interval, 10)
-        self.assertFalse(self.engine.configuration.collect_metrics)
-        self.assertFalse(self.engine.configuration.auto_restart)
-        self.assertEqual(
-            self.engine.configuration.notification_channels, ["email", "webhook"]
-        )
+        assert result["success"]
+        assert self.engine.configuration.monitoring_interval == 10
+        assert not self.engine.configuration.collect_metrics
+        assert not self.engine.configuration.auto_restart
+        assert self.engine.configuration.notification_channels == ["email", "webhook"]
 
-    def test_generate_dashboard_data(self):
+    def test_generate_dashboard_data(self) -> None:
         """Test dashboard data generation."""
         # Add some test processes
         for i in range(3):
@@ -573,18 +564,18 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         dashboard_data = self.engine.generate_dashboard_data()
 
-        self.assertIn("timestamp", dashboard_data)
-        self.assertIn("summary", dashboard_data)
-        self.assertIn("recent_activity", dashboard_data)
-        self.assertIn("performance_trends", dashboard_data)
-        self.assertIn("monitoring_config", dashboard_data)
+        assert "timestamp" in dashboard_data
+        assert "summary" in dashboard_data
+        assert "recent_activity" in dashboard_data
+        assert "performance_trends" in dashboard_data
+        assert "monitoring_config" in dashboard_data
 
         # Check summary
         summary = dashboard_data["summary"]
-        self.assertEqual(summary["total_processes"], 3)
-        self.assertIn("agent_breakdown", summary)
+        assert summary["total_processes"] == 3
+        assert "agent_breakdown" in summary
 
-    def test_process_request_monitor(self):
+    def test_process_request_monitor(self) -> None:
         """Test processing monitor operation request."""
         request = {
             "operation": "monitor",
@@ -607,11 +598,11 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertEqual(response["process_id"], "api_test_001")
-        self.assertIn("pid", response)
+        assert response["success"]
+        assert response["process_id"] == "api_test_001"
+        assert "pid" in response
 
-    def test_process_request_start(self):
+    def test_process_request_start(self) -> None:
         """Test processing start monitoring request."""
         request = {
             "operation": "start",
@@ -625,28 +616,28 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertIn("Monitoring started", response["message"])
-        self.assertIn("configuration", response)
+        assert response["success"]
+        assert "Monitoring started" in response["message"]
+        assert "configuration" in response
 
         # Check that monitoring is active
-        self.assertTrue(self.engine.monitoring_active)
+        assert self.engine.monitoring_active
 
-    def test_process_request_stop(self):
+    def test_process_request_stop(self) -> None:
         """Test processing stop monitoring request."""
         # Start monitoring first
         self.engine.start_monitoring()
-        self.assertTrue(self.engine.monitoring_active)
+        assert self.engine.monitoring_active
 
         # Stop monitoring
         request = {"operation": "stop"}
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertIn("Monitoring stopped", response["message"])
-        self.assertFalse(self.engine.monitoring_active)
+        assert response["success"]
+        assert "Monitoring stopped" in response["message"]
+        assert not self.engine.monitoring_active
 
-    def test_process_request_status(self):
+    def test_process_request_status(self) -> None:
         """Test processing status request."""
         # Add a test process
         self.engine.monitor_process(
@@ -666,10 +657,10 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertIn("process_status", response)
+        assert response["success"]
+        assert "process_status" in response
 
-    def test_process_request_configure(self):
+    def test_process_request_configure(self) -> None:
         """Test processing configure request."""
         request = {
             "operation": "configure",
@@ -678,11 +669,11 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertEqual(self.engine.configuration.monitoring_interval, 15)
-        self.assertFalse(self.engine.configuration.collect_metrics)
+        assert response["success"]
+        assert self.engine.configuration.monitoring_interval == 15
+        assert not self.engine.configuration.collect_metrics
 
-    def test_process_request_alert(self):
+    def test_process_request_alert(self) -> None:
         """Test processing alert request."""
         # Add a process with alerts
         process = MonitoredProcess(
@@ -710,7 +701,7 @@ class TestExecutionMonitorEngine(unittest.TestCase):
                     current_value=95.0,
                     timestamp=datetime.now(),
                     process_id="alert_test_001",
-                )
+                ),
             ],
         )
 
@@ -724,27 +715,27 @@ class TestExecutionMonitorEngine(unittest.TestCase):
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertIn("alerts", response)
-        self.assertIn("alert_count", response)
-        self.assertGreater(response["alert_count"], 0)
+        assert response["success"]
+        assert "alerts" in response
+        assert "alert_count" in response
+        assert response["alert_count"] > 0
 
-    def test_process_request_unsupported(self):
+    def test_process_request_unsupported(self) -> None:
         """Test processing unsupported operation."""
         request = {"operation": "unsupported_operation"}
         response = self.engine.process_request(request)
 
-        self.assertFalse(response["success"])
-        self.assertIn("Unsupported operation", response["error"])
+        assert not response["success"]
+        assert "Unsupported operation" in response["error"]
 
-    def test_alert_handlers_setup(self):
+    def test_alert_handlers_setup(self) -> None:
         """Test that alert handlers are properly set up."""
         handlers = self.engine.alert_handlers
 
-        self.assertIn("email", handlers)
-        self.assertIn("webhook", handlers)
-        self.assertIn("slack", handlers)
-        self.assertIn("file", handlers)
+        assert "email" in handlers
+        assert "webhook" in handlers
+        assert "slack" in handlers
+        assert "file" in handlers
 
         # Test file alert handler
         test_alert = Alert(
@@ -760,7 +751,7 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         # Should not raise an exception
         handlers["file"](test_alert)
 
-    def test_process_progress_update(self):
+    def test_process_progress_update(self) -> None:
         """Test process progress updates."""
         now = datetime.now()
 
@@ -787,21 +778,21 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         self.engine._update_process_progress(process)
 
         # Check that progress was updated
-        self.assertIsNotNone(process.progress)
-        self.assertEqual(process.progress.current_phase, "execution")
-        self.assertGreater(process.progress.completion_percentage, 0)
-        self.assertIn("started", process.progress.milestones_completed)
+        assert process.progress is not None
+        assert process.progress.current_phase == "execution"
+        assert process.progress.completion_percentage > 0
+        assert "started" in process.progress.milestones_completed
 
-    def test_logging_setup(self):
+    def test_logging_setup(self) -> None:
         """Test that logging is set up correctly."""
-        self.assertIsNotNone(self.engine.logger)
-        self.assertEqual(self.engine.logger.name, "execution_monitor")
+        assert self.engine.logger is not None
+        assert self.engine.logger.name == "execution_monitor"
 
         import logging
 
-        self.assertEqual(self.engine.logger.level, logging.INFO)
+        assert self.engine.logger.level == logging.INFO
 
-    def test_thread_safety(self):
+    def test_thread_safety(self) -> None:
         """Test thread safety of concurrent operations."""
 
         # This test checks basic thread safety during concurrent process additions
@@ -832,10 +823,10 @@ class TestExecutionMonitorEngine(unittest.TestCase):
             thread.join()
 
         # All operations should succeed
-        self.assertTrue(all(results))
-        self.assertEqual(len(self.engine.monitored_processes), 5)
+        assert all(results)
+        assert len(self.engine.monitored_processes) == 5
 
-    def test_system_summary_calculation(self):
+    def test_system_summary_calculation(self) -> None:
         """Test system summary calculations."""
         # Add processes with different agent types
         agents = ["workflow-manager", "code-writer", "code-reviewer"]
@@ -853,15 +844,15 @@ class TestExecutionMonitorEngine(unittest.TestCase):
         summary = self.engine._build_system_summary()
 
         # Check summary structure
-        self.assertIn("total_processes", summary)
-        self.assertIn("agent_breakdown", summary)
-        self.assertEqual(summary["total_processes"], 6)
+        assert "total_processes" in summary
+        assert "agent_breakdown" in summary
+        assert summary["total_processes"] == 6
 
         # Check agent breakdown
         breakdown = summary["agent_breakdown"]
         for agent_type in agents:
-            self.assertIn(agent_type, breakdown)
-            self.assertEqual(breakdown[agent_type]["count"], 2)
+            assert agent_type in breakdown
+            assert breakdown[agent_type]["count"] == 2
 
 
 if __name__ == "__main__":

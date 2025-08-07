@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
-"""
-Agent Generator Engine for Gadugi v0.3
+"""Agent Generator Engine for Gadugi v0.3.
 
 Dynamically creates and manages agents within the Gadugi ecosystem.
 Provides template-based generation, validation, and deployment capabilities.
 """
 
-import json
-import logging
-import os
-import re
-import shutil
 import hashlib
+import logging
+import re
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class AgentType(Enum):
@@ -44,9 +40,9 @@ class AgentSpecification:
     name: str
     type: AgentType
     description: str
-    capabilities: List[str]
-    interfaces: Dict[str, str]
-    requirements: Dict[str, Any]
+    capabilities: list[str]
+    interfaces: dict[str, str]
+    requirements: dict[str, Any]
 
 
 @dataclass
@@ -116,19 +112,19 @@ class AgentGeneratorResponse:
 
     success: bool
     operation: str
-    agent_info: Dict[str, Any]
-    generated_files: List[GeneratedFile]
-    integration_points: List[IntegrationPoint]
+    agent_info: dict[str, Any]
+    generated_files: list[GeneratedFile]
+    integration_points: list[IntegrationPoint]
     validation_results: ValidationResult
-    recommendations: List[Recommendation]
-    warnings: List[str]
-    errors: List[str]
+    recommendations: list[Recommendation]
+    warnings: list[str]
+    errors: list[str]
 
 
 class AgentGeneratorEngine:
     """Engine for generating agents dynamically."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Agent Generator Engine."""
         self.logger = self._setup_logging()
         self.templates = self._load_templates()
@@ -144,14 +140,14 @@ class AgentGeneratorEngine:
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
         return logger
 
-    def _load_templates(self) -> Dict[str, str]:
+    def _load_templates(self) -> dict[str, str]:
         """Load agent templates."""
         return {
             "standard": self._get_standard_template(),
@@ -195,17 +191,17 @@ class {AGENT_CLASS_NAME}Response:
 
 class {AGENT_CLASS_NAME}Engine:
     """Main {AGENT_NAME} agent engine."""
-    
+
     def __init__(self):
         """Initialize the {AGENT_NAME} engine."""
         self.logger = self._setup_logging()
         {INITIALIZATION_CODE}
-    
+
     def _setup_logging(self) -> logging.Logger:
         """Set up logging for the {AGENT_NAME} engine."""
         logger = logging.getLogger("{AGENT_LOGGER_NAME}")
         logger.setLevel(logging.INFO)
-        
+
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
@@ -213,16 +209,16 @@ class {AGENT_CLASS_NAME}Engine:
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        
+
         return logger
-    
+
     def execute_operation(self, request: {AGENT_CLASS_NAME}Request) -> {AGENT_CLASS_NAME}Response:
         """Execute {AGENT_NAME} operation based on request."""
         try:
             self.logger.info(f"Executing {AGENT_NAME} operation: {{request.operation}}")
-            
+
             {OPERATION_ROUTING}
-            
+
             return {AGENT_CLASS_NAME}Response(
                 success=True,
                 operation=request.operation,
@@ -230,7 +226,7 @@ class {AGENT_CLASS_NAME}Engine:
                 warnings=[],
                 errors=[]
             )
-            
+
         except Exception as e:
             self.logger.error(f"Error executing {AGENT_NAME} operation: {{e}}")
             return {AGENT_CLASS_NAME}Response(
@@ -240,23 +236,23 @@ class {AGENT_CLASS_NAME}Engine:
                 warnings=[],
                 errors=[str(e)]
             )
-    
+
     {AGENT_SPECIFIC_METHODS}
 
 
 def main():
     """Main function for testing the {AGENT_NAME} engine."""
     engine = {AGENT_CLASS_NAME}Engine()
-    
+
     # Test request
     test_request = {AGENT_CLASS_NAME}Request(
         operation="test",
         parameters={{"test_parameter": "test_value"}},
         options={{}}
     )
-    
+
     response = engine.execute_operation(test_request)
-    
+
     if response.success:
         print(f"{AGENT_NAME} operation completed successfully!")
         print(f"Results: {{response.results}}")
@@ -282,15 +278,15 @@ from typing import Dict, Any
 
 class {AGENT_CLASS_NAME}:
     """Minimal {AGENT_NAME} agent."""
-    
+
     def __init__(self):
         self.logger = logging.getLogger("{AGENT_LOGGER_NAME}")
-    
+
     def process(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process request and return response."""
         try:
             {MINIMAL_PROCESSING_CODE}
-            
+
             return {{
                 "success": True,
                 "results": {{"message": "Processing completed"}},
@@ -319,7 +315,7 @@ if __name__ == "__main__":
 This agent includes advanced features like:
 - State management
 - Caching
-- Performance monitoring  
+- Performance monitoring
 - Error recovery
 - Configuration management
 """
@@ -363,7 +359,7 @@ class PerformanceMetrics:
 
 class {AGENT_CLASS_NAME}Engine:
     """Advanced {AGENT_NAME} agent engine with monitoring and caching."""
-    
+
     def __init__(self, config: Optional[{AGENT_CLASS_NAME}Config] = None):
         """Initialize the advanced {AGENT_NAME} engine."""
         self.config = config or {AGENT_CLASS_NAME}Config()
@@ -371,14 +367,14 @@ class {AGENT_CLASS_NAME}Engine:
         self.state = {AGENT_CLASS_NAME}State.IDLE
         self.metrics = PerformanceMetrics(last_updated=datetime.now())
         self.cache = {{}}
-        
+
         {ADVANCED_INITIALIZATION}
-    
+
     def _setup_logging(self) -> logging.Logger:
         """Set up advanced logging with configuration."""
         logger = logging.getLogger("{AGENT_LOGGER_NAME}_advanced")
         logger.setLevel(getattr(logging, self.config.log_level))
-        
+
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
@@ -386,16 +382,16 @@ class {AGENT_CLASS_NAME}Engine:
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        
+
         return logger
-    
+
     async def execute_operation_async(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Execute operation asynchronously with monitoring."""
         start_time = datetime.now()
-        
+
         try:
             self.state = {AGENT_CLASS_NAME}State.PROCESSING
-            
+
             # Check cache first
             cache_key = self._generate_cache_key(request)
             if cache_key in self.cache:
@@ -403,82 +399,82 @@ class {AGENT_CLASS_NAME}Engine:
                 if self._is_cache_valid(cached_result):
                     self._update_metrics(start_time, cache_hit=True)
                     return cached_result["data"]
-            
+
             # Process request
             result = await self._process_request_async(request)
-            
+
             # Cache result
             self.cache[cache_key] = {{
                 "data": result,
                 "timestamp": datetime.now()
             }}
-            
+
             self._update_metrics(start_time, cache_hit=False)
             self.state = {AGENT_CLASS_NAME}State.IDLE
-            
+
             return result
-            
+
         except Exception as e:
             self.state = {AGENT_CLASS_NAME}State.ERROR
             self.logger.error(f"Error in async operation: {{e}}")
             self._update_metrics(start_time, error=True)
-            
+
             return {{
                 "success": False,
                 "error": str(e),
                 "timestamp": datetime.now().isoformat()
             }}
-    
+
     async def _process_request_async(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process request asynchronously."""
         # Simulate async processing
         await asyncio.sleep(0.1)
-        
+
         {ADVANCED_PROCESSING_CODE}
-        
+
         return {{
             "success": True,
             "operation": request.get("operation", "unknown"),
             "results": {{"processed": True}},
             "timestamp": datetime.now().isoformat()
         }}
-    
+
     def _generate_cache_key(self, request: Dict[str, Any]) -> str:
         """Generate cache key for request."""
         return f"{AGENT_NAME}:{{hash(json.dumps(request, sort_keys=True))}}"
-    
+
     def _is_cache_valid(self, cached_item: Dict[str, Any]) -> bool:
         """Check if cached item is still valid."""
         cache_age = datetime.now() - cached_item["timestamp"]
         return cache_age.total_seconds() < self.config.cache_ttl
-    
+
     def _update_metrics(self, start_time: datetime, cache_hit: bool = False, error: bool = False):
         """Update performance metrics."""
         processing_time = (datetime.now() - start_time).total_seconds()
-        
+
         self.metrics.operations_count += 1
-        
+
         # Update average processing time
         if self.metrics.average_processing_time == 0:
             self.metrics.average_processing_time = processing_time
         else:
             self.metrics.average_processing_time = (
-                (self.metrics.average_processing_time * (self.metrics.operations_count - 1) + processing_time) 
+                (self.metrics.average_processing_time * (self.metrics.operations_count - 1) + processing_time)
                 / self.metrics.operations_count
             )
-        
+
         # Update error rate
         if error:
             error_count = self.metrics.error_rate * (self.metrics.operations_count - 1) + 1
             self.metrics.error_rate = error_count / self.metrics.operations_count
-        
+
         # Update cache hit rate
         if cache_hit:
             hit_count = self.metrics.cache_hit_rate * (self.metrics.operations_count - 1) + 1
             self.metrics.cache_hit_rate = hit_count / self.metrics.operations_count
-        
+
         self.metrics.last_updated = datetime.now()
-    
+
     def get_metrics(self) -> Dict[str, Any]:
         """Get current performance metrics."""
         return {{
@@ -487,22 +483,22 @@ class {AGENT_CLASS_NAME}Engine:
             "cache_size": len(self.cache),
             "config": asdict(self.config)
         }}
-    
+
     def cleanup_cache(self):
         """Clean up expired cache entries."""
         current_time = datetime.now()
         expired_keys = []
-        
+
         for key, cached_item in self.cache.items():
             cache_age = current_time - cached_item["timestamp"]
             if cache_age.total_seconds() >= self.config.cache_ttl:
                 expired_keys.append(key)
-        
+
         for key in expired_keys:
             del self.cache[key]
-        
+
         self.logger.info(f"Cleaned up {{len(expired_keys)}} expired cache entries")
-    
+
     def shutdown(self):
         """Graceful shutdown of the agent."""
         self.state = {AGENT_CLASS_NAME}State.SHUTDOWN
@@ -572,7 +568,7 @@ class {AGENT_CLASS_NAME}Engine:
                         component="orchestrator",
                         integration_type="registration",
                         status="complete",
-                    )
+                    ),
                 )
 
                 integration_points.append(
@@ -580,7 +576,7 @@ class {AGENT_CLASS_NAME}Engine:
                         component="gadugi",
                         integration_type="service_registration",
                         status="complete",
-                    )
+                    ),
                 )
 
             # Generate recommendations
@@ -621,7 +617,7 @@ class {AGENT_CLASS_NAME}Engine:
             )
 
         except Exception as e:
-            self.logger.error(f"Error creating agent {spec.name}: {e}")
+            self.logger.exception(f"Error creating agent {spec.name}: {e}")
             return AgentGeneratorResponse(
                 success=False,
                 operation="create",
@@ -675,12 +671,12 @@ class {AGENT_CLASS_NAME}Engine:
                 integration_test="failed",
             )
 
-    def _ensure_directory(self, directory: Path):
+    def _ensure_directory(self, directory: Path) -> None:
         """Ensure directory exists."""
         directory.mkdir(parents=True, exist_ok=True)
 
     def _generate_agent_file(
-        self, spec: AgentSpecification, output_dir: Path
+        self, spec: AgentSpecification, output_dir: Path,
     ) -> GeneratedFile:
         """Generate agent specification file."""
         agent_content = f"""# {spec.name.title().replace("-", " ").replace("_", " ")}
@@ -702,11 +698,11 @@ You are the {spec.name.title().replace("-", " ").replace("_", " ")} for Gadugi v
 }}
 ```
 
-### Output Format  
+### Output Format
 ```json
 {{
   "success": true,
-  "operation": "string", 
+  "operation": "string",
   "results": {{}},
   "warnings": [],
   "errors": []
@@ -795,7 +791,7 @@ This agent integrates with the Gadugi ecosystem through:
         )
 
     def _generate_test_file(
-        self, spec: AgentSpecification, output_dir: Path
+        self, spec: AgentSpecification, output_dir: Path,
     ) -> GeneratedFile:
         """Generate test file for agent."""
         class_name = "".join(
@@ -821,16 +817,16 @@ from {spec.name.replace("-", "_")}_engine import {class_name}Engine, {class_name
 
 class Test{class_name}Engine(unittest.TestCase):
     """Test cases for {class_name} Engine."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.engine = {class_name}Engine()
-    
+
     def test_engine_initialization(self):
         """Test engine initializes properly."""
         self.assertIsNotNone(self.engine)
         self.assertIsNotNone(self.engine.logger)
-    
+
     def test_basic_operation(self):
         """Test basic operation execution."""
         request = {class_name}Request(
@@ -838,39 +834,39 @@ class Test{class_name}Engine(unittest.TestCase):
             parameters={{"test_param": "test_value"}},
             options={{}}
         )
-        
+
         response = self.engine.execute_operation(request)
-        
+
         self.assertIsInstance(response, {class_name}Response)
         self.assertTrue(response.success)
         self.assertEqual(response.operation, "test")
         self.assertEqual(len(response.errors), 0)
-    
+
     def test_invalid_operation(self):
-        """Test handling of invalid operations.""" 
+        """Test handling of invalid operations."""
         request = {class_name}Request(
             operation="invalid_operation",
             parameters={{}},
             options={{}}
         )
-        
+
         response = self.engine.execute_operation(request)
-        
+
         self.assertIsInstance(response, {class_name}Response)
         # Should still succeed with default handling
         self.assertTrue(response.success)
-    
+
     def test_error_handling(self):
         """Test error handling in operations."""
         # This test would need specific error conditions
         # based on the agent's implementation
         pass
-    
+
     def test_logging_setup(self):
         """Test that logging is set up correctly."""
         self.assertIsNotNone(self.engine.logger)
         self.assertEqual(self.engine.logger.name, "{spec.name.replace("-", "_").lower()}")
-    
+
     def test_request_response_dataclasses(self):
         """Test request and response dataclass functionality."""
         request = {class_name}Request(
@@ -878,11 +874,11 @@ class Test{class_name}Engine(unittest.TestCase):
             parameters={{"key": "value"}},
             options={{"option": True}}
         )
-        
+
         self.assertEqual(request.operation, "test")
-        self.assertEqual(request.parameters["key"], "value") 
+        self.assertEqual(request.parameters["key"], "value")
         self.assertTrue(request.options["option"])
-        
+
         response = {class_name}Response(
             success=True,
             operation="test",
@@ -890,7 +886,7 @@ class Test{class_name}Engine(unittest.TestCase):
             warnings=[],
             errors=[]
         )
-        
+
         self.assertTrue(response.success)
         self.assertEqual(response.operation, "test")
         self.assertEqual(response.results["result"], "success")
@@ -914,7 +910,7 @@ if __name__ == '__main__':
         )
 
     def _generate_readme_file(
-        self, spec: AgentSpecification, output_dir: Path
+        self, spec: AgentSpecification, output_dir: Path,
     ) -> GeneratedFile:
         """Generate README file for agent."""
         readme_content = f"""# {spec.name.title().replace("-", " ").replace("_", " ")} Agent
@@ -982,7 +978,7 @@ parameters:
     "key": "value - Operation parameters"
   }},
   "options": {{
-    "key": "value - Optional operation options"  
+    "key": "value - Optional operation options"
   }}
 }}
 ```
@@ -1095,7 +1091,7 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
         routing_lines.append("            # Default operation handling")
         routing_lines.append(
-            '            self.logger.info(f"Handling operation: {request.operation}")'
+            '            self.logger.info(f"Handling operation: {request.operation}")',
         )
 
         return "\n".join(routing_lines)
@@ -1111,7 +1107,7 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         try:
             # Implement {capability} logic here
             result = {{"operation": "{capability}", "status": "completed"}}
-            
+
             return {spec.name.title().replace("-", "").replace("_", "")}Response(
                 success=True,
                 operation=request.operation,
@@ -1136,7 +1132,7 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         return f"""# Process {spec.name} operation
             operation = request.get("operation", "unknown")
             self.logger.info(f"Processing {{operation}}")
-            
+
             # Implement basic processing logic
             result = {{"operation": operation, "processed": True}}"""
 
@@ -1161,14 +1157,14 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         return f"""# Advanced processing for {spec.name}
         operation = request.get("operation", "unknown")
         self.logger.info(f"Advanced processing: {{operation}}")
-        
+
         # Record operation
         self.operation_history.append({{
             "operation": operation,
             "timestamp": datetime.now(),
             "parameters": request.get("parameters", {{}})
         }})
-        
+
         # Process with monitoring
         result = {{"operation": operation, "processed": True, "advanced": True}}"""
 
@@ -1177,11 +1173,11 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         return f'''
 class {spec.name.title().replace("-", "").replace("_", "")}Manager:
     """Manager class for {spec.name} operations."""
-    
+
     def __init__(self, engine: {spec.name.title().replace("-", "").replace("_", "")}Engine):
         self.engine = engine
         self.active_operations = {{}}
-    
+
     def submit_operation(self, request: Dict[str, Any]) -> str:
         """Submit operation for processing."""
         operation_id = f"op_{{datetime.now().strftime('%Y%m%d_%H%M%S')}}"
@@ -1191,15 +1187,15 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
             "timestamp": datetime.now()
         }}
         return operation_id
-    
+
     def get_operation_status(self, operation_id: str) -> Dict[str, Any]:
         """Get status of submitted operation."""
         return self.active_operations.get(operation_id, {{"error": "Operation not found"}})
 '''
 
     def _generate_recommendations(
-        self, spec: AgentSpecification, template_options: TemplateOptions
-    ) -> List[Recommendation]:
+        self, spec: AgentSpecification, template_options: TemplateOptions,
+    ) -> list[Recommendation]:
         """Generate recommendations for the agent."""
         recommendations = []
 
@@ -1210,7 +1206,7 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     priority="medium",
                     message="Consider splitting agent into multiple specialized agents",
                     implementation="Break down capabilities into focused agents",
-                )
+                ),
             )
 
         if template_options.base_template == TemplateType.MINIMAL:
@@ -1220,7 +1216,7 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     priority="low",
                     message="Consider upgrading to standard template for better error handling",
                     implementation="Use standard template with comprehensive error handling",
-                )
+                ),
             )
 
         if not template_options.include_tests:
@@ -1230,12 +1226,12 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     priority="high",
                     message="Add comprehensive test coverage",
                     implementation="Generate test files and implement test cases",
-                )
+                ),
             )
 
         return recommendations
 
-    def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Process incoming agent generation request."""
         try:
             # Parse request
@@ -1257,15 +1253,15 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                 template_opts_data = request_data.get("template_options", {})
                 template_options = TemplateOptions(
                     base_template=TemplateType(
-                        template_opts_data.get("base_template", "standard")
+                        template_opts_data.get("base_template", "standard"),
                     ),
                     include_tests=template_opts_data.get("include_tests", True),
                     include_documentation=template_opts_data.get(
-                        "include_documentation", True
+                        "include_documentation", True,
                     ),
                     include_examples=template_opts_data.get("include_examples", True),
                     integration_level=template_opts_data.get(
-                        "integration_level", "basic"
+                        "integration_level", "basic",
                     ),
                 )
 
@@ -1275,7 +1271,7 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                     output_directory=gen_opts_data.get("output_directory", "./agents"),
                     overwrite_existing=gen_opts_data.get("overwrite_existing", False),
                     validate_before_creation=gen_opts_data.get(
-                        "validate_before_creation", True
+                        "validate_before_creation", True,
                     ),
                     auto_register=gen_opts_data.get("auto_register", True),
                     auto_deploy=gen_opts_data.get("auto_deploy", False),
@@ -1285,21 +1281,20 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
                 response = self.create_agent(spec, template_options, generation_options)
                 return asdict(response)
 
-            else:
-                return {
-                    "success": False,
-                    "operation": operation,
-                    "agent_info": {},
-                    "generated_files": [],
-                    "integration_points": [],
-                    "validation_results": {},
-                    "recommendations": [],
-                    "warnings": [],
-                    "errors": [f"Unsupported operation: {operation}"],
-                }
+            return {
+                "success": False,
+                "operation": operation,
+                "agent_info": {},
+                "generated_files": [],
+                "integration_points": [],
+                "validation_results": {},
+                "recommendations": [],
+                "warnings": [],
+                "errors": [f"Unsupported operation: {operation}"],
+            }
 
         except Exception as e:
-            self.logger.error(f"Error processing request: {e}")
+            self.logger.exception(f"Error processing request: {e}")
             return {
                 "success": False,
                 "operation": request_data.get("operation", "unknown"),
@@ -1313,7 +1308,7 @@ class {spec.name.title().replace("-", "").replace("_", "")}Manager:
             }
 
 
-def main():
+def main() -> None:
     """Main function for testing the Agent Generator Engine."""
     engine = AgentGeneratorEngine()
 
@@ -1352,14 +1347,11 @@ def main():
     response = engine.process_request(test_request)
 
     if response["success"]:
-        print("Agent generation completed successfully!")
-        print(f"Generated files: {len(response['generated_files'])}")
-        for file_info in response["generated_files"]:
-            print(f"  - {file_info['path']} ({file_info['type']})")
+        for _file_info in response["generated_files"]:
+            pass
     else:
-        print("Agent generation failed:")
-        for error in response["errors"]:
-            print(f"  - {error}")
+        for _error in response["errors"]:
+            pass
 
 
 if __name__ == "__main__":

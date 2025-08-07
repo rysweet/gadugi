@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Simple agent runner for Gadugi v0.3 orchestrator.
+"""Simple agent runner for Gadugi v0.3 orchestrator.
 Runs agents in subprocess and captures output.
 """
 
@@ -10,8 +9,7 @@ from pathlib import Path
 
 
 def run_agent(agent_name: str, task_description: str = "") -> dict:
-    """
-    Run an agent in subprocess and capture output.
+    """Run an agent in subprocess and capture output.
 
     Args:
         agent_name: Name of the agent to run
@@ -19,8 +17,8 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     Returns:
         Dict with stdout, stderr, returncode, and success status
-    """
 
+    """
     # Special cases: agents with Python implementations for reliability
     if agent_name == "task-decomposer":
         try:
@@ -48,7 +46,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "agent": agent_name,
                 "task": task_description,
                 "stdout": "",
-                "stderr": f"Task decomposer error: {str(e)}",
+                "stderr": f"Task decomposer error: {e!s}",
                 "returncode": -1,
                 "success": False,
             }
@@ -67,7 +65,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             from prompt_writer_engine import generate_prompt_for_task
 
             result = generate_prompt_for_task(
-                task_description or "Generic development task"
+                task_description or "Generic development task",
             )
             return {
                 "agent": agent_name,
@@ -86,7 +84,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "agent": agent_name,
                 "task": task_description,
                 "stdout": "",
-                "stderr": f"Prompt writer error: {str(e)}",
+                "stderr": f"Prompt writer error: {e!s}",
                 "returncode": -1,
                 "success": False,
             }
@@ -105,7 +103,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             from code_writer_engine import generate_code_for_task
 
             result = generate_code_for_task(
-                task_description or "Generic code generation task"
+                task_description or "Generic code generation task",
             )
 
             # Format output for orchestrator consumption
@@ -114,7 +112,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 files_summary = []
                 for file_info in result["files"]:
                     files_summary.append(
-                        f"📁 {file_info['filename']}: {file_info['description']}"
+                        f"📁 {file_info['filename']}: {file_info['description']}",
                     )
 
                 output = "Code Generation Results:\n"
@@ -150,7 +148,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "agent": agent_name,
                 "task": task_description,
                 "stdout": "",
-                "stderr": f"Code writer error: {str(e)}",
+                "stderr": f"Code writer error: {e!s}",
                 "returncode": -1,
                 "success": False,
             }
@@ -172,8 +170,8 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     # Read the agent file content
     try:
-        with open(agent_file, "r") as f:
-            agent_content = f.read()
+        with open(agent_file) as f:
+            f.read()
     except Exception as e:
         return {
             "agent": agent_name,
@@ -195,7 +193,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         # Run claude with a simple non-interactive command
         result = subprocess.run(
             ["claude", "-p", simple_prompt],
-            capture_output=True,
+            check=False, capture_output=True,
             text=True,
             timeout=30,  # Reduced timeout
         )
@@ -234,38 +232,31 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             "agent": agent_name,
             "task": task_description,
             "stdout": "",
-            "stderr": f"Error running agent: {str(e)}",
+            "stderr": f"Error running agent: {e!s}",
             "returncode": -1,
             "success": False,
         }
 
 
-def main():
+def main() -> None:
     """Command line interface for testing the runner."""
     if len(sys.argv) < 2:
-        print("Usage: python run_agent.py <agent_name> [task_description]")
         sys.exit(1)
 
     agent_name = sys.argv[1]
     task_description = sys.argv[2] if len(sys.argv) > 2 else ""
 
-    print(f"Running agent: {agent_name}")
     if task_description:
-        print(f"Task: {task_description}")
-    print("-" * 50)
+        pass
 
     result = run_agent(agent_name, task_description)
 
-    print(f"Success: {result['success']}")
-    print(f"Return code: {result['returncode']}")
 
     if result["stdout"]:
-        print("\n--- STDOUT ---")
-        print(result["stdout"])
+        pass
 
     if result["stderr"]:
-        print("\n--- STDERR ---")
-        print(result["stderr"])
+        pass
 
 
 if __name__ == "__main__":

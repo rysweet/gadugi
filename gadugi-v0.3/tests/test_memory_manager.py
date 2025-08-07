@@ -1,37 +1,33 @@
 #!/usr/bin/env python3
-"""
-Tests for Memory Manager Engine
-"""
+"""Tests for Memory Manager Engine."""
 
-import pytest
 import json
-import tempfile
 import os
-from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
 
 # Add src to path for imports
 import sys
-import os
+from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from memory_manager_engine import (
-    MemoryManager,
-    GitHubSync,
-    MemoryManagerEngine,
-    MemoryItem,
-    MemorySection,
     GitHubIssue,
+    GitHubSync,
+    MemoryItem,
+    MemoryManager,
+    MemoryManagerEngine,
     MemoryManagerRequest,
     run_memory_manager,
 )
 
 
 class TestMemoryManager:
-    """Test the core MemoryManager class"""
+    """Test the core MemoryManager class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.memory_manager = MemoryManager()
         self.sample_memory = """# AI Assistant Memory
 
@@ -57,8 +53,8 @@ class TestMemoryManager:
 - Need to improve CI/CD pipeline speed
 """
 
-    def test_parse_memory_content(self):
-        """Test parsing Memory.md content into sections"""
+    def test_parse_memory_content(self) -> None:
+        """Test parsing Memory.md content into sections."""
         sections = self.memory_manager.parse_memory_content(self.sample_memory)
 
         assert len(sections) == 5
@@ -78,8 +74,8 @@ class TestMemoryManager:
         assert items[1].type == "todo"  # 🔄 marker
         assert items[2].type == "context"  # default
 
-    def test_determine_item_type(self):
-        """Test item type determination"""
+    def test_determine_item_type(self) -> None:
+        """Test item type determination."""
         # Accomplishment markers
         assert (
             self.memory_manager._determine_item_type("- ✅ Completed task")
@@ -110,8 +106,8 @@ class TestMemoryManager:
             == "goal"
         )
 
-    def test_determine_priority(self):
-        """Test priority determination"""
+    def test_determine_priority(self) -> None:
+        """Test priority determination."""
         assert (
             self.memory_manager._determine_priority("- Critical bug fix needed")
             == "high"
@@ -123,8 +119,8 @@ class TestMemoryManager:
         )
         assert self.memory_manager._determine_priority("- Regular task") == "medium"
 
-    def test_update_memory(self):
-        """Test updating memory with new items"""
+    def test_update_memory(self) -> None:
+        """Test updating memory with new items."""
         sections = self.memory_manager.parse_memory_content(self.sample_memory)
 
         updates = [
@@ -158,8 +154,8 @@ class TestMemoryManager:
         assert new_accomplishment.priority == "high"
         assert new_accomplishment.metadata["pr_number"] == 456
 
-    def test_prune_memory(self):
-        """Test memory pruning functionality"""
+    def test_prune_memory(self) -> None:
+        """Test memory pruning functionality."""
         sections = self.memory_manager.parse_memory_content(self.sample_memory)
 
         # Add some old items
@@ -173,7 +169,7 @@ class TestMemoryManager:
 
         # Prune with 7-day threshold
         pruned_sections = self.memory_manager.prune_memory(
-            sections, days_threshold=7, preserve_critical=True
+            sections, days_threshold=7, preserve_critical=True,
         )
 
         # Should have fewer items after pruning
@@ -182,8 +178,8 @@ class TestMemoryManager:
 
         assert pruned_count <= original_count
 
-    def test_render_memory(self):
-        """Test rendering sections back to Memory.md format"""
+    def test_render_memory(self) -> None:
+        """Test rendering sections back to Memory.md format."""
         sections = self.memory_manager.parse_memory_content(self.sample_memory)
         rendered = self.memory_manager.render_memory(sections)
 
@@ -199,8 +195,8 @@ class TestMemoryManager:
         assert "*Last updated:" in rendered
         assert rendered.endswith("*")
 
-    def test_get_target_section(self):
-        """Test section targeting for different item types"""
+    def test_get_target_section(self) -> None:
+        """Test section targeting for different item types."""
         assert self.memory_manager._get_target_section("goal") == "Active Goals"
         assert (
             self.memory_manager._get_target_section("accomplishment")
@@ -212,14 +208,14 @@ class TestMemoryManager:
 
 
 class TestGitHubSync:
-    """Test the GitHubSync class"""
+    """Test the GitHubSync class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.github_sync = GitHubSync()
 
     @patch("subprocess.run")
-    def test_check_gh_cli(self, mock_run):
-        """Test GitHub CLI availability check"""
+    def test_check_gh_cli(self, mock_run) -> None:
+        """Test GitHub CLI availability check."""
         # Test CLI available
         mock_run.return_value = MagicMock(returncode=0)
         sync = GitHubSync()
@@ -230,8 +226,8 @@ class TestGitHubSync:
         sync = GitHubSync()
         assert sync.gh_available is False
 
-    def test_extract_title(self):
-        """Test title extraction from memory item content"""
+    def test_extract_title(self) -> None:
+        """Test title extraction from memory item content."""
         content1 = "- ✅ Complete feature X implementation with tests"
         title1 = self.github_sync._extract_title(content1)
         assert "Complete feature X implementation with tests" in title1
@@ -248,8 +244,8 @@ class TestGitHubSync:
         assert len(long_title) <= 80
         assert long_title.endswith("...")
 
-    def test_get_labels_for_item(self):
-        """Test label generation for memory items"""
+    def test_get_labels_for_item(self) -> None:
+        """Test label generation for memory items."""
         item = MemoryItem(
             type="todo",
             content="Fix critical bug in authentication",
@@ -267,8 +263,8 @@ class TestGitHubSync:
         assert "task" in labels
         assert "bug" in labels
 
-    def test_format_issue_body(self):
-        """Test issue body formatting"""
+    def test_format_issue_body(self) -> None:
+        """Test issue body formatting."""
         item = MemoryItem(
             type="goal",
             content="Complete all v0.3 agents implementation",
@@ -288,8 +284,8 @@ class TestGitHubSync:
         assert "Memory Manager Agent" in body
 
     @patch("subprocess.run")
-    def test_get_memory_issues(self, mock_run):
-        """Test getting existing memory issues"""
+    def test_get_memory_issues(self, mock_run) -> None:
+        """Test getting existing memory issues."""
         # Mock successful response
         mock_response = json.dumps(
             [
@@ -300,8 +296,8 @@ class TestGitHubSync:
                     "state": "open",
                     "labels": [{"name": "memory-sync"}, {"name": "high-priority"}],
                     "url": "https://github.com/test/repo/issues/123",
-                }
-            ]
+                },
+            ],
         )
 
         mock_run.return_value = MagicMock(returncode=0, stdout=mock_response)
@@ -315,11 +311,11 @@ class TestGitHubSync:
         assert "memory-sync" in issues[0].labels
 
     @patch("subprocess.run")
-    def test_create_issue_for_item(self, mock_run):
-        """Test creating GitHub issue for memory item"""
+    def test_create_issue_for_item(self, mock_run) -> None:
+        """Test creating GitHub issue for memory item."""
         # Mock successful issue creation
         mock_run.return_value = MagicMock(
-            returncode=0, stdout="https://github.com/test/repo/issues/456"
+            returncode=0, stdout="https://github.com/test/repo/issues/456",
         )
         self.github_sync.gh_available = True
 
@@ -340,8 +336,8 @@ class TestGitHubSync:
         assert "memory-sync" in issue.labels
 
     @patch("subprocess.run")
-    def test_update_issue_status(self, mock_run):
-        """Test updating issue status"""
+    def test_update_issue_status(self, mock_run) -> None:
+        """Test updating issue status."""
         mock_run.return_value = MagicMock(returncode=0)
         self.github_sync.gh_available = True
 
@@ -365,9 +361,9 @@ class TestGitHubSync:
 
 
 class TestMemoryManagerEngine:
-    """Test the main MemoryManagerEngine"""
+    """Test the main MemoryManagerEngine."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.engine = MemoryManagerEngine()
         self.sample_memory = """# AI Assistant Memory
 
@@ -382,8 +378,8 @@ class TestMemoryManagerEngine:
 - Working on v0.3 regeneration
 """
 
-    def test_handle_update(self):
-        """Test handling update requests"""
+    def test_handle_update(self) -> None:
+        """Test handling update requests."""
         request = MemoryManagerRequest(
             action="update",
             memory_content=self.sample_memory,
@@ -393,7 +389,7 @@ class TestMemoryManagerEngine:
                     "content": "✅ Implemented memory manager engine",
                     "priority": "high",
                     "metadata": {"component": "memory-manager"},
-                }
+                },
             ],
         )
 
@@ -405,8 +401,8 @@ class TestMemoryManagerEngine:
         assert response.statistics["items_added"] == 1
         assert "✅ Implemented memory manager engine" in response.updated_memory
 
-    def test_handle_prune(self):
-        """Test handling prune requests"""
+    def test_handle_prune(self) -> None:
+        """Test handling prune requests."""
         request = MemoryManagerRequest(
             action="prune",
             memory_content=self.sample_memory,
@@ -419,10 +415,10 @@ class TestMemoryManagerEngine:
         assert response.updated_memory is not None
         assert "items_removed" in response.statistics
 
-    def test_handle_status(self):
-        """Test handling status requests"""
+    def test_handle_status(self) -> None:
+        """Test handling status requests."""
         request = MemoryManagerRequest(
-            action="status", memory_content=self.sample_memory
+            action="status", memory_content=self.sample_memory,
         )
 
         response = self.engine.process_request(request)
@@ -435,8 +431,8 @@ class TestMemoryManagerEngine:
         assert "items_by_priority" in response.statistics
 
     @patch("memory_manager_engine.GitHubSync")
-    def test_handle_sync(self, mock_github_sync):
-        """Test handling sync requests"""
+    def test_handle_sync(self, mock_github_sync) -> None:
+        """Test handling sync requests."""
         # Mock GitHub sync
         mock_sync_instance = MagicMock()
         mock_sync_instance.get_memory_issues.return_value = []
@@ -467,8 +463,8 @@ class TestMemoryManagerEngine:
         assert response.success is True
         assert "issues_created" in response.statistics
 
-    def test_invalid_action(self):
-        """Test handling invalid action"""
+    def test_invalid_action(self) -> None:
+        """Test handling invalid action."""
         request = MemoryManagerRequest(action="invalid_action")
         response = self.engine.process_request(request)
 
@@ -476,8 +472,8 @@ class TestMemoryManagerEngine:
         assert len(response.errors) > 0
         assert "Unknown action" in response.errors[0]
 
-    def test_exception_handling(self):
-        """Test exception handling in engine"""
+    def test_exception_handling(self) -> None:
+        """Test exception handling in engine."""
         # Create request with invalid data to trigger exception
         request = MemoryManagerRequest(
             action="update",
@@ -493,10 +489,10 @@ class TestMemoryManagerEngine:
 
 
 class TestRunMemoryManager:
-    """Test the run_memory_manager entry point"""
+    """Test the run_memory_manager entry point."""
 
-    def test_successful_request(self):
-        """Test successful memory manager request"""
+    def test_successful_request(self) -> None:
+        """Test successful memory manager request."""
         request_data = {
             "action": "status",
             "memory_content": "# AI Assistant Memory\n\n## Active Goals\n- Test goal",
@@ -509,8 +505,8 @@ class TestRunMemoryManager:
         assert "actions_taken" in result
         assert "errors" in result
 
-    def test_invalid_request(self):
-        """Test invalid request handling"""
+    def test_invalid_request(self) -> None:
+        """Test invalid request handling."""
         request_data = {"action": "invalid"}
 
         result = run_memory_manager(request_data)
@@ -518,8 +514,8 @@ class TestRunMemoryManager:
         assert result["success"] is False
         assert len(result["errors"]) > 0
 
-    def test_exception_handling(self):
-        """Test exception handling in entry point"""
+    def test_exception_handling(self) -> None:
+        """Test exception handling in entry point."""
         # Pass completely invalid data
         request_data = None
 

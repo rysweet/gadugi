@@ -1,42 +1,40 @@
 #!/usr/bin/env python3
-"""
-Tests for Team Coach Engine
-"""
+"""Tests for Team Coach Engine."""
 
-import pytest
-from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+import os
 
 # Add src to path for imports
 import sys
-import os
+from datetime import datetime, timedelta
+
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from team_coach_engine import (
-    PerformanceAnalyzer,
-    PatternRecognizer,
     LearningEngine,
+    LearningInsight,
+    Pattern,
+    PatternRecognizer,
+    PerformanceAnalyzer,
+    PerformanceMetrics,
+    Recommendation,
     RecommendationEngine,
+    ResourceUsage,
     TeamCoachEngine,
     WorkflowData,
-    WorkflowStep,
-    ResourceUsage,
     WorkflowOutcomes,
-    Pattern,
-    Recommendation,
-    LearningInsight,
-    PerformanceMetrics,
-    run_team_coach,
+    WorkflowStep,
     _parse_workflow_data,
+    run_team_coach,
 )
 
 
 class TestWorkflowData:
-    """Test workflow data structures"""
+    """Test workflow data structures."""
 
-    def test_workflow_step_creation(self):
-        """Test WorkflowStep creation"""
+    def test_workflow_step_creation(self) -> None:
+        """Test WorkflowStep creation."""
         step = WorkflowStep(
             agent="test-agent",
             action="test-action",
@@ -52,10 +50,10 @@ class TestWorkflowData:
         assert step.success is True
         assert step.metadata == {"key": "value"}
 
-    def test_resource_usage_creation(self):
-        """Test ResourceUsage creation"""
+    def test_resource_usage_creation(self) -> None:
+        """Test ResourceUsage creation."""
         resource_usage = ResourceUsage(
-            peak_memory_mb=512.0, cpu_time_seconds=120.0, disk_io_mb=25.5
+            peak_memory_mb=512.0, cpu_time_seconds=120.0, disk_io_mb=25.5,
         )
 
         assert resource_usage.peak_memory_mb == 512.0
@@ -63,8 +61,8 @@ class TestWorkflowData:
         assert resource_usage.disk_io_mb == 25.5
         assert resource_usage.network_io_mb == 0.0  # Default value
 
-    def test_workflow_outcomes_creation(self):
-        """Test WorkflowOutcomes creation"""
+    def test_workflow_outcomes_creation(self) -> None:
+        """Test WorkflowOutcomes creation."""
         outcomes = WorkflowOutcomes(
             files_created=3,
             tests_written=15,
@@ -82,14 +80,14 @@ class TestWorkflowData:
 
 
 class TestPerformanceAnalyzer:
-    """Test the PerformanceAnalyzer class"""
+    """Test the PerformanceAnalyzer class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.analyzer = PerformanceAnalyzer()
         self.sample_workflow = self._create_sample_workflow()
 
     def _create_sample_workflow(self):
-        """Create a sample workflow for testing"""
+        """Create a sample workflow for testing."""
         start_time = datetime.now() - timedelta(minutes=2)
         end_time = datetime.now()
 
@@ -114,8 +112,8 @@ class TestPerformanceAnalyzer:
             project_context="test_project",
         )
 
-    def test_analyze_workflow_performance(self):
-        """Test workflow performance analysis"""
+    def test_analyze_workflow_performance(self) -> None:
+        """Test workflow performance analysis."""
         metrics = self.analyzer.analyze_workflow_performance(self.sample_workflow)
 
         assert isinstance(metrics, PerformanceMetrics)
@@ -125,15 +123,15 @@ class TestPerformanceAnalyzer:
         assert 0.0 <= metrics.resource_efficiency_score <= 10.0
         assert 0.0 <= metrics.coordination_score <= 10.0
 
-    def test_calculate_speed_score(self):
-        """Test speed score calculation"""
+    def test_calculate_speed_score(self) -> None:
+        """Test speed score calculation."""
         score = self.analyzer._calculate_speed_score(self.sample_workflow)
 
         assert isinstance(score, float)
         assert 2.0 <= score <= 10.0  # Should be in valid range
 
-    def test_calculate_quality_score(self):
-        """Test quality score calculation"""
+    def test_calculate_quality_score(self) -> None:
+        """Test quality score calculation."""
         score = self.analyzer._calculate_quality_score(self.sample_workflow)
 
         assert isinstance(score, float)
@@ -142,27 +140,27 @@ class TestPerformanceAnalyzer:
         # High success rate and satisfaction should yield good score
         assert score >= 8.0  # Sample workflow has high quality
 
-    def test_calculate_resource_efficiency_score(self):
-        """Test resource efficiency score calculation"""
+    def test_calculate_resource_efficiency_score(self) -> None:
+        """Test resource efficiency score calculation."""
         score = self.analyzer._calculate_resource_efficiency_score(self.sample_workflow)
 
         assert isinstance(score, float)
         assert 2.0 <= score <= 10.0
 
-    def test_calculate_coordination_score(self):
-        """Test coordination score calculation"""
+    def test_calculate_coordination_score(self) -> None:
+        """Test coordination score calculation."""
         score = self.analyzer._calculate_coordination_score(self.sample_workflow)
 
         assert isinstance(score, float)
         assert 5.0 <= score <= 10.0  # Sample workflow has good coordination
 
-    def test_single_step_coordination_score(self):
-        """Test coordination score for single-step workflow"""
+    def test_single_step_coordination_score(self) -> None:
+        """Test coordination score for single-step workflow."""
         single_step_workflow = WorkflowData(
             workflow_id="single_step",
             agents_used=["code-writer"],
             task_sequence=[
-                WorkflowStep("code-writer", "generate", 30, True, {}, datetime.now())
+                WorkflowStep("code-writer", "generate", 30, True, {}, datetime.now()),
             ],
             resource_usage=ResourceUsage(256, 30, 5),
             outcomes=WorkflowOutcomes(1, 0, 50, 1.0, "high"),
@@ -176,14 +174,14 @@ class TestPerformanceAnalyzer:
 
 
 class TestPatternRecognizer:
-    """Test the PatternRecognizer class"""
+    """Test the PatternRecognizer class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.recognizer = PatternRecognizer()
         self.sample_workflows = self._create_sample_workflows()
 
     def _create_sample_workflows(self):
-        """Create sample workflows for pattern testing"""
+        """Create sample workflows for pattern testing."""
         workflows = []
         base_time = datetime.now() - timedelta(hours=1)
 
@@ -195,7 +193,7 @@ class TestPatternRecognizer:
                     agents_used=["orchestrator", "code-writer", "test-writer"],
                     task_sequence=[
                         WorkflowStep(
-                            "orchestrator", "coordinate", 15, True, {}, base_time
+                            "orchestrator", "coordinate", 15, True, {}, base_time,
                         ),
                         WorkflowStep(
                             "code-writer",
@@ -219,7 +217,7 @@ class TestPatternRecognizer:
                     start_time=base_time,
                     end_time=base_time + timedelta(seconds=65),
                     project_context="test_project",
-                )
+                ),
             )
 
         # Create some failed workflows
@@ -230,7 +228,7 @@ class TestPatternRecognizer:
                     agents_used=["orchestrator", "code-writer"],
                     task_sequence=[
                         WorkflowStep(
-                            "orchestrator", "coordinate", 15, True, {}, base_time
+                            "orchestrator", "coordinate", 15, True, {}, base_time,
                         ),
                         WorkflowStep(
                             "code-writer",
@@ -246,13 +244,13 @@ class TestPatternRecognizer:
                     start_time=base_time,
                     end_time=base_time + timedelta(seconds=45),
                     project_context="test_project",
-                )
+                ),
             )
 
         return workflows
 
-    def test_identify_patterns(self):
-        """Test pattern identification"""
+    def test_identify_patterns(self) -> None:
+        """Test pattern identification."""
         patterns = self.recognizer.identify_patterns(self.sample_workflows)
 
         assert isinstance(patterns, list)
@@ -262,8 +260,8 @@ class TestPatternRecognizer:
         success_patterns = [p for p in patterns if p.pattern_type == "success"]
         assert len(success_patterns) > 0
 
-    def test_identify_success_patterns(self):
-        """Test identification of success patterns"""
+    def test_identify_success_patterns(self) -> None:
+        """Test identification of success patterns."""
         patterns = self.recognizer._identify_success_patterns(self.sample_workflows)
 
         assert isinstance(patterns, list)
@@ -274,8 +272,8 @@ class TestPatternRecognizer:
             assert pattern.impact in ["low", "medium", "high"]
             assert 0.0 <= pattern.confidence <= 1.0
 
-    def test_identify_failure_patterns(self):
-        """Test identification of failure patterns"""
+    def test_identify_failure_patterns(self) -> None:
+        """Test identification of failure patterns."""
         patterns = self.recognizer._identify_failure_patterns(self.sample_workflows)
 
         assert isinstance(patterns, list)
@@ -285,10 +283,10 @@ class TestPatternRecognizer:
             assert 0.0 <= pattern.frequency <= 1.0
             assert pattern.impact in ["low", "medium", "high"]
 
-    def test_identify_optimization_patterns(self):
-        """Test identification of optimization patterns"""
+    def test_identify_optimization_patterns(self) -> None:
+        """Test identification of optimization patterns."""
         patterns = self.recognizer._identify_optimization_patterns(
-            self.sample_workflows
+            self.sample_workflows,
         )
 
         assert isinstance(patterns, list)
@@ -297,8 +295,8 @@ class TestPatternRecognizer:
             assert pattern.pattern_type == "optimization"
             assert 0.0 <= pattern.frequency <= 1.0
 
-    def test_identify_bottleneck_patterns(self):
-        """Test identification of bottleneck patterns"""
+    def test_identify_bottleneck_patterns(self) -> None:
+        """Test identification of bottleneck patterns."""
         patterns = self.recognizer._identify_bottleneck_patterns(self.sample_workflows)
 
         assert isinstance(patterns, list)
@@ -307,14 +305,14 @@ class TestPatternRecognizer:
             assert pattern.pattern_type == "bottleneck"
             assert pattern.impact in ["low", "medium", "high"]
 
-    def test_empty_workflows_list(self):
-        """Test pattern recognition with empty workflows list"""
+    def test_empty_workflows_list(self) -> None:
+        """Test pattern recognition with empty workflows list."""
         patterns = self.recognizer.identify_patterns([])
 
         assert patterns == []
 
-    def test_single_workflow(self):
-        """Test pattern recognition with single workflow"""
+    def test_single_workflow(self) -> None:
+        """Test pattern recognition with single workflow."""
         patterns = self.recognizer.identify_patterns([self.sample_workflows[0]])
 
         # Should handle single workflow gracefully
@@ -322,9 +320,9 @@ class TestPatternRecognizer:
 
 
 class TestLearningEngine:
-    """Test the LearningEngine class"""
+    """Test the LearningEngine class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.learning_engine = LearningEngine()
         self.sample_patterns = [
             Pattern(
@@ -336,7 +334,7 @@ class TestLearningEngine:
                 ["workflow1", "workflow2"],
             ),
             Pattern(
-                "failure", "Test failure pattern", 0.3, "medium", 0.7, ["workflow3"]
+                "failure", "Test failure pattern", 0.3, "medium", 0.7, ["workflow3"],
             ),
             Pattern(
                 "optimization",
@@ -350,7 +348,7 @@ class TestLearningEngine:
         self.sample_workflows = self._create_sample_workflows()
 
     def _create_sample_workflows(self):
-        """Create sample workflows for testing"""
+        """Create sample workflows for testing."""
         return [
             WorkflowData(
                 workflow_id="test1",
@@ -361,13 +359,13 @@ class TestLearningEngine:
                 start_time=datetime.now(),
                 end_time=datetime.now() + timedelta(seconds=30),
                 project_context="test",
-            )
+            ),
         ]
 
-    def test_extract_learning_insights(self):
-        """Test extraction of learning insights"""
+    def test_extract_learning_insights(self) -> None:
+        """Test extraction of learning insights."""
         insights = self.learning_engine.extract_learning_insights(
-            self.sample_workflows, self.sample_patterns
+            self.sample_workflows, self.sample_patterns,
         )
 
         assert isinstance(insights, list)
@@ -383,26 +381,26 @@ class TestLearningEngine:
             assert isinstance(insight.supporting_evidence, list)
             assert isinstance(insight.applicable_contexts, list)
 
-    def test_extract_resource_insights(self):
-        """Test extraction of resource-related insights"""
+    def test_extract_resource_insights(self) -> None:
+        """Test extraction of resource-related insights."""
         insights = self.learning_engine._extract_resource_insights(
-            self.sample_workflows
+            self.sample_workflows,
         )
 
         assert isinstance(insights, list)
         # Low resource usage shouldn't generate insights
         assert len(insights) == 0
 
-    def test_extract_coordination_insights(self):
-        """Test extraction of coordination-related insights"""
+    def test_extract_coordination_insights(self) -> None:
+        """Test extraction of coordination-related insights."""
         insights = self.learning_engine._extract_coordination_insights(
-            self.sample_workflows
+            self.sample_workflows,
         )
 
         assert isinstance(insights, list)
 
-    def test_high_resource_insight_generation(self):
-        """Test insight generation for high resource usage"""
+    def test_high_resource_insight_generation(self) -> None:
+        """Test insight generation for high resource usage."""
         high_resource_workflows = [
             WorkflowData(
                 workflow_id="high_resource",
@@ -413,11 +411,11 @@ class TestLearningEngine:
                 start_time=datetime.now(),
                 end_time=datetime.now() + timedelta(seconds=180),
                 project_context="test",
-            )
+            ),
         ]
 
         insights = self.learning_engine._extract_resource_insights(
-            high_resource_workflows
+            high_resource_workflows,
         )
 
         # Should generate insights for high resource usage
@@ -428,9 +426,9 @@ class TestLearningEngine:
 
 
 class TestRecommendationEngine:
-    """Test the RecommendationEngine class"""
+    """Test the RecommendationEngine class."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.recommendation_engine = RecommendationEngine()
         self.sample_metrics = PerformanceMetrics(
             efficiency_score=7.5,
@@ -451,13 +449,13 @@ class TestRecommendationEngine:
                 0.8,
                 [],
                 [],
-            )
+            ),
         ]
 
-    def test_generate_recommendations(self):
-        """Test recommendation generation"""
+    def test_generate_recommendations(self) -> None:
+        """Test recommendation generation."""
         recommendations = self.recommendation_engine.generate_recommendations(
-            self.sample_metrics, self.sample_patterns, self.sample_insights
+            self.sample_metrics, self.sample_patterns, self.sample_insights,
         )
 
         assert isinstance(recommendations, list)
@@ -473,11 +471,11 @@ class TestRecommendationEngine:
             assert rec.implementation_effort in ["low", "medium", "high"]
             assert rec.risk_level in ["low", "medium", "high"]
 
-    def test_generate_performance_recommendations(self):
-        """Test performance-based recommendations"""
+    def test_generate_performance_recommendations(self) -> None:
+        """Test performance-based recommendations."""
         recommendations = (
             self.recommendation_engine._generate_performance_recommendations(
-                self.sample_metrics
+                self.sample_metrics,
             )
         )
 
@@ -492,10 +490,10 @@ class TestRecommendationEngine:
         ]
         assert len(resource_recs) > 0
 
-    def test_generate_pattern_recommendations(self):
-        """Test pattern-based recommendations"""
+    def test_generate_pattern_recommendations(self) -> None:
+        """Test pattern-based recommendations."""
         recommendations = self.recommendation_engine._generate_pattern_recommendations(
-            self.sample_patterns
+            self.sample_patterns,
         )
 
         assert isinstance(recommendations, list)
@@ -506,41 +504,41 @@ class TestRecommendationEngine:
         ]
         assert len(bottleneck_recs) > 0
 
-    def test_generate_insight_recommendations(self):
-        """Test insight-based recommendations"""
+    def test_generate_insight_recommendations(self) -> None:
+        """Test insight-based recommendations."""
         recommendations = self.recommendation_engine._generate_insight_recommendations(
-            self.sample_insights
+            self.sample_insights,
         )
 
         assert isinstance(recommendations, list)
         assert len(recommendations) > 0  # Should generate recommendation from insight
 
-    def test_recommendation_sorting(self):
-        """Test that recommendations are properly sorted"""
+    def test_recommendation_sorting(self) -> None:
+        """Test that recommendations are properly sorted."""
         recommendations = self.recommendation_engine.generate_recommendations(
-            self.sample_metrics, self.sample_patterns, self.sample_insights
+            self.sample_metrics, self.sample_patterns, self.sample_insights,
         )
 
         if len(recommendations) > 1:
             # Should be sorted by priority (high first)
             priorities = [r.priority for r in recommendations]
-            high_count = priorities.count("high")
-            medium_count = priorities.count("medium")
-            low_count = priorities.count("low")
+            priorities.count("high")
+            priorities.count("medium")
+            priorities.count("low")
 
             # High priority should come first
             assert recommendations[0].priority in ["high", "medium"]
 
 
 class TestTeamCoachEngine:
-    """Test the main TeamCoachEngine"""
+    """Test the main TeamCoachEngine."""
 
-    def setup_method(self):
+    def setup_method(self) -> None:
         self.engine = TeamCoachEngine()
         self.sample_request = self._create_sample_request()
 
     def _create_sample_request(self):
-        """Create a sample team coach request"""
+        """Create a sample team coach request."""
         from team_coach_engine import TeamCoachRequest
 
         workflow_data = WorkflowData(
@@ -548,7 +546,7 @@ class TestTeamCoachEngine:
             agents_used=["orchestrator", "code-writer"],
             task_sequence=[
                 WorkflowStep(
-                    "orchestrator", "coordinate", 15, True, {}, datetime.now()
+                    "orchestrator", "coordinate", 15, True, {}, datetime.now(),
                 ),
                 WorkflowStep(
                     "code-writer",
@@ -573,8 +571,8 @@ class TestTeamCoachEngine:
             reflection_scope="session",
         )
 
-    def test_process_request(self):
-        """Test processing a team coach request"""
+    def test_process_request(self) -> None:
+        """Test processing a team coach request."""
         response = self.engine.process_request(self.sample_request)
 
         assert response.success is True
@@ -585,8 +583,8 @@ class TestTeamCoachEngine:
         assert isinstance(response.patterns_identified, list)
         assert len(response.errors) == 0
 
-    def test_get_relevant_historical_workflows(self):
-        """Test getting relevant historical workflows"""
+    def test_get_relevant_historical_workflows(self) -> None:
+        """Test getting relevant historical workflows."""
         # Add some historical workflows
         self.engine.historical_workflows = [
             self.sample_request.workflow_data,  # Same project context
@@ -597,8 +595,8 @@ class TestTeamCoachEngine:
         assert len(relevant) >= 1  # Should include current workflow
         assert self.sample_request.workflow_data in relevant
 
-    def test_calculate_performance_trends(self):
-        """Test performance trend calculation"""
+    def test_calculate_performance_trends(self) -> None:
+        """Test performance trend calculation."""
         workflows = [self.sample_request.workflow_data]
         trends = self.engine._calculate_performance_trends(workflows)
 
@@ -607,15 +605,15 @@ class TestTeamCoachEngine:
             "insufficient_data" in trends
         )  # Single workflow should indicate insufficient data
 
-    def test_score_to_label(self):
-        """Test score to label conversion"""
+    def test_score_to_label(self) -> None:
+        """Test score to label conversion."""
         assert self.engine._score_to_label(9.0) == "excellent"
         assert self.engine._score_to_label(7.0) == "good"
         assert self.engine._score_to_label(5.0) == "fair"
         assert self.engine._score_to_label(3.0) == "poor"
 
-    def test_exception_handling(self):
-        """Test exception handling in engine"""
+    def test_exception_handling(self) -> None:
+        """Test exception handling in engine."""
         # Create invalid request to trigger exception
         invalid_request = self.sample_request
         invalid_request.workflow_data = None  # This should cause issues
@@ -628,10 +626,10 @@ class TestTeamCoachEngine:
 
 
 class TestRunTeamCoach:
-    """Test the run_team_coach entry point"""
+    """Test the run_team_coach entry point."""
 
-    def test_successful_request(self):
-        """Test successful team coach request"""
+    def test_successful_request(self) -> None:
+        """Test successful team coach request."""
         request_data = {
             "analysis_type": "performance",
             "workflow_data": {
@@ -681,8 +679,8 @@ class TestRunTeamCoach:
         assert "patterns_identified" in result
         assert len(result["errors"]) == 0
 
-    def test_parse_workflow_data(self):
-        """Test parsing workflow data from dictionary"""
+    def test_parse_workflow_data(self) -> None:
+        """Test parsing workflow data from dictionary."""
         data = {
             "workflow_id": "test_workflow",
             "agents_used": ["orchestrator"],
@@ -693,7 +691,7 @@ class TestRunTeamCoach:
                     "duration_seconds": 30,
                     "success": True,
                     "metadata": {"key": "value"},
-                }
+                },
             ],
             "resource_usage": {
                 "peak_memory_mb": 256,
@@ -719,8 +717,8 @@ class TestRunTeamCoach:
         assert workflow_data.resource_usage.peak_memory_mb == 256
         assert workflow_data.outcomes.files_created == 1
 
-    def test_invalid_request_handling(self):
-        """Test handling of invalid requests"""
+    def test_invalid_request_handling(self) -> None:
+        """Test handling of invalid requests."""
         invalid_request = {"invalid": "data"}
 
         result = run_team_coach(invalid_request)
@@ -729,8 +727,8 @@ class TestRunTeamCoach:
         assert "success" in result
         assert "errors" in result
 
-    def test_exception_handling(self):
-        """Test exception handling in entry point"""
+    def test_exception_handling(self) -> None:
+        """Test exception handling in entry point."""
         # Pass None to trigger exception
         result = run_team_coach(None)
 

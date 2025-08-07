@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Demo script for Team Coach Engine
+"""Demo script for Team Coach Engine.
 
 Shows the team coach capabilities including:
 - Performance analysis of workflows
@@ -10,20 +9,14 @@ Shows the team coach capabilities including:
 - Trend analysis
 """
 
-import json
 from datetime import datetime, timedelta
+
 from team_coach_engine import run_team_coach
 
 
 def demo_team_coach():
-    """Demonstrate team coach capabilities"""
-
-    print("🏆 Team Coach Engine Demo")
-    print("=" * 50)
-
+    """Demonstrate team coach capabilities."""
     # Create sample workflow data for analysis
-    print("\n1. 📊 Analyzing Single Workflow Performance")
-    print("-" * 40)
 
     sample_workflow = {
         "workflow_id": "demo_workflow_001",
@@ -99,32 +92,17 @@ def demo_team_coach():
 
     performance_result = run_team_coach(performance_request)
 
-    print("✅ Performance Analysis Complete:")
     analysis = performance_result["analysis_results"]
-    print(f"   • Overall Performance Score: {analysis['performance_score']:.1f}/10.0")
-    print(f"   • Workflow Duration: {analysis['workflow_duration']:.1f} seconds")
-    print(f"   • Agents Utilized: {analysis['agents_utilized']}")
-    print(f"   • Success Rate: {analysis['success_rate'] * 100:.0f}%")
-    print("   • Efficiency Metrics:")
-    for metric, value in analysis["efficiency_metrics"].items():
-        print(f"     - {metric.replace('_', ' ').title()}: {value}")
+    for _metric, _value in analysis["efficiency_metrics"].items():
+        pass
 
-    print(
-        f"\n📋 Recommendations Generated: {len(performance_result['recommendations'])}"
-    )
-    for i, rec in enumerate(performance_result["recommendations"][:3], 1):
-        print(f"   {i}. [{rec['priority'].upper()}] {rec['description']}")
-        print(f"      Expected: {rec['expected_improvement']}")
-        print(
-            f"      Effort: {rec['implementation_effort']}, Risk: {rec['risk_level']}"
-        )
+    for i, _rec in enumerate(performance_result["recommendations"][:3], 1):
+        pass
 
-    print("\n2. 🔍 Pattern Recognition Analysis")
-    print("-" * 40)
 
     # Simulate historical workflows for pattern analysis
     historical_workflows = []
-    base_time = datetime.now() - timedelta(hours=2)
+    datetime.now() - timedelta(hours=2)
 
     # Create varied workflows to demonstrate patterns
     workflow_scenarios = [
@@ -194,27 +172,14 @@ def demo_team_coach():
 
     pattern_result = run_team_coach(pattern_request)
 
-    print("✅ Pattern Analysis Complete:")
     patterns = pattern_result["patterns_identified"]
-    print(f"   • Patterns Identified: {len(patterns)}")
 
-    for pattern in patterns[:4]:  # Show first 4 patterns
-        print(f"     - {pattern['pattern_type'].title()}: {pattern['description']}")
-        print(
-            f"       Frequency: {pattern['frequency']:.0%}, Impact: {pattern['impact']}, Confidence: {pattern['confidence']:.0%}"
-        )
+    for _pattern in patterns[:4]:  # Show first 4 patterns
+        pass
 
-    print(
-        f"\n🧠 Learning Insights Generated: {len(pattern_result['learning_insights'])}"
-    )
-    for insight in pattern_result["learning_insights"][:3]:
-        print(
-            f"   • [{insight['insight_type'].replace('_', ' ').title()}] {insight['description']}"
-        )
-        print(f"     Confidence: {insight['confidence']:.0%}")
+    for _insight in pattern_result["learning_insights"][:3]:
+        pass
 
-    print("\n3. 📈 Performance Trend Analysis")
-    print("-" * 40)
 
     # Analyze trends with system-wide scope
     trend_request = {
@@ -228,18 +193,10 @@ def demo_team_coach():
 
     trends = trend_result["performance_trends"]
     if "insufficient_data" not in trends:
-        print("✅ Trend Analysis Complete:")
-        print(
-            f"   • Overall Improvement Rate: {trends.get('improvement_rate', 0) * 100:.1f}%"
-        )
-        print(f"   • Success Trend: {trends.get('success_trend', 0) * 100:+.1f}%")
-        print(f"   • Speed Trend: {trends.get('speed_trend', 0) * 100:+.1f}%")
-        print(f"   • Workflows Analyzed: {trends.get('total_workflows_analyzed', 0)}")
+        pass
     else:
-        print("   • Insufficient historical data for trend analysis")
+        pass
 
-    print("\n4. 🎯 Comprehensive Optimization Report")
-    print("-" * 40)
 
     # Generate comprehensive optimization report
     all_recommendations = []
@@ -251,49 +208,22 @@ def demo_team_coach():
 
     # Prioritize recommendations
     high_priority = [r for r in all_recommendations if r["priority"] == "high"]
-    medium_priority = [r for r in all_recommendations if r["priority"] == "medium"]
+    [r for r in all_recommendations if r["priority"] == "medium"]
 
-    print("📊 Optimization Summary:")
-    print(f"   • Total Recommendations: {len(all_recommendations)}")
-    print(f"     - High Priority: {len(high_priority)}")
-    print(f"     - Medium Priority: {len(medium_priority)}")
-    print(f"   • Learning Insights: {len(all_insights)}")
 
-    print("\n🚀 Top Priority Actions:")
-    for i, rec in enumerate(high_priority[:3], 1):
-        print(f"   {i}. {rec['description']}")
-        print(f"      → {rec['expected_improvement']}")
-        print(
-            f"      Implementation: {rec['implementation_effort']} effort, {rec['risk_level']} risk"
-        )
+    for i, _rec in enumerate(high_priority[:3], 1):
+        pass
 
-    print("\n💡 Key Learning Insights:")
     best_practices = [i for i in all_insights if i["insight_type"] == "best_practice"]
-    for insight in best_practices[:2]:
-        print(f"   • {insight['description']}")
+    for _insight in best_practices[:2]:
+        pass
 
     optimization_opportunities = [
         i for i in all_insights if i["insight_type"] == "optimization_opportunity"
     ]
-    for insight in optimization_opportunities[:2]:
-        print(f"   • {insight['description']}")
+    for _insight in optimization_opportunities[:2]:
+        pass
 
-    print("\n📈 Team Coach Demo Summary")
-    print("=" * 50)
-    print("✅ Successfully demonstrated:")
-    print("   • Comprehensive workflow performance analysis")
-    print("   • Multi-dimensional scoring (speed, quality, resource, coordination)")
-    print("   • Pattern recognition across workflow histories")
-    print("   • Learning insights extraction from success and failure patterns")
-    print("   • Prioritized optimization recommendations")
-    print("   • Performance trend analysis and forecasting")
-    print()
-    print("🎯 Team Coach is ready for:")
-    print("   • Real-time workflow optimization")
-    print("   • Historical pattern analysis for continuous improvement")
-    print("   • Intelligent recommendation generation")
-    print("   • Multi-agent coordination enhancement")
-    print("   • Performance trend monitoring and forecasting")
 
     # Return comprehensive results for further analysis
     return {
@@ -306,15 +236,8 @@ def demo_team_coach():
     }
 
 
-def demonstrate_advanced_features():
-    """Demonstrate advanced team coach features"""
-
-    print("\n\n🔬 Advanced Team Coach Features Demo")
-    print("=" * 50)
-
-    print("\n1. 🎨 Custom Workflow Analysis")
-    print("-" * 30)
-
+def demonstrate_advanced_features() -> None:
+    """Demonstrate advanced team coach features."""
     # Example of analyzing a failed workflow
     failed_workflow = {
         "workflow_id": "failed_demo_workflow",
@@ -358,23 +281,14 @@ def demonstrate_advanced_features():
             "workflow_data": failed_workflow,
             "historical_context": {},
             "reflection_scope": "session",
-        }
+        },
     )
 
-    print("❌ Failed Workflow Analysis:")
-    analysis = failed_analysis["analysis_results"]
-    print(f"   • Performance Score: {analysis['performance_score']:.1f}/10.0 (Poor)")
-    print(f"   • Success Rate: {analysis['success_rate'] * 100:.0f}%")
-    print(
-        f"   • Resource Efficiency: {analysis['efficiency_metrics']['resource_efficiency']}"
-    )
+    failed_analysis["analysis_results"]
 
-    print("\n🔧 Recovery Recommendations:")
     for rec in failed_analysis["recommendations"][:3]:
-        print(f"   • {rec['description']} (Priority: {rec['priority']})")
+        pass
 
-    print("\n2. ⚡ Real-time Performance Monitoring")
-    print("-" * 30)
 
     # Simulate real-time monitoring scenario
     realtime_workflow = {
@@ -426,36 +340,22 @@ def demonstrate_advanced_features():
             "workflow_data": realtime_workflow,
             "historical_context": {},
             "reflection_scope": "session",
-        }
+        },
     )
 
-    print("🚀 Optimized Workflow Results:")
-    analysis = optimized_analysis["analysis_results"]
-    print(
-        f"   • Performance Score: {analysis['performance_score']:.1f}/10.0 (Excellent)"
-    )
-    print(f"   • Duration: {analysis['workflow_duration']:.0f}s (Fast)")
-    print("   • All Efficiency Metrics: Excellent")
+    optimized_analysis["analysis_results"]
 
-    print("\n✨ Performance Improvements Detected:")
     if optimized_analysis["recommendations"]:
         for rec in optimized_analysis["recommendations"]:
             if "maintain" in rec["description"].lower():
-                print(f"   • {rec['description']}")
+                pass
     else:
-        print("   • No recommendations needed - workflow is performing optimally!")
+        pass
 
-    print("\n🎓 Advanced Demo Complete")
-    print("Team Coach successfully analyzed diverse workflow scenarios:")
-    print("• High-performing workflows with detailed metrics")
-    print("• Failed workflows with targeted recovery recommendations")
-    print("• Optimized workflows with maintenance suggestions")
-    print("• Real-time performance monitoring capabilities")
 
 
 if __name__ == "__main__":
     try:
-        print("🚀 Starting Team Coach Engine Demonstration...")
 
         # Run main demo
         results = demo_team_coach()
@@ -463,17 +363,8 @@ if __name__ == "__main__":
         # Run advanced features demo
         demonstrate_advanced_features()
 
-        print("\n🎉 Team Coach Demo Completed Successfully!")
-        print(
-            f"   • Generated {results['total_recommendations']} optimization recommendations"
-        )
-        print(f"   • Extracted {results['total_insights']} learning insights")
-        print(
-            f"   • Identified {results['high_priority_actions']} high-priority actions"
-        )
 
-    except Exception as e:
-        print(f"\n❌ Demo failed with error: {e}")
+    except Exception:
         import traceback
 
         traceback.print_exc()

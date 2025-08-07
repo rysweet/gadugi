@@ -1,41 +1,39 @@
 #!/usr/bin/env python3
-"""
-Tests for README Agent Engine
-"""
+"""Tests for README Agent Engine."""
 
-import unittest
 import json
-import tempfile
 import os
 import sys
+import tempfile
+import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 # Add src directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "orchestrator"))
 
 from readme_agent_engine import (
-    ReadmeAgentEngine,
-    ProjectType,
-    DocumentationStyle,
     AudienceType,
-    ContentRequirements,
-    GenerationOptions,
-    ProjectMetadata,
-    SectionInfo,
-    QualityMetrics,
     Badge,
-    ImprovementSuggestion,
-    DocumentationResult,
     ContentDiscoverer,
+    ContentRequirements,
+    DocumentationResult,
+    DocumentationStyle,
+    GenerationOptions,
+    ImprovementSuggestion,
+    ProjectMetadata,
+    ProjectType,
     QualityAssessor,
+    QualityMetrics,
+    ReadmeAgentEngine,
+    SectionInfo,
 )
 
 
 class TestReadmeAgentEngine(unittest.TestCase):
     """Test cases for README Agent Engine."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.engine = ReadmeAgentEngine()
 
@@ -76,23 +74,23 @@ class TestReadmeAgentEngine(unittest.TestCase):
             template_name="standard",
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test fixtures."""
         import shutil
 
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
 
-    def test_engine_initialization(self):
+    def test_engine_initialization(self) -> None:
         """Test engine initializes properly."""
-        self.assertIsNotNone(self.engine)
-        self.assertIsNotNone(self.engine.logger)
-        self.assertIsNotNone(self.engine.templates)
-        self.assertIsNotNone(self.engine.badge_providers)
-        self.assertIsInstance(self.engine.quality_assessor, QualityAssessor)
-        self.assertIsInstance(self.engine.content_discoverer, ContentDiscoverer)
+        assert self.engine is not None
+        assert self.engine.logger is not None
+        assert self.engine.templates is not None
+        assert self.engine.badge_providers is not None
+        assert isinstance(self.engine.quality_assessor, QualityAssessor)
+        assert isinstance(self.engine.content_discoverer, ContentDiscoverer)
 
-    def test_templates_loading(self):
+    def test_templates_loading(self) -> None:
         """Test that templates are loaded correctly."""
         templates = self.engine.templates
 
@@ -104,11 +102,11 @@ class TestReadmeAgentEngine(unittest.TestCase):
             "minimal",
         ]
         for template_name in required_templates:
-            self.assertIn(template_name, templates)
-            self.assertIsInstance(templates[template_name], str)
-            self.assertGreater(len(templates[template_name]), 100)
+            assert template_name in templates
+            assert isinstance(templates[template_name], str)
+            assert len(templates[template_name]) > 100
 
-    def test_badge_providers_setup(self):
+    def test_badge_providers_setup(self) -> None:
         """Test badge providers are set up correctly."""
         providers = self.engine.badge_providers
 
@@ -120,141 +118,141 @@ class TestReadmeAgentEngine(unittest.TestCase):
             "downloads",
         ]
         for badge_type in required_badges:
-            self.assertIn(badge_type, providers)
-            self.assertIsInstance(providers[badge_type], dict)
+            assert badge_type in providers
+            assert isinstance(providers[badge_type], dict)
 
-    def test_project_type_enum(self):
+    def test_project_type_enum(self) -> None:
         """Test ProjectType enum functionality."""
-        self.assertEqual(ProjectType.LIBRARY.value, "library")
-        self.assertEqual(ProjectType.APPLICATION.value, "application")
-        self.assertEqual(ProjectType.TOOL.value, "tool")
-        self.assertEqual(ProjectType.FRAMEWORK.value, "framework")
+        assert ProjectType.LIBRARY.value == "library"
+        assert ProjectType.APPLICATION.value == "application"
+        assert ProjectType.TOOL.value == "tool"
+        assert ProjectType.FRAMEWORK.value == "framework"
 
-    def test_documentation_style_enum(self):
+    def test_documentation_style_enum(self) -> None:
         """Test DocumentationStyle enum functionality."""
-        self.assertEqual(DocumentationStyle.COMPREHENSIVE.value, "comprehensive")
-        self.assertEqual(DocumentationStyle.MINIMAL.value, "minimal")
-        self.assertEqual(DocumentationStyle.TECHNICAL.value, "technical")
-        self.assertEqual(DocumentationStyle.USER_FRIENDLY.value, "user_friendly")
+        assert DocumentationStyle.COMPREHENSIVE.value == "comprehensive"
+        assert DocumentationStyle.MINIMAL.value == "minimal"
+        assert DocumentationStyle.TECHNICAL.value == "technical"
+        assert DocumentationStyle.USER_FRIENDLY.value == "user_friendly"
 
-    def test_audience_type_enum(self):
+    def test_audience_type_enum(self) -> None:
         """Test AudienceType enum functionality."""
-        self.assertEqual(AudienceType.DEVELOPERS.value, "developers")
-        self.assertEqual(AudienceType.END_USERS.value, "end_users")
-        self.assertEqual(AudienceType.CONTRIBUTORS.value, "contributors")
-        self.assertEqual(AudienceType.MIXED.value, "mixed")
+        assert AudienceType.DEVELOPERS.value == "developers"
+        assert AudienceType.END_USERS.value == "end_users"
+        assert AudienceType.CONTRIBUTORS.value == "contributors"
+        assert AudienceType.MIXED.value == "mixed"
 
-    def test_generate_overview_section(self):
+    def test_generate_overview_section(self) -> None:
         """Test overview section generation."""
         content = self.engine._generate_overview_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("# test-project", content)
-        self.assertIn("A test project for README generation", content)
-        self.assertIn("Python project", content)
-        self.assertIn("## Key Benefits", content)
-        self.assertIn("Easy to use", content)
+        assert "# test-project" in content
+        assert "A test project for README generation" in content
+        assert "Python project" in content
+        assert "## Key Benefits" in content
+        assert "Easy to use" in content
 
-    def test_generate_installation_section(self):
+    def test_generate_installation_section(self) -> None:
         """Test installation section generation."""
         content = self.engine._generate_installation_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## Installation", content)
-        self.assertIn("pip install", content)
-        self.assertIn("test-project", content.lower())
-        self.assertIn("System Requirements", content)
-        self.assertIn("Python 3.7", content)
+        assert "## Installation" in content
+        assert "pip install" in content
+        assert "test-project" in content.lower()
+        assert "System Requirements" in content
+        assert "Python 3.7" in content
 
-    def test_generate_usage_section(self):
+    def test_generate_usage_section(self) -> None:
         """Test usage section generation."""
         content = self.engine._generate_usage_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## Usage", content)
-        self.assertIn("Quick Start", content)
-        self.assertIn("```python", content)
-        self.assertIn("from test_project import", content)
-        self.assertIn("Advanced Usage", content)
+        assert "## Usage" in content
+        assert "Quick Start" in content
+        assert "```python" in content
+        assert "from test_project import" in content
+        assert "Advanced Usage" in content
 
-    def test_generate_api_section(self):
+    def test_generate_api_section(self) -> None:
         """Test API reference section generation."""
         content = self.engine._generate_api_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## API Reference", content)
-        self.assertIn("Main Classes", content)
-        self.assertIn("Configuration Options", content)
-        self.assertIn("Error Handling", content)
-        self.assertIn("| Option | Type |", content)  # Table format
+        assert "## API Reference" in content
+        assert "Main Classes" in content
+        assert "Configuration Options" in content
+        assert "Error Handling" in content
+        assert "| Option | Type |" in content  # Table format
 
-    def test_generate_contributing_section(self):
+    def test_generate_contributing_section(self) -> None:
         """Test contributing section generation."""
         content = self.engine._generate_contributing_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## Contributing", content)
-        self.assertIn("Development Setup", content)
-        self.assertIn("Making Changes", content)
-        self.assertIn("Code Style", content)
-        self.assertIn("git checkout -b", content)
-        self.assertIn("pre-commit install", content)  # Python-specific
+        assert "## Contributing" in content
+        assert "Development Setup" in content
+        assert "Making Changes" in content
+        assert "Code Style" in content
+        assert "git checkout -b" in content
+        assert "pre-commit install" in content  # Python-specific
 
-    def test_generate_license_section(self):
+    def test_generate_license_section(self) -> None:
         """Test license section generation."""
         content = self.engine._generate_license_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## License", content)
-        self.assertIn("MIT License", content)
-        self.assertIn("LICENSE", content)
+        assert "## License" in content
+        assert "MIT License" in content
+        assert "LICENSE" in content
 
-    def test_generate_features_section(self):
+    def test_generate_features_section(self) -> None:
         """Test features section generation."""
         content = self.engine._generate_features_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## Features", content)
-        self.assertIn("Core Features", content)
-        self.assertIn("Fast and Efficient", content)
-        self.assertIn("Framework Integration", content)
-        self.assertIn("Flask", content)
-        self.assertIn("Platform Support", content)
+        assert "## Features" in content
+        assert "Core Features" in content
+        assert "Fast and Efficient" in content
+        assert "Framework Integration" in content
+        assert "Flask" in content
+        assert "Platform Support" in content
 
-    def test_generate_configuration_section(self):
+    def test_generate_configuration_section(self) -> None:
         """Test configuration section generation."""
         content = self.engine._generate_configuration_section(
-            self.test_metadata, self.test_content_requirements, self.temp_dir
+            self.test_metadata, self.test_content_requirements, self.temp_dir,
         )
 
-        self.assertIn("## Configuration", content)
-        self.assertIn("config.yml", content)
-        self.assertIn("```yaml", content)
-        self.assertIn("Environment Variables", content)
-        self.assertIn("| Variable |", content)
+        assert "## Configuration" in content
+        assert "config.yml" in content
+        assert "```yaml" in content
+        assert "Environment Variables" in content
+        assert "| Variable |" in content
 
-    def test_generate_badges(self):
+    def test_generate_badges(self) -> None:
         """Test badge generation."""
         badges = self.engine._generate_badges(self.test_metadata, self.temp_dir)
 
-        self.assertIsInstance(badges, list)
+        assert isinstance(badges, list)
         # Would have badges if repo info was extracted
         # For now, just test the structure
         for badge in badges:
-            self.assertIsInstance(badge, Badge)
-            self.assertIsNotNone(badge.name)
-            self.assertIsNotNone(badge.url)
-            self.assertIsNotNone(badge.alt_text)
+            assert isinstance(badge, Badge)
+            assert badge.name is not None
+            assert badge.url is not None
+            assert badge.alt_text is not None
 
     @patch("subprocess.run")
-    def test_extract_repo_info_success(self, mock_subprocess):
+    def test_extract_repo_info_success(self, mock_subprocess) -> None:
         """Test successful repository info extraction."""
         # Mock git command success
         mock_result = Mock()
@@ -264,12 +262,12 @@ class TestReadmeAgentEngine(unittest.TestCase):
 
         result = self.engine._extract_repo_info(self.temp_dir)
 
-        self.assertIsNotNone(result)
-        self.assertEqual(result[0], "testuser")
-        self.assertEqual(result[1], "testrepo")
+        assert result is not None
+        assert result[0] == "testuser"
+        assert result[1] == "testrepo"
 
     @patch("subprocess.run")
-    def test_extract_repo_info_ssh(self, mock_subprocess):
+    def test_extract_repo_info_ssh(self, mock_subprocess) -> None:
         """Test repository info extraction from SSH URL."""
         # Mock git command success with SSH URL
         mock_result = Mock()
@@ -279,12 +277,12 @@ class TestReadmeAgentEngine(unittest.TestCase):
 
         result = self.engine._extract_repo_info(self.temp_dir)
 
-        self.assertIsNotNone(result)
-        self.assertEqual(result[0], "testuser")
-        self.assertEqual(result[1], "testrepo")
+        assert result is not None
+        assert result[0] == "testuser"
+        assert result[1] == "testrepo"
 
     @patch("subprocess.run")
-    def test_extract_repo_info_failure(self, mock_subprocess):
+    def test_extract_repo_info_failure(self, mock_subprocess) -> None:
         """Test repository info extraction failure."""
         # Mock git command failure
         mock_result = Mock()
@@ -293,33 +291,33 @@ class TestReadmeAgentEngine(unittest.TestCase):
 
         result = self.engine._extract_repo_info(self.temp_dir)
 
-        self.assertIsNone(result)
+        assert result is None
 
-    def test_apply_template(self):
+    def test_apply_template(self) -> None:
         """Test template application."""
         template = "{PROJECT_NAME}\n\n{BADGES}\n\n{BRIEF_DESCRIPTION}"
         sections = {"overview": "Test overview"}
         badges = [
-            Badge(name="test", url="http://test.com", alt_text="Test", provider="test")
+            Badge(name="test", url="http://test.com", alt_text="Test", provider="test"),
         ]
 
         result = self.engine._apply_template(
-            template, self.test_metadata, sections, badges, self.test_generation_options
+            template, self.test_metadata, sections, badges, self.test_generation_options,
         )
 
-        self.assertIn("test-project", result)
-        self.assertIn("![Test](http://test.com)", result)
-        self.assertIn("A test project for README generation", result)
+        assert "test-project" in result
+        assert "![Test](http://test.com)" in result
+        assert "A test project for README generation" in result
 
-    def test_generate_quick_start(self):
+    def test_generate_quick_start(self) -> None:
         """Test quick start generation."""
         quick_start = self.engine._generate_quick_start(self.test_metadata)
 
-        self.assertIn("```python", quick_start)
-        self.assertIn("test_project", quick_start)
-        self.assertIn("import", quick_start)
+        assert "```python" in quick_start
+        assert "test_project" in quick_start
+        assert "import" in quick_start
 
-    def test_generate_toc(self):
+    def test_generate_toc(self) -> None:
         """Test table of contents generation."""
         content = """# Main Title
 ## Section 1
@@ -329,13 +327,13 @@ class TestReadmeAgentEngine(unittest.TestCase):
 
         toc = self.engine._generate_toc(content)
 
-        self.assertIsInstance(toc, list)
-        self.assertGreater(len(toc), 0)
-        self.assertIn("[Section 1](#section-1)", toc[0])
-        self.assertIn("[Subsection 1.1](#subsection-11)", toc[1])
-        self.assertIn("  ", toc[1])  # Indentation for subsection
+        assert isinstance(toc, list)
+        assert len(toc) > 0
+        assert "[Section 1](#section-1)" in toc[0]
+        assert "[Subsection 1.1](#subsection-11)" in toc[1]
+        assert "  " in toc[1]  # Indentation for subsection
 
-    def test_insert_toc(self):
+    def test_insert_toc(self) -> None:
         """Test table of contents insertion."""
         content = """# Main Title
 
@@ -348,8 +346,8 @@ More content."""
         toc = ["- [Section 1](#section-1)"]
         result = self.engine._insert_toc(content, toc)
 
-        self.assertIn("## Table of Contents", result)
-        self.assertIn("- [Section 1](#section-1)", result)
+        assert "## Table of Contents" in result
+        assert "- [Section 1](#section-1)" in result
         # TOC should be inserted after title
         lines = result.split("\n")
         toc_index = next(
@@ -358,13 +356,13 @@ More content."""
         title_index = next(
             i for i, line in enumerate(lines) if line.startswith("# Main Title")
         )
-        self.assertGreater(toc_index, title_index)
+        assert toc_index > title_index
 
-    def test_calculate_complexity_score(self):
+    def test_calculate_complexity_score(self) -> None:
         """Test complexity score calculation."""
         simple_content = "This is a simple document with short sentences."
         complex_content = """This is a more complex document with longer sentences and more technical content.
-        
+
 ```python
 # Code examples add complexity
 def complex_function():
@@ -377,11 +375,11 @@ def complex_function():
         simple_score = self.engine._calculate_complexity_score(simple_content)
         complex_score = self.engine._calculate_complexity_score(complex_content)
 
-        self.assertIsInstance(simple_score, float)
-        self.assertIsInstance(complex_score, float)
-        self.assertGreater(complex_score, simple_score)
+        assert isinstance(simple_score, float)
+        assert isinstance(complex_score, float)
+        assert complex_score > simple_score
 
-    def test_calculate_completeness(self):
+    def test_calculate_completeness(self) -> None:
         """Test completeness calculation."""
         sections_generated = [
             SectionInfo("overview", 100, True, 80.0, "content"),
@@ -391,12 +389,12 @@ def complex_function():
         requested_sections = ["overview", "installation", "usage", "api_reference"]
 
         completeness = self.engine._calculate_completeness(
-            sections_generated, requested_sections
+            sections_generated, requested_sections,
         )
 
-        self.assertEqual(completeness, 75.0)  # 3 of 4 sections
+        assert completeness == 75.0  # 3 of 4 sections
 
-    def test_calculate_section_quality(self):
+    def test_calculate_section_quality(self) -> None:
         """Test section quality calculation."""
         high_quality_content = """## Installation
 
@@ -416,22 +414,22 @@ Requirements are listed below.
         low_quality_content = "## Installation\n\nInstall it."
 
         high_score = self.engine._calculate_section_quality(
-            high_quality_content, "installation"
+            high_quality_content, "installation",
         )
         low_score = self.engine._calculate_section_quality(
-            low_quality_content, "installation"
+            low_quality_content, "installation",
         )
 
-        self.assertGreater(high_score, low_score)
-        self.assertGreater(high_score, 50.0)
-        self.assertLess(low_score, 50.0)
+        assert high_score > low_score
+        assert high_score > 50.0
+        assert low_score < 50.0
 
-    def test_generate_improvement_suggestions(self):
+    def test_generate_improvement_suggestions(self) -> None:
         """Test improvement suggestions generation."""
         sections = [
             SectionInfo("overview", 50, True, 40.0, "short content"),  # Low quality
             SectionInfo(
-                "installation", 200, True, 85.0, "good content"
+                "installation", 200, True, 85.0, "good content",
             ),  # Good quality
         ]
 
@@ -444,24 +442,24 @@ Requirements are listed below.
         )
 
         suggestions = self.engine._generate_improvement_suggestions(
-            sections, quality_metrics
+            sections, quality_metrics,
         )
 
-        self.assertIsInstance(suggestions, list)
-        self.assertGreater(len(suggestions), 0)
+        assert isinstance(suggestions, list)
+        assert len(suggestions) > 0
 
         # Should suggest improving low-quality overview section
         overview_suggestions = [s for s in suggestions if s.section == "overview"]
-        self.assertGreater(len(overview_suggestions), 0)
-        self.assertEqual(overview_suggestions[0].priority, "high")
+        assert len(overview_suggestions) > 0
+        assert overview_suggestions[0].priority == "high"
 
         # Should suggest adding missing sections due to low completeness
         completeness_suggestions = [
             s for s in suggestions if "missing" in s.suggestion.lower()
         ]
-        self.assertGreater(len(completeness_suggestions), 0)
+        assert len(completeness_suggestions) > 0
 
-    def test_generate_readme_success(self):
+    def test_generate_readme_success(self) -> None:
         """Test successful README generation."""
         result = self.engine.generate_readme(
             self.temp_dir,
@@ -471,20 +469,20 @@ Requirements are listed below.
             self.test_generation_options,
         )
 
-        self.assertIsInstance(result, DocumentationResult)
-        self.assertTrue(result.success)
-        self.assertEqual(result.operation, "generate")
-        self.assertIsNotNone(result.readme_content)
-        self.assertGreater(len(result.sections_generated), 0)
-        self.assertIn("word_count", result.metadata)
-        self.assertIn("quality_metrics", result.analysis)
+        assert isinstance(result, DocumentationResult)
+        assert result.success
+        assert result.operation == "generate"
+        assert result.readme_content is not None
+        assert len(result.sections_generated) > 0
+        assert "word_count" in result.metadata
+        assert "quality_metrics" in result.analysis
 
         # Check README content
-        self.assertIn("# test-project", result.readme_content)
-        self.assertIn("## Installation", result.readme_content)
-        self.assertIn("## Usage", result.readme_content)
+        assert "# test-project" in result.readme_content
+        assert "## Installation" in result.readme_content
+        assert "## Usage" in result.readme_content
 
-    def test_parse_existing_sections(self):
+    def test_parse_existing_sections(self) -> None:
         """Test parsing of existing README sections."""
         content = """# Main Title
 
@@ -509,25 +507,25 @@ MIT License
 
         sections = self.engine._parse_existing_sections(content)
 
-        self.assertIn("installation", sections)
-        self.assertIn("usage", sections)
-        self.assertIn("license", sections)
-        self.assertIn("Install with pip", sections["installation"])
-        self.assertIn("```python", sections["usage"])
+        assert "installation" in sections
+        assert "usage" in sections
+        assert "license" in sections
+        assert "Install with pip" in sections["installation"]
+        assert "```python" in sections["usage"]
 
-    def test_identify_missing_sections(self):
+    def test_identify_missing_sections(self) -> None:
         """Test identification of missing standard sections."""
         existing_sections = {"installation": "content", "usage": "content"}
 
         missing = self.engine._identify_missing_sections(existing_sections)
 
-        self.assertIn("api_reference", missing)
-        self.assertIn("contributing", missing)
-        self.assertIn("license", missing)
-        self.assertNotIn("installation", missing)
-        self.assertNotIn("usage", missing)
+        assert "api_reference" in missing
+        assert "contributing" in missing
+        assert "license" in missing
+        assert "installation" not in missing
+        assert "usage" not in missing
 
-    def test_analyze_structure(self):
+    def test_analyze_structure(self) -> None:
         """Test document structure analysis."""
         content = """# Main Title
 ## Section 1
@@ -538,14 +536,14 @@ MIT License
 
         structure = self.engine._analyze_structure(content)
 
-        self.assertIn("heading_count", structure)
-        self.assertIn("max_heading_level", structure)
-        self.assertIn("has_proper_hierarchy", structure)
-        self.assertEqual(structure["heading_count"], 5)
-        self.assertEqual(structure["max_heading_level"], 4)
-        self.assertTrue(structure["has_proper_hierarchy"])
+        assert "heading_count" in structure
+        assert "max_heading_level" in structure
+        assert "has_proper_hierarchy" in structure
+        assert structure["heading_count"] == 5
+        assert structure["max_heading_level"] == 4
+        assert structure["has_proper_hierarchy"]
 
-    def test_check_heading_hierarchy_valid(self):
+    def test_check_heading_hierarchy_valid(self) -> None:
         """Test valid heading hierarchy checking."""
         headings = [
             {"level": 1, "text": "Title"},
@@ -555,9 +553,9 @@ MIT License
         ]
 
         result = self.engine._check_heading_hierarchy(headings)
-        self.assertTrue(result)
+        assert result
 
-    def test_check_heading_hierarchy_invalid(self):
+    def test_check_heading_hierarchy_invalid(self) -> None:
         """Test invalid heading hierarchy checking."""
         # Skipped level (1 to 3)
         invalid_headings = [
@@ -566,15 +564,15 @@ MIT License
         ]
 
         result = self.engine._check_heading_hierarchy(invalid_headings)
-        self.assertFalse(result)
+        assert not result
 
         # Doesn't start with level 1
         invalid_start = [{"level": 2, "text": "Section"}]
 
         result = self.engine._check_heading_hierarchy(invalid_start)
-        self.assertFalse(result)
+        assert not result
 
-    def test_analyze_links(self):
+    def test_analyze_links(self) -> None:
         """Test link analysis."""
         content = """# Test Document
 
@@ -585,14 +583,14 @@ Also see [GitHub](https://github.com/test/repo).
 
         analysis = self.engine._analyze_links(content)
 
-        self.assertIn("total_links", analysis)
-        self.assertIn("internal_links", analysis)
-        self.assertIn("external_links", analysis)
-        self.assertEqual(analysis["total_links"], 3)
-        self.assertEqual(analysis["internal_links"], 1)  # #usage
-        self.assertEqual(analysis["external_links"], 2)  # https links
+        assert "total_links" in analysis
+        assert "internal_links" in analysis
+        assert "external_links" in analysis
+        assert analysis["total_links"] == 3
+        assert analysis["internal_links"] == 1  # #usage
+        assert analysis["external_links"] == 2  # https links
 
-    def test_analyze_readme(self):
+    def test_analyze_readme(self) -> None:
         """Test README analysis."""
         # Create a temporary README file
         readme_content = """# Test Project
@@ -626,15 +624,15 @@ MIT License
 
         result = self.engine.analyze_readme(readme_path, "detailed")
 
-        self.assertTrue(result.success)
-        self.assertEqual(result.operation, "analyze")
-        self.assertEqual(result.readme_content, readme_content)
-        self.assertIn("sections_found", result.analysis)
-        self.assertIn("missing_sections", result.analysis)
-        self.assertIn("quality_metrics", result.analysis)
-        self.assertIn("word_count", result.metadata)
+        assert result.success
+        assert result.operation == "analyze"
+        assert result.readme_content == readme_content
+        assert "sections_found" in result.analysis
+        assert "missing_sections" in result.analysis
+        assert "quality_metrics" in result.analysis
+        assert "word_count" in result.metadata
 
-    def test_process_request_generate(self):
+    def test_process_request_generate(self) -> None:
         """Test processing generate request."""
         request = {
             "operation": "generate",
@@ -658,12 +656,12 @@ MIT License
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertEqual(response["operation"], "generate")
-        self.assertIn("readme_content", response)
-        self.assertIn("sections_generated", response)
+        assert response["success"]
+        assert response["operation"] == "generate"
+        assert "readme_content" in response
+        assert "sections_generated" in response
 
-    def test_process_request_analyze(self):
+    def test_process_request_analyze(self) -> None:
         """Test processing analyze request."""
         # Create test README
         readme_path = os.path.join(self.temp_dir, "README.md")
@@ -678,24 +676,24 @@ MIT License
 
         response = self.engine.process_request(request)
 
-        self.assertTrue(response["success"])
-        self.assertEqual(response["operation"], "analyze")
-        self.assertIn("analysis", response)
+        assert response["success"]
+        assert response["operation"] == "analyze"
+        assert "analysis" in response
 
-    def test_process_request_unsupported(self):
+    def test_process_request_unsupported(self) -> None:
         """Test processing unsupported operation."""
         request = {"operation": "unsupported_operation"}
         response = self.engine.process_request(request)
 
-        self.assertFalse(response["success"])
-        self.assertIn("Unsupported operation", response["error"])
+        assert not response["success"]
+        assert "Unsupported operation" in response["error"]
 
-    def test_content_discoverer_initialization(self):
+    def test_content_discoverer_initialization(self) -> None:
         """Test ContentDiscoverer initialization."""
         discoverer = ContentDiscoverer()
-        self.assertIsNotNone(discoverer)
+        assert discoverer is not None
 
-    def test_discover_languages(self):
+    def test_discover_languages(self) -> None:
         """Test language discovery."""
         discoverer = ContentDiscoverer()
 
@@ -707,10 +705,10 @@ MIT License
 
         languages = discoverer._discover_languages(test_project)
 
-        self.assertIn("Python", languages)
-        self.assertIn("JavaScript", languages)
+        assert "Python" in languages
+        assert "JavaScript" in languages
 
-    def test_parse_setup_py(self):
+    def test_parse_setup_py(self) -> None:
         """Test setup.py parsing."""
         discoverer = ContentDiscoverer()
         metadata = ProjectMetadata(
@@ -745,11 +743,11 @@ setup(
 
         discoverer._parse_setup_py(setup_path, metadata)
 
-        self.assertEqual(metadata.name, "test-package")
-        self.assertEqual(metadata.version, "1.2.3")
-        self.assertEqual(metadata.description, "A test package")
+        assert metadata.name == "test-package"
+        assert metadata.version == "1.2.3"
+        assert metadata.description == "A test package"
 
-    def test_parse_package_json(self):
+    def test_parse_package_json(self) -> None:
         """Test package.json parsing."""
         discoverer = ContentDiscoverer()
         metadata = ProjectMetadata(
@@ -783,14 +781,14 @@ setup(
 
         discoverer._discover_nodejs_info(Path(self.temp_dir), metadata)
 
-        self.assertEqual(metadata.name, "test-package")
-        self.assertEqual(metadata.version, "2.1.0")
-        self.assertEqual(metadata.description, "A Node.js test package")
-        self.assertEqual(metadata.license, "Apache-2.0")
-        self.assertIn("express", metadata.dependencies["runtime"])
-        self.assertIn("jest", metadata.dependencies["development"])
+        assert metadata.name == "test-package"
+        assert metadata.version == "2.1.0"
+        assert metadata.description == "A Node.js test package"
+        assert metadata.license == "Apache-2.0"
+        assert "express" in metadata.dependencies["runtime"]
+        assert "jest" in metadata.dependencies["development"]
 
-    def test_discover_license(self):
+    def test_discover_license(self) -> None:
         """Test license discovery."""
         discoverer = ContentDiscoverer()
 
@@ -807,14 +805,14 @@ Permission is hereby granted, free of charge..."""
 
         license_type = discoverer._discover_license(Path(self.temp_dir))
 
-        self.assertEqual(license_type, "MIT")
+        assert license_type == "MIT"
 
-    def test_quality_assessor_initialization(self):
+    def test_quality_assessor_initialization(self) -> None:
         """Test QualityAssessor initialization."""
         assessor = QualityAssessor()
-        self.assertIsNotNone(assessor)
+        assert assessor is not None
 
-    def test_assess_quality(self):
+    def test_assess_quality(self) -> None:
         """Test quality assessment."""
         assessor = QualityAssessor()
 
@@ -859,14 +857,14 @@ MIT License
 
         metrics = assessor.assess_quality(high_quality_content, sections)
 
-        self.assertIsInstance(metrics, QualityMetrics)
-        self.assertGreater(metrics.clarity, 70.0)
-        self.assertGreater(metrics.completeness, 70.0)
-        self.assertGreater(metrics.accuracy, 70.0)
-        self.assertGreater(metrics.usefulness, 70.0)
-        self.assertGreater(metrics.overall_score, 70.0)
+        assert isinstance(metrics, QualityMetrics)
+        assert metrics.clarity > 70.0
+        assert metrics.completeness > 70.0
+        assert metrics.accuracy > 70.0
+        assert metrics.usefulness > 70.0
+        assert metrics.overall_score > 70.0
 
-    def test_assess_clarity(self):
+    def test_assess_clarity(self) -> None:
         """Test clarity assessment."""
         assessor = QualityAssessor()
 
@@ -887,10 +885,10 @@ echo "hello"
         clear_score = assessor._assess_clarity(clear_content)
         unclear_score = assessor._assess_clarity(unclear_content)
 
-        self.assertGreater(clear_score, unclear_score)
-        self.assertGreater(clear_score, 80.0)
+        assert clear_score > unclear_score
+        assert clear_score > 80.0
 
-    def test_dataclass_functionality(self):
+    def test_dataclass_functionality(self) -> None:
         """Test dataclass functionality."""
         # Test ContentRequirements
         content_req = ContentRequirements(
@@ -899,16 +897,16 @@ echo "hello"
             audience=AudienceType.END_USERS,
         )
 
-        self.assertEqual(len(content_req.sections), 2)
-        self.assertEqual(content_req.style, DocumentationStyle.MINIMAL)
-        self.assertTrue(content_req.include_api)  # Default value
+        assert len(content_req.sections) == 2
+        assert content_req.style == DocumentationStyle.MINIMAL
+        assert content_req.include_api  # Default value
 
         # Test GenerationOptions
         options = GenerationOptions(include_badges=False, template_name="custom")
 
-        self.assertFalse(options.include_badges)
-        self.assertTrue(options.include_toc)  # Default value
-        self.assertEqual(options.template_name, "custom")
+        assert not options.include_badges
+        assert options.include_toc  # Default value
+        assert options.template_name == "custom"
 
         # Test ProjectMetadata
         metadata = ProjectMetadata(
@@ -925,20 +923,20 @@ echo "hello"
             entry_points=[],
         )
 
-        self.assertEqual(metadata.name, "test")
-        self.assertIsNone(metadata.author)
-        self.assertEqual(len(metadata.languages), 1)
+        assert metadata.name == "test"
+        assert metadata.author is None
+        assert len(metadata.languages) == 1
 
-    def test_logging_setup(self):
+    def test_logging_setup(self) -> None:
         """Test that logging is set up correctly."""
-        self.assertIsNotNone(self.engine.logger)
-        self.assertEqual(self.engine.logger.name, "readme_agent")
+        assert self.engine.logger is not None
+        assert self.engine.logger.name == "readme_agent"
 
         import logging
 
-        self.assertEqual(self.engine.logger.level, logging.INFO)
+        assert self.engine.logger.level == logging.INFO
 
-    def test_section_info_dataclass(self):
+    def test_section_info_dataclass(self) -> None:
         """Test SectionInfo dataclass."""
         section = SectionInfo(
             name="test_section",
@@ -948,13 +946,13 @@ echo "hello"
             content="Test content",
         )
 
-        self.assertEqual(section.name, "test_section")
-        self.assertEqual(section.content_length, 500)
-        self.assertTrue(section.auto_generated)
-        self.assertEqual(section.quality_score, 85.5)
-        self.assertEqual(section.content, "Test content")
+        assert section.name == "test_section"
+        assert section.content_length == 500
+        assert section.auto_generated
+        assert section.quality_score == 85.5
+        assert section.content == "Test content"
 
-    def test_badge_dataclass(self):
+    def test_badge_dataclass(self) -> None:
         """Test Badge dataclass."""
         badge = Badge(
             name="build",
@@ -963,12 +961,12 @@ echo "hello"
             provider="github",
         )
 
-        self.assertEqual(badge.name, "build")
-        self.assertTrue(badge.url.startswith("https://"))
-        self.assertEqual(badge.alt_text, "Build Status")
-        self.assertEqual(badge.provider, "github")
+        assert badge.name == "build"
+        assert badge.url.startswith("https://")
+        assert badge.alt_text == "Build Status"
+        assert badge.provider == "github"
 
-    def test_improvement_suggestion_dataclass(self):
+    def test_improvement_suggestion_dataclass(self) -> None:
         """Test ImprovementSuggestion dataclass."""
         suggestion = ImprovementSuggestion(
             section="installation",
@@ -977,12 +975,12 @@ echo "hello"
             implementation="Include code examples",
         )
 
-        self.assertEqual(suggestion.section, "installation")
-        self.assertEqual(suggestion.priority, "high")
-        self.assertIn("examples", suggestion.suggestion)
-        self.assertIsNotNone(suggestion.implementation)
+        assert suggestion.section == "installation"
+        assert suggestion.priority == "high"
+        assert "examples" in suggestion.suggestion
+        assert suggestion.implementation is not None
 
-    def test_documentation_result_dataclass(self):
+    def test_documentation_result_dataclass(self) -> None:
         """Test DocumentationResult dataclass."""
         result = DocumentationResult(
             success=True,
@@ -996,11 +994,11 @@ echo "hello"
             errors=[],
         )
 
-        self.assertTrue(result.success)
-        self.assertEqual(result.operation, "generate")
-        self.assertEqual(result.readme_content, "# Test")
-        self.assertEqual(len(result.warnings), 1)
-        self.assertEqual(len(result.errors), 0)
+        assert result.success
+        assert result.operation == "generate"
+        assert result.readme_content == "# Test"
+        assert len(result.warnings) == 1
+        assert len(result.errors) == 0
 
 
 if __name__ == "__main__":

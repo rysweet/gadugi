@@ -1,34 +1,31 @@
 #!/usr/bin/env python3
-"""
-Team Coach Engine for Gadugi v0.3
+"""Team Coach Engine for Gadugi v0.3.
 
 Provides intelligent reflection, continuous learning, and performance optimization
 for multi-agent development workflows.
 """
 
-import json
 import statistics
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
-import math
+from datetime import datetime, timedelta
+from typing import Any
 
 
 @dataclass
 class WorkflowStep:
-    """Represents a single step in a workflow"""
+    """Represents a single step in a workflow."""
 
     agent: str
     action: str
     duration_seconds: float
     success: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     timestamp: datetime
 
 
 @dataclass
 class ResourceUsage:
-    """Resource usage metrics for a workflow"""
+    """Resource usage metrics for a workflow."""
 
     peak_memory_mb: float
     cpu_time_seconds: float
@@ -38,7 +35,7 @@ class ResourceUsage:
 
 @dataclass
 class WorkflowOutcomes:
-    """Outcomes and results of a workflow"""
+    """Outcomes and results of a workflow."""
 
     files_created: int
     tests_written: int
@@ -51,11 +48,11 @@ class WorkflowOutcomes:
 
 @dataclass
 class WorkflowData:
-    """Complete workflow execution data"""
+    """Complete workflow execution data."""
 
     workflow_id: str
-    agents_used: List[str]
-    task_sequence: List[WorkflowStep]
+    agents_used: list[str]
+    task_sequence: list[WorkflowStep]
     resource_usage: ResourceUsage
     outcomes: WorkflowOutcomes
     start_time: datetime
@@ -65,19 +62,19 @@ class WorkflowData:
 
 @dataclass
 class Pattern:
-    """Identified workflow pattern"""
+    """Identified workflow pattern."""
 
     pattern_type: str  # success, failure, optimization, bottleneck
     description: str
     frequency: float  # 0.0 to 1.0
     impact: str  # low, medium, high
     confidence: float  # 0.0 to 1.0
-    supporting_evidence: List[str]
+    supporting_evidence: list[str]
 
 
 @dataclass
 class Recommendation:
-    """Optimization recommendation"""
+    """Optimization recommendation."""
 
     type: str  # workflow_optimization, agent_coordination, resource_management
     priority: str  # high, medium, low
@@ -85,23 +82,23 @@ class Recommendation:
     expected_improvement: str
     implementation_effort: str  # low, medium, high
     risk_level: str  # low, medium, high
-    estimated_impact: Dict[str, float]
+    estimated_impact: dict[str, float]
 
 
 @dataclass
 class LearningInsight:
-    """Learning insight from workflow analysis"""
+    """Learning insight from workflow analysis."""
 
     insight_type: str  # best_practice, anti_pattern, optimization_opportunity
     description: str
     confidence: float
-    supporting_evidence: List[str]
-    applicable_contexts: List[str]
+    supporting_evidence: list[str]
+    applicable_contexts: list[str]
 
 
 @dataclass
 class PerformanceMetrics:
-    """Performance metrics for workflows"""
+    """Performance metrics for workflows."""
 
     efficiency_score: float  # 0.0 to 10.0
     speed_score: float
@@ -113,31 +110,31 @@ class PerformanceMetrics:
 
 @dataclass
 class TeamCoachRequest:
-    """Request format for team coach analysis"""
+    """Request format for team coach analysis."""
 
     analysis_type: str  # performance, learning, optimization, reflection
     workflow_data: WorkflowData
-    historical_context: Dict[str, Any]
+    historical_context: dict[str, Any]
     reflection_scope: str  # session, project, system
 
 
 @dataclass
 class TeamCoachResponse:
-    """Response format for team coach analysis"""
+    """Response format for team coach analysis."""
 
     success: bool
-    analysis_results: Dict[str, Any]
-    recommendations: List[Recommendation]
-    learning_insights: List[LearningInsight]
-    performance_trends: Dict[str, Any]
-    patterns_identified: List[Pattern]
-    errors: List[str]
+    analysis_results: dict[str, Any]
+    recommendations: list[Recommendation]
+    learning_insights: list[LearningInsight]
+    performance_trends: dict[str, Any]
+    patterns_identified: list[Pattern]
+    errors: list[str]
 
 
 class PerformanceAnalyzer:
-    """Analyzes workflow performance and identifies optimization opportunities"""
+    """Analyzes workflow performance and identifies optimization opportunities."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics_weights = {
             "speed": 0.25,
             "quality": 0.30,
@@ -146,10 +143,9 @@ class PerformanceAnalyzer:
         }
 
     def analyze_workflow_performance(
-        self, workflow_data: WorkflowData
+        self, workflow_data: WorkflowData,
     ) -> PerformanceMetrics:
-        """Analyze the performance of a workflow"""
-
+        """Analyze the performance of a workflow."""
         # Calculate individual scores
         speed_score = self._calculate_speed_score(workflow_data)
         quality_score = self._calculate_quality_score(workflow_data)
@@ -174,7 +170,7 @@ class PerformanceAnalyzer:
         )
 
     def _calculate_speed_score(self, workflow_data: WorkflowData) -> float:
-        """Calculate workflow speed score (0-10)"""
+        """Calculate workflow speed score (0-10)."""
         total_duration = (
             workflow_data.end_time - workflow_data.start_time
         ).total_seconds()
@@ -186,17 +182,16 @@ class PerformanceAnalyzer:
         # Calculate efficiency ratio
         if total_duration <= expected_total * 0.5:
             return 10.0  # Exceptional speed
-        elif total_duration <= expected_total:
+        if total_duration <= expected_total:
             return 8.0  # Good speed
-        elif total_duration <= expected_total * 1.5:
+        if total_duration <= expected_total * 1.5:
             return 6.0  # Acceptable speed
-        elif total_duration <= expected_total * 2.0:
+        if total_duration <= expected_total * 2.0:
             return 4.0  # Slow
-        else:
-            return 2.0  # Very slow
+        return 2.0  # Very slow
 
     def _calculate_quality_score(self, workflow_data: WorkflowData) -> float:
-        """Calculate workflow quality score (0-10)"""
+        """Calculate workflow quality score (0-10)."""
         outcomes = workflow_data.outcomes
 
         # Base score from success rate
@@ -204,7 +199,7 @@ class PerformanceAnalyzer:
 
         # Adjust for user satisfaction
         satisfaction_multiplier = {"high": 1.0, "medium": 0.85, "low": 0.6}.get(
-            outcomes.user_satisfaction, 0.8
+            outcomes.user_satisfaction, 0.8,
         )
 
         # Penalize for errors and warnings
@@ -226,9 +221,9 @@ class PerformanceAnalyzer:
         return max(0.0, min(10.0, quality_score))
 
     def _calculate_resource_efficiency_score(
-        self, workflow_data: WorkflowData
+        self, workflow_data: WorkflowData,
     ) -> float:
-        """Calculate resource efficiency score (0-10)"""
+        """Calculate resource efficiency score (0-10)."""
         resource_usage = workflow_data.resource_usage
 
         # Expected resource usage baselines
@@ -247,15 +242,14 @@ class PerformanceAnalyzer:
         # Convert to score (closer to 1.0 is better)
         if avg_efficiency >= 1.0:
             return 10.0
-        elif avg_efficiency >= 0.8:
+        if avg_efficiency >= 0.8:
             return 8.0 + (avg_efficiency - 0.8) * 10
-        elif avg_efficiency >= 0.6:
+        if avg_efficiency >= 0.6:
             return 6.0 + (avg_efficiency - 0.6) * 10
-        else:
-            return max(2.0, avg_efficiency * 10)
+        return max(2.0, avg_efficiency * 10)
 
     def _calculate_coordination_score(self, workflow_data: WorkflowData) -> float:
-        """Calculate agent coordination score (0-10)"""
+        """Calculate agent coordination score (0-10)."""
         if len(workflow_data.task_sequence) <= 1:
             return 10.0  # Single step workflows are perfectly coordinated
 
@@ -290,16 +284,16 @@ class PerformanceAnalyzer:
 
 
 class PatternRecognizer:
-    """Recognizes patterns in workflow execution and outcomes"""
+    """Recognizes patterns in workflow execution and outcomes."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.pattern_thresholds = {
             "frequency_threshold": 0.3,  # Minimum frequency to consider a pattern
             "confidence_threshold": 0.7,  # Minimum confidence for pattern recognition
         }
 
-    def identify_patterns(self, workflows: List[WorkflowData]) -> List[Pattern]:
-        """Identify patterns across multiple workflows"""
+    def identify_patterns(self, workflows: list[WorkflowData]) -> list[Pattern]:
+        """Identify patterns across multiple workflows."""
         patterns = []
 
         if not workflows:
@@ -320,9 +314,9 @@ class PatternRecognizer:
         return patterns
 
     def _identify_success_patterns(
-        self, workflows: List[WorkflowData]
-    ) -> List[Pattern]:
-        """Identify patterns that lead to successful outcomes"""
+        self, workflows: list[WorkflowData],
+    ) -> list[Pattern]:
+        """Identify patterns that lead to successful outcomes."""
         patterns = []
         successful_workflows = [w for w in workflows if w.outcomes.success_rate >= 0.8]
 
@@ -351,21 +345,21 @@ class PatternRecognizer:
                             for w in successful_workflows
                             if tuple(sorted(w.agents_used)) == combo
                         ],
-                    )
+                    ),
                 )
 
         # Analyze task sequence patterns
         sequence_patterns = self._analyze_sequence_patterns(
-            successful_workflows, "success"
+            successful_workflows, "success",
         )
         patterns.extend(sequence_patterns)
 
         return patterns
 
     def _identify_failure_patterns(
-        self, workflows: List[WorkflowData]
-    ) -> List[Pattern]:
-        """Identify patterns that lead to failures"""
+        self, workflows: list[WorkflowData],
+    ) -> list[Pattern]:
+        """Identify patterns that lead to failures."""
         patterns = []
         failed_workflows = [w for w in workflows if w.outcomes.success_rate < 0.5]
 
@@ -391,15 +385,15 @@ class PatternRecognizer:
                         impact="high",
                         confidence=frequency,
                         supporting_evidence=[w.workflow_id for w in failed_workflows],
-                    )
+                    ),
                 )
 
         return patterns
 
     def _identify_optimization_patterns(
-        self, workflows: List[WorkflowData]
-    ) -> List[Pattern]:
-        """Identify optimization opportunities"""
+        self, workflows: list[WorkflowData],
+    ) -> list[Pattern]:
+        """Identify optimization opportunities."""
         patterns = []
 
         # Look for resource inefficiencies
@@ -423,7 +417,7 @@ class PatternRecognizer:
                     supporting_evidence=[
                         w.workflow_id for w in high_resource_workflows
                     ],
-                )
+                ),
             )
 
         # Look for slow workflows
@@ -443,15 +437,15 @@ class PatternRecognizer:
                     impact="high" if frequency > 0.5 else "medium",
                     confidence=frequency,
                     supporting_evidence=[w.workflow_id for w in slow_workflows],
-                )
+                ),
             )
 
         return patterns
 
     def _identify_bottleneck_patterns(
-        self, workflows: List[WorkflowData]
-    ) -> List[Pattern]:
-        """Identify bottleneck patterns in workflows"""
+        self, workflows: list[WorkflowData],
+    ) -> list[Pattern]:
+        """Identify bottleneck patterns in workflows."""
         patterns = []
 
         # Analyze step durations to find bottlenecks
@@ -479,15 +473,15 @@ class PatternRecognizer:
                                 for w in workflows
                                 if any(s.agent == agent for s in w.task_sequence)
                             ],
-                        )
+                        ),
                     )
 
         return patterns
 
     def _analyze_sequence_patterns(
-        self, workflows: List[WorkflowData], pattern_type: str
-    ) -> List[Pattern]:
-        """Analyze task sequence patterns"""
+        self, workflows: list[WorkflowData], pattern_type: str,
+    ) -> list[Pattern]:
+        """Analyze task sequence patterns."""
         patterns = []
 
         # Look for common sequences
@@ -518,22 +512,22 @@ class PatternRecognizer:
                         impact="medium",
                         confidence=frequency,
                         supporting_evidence=[],
-                    )
+                    ),
                 )
 
         return patterns
 
 
 class LearningEngine:
-    """Extracts learning insights from workflow analysis"""
+    """Extracts learning insights from workflow analysis."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.insight_confidence_threshold = 0.6
 
     def extract_learning_insights(
-        self, workflows: List[WorkflowData], patterns: List[Pattern]
-    ) -> List[LearningInsight]:
-        """Extract actionable learning insights from workflow analysis"""
+        self, workflows: list[WorkflowData], patterns: list[Pattern],
+    ) -> list[LearningInsight]:
+        """Extract actionable learning insights from workflow analysis."""
         insights = []
 
         # Extract best practices from success patterns
@@ -587,9 +581,9 @@ class LearningEngine:
         return insights
 
     def _extract_resource_insights(
-        self, workflows: List[WorkflowData]
-    ) -> List[LearningInsight]:
-        """Extract insights about resource usage patterns"""
+        self, workflows: list[WorkflowData],
+    ) -> list[LearningInsight]:
+        """Extract insights about resource usage patterns."""
         insights = []
 
         if not workflows:
@@ -634,9 +628,9 @@ class LearningEngine:
         return insights
 
     def _extract_coordination_insights(
-        self, workflows: List[WorkflowData]
-    ) -> List[LearningInsight]:
-        """Extract insights about agent coordination"""
+        self, workflows: list[WorkflowData],
+    ) -> list[LearningInsight]:
+        """Extract insights about agent coordination."""
         insights = []
 
         # Analyze workflows with multiple agents
@@ -664,9 +658,9 @@ class LearningEngine:
 
 
 class RecommendationEngine:
-    """Generates optimization recommendations based on analysis"""
+    """Generates optimization recommendations based on analysis."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.recommendation_thresholds = {
             "high_priority": 0.8,
             "medium_priority": 0.5,
@@ -676,15 +670,15 @@ class RecommendationEngine:
     def generate_recommendations(
         self,
         performance_metrics: PerformanceMetrics,
-        patterns: List[Pattern],
-        insights: List[LearningInsight],
-    ) -> List[Recommendation]:
-        """Generate optimization recommendations"""
+        patterns: list[Pattern],
+        insights: list[LearningInsight],
+    ) -> list[Recommendation]:
+        """Generate optimization recommendations."""
         recommendations = []
 
         # Performance-based recommendations
         recommendations.extend(
-            self._generate_performance_recommendations(performance_metrics)
+            self._generate_performance_recommendations(performance_metrics),
         )
 
         # Pattern-based recommendations
@@ -705,9 +699,9 @@ class RecommendationEngine:
         return recommendations
 
     def _generate_performance_recommendations(
-        self, metrics: PerformanceMetrics
-    ) -> List[Recommendation]:
-        """Generate recommendations based on performance metrics"""
+        self, metrics: PerformanceMetrics,
+    ) -> list[Recommendation]:
+        """Generate recommendations based on performance metrics."""
         recommendations = []
 
         # Speed recommendations
@@ -721,7 +715,7 @@ class RecommendationEngine:
                     implementation_effort="medium",
                     risk_level="low",
                     estimated_impact={"speed": 10 - metrics.speed_score},
-                )
+                ),
             )
 
         # Quality recommendations
@@ -735,7 +729,7 @@ class RecommendationEngine:
                     implementation_effort="low",
                     risk_level="low",
                     estimated_impact={"quality": 10 - metrics.quality_score},
-                )
+                ),
             )
 
         # Resource efficiency recommendations
@@ -749,9 +743,9 @@ class RecommendationEngine:
                     implementation_effort="medium",
                     risk_level="low",
                     estimated_impact={
-                        "resource_efficiency": 10 - metrics.resource_efficiency_score
+                        "resource_efficiency": 10 - metrics.resource_efficiency_score,
                     },
-                )
+                ),
             )
 
         # Coordination recommendations
@@ -765,15 +759,15 @@ class RecommendationEngine:
                     implementation_effort="high",
                     risk_level="medium",
                     estimated_impact={"coordination": 10 - metrics.coordination_score},
-                )
+                ),
             )
 
         return recommendations
 
     def _generate_pattern_recommendations(
-        self, patterns: List[Pattern]
-    ) -> List[Recommendation]:
-        """Generate recommendations based on identified patterns"""
+        self, patterns: list[Pattern],
+    ) -> list[Recommendation]:
+        """Generate recommendations based on identified patterns."""
         recommendations = []
 
         for pattern in patterns:
@@ -787,7 +781,7 @@ class RecommendationEngine:
                         implementation_effort="medium",
                         risk_level="low",
                         estimated_impact={"speed": 2.5, "efficiency": 2.0},
-                    )
+                    ),
                 )
 
             elif pattern.pattern_type == "optimization" and pattern.frequency > 0.5:
@@ -800,15 +794,15 @@ class RecommendationEngine:
                         implementation_effort="medium",
                         risk_level="low",
                         estimated_impact={"resource_efficiency": 2.0},
-                    )
+                    ),
                 )
 
         return recommendations
 
     def _generate_insight_recommendations(
-        self, insights: List[LearningInsight]
-    ) -> List[Recommendation]:
-        """Generate recommendations based on learning insights"""
+        self, insights: list[LearningInsight],
+    ) -> list[Recommendation]:
+        """Generate recommendations based on learning insights."""
         recommendations = []
 
         for insight in insights:
@@ -825,16 +819,16 @@ class RecommendationEngine:
                         implementation_effort="low",
                         risk_level="low",
                         estimated_impact={"overall": 1.5},
-                    )
+                    ),
                 )
 
         return recommendations
 
 
 class TeamCoachEngine:
-    """Main engine that orchestrates team coaching operations"""
+    """Main engine that orchestrates team coaching operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.performance_analyzer = PerformanceAnalyzer()
         self.pattern_recognizer = PatternRecognizer()
         self.learning_engine = LearningEngine()
@@ -842,7 +836,7 @@ class TeamCoachEngine:
         self.historical_workflows = []
 
     def process_request(self, request: TeamCoachRequest) -> TeamCoachResponse:
-        """Process a team coach analysis request"""
+        """Process a team coach analysis request."""
         try:
             # Store workflow data for historical analysis
             self.historical_workflows.append(request.workflow_data)
@@ -850,7 +844,7 @@ class TeamCoachEngine:
             # Analyze performance
             performance_metrics = (
                 self.performance_analyzer.analyze_workflow_performance(
-                    request.workflow_data
+                    request.workflow_data,
                 )
             )
 
@@ -860,12 +854,12 @@ class TeamCoachEngine:
 
             # Extract learning insights
             insights = self.learning_engine.extract_learning_insights(
-                historical_workflows, patterns
+                historical_workflows, patterns,
             )
 
             # Generate recommendations
             recommendations = self.recommendation_engine.generate_recommendations(
-                performance_metrics, patterns, insights
+                performance_metrics, patterns, insights,
             )
 
             # Calculate performance trends
@@ -876,16 +870,16 @@ class TeamCoachEngine:
                 "performance_score": performance_metrics.overall_score,
                 "efficiency_metrics": {
                     "workflow_speed": self._score_to_label(
-                        performance_metrics.speed_score
+                        performance_metrics.speed_score,
                     ),
                     "resource_efficiency": self._score_to_label(
-                        performance_metrics.resource_efficiency_score
+                        performance_metrics.resource_efficiency_score,
                     ),
                     "coordination_quality": self._score_to_label(
-                        performance_metrics.coordination_score
+                        performance_metrics.coordination_score,
                     ),
                     "output_quality": self._score_to_label(
-                        performance_metrics.quality_score
+                        performance_metrics.quality_score,
                     ),
                 },
                 "workflow_duration": (
@@ -913,13 +907,13 @@ class TeamCoachEngine:
                 learning_insights=[],
                 performance_trends={},
                 patterns_identified=[],
-                errors=[f"Team coach analysis error: {str(e)}"],
+                errors=[f"Team coach analysis error: {e!s}"],
             )
 
     def _get_relevant_historical_workflows(
-        self, request: TeamCoachRequest
-    ) -> List[WorkflowData]:
-        """Get historical workflows relevant to the current analysis"""
+        self, request: TeamCoachRequest,
+    ) -> list[WorkflowData]:
+        """Get historical workflows relevant to the current analysis."""
         relevant_workflows = [request.workflow_data]  # Include current workflow
 
         # Add historical workflows based on scope
@@ -941,9 +935,9 @@ class TeamCoachEngine:
         return relevant_workflows
 
     def _calculate_performance_trends(
-        self, workflows: List[WorkflowData]
-    ) -> Dict[str, Any]:
-        """Calculate performance trends from historical workflows"""
+        self, workflows: list[WorkflowData],
+    ) -> dict[str, Any]:
+        """Calculate performance trends from historical workflows."""
         if len(workflows) < 2:
             return {"insufficient_data": True}
 
@@ -961,7 +955,7 @@ class TeamCoachEngine:
             recent_success = statistics.mean(success_rates[-3:])
             earlier_success = statistics.mean(success_rates[:3])
             success_improvement = (recent_success - earlier_success) / max(
-                earlier_success, 0.1
+                earlier_success, 0.1,
             )
         else:
             success_improvement = 0.0
@@ -970,7 +964,7 @@ class TeamCoachEngine:
             recent_duration = statistics.mean(durations[-3:])
             earlier_duration = statistics.mean(durations[:3])
             speed_improvement = (earlier_duration - recent_duration) / max(
-                earlier_duration, 1
+                earlier_duration, 1,
             )
         else:
             speed_improvement = 0.0
@@ -985,19 +979,18 @@ class TeamCoachEngine:
         }
 
     def _score_to_label(self, score: float) -> str:
-        """Convert numeric score to descriptive label"""
+        """Convert numeric score to descriptive label."""
         if score >= 8.0:
             return "excellent"
-        elif score >= 6.0:
+        if score >= 6.0:
             return "good"
-        elif score >= 4.0:
+        if score >= 4.0:
             return "fair"
-        else:
-            return "poor"
+        return "poor"
 
 
-def run_team_coach(request_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Entry point for team coach operations"""
+def run_team_coach(request_data: dict[str, Any]) -> dict[str, Any]:
+    """Entry point for team coach operations."""
     try:
         # Parse request data into proper objects
         workflow_data = _parse_workflow_data(request_data.get("workflow_data", {}))
@@ -1038,12 +1031,12 @@ def run_team_coach(request_data: Dict[str, Any]) -> Dict[str, Any]:
             "learning_insights": [],
             "performance_trends": {},
             "patterns_identified": [],
-            "errors": [f"Team coach error: {str(e)}"],
+            "errors": [f"Team coach error: {e!s}"],
         }
 
 
-def _parse_workflow_data(data: Dict[str, Any]) -> WorkflowData:
-    """Parse dictionary data into WorkflowData object"""
+def _parse_workflow_data(data: dict[str, Any]) -> WorkflowData:
+    """Parse dictionary data into WorkflowData object."""
     # Parse task sequence
     task_sequence = []
     for step_data in data.get("task_sequence", []):
@@ -1055,7 +1048,7 @@ def _parse_workflow_data(data: Dict[str, Any]) -> WorkflowData:
                 success=step_data.get("success", True),
                 metadata=step_data.get("metadata", {}),
                 timestamp=datetime.now(),  # Default to now if not provided
-            )
+            ),
         )
 
     # Parse resource usage
@@ -1081,7 +1074,7 @@ def _parse_workflow_data(data: Dict[str, Any]) -> WorkflowData:
 
     return WorkflowData(
         workflow_id=data.get(
-            "workflow_id", f"workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            "workflow_id", f"workflow_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         ),
         agents_used=data.get("agents_used", []),
         task_sequence=task_sequence,
@@ -1093,8 +1086,8 @@ def _parse_workflow_data(data: Dict[str, Any]) -> WorkflowData:
     )
 
 
-def _recommendation_to_dict(recommendation: Recommendation) -> Dict[str, Any]:
-    """Convert Recommendation object to dictionary"""
+def _recommendation_to_dict(recommendation: Recommendation) -> dict[str, Any]:
+    """Convert Recommendation object to dictionary."""
     return {
         "type": recommendation.type,
         "priority": recommendation.priority,
@@ -1106,8 +1099,8 @@ def _recommendation_to_dict(recommendation: Recommendation) -> Dict[str, Any]:
     }
 
 
-def _insight_to_dict(insight: LearningInsight) -> Dict[str, Any]:
-    """Convert LearningInsight object to dictionary"""
+def _insight_to_dict(insight: LearningInsight) -> dict[str, Any]:
+    """Convert LearningInsight object to dictionary."""
     return {
         "insight_type": insight.insight_type,
         "description": insight.description,
@@ -1117,8 +1110,8 @@ def _insight_to_dict(insight: LearningInsight) -> Dict[str, Any]:
     }
 
 
-def _pattern_to_dict(pattern: Pattern) -> Dict[str, Any]:
-    """Convert Pattern object to dictionary"""
+def _pattern_to_dict(pattern: Pattern) -> dict[str, Any]:
+    """Convert Pattern object to dictionary."""
     return {
         "pattern_type": pattern.pattern_type,
         "description": pattern.description,
@@ -1180,4 +1173,3 @@ if __name__ == "__main__":
     }
 
     result = run_team_coach(request_data)
-    print(json.dumps(result, indent=2))
