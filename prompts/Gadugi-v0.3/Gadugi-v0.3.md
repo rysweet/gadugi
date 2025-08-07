@@ -37,6 +37,9 @@ The Orchestration Agent delegates aspects of the workflow to sub-agents, which a
 
 Some invocations of sub-agents will be done directly and synchronously, while others will be done through the event router, which allows for asynchronous communication and coordination between agents.
 
+The Orchestration Agent should use sub-agents to analyze a task and decompose it into sub-tasks. It also will use sub-agents to look for things that can happen in parallel, and then emit the appropriate events to cause those sub-agents to be invoked. This allows for efficient parallel processing of tasks, which can significantly speed up the overall workflow.
+
+
 ## Problem Solving Loop
 
 The problem solving loop is at the core of the Orchestration Agent. It is a loop that runs until the problem is solved or the agent is stopped. The loop consists of the following steps:
@@ -114,7 +117,7 @@ Agent sessions end with a reflection loop that uses a Team Coach agent to reflec
 - tries to remember (store) which agents are running
 - is the installer and bootstrap point - starts/stops/installs/updates the Gadugi agents and the rest of the system
 - reports on agent activity
-- can stream filter of agent events 
+- can stream and filter agent events 
 - can send cancel events
 
 ## LLM Provider Proxy
