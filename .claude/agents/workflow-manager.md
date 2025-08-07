@@ -375,14 +375,14 @@ Enhanced issue creation features:
    # Install pre-commit hooks if not already installed
    # For UV projects:
    uv run pre-commit install
-   
+
    # For standard Python projects:
    pre-commit install
 
    # Run pre-commit hooks on all files
    # For UV projects:
    uv run pre-commit run --all-files
-   
+
    # For standard Python projects:
    pre-commit run --all-files
    ```
