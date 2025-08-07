@@ -1052,7 +1052,7 @@ class TestCheckpointManager:
                 "status": "in_progress",
             }
             checkpoint_id = checkpoint_manager.create_checkpoint(
-                state, f"checkpoint-{i+1}"
+                state, f"checkpoint-{i + 1}"
             )
             checkpoint_ids.append(checkpoint_id)
 
