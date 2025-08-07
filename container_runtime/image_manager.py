@@ -5,16 +5,28 @@ Manages container images with security scanning, hardening,
 and efficient caching for the Gadugi execution environment.
 """
 
-import docker
 import logging
 import hashlib
 import subprocess
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime, timedelta
 import json
 import tempfile
+
+if TYPE_CHECKING:
+    import docker
+else:
+    docker = None
+
+# Runtime import attempt
+try:
+    import docker  # type: ignore[import-untyped]
+
+    docker_available = True
+except ImportError:
+    docker_available = False
 
 # Import Enhanced Separation shared modules
 import sys
@@ -66,11 +78,14 @@ class ImageManager:
 
     def __init__(
         self,
-        docker_client: Optional[docker.DockerClient] = None,
+        docker_client: Optional[Any] = None,
         image_cache_dir: Optional[Path] = None,
     ):
         """Initialize image manager."""
-        self.client = docker_client or docker.from_env()
+        if not docker_available:
+            raise GadugiError("Docker is not available. Please install docker package.")
+
+        self.client = docker_client or docker.from_env()  # type: ignore[attr-defined]
         self.image_cache_dir = image_cache_dir or Path("cache/images")
         self.image_cache_dir.mkdir(parents=True, exist_ok=True)
 

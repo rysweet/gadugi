@@ -103,3 +103,8 @@ lint.ignore = [
 docstring-code-format = true
 docstring-code-line-length = 88
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.403",
+]
