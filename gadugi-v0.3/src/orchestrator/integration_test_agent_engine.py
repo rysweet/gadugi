@@ -12,6 +12,7 @@ This agent includes advanced features like:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -59,7 +60,7 @@ class IntegrationTestAgentEngine:
         self.logger = self._setup_logging()
         self.state = IntegrationTestAgentState.IDLE
         self.metrics = PerformanceMetrics(last_updated=datetime.now())
-        self.cache = {{}}
+        self.cache = {}
 
         # Advanced initialization
         self.operation_history = []
@@ -101,10 +102,8 @@ class IntegrationTestAgentEngine:
 
             # Cache result
             self.cache[cache_key] = {
-                {
-                    "data": result,
-                    "timestamp": datetime.now(),
-                },
+                "data": result,
+                "timestamp": datetime.now(),
             }
 
             self._update_metrics(start_time, cache_hit=False)
@@ -114,15 +113,13 @@ class IntegrationTestAgentEngine:
 
         except Exception as e:
             self.state = IntegrationTestAgentState.ERROR
-            self.logger.exception("Error in async operation: {e}")
+            self.logger.exception(f"Error in async operation: {e}")
             self._update_metrics(start_time, error=True)
 
             return {
-                {
-                    "success": False,
-                    "error": str(e),
-                    "timestamp": datetime.now().isoformat(),
-                },
+                "success": False,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
             }
 
     async def _process_request_async(self, request: dict[str, Any]) -> dict[str, Any]:
@@ -146,17 +143,15 @@ class IntegrationTestAgentEngine:
         # Process with monitoring
 
         return {
-            {
-                "success": True,
-                "operation": request.get("operation", "unknown"),
-                "results": {{"processed": True}},
-                "timestamp": datetime.now().isoformat(),
-            },
+            "success": True,
+            "operation": request.get("operation", "unknown"),
+            "results": {"processed": True},
+            "timestamp": datetime.now().isoformat(),
         }
 
     def _generate_cache_key(self, request: dict[str, Any]) -> str:
         """Generate cache key for request."""
-        return "integration_test_agent:{hash(json.dumps(request, sort_keys=True))}"
+        return f"integration_test_agent:{hash(json.dumps(request, sort_keys=True))}"
 
     def _is_cache_valid(self, cached_item: dict[str, Any]) -> bool:
         """Check if cached item is still valid."""
@@ -198,12 +193,10 @@ class IntegrationTestAgentEngine:
     def get_metrics(self) -> dict[str, Any]:
         """Get current performance metrics."""
         return {
-            {
-                "state": self.state.value,
-                "metrics": asdict(self.metrics),
-                "cache_size": len(self.cache),
-                "config": asdict(self.config),
-            },
+            "state": self.state.value,
+            "metrics": asdict(self.metrics),
+            "cache_size": len(self.cache),
+            "config": asdict(self.config),
         }
 
     def cleanup_cache(self) -> None:
@@ -219,7 +212,7 @@ class IntegrationTestAgentEngine:
         for key in expired_keys:
             del self.cache[key]
 
-        self.logger.info("Cleaned up {len(expired_keys)} expired cache entries")
+        self.logger.info(f"Cleaned up {len(expired_keys)} expired cache entries")
 
     def shutdown(self) -> None:
         """Graceful shutdown of the agent."""
