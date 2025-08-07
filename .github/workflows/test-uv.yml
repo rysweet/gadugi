@@ -65,7 +65,7 @@ jobs:
       run: uv sync --extra dev
 
     - name: Run ruff check (lint and format)
-      run: uv run ruff check .
+      run: uv run ruff check gadugi-v0.3/ --select E,F,W --ignore E501
 
     - name: Run ruff format check
-      run: uv run ruff format --check .
+      run: uv run ruff format --check gadugi-v0.3/

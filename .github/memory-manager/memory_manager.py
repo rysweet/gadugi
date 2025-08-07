@@ -10,16 +10,15 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from config import ConfigManager, MemoryManagerConfig, create_default_config
+from config import ConfigManager, create_default_config
 from github_integration import GitHubIntegration
 
 # Import our components
-from memory_parser import MemoryDocument, MemoryParser, TaskStatus
-from sync_engine import ConflictResolution, SyncDirection, SyncEngine
+from memory_parser import MemoryParser, TaskStatus
+from sync_engine import SyncDirection, SyncEngine
 from memory_compactor import MemoryCompactor
 
 
