@@ -99,13 +99,13 @@ def demo_team_coach():
 
     performance_result = run_team_coach(performance_request)
 
-    print(f"✅ Performance Analysis Complete:")
+    print("✅ Performance Analysis Complete:")
     analysis = performance_result["analysis_results"]
     print(f"   • Overall Performance Score: {analysis['performance_score']:.1f}/10.0")
     print(f"   • Workflow Duration: {analysis['workflow_duration']:.1f} seconds")
     print(f"   • Agents Utilized: {analysis['agents_utilized']}")
     print(f"   • Success Rate: {analysis['success_rate'] * 100:.0f}%")
-    print(f"   • Efficiency Metrics:")
+    print("   • Efficiency Metrics:")
     for metric, value in analysis["efficiency_metrics"].items():
         print(f"     - {metric.replace('_', ' ').title()}: {value}")
 
@@ -194,7 +194,7 @@ def demo_team_coach():
 
     pattern_result = run_team_coach(pattern_request)
 
-    print(f"✅ Pattern Analysis Complete:")
+    print("✅ Pattern Analysis Complete:")
     patterns = pattern_result["patterns_identified"]
     print(f"   • Patterns Identified: {len(patterns)}")
 
@@ -228,7 +228,7 @@ def demo_team_coach():
 
     trends = trend_result["performance_trends"]
     if "insufficient_data" not in trends:
-        print(f"✅ Trend Analysis Complete:")
+        print("✅ Trend Analysis Complete:")
         print(
             f"   • Overall Improvement Rate: {trends.get('improvement_rate', 0) * 100:.1f}%"
         )
@@ -253,13 +253,13 @@ def demo_team_coach():
     high_priority = [r for r in all_recommendations if r["priority"] == "high"]
     medium_priority = [r for r in all_recommendations if r["priority"] == "medium"]
 
-    print(f"📊 Optimization Summary:")
+    print("📊 Optimization Summary:")
     print(f"   • Total Recommendations: {len(all_recommendations)}")
     print(f"     - High Priority: {len(high_priority)}")
     print(f"     - Medium Priority: {len(medium_priority)}")
     print(f"   • Learning Insights: {len(all_insights)}")
 
-    print(f"\n🚀 Top Priority Actions:")
+    print("\n🚀 Top Priority Actions:")
     for i, rec in enumerate(high_priority[:3], 1):
         print(f"   {i}. {rec['description']}")
         print(f"      → {rec['expected_improvement']}")
@@ -267,7 +267,7 @@ def demo_team_coach():
             f"      Implementation: {rec['implementation_effort']} effort, {rec['risk_level']} risk"
         )
 
-    print(f"\n💡 Key Learning Insights:")
+    print("\n💡 Key Learning Insights:")
     best_practices = [i for i in all_insights if i["insight_type"] == "best_practice"]
     for insight in best_practices[:2]:
         print(f"   • {insight['description']}")
@@ -278,7 +278,7 @@ def demo_team_coach():
     for insight in optimization_opportunities[:2]:
         print(f"   • {insight['description']}")
 
-    print(f"\n📈 Team Coach Demo Summary")
+    print("\n📈 Team Coach Demo Summary")
     print("=" * 50)
     print("✅ Successfully demonstrated:")
     print("   • Comprehensive workflow performance analysis")
@@ -361,7 +361,7 @@ def demonstrate_advanced_features():
         }
     )
 
-    print(f"❌ Failed Workflow Analysis:")
+    print("❌ Failed Workflow Analysis:")
     analysis = failed_analysis["analysis_results"]
     print(f"   • Performance Score: {analysis['performance_score']:.1f}/10.0 (Poor)")
     print(f"   • Success Rate: {analysis['success_rate'] * 100:.0f}%")
@@ -369,7 +369,7 @@ def demonstrate_advanced_features():
         f"   • Resource Efficiency: {analysis['efficiency_metrics']['resource_efficiency']}"
     )
 
-    print(f"\n🔧 Recovery Recommendations:")
+    print("\n🔧 Recovery Recommendations:")
     for rec in failed_analysis["recommendations"][:3]:
         print(f"   • {rec['description']} (Priority: {rec['priority']})")
 
@@ -429,15 +429,15 @@ def demonstrate_advanced_features():
         }
     )
 
-    print(f"🚀 Optimized Workflow Results:")
+    print("🚀 Optimized Workflow Results:")
     analysis = optimized_analysis["analysis_results"]
     print(
         f"   • Performance Score: {analysis['performance_score']:.1f}/10.0 (Excellent)"
     )
     print(f"   • Duration: {analysis['workflow_duration']:.0f}s (Fast)")
-    print(f"   • All Efficiency Metrics: Excellent")
+    print("   • All Efficiency Metrics: Excellent")
 
-    print(f"\n✨ Performance Improvements Detected:")
+    print("\n✨ Performance Improvements Detected:")
     if optimized_analysis["recommendations"]:
         for rec in optimized_analysis["recommendations"]:
             if "maintain" in rec["description"].lower():
@@ -463,7 +463,7 @@ if __name__ == "__main__":
         # Run advanced features demo
         demonstrate_advanced_features()
 
-        print(f"\n🎉 Team Coach Demo Completed Successfully!")
+        print("\n🎉 Team Coach Demo Completed Successfully!")
         print(
             f"   • Generated {results['total_recommendations']} optimization recommendations"
         )

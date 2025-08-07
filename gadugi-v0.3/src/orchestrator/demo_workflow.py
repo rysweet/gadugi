@@ -17,7 +17,7 @@ def demo_multi_agent_workflow(high_level_task: str):
     3. Orchestrator could then run each subtask (future enhancement)
     """
 
-    print(f"=== Gadugi v0.3 Multi-Agent Workflow Demo ===")
+    print("=== Gadugi v0.3 Multi-Agent Workflow Demo ===")
     print(f"High-level task: {high_level_task}")
     print("=" * 60)
 

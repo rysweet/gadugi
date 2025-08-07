@@ -58,7 +58,7 @@ def demo_memory_manager():
     status_request = {"action": "status", "memory_content": sample_memory}
 
     status_result = run_memory_manager(status_request)
-    print(f"✅ Memory analysis complete:")
+    print("✅ Memory analysis complete:")
     stats = status_result["statistics"]
     print(f"   • Total sections: {stats['total_sections']}")
     print(f"   • Total items: {stats['total_items']}")
@@ -99,7 +99,7 @@ def demo_memory_manager():
     }
 
     update_result = run_memory_manager(update_request)
-    print(f"✅ Memory updated successfully:")
+    print("✅ Memory updated successfully:")
     print(f"   • Items added: {update_result['statistics']['items_added']}")
     print(f"   • Actions taken: {len(update_result['actions_taken'])}")
 
@@ -116,7 +116,7 @@ def demo_memory_manager():
     }
 
     prune_result = run_memory_manager(prune_request)
-    print(f"✅ Memory pruned successfully:")
+    print("✅ Memory pruned successfully:")
     if "items_removed" in prune_result["statistics"]:
         print(f"   • Items removed: {prune_result['statistics']['items_removed']}")
     else:
@@ -136,7 +136,7 @@ def demo_memory_manager():
     }
 
     sync_result = run_memory_manager(sync_request)
-    print(f"✅ GitHub sync completed:")
+    print("✅ GitHub sync completed:")
     sync_stats = sync_result["statistics"]
     print(f"   • Issues created: {sync_stats['issues_created']}")
     print(f"   • Issues updated: {sync_stats['issues_updated']}")
@@ -169,7 +169,7 @@ def demo_memory_manager():
     if len(lines) > 25:
         print(f"... ({len(lines) - 25} more lines)")
 
-    print(f"\n📈 Memory Manager Demo Summary")
+    print("\n📈 Memory Manager Demo Summary")
     print("=" * 50)
     print("✅ Successfully demonstrated:")
     print("   • Memory content parsing and structure analysis")
@@ -196,7 +196,7 @@ def demo_memory_manager():
 if __name__ == "__main__":
     try:
         results = demo_memory_manager()
-        print(f"\n🎉 Demo completed successfully!")
+        print("\n🎉 Demo completed successfully!")
 
     except Exception as e:
         print(f"\n❌ Demo failed with error: {e}")

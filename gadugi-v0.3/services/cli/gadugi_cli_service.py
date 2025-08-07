@@ -241,17 +241,17 @@ class ServiceManager:
             if config["port"]:
                 cmd.extend(["--port", str(config["port"])])
 
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
                 start_new_session=True,
             )
 
             # Wait a moment to check if service started successfully
             await asyncio.sleep(2)
 
-            if process.poll() is None:  # Process is still running
+            if process.returncode is None:  # Process is still running
                 self.services[service_name] = ServiceInfo(
                     name=service_name,
                     type=ServiceType(service_name),
@@ -268,7 +268,7 @@ class ServiceManager:
                     execution_time=time.time() - start_time,
                 )
             else:
-                stdout, stderr = process.communicate()
+                stdout, stderr = await process.communicate()
                 return CommandResult(
                     success=False,
                     message=f"Failed to start service {service_name}",
@@ -1200,10 +1200,14 @@ Examples:
 
         # Install development dependencies
         try:
-            subprocess.run(
-                [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"],
-                check=True,
+            process = await asyncio.create_subprocess_exec(
+                sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"], stderr)
             if RICH_AVAILABLE:
                 self.console.print("[green]Development dependencies installed[/green]")
             else:
@@ -1239,7 +1243,13 @@ Examples:
         cmd.extend(["-v", "--tb=short"])
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            result = subprocess.CompletedProcess(cmd, process.returncode, stdout.decode(), stderr.decode())
 
             if RICH_AVAILABLE:
                 if result.returncode == 0:
@@ -1274,11 +1284,15 @@ Examples:
         # Run basic checks
         try:
             # Python syntax check
-            subprocess.run(
-                [sys.executable, "-m", "py_compile"]
-                + [str(f) for f in Path(".").rglob("*.py")],
-                check=True,
+            cmd = [sys.executable, "-m", "py_compile"] + [str(f) for f in Path(".").rglob("*.py")]
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
+            stdout, stderr = await process.communicate()
+            if process.returncode != 0:
+                raise subprocess.CalledProcessError(process.returncode, cmd, stderr)
 
             if RICH_AVAILABLE:
                 self.console.print("[green]Python syntax check passed[/green]")

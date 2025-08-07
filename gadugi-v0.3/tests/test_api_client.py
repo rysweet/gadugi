@@ -60,7 +60,7 @@ class TestApiClientEngine(unittest.TestCase):
         """Test error handling in operations."""
         # This test would need specific error conditions
         # based on the agent's implementation
-        pass
+        self.skipTest("Implementation-specific behavior testing not yet implemented")
     
     def test_logging_setup(self):
         """Test that logging is set up correctly."""

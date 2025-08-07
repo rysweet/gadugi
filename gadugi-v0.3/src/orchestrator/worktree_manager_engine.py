@@ -714,7 +714,6 @@ class WorktreeCleanupManager:
     async def _cleanup_metadata(self, worktree: WorktreeMetadata):
         """Clean up tracking metadata"""
         # Remove from registry (implementation depends on storage)
-        pass
 
 
 class WorktreeManagerEngine:
@@ -1134,7 +1133,7 @@ async def main():
             args.policy, args.retention_days, args.dry_run
         )
 
-        print(f"Cleanup Results:")
+        print("Cleanup Results:")
         print(f"  Removed: {result.removed_count}")
         print(f"  Preserved: {result.preserved_count}")
         print(f"  Disk freed: {result.disk_freed_mb}MB")
@@ -1151,7 +1150,7 @@ async def main():
         else:
             if "summary" in health:
                 s = health["summary"]
-                print(f"Worktree Health Summary:")
+                print("Worktree Health Summary:")
                 print(f"  Total: {s['total_worktrees']}")
                 print(f"  Healthy: {s['healthy']}")
                 print(f"  Unhealthy: {s['unhealthy']}")

@@ -503,11 +503,11 @@ class TestNeo4jGraphService(unittest.IsolatedAsyncioTestCase):
         # Mock path with nodes and relationships
         mock_path = Mock()
         mock_path.nodes = [
-            Mock(**{"__iter__": lambda: iter([("id", "node1"), ("name", "Node 1")])}),
-            Mock(**{"__iter__": lambda: iter([("id", "node2"), ("name", "Node 2")])}),
+            Mock(__iter__=lambda: iter([("id", "node1"), ("name", "Node 1")])),
+            Mock(__iter__=lambda: iter([("id", "node2"), ("name", "Node 2")])),
         ]
         mock_path.relationships = [
-            Mock(**{"__iter__": lambda: iter([("id", "rel1"), ("type", "CONNECTS")])})
+            Mock(__iter__=lambda: iter([("id", "rel1"), ("type", "CONNECTS")]))
         ]
 
         found_paths = [{"path": mock_path}]

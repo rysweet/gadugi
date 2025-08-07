@@ -167,10 +167,18 @@ class AnalysisTool:
     async def is_available(self) -> bool:
         """Check if tool is available"""
         try:
-            result = subprocess.run(
-                [self.name, "--version"], capture_output=True, timeout=10
+            process = await asyncio.create_subprocess_exec(
+                self.name, "--version",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
-            return result.returncode == 0
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10.0)
+                return process.returncode == 0
+            except asyncio.TimeoutError:
+                process.terminate()
+                await process.wait()
+                return False
         except (
             subprocess.CalledProcessError,
             FileNotFoundError,
@@ -199,7 +207,18 @@ class RuffAnalyzer(AnalysisTool):
             if self.config.get("args"):
                 cmd.extend(self.config["args"])
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
+                result = subprocess.CompletedProcess(cmd, process.returncode, stdout.decode(), stderr.decode())
+            except asyncio.TimeoutError:
+                process.terminate()
+                await process.wait()
+                raise subprocess.TimeoutExpired(cmd, 300)
 
             issues = []
             if result.stdout:

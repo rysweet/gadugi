@@ -168,7 +168,7 @@ def main():
     response = engine.execute_operation(test_request)
     
     if response.success:
-        print(f"api_client operation completed successfully!")
+        print("api_client operation completed successfully!")
         print(f"Results: {response.results}")
     else:
         print(f"api_client operation failed: {response.errors}")

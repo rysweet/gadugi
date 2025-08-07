@@ -82,7 +82,7 @@ def demo_complete_workflow():
         code_result = run_agent("code-writer", task["task"])
 
         if code_result["success"]:
-            print(f"✅ Code generation successful!")
+            print("✅ Code generation successful!")
             print(f"   Language: {code_result['metadata']['language']}")
             print(f"   Type: {code_result['metadata']['code_type']}")
 
@@ -107,26 +107,26 @@ def demo_complete_workflow():
     print(f"📝 Generated: {len(generated_prompts)} detailed prompts")
     print(f"💻 Generated: {len(generated_code)} code implementations")
 
-    print(f"\n📊 Agents Used:")
+    print("\n📊 Agents Used:")
     print("  ✅ task-decomposer: Broke down high-level task")
     print("  ✅ prompt-writer: Created structured implementation prompts")
     print("  ✅ code-writer: Generated functional source code")
 
-    print(f"\n🔄 Workflow Phases:")
+    print("\n🔄 Workflow Phases:")
     print("  1. Task Analysis & Decomposition")
     print("  2. Prompt Generation & Structuring")
     print("  3. Code Implementation & Generation")
     print("  4. Integration & Coordination")
 
     if generated_code:
-        print(f"\n🎉 Complete End-to-End Success!")
+        print("\n🎉 Complete End-to-End Success!")
         print("The workflow successfully transformed a high-level task into:")
         print("  • Structured subtasks")
         print("  • Detailed implementation prompts")
         print("  • Functional source code")
 
         # Show what would happen next in a full implementation
-        print(f"\n⏭️  Next Steps (in full system):")
+        print("\n⏭️  Next Steps (in full system):")
         print("  • Run generated code through test-writer agent")
         print("  • Create integration tests and validation")
         print("  • Package and deploy components")

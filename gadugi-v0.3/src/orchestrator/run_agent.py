@@ -117,10 +117,10 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                         f"📁 {file_info['filename']}: {file_info['description']}"
                     )
 
-                output = f"Code Generation Results:\n"
+                output = "Code Generation Results:\n"
                 output += f"Task: {result['task']}\n"
                 output += f"Language: {result['metadata']['language']}\n"
-                output += f"Files Generated:\n" + "\n".join(files_summary)
+                output += "Files Generated:\n" + "\n".join(files_summary)
 
                 if result["dependencies"]:
                     output += f"\nDependencies: {', '.join(result['dependencies'])}"

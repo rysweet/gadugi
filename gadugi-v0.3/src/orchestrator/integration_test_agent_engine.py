@@ -109,7 +109,7 @@ class IntegrationTestAgentEngine:
             
         except Exception as e:
             self.state = IntegrationTestAgentState.ERROR
-            self.logger.error(f"Error in async operation: {{e}}")
+            self.logger.error("Error in async operation: {e}")
             self._update_metrics(start_time, error=True)
             
             return {{
@@ -146,7 +146,7 @@ class IntegrationTestAgentEngine:
     
     def _generate_cache_key(self, request: Dict[str, Any]) -> str:
         """Generate cache key for request."""
-        return f"integration_test_agent:{{hash(json.dumps(request, sort_keys=True))}}"
+        return "integration_test_agent:{hash(json.dumps(request, sort_keys=True))}"
     
     def _is_cache_valid(self, cached_item: Dict[str, Any]) -> bool:
         """Check if cached item is still valid."""
@@ -202,7 +202,7 @@ class IntegrationTestAgentEngine:
         for key in expired_keys:
             del self.cache[key]
         
-        self.logger.info(f"Cleaned up {{len(expired_keys)}} expired cache entries")
+        self.logger.info("Cleaned up {len(expired_keys)} expired cache entries")
     
     def shutdown(self):
         """Graceful shutdown of the agent."""

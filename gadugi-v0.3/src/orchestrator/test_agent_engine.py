@@ -168,7 +168,7 @@ def main():
     response = engine.execute_operation(test_request)
     
     if response.success:
-        print(f"test_agent operation completed successfully!")
+        print("test_agent operation completed successfully!")
         print(f"Results: {response.results}")
     else:
         print(f"test_agent operation failed: {response.errors}")

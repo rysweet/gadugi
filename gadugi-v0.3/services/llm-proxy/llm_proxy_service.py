@@ -261,14 +261,14 @@ class LLMProviderBase(ABC):
     @abstractmethod
     async def generate_completion(self, request: LLMRequest) -> LLMResponse:
         """Generate completion for the request."""
-        pass
+        ...
 
     @abstractmethod
     async def generate_streaming_completion(
         self, request: LLMRequest
     ) -> AsyncIterator[str]:
         """Generate streaming completion for the request."""
-        pass
+        ...
 
     def can_handle_request(self, request: LLMRequest) -> bool:
         """Check if provider can handle the request."""
