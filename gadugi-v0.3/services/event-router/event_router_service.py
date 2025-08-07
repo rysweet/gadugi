@@ -14,7 +14,7 @@ import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable
@@ -129,7 +129,7 @@ class Subscription:
     callback: Callable[[Event], None] | None
     endpoint: str | None
     active: bool = True
-    created_at: datetime = None
+    created_at: datetime | None = None
 
     def __post_init__(self):
         if self.created_at is None:
@@ -141,20 +141,12 @@ class EventStats:
     """Event processing statistics."""
 
     total_events: int = 0
-    events_by_type: dict[str, int] = None
-    events_by_priority: dict[str, int] = None
-    events_by_source: dict[str, int] = None
+    events_by_type: dict[str, int] = field(default_factory=dict)
+    events_by_priority: dict[str, int] = field(default_factory=dict)
+    events_by_source: dict[str, int] = field(default_factory=dict)
     average_processing_time: float = 0.0
     failed_deliveries: int = 0
     active_subscriptions: int = 0
-
-    def __post_init__(self):
-        if self.events_by_type is None:
-            self.events_by_type = {}
-        if self.events_by_priority is None:
-            self.events_by_priority = {}
-        if self.events_by_source is None:
-            self.events_by_source = {}
 
 
 class EventQueue:
@@ -489,6 +481,7 @@ class EventRouterService:
                 subscriber_id=client_id,
                 subscription_type=SubscriptionType(sub_data.get("type", "filtered")),
                 filter=event_filter,
+                callback=None,  # No direct callback for WebSocket subscriptions
                 endpoint=client_id,  # Use client_id as endpoint for direct delivery
             )
 
@@ -815,6 +808,7 @@ class EventRouterService:
             subscription_type=SubscriptionType.FILTERED,
             filter=event_filter,
             callback=callback,
+            endpoint=None,  # No specific endpoint for programmatic subscriptions
         )
 
         self.subscriptions[subscription.id] = subscription
@@ -848,7 +842,7 @@ class EventRouterService:
                     "id": subscription.id,
                     "subscriber_id": subscription.subscriber_id,
                     "type": subscription.subscription_type.value,
-                    "created_at": subscription.created_at.isoformat(),
+                    "created_at": subscription.created_at.isoformat() if subscription.created_at else datetime.now().isoformat(),
                     "has_filter": subscription.filter is not None,
                     "has_callback": subscription.callback is not None,
                 }
