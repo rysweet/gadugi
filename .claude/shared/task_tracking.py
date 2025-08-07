@@ -821,3 +821,8 @@ class TaskTracker:
                 task.dependencies = task_data['dependencies']
             self.task_list.add_task(task)
         logger.info(f"Initialized task list with {len(tasks)} tasks for workflow {workflow_id}")
+
+    def initialize_workflow(self, workflow_id: str) -> None:
+        """Initialize workflow tracking for the given workflow ID."""
+        self.phase_tracker.workflow_id = workflow_id
+        logger.info(f"Initialized workflow tracking for workflow {workflow_id}")
