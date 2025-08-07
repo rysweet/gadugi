@@ -900,7 +900,12 @@ class TestStateManager:
         )
         state_manager.save_state(original_state)
         temp_backup_dir = state_manager.state_dir.parent / "restore_backup_test"
-        state_manager.backup_state(str(temp_backup_dir))
+        temp_backup_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create backup by copying state file to backup directory
+        original_state_file = state_manager._get_state_file("restore-test")
+        backup_file = temp_backup_dir / "restore-test.json"
+        shutil.copy2(original_state_file, backup_file)
 
         # Modify current state
         current_state = state_manager.load_state("restore-test")
@@ -1023,13 +1028,13 @@ class TestCheckpointManager:
             "current_phase": state.current_phase,
             "prompt_file": state.prompt_file,
         }
-        checkpoint_id = checkpoint_manager.create_checkpoint(
-            "checkpoint-001", state.to_dict()
-        )
+        checkpoint_id = checkpoint_manager.create_checkpoint(state, "checkpoint-001")
         assert checkpoint_id is not None
 
         # Verify checkpoint file exists
-        checkpoint_file = checkpoint_manager.checkpoint_dir / f"{checkpoint_id}.json"
+        checkpoint_file = (
+            checkpoint_manager.checkpoint_dir / state.task_id / f"{checkpoint_id}.json"
+        )
         assert checkpoint_file.exists()
 
     def test_list_checkpoints(self, checkpoint_manager):
@@ -1047,17 +1052,17 @@ class TestCheckpointManager:
                 "status": "in_progress",
             }
             checkpoint_id = checkpoint_manager.create_checkpoint(
-                "list-checkpoints", checkpoint_state
+                state, f"checkpoint-{i+1}"
             )
             checkpoint_ids.append(checkpoint_id)
 
         # List all checkpoints
-        checkpoints = checkpoint_manager.list_checkpoints()
+        checkpoints = checkpoint_manager.list_checkpoints("list-checkpoints")
         assert len(checkpoints) >= 3
 
         # Check that our checkpoints are in the list
         for checkpoint_id in checkpoint_ids:
-            assert checkpoint_id in checkpoints
+            assert any(cp["checkpoint_id"] == checkpoint_id for cp in checkpoints)
 
     def test_restore_checkpoint(self, checkpoint_manager):
         """Test checkpoint restoration."""
@@ -1076,16 +1081,18 @@ class TestCheckpointManager:
             "current_phase": 3,
         }
         checkpoint_id = checkpoint_manager.create_checkpoint(
-            "restore-checkpoint", checkpoint_state
+            original_state, "restore-checkpoint-desc"
         )
 
         # Restore checkpoint
-        restored_data = checkpoint_manager.restore_checkpoint(checkpoint_id)
+        restored_data = checkpoint_manager.restore_checkpoint(
+            "restore-checkpoint", checkpoint_id
+        )
 
         assert restored_data is not None
-        assert restored_data["task_id"] == "restore-checkpoint"
-        assert restored_data["current_phase"] == 3
-        assert restored_data["status"] == "in_progress"
+        assert restored_data.task_id == "restore-checkpoint"
+        assert restored_data.current_phase == 3
+        assert restored_data.status == "in_progress"
 
     def test_cleanup_old_checkpoints(self, checkpoint_manager):
         """Test cleanup of old checkpoints."""
@@ -1129,9 +1136,11 @@ class TestCheckpointManager:
         assert len(checkpoint_files) > 0, "At least one checkpoint file should exist"
 
         # Verify we can restore the checkpoint
-        restored_data = checkpoint_manager.restore_checkpoint(checkpoint_id)
+        restored_data = checkpoint_manager.restore_checkpoint(
+            "compression-test", checkpoint_id
+        )
         assert restored_data is not None
-        assert restored_data["context"]["large_data"] == "x" * 10000
+        assert restored_data.context["large_data"] == "x" * 10000
 
 
 class TestStateError:
@@ -1212,7 +1221,7 @@ class TestStateManagementIntegration:
         # Verify final state
         final_state = state_manager.load_state("integration-workflow")
         assert final_state.status == "completed"
-        assert final_state.current_phase == WorkflowPhase.REVIEW
+        assert final_state.current_phase == WorkflowPhase.REVIEW.value
         assert final_state.issue_number == 42
         assert final_state.pr_number == 15
         assert final_state.branch == "feature/integration-test-42"
@@ -1237,7 +1246,7 @@ class TestStateManagementIntegration:
 
         # Progress through phases with checkpoints
         phases = [
-            WorkflowPhase.PLANNING,
+            WorkflowPhase.RESEARCH_PLANNING,
             WorkflowPhase.ISSUE_CREATION,
             WorkflowPhase.IMPLEMENTATION,
         ]
@@ -1245,7 +1254,7 @@ class TestStateManagementIntegration:
             task_state.update_phase(phase)
             state_manager.update_state(task_state)
             checkpoint_manager.create_checkpoint(
-                "error-recovery-test", task_state.to_dict()
+                task_state, f"error-recovery-phase-{phase.value}"
             )
 
         # Simulate error in implementation phase
@@ -1265,7 +1274,7 @@ class TestStateManagementIntegration:
         # Verify recovery
         current_state = state_manager.load_state("error-recovery-test")
         assert current_state.status == "pending"  # Error cleared
-        assert current_state.error_info is None
+        assert current_state.error_info == {}
 
     @pytest.mark.integration
     def test_concurrent_task_management(self, integration_setup):
@@ -1283,16 +1292,16 @@ class TestStateManagementIntegration:
             )
             tasks.append(task)
             state_manager.save_state(task)
-            checkpoint_manager.create_checkpoint(task.task_id, task.to_dict())
+            checkpoint_manager.create_checkpoint(task, f"concurrent-task-{i}")
 
         # Verify all tasks are tracked
-        active_states = state_manager.get_active_states()
+        active_states = state_manager.list_active_states()
         assert len(active_states) == 5
 
         # Complete some tasks
         for i in [0, 2, 4]:
             tasks[i].status = "completed"
-            tasks[i].current_phase = WorkflowPhase.REVIEW
+            tasks[i].update_phase(WorkflowPhase.REVIEW)
             state_manager.update_state(tasks[i])
 
         # Verify final states
@@ -1300,5 +1309,5 @@ class TestStateManagementIntegration:
         assert len(completed_states) == 3
 
         # The remaining tasks should still be in progress or pending
-        active_states = state_manager.list_active_states()
-        assert len(active_states) == 2
+        in_progress_states = state_manager.list_states_by_status("in_progress")
+        assert len(in_progress_states) == 2
