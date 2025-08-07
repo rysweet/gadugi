@@ -19,15 +19,19 @@ RUN apt-get update && apt-get install -y \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude CLI (simulated - replace with actual installation)
-# NOTE: Replace this with the actual Claude CLI installation method
-RUN echo '#!/bin/bash' > /usr/local/bin/claude && \
-    echo 'echo "Claude CLI placeholder - replace with actual Claude CLI"' >> /usr/local/bin/claude && \
-    echo 'echo "Command: $@"' >> /usr/local/bin/claude && \
-    echo 'echo "Working directory: $(pwd)"' >> /usr/local/bin/claude && \
-    echo 'echo "Files in workspace:"' >> /usr/local/bin/claude && \
-    echo 'ls -la' >> /usr/local/bin/claude && \
-    chmod +x /usr/local/bin/claude
+# Install Node.js (required for Claude CLI)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Claude CLI
+# Note: This assumes Claude CLI is available via npm. Update if installation method changes.
+RUN npm install -g @anthropic/claude-cli || \
+    (echo "Warning: Claude CLI installation failed. Container will need manual setup." && \
+     echo '#!/bin/bash' > /usr/local/bin/claude && \
+     echo 'echo "ERROR: Claude CLI not installed. Please install manually."' >> /usr/local/bin/claude && \
+     echo 'exit 1' >> /usr/local/bin/claude && \
+     chmod +x /usr/local/bin/claude)
 
 # Install Python dependencies for container execution
 RUN pip install --no-cache-dir \

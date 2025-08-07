@@ -267,8 +267,47 @@ CMD ["bash"]
         if not self.docker_client:
             raise RuntimeError("Docker client not initialized")
         
+        # Validate API key before container creation
+        api_key = os.getenv('CLAUDE_API_KEY', '').strip()
+        if not api_key:
+            logger.error(f"CLAUDE_API_KEY not set for task {task_id}")
+            return ContainerResult(
+                task_id=task_id,
+                status="failed",
+                exit_code=-1,
+                stdout="",
+                stderr="ERROR: CLAUDE_API_KEY environment variable not set",
+                logs="",
+                start_time=datetime.now(),
+                end_time=datetime.now(),
+                duration=0.0,
+                resource_usage={}
+            )
+        
         container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
         start_time = datetime.now()
+        
+        # Validate host system resources
+        try:
+            import psutil
+            mem = psutil.virtual_memory()
+            if mem.available < 1024 * 1024 * 1024:  # Less than 1GB available
+                logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
+                if mem.available < 512 * 1024 * 1024:  # Less than 512MB
+                    return ContainerResult(
+                        task_id=task_id,
+                        status="failed",
+                        exit_code=-1,
+                        stdout="",
+                        stderr="ERROR: Insufficient memory to create container",
+                        logs="",
+                        start_time=start_time,
+                        end_time=datetime.now(),
+                        duration=0.0,
+                        resource_usage={}
+                    )
+        except ImportError:
+            logger.warning("psutil not available, skipping resource check")
         
         logger.info(f"Starting containerized task: {task_id}")
         
@@ -280,10 +319,12 @@ CMD ["bash"]
             }
         }
         
-        # Prepare Claude CLI command with proper flags
+        # Prepare Claude CLI command with proper flags and path escaping
+        import shlex
+        escaped_prompt = shlex.quote(prompt_file)
         claude_cmd = [
             "claude",
-            "-p", prompt_file
+            "-p", escaped_prompt
         ] + self.config.claude_flags
         
         logger.info(f"Container command: {' '.join(claude_cmd)}")
@@ -342,12 +383,36 @@ CMD ["bash"]
                 'network_tx': stats.get('networks', {}).get('eth0', {}).get('tx_bytes', 0)
             }
             
-        except Exception as e:
-            logger.error(f"Container execution failed for {task_id}: {e}")
-            exit_code = -1
+        except docker.errors.ImageNotFound as e:
+            logger.error(f"Docker image not found for {task_id}: {e}")
+            exit_code = -2
             status = "failed"
             stdout = ""
-            stderr = str(e)
+            stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."
+            logs = ""
+            resource_usage = {}
+        except docker.errors.APIError as e:
+            logger.error(f"Docker API error for {task_id}: {e}")
+            exit_code = -3
+            status = "failed"
+            stdout = ""
+            stderr = f"Docker API error: {e}"
+            logs = ""
+            resource_usage = {}
+        except docker.errors.ContainerError as e:
+            logger.error(f"Container error for {task_id}: {e}")
+            exit_code = e.exit_status
+            status = "failed"
+            stdout = e.stdout.decode('utf-8') if e.stdout else ""
+            stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
+            logs = ""
+            resource_usage = {}
+        except Exception as e:
+            logger.error(f"Unexpected container execution error for {task_id}: {e}")
+            exit_code = -99
+            status = "failed"
+            stdout = ""
+            stderr = f"Unexpected error: {type(e).__name__}: {e}"
             logs = ""
             resource_usage = {}
             
