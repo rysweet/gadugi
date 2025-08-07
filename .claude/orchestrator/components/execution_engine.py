@@ -35,14 +35,24 @@ from .prompt_generator import PromptContext, PromptGenerator
 
 # Import ContainerManager for Docker-based execution (CRITICAL FIX #167)
 try:
-    from ..container_manager import ContainerManager, ContainerConfig, ContainerResult
+    # Try absolute import first (works when run directly)
+    import sys
+    import os
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, parent_dir)
+    from container_manager import ContainerManager, ContainerConfig, ContainerResult
     CONTAINER_EXECUTION_AVAILABLE = True
 except ImportError:
-    logging.warning("ContainerManager not available - falling back to subprocess execution")
-    CONTAINER_EXECUTION_AVAILABLE = False
-    ContainerManager = None
-    ContainerConfig = None
-    ContainerResult = None
+    try:
+        # Fallback to relative import (works when imported as module)
+        from ..container_manager import ContainerManager, ContainerConfig, ContainerResult
+        CONTAINER_EXECUTION_AVAILABLE = True
+    except ImportError:
+        logging.warning("ContainerManager not available - falling back to subprocess execution")
+        CONTAINER_EXECUTION_AVAILABLE = False
+        ContainerManager = None
+        ContainerConfig = None
+        ContainerResult = None
 
 # Security: Define strict resource limits
 MAX_CONCURRENT_TASKS = 8
@@ -232,12 +242,25 @@ class TaskExecutor:
                     progress_callback=self._progress_callback
                 )
 
-                # Convert ContainerResult to ExecutionResult for compatibility
-                execution_result = self._convert_container_result(container_result)
-
-                print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
-                self.result = execution_result
-                return execution_result
+                # Check if containerized execution failed due to missing prerequisites
+                # (e.g., no API key, Docker issues) and should fall back to subprocess
+                if container_result.status == "failed" and container_result.exit_code == -1:
+                    if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
+                        print(f"⚠️  Container execution requires API key for {self.task_id}")
+                        print(f"🔄 Falling back to subprocess execution...")
+                        # Fall through to subprocess fallback
+                    else:
+                        # This is a real failure, return it
+                        execution_result = self._convert_container_result(container_result)
+                        print(f"❌ Containerized task failed: {self.task_id}, status={execution_result.status}")
+                        self.result = execution_result
+                        return execution_result
+                else:
+                    # Convert ContainerResult to ExecutionResult for compatibility
+                    execution_result = self._convert_container_result(container_result)
+                    print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
+                    self.result = execution_result
+                    return execution_result
 
             except Exception as e:
                 print(f"⚠️  Containerized execution failed for {self.task_id}: {e}")

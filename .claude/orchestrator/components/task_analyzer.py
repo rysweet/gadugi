@@ -70,10 +70,14 @@ class TaskInfo:
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
 
-    def __init__(self, prompts_dir: str = "/prompts/", project_root: str = "."):
+    def __init__(self, prompts_dir: str = None, project_root: str = "."):
         # Security: Validate and sanitize input paths
-        self.prompts_dir = self._validate_directory_path(prompts_dir)
         self.project_root = self._validate_directory_path(project_root)
+        # If prompts_dir not specified, use project_root/prompts
+        if prompts_dir is None:
+            self.prompts_dir = self.project_root / "prompts"
+        else:
+            self.prompts_dir = self._validate_directory_path(prompts_dir)
         self.tasks: List[TaskInfo] = []
         self.dependency_graph: Dict[str, List[str]] = {}
         self.conflict_matrix: Dict[str, Set[str]] = {}
@@ -82,9 +86,9 @@ class TaskAnalyzer:
         """Security: Validate directory paths to prevent path traversal attacks"""
         try:
             resolved_path = Path(path).resolve()
-            # Prevent path traversal attacks
-            if '..' in str(resolved_path) or not resolved_path.is_absolute():
-                raise ValueError(f"Invalid directory path: {path}")
+            # Prevent path traversal attacks - but allow relative paths that resolve to absolute
+            if '..' in Path(path).parts:  # Check original path for .. components
+                raise ValueError(f"Path traversal detected: {path}")
             return resolved_path
         except Exception as e:
             logging.error(f"Path validation failed for {path}: {e}")
