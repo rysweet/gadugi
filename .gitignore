@@ -145,4 +145,15 @@ Pipfile.lock
 .github/workflow-checkpoints/
 .task/
 
-.task/
+# Gadugi monitoring and orchestrator runtime files
+.gadugi/monitoring/
+.gadugi/logs/
+.gadugi/cache/
+
+# Git worktrees (used for parallel development)
+.worktrees/
+
+# Temporary orchestrator files
+orchestration-*/
+*_orchestration.json
+*_orchestration.log
