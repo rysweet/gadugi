@@ -2,6 +2,14 @@
 
 > **Gadugi** is a multi-agent system for AI-assisted coding. It takes its name from the Cherokee word (gah-DOO-gee) that means communal work - where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
 
+## 📦 Release Notes
+
+### v0.1.0 - Initial Release (January 2025)
+
+This inaugural release of Gadugi establishes the foundation for AI-assisted software development with a focus on systematic, quality-driven workflows. Key highlights include the orchestrator-based task management system that enables parallel execution of independent tasks, comprehensive VS Code integration for seamless development experiences, and the implementation of an 11-phase development workflow that ensures consistent, professional development practices from issue creation through code review.
+
+The release delivers a complete multi-agent architecture with specialized agents for orchestration, implementation, review, and maintenance tasks. With built-in support for UV Python projects, automated git worktree management for isolated development environments, and seamless GitHub integration for issue tracking and pull request workflows, v0.1 provides a robust framework for maintaining code quality while accelerating development velocity. The system includes automated testing gates, pre-commit hooks with pyright type checking, and comprehensive documentation to ensure reliable, maintainable codebases.
+
 ## Overview
 
 Gadugi provides a collection of reusable AI agents that work together (and in parallel) to enhance software development workflows. While currently implemented for Claude Code, the architecture is designed to be agent-host neutral and can be adapted to other AI coding assistants.
