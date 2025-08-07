@@ -43,8 +43,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 try:
     from github_operations import GitHubOperations
     from state_management import StateManager, CheckpointManager
-    from utils.error_handling import ErrorHandler, CircuitBreaker, RetryManager
-    from task_tracking import TaskMetrics, WorkflowPhase
+    from utils.error_handling import ErrorHandler, CircuitBreaker
+    from task_tracking import TaskMetrics
     from interfaces import AgentConfig, OperationResult
 except ImportError as e:
     logging.warning(f"Could not import shared modules: {e}")
