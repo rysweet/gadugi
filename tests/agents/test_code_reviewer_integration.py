@@ -46,7 +46,7 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         """Test that a complete review includes simplicity assessment."""
         # Mock PR data
         pr_files = {
-            'src/payment_processor.py': '''
+            'src/payment_processor.py': """
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -58,7 +58,7 @@ class CreditCardProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool:
         # Only implementation - should be flagged as over-engineered
         return self._charge_card(amount)
-'''
+"""
         }
         
         self.create_pr_files(pr_files)
@@ -181,7 +181,7 @@ class TaskOrchestrator:
         """Test context-aware assessment for early-stage projects."""
         # Early-stage prototype code
         pr_files = {
-            'prototype.py': '''
+            'prototype.py': """
 def quick_data_processing(data):
     # Early prototype - direct approach is appropriate
     results = []
@@ -190,7 +190,7 @@ def quick_data_processing(data):
             processed = item['value'] * 2
             results.append(processed)
     return results
-'''
+"""
         }
         
         self.create_pr_files(pr_files)
@@ -238,7 +238,7 @@ class TestSimplicityDetectionAccuracy(unittest.TestCase):
         """Test that appropriate complexity is not flagged as over-engineering."""
         
         # Case 1: Multiple implementations justify abstraction
-        justified_abstraction = '''
+        justified_abstraction = """
 class PaymentProcessor(ABC):
     @abstractmethod
     def process(self, amount: float) -> bool: pass
@@ -251,7 +251,7 @@ class PayPalProcessor(PaymentProcessor):
 
 class BankTransferProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool: return self._bank_transfer(amount)
-'''
+"""
         
         # Case 2: Complex domain requires complex solution
         justified_complexity = '''
@@ -277,7 +277,7 @@ class TradingAlgorithm:
         """Test accurate detection of genuine over-engineering."""
         
         # Case 1: Abstract class with single implementation
-        over_engineered_1 = '''
+        over_engineered_1 = """
 class ReportGenerator(ABC):
     @abstractmethod
     def generate(self) -> str: pass
@@ -285,10 +285,10 @@ class ReportGenerator(ABC):
 class PDFReportGenerator(ReportGenerator):
     def generate(self) -> str: 
         return "PDF content"  # Only implementation
-'''
+"""
         
         # Case 2: Configuration that's never varied
-        over_engineered_2 = '''
+        over_engineered_2 = """
 class AppConfig:
     def __init__(self):
         # These are never actually configured differently
@@ -296,17 +296,17 @@ class AppConfig:
         self.max_retries = 3        # Always 3
         self.cache_size = 100       # Always 100
         # 15 more "configurable" options that never change
-'''
+"""
         
         # Case 3: Builder for simple data
-        over_engineered_3 = '''
+        over_engineered_3 = """
 class PersonBuilder:
     def name(self, name): self._name = name; return self
     def age(self, age): self._age = age; return self
     def build(self): return Person(self._name, self._age)
     
 # For a simple 2-field data class
-'''
+"""
         
         # These SHOULD be flagged as over-engineered
         self.assertTrue(True)  # Placeholder for actual validation

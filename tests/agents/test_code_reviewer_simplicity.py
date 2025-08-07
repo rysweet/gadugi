@@ -32,7 +32,7 @@ class TestCodeReviewerSimplicityDetection(unittest.TestCase):
 
     def test_over_engineered_abstract_class_detection(self):
         """Test detection of abstract classes with single implementation."""
-        over_engineered_code = '''
+        over_engineered_code = """
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -44,7 +44,7 @@ class CreditCardProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool:
         # Only implementation
         return True
-'''
+"""
         filepath = self.create_test_file("over_engineered.py", over_engineered_code)
         
         # The CodeReviewer should identify this as over-engineered
@@ -53,7 +53,7 @@ class CreditCardProcessor(PaymentProcessor):
 
     def test_appropriate_abstraction_acceptance(self):
         """Test that appropriate abstractions are not flagged as over-engineered."""
-        appropriate_code = '''
+        appropriate_code = """
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -72,7 +72,7 @@ class PayPalProcessor(PaymentProcessor):
 class BankTransferProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool:
         return self._initiate_bank_transfer(amount)
-'''
+"""
         filepath = self.create_test_file("appropriate.py", appropriate_code)
         
         # This should NOT be flagged as over-engineered since there are
@@ -81,7 +81,7 @@ class BankTransferProcessor(PaymentProcessor):
 
     def test_unnecessary_configuration_detection(self):
         """Test detection of configuration options without clear use cases."""
-        over_configured_code = '''
+        over_configured_code = """
 class DatabaseConfig:
     def __init__(self):
         self.max_connections = 10  # Never changed
@@ -93,7 +93,7 @@ class DatabaseConfig:
         self.log_level = "INFO"  # Never changed
         self.cache_size = 100  # Never changed
         # ... 20 more config options that are never actually configured
-'''
+"""
         filepath = self.create_test_file("over_configured.py", over_configured_code)
         
         # Should detect excessive configuration without variation
@@ -117,7 +117,7 @@ def apply_discount(total, discount_percent):
 
     def test_complex_inheritance_detection(self):
         """Test detection of complex inheritance for simple variations."""
-        complex_inheritance_code = '''
+        complex_inheritance_code = """
 class Animal:
     def make_sound(self):
         pass
@@ -140,7 +140,7 @@ class Cat(Feline):
         
     def purr(self):
         return "purr"
-'''
+"""
         filepath = self.create_test_file("complex_inheritance.py", complex_inheritance_code)
         
         # Should detect unnecessarily deep inheritance hierarchy
@@ -148,7 +148,7 @@ class Cat(Feline):
 
     def test_builder_pattern_for_simple_data(self):
         """Test detection of builder pattern used for simple data structures."""
-        over_engineered_builder = '''
+        over_engineered_builder = """
 class PersonBuilder:
     def __init__(self):
         self._name = None
@@ -175,7 +175,7 @@ class Person:
         self.name = name
         self.age = age
         self.email = email
-'''
+"""
         filepath = self.create_test_file("over_engineered_builder.py", over_engineered_builder)
         
         # Builder pattern is overkill for a simple 3-field data class
@@ -236,7 +236,7 @@ class DistributedTaskOrchestrator:
 
     def test_yagni_violation_detection(self):
         """Test detection of YAGNI (You Aren't Gonna Need It) violations."""
-        yagni_violation_code = '''
+        yagni_violation_code = """
 class UserManager:
     def __init__(self):
         # Currently only need basic user creation
@@ -259,7 +259,7 @@ class UserManager:
         self._collect_metrics(user)      # No metrics requirement
         
         return user
-'''
+"""
         filepath = self.create_test_file("yagni_violation.py", yagni_violation_code)
         
         # Should detect features built for imagined future requirements
@@ -275,7 +275,7 @@ class TestSimplicityRecommendations(unittest.TestCase):
         # provides appropriate guidance on abstraction decisions
         
         # Case 1: Code used in only 2 places - suggest inline
-        duplicate_code = '''
+        duplicate_code = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
@@ -288,24 +288,24 @@ def process_user_update(email):
     if not validate_email_format(email):
         raise ValueError("Invalid email")
     # ... rest of update
-'''
+"""
         # Should suggest inlining since it's only used in 2 places
         
         # Case 2: Code used in 5+ places - abstraction is justified
-        justified_abstraction = '''
+        justified_abstraction = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
 # Used in: registration, update, password_reset, newsletter_signup, 
 # contact_form, admin_user_creation, bulk_import
-'''
+"""
         # Should accept abstraction as justified
         
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_cognitive_load_reduction_suggestions(self):
         """Test suggestions for reducing cognitive load."""
-        high_cognitive_load = '''
+        high_cognitive_load = """
 def process_order(order_data):
     if order_data and order_data.get('items') and len(order_data['items']) > 0 and \
        order_data.get('customer') and order_data['customer'].get('id') and \
@@ -328,7 +328,7 @@ def process_order(order_data):
         return True
     else:
         return False
-'''
+"""
         # Should suggest extracting complex conditions and reducing nesting
         self.assertTrue(True)  # Placeholder for actual implementation
 
@@ -339,7 +339,7 @@ class TestContextAwareAssessment(unittest.TestCase):
     def test_early_stage_vs_mature_project_context(self):
         """Test different standards for early-stage vs mature projects."""
         # Early stage: favor simplicity even if not perfectly architected
-        early_stage_code = '''
+        early_stage_code = """
 # Quick prototype - direct approach acceptable
 def send_notification(user, message):
     # Direct email sending - no abstraction layer yet
@@ -347,33 +347,33 @@ def send_notification(user, message):
     server = smtplib.SMTP('localhost')
     server.send(user.email, message)
     server.quit()
-'''
+"""
         
         # Mature project: consider consistency with existing patterns
-        mature_project_code = '''
+        mature_project_code = """
 # In mature codebase with established notification system
 def send_notification(user, message):
     # Should use existing NotificationService
     notification_service = NotificationService()
     notification_service.send_email(user.email, message)
-'''
+"""
         
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_team_size_context(self):
         """Test different standards based on team size and experience."""
         # Small team: simpler patterns acceptable
-        small_team_code = '''
+        small_team_code = """
 # Small team - direct approach is fine
 def calculate_shipping(weight, distance):
     base_rate = 5.00
     weight_factor = weight * 0.50
     distance_factor = distance * 0.10
     return base_rate + weight_factor + distance_factor
-'''
+"""
         
         # Large team: more sophisticated patterns may be warranted
-        large_team_code = '''
+        large_team_code = """
 # Large team - structured approach for maintainability
 class ShippingCalculator:
     def __init__(self, rate_config: ShippingRateConfig):
@@ -382,7 +382,7 @@ class ShippingCalculator:
     def calculate(self, shipment: Shipment) -> Decimal:
         calculator = self._get_calculator_for_region(shipment.destination)
         return calculator.calculate_rate(shipment)
-'''
+"""
         
         self.assertTrue(True)  # Placeholder for actual implementation
 
