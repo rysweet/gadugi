@@ -20,7 +20,7 @@ import threading
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -118,7 +118,7 @@ class MemoryEntry:
     access_count: int = 0
     importance_score: float = 1.0
     decay_rate: float = 0.1
-    tags: list[str] = None
+    tags: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.tags is None:
@@ -176,14 +176,14 @@ class MemoryStats:
     """Memory system statistics."""
 
     total_memories: int = 0
-    memories_by_type: dict[str, int] = None
+    memories_by_type: dict[str, int] = field(default_factory=dict)
     total_contexts: int = 0
-    contexts_by_type: dict[str, int] = None
+    contexts_by_type: dict[str, int] = field(default_factory=dict)
     storage_size: int = 0
     cache_hit_rate: float = 0.0
     average_access_time: float = 0.0
     compression_ratio: float = 0.0
-    last_cleanup: datetime = None
+    last_cleanup: datetime | None = None
 
     def __post_init__(self):
         if self.memories_by_type is None:
@@ -201,10 +201,10 @@ class OperationResult:
     success: bool
     operation: str
     data: Any = None
-    metadata: dict[str, Any] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
-    warnings: list[str] = None
-    errors: list[str] = None
+    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         if self.metadata is None:
@@ -688,7 +688,7 @@ class ContextManager:
         self.redis_client = None
         if REDIS_AVAILABLE and redis_url:
             try:
-                import redis
+                import redis  # type: ignore[import]
 
                 self.redis_client = redis.from_url(redis_url)
                 self.redis_client.ping()  # Test connection
