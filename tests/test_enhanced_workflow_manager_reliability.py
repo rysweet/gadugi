@@ -1290,9 +1290,9 @@ class TestWorkflowReliabilityPerformance:
 
         # Monitoring should not add more than 15 seconds overhead for 10 workflows
         # (increased from 5s to account for module imports and test environment overhead in CI)
-        assert execution_time < 15.0, (
-            f"Monitoring overhead too high: {execution_time:.2f}s"
-        )
+        assert (
+            execution_time < 15.0
+        ), f"Monitoring overhead too high: {execution_time:.2f}s"
 
     def test_concurrent_workflow_monitoring(self):
         """Test concurrent workflow monitoring"""
