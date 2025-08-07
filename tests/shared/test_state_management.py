@@ -337,11 +337,24 @@ except ImportError as e:
                 if getattr(s.status, "value", s.status) == "failed"
             ]
 
-        def backup_state(self, backup_dir: str) -> None:
-            backup_path = Path(backup_dir)
-            backup_path.mkdir(parents=True, exist_ok=True)
-            for state_file in self.state_dir.glob("*.json"):
-                shutil.copy2(state_file, backup_path / state_file.name)
+        def backup_state(self, task_id: str) -> Optional[Path]:
+            """Create backup of task state, matching actual implementation signature."""
+            state_file = self.state_dir / f"{task_id}.json"
+            if not state_file.exists():
+                return None
+
+            # Create backup directory structure like actual implementation
+            backup_dir = self.state_dir / "backups"
+            backup_dir.mkdir(parents=True, exist_ok=True)
+
+            # Create timestamp-based backup filename
+            timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+            backup_file = backup_dir / f"{task_id}-{timestamp}.json"
+
+            # Copy state file to backup
+            shutil.copy2(state_file, backup_file)
+
+            return backup_file
 
         def restore_state(self, backup_dir: str) -> None:
             backup_path = Path(backup_dir)
