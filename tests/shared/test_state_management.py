@@ -877,15 +877,15 @@ class TestStateManager:
         )
         state_manager.save_state(state)
 
-        # Create backup
-        temp_backup_dir = state_manager.state_dir.parent / "backup_test"
-        state_manager.backup_state(str(temp_backup_dir))
+        # Create backup - pass task_id, not directory
+        backup_path = state_manager.backup_state("backup-test")
 
-        backup_file = temp_backup_dir / "backup-test.json"
-        assert backup_file.exists()
+        # Check that backup was created
+        assert backup_path is not None
+        assert backup_path.exists()
 
         # Verify backup content
-        with open(backup_file, "r") as f:
+        with open(backup_path, "r") as f:
             backup_data = json.load(f)
         assert backup_data["task_id"] == "backup-test"
 
