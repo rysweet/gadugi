@@ -202,63 +202,43 @@ gadugi/
 
 ## Quick Start
 
-### Prerequisites
+### Simple Installation
 
-Gadugi uses [UV (Ultraviolet)](https://github.com/astral-sh/uv) for fast Python dependency management. Install UV first:
+Install Gadugi into any repository without pollution - everything goes in `.claude/`:
 
 ```bash
-# macOS/Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Windows (PowerShell)
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
-
-# Or using pip
-pip install uv
+curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
 ```
 
-### Environment Setup
+That's it. The script:
+- Creates `.claude/` directory structure
+- Installs UV if needed
+- Sets up Python environment
+- Downloads all agents
+- Creates bootstrap runner
 
-1. **Clone and set up the repository**:
-   ```bash
-   git clone https://github.com/rysweet/gadugi.git
-   cd gadugi
+### Usage
 
-   # Install dependencies (creates .venv automatically)
-   uv sync --extra dev
+```bash
+.claude/scripts/gadugi --help
+```
 
-   # Verify installation
-   uv run python -c "import gadugi; print(f'Gadugi {gadugi.get_version()} ready!')"
-   ```
+Start with the agent manager:
 
-2. **Run tests to verify setup**:
-   ```bash
-   uv run pytest tests/ -v
-   ```
+```bash
+.claude/scripts/gadugi agent-manager bootstrap
+```
 
-### Bootstrap Agent Manager
+### Development Installation (Contributors)
 
-The agent-manager is required to sync agents from gadugi:
+For development work on Gadugi itself:
 
-1. **Download agent-manager locally**:
-   ```bash
-   mkdir -p .claude/agents
-   curl -o .claude/agents/agent-manager.md \
-     https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-manager.md
-   ```
-
-2. **Initialize and configure**:
-   ```
-   /agent:agent-manager init
-   /agent:agent-manager register-repo https://github.com/rysweet/gadugi
-   ```
-
-3. **Install agents**:
-   ```
-   /agent:agent-manager install all
-   ```
-
-The agent-manager will handle all necessary configuration updates.
+```bash
+git clone https://github.com/rysweet/gadugi.git
+cd gadugi
+uv sync --extra dev
+uv run pytest tests/ -v
+```
 
 ### Using Agents
 
