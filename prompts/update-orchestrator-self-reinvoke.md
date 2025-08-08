@@ -15,9 +15,9 @@ Update the orchestrator agent to handle any type of input (not just existing pro
    Add input validation and processing logic:
    ```markdown
    ## Input Processing and Prompt File Creation
-   
+
    The orchestrator must handle ANY type of input:
-   
+
    1. Check if input is an existing prompt file
    2. If not, treat it as a task description:
       - Invoke prompt-writer agent to create prompt file
