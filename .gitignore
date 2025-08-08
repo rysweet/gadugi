@@ -152,6 +152,8 @@ Pipfile.lock
 
 # Gadugi monitoring and orchestrator runtime files
 .gadugi/monitoring/
+.gadugi/monitoring/*.json
+.gadugi/monitoring/**/*.json
 .gadugi/logs/
 .gadugi/cache/
 
