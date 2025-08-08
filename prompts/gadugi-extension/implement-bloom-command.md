@@ -90,10 +90,10 @@ The Gadugi system enables powerful parallel development through orchestrated mul
 ### Current Implementation Review
 
 **Existing Gadugi Terminal Management**:
-- `launch-claude-terminals.sh`: Bash script for terminal creation
-- `launch-claude-vscode.py`: Python script for VS Code integration
-- `restart-claude-worktrees.sh`: Worktree restart functionality
-- `vscode-claude-terminals.json`: Configuration for terminal management
+- `scripts/launch-claude-terminals.sh`: Bash script for terminal creation
+- `scripts/launch-claude-vscode.py`: Python script for VS Code integration
+- `scripts/restart-claude-worktrees.sh`: Worktree restart functionality
+- `config/vscode-claude-terminals.json`: Configuration for terminal management
 
 **VS Code Extension Ecosystem**:
 - No existing Gadugi VS Code extension
@@ -501,9 +501,9 @@ git checkout -b feature/bloom-command-implementation
 
 **Codebase Analysis**:
 1. Examine existing terminal management scripts:
-   - `launch-claude-terminals.sh`
-   - `launch-claude-vscode.py`
-   - `restart-claude-worktrees.sh`
+   - `scripts/launch-claude-terminals.sh`
+   - `scripts/launch-claude-vscode.py`
+   - `scripts/restart-claude-worktrees.sh`
 2. Review VS Code extension patterns and best practices
 3. Analyze git worktree integration requirements
 4. Study Claude Code CLI interface and options

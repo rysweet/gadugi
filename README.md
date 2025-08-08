@@ -2,6 +2,14 @@
 
 > **Gadugi** is a multi-agent system for AI-assisted coding. It takes its name from the Cherokee word (gah-DOO-gee) that means communal work - where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
 
+## Release Notes
+
+### v0.1.0 - Initial Release (August 2025)
+
+This initial release of Gadugi provides a multi-agent system for AI-assisted software development. The v0.1 milestone includes 27 completed issues establishing core functionality. The system uses an orchestrator to coordinate task execution across isolated git worktrees. Development follows an 11-phase process from issue creation through code review.
+
+The release includes VS Code integration, GitHub workflow automation, and support for UV Python projects with testing integration. Multiple specialized agents handle different development tasks - writing prompts, creating tests, and reviewing code. The system includes pre-commit hooks and automated testing to help maintain code quality.
+
 ## Overview
 
 Gadugi provides a collection of reusable AI agents that work together (and in parallel) to enhance software development workflows. While currently implemented for Claude Code, the architecture is designed to be agent-host neutral and can be adapted to other AI coding assistants.
@@ -155,7 +163,7 @@ gadugi/
 │   │   ├── task-research-agent.md      # Research and planning
 │   │   ├── worktree-manager.md         # Git worktree lifecycle
 │   │   ├── execution-monitor.md        # Parallel execution tracking
-│   │   ├── team-coach.md               # Team coordination & optimization
+│   │   ├── team-coach.md               # Team coordination & analytics
 │   │   ├── teamcoach-agent.md          # Alternative team coaching
 │   │   ├── pr-backlog-manager.md       # PR readiness management
 │   │   ├── program-manager.md          # Project health & strategy
@@ -171,7 +179,21 @@ gadugi/
 │   ├── Memory.md                   # AI assistant persistent memory
 │   └── workflows/                  # GitHub Actions workflows
 ├── prompts/                        # Prompt templates
-├── manifest.yaml                   # Agent registry and versions
+├── docs/                           # Documentation
+│   ├── architecture/
+│   │   ├── AGENT_HIERARCHY.md      # Agent system hierarchy
+│   │   └── SYSTEM_DESIGN.md        # System design documentation
+│   └── templates/
+│       └── CLAUDE_TEMPLATE.md      # Claude instruction template
+├── scripts/                        # Utility scripts
+│   ├── claude                      # Claude CLI executable
+│   ├── claude-worktree-manager.sh  # Worktree management
+│   └── launch-claude-*.sh          # Launch helpers
+├── config/                         # Configuration files
+│   ├── manifest.yaml               # Agent registry and versions
+│   └── vscode-claude-terminals.json # VSCode configuration
+├── compat/                         # Compatibility shims for legacy imports
+├── types/                          # Type definitions and stubs
 ├── CLAUDE.md                       # Project-specific AI instructions
 ├── claude-generic-instructions.md  # Generic Claude Code best practices
 ├── LICENSE                         # MIT License
@@ -251,7 +273,7 @@ Once installed, invoke agents as needed:
 - `/agent:prompt-writer` - For creating structured prompts
 - `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
 - `/agent:program-manager` - For project health and issue lifecycle management
-- `/agent:team-coach` - For team coordination and performance optimization
+- `/agent:team-coach` - For team coordination and analytics
 - `/agent:readme-agent` - For README management and maintenance
 
 #### Development Tools
@@ -392,7 +414,7 @@ Comprehensive monitoring system integrated into VS Code sidebar:
 - **Process Details**: Shows PID, runtime duration, memory usage
 - **Worktree Status**: Displays current branch and git status
 - **Interactive Controls**: Click-to-action buttons for common operations
-- **Resource Monitoring**: Memory usage tracking and performance insights
+- **Resource Monitoring**: Memory usage tracking and system insights
 
 #### 🔧 Git Integration
 Deep integration with git worktree functionality:
@@ -439,7 +461,7 @@ Use `Gadugi: Show Output` command to access detailed logs:
 - Process discovery and monitoring details
 - Terminal creation and management status
 - Error stack traces and diagnostic information
-- Performance metrics and timing data
+- Metrics and timing data
 
 #### Validation and Health Checks
 
@@ -474,9 +496,58 @@ The extension serves as a visual frontend for:
 - **workflow-manager**: Start workflows directly from worktree context menu
 - **code-reviewer**: Trigger reviews from PR branches
 - **orchestrator-agent**: Visualize and manage parallel execution
-- **team-coach**: Display team performance metrics and coaching insights
+- **team-coach**: Display team metrics and coaching insights
 
 This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
+
+## Documentation
+
+Gadugi provides comprehensive documentation to help you understand and use the multi-agent system effectively:
+
+### Core Documentation
+- **[Getting Started Guide](docs/getting-started.md)** - Quick start tutorial for new users
+- **[Agent Implementation Guide](docs/AGENT_IMPLEMENTATION_GUIDE.md)** - Detailed guide to creating and modifying agents
+- **[Agent Hierarchy](AGENT_HIERARCHY.md)** - Understanding the agent system hierarchy and when to use each agent
+- **[System Design](SYSTEM_DESIGN.md)** - Comprehensive system architecture and design patterns
+- **[API Reference](docs/api-reference.md)** - Complete API documentation
+- **[Architecture Overview](docs/architecture.md)** - High-level system architecture
+
+### Setup and Configuration
+- **[UV Installation Guide](docs/uv-installation-guide.md)** - Installing and configuring UV package manager
+- **[UV Migration Guide](docs/uv-migration-guide.md)** - Migrating from pip to UV
+- **[UV Cheat Sheet](docs/uv-cheat-sheet.md)** - Quick reference for UV commands
+- **[Pre-commit Setup](docs/pre-commit-setup.md)** - Setting up code quality hooks
+
+### Workflow and Testing
+- **[Workflows Guide](docs/workflows.md)** - Understanding workflow patterns and execution
+- **[Testing Workflow](docs/testing-workflow.md)** - Testing strategy and practices
+- **[Test Agents Guide](docs/test-agents-guide.md)** - Using test-writer and test-solver agents
+- **[Enhanced WorkflowMaster Guide](docs/enhanced-workflowmaster-guide.md)** - Advanced workflow management
+
+### Agent Guides
+- **[Agents Overview](docs/agents/README.md)** - Introduction to available agents
+- **[PR Backlog Manager Guide](docs/pr-backlog-manager-guide.md)** - Managing pull request backlogs
+- **[System Design Reviewer Integration](docs/system-design-reviewer-integration-guide.md)** - Architecture review automation
+- **[Task Decomposition Analyzer Guide](docs/task-decomposition-analyzer-guide.md)** - Breaking down complex tasks
+- **[Event Service Guide](docs/event_service_guide.md)** - Understanding the event-driven architecture
+
+### Architecture and Design
+- **[Enhanced Separation Migration Guide](docs/guides/enhanced-separation-migration-guide.md)** - Migration to shared module architecture
+- **[Shared Module Architecture](docs/design/shared-module-architecture.md)** - Understanding shared components
+- **[ADR-002: Orchestrator-WorkflowMaster Architecture](docs/adr/ADR-002-orchestrator-workflowmaster-architecture.md)** - Architecture decision record
+
+### Analysis and Reference
+- **[Analysis Overview](docs/analysis/README.md)** - System analysis documentation
+- **[Orchestrator-WorkflowMaster Code Analysis](docs/analysis/orchestrator-workflowmaster-code-analysis.md)** - Code analysis insights
+- **[Performance Analysis](docs/analysis/orchestrator-workflowmaster-performance-analysis.md)** - Performance characteristics
+- **[Risk Assessment](docs/analysis/orchestrator-workflowmaster-risk-assessment.md)** - Risk analysis and mitigation
+- **[Task ID Traceability](docs/task-id-traceability.md)** - Tracking task execution
+- **[Troubleshooting Guide](docs/troubleshooting.md)** - Common issues and solutions
+- **[Ruff Version Mismatch Analysis](docs/ruff-version-mismatch-analysis.md)** - Dependency conflict resolution
+
+### Templates and Examples
+- **[Claude Template](CLAUDE_TEMPLATE.md)** - Template for Claude Code projects
+- **[Configuration Examples](examples/)** - Example configurations and setups
 
 ## Quick Reference: Common Workflows
 
@@ -494,7 +565,7 @@ flowchart TD
 
     TaskType -->|Failed Tests| TestSolver[🔧 Use test-solver<br/>Diagnostic analysis<br/>Fix implementation]
 
-    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure optimization]
+    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure enhancement]
 
     TaskType -->|Project Planning| ProgramMgr[🏗️ Use program-manager<br/>Issue lifecycle<br/>Strategic direction]
 
@@ -530,7 +601,7 @@ flowchart TD
 | **Create Tests** | `/agent:test-writer` | Generate comprehensive test suites |
 | **Update README** | `/agent:readme-agent` | Documentation management |
 | **Project Planning** | `/agent:program-manager` | Issue lifecycle and strategy |
-| **Team Optimization** | `/agent:team-coach` | Performance analytics and coordination |
+| **Team Coordination** | `/agent:team-coach` | Team analytics and coordination |
 
 ## Available Agents
 
@@ -552,8 +623,8 @@ flowchart TD
 - **test-solver** - Diagnoses and fixes failing tests
 - **test-writer** - Creates comprehensive test suites
 
-### Team Coordination & Optimization
-- **team-coach** - Provides intelligent multi-agent team coordination with performance analytics
+### Team Coordination & Analytics
+- **team-coach** - Provides intelligent multi-agent team coordination with team analytics
 - **teamcoach-agent** - Alternative implementation of team coaching functionality
 - **pr-backlog-manager** - Manages PR backlogs by ensuring readiness for review and merge
 
@@ -618,13 +689,13 @@ uv add --group dev mypy          # Add dev dependency
 uv remove package                # Remove dependency
 ```
 
-### Performance Benefits
+### UV Package Management
 
-UV provides significant performance improvements over pip:
-- **10-100x faster** package installation
+UV provides modern Python packaging management:
+- Package installation and dependency resolution
 - **Automatic virtual environment** management
 - **Reproducible builds** with `uv.lock`
-- **Better dependency resolution**
+- **Consistent dependency resolution**
 
 ### Development Workflow
 
@@ -634,7 +705,7 @@ UV provides significant performance improvements over pip:
 4. **Lint**: `uv run ruff check .`
 5. **Add deps**: `uv add package`
 
-See [docs/uv-migration-guide.md](docs/uv-migration-guide.md) for detailed instructions.
+See the **[UV Migration Guide](docs/uv-migration-guide.md)** for detailed instructions.
 
 ## Version Management
 

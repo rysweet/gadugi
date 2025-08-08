@@ -272,16 +272,18 @@ CMD ["bash"]
         if not api_key:
             logger.error(f"CLAUDE_API_KEY not set for task {task_id}")
             return ContainerResult(
+                container_id="none",
                 task_id=task_id,
                 status="failed",
-                exit_code=-1,
-                stdout="",
-                stderr="ERROR: CLAUDE_API_KEY environment variable not set",
-                logs="",
                 start_time=datetime.now(),
                 end_time=datetime.now(),
                 duration=0.0,
-                resource_usage={}
+                exit_code=-1,
+                stdout="",
+                stderr="ERROR: CLAUDE_API_KEY environment variable not set",
+                logs=[],
+                resource_usage={},
+                error_message="CLAUDE_API_KEY not set"
             )
 
         container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"

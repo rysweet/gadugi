@@ -24,7 +24,10 @@ from pathlib import Path
 from types import ModuleType
 
 _IMPL_PATH = (
-    Path(__file__).resolve().parent / ".claude" / "shared" / "state_management.py"
+    Path(__file__).resolve().parent.parent
+    / ".claude"
+    / "shared"
+    / "state_management.py"
 )
 
 if not _IMPL_PATH.is_file():

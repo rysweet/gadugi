@@ -50,7 +50,7 @@ EOF
 # Option 1: Using VS Code Tasks (Recommended)
 echo "Option 1: Using VS Code Tasks (Recommended)"
 echo "-------------------------------------------"
-echo "Run: ./claude-worktree-manager.sh launch"
+echo "Run: ./scripts/claude-worktree-manager.sh launch"
 echo "Then use Cmd+Shift+P → 'Tasks: Run Task' to launch terminals"
 echo ""
 

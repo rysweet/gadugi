@@ -139,7 +139,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 ## Project-Specific Instructions
 
-@claude-project-specific.md
+Note: Project-specific instructions are integrated directly into this file above.
 
 ---
 
