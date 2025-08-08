@@ -1058,7 +1058,7 @@ execute_phase_13_with_error_handling() {
     echo "🎯 Executing Phase 13: Team Coach Reflection"
     
     # Team Coach reflection should not fail the entire workflow
-    if timeout 120 /agent:team-coach --session-analysis 2>/dev/null; then
+    if timeout 120 /agent:team-coach --session-analysis 2>&1 | tee phase13-output.log; then
         echo "✅ Team Coach reflection completed successfully"
         complete_phase 13 "Team Coach Reflection" "verify_phase_13"
     else
