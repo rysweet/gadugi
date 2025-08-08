@@ -1,5 +1,6 @@
 ---
 name: agent-updater
+model: inherit
 description: Automatically checks for and manages updates for Claude Code agents, ensuring all agents are up-to-date
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebFetch
 ---

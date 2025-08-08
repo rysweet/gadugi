@@ -1,5 +1,6 @@
 ---
 name: system-design-reviewer
+model: inherit
 description: Specialized agent for automated architectural review and system design documentation maintenance
 tools: Read, Grep, LS, Bash, WebSearch, WebFetch, TodoWrite, Edit, Write
 ---

@@ -1,5 +1,6 @@
 ---
 name: readme-agent
+model: inherit
 description: Manages and maintains README.md files on behalf of the Product Manager, ensuring consistency with project state and documentation standards
 tools: Read, Write, Edit, Bash, Grep, LS
 imports: |
