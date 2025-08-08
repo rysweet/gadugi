@@ -163,7 +163,7 @@ gadugi/
 │   │   ├── task-research-agent.md      # Research and planning
 │   │   ├── worktree-manager.md         # Git worktree lifecycle
 │   │   ├── execution-monitor.md        # Parallel execution tracking
-│   │   ├── team-coach.md               # Team coordination & optimization
+│   │   ├── team-coach.md               # Team coordination & analytics
 │   │   ├── teamcoach-agent.md          # Alternative team coaching
 │   │   ├── pr-backlog-manager.md       # PR readiness management
 │   │   ├── program-manager.md          # Project health & strategy
@@ -273,7 +273,7 @@ Once installed, invoke agents as needed:
 - `/agent:prompt-writer` - For creating structured prompts
 - `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
 - `/agent:program-manager` - For project health and issue lifecycle management
-- `/agent:team-coach` - For team coordination and performance optimization
+- `/agent:team-coach` - For team coordination and analytics
 - `/agent:readme-agent` - For README management and maintenance
 
 #### Development Tools
@@ -414,7 +414,7 @@ Comprehensive monitoring system integrated into VS Code sidebar:
 - **Process Details**: Shows PID, runtime duration, memory usage
 - **Worktree Status**: Displays current branch and git status
 - **Interactive Controls**: Click-to-action buttons for common operations
-- **Resource Monitoring**: Memory usage tracking and performance insights
+- **Resource Monitoring**: Memory usage tracking and system insights
 
 #### 🔧 Git Integration
 Deep integration with git worktree functionality:
@@ -461,7 +461,7 @@ Use `Gadugi: Show Output` command to access detailed logs:
 - Process discovery and monitoring details
 - Terminal creation and management status
 - Error stack traces and diagnostic information
-- Performance metrics and timing data
+- Metrics and timing data
 
 #### Validation and Health Checks
 
@@ -496,7 +496,7 @@ The extension serves as a visual frontend for:
 - **workflow-manager**: Start workflows directly from worktree context menu
 - **code-reviewer**: Trigger reviews from PR branches
 - **orchestrator-agent**: Visualize and manage parallel execution
-- **team-coach**: Display team performance metrics and coaching insights
+- **team-coach**: Display team metrics and coaching insights
 
 This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
 
@@ -516,7 +516,7 @@ flowchart TD
 
     TaskType -->|Failed Tests| TestSolver[🔧 Use test-solver<br/>Diagnostic analysis<br/>Fix implementation]
 
-    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure optimization]
+    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure enhancement]
 
     TaskType -->|Project Planning| ProgramMgr[🏗️ Use program-manager<br/>Issue lifecycle<br/>Strategic direction]
 
@@ -552,7 +552,7 @@ flowchart TD
 | **Create Tests** | `/agent:test-writer` | Generate comprehensive test suites |
 | **Update README** | `/agent:readme-agent` | Documentation management |
 | **Project Planning** | `/agent:program-manager` | Issue lifecycle and strategy |
-| **Team Optimization** | `/agent:team-coach` | Performance analytics and coordination |
+| **Team Coordination** | `/agent:team-coach` | Team analytics and coordination |
 
 ## Available Agents
 
@@ -574,8 +574,8 @@ flowchart TD
 - **test-solver** - Diagnoses and fixes failing tests
 - **test-writer** - Creates comprehensive test suites
 
-### Team Coordination & Optimization
-- **team-coach** - Provides intelligent multi-agent team coordination with performance analytics
+### Team Coordination & Analytics
+- **team-coach** - Provides intelligent multi-agent team coordination with team analytics
 - **teamcoach-agent** - Alternative implementation of team coaching functionality
 - **pr-backlog-manager** - Manages PR backlogs by ensuring readiness for review and merge
 
@@ -640,13 +640,13 @@ uv add --group dev mypy          # Add dev dependency
 uv remove package                # Remove dependency
 ```
 
-### Performance Benefits
+### UV Package Management
 
-UV provides significant performance improvements over pip:
-- **10-100x faster** package installation
+UV provides modern Python packaging management:
+- Package installation and dependency resolution
 - **Automatic virtual environment** management
 - **Reproducible builds** with `uv.lock`
-- **Better dependency resolution**
+- **Consistent dependency resolution**
 
 ### Development Workflow
 
