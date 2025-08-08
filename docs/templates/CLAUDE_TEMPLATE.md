@@ -15,7 +15,7 @@ This template shows how to integrate Gadugi agents and instructions into your pr
 
 ## Generic Claude Code Instructions
 
-@https://raw.githubusercontent.com/rysweet/gadugi/main/docs/ai-instructions/claude-generic-instructions.md
+@https://raw.githubusercontent.com/rysweet/gadugi/main/claude-generic-instructions.md
 
 ## Agent Hierarchy
 

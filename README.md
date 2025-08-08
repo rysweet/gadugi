@@ -172,8 +172,6 @@ gadugi/
 │   └── workflows/                  # GitHub Actions workflows
 ├── prompts/                        # Prompt templates
 ├── docs/                           # Documentation
-│   ├── ai-instructions/
-│   │   └── claude-generic-instructions.md  # Generic Claude Code best practices
 │   ├── architecture/
 │   │   ├── AGENT_HIERARCHY.md      # Agent system hierarchy
 │   │   └── SYSTEM_DESIGN.md        # System design documentation
@@ -189,6 +187,7 @@ gadugi/
 ├── compat/                         # Compatibility shims for legacy imports
 ├── types/                          # Type definitions and stubs
 ├── CLAUDE.md                       # Project-specific AI instructions
+├── claude-generic-instructions.md  # Generic Claude Code best practices
 ├── LICENSE                         # MIT License
 └── README.md                       # This file
 ```
