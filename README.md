@@ -500,6 +500,55 @@ The extension serves as a visual frontend for:
 
 This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
 
+## Documentation
+
+Gadugi provides comprehensive documentation to help you understand and use the multi-agent system effectively:
+
+### Core Documentation
+- **[Getting Started Guide](docs/getting-started.md)** - Quick start tutorial for new users
+- **[Agent Implementation Guide](docs/AGENT_IMPLEMENTATION_GUIDE.md)** - Detailed guide to creating and modifying agents
+- **[Agent Hierarchy](AGENT_HIERARCHY.md)** - Understanding the agent system hierarchy and when to use each agent
+- **[System Design](SYSTEM_DESIGN.md)** - Comprehensive system architecture and design patterns
+- **[API Reference](docs/api-reference.md)** - Complete API documentation
+- **[Architecture Overview](docs/architecture.md)** - High-level system architecture
+
+### Setup and Configuration
+- **[UV Installation Guide](docs/uv-installation-guide.md)** - Installing and configuring UV package manager
+- **[UV Migration Guide](docs/uv-migration-guide.md)** - Migrating from pip to UV
+- **[UV Cheat Sheet](docs/uv-cheat-sheet.md)** - Quick reference for UV commands
+- **[Pre-commit Setup](docs/pre-commit-setup.md)** - Setting up code quality hooks
+
+### Workflow and Testing
+- **[Workflows Guide](docs/workflows.md)** - Understanding workflow patterns and execution
+- **[Testing Workflow](docs/testing-workflow.md)** - Testing strategy and practices
+- **[Test Agents Guide](docs/test-agents-guide.md)** - Using test-writer and test-solver agents
+- **[Enhanced WorkflowMaster Guide](docs/enhanced-workflowmaster-guide.md)** - Advanced workflow management
+
+### Agent Guides
+- **[Agents Overview](docs/agents/README.md)** - Introduction to available agents
+- **[PR Backlog Manager Guide](docs/pr-backlog-manager-guide.md)** - Managing pull request backlogs
+- **[System Design Reviewer Integration](docs/system-design-reviewer-integration-guide.md)** - Architecture review automation
+- **[Task Decomposition Analyzer Guide](docs/task-decomposition-analyzer-guide.md)** - Breaking down complex tasks
+- **[Event Service Guide](docs/event_service_guide.md)** - Understanding the event-driven architecture
+
+### Architecture and Design
+- **[Enhanced Separation Migration Guide](docs/guides/enhanced-separation-migration-guide.md)** - Migration to shared module architecture
+- **[Shared Module Architecture](docs/design/shared-module-architecture.md)** - Understanding shared components
+- **[ADR-002: Orchestrator-WorkflowMaster Architecture](docs/adr/ADR-002-orchestrator-workflowmaster-architecture.md)** - Architecture decision record
+
+### Analysis and Reference
+- **[Analysis Overview](docs/analysis/README.md)** - System analysis documentation
+- **[Orchestrator-WorkflowMaster Code Analysis](docs/analysis/orchestrator-workflowmaster-code-analysis.md)** - Code analysis insights
+- **[Performance Analysis](docs/analysis/orchestrator-workflowmaster-performance-analysis.md)** - Performance characteristics
+- **[Risk Assessment](docs/analysis/orchestrator-workflowmaster-risk-assessment.md)** - Risk analysis and mitigation
+- **[Task ID Traceability](docs/task-id-traceability.md)** - Tracking task execution
+- **[Troubleshooting Guide](docs/troubleshooting.md)** - Common issues and solutions
+- **[Ruff Version Mismatch Analysis](docs/ruff-version-mismatch-analysis.md)** - Dependency conflict resolution
+
+### Templates and Examples
+- **[Claude Template](CLAUDE_TEMPLATE.md)** - Template for Claude Code projects
+- **[Configuration Examples](examples/)** - Example configurations and setups
+
 ## Quick Reference: Common Workflows
 
 ### Task Execution Decision Tree
@@ -656,7 +705,7 @@ UV provides modern Python packaging management:
 4. **Lint**: `uv run ruff check .`
 5. **Add deps**: `uv add package`
 
-See [docs/uv-migration-guide.md](docs/uv-migration-guide.md) for detailed instructions.
+See the **[UV Migration Guide](docs/uv-migration-guide.md)** for detailed instructions.
 
 ## Version Management
 
