@@ -690,6 +690,41 @@ class OrchestrationRecoveryManager:
 - **Shared Dependencies**: Cache common dependency resolution results
 - **Environment Reuse**: Reuse compatible worktree environments when possible
 
+## Phase 13: Team Coach Integration
+
+### Automated Session Analysis
+
+The OrchestratorAgent ensures that all WorkflowManager instances complete Phase 13 (Team Coach Reflection) at session end:
+
+```python
+def validate_phase_13_completion(workflow_results):
+    """Ensure Phase 13 Team Coach Reflection was executed"""
+    
+    for result in workflow_results:
+        # Check Phase 13 completion
+        if not result.phases.get('phase_13_team_coach'):
+            log_warning(f"Task {result.task_id} missing Phase 13 reflection")
+        
+        # Aggregate Team Coach insights
+        if result.team_coach_insights:
+            aggregate_insights(result.team_coach_insights)
+    
+    # Save aggregated insights to Memory.md
+    save_team_coach_insights_to_memory()
+    
+    # Optional: Create improvement issues
+    if significant_improvements_detected():
+        create_github_improvement_issues()
+```
+
+### Benefits of Phase 13 Integration
+
+- **Automated Learning**: Every workflow contributes to continuous improvement
+- **Performance Tracking**: Metrics collected across all parallel workflows
+- **Pattern Recognition**: Identifies common issues across multiple tasks
+- **Knowledge Preservation**: Insights saved to Memory.md for future reference
+- **Zero Manual Effort**: Completely automated with graceful failure handling
+
 ## Success Criteria and Metrics
 
 ### Performance Targets
@@ -778,7 +813,9 @@ def validate_workflow_compliance(task):
 
     # Check 2: Verify complete workflow phases will be followed
     required_phases = ['setup', 'issue_creation', 'branch_creation', 'implementation',
-                      'testing', 'documentation', 'pr_creation', 'review']
+                      'testing', 'documentation', 'pr_creation', 'review', 
+                      'review_response', 'settings_update', 'deployment_readiness', 
+                      'memory_compaction', 'team_coach_reflection']
     missing_phases = [phase for phase in required_phases if phase not in task.planned_phases]
     if missing_phases:
         raise IncompleteWorkflowError(task.id, missing_phases)

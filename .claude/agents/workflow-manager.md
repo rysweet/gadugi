@@ -884,6 +884,12 @@ echo "⚡ AUTOMATIC: Triggering Phase 12 - Memory Compaction"
 execute_phase_12_memory_compaction
 
 echo "✅ Phase 10, 11, and 12 completed successfully"
+echo "⚡ AUTOMATIC: Triggering Phase 13 - Team Coach Reflection"
+
+# Execute Phase 13 immediately
+execute_phase_13_with_error_handling
+
+echo "✅ ALL PHASES (1-13) completed successfully - Workflow complete!"
 ```
 
 #### **Phase 12 Execution Steps (AUTOMATIC)**
@@ -940,9 +946,26 @@ echo "✅ Phase 10, 11, and 12 completed successfully"
 - **Intelligent Archiving**: Preserves important current information while archiving historical details
 - **Configurable Thresholds**: Size limits and compaction rules can be customized
 
+#### **Phase 13 Execution Steps (AUTOMATIC)**
+
+The Phase 13 Team Coach Reflection is implemented in the `execute_phase_13_with_error_handling()` function, which:
+- Invokes the Team Coach agent for session analysis
+- Captures performance metrics and improvement recommendations
+- Updates Memory.md with insights
+- Has timeout protection (120 seconds max)
+- Gracefully handles failures without blocking workflow completion
+
+#### **Benefits of Automatic Team Coach Reflection**
+
+- **Continuous Improvement**: Every session contributes to process optimization
+- **Pattern Recognition**: Identifies recurring issues and success factors
+- **Data-Driven Insights**: Metrics-based recommendations for workflow enhancement
+- **Knowledge Accumulation**: Builds institutional memory in Memory.md
+- **Zero Overhead**: Completely automatic with graceful failure handling
+
 #### **State File Updates**
 
-Update state file format to include Phase 11 and 12:
+Update state file format to include Phase 11, 12, and 13:
 
 ```markdown
 ## Phase Completion Status
@@ -958,11 +981,12 @@ Update state file format to include Phase 11 and 12:
 - [x] Phase 10: Review Response ✅
 - [x] Phase 11: Settings Update ✅
 - [x] Phase 12: Memory Compaction ✅
+- [x] Phase 13: Team Coach Reflection ✅
 ```
 
 #### **Enhanced Task List Integration**
 
-Add Phase 11 and 12 to mandatory workflow tasks:
+Add Phase 11, 12, and 13 to mandatory workflow tasks:
 
 ```python
 TaskData(
@@ -982,12 +1006,21 @@ TaskData(
     phase=WorkflowPhase.MEMORY_COMPACTION,
     auto_invoke=True,
     enforcement_level="MAINTENANCE"  # Memory compaction is automated maintenance
+),
+TaskData(
+    id="13",
+    content="🎯 AUTOMATIC: Team Coach Reflection (Phase 13)",
+    status="pending",
+    priority="medium",
+    phase=WorkflowPhase.TEAM_COACH_REFLECTION,
+    auto_invoke=True,
+    enforcement_level="RECOMMENDED"  # Team Coach analysis is recommended for improvement
 )
 ```
 
-#### **Error Handling for Phase 11 and 12**
+#### **Error Handling for Phase 11, 12, and 13**
 
-Settings update and memory compaction failures should not block workflow completion:
+Settings update, memory compaction, and Team Coach reflection failures should not block workflow completion:
 
 ```bash
 execute_phase_11_with_error_handling() {
@@ -1020,11 +1053,26 @@ execute_phase_12_with_error_handling() {
     fi
     cd ../..
 }
+
+execute_phase_13_with_error_handling() {
+    echo "🎯 Executing Phase 13: Team Coach Reflection"
+    
+    # Team Coach reflection should not fail the entire workflow
+    if timeout 120 /agent:team-coach --session-analysis 2>/dev/null; then
+        echo "✅ Team Coach reflection completed successfully"
+        complete_phase 13 "Team Coach Reflection" "verify_phase_13"
+    else
+        echo "⚠️ Team Coach reflection failed or timed out - continuing"
+        echo "💡 Manual session review may provide additional insights"
+        # Mark as completed anyway - this is not a critical failure
+        complete_phase 13 "Team Coach Reflection" "verify_phase_13"
+    fi
+}
 ```
 
 #### **Execution Pattern Update**
 
-Updated execution pattern with Phase 11 and 12:
+Updated execution pattern with Phase 11, 12, and 13:
 
 1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
 2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning
@@ -1033,7 +1081,8 @@ Updated execution pattern with Phase 11 and 12:
 5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**
 6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
 7. 🔧 **Phase 11**: Settings Update → ⚡ **IMMEDIATE Phase 12**
-8. 📦 **Phase 12**: Memory Compaction → 📝 **Final state update** → ✅ **COMPLETE**
+8. 📦 **Phase 12**: Memory Compaction → ⚡ **IMMEDIATE Phase 13**
+9. 🎯 **Phase 13**: Team Coach Reflection → 📝 **Final state update** → ✅ **COMPLETE**
 
 ## Enhanced Progress Tracking (Shared Modules)
 

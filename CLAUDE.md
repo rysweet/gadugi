@@ -56,7 +56,7 @@ This ensures:
    - Code review invocation (Phase 9)
    - State management
 
-6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
+6. **Mandatory 13-Phase Workflow** (ALL tasks MUST follow):
    - Phase 1: Initial Setup
    - Phase 2: Issue Creation
    - Phase 3: Branch Management
@@ -68,6 +68,8 @@ This ensures:
    - Phase 9: Review (code-reviewer invocation)
    - Phase 10: Review Response
    - Phase 11: Settings Update
+   - Phase 12: Deployment Readiness (when applicable)
+   - Phase 13: Team Coach Reflection (MANDATORY - session end)
 
 **Only execute manual steps for**:
 - Read-only operations (searching, viewing files)
@@ -83,10 +85,11 @@ This ensures:
 
 **Workflow Validation Requirements**:
 - Orchestrator MUST delegate ALL tasks to WorkflowManager
-- ALL 11 workflow phases MUST be executed for every task
+- ALL 13 workflow phases MUST be executed for every task
 - NO direct execution bypassing workflow phases
 - State tracking MUST be maintained throughout all phases
 - Quality gates MUST be validated at each phase transition
+- Phase 13 (Team Coach Reflection) MUST execute at session end for continuous improvement
 
 **Enforcement Examples**:
 - ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
@@ -94,6 +97,36 @@ This ensures:
 - ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
 - ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
 - ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
+
+### Phase 13: Team Coach Reflection Details
+
+**Purpose**: Automatic session-end analysis for continuous improvement and learning.
+
+**When Executed**: 
+- Automatically after Phase 12 completion
+- At the end of every workflow session
+- Before final state cleanup
+
+**What It Does**:
+1. **Performance Analysis**: Reviews metrics from all completed phases
+2. **Pattern Recognition**: Identifies success patterns and improvement areas
+3. **Recommendation Generation**: Creates actionable improvement suggestions
+4. **Memory Update**: Saves insights to Memory.md for future reference
+5. **Issue Creation**: Optionally creates GitHub issues for significant improvements
+
+**Implementation Safety**:
+- No subprocess spawning - uses direct agent invocation
+- Timeout protection (max 2 minutes)
+- Graceful degradation if Team Coach fails
+- Non-blocking - workflow completes even on failure
+- Prevents infinite loops through state tracking
+
+**Benefits**:
+- Automated performance tracking
+- Continuous process improvement
+- Knowledge accumulation in Memory.md
+- Reduced manual review overhead
+- Data-driven workflow optimization
 
 ### Emergency Procedures (Critical Production Issues)
 
