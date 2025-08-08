@@ -1,21 +1,21 @@
 #!/bin/bash
-# Gadugi Bootstrap - Download agent-updater only
-# The actual installation happens via /agent:agent-updater
+# Gadugi Bootstrap - Downloads gadugi-updater agent only
 
 set -e
 
-# Just download the agent-updater, nothing else
+# Create agents directory if it doesn't exist
 mkdir -p .claude/agents
 
-curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-updater.md \
-     -o .claude/agents/agent-updater.md
+# Download the gadugi-updater agent
+curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/gadugi-updater.md \
+     -o .claude/agents/gadugi-updater.md
 
 if [ $? -eq 0 ]; then
-    echo "✅ Agent-updater downloaded to .claude/agents/"
+    echo "✅ Gadugi updater downloaded to .claude/agents/"
     echo ""
     echo "To install Gadugi, run:"
-    echo "  /agent:agent-updater install"
+    echo "  /agent:gadugi-updater install"
 else
-    echo "❌ Failed to download agent-updater"
+    echo "❌ Failed to download gadugi-updater"
     exit 1
 fi

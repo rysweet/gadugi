@@ -204,23 +204,26 @@ gadugi/
 
 ### Simple Installation
 
-**Step 1: Download the agent-updater**
+**Step 1: Download the Gadugi updater**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
 ```
 
-**Step 2: Install Gadugi via the agent**
+This downloads the `gadugi-updater` agent to `.claude/agents/`.
+
+**Step 2: Install Gadugi**
 
 ```
-/agent:agent-updater install
+/agent:gadugi-updater install
 ```
 
-The agent-updater will handle:
-- Installing all Gadugi agents to `.claude/agents/`
-- Setting up Python environment in `.claude/gadugi/.venv/`
-- Configuring the system
-- Keeping everything isolated from your project
+The gadugi-updater will:
+- Download and run the installation script
+- Install all Gadugi agents to `.claude/agents/`
+- Set up Python environment in `.claude/gadugi/.venv/`
+- Configure the system
+- Keep everything isolated from your project
 
 ### Usage
 
