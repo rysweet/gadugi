@@ -204,29 +204,32 @@ gadugi/
 
 ### Simple Installation
 
-Install Gadugi into any repository without pollution - everything goes in `.claude/`:
+**Step 1: Download the agent-updater**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
 ```
 
-That's it. The script:
-- Creates `.claude/` directory structure
-- Installs UV if needed
-- Sets up Python environment
-- Downloads all agents
-- Creates bootstrap runner
+**Step 2: Install Gadugi via the agent**
+
+```
+/agent:agent-updater install
+```
+
+The agent-updater will handle:
+- Installing all Gadugi agents to `.claude/agents/`
+- Setting up Python environment in `.claude/gadugi/.venv/`
+- Configuring the system
+- Keeping everything isolated from your project
 
 ### Usage
 
-```bash
-.claude/scripts/gadugi --help
+After installation, you can use any Gadugi agent:
+
 ```
-
-Start with the agent manager:
-
-```bash
-.claude/scripts/gadugi agent-manager bootstrap
+/agent:orchestrator-agent
+/agent:workflow-manager
+/agent:code-reviewer
 ```
 
 ### Development Installation (Contributors)
