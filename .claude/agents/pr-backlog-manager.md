@@ -1,5 +1,6 @@
 ---
 name: pr-backlog-manager
+model: inherit
 description: Manages the backlog of PRs by ensuring they are ready for review and merge, automating checks for merge conflicts, CI status, and code review completion
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
 imports: |
@@ -74,6 +75,7 @@ pr_analysis_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
 ```yaml
 # Example GitHub Actions integration
 name: PR Backlog Management
+model: inherit
 on:
   pull_request:
     types: [ready_for_review, synchronize]
@@ -360,7 +362,7 @@ ENV CLAUDE_GITHUB_ACTIONS=true
 ```yaml
 # .github/workflows/pr-backlog-management.yml
 name: PR Backlog Management
-
+model: inherit
 on:
   pull_request:
     types: [ready_for_review, synchronize]

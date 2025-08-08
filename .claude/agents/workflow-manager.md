@@ -1,5 +1,6 @@
 ---
 name: workflow-manager
+model: inherit
 description: Orchestrates complete development workflows from prompt files, ensuring all phases from issue creation to PR review are executed systematically
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
 imports: |
@@ -375,14 +376,14 @@ Enhanced issue creation features:
    # Install pre-commit hooks if not already installed
    # For UV projects:
    uv run pre-commit install
-   
+
    # For standard Python projects:
    pre-commit install
 
    # Run pre-commit hooks on all files
    # For UV projects:
    uv run pre-commit run --all-files
-   
+
    # For standard Python projects:
    pre-commit run --all-files
    ```

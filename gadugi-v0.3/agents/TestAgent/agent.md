@@ -1,7 +1,7 @@
 ---
 id: test-agent
 name: "Test Agent"
-description: "Simple test agent that outputs hello message"
+model: inheritdescription: "Simple test agent that outputs hello message"
 tools:
   - name: "bash"
     type: "command_line"

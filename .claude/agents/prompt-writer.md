@@ -1,5 +1,6 @@
 ---
 name: prompt-writer
+model: inherit
 description: Specialized sub-agent for creating high-quality, structured prompt files that guide complete development workflows from issue creation to PR review, with automatic GitHub issue integration
 tools: Read, Write, Grep, LS, WebSearch, TodoWrite, Bash
 ---

@@ -1,5 +1,6 @@
 ---
 name: test-writer
+model: inherit
 description: Authors new tests for code coverage and TDD alignment, ensuring proper test structure, documentation, and quality
 tools: Read, Write, Edit, Bash, Grep, LS
 imports: |

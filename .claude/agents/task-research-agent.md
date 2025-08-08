@@ -1,5 +1,6 @@
 ---
 name: task-research-agent
+model: inherit
 description: Researches solutions, technologies, and approaches for unknown or novel tasks requiring investigation before implementation
 tools: Read, Write, Edit, Grep, LS, Glob, Bash, TodoWrite
 ---

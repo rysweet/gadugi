@@ -191,13 +191,13 @@ class TaskExecutor:
         self.start_time: Optional[datetime] = None
         self.result: Optional[ExecutionResult] = None
         self.prompt_generator = PromptGenerator()
-        
+
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if CONTAINER_EXECUTION_AVAILABLE:
             container_config = ContainerConfig(
                 image="claude-orchestrator:latest",
                 cpu_limit="2.0",
-                memory_limit="4g", 
+                memory_limit="4g",
                 timeout_seconds=self.task_context.get('timeout_seconds', 3600),
                 # CRITICAL: Proper Claude CLI flags with automation support
                 claude_flags=[
@@ -218,11 +218,11 @@ class TaskExecutor:
         # CRITICAL FIX #167: Use ContainerManager for true containerized execution
         if self.container_manager and CONTAINER_EXECUTION_AVAILABLE:
             print(f"🐳 Starting containerized task execution: {self.task_id}")
-            
+
             try:
                 # Generate WorkflowManager prompt with full context
                 workflow_prompt = self._generate_workflow_prompt()
-                
+
                 # Execute task in Docker container with proper Claude CLI flags
                 container_result = self.container_manager.execute_containerized_task(
                     task_id=self.task_id,
@@ -231,19 +231,19 @@ class TaskExecutor:
                     task_context=self.task_context,
                     progress_callback=self._progress_callback
                 )
-                
+
                 # Convert ContainerResult to ExecutionResult for compatibility
                 execution_result = self._convert_container_result(container_result)
-                
+
                 print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
                 self.result = execution_result
                 return execution_result
-                
+
             except Exception as e:
                 print(f"⚠️  Containerized execution failed for {self.task_id}: {e}")
                 print(f"🔄 Falling back to subprocess execution...")
                 # Fall through to subprocess fallback
-        
+
         # Fallback to subprocess execution (original implementation)
         print(f"🔧 Using subprocess fallback for task: {self.task_id}")
         return self._execute_subprocess_fallback(timeout)
@@ -309,19 +309,27 @@ class TaskExecutor:
         json_output_file = output_dir / f"{self.task_id}_output.json"
 
         # Generate WorkflowManager prompt
-        workflow_prompt = self._generate_workflow_prompt()
+        workflow_prompt_file = self._generate_workflow_prompt()
+
+        # Read the prompt content from the file
+        with open(workflow_prompt_file, 'r') as f:
+            workflow_prompt_content = f.read()
+
+        print(f"📄 Read prompt content: {len(workflow_prompt_content)} characters")
 
         # CRITICAL FIX: Proper Claude CLI command with automation flags
+        # Pass the prompt CONTENT to -p, not the file path
         claude_cmd = [
             "claude",
-            "-p", workflow_prompt,
+            "-p", workflow_prompt_content,
             "--dangerously-skip-permissions",  # CRITICAL: Enable automation
             "--verbose",
             f"--max-turns={self.task_context.get('max_turns', 50)}",
             "--output-format=json"
         ]
 
-        print(f"🚀 Starting subprocess task {self.task_id}: {' '.join(claude_cmd)}")
+        # Don't print the full command as it includes the entire prompt content
+        print(f"🚀 Starting subprocess task {self.task_id} with claude CLI")
 
         stdout_content = ""
         stderr_content = ""
@@ -534,7 +542,7 @@ class ExecutionEngine:
         progress_callback: Optional[Callable] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using ContainerManager for true containerized parallel execution"""
-        
+
         # Start resource monitoring
         self.resource_monitor.start_monitoring()
 
@@ -587,7 +595,7 @@ class ExecutionEngine:
             results = {}
             for task_id, container_result in container_results.items():
                 results[task_id] = self._convert_container_to_execution_result(container_result)
-                
+
                 # Update statistics
                 if results[task_id].status == 'success':
                     self.stats['completed_tasks'] += 1
@@ -598,7 +606,7 @@ class ExecutionEngine:
 
                 # Progress callback
                 if progress_callback:
-                    progress_callback(self.stats['completed_tasks'] + self.stats['failed_tasks'], 
+                    progress_callback(self.stats['completed_tasks'] + self.stats['failed_tasks'],
                                     self.stats['total_tasks'], results[task_id])
 
             # Update statistics
@@ -626,7 +634,7 @@ class ExecutionEngine:
         progress_callback: Optional[Callable] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using subprocess (original implementation)"""
-        
+
         # Start resource monitoring
         self.resource_monitor.start_monitoring()
 

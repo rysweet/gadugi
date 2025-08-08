@@ -1,7 +1,7 @@
 ---
 id: orchestrator
 name: "Orchestrator"
-description: "Runs agents in subprocess and captures output"
+model: inheritdescription: "Runs agents in subprocess and captures output"
 tools:
   - name: "bash"
     type: "command_line"
@@ -40,7 +40,7 @@ Task: Output a hello message
 ## Approach
 
 1. Validate the agent exists
-2. Start agent with claude command in subprocess  
+2. Start agent with claude command in subprocess
 3. Capture stdout and stderr
 4. Parse and return results
 5. Report any errors

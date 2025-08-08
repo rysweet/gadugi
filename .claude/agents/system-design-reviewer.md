@@ -1,5 +1,6 @@
 ---
 name: system-design-reviewer
+model: inherit
 description: Specialized agent for automated architectural review and system design documentation maintenance
 tools: Read, Grep, LS, Bash, WebSearch, WebFetch, TodoWrite, Edit, Write
 ---
@@ -225,6 +226,7 @@ Generate ADRs when changes involve:
 
 ```yaml
 name: System Design Review
+model: inherit
 on:
   pull_request:
     types: [opened, synchronize, reopened]

@@ -1,7 +1,7 @@
 ---
 id: task-decomposer
 name: "Task Decomposer"
-description: "Breaks down high-level tasks into subtasks with dependencies"
+model: inheritdescription: "Breaks down high-level tasks into subtasks with dependencies"
 tools:
   - name: "analysis"
     type: "reasoning"
@@ -43,21 +43,21 @@ I MUST return valid JSON with this exact structure:
   "original_task": "Build a simple web API with user authentication",
   "tasks": [
     {
-      "id": "1", 
-      "agent": "code-writer", 
+      "id": "1",
+      "agent": "code-writer",
       "task": "Create user model with fields for username, email, password hash",
       "dependencies": []
     },
     {
       "id": "2",
-      "agent": "code-writer", 
+      "agent": "code-writer",
       "task": "Create authentication endpoints (login, register, logout)",
       "dependencies": ["1"]
     },
     {
       "id": "3",
       "agent": "test-writer",
-      "task": "Write unit tests for authentication endpoints", 
+      "task": "Write unit tests for authentication endpoints",
       "dependencies": ["2"]
     },
     {
@@ -69,7 +69,7 @@ I MUST return valid JSON with this exact structure:
   ],
   "parallel_groups": [
     ["1"],
-    ["2"], 
+    ["2"],
     ["3", "4"]
   ]
 }
@@ -97,7 +97,7 @@ When given a task:
 ## Agent Types I Use
 
 - **code-writer**: For implementation tasks
-- **test-writer**: For testing tasks  
+- **test-writer**: For testing tasks
 - **reviewer**: For code review tasks
 - **documentation**: For documentation tasks
 - **deployment**: For deployment and infrastructure tasks

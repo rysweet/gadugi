@@ -1,0 +1,30 @@
+{
+  "orchestration_id": "orchestration-20250807-160325",
+  "timestamp": "2025-08-07 16:03:26.315855",
+  "total_processes": 12,
+  "status_breakdown": {
+    "failed": 8,
+    "completed": 1,
+    "running": 3
+  },
+  "active_processes": [
+    {
+      "task_id": "fix-test-workflow-manager-errors",
+      "task_name": "Fix Pyright Errors in test_workflow_manager_enhanced_separation.py",
+      "status": "running",
+      "runtime_seconds": 38.311366
+    },
+    {
+      "task_id": "fix-test-enhanced-separation-errors",
+      "task_name": "Fix Pyright Errors in test_enhanced_separation_basic.py",
+      "status": "running",
+      "runtime_seconds": 38.306832
+    },
+    {
+      "task_id": "fix-orchestrator-main-errors",
+      "task_name": "Fix Pyright Errors in orchestrator_main.py",
+      "status": "running",
+      "runtime_seconds": 38.297804
+    }
+  ]
+}
