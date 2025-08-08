@@ -6,13 +6,14 @@ set -e
 
 echo "🚀 Bootstrapping Gadugi..."
 
-# Create minimal .claude structure with isolated gadugi directory
-mkdir -p .claude/gadugi/agents
+# Create minimal .claude structure (agents must be in .claude/agents for Claude)
+mkdir -p .claude/agents
+mkdir -p .claude/gadugi
 
 # Download the agent-updater (it will handle everything else)
 echo "📦 Downloading agent-updater..."
 curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-updater.md \
-     -o .claude/gadugi/agents/agent-updater.md
+     -o .claude/agents/agent-updater.md
 
 if [ $? -eq 0 ]; then
     echo ""
