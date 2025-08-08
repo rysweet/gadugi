@@ -141,6 +141,10 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 Note: Project-specific instructions are integrated directly into this file above.
 
+## Gadugi Development Guidelines
+
+@.claude/Guidelines.md
+
 ---
 
 ## Worktree Lifecycle Management
