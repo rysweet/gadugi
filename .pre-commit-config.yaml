@@ -3,13 +3,15 @@
 repos:
   # Formatting and linting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.7
+    rev: v0.8.4
     hooks:
-      # Run the linter
-      - id: ruff
-        args: [ --fix ]
-      # Run the formatter
+      # Run the formatter first
       - id: ruff-format
+        types_or: [python, pyi]
+      # Then run the linter
+      - id: ruff
+        types_or: [python, pyi]
+        args: ['--fix', '--exit-non-zero-on-fix']
 
   # Additional Python code quality checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -27,14 +29,18 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with mypy (disabled for now)
-  # Uncomment this section when ready to enable type checking
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.13.0
-  #   hooks:
-  #     - id: mypy
-  #       additional_dependencies: [types-all]
-  #       args: [--ignore-missing-imports]
+  # Type checking with pyright
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.390
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: pyright
+        language: node
+        types: [python]
+        pass_filenames: false
+        additional_dependencies: ['pyright@1.1.390']
+        args: []
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets

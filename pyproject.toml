@@ -16,6 +16,8 @@ dependencies = [
     "PyYAML>=6.0",
     "aiohttp>=3.8.0",
     "protobuf>=4.0.0",
+    "grpcio-tools>=1.60.0",
+    "neo4j>=5.0.0",
 ]
 dynamic = ["version"]
 
@@ -31,7 +33,10 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "pytest-mock>=3.10",
-    "ruff==0.12.7",
+    "ruff>=0.8.0",
+    "pyright>=1.1.380",
+    "pre-commit>=3.5.0",
+    "mypy>=1.8.0",
 ]
 test = [
     "pytest>=7.0",
@@ -39,6 +44,17 @@ test = [
     "pytest-asyncio>=0.21",
     "docker>=6.0",
     "psutil>=5.9",
+]
+qa = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.8.0",
+    "pyright>=1.1.380",
+    "pre-commit>=3.5.0",
+    "mypy>=1.8.0",
+    "black>=24.0.0",
 ]
 
 [tool.setuptools.dynamic]
@@ -83,13 +99,16 @@ exclude_lines = [
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py39"
 extend-exclude = [
     ".git",
     ".venv",
     ".claude",
     "__pycache__",
+    "node_modules",
+    "build",
+    "dist",
 ]
 [tool.ruff.lint]
 select = ["E", "F", "W"]  # Basic errors and warnings only

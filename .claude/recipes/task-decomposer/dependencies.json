@@ -1,0 +1,80 @@
+{
+  "name": "task-decomposer",
+  "version": "0.3.0",
+  "dependencies": {
+    "internal": [
+      {
+        "component": "agent-framework",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Task and subtask definitions"
+      },
+      {
+        "component": "memory-system",
+        "version": ">=0.3.0",
+        "required": false,
+        "purpose": "Learning from past decompositions (optional)"
+      }
+    ],
+    "external": [
+      {
+        "package": "networkx",
+        "version": ">=3.0",
+        "required": true,
+        "purpose": "Dependency graph construction and analysis"
+      },
+      {
+        "package": "numpy",
+        "version": ">=1.24.0",
+        "required": true,
+        "purpose": "Numerical computations and feature vectors"
+      },
+      {
+        "package": "scikit-learn",
+        "version": ">=1.3.0",
+        "required": false,
+        "purpose": "ML models for strategy prediction (optional)"
+      },
+      {
+        "package": "pydantic",
+        "version": ">=2.0.0",
+        "required": true,
+        "purpose": "Task and subtask validation"
+      },
+      {
+        "package": "asyncio",
+        "version": "builtin",
+        "required": true,
+        "purpose": "Async decomposition operations"
+      },
+      {
+        "package": "joblib",
+        "version": ">=1.3.0",
+        "required": false,
+        "purpose": "Model persistence and caching (optional)"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "interface": "TaskDecomposer",
+      "version": "1.0.0",
+      "description": "Main interface for task decomposition"
+    },
+    {
+      "interface": "DecompositionStrategy",
+      "version": "1.0.0",
+      "description": "Base class for decomposition strategies"
+    },
+    {
+      "interface": "ComplexityAnalyzer",
+      "version": "1.0.0",
+      "description": "Task complexity analysis"
+    },
+    {
+      "interface": "DecompositionOptimizer",
+      "version": "1.0.0",
+      "description": "Optimization of decomposition results"
+    }
+  ]
+}

@@ -90,6 +90,7 @@
 - **Quality Standards**: Enterprise-grade implementations with comprehensive testing
 - **Extensibility**: Template-based agent generation enables rapid ecosystem expansion
 - **Performance**: Real-time monitoring and coordination across all components
+- **Core Value - Humility**: All development and communication must demonstrate humility. No claims of speedup or performance improvements without measured evidence. Focus on functionality and correctness over optimization claims.
 
 ## Reflections
 

@@ -888,3 +888,4 @@ Remember: The goal is to maintain development velocity while preserving quality 
 ## Memories and Best Practices
 
 - Remember to not use artificial dev timescales in planning or estimating.
+- **Core Value - Humility**: Always demonstrate humility in all development and communication. Never make claims of speedup or performance improvements without measured evidence. Focus on functionality and correctness over optimization claims. Let results speak for themselves.

@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package gadugi.task;
+
+import "common.proto";
+
+// Event emitted when a task starts
+message TaskStarted {
+  string task_id = 1;                 // Unique task identifier
+  string parent_task_id = 2;          // Parent task if subtask
+  string workflow_id = 3;             // Workflow this task belongs to
+  string agent_id = 4;                // Agent executing the task
+  string task_type = 5;               // Type of task
+  string task_name = 6;               // Human-readable task name
+  string description = 7;             // Task description
+  common.Timestamp timestamp = 8;     // Start timestamp
+  common.Priority priority = 9;       // Task priority
+  map<string, string> parameters = 10; // Task parameters
+  common.Metadata metadata = 11;      // Additional metadata
+  common.ResourceRequirements resources = 12; // Required resources
+  int32 timeout_seconds = 13;         // Task timeout
+  repeated string dependencies = 14;  // Task dependencies
+}
+
+// Event emitted to report task progress
+message TaskProgress {
+  string task_id = 1;                // Task identifier
+  string agent_id = 2;               // Agent reporting progress
+  int32 percent_complete = 3;        // Completion percentage (0-100)
+  string status_message = 4;         // Current status message
+  common.Timestamp timestamp = 5;    // Progress timestamp
+  repeated string completed_steps = 6; // Completed step names
+  repeated string remaining_steps = 7; // Remaining step names
+  int64 elapsed_ms = 8;              // Elapsed time in milliseconds
+  int64 estimated_remaining_ms = 9;  // Estimated remaining time
+  map<string, double> metrics = 10;  // Progress metrics
+  string current_phase = 11;         // Current execution phase
+}
+
+// Event emitted when a task completes successfully
+message TaskCompleted {
+  string task_id = 1;              // Task identifier
+  string agent_id = 2;             // Agent that completed the task
+  common.Timestamp timestamp = 3;  // Completion timestamp
+  oneof result {
+    string success_message = 4;  // Success message
+    bytes output_data = 5;       // Binary output data
+  }
+  map<string, string> outputs = 6; // Task outputs
+  int64 duration_ms = 7;          // Total duration in milliseconds
+  common.Metadata metadata = 8;   // Additional metadata
+  map<string, double> performance_metrics = 9; // Performance metrics
+  int32 retry_count = 10;         // Number of retries before success
+  repeated string artifacts = 11;  // Generated artifact paths
+}
+
+// Event emitted when a task fails
+message TaskFailed {
+  string task_id = 1;              // Task identifier
+  string agent_id = 2;             // Agent where task failed
+  common.Timestamp timestamp = 3;  // Failure timestamp
+  common.Error error = 4;          // Error information
+  bool retriable = 5;              // Whether task can be retried
+  int32 retry_count = 6;           // Number of retries attempted
+  string recovery_suggestion = 7;  // Suggested recovery action
+  int64 duration_ms = 8;           // Duration before failure
+  string failure_phase = 9;        // Phase where failure occurred
+  repeated string partial_outputs = 10; // Any partial outputs
+  map<string, string> debug_info = 11;  // Debug information
+}
+
+// Event emitted when a task is cancelled
+message TaskCancelled {
+  string task_id = 1;             // Task identifier
+  string agent_id = 2;            // Agent where task was running
+  string reason = 3;              // Cancellation reason
+  common.Timestamp timestamp = 4; // Cancellation timestamp
+  string cancelled_by = 5;        // Who cancelled (user/agent/system)
+  bool force_cancelled = 6;       // Whether it was force cancelled
+  string state_at_cancellation = 7; // Task state when cancelled
+  int32 percent_complete = 8;     // Completion percentage
+}
+
+// Event emitted when a task is paused
+message TaskPaused {
+  string task_id = 1;             // Task identifier
+  string agent_id = 2;            // Agent where task is running
+  string reason = 3;              // Pause reason
+  common.Timestamp timestamp = 4; // Pause timestamp
+  string paused_by = 5;           // Who paused the task
+  bytes checkpoint_data = 6;      // Checkpoint data for resume
+  int32 percent_complete = 7;     // Completion percentage
+  bool can_resume = 8;            // Whether task can be resumed
+}
+
+// Event emitted when a task is resumed
+message TaskResumed {
+  string task_id = 1;             // Task identifier
+  string agent_id = 2;            // Agent resuming the task
+  common.Timestamp timestamp = 3; // Resume timestamp
+  string resumed_by = 4;          // Who resumed the task
+  int64 pause_duration_ms = 5;    // How long it was paused
+  bytes checkpoint_data = 6;      // Checkpoint data used
+}
+
+// Event for task dependency updates
+message TaskDependencyUpdate {
+  string task_id = 1;                    // Task identifier
+  repeated string depends_on = 2;        // Tasks this depends on
+  repeated string blocks = 3;            // Tasks blocked by this
+  repeated string ready_dependencies = 4; // Dependencies now ready
+  repeated string waiting_on = 5;        // Still waiting on these
+  common.Timestamp timestamp = 6;        // Update timestamp
+  bool all_dependencies_met = 7;         // Whether all deps are met
+}
+
+// Event for task retry
+message TaskRetrying {
+  string task_id = 1;              // Task identifier
+  string agent_id = 2;             // Agent retrying the task
+  int32 attempt_number = 3;        // Current attempt number
+  int32 max_attempts = 4;          // Maximum attempts allowed
+  common.Timestamp timestamp = 5;  // Retry timestamp
+  common.Error previous_error = 6; // Error from previous attempt
+  int32 delay_ms = 7;              // Delay before retry
+  string retry_strategy = 8;       // Retry strategy being used
+}
+
+// Event for task timeout
+message TaskTimeout {
+  string task_id = 1;             // Task identifier
+  string agent_id = 2;            // Agent where task timed out
+  common.Timestamp timestamp = 3; // Timeout timestamp
+  int32 timeout_seconds = 4;      // Configured timeout
+  int64 actual_duration_ms = 5;   // Actual duration before timeout
+  string last_status = 6;         // Last known status
+  bool will_retry = 7;            // Whether it will be retried
+}
+
+// Event for task resource allocation
+message TaskResourceAllocated {
+  string task_id = 1;                        // Task identifier
+  string agent_id = 2;                       // Agent allocated to
+  common.ResourceRequirements allocated = 3; // Resources allocated
+  common.ResourceRequirements requested = 4; // Resources requested
+  common.Timestamp timestamp = 5;            // Allocation timestamp
+  string allocation_id = 6;                  // Unique allocation ID
+  int32 queue_position = 7;                  // Position in queue before allocation
+  int64 queue_time_ms = 8;                   // Time spent in queue
+}
