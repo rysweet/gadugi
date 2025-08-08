@@ -92,7 +92,7 @@ from .teamcoach.phase3 import CoachingEngine, ConflictResolver, WorkflowOptimize
 ### 1. Task Assignment Optimization
 ```bash
 # Invoke TeamCoach for intelligent task assignment
-/agent:teamcoach
+/agent:team-coach
 
 Task: Optimize assignment for complex implementation task requiring multiple capabilities
 
@@ -107,7 +107,7 @@ Strategy: BEST_FIT with risk minimization
 ### 2. Team Formation for Projects
 ```bash
 # Invoke TeamCoach for project team optimization
-/agent:teamcoach
+/agent:team-coach
 
 Task: Form optimal team for microservices architecture project
 
@@ -123,7 +123,7 @@ Strategy: Multi-objective optimization (capability + learning + cost)
 ### 3. Performance Analysis and Coaching
 ```bash
 # Invoke TeamCoach for team performance analysis
-/agent:teamcoach
+/agent:team-coach
 
 Task: Analyze team performance and provide coaching recommendations
 
@@ -138,7 +138,7 @@ Analysis Period: Last 30 days with trend analysis
 ### 4. Real-time Coordination
 ```bash
 # Invoke TeamCoach for dynamic workload balancing
-/agent:teamcoach
+/agent:team-coach
 
 Task: Optimize current workload distribution and resolve conflicts
 
