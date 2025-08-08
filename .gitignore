@@ -43,6 +43,11 @@ pids/
 .env.production
 .env.local
 
+# Orchestrator and monitoring state files
+.gadugi/monitoring/
+.claude/orchestrator/worktree_state.json
+.worktrees/
+
 # parcel-bundler cache
 .cache
 .parcel-cache
