@@ -137,7 +137,7 @@ class OrchestratorCoordinator:
 
         # Initialize existing components
         logger.info("Initializing orchestrator components...")
-        self.task_analyzer = TaskAnalyzer(str(self.project_root))
+        self.task_analyzer = TaskAnalyzer(project_root=str(self.project_root))
         self.worktree_manager = WorktreeManager(
             str(self.project_root),
             self.config.worktrees_dir
