@@ -334,20 +334,21 @@ class TaskExecutor:
         # Generate WorkflowManager prompt
         workflow_prompt_file = self._generate_workflow_prompt()
 
-        # CRITICAL FIX: Tell Claude to read the prompt file instead of passing content
-        # This avoids CLI length limitations and complexity
-        prompt_instruction = f"Read and follow the instructions in the file: {workflow_prompt_file}"
-
         print(f"📄 Generated prompt file: {workflow_prompt_file}")
+
+        # CRITICAL FIX: Use agent invocation with file instruction to avoid CLI length limitations
+        # This maintains agent architecture while solving CLI length issues
+        agent_instruction = f"Execute the complete workflow from file: {workflow_prompt_file}"
 
         # Proper Claude CLI command with automation flags
         claude_cmd = [
             "claude",
-            "-p", prompt_instruction,
+            "/agent:workflow-manager",
+            agent_instruction,
             "--dangerously-skip-permissions",  # CRITICAL: Enable automation
             "--verbose",
             f"--max-turns={self.task_context.get('max_turns', 50)}",
-            "--output-format=json"
+            "--output-format", "json"
         ]
 
         print(f"🚀 Starting subprocess task {self.task_id}: {' '.join(claude_cmd)}")
