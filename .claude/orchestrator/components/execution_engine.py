@@ -346,7 +346,7 @@ class TaskExecutor:
             "-p", prompt_instruction,  # -p flag required for prompt input to subprocess
             "--dangerously-skip-permissions",  # Enable automation without user confirmation
             "--verbose",  # Verbose output for debugging
-            f"--max-turns={self.task_context.get('max_turns', 50)}",  # Limit conversation turns
+            f"--max-turns={self.task_context.get('max_turns', 2000)}",  # Allow sufficient turns for complex workflows
             "--output-format", "json"  # Structured JSON output for parsing
         ]
 
