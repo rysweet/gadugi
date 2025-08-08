@@ -9,16 +9,29 @@ import json
 import shutil
 import subprocess
 
-# Add the components directory to the path
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
+import importlib.util
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
+# Set up path for imports
+orchestrator_dir = Path(__file__).parent.parent
+components_dir = orchestrator_dir / 'components'
 
-from worktree_manager import WorktreeInfo, WorktreeManager
+# Import worktree_manager directly (it doesn't have problematic relative imports)
+spec = importlib.util.spec_from_file_location(
+    "worktree_manager",
+    components_dir / "worktree_manager.py"
+)
+worktree_manager_module = importlib.util.module_from_spec(spec)
+sys.modules['worktree_manager'] = worktree_manager_module
+spec.loader.exec_module(worktree_manager_module)
+
+# Import the classes we need
+WorktreeInfo = worktree_manager_module.WorktreeInfo
+WorktreeManager = worktree_manager_module.WorktreeManager
 
 
 class TestWorktreeManager(unittest.TestCase):

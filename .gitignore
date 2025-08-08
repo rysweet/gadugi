@@ -152,6 +152,8 @@ Pipfile.lock
 
 # Gadugi monitoring and orchestrator runtime files
 .gadugi/monitoring/
+.gadugi/monitoring/*.json
+.gadugi/monitoring/**/*.json
 .gadugi/logs/
 .gadugi/cache/
 
@@ -162,3 +164,6 @@ Pipfile.lock
 orchestration-*/
 *_orchestration.json
 *_orchestration.log
+
+# Orchestrator state files
+.claude/orchestrator/worktree_state.json

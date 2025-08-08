@@ -332,16 +332,22 @@ class TaskExecutor:
         json_output_file = output_dir / f"{self.task_id}_output.json"
 
         # Generate WorkflowManager prompt
-        workflow_prompt = self._generate_workflow_prompt()
+        workflow_prompt_file = self._generate_workflow_prompt()
 
-        # CRITICAL FIX: Proper Claude CLI command with automation flags
+        print(f"📄 Generated prompt file: {workflow_prompt_file}")
+
+        # CRITICAL FIX: Use -p flag with file instruction to avoid CLI length limitations
+        # The -p flag is REQUIRED for subprocess invocation with automation flags
+        prompt_instruction = f"Read and follow the instructions in the file: {workflow_prompt_file}"
+
+        # Proper Claude CLI command for subprocess execution with automation flags
         claude_cmd = [
             "claude",
-            "-p", workflow_prompt,
-            "--dangerously-skip-permissions",  # CRITICAL: Enable automation
-            "--verbose",
-            f"--max-turns={self.task_context.get('max_turns', 50)}",
-            "--output-format=json"
+            "-p", prompt_instruction,  # -p flag required for prompt input to subprocess
+            "--dangerously-skip-permissions",  # Enable automation without user confirmation
+            "--verbose",  # Verbose output for debugging
+            f"--max-turns={self.task_context.get('max_turns', 2000)}",  # Allow sufficient turns for complex workflows
+            "--output-format", "json"  # Structured JSON output for parsing
         ]
 
         print(f"🚀 Starting subprocess task {self.task_id}: {' '.join(claude_cmd)}")

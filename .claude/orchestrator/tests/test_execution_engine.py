@@ -9,7 +9,6 @@ import json
 import shutil
 import subprocess
 
-# Add the components directory to the path
 import sys
 import tempfile
 import time
@@ -17,16 +16,85 @@ import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
+import importlib.util
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
+# Set up path for imports
+orchestrator_dir = Path(__file__).parent.parent
+components_dir = orchestrator_dir / 'components'
 
-from execution_engine import (
-    ExecutionEngine,
-    ExecutionResult,
-    ResourceMonitor,
-    SystemResources,
-    TaskExecutor,
+# Read and modify the execution_engine source to use absolute imports
+execution_engine_path = components_dir / "execution_engine.py"
+with open(execution_engine_path, 'r') as f:
+    source_code = f.read()
+
+# Replace the problematic relative imports
+modified_source = source_code.replace(
+    "from .prompt_generator import PromptContext, PromptGenerator",
+    "from prompt_generator import PromptContext, PromptGenerator"
+).replace(
+    "from ..container_manager import ContainerManager, ContainerConfig, ContainerResult",
+    "from container_manager import ContainerManager, ContainerConfig, ContainerResult"
 )
+
+# Import prompt_generator first (it doesn't have relative imports)
+spec = importlib.util.spec_from_file_location(
+    "prompt_generator",
+    components_dir / "prompt_generator.py"
+)
+prompt_generator_module = importlib.util.module_from_spec(spec)
+sys.modules['prompt_generator'] = prompt_generator_module
+spec.loader.exec_module(prompt_generator_module)
+
+# Create proper mock classes instead of MagicMock to avoid InvalidSpecError
+class MockContainerManager:
+    def __init__(self, config):
+        self.config = config
+
+class MockContainerConfig:
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+class MockContainerResult:
+    def __init__(self, **kwargs):
+        self.task_id = kwargs.get('task_id', '')
+        self.status = kwargs.get('status', 'success')
+        self.start_time = kwargs.get('start_time')
+        self.end_time = kwargs.get('end_time')
+        self.duration = kwargs.get('duration', 0)
+        self.exit_code = kwargs.get('exit_code', 0)
+        self.stdout = kwargs.get('stdout', '')
+        self.stderr = kwargs.get('stderr', '')
+        self.error_message = kwargs.get('error_message', None)
+        self.resource_usage = kwargs.get('resource_usage', {})
+
+# Create container_manager module with proper classes
+container_manager_mock = type('module', (), {})()
+container_manager_mock.ContainerManager = MockContainerManager
+container_manager_mock.ContainerConfig = MockContainerConfig
+container_manager_mock.ContainerResult = MockContainerResult
+sys.modules['container_manager'] = container_manager_mock
+
+# Create execution_engine module from modified source
+spec = importlib.util.spec_from_loader("execution_engine", loader=None)
+execution_engine_module = importlib.util.module_from_spec(spec)
+sys.modules['execution_engine'] = execution_engine_module
+
+# Execute the modified code with proper globals
+globals_dict = execution_engine_module.__dict__.copy()
+globals_dict['__file__'] = str(execution_engine_path)
+globals_dict['__name__'] = 'execution_engine'
+exec(modified_source, globals_dict)
+
+# Update the module dict with the executed code
+execution_engine_module.__dict__.update(globals_dict)
+
+# Import the classes we need
+ExecutionEngine = execution_engine_module.ExecutionEngine
+ExecutionResult = execution_engine_module.ExecutionResult
+ResourceMonitor = execution_engine_module.ResourceMonitor
+SystemResources = execution_engine_module.SystemResources
+TaskExecutor = execution_engine_module.TaskExecutor
 
 
 class TestResourceMonitor(unittest.TestCase):

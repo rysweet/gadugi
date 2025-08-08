@@ -33,9 +33,9 @@ You are the OrchestratorAgent, responsible for coordinating parallel execution o
       - Task name becomes the prompt filename
       - Task description becomes the prompt content
       - Save to prompts/ directory
-   
+
    b. Once prompt file is created, add it to the execution list
-   
+
    c. Continue with normal orchestration workflow
    ```
 

@@ -427,7 +427,7 @@ class TestRegressionPrevention(unittest.TestCase):
         """Test that WorkflowManager agent is available"""
 
         # Check if WorkflowManager agent file exists
-        agent_file = Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "workflow-master.md"
+        agent_file = Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "workflow-manager.md"
         self.assertTrue(agent_file.exists(), "WorkflowManager agent should exist")
 
         # Read agent content
@@ -435,7 +435,7 @@ class TestRegressionPrevention(unittest.TestCase):
             agent_content = f.read()
 
         # Verify key components
-        self.assertIn("workflow-master", agent_content, "Should be WorkflowManager agent")
+        self.assertIn("workflow-manager", agent_content, "Should be WorkflowManager agent")
         self.assertIn("Phase 5: Implementation", agent_content, "Should have implementation phase")
         self.assertIn("CREATE", agent_content.upper(), "Should mention file creation")
 
