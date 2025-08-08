@@ -19,7 +19,7 @@ This template shows how to integrate Gadugi agents and instructions into your pr
 
 ## Agent Hierarchy
 
-@https://raw.githubusercontent.com/rysweet/gadugi/main/AGENT_HIERARCHY.md
+@https://raw.githubusercontent.com/rysweet/gadugi/main/docs/architecture/AGENT_HIERARCHY.md
 
 ## Project-Specific Instructions
 
