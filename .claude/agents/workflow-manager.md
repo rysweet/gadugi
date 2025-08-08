@@ -1,5 +1,6 @@
 ---
 name: workflow-manager
+model: inherit
 description: Orchestrates complete development workflows from prompt files, ensuring all phases from issue creation to PR review are executed systematically
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
 imports: |

@@ -2,6 +2,7 @@
 name: worktree-manager
 description: Manages git worktree lifecycle for isolated parallel execution environments, preventing conflicts between concurrent WorkflowManagers
 tools: Bash, Read, Write, LS
+model: inherit
 ---
 
 # WorktreeManager Sub-Agent
