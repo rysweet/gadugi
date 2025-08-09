@@ -11,9 +11,20 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## CRITICAL: Workflow Execution Pattern
 
-⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
+⚠️ **MANDATORY ORCHESTRATOR AND WORKFLOW MANAGER USAGE** ⚠️
 
-**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
+**ALL requests that will result in changes to version-controlled files MUST:**
+1. **Use the orchestrator agent as entry point**
+2. **Orchestrator MUST delegate to workflow-manager** 
+3. **Workflow-manager MUST execute all 13 phases**
+4. **Direct implementation is FORBIDDEN**
+
+**VERIFICATION CHECKLIST:**
+- ✅ Worktree created in `.worktrees/` directory
+- ✅ Workflow state in `.github/workflow-states/task-*`
+- ✅ All 13 phases documented in PR
+- ✅ Phase tracking shows completion
+- ❌ If these don't exist, workflow was NOT properly executed
 
 This ensures:
 - Proper worktree isolation for all changes
@@ -46,7 +57,15 @@ This ensures:
    - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
    - **Code-Reviewer**: Executes Phase 9 reviews
 
-**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
+**⚠️ GOVERNANCE ENFORCEMENT**: 
+- The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances
+- Direct execution is STRICTLY PROHIBITED
+- If orchestrator executes directly without workflow-manager, this is a CRITICAL VIOLATION
+- Every task MUST show evidence of:
+  - Worktree creation (`.worktrees/task-*`)
+  - Workflow state (`.github/workflow-states/task-*`)
+  - 13 phase execution
+- WITHOUT this evidence, the task was improperly executed and must be rejected
 
 5. **Automated Workflow Handling**:
    - Issue creation

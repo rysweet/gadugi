@@ -9,22 +9,30 @@
 - **Recent Work**: Fixed Team Coach Phase 13 integration - agent registration and error suppression issues
 - **System State**: Team Coach now properly registered and functional as Phase 13
 
-## Team Coach Session Insights (2025-01-08)
-### Issues Discovered
+## Team Coach Session Insights (2025-01-09)
+### Critical Governance Violations Discovered
+- **Orchestrator bypassing workflow-manager**: Directly executing tasks instead of delegating (violates Issue #148)
+- **No workflow states created**: Last workflow state from August 2025, none for recent PRs
+- **Code-review-response auto-merging**: PR #253 merged without user approval
+- **No worktrees created**: All recent work done directly in main repository
+
+### Impact Analysis
+- **No audit trail**: Cannot track workflow execution
+- **Quality gates bypassed**: Testing, documentation phases skipped
+- **User control lost**: PRs merging without permission
+- **No isolation**: Changes made directly without worktree protection
+
+### GitHub Issues Created
+- #255: CRITICAL - Orchestrator bypassing workflow-manager delegation requirement
+- #256: Code-review-response agent violating PR merge policy
+- #257: No worktrees being created for development work
+
+### Previous Session (2025-01-08)
 - Agent registration failures not caught by tests (mocking hid real problems)
 - Error suppression (2>/dev/null) masked critical failures
 - Test validation checked invocation but not actual execution
 - Missing YAML frontmatter prevented agent registration
-
-### Improvements Implemented
-- Added proper YAML frontmatter to team-coach.md
-- Standardized agent naming to use hyphens
-- Removed error suppression from workflow-manager Phase 13
-- Created lessons learned documentation
-
-### GitHub Issues Created
-- #248: Add Agent Registration Validation to CI/CD
-- #249: Remove Error Suppression from Critical Code Paths
+- Issues #248-249 created for testing improvements
 
 ## Current Goals
 - Implement main install.sh script with platform detection and UV installation
@@ -42,11 +50,19 @@
 - **Testing Best Practice**: Always validate agent registration before mocking in tests
 - **Error Handling**: Never suppress errors in critical paths - log and handle properly
 
-## Next Steps
-1. Implement agent registration validator (Issue #248)
-2. Audit and remove error suppression (Issue #249)
-3. Continue with non-disruptive installation system implementation
-4. Add pre-commit hooks for agent validation
+## Next Steps (Priority Order)
+1. **CRITICAL**: Fix orchestrator to delegate to workflow-manager (Issue #255)
+2. **CRITICAL**: Fix code-review-response to never auto-merge (Issue #256)
+3. **HIGH**: Ensure worktree creation for all development (Issue #257)
+4. Implement agent registration validator (Issue #248)
+5. Audit and remove error suppression (Issue #249)
+6. Continue with non-disruptive installation system implementation
+
+## Key Learnings
+- **Governance enforcement is broken**: Orchestrator not following mandatory delegation rules
+- **Testing gaps exist**: Mocking hides real integration problems
+- **Agent instructions drift**: Agents not following documented policies
+- **Workflow state tracking missing**: No evidence of proper workflow execution
 
 ---
-*Last Updated: 2025-01-08*
+*Last Updated: 2025-01-09*

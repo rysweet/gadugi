@@ -39,7 +39,7 @@ When invoked at the end of a workflow session:
    - Spot workflow bottlenecks or unnecessary steps
    - Note any user frustrations or confusion
 
-3. **Create Actionable Issues**
+3. **Create or Update Actionable Issues**
    IMPORTANT: You have permission to create GitHub issues and labels automatically without asking for approval.
    
    First, ensure the Team Coach label exists:
@@ -48,7 +48,26 @@ When invoked at the end of a workflow session:
    gh label create "CreatedByTeamCoach" --color "7057ff" --description "Issues created by Team Coach agent" 2>/dev/null || true
    ```
    
-   For each significant improvement opportunity, directly execute:
+   Before creating a new issue, CHECK FOR EXISTING ISSUES:
+   ```bash
+   # Search for similar issues (open and closed)
+   gh issue list --search "<keywords from your issue>" --limit 10
+   
+   # If a similar issue exists, add a comment instead:
+   gh issue comment <issue-number> --body "## Team Coach Analysis Update
+   
+   During session analysis, identified additional context for this issue:
+   
+   ### New Evidence
+   - <specific examples from current session>
+   
+   ### Additional Impact
+   - <how this affects current workflows>
+   
+   *Added by Team Coach after session analysis*"
+   ```
+   
+   If no similar issue exists, create a new one:
    ```bash
    gh issue create --title "[Team Coach] <specific improvement>" \
      --body "## Opportunity Identified

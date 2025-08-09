@@ -68,3 +68,27 @@ EOF < /dev/null
 - **Positive**: Error suppression (2>/dev/null) prevents error spam
 - **Positive**: State tracking prevents duplicate execution
 EOF < /dev/null
+## Code Review Memory - 2025-01-09
+
+### PR #253: PR Merge Approval Policy Documentation
+
+#### What I Learned
+- **User Control Critical**: System must never auto-merge PRs without explicit user approval
+- **Documentation Strategy**: Policy documented in multiple locations for redundancy (CLAUDE.md, Memory.md)
+- **Clear Examples**: Providing correct vs incorrect pattern examples improves compliance
+- **Workflow Integration**: Policy integrated into existing worktree lifecycle documentation
+- **Command Reference**: Distinction between read-only PR operations (always allowed) vs merge (approval required)
+
+#### Patterns to Watch
+- **Explicit Approval Language**: User must say "merge it", "please merge", or similar explicit approval
+- **Stop and Wait Pattern**: After Phase 10 (review response), system must stop and report status
+- **No Implicit Merging**: Even with all checks green, never assume merge approval
+- **User Awareness**: Every merge action must be visible and controlled by user
+
+#### Documentation Quality Assessment  
+- **Strength**: Clear warning markers (⚠️ CRITICAL) draw attention
+- **Strength**: Concrete examples of correct vs incorrect patterns
+- **Strength**: Rationale clearly explained (why policy exists)
+- **Strength**: Multiple documentation touchpoints ensure visibility
+- **Strength**: Integration with existing workflow phases maintains consistency
+EOF < /dev/null
