@@ -47,8 +47,16 @@ gh issue list --search "[Team Coach]"
 
 ## Manual Invocation
 
-While Team Coach normally runs automatically, you can invoke it manually:
+While Team Coach normally runs automatically, you can invoke it manually for specific scenarios:
 
+### When to Use Manual Invocation
+- **Ad-hoc session analysis**: Review a specific workflow or task outside the normal Phase 13 execution
+- **Testing Team Coach improvements**: Verify agent functionality after making changes
+- **Historical analysis**: Analyze past sessions or workflows for insights
+- **Debugging workflow issues**: Investigate specific problems or patterns
+- **Custom analysis scope**: Focus on particular aspects of team performance
+
+### Manual Invocation Command
 ```
 /agent:team-coach
 
@@ -86,9 +94,14 @@ The Team Coach agent is configured in `.claude/agents/team-coach.md` with:
 - If creation fails, it will still create the issue with 'enhancement' label
 - Check repository permissions for label creation
 
-## Recent Improvements
+## Version History
 
-- Added proper YAML frontmatter for agent registration
-- Implemented automatic label creation
-- Removed error suppression for better debugging
-- Standardized agent naming to `/agent:team-coach`
+### Current Implementation (v1.0)
+The Team Coach agent includes the following features:
+- Automatic invocation during Phase 13 of workflows
+- GitHub issue creation with automatic label management
+- Session analysis and improvement identification
+- Memory.md integration for persistent insights
+- Support for both automatic and manual invocation
+
+*Note: For detailed implementation history and recent changes, see the project's git history and PR #244.*
