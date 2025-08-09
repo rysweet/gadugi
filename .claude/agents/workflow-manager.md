@@ -889,7 +889,7 @@ echo "⚡ AUTOMATIC: Triggering Phase 13 - Team Coach Reflection"
 # Execute Phase 13 immediately
 execute_phase_13_with_error_handling
 
-echo "✅ ALL PHASES (1-13) completed successfully - Workflow complete!"
+echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
 ```
 
 #### **Phase 12 Execution Steps (AUTOMATIC)**
@@ -965,7 +965,7 @@ The Phase 13 Team Coach Reflection is implemented in the `execute_phase_13_with_
 
 #### **State File Updates**
 
-Update state file format to include Phase 11, 12, and 13:
+Update state file format to include Phase 11, 12, 13, and 14:
 
 ```markdown
 ## Phase Completion Status
@@ -982,11 +982,12 @@ Update state file format to include Phase 11, 12, and 13:
 - [x] Phase 11: Settings Update ✅
 - [x] Phase 12: Memory Compaction ✅
 - [x] Phase 13: Team Coach Reflection ✅
+- [x] Phase 14: Worktree Cleanup ✅
 ```
 
 #### **Enhanced Task List Integration**
 
-Add Phase 11, 12, and 13 to mandatory workflow tasks:
+Add Phase 11, 12, 13, and 14 to mandatory workflow tasks:
 
 ```python
 TaskData(
@@ -1015,12 +1016,21 @@ TaskData(
     phase=WorkflowPhase.TEAM_COACH_REFLECTION,
     auto_invoke=True,
     enforcement_level="RECOMMENDED"  # Team Coach analysis is recommended for improvement
+),
+TaskData(
+    id="14",
+    content="🧹 AUTOMATIC: Worktree Cleanup (Phase 14)",
+    status="pending",
+    priority="low",
+    phase=WorkflowPhase.WORKTREE_CLEANUP,
+    auto_invoke=True,
+    enforcement_level="OPTIONAL"  # Worktree cleanup is optional maintenance
 )
 ```
 
-#### **Error Handling for Phase 11, 12, and 13**
+#### **Error Handling for Phase 11, 12, 13, and 14**
 
-Settings update, memory compaction, and Team Coach reflection failures should not block workflow completion:
+Settings update, memory compaction, Team Coach reflection, and worktree cleanup failures should not block workflow completion:
 
 ```bash
 execute_phase_11_with_error_handling() {
@@ -1056,7 +1066,7 @@ execute_phase_12_with_error_handling() {
 
 execute_phase_13_with_error_handling() {
     echo "🎯 Executing Phase 13: Team Coach Reflection"
-    
+
     # Team Coach reflection should not fail the entire workflow
     if timeout 120 /agent:team-coach --session-analysis 2>/dev/null; then
         echo "✅ Team Coach reflection completed successfully"
@@ -1067,6 +1077,10 @@ execute_phase_13_with_error_handling() {
         # Mark as completed anyway - this is not a critical failure
         complete_phase 13 "Team Coach Reflection" "verify_phase_13"
     fi
+
+    # Trigger Phase 14 automatically
+    echo "⚡ AUTOMATIC: Triggering Phase 14 - Worktree Cleanup"
+    execute_phase_14_with_error_handling
 }
 ```
 
@@ -1082,7 +1096,99 @@ Updated execution pattern with Phase 11, 12, and 13:
 6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
 7. 🔧 **Phase 11**: Settings Update → ⚡ **IMMEDIATE Phase 12**
 8. 📦 **Phase 12**: Memory Compaction → ⚡ **IMMEDIATE Phase 13**
-9. 🎯 **Phase 13**: Team Coach Reflection → 📝 **Final state update** → ✅ **COMPLETE**
+9. 🎯 **Phase 13**: Team Coach Reflection → ⚡ **IMMEDIATE Phase 14**
+10. 🧹 **Phase 14**: Worktree Cleanup → 📝 **Final state update** → ✅ **COMPLETE**
+
+### 14. Automatic Worktree Cleanup Phase (AUTOMATIC)
+
+**AUTOMATIC EXECUTION**: This phase runs automatically after Phase 13 to clean up old worktrees and maintain repository hygiene.
+
+After completing Phase 13, automatically clean up old worktrees:
+
+#### **Phase 14 Execution Steps (AUTOMATIC)**
+
+1. **Execute Worktree Cleanup**:
+   ```bash
+   echo "🧹 Phase 14: Automatic Worktree Cleanup"
+   echo "Cleaning up old worktrees..."
+
+   # Run cleanup script with appropriate flags
+   if [ -f ".claude/scripts/cleanup-worktrees.sh" ]; then
+       # First run in dry-run mode to show what will be cleaned
+       .claude/scripts/cleanup-worktrees.sh --dry-run
+
+       # Then execute actual cleanup (skip current worktree)
+       .claude/scripts/cleanup-worktrees.sh
+       echo "✅ Worktree cleanup completed"
+   else
+       echo "⚠️ Cleanup script not found - skipping worktree cleanup"
+   fi
+   ```
+
+2. **Update Workflow State**:
+   ```bash
+   # Mark Phase 14 as completed
+   complete_phase 14 "Worktree Cleanup" "verify_phase_14"
+
+   # Update final workflow state
+   update_state "workflow_completed" "true"
+   update_state "completion_time" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+   ```
+
+3. **Verification Function**:
+   ```bash
+   verify_phase_14() {
+       # Phase 14 always succeeds (cleanup is maintenance)
+       echo "✅ Phase 14: Worktree cleanup check completed"
+
+       # Show current worktree status
+       echo "Current worktree status:"
+       git worktree list
+
+       return 0
+   }
+   ```
+
+#### **Error Handling for Phase 14**
+
+Worktree cleanup failures should not block workflow completion:
+
+```bash
+execute_phase_14_with_error_handling() {
+    echo "🧹 Executing Phase 14: Worktree Cleanup"
+
+    # Worktree cleanup should not fail the entire workflow
+    if [ -f ".claude/scripts/cleanup-worktrees.sh" ]; then
+        if .claude/scripts/cleanup-worktrees.sh 2>/dev/null; then
+            echo "✅ Worktree cleanup completed successfully"
+            complete_phase 14 "Worktree Cleanup" "verify_phase_14"
+        else
+            echo "⚠️ Worktree cleanup failed - continuing workflow"
+            echo "💡 Manual cleanup may be needed later"
+            # Mark as completed anyway - this is not a critical failure
+            complete_phase 14 "Worktree Cleanup" "verify_phase_14"
+        fi
+    else
+        echo "⚠️ Cleanup script not found - skipping worktree cleanup"
+        complete_phase 14 "Worktree Cleanup" "verify_phase_14"
+    fi
+}
+```
+
+#### **Integration with Existing Phases**
+
+Update the Phase 13 completion to trigger Phase 14:
+
+```bash
+# After Team Coach reflection completion in Phase 13
+echo "✅ Team Coach reflection completed"
+echo "⚡ AUTOMATIC: Triggering Phase 14 - Worktree Cleanup"
+
+# Execute Phase 14 immediately
+execute_phase_14_with_error_handling
+
+echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
+```
 
 ## Enhanced Progress Tracking (Shared Modules)
 
