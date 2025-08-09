@@ -34,6 +34,7 @@
 - Update README.md with new installation instructions
 
 ## Important Notes
+- **PR Merge Policy**: NEVER merge PRs without explicit user approval - always wait for user to say "merge it" or similar
 - All Gadugi files must go in .claude/ directory (complete isolation)
 - One-line install: curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
 - Focus on reliability and robustness over features

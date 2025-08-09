@@ -215,6 +215,7 @@ Use worktrees for:
    - Push branch from within worktree
    - Create PR using `gh pr create` from worktree directory
    - Reference issue number in PR description
+   - **CRITICAL: Never merge PRs without explicit user approval** (see PR Merge Policy below)
 
 4. **Cleanup Phase**:
    - After PR is merged, remove worktree:
@@ -275,6 +276,50 @@ The worktree-manager agent handles:
 - Integration with orchestrator for parallel work
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
+
+## PR Merge Approval Policy
+
+**⚠️ CRITICAL: NEVER merge PRs without explicit user approval**
+
+### Required Workflow for PR Completion
+
+1. **Create PR** - Use `gh pr create` with proper description
+2. **Execute Code Review** - Phase 9 with code-reviewer agent
+3. **Address Feedback** - Phase 10 with review response
+4. **STOP AND WAIT** - Report PR status to user
+5. **Only merge when user explicitly says to** - Wait for "merge it", "please merge", or similar
+
+### Correct Pattern
+```
+Assistant: "PR #123 has passed review and all checks are green. 
+          Ready for merge. Awaiting your approval to proceed."
+User: "Please merge it"
+Assistant: [Now executes: gh pr merge 123]
+```
+
+### Incorrect Pattern (DO NOT DO THIS)
+```
+Assistant: "PR passed review, merging now..."  ❌
+Assistant: [Auto-merges without asking]        ❌
+```
+
+### Why This Policy Exists
+- User maintains control over main branch
+- Allows final review before merge
+- Prevents unwanted changes from entering production
+- Ensures user awareness of all merges
+
+### Commands Reference
+```bash
+# View PR status (always allowed)
+gh pr view <pr-number>
+gh pr checks <pr-number>
+
+# Merge PR (ONLY with explicit user approval)
+gh pr merge <pr-number> --merge --delete-branch
+```
+
+Remember: Even if all checks pass and review is approved, ALWAYS wait for explicit user permission before merging.
 
 ## UV Virtual Environment Setup for Agents
 
