@@ -1,6 +1,7 @@
 """Parallel task executor with worktree isolation support."""
 
 import asyncio
+import json
 import logging
 import os
 import subprocess
@@ -170,6 +171,9 @@ class ParallelExecutor:
     async def _execute_single_task(self, task: Any) -> Any:
         """Execute a single task.
         
+        GOVERNANCE REQUIREMENT: All tasks MUST be delegated to WorkflowManager
+        to ensure complete 11-phase workflow execution (Issue #148).
+        
         Args:
             task: Task to execute
             
@@ -182,30 +186,243 @@ class ParallelExecutor:
         result = ExecutionResult(task_id=task_id)
         
         try:
-            logger.debug(f"Executing task {task_id}")
+            logger.debug(f"Delegating task {task_id} to WorkflowManager")
             
-            # Simulate task execution (replace with actual implementation)
-            if hasattr(task, "agent_type") and task.agent_type:
-                # Would invoke specific agent here
-                await asyncio.sleep(0.1)  # Simulate work
-                execution_output = f"Executed by {task.agent_type}"
+            # MANDATORY: Delegate ALL tasks to WorkflowManager
+            # This ensures proper 11-phase workflow execution
+            workflow_result = await self._invoke_workflow_manager(task)
+            
+            if workflow_result["success"]:
+                result.complete(True, result=workflow_result)
+                self.total_executed += 1
+                self.total_succeeded += 1
+                logger.info(f"Task {task_id} completed successfully via WorkflowManager")
             else:
-                # Generic execution
-                await asyncio.sleep(0.1)  # Simulate work
-                execution_output = "Task executed successfully"
-            
-            # Mark as complete
-            result.complete(True, result=execution_output)
-            self.total_executed += 1
-            self.total_succeeded += 1
+                error_msg = workflow_result.get("error", "WorkflowManager execution failed")
+                result.complete(False, error=error_msg)
+                self.total_executed += 1
+                self.total_failed += 1
+                logger.error(f"Task {task_id} failed: {error_msg}")
             
         except Exception as e:
-            logger.error(f"Task {task_id} failed: {e}")
+            logger.error(f"Task {task_id} failed with exception: {e}")
             result.complete(False, error=str(e))
             self.total_executed += 1
             self.total_failed += 1
         
         return result
+    
+    async def _invoke_workflow_manager(self, task: Any) -> Dict[str, Any]:
+        """Invoke WorkflowManager for task execution via claude -p.
+        
+        GOVERNANCE: This is the MANDATORY delegation point to ensure
+        all tasks go through the complete 11-phase workflow using proper
+        Claude subprocess invocation.
+        
+        Args:
+            task: Task to execute via WorkflowManager
+            
+        Returns:
+            Dictionary with execution results
+        """
+        task_id = task.id if hasattr(task, "id") else str(uuid.uuid4())
+        
+        # Create prompt file for WorkflowManager invocation
+        prompt_content = self._create_workflow_prompt(task)
+        prompt_file = Path(f"/tmp/orchestrator_task_{task_id}.md")
+        
+        try:
+            # Write prompt file for claude -p invocation
+            prompt_file.write_text(prompt_content)
+            
+            # Prepare claude -p command for WorkflowManager
+            workflow_cmd = [
+                "claude", "-p", str(prompt_file)
+            ]
+            
+            # Execute WorkflowManager via claude subprocess
+            logger.info(f"Invoking WorkflowManager for task {task_id} via 'claude -p'")
+            logger.debug(f"Command: {' '.join(workflow_cmd)}")
+            logger.debug(f"Prompt file: {prompt_file}")
+            
+            # Run in subprocess to ensure proper isolation
+            process = await asyncio.create_subprocess_exec(
+                *workflow_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=str(self.worktrees[task_id].path) if task_id in self.worktrees else None,
+            )
+            
+            # Wait for completion with timeout
+            timeout = getattr(task, "timeout_seconds", 300)
+            try:
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(),
+                    timeout=timeout
+                )
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+                return {
+                    "success": False,
+                    "error": f"WorkflowManager timed out after {timeout} seconds",
+                    "task_id": task_id,
+                }
+            
+            # Parse results
+            if process.returncode == 0:
+                # Success - parse output for details
+                output = stdout.decode("utf-8")
+                
+                # Extract key information from output
+                pr_number = None
+                issues_created = []
+                phases_completed = []
+                
+                for line in output.split("\n"):
+                    if "PR #" in line or "Pull request #" in line:
+                        # Extract PR number
+                        import re
+                        match = re.search(r"#(\d+)", line)
+                        if match:
+                            pr_number = match.group(1)
+                    elif "Issue #" in line:
+                        # Extract issue number
+                        import re
+                        match = re.search(r"#(\d+)", line)
+                        if match:
+                            issues_created.append(match.group(1))
+                    elif "Phase" in line and "completed" in line.lower():
+                        phases_completed.append(line.strip())
+                
+                return {
+                    "success": True,
+                    "task_id": task_id,
+                    "pr_number": pr_number,
+                    "issues_created": issues_created,
+                    "phases_completed": phases_completed,
+                    "output": output,
+                    "workflow_manager_invoked": True,
+                    "all_phases_executed": len(phases_completed) >= 11,
+                }
+            else:
+                # Failure
+                error_output = stderr.decode("utf-8")
+                return {
+                    "success": False,
+                    "error": f"WorkflowManager failed: {error_output}",
+                    "task_id": task_id,
+                    "returncode": process.returncode,
+                    "workflow_manager_invoked": True,
+                }
+                
+        except Exception as e:
+            logger.error(f"Failed to invoke WorkflowManager: {e}")
+            return {
+                "success": False,
+                "error": f"Failed to invoke WorkflowManager: {str(e)}",
+                "task_id": task_id,
+                "workflow_manager_invoked": False,
+            }
+    
+    def _create_workflow_prompt(self, task: Any) -> str:
+        """Create a prompt file for WorkflowManager invocation.
+        
+        GOVERNANCE: This ensures proper delegation to WorkflowManager
+        with all required context for 11-phase workflow execution.
+        
+        Args:
+            task: Task to create prompt for
+            
+        Returns:
+            Prompt content for WorkflowManager
+        """
+        task_id = task.id if hasattr(task, "id") else str(uuid.uuid4())
+        task_name = getattr(task, "name", "Unnamed Task")
+        task_description = getattr(task, "description", "No description provided")
+        
+        # Build prompt content
+        prompt_lines = [
+            "# WorkflowManager Task Execution Request",
+            "",
+            "## GOVERNANCE NOTICE",
+            "This task has been delegated by the Orchestrator to ensure proper 11-phase workflow execution.",
+            "ALL phases MUST be completed as per Issue #148 requirements.",
+            "",
+            f"## Task ID: {task_id}",
+            f"## Task Name: {task_name}",
+            "",
+            "## Task Description",
+            task_description,
+            "",
+            "## Required Actions",
+            "Execute the complete 11-phase workflow for this task:",
+            "1. Phase 1: Initial Setup",
+            "2. Phase 2: Issue Creation",  
+            "3. Phase 3: Branch Management",
+            "4. Phase 4: Research and Planning",
+            "5. Phase 5: Implementation",
+            "6. Phase 6: Testing",
+            "7. Phase 7: Documentation",
+            "8. Phase 8: Pull Request Creation",
+            "9. Phase 9: Code Review (invoke code-reviewer agent)",
+            "10. Phase 10: Review Response",
+            "11. Phase 11: Settings Update",
+            "",
+        ]
+        
+        # Add task parameters if available
+        if hasattr(task, "parameters") and task.parameters:
+            prompt_lines.extend([
+                "## Task Parameters",
+                "```json",
+                json.dumps(task.parameters, indent=2),
+                "```",
+                "",
+            ])
+            
+            # Special handling for prompt files
+            if "prompt_file" in task.parameters:
+                prompt_lines.extend([
+                    "## Source Prompt File",
+                    f"Execute workflow for: {task.parameters['prompt_file']}",
+                    "",
+                ])
+        
+        # Add worktree information if available
+        if task_id in self.worktrees:
+            worktree = self.worktrees[task_id]
+            prompt_lines.extend([
+                "## Worktree Information",
+                f"Worktree Path: {worktree.path}",
+                f"Branch: {worktree.branch}",
+                "",
+                "Please execute all workflow phases within this worktree for proper isolation.",
+                "",
+            ])
+        
+        # Add execution requirements
+        prompt_lines.extend([
+            "## Execution Requirements",
+            "- Create GitHub issue for tracking",
+            "- Create feature branch in worktree",
+            "- Implement all required changes",
+            "- Run all tests and quality checks",
+            "- Create pull request with detailed description",
+            "- Invoke code-reviewer agent for Phase 9",
+            "- Respond to review feedback in Phase 10",
+            "- Update settings and complete workflow in Phase 11",
+            "",
+            "## Important",
+            "This is a MANDATORY workflow execution delegated by the Orchestrator.",
+            "Failure to complete all 11 phases is a governance violation.",
+            "",
+            "/agent:workflow-manager",
+            "",
+            f"Execute complete workflow for task {task_id}",
+        ])
+        
+        return "\n".join(prompt_lines)
     
     async def _execute_with_isolation(
         self,

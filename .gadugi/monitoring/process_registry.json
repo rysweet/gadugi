@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-07T14:39:54.581583",
+  "timestamp": "2025-08-08T17:15:26.416028",
   "processes": {
     "fix-types-pr-backlog-manager": {
       "task_id": "fix-types-pr-backlog-manager",
@@ -68,34 +68,85 @@
     "add-v0.1-release-notes": {
       "task_id": "add-v0.1-release-notes",
       "task_name": "Add v0.1 Release Notes to README",
-      "status": "running",
+      "status": "failed",
       "command": "claude /agent:workflow-manager",
       "working_directory": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-add-v0.1-release-notes",
       "created_at": "2025-08-07T14:39:54.553349",
       "prompt_file": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-add-v0.1-release-notes/prompts/add-v0.1-release-notes-workflow.md",
       "pid": null,
       "started_at": "2025-08-07T14:39:54.581227",
-      "completed_at": null,
-      "last_heartbeat": "2025-08-07T14:39:54.581224",
+      "completed_at": "2025-08-08T17:14:26.634390",
+      "last_heartbeat": "2025-08-08T17:14:26.634388",
       "exit_code": null,
-      "error_message": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
       "resource_usage": null
     },
     "update-orchestrator-self-reinvoke": {
       "task_id": "update-orchestrator-self-reinvoke",
       "task_name": "Update Orchestrator Agent for Self-Reinvocation",
-      "status": "running",
+      "status": "failed",
       "command": "claude /agent:workflow-manager",
       "working_directory": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-update-orchestrator-self-reinvoke",
       "created_at": "2025-08-07T14:39:54.576769",
       "prompt_file": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-update-orchestrator-self-reinvoke/prompts/update-orchestrator-self-reinvoke-workflow.md",
       "pid": null,
       "started_at": "2025-08-07T14:39:54.581582",
+      "completed_at": "2025-08-08T17:14:26.635355",
+      "last_heartbeat": "2025-08-08T17:14:26.635353",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "task-1-neo4j-setup": {
+      "task_id": "task-1-neo4j-setup",
+      "task_name": "Task 1: Start and Verify Neo4j for Gadugi",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-1-neo4j-setup",
+      "created_at": "2025-08-08T17:15:26.373576",
+      "prompt_file": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-1-neo4j-setup/prompts/task-1-neo4j-setup-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-08T17:15:26.415760",
       "completed_at": null,
-      "last_heartbeat": "2025-08-07T14:39:54.581579",
+      "last_heartbeat": "2025-08-08T17:15:26.415758",
       "exit_code": null,
       "error_message": null,
       "resource_usage": null
+    },
+    "task-2-mcp-service": {
+      "task_id": "task-2-mcp-service",
+      "task_name": "Task 2: Implement MCP Service",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-2-mcp-service",
+      "created_at": "2025-08-08T17:15:26.387405",
+      "prompt_file": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-2-mcp-service/prompts/task-2-mcp-service-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-08T17:15:26.416027",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-08T17:15:26.416025",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    },
+    "task-3-agent-framework": {
+      "task_id": "task-3-agent-framework",
+      "task_name": "Task 3: Implement Agent Framework",
+      "status": "queued",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-3-agent-framework",
+      "created_at": "2025-08-08T17:15:26.406046",
+      "prompt_file": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-3-agent-framework/prompts/task-3-agent-framework-workflow.md",
+      "pid": null,
+      "started_at": null,
+      "completed_at": null,
+      "last_heartbeat": "2025-08-08T17:15:26.406068",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    }
+  }
+}_usage": null
     }
   }
 }

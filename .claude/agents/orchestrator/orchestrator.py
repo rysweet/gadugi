@@ -106,7 +106,18 @@ class ExecutionResult:
 
 
 class Orchestrator(BaseAgent):
-    """Orchestrator agent for coordinating parallel task execution."""
+    """Orchestrator agent for coordinating parallel task execution.
+    
+    GOVERNANCE REQUIREMENT (Issue #148):
+    The Orchestrator MUST delegate ALL task execution to WorkflowManager instances.
+    Direct task execution is PROHIBITED to ensure complete 11-phase workflow execution.
+    
+    Each task is:
+    1. Assigned to a dedicated worktree for isolation
+    2. Delegated to a WorkflowManager subprocess via 'claude -p'
+    3. Executed through the complete 11-phase workflow
+    4. Monitored for successful completion of all phases
+    """
     
     def __init__(
         self,
@@ -116,6 +127,9 @@ class Orchestrator(BaseAgent):
         enable_worktrees: bool = True,
     ):
         """Initialize the Orchestrator.
+        
+        GOVERNANCE: All task execution MUST be delegated to WorkflowManager.
+        The orchestrator only coordinates and monitors WorkflowManager instances.
         
         Args:
             event_router: Event router service

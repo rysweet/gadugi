@@ -53,6 +53,33 @@
       "status": "active",
       "created_at": "2025-08-07T14:39:54.520008",
       "pid": null
+    },
+    "task-1-neo4j-setup": {
+      "task_id": "task-1-neo4j-setup",
+      "task_name": "Task 1: Start and Verify Neo4j for Gadugi",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-1-neo4j-setup",
+      "branch_name": "feature/parallel-task-1-start-and-verify-neo4j-for-gadugi-task-1-neo4j-setup",
+      "status": "active",
+      "created_at": "2025-08-08T17:15:26.098815",
+      "pid": null
+    },
+    "task-2-mcp-service": {
+      "task_id": "task-2-mcp-service",
+      "task_name": "Task 2: Implement MCP Service",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-2-mcp-service",
+      "branch_name": "feature/parallel-task-2-implement-mcp-service-task-2-mcp-service",
+      "status": "active",
+      "created_at": "2025-08-08T17:15:26.218206",
+      "pid": null
+    },
+    "task-3-agent-framework": {
+      "task_id": "task-3-agent-framework",
+      "task_name": "Task 3: Implement Agent Framework",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-3-agent-framework",
+      "branch_name": "feature/parallel-task-3-implement-agent-framework-task-3-agent-framework",
+      "status": "active",
+      "created_at": "2025-08-08T17:15:26.353607",
+      "pid": null
     }
   }
 }

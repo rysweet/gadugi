@@ -1,20 +1,28 @@
 {
-  "timestamp": "2025-08-07T14:40:24.545048",
+  "timestamp": "2025-08-08T17:15:56.370051",
   "active_processes": [
     {
-      "task_id": "add-v0.1-release-notes",
-      "task_name": "Add v0.1 Release Notes to README",
+      "task_id": "task-1-neo4j-setup",
+      "task_name": "Task 1: Start and Verify Neo4j for Gadugi",
       "status": "running",
       "pid": null,
-      "last_heartbeat": "2025-08-07T14:39:54.581224",
+      "last_heartbeat": "2025-08-08T17:15:26.415758",
       "resource_usage": null
     },
     {
-      "task_id": "update-orchestrator-self-reinvoke",
-      "task_name": "Update Orchestrator Agent for Self-Reinvocation",
+      "task_id": "task-2-mcp-service",
+      "task_name": "Task 2: Implement MCP Service",
       "status": "running",
       "pid": null,
-      "last_heartbeat": "2025-08-07T14:39:54.581579",
+      "last_heartbeat": "2025-08-08T17:15:26.416025",
+      "resource_usage": null
+    },
+    {
+      "task_id": "task-3-agent-framework",
+      "task_name": "Task 3: Implement Agent Framework",
+      "status": "running",
+      "pid": null,
+      "last_heartbeat": "2025-08-08T17:15:26.416245",
       "resource_usage": null
     }
   ]
