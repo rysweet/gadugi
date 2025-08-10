@@ -5,10 +5,10 @@ Test Neo4j connection and initialization for Gadugi.
 
 import sys
 from datetime import datetime
-from typing import Dict, List, Optional
 
 from neo4j import GraphDatabase, basic_auth
 from neo4j.exceptions import ServiceUnavailable, AuthError
+from typing import List
 
 
 class Neo4jConnection:

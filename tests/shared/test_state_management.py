@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import pytest
-from unittest.mock import Mock, call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING
@@ -47,7 +46,7 @@ except ImportError as e:
 
     # Define stubs for all needed classes
     from enum import Enum
-    from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List, Union
     from datetime import datetime
 
     class WorkflowPhase(Enum):
@@ -1324,3 +1323,4 @@ class TestStateManagementIntegration:
         # The remaining tasks should still be in progress or pending
         in_progress_states = state_manager.list_states_by_status("in_progress")
         assert len(in_progress_states) == 2
+

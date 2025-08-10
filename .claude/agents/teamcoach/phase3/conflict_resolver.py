@@ -780,7 +780,7 @@ class ConflictResolver:
 
         # Find most common
         if self.conflict_patterns:
-            most_common_key = max(
+            most_common_key = max(  # type: ignore
                 self.conflict_patterns, key=self.conflict_patterns.get
             )
             patterns["most_common"] = {

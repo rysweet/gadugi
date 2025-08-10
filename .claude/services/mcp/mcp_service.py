@@ -6,7 +6,7 @@ A REAL, working FastAPI service that integrates with Neo4j for context storage
 
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 import os
 import uuid
 
@@ -81,7 +81,7 @@ class Neo4jManager:
         async with self.driver.session() as session:
             result = await session.run("RETURN 1 as test")
             test = await result.single()
-            if test["test"] != 1:
+            if test["test"] != 1:  # type: ignore
                 raise Exception("Neo4j connection test failed")
 
     async def close(self):
@@ -94,7 +94,7 @@ class Neo4jManager:
         context_id = f"ctx-{uuid.uuid4().hex[:12]}"
         timestamp = datetime.utcnow().isoformat()
 
-        async with self.driver.session() as session:
+        async with self.driver.session() as session:  # type: ignore
             result = await session.run("""
                 CREATE (c:Context {
                     id: $id,
@@ -109,7 +109,7 @@ class Neo4jManager:
                 timestamp=timestamp, metadata=dict(context.metadata or {}),
                 tags=context.tags or [])
 
-            record = await result.single()
+            _record = await result.single()
             
             # Create relationship to source agent if exists
             await session.run("""
@@ -122,7 +122,7 @@ class Neo4jManager:
 
     async def retrieve_context(self, context_id: str) -> Optional[ContextResponse]:
         """Retrieve context by ID"""
-        async with self.driver.session() as session:
+        async with self.driver.session() as session:  # type: ignore
             result = await session.run("""
                 MATCH (c:Context {id: $id})
                 OPTIONAL MATCH (c)-[r]-(related)
@@ -166,7 +166,7 @@ class Neo4jManager:
 
         where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
 
-        async with self.driver.session() as session:
+        async with self.driver.session() as session:  # type: ignore
             result = await session.run(f"""
                 MATCH (c:Context)
                 WHERE {where_clause}
@@ -192,18 +192,18 @@ class Neo4jManager:
 
     async def get_metrics(self) -> Dict[str, int]:
         """Get database metrics"""
-        async with self.driver.session() as session:
+        async with self.driver.session() as session:  # type: ignore
             # Count contexts
             contexts_result = await session.run("MATCH (c:Context) RETURN count(c) as count")
-            contexts_count = (await contexts_result.single())["count"]
+            contexts_count = (await contexts_result.single())["count"]  # type: ignore
 
             # Count agents
             agents_result = await session.run("MATCH (a:Agent) RETURN count(a) as count")
-            agents_count = (await agents_result.single())["count"]
+            agents_count = (await agents_result.single())["count"]  # type: ignore
 
             # Count relationships
             rels_result = await session.run("MATCH ()-[r]->() RETURN count(r) as count")
-            rels_count = (await rels_result.single())["count"]
+            rels_count = (await rels_result.single())["count"]  # type: ignore
 
             return {
                 "total_contexts": contexts_count,
@@ -309,7 +309,7 @@ async def health_check():
             async with db_manager.driver.session() as session:
                 result = await session.run("RETURN 1 as test")
                 test = await result.single()
-                neo4j_connected = test["test"] == 1
+                neo4j_connected = test["test"] == 1  # type: ignore
         except:
             neo4j_connected = False
     

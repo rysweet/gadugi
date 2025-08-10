@@ -10,16 +10,12 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
-from config import ConfigManager, MemoryManagerConfig, create_default_config
 from github_integration import GitHubIntegration
 
 # Import our components
-from memory_parser import MemoryDocument, MemoryParser, TaskStatus
-from sync_engine import ConflictResolution, SyncDirection, SyncEngine
 from memory_compactor import MemoryCompactor
 
 
@@ -284,7 +280,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Status command
-    status_parser = subparsers.add_parser("status", help="Show current status")
+    _status_parser = subparsers.add_parser("status", help="Show current status")
 
     # Sync command
     sync_parser = subparsers.add_parser(
@@ -320,7 +316,7 @@ def main():
     )
 
     # Auto-compact command
-    auto_compact_parser = subparsers.add_parser(
+    _auto_compact_parser = subparsers.add_parser(
         "auto-compact",
         help="Check and automatically compact if thresholds are exceeded",
     )
@@ -337,7 +333,7 @@ def main():
     )
 
     # Conflicts command
-    conflicts_parser = subparsers.add_parser(
+    _conflicts_parser = subparsers.add_parser(
         "conflicts", help="List synchronization conflicts"
     )
 
@@ -349,10 +345,10 @@ def main():
     resolve_parser.add_argument("resolution", help="Resolution strategy")
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate configuration")
+    _validate_parser = subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    init_parser = subparsers.add_parser(
+    _init_parser = subparsers.add_parser(
         "init", help="Initialize Memory Manager configuration"
     )
 

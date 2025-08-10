@@ -20,19 +20,15 @@ Test Categories:
 7. End-to-end reliability tests
 """
 
-import json
-import os
 import shutil
 import sys
 import tempfile
 import time
-import threading
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch, call, ANY
-from typing import Dict, Any, List
 
 import pytest
+from typing import Set
 
 # Add project paths
 test_dir = Path(__file__).parent

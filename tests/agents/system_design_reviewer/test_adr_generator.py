@@ -179,7 +179,7 @@ class TestADRGenerator:
         assert len(groups["security_change"]) == 2  # Both changes are security-related
 
         # Should not have empty groups
-        for group_name, changes in groups.items():
+        for _group_name, changes in groups.items():
             assert len(changes) > 0
 
     def test_generate_title_single_change(self, sample_changes_requiring_adr):

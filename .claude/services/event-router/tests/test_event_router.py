@@ -5,12 +5,12 @@ Comprehensive tests for Event Router.
 import asyncio
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from pathlib import 
 
 import pytest
 
 from ..event_router import (
+from typing import Set
     Event,
     EventPriority,
     EventRouter,

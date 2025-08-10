@@ -6,7 +6,6 @@ This module orchestrates the synchronization between Memory.md tasks and GitHub 
 handling conflict resolution, status updates, and maintaining data consistency.
 """
 
-import hashlib
 import json
 import shutil
 import time
@@ -14,10 +13,9 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 from github_integration import GitHubIntegration, GitHubIssue
-from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
+from typing import Any, Dict, List, Optional
 
 
 class SyncDirection(Enum):

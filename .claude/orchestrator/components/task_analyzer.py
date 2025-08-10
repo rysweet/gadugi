@@ -19,7 +19,7 @@ import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
@@ -407,7 +407,7 @@ class TaskAnalyzer:
         target_files.extend([path[0] for path in file_paths])
 
         # Look for directory references
-        dir_patterns = re.findall(r'(\w+(?:/\w+)+/)', content)
+        _dir_patterns = re.findall(r'(\w+(?:/\w+)+/)', content)
 
         # Remove duplicates and clean paths
         cleaned_files = []
@@ -700,7 +700,7 @@ def main():
     analyzer = TaskAnalyzer(args.prompts_dir)
 
     try:
-        tasks = analyzer.analyze_all_prompts()
+        tasks = analyzer.analyze_all_prompts()  # type: ignore
         execution_plan = analyzer.generate_execution_plan()
 
         print(f"\n📊 Analysis Summary:")

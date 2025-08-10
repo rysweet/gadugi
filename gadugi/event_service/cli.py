@@ -13,7 +13,6 @@ import os
 import socket
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
 
 from .service import GadugiEventService
 from .config import (
@@ -26,6 +25,7 @@ from .config import (
 )
 from .events import create_local_event
 from .github_client import GitHubClient
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -386,7 +386,6 @@ Examples:
                 event_data = json.loads(args.data)
             elif args.file:
                 import aiofiles
-                import asyncio
 
                 async def read_json_file(path):
                     async with aiofiles.open(path, "r") as f:
@@ -439,7 +438,6 @@ Examples:
 
             if args.tail:
                 # Follow log file
-                import subprocess
 
                 # Use asyncio.create_subprocess_exec for non-blocking tail
                 process = await asyncio.create_subprocess_exec("tail", "-f", log_file)

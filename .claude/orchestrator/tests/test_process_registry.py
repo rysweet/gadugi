@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
 import sys
+from typing import Set
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo, RegistryStats

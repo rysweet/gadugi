@@ -5,7 +5,7 @@ Tests for TeamCoach Phase 3: Strategic Planner
 import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock
-
+from typing import Set
 from ..phase3.strategic_planner import (
     StrategicPlanner,
     TeamEvolutionPlan,
@@ -456,3 +456,4 @@ class TestStrategicPlanner(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

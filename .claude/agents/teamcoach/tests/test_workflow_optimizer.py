@@ -7,6 +7,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from ..phase3.workflow_optimizer import (
+from typing import Set
     WorkflowOptimizer,
     WorkflowMetrics,
     Bottleneck,

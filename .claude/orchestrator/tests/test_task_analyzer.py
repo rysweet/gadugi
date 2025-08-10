@@ -13,6 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
+from typing import Set
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 

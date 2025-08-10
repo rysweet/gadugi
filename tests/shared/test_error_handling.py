@@ -10,10 +10,8 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import Any, Dict
 
 import pytest
-from unittest.mock import Mock, call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING

@@ -10,10 +10,9 @@ import json
 import os
 import shutil
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 
 
 @dataclass
@@ -68,7 +67,7 @@ class WorktreeManager:
                 base_branch
             ]
 
-            result = subprocess.run(
+            _result = subprocess.run(
                 cmd,
                 cwd=self.project_root,
                 capture_output=True,

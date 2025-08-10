@@ -7,6 +7,7 @@ These tests validate that the agent-manager file exists and has proper structure
 
 import unittest
 from pathlib import Path
+from typing import Set
 
 
 class TestAgentManagerStructure(unittest.TestCase):

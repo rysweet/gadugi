@@ -5,7 +5,6 @@ Test suite for WorktreeManager component of OrchestratorAgent
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import json
 import shutil
 import subprocess
 
@@ -15,6 +14,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
+from typing import Set
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 

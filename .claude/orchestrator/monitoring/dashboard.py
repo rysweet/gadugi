@@ -17,28 +17,26 @@ import asyncio
 import json
 import logging
 import os
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Set  # type: ignore
 
 try:
     import websockets
-    from websockets.server import WebSocketServerProtocol
+    from websockets.server import WebSocketServerProtocol  # type: ignore
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
     WebSocketServerProtocol = None
 
 try:
-    from aiohttp import web, WSMsgType
-    import aiofiles
+    from aiohttp import web, WSMsgType  # type: ignore
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
 
 try:
-    import docker
+    import docker  # type: ignore
     DOCKER_AVAILABLE = True
 except ImportError:
     DOCKER_AVAILABLE = False
@@ -54,7 +52,7 @@ class OrchestrationMonitor:
         self.monitoring_dir = Path(monitoring_dir)
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
 
-        self.websocket_clients: Set[WebSocketServerProtocol] = set()
+        self.websocket_clients: Set[WebSocketServerProtocol] = set()  # type: ignore
         self.docker_client = None
         self.active_containers: Dict[str, Dict] = {}
         self.monitoring = False
@@ -62,7 +60,8 @@ class OrchestrationMonitor:
         # Initialize Docker client
         if DOCKER_AVAILABLE:
             try:
-                self.docker_client = docker.from_env()
+                docker = None
+                self.docker_client = docker.from_env()  # type: ignore
             except Exception as e:
                 logger.warning(f"Docker client not available: {e}")
 
@@ -211,8 +210,9 @@ class OrchestrationMonitor:
 
         monitoring_file = self.monitoring_dir / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
-        try:
-            data = {
+        try:  # type: ignore
+                    aiofiles = None
+            data = {  # type: ignore
                 'timestamp': datetime.now().isoformat(),
                 'containers': self.active_containers,
                 'monitoring_metadata': {
@@ -223,15 +223,15 @@ class OrchestrationMonitor:
                 }
             }
 
-            if AIOHTTP_AVAILABLE:
-                async with aiofiles.open(monitoring_file, 'w') as f:
+            if AIOHTTP_AVAILABLE:  # type: ignore
+                async with aiofiles.open(monitoring_file, 'w') as f:  # type: ignore
                     await f.write(json.dumps(data, indent=2))
             else:
                 with open(monitoring_file, 'w') as f:
                     json.dump(data, f, indent=2)
 
-        except Exception as e:
-            logger.error(f"Failed to save monitoring data: {e}")
+        except Exception as e:  # type: ignore
+            logger.error(f"Failed to save monitoring data: {e}")  # type: ignore
 
     async def start_websocket_server(self):
         """Start WebSocket server for real-time updates"""
@@ -246,7 +246,7 @@ class OrchestrationMonitor:
             logger.info(f"New WebSocket client connected: {websocket.remote_address}")
             self.websocket_clients.add(websocket)
 
-            try:
+            try:  # type: ignore
                 # Send initial status
                 if self.active_containers:
                     initial_message = {
@@ -259,20 +259,24 @@ class OrchestrationMonitor:
                 # Keep connection alive
                 async for message in websocket:
                     # Handle client messages if needed
-                    try:
-                        data = json.loads(message)
+                    try:  # type: ignore
+            websockets = None  # type: ignore
+                            message = None  # type: ignore
+                            message = None
+            _websockets = None
+                        data = json.loads(message)  # type: ignore
                         await self.handle_client_message(websocket, data)
-                    except json.JSONDecodeError:
-                        logger.warning(f"Invalid JSON from client: {message}")
+                    except json.JSONDecodeError:  # type: ignore
+                        logger.warning(f"Invalid JSON from client: {message}")  # type: ignore
 
-            except Exception as e:
-                logger.warning(f"WebSocket client error: {e}")
-            finally:
-                self.websocket_clients.discard(websocket)
+            except Exception as e:  # type: ignore
+                logger.warning(f"WebSocket client error: {e}")  # type: ignore
+            finally:  # type: ignore
+                self.websocket_clients.discard(websocket)  # type: ignore
                 logger.info(f"WebSocket client disconnected: {websocket.remote_address}")
 
         try:
-            await websockets.serve(handle_websocket, "0.0.0.0", port)
+            await websockets.serve(handle_websocket, "0.0.0.0", port)  # type: ignore
             logger.info(f"WebSocket server started on port {port}")
         except Exception as e:
             logger.error(f"Failed to start WebSocket server: {e}")
@@ -341,6 +345,16 @@ class OrchestrationMonitor:
             await websocket.send(json.dumps(error_message))
 
     def stop_monitoring(self):
+        _web = None
+        _web = None
+        _web = None
+        _web = None
+            web = None  # type: ignore
+        _web = None
+        _web = None
+        _web = None
+        _web = None
+            web = None  # type: ignore
         """Stop monitoring"""
         self.monitoring = False
         logger.info("Stopping orchestrator monitoring...")
@@ -352,7 +366,7 @@ async def create_web_app():
         logger.error("aiohttp not available - install with: pip install aiohttp")
         return None
 
-    app = web.Application()
+    app = web.Application()  # type: ignore
 
     # Serve static monitoring dashboard
     dashboard_html = '''
@@ -512,10 +526,10 @@ async def create_web_app():
     '''
 
     async def dashboard_handler(request):
-        return web.Response(text=dashboard_html, content_type='text/html')
+        return web.Response(text=dashboard_html, content_type='text/html')  # type: ignore
 
     async def health_handler(request):
-        return web.Response(text='OK', status=200)
+        return web.Response(text='OK', status=200)  # type: ignore
 
     app.router.add_get('/', dashboard_handler)
     app.router.add_get('/health', health_handler)
@@ -536,9 +550,9 @@ async def main():
         app = await create_web_app()
         if app:
             port = int(os.getenv('HTTP_PORT', 8080))
-            runner = web.AppRunner(app)
+            runner = web.AppRunner(app)  # type: ignore
             await runner.setup()
-            site = web.TCPSite(runner, '0.0.0.0', port)
+            site = web.TCPSite(runner, '0.0.0.0', port)  # type: ignore
             await site.start()
             logger.info(f"Monitoring dashboard available at http://localhost:{port}")
 

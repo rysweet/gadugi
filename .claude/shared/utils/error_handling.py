@@ -6,7 +6,7 @@ Provides retry logic, graceful degradation, and error recovery patterns.
 import time
 import functools
 import logging
-from typing import Callable, Any, Optional, Dict, List, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from enum import Enum
 
 
@@ -301,7 +301,7 @@ class CircuitBreaker:
                 self.failure_count = 0
                 self.last_failure_time = None
             return result
-        except Exception as e:
+        except Exception as _e:
             self.failure_count += 1
             self.last_failure_time = time.time()
 

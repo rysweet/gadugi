@@ -5,7 +5,7 @@ Tests for TeamCoach Phase 3: Coaching Engine
 import unittest
 from datetime import datetime
 from unittest.mock import Mock, patch
-
+from typing import Set
 from ..phase3.coaching_engine import (
     CoachingEngine,
     CoachingRecommendation,
@@ -357,3 +357,4 @@ class TestCoachingEngine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

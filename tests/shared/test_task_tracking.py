@@ -3,22 +3,17 @@ Comprehensive tests for task_tracking.py module (TodoWrite integration).
 Tests task management, workflow tracking, and Claude Code integration.
 """
 
-import json
 import os
 import uuid
 
 # Import the module we're testing
 import sys
 import time
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
 
 import pytest
-from unittest.mock import MagicMock, Mock, call, patch
 
 # For type checking only
-from typing import TYPE_CHECKING
+from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from claude.shared.task_tracking import (
@@ -57,7 +52,6 @@ except ImportError as e:
     )
 
     from enum import Enum
-    from typing import ClassVar
 
     class TaskStatus(Enum):
         PENDING = "pending"

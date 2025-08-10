@@ -4,11 +4,9 @@ Validate Gadugi v0.3 Implementation
 Checks what's ACTUALLY implemented vs claimed
 """
 
-import os
 import subprocess
-import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 class ImplementationValidator:
     def __init__(self):

@@ -24,7 +24,7 @@ from .models import (
 
 # Import service dependencies
 try:
-    from ..mcp import MCPService
+    from ..mcp import MCPService  # type: ignore
     from ..event_router import EventRouter, Event, EventType, EventPriority
 except ImportError:
     # Mock imports for development
@@ -236,7 +236,7 @@ class MemorySystem:
                     ORDER BY m.importance DESC, m.updated_at DESC
                     LIMIT $limit
                     """,
-                    query=query,
+                    query=query,  # type: ignore
                     limit=limit,
                 )
                 

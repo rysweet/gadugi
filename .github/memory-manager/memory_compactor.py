@@ -9,9 +9,8 @@ while preserving essential current information.
 
 import os
 import re
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import os
 
@@ -430,7 +429,7 @@ class MemoryCompactor:
                             item_date = item_date.replace(year=item_date.year + 100)
 
                     return (current_date - item_date).days
-                except ValueError as e:
+                except ValueError as _e:
                     # Log error but continue
                     pass
 

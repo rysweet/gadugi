@@ -7,14 +7,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Set  # type: ignore
 
 from .frontmatter_parser import parse_agent_definition
 from .tool_registry import ToolRegistry
 
 # Import service dependencies
 try:
-    from ..services.event_router import EventRouter, Event, EventType, Subscription
+    from ..services.event_router import EventRouter, Event, EventType, Subscription  # type: ignore
     from ..services.memory_system import MemorySystem, Memory, MemoryType
 except ImportError:
     # Mock imports for development
@@ -284,7 +284,7 @@ class BaseAgent(ABC):
                 pass
         
         # Unsubscribe from events
-        for subscription in self.subscriptions:
+        for _subscription in self.subscriptions:
             # Unsubscribe logic would go here
             pass
         

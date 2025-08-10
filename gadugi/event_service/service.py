@@ -11,27 +11,15 @@ Provides the core event-driven service that handles:
 import asyncio
 import json
 import logging
-import socket
-import threading
 import time
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Set
 import hmac
 import hashlib
-import subprocess
 import signal
 import sys
-import os
 
-import aiohttp
-from aiohttp import web, ClientSession
-import yaml
 
-from .config import ServiceConfig, load_config
-from .events import Event, GitHubEvent, LocalEvent, AgentEvent
-from .handlers import EventHandler, EventFilter
 from .github_client import GitHubClient
 from .agent_invoker import AgentInvoker
 

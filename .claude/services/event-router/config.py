@@ -7,7 +7,7 @@ from typing import Optional
 from pydantic import BaseSettings
 
 
-class Settings(BaseSettings):
+class Settings(BaseSettings):  # type: ignore
     """Application settings."""
     
     # Service configuration

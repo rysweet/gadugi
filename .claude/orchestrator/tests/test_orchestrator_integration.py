@@ -6,18 +6,16 @@ These tests validate the complete orchestrator workflow from CLI input
 to parallel execution coordination.
 """
 
-import json
 import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
 
 # Add orchestrator components to path
 import sys
+from typing import Set
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig, OrchestrationResult
 from orchestrator_cli import OrchestrationCLI
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 

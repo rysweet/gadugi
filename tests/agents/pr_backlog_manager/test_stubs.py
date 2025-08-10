@@ -7,9 +7,9 @@ cannot be imported during type checking.
 
 import os
 from enum import Enum
-from typing import Dict, List, Any, Optional, Callable, Union
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Set
 
 
 # Pytest stubs

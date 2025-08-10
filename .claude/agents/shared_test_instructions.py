@@ -6,7 +6,7 @@ Contains common patterns, utilities, and validation logic.
 import os
 import sys
 import logging
-from typing import List, Any, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
     from utils.error_handling import ErrorHandler
-    from interfaces import AgentConfig, OperationResult
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass

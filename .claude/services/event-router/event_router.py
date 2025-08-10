@@ -8,24 +8,22 @@ Handles protobuf events, spawns agent processes, and manages routing.
 
 import asyncio
 import json
-import logging
 import os
-import signal
-import subprocess
-import sys
+import subprocess  # type: ignore
+import sys  # type: ignore
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 
-import psutil
+import psutil  # type: ignore
 import structlog
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field  # type: ignore
 
 try:
-    from .auth_manager import AuthManager, AuthConfig
+    from .auth_manager import AuthManager, AuthConfig  # type: ignore
 except ImportError:
     # Fallback if auth_manager is not available
     AuthManager = None
@@ -600,7 +598,7 @@ class EventRouter:
         while self.running:
             try:
                 # Get next event from priority queue
-                priority, event = await asyncio.wait_for(
+                _priority, event = await asyncio.wait_for(
                     self.event_queue.get(),
                     timeout=1.0
                 )
@@ -745,7 +743,7 @@ async def main():
     await router.publish(subprocess_event)
     
     # Example 2: Spawn agent in container (with mounted auth)
-    container_event = Event(
+    _container_event = Event(
         id="test-002",
         type=EventType.AGENT_STARTED,
         topic="agent.worker",

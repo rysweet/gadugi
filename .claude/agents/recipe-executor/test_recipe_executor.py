@@ -5,7 +5,7 @@ Comprehensive tests for Recipe Executor Agent.
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from recipe_executor import RecipeExecutor, Recipe, Implementation
 

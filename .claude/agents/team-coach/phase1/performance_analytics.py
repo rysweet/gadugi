@@ -17,7 +17,7 @@ Key Features:
 import logging
 import statistics
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -276,7 +276,7 @@ class AgentPerformanceAnalyzer:
         """Calculate success rate and task completion metrics."""
         try:
             # Get task results from task metrics
-            task_results = self.task_metrics.get_agent_task_results(
+            task_results = self.task_metrics.get_agent_task_results(  # type: ignore
                 performance_data.agent_id, time_period[0], time_period[1]
             )
 
@@ -316,7 +316,7 @@ class AgentPerformanceAnalyzer:
         """Analyze execution time metrics."""
         try:
             # Get execution times from task metrics
-            execution_times = self.task_metrics.get_agent_execution_times(
+            execution_times = self.task_metrics.get_agent_execution_times(  # type: ignore
                 performance_data.agent_id, time_period[0], time_period[1]
             )
 
@@ -348,7 +348,7 @@ class AgentPerformanceAnalyzer:
         """Measure resource utilization metrics."""
         try:
             # Get resource usage data
-            resource_data = self.task_metrics.get_agent_resource_usage(
+            resource_data = self.task_metrics.get_agent_resource_usage(  # type: ignore
                 performance_data.agent_id, time_period[0], time_period[1]
             )
 
@@ -402,7 +402,7 @@ class AgentPerformanceAnalyzer:
         """Assess output quality metrics."""
         try:
             # Get quality metrics from task results
-            quality_data = self.task_metrics.get_agent_quality_metrics(
+            quality_data = self.task_metrics.get_agent_quality_metrics(  # type: ignore
                 performance_data.agent_id, time_period[0], time_period[1]
             )
 
@@ -451,7 +451,7 @@ class AgentPerformanceAnalyzer:
         """Measure collaboration effectiveness metrics."""
         try:
             # Get collaboration data
-            collaboration_data = self.task_metrics.get_agent_collaboration_metrics(
+            collaboration_data = self.task_metrics.get_agent_collaboration_metrics(  # type: ignore
                 performance_data.agent_id, time_period[0], time_period[1]
             )
 
@@ -547,7 +547,7 @@ class AgentPerformanceAnalyzer:
         """Calculate composite performance score for a specific period."""
         try:
             # Get basic metrics for the period
-            task_results = self.task_metrics.get_agent_task_results(
+            task_results = self.task_metrics.get_agent_task_results(  # type: ignore
                 agent_id, period[0], period[1]
             )
 

@@ -765,7 +765,7 @@ jobs:
         avg_completion_time = 0
         if completed_with_time:
             total_time = sum(
-                (task.completion_time - task.created_at).total_seconds()
+                (task.completion_time - task.created_at).total_seconds()  # type: ignore
                 for task in completed_with_time
             )
             avg_completion_time = total_time / len(completed_with_time)

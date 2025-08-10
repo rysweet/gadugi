@@ -5,11 +5,8 @@ Handles GitHub API interactions for polling and webhook management.
 """
 
 import asyncio
-import base64
-import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
 import aiohttp
@@ -295,7 +292,6 @@ class GitHubClient:
     async def auto_detect_repository(self) -> Optional[tuple[str, str]]:
         """Auto-detect current repository from git remote."""
         try:
-            import subprocess
 
             import asyncio
 

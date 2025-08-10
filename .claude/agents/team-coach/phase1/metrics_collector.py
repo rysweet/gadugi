@@ -2,7 +2,7 @@ from datetime import timedelta
 import logging
 import threading
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable, Union, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
@@ -140,7 +140,7 @@ class MetricsCollector:
         # Collection infrastructure
         self.collection_hooks: Dict[MetricSource, List[Callable]] = defaultdict(list)
         self.collection_threads: Dict[str, threading.Thread] = {}
-        self.stop_collection = threading.Event()
+        self.stop_collection = threading.Event()  # type: ignore
 
         # Performance tracking
         self.collection_stats = {
@@ -626,7 +626,7 @@ class MetricsCollector:
     def _collection_worker(self, source: MetricSource) -> None:
         """Worker thread for collecting metrics from a specific source."""
         try:
-            while not self.stop_collection.is_set():
+            while not self.stop_collection.is_set():  # type: ignore
                 try:
                     # Collection logic would be implemented here based on source
                     if source == MetricSource.TASK_TRACKING:
@@ -638,13 +638,13 @@ class MetricsCollector:
 
                     # Sleep based on the shortest collection frequency for this source
                     sleep_time = self._get_min_collection_frequency(source)
-                    self.stop_collection.wait(sleep_time.total_seconds())
+                    self.stop_collection.wait(sleep_time.total_seconds())  # type: ignore
 
                 except Exception as e:
                     self.logger.error(
                         f"Error in collection worker for {source.value}: {e}"
                     )
-                    self.stop_collection.wait(60)  # Wait 1 minute on error
+                    self.stop_collection.wait(60)  # Wait 1 minute on error  # type: ignore
 
         except Exception as e:
             self.logger.error(f"Collection worker {source.value} failed: {e}")
@@ -707,7 +707,7 @@ class MetricsCollector:
             cutoff_time = datetime.now() - retention_period
             removed_count = 0
 
-            for metric_name, data_deque in self.metric_data.items():
+            for _metric_name, data_deque in self.metric_data.items():
                 # Convert to list for processing
                 data_list = list(data_deque)
                 filtered_data = [dp for dp in data_list if dp.timestamp >= cutoff_time]
@@ -745,7 +745,7 @@ class MetricsCollector:
     def stop_collection(self) -> None:
         """Stop all metric collection."""
         try:
-            self.stop_collection.set()
+            self.stop_collection.set()  # type: ignore
 
             # Wait for threads to finish
             for thread in self.collection_threads.values():

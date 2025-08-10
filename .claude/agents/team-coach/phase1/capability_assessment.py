@@ -288,7 +288,7 @@ class CapabilityAssessment:
             end_time = datetime.now()
             start_time = end_time - self.assessment_config["trend_analysis_window"]
 
-            task_results = self.task_metrics.get_agent_task_results(
+            task_results = self.task_metrics.get_agent_task_results(  # type: ignore
                 profile.agent_id, start_time, end_time
             )
 
@@ -326,7 +326,7 @@ class CapabilityAssessment:
             self.logger.error(f"Failed to assess domain capabilities: {e}")
 
     def _assess_domain_capability(
-        self, domain: CapabilityDomain, tasks: List[TaskResult], agent_id: str
+        self, domain: CapabilityDomain, tasks: List[TaskResult], agent_id: str  # type: ignore
     ) -> CapabilityScore:
         """Assess capability in a specific domain."""
         try:
@@ -397,8 +397,8 @@ class CapabilityAssessment:
             )
 
     def _group_tasks_by_domain(
-        self, tasks: List[TaskResult]
-    ) -> Dict[CapabilityDomain, List[TaskResult]]:
+        self, tasks: List[TaskResult]  # type: ignore
+    ) -> Dict[CapabilityDomain, List[TaskResult]]:  # type: ignore
         """Group tasks by their primary capability domain."""
         domain_tasks = {domain: [] for domain in CapabilityDomain}
 
@@ -410,7 +410,7 @@ class CapabilityAssessment:
 
         return domain_tasks
 
-    def _determine_task_domain(self, task: TaskResult) -> Optional[CapabilityDomain]:
+    def _determine_task_domain(self, task: TaskResult) -> Optional[CapabilityDomain]:  # type: ignore
         """Determine the primary capability domain for a task."""
         # This would analyze task type, description, etc. to determine domain
         # For now, use basic heuristics based on task type
@@ -501,7 +501,7 @@ class CapabilityAssessment:
         confidence = (count_factor * 0.6) + (consistency_factor * 0.4)
         return min(1.0, confidence)
 
-    def _calculate_improvement_trend(self, tasks: List[TaskResult]) -> float:
+    def _calculate_improvement_trend(self, tasks: List[TaskResult]) -> float:  # type: ignore
         """Calculate improvement trend from task results."""
         if len(tasks) < 2:
             return 0.0

@@ -31,9 +31,9 @@ from .phase2.recommendation_engine import RecommendationEngine
 from .phase2.realtime_assignment import RealtimeAssignment
 
 from .phase3.coaching_engine import CoachingEngine
-from .phase3.conflict_resolver import AgentConflictResolver
+from .phase3.conflict_resolver import AgentConflictResolver  # type: ignore
 from .phase3.workflow_optimizer import WorkflowOptimizer
-from .phase3.strategic_planner import StrategicTeamPlanner
+from .phase3.strategic_planner import StrategicTeamPlanner  # type: ignore
 
 # Phase 4 imports temporarily commented out until implementation is complete
 # from .phase4.performance_learner import TeamPerformanceLearner

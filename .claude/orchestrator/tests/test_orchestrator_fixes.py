@@ -12,14 +12,12 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import json
 import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
 
 # Add parent directory to path to import components
 sys.path.insert(0, str(Path(__file__).parent.parent))

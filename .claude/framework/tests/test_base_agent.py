@@ -1,12 +1,12 @@
 """Tests for the BaseAgent class."""
 
 import asyncio
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from pathlib import 
 
 import pytest
 
 from ..base_agent import AgentMetadata, AgentResponse, BaseAgent
+from typing import Set
 
 
 class TestAgentImpl(BaseAgent):

@@ -14,6 +14,7 @@ import sys
 import subprocess
 import os
 from datetime import datetime
+from typing import Set
 
 
 def invoke_teamcoach_agent_analysis(agent_data):

@@ -1,8 +1,8 @@
 """Example agent implementation using the BaseAgent framework."""
 
 import logging
-from pathlib import Path
-from typing import Any, Dict
+from pathlib import   # type: ignore
+from typing import Any, Dict, Set
 
 from .base_agent import AgentResponse, BaseAgent
 

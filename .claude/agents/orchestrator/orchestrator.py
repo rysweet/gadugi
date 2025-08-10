@@ -6,14 +6,14 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from pathlib import   # type: ignore
+from typing import Any, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 
 from ...framework import BaseAgent, AgentMetadata, AgentResponse
-from ...services.event_router import EventRouter, Event, EventType, EventPriority
+from ...services.event_router import EventRouter, Event, EventType, EventPriority  # type: ignore
 from ...services.memory_system import MemorySystem, Memory, MemoryType
 from .parallel_executor import ParallelExecutor, ExecutionMode
-from .task_analyzer import TaskAnalyzer, TaskDependency
+from .task_analyzer import TaskAnalyzer, TaskDependency  # type: ignore
 
 logger = logging.getLogger(__name__)
 

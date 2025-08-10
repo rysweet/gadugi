@@ -6,7 +6,6 @@ CodeReviewer agent identify over-engineering patterns and suggest simpler altern
 """
 
 import unittest
-from unittest.mock import patch, Mock
 import tempfile
 import os
 
@@ -190,7 +189,7 @@ class Person:
         """Test that complex solutions are accepted for genuinely complex problems."""
         complex_but_justified_code = '''
 import asyncio
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
 

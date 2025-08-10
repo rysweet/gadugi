@@ -8,11 +8,11 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from pathlib import   # type: ignore
+from typing import Dict, List, Any, Optional, Tuple  # type: ignore
 from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel
+from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel  # type: ignore
 
 
 @dataclass

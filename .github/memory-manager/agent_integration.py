@@ -7,7 +7,7 @@ with the GitHub Issues-only memory management system, replacing Memory.md operat
 """
 
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from pathlib import Path
 import sys
 

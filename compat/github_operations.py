@@ -48,3 +48,4 @@ from typing import Any as _Any
 def __getattr__(name: str) -> _Any:  # type: ignore[misc]
     """Return attribute from underlying implementation or Any for unknown names."""
     return getattr(_module, name, _Any)  # noqa: ANN001
+

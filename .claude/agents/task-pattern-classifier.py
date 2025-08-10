@@ -5,8 +5,7 @@ Part of the Enhanced Task Decomposition Analyzer
 This module provides ML-based task pattern recognition and optimization
 for the Gadugi multi-agent system.
 """
-
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import Counter, defaultdict
@@ -429,7 +428,7 @@ class TaskPatternClassifier:
         description_lower = description.lower()
         indicators = []
 
-        for indicator, score in self.complexity_indicators.items():
+        for indicator, _score in self.complexity_indicators.items():
             if indicator in description_lower:
                 indicators.append(indicator)
 
@@ -767,7 +766,7 @@ class TaskPatternClassifier:
         if features.external_dependency_count > 2:
             optimizations.append("dependency_isolation")
 
-        if features.complexity_scores.get("overall", 0) > 4.0:
+        if features.complexity_scores.get("overall", 0) > 4.0:  # type: ignore
             optimizations.append("task_decomposition")
 
         return list(set(optimizations))  # Remove duplicates
@@ -875,3 +874,4 @@ if __name__ == "__main__":
     print(f"Optimizations: {classification.optimizations}")
     print(f"Risk Factors: {classification.risk_factors}")
     print(f"Recommended Approach: {classification.recommended_approach}")
+

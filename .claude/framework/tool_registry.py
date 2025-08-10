@@ -4,7 +4,7 @@ import asyncio
 import inspect
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union  # type: ignore
 
 logger = logging.getLogger(__name__)
 

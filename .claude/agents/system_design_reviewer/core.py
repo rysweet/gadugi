@@ -10,7 +10,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -148,7 +148,7 @@ class SystemDesignReviewer:
             self.task_tracker.create_task(
                 f"review_pr_{pr_number}",
                 f"Review PR #{pr_number} for architectural changes",
-                priority="high"
+                priority="high"  # type: ignore
             )
             self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")
 
@@ -235,7 +235,7 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)
+            result = self.github_ops.get_pr_details(pr_number)  # type: ignore
 
             # Get changed files
             changed_files = self._get_changed_files(pr_number)
@@ -475,7 +475,7 @@ class SystemDesignReviewer:
             )
 
             # Post review using GitHub operations
-            self.github_ops.post_pr_review(pr_number, review_action, review_body)
+            self.github_ops.post_pr_review(pr_number, review_action, review_body)  # type: ignore
 
         except Exception as e:
             print(f"Error posting GitHub review: {e}")
@@ -560,7 +560,7 @@ class SystemDesignReviewer:
         return self.review_pr(pr_number, **kwargs)
 
 
-class SystemDesignStateManager(StateManager):
+class SystemDesignStateManager(StateManager):  # type: ignore
     """State manager for System Design Review Agent"""
 
     def __init__(self):

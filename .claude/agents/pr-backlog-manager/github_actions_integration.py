@@ -9,7 +9,7 @@ import os
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -410,7 +410,7 @@ class GitHubActionsIntegration:
             summary_content = self._format_github_summary(result)
 
             # Append to GitHub Actions summary
-            with open(os.getenv("GITHUB_STEP_SUMMARY"), "a") as f:
+            with open(os.getenv("GITHUB_STEP_SUMMARY"), "a") as f:  # type: ignore
                 f.write(summary_content)
 
             logger.info("Generated GitHub Actions workflow summary")
@@ -576,7 +576,7 @@ class GitHubActionsIntegration:
                 )
 
             # Write outputs to GitHub Actions
-            with open(os.getenv("GITHUB_OUTPUT"), "a") as f:
+            with open(os.getenv("GITHUB_OUTPUT"), "a") as f:  # type: ignore
                 for key, value in outputs.items():
                     f.write(f"{key}={value}\n")
 

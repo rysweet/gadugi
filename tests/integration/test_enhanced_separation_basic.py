@@ -11,10 +11,9 @@ import shutil
 import sys
 import tempfile
 from datetime import datetime
-from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pytest
+from typing import List, Set
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -22,8 +21,6 @@ sys.path.append(
 
 from task_tracking import Task, TaskList, TaskStatus, TaskPriority
 
-from github_operations import GitHubOperations
-from interfaces import AgentConfig
 from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
 from task_tracking import (
     Task,

@@ -17,14 +17,12 @@ import subprocess
 import time
 import json
 import os
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable, Tuple
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
-from enum import Enum, auto
 
 # Import workflow engine components
-from claude.shared.workflow_engine import WorkflowPhase, PhaseResult, WorkflowState
+from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
 
 
 @dataclass
@@ -169,7 +167,10 @@ class PhaseEnforcer:
                     )
 
                 # Execute enforcement action
-                success, message, details = rule.enforcement_action(workflow_state, context)
+                if rule.enforcement_action:
+                    success, message, details = rule.enforcement_action(workflow_state, context)
+                else:
+                    success, message, details = False, "No enforcement action defined", {}
 
                 if success:
                     # Reset circuit breaker on success

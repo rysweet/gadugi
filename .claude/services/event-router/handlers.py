@@ -3,7 +3,7 @@ Request handlers for event-router.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional  # type: ignore
 
 from .models import RequestModel, ValidationResult
 
@@ -35,7 +35,7 @@ async def validate_input(request: RequestModel) -> ValidationResult:
                     error=f"Required field missing: {field}"
                 )
         
-        return ValidationResult(is_valid=True)
+        return ValidationResult(is_valid=True)  # type: ignore
     except Exception as e:
         logger.error(f"Validation error: {e}")
         return ValidationResult(

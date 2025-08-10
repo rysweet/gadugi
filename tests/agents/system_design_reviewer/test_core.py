@@ -8,11 +8,10 @@ and GitHub integration.
 import pytest
 import tempfile
 import json
-import os
-from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 from pathlib import Path
 from agents.system_design_reviewer.core import (
+from typing import Set
     SystemDesignReviewer,
     ReviewResult,
     ReviewStatus,

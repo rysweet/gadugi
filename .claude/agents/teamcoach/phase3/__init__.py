@@ -4,7 +4,6 @@ TeamCoach Phase 3: Coaching and Optimization
 This module provides coaching capabilities, conflict resolution,
 workflow optimization, and strategic planning for multi-agent teams.
 """
-
 from typing import Dict, Any
 
 
@@ -20,3 +19,4 @@ def get_phase3_info() -> Dict[str, Any]:
         ],
         "status": "Active Development",
     }
+

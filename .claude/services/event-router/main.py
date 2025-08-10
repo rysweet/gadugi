@@ -38,7 +38,7 @@ def process():
         data = request.get_json()
         
         # Validate input
-        is_valid, error = validate_input(data)
+        is_valid, error = validate_input(data)  # type: ignore
         if not is_valid:
             return jsonify({"error": error}), 400
         
