@@ -48,6 +48,17 @@ repos:
         exclude: .*\.lock$|package-lock\.json$
 
 
+  # Validate agent registration files
+  - repo: local
+    hooks:
+      - id: validate-agents
+        name: Validate agent registration
+        entry: python .github/scripts/validate-agent-registration.py
+        language: system
+        files: '\.(claude|github)/agents/.*\.md$'
+        pass_filenames: false
+        stages: [pre-commit]
+
   # Run tests (using local hook)
   - repo: local
     hooks:
