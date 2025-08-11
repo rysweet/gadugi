@@ -50,7 +50,7 @@ After installation, you can use any Gadugi agent:
 
 ### v0.1.0 - Initial Release (August 2025)
 
-A first draft-ish version helps with automated coding using Claude Code. It could be adapted to GH Copilot or Roo Code pretty easily  - thats coming. It is already capable of self-hosting - I used a previous draft to rebuild itself into this one, and its now busy building a few versions of the next ones. 
+A first draft-ish version helps with automated coding using Claude Code. It could be adapted to GH Copilot or Roo Code pretty easily  - thats coming. It is already capable of self-hosting - I used a previous draft to rebuild itself into this one, and its now busy building a few versions of the next ones. I gaurantee its buggy and messy and that there are massive inconsistencies and quality gaps, but its starting to be functional. This version is integrated with GitHub, ADO coming soon. 
 
 This initial release of Gadugi provides a multi-agent system for AI-assisted software development. The v0.1 milestone includes 27 completed issues establishing core functionality. The system uses an orchestrator to coordinate task execution across isolated git worktrees. Development follows an 11-phase process from issue creation through code review.
 
