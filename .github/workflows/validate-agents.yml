@@ -1,0 +1,48 @@
+name: Validate Agent Registration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.claude/agents/**/*.md'
+      - '.github/agents/**/*.md'
+      - '.github/scripts/validate-agent-registration.py'
+      - '.github/workflows/validate-agents.yml'
+  pull_request:
+    paths:
+      - '.claude/agents/**/*.md'
+      - '.github/agents/**/*.md'
+      - '.github/scripts/validate-agent-registration.py'
+      - '.github/workflows/validate-agents.yml'
+
+jobs:
+  validate-agents:
+    name: Validate Agent Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+      
+      - name: Run agent validation
+        run: |
+          echo "🔍 Validating agent registration files..."
+          python .github/scripts/validate-agent-registration.py --verbose
+      
+      - name: Report validation status
+        if: failure()
+        run: |
+          echo "❌ Agent validation failed!"
+          echo "Please fix the YAML frontmatter in your agent files."
+          echo "See the validation output above for specific errors."
+          exit 1
