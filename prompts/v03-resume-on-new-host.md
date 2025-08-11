@@ -1,5 +1,16 @@
 # Resume Gadugi v0.3 Implementation on New Host
 
+## 🚨 IMMEDIATE ACTION REQUIRED 🚨
+
+**You are resuming work that was interrupted by a host crash. The following TODOs MUST be completed:**
+
+1. **FIX PYRIGHT ERRORS**: 388 errors remain (down from 680) - MUST achieve ZERO
+2. **VERIFY TEAM COACH**: Implementation exists but needs verification
+3. **RUN VALIDATION**: Confirm all components working with tests
+4. **CREATE PR**: Final PR with all fixes
+
+**DO NOT STOP** until `uv run pyright .claude/` shows **0 errors**!
+
 ## System State at Checkpoint
 - **Branch**: feature/parallel-implement-task-decomposer-agent-(#240)-implement-task-decomposer-agent
 - **Latest Commit**: 8bd0a85 (fix: apply pyright error fixes and type annotations)
@@ -25,7 +36,15 @@ workflow_cmd = ["claude", "--dangerously-skip-permissions", "-p", str(prompt_fil
 ```
 This fix is committed but needs to be used for proper parallel execution.
 
-## Remaining Work (In Priority Order)
+## TODO List for Next Host
+
+### Critical TODOs (Must Complete in Order):
+- [ ] **TODO #1**: Fix remaining 388 pyright errors to achieve ZERO
+- [ ] **TODO #2**: Verify Team Coach implementation works properly  
+- [ ] **TODO #3**: Run final validation to confirm all components working
+- [ ] **TODO #4**: Create PR with all fixes
+
+## Remaining Work (Detailed Breakdown)
 
 ### 1. Fix Remaining 388 Pyright Errors
 **Current State**: 388 errors (reduced from 680)
@@ -144,13 +163,26 @@ Checklist:
 ```
 
 ### Step 4: Invoke Orchestrator
+
+**ORCHESTRATOR INSTRUCTIONS**: You MUST complete these TODOs:
+
 ```bash
 /agent:orchestrator-agent
 
+MANDATORY: Complete ALL of the following TODOs from the interrupted session:
+
+TODO #1: Fix remaining 388 pyright errors to achieve ZERO
+TODO #2: Verify Team Coach implementation works properly
+TODO #3: Run final validation to confirm all components working
+TODO #4: Create PR with all fixes
+
 Execute these specific prompts in parallel:
-- fix-final-pyright-errors.md
-- complete-testing-suite.md
-- final-integration-check.md
+- fix-final-pyright-errors.md (TODO #1)
+- complete-testing-suite.md (TODO #3)
+- final-integration-check.md (TODO #2)
+
+Use --dangerously-skip-permissions flag for all claude invocations.
+DO NOT STOP until all TODOs are complete and pyright shows 0 errors.
 ```
 
 ## Important Notes
@@ -161,7 +193,7 @@ Execute these specific prompts in parallel:
 4. **Quality Gates**: Don't claim completion until `uv run pyright .claude/` shows 0 errors
 5. **Pre-commit Issues**: May need `--no-verify` for commits due to syntax errors in some files
 
-## Success Criteria
+## Success Criteria (All TODOs Complete When)
 - [ ] Zero pyright errors (`uv run pyright .claude/` shows 0 errors)
 - [ ] All tests passing (`uv run pytest`)
 - [ ] Neo4j connected and working
