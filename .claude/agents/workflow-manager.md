@@ -903,7 +903,12 @@ echo "✅ ALL PHASES (1-13) completed successfully - Workflow complete!"
    cd .github/memory-manager
 
    # Check if compaction is needed
-   COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>/dev/null || echo "failed")
+   # Note: Capturing stderr to log for debugging if command fails
+   COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>&1) || {
+       echo "⚠️  Memory compaction command failed with exit code $?"
+       echo "Error output: $COMPACTION_RESULT"
+       COMPACTION_RESULT="failed"
+   }
 
    if [[ "$COMPACTION_RESULT" == *"auto_compaction_triggered"* ]]; then
        echo "✅ Memory.md automatically compacted - size reduced and items archived"
@@ -1042,11 +1047,15 @@ execute_phase_12_with_error_handling() {
     echo "📦 Executing Phase 12: Memory Compaction"
 
     # Memory compaction should not fail the entire workflow
-    if cd .github/memory-manager && python3 memory_manager.py auto-compact 2>/dev/null; then
-        echo "✅ Memory compaction check completed successfully"
-        complete_phase 12 "Memory Compaction" "verify_phase_12"
-    else
-        echo "⚠️  Memory compaction check failed - continuing workflow"
+    # Note: Capturing full output for debugging if compaction fails
+    if cd .github/memory-manager; then
+        COMPACT_OUTPUT=$(python3 memory_manager.py auto-compact 2>&1) && {
+            echo "✅ Memory compaction check completed successfully"
+            complete_phase 12 "Memory Compaction" "verify_phase_12"
+        } || {
+            echo "⚠️  Memory compaction check failed with exit code $?"
+            echo "Debug output: $COMPACT_OUTPUT"
+            echo "Continuing workflow despite memory compaction failure"
         echo "💡 Manual memory maintenance may be needed later"
         # Mark as completed anyway - this is not a critical failure
         complete_phase 12 "Memory Compaction" "verify_phase_12"

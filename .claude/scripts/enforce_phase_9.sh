@@ -69,7 +69,14 @@ check_review_exists() {
     local pr_num="$1"
     local review_count
 
-    review_count=$(gh pr view "$pr_num" --json reviews --jq '.reviews | length' 2>/dev/null || echo "0")
+    # Note: GitHub CLI may return errors if PR doesn't exist or network issues
+    # Capturing stderr to help debug issues
+    review_count=$(gh pr view "$pr_num" --json reviews --jq '.reviews | length' 2>&1) || {
+        local exit_code=$?
+        echo "⚠️  Failed to get PR review count (exit code: $exit_code)" >&2
+        echo "Error output: $review_count" >&2
+        review_count="0"
+    }
 
     if [ "$review_count" -gt 0 ]; then
         log "INFO" "✅ Review already exists for PR #$pr_num (count: $review_count)"
