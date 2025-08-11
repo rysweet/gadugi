@@ -133,6 +133,7 @@ fi
 echo
 echo "Preview of settings with XPIA web hooks:"
 echo "----------------------------------------"
+# Error suppression justified: json.tool might fail on invalid JSON, fallback to raw output
 cat "$CLAUDE_SETTINGS.xpia_temp" | python3 -m json.tool 2>/dev/null || cat "$CLAUDE_SETTINGS.xpia_temp"
 echo "----------------------------------------"
 echo

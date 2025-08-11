@@ -271,6 +271,7 @@ show_uv_info() {
             # Show project name if available
             if command -v python &> /dev/null; then
                 local project_name
+                # Error suppression justified: Python might not have tomllib module, fallback to "Unknown"
                 project_name=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb')).get('project', {}).get('name', 'Unknown'))" 2>/dev/null || echo "Unknown")
                 echo "📦 Project Name: $project_name"
             fi

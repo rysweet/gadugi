@@ -43,6 +43,7 @@ wait_for_pr_propagation() {
 
     while [ $waited -lt $max_wait ]; do
         # Check if PR is accessible and has all expected metadata
+        # Error suppression justified: We're checking for PR existence, stderr output not needed
         if gh pr view "$pr_num" --json reviews,title,author >/dev/null 2>&1; then
             # Add minimum wait time to ensure GitHub API consistency
             local min_wait=10
@@ -69,6 +70,8 @@ check_review_exists() {
     local pr_num="$1"
     local review_count
 
+    # Error suppression justified: gh command may fail if PR doesn't exist yet, 
+    # but we handle that case with the echo "0" fallback
     review_count=$(gh pr view "$pr_num" --json reviews --jq '.reviews | length' 2>/dev/null || echo "0")
 
     if [ "$review_count" -gt 0 ]; then
@@ -142,6 +145,7 @@ main() {
     log "INFO" "=== PHASE 9 ENFORCEMENT START ==="
 
     # Step 1: Check if PR exists
+    # Error suppression justified: We're checking for PR existence, stderr output not needed
     if ! gh pr view "$PR_NUMBER" >/dev/null 2>&1; then
         log "ERROR" "PR #$PR_NUMBER does not exist!"
         exit 1

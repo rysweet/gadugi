@@ -20,6 +20,7 @@ echo ""
 for i in "${!WORKTREES[@]}"; do
     worktree="${WORKTREES[$i]}"
     name=$(basename "$worktree")
+    # Error suppression justified: Worktree might not exist or be valid, fallback to "unknown"
     branch=$(cd "$worktree" && git branch --show-current 2>/dev/null || echo "unknown")
 
     echo "Terminal $((i+1)) - $name [$branch]:"

@@ -73,7 +73,7 @@ for name in "${!WORKTREES[@]}"; do
         keystroke \"cd \\\"$worktree\\\" && claude\"
         keystroke return
         delay 0.5
-    end tell" 2>/dev/null || echo "  - Failed to create terminal for $name"
+    end tell" 2>&1 | grep -v "execution error" || echo "  - Failed to create terminal for $name"
 
     echo "  ✓ Created terminal for $name"
     sleep 1
