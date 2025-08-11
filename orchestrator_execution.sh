@@ -18,12 +18,12 @@ execute_task() {
     local prompt_file=$2
     local worktree_path=$3
     local description=$4
-    
+
     echo "🚀 Starting Task: $task_id"
     echo "   Prompt: $prompt_file"
     echo "   Worktree: $worktree_path"
     echo ""
-    
+
     # Create WorkflowManager invocation prompt
     cat > /tmp/orchestrator_${task_id}.md <<EOF
 # WorkflowManager Task Execution
@@ -64,7 +64,7 @@ EOF
     # Execute via claude CLI
     cd "$worktree_path"
     claude -p /tmp/orchestrator_${task_id}.md > /tmp/${task_id}_output.log 2>&1 &
-    
+
     echo "   PID: $!"
     echo ""
 }
@@ -121,7 +121,7 @@ for task_id in "fix-pyright-errors" "complete-team-coach" "cleanup-worktrees"; d
         else
             echo "❌ FAILED or INCOMPLETE"
         fi
-        
+
         # Show key outputs
         grep -E "(Issue #|PR #|Pull request #|Phase.*completed)" "/tmp/${task_id}_output.log" | head -5
     fi

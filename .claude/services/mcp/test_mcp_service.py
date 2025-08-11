@@ -6,7 +6,7 @@ Test suite for MCP Service
 import asyncio
 import httpx
 import pytest
-from  import 
+from  import
 
 
 BASE_URL = "http://localhost:8000"
@@ -35,16 +35,16 @@ async def test_store_context():
             "metadata": {"test": True, "version": "0.3.0"},
             "tags": ["test", "mcp", "gadugi"]
         }
-        
+
         response = await client.post(f"{BASE_URL}/context/store", json=context_data)
         assert response.status_code == 201
         data = response.json()
-        
+
         assert "id" in data
         assert data["content"] == context_data["content"]
         assert data["source"] == context_data["source"]
         assert data["tags"] == context_data["tags"]
-        
+
         return data["id"]  # Return for use in other tests
 
 
@@ -58,15 +58,15 @@ async def test_retrieve_context():
             "source": "test_suite",
             "tags": ["retrieve", "test"]
         }
-        
+
         store_response = await client.post(f"{BASE_URL}/context/store", json=context_data)
         context_id = store_response.json()["id"]
-        
+
         # Now retrieve it
         response = await client.get(f"{BASE_URL}/context/retrieve/{context_id}")
         assert response.status_code == 200
         data = response.json()
-        
+
         assert data["id"] == context_id
         assert data["content"] == context_data["content"]
         assert data["source"] == context_data["source"]
@@ -83,18 +83,18 @@ async def test_search_contexts():
                 "source": "search_test",
                 "tags": ["search", f"item-{i}"]
             })
-        
+
         # Search for them
         search_request = {
             "query": "Searchable",
             "source": "search_test",
             "limit": 10
         }
-        
+
         response = await client.post(f"{BASE_URL}/context/search", json=search_request)
         assert response.status_code == 200
         data = response.json()
-        
+
         assert isinstance(data, list)
         assert len(data) >= 3
         assert all("Searchable" in ctx["content"] for ctx in data)
@@ -107,7 +107,7 @@ async def test_metrics_endpoint():
         response = await client.get(f"{BASE_URL}/metrics")
         assert response.status_code == 200
         data = response.json()
-        
+
         assert "total_contexts" in data
         assert "total_agents" in data
         assert "total_relationships" in data
@@ -122,7 +122,7 @@ async def test_root_endpoint():
         response = await client.get(f"{BASE_URL}/")
         assert response.status_code == 200
         data = response.json()
-        
+
         assert data["service"] == "Gadugi MCP Service"
         assert data["status"] == "running"
         assert "endpoints" in data
@@ -139,10 +139,10 @@ async def test_404_context():
 def test_mcp_service_integration():
     """Run all integration tests"""
     print("\n🧪 Running MCP Service Integration Tests\n")
-    
+
     # Run async tests
     loop = asyncio.get_event_loop()
-    
+
     tests = [
         ("Health Check", test_health_endpoint()),
         ("Store Context", test_store_context()),
@@ -152,7 +152,7 @@ def test_mcp_service_integration():
         ("Root Endpoint", test_root_endpoint()),
         ("404 Test", test_404_context()),
     ]
-    
+
     for test_name, test_coro in tests:
         try:
             loop.run_until_complete(test_coro)
@@ -161,7 +161,7 @@ def test_mcp_service_integration():
             print(f"❌ {test_name} failed: {e}")
         except Exception as e:
             print(f"❌ {test_name} error: {e}")
-    
+
     print("\n✅ MCP Service tests completed!\n")
 
 

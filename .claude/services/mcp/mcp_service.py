@@ -110,7 +110,7 @@ class Neo4jManager:
                 tags=context.tags or [])
 
             _record = await result.single()
-            
+
             # Create relationship to source agent if exists
             await session.run("""
                 MATCH (a:Agent {name: $source})
@@ -222,18 +222,18 @@ start_time = datetime.utcnow()
 async def lifespan(app: FastAPI):
     """Manage application lifespan"""
     global db_manager
-    
+
     # Startup
     neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7689")
     neo4j_user = os.getenv("NEO4J_USER", "neo4j")
     neo4j_password = os.getenv("NEO4J_PASSWORD", "gadugi-password")
-    
+
     db_manager = Neo4jManager(neo4j_uri, neo4j_user, neo4j_password)
     await db_manager.connect()
     print(f"✅ Connected to Neo4j at {neo4j_uri}")
-    
+
     yield
-    
+
     # Shutdown
     if db_manager:
         await db_manager.close()
@@ -264,7 +264,7 @@ async def store_context(request: ContextCreateRequest):
     """Store a new context in Neo4j"""
     if not db_manager:
         raise HTTPException(status_code=500, detail="Database not initialized")
-    
+
     try:
         context_id = await db_manager.store_context(request)
         stored_context = await db_manager.retrieve_context(context_id)
@@ -280,7 +280,7 @@ async def retrieve_context(context_id: str):
     """Retrieve context by ID"""
     if not db_manager:
         raise HTTPException(status_code=500, detail="Database not initialized")
-    
+
     context = await db_manager.retrieve_context(context_id)
     if not context:
         raise HTTPException(status_code=404, detail="Context not found")
@@ -292,7 +292,7 @@ async def search_contexts(request: ContextSearchRequest):
     """Search contexts with filters"""
     if not db_manager:
         raise HTTPException(status_code=500, detail="Database not initialized")
-    
+
     try:
         contexts = await db_manager.search_contexts(request)
         return contexts
@@ -312,7 +312,7 @@ async def health_check():
                 neo4j_connected = test["test"] == 1  # type: ignore
         except:
             neo4j_connected = False
-    
+
     return HealthResponse(
         status="healthy" if neo4j_connected else "degraded",
         neo4j_connected=neo4j_connected,
@@ -326,11 +326,11 @@ async def get_metrics():
     """Get service metrics"""
     if not db_manager:
         raise HTTPException(status_code=500, detail="Database not initialized")
-    
+
     try:
         metrics = await db_manager.get_metrics()
         uptime = (datetime.utcnow() - start_time).total_seconds()
-        
+
         return MetricsResponse(
             total_contexts=metrics["total_contexts"],
             total_agents=metrics["total_agents"],

@@ -1323,4 +1323,3 @@ class TestStateManagementIntegration:
         # The remaining tasks should still be in progress or pending
         in_progress_states = state_manager.list_states_by_status("in_progress")
         assert len(in_progress_states) == 2
-

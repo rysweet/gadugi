@@ -98,7 +98,7 @@ Comprehensive test suite results:
 1. **Clean up completed branches**:
    ```bash
    git branch -D feature/parallel-fix-all-pyright-errors-in-v0.3-components-fix-all-pyright-errors
-   git branch -D feature/parallel-complete-team-coach-agent-implementation-complete-team-coach-implementation  
+   git branch -D feature/parallel-complete-team-coach-agent-implementation-complete-team-coach-implementation
    git branch -D feature/parallel-clean-up-all-worktrees-cleanup-all-worktrees
    ```
 

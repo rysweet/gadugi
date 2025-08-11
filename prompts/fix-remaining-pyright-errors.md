@@ -45,8 +45,8 @@ Fix ALL 388 remaining pyright errors to achieve ZERO errors in the codebase.
    ```bash
    uv run pyright
    ```
-   
-2. **Expected outcome**: 
+
+2. **Expected outcome**:
    - 0 errors
    - All files pass type checking
 

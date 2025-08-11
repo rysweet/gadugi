@@ -10,7 +10,7 @@ This orchestration request MUST delegate ALL tasks to WorkflowManager instances 
 - Priority: High (others depend on this)
 - Estimated time: 15 minutes
 
-### Task 2: MCP Service Implementation  
+### Task 2: MCP Service Implementation
 - Prompt file: /Users/ryan/src/gadugi2/gadugi/prompts/v03-mcp-service.md
 - Dependencies: Task 1 (Neo4j must be running)
 - Priority: High

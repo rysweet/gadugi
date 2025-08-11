@@ -1154,4 +1154,3 @@ class InterfaceRegistry:
 
 # Global interface registry instance
 interface_registry = InterfaceRegistry()
-

@@ -874,4 +874,3 @@ if __name__ == "__main__":
     print(f"Optimizations: {classification.optimizations}")
     print(f"Risk Factors: {classification.risk_factors}")
     print(f"Recommended Approach: {classification.recommended_approach}")
-

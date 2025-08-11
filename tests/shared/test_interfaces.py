@@ -976,4 +976,3 @@ class TestInterfaceIntegration:
 
         assert result["success"] is True
         assert result["agent_id"] == "workflow-1"
-

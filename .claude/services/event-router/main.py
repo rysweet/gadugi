@@ -36,15 +36,15 @@ def process():
     """Process incoming request."""
     try:
         data = request.get_json()
-        
+
         # Validate input
         is_valid, error = validate_input(data)  # type: ignore
         if not is_valid:
             return jsonify({"error": error}), 400
-        
+
         # Process request
         result = process_request(data)
-        
+
         return jsonify({
             "success": True,
             "data": result,

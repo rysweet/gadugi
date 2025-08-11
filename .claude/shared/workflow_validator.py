@@ -943,4 +943,3 @@ if __name__ == "__main__":
 
     # Exit with appropriate code
     sys.exit(0 if report.overall_status == 'PASSED' else 1)
-

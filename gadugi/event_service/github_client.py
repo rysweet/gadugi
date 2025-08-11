@@ -292,7 +292,6 @@ class GitHubClient:
     async def auto_detect_repository(self) -> Optional[tuple[str, str]]:
         """Auto-detect current repository from git remote."""
         try:
-
             import asyncio
 
             process = await asyncio.create_subprocess_exec(

@@ -28,7 +28,7 @@ ALL tasks MUST be delegated to WorkflowManager instances via 'claude -p' subproc
 - Must achieve: All tests passing, 80%+ coverage
 
 ### Task 4: Worktree Cleanup
-- Prompt file: /Users/ryan/src/gadugi2/gadugi/prompts/v03-worktree-cleanup.md  
+- Prompt file: /Users/ryan/src/gadugi2/gadugi/prompts/v03-worktree-cleanup.md
 - Priority: HIGH (system hygiene)
 - Must achieve: All worktrees cleaned, cleanup added to workflow
 

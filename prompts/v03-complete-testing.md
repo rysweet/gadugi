@@ -32,7 +32,7 @@ Run comprehensive testing and quality checks on all v0.3 components.
 
 ## Components to Test
 1. Recipe Executor
-2. Event Router  
+2. Event Router
 3. MCP Service
 4. Neo4j Service
 5. Agent Framework

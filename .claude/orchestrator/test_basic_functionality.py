@@ -20,21 +20,21 @@ def test_imports():
     print("Testing imports...")
 
     try:
-        from orchestrator_cli import 
+        from orchestrator_cli import
         print("✅ orchestrator_cli imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_cli import failed: {e}")
         return False
 
     try:
-        from process_registry import 
+        from process_registry import
         print("✅ process_registry imported successfully")
     except Exception as e:
         print(f"❌ process_registry import failed: {e}")
         return False
 
     try:
-        from orchestrator_main import 
+        from orchestrator_main import
         print("✅ orchestrator_main imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_main import failed: {e}")

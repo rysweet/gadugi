@@ -1,6 +1,6 @@
 from typing import Any, Dict
-"""Type stub for agent memory interface."""
 
+"""Type stub for agent memory interface."""
 
 
 class AgentMemoryInterface:

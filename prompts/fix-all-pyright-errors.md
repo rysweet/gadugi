@@ -7,7 +7,7 @@ Fix all remaining pyright errors across v0.3 components to achieve 100% clean co
 ### Recipe Executor (1 error)
 - Location: .claude/agents/recipe-executor/recipe_executor.py
 
-### Event Router (14 errors)  
+### Event Router (14 errors)
 - Location: .claude/services/event-router/
 
 ### MCP Service (1 error)

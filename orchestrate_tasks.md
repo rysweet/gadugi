@@ -14,7 +14,7 @@ Execute three independent tasks in parallel using isolated worktrees and Workflo
   - Achieve zero errors
   - Test each component after fixing
 
-### Task 2: Complete Team Coach Implementation  
+### Task 2: Complete Team Coach Implementation
 - **ID**: complete-team-coach
 - **Prompt**: prompts/complete-team-coach-implementation.md
 - **Priority**: HIGH
@@ -38,7 +38,7 @@ Execute three independent tasks in parallel using isolated worktrees and Workflo
 Create isolated worktrees for each task:
 ```bash
 git worktree add -b task/fix-pyright-errors .worktrees/task-fix-pyright-errors
-git worktree add -b task/complete-team-coach .worktrees/task-complete-team-coach  
+git worktree add -b task/complete-team-coach .worktrees/task-complete-team-coach
 git worktree add -b task/cleanup-worktrees .worktrees/task-cleanup-worktrees
 ```
 

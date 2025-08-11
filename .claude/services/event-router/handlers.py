@@ -25,7 +25,7 @@ async def validate_input(request: RequestModel) -> ValidationResult:
                 is_valid=False,
                 error="Request data is required"
             )
-        
+
         # Check for required fields
         required_fields = []  # Add required fields based on recipe
         for field in required_fields:
@@ -34,7 +34,7 @@ async def validate_input(request: RequestModel) -> ValidationResult:
                     is_valid=False,
                     error=f"Required field missing: {field}"
                 )
-        
+
         return ValidationResult(is_valid=True)  # type: ignore
     except Exception as e:
         logger.error(f"Validation error: {e}")
@@ -54,9 +54,9 @@ async def process_request(request: RequestModel) -> Dict[str, Any]:
             "data": request.data,
             "timestamp": request.timestamp.isoformat()
         }
-        
+
         # Implement actual business logic based on recipe
-        
+
         return result
     except Exception as e:
         logger.error(f"Processing error: {e}")
