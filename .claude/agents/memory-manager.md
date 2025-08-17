@@ -1,3 +1,11 @@
+---
+name: memory-manager
+model: inherit
+description: Maintains, curates, and synchronizes Memory.md with GitHub Issues for bidirectional task tracking
+version: 1.0.0
+tools: ["Read", "Write", "Edit", "Bash", "Grep"]
+---
+
 # MemoryManagerAgent
 
 ## Purpose

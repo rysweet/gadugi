@@ -1,8 +1,18 @@
 ---
-name: task-decomposer
+description: Breaks complex tasks down into manageable, parallelizable subtasks with
+  proper dependency management and resource allocation
 model: inherit
-description: Breaks complex tasks down into manageable, parallelizable subtasks with proper dependency management and resource allocation
-tools: Read, Write, Edit, Grep, LS, Glob, Bash, TodoWrite
+name: task-decomposer
+tools:
+- Read
+- Write
+- Edit
+- Grep
+- LS
+- Glob
+- Bash
+- TodoWrite
+version: 1.0.0
 ---
 
 # TaskDecomposer Agent - Intelligent Task Breakdown and Subtask Generation

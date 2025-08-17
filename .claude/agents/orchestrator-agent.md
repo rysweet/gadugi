@@ -1,15 +1,34 @@
 ---
-name: orchestrator-agent
-model: inherit
-description: Coordinates parallel execution of multiple WorkflowManagers for independent tasks, enabling 3-5x faster development workflows through intelligent task analysis and git worktree management
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Glob
-imports: |
-  # Enhanced Separation Architecture - Shared Modules
+description: Coordinates parallel execution of multiple WorkflowManagers for independent
+  tasks, enabling 3-5x faster development workflows through intelligent task analysis
+  and git worktree management
+imports: '# Enhanced Separation Architecture - Shared Modules
+
   from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext
+
+  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager,
+  StateBackupRestore
+
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker,
+  RecoveryManager
+
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker,
+  ProductivityAnalyzer
+
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState,
+  TaskData, ErrorContext'
+model: inherit
+name: orchestrator-agent
+tools:
+- Read
+- Write
+- Edit
+- Bash
+- Grep
+- LS
+- TodoWrite
+- Glob
+version: 1.0.0
 ---
 
 # OrchestratorAgent Sub-Agent for Parallel Workflow Execution

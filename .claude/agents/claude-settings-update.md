@@ -1,3 +1,11 @@
+---
+name: claude-settings-update
+model: inherit
+description: Automatically merges local Claude settings into global configuration with alphabetically sorted allow-list
+version: 1.0.0
+tools: ["Bash", "Read", "Write", "Grep"]
+---
+
 # Claude Settings Update Agent
 
 ## Agent Profile

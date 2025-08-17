@@ -1,8 +1,18 @@
 ---
-name: prompt-writer
+description: Specialized sub-agent for creating high-quality, structured prompt files
+  that guide complete development workflows from issue creation to PR review, with
+  automatic GitHub issue integration
 model: inherit
-description: Specialized sub-agent for creating high-quality, structured prompt files that guide complete development workflows from issue creation to PR review, with automatic GitHub issue integration
-tools: Read, Write, Grep, LS, WebSearch, TodoWrite, Bash
+name: prompt-writer
+tools:
+- Read
+- Write
+- Grep
+- LS
+- WebSearch
+- TodoWrite
+- Bash
+version: 1.0.0
 ---
 
 # PromptWriter Sub-Agent for Gadugi

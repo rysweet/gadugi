@@ -1,8 +1,16 @@
 ---
-name: task-bounds-eval
+description: Evaluates whether tasks are well understood and bounded or require decomposition,
+  research, and clarification
 model: inherit
-description: Evaluates whether tasks are well understood and bounded or require decomposition, research, and clarification
-tools: Read, Grep, LS, Glob, Bash, TodoWrite
+name: task-bounds-eval
+tools:
+- Read
+- Grep
+- LS
+- Glob
+- Bash
+- TodoWrite
+version: 1.0.0
 ---
 
 # TaskBoundsEval Agent - Task Understanding and Complexity Assessment

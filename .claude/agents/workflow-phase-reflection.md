@@ -1,3 +1,11 @@
+---
+name: workflow-phase-reflection
+model: inherit
+description: Reflection and continuous improvement phase for WorkflowManager execution
+version: 1.0.0
+tools: []
+---
+
 # Workflow Phase 10: Reflection and Continuous Improvement
 
 ## Overview

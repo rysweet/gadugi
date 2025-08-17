@@ -1,8 +1,19 @@
 ---
-name: team-coach
-description: Analyzes completed workflows to provide team coaching insights, identify improvement opportunities, and create GitHub issues for recommended enhancements. Use at the end of sessions for continuous improvement.
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
+description: Analyzes completed workflows to provide team coaching insights, identify
+  improvement opportunities, and create GitHub issues for recommended enhancements.
+  Use at the end of sessions for continuous improvement.
 model: inherit
+name: team-coach
+tools:
+- Read
+- Write
+- Edit
+- Bash
+- Grep
+- LS
+- TodoWrite
+- WebSearch
+version: 1.0.0
 ---
 
 # TeamCoach Agent

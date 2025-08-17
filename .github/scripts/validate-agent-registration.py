@@ -84,7 +84,7 @@ class AgentValidator:
             frontmatter_content = self.extract_frontmatter(content)
             
             if frontmatter_content is None:
-                errors.append(f"Missing YAML frontmatter (should be between --- markers)")
+                errors.append("Missing YAML frontmatter (should be between --- markers)")
                 return False, errors
             
             # Parse YAML
@@ -95,7 +95,7 @@ class AgentValidator:
                 return False, errors
             
             if not isinstance(frontmatter, dict):
-                errors.append(f"Frontmatter is not a dictionary/object")
+                errors.append("Frontmatter is not a dictionary/object")
                 return False, errors
             
             # Check required fields
@@ -115,7 +115,7 @@ class AgentValidator:
             # Validate tools field
             if 'tools' in frontmatter:
                 if frontmatter['tools'] is not None and not isinstance(frontmatter['tools'], list):
-                    errors.append(f"Field 'tools' must be a list (can be empty list)")
+                    errors.append("Field 'tools' must be a list (can be empty list)")
             
             # Check if agent name matches filename (warning only)
             if 'name' in frontmatter and frontmatter['name']:

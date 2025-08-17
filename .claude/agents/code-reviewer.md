@@ -1,8 +1,16 @@
 ---
-name: code-reviewer
-model: inherit
 description: Specialized sub-agent for conducting thorough code reviews on pull requests
-tools: Read, Grep, LS, Bash, WebSearch, WebFetch, TodoWrite
+model: inherit
+name: code-reviewer
+tools:
+- Read
+- Grep
+- LS
+- Bash
+- WebSearch
+- WebFetch
+- TodoWrite
+version: 1.0.0
 ---
 
 # Code Review Sub-Agent for Gadugi

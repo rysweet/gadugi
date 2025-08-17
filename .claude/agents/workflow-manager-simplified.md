@@ -1,19 +1,35 @@
 ---
-name: workflow-manager
-model: inherit
-description: Code-driven workflow orchestration agent that ensures deterministic execution of all development phases using WorkflowEngine
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite
-imports: |
-  # WorkflowManager Code-Based Implementation
+description: Code-driven workflow orchestration agent that ensures deterministic execution
+  of all development phases using WorkflowEngine
+imports: '# WorkflowManager Code-Based Implementation
+
   from ..shared.workflow_engine import WorkflowEngine, execute_workflow
+
   from ..shared.phase_enforcer import PhaseEnforcer, enforce_phase_9, enforce_phase_10
+
   from ..shared.workflow_validator import WorkflowValidator, validate_workflow
 
+
   # Enhanced Separation Architecture - Shared Modules
+
   from ..shared.github_operations import GitHubOperations
+
   from ..shared.state_management import WorkflowStateManager, CheckpointManager
+
   from ..shared.error_handling import ErrorHandler, RecoveryManager
-  from ..shared.task_tracking import TaskTracker, ProductivityAnalyzer
+
+  from ..shared.task_tracking import TaskTracker, ProductivityAnalyzer'
+model: inherit
+name: workflow-manager
+tools:
+- Read
+- Write
+- Edit
+- Bash
+- Grep
+- LS
+- TodoWrite
+version: 1.0.0
 ---
 
 # WorkflowManager - Code-Driven Workflow Orchestration
