@@ -1,3 +1,9 @@
+---
+name: xpia-defense-agent
+description: Protect the Gadugi multi-agent system from Cross-Prompt Injection Attacks
+tools: Read, Grep, LS, Bash, TodoWrite
+---
+
 # XPIA Defense Agent - Cross-Prompt Injection Attack Protection
 
 ## Agent Overview

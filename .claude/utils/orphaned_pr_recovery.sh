@@ -74,6 +74,7 @@ has_reviews() {
     local pr_number="$1"
 
     local review_count
+    # Error suppression justified: PR might not exist, fallback to "0" for non-existent PRs
     review_count=$(gh pr view "$pr_number" --json reviews --jq '.reviews | length' 2>/dev/null || echo "0")
 
     [ "$review_count" -gt 0 ]
@@ -85,6 +86,7 @@ is_workflow_pr() {
 
     # Check PR description for AI-generated markers
     local pr_body
+    # Error suppression justified: PR might not exist, fallback to empty string
     pr_body=$(gh pr view "$pr_number" --json body --jq '.body' 2>/dev/null || echo "")
 
     # Look for AI-generated markers in PR body

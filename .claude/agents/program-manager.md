@@ -1,5 +1,6 @@
 ---
 name: program-manager
+description: Program manager for project orchestration and issue lifecycle management
 model: inherit
 specialization: Program manager for project orchestration and issue lifecycle management
 tools:

@@ -903,6 +903,7 @@ echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
    cd .github/memory-manager
 
    # Check if compaction is needed
+   # Error suppression justified: Memory compaction is optional, should not fail workflow
    COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>/dev/null || echo "failed")
 
    if [[ "$COMPACTION_RESULT" == *"auto_compaction_triggered"* ]]; then
@@ -1052,6 +1053,7 @@ execute_phase_12_with_error_handling() {
     echo "📦 Executing Phase 12: Memory Compaction"
 
     # Memory compaction should not fail the entire workflow
+    # Error suppression justified: Memory compaction is optional, should not fail workflow
     if cd .github/memory-manager && python3 memory_manager.py auto-compact 2>/dev/null; then
         echo "✅ Memory compaction check completed successfully"
         complete_phase 12 "Memory Compaction" "verify_phase_12"

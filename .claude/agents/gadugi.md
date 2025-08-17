@@ -1,3 +1,9 @@
+---
+name: gadugi
+description: Primary service management agent for the Gadugi event-driven multi-agent system
+tools: Read, Write, Edit, Bash, Grep, Glob, LS
+---
+
 # Gadugi Service Management Agent
 
 The Gadugi agent is the primary service management agent for the Gadugi event-driven multi-agent system. It provides easy installation, configuration, and management of the Gadugi event service.
