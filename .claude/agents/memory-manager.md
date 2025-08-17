@@ -1,3 +1,9 @@
+---
+name: memory-manager
+description: Maintains, curates, and synchronizes Memory.md with GitHub Issues
+tools: Read, Write, Edit, Bash, Grep, TodoWrite
+---
+
 # MemoryManagerAgent
 
 ## Purpose

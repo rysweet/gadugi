@@ -1,3 +1,9 @@
+---
+name: workflow-manager-phase9-enforcement
+description: Enforcement documentation for mandatory Phase 9 code review in workflow
+tools: Task, Read, Bash, TodoWrite
+---
+
 # WorkflowManager Phase 9 Enforcement Implementation
 
 ## CRITICAL: How to Actually Enforce Phase 9

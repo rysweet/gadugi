@@ -1,3 +1,9 @@
+---
+name: claude-settings-update
+description: Automatically merges Claude settings and maintains alphabetically sorted allow-list
+tools: Bash, Read, Write, Grep
+---
+
 # Claude Settings Update Agent
 
 ## Agent Profile

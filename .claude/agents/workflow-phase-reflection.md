@@ -1,3 +1,9 @@
+---
+name: workflow-phase-reflection
+description: Collects workflow metrics and generates insights for continuous improvement
+tools: Read, Write, Bash, Grep, TodoWrite
+---
+
 # Workflow Phase 10: Reflection and Continuous Improvement
 
 ## Overview
