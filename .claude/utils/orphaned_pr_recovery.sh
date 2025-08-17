@@ -194,9 +194,12 @@ detect_and_fix_orphaned_prs() {
 
     # Get open PRs without reviews, older than threshold
     local orphaned_prs
-    orphaned_prs=$(gh pr list --state open --json number,title,author,createdAt,reviews | \
+    if ! orphaned_prs=$(gh pr list --state open --json number,title,author,createdAt,reviews | \
         jq -r --arg threshold "$threshold_timestamp" \
-        '.[] | select(.createdAt < $threshold and (.reviews | length == 0)) | "\(.number)|\(.title)|\(.author.login)|\(.createdAt)"' 2>/dev/null || true)
+        '.[] | select(.createdAt < $threshold and (.reviews | length == 0)) | "\(.number)|\(.title)|\(.author.login)|\(.createdAt)"' 2>/dev/null); then
+        log "WARNING" "Failed to query orphaned PRs, jq command may have issues"
+        orphaned_prs=""
+    fi
 
     if [ -z "$orphaned_prs" ]; then
         log "INFO" "No orphaned PRs found"

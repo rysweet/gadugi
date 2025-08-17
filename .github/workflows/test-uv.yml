@@ -31,6 +31,7 @@ jobs:
         # Docker is pre-installed on GitHub-hosted Ubuntu runners
         # Just verify it's working
         docker --version
+        # Diagnostic output - failure is expected if Docker not installed
         sudo systemctl status docker || true
 
     - name: Create virtual environment

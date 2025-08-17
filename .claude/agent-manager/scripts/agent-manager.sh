@@ -14,7 +14,9 @@ source "$SCRIPT_DIR/check-updates.sh"
 # Main function to handle commands
 main() {
     local command="${1:-help}"
-    shift || true
+    if [ $# -gt 0 ]; then
+        shift
+    fi
 
     case "$command" in
         setup-hooks)

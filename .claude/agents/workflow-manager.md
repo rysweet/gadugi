@@ -675,12 +675,16 @@ TaskData(
    complete_phase 10 "Review Response" "verify_phase_10"
 
    git add .github/Memory.md .github/CodeReviewerProjectMemory.md
-   git commit -m "docs: update project memory files after Phase 9+10 completion
+   if ! git commit -m "docs: update project memory files after Phase 9+10 completion
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
-Co-Authored-By: Claude <noreply@anthropic.com>" || true
-   git push || true
+Co-Authored-By: Claude <noreply@anthropic.com>"; then
+       echo "No changes to commit or commit failed - continuing"
+   fi
+   if ! git push; then
+       echo "Push failed - may need to pull first or resolve conflicts"
+   fi
 
    echo "✅ Phase 9 and 10 completed successfully"
    ```
@@ -1058,7 +1062,7 @@ execute_phase_12_with_error_handling() {
 
 execute_phase_13_with_error_handling() {
     echo "🎯 Executing Phase 13: Team Coach Reflection"
-    
+
     # Team Coach reflection should not fail the entire workflow
     if timeout 120 /agent:team-coach --session-analysis 2>&1 | tee phase13-output.log; then
         echo "✅ Team Coach reflection completed successfully"
