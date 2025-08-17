@@ -13,11 +13,34 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ⚠️ **MANDATORY ORCHESTRATOR AND WORKFLOW MANAGER USAGE** ⚠️
 
-**ALL requests that will result in changes to version-controlled files MUST:**
-1. **Use the orchestrator agent as entry point**
-2. **Orchestrator MUST delegate to workflow-manager**
-3. **Workflow-manager MUST execute all 13 phases**
-4. **Direct implementation is FORBIDDEN**
+## Every Repository File Change Must Use the Orchestrator to Invoke the Workflow via the Workflow Manager - No Exceptions
+
+Any time there are changes to repository files required - whether it's fixing YAML
+frontmatter, updating documentation, modifying configs, or writing code - you must
+use the orchestrator to invoke the workflow via the workflow manager.
+
+This means:
+1. You invoke /agent:orchestrator-agent with a prompt file
+2. The orchestrator creates worktrees and invokes workflow-manager
+3. The workflow-manager executes all 13 phases
+4. You NEVER edit files directly
+
+This includes:
+- Fixing CI failures (even "simple" ones)
+- Adding missing metadata to agent files
+- Updating README or documentation
+- Changing configuration files
+- Modifying ANY file that gets committed to git
+
+Your brain will try to categorize some changes as "too trivial" or "not really code"
+to justify skipping this chain. Don't. If it's going to be committed to the
+repository, it must go through orchestrator → workflow-manager → 13 phases.
+
+The complete chain is mandatory because:
+- Orchestrator alone isn't enough (it must delegate to workflow-manager)
+- Workflow-manager ensures Phase 9 (Code Review) happens
+- Phase 10 (Review Response) addresses feedback
+- All changes get proper tracking and validation
 
 **VERIFICATION CHECKLIST:**
 - ✅ Worktree created in `.worktrees/` directory
