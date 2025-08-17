@@ -276,7 +276,7 @@ RUN groupadd -g {context.group_id} gadugi \\
 # Security hardening
 RUN chmod -R go-w /usr/local/lib/python* \\
     && find /usr/local/lib/python* -name "*.pyc" -delete \\
-    && find /usr/local/lib/python* -name "__pycache__" -type d -exec rm -rf {{}} + 2>/dev/null ; exit 0
+    && find /usr/local/lib/python* -name "__pycache__" -type d -exec rm -rf {{}} + || echo "Note: Some __pycache__ directories may be in use"
 
 # Set working directory
 WORKDIR /workspace
@@ -313,8 +313,8 @@ RUN addgroup -g {context.group_id} gadugi \\
 
 # Security hardening
 RUN find /usr/local/lib/node_modules -type f -name "*.md" -delete \\
-    && find /usr/local/lib/node_modules -name "test" -type d -exec rm -rf {{}} + 2>/dev/null ; \\
-    find /usr/local/lib/node_modules -name "docs" -type d -exec rm -rf {{}} + 2>/dev/null ; exit 0
+    && find /usr/local/lib/node_modules -name "test" -type d -exec rm -rf {{}} + || echo "Note: Some test directories may be in use" \\
+    && find /usr/local/lib/node_modules -name "docs" -type d -exec rm -rf {{}} + || echo "Note: Some docs directories may be in use"
 
 # Set working directory
 WORKDIR /workspace
@@ -384,7 +384,7 @@ RUN groupadd -g {context.group_id} gadugi \\
 
 # Security hardening
 RUN find /usr -name "*.pyc" -delete \\
-    && find /usr -name "__pycache__" -type d -exec rm -rf {{}} + 2>/dev/null ; exit 0
+    && find /usr -name "__pycache__" -type d -exec rm -rf {{}} + || echo "Note: Some __pycache__ directories may be in use"
 
 # Set working directory
 WORKDIR /workspace
