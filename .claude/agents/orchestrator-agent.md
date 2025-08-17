@@ -196,6 +196,57 @@ Execute these specific prompts in parallel:
 - Skip any prompts marked as IMPLEMENTED or COMPLETED
 - Generate unique task IDs for each execution
 
+## Execution Implementation
+
+**CRITICAL**: When invoked via `/agent:orchestrator-agent`, this agent uses the Bash tool to execute the orchestrator Python CLI:
+
+```bash
+# The agent should use the Bash tool to run:
+python3 .claude/orchestrator/orchestrator_cli.py --stdin << 'EOF'
+[user input with prompt files]
+EOF
+```
+
+This ensures:
+- Proper subprocess spawning with `--dangerously-skip-permissions` flag
+- Correct WorkflowManager delegation
+- Real parallel execution rather than simulated
+
+**IMPORTANT**: The orchestrator agent MUST:
+1. Parse the user input to identify prompt files or task descriptions
+2. Use the Bash tool to invoke the Python CLI script
+3. Monitor the execution output
+4. Report results back to the user
+
+### Self-Correction Mechanism
+
+If the orchestrator detects it was not invoked properly (e.g., missing prompt delegation pattern), it should:
+
+1. **Detect Improper Invocation**: Check if the input contains the proper delegation pattern:
+   ```
+   Execute the prompt file: /prompts/[filename].md
+   You must delegate this to the workflow-manager agent.
+   ```
+
+2. **Self-Correct**: If the pattern is missing or incomplete, the orchestrator should:
+   - Log a warning about improper invocation
+   - Automatically add the proper delegation instruction
+   - Re-invoke itself with the corrected pattern using the Bash tool
+
+3. **Example Self-Correction**:
+   ```python
+   # If input is just "fix-bug.md" without proper delegation:
+   if "You must delegate this to the workflow-manager agent" not in user_input:
+       corrected_input = f"""
+       Execute the prompt file: /prompts/{prompt_file}
+       You must delegate this to the workflow-manager agent.
+       """
+       # Re-invoke with corrected pattern
+       self.invoke_with_correction(corrected_input)
+   ```
+
+This ensures the orchestrator always follows proper governance requirements regardless of how it's initially invoked.
+
 ## Architecture: Sub-Agent Coordination
 
 The OrchestratorAgent coordinates three specialized sub-agents to achieve parallel execution:

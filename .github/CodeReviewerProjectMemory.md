@@ -92,3 +92,35 @@ EOF < /dev/null
 - **Strength**: Multiple documentation touchpoints ensure visibility
 - **Strength**: Integration with existing workflow phases maintains consistency
 EOF < /dev/null
+## Code Review Memory - 2025-01-17
+
+### PR #262: Agent Registration Validation System
+
+#### What I Learned
+- **Agent Registration Requirements**: All agents must have YAML frontmatter with name, description, tools fields
+- **Version Field Evolution**: Version field was initially required but made optional in final implementation
+- **Tools Format Change**: Tools changed from single-line string to proper YAML list format
+- **Validation Layers**: Multiple validation points - pre-commit, CI/CD, and script-based
+- **Agent Discovery Pattern**: System searches both .claude/agents and .github/agents directories
+
+#### Patterns to Watch
+- **YAML Frontmatter Structure**: Must be between --- markers at start of file
+- **Required Fields**: name, description, tools are mandatory; version is optional
+- **Tools Field Format**: Must be a list, not a string (even with comma separation)
+- **Error Reporting**: Validation script provides clear, actionable error messages
+- **CI Integration**: GitHub Actions workflow triggers on agent file changes
+
+#### Implementation Quality Observations
+- **Good Practice**: Comprehensive validation script with verbose mode for debugging
+- **Good Practice**: Clear error messages with fix suggestions
+- **Good Practice**: Validation at multiple stages (local pre-commit + CI)
+- **Good Practice**: Handles multiple agent directories (.claude and .github)
+- **Improvement Needed**: Many existing agents need tools format fixed (string to list)
+- **Note**: PR has merge conflicts that need resolution
+
+#### Security and Robustness
+- **Input Validation**: Proper YAML parsing with safe_load to prevent code injection
+- **Error Handling**: Graceful handling of file read errors and YAML parse errors
+- **Path Safety**: Uses pathlib for safe path operations
+- **Exit Codes**: Proper exit codes for CI/CD integration
+

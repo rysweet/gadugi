@@ -30,6 +30,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 import psutil
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # Import the PromptGenerator for creating WorkflowMaster prompts
 from .prompt_generator import PromptContext, PromptGenerator
 
@@ -217,7 +220,12 @@ class TaskExecutor:
                     "--output-format=json"
                 ]
             )
-            self.container_manager = ContainerManager(container_config)
+            try:
+                self.container_manager = ContainerManager(container_config)
+            except (RuntimeError, ImportError) as e:
+                logger.info(f"Container manager unavailable: {e}")
+                logger.info("Will use subprocess fallback")
+                self.container_manager = None
         else:
             self.container_manager = None
 
@@ -501,7 +509,11 @@ class ExecutionEngine:
                     "--output-format=json"
                 ]
             )
-            self.container_manager = ContainerManager(container_config)
+            try:
+                self.container_manager = ContainerManager(container_config)
+            except (RuntimeError, ImportError) as e:
+                logger.info(f"Container manager unavailable, using subprocess: {e}")
+                self.container_manager = None
             self.execution_mode = "containerized"
         else:
             print("⚠️  Docker not available - using subprocess fallback mode")
