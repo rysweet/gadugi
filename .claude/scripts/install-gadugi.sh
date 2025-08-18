@@ -54,8 +54,11 @@ agents=(
 # Download each agent
 for agent in "${agents[@]}"; do
     echo "  📥 Downloading $agent..."
-    curl -fsSL "https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/$agent.md" \
-         -o ".claude/agents/$agent.md" 2>/dev/null || echo "    ⚠️  $agent not found, skipping..."
+    # Log curl errors to install log instead of suppressing
+    if ! curl -fsSL "https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/$agent.md" \
+         -o ".claude/agents/$agent.md" 2>>.claude/gadugi/install.log; then
+        echo "    ⚠️  $agent download failed, check .claude/gadugi/install.log for details"
+    fi
 done
 
 # Create configuration file
@@ -77,7 +80,7 @@ echo ""
 echo "✅ Gadugi installation complete!"
 echo ""
 echo "📦 Installed components:"
-echo "  • $(ls -1 .claude/agents/*.md 2>/dev/null | wc -l) agents in .claude/agents/"
+echo "  • $(ls -1 .claude/agents/*.md 2>&1 | grep -v "No such file" | wc -l) agents in .claude/agents/"
 echo "  • Python environment in .claude/gadugi/.venv/"
 echo "  • Configuration in .claude/gadugi/config/"
 echo ""

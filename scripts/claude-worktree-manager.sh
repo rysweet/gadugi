@@ -20,6 +20,7 @@ case "$ACTION" in
             echo "Branch: $branch"
 
             # Check if Claude is running in this directory
+            # Error suppression justified: lsof might not be available on all systems
             if lsof 2>/dev/null | grep -q "$worktree"; then
                 echo "Claude Status: Possibly active"
             else

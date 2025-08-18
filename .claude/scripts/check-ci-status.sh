@@ -39,6 +39,7 @@ get_pr_number() {
     else
         # Try to get PR number from current branch
         local current_branch=$(git branch --show-current)
+        # Error suppression justified: Branch might not have a PR, fallback to empty string
         gh pr list --head "$current_branch" --json number --jq '.[0].number' 2>/dev/null || echo ""
     fi
 }
@@ -50,7 +51,14 @@ check_ci_status() {
     echo -e "${BLUE}Checking CI status for PR #${pr_number}...${NC}\n"
 
     # Get PR info including CI status
-    local pr_info=$(gh pr view "$pr_number" --json state,mergeable,statusCheckRollup 2>/dev/null)
+    # Log errors instead of suppressing them
+    local pr_info=$(gh pr view "$pr_number" --json state,mergeable,statusCheckRollup 2>&1)
+    
+    # Check if the command failed
+    if [[ "$pr_info" == *"error"* ]] || [[ "$pr_info" == *"failed"* ]]; then
+        echo -e "${RED}Error fetching PR info: $pr_info${NC}" >&2
+        pr_info=""
+    fi
 
     if [ -z "$pr_info" ]; then
         echo -e "${RED}Error: Could not fetch PR information${NC}"

@@ -13,11 +13,34 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ⚠️ **MANDATORY ORCHESTRATOR AND WORKFLOW MANAGER USAGE** ⚠️
 
-**ALL requests that will result in changes to version-controlled files MUST:**
-1. **Use the orchestrator agent as entry point**
-2. **Orchestrator MUST delegate to workflow-manager** 
-3. **Workflow-manager MUST execute all 13 phases**
-4. **Direct implementation is FORBIDDEN**
+## Every Repository File Change Must Use the Orchestrator to Invoke the Workflow via the Workflow Manager - No Exceptions
+
+Any time there are changes to repository files required - whether it's fixing YAML
+frontmatter, updating documentation, modifying configs, or writing code - you must
+use the orchestrator to invoke the workflow via the workflow manager.
+
+This means:
+1. You invoke /agent:orchestrator-agent with a prompt file
+2. The orchestrator creates worktrees and invokes workflow-manager
+3. The workflow-manager executes all 13 phases
+4. You NEVER edit files directly
+
+This includes:
+- Fixing CI failures (even "simple" ones)
+- Adding missing metadata to agent files
+- Updating README or documentation
+- Changing configuration files
+- Modifying ANY file that gets committed to git
+
+Your brain will try to categorize some changes as "too trivial" or "not really code"
+to justify skipping this chain. Don't. If it's going to be committed to the
+repository, it must go through orchestrator → workflow-manager → 13 phases.
+
+The complete chain is mandatory because:
+- Orchestrator alone isn't enough (it must delegate to workflow-manager)
+- Workflow-manager ensures Phase 9 (Code Review) happens
+- Phase 10 (Review Response) addresses feedback
+- All changes get proper tracking and validation
 
 **VERIFICATION CHECKLIST:**
 - ✅ Worktree created in `.worktrees/` directory
@@ -36,20 +59,98 @@ This ensures:
 **For ANY task that modifies code, configuration, or documentation files:**
 
 1. **NEVER manually edit files directly**
-2. **ALWAYS use the orchestrator agent as the entry point**:
+2. **ALWAYS use the orchestrator agent as the entry point**
 
-   ```
-   /agent:orchestrator-agent
+## ⚠️ CRITICAL: How the Orchestrator ACTUALLY Works
 
-   Execute the following task:
-   - [description of changes needed]
-   ```
+The orchestrator is NOT just a concept - it's a fully working implementation that:
 
-3. **The Orchestrator will automatically**:
-   - Invoke the worktree-manager to create isolated environments
-   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
-   - Coordinate parallel execution when multiple tasks exist
-   - Ensure proper branch creation and PR workflow
+### 1. Creates Prompt Files
+For each task, create a prompt file in `/prompts/` directory:
+```bash
+# Example: /prompts/fix-bug-issue-256.md
+Task: Fix the code-review-response agent merge policy violation
+Issue: #256
+Requirements:
+- Update agent to ask for user approval before merging
+- Add clear prompt waiting for user permission
+```
+
+### 2. Invokes via Claude CLI with SPECIFIC FLAGS
+The orchestrator uses this EXACT command structure:
+```bash
+claude \
+  -p "Read and follow the instructions in the file: /prompts/[task].md" \
+  --dangerously-skip-permissions \
+  --verbose \
+  --max-turns=2000 \
+  --output-format json
+```
+
+### 3. Parallel Execution Architecture
+- **orchestrator_main.py**: Central coordination engine
+- **process_registry.py**: Process tracking and monitoring
+- **execution_engine.py**: Spawns subprocess.Popen with claude commands
+- **worktree_manager.py**: Creates isolated `.worktrees/task-*` directories
+
+### 4. CORRECT Invocation Pattern
+```
+/agent:orchestrator-agent
+
+Execute these specific prompts in parallel:
+- fix-bug-issue-256.md
+- add-validation-issue-248.md
+- remove-suppression-issue-249.md
+```
+
+### 5. What Actually Happens
+1. Orchestrator reads prompt files from `/prompts/`
+2. Creates worktrees in `.worktrees/task-[id]/`
+3. Spawns parallel `claude` processes with JSON output
+4. Each process runs workflow-manager in its worktree
+5. Monitors execution via process_registry
+6. Collects results and handles failures
+
+**The Orchestrator will automatically**:
+   - Create worktrees using worktree-manager
+   - Spawn REAL parallel claude processes
+   - Monitor execution with process tracking
+   - Handle failures with fallback to sequential
+
+## ❌ DO NOT DO THESE (Common Mistakes)
+
+### Wrong Way 1: Direct Claude Invocation
+```bash
+# NEVER DO THIS - loses all tracking and logs
+claude -p prompts/fix-bug.md
+```
+
+### Wrong Way 2: Made-up Commands
+```bash
+# NEVER INVENT COMMANDS - orchestrator has specific implementation
+orchestrator-agent execute --parallel --tasks="..."  # NOT A REAL COMMAND
+```
+
+### Wrong Way 3: Direct File Editing
+```python
+# NEVER EDIT FILES DIRECTLY - always use orchestrator
+with open('file.py', 'w') as f:
+    f.write(new_content)
+```
+
+### Wrong Way 4: Skipping Prompt Files
+```
+# NEVER TRY TO EXECUTE WITHOUT PROMPT FILES
+/agent:orchestrator-agent
+Fix these bugs: [list]  # WRONG - need actual prompt files
+```
+
+## ✅ CORRECT WAY (The ONLY Way)
+
+1. **Create prompt files** in `/prompts/` for each task
+2. **Invoke orchestrator** with list of prompt files
+3. **Let it handle everything** - worktrees, parallel execution, monitoring
+4. **Check results** in `.worktrees/task-*/` and workflow states
 
 4. **Agent Hierarchy**:
    - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
@@ -57,7 +158,7 @@ This ensures:
    - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
    - **Code-Reviewer**: Executes Phase 9 reviews
 
-**⚠️ GOVERNANCE ENFORCEMENT**: 
+**⚠️ GOVERNANCE ENFORCEMENT**:
 - The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances
 - Direct execution is STRICTLY PROHIBITED
 - If orchestrator executes directly without workflow-manager, this is a CRITICAL VIOLATION
@@ -121,7 +222,7 @@ This ensures:
 
 **Purpose**: Automatic session-end analysis for continuous improvement and learning.
 
-**When Executed**: 
+**When Executed**:
 - Automatically after Phase 12 completion
 - At the end of every workflow session
 - Before final state cleanup
@@ -310,7 +411,7 @@ Use worktrees whenever working on issues to maintain clean, isolated development
 
 ### Correct Pattern
 ```
-Assistant: "PR #123 has passed review and all checks are green. 
+Assistant: "PR #123 has passed review and all checks are green.
           Ready for merge. Awaiting your approval to proceed."
 User: "Please merge it"
 Assistant: [Now executes: gh pr merge 123]
