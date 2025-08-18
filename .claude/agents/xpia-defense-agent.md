@@ -3,7 +3,7 @@ name: xpia-defense-agent
 model: inherit
 description: Cross-Prompt Injection Attack Protection - Security middleware for threat detection and content sanitization
 version: 1.0.0
-tools: []
+tools: ["Read", "Grep", "LS", "Bash", "TodoWrite"]
 ---
 
 # XPIA Defense Agent - Cross-Prompt Injection Attack Protection

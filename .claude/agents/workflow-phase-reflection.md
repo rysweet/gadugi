@@ -3,7 +3,7 @@ name: workflow-phase-reflection
 model: inherit
 description: Reflection and continuous improvement phase for WorkflowManager execution
 version: 1.0.0
-tools: []
+tools: ["Read", "Write", "Bash", "Grep", "TodoWrite"]
 ---
 
 # Workflow Phase 10: Reflection and Continuous Improvement

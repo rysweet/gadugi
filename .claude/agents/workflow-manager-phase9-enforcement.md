@@ -3,7 +3,7 @@ name: workflow-manager-phase9-enforcement
 model: inherit
 description: Enforcement mechanism for mandatory Phase 9 code review in WorkflowManager
 version: 1.0.0
-tools: []
+tools: ["Task", "Read", "Bash", "TodoWrite"]
 ---
 
 # WorkflowManager Phase 9 Enforcement Implementation
