@@ -590,11 +590,58 @@ class OrchestratorCoordinator:
             task_results=[]
         )
 
-        # TODO: Implement sequential fallback using existing WorkflowManager
-        # For now, return partial success
-        result.execution_time_seconds = time.time() - start_time
-        logger.info("Fallback execution completed")
+        # Execute tasks sequentially as fallback
+        for prompt_file in prompt_files:
+            try:
+                logger.info(f"Executing task sequentially: {prompt_file}")
 
+                # Analyze the task
+                task_infos = self._analyze_tasks([prompt_file])
+                if not task_infos:
+                    logger.error(f"Failed to analyze task: {prompt_file}")
+                    result.failed_tasks += 1
+                    continue
+
+                task_info = task_infos[0]
+
+                # Check if worktree already exists from earlier phase
+                worktree_info = None
+                if task_info.id in self.worktree_manager.worktrees:
+                    logger.info(f"Using existing worktree for: {task_info.id}")
+                    worktree_info = self.worktree_manager.worktrees[task_info.id]
+                else:
+                    # Set up new worktree if it doesn't exist
+                    worktree_assignments = self._setup_worktrees([task_info])
+                    if task_info.id not in worktree_assignments:
+                        logger.error(f"Failed to setup worktree for: {prompt_file}")
+                        result.failed_tasks += 1
+                        continue
+                    worktree_info = worktree_assignments[task_info.id]
+
+                # Create task executor
+                executor = TaskExecutor(
+                    task_id=task_info.id,
+                    worktree_path=Path(worktree_info.worktree_path),
+                    prompt_file=prompt_file,
+                    task_context={'name': task_info.name, 'sequential_fallback': True}
+                )
+
+                # Execute the task with subprocess fallback
+                exec_result = executor.execute(timeout=self.config.execution_timeout_hours * 3600)
+
+                if exec_result.status == 'success':
+                    result.successful_tasks += 1
+                else:
+                    result.failed_tasks += 1
+
+                result.task_results.append(exec_result)
+
+            except Exception as e:
+                logger.error(f"Failed to execute task {prompt_file}: {e}")
+                result.failed_tasks += 1
+
+        result.execution_time_seconds = time.time() - start_time
+        logger.info(f"Fallback execution completed: {result.successful_tasks}/{result.total_tasks} succeeded")
         return result
 
     def get_status(self) -> Dict[str, Any]:
@@ -609,7 +656,7 @@ class OrchestratorCoordinator:
 
         # Clean up any remaining resources
         try:
-            self.worktree_manager.cleanup_all()
+            self.worktree_manager.cleanup_all_worktrees()
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
 
