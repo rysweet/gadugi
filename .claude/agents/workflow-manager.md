@@ -1,18 +1,40 @@
 ---
-name: workflow-manager
-model: inherit
-description: Orchestrates complete development workflows from prompt files, ensuring all phases from issue creation to PR review are executed systematically
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
-imports: |
-  # Enhanced Separation Architecture - Shared Modules
+description: Orchestrates complete development workflows from prompt files, ensuring
+  all phases from issue creation to PR review are executed systematically
+imports: '# Enhanced Separation Architecture - Shared Modules
+
   from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
+
+  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager,
+  StateBackupRestore
+
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker,
+  RecoveryManager
+
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker,
+  ProductivityAnalyzer
+
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState,
+  TaskData, ErrorContext, WorkflowPhase
+
   # Enhanced Reliability Features (Issue #73)
-  from .claude.shared.workflow_reliability import WorkflowReliabilityManager, WorkflowStage, monitor_workflow, create_reliability_manager
-  from .claude.agents.enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration
+
+  from .claude.shared.workflow_reliability import WorkflowReliabilityManager, WorkflowStage,
+  monitor_workflow, create_reliability_manager
+
+  from .claude.agents.enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration'
+model: inherit
+name: workflow-manager
+tools:
+- Read
+- Write
+- Edit
+- Bash
+- Grep
+- LS
+- TodoWrite
+- Task
+version: 1.0.0
 ---
 
 # Enhanced WorkflowManager Sub-Agent for Gadugi

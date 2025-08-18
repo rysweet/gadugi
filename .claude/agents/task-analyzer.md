@@ -1,15 +1,27 @@
 ---
-name: task-analyzer
-model: inherit
-description: Enhanced task analyzer with intelligent decomposition, dependency analysis, and pattern recognition for optimized parallel execution
-tools: Read, Grep, LS, Glob, Bash, TodoWrite
-imports: |
-  # Enhanced Separation Architecture - Shared Modules
+description: Enhanced task analyzer with intelligent decomposition, dependency analysis,
+  and pattern recognition for optimized parallel execution
+imports: '# Enhanced Separation Architecture - Shared Modules
+
   from .claude.shared.github_operations import GitHubOperations
+
   from .claude.shared.state_management import StateManager, CheckpointManager
+
   from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
+
   from .claude.shared.task_tracking import TaskTracker, TaskMetrics, WorkflowPhaseTracker
-  from .claude.shared.interfaces import AgentConfig, TaskData, AnalysisResult, DependencyGraph
+
+  from .claude.shared.interfaces import AgentConfig, TaskData, AnalysisResult, DependencyGraph'
+model: inherit
+name: task-analyzer
+tools:
+- Read
+- Grep
+- LS
+- Glob
+- Bash
+- TodoWrite
+version: 1.0.0
 ---
 
 # Enhanced TaskAnalyzer - Intelligent Task Analysis and Decomposition

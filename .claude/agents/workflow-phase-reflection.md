@@ -1,7 +1,9 @@
 ---
 name: workflow-phase-reflection
-description: Collects workflow metrics and generates insights for continuous improvement
-tools: Read, Write, Bash, Grep, TodoWrite
+model: inherit
+description: Reflection and continuous improvement phase for WorkflowManager execution
+version: 1.0.0
+tools: ["Read", "Write", "Bash", "Grep", "TodoWrite"]
 ---
 
 # Workflow Phase 10: Reflection and Continuous Improvement

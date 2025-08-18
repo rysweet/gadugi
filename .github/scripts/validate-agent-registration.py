@@ -16,7 +16,7 @@ from typing import Dict, List, Tuple, Optional
 class AgentValidator:
     """Validates agent files for proper registration requirements."""
 
-    REQUIRED_FIELDS = ["name", "description", "tools"]  # version is now optional
+    REQUIRED_FIELDS = ["name", "description", "version", "tools"]
     AGENT_DIRECTORIES = [".claude/agents", ".github/agents"]
 
     def __init__(self, verbose: bool = False):
@@ -112,27 +112,19 @@ class AgentValidator:
                 ):
                     errors.append(f"Field '{field}' is empty or whitespace only")
 
-            # Validate version format (optional field)
+            # Validate version format
             if "version" in frontmatter and frontmatter["version"]:
                 if not self.validate_semver(frontmatter["version"]):
                     errors.append(
                         f"Invalid version format: '{frontmatter['version']}' (expected semver like 1.0.0)"
                     )
 
-            # Validate tools field - accept both string (comma-separated) and list formats
+            # Validate tools field
             if "tools" in frontmatter:
-                tools_value = frontmatter["tools"]
-                if tools_value is not None:
-                    # Accept both string and list formats
-                    if isinstance(tools_value, str):
-                        # String format is acceptable (e.g., "Read, Write, Edit")
-                        self.log(
-                            f"Tools field is a string (comma-separated): {tools_value}"
-                        )
-                    elif not isinstance(tools_value, list):
-                        errors.append(
-                            "Field 'tools' must be a list or comma-separated string"
-                        )
+                if frontmatter["tools"] is not None and not isinstance(
+                    frontmatter["tools"], list
+                ):
+                    errors.append("Field 'tools' must be a list (can be empty list)")
 
             # Check if agent name matches filename (warning only)
             if "name" in frontmatter and frontmatter["name"]:
@@ -220,11 +212,9 @@ class AgentValidator:
             print(
                 "   - Ensure frontmatter is between --- markers at the start of the file"
             )
-            print("   - Include all required fields: name, description, tools")
-            print(
-                "   - Version field is optional but if present must be valid semver (e.g., 1.0.0)"
-            )
-            print("   - Tools field can be a list or comma-separated string")
+            print("   - Include all required fields: name, description, version, tools")
+            print("   - Use valid semver format for version (e.g., 1.0.0)")
+            print("   - Make tools field a list (can be empty: [])")
             return 1
         else:
             print("\n✅ All agent files are valid!")

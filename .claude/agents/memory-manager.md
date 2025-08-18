@@ -1,7 +1,9 @@
 ---
 name: memory-manager
-description: Maintains, curates, and synchronizes Memory.md with GitHub Issues
-tools: Read, Write, Edit, Bash, Grep, TodoWrite
+model: inherit
+description: Maintains, curates, and synchronizes Memory.md with GitHub Issues for bidirectional task tracking
+version: 1.0.0
+tools: ["Read", "Write", "Edit", "Bash", "Grep", "TodoWrite"]
 ---
 
 # MemoryManagerAgent

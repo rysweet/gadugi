@@ -9,6 +9,15 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ---
 
+## CRITICAL: UV Python Environment Usage
+
+**In UV projects (with `pyproject.toml` and `uv.lock`), ALWAYS prefix Python commands with `uv run`:**
+- ✅ `uv run python script.py`
+- ✅ `uv run pytest tests/`
+- ❌ Never: `python script.py` or `pytest tests/`
+
+---
+
 ## CRITICAL: Workflow Execution Pattern
 
 ⚠️ **MANDATORY ORCHESTRATOR AND WORKFLOW MANAGER USAGE** ⚠️

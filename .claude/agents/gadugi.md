@@ -1,7 +1,9 @@
 ---
 name: gadugi
+model: inherit
 description: Primary service management agent for the Gadugi event-driven multi-agent system
-tools: Read, Write, Edit, Bash, Grep, Glob, LS
+version: 1.0.0
+tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "LS"]
 ---
 
 # Gadugi Service Management Agent

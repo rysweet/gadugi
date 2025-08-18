@@ -1,8 +1,19 @@
 ---
-name: system-design-reviewer
+description: Specialized agent for automated architectural review and system design
+  documentation maintenance
 model: inherit
-description: Specialized agent for automated architectural review and system design documentation maintenance
-tools: Read, Grep, LS, Bash, WebSearch, WebFetch, TodoWrite, Edit, Write
+name: system-design-reviewer
+tools:
+- Read
+- Grep
+- LS
+- Bash
+- WebSearch
+- WebFetch
+- TodoWrite
+- Edit
+- Write
+version: 1.0.0
 ---
 
 # System Design Review Agent for Gadugi

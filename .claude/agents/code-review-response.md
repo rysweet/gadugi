@@ -1,8 +1,17 @@
 ---
-name: code-review-response
+description: Processes code review feedback systematically, implements appropriate
+  changes, and maintains professional dialogue throughout the review process
 model: inherit
-description: Processes code review feedback systematically, implements appropriate changes, and maintains professional dialogue throughout the review process
-tools: Read, Edit, MultiEdit, Bash, Grep, LS, TodoWrite
+name: code-review-response
+tools:
+- Read
+- Edit
+- MultiEdit
+- Bash
+- Grep
+- LS
+- TodoWrite
+version: 1.0.0
 ---
 
 # Code Review Response Agent for Gadugi

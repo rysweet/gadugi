@@ -1,15 +1,33 @@
 ---
-name: pr-backlog-manager
-model: inherit
-description: Manages the backlog of PRs by ensuring they are ready for review and merge, automating checks for merge conflicts, CI status, and code review completion
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
-imports: |
-  # Enhanced Separation Architecture - Shared Modules
+description: Manages the backlog of PRs by ensuring they are ready for review and
+  merge, automating checks for merge conflicts, CI status, and code review completion
+imports: '# Enhanced Separation Architecture - Shared Modules
+
   from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
+
+  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager,
+  StateBackupRestore
+
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker,
+  RecoveryManager
+
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker,
+  ProductivityAnalyzer
+
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState,
+  TaskData, ErrorContext, WorkflowPhase'
+model: inherit
+name: pr-backlog-manager
+tools:
+- Read
+- Write
+- Edit
+- Bash
+- Grep
+- LS
+- TodoWrite
+- WebSearch
+version: 1.0.0
 ---
 
 # PR Backlog Manager Sub-Agent for Gadugi

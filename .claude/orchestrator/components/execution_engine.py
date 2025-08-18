@@ -17,6 +17,9 @@ import json
 import logging
 import os
 import queue
+
+# Set up logging
+logger = logging.getLogger(__name__)
 import signal
 import subprocess
 import sys
@@ -204,20 +207,25 @@ class TaskExecutor:
 
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if CONTAINER_EXECUTION_AVAILABLE:
-            container_config = ContainerConfig(
-                image="claude-orchestrator:latest",
-                cpu_limit="2.0",
-                memory_limit="4g",
-                timeout_seconds=self.task_context.get('timeout_seconds', 3600),
-                # CRITICAL: Proper Claude CLI flags with automation support
-                claude_flags=[
-                    "--dangerously-skip-permissions",  # Essential for automation
-                    "--verbose",
-                    f"--max-turns={self.task_context.get('max_turns', 50)}",
-                    "--output-format=json"
-                ]
-            )
-            self.container_manager = ContainerManager(container_config)
+            try:
+                container_config = ContainerConfig(
+                    image="claude-orchestrator:latest",
+                    cpu_limit="2.0",
+                    memory_limit="4g",
+                    timeout_seconds=self.task_context.get('timeout_seconds', 3600),
+                    # CRITICAL: Proper Claude CLI flags with automation support
+                    claude_flags=[
+                        "--dangerously-skip-permissions",  # Essential for automation
+                        "--verbose",
+                        f"--max-turns={self.task_context.get('max_turns', 50)}",
+                        "--output-format=json"
+                    ]
+                )
+                self.container_manager = ContainerManager(container_config)
+            except (RuntimeError, ImportError) as e:
+                logger.info(f"Container manager unavailable for task {task_id}: {e}")
+                logger.info("Will use subprocess fallback")
+                self.container_manager = None
         else:
             self.container_manager = None
 
@@ -489,20 +497,26 @@ class ExecutionEngine:
         # CRITICAL FIX #167: Initialize ContainerManager for true parallel containerized execution
         if CONTAINER_EXECUTION_AVAILABLE:
             print("🐳 Initializing containerized execution engine...")
-            container_config = ContainerConfig(
-                image="claude-orchestrator:latest",
-                cpu_limit="2.0",
-                memory_limit="4g",
-                timeout_seconds=default_timeout,
-                claude_flags=[
-                    "--dangerously-skip-permissions",  # CRITICAL for automation
-                    "--verbose",
-                    "--max-turns=50",
-                    "--output-format=json"
-                ]
-            )
-            self.container_manager = ContainerManager(container_config)
-            self.execution_mode = "containerized"
+            try:
+                container_config = ContainerConfig(
+                    image="claude-orchestrator:latest",
+                    cpu_limit="2.0",
+                    memory_limit="4g",
+                    timeout_seconds=default_timeout,
+                    claude_flags=[
+                        "--dangerously-skip-permissions",  # CRITICAL for automation
+                        "--verbose",
+                        "--max-turns=50",
+                        "--output-format=json"
+                    ]
+                )
+                self.container_manager = ContainerManager(container_config)
+                self.execution_mode = "containerized"
+            except (RuntimeError, ImportError) as e:
+                print(f"⚠️  Container manager unavailable: {e}")
+                print("⚠️  Using subprocess fallback mode")
+                self.container_manager = None
+                self.execution_mode = "subprocess"
         else:
             print("⚠️  Docker not available - using subprocess fallback mode")
             self.container_manager = None
