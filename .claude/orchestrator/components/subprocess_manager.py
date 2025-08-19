@@ -22,14 +22,23 @@ logger = logging.getLogger(__name__)
 class SubprocessManager:
     """Manages real Claude CLI subprocess execution"""
 
-    def __init__(self, project_root: str):
+    def __init__(self, project_root: str, max_concurrent_processes: int = 10):
         self.project_root = Path(project_root)
         self.active_processes: Dict[str, subprocess.Popen] = {}
         self.process_lock = threading.Lock()
+        self.max_concurrent = max_concurrent_processes
 
     def spawn_workflow_manager(self, task_id: str, worktree_path: Path,
                              original_prompt: str, task_context: dict) -> subprocess.Popen:
         """Spawn real WorkflowManager subprocess"""
+
+        # Check resource limits to prevent system exhaustion
+        with self.process_lock:
+            if len(self.active_processes) >= self.max_concurrent:
+                raise RuntimeError(
+                    f"Maximum concurrent processes reached ({self.max_concurrent}). "
+                    f"Active processes: {list(self.active_processes.keys())}"
+                )
 
         # Create WorkflowManager prompt with task context
         workflow_prompt = self._create_workflow_manager_prompt(
@@ -46,10 +55,10 @@ class SubprocessManager:
         if self._is_uv_project(worktree_path):
             env['ORCHESTRATOR_UV_PROJECT'] = 'true'
 
-        # Real Claude CLI command for WorkflowManager delegation
+        # Real Claude CLI command for WorkflowManager delegation (SECURE - uses list form)
         claude_cmd = [
             "claude",
-            "-p", workflow_prompt,
+            "-p", workflow_prompt,  # File path is safe - generated internally
             "--dangerously-skip-permissions",
             "--verbose",
             "--max-turns=50",
@@ -59,14 +68,15 @@ class SubprocessManager:
         logger.info(f"Spawning real subprocess for task {task_id}: {' '.join(claude_cmd)}")
         logger.info(f"Working directory: {worktree_path}")
 
-        # Spawn the actual subprocess
+        # Spawn the actual subprocess (SECURE - shell=False prevents injection)
         process = subprocess.Popen(
             claude_cmd,
             cwd=worktree_path,
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            shell=False  # SECURITY: Prevent command injection
         )
 
         # Track the process
@@ -174,27 +184,45 @@ Begin workflow execution now.
             return "", str(e), -1
 
     def cancel_process(self, task_id: str) -> bool:
-        """Cancel a running subprocess"""
+        """Cancel a running subprocess with progressive termination"""
         process = self.active_processes.get(task_id)
         if not process:
             return False
 
         try:
-            process.terminate()
-            # Give it a moment to terminate gracefully
-            time.sleep(2)
-            if process.poll() is None:
-                process.kill()
+            # Progressive termination to prevent zombie processes
+            logger.info(f"Initiating graceful termination of process {task_id} (PID {process.pid})")
 
+            # Step 1: Try graceful termination first
+            process.terminate()
+            try:
+                process.wait(timeout=5)  # Wait up to 5 seconds for graceful termination
+                logger.info(f"Process {task_id} terminated gracefully")
+            except subprocess.TimeoutExpired:
+                # Step 2: Force kill if graceful termination fails
+                logger.warning(f"Process {task_id} didn't terminate gracefully, forcing kill")
+                process.kill()
+                try:
+                    process.wait(timeout=2)  # Give kill command time to complete
+                    logger.info(f"Process {task_id} killed successfully")
+                except subprocess.TimeoutExpired:
+                    logger.error(f"Process {task_id} failed to die even after kill signal")
+                    # Process may be a zombie, but we'll clean it up anyway
+
+            # Clean up from registry
             with self.process_lock:
                 if task_id in self.active_processes:
                     del self.active_processes[task_id]
 
-            logger.info(f"Process {task_id} cancelled")
+            logger.info(f"Process {task_id} cancelled and cleaned up")
             return True
 
         except Exception as e:
             logger.error(f"Error cancelling process {task_id}: {e}")
+            # Still try to clean up from registry
+            with self.process_lock:
+                if task_id in self.active_processes:
+                    del self.active_processes[task_id]
             return False
 
     def get_process_status(self, task_id: str) -> dict:
@@ -226,3 +254,48 @@ Begin workflow execution now.
                     logger.error(f"Error cleaning up process {task_id}: {e}")
 
         logger.info("All processes cleaned up")
+
+    def validate_workflow_execution(self, task_id: str, worktree_path: Path) -> bool:
+        """Verify that WorkflowManager created proper workflow state"""
+        # Check for workflow state directory
+        workflow_states_dir = worktree_path / ".github" / "workflow-states" / f"task-{task_id}"
+
+        if not workflow_states_dir.exists():
+            logger.warning(f"No workflow state directory found for task {task_id}")
+            return False
+
+        # Check for workflow state file
+        workflow_state_file = workflow_states_dir / "workflow.json"
+        if not workflow_state_file.exists():
+            logger.warning(f"No workflow state file found for task {task_id}")
+            return False
+
+        try:
+            import json
+            with open(workflow_state_file, 'r') as f:
+                workflow_state = json.load(f)
+
+            # Validate that workflow phases were executed
+            phases = workflow_state.get('phases', {})
+            required_phases = [
+                'phase_1_initial_setup', 'phase_2_issue_creation', 'phase_3_branch_management',
+                'phase_4_research_planning', 'phase_5_implementation', 'phase_6_testing',
+                'phase_7_documentation', 'phase_8_pull_request', 'phase_9_review',
+                'phase_10_review_response', 'phase_11_settings_update'
+            ]
+
+            completed_phases = [phase for phase, data in phases.items()
+                              if isinstance(data, dict) and data.get('completed', False)]
+
+            logger.info(f"Task {task_id} completed phases: {completed_phases}")
+
+            if len(completed_phases) < 8:  # At least 8 phases should complete
+                logger.warning(f"Task {task_id} only completed {len(completed_phases)} phases, "
+                             f"expected at least 8")
+                return False
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Error validating workflow execution for task {task_id}: {e}")
+            return False

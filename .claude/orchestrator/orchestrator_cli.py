@@ -203,9 +203,19 @@ class OrchestrationCLI:
                 exec_time = getattr(task_result, 'duration', 0) or 0
                 print(f"  {task_result.task_id}: {status} ({exec_time:.1f}s)")
 
-                if task_result.status != 'success' and hasattr(task_result, 'error_message'):
-                    error_msg = getattr(task_result, 'error_message', 'Unknown error')
+                if task_result.status != 'success':
+                    # Improved error context handling
+                    error_msg = "Unknown error"
+                    if hasattr(task_result, 'error_message') and task_result.error_message:
+                        error_msg = task_result.error_message
+                    elif hasattr(task_result, 'stderr') and task_result.stderr:
+                        error_msg = task_result.stderr[:200] + "..." if len(task_result.stderr) > 200 else task_result.stderr
+                    elif hasattr(task_result, 'stdout') and task_result.stdout:
+                        # Sometimes errors are in stdout
+                        error_msg = task_result.stdout[:200] + "..." if len(task_result.stdout) > 200 else task_result.stdout
+
                     print(f"    Error: {error_msg}")
+                    logger.error(f"Task {task_result.task_id} failed: {error_msg}, result type: {type(task_result)}")
 
         # Error summary
         if result.error_summary:
