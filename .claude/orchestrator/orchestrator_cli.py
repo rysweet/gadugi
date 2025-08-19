@@ -309,8 +309,8 @@ Examples:
     parser.add_argument(
         "--timeout",
         type=int,
-        default=2,
-        help="Execution timeout in hours (default: 2)"
+        default=12,
+        help="Execution timeout in hours (default: 12)"
     )
     parser.add_argument(
         "--project-root",

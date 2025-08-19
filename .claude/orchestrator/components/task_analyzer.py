@@ -687,7 +687,7 @@ class TaskAnalyzer:
 
 
 def main():
-    """CLI entry point for TaskAnalyzer"""))
+    """CLI entry point for TaskAnalyzer"""
     import argparse
 
     parser = argparse.ArgumentParser(description="Analyze prompt files for parallel execution")
