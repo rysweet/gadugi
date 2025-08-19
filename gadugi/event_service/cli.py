@@ -13,7 +13,6 @@ import os
 import socket
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
 
 from .service import GadugiEventService
 from .config import (
@@ -143,9 +142,7 @@ Examples:
         handler_parser = subparsers.add_parser("handler", help="Manage event handlers")
         handler_subparsers = handler_parser.add_subparsers(dest="handler_action")
 
-        list_handlers_parser = handler_subparsers.add_parser(
-            "list", help="List event handlers"
-        )
+        handler_subparsers.add_parser("list", help="List event handlers")
 
         enable_parser = handler_subparsers.add_parser("enable", help="Enable handler")
         enable_parser.add_argument("name", help="Handler name")
@@ -386,7 +383,6 @@ Examples:
                 event_data = json.loads(args.data)
             elif args.file:
                 import aiofiles
-                import asyncio
 
                 async def read_json_file(path):
                     async with aiofiles.open(path, "r") as f:
@@ -439,7 +435,6 @@ Examples:
 
             if args.tail:
                 # Follow log file
-                import subprocess
 
                 # Use asyncio.create_subprocess_exec for non-blocking tail
                 process = await asyncio.create_subprocess_exec("tail", "-f", log_file)

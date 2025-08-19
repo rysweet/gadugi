@@ -10,10 +10,9 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import Any, Dict
 
 import pytest
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING
@@ -244,7 +243,7 @@ except ImportError:
                     self.failure_count = 0
                     self.last_failure_time = None
                     return result
-                except Exception as e:
+                except Exception:
                     self.failure_count += 1
                     self.last_failure_time = datetime.now()
 
@@ -964,7 +963,7 @@ class TestErrorContext:
         """Test ErrorContext with successful operation."""
         with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
-                result = "success"
+                pass
 
             assert ctx.error is None
             mock_logger.debug.assert_has_calls(

@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import pytest
-from unittest.mock import Mock, call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING
@@ -582,13 +581,6 @@ class TestTaskState:
             task_id="test-task-006", prompt_file="test.md", status="in_progress"
         )
 
-        error_info = {
-            "error_type": "network_error",
-            "message": "Connection failed",
-            "phase": 2,
-            "retry_count": 3,
-        }
-
         state.set_error(
             {
                 "error_type": "network_error",
@@ -782,7 +774,7 @@ class TestStateManager:
         state.status = "in_progress"
         state.current_phase = 2
         state.issue_number = 42
-        updated_state = state_manager.update_state(state)
+        state_manager.update_state(state)
 
         # Verify update
         loaded_state = state_manager.load_state("test-update-001")
@@ -990,7 +982,7 @@ class TestStateManager:
 
     def test_concurrent_access_handling(self, state_manager):
         """Test handling of concurrent state access."""
-        state = TaskState(
+        TaskState(
             task_id="concurrent-test", prompt_file="concurrent.md", status="pending"
         )
 
@@ -1035,12 +1027,6 @@ class TestCheckpointManager:
             current_phase=3,
         )
 
-        checkpoint_state = {
-            "task_id": state.task_id,
-            "status": state.status,
-            "current_phase": state.current_phase,
-            "prompt_file": state.prompt_file,
-        }
         checkpoint_id = checkpoint_manager.create_checkpoint(state, "checkpoint-001")
         assert checkpoint_id is not None
 
@@ -1059,7 +1045,7 @@ class TestCheckpointManager:
         # Create multiple checkpoints
         checkpoint_ids = []
         for i in range(3):
-            checkpoint_state = {
+            {
                 "task_id": "list-checkpoints",
                 "current_phase": i + 1,
                 "status": "in_progress",
@@ -1087,12 +1073,6 @@ class TestCheckpointManager:
             current_phase=3,
         )
 
-        checkpoint_state = {
-            "task_id": "restore-checkpoint",
-            "prompt_file": "restore.md",
-            "status": "in_progress",
-            "current_phase": 3,
-        }
         checkpoint_id = checkpoint_manager.create_checkpoint(
             original_state, "restore-checkpoint-desc"
         )

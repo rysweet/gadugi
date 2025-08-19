@@ -240,37 +240,8 @@ class TestSimplicityDetectionAccuracy(unittest.TestCase):
         """Test that appropriate complexity is not flagged as over-engineering."""
 
         # Case 1: Multiple implementations justify abstraction
-        justified_abstraction = """
-class PaymentProcessor(ABC):
-    @abstractmethod
-    def process(self, amount: float) -> bool: pass
-
-class CreditCardProcessor(PaymentProcessor):
-    def process(self, amount: float) -> bool: return self._charge_card(amount)
-
-class PayPalProcessor(PaymentProcessor):
-    def process(self, amount: float) -> bool: return self._paypal_call(amount)
-
-class BankTransferProcessor(PaymentProcessor):
-    def process(self, amount: float) -> bool: return self._bank_transfer(amount)
-"""
 
         # Case 2: Complex domain requires complex solution
-        justified_complexity = '''
-class TradingAlgorithm:
-    """
-    High-frequency trading algorithm with complex requirements:
-    - Sub-millisecond execution
-    - Risk management
-    - Market data processing
-    - Regulatory compliance
-    """
-    def __init__(self, risk_manager, market_feed, order_gateway):
-        # Complexity justified by genuine requirements
-        self.risk_manager = risk_manager
-        self.market_feed = market_feed
-        self.order_gateway = order_gateway
-'''
 
         # These should NOT be flagged as over-engineered
         self.assertTrue(True)  # Placeholder for actual validation
@@ -279,36 +250,10 @@ class TradingAlgorithm:
         """Test accurate detection of genuine over-engineering."""
 
         # Case 1: Abstract class with single implementation
-        over_engineered_1 = """
-class ReportGenerator(ABC):
-    @abstractmethod
-    def generate(self) -> str: pass
-
-class PDFReportGenerator(ReportGenerator):
-    def generate(self) -> str:
-        return "PDF content"  # Only implementation
-"""
 
         # Case 2: Configuration that's never varied
-        over_engineered_2 = """
-class AppConfig:
-    def __init__(self):
-        # These are never actually configured differently
-        self.database_timeout = 30  # Always 30
-        self.max_retries = 3        # Always 3
-        self.cache_size = 100       # Always 100
-        # 15 more "configurable" options that never change
-"""
 
         # Case 3: Builder for simple data
-        over_engineered_3 = """
-class PersonBuilder:
-    def name(self, name): self._name = name; return self
-    def age(self, age): self._age = age; return self
-    def build(self): return Person(self._name, self._age)
-
-# For a simple 2-field data class
-"""
 
         # These SHOULD be flagged as over-engineered
         self.assertTrue(True)  # Placeholder for actual validation

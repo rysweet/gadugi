@@ -9,11 +9,10 @@ import subprocess
 
 # Import the module we're testing (will be implemented after tests)
 import sys
-from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 # For type checking only
 from typing import TYPE_CHECKING
@@ -31,7 +30,7 @@ except ImportError:
     # These will be implemented after tests pass
     import subprocess
     import time
-    from typing import Any, Dict, List, Optional, Union
+    from typing import Any, Dict, List, Optional
 
     class GitHubError(Exception):
         """Base exception for GitHub operations."""

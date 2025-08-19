@@ -27,17 +27,17 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with pyright (using local hook for now)
+  # Type checking with pyright - zero tolerance enforcement
   - repo: local
     hooks:
-      - id: pyright
-        name: pyright type checker
-        entry: pyright container_runtime/
+      - id: pyright-uv
+        name: PyRight Type Checking (UV) - Zero Tolerance
+        entry: uv run pyright
         language: system
         types: [python]
         pass_filenames: false
-        stages: [pre-push]  # Run on push to avoid slowing down commits
-        # Scoped to container_runtime/ initially for phased rollout
+        stages: [pre-push]
+        # Zero tolerance - any errors will fail the commit
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets

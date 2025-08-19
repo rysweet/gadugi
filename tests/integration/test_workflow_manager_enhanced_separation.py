@@ -21,9 +21,8 @@ import os
 import shutil
 import sys
 import tempfile
-from datetime import datetime, timedelta
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -331,7 +330,7 @@ class TestWorkflowManagerIntegration:
         self.task_tracker.todowrite.submit_task_list(self.task_tracker.task_list)
 
         # Test TodoWrite integration
-        todowrite_integration = TodoWriteIntegration()
+        TodoWriteIntegration()
         # todowrite_manager.create_enhanced_task_list(tasks)  # Not available in current API
 
         # Test basic task list initialization works
@@ -361,7 +360,7 @@ class TestWorkflowManagerIntegration:
         """Test comprehensive error handling scenarios"""
 
         task_id = "test-error-handling"
-        workflow_state = TaskState(
+        TaskState(
             task_id=task_id,
             prompt_file="test-error.md",
             phase=WorkflowPhase.IMPLEMENTATION,
@@ -369,7 +368,7 @@ class TestWorkflowManagerIntegration:
         )
 
         # Test error context creation
-        test_error = Exception("Simulated implementation failure")
+        Exception("Simulated implementation failure")
         error_context = ErrorContext(
             operation="implementation",
             details={
@@ -420,8 +419,6 @@ class TestWorkflowManagerIntegration:
 
     def test_workflow_phase_tracking_integration(self):
         """Test comprehensive workflow phase tracking"""
-
-        task_id = "test-phase-tracking"
 
         # Test all workflow phases (using enum values)
         phases_to_test = [
