@@ -13,6 +13,9 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ⚠️ **YOU MUST FOLLOW THE GUIDELINES IN @.claude/Guidelines.md** ⚠️
 
+### 🚫 ABSOLUTELY FORBIDDEN: Time Estimates
+**NEVER provide time estimates** (hours, days, weeks) for any development tasks. AI agents work at variable speeds making time estimates meaningless. Use complexity ratings (simple/medium/complex) instead.
+
 Key principles you MUST follow:
 - **Zero BS Principle**: NO false claims of completion. If it's not implemented, say so.
 - **Recipe-Driven Development**: Requirements → Design → Implementation → Tests → Review
@@ -902,4 +905,25 @@ Remember: The goal is to maintain development velocity while preserving quality 
 
 ## Memories and Best Practices
 
-- Remember to not use artificial dev timescales in planning or estimating.
+### ⚠️ CRITICAL: NO TIME ESTIMATES ⚠️
+
+**NEVER provide time estimates for development tasks when using AI coding agents.**
+
+- **DO NOT** estimate hours, days, or weeks for tasks
+- **DO NOT** provide "estimated completion time" in any format
+- **DO NOT** include time-based projections in reports or reviews
+- **DO NOT** make up artificial dev timescales in planning
+
+**Why**: AI agents work at variable speeds and time estimates are meaningless and wasteful in this context.
+
+**Instead of time estimates, provide**:
+- Task complexity (simple/medium/complex)
+- Dependencies that must be completed first
+- Number of components affected
+- Whether tasks can be parallelized
+
+### Other Best Practices
+
+- Focus on task dependencies rather than timelines
+- Describe work in terms of concrete deliverables
+- Use the orchestrator for parallel execution to maximize throughput
