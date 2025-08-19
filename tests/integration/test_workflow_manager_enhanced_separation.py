@@ -21,9 +21,8 @@ import os
 import shutil
 import sys
 import tempfile
-from datetime import datetime, timedelta
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
 

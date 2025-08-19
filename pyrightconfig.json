@@ -18,6 +18,11 @@
     ".ruff_cache",
     "htmlcov"
   ],
+  "extraPaths": [
+    ".claude/shared",
+    "compat",
+    "types"
+  ],
   "typeCheckingMode": "standard",
   "pythonVersion": "3.13",
   "pythonPlatform": "All",

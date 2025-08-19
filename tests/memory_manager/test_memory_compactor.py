@@ -3,11 +3,10 @@
 Tests for Memory Compactor - Automatic Memory.md compaction functionality
 """
 
-import json
 import os
 import tempfile
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 

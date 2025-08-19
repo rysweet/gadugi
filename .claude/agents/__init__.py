@@ -37,7 +37,6 @@ try:
     from .test_solver_agent import TestSolverAgent
     from .test_writer_agent import TestWriterAgent
     from .shared_test_instructions import SharedTestInstructions
-    from .workflow_master_enhanced import EnhancedWorkflowMaster
 except ImportError:
     # Graceful degradation if imports fail
     pass

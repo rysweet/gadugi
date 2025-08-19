@@ -24,9 +24,9 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 # Add shared modules to path
@@ -40,11 +40,11 @@ try:
         monitor_workflow,
         create_reliability_manager
     )
-    from utils.error_handling import ErrorHandler, retry, graceful_degradation
-    from state_management import StateManager, TaskState, WorkflowPhase
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker
+    from utils.error_handling import ErrorHandler, retry
+    from state_management import StateManager
+    from task_tracking import TaskTracker, WorkflowPhaseTracker
     from github_operations import GitHubOperations
-    from interfaces import AgentConfig, ErrorContext
+    from interfaces import AgentConfig
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
