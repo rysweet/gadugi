@@ -1,12 +1,111 @@
 {
   "worktrees": {
-    "achieve-zero-pyright-errors": {
-      "task_id": "achieve-zero-pyright-errors",
-      "task_name": "Achieve Zero Pyright Errors for Team Coach Implementation",
-      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-achieve-zero-pyright-errors",
-      "branch_name": "feature/parallel-achieve-zero-pyright-errors-for-team-coach-implementation-achieve-zero-pyright-errors",
+    "complete-workflow-pr-270": {
+      "task_id": "complete-workflow-pr-270",
+      "task_name": "Complete Workflow for PR #270",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-270",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#270-complete-workflow-pr-270",
       "status": "active",
-      "created_at": "2025-08-19T12:14:58.240095",
+      "created_at": "2025-08-19T16:32:31.660632",
+      "pid": null
+    },
+    "complete-workflow-pr-278": {
+      "task_id": "complete-workflow-pr-278",
+      "task_name": "Complete Workflow for PR #278",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-278",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#278-complete-workflow-pr-278",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:31.814086",
+      "pid": null
+    },
+    "complete-workflow-pr-279": {
+      "task_id": "complete-workflow-pr-279",
+      "task_name": "Complete Workflow for PR #279",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-279",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#279-complete-workflow-pr-279",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:31.985944",
+      "pid": null
+    },
+    "complete-workflow-pr-280": {
+      "task_id": "complete-workflow-pr-280",
+      "task_name": "Complete Workflow for PR #280",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-280",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#280-complete-workflow-pr-280",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:32.142671",
+      "pid": null
+    },
+    "complete-workflow-pr-281": {
+      "task_id": "complete-workflow-pr-281",
+      "task_name": "Complete Workflow for PR #281",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-281",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#281-complete-workflow-pr-281",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:32.289512",
+      "pid": null
+    },
+    "complete-workflow-pr-282": {
+      "task_id": "complete-workflow-pr-282",
+      "task_name": "Complete Workflow for PR #282",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-282",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#282-complete-workflow-pr-282",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:32.495233",
+      "pid": null
+    },
+    "complete-workflow-pr-286": {
+      "task_id": "complete-workflow-pr-286",
+      "task_name": "Complete Workflow for PR #286",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-286",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#286-complete-workflow-pr-286",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:32.653559",
+      "pid": null
+    },
+    "complete-workflow-pr-287": {
+      "task_id": "complete-workflow-pr-287",
+      "task_name": "Complete Workflow for PR #287",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-287",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#287-complete-workflow-pr-287",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:32.855715",
+      "pid": null
+    },
+    "complete-workflow-pr-293": {
+      "task_id": "complete-workflow-pr-293",
+      "task_name": "Complete Workflow for PR #293",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-293",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#293-complete-workflow-pr-293",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:33.009799",
+      "pid": null
+    },
+    "complete-workflow-pr-294": {
+      "task_id": "complete-workflow-pr-294",
+      "task_name": "Complete Workflow for PR #294",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-294",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#294-complete-workflow-pr-294",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:33.199612",
+      "pid": null
+    },
+    "complete-workflow-pr-295": {
+      "task_id": "complete-workflow-pr-295",
+      "task_name": "Complete Workflow for PR #295",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-295",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#295-complete-workflow-pr-295",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:33.352263",
+      "pid": null
+    },
+    "complete-workflow-pr-296": {
+      "task_id": "complete-workflow-pr-296",
+      "task_name": "Complete Workflow for PR #296",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-workflow-pr-296",
+      "branch_name": "feature/parallel-complete-workflow-for-pr-#296-complete-workflow-pr-296",
+      "status": "active",
+      "created_at": "2025-08-19T16:32:33.482558",
       "pid": null
     }
   }

@@ -3,7 +3,6 @@ Comprehensive tests for interfaces.py module.
 Tests shared interfaces, protocols, and contracts for the Enhanced Separation architecture.
 """
 
-import json
 import os
 
 # Import the module we're testing

@@ -33,20 +33,20 @@ class TestCodeReviewerIntegration(unittest.TestCase):
 
     def create_pr_files(self, files_content: dict):
         """Create PR files for testing."""
-        created_files = []
+        _created_files = []
         for filename, content in files_content.items():
             filepath = os.path.join(self.test_dir, filename)
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
             with open(filepath, "w") as f:
                 f.write(content)
-            created_files.append(filepath)
-        return created_files
+            _created_files.append(filepath)
+        return _created_files
 
     @patch("subprocess.run")
     def test_complete_review_with_simplicity_assessment(self, mock_subprocess):
         """Test that a complete review includes simplicity assessment."""
         # Mock PR data
-        pr_files = {
+        _pr_files = {
             "src/payment_processor.py": """
 from abc import ABC, abstractmethod
 
@@ -62,7 +62,7 @@ class CreditCardProcessor(PaymentProcessor):
 """
         }
 
-        self.create_pr_files(pr_files)
+        self.create_pr_files(_pr_files)
 
         # Mock gh pr view to return PR info
         mock_subprocess.return_value = Mock(
@@ -83,7 +83,7 @@ class CreditCardProcessor(PaymentProcessor):
         # 3. Over-engineering detection
         # 4. Specific recommendations for simplification
 
-        expected_review_sections = [
+        _expected_review_sections = [
             "Code Review Summary",
             "Design Simplicity Assessment 🎯",
             "Over-engineering issues",
@@ -91,12 +91,12 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify that simplicity assessment is integrated into the review
-        self.assertTrue(all(section for section in expected_review_sections))
+        self.assertTrue(all(section for section in _expected_review_sections))
 
     def test_review_template_includes_simplicity_section(self):
         """Test that the review template includes the new simplicity section."""
         # The enhanced review template should include:
-        expected_template_sections = [
+        _expected_template_sections = [
             "### Design Simplicity Assessment 🎯",
             "- **Complexity Level**: [Appropriate / Over-engineered / Under-engineered]",
             "- **YAGNI Compliance**: [Good / Concerns noted]",
@@ -105,12 +105,12 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify template structure
-        self.assertTrue(all(section for section in expected_template_sections))
+        self.assertTrue(all(section for section in _expected_template_sections))
 
     def test_priority_handling_with_simplicity_issues(self):
         """Test that simplicity issues are properly prioritized."""
         # Test that the priority system includes:
-        expected_priorities = [
+        _expected_priorities = [
             "Security vulnerabilities",
             "Data corruption risks",
             "Over-engineering issues",  # Added in Issue #104
@@ -120,11 +120,11 @@ class CreditCardProcessor(PaymentProcessor):
 
         # Over-engineering should be high priority (affects team velocity)
         # Design simplicity should be important for maintainability
-        self.assertTrue(all(priority for priority in expected_priorities))
+        self.assertTrue(all(priority for priority in _expected_priorities))
 
     def test_checklist_includes_simplicity_items(self):
         """Test that the review checklist includes simplicity items."""
-        expected_checklist_items = [
+        _expected_checklist_items = [
             "Solution complexity matches problem complexity",
             "No abstractions without multiple use cases",
             "YAGNI principle followed (no speculative features)",
@@ -134,13 +134,13 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify simplicity items are in the checklist
-        self.assertTrue(all(item for item in expected_checklist_items))
+        self.assertTrue(all(item for item in _expected_checklist_items))
 
     @patch("subprocess.run")
     def test_appropriate_complexity_not_flagged(self, mock_subprocess):
         """Test that appropriately complex code is not flagged as over-engineered."""
         # Complex but justified code
-        pr_files = {
+        _pr_files = {
             "src/orchestrator.py": '''
 import asyncio
 from typing import Dict, List, Optional
@@ -164,7 +164,7 @@ class TaskOrchestrator:
 '''
         }
 
-        self.create_pr_files(pr_files)
+        self.create_pr_files(_pr_files)
 
         # This should NOT be flagged as over-engineered because:
         # 1. Complexity matches the genuinely complex problem
@@ -182,7 +182,7 @@ class TaskOrchestrator:
     def test_context_aware_assessment_early_stage(self, mock_subprocess):
         """Test context-aware assessment for early-stage projects."""
         # Early-stage prototype code
-        pr_files = {
+        _pr_files = {
             "prototype.py": """
 def quick_data_processing(data):
     # Early prototype - direct approach is appropriate
@@ -195,7 +195,7 @@ def quick_data_processing(data):
 """
         }
 
-        self.create_pr_files(pr_files)
+        self.create_pr_files(_pr_files)
 
         # For early-stage projects, the reviewer should:
         # 1. Accept simpler, more direct approaches
@@ -208,7 +208,7 @@ def quick_data_processing(data):
     def test_memory_update_with_simplicity_insights(self):
         """Test that CodeReviewerProjectMemory.md is updated with simplicity insights."""
         # The reviewer should update its memory with:
-        expected_memory_sections = [
+        _expected_memory_sections = [
             "## Patterns to Watch",
             "- Over-engineering pattern: Single-implementation abstractions",
             "- YAGNI violations in configuration",
@@ -216,12 +216,12 @@ def quick_data_processing(data):
         ]
 
         # Verify memory update includes simplicity patterns
-        self.assertTrue(all(section for section in expected_memory_sections))
+        self.assertTrue(all(section for section in _expected_memory_sections))
 
     def test_learning_from_review_patterns(self):
         """Test that the reviewer learns from common over-engineering patterns."""
         # Over time, the reviewer should build up knowledge of:
-        common_patterns_to_detect = [
+        _common_patterns_to_detect = [
             "Factory pattern with single product type",
             "Strategy pattern with only one strategy",
             "Builder pattern for simple data structures",
@@ -230,7 +230,7 @@ def quick_data_processing(data):
         ]
 
         # These should be remembered and flagged in future reviews
-        self.assertTrue(all(pattern for pattern in common_patterns_to_detect))
+        self.assertTrue(all(pattern for pattern in _common_patterns_to_detect))
 
 
 class TestSimplicityDetectionAccuracy(unittest.TestCase):
@@ -240,7 +240,7 @@ class TestSimplicityDetectionAccuracy(unittest.TestCase):
         """Test that appropriate complexity is not flagged as over-engineering."""
 
         # Case 1: Multiple implementations justify abstraction
-        justified_abstraction = """
+        _justified_abstraction = """
 class PaymentProcessor(ABC):
     @abstractmethod
     def process(self, amount: float) -> bool: pass
@@ -256,7 +256,7 @@ class BankTransferProcessor(PaymentProcessor):
 """
 
         # Case 2: Complex domain requires complex solution
-        justified_complexity = '''
+        _justified_complexity = '''
 class TradingAlgorithm:
     """
     High-frequency trading algorithm with complex requirements:
@@ -279,7 +279,7 @@ class TradingAlgorithm:
         """Test accurate detection of genuine over-engineering."""
 
         # Case 1: Abstract class with single implementation
-        over_engineered_1 = """
+        _over_engineered_1 = """
 class ReportGenerator(ABC):
     @abstractmethod
     def generate(self) -> str: pass
@@ -290,7 +290,7 @@ class PDFReportGenerator(ReportGenerator):
 """
 
         # Case 2: Configuration that's never varied
-        over_engineered_2 = """
+        _over_engineered_2 = """
 class AppConfig:
     def __init__(self):
         # These are never actually configured differently
@@ -301,7 +301,7 @@ class AppConfig:
 """
 
         # Case 3: Builder for simple data
-        over_engineered_3 = """
+        _over_engineered_3 = """
 class PersonBuilder:
     def name(self, name): self._name = name; return self
     def age(self, age): self._age = age; return self

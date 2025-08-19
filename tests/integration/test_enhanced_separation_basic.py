@@ -64,9 +64,9 @@ class TestEnhancedSeparationBasic:
         assert hasattr(self.github_operations, "list_pull_requests")
 
         # Test configuration
-        config = {"retry_count": 3, "timeout": 30}
-        github_ops_with_config = GitHubOperations(retry_config=config)
-        assert github_ops_with_config is not None
+        assert (
+            GitHubOperations(retry_config={"retry_count": 3, "timeout": 30}) is not None
+        )
 
     def test_state_manager_basic_operations(self):
         """Test StateManager basic state operations"""
@@ -89,8 +89,7 @@ class TestEnhancedSeparationBasic:
             status="in_progress",
             context=state_data,
         )
-        result = self.state_manager.save_state(task_state)
-        assert result == True
+        assert self.state_manager.save_state(task_state) == True
 
         # Load state
         loaded_state = self.state_manager.load_state(state_id)
@@ -181,7 +180,7 @@ class TestEnhancedSeparationBasic:
             raise Exception("Test failure")
 
         failure_count = 0
-        for i in range(3):
+        for _ in range(3):
             try:
                 failing_function()
             except Exception:
@@ -263,16 +262,18 @@ class TestEnhancedSeparationBasic:
         assert is_valid == True
 
         # Test invalid task list
-        invalid_tasks = [
-            {
-                "id": "1",
-                "content": "Missing required fields",
-                # Missing status and priority
-            }
-        ]
-
-        is_valid_invalid = todowrite_integration.validate_task_list(invalid_tasks)
-        assert is_valid_invalid == False
+        assert (
+            todowrite_integration.validate_task_list(
+                [
+                    {
+                        "id": "1",
+                        "content": "Missing required fields",
+                        # Missing status and priority
+                    }
+                ]
+            )
+            == False
+        )
 
     def test_integration_workflow_simulation(self):
         """Test a simplified workflow simulation using all shared modules"""

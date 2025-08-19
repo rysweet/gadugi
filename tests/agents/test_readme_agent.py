@@ -214,9 +214,9 @@ class TestProjectAnalyzer:
         analyzer = ProjectAnalyzer()
 
         # Mock existing README with only some agents
-        existing_agents = ["workflow-manager", "code-reviewer"]
-
-        new_agents = analyzer.detect_new_agents(self.agents_dir, existing_agents)
+        new_agents = analyzer.detect_new_agents(
+            self.agents_dir, ["workflow-manager", "code-reviewer"]
+        )
 
         assert "readme-agent" in new_agents
         assert "workflow-manager" not in new_agents
@@ -227,10 +227,7 @@ class TestProjectAnalyzer:
         analyzer = ProjectAnalyzer()
 
         # Mock package.json with version
-        package_data = {"version": "1.2.0"}
-        readme_content = "Version: 1.1.0"
-
-        changes = analyzer.check_version_changes(package_data, readme_content)
+        changes = analyzer.check_version_changes({"version": "1.2.0"}, "Version: 1.1.0")
 
         assert changes["version_outdated"] is True
         assert changes["current_version"] == "1.2.0"
@@ -255,22 +252,22 @@ class TestContentGenerator:
         """Test automatic agent list generation."""
         generator = ContentGenerator()
 
-        manifest_data = {
-            "agents": [
-                {
-                    "name": "workflow-manager",
-                    "description": "Orchestrates development workflows",
-                    "category": "workflow",
-                },
-                {
-                    "name": "code-reviewer",
-                    "description": "Performs code reviews",
-                    "category": "quality",
-                },
-            ]
-        }
-
-        agent_list = generator.generate_agent_list(manifest_data)
+        agent_list = generator.generate_agent_list(
+            {
+                "agents": [
+                    {
+                        "name": "workflow-manager",
+                        "description": "Orchestrates development workflows",
+                        "category": "workflow",
+                    },
+                    {
+                        "name": "code-reviewer",
+                        "description": "Performs code reviews",
+                        "category": "quality",
+                    },
+                ]
+            }
+        )
 
         assert "workflow-manager" in agent_list
         assert "code-reviewer" in agent_list
@@ -281,13 +278,13 @@ class TestContentGenerator:
         """Test installation section generation."""
         generator = ContentGenerator()
 
-        project_data = {
-            "name": "test-project",
-            "package_manager": "npm",
-            "has_agents": True,
-        }
-
-        installation = generator.generate_installation_section(project_data)
+        installation = generator.generate_installation_section(
+            {
+                "name": "test-project",
+                "package_manager": "npm",
+                "has_agents": True,
+            }
+        )
 
         assert "npm install" in installation
         assert "agent-manager" in installation
@@ -297,7 +294,7 @@ class TestContentGenerator:
         """Test table of contents generation."""
         generator = ContentGenerator()
 
-        readme_content = """# Test Project
+        toc = generator.generate_table_of_contents("""# Test Project
 
 ## Overview
 Content here
@@ -313,9 +310,7 @@ Advanced examples
 
 ## Contributing
 Contribution guidelines
-"""
-
-        toc = generator.generate_table_of_contents(readme_content)
+""")
 
         assert "- [Overview](#overview)" in toc
         assert "- [Installation](#installation)" in toc
@@ -359,15 +354,16 @@ Current version: 1.0.0
         """Test updating agent list in README."""
         updater = READMEUpdater()
 
-        new_agents = [
-            {"name": "readme-agent", "description": "Manages README files"},
-            {"name": "memory-manager", "description": "Manages memory files"},
-        ]
-
         with open(self.readme_path, "r") as f:
             content = f.read()
 
-        updated_content = updater.update_agent_list(content, new_agents)
+        updated_content = updater.update_agent_list(
+            content,
+            [
+                {"name": "readme-agent", "description": "Manages README files"},
+                {"name": "memory-manager", "description": "Manages memory files"},
+            ],
+        )
 
         assert "readme-agent" in updated_content
         assert "memory-manager" in updated_content
@@ -397,13 +393,12 @@ Current version: 1.0.0
         with open(self.readme_path, "r") as f:
             content = f.read()
 
-        new_instructions = {
-            "package_manager": "yarn",
-            "additional_steps": ["yarn global add @gadugi/cli"],
-        }
-
         updated_content = updater.update_installation_instructions(
-            content, new_instructions
+            content,
+            {
+                "package_manager": "yarn",
+                "additional_steps": ["yarn global add @gadugi/cli"],
+            },
         )
 
         assert "yarn install" in updated_content or "yarn add" in updated_content
@@ -420,13 +415,13 @@ class TestREADMEIntegration:
 
         mock_subprocess.return_value = Mock(returncode=0, stdout="", stderr="")
 
-        changes = {
-            "type": "agent_addition",
-            "agent_name": "readme-agent",
-            "description": "Added README agent",
-        }
-
-        result = integrator.commit_readme_changes(changes)
+        result = integrator.commit_readme_changes(
+            {
+                "type": "agent_addition",
+                "agent_name": "readme-agent",
+                "description": "Added README agent",
+            }
+        )
 
         assert result["success"] is True
         mock_subprocess.assert_called()
@@ -440,13 +435,13 @@ class TestREADMEIntegration:
         """Test integration with Workflow Manager."""
         integrator = READMEIntegrator()
 
-        workflow_data = {
-            "phase": "post_implementation",
-            "feature_name": "New Feature",
-            "changes": ["Added new API endpoint", "Updated configuration"],
-        }
-
-        readme_updates = integrator.generate_workflow_updates(workflow_data)
+        readme_updates = integrator.generate_workflow_updates(
+            {
+                "phase": "post_implementation",
+                "feature_name": "New Feature",
+                "changes": ["Added new API endpoint", "Updated configuration"],
+            }
+        )
 
         assert "feature_name" in readme_updates
         assert "New Feature" in readme_updates["feature_name"]
@@ -456,13 +451,13 @@ class TestREADMEIntegration:
         """Test coordination with Agent Manager."""
         integrator = READMEIntegrator()
 
-        agent_changes = {
-            "added": ["readme-agent", "memory-manager"],
-            "updated": ["workflow-manager"],
-            "removed": [],
-        }
-
-        readme_updates = integrator.coordinate_with_agent_manager(agent_changes)
+        readme_updates = integrator.coordinate_with_agent_manager(
+            {
+                "added": ["readme-agent", "memory-manager"],
+                "updated": ["workflow-manager"],
+                "removed": [],
+            }
+        )
 
         assert "agent_list_updates" in readme_updates
         assert len(readme_updates["agent_list_updates"]["added"]) == 2
@@ -476,7 +471,15 @@ class TestREADMEValidation:
         """Test full README validation suite."""
         validator = READMEValidator()
 
-        readme_content = """# Test Project
+        # Mock dependencies
+        with patch("os.path.exists", return_value=True):
+            with patch("requests.get") as mock_get:
+                mock_response = Mock()
+                mock_response.status_code = 200
+                mock_get.return_value = mock_response
+
+                validation_results = validator.validate_comprehensive(
+                    """# Test Project
 Brief description
 
 ## Overview
@@ -498,17 +501,8 @@ const project = require('test-project');
 
 ## License
 MIT License
-"""
-
-        # Mock dependencies
-        with patch("os.path.exists", return_value=True):
-            with patch("requests.get") as mock_get:
-                mock_response = Mock()
-                mock_response.status_code = 200
-                mock_get.return_value = mock_response
-
-                validation_results = validator.validate_comprehensive(
-                    readme_content, "/tmp"
+""",
+                    "/tmp",
                 )
 
                 assert "structure" in validation_results
@@ -589,12 +583,13 @@ class TestErrorHandling:
         """Test handling of network errors during link validation."""
         validator = ContentValidator()
 
-        readme_with_external_links = """# Project
-See [documentation](https://unreachable-site.example.com).
-"""
-
         with patch("requests.get", side_effect=Exception("Network error")):
-            issues = validator.validate_links(readme_with_external_links, "/tmp")
+            issues = validator.validate_links(
+                """# Project
+See [documentation](https://unreachable-site.example.com).
+""",
+                "/tmp",
+            )
 
             network_errors = [
                 issue for issue in issues if issue["type"] == "network_error"
@@ -727,8 +722,9 @@ class ProjectAnalyzer:
     def detect_new_agents(self, agents_dir, existing_agents):
         import os
 
-        agent_files = [f for f in os.listdir(agents_dir) if f.endswith(".md")]
-        agent_names = [f.replace(".md", "") for f in agent_files]
+        agent_names = [
+            f.replace(".md", "") for f in os.listdir(agents_dir) if f.endswith(".md")
+        ]
 
         return [name for name in agent_names if name not in existing_agents]
 
@@ -738,8 +734,11 @@ class ProjectAnalyzer:
         package_version = package_data.get("version", "0.0.0")
 
         # Find version in README
-        version_match = re.search(r"Version:\s*(\d+\.\d+\.\d+)", readme_content)
-        readme_version = version_match.group(1) if version_match else None
+        readme_version = (
+            match.group(1)
+            if (match := re.search(r"Version:\s*(\d+\.\d+\.\d+)", readme_content))
+            else None
+        )
 
         return {
             "version_outdated": package_version != readme_version,
@@ -814,15 +813,13 @@ class READMEUpdater:
         pattern = r"(## Available Agents\n)(.*?)(?=\n##|\n$)"
 
         def replace_section(match):
-            existing_content = match.group(2)
             existing_lines = (
-                existing_content.strip().split("\n") if existing_content.strip() else []
+                match.group(2).strip().split("\n") if match.group(2).strip() else []
             )
 
             # Add new agents
             for agent in new_agents:
-                new_line = f"- {agent['name']} - {agent['description']}"
-                existing_lines.append(new_line)
+                existing_lines.append(f"- {agent['name']} - {agent['description']}")
 
             return match.group(1) + "\n".join(existing_lines) + "\n"
 
@@ -830,10 +827,15 @@ class READMEUpdater:
             return re.sub(pattern, replace_section, content, flags=re.DOTALL)
         else:
             # Add new section
-            new_list = []
-            for agent in new_agents:
-                new_list.append(f"- {agent['name']} - {agent['description']}")
-            return content + "\n\n## Available Agents\n" + "\n".join(new_list) + "\n"
+            return (
+                content
+                + "\n\n## Available Agents\n"
+                + "\n".join(
+                    f"- {agent['name']} - {agent['description']}"
+                    for agent in new_agents
+                )
+                + "\n"
+            )
 
     def update_version_references(self, content, new_version):
         import re

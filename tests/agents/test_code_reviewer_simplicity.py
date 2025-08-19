@@ -33,7 +33,7 @@ class TestCodeReviewerSimplicityDetection(unittest.TestCase):
 
     def test_over_engineered_abstract_class_detection(self):
         """Test detection of abstract classes with single implementation."""
-        over_engineered_code = """
+        _over_engineered_code = """
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -46,7 +46,7 @@ class CreditCardProcessor(PaymentProcessor):
         # Only implementation
         return True
 """
-        filepath = self.create_test_file("over_engineered.py", over_engineered_code)
+        filepath = self.create_test_file("over_engineered.py", _over_engineered_code)
 
         # The CodeReviewer should identify this as over-engineered
         # since there's only one implementation of the abstract class
@@ -54,7 +54,7 @@ class CreditCardProcessor(PaymentProcessor):
 
     def test_appropriate_abstraction_acceptance(self):
         """Test that appropriate abstractions are not flagged as over-engineered."""
-        appropriate_code = """
+        _appropriate_code = """
 from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
@@ -74,7 +74,7 @@ class BankTransferProcessor(PaymentProcessor):
     def process(self, amount: float) -> bool:
         return self._initiate_bank_transfer(amount)
 """
-        filepath = self.create_test_file("appropriate.py", appropriate_code)
+        filepath = self.create_test_file("appropriate.py", _appropriate_code)
 
         # This should NOT be flagged as over-engineered since there are
         # multiple implementations justifying the abstraction
@@ -82,7 +82,7 @@ class BankTransferProcessor(PaymentProcessor):
 
     def test_unnecessary_configuration_detection(self):
         """Test detection of configuration options without clear use cases."""
-        over_configured_code = """
+        _over_configured_code = """
 class DatabaseConfig:
     def __init__(self):
         self.max_connections = 10  # Never changed
@@ -95,14 +95,14 @@ class DatabaseConfig:
         self.cache_size = 100  # Never changed
         # ... 20 more config options that are never actually configured
 """
-        filepath = self.create_test_file("over_configured.py", over_configured_code)
+        filepath = self.create_test_file("over_configured.py", _over_configured_code)
 
         # Should detect excessive configuration without variation
         self.assertTrue(os.path.exists(filepath))
 
     def test_simple_solution_acceptance(self):
         """Test that simple, direct solutions are preferred."""
-        simple_code = '''
+        _simple_code = '''
 def calculate_total(items):
     """Calculate total price of items."""
     return sum(item.price for item in items)
@@ -111,14 +111,14 @@ def apply_discount(total, discount_percent):
     """Apply percentage discount to total."""
     return total * (1 - discount_percent / 100)
 '''
-        filepath = self.create_test_file("simple.py", simple_code)
+        filepath = self.create_test_file("simple.py", _simple_code)
 
         # Simple, direct code should be accepted without simplicity concerns
         self.assertTrue(os.path.exists(filepath))
 
     def test_complex_inheritance_detection(self):
         """Test detection of complex inheritance for simple variations."""
-        complex_inheritance_code = """
+        _complex_inheritance_code = """
 class Animal:
     def make_sound(self):
         pass
@@ -143,7 +143,7 @@ class Cat(Feline):
         return "purr"
 """
         filepath = self.create_test_file(
-            "complex_inheritance.py", complex_inheritance_code
+            "complex_inheritance.py", _complex_inheritance_code
         )
 
         # Should detect unnecessarily deep inheritance hierarchy
@@ -151,7 +151,7 @@ class Cat(Feline):
 
     def test_builder_pattern_for_simple_data(self):
         """Test detection of builder pattern used for simple data structures."""
-        over_engineered_builder = """
+        _over_engineered_builder = """
 class PersonBuilder:
     def __init__(self):
         self._name = None
@@ -180,7 +180,7 @@ class Person:
         self.email = email
 """
         filepath = self.create_test_file(
-            "over_engineered_builder.py", over_engineered_builder
+            "over_engineered_builder.py", _over_engineered_builder
         )
 
         # Builder pattern is overkill for a simple 3-field data class
@@ -188,7 +188,7 @@ class Person:
 
     def test_appropriate_complexity_for_complex_problem(self):
         """Test that complex solutions are accepted for genuinely complex problems."""
-        complex_but_justified_code = '''
+        _complex_but_justified_code = '''
 import asyncio
 from typing import Dict, List, Optional, Callable
 from dataclasses import dataclass
@@ -235,7 +235,7 @@ class DistributedTaskOrchestrator:
         pass
 '''
         filepath = self.create_test_file(
-            "justified_complexity.py", complex_but_justified_code
+            "justified_complexity.py", _complex_but_justified_code
         )
 
         # This complex code is justified by genuinely complex requirements
@@ -243,7 +243,7 @@ class DistributedTaskOrchestrator:
 
     def test_yagni_violation_detection(self):
         """Test detection of YAGNI (You Aren't Gonna Need It) violations."""
-        yagni_violation_code = """
+        _yagni_violation_code = """
 class UserManager:
     def __init__(self):
         # Currently only need basic user creation
@@ -267,7 +267,7 @@ class UserManager:
 
         return user
 """
-        filepath = self.create_test_file("yagni_violation.py", yagni_violation_code)
+        filepath = self.create_test_file("yagni_violation.py", _yagni_violation_code)
 
         # Should detect features built for imagined future requirements
         self.assertTrue(os.path.exists(filepath))
@@ -282,7 +282,7 @@ class TestSimplicityRecommendations(unittest.TestCase):
         # provides appropriate guidance on abstraction decisions
 
         # Case 1: Code used in only 2 places - suggest inline
-        duplicate_code = """
+        _duplicate_code = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
@@ -299,7 +299,7 @@ def process_user_update(email):
         # Should suggest inlining since it's only used in 2 places
 
         # Case 2: Code used in 5+ places - abstraction is justified
-        justified_abstraction = """
+        _justified_abstraction = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
@@ -312,7 +312,7 @@ def validate_email_format(email):
 
     def test_cognitive_load_reduction_suggestions(self):
         """Test suggestions for reducing cognitive load."""
-        high_cognitive_load = """
+        _high_cognitive_load = """
 def process_order(order_data):
     if order_data and order_data.get('items') and len(order_data['items']) > 0 and \
        order_data.get('customer') and order_data['customer'].get('id') and \

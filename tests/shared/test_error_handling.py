@@ -587,8 +587,7 @@ class TestGracefulDegradation:
         def success_func():
             return "success"
 
-        result = success_func()
-        assert result == "success"
+        assert success_func() == "success"
 
     def test_graceful_degradation_with_fallback(self):
         """Test graceful degradation returns fallback on error."""
@@ -597,8 +596,7 @@ class TestGracefulDegradation:
         def failing_func():
             raise ValueError("Error")
 
-        result = failing_func()
-        assert result == "fallback"
+        assert failing_func() == "fallback"
 
     def test_graceful_degradation_none_fallback(self):
         """Test graceful degradation with None fallback."""
@@ -607,8 +605,7 @@ class TestGracefulDegradation:
         def failing_func():
             raise ValueError("Error")
 
-        result = failing_func()
-        assert result is None
+        assert failing_func() is None
 
     def test_graceful_degradation_specific_exceptions(self):
         """Test graceful degradation only handles specified exceptions."""
@@ -628,8 +625,7 @@ class TestGracefulDegradation:
             def failing_func():
                 raise ValueError("Test error")
 
-            result = failing_func()
-            assert result == "fallback"
+            assert failing_func() == "fallback"
             mock_logger.error.assert_called_once()
 
     def test_graceful_degradation_no_logging(self):
@@ -640,8 +636,7 @@ class TestGracefulDegradation:
             def failing_func():
                 raise ValueError("Test error")
 
-            result = failing_func()
-            assert result == "fallback"
+            assert failing_func() == "fallback"
             mock_logger.error.assert_not_called()
 
 
@@ -676,19 +671,18 @@ class TestErrorHandler:
         handler.register_recovery_strategy(ValueError, recovery_func)
 
         error = ValueError("test error")
-        context = {"operation": "test"}
-
-        result = handler.handle_error(error, context)
-        assert result == "recovered from test error"
+        assert (
+            handler.handle_error(error, {"operation": "test"})
+            == "recovered from test error"
+        )
 
     def test_handle_error_without_recovery(self):
         """Test error handling without recovery strategy."""
         handler = ErrorHandler()
         error = ValueError("test error")
-        context = {"operation": "test"}
 
         with pytest.raises(ValueError):
-            handler.handle_error(error, context)
+            handler.handle_error(error, {"operation": "test"})
 
     def test_error_counting(self):
         """Test error counting functionality."""
@@ -794,8 +788,7 @@ class TestCircuitBreaker:
         def success_func():
             return "success"
 
-        result = success_func()
-        assert result == "success"
+        assert success_func() == "success"
         assert cb.failure_count == 0
         assert not cb.is_open
 
@@ -847,8 +840,7 @@ class TestCircuitBreaker:
         time.sleep(0.2)
 
         # Should recover and succeed
-        result = conditional_func()
-        assert result == "success"
+        assert conditional_func() == "success"
         assert cb.failure_count == 0
         assert not cb.is_open
 
@@ -874,8 +866,7 @@ class TestCircuitBreaker:
         assert cb.failure_count == 2
 
         # Success should reset
-        result = sometimes_fails()
-        assert result == "success"
+        assert sometimes_fails() == "success"
         assert cb.failure_count == 0
 
     def test_circuit_breaker_reset_method(self):
@@ -910,8 +901,7 @@ class TestHandleWithFallback:
         def fallback():
             return "fallback result"
 
-        result = handle_with_fallback(primary, fallback)
-        assert result == "primary result"
+        assert handle_with_fallback(primary, fallback) == "primary result"
 
     def test_handle_with_fallback_failure(self):
         """Test fallback handler with failing primary function."""
@@ -922,8 +912,7 @@ class TestHandleWithFallback:
         def fallback():
             return "fallback result"
 
-        result = handle_with_fallback(primary, fallback)
-        assert result == "fallback result"
+        assert handle_with_fallback(primary, fallback) == "fallback result"
 
     def test_handle_with_fallback_specific_exceptions(self):
         """Test fallback handler with specific exception types."""
@@ -939,8 +928,10 @@ class TestHandleWithFallback:
             handle_with_fallback(primary, fallback, exceptions=(ValueError,))
 
         # Should catch TypeError if specified
-        result = handle_with_fallback(primary, fallback, exceptions=(TypeError,))
-        assert result == "fallback result"
+        assert (
+            handle_with_fallback(primary, fallback, exceptions=(TypeError,))
+            == "fallback result"
+        )
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
@@ -952,8 +943,7 @@ class TestHandleWithFallback:
             def fallback():
                 return "fallback result"
 
-            result = handle_with_fallback(primary, fallback)
-            assert result == "fallback result"
+            assert handle_with_fallback(primary, fallback) == "fallback result"
             mock_logger.warning.assert_called_once()
 
 
@@ -964,7 +954,7 @@ class TestErrorContext:
         """Test ErrorContext with successful operation."""
         with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
-                result = "success"
+                pass  # Successful operation
 
             assert ctx.error is None
             mock_logger.debug.assert_has_calls(
@@ -1037,8 +1027,7 @@ class TestValidateInput:
         def test_func(x, y):
             return f"{x}: {y}"
 
-        result = test_func(5, "hello")
-        assert result == "5: hello"
+        assert test_func(5, "hello") == "5: hello"
 
     def test_validate_input_failure(self):
         """Test input validation with invalid inputs."""
@@ -1057,8 +1046,7 @@ class TestValidateInput:
         def test_func(x, y="default"):
             return f"{x}: {y}"
 
-        result = test_func(5)
-        assert result == "5: default"
+        assert test_func(5) == "5: default"
 
     def test_validate_input_kwargs(self):
         """Test input validation with keyword arguments."""
@@ -1067,8 +1055,7 @@ class TestValidateInput:
         def test_func(x, y):
             return f"{x}: {y}"
 
-        result = test_func(x=5, y="hello")
-        assert result == "5: hello"
+        assert test_func(x=5, y="hello") == "5: hello"
 
     def test_validate_input_partial_validation(self):
         """Test input validation only validates specified parameters."""
@@ -1078,8 +1065,7 @@ class TestValidateInput:
             return f"{x}: {y}"
 
         # Should not validate 'y' parameter
-        result = test_func(5, -1)
-        assert result == "5: -1"
+        assert test_func(5, -1) == "5: -1"
 
     def test_validate_input_missing_parameter(self):
         """Test input validation with missing parameter in validation rules."""
@@ -1089,8 +1075,7 @@ class TestValidateInput:
             return f"{x}: {y}"
 
         # Should work fine, just ignores unknown parameter
-        result = test_func(5, "hello")
-        assert result == "5: hello"
+        assert test_func(5, "hello") == "5: hello"
 
 
 class TestErrorHandlingIntegration:
@@ -1131,8 +1116,10 @@ class TestErrorHandlingIntegration:
 
         # Test error handling
         error = ValueError("test error")
-        result = handler.handle_error(error, {"operation": "test"})
-        assert result == "recovered from test error"
+        assert (
+            handler.handle_error(error, {"operation": "test"})
+            == "recovered from test error"
+        )
 
     @pytest.mark.integration
     def test_error_handling_with_context_manager(self):
@@ -1159,8 +1146,7 @@ class TestErrorHandlingIntegration:
         assert isinstance(ctx.error, ValueError)
 
         # Use handler to recover from the error
-        result = handler.handle_error(ctx.error, {"operation": "test"})
-        assert result == "recovered"
+        assert handler.handle_error(ctx.error, {"operation": "test"}) == "recovered"
 
     @pytest.mark.integration
     def test_comprehensive_retry_with_circuit_breaker(self):
@@ -1172,8 +1158,7 @@ class TestErrorHandlingIntegration:
         def graceful_func():
             raise ValueError("Always fails")
 
-        result = graceful_func()
-        assert result == "graceful_fallback"
+        assert graceful_func() == "graceful_fallback"
 
         # Test circuit breaker separately
         @cb

@@ -120,19 +120,20 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         merged = deep_merge(self.global_settings, self.local_settings)
 
         # Check that local settings took precedence and allow-list was merged
-        expected_allow = sorted(
-            [
-                "Bash(git add:*)",
-                "Bash(git commit:*)",
-                "Bash(echo:*)",
-                "Bash(python:*)",
-                "Bash(git push:*)",
-                "Bash(gh pr create:*)",
-                "Bash(claude:*)",
-            ]
+        self.assertEqual(
+            merged["permissions"]["allow"],
+            sorted(
+                [
+                    "Bash(git add:*)",
+                    "Bash(git commit:*)",
+                    "Bash(echo:*)",
+                    "Bash(python:*)",
+                    "Bash(git push:*)",
+                    "Bash(gh pr create:*)",
+                    "Bash(claude:*)",
+                ]
+            ),
         )
-
-        self.assertEqual(merged["permissions"]["allow"], expected_allow)
         # Hooks should be preserved from global
         self.assertEqual(merged["hooks"], self.global_settings["hooks"])
 
@@ -145,15 +146,15 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
             "Bash(b-command:*)",
         ]
 
-        sorted_allow = sorted(unsorted_allow)
-        expected = [
-            "Bash(a-command:*)",
-            "Bash(b-command:*)",
-            "Bash(m-command:*)",
-            "Bash(z-command:*)",
-        ]
-
-        self.assertEqual(sorted_allow, expected)
+        self.assertEqual(
+            sorted(unsorted_allow),
+            [
+                "Bash(a-command:*)",
+                "Bash(b-command:*)",
+                "Bash(m-command:*)",
+                "Bash(z-command:*)",
+            ],
+        )
 
     def test_duplicate_removal(self):
         """Test duplicate removal in allow-list."""
@@ -167,10 +168,10 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
             "Bash(echo:*)",  # duplicate
         ]
 
-        deduplicated = list(OrderedDict.fromkeys(allow_with_dupes))
-        expected = ["Bash(git add:*)", "Bash(echo:*)", "Bash(python:*)"]
-
-        self.assertEqual(deduplicated, expected)
+        self.assertEqual(
+            list(OrderedDict.fromkeys(allow_with_dupes)),
+            ["Bash(git add:*)", "Bash(echo:*)", "Bash(python:*)"],
+        )
 
     def test_change_detection_with_changes(self):
         """Test change detection when changes exist."""
@@ -340,12 +341,10 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         import datetime
 
         # Test timestamp format
-        now = datetime.datetime.now()
-        timestamp = now.strftime("%Y%m%d-%H%M%S")
-        branch_name = f"chore/update-claude-settings-{timestamp}"
+        branch_name = f"chore/update-claude-settings-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
         # Should match expected pattern
-        self.assertTrue(branch_name.startswith("chore/update-claude-settings-"))
+        assert branch_name.startswith("chore/update-claude-settings-")
         self.assertRegex(branch_name, r"chore/update-claude-settings-\d{8}-\d{6}")
 
     def test_commit_message_format(self):
@@ -361,17 +360,16 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
 Co-Authored-By: Claude <noreply@anthropic.com>"""
 
         # Test message components
-        self.assertIn("chore: update Claude settings", expected_message)
-        self.assertIn("Claude Code", expected_message)
-        self.assertIn("Co-Authored-By: Claude", expected_message)
+        assert "chore: update Claude settings" in expected_message
+        assert "Claude Code" in expected_message
+        assert "Co-Authored-By: Claude" in expected_message
 
     def test_pr_title_format(self):
         """Test PR title formatting."""
-        timestamp = "20250805-143022"
-        title = f"chore: update Claude settings - {timestamp}"
+        title = "chore: update Claude settings - 20250805-143022"
 
-        self.assertEqual(title, "chore: update Claude settings - 20250805-143022")
-        self.assertTrue(title.startswith("chore: update Claude settings"))
+        assert title == "chore: update Claude settings - 20250805-143022"
+        assert title.startswith("chore: update Claude settings")
 
     def test_integration_workflow_success(self):
         """Test complete integration workflow success scenario."""
@@ -394,8 +392,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         self.assertTrue(os.path.exists(self.local_settings_path))
 
         # This represents successful completion
-        workflow_success = True
-        self.assertTrue(workflow_success)
+        self.assertTrue(True)
 
     def test_integration_workflow_no_changes(self):
         """Test workflow when no changes are detected."""
@@ -405,17 +402,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             {"permissions": {"allow": []}}, self.local_settings_path
         )
 
-        # Simulate no changes detected scenario
-        no_changes_detected = True  # Would be determined by actual merge logic
-
-        if no_changes_detected:
-            # Should exit early without creating PR
-            workflow_result = "no_changes"
-        else:
-            workflow_result = "pr_created"
-
-        # For this test, we expect no changes
-        self.assertEqual(workflow_result, "no_changes")
+        # Simulate no changes detected scenario - should exit early without creating PR
+        assert "no_changes" == "no_changes"
 
     def test_error_recovery_scenarios(self):
         """Test various error recovery scenarios."""
@@ -424,19 +412,16 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         # Test JSON parsing errors
         # Test network failures for PR creation
 
-        error_scenarios = [
+        for scenario in [
             "file_permission_error",
             "git_operation_failure",
             "json_parsing_error",
             "pr_creation_failure",
-        ]
-
-        for scenario in error_scenarios:
+        ]:
             with self.subTest(scenario=scenario):
                 # Each scenario should be handled gracefully
                 # without crashing the entire workflow
-                error_handled = True  # Would be actual error handling logic
-                self.assertTrue(error_handled, f"Failed to handle {scenario}")
+                self.assertTrue(True, f"Failed to handle {scenario}")
 
 
 class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
@@ -444,13 +429,9 @@ class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
 
     def test_workflow_manager_integration(self):
         """Test integration with WorkflowManager Phase 11."""
-        # Test that Phase 11 is properly defined
-        phase_11_defined = True  # Would check actual workflow-manager.md
-        self.assertTrue(phase_11_defined)
-
-        # Test automatic invocation after Phase 10
-        phase_11_auto_invoke = True  # Would test actual invocation
-        self.assertTrue(phase_11_auto_invoke)
+        # Test that Phase 11 is properly defined and automatically invoked
+        self.assertTrue(True)  # Would check actual workflow-manager.md
+        self.assertTrue(True)  # Would test actual invocation
 
     def test_state_management_integration(self):
         """Test state management updates for Phase 11."""
@@ -459,14 +440,13 @@ class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
 ## Phase Completion Status
 - [x] Phase 11: Settings Update ✅
 """
-        self.assertIn("Phase 11", state_file_format)
-        self.assertIn("Settings Update", state_file_format)
+        assert "Phase 11" in state_file_format
+        assert "Settings Update" in state_file_format
 
     def test_error_handling_integration(self):
         """Test that settings update failures don't block workflow."""
         # Settings update should be optional
-        workflow_continues_on_failure = True
-        self.assertTrue(workflow_continues_on_failure)
+        self.assertTrue(True)
 
 
 if __name__ == "__main__":
