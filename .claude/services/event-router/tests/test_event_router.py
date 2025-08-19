@@ -1,12 +1,3 @@
-import asyncio
-import unittest
-from unittest import TestCase
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-
-
 """
 Comprehensive tests for Event Router.
 """
@@ -14,7 +5,7 @@ Comprehensive tests for Event Router.
 import asyncio
 import json
 from datetime import datetime, timedelta
-from pathlib import
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 

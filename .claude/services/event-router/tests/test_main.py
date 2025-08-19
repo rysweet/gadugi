@@ -3,16 +3,16 @@ Tests for event-router service.
 """
 
 import pytest
-from fastapi.testclient import TestClient
 from unittest.mock import patch
 
 from ..main import app
+from ..models import RequestModel
 
 
 @pytest.fixture
 def client():
     """Create test client."""
-    return TestClient(app)
+    return app.test_client()
 
 
 @pytest.fixture
@@ -32,7 +32,7 @@ class TestHealthEndpoint:
         """Test health check endpoint."""
         response = client.get("/health")
         assert response.status_code == 200
-        assert response.json()["status"] == "healthy"
+        assert response.get_json()["status"] == "healthy"
 
 
 class TestRootEndpoint:
@@ -42,7 +42,7 @@ class TestRootEndpoint:
         """Test root endpoint."""
         response = client.get("/")
         assert response.status_code == 200
-        data = response.json()
+        data = response.get_json()
         assert data["service"] == "event-router"
         assert data["status"] == "running"
 
@@ -57,7 +57,7 @@ class TestProcessEndpoint:
             json=sample_request.dict()
         )
         assert response.status_code == 200
-        data = response.json()
+        data = response.get_json()
         assert data["success"] is True
         assert "data" in data
 
@@ -67,7 +67,7 @@ class TestProcessEndpoint:
             "/process",
             json={}
         )
-        assert response.status_code == 422  # Validation error
+        assert response.status_code == 400  # Validation error
 
     def test_process_empty_data(self, client):
         """Test processing with empty data."""
@@ -86,7 +86,7 @@ class TestStatusEndpoint:
         """Test status endpoint."""
         response = client.get("/status")
         assert response.status_code == 200
-        data = response.json()
+        data = response.get_json()
         assert data["service"] == "event-router"
         assert data["status"] == "operational"
 
@@ -104,4 +104,4 @@ class TestErrorHandling:
             json=sample_request.dict()
         )
         assert response.status_code == 500
-        assert "error" in response.json()
+        assert "error" in response.get_json()

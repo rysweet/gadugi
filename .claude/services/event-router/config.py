@@ -4,10 +4,10 @@ Configuration for event-router.
 
 import os
 from typing import Optional
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
-class Settings(BaseSettings):  # type: ignore
+class Settings(BaseSettings):
     """Application settings."""
 
     # Service configuration
@@ -32,9 +32,10 @@ class Settings(BaseSettings):  # type: ignore
     api_key: Optional[str] = None
     secret_key: str = "change-me-in-production"
 
-    class Config:
-        env_prefix = "EVENT-ROUTER_"
-        env_file = ".env"
+    model_config = {
+        "env_prefix": "EVENT_ROUTER_",
+        "env_file": ".env"
+    }
 
 
 def get_settings() -> Settings:

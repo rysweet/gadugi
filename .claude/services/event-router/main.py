@@ -31,6 +31,15 @@ def root():
         "version": "0.1.0"
     }), 200
 
+@app.route('/status', methods=['GET'])
+def status():
+    """Status endpoint."""
+    return jsonify({
+        "service": "event-router",
+        "status": "operational",
+        "version": "0.1.0"
+    }), 200
+
 @app.route('/process', methods=['POST'])
 def process():
     """Process incoming request."""
@@ -38,7 +47,7 @@ def process():
         data = request.get_json()
 
         # Validate input
-        is_valid, error = validate_input(data)  # type: ignore
+        is_valid, error = validate_input(data)
         if not is_valid:
             return jsonify({"error": error}), 400
 
