@@ -66,7 +66,7 @@ class ImplementationValidator:
             cmd = f"python3 -c 'import {module}'"
             result = subprocess.run(cmd, shell=True, capture_output=True, timeout=5)
             return result.returncode == 0
-        except:
+        except Exception:
             return False
 
     def validate_component(self, name: str, path: str, requirements: List[str]):
@@ -96,7 +96,7 @@ class ImplementationValidator:
 
             if has_impl:
                 # Run pyright
-                errors, warnings, infos = self.run_pyright(path)
+                errors, _warnings, _infos = self.run_pyright(path)
                 result["pyright_errors"] = errors
 
                 # Determine status
