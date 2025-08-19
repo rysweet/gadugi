@@ -13,9 +13,6 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ⚠️ **YOU MUST FOLLOW THE GUIDELINES IN @.claude/Guidelines.md** ⚠️
 
-### 🚫 ABSOLUTELY FORBIDDEN: Time Estimates
-**NEVER provide time estimates** (hours, days, weeks) for any development tasks. AI agents work at variable speeds making time estimates meaningless. Use complexity ratings (simple/medium/complex) instead.
-
 Key principles you MUST follow:
 - **Zero BS Principle**: NO false claims of completion. If it's not implemented, say so.
 - **Recipe-Driven Development**: Requirements → Design → Implementation → Tests → Review
