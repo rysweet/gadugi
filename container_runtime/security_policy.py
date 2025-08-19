@@ -1,4 +1,3 @@
-
 import logging
 import yaml
 import sys
@@ -24,6 +23,7 @@ from error_handling import GadugiError
 
 logger = logging.getLogger(__name__)
 
+
 class SecurityLevel(Enum):
     """Security levels for different execution contexts."""
 
@@ -32,6 +32,7 @@ class SecurityLevel(Enum):
     HARDENED = "hardened"  # Enhanced security
     PARANOID = "paranoid"  # Maximum security
 
+
 class NetworkPolicy(Enum):
     """Network access policies."""
 
@@ -39,6 +40,7 @@ class NetworkPolicy(Enum):
     INTERNAL = "internal"  # Internal network only
     LIMITED = "limited"  # Limited external access
     FULL = "full"  # Full network access
+
 
 @dataclass
 class ResourceLimits:
@@ -50,6 +52,7 @@ class ResourceLimits:
     processes: int = 1024
     open_files: int = 1024
     execution_time: int = 1800  # 30 minutes
+
 
 @dataclass
 class SecurityConstraints:
@@ -63,6 +66,7 @@ class SecurityConstraints:
     apparmor_profile: Optional[str] = None
     user_id: int = 1000
     group_id: int = 1000
+
 
 @dataclass
 class ExecutionPolicy:
@@ -78,6 +82,7 @@ class ExecutionPolicy:
     environment_whitelist: Set[str] = field(default_factory=set)
     mount_restrictions: Dict[str, Any] = field(default_factory=dict)
     audit_required: bool = True
+
 
 class SecurityPolicyEngine:
     """

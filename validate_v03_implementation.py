@@ -10,6 +10,7 @@ Checks what's ACTUALLY implemented vs claimed
 
 from pathlib import Path
 
+
 class ImplementationValidator:
     def __init__(self):
         self.results = {
@@ -234,6 +235,7 @@ class ImplementationValidator:
         else:
             print("❌ MOSTLY NOT IMPLEMENTED - claims don't match reality")
         print("=" * 60)
+
 
 if __name__ == "__main__":
     validator = ImplementationValidator()

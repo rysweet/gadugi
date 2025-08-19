@@ -26,6 +26,7 @@ WORKTREES = [
     ("UV-Migration", "/Users/ryan/src/gadugi/.worktrees/uv-migration-20250802"),
 ]
 
+
 def create_vscode_task_file():
     """Create a VS Code task file for launching terminals"""
     tasks = {"version": "2.0.0", "tasks": []}
@@ -53,6 +54,7 @@ def create_vscode_task_file():
 
     print("Created .vscode/claude-tasks.json")
     print("You can now run these tasks from VS Code's command palette")
+
 
 def launch_with_applescript():
     """Use AppleScript to control VS Code (macOS only)"""
@@ -93,6 +95,7 @@ def launch_with_applescript():
         except subprocess.CalledProcessError as e:
             print(f"✗ Failed to create terminal for {name}: {e}")
 
+
 def main():
     print("Claude VS Code Terminal Launcher")
     print("================================\n")
@@ -109,6 +112,7 @@ def main():
         print("Please use VS Code tasks: Cmd+Shift+P → 'Tasks: Run Task'")
 
     print("\nDone! Your Claude terminals should be starting in VS Code.")
+
 
 if __name__ == "__main__":
     main()

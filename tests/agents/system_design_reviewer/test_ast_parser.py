@@ -23,6 +23,7 @@ from agents.system_design_reviewer.ast_parser import (
     ImpactLevel,
 )
 
+
 @pytest.fixture
 def sample_python_code():
     """Sample Python code for testing"""
@@ -72,6 +73,7 @@ def utility_function(value: str) -> str:
 
 CONSTANT_VALUE = "test_constant"
 '''
+
 
 @pytest.fixture
 def modified_python_code():
@@ -141,6 +143,7 @@ CONSTANT_VALUE = "test_constant_updated"  # Modified constant
 NEW_CONSTANT = "new_value"  # New constant
 '''
 
+
 class TestASTParserFactory:
     """Test the AST parser factory"""
 
@@ -177,6 +180,7 @@ class TestASTParserFactory:
 
         factory.register_parser("custom", custom_parser)
         assert factory.get_parser_by_name("custom") == custom_parser
+
 
 class TestPythonASTParser:
     """Test Python AST parser functionality"""
@@ -440,6 +444,7 @@ class TestPythonASTParser:
             for keyword in ["singleton", "async", "coupling"]
         )
 
+
 class TestArchitecturalElements:
     """Test architectural element data structures"""
 
@@ -502,6 +507,7 @@ class TestArchitecturalElements:
         assert (
             "Renamed function 'old_function' to 'test_function'" in rename_description
         )
+
 
 class TestPatternDetection:
     """Test architectural pattern detection"""
@@ -576,6 +582,7 @@ class AbstractFactory(ABC):
         assert "abc" in patterns
         assert "factory" in patterns
         assert "observer" in patterns
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

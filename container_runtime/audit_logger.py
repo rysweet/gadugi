@@ -27,6 +27,7 @@ sys.path.append(
 )
 logger = logging.getLogger(__name__)
 
+
 class AuditEventType(Enum):
     """Types of audit events."""
 
@@ -44,6 +45,7 @@ class AuditEventType(Enum):
     CONFIGURATION_CHANGED = "configuration_changed"
     SYSTEM_ERROR = "system_error"
 
+
 class AuditSeverity(Enum):
     """Audit event severity levels."""
 
@@ -51,6 +53,7 @@ class AuditSeverity(Enum):
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
+
 
 @dataclass
 class AuditEvent:
@@ -68,6 +71,7 @@ class AuditEvent:
     resource_usage: Optional[Dict[str, Any]] = None
     security_context: Optional[Dict[str, Any]] = None
     checksum: Optional[str] = None
+
 
 class AuditLogger:
     """

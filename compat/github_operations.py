@@ -47,6 +47,7 @@ __all__ = [name for name in globals() if not name.startswith("_")]
 
 # Fallback for static type checkers – dynamically expose missing attributes
 
+
 def __getattr__(name: str) -> _Any:  # type: ignore[misc]
     """Return attribute from underlying implementation or Any for unknown names."""
     return getattr(_module, name, _Any)  # noqa: ANN001

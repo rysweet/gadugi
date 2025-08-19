@@ -13,11 +13,13 @@ Tests all aspects of parallel task execution.
 
 from pathlib import Path
 
+
 def print_section(title: str):
     """Print a formatted section header."""
     print("\n" + "=" * 60)
     print(f"  {title}")
     print("=" * 60)
+
 
 def run_command(cmd: List[str], description: str = None) -> Tuple[int, str, str]:
     """Run a command and return exit code, stdout, stderr."""
@@ -27,6 +29,7 @@ def run_command(cmd: List[str], description: str = None) -> Tuple[int, str, str]
         cmd, capture_output=True, text=True, cwd="/Users/ryan/src/gadugi2/gadugi"
     )
     return result.returncode, result.stdout, result.stderr
+
 
 def test_orchestrator_modules():
     """Test that orchestrator modules can be imported."""
@@ -65,6 +68,7 @@ def test_orchestrator_modules():
 
     return all(results)
 
+
 def test_prompt_files():
     """Test that all required prompt files exist."""
     print_section("Testing Prompt Files")
@@ -95,6 +99,7 @@ def test_prompt_files():
 
     return all(results)
 
+
 def test_git_worktrees():
     """Test git worktree operations."""
     print_section("Testing Git Worktree Operations")
@@ -119,6 +124,7 @@ def test_git_worktrees():
         print(f"  ❌ Worktree prune failed: {stderr}")
 
     return True
+
 
 def test_process_registry():
     """Test the process registry functionality."""
@@ -148,6 +154,7 @@ def test_process_registry():
 
     return True
 
+
 def test_orchestrator_cli():
     """Test the orchestrator CLI interface."""
     print_section("Testing Orchestrator CLI")
@@ -170,6 +177,7 @@ def test_orchestrator_cli():
         return False
 
     return True
+
 
 def test_docker_setup():
     """Test Docker setup for containerized execution."""
@@ -206,6 +214,7 @@ def test_docker_setup():
 
     return True
 
+
 def cleanup_branches():
     """Clean up any leftover parallel branches."""
     print_section("Cleaning Up Parallel Branches")
@@ -234,6 +243,7 @@ def cleanup_branches():
             print("  ✅ No local parallel branches found")
 
     return True
+
 
 def run_integration_test():
     """Run a small integration test with the orchestrator."""
@@ -290,6 +300,7 @@ This is a test task for the orchestrator.
 
     return True
 
+
 def main():
     """Run all tests."""
     print("\n" + "🔬" * 30)
@@ -331,6 +342,7 @@ def main():
     else:
         print(f"\n  ⚠️  {total - passed} tests failed. Review the output above.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

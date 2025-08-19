@@ -19,6 +19,7 @@ from ..claude.agents.orchestrator.governance_validator import (
 from ..claude.agents.orchestrator.orchestrator import Orchestrator, TaskDefinition
 from ..claude.agents.orchestrator.parallel_executor import ParallelExecutor
 
+
 class TestOrchestratorGovernance:
     """Test suite for orchestrator governance compliance."""
 
@@ -294,6 +295,7 @@ class TestOrchestratorGovernance:
         assert hasattr(report, "violations")
         assert hasattr(report, "workflow_manager_invocations")
         assert hasattr(report, "direct_executions")
+
 
 if __name__ == "__main__":
     # Run the tests

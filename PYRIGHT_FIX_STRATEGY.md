@@ -160,7 +160,7 @@ Based on error concentration:
 
 ## Success Criteria
 - [ ] Zero pyright errors (`uv run pyright` shows 0 errors)
-- [ ] Zero pyright warnings  
+- [ ] Zero pyright warnings
 - [ ] All tests still pass (`uv run pytest`)
 - [ ] No functional regressions
 - [ ] Proper type safety maintained

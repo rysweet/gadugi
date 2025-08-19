@@ -16,6 +16,7 @@ from pathlib import Path
 
 from sync_engine import ConflictResolution, SyncDirection
 
+
 @dataclass
 class CompactionConfig:
     """Configuration for automatic Memory.md compaction"""
@@ -44,6 +45,7 @@ class CompactionConfig:
         }
     )
 
+
 @dataclass
 class PruningConfig:
     """Configuration for Memory.md content pruning (legacy - use CompactionConfig)"""
@@ -68,6 +70,7 @@ class PruningConfig:
         }
     )
 
+
 @dataclass
 class SyncConfig:
     """Configuration for Memory.md-GitHub synchronization"""
@@ -91,6 +94,7 @@ class SyncConfig:
     exclude_sections: List[str] = field(
         default_factory=lambda: ["Reflections", "Important Context"]
     )
+
 
 @dataclass
 class IssueCreationConfig:
@@ -117,6 +121,7 @@ class IssueCreationConfig:
             "low": "priority:low",
         }
     )
+
 
 @dataclass
 class ContentRules:
@@ -154,6 +159,7 @@ class ContentRules:
     preserve_context_links: bool = True
     normalize_task_format: bool = True
 
+
 @dataclass
 class MonitoringConfig:
     """Configuration for monitoring and logging"""
@@ -171,6 +177,7 @@ class MonitoringConfig:
     alert_on_conflicts: bool = True
     alert_on_failures: bool = True
     alert_email: Optional[str] = None
+
 
 @dataclass
 class MemoryManagerConfig:
@@ -265,6 +272,7 @@ class MemoryManagerConfig:
                 setattr(config, field_name, data[field_name])
 
         return config
+
 
 class ConfigManager:
     """Manages Memory Manager configuration"""
@@ -372,6 +380,7 @@ class ConfigManager:
 
         return effective
 
+
 def create_default_config() -> MemoryManagerConfig:
     """Create default configuration with sensible defaults"""
     return MemoryManagerConfig(
@@ -395,6 +404,7 @@ def create_default_config() -> MemoryManagerConfig:
         ),
         monitoring=MonitoringConfig(enable_logging=True, track_sync_performance=True),
     )
+
 
 def main():
     """Example usage of configuration system"""
@@ -426,6 +436,7 @@ def main():
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     main()

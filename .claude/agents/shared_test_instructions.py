@@ -83,8 +83,8 @@ class SharedTestInstructions:
 
     def __init__(self, config: Optional[AgentConfig] = None):
         self.config = config or AgentConfig(
-            name="Shared Test Instructions", 
-            version="1.0.0", 
+            name="Shared Test Instructions",
+            version="1.0.0",
             capabilities=["test_analysis", "test_validation"]
         )
         self.logger = logging.getLogger(self.__class__.__name__)

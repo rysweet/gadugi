@@ -18,6 +18,7 @@ import yaml
 import json
 from unittest.mock import Mock, patch
 
+
 class TestREADMEAnalyzer:
     """Test README content analysis functionality."""
 
@@ -179,6 +180,7 @@ def broken_function(
         assert len(syntax_errors) == 1
         assert "python" in syntax_errors[0]["language"]
 
+
 class TestProjectAnalyzer:
     """Test project state analysis and change detection."""
 
@@ -244,6 +246,7 @@ class TestProjectAnalyzer:
         assert changes["agents_count"] == 3
         assert changes["has_agents_dir"] is True
         assert "has_tests_dir" in changes
+
 
 class TestContentGenerator:
     """Test README content generation capabilities."""
@@ -319,6 +322,7 @@ Contribution guidelines
         assert "- [Usage](#usage)" in toc
         assert "  - [Advanced Usage](#advanced-usage)" in toc
         assert "- [Contributing](#contributing)" in toc
+
 
 class TestREADMEUpdater:
     """Test README update and maintenance functionality."""
@@ -404,6 +408,7 @@ Current version: 1.0.0
         assert "yarn install" in updated_content or "yarn add" in updated_content
         assert "@gadugi/cli" in updated_content
 
+
 class TestREADMEIntegration:
     """Test integration with other agents and workflows."""
 
@@ -461,6 +466,7 @@ class TestREADMEIntegration:
         assert "agent_list_updates" in readme_updates
         assert len(readme_updates["agent_list_updates"]["added"]) == 2
         assert len(readme_updates["agent_list_updates"]["updated"]) == 1
+
 
 class TestREADMEValidation:
     """Test comprehensive README validation."""
@@ -553,6 +559,7 @@ npm install
         score = scorer.calculate_quality_score(low_quality_readme)
         assert score <= 0.4  # Low quality score
 
+
 class TestErrorHandling:
     """Test error handling and recovery."""
 
@@ -593,6 +600,7 @@ See [documentation](https://unreachable-site.example.com).
             ]
             assert len(network_errors) == 1
             assert "unreachable-site.example.com" in network_errors[0]["link"]
+
 
 # Mock classes for testing (simplified implementations)
 class READMEAnalyzer:
@@ -639,6 +647,7 @@ class READMEAnalyzer:
         with open(path, "r") as f:
             content = f.read()
         return self.analyze_structure(content)
+
 
 class ContentValidator:
     def validate_links(self, content, base_path):
@@ -710,16 +719,15 @@ class ContentValidator:
 
         return issues
 
+
 class ProjectAnalyzer:
     def detect_new_agents(self, agents_dir, existing_agents):
-
         agent_files = [f for f in os.listdir(agents_dir) if f.endswith(".md")]
         agent_names = [f.replace(".md", "") for f in agent_files]
 
         return [name for name in agent_names if name not in existing_agents]
 
     def check_version_changes(self, package_data, readme_content):
-
         package_version = package_data.get("version", "0.0.0")
 
         # Find version in README
@@ -733,7 +741,6 @@ class ProjectAnalyzer:
         }
 
     def analyze_file_structure(self, base_path):
-
         agents_dir = os.path.join(base_path, ".claude", "agents")
         tests_dir = os.path.join(base_path, "tests")
 
@@ -746,6 +753,7 @@ class ProjectAnalyzer:
             "has_agents_dir": os.path.exists(agents_dir),
             "has_tests_dir": os.path.exists(tests_dir),
         }
+
 
 class ContentGenerator:
     def generate_agent_list(self, manifest_data):
@@ -774,7 +782,6 @@ class ContentGenerator:
         return content
 
     def generate_table_of_contents(self, content):
-
         toc_lines = []
         headers = re.findall(r"^(#{2,6})\s+(.+)$", content, re.MULTILINE)
 
@@ -787,9 +794,9 @@ class ContentGenerator:
 
         return "\n".join(toc_lines)
 
+
 class READMEUpdater:
     def update_agent_list(self, content, new_agents):
-
         # Find the agents section
         pattern = r"(## Available Agents\n)(.*?)(?=\n##|\n$)"
 
@@ -816,7 +823,6 @@ class READMEUpdater:
             return content + "\n\n## Available Agents\n" + "\n".join(new_list) + "\n"
 
     def update_version_references(self, content, new_version):
-
         # Update version references
         patterns = [
             (r"Current version:\s*\d+\.\d+\.\d+", f"Current version: {new_version}"),
@@ -839,6 +845,7 @@ class READMEUpdater:
                 content += f"\n{step}\n"
 
         return content
+
 
 class READMEIntegrator:
     def commit_readme_changes(self, changes):
@@ -872,6 +879,7 @@ class READMEIntegrator:
             }
         }
 
+
 class READMEValidator:
     def validate_comprehensive(self, content, base_path):
         analyzer = READMEAnalyzer()
@@ -895,6 +903,7 @@ class READMEValidator:
             "content_quality": {"score": overall_score},
             "overall_score": overall_score,
         }
+
 
 class READMEQualityScorer:
     def calculate_quality_score(self, content):
@@ -937,6 +946,7 @@ class READMEQualityScorer:
             score += 0.1
 
         return min(score, 1.0)
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

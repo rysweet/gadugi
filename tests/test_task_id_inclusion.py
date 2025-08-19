@@ -4,6 +4,7 @@ import os
 #!/usr/bin/env python3
 from ..shared.github_operations import GitHubOperations
 from unittest.mock import Mock, patch, MagicMock
+
 """
 Test script to verify task ID inclusion in GitHub operations.
 """
@@ -14,6 +15,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from claude.shared.github_operations import GitHubOperations
+
 
 def test_task_id_formatting():
     """Test that task ID is properly formatted in GitHub operations."""
@@ -44,6 +46,7 @@ def test_task_id_formatting():
 
     return True
 
+
 def test_issue_creation_mock():
     """Mock test for issue creation with task ID."""
 
@@ -64,6 +67,7 @@ def test_issue_creation_mock():
 
     return True
 
+
 def test_pr_creation_mock():
     """Mock test for PR creation with task ID."""
 
@@ -83,6 +87,7 @@ def test_pr_creation_mock():
 
     return True
 
+
 def test_comment_mock():
     """Mock test for comment creation with task ID."""
 
@@ -100,6 +105,7 @@ def test_comment_mock():
     print(f"   Comment includes task ID: {task_id}")
 
     return True
+
 
 def main():
     """Run all tests."""
@@ -133,6 +139,7 @@ def main():
     else:
         print("❌ Some tests failed. Please review the errors above.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

@@ -16,6 +16,7 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 
+
 class TaskStatus(Enum):
     """Task status enumeration"""
 
@@ -24,12 +25,14 @@ class TaskStatus(Enum):
     COMPLETED = "completed"
     BLOCKED = "blocked"
 
+
 class TaskPriority(Enum):
     """Task priority enumeration"""
 
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
+
 
 @dataclass
 class Task:
@@ -51,6 +54,7 @@ class Task:
         result["priority"] = self.priority.value
         return result
 
+
 @dataclass
 class MemorySection:
     """Represents a section from Memory.md"""
@@ -65,6 +69,7 @@ class MemorySection:
     def __post_init__(self):
         if self.tasks is None:
             self.tasks = []
+
 
 @dataclass
 class MemoryDocument:
@@ -93,6 +98,7 @@ class MemoryDocument:
         return [
             task for task in self.tasks if task.section.lower() == section_name.lower()
         ]
+
 
 class MemoryParser:
     """Parser for Memory.md files"""
@@ -334,6 +340,7 @@ class MemoryParser:
         # For now, return unchanged content
         return content
 
+
 def main():
     """Example usage of MemoryParser"""
     parser = MemoryParser()
@@ -355,6 +362,7 @@ def main():
 
     except Exception as e:
         print(f"Error parsing Memory.md: {e}")
+
 
 if __name__ == "__main__":
     main()

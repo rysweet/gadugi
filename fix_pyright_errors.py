@@ -10,6 +10,7 @@ Script to automatically fix common pyright errors in the codebase.
 
 from pathlib import Path
 
+
 def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
     """Get all pyright errors for a directory."""
     result = subprocess.run(
@@ -26,6 +27,7 @@ def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
                 errors.append((filepath, int(line_num), error_msg))
 
     return errors
+
 
 def fix_unused_imports(filepath: str, line_num: int, import_name: str):
     """Remove unused import from file."""
@@ -57,6 +59,7 @@ def fix_unused_imports(filepath: str, line_num: int, import_name: str):
         return True
     return False
 
+
 def fix_possibly_unbound(filepath: str, line_num: int, var_name: str):
     """Initialize possibly unbound variables."""
     lines = Path(filepath).read_text().splitlines()
@@ -77,6 +80,7 @@ def fix_possibly_unbound(filepath: str, line_num: int, var_name: str):
                 Path(filepath).write_text("\n".join(lines) + "\n")
                 return True
     return False
+
 
 def main():
     """Main function to fix errors."""
@@ -124,6 +128,7 @@ def main():
     # Run pyright again to show remaining errors
     print("\n🔍 Running pyright to check remaining errors...")
     subprocess.run(["uv", "run", "pyright", ".claude/"], check=False)
+
 
 if __name__ == "__main__":
     main()

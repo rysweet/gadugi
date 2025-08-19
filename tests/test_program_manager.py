@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.agents.program_manager import ProgramManager, Issue, IssueStage
 
+
 class TestProgramManager(unittest.TestCase):
     """Test cases for Program Manager agent"""
 
@@ -458,6 +459,7 @@ with multiple lines"""
                 unittest.mock.ANY,  # Don't check exact timestamp
             )
 
+
 class TestIssueStage(unittest.TestCase):
     """Test IssueStage enum"""
 
@@ -468,6 +470,7 @@ class TestIssueStage(unittest.TestCase):
         self.assertEqual(IssueStage.DRAFT.value, "draft")
         self.assertEqual(IssueStage.READY.value, "ready")
         self.assertEqual(IssueStage.BUG.value, "bug")
+
 
 if __name__ == "__main__":
     unittest.main()

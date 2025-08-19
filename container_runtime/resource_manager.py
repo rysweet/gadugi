@@ -25,6 +25,7 @@ sys.path.append(
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ResourceUsage:
     """Resource usage snapshot."""
@@ -39,6 +40,7 @@ class ResourceUsage:
     processes: int
     open_files: int
 
+
 @dataclass
 class ResourceAlert:
     """Resource usage alert."""
@@ -50,6 +52,7 @@ class ResourceAlert:
     timestamp: datetime
     severity: str
     message: str
+
 
 class ResourceMonitor:
     """Monitors resource usage for a single container."""
@@ -263,6 +266,7 @@ class ResourceMonitor:
             return self.alerts.copy()
 
         return [a for a in self.alerts if a.severity == severity]
+
 
 class ResourceManager:
     """

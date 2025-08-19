@@ -1,4 +1,3 @@
-
 import os
 import re
 import subprocess
@@ -10,6 +9,7 @@ Comprehensive final fix for all remaining pyright errors.
 """
 
 from pathlib import Path
+
 
 def get_error_files() -> Set[str]:
     """Get all files with pyright errors."""
@@ -26,6 +26,7 @@ def get_error_files() -> Set[str]:
                 files.add(path)
 
     return files
+
 
 def fix_agent_performance_dataclass():
     """Properly fix AgentPerformance usage in all test files."""
@@ -80,6 +81,7 @@ def fix_agent_performance_dataclass():
         path.write_text(content)
         print(f"Fixed AgentPerformance usage in {filepath}")
 
+
 def fix_unused_imports():
     """Remove all unused imports."""
 
@@ -127,6 +129,7 @@ def fix_unused_imports():
         path.write_text(content)
         print(f"Fixed unused imports in {filepath}")
 
+
 def fix_unused_variables():
     """Fix unused variable warnings."""
 
@@ -151,6 +154,7 @@ def fix_unused_variables():
         path.write_text(content)
         print(f"Fixed unused variables in {filepath}")
 
+
 def fix_attribute_access():
     """Fix attribute access errors."""
 
@@ -163,6 +167,7 @@ def fix_attribute_access():
 
         path.write_text(content)
         print("Fixed attribute access in test_strategic_planner.py")
+
 
 def fix_shared_test_redeclaration():
     """Fix redeclaration in shared_test_instructions.py."""
@@ -201,6 +206,7 @@ def fix_shared_test_redeclaration():
         path.write_text(content)
         print("Fixed redeclaration in shared_test_instructions.py")
 
+
 def fix_test_file_syntax():
     """Fix remaining syntax issues in test files."""
 
@@ -235,6 +241,7 @@ def fix_test_file_syntax():
             test_file.write_text(content)
             print(f"Fixed syntax in {test_file.name}")
 
+
 def fix_orchestrator_tests():
     """Fix specific issues in orchestrator test files."""
 
@@ -251,6 +258,7 @@ def fix_orchestrator_tests():
         path.write_text(content)
         print("Fixed orchestrator test imports")
 
+
 def fix_event_router_tests():
     """Fix event router test issues."""
 
@@ -264,6 +272,7 @@ def fix_event_router_tests():
 
         path.write_text(content)
         print("Fixed event router test imports")
+
 
 def main():
     """Main execution."""
@@ -295,6 +304,7 @@ def main():
         print("\nSample of remaining errors:")
         for error in error_lines[:10]:
             print(f"  {error}")
+
 
 if __name__ == "__main__":
     main()

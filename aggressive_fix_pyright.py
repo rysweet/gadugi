@@ -10,6 +10,7 @@ Aggressive script to fix pyright errors - adds type: ignore where needed.
 
 from pathlib import Path
 
+
 def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
     """Get all pyright errors for a directory."""
     result = subprocess.run(
@@ -26,6 +27,7 @@ def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
                 errors.append((filepath, int(line_num), error_msg))
 
     return errors
+
 
 def add_type_ignore(filepath: str, line_num: int):
     """Add type: ignore to problematic lines."""
@@ -47,6 +49,7 @@ def add_type_ignore(filepath: str, line_num: int):
         print(f"Error fixing {filepath}:{line_num}: {e}")
     return False
 
+
 def fix_import_errors(filepath: str, errors: List[Tuple[int, str]]):
     """Fix import errors by adding proper module paths or type ignores."""
     try:
@@ -66,6 +69,7 @@ def fix_import_errors(filepath: str, errors: List[Tuple[int, str]]):
         print(f"Error fixing imports in {filepath}: {e}")
     return False
 
+
 def group_errors_by_file(
     errors: List[Tuple[str, int, str]],
 ) -> Dict[str, List[Tuple[int, str]]]:
@@ -76,6 +80,7 @@ def group_errors_by_file(
             grouped[filepath] = []
         grouped[filepath].append((line_num, error_msg))
     return grouped
+
 
 def main():
     """Main function to aggressively fix errors."""
@@ -143,6 +148,7 @@ def main():
         if "errors" in line and "warnings" in line:
             print(f"📊 Final result: {line}")
             break
+
 
 if __name__ == "__main__":
     main()

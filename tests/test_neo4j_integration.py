@@ -12,6 +12,7 @@ Tests Neo4j connectivity, schema initialization, and basic operations.
 
 from neo4j.exceptions import ServiceUnavailable, AuthError
 
+
 class Neo4jConnection:
     """Neo4j connection manager for testing."""
 
@@ -55,6 +56,7 @@ class Neo4jConnection:
         except Exception as e:
             print(f"Unexpected error: {e}")
             return False
+
 
 class TestNeo4jIntegration:
     """Test suite for Neo4j integration."""
@@ -215,6 +217,7 @@ class TestNeo4jIntegration:
 
             count = result.single()["count"]
             assert count == 0, "Failed to delete node"
+
 
 if __name__ == "__main__":
     # Run tests with pytest

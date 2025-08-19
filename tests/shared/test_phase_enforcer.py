@@ -28,6 +28,7 @@ from claude.shared.phase_enforcer import (
 # Import workflow engine for WorkflowPhase and WorkflowState
 from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
 
+
 class TestPhaseEnforcer:
     """Test suite for PhaseEnforcer class"""
 
@@ -671,6 +672,7 @@ class TestPhaseEnforcer:
         # Cleanup
         os.remove(filename)
 
+
 class TestConvenienceFunctions:
     """Test suite for convenience functions"""
 
@@ -725,6 +727,7 @@ class TestConvenienceFunctions:
         result = enforce_phase_10(123)
 
         assert result is False
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

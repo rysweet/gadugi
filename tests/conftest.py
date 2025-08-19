@@ -15,6 +15,7 @@ if str(claude_path) not in sys.path:
 Pytest configuration and shared fixtures for Gadugi tests.
 """
 
+
 @pytest.fixture
 def temp_dir() -> Generator[Path, None, None]:
     """Create a temporary directory for test files."""
@@ -23,6 +24,7 @@ def temp_dir() -> Generator[Path, None, None]:
         yield temp_path
     finally:
         shutil.rmtree(temp_path, ignore_errors=True)
+
 
 @pytest.fixture
 def mock_gh_response():
@@ -43,6 +45,7 @@ def mock_gh_response():
 
     return _mock_response
 
+
 @pytest.fixture
 def mock_subprocess():
     """Mock subprocess for GitHub operations."""
@@ -53,6 +56,7 @@ def mock_subprocess():
         )
         mock_run.return_value.stderr = ""
         yield mock_run
+
 
 @pytest.fixture
 def sample_task():
@@ -67,6 +71,7 @@ def sample_task():
         "created_at": "2025-08-01T22:00:00Z",
         "context": {"user_request": "Add test feature", "priority": "high"},
     }
+
 
 @pytest.fixture
 def mock_state_file(temp_dir):
@@ -114,6 +119,7 @@ Last Updated: 2025-08-01T22:00:00Z
 """
     state_file.write_text(state_content)
     return state_file
+
 
 @pytest.fixture
 def mock_config():

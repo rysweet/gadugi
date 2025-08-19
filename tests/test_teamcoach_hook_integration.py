@@ -14,6 +14,7 @@ when running Claude Code tasks.
 
 from datetime import datetime
 
+
 @pytest.mark.skipif(
     shutil.which("claude") is None, reason="Claude CLI not available in CI environment"
 )
@@ -112,6 +113,7 @@ This is a simple task to test hook execution.
             "Test task should complete successfully or show hook indicators"
         )
 
+
 @pytest.mark.skip(
     reason="Claude CLI not available in CI environment - Issue created to enable Claude CLI in CI"
 )
@@ -182,6 +184,7 @@ def calculate_sum(a, b):
         "duration": duration,
     }
 
+
 def verify_hook_configuration():
     """Verify that hooks are properly configured in settings.json."""
 
@@ -223,6 +226,7 @@ def verify_hook_configuration():
         print(f"❌ Error reading settings.json: {e}")
         return False
 
+
 def main():
     """Run all integration tests."""
 
@@ -261,6 +265,7 @@ def main():
         print("Note: Hook execution may not show clear indicators in stdout/stderr")
         print("but could still be working correctly in the background")
         return 1
+
 
 if __name__ == "__main__":
     exit_code = main()

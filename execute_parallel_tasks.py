@@ -28,6 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class TaskOrchestrator:
     """Simplified orchestrator for executing the three parallel tasks."""
 
@@ -292,6 +293,7 @@ Execute complete workflow for {task_id} using prompt file {prompt_file}
 
         return self.results
 
+
 async def main():
     """Main entry point."""
     orchestrator = TaskOrchestrator()
@@ -316,6 +318,7 @@ async def main():
     except Exception as e:
         logger.error(f"\n❌ Fatal error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

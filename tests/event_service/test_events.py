@@ -12,6 +12,7 @@ from gadugi.event_service.events import (
     create_agent_event,
 )
 
+
 class TestGitHubEvent:
     """Test GitHubEvent model."""
 
@@ -46,6 +47,7 @@ class TestGitHubEvent:
         assert event.labels == []
         assert event.assignees == []
 
+
 class TestLocalEvent:
     """Test LocalEvent model."""
 
@@ -70,6 +72,7 @@ class TestLocalEvent:
         assert event.working_directory == ""
         assert event.environment == {}
         assert event.files_changed == []
+
 
 class TestAgentEvent:
     """Test AgentEvent model."""
@@ -101,6 +104,7 @@ class TestAgentEvent:
         assert event.status == ""
         assert event.message == ""
         assert event.context == {}
+
 
 class TestEvent:
     """Test Event model."""
@@ -235,6 +239,7 @@ class TestEvent:
         assert agent_event.get_github_event() is None
         assert agent_event.get_local_event() is None
         assert agent_event.get_agent_event() == agent_payload
+
 
 class TestEventCreators:
     """Test event creator functions."""

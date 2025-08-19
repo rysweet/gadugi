@@ -1841,4 +1841,4 @@ warning: `VIRTUAL_ENV=/Users/ryan/src/gadugi2/gadugi/.venv` does not match the p
 /Users/ryan/src/gadugi2/gadugi/.worktrees/task-zero-pyright-errors/validate_v03_implementation.py
   /Users/ryan/src/gadugi2/gadugi/.worktrees/task-zero-pyright-errors/validate_v03_implementation.py:99:25 - error: Variable "warnings" is not accessed (reportUnusedVariable)
   /Users/ryan/src/gadugi2/gadugi/.worktrees/task-zero-pyright-errors/validate_v03_implementation.py:99:35 - error: Variable "infos" is not accessed (reportUnusedVariable)
-1213 errors, 362 warnings, 0 informations 
+1213 errors, 362 warnings, 0 informations

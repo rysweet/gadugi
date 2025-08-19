@@ -45,6 +45,7 @@ except ImportError:
         def record_agent_memory(self, category: str, content: str):
             print(f"[Agent Memory] {category}: {content}")
 
+
 class IssueStage(Enum):
     """Issue lifecycle stages as defined in issue #44"""
 
@@ -58,6 +59,7 @@ class IssueStage(Enum):
     FUTURE = "future"
     BUG = "bug"
 
+
 @dataclass
 class Issue:
     """Represents a GitHub issue"""
@@ -70,6 +72,7 @@ class Issue:
     author: str
     created_at: str
     updated_at: str
+
 
 class ProgramManager:
     """Program Manager agent for project orchestration"""
@@ -899,6 +902,7 @@ class ProgramManager:
             "maintenance_complete",
             f"Completed full project maintenance cycle at {datetime.now().isoformat()}",
         )
+
 
 if __name__ == "__main__":
     # Example usage

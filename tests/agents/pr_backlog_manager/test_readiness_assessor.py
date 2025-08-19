@@ -49,6 +49,7 @@ from .test_stubs import (
     CIFailureType,
 )
 
+
 @pytest.fixture
 def mock_github_ops():
     """Create mock GitHub operations."""
@@ -59,10 +60,12 @@ def mock_github_ops():
     mock.compare_commits.return_value = {"behind_by": 0, "ahead_by": 1, "commits": []}
     return mock
 
+
 @pytest.fixture
 def assessor(mock_github_ops):
     """Create ReadinessAssessor instance."""
     return ReadinessAssessor(mock_github_ops)
+
 
 @pytest.fixture
 def sample_pr_details():
@@ -83,6 +86,7 @@ def sample_pr_details():
         "requested_reviewers": [],
         "requested_teams": [],
     }
+
 
 class TestConflictAssessment:
     """Test conflict assessment functionality."""
@@ -163,6 +167,7 @@ class TestConflictAssessment:
         assert assessor._estimate_resolution_time(ConflictComplexity.HIGH) == timedelta(
             hours=2
         )
+
 
 class TestCIAssessment:
     """Test CI/CD assessment functionality."""
@@ -262,6 +267,7 @@ class TestCIAssessment:
             "context": "unknown/check",
         }
         assert assessor._classify_ci_failure(unknown_check) == CIFailureType.UNKNOWN
+
 
 class TestReviewAssessment:
     """Test code review assessment functionality."""
@@ -366,6 +372,7 @@ class TestReviewAssessment:
         coverage_none = assessor._calculate_review_coverage(pr_details, no_reviews)
         assert coverage_none < coverage
 
+
 class TestSyncAssessment:
     """Test branch synchronization assessment functionality."""
 
@@ -468,6 +475,7 @@ class TestSyncAssessment:
         }
         assert assessor._assess_sync_complexity(complex_comparison) == "complex"
 
+
 class TestMetadataAssessment:
     """Test metadata completeness assessment functionality."""
 
@@ -533,6 +541,7 @@ class TestMetadataAssessment:
         assert assessor._check_linked_issues("Just a regular description") is False
         assert assessor._check_linked_issues("") is False
         assert assessor._check_linked_issues(None) is False
+
 
 class TestComprehensiveAssessment:
     """Test comprehensive assessment functionality."""
@@ -769,6 +778,7 @@ class TestComprehensiveAssessment:
         assert any(
             "metadata" in rec.lower() for rec in recommendations
         )  # Incomplete metadata
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

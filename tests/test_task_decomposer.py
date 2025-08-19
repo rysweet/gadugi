@@ -15,6 +15,7 @@ from decomposer.task_decomposer import (
     TaskDecomposer,
 )
 
+
 class TestSubTask:
     """Test SubTask dataclass."""
 
@@ -54,6 +55,7 @@ class TestSubTask:
         assert result["name"] == "Another Task"
         assert result["dependencies"] == []
         assert result["can_parallelize"] is True
+
 
 class TestDecompositionResult:
     """Test DecompositionResult dataclass."""
@@ -96,6 +98,7 @@ class TestDecompositionResult:
         assert dict_result["original_task"] == "Simple task"
         assert len(dict_result["subtasks"]) == 1
         assert dict_result["parallelization_score"] == 1.0
+
 
 class TestPatternDatabase:
     """Test PatternDatabase functionality."""
@@ -180,6 +183,7 @@ class TestPatternDatabase:
             db2 = PatternDatabase(storage_path=db_path)
             assert "test_pattern" in db2.patterns
             assert db2.patterns["test_pattern"]["triggers"] == ["test"]
+
 
 class TestTaskDecomposer:
     """Test TaskDecomposer functionality."""
@@ -453,6 +457,7 @@ class TestTaskDecomposer:
         time_partial = decomposer._calculate_total_time(tasks, sequential_deps, 0.5)
         assert time_parallel < time_partial < time_sequential
 
+
 class TestIntegration:
     """Integration tests for the complete system."""
 
@@ -525,6 +530,7 @@ class TestIntegration:
         pattern = decomposer.patterns_db.patterns.get(result1.decomposition_pattern)
         if pattern:
             assert pattern["avg_parallelization"] != initial_score
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

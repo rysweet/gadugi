@@ -1,4 +1,3 @@
-
 import argparse
 import json
 import os
@@ -19,6 +18,7 @@ from github_integration import GitHubIntegration
 
 # Import our components
 from memory_compactor import MemoryCompactor
+
 
 class MemoryManager:
     """Main Memory Manager class"""
@@ -266,6 +266,7 @@ class MemoryManager:
             "config_path": self.config_manager._find_config_file(),
         }
 
+
 def main():
     """Main CLI interface"""
     parser = argparse.ArgumentParser(
@@ -470,6 +471,7 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

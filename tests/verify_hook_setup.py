@@ -7,6 +7,7 @@ import subprocess
 Verify TeamCoach hooks are properly set up and ready for use.
 """
 
+
 def verify_setup():
     """Comprehensive verification of TeamCoach hook setup."""
 
@@ -166,6 +167,7 @@ def verify_setup():
         print(f"\n⚠️  Some checks failed ({total_checks - checks_passed} issues)")
         print("   Please review the issues above to ensure proper hook operation")
         return False
+
 
 if __name__ == "__main__":
     success = verify_setup()

@@ -9,6 +9,7 @@ Execute the orchestrator to run three tasks in parallel with proper path handlin
 
 from pathlib import Path
 
+
 def main():
     # Get to the main repository directory
     repo_dir = Path("/Users/ryan/src/gadugi2/gadugi")
@@ -83,6 +84,7 @@ def main():
         print(f"\n❌ Orchestrator execution failed with exit code: {result.returncode}")
 
     return result.returncode
+
 
 if __name__ == "__main__":
     sys.exit(main())

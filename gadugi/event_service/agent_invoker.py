@@ -18,6 +18,7 @@ from .events import Event
 
 logger = logging.getLogger(__name__)
 
+
 class AgentInvoker:
     """Handles agent invocation for event responses."""
 

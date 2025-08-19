@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 # Note: In a real implementation, these would be proper imports
 # For testing purposes, we'll mock the functionality
 
+
 class TestTaskBoundsEval:
     """Test suite for TaskBoundsEval Agent"""
 
@@ -148,6 +149,7 @@ class TestTaskBoundsEval:
         assert result["understanding_level"] == "RESEARCH_REQUIRED"
         assert result["requires_research"]
         assert "Quantum algorithms" in result["research_requirements"]["research_areas"]
+
 
 class TestTaskDecomposer:
     """Test suite for TaskDecomposer Agent"""
@@ -290,6 +292,7 @@ class TestTaskDecomposer:
         assert quality_checks["is_estimable"]
         assert quality_checks["is_small"]
 
+
 class TestTaskResearchAgent:
     """Test suite for TaskResearchAgent"""
 
@@ -388,6 +391,7 @@ class TestTaskResearchAgent:
         )
         assert len(result["findings"]["risk_assessment"]["high_risks"]) == 1
 
+
 class TestTaskPatternClassifier:
     """Test suite for TaskPatternClassifier ML component"""
 
@@ -474,6 +478,7 @@ class TestTaskPatternClassifier:
             in patterns[0]["optimization_strategies"]
         )
 
+
 class TestEnhancedTaskAnalyzer:
     """Test suite for Enhanced TaskAnalyzer integration"""
 
@@ -559,6 +564,7 @@ class TestEnhancedTaskAnalyzer:
         assert result["enhanced_task_count"] > result["original_task_count"]
         assert result["decomposition_applied"] == 1
         assert result["execution_plan"]["estimated_speedup"] == "2.3x"
+
 
 class TestIntegrationScenarios:
     """Integration test scenarios for the complete Task Decomposition Analyzer system"""
@@ -669,6 +675,7 @@ class TestIntegrationScenarios:
         assert metrics["actual_vs_predicted_accuracy"] > 0.8
         assert metrics["performance_improvement_predicted"] == "180%"
 
+
 class TestErrorHandlingAndResilience:
     """Test error handling and resilience of the Task Decomposition Analyzer"""
 
@@ -736,12 +743,14 @@ class TestErrorHandlingAndResilience:
         assert result["timeout_occurred"] is True
         assert "partial_results" in result
 
+
 # Pytest fixtures for integration testing
 @pytest.fixture
 def temp_workspace():
     """Create temporary workspace for testing"""
     with tempfile.TemporaryDirectory() as temp_dir:
         yield temp_dir
+
 
 @pytest.fixture
 def sample_prompt_files(temp_workspace):
@@ -792,6 +801,7 @@ Implement Redis caching for improved performance.
 
     return prompt_files
 
+
 # Performance benchmarks
 class TestPerformanceBenchmarks:
     """Performance benchmarks for the Task Decomposition Analyzer"""
@@ -834,6 +844,7 @@ class TestPerformanceBenchmarks:
         for _scenario, data in speedup_data.items():
             assert data["speedup"] > 1.5  # Minimum 50% improvement
             assert data["parallel_time"] < data["sequential_time"]
+
 
 if __name__ == "__main__":
     # Run the test suite

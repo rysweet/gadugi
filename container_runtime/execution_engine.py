@@ -32,6 +32,7 @@ from error_handling import GadugiError
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ExecutionRequest:
     """Container execution request."""
@@ -45,6 +46,7 @@ class ExecutionRequest:
     timeout: Optional[int] = None
     user_id: Optional[str] = None
     working_directory: str = "/workspace"
+
 
 @dataclass
 class ExecutionResponse:
@@ -60,6 +62,7 @@ class ExecutionResponse:
     security_events: List[Dict[str, Any]]
     audit_events: List[str]
     error_message: Optional[str] = None
+
 
 class ContainerExecutionEngine:
     """
@@ -542,6 +545,7 @@ class ContainerExecutionEngine:
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
 
+
 # Convenience functions for direct usage
 def execute_python(
     code: str,
@@ -556,6 +560,7 @@ def execute_python(
     finally:
         engine.shutdown()
 
+
 def execute_shell(
     script: str, security_policy: str = "standard", timeout: int = 300
 ) -> ExecutionResponse:
@@ -565,6 +570,7 @@ def execute_shell(
         return engine.execute_shell_script(script, security_policy, timeout)
     finally:
         engine.shutdown()
+
 
 def execute_node(
     code: str,

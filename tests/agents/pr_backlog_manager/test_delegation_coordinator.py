@@ -47,6 +47,7 @@ from .test_stubs import (
     DelegationStatus,
 )
 
+
 @pytest.fixture
 def mock_github_ops():
     """Create mock GitHub operations."""
@@ -55,10 +56,12 @@ def mock_github_ops():
     mock.add_pr_comment.return_value = None
     return mock
 
+
 @pytest.fixture
 def coordinator(mock_github_ops):
     """Create DelegationCoordinator instance."""
     return DelegationCoordinator(mock_github_ops, auto_approve=False)
+
 
 @pytest.fixture
 def sample_pr_context():
@@ -71,8 +74,10 @@ def sample_pr_context():
         "github_actions": True,
     }
 
+
 class TestDelegationCoordinator:
     """Test suite for DelegationCoordinator functionality."""
+
 
 class TestDelegationTask:
     """Test DelegationTask data class."""
@@ -98,6 +103,7 @@ class TestDelegationTask:
         assert task.agent_target == "workflow-master"
         assert task.status == DelegationStatus.PENDING
         assert task.retry_count == 0
+
 
 class TestDelegationCreation:
     """Test delegation task creation functionality."""
@@ -225,6 +231,7 @@ class TestDelegationCreation:
         assert "merge conflicts" in task.prompt_template.lower()
         assert task.task_id.startswith("delegation-123-merge_conflict_resolution-")
 
+
 class TestPromptGeneration:
     """Test prompt template generation."""
 
@@ -301,6 +308,7 @@ class TestPromptGeneration:
         assert "conventional commit" in prompt.lower()
         assert "description" in prompt.lower()
         assert "labels" in prompt.lower()
+
 
 class TestDelegationExecution:
     """Test delegation execution functionality."""
@@ -398,6 +406,7 @@ class TestDelegationExecution:
             assert task.error_message == "Test error"
             assert task.retry_count == 1
 
+
 class TestWorkflowMasterDelegation:
     """Test WorkflowMaster delegation functionality."""
 
@@ -445,6 +454,7 @@ class TestWorkflowMasterDelegation:
         coordinator._invoke_workflow_master_interactive(task)
 
         assert task.status == DelegationStatus.IN_PROGRESS
+
 
 class TestCodeReviewerDelegation:
     """Test code-reviewer delegation functionality."""
@@ -496,6 +506,7 @@ class TestCodeReviewerDelegation:
         coordinator._invoke_code_reviewer_direct(task)
 
         assert task.status == DelegationStatus.IN_PROGRESS
+
 
 class TestDelegationComments:
     """Test delegation comment functionality."""
@@ -572,6 +583,7 @@ class TestDelegationComments:
 
         assert "🤖 **AI Code Review Initiated**" in comment
         assert "test-789" in comment
+
 
 class TestDelegationManagement:
     """Test delegation management functionality."""
@@ -837,6 +849,7 @@ class TestDelegationManagement:
         assert metrics["task_types"][DelegationType.CI_FAILURE_FIX.value] == 1
         assert metrics["task_types"][DelegationType.AI_CODE_REVIEW.value] == 1
         assert metrics["task_types"][DelegationType.BRANCH_UPDATE.value] == 1
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
