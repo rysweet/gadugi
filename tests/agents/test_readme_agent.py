@@ -15,6 +15,7 @@ import os
 import yaml
 import json
 from typing import Set
+from unittest.mock import Mock, patch, MagicMock
 
 
 class TestREADMEAnalyzer:

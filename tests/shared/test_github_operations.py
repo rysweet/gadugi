@@ -6,6 +6,7 @@ Tests the Enhanced Separation architecture implementation.
 import json
 import os
 import subprocess
+from unittest.mock import Mock, patch
 
 # Import the module we're testing (will be implemented after tests)
 import sys

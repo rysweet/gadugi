@@ -13,22 +13,24 @@ from enum import Enum
 # Add shared modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
+# Define fallback classes first
+@dataclass
+class OperationResult:
+    success: bool
+    data: Any = None
+    error: str = ""
+
+@dataclass
+class AgentConfig:
+    agent_id: str
+    name: str
+
 try:
     from utils.error_handling import ErrorHandler
+    # If successful import, override the fallback definitions if they exist there
 except ImportError:
-    # Fallback definitions for missing imports
-    from dataclasses import dataclass
-
-    @dataclass
-    class OperationResult:
-        success: bool
-        data: Any = None
-        error: str = ""
-
-    @dataclass
-    class AgentConfig:
-        agent_id: str
-        name: str
+    # Use the fallback definitions already defined above
+    pass
 
 
 class TestStatus(Enum):

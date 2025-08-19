@@ -10,8 +10,9 @@ import tempfile
 import json
 from datetime import datetime
 from pathlib import Path
-from agents.system_design_reviewer.core import (
 from typing import Set
+from unittest.mock import Mock, patch, MagicMock
+from agents.system_design_reviewer.core import (
     SystemDesignReviewer,
     ReviewResult,
     ReviewStatus,

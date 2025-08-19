@@ -9,6 +9,7 @@ import os
 import tempfile
 import unittest
 from typing import Set
+from unittest.mock import Mock, patch, MagicMock
 
 
 class TestClaudeSettingsUpdate(unittest.TestCase):

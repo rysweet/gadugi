@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Set
+# Removed unused Set import
 
 
 class TestChecksumVerification(unittest.TestCase):

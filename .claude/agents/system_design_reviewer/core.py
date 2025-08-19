@@ -58,8 +58,8 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
         )
 
 from .ast_parser import (
-    ASTParserFactory, ArchitecturalElement, ArchitecturalChange,
-    ChangeType, ImpactLevel, ElementType
+    ASTParserFactory, ArchitecturalChange,
+    ImpactLevel
 )
 from .documentation_manager import DocumentationManager
 from .adr_generator import ADRGenerator

@@ -21,6 +21,7 @@ import os
 import shutil
 import sys
 import tempfile
+from unittest.mock import Mock, MagicMock, patch
 
 import pytest
 

@@ -8,7 +8,7 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from pathlib import   # type: ignore
+from pathlib import Path  # type: ignore
 from typing import Dict, List, Any, Optional, Tuple  # type: ignore
 from dataclasses import dataclass
 

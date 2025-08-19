@@ -1,15 +1,15 @@
 #!/bin/bash
 # Orchestrator Execution Script
-# Executes three tasks in parallel using WorkflowManager delegation
+# Executes three critical v0.3 tasks in parallel using WorkflowManager delegation
 
 echo "=================================================="
 echo "🎯 ORCHESTRATOR: Starting Parallel Task Execution"
 echo "=================================================="
 echo ""
 echo "Tasks to execute:"
-echo "1. Fix All Pyright Errors"
-echo "2. Complete Team Coach Implementation"
-echo "3. Clean Up All Worktrees"
+echo "1. Fix Final Pyright Errors (achieve ZERO errors)"
+echo "2. Complete Testing Suite (full coverage)"
+echo "3. Final Integration Check (system validation)"
 echo ""
 
 # Function to execute a task via WorkflowManager
@@ -61,38 +61,67 @@ Execute the complete 11-phase workflow:
 Execute complete workflow for task $task_id using prompt file $prompt_file in worktree $worktree_path
 EOF
 
-    # Execute via claude CLI
+    # Execute via claude CLI with --dangerously-skip-permissions flag
     cd "$worktree_path"
-    claude -p /tmp/orchestrator_${task_id}.md > /tmp/${task_id}_output.log 2>&1 &
+    claude --dangerously-skip-permissions -p /tmp/orchestrator_${task_id}.md > /tmp/${task_id}_output.log 2>&1 &
 
     echo "   PID: $!"
     echo ""
 }
 
 # Execute all three tasks in parallel
-echo "📁 Phase 1: Worktrees already created and UV environments set up"
+echo "📁 Phase 1: Creating worktrees and setting up UV environments..."
+echo ""
+
+# Create worktrees for each task
+create_worktree() {
+    local task_id=$1
+    local worktree_path=$2
+
+    if [ -d "$worktree_path" ]; then
+        echo "   Worktree already exists: $worktree_path"
+    else
+        echo "   Creating worktree: $worktree_path"
+        git worktree add "$worktree_path" -b "feature/$task_id" || {
+            # If branch exists, use it
+            git worktree add "$worktree_path" "feature/$task_id"
+        }
+
+        # Set up UV environment
+        echo "   Setting up UV environment..."
+        cd "$worktree_path"
+        uv sync --all-extras
+        cd - > /dev/null
+    fi
+}
+
+# Create worktrees
+create_worktree "fix-final-pyright-errors" "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-final-pyright-errors"
+create_worktree "complete-testing-suite" "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-testing-suite"
+create_worktree "final-integration-check" "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-final-integration-check"
+
 echo ""
 
 echo "🚀 Phase 2: Launching parallel WorkflowManager executions..."
 echo ""
 
-# Task 1: Fix Pyright Errors
-execute_task "fix-pyright-errors" \
-    "fix-all-pyright-errors.md" \
-    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-pyright-errors" \
-    "Fix All Pyright Errors"
+# Task 1: Fix Final Pyright Errors
+execute_task "fix-final-pyright-errors" \
+    "fix-final-pyright-errors.md" \
+    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-final-pyright-errors" \
+    "Fix Final Pyright Errors - Achieve ZERO errors"
 
-# Task 2: Complete Team Coach
-execute_task "complete-team-coach" \
-    "complete-team-coach-implementation.md" \
-    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-team-coach" \
-    "Complete Team Coach Implementation"
+# Task 2: Complete Testing Suite
+execute_task "complete-testing-suite" \
+    "complete-testing-suite.md" \
+    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-testing-suite" \
+    "Complete Testing Suite - Full Coverage"
 
-# Task 3: Cleanup Worktrees
-execute_task "cleanup-worktrees" \
-    "cleanup-all-worktrees.md" \
-    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-cleanup-worktrees" \
-    "Clean Up All Worktrees"
+# Task 3: Final Integration Check
+execute_task "final-integration-check" \
+    "final-integration-check.md" \
+    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-final-integration-check" \
+    "Final Integration Check - System Validation"
 
 echo "⏳ Phase 3: Monitoring parallel executions..."
 echo "   Waiting for all tasks to complete..."
@@ -108,7 +137,7 @@ echo "📊 Results Summary:"
 echo "==================="
 
 # Check results
-for task_id in "fix-pyright-errors" "complete-team-coach" "cleanup-worktrees"; do
+for task_id in "fix-final-pyright-errors" "complete-testing-suite" "final-integration-check"; do
     if [ -f "/tmp/${task_id}_output.log" ]; then
         echo ""
         echo "Task: $task_id"
@@ -138,6 +167,6 @@ echo "2. Merge PRs after approval"
 echo "3. Clean up worktrees with: git worktree prune"
 echo ""
 echo "Log files available at:"
-echo "  - /tmp/fix-pyright-errors_output.log"
-echo "  - /tmp/complete-team-coach_output.log"
-echo "  - /tmp/cleanup-worktrees_output.log"
+echo "  - /tmp/fix-final-pyright-errors_output.log"
+echo "  - /tmp/complete-testing-suite_output.log"
+echo "  - /tmp/final-integration-check_output.log"

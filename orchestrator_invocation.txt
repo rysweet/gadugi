@@ -1,0 +1,33 @@
+/agent:orchestrator-agent
+
+Execute these specific prompts in parallel:
+- fix-final-pyright-errors.md
+- complete-testing-suite.md
+- final-integration-check.md
+
+Configuration:
+- Enable parallel execution mode
+- Use worktree isolation for all tasks
+- Monitor until completion
+- Generate comprehensive execution report
+
+Requirements:
+1. Create isolated worktrees for each task
+2. Use claude --dangerously-skip-permissions -p for each WorkflowManager invocation
+3. Execute all three tasks in parallel
+4. Monitor progress and handle any failures
+5. Achieve ZERO pyright errors in fix-final-pyright-errors.md task
+6. Ensure complete test coverage in complete-testing-suite.md task
+7. Validate full system integration in final-integration-check.md task
+
+Context:
+This is resuming work from an interrupted session. The orchestrator's parallel_executor.py has been updated to use the --dangerously-skip-permissions flag to prevent permission prompts during parallel execution.
+
+Expected Outcome:
+- All three tasks complete successfully
+- ZERO pyright errors across the codebase
+- Complete test suite with high coverage
+- Validated system integration
+- Clean parallel execution with no permission prompts
+
+Priority: CRITICAL - These are the final tasks needed to complete the v0.3 implementation.

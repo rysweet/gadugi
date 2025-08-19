@@ -5,9 +5,20 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
-from decomposer.task_decomposer import (
 from typing import Dict, List
+
+# Import from the actual implementation
+import sys
+import os
+
+sys.path.insert(
+    0,
+    os.path.join(
+        os.path.dirname(__file__), "..", ".claude", "agents", "task-decomposer"
+    ),
+)
+
+from task_decomposer import (
     DecompositionResult,
     PatternDatabase,
     SubTask,

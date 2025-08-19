@@ -28,7 +28,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import pytest
-from typing import Set
 
 # Add project paths
 test_dir = Path(__file__).parent

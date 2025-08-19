@@ -5,6 +5,7 @@ Tests task management, workflow tracking, and Claude Code integration.
 
 import os
 import uuid
+from unittest.mock import Mock, MagicMock, patch
 
 # Import the module we're testing
 import sys

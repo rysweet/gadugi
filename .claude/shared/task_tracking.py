@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 from enum import Enum
 from dataclasses import dataclass, field
-from pathlib import   # type: ignore
+from pathlib import Path  # type: ignore
 
 logger = logging.getLogger(__name__)
 

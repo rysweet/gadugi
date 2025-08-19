@@ -10,6 +10,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock, MagicMock, patch
 
 # Add orchestrator components to path
 import sys
