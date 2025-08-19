@@ -67,22 +67,32 @@ graph TD
         CSU[claude-settings-update<br/>⚙️ Configuration<br/>Settings merger]
     end
 
+    subgraph "🔴 Services Layer"
+        direction TB
+        NS[neo4j-service<br/>🗄️ Graph Database<br/>Recipe & state persistence]
+        ERS[event-router-service<br/>📡 Event Bus<br/>Inter-agent communication]
+        MCPS[mcp-service<br/>🔗 MCP Integration<br/>External service bridge]
+    end
+
     %% Inter-layer connections
     OA -.-> WF
     WF -.-> CR
     CR -.-> CRR
     WF -.-> MM
+    WF -.-> NS
 
     %% Styling
     classDef orchestration fill:#3498db,stroke:#2980b9,color:#fff,stroke-width:2px
     classDef implementation fill:#2ecc71,stroke:#27ae60,color:#fff,stroke-width:2px
     classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff,stroke-width:2px
     classDef maintenance fill:#e67e22,stroke:#d35400,color:#fff,stroke-width:2px
+    classDef services fill:#e74c3c,stroke:#c0392b,color:#fff,stroke-width:2px
 
     class OA,TA,WM,EM orchestration
     class WF,PW,TW,TS,TFA implementation
     class CR,CRR,SDR review
     class PBM,AU,MM,RA,CSU maintenance
+    class NS,ERS,MCPS services
 ```
 
 ### Comprehensive Workflow Process
@@ -142,6 +152,7 @@ flowchart TD
 - **🟢 Implementation Layer**: Handles core development tasks and code generation
 - **🟣 Review Layer**: Ensures quality through automated and systematic reviews
 - **🟠 Maintenance Layer**: Manages system health, updates, and administrative tasks
+- **🔴 Services Layer**: Provides infrastructure and data persistence services
 
 **Mandatory Phase 9 Enforcement**: The system includes multiple mechanisms to ensure code review is never skipped, including automatic timers, validation checks, and retry logic.
 
@@ -172,6 +183,10 @@ gadugi/
 │   │   ├── test-writer.md              # Test suite creation
 │   │   ├── xpia-defense-agent.md       # Security protection
 │   │   └── workflow-manager-phase9-enforcement.md  # Review enforcement
+│   ├── services/                   # Infrastructure services
+│   │   ├── neo4j_service/          # Graph database service
+│   │   ├── event-router/           # Event-driven communication
+│   │   └── mcp/                    # Model Context Protocol integration
 │   ├── shared/                     # Shared utilities and modules
 │   ├── docs/                       # Additional documentation
 │   └── templates/                  # Workflow templates

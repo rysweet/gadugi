@@ -243,7 +243,7 @@ class Neo4jConnection:
                     print(f"  Total relationships: {rel_count}")
 
                     return {"total_nodes": node_count, "total_relationships": rel_count}
-            except:
+            except Exception:
                 return {}
 
 

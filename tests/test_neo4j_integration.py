@@ -7,6 +7,7 @@ Tests Neo4j connectivity, schema initialization, and basic operations.
 import os
 import pytest
 from typing import Optional
+from neo4j import GraphDatabase, Driver
 from neo4j.exceptions import ServiceUnavailable, AuthError
 
 
@@ -15,7 +16,7 @@ class Neo4jConnection:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7475",
+        uri: str = "bolt://localhost:7688",
         user: str = "neo4j",
         password: Optional[str] = None,
     ):
@@ -66,15 +67,15 @@ class TestNeo4jIntegration:
         conn.close()
 
     def test_neo4j_connection(self, neo4j_conn):
-        """Test basic Neo4j connectivity on port 7475."""
-        assert neo4j_conn.test_connection(), "Failed to connect to Neo4j on port 7475"
+        """Test basic Neo4j connectivity on port 7688."""
+        assert neo4j_conn.test_connection(), "Failed to connect to Neo4j on port 7688"
 
     def test_schema_initialization(self, neo4j_conn):
         """Test that schema can be initialized."""
         driver = neo4j_conn.connect()
 
         # Read schema file
-        schema_path = "neo4j/init/init_schema.cypher"
+        schema_path = "neo4j-setup/init/init_schema.cypher"
         assert os.path.exists(schema_path), f"Schema file not found: {schema_path}"
 
         with open(schema_path, "r") as f:

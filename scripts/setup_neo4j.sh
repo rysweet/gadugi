@@ -25,7 +25,7 @@ while [ $attempt -lt $max_attempts ]; do
         echo "✅ Neo4j is ready!"
         break
     fi
-    
+
     attempt=$((attempt + 1))
     echo "   Attempt $attempt/$max_attempts..."
     sleep 2
@@ -38,12 +38,12 @@ fi
 
 # Initialize schema
 echo "📝 Initializing schema..."
-docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher
+docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j-setup/init/init_schema.cypher
 
 # Test connection
 echo "🧪 Testing connection..."
 if command -v python3 &> /dev/null; then
-    python3 neo4j/test_connection.py
+    python3 neo4j-setup/test_connection.py
 else
     echo "⚠️  Python not found, skipping connection test"
 fi

@@ -5,7 +5,7 @@ Tests the connection to Neo4j and verifies schema initialization
 """
 
 import sys
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, Driver
 from typing import Optional
 
 
@@ -15,16 +15,19 @@ class Neo4jConnectionTest:
         self.uri = uri
         self.user = user
         self.password = password
-        self.driver: Optional[GraphDatabase.driver] = None
+        self.driver: Optional[Driver] = None
 
     def connect(self) -> bool:
         """Establish connection to Neo4j"""
         try:
-            self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+            self.driver = GraphDatabase.driver(
+                self.uri, auth=(self.user, self.password)
+            )
             # Test the connection
             with self.driver.session() as session:
                 result = session.run("RETURN 1 as test")
-                test_value = result.single()["test"]
+                record = result.single()
+                test_value = record["test"] if record else 0
                 print(f"✅ Connected to Neo4j at {self.uri}")
                 return test_value == 1
         except Exception as e:
@@ -45,7 +48,12 @@ class Neo4jConnectionTest:
                     RETURN count(a) as agent_count, collect(a.name) as agent_names
                 """)
                 agents = agents_result.single()
-                print(f"✅ Found {agents['agent_count']} agents: {agents['agent_names']}")
+                if agents:
+                    print(
+                        f"✅ Found {agents['agent_count']} agents: {agents['agent_names']}"
+                    )
+                else:
+                    print("⚠️ No agents found")
 
                 # Check for Tool nodes
                 tools_result = session.run("""
@@ -53,7 +61,12 @@ class Neo4jConnectionTest:
                     RETURN count(t) as tool_count, collect(t.name) as tool_names
                 """)
                 tools = tools_result.single()
-                print(f"✅ Found {tools['tool_count']} tools: {tools['tool_names']}")
+                if tools:
+                    print(
+                        f"✅ Found {tools['tool_count']} tools: {tools['tool_names']}"
+                    )
+                else:
+                    print("⚠️ No tools found")
 
                 # Check for relationships
                 rels_result = session.run("""
@@ -61,7 +74,12 @@ class Neo4jConnectionTest:
                     RETURN count(r) as rel_count, collect(distinct type(r)) as rel_types
                 """)
                 rels = rels_result.single()
-                print(f"✅ Found {rels['rel_count']} relationships: {rels['rel_types']}")
+                if rels:
+                    print(
+                        f"✅ Found {rels['rel_count']} relationships: {rels['rel_types']}"
+                    )
+                else:
+                    print("⚠️ No relationships found")
 
                 # Check constraints
                 constraints_result = session.run("SHOW CONSTRAINTS")
@@ -73,7 +91,9 @@ class Neo4jConnectionTest:
                 indexes = list(indexes_result)
                 print(f"✅ Found {len(indexes)} indexes")
 
-                return agents['agent_count'] > 0 and tools['tool_count'] > 0
+                agent_count = agents["agent_count"] if agents else 0
+                tool_count = tools["tool_count"] if tools else 0
+                return agent_count > 0 and tool_count > 0
 
         except Exception as e:
             print(f"❌ Failed to verify schema: {e}")
@@ -97,8 +117,13 @@ class Neo4jConnectionTest:
                     })
                     RETURN c.id as context_id
                 """)
-                context_id = result.single()["context_id"]
-                print(f"✅ Created test context: {context_id}")
+                record = result.single()
+                if record:
+                    context_id = record["context_id"]
+                    print(f"✅ Created test context: {context_id}")
+                else:
+                    print("⚠️ Failed to create test context")
+                    return False
 
                 # Create relationship to system agent
                 session.run("""
@@ -126,9 +151,9 @@ def main():
     print("\n🧪 Testing Neo4j Connection for Gadugi\n")
 
     # Connection parameters
-    uri = "bolt://localhost:7689"  # Updated port
+    uri = "bolt://localhost:7688"  # Correct port for Gadugi
     user = "neo4j"
-    password = "gadugi-password"
+    password = "gadugi-password"  # pragma: allowlist secret
 
     # Run tests
     tester = Neo4jConnectionTest(uri, user, password)
@@ -149,7 +174,7 @@ def main():
     tester.cleanup()
 
     print("\n✅ All Neo4j tests passed!\n")
-    print(f"📊 Neo4j Browser: http://localhost:7475")
+    print("📊 Neo4j Browser: http://localhost:7475")
     print(f"🔌 Bolt URL: {uri}")
     print(f"👤 Username: {user}")
     print(f"🔑 Password: {password}\n")

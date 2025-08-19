@@ -57,6 +57,19 @@ Mandatory testing and review phases ensure code quality before merging.
 - **readme-agent**: Keeps README documentation current
 - **claude-settings-update**: Manages configuration synchronization
 
+### Layer 5: Services Layer
+
+**Purpose**: Provide infrastructure and data persistence services
+
+- **Neo4j Service**: Graph database for storing recipes, agent states, and relationships
+  - Connection pooling and retry logic
+  - Schema management with constraints and indexes
+  - CRUD operations for entities (Agents, Tools, Workflows, Recipes, Events, Tasks)
+  - Data models with serialization/deserialization
+  - Health checking and statistics
+- **Event Router Service**: Event-driven communication between agents
+- **MCP Service**: Model Context Protocol integration for external services
+
 ## 11-Phase Workflow Process
 
 Every task follows a mandatory 11-phase workflow:
@@ -161,6 +174,8 @@ Task description and requirements
 - **Language**: Python 3.11+
 - **Package Manager**: UV
 - **Version Control**: Git with worktrees
+- **Database**: Neo4j 5.19+ (Graph database)
+- **Containerization**: Docker & Docker Compose
 - **CI/CD**: GitHub Actions
 - **Testing**: pytest
 - **Linting**: ruff

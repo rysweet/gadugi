@@ -6,7 +6,7 @@ services:
     container_name: gadugi-neo4j
     ports:
       - "7475:7474"  # HTTP (using 7475 to avoid conflict)
-      - "7689:7687"  # Bolt (using 7689 to avoid conflict)
+      - "7688:7687"  # Bolt (using 7688 to avoid conflict)
     environment:
       - NEO4J_AUTH=neo4j/gadugi-password  # Change in production
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
@@ -21,7 +21,7 @@ services:
       - gadugi_neo4j_logs:/logs
       - gadugi_neo4j_import:/var/lib/neo4j/import
       - gadugi_neo4j_plugins:/plugins
-      - ./neo4j/init:/var/lib/neo4j/init
+      - ./neo4j-setup/init:/var/lib/neo4j/init
     healthcheck:
       test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "gadugi-password", "MATCH (n) RETURN count(n) LIMIT 1"]
       interval: 30s
