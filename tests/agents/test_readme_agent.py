@@ -14,8 +14,7 @@ import tempfile
 import os
 import yaml
 import json
-from unittest.mock import Mock, patch, MagicMock
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 
 class TestREADMEAnalyzer:

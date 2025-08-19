@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict, List
+from typing import Any, Dict, List
 
 class DockerClient:
     def __init__(self) -> None: ...

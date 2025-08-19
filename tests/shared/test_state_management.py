@@ -15,7 +15,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import pytest
-from unittest.mock import Mock, call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING

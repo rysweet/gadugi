@@ -5,14 +5,11 @@ Handles the actual execution of agents in response to events.
 """
 
 import asyncio
-import json
 import logging
 import os
-import subprocess
 import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional
-import shlex
+from typing import Dict, Any
 
 from .config import AgentInvocation
 from .events import Event

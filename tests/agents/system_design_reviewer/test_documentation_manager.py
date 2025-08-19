@@ -8,8 +8,6 @@ and evolution history tracking.
 import pytest
 import tempfile
 import os
-from pathlib import Path
-from datetime import datetime
 from agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,

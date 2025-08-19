@@ -3,16 +3,13 @@ Comprehensive tests for interfaces.py module.
 Tests shared interfaces, protocols, and contracts for the Enhanced Separation architecture.
 """
 
-import json
 import os
 
 # Import the module we're testing
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Protocol, Union
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any, Dict, List, Optional, Protocol
 
 import pytest
 
@@ -52,8 +49,6 @@ except ImportError:
 
     from abc import ABC, abstractmethod
     from dataclasses import dataclass
-    from datetime import datetime
-    from enum import Enum
     from typing import Any, Dict, List, Optional, Protocol
 
     # Core interfaces
