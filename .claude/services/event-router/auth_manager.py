@@ -1,4 +1,15 @@
+from typing import Dict, List, Optional
+
+import os
+import shutil
+import structlog
+                import yaml
+            import base64
+            import tarfile
+            import subprocess
+
 #!/usr/bin/env python3
+
 """
 Authentication Manager for Event Router.
 
@@ -6,16 +17,10 @@ Handles secure token management for GitHub and Claude Code authentication
 when spawning agent processes or containers.
 """
 
-import os
-import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
-
-import structlog
 
 logger = structlog.get_logger()
-
 
 @dataclass
 class AuthConfig:
@@ -40,7 +45,6 @@ class AuthConfig:
 
         return env
 
-
 class AuthManager:
     """Manages authentication for agent processes and containers."""
 
@@ -63,7 +67,6 @@ class AuthManager:
         gh_config = self.home_dir / ".config" / "gh" / "hosts.yml"
         if gh_config.exists():
             try:
-                import yaml
                 with open(gh_config) as f:
                     config = yaml.safe_load(f)
                     # Extract token from gh config
@@ -199,7 +202,6 @@ class AuthManager:
 
         # Add GitHub token
         if self.github_token:
-            import base64
             secret_data["github-token"] = base64.b64encode(
                 self.github_token.encode()
             ).decode()
@@ -221,8 +223,6 @@ class AuthManager:
         # Also create ConfigMap for .claude directory if it exists
         if self.claude_dir.exists():
             # Create tar archive of .claude directory
-            import tarfile
-            import base64
             from io import BytesIO
 
             tar_buffer = BytesIO()
@@ -277,7 +277,6 @@ class AuthManager:
         gh_path = shutil.which("gh")
         if gh_path:
             # Try to run gh auth status
-            import subprocess
             try:
                 result = subprocess.run(
                     ["gh", "auth", "status"],
@@ -322,7 +321,6 @@ class AuthManager:
         except Exception as e:
             logger.error(f"Failed to set up workspace auth: {e}")
             return False
-
 
 class ContainerAuthBuilder:
     """Builder for container authentication configurations."""
@@ -406,7 +404,6 @@ exec "$@"
             )
 
         return service
-
 
 # Example usage
 if __name__ == "__main__":

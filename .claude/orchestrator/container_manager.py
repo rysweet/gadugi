@@ -1,4 +1,28 @@
+from typing import (
+    Any,
+    AsyncGenerator,
+    Callable,
+    Callable  # type: ignore,
+    Dict,
+    List,
+    Optional
+)
+
+import asyncio
+import json
+import logging
+import os
+import threading
+import uuid
+    import docker  # type: ignore
+    import websockets  # type: ignore
+        import tempfile
+            import psutil
+        import shlex
+    import argparse
+
 #!/usr/bin/env python3
+
 """
 ContainerManager - Docker-based execution for OrchestratorAgent
 
@@ -19,20 +43,12 @@ Security Features:
 - Proper cleanup and garbage collection
 """
 
-import asyncio
-import json
-import logging
-import os
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable  # type: ignore, Dict, List, Optional
-import uuid
 
 try:
-    import docker  # type: ignore
     from docker.errors import DockerException, ContainerError, ImageNotFound  # type: ignore
     DOCKER_AVAILABLE = True
 except ImportError:
@@ -44,15 +60,12 @@ except ImportError:
     class ImageNotFound(Exception): pass
 
 try:
-    import websockets  # type: ignore
-    import asyncio
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     logging.warning("WebSocket support not available. Install with: pip install websockets")
     WEBSOCKET_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ContainerConfig:
@@ -79,7 +92,6 @@ class ContainerConfig:
                 f"--output-format={self.output_format}"
             ]
 
-
 @dataclass
 class ContainerResult:
     """Result of container execution"""
@@ -95,7 +107,6 @@ class ContainerResult:
     logs: List[str]
     resource_usage: Dict[str, Any]
     error_message: Optional[str] = None
-
 
 class ContainerOutputStreamer:
     """Streams container output in real-time"""
@@ -158,7 +169,6 @@ class ContainerOutputStreamer:
         """Remove WebSocket client"""
         if client in self.clients:  # type: ignore
             self.clients.remove(client)  # type: ignore
-
 
 class ContainerManager:
     """Manages Docker container execution for orchestrator tasks"""
@@ -229,7 +239,6 @@ CMD ["bash"]
 '''
 
         # Create temporary build context
-        import tempfile
         with tempfile.TemporaryDirectory() as build_dir:
             dockerfile_path = Path(build_dir) / "Dockerfile"
             dockerfile_path.write_text(dockerfile_content)
@@ -291,7 +300,6 @@ CMD ["bash"]
 
         # Validate host system resources
         try:
-            import psutil
             mem = psutil.virtual_memory()
             if mem.available < 1024 * 1024 * 1024:  # Less than 1GB available
                 logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
@@ -322,7 +330,6 @@ CMD ["bash"]
         }
 
         # Prepare Claude CLI command with proper flags and path escaping
-        import shlex
         escaped_prompt = shlex.quote(prompt_file)
         claude_cmd = [
             "claude",
@@ -406,7 +413,7 @@ CMD ["bash"]
             resource_usage = {}
         except docker.errors.ContainerError as e:  # type: ignore
             logger.error(f"Container error for {task_id}: {e}")  # type: ignore
-            exit_code = e.exit_status  # type: ignore
+            exit_code = e.exit_status if e is not None else None
             status = "failed"
             stdout = e.stdout.decode('utf-8') if e.stdout else ""  # type: ignore
             stderr = e.stderr.decode('utf-8') if e.stderr else str(e)  # type: ignore
@@ -617,10 +624,8 @@ CMD ["bash"]
 
         logger.info("ContainerManager cleanup complete")
 
-
 def main():
     """CLI entry point for ContainerManager testing"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Container Manager for Orchestrator")
     parser.add_argument("--task-id", required=True, help="Task ID")
@@ -656,7 +661,6 @@ def main():
         return 1
     finally:
         manager.cleanup()
-
 
 if __name__ == "__main__":
     exit(main())

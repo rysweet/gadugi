@@ -1,11 +1,14 @@
+from typing import Any, Dict
+
+import re
+    import subprocess
+
 #!/usr/bin/env python3
 """
 Fix PerformanceMetrics usage in test files.
 """
 
-import re
 from pathlib import Path
-
 
 def fix_performance_metrics_usage():
     """Fix PerformanceMetrics instantiation in test files."""
@@ -61,7 +64,6 @@ def fix_performance_metrics_usage():
             mock_class = '''
 # Mock performance data class for testing
 from dataclasses import dataclass
-from typing import Dict, Any
 
 @dataclass
 class MockPerformanceData:
@@ -99,7 +101,6 @@ class MockPerformanceData:
 
         path.write_text(content)
         print(f"Fixed PerformanceMetrics in {filepath}")
-
 
 def fix_shared_test_instructions():
     """Fix the shared_test_instructions.py file."""
@@ -140,7 +141,6 @@ def fix_shared_test_instructions():
     path.write_text(content)
     print("Fixed shared_test_instructions.py")
 
-
 def main():
     """Main execution."""
     print("Fixing PerformanceMetrics and related issues...")
@@ -149,7 +149,6 @@ def main():
     fix_shared_test_instructions()
 
     # Check remaining errors
-    import subprocess
 
     result = subprocess.run(
         ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
@@ -157,7 +156,6 @@ def main():
 
     error_count = len([l for l in result.stdout.split("\n") if "error:" in l])
     print(f"\nErrors remaining: {error_count}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-"""
-Gadugi Event Service CLI
-
-Command-line interface for managing the Gadugi event-driven service.
-"""
+from typing import List
 
 import argparse
 import asyncio
@@ -12,6 +7,18 @@ import logging
 import os
 import socket
 import sys
+                import traceback
+            import secrets
+            import aiohttp
+                import aiofiles
+
+#!/usr/bin/env python3
+"""
+Gadugi Event Service CLI
+
+Command-line interface for managing the Gadugi event-driven service.
+"""
+
 from pathlib import Path
 
 from .service import GadugiEventService
@@ -25,10 +32,8 @@ from .config import (
 )
 from .events import create_local_event
 from .github_client import GitHubClient
-from typing import List
 
 logger = logging.getLogger(__name__)
-
 
 class GadugiCLI:
     """Command-line interface for Gadugi Event Service."""
@@ -194,7 +199,6 @@ Examples:
         except Exception as e:
             logger.error(f"Command failed: {e}")
             if args.verbose:
-                import traceback
 
                 traceback.print_exc()
             return 1
@@ -223,7 +227,6 @@ Examples:
                 config.github_token = token
 
         if not config.webhook_secret:
-            import secrets
 
             config.webhook_secret = secrets.token_hex(32)
             print(f"Generated webhook secret: {config.webhook_secret}")
@@ -276,7 +279,6 @@ Examples:
             config = load_config(args.config)
 
             # Try to connect to health endpoint
-            import aiohttp
 
             async with aiohttp.ClientSession() as session:
                 url = f"http://{config.bind_address}:{config.bind_port}/health"
@@ -385,7 +387,6 @@ Examples:
             if args.data:
                 event_data = json.loads(args.data)
             elif args.file:
-                import aiofiles
 
                 async def read_json_file(path):
                     async with aiofiles.open(path, "r") as f:
@@ -597,7 +598,6 @@ Examples:
             print("Webhook deletion failed")
             return 1
 
-
 def main():
     """Main CLI entry point."""
     cli = GadugiCLI()
@@ -611,7 +611,6 @@ def main():
 
     exit_code = asyncio.run(cli.run(args))
     sys.exit(exit_code)
-
 
 if __name__ == "__main__":
     main()

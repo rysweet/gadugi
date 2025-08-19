@@ -1,3 +1,27 @@
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    Union  # type: ignore
+)
+
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.error_handling import ErrorHandler
+from ..shared.state_management import StateManager
+import logging
+import psutil
+import signal  # type: ignore
+import sys  # type: ignore
+import threading
+import time
+import uuid  # type: ignore
+            import subprocess
+
 """
 WorkflowManager Reliability Module
 
@@ -18,18 +42,10 @@ Integration with Enhanced Separation:
 - Leverages task tracking for comprehensive monitoring
 """
 
-import logging
-import psutil
-import signal  # type: ignore
-import sys  # type: ignore
-import threading
-import time
 from datetime import datetime, timedelta, timezone  # type: ignore
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # type: ignore
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid  # type: ignore
 
 # Import Enhanced Separation shared modules
 try:
@@ -55,7 +71,6 @@ except ImportError as e:
         details: Dict[str, Any] = field(default_factory=dict)
         workflow_id: Optional[str] = None
 
-
 class WorkflowStage(Enum):
     """Detailed workflow stages for comprehensive tracking"""
     INITIALIZATION = "initialization"
@@ -78,7 +93,6 @@ class WorkflowStage(Enum):
     FINAL_CLEANUP = "final_cleanup"
     COMPLETION = "completion"
 
-
 class HealthStatus(Enum):
     """Health status for system checks"""
     HEALTHY = "healthy"
@@ -86,7 +100,6 @@ class HealthStatus(Enum):
     DEGRADED = "degraded"
     CRITICAL = "critical"
     FAILED = "failed"
-
 
 @dataclass
 class SystemHealthCheck:
@@ -102,7 +115,6 @@ class SystemHealthCheck:
     timestamp: datetime = field(default_factory=datetime.now)
     recommendations: List[str] = field(default_factory=list)
 
-
 @dataclass
 class WorkflowTimeout:
     """Timeout configuration for workflow stages"""
@@ -110,7 +122,6 @@ class WorkflowTimeout:
     timeout_seconds: int
     warning_threshold_seconds: int
     recovery_actions: List[str] = field(default_factory=list)
-
 
 @dataclass
 class WorkflowMonitoringState:
@@ -126,7 +137,6 @@ class WorkflowMonitoringState:
     recovery_attempts: int = 0
     timeout_warnings: int = 0
     performance_metrics: Dict[str, Any] = field(default_factory=dict)
-
 
 class WorkflowReliabilityManager:
     """
@@ -957,7 +967,6 @@ class WorkflowReliabilityManager:
     def _check_git_status(self) -> str:
         """Check git repository status"""
         try:
-            import subprocess
             result = subprocess.run(['git', 'status', '--porcelain'],
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
@@ -970,7 +979,6 @@ class WorkflowReliabilityManager:
     def _check_github_connectivity(self) -> bool:
         """Check GitHub API connectivity"""
         try:
-            import subprocess
             result = subprocess.run(['gh', 'api', 'user'],
                                   capture_output=True, timeout=10)
             return result.returncode == 0
@@ -980,7 +988,6 @@ class WorkflowReliabilityManager:
     def _check_claude_availability(self) -> bool:
         """Check Claude CLI availability"""
         try:
-            import subprocess
             result = subprocess.run(['claude', '--version'],
                                   capture_output=True, timeout=10)
             return result.returncode == 0
@@ -1250,7 +1257,6 @@ class WorkflowReliabilityManager:
         except Exception as e:
             self.logger.error(f"Error during shutdown: {e}")
 
-
 # Context manager for workflow reliability
 class WorkflowReliabilityContext:
     """Context manager for workflow execution with comprehensive reliability features"""
@@ -1286,7 +1292,6 @@ class WorkflowReliabilityContext:
 
         # Don't suppress exceptions
         return False
-
 
 # Convenience functions for WorkflowManager integration
 def create_reliability_manager(config: Optional[Dict[str, Any]] = None) -> WorkflowReliabilityManager:

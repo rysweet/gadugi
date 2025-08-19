@@ -1,9 +1,11 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+import docker
+
 """
 Tests for Container Manager.
 """
 
-import pytest
-import docker
 from unittest.mock import Mock, patch
 
 from container_runtime.container_manager import (
@@ -13,7 +15,6 @@ from container_runtime.container_manager import (
     ContainerStatus,
 )
 
-
 @pytest.fixture
 def mock_docker_client():
     """Mock Docker client fixture."""
@@ -21,12 +22,10 @@ def mock_docker_client():
     client.ping.return_value = True
     return client
 
-
 @pytest.fixture
 def container_manager(mock_docker_client):
     """Container manager fixture."""
     return ContainerManager(docker_client=mock_docker_client)
-
 
 @pytest.fixture
 def sample_config():
@@ -39,7 +38,6 @@ def sample_config():
         timeout=60,
     )
 
-
 def test_container_manager_initialization(mock_docker_client):
     """Test container manager initialization."""
     manager = ContainerManager(docker_client=mock_docker_client)
@@ -48,7 +46,6 @@ def test_container_manager_initialization(mock_docker_client):
     assert len(manager.active_containers) == 0
     assert len(manager.execution_history) == 0
     mock_docker_client.ping.assert_called_once()
-
 
 def test_container_manager_initialization_without_client():
     """Test container manager initialization without client."""
@@ -63,7 +60,6 @@ def test_container_manager_initialization_without_client():
         mock_from_env.assert_called_once()
         mock_client.ping.assert_called_once()
 
-
 def test_container_manager_docker_connection_failure():
     """Test container manager with Docker connection failure."""
     mock_client = Mock(spec=docker.DockerClient)
@@ -71,7 +67,6 @@ def test_container_manager_docker_connection_failure():
 
     with pytest.raises(Exception, match="Failed to connect to Docker daemon"):
         ContainerManager(docker_client=mock_client)
-
 
 def test_create_container_success(container_manager, sample_config):
     """Test successful container creation."""
@@ -93,7 +88,6 @@ def test_create_container_success(container_manager, sample_config):
     assert call_args[1]["command"] == sample_config.command
     assert call_args[1]["mem_limit"] == sample_config.memory_limit
 
-
 def test_create_container_failure(container_manager, sample_config):
     """Test container creation failure."""
     container_manager.client.containers.create.side_effect = docker.errors.APIError(
@@ -102,7 +96,6 @@ def test_create_container_failure(container_manager, sample_config):
 
     with pytest.raises(Exception, match="Docker API error creating container"):
         container_manager.create_container(sample_config)
-
 
 def test_start_container_success(container_manager, sample_config):
     """Test successful container start."""
@@ -116,12 +109,10 @@ def test_start_container_success(container_manager, sample_config):
 
     mock_container.start.assert_called_once()
 
-
 def test_start_container_not_found(container_manager):
     """Test starting non-existent container."""
     with pytest.raises(Exception, match="Container .* not found"):
         container_manager.start_container("non-existent")
-
 
 def test_start_container_failure(container_manager, sample_config):
     """Test container start failure."""
@@ -133,7 +124,6 @@ def test_start_container_failure(container_manager, sample_config):
 
     with pytest.raises(Exception, match="Docker API error starting container"):
         container_manager.start_container(container_id)
-
 
 def test_execute_container_success(container_manager, sample_config):
     """Test successful container execution."""
@@ -153,7 +143,6 @@ def test_execute_container_success(container_manager, sample_config):
     assert result.status == ContainerStatus.STOPPED
     assert result.execution_time > 0
 
-
 def test_execute_container_failure(container_manager, sample_config):
     """Test container execution with non-zero exit code."""
     # Mock container
@@ -168,7 +157,6 @@ def test_execute_container_failure(container_manager, sample_config):
 
     assert result.exit_code == 1
     assert result.status == ContainerStatus.FAILED
-
 
 def test_execute_container_timeout(container_manager, sample_config):
     """Test container execution timeout."""
@@ -186,7 +174,6 @@ def test_execute_container_timeout(container_manager, sample_config):
     assert result.exit_code == 124  # Timeout exit code
     mock_stop.assert_called_once()
 
-
 def test_stop_container_graceful(container_manager, sample_config):
     """Test graceful container stop."""
     # Create container
@@ -198,7 +185,6 @@ def test_stop_container_graceful(container_manager, sample_config):
     container_manager.stop_container(container_id, force=False, timeout=5)
 
     mock_container.stop.assert_called_once_with(timeout=5)
-
 
 def test_stop_container_force(container_manager, sample_config):
     """Test forced container stop."""
@@ -212,12 +198,10 @@ def test_stop_container_force(container_manager, sample_config):
 
     mock_container.kill.assert_called_once()
 
-
 def test_stop_container_not_found(container_manager):
     """Test stopping non-existent container."""
     # Should not raise exception
     container_manager.stop_container("non-existent")
-
 
 def test_cleanup_container(container_manager, sample_config):
     """Test container cleanup."""
@@ -233,7 +217,6 @@ def test_cleanup_container(container_manager, sample_config):
     mock_container.remove.assert_called_once_with(force=True)
     assert container_id not in container_manager.active_containers
 
-
 def test_cleanup_running_container(container_manager, sample_config):
     """Test cleanup of running container."""
     # Create running container
@@ -247,7 +230,6 @@ def test_cleanup_running_container(container_manager, sample_config):
 
     mock_container.stop.assert_called_once_with(timeout=5)
     mock_container.remove.assert_called_once_with(force=True)
-
 
 def test_get_resource_usage(container_manager):
     """Test resource usage collection."""
@@ -281,7 +263,6 @@ def test_get_resource_usage(container_manager):
     assert usage["memory_usage_bytes"] == 134217728
     assert usage["memory_percent"] == 25.0  # 128MB / 512MB * 100
 
-
 def test_list_active_containers(container_manager, sample_config):
     """Test listing active containers."""
     # Create multiple containers
@@ -307,7 +288,6 @@ def test_list_active_containers(container_manager, sample_config):
     assert any(c["container_id"] == container_id1 for c in containers)
     assert any(c["container_id"] == container_id2 for c in containers)
 
-
 def test_cleanup_all(container_manager, sample_config):
     """Test cleanup of all containers."""
     # Create multiple containers
@@ -324,7 +304,6 @@ def test_cleanup_all(container_manager, sample_config):
     container_manager.cleanup_all()
 
     assert len(container_manager.active_containers) == 0
-
 
 def test_get_execution_history(container_manager, sample_config):
     """Test getting execution history."""

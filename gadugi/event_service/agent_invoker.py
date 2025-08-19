@@ -1,21 +1,22 @@
+from typing import Any, Dict
+
+import asyncio
+import logging
+import os
+import tempfile
+
 """
 Agent invocation system for Gadugi Event Service
 
 Handles the actual execution of agents in response to events.
 """
 
-import asyncio
-import logging
-import os
-import tempfile
 from pathlib import Path
 
 from .config import AgentInvocation
 from .events import Event
-from typing import Any, Dict, Set
 
 logger = logging.getLogger(__name__)
-
 
 class AgentInvoker:
     """Handles agent invocation for event responses."""

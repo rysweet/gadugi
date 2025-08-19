@@ -1,3 +1,10 @@
+from typing import List
+
+import argparse
+import logging
+import sys
+            import traceback
+
 #!/usr/bin/env python3
 """
 OrchestratorCLI - Command Line Interface for Orchestrator Agent
@@ -13,11 +20,7 @@ Key Features:
 - Supports both interactive and batch execution modes
 """
 
-import argparse
-import logging
-import sys
 from pathlib import Path
-from typing import List
 
 # Import orchestrator components
 try:
@@ -31,7 +34,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 class OrchestrationCLI:
     """
@@ -260,7 +262,6 @@ class OrchestrationCLI:
         except Exception as e:
             print(f"\n❌ Orchestration failed: {e}")
 
-
 def parse_arguments():
     """Parse command-line arguments"""
     parser = argparse.ArgumentParser(
@@ -342,7 +343,6 @@ Examples:
 
     return parser.parse_args()
 
-
 def main():
     """Main entry point for orchestrator CLI"""
     args = parse_arguments()
@@ -408,10 +408,8 @@ def main():
     except Exception as e:
         logger.error(f"CLI execution failed: {e}")
         if args.verbose:
-            import traceback
             traceback.print_exc()
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

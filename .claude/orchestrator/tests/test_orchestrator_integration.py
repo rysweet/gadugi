@@ -1,5 +1,14 @@
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch
+import os
+import tempfile
+import unittest
+import sys
+        import shutil
+    import logging
+
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Integration tests for the Orchestrator implementation
 
@@ -7,18 +16,13 @@ These tests validate the complete orchestrator workflow from CLI input
 to parallel execution coordination.
 """
 
-import os
-import tempfile
-import unittest
 from pathlib import Path
 
 # Add orchestrator components to path
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from orchestrator_cli import OrchestrationCLI
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
-
 
 class TestOrchestratorIntegration(unittest.TestCase):
     """Integration tests for orchestrator components"""
@@ -64,7 +68,6 @@ Test prompt for orchestrator integration testing.
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_orchestrator_coordinator_initialization(self):
@@ -306,7 +309,6 @@ Execute these prompts:
         with self.assertRaises(ValueError):
             cli.execute_orchestration([])
 
-
 class TestOrchestratorPerformance(unittest.TestCase):
     """Performance and stress tests for orchestrator"""
 
@@ -316,7 +318,6 @@ class TestOrchestratorPerformance(unittest.TestCase):
         self.prompts_dir.mkdir(parents=True)
 
     def tearDown(self):
-        import shutil
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_large_prompt_set_handling(self):
@@ -350,10 +351,8 @@ class TestOrchestratorPerformance(unittest.TestCase):
         self.assertLessEqual(config.max_parallel_tasks, 32)  # Reasonable upper bound
         self.assertLessEqual(config.execution_timeout_hours, 24)  # Reasonable timeout
 
-
 if __name__ == '__main__':
     # Set up test environment
-    import logging
     logging.basicConfig(level=logging.WARNING)  # Reduce noise during testing
 
     # Run tests

@@ -1,13 +1,16 @@
+import json
+import tempfile
+import unittest
+        import shutil
+
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
 """Comprehensive tests for Memory.md to GitHub Issues integration
 
 This test suite validates all components of the Memory.md integration system,
 including parsing, GitHub API integration, synchronization, and conflict resolution.
 """
 
-import json
-import tempfile
-import unittest
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -18,8 +21,6 @@ from github_integration import GitHubIntegration, GitHubIssue
 # Import our modules
 from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
 from sync_engine import SyncConfig, SyncDirection, SyncEngine
-from typing import Set
-
 
 class TestMemoryParser(unittest.TestCase):
     """Test Memory.md parsing functionality"""
@@ -116,7 +117,6 @@ Some important insights about the project.
         self.assertIsInstance(doc, MemoryDocument)
         self.assertGreater(len(doc.tasks), 0)
 
-
 class TestGitHubIntegration(unittest.TestCase):
     """Test GitHub Issues integration"""
 
@@ -137,7 +137,6 @@ class TestGitHubIntegration(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -197,7 +196,6 @@ class TestGitHubIntegration(unittest.TestCase):
         self.assertEqual(issue.memory_task_id, "test-001")
         self.assertEqual(issue.state, "open")
 
-
 class TestSyncEngine(unittest.TestCase):
     """Test synchronization engine"""
 
@@ -226,7 +224,6 @@ Last Updated: 2025-08-01T13:00:00-08:00
 
     def tearDown(self):
         """Clean up test fixtures"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -315,7 +312,6 @@ Last Updated: 2025-08-01T13:00:00-08:00
         self.assertIn("last_sync", state_data)
         self.assertIn("last_result", state_data)
 
-
 class TestConfigManager(unittest.TestCase):
     """Test configuration management"""
 
@@ -326,7 +322,6 @@ class TestConfigManager(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -373,7 +368,6 @@ class TestConfigManager(unittest.TestCase):
         self.assertIn("memory_file_path", effective)
         self.assertTrue(Path(effective["memory_file_path"]).is_absolute())
 
-
 class TestIntegrationScenarios(unittest.TestCase):
     """Test end-to-end integration scenarios"""
 
@@ -410,7 +404,6 @@ Last Updated: 2025-08-01T13:00:00-08:00
 
     def tearDown(self):
         """Clean up integration test environment"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -463,7 +456,6 @@ Last Updated: 2025-08-01T13:00:00-08:00
         self.assertEqual(sync_engine.config.direction, config.sync.direction)
         self.assertEqual(sync_engine.config.dry_run, config.sync.dry_run)
 
-
 def run_comprehensive_tests():
     """Run all tests with detailed reporting"""
     # Create test suite
@@ -508,7 +500,6 @@ def run_comprehensive_tests():
             print(f"  - {test}: {split_tb[-2]}")
 
     return result.wasSuccessful()
-
 
 if __name__ == "__main__":
     success = run_comprehensive_tests()

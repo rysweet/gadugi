@@ -1,3 +1,6 @@
+
+from ..shared.state_management import StateManager
+from unittest.mock import Mock, patch, MagicMock
 """
 Tests for TeamCoach Task Matcher
 
@@ -28,7 +31,6 @@ from ..phase1.capability_assessment import (
 )
 from ...shared.task_tracking import TaskMetrics
 from ...shared.state_management import StateManager
-
 
 class TestTaskAgentMatcher(unittest.TestCase):
     """Test cases for TaskAgentMatcher"""
@@ -418,7 +420,6 @@ class TestTaskAgentMatcher(unittest.TestCase):
             total_weight = sum(weights.values())
             self.assertAlmostEqual(total_weight, 1.0, places=2)
 
-
 class TestTaskRequirements(unittest.TestCase):
     """Test cases for TaskRequirements dataclass"""
 
@@ -440,7 +441,6 @@ class TestTaskRequirements(unittest.TestCase):
         self.assertIsInstance(requirements.preferred_capabilities, dict)
         self.assertEqual(requirements.priority, TaskPriority.MEDIUM)
         self.assertEqual(requirements.urgency, TaskUrgency.NORMAL)
-
 
 class TestMatchingScore(unittest.TestCase):
     """Test cases for MatchingScore dataclass"""
@@ -465,7 +465,6 @@ class TestMatchingScore(unittest.TestCase):
         self.assertIsInstance(score.strengths, list)
         self.assertIsInstance(score.concerns, list)
         self.assertIsInstance(score.recommendations, list)
-
 
 if __name__ == "__main__":
     unittest.main()

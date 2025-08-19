@@ -1,23 +1,23 @@
-#!/usr/bin/env python3
-"""
-Comprehensive tests for TeamCoach hooks functionality.
-This test suite provides complete coverage of TeamCoach hook integration.
-"""
-
 import unittest
 import json
 import subprocess
 import tempfile
 import os
 import sys
-from unittest.mock import patch, MagicMock
 import io
 import importlib.util
-from typing import Set
+
+#!/usr/bin/env python3
+
+"""
+Comprehensive tests for TeamCoach hooks functionality.
+This test suite provides complete coverage of TeamCoach hook integration.
+"""
+
+from unittest.mock import Mock, patch, MagicMock
 
 # Add the project root to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 
 class TestTeamCoachStopHookUnit(unittest.TestCase):
     """Unit tests for TeamCoach stop hook functionality."""
@@ -179,7 +179,6 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
         self.assertEqual(printed_output["action"], "continue")
         self.assertIn("issues", printed_output["message"])
 
-
 class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
     """Unit tests for TeamCoach subagent stop hook functionality."""
 
@@ -262,7 +261,6 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
         # Should still call TeamCoach with empty data
         mock_run.assert_called_once()
 
-
 class TestTeamCoachHookIntegration(unittest.TestCase):
     """Integration tests for TeamCoach hooks."""
 
@@ -308,7 +306,6 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
         mock_claude = os.path.join(temp_dir, "claude")
         with open(mock_claude, "w") as f:
             f.write("""#!/usr/bin/env python3
-import sys
 # Simulate successful claude execution
 sys.exit(0)
 """)
@@ -394,7 +391,6 @@ sys.exit(0)
             subagent_content = f.read()
         self.assertIn("timeout=180", subagent_content)
 
-
 class TestTeamCoachHookPermissions(unittest.TestCase):
     """Test file permissions and security aspects."""
 
@@ -461,7 +457,6 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
             "Workflow reflection agent should exist as hook replacement",
         )
 
-
 class TestTeamCoachHookErrorHandling(unittest.TestCase):
     """Test error handling in TeamCoach hooks."""
 
@@ -510,7 +505,6 @@ class TestTeamCoachHookErrorHandling(unittest.TestCase):
         self.assertIn("TeamCoach agent analysis timed out", subagent_content)
         self.assertIn("Error in TeamCoach agent analysis", subagent_content)
         self.assertIn("hook error", subagent_content)
-
 
 if __name__ == "__main__":
     # Run with verbose output

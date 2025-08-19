@@ -1,5 +1,12 @@
-#!/usr/bin/env python3
 import tempfile
+import json
+import os
+import shutil
+import subprocess
+import unittest
+
+#!/usr/bin/env python3
+
 """
 Test the agent-manager hook setup functionality with external scripts.
 
@@ -7,13 +14,7 @@ These tests validate that the agent-manager correctly sets up SessionStart hooks
 in .claude/settings.json using the external setup-hooks.sh script.
 """
 
-import json
-import os
-import shutil
-import subprocess
-import unittest
 from pathlib import Path
-
 
 class TestAgentManagerHookSetup(unittest.TestCase):
     """Test the Agent Manager hook setup functionality."""
@@ -231,7 +232,6 @@ class TestAgentManagerHookSetup(unittest.TestCase):
 
         for entry in expected_entries:
             self.assertIn(entry, content, f"Missing .gitignore entry: {entry}")
-
 
 if __name__ == '__main__':
     unittest.main()

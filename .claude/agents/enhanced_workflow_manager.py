@@ -1,4 +1,25 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import json
+import logging
+import os
+import sys
+import time
+    import argparse
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.error_handling import ErrorHandler
+
+from ..shared.state_management import StateManager
 """
 Enhanced WorkflowManager Agent with Comprehensive Reliability Features
 
@@ -19,14 +40,8 @@ Integration:
 - Maintains compatibility with orchestrator and other agents
 """
 
-import json
-import logging
-import os
-import sys
-import time
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 from dataclasses import dataclass
 
 # Add shared modules to path
@@ -62,14 +77,12 @@ except ImportError as e:
             def __exit__(self, *args): pass
         return MockContext()
 
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class WorkflowConfiguration:
@@ -82,7 +95,6 @@ class WorkflowConfiguration:
     timeout_multiplier: float = 1.5
     log_level: str = 'INFO'
     checkpoint_frequency: int = 5  # Create checkpoint every N phases
-
 
 class EnhancedWorkflowManager:
     """
@@ -305,7 +317,7 @@ class EnhancedWorkflowManager:
             critical_phases = [
                 WorkflowStage.IMPLEMENTATION_START,  # type: ignore
                 WorkflowStage.PR_CREATION,  # type: ignore
-                WorkflowStage.REVIEW_PROCESSING  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING if WorkflowStage is not None else None
             ]
 
             if stage in critical_phases:
@@ -332,7 +344,7 @@ class EnhancedWorkflowManager:
                 WorkflowStage.ISSUE_CREATION,  # type: ignore
                 WorkflowStage.IMPLEMENTATION_COMPLETE,  # type: ignore
                 WorkflowStage.PR_CREATION,  # type: ignore
-                WorkflowStage.REVIEW_PROCESSING  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING if WorkflowStage is not None else None
             ]
 
             if stage in checkpoint_phases and self.config.enable_persistence:
@@ -992,11 +1004,9 @@ This PR implements comprehensive reliability improvements for the WorkflowManage
                 'workflow_id': workflow_id
             }
 
-
 # CLI interface for the Enhanced WorkflowManager
 def main():
     """CLI entry point for Enhanced WorkflowManager"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Enhanced WorkflowManager with comprehensive reliability features")
     parser.add_argument('prompt_file', help='Path to the prompt file to execute')
@@ -1061,7 +1071,6 @@ def main():
     finally:
         # Cleanup
         enhanced_manager.reliability_manager.shutdown()
-
 
 if __name__ == "__main__":
     exit(main())

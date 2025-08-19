@@ -1,3 +1,10 @@
+import unittest
+import sys
+import time
+import base64
+import urllib.parse
+    import logging
+
 #!/usr/bin/env python3
 """
 Test suite for XPIA Defense Engine
@@ -6,11 +13,6 @@ Comprehensive testing of Cross-Prompt Injection Attack defense capabilities
 including threat detection, content sanitization, and performance validation.
 """
 
-import unittest
-import sys
-import time
-import base64
-import urllib.parse
 from pathlib import Path
 
 # Add shared modules to path
@@ -24,7 +26,6 @@ from xpia_defense import (
     ThreatLevel,
     SecurityMode,
 )
-
 
 class TestThreatPatternLibrary(unittest.TestCase):
     """Test threat pattern library functionality"""
@@ -96,7 +97,6 @@ class TestThreatPatternLibrary(unittest.TestCase):
 
         # Try to remove non-existent pattern
         self.assertFalse(self.pattern_library.remove_pattern("non_existent"))
-
 
 class TestThreatDetection(unittest.TestCase):
     """Test threat detection capabilities"""
@@ -194,7 +194,6 @@ class TestThreatDetection(unittest.TestCase):
         # Should detect both the URL encoding and the underlying threat
         self.assertGreater(len(result.threats_detected), 0)
 
-
 class TestContentSanitization(unittest.TestCase):
     """Test content sanitization functionality"""
 
@@ -226,7 +225,6 @@ class TestContentSanitization(unittest.TestCase):
 
         self.assertEqual(result.sanitized_content, result.original_content)
         self.assertEqual(len(result.sanitization_applied), 0)
-
 
 class TestSecurityModes(unittest.TestCase):
     """Test different security mode behaviors"""
@@ -280,7 +278,6 @@ class TestSecurityModes(unittest.TestCase):
         result = engine.validate_content(self.critical_content)
         if result.threat_level == ThreatLevel.CRITICAL:
             self.assertFalse(result.is_safe)
-
 
 class TestPerformance(unittest.TestCase):
     """Test performance characteristics"""
@@ -338,7 +335,6 @@ class TestPerformance(unittest.TestCase):
 
         # All validations should complete
         self.assertEqual(len(results), len(test_contents))
-
 
 class TestXPIADefenseAgent(unittest.TestCase):
     """Test the main XPIA Defense Agent interface"""
@@ -416,7 +412,6 @@ class TestXPIADefenseAgent(unittest.TestCase):
         self.assertEqual(result["total_patterns"], original_count + 1)
         self.assertEqual(len(result["errors"]), 0)
 
-
 class TestIntegration(unittest.TestCase):
     """Integration tests for real-world scenarios"""
 
@@ -486,10 +481,8 @@ class TestIntegration(unittest.TestCase):
         false_positive_rate = false_positives / len(legitimate_contents)
         self.assertLess(false_positive_rate, 0.1)  # Less than 10% false positive rate
 
-
 if __name__ == "__main__":
     # Setup test logging
-    import logging
 
     logging.basicConfig(level=logging.WARNING)  # Reduce log noise during testing
 

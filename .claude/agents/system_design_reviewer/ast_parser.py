@@ -1,3 +1,14 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Union
+)
+
+import ast
+
 """
 AST Parser Abstraction Layer - Pluggable architecture for multi-language code analysis
 
@@ -5,13 +16,10 @@ Provides pluggable AST parsing capabilities for identifying architectural elemen
 and changes across different programming languages.
 """
 
-import ast
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional, Set, Union
 from pathlib import Path
 from enum import Enum
-
 
 class ChangeType(Enum):
     """Types of architectural changes"""
@@ -20,14 +28,12 @@ class ChangeType(Enum):
     REMOVED = "removed"
     RENAMED = "renamed"
 
-
 class ImpactLevel(Enum):
     """Impact levels for architectural changes"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class ElementType(Enum):
     """Types of architectural elements"""
@@ -39,7 +45,6 @@ class ElementType(Enum):
     IMPORT = "import"
     CONSTANT = "constant"
     ASYNC_FUNCTION = "async_function"
-
 
 @dataclass
 class ArchitecturalElement:
@@ -61,7 +66,6 @@ class ArchitecturalElement:
 
     def __hash__(self):
         return hash((self.element_type, self.name, self.location))
-
 
 @dataclass
 class ArchitecturalChange:
@@ -91,7 +95,6 @@ class ArchitecturalChange:
             return f"{action} {element_type} '{self.old_element.name}' to '{self.element.name}'"
         else:
             return f"{action} {element_type} '{self.element.name}'"
-
 
 class ASTParser(ABC):
     """Base class for language-specific AST parsers"""
@@ -133,7 +136,6 @@ class ASTParser(ABC):
             "cognitive_complexity": 1,
             "nesting_depth": 0
         }
-
 
 class PythonASTParser(ASTParser):
     """Python-specific AST parser using built-in ast module"""
@@ -289,7 +291,6 @@ class PythonASTParser(ASTParser):
 
         return implications
 
-
 class PythonASTVisitor(ast.NodeVisitor):
     """AST visitor for extracting architectural elements from Python code"""
 
@@ -418,7 +419,6 @@ class PythonASTVisitor(ast.NodeVisitor):
             return ast.unparse(node.returns) if hasattr(ast, 'unparse') else str(node.returns)
         return None
 
-
 class TypeScriptASTParser(ASTParser):
     """TypeScript-specific AST parser (placeholder for future implementation)"""
 
@@ -454,7 +454,6 @@ class TypeScriptASTParser(ASTParser):
         """Analyze TypeScript changes - placeholder implementation"""
         # TODO: Implement TypeScript-specific change analysis
         return []
-
 
 class ASTParserFactory:
     """Factory for creating appropriate AST parsers based on file type"""

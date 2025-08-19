@@ -1,4 +1,19 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple
+)
+
+import os
+import re
+    import warnings
+    import sys
+
 #!/usr/bin/env python3
+
 """
 Memory Compactor - Automatic Memory.md compaction with LongTermMemoryDetails.md archiving
 
@@ -7,15 +22,9 @@ size thresholds, moving detailed historical information to LongTermMemoryDetails
 while preserving essential current information.
 """
 
-import os
-import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-import os
 
 if os.environ.get("GADUGI_TEST_ENV") == "1":
-    import warnings
 
     warnings.warn("memory_parser module not found. Some functionality may be limited.")
 
@@ -67,7 +76,6 @@ else:
             f"Original error: {e}"
         )
 
-
 class CompactionRule:
     """Defines rules for compacting specific content types"""
 
@@ -104,7 +112,6 @@ class CompactionRule:
             return True
 
         return False
-
 
 class MemoryCompactor:
     """Handles automatic Memory.md compaction with archiving"""
@@ -636,10 +643,8 @@ Last Updated: {timestamp}
         except (OSError, RuntimeError) as e:
             raise ValueError(f"Invalid path: {path_str}") from e
 
-
 def main():
     """Example usage of MemoryCompactor"""
-    import sys
 
     if len(sys.argv) < 2:
         print("Usage: python memory_compactor.py <memory_file_path> [--dry-run]")
@@ -676,7 +681,6 @@ def main():
             sys.exit(1)
     else:
         print("No compaction needed")
-
 
 if __name__ == "__main__":
     main()

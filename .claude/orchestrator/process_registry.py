@@ -1,4 +1,13 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import logging
+import time
+import psutil
+    import argparse
+
 #!/usr/bin/env python3
+
 """
 ProcessRegistry - Process Tracking and Monitoring System
 
@@ -14,16 +23,10 @@ Key Features:
 - Integration with VS Code monitoring extensions
 """
 
-import json
-import logging
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import psutil
 
 # Configure logging
 logging.basicConfig(
@@ -31,7 +34,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 class ProcessStatus(Enum):
     """Process execution status"""
@@ -41,7 +43,6 @@ class ProcessStatus(Enum):
     FAILED = "failed"
     TIMEOUT = "timeout"
     CANCELLED = "cancelled"
-
 
 @dataclass
 class ProcessInfo:
@@ -61,7 +62,6 @@ class ProcessInfo:
     error_message: Optional[str] = None
     resource_usage: Optional[Dict[str, Any]] = None
 
-
 @dataclass
 class RegistryStats:
     """Overall registry statistics"""
@@ -73,7 +73,6 @@ class RegistryStats:
     average_execution_time: Optional[float] = None
     total_cpu_usage: Optional[float] = None
     total_memory_usage: Optional[float] = None
-
 
 class ProcessRegistry:
     """
@@ -517,10 +516,8 @@ class ProcessRegistry:
             logger.warning(f"Could not get resource usage for PID {pid}: {e}")
             return {}
 
-
 def main():
     """Main entry point for registry management CLI"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Process Registry Management")
     parser.add_argument("command", choices=["status", "cleanup", "export", "cancel"],
@@ -571,7 +568,6 @@ def main():
             print(f"Process {args.task_id} cancelled successfully")
         else:
             print(f"Failed to cancel process {args.task_id}")
-
 
 if __name__ == "__main__":
     main()

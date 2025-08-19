@@ -1,30 +1,32 @@
-"""
-Container Manager for secure container lifecycle management.
-"""
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 import logging
 import time
 import uuid
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+    import docker
+    import docker  # type: ignore[import-untyped]
+import sys
+import os
+
+"""
+Container Manager for secure container lifecycle management.
+"""
+
 from dataclasses import dataclass
 from enum import Enum
 
 if TYPE_CHECKING:
-    import docker
 else:
     docker = None
 
 # Runtime import attempt
 try:
-    import docker  # type: ignore[import-untyped]
 
     docker_available = True
 except ImportError:
     docker_available = False
 
 # Import Enhanced Separation shared modules
-import sys
-import os
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
@@ -32,7 +34,6 @@ sys.path.append(
 from error_handling import GadugiError
 
 logger = logging.getLogger(__name__)
-
 
 class ContainerStatus(Enum):
     """Container status enumeration."""
@@ -42,7 +43,6 @@ class ContainerStatus(Enum):
     STOPPED = "stopped"
     FAILED = "failed"
     REMOVED = "removed"
-
 
 @dataclass
 class ContainerConfig:
@@ -62,7 +62,6 @@ class ContainerConfig:
     cap_drop: Optional[List[str]] = None
     timeout: int = 1800  # 30 minutes default
 
-
 @dataclass
 class ContainerResult:
     """Container execution result."""
@@ -74,7 +73,6 @@ class ContainerResult:
     execution_time: float
     resource_usage: Dict[str, Any]
     status: ContainerStatus
-
 
 class ContainerManager:
     """

@@ -1,18 +1,21 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.task_tracking import TaskTracker
+import uuid
+import logging
+        import psutil
+
 """
 Task tracking and TodoWrite integration for Gadugi multi-agent system.
 Provides comprehensive task management, workflow tracking, and Claude Code integration.
 """
 
-import uuid
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
 from pathlib import Path  # type: ignore
 
 logger = logging.getLogger(__name__)
-
 
 class TaskStatus(Enum):
     """Task status enumeration."""
@@ -22,7 +25,6 @@ class TaskStatus(Enum):
     BLOCKED = "blocked"
     CANCELLED = "cancelled"
 
-
 class TaskPriority(Enum):
     """Task priority enumeration."""
     LOW = "low"
@@ -30,16 +32,13 @@ class TaskPriority(Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
-
 class TaskError(Exception):
     """Base exception for task tracking errors."""
     pass
 
-
 class TaskValidationError(TaskError):
     """Exception for task validation errors."""
     pass
-
 
 @dataclass
 class Task:
@@ -183,7 +182,6 @@ class Task:
         if reason:
             self.metadata["cancel_reason"] = reason
 
-
 class TaskList:
     """Manages a collection of tasks."""
 
@@ -271,7 +269,6 @@ class TaskList:
 
         return stats
 
-
 def claude_function_call(function_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
     """
     Mock function for Claude Code function calls.
@@ -279,7 +276,6 @@ def claude_function_call(function_name: str, parameters: Dict[str, Any]) -> Dict
     """
     logger.info(f"Claude function call: {function_name} with parameters: {parameters}")
     return {"success": True, "function": function_name, "parameters": parameters}
-
 
 class TodoWriteIntegration:
     """Integration with Claude Code's TodoWrite function."""
@@ -389,7 +385,6 @@ class TodoWriteIntegration:
         except Exception as e:
             logger.error(f"Task list validation failed: {e}")
             return False
-
 
 class WorkflowPhaseTracker:
     """Tracks workflow phases and their associated tasks."""
@@ -527,7 +522,6 @@ class WorkflowPhaseTracker:
                 return phase_record.get('status', 'not_started')
         return 'not_started'
 
-
 class TaskMetrics:
     """Collects and analyzes task performance metrics."""
 
@@ -608,7 +602,6 @@ class TaskMetrics:
 
     def detect_resource_exhaustion(self) -> Dict[str, Any]:
         """Detect if system resources are being exhausted."""
-        import psutil
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
@@ -643,7 +636,6 @@ class TaskMetrics:
                 logger.info(f"Completed workflow phase: {phase_name}")
         else:
             logger.info(f"Completed workflow phase: {phase_name}")
-
 
 class TaskTracker:
     """Main task tracking coordinator that integrates all components."""

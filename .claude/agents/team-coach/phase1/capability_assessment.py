@@ -1,3 +1,12 @@
+from typing import Dict, List, Optional
+
+from ..shared.error_handling import ErrorHandler
+from ..shared.state_management import StateManager
+import logging
+import numpy as np
+import sys
+import os
+
 """
 TeamCoach Phase 1: Agent Capability Assessment
 
@@ -14,16 +23,11 @@ Key Features:
 - Performance context analysis
 """
 
-import logging
-import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules with absolute path resolution
-import sys
-import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
@@ -44,7 +48,6 @@ except ImportError:
         def __init__(self, *args, **kwargs):
             pass
 
-
 # Define capability-specific data classes
 @dataclass
 class CapabilityProfile:
@@ -55,7 +58,6 @@ class CapabilityProfile:
     specializations: List[str] = field(default_factory=list)
     strengths: List[str] = field(default_factory=list)
     weaknesses: List[str] = field(default_factory=list)
-
 
 class CapabilityDomain(Enum):
     """Domains for capability assessment"""
@@ -73,7 +75,6 @@ class CapabilityDomain(Enum):
     PROJECT_MANAGEMENT = "project_management"
     COORDINATION = "coordination"
 
-
 class ProficiencyLevel(Enum):
     """Proficiency levels for capabilities"""
 
@@ -82,7 +83,6 @@ class ProficiencyLevel(Enum):
     INTERMEDIATE = 3
     ADVANCED = 4
     EXPERT = 5
-
 
 @dataclass
 class CapabilityScore:
@@ -95,7 +95,6 @@ class CapabilityScore:
     last_updated: datetime
     recent_performance: List[float] = field(default_factory=list)
     improvement_trend: float = 0.0  # -1.0 to 1.0, negative = declining
-
 
 @dataclass
 class AgentCapabilityProfile:
@@ -128,7 +127,6 @@ class AgentCapabilityProfile:
     capability_trend: Dict[CapabilityDomain, float] = field(default_factory=dict)
     skill_development_recommendations: List[str] = field(default_factory=list)
 
-
 @dataclass
 class TaskCapabilityRequirement:
     """Required capabilities for a specific task"""
@@ -140,7 +138,6 @@ class TaskCapabilityRequirement:
     )
     collaborative_aspects: List[CapabilityDomain] = field(default_factory=list)
     complexity_level: int = 1  # 1-5 scale
-
 
 class CapabilityAssessment:
     """
@@ -899,7 +896,6 @@ class CapabilityAssessment:
         except Exception as e:
             self.logger.error(f"Failed to calculate capability match score: {e}")
             return 0.0
-
 
 class AssessmentError(Exception):
     """Exception raised when capability assessment fails."""

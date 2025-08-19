@@ -1,14 +1,16 @@
-#!/usr/bin/env python3
-"""
-Fix remaining specific pyright errors.
-"""
+from typing import , ", " in content:, Any, Dict, List, Optional, Optional\nfrom dataclasses import dataclass\n\n@dataclass\nclass AgentConfig:\n    name: str\n    version: str\n    capabilities: list\n\nclass ErrorHandler:\n    def __init__(self):\n        pass\n\nfrom typing import"
 
 import os
 import re
 import subprocess
-from pathlib import Path
-from typing import List, Dict, Any
 
+#!/usr/bin/env python3
+from ..shared.error_handling import ErrorHandler
+"""
+Fix remaining specific pyright errors.
+"""
+
+from pathlib import Path
 
 def fix_tempfile_import():
     """Fix missing tempfile import."""
@@ -28,7 +30,6 @@ def fix_tempfile_import():
             file_path.write_text("\n".join(lines))
             print(f"Fixed tempfile import in {file_path}")
 
-
 def fix_shared_test_instructions():
     """Fix issues in shared_test_instructions.py."""
     file_path = Path(".claude/agents/shared_test_instructions.py")
@@ -36,11 +37,8 @@ def fix_shared_test_instructions():
         content = file_path.read_text()
 
         # Add necessary imports at the top
-        if "from typing import" in content:
-            content = content.replace(
-                "from typing import",
-                "from typing import Any, Dict, Optional\nfrom dataclasses import dataclass\n\n@dataclass\nclass AgentConfig:\n    name: str\n    version: str\n    capabilities: list\n\nclass ErrorHandler:\n    def __init__(self):\n        pass\n\nfrom typing import",
-            )
+        if "            content = content.replace(
+                "                "            )
 
         # Fix possibly unbound variables by initializing them
         if "config" in content and "config = " not in content:
@@ -64,7 +62,6 @@ def fix_shared_test_instructions():
         file_path.write_text(content)
         print("Fixed shared_test_instructions.py")
 
-
 def fix_adr_generator():
     """Fix attribute access in adr_generator.py."""
     file_path = Path(".claude/agents/system_design_reviewer/adr_generator.py")
@@ -74,7 +71,6 @@ def fix_adr_generator():
         content = content.replace("._element", ".element")
         file_path.write_text(content)
         print("Fixed adr_generator.py")
-
 
 def fix_unused_imports_in_core():
     """Fix unused imports in system_design_reviewer/core.py."""
@@ -125,7 +121,6 @@ def fix_unused_imports_in_core():
         file_path.write_text("\n".join(lines))
         print("Fixed unused imports in core.py")
 
-
 def fix_task_matcher():
     """Fix unused import in task_matcher.py."""
     file_path = Path(".claude/agents/team-coach/phase2/task_matcher.py")
@@ -157,7 +152,6 @@ def fix_task_matcher():
             file_path.write_text(content)
             print("Fixed task_matcher.py")
 
-
 def fix_workflow_optimizer_syntax():
     """Fix syntax errors in workflow_optimizer test files."""
     for path in [
@@ -183,9 +177,7 @@ def fix_workflow_optimizer_syntax():
             # Fix missing imports after fixing syntax
             if "WorkflowOptimizer" in content and "from" not in content:
                 # Add proper imports
-                import_block = """from typing import Dict, List, Optional
-from unittest import TestCase
-from unittest.mock import Mock, patch
+                import_block = """from unittest import TestCase
 
 from ..phase2.workflow_optimizer import (
     WorkflowOptimizer,
@@ -199,7 +191,6 @@ from ..phase2.workflow_optimizer import (
 
             file_path.write_text(content)
             print(f"Fixed {file_path}")
-
 
 def fix_performance_data_calls():
     """Fix AgentPerformance parameter issues."""
@@ -253,7 +244,6 @@ class AgentPerformance:
             file_path.write_text(content)
             print(f"Fixed AgentPerformance in {file_path}")
 
-
 def fix_all_test_files():
     """Fix common issues in all test files."""
     test_dir = Path(".claude")
@@ -263,12 +253,12 @@ def fix_all_test_files():
         modified = False
 
         # Fix undefined Mock
-        if "Mock()" in content and "from unittest.mock import" not in content:
+
             lines = content.split("\n")
             for i, line in enumerate(lines):
                 if line.startswith("from unittest"):
                     lines.insert(
-                        i + 1, "from unittest.mock import Mock, patch, MagicMock"
+
                     )
                     modified = True
                     break
@@ -289,7 +279,6 @@ def fix_all_test_files():
         if modified:
             test_file.write_text(content)
             print(f"Fixed common issues in {test_file.name}")
-
 
 def main():
     """Main execution."""
@@ -312,7 +301,6 @@ def main():
 
     error_count = len([l for l in result.stdout.split("\n") if "error:" in l])
     print(f"\nErrors remaining: {error_count}")
-
 
 if __name__ == "__main__":
     main()

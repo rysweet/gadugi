@@ -1,19 +1,18 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+
 """
 Tests for event-router service.
 """
 
-import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
 
 from ..main import app
-
 
 @pytest.fixture
 def client():
     """Create test client."""
     return TestClient(app)
-
 
 @pytest.fixture
 def sample_request():
@@ -24,7 +23,6 @@ def sample_request():
         metadata={"source": "test"}
     )
 
-
 class TestHealthEndpoint:
     """Test health endpoint."""
 
@@ -33,7 +31,6 @@ class TestHealthEndpoint:
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
-
 
 class TestRootEndpoint:
     """Test root endpoint."""
@@ -45,7 +42,6 @@ class TestRootEndpoint:
         data = response.json()
         assert data["service"] == "event-router"
         assert data["status"] == "running"
-
 
 class TestProcessEndpoint:
     """Test process endpoint."""
@@ -78,7 +74,6 @@ class TestProcessEndpoint:
         # Should still work with empty data dict
         assert response.status_code == 200
 
-
 class TestStatusEndpoint:
     """Test status endpoint."""
 
@@ -89,7 +84,6 @@ class TestStatusEndpoint:
         data = response.json()
         assert data["service"] == "event-router"
         assert data["status"] == "operational"
-
 
 class TestErrorHandling:
     """Test error handling."""

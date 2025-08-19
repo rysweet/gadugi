@@ -1,8 +1,17 @@
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union
+)
+
 from datetime import timedelta
 import logging
 import threading
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict, deque
@@ -11,6 +20,8 @@ from collections import defaultdict, deque
 from ...shared.task_tracking import TaskMetrics
 from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
 from ...shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+from ..shared.state_management import StateManager
 
 """
 TeamCoach Phase 1: Metrics Collection Infrastructure
@@ -28,9 +39,7 @@ Key Features:
 - Extensible metric definitions
 """
 
-
 # Import shared modules
-
 
 class MetricType(Enum):
     """Types of metrics collected"""
@@ -42,7 +51,6 @@ class MetricType(Enum):
     TIMING = "timing"
     SYSTEM = "system"
 
-
 class MetricSource(Enum):
     """Sources of metric data"""
 
@@ -52,7 +60,6 @@ class MetricSource(Enum):
     USER_FEEDBACK = "user_feedback"
     COLLABORATION_TRACKER = "collaboration_tracker"
     EXTERNAL_API = "external_api"
-
 
 @dataclass
 class MetricDefinition:
@@ -68,7 +75,6 @@ class MetricDefinition:
     retention_period: timedelta = field(default_factory=lambda: timedelta(days=90))
     validation_rules: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class MetricDataPoint:
     """Individual metric data point"""
@@ -81,7 +87,6 @@ class MetricDataPoint:
     context: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-
 @dataclass
 class AggregatedMetric:
     """Aggregated metric data"""
@@ -93,7 +98,6 @@ class AggregatedMetric:
     data_point_count: int
     aggregation_method: str
     confidence_score: float = 1.0
-
 
 class MetricsCollector:
     """

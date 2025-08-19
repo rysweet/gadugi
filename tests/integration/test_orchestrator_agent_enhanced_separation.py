@@ -1,4 +1,17 @@
+import os
+import shutil
+import sys
+import tempfile
+import pytest
+import datetime
+        import time
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+from unittest.mock import Mock, patch, MagicMock
 """
 Integration tests for OrchestratorAgent with Enhanced Separation shared modules.
 
@@ -16,12 +29,7 @@ Validates that the Enhanced Separation architecture maintains:
 - Robust task tracking and analytics
 """
 
-import os
-import shutil
-import sys
-import tempfile
-
-import pytest
+from unittest.mock import Mock, patch
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -37,7 +45,6 @@ from task_tracking import (
     WorkflowPhaseTracker,
 )
 from utils.error_handling import CircuitBreaker, ErrorHandler
-
 
 class TestOrchestratorAgentIntegration:
     """Integration tests for OrchestratorAgent with shared modules"""
@@ -427,7 +434,6 @@ class TestOrchestratorAgentIntegration:
             # Clean up the mock method
             delattr(self.task_metrics, "calculate_speedup")
 
-
 class TestOrchestratorAgentPerformance:
     """Performance-specific tests for OrchestratorAgent integration"""
 
@@ -476,8 +482,6 @@ class TestOrchestratorAgentPerformance:
     def test_shared_module_performance_overhead(self):
         """Test that shared modules don't add significant performance overhead"""
 
-        import time
-
         # Test GitHub operations performance
         start_time = time.time()
 
@@ -512,7 +516,6 @@ class TestOrchestratorAgentPerformance:
             f"GitHub operations too slow: {github_ops_time:.3f}s"
         )
         assert state_ops_time < 1.0, f"State operations too slow: {state_ops_time:.3f}s"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

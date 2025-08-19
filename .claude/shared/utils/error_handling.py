@@ -1,17 +1,27 @@
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type
+)
+
+from ..shared.error_handling import ErrorHandler
+import time
+import functools
+import logging
+            import inspect
+
 """
 Error handling utilities for Gadugi multi-agent system.
 Provides retry logic, graceful degradation, and error recovery patterns.
 """
 
-import time
-import functools
-import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from enum import Enum
 
-
 logger = logging.getLogger(__name__)
-
 
 class ErrorSeverity(Enum):
     """Error severity levels."""
@@ -21,14 +31,12 @@ class ErrorSeverity(Enum):
     HIGH = "high"
     CRITICAL = "critical"
 
-
 class RetryStrategy(Enum):
     """Retry strategies."""
 
     EXPONENTIAL = "exponential"
     LINEAR = "linear"
     FIXED = "fixed"
-
 
 class GadugiError(Exception):
     """Base exception for Gadugi system."""
@@ -43,19 +51,16 @@ class GadugiError(Exception):
         self.severity = severity
         self.context = context or {}
 
-
 class RecoverableError(GadugiError):
     """Error that can potentially be recovered from."""
 
     pass
-
 
 class NonRecoverableError(GadugiError):
     """Error that cannot be recovered from."""
 
     def __init__(self, message: str, context: Optional[Dict[str, Any]] = None):
         super().__init__(message, ErrorSeverity.CRITICAL, context)
-
 
 def retry(
     max_attempts: int = 3,
@@ -121,7 +126,6 @@ def retry(
 
     return decorator
 
-
 def graceful_degradation(
     fallback_value: Any = None,
     log_errors: bool = True,
@@ -149,7 +153,6 @@ def graceful_degradation(
         return wrapper
 
     return decorator
-
 
 class ErrorHandler:
     """Centralized error handling with recovery strategies."""
@@ -215,7 +218,6 @@ class ErrorHandler:
         """Reset error statistics."""
         self.error_counts.clear()
         self.error_history.clear()
-
 
 class CircuitBreaker:
     """
@@ -311,7 +313,6 @@ class CircuitBreaker:
 
             raise
 
-
 def handle_with_fallback(
     primary_func: Callable, fallback_func: Callable, exceptions: tuple = (Exception,)
 ) -> Any:
@@ -331,7 +332,6 @@ def handle_with_fallback(
     except exceptions as e:
         logger.warning(f"Primary function failed, using fallback: {e}")
         return fallback_func()
-
 
 class ErrorContext:
     """Context manager for error handling with cleanup."""
@@ -368,7 +368,6 @@ class ErrorContext:
         # Suppress errors if requested
         return self.suppress_errors
 
-
 def validate_input(validation_rules: Dict[str, Callable]) -> Callable:
     """
     Decorator for input validation.
@@ -381,7 +380,6 @@ def validate_input(validation_rules: Dict[str, Callable]) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             # Get function signature
-            import inspect
 
             sig = inspect.signature(func)
             bound_args = sig.bind(*args, **kwargs)

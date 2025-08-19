@@ -1,4 +1,13 @@
+import json
+import tempfile
+import unittest
+import sys
+        import shutil
+    import logging
+
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Unit tests for ProcessRegistry component
 
@@ -6,19 +15,14 @@ These tests validate the process tracking and monitoring functionality
 of the ProcessRegistry class.
 """
 
-import json
-import tempfile
-import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo, RegistryStats
-
 
 class TestProcessRegistry(unittest.TestCase):
     """Unit tests for ProcessRegistry"""
@@ -31,7 +35,6 @@ class TestProcessRegistry(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_registry_initialization(self):
@@ -372,7 +375,6 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertEqual(len(data["processes"]), 1)
         self.assertIn("test-save", data["processes"])
 
-
 class TestProcessInfo(unittest.TestCase):
     """Unit tests for ProcessInfo dataclass"""
 
@@ -403,10 +405,8 @@ class TestProcessInfo(unittest.TestCase):
         self.assertIsNone(process_info.started_at)
         self.assertIsNone(process_info.completed_at)
 
-
 if __name__ == '__main__':
     # Set up test environment
-    import logging
     logging.basicConfig(level=logging.WARNING)
 
     # Run tests

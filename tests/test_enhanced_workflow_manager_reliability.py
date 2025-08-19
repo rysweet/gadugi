@@ -1,4 +1,12 @@
+import shutil
+import sys
+import tempfile
+import time
+import pytest
+
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Comprehensive tests for Enhanced WorkflowManager reliability features.
 
@@ -20,15 +28,9 @@ Test Categories:
 7. End-to-end reliability tests
 """
 
-import shutil
-import sys
-import tempfile
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-
-import pytest
-from typing import Set
+from unittest.mock import Mock, patch
 
 # Add project paths
 test_dir = Path(__file__).parent
@@ -50,7 +52,6 @@ try:
     from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration
 except ImportError as e:
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
-
 
 class TestWorkflowReliabilityManager:
     """Test suite for WorkflowReliabilityManager core functionality"""
@@ -342,7 +343,6 @@ class TestWorkflowReliabilityManager:
         assert diagnostics["workflow_id"] == self.workflow_id
         assert diagnostics["status"] == "active"
         assert len(diagnostics["stage_history"]) > 0
-
 
 class TestEnhancedWorkflowManager:
     """Test suite for EnhancedWorkflowManager functionality"""
@@ -723,7 +723,6 @@ class TestEnhancedWorkflowManager:
             assert result["success"] == False
             assert "error" in result
             assert result["workflow_id"] == test_workflow_id
-
 
 class TestWorkflowReliabilityIntegration:
     """Integration tests for workflow reliability features"""
@@ -1177,7 +1176,6 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             assert "current_stage" in metrics
             assert "stage_history" in metrics
 
-
 class TestWorkflowReliabilityContextManager:
     """Test the workflow reliability context manager"""
 
@@ -1229,7 +1227,6 @@ class TestWorkflowReliabilityContextManager:
             workflow_id, "failed"
         )
 
-
 # Test configuration and fixtures
 @pytest.fixture
 def reliability_manager():
@@ -1242,7 +1239,6 @@ def reliability_manager():
     manager = WorkflowReliabilityManager(config)
     yield manager
     manager.shutdown()
-
 
 @pytest.fixture
 def enhanced_workflow_manager():
@@ -1258,7 +1254,6 @@ def enhanced_workflow_manager():
     yield manager
     manager.reliability_manager.shutdown()
     shutil.rmtree(temp_dir, ignore_errors=True)
-
 
 # Performance and stress tests
 class TestWorkflowReliabilityPerformance:
@@ -1322,7 +1317,6 @@ class TestWorkflowReliabilityPerformance:
 
         # Verify cleanup
         assert len(manager.reliability_manager.monitoring_states) == 0
-
 
 if __name__ == "__main__":
     # Run tests with pytest

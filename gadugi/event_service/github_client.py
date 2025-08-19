@@ -1,18 +1,20 @@
+from typing import Any, Dict, List, Optional
+
+import asyncio
+import logging
+import aiohttp
+import datetime
+        import re
+
 """
 GitHub API client for Gadugi Event Service
 
 Handles GitHub API interactions for polling and webhook management.
 """
 
-import asyncio
-import logging
-from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin
 
-import aiohttp
-
 logger = logging.getLogger(__name__)
-
 
 class GitHubClient:
     """Async GitHub API client for the Gadugi Event Service."""
@@ -275,7 +277,6 @@ class GitHubClient:
     async def parse_repository_url(self, repo_url: str) -> tuple[str, str]:
         """Parse repository URL to extract owner and repo name."""
         # Handle various GitHub URL formats
-        import re
 
         patterns = [
             r"github\.com[:/]([^/]+)/([^/.]+)",  # git@github.com:owner/repo or https://github.com/owner/repo
@@ -292,7 +293,6 @@ class GitHubClient:
     async def auto_detect_repository(self) -> Optional[tuple[str, str]]:
         """Auto-detect current repository from git remote."""
         try:
-            import asyncio
 
             process = await asyncio.create_subprocess_exec(
                 "git",

@@ -1,23 +1,27 @@
+import json
+import sys
+import tempfile
+import unittest
+        import shutil
+        import ast
+import issue between DefinitionNode and lsp_helper causing import
+import failures.
+
 #!/usr/bin/env python3
+
 """
 Test suite for TaskAnalyzer component of OrchestratorAgent
 
 Tests prompt file analysis, dependency detection, and task classification.
 """
 
-import json
-
 # Add the components directory to the path
-import sys
-import tempfile
-import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import Mock, patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
 from task_analyzer import TaskAnalyzer, TaskComplexity, TaskInfo, TaskType
-
 
 class TestTaskAnalyzer(unittest.TestCase):
     """Test cases for TaskAnalyzer"""
@@ -36,7 +40,6 @@ class TestTaskAnalyzer(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def create_test_prompt(self, filename: str, content: str):
@@ -183,7 +186,6 @@ class TestTaskAnalyzer(unittest.TestCase):
         mock_parse.return_value = mock_tree
 
         # Create mock import nodes with proper types
-        import ast
         import_node = MagicMock(spec=ast.Import)
         import_node.names = [MagicMock(name='gadugi.agents.workflow_manager')]
 
@@ -404,7 +406,6 @@ Comprehensive test suite with edge cases.
         self.assertIn('total_tasks', data)
         self.assertEqual(data['total_tasks'], 1)
 
-
 class TestTaskAnalyzerIntegration(unittest.TestCase):
     """Integration tests for TaskAnalyzer with real prompt files"""
 
@@ -424,7 +425,6 @@ class TestTaskAnalyzerIntegration(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def create_sample_prompts(self):
@@ -456,8 +456,6 @@ Improve test coverage for the definition_node.py module from 32.09% to 80%+ by w
 
 ## Problem
 There's a circular import
-import issue between DefinitionNode and lsp_helper causing import
-import failures.
 
 ## Target Files
 - `gadugi/shared/github_operations.py`
@@ -543,7 +541,6 @@ This is a complex feature requiring careful architecture and extensive testing.
             self.assertIn('tasks', group)
             self.assertIn('estimated_time', group)
             self.assertIn('parallelizable', group)
-
 
 if __name__ == '__main__':
     unittest.main()

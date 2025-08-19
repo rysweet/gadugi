@@ -1,3 +1,8 @@
+from typing import Any, Dict, List, Optional
+
+import re
+import numpy as np
+
 """
 Task Pattern Recognition System
 Advanced pattern recognition and matching for the Enhanced Task Decomposition Analyzer
@@ -9,14 +14,10 @@ This module provides sophisticated pattern recognition capabilities including:
 - Optimization pattern identification
 """
 
-import re
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
 from datetime import datetime
-import numpy as np
 from enum import Enum
-
 
 class PatternType(Enum):
     """Types of patterns that can be recognized"""
@@ -30,7 +31,6 @@ class PatternType(Enum):
     ARCHITECTURAL = "architectural"
     PERFORMANCE = "performance"
 
-
 class ConfidenceLevel(Enum):
     """Confidence levels for pattern recognition"""
 
@@ -39,7 +39,6 @@ class ConfidenceLevel(Enum):
     MEDIUM = 0.6
     LOW = 0.4
     VERY_LOW = 0.2
-
 
 @dataclass
 class Pattern:
@@ -70,7 +69,6 @@ class Pattern:
     average_completion_time: float = 60.0
     last_used: Optional[datetime] = None
 
-
 @dataclass
 class PatternMatch:
     """Represents a pattern match result"""
@@ -90,7 +88,6 @@ class PatternMatch:
     # Recommendations
     suggested_modifications: List[str] = field(default_factory=list)
     optimization_opportunities: List[str] = field(default_factory=list)
-
 
 class TaskPatternRecognitionSystem:
     """
@@ -827,7 +824,6 @@ class TaskPatternRecognitionSystem:
             ),
         }
 
-
 class ContextAnalyzer:
     """Analyzes task context for better pattern recognition"""
 
@@ -858,7 +854,6 @@ class ContextAnalyzer:
             context["modification_scope"] = "local"
 
         return context
-
 
 class PerformancePatternPredictor:
     """Predicts performance characteristics based on recognized patterns"""
@@ -894,7 +889,6 @@ class PerformancePatternPredictor:
             )
             / total_confidence,
         }
-
 
 # Example usage and testing
 if __name__ == "__main__":

@@ -1,13 +1,14 @@
+import unittest
+
 #!/usr/bin/env python3
+
 """
 Simple structural tests for Agent Manager sub-agent.
 
 These tests validate that the agent-manager file exists and has proper structure.
 """
 
-import unittest
 from pathlib import Path
-
 
 class TestAgentManagerStructure(unittest.TestCase):
     """Test the Agent Manager sub-agent file structure."""
@@ -70,7 +71,6 @@ class TestAgentManagerStructure(unittest.TestCase):
             self.assertTrue(
                 template_path.exists(), f"Template file not found: {template}"
             )
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,12 +1,15 @@
+from ..shared.state_management import StateManager
+import path:
+    import state_management
+import importlib.util
+import sys
+
 """
 Compatibility shim for legacy `state_management` imports.
 
 This module re-exports the canonical implementation located at
 `.claude/shared/state_management.py` so that existing code written
 before the Enhanced Separation refactor can continue to use the simple
-import path:
-
-    import state_management
 
 or:
 
@@ -18,8 +21,6 @@ there is a single source of truth for the implementation.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from pathlib import Path
 from types import ModuleType
 

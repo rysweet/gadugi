@@ -1,12 +1,15 @@
+from typing import Any, List, Optional, Tuple
+
+from ..shared.error_handling import ErrorHandler
+import os
+import sys
+import logging
+
 """
 Shared instruction framework for Test Solver and Test Writer agents.
 Contains common patterns, utilities, and validation logic.
 """
 
-import os
-import sys
-import logging
-from typing import Any, Optional
 from dataclasses import dataclass
 
 @dataclass
@@ -19,8 +22,6 @@ class ErrorHandler:
     def __init__(self):
         pass
 
-from typing import Any, List, Optional, Tuple
-from dataclasses import dataclass
 from enum import Enum
 
 # Add shared modules to path
@@ -30,7 +31,6 @@ try:
     from utils.error_handling import ErrorHandler
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass
 
     @dataclass
     class OperationResult:
@@ -39,13 +39,11 @@ except ImportError:
         error: str = ""
 
     class TestStatus(Enum):
-    """Test execution status."""
-
-    PASS = "pass"
-    FAIL = "fail"
-    SKIP = "skip"
-    ERROR = "error"
-
+        """Test execution status."""
+        PASS = "pass"
+        FAIL = "fail"
+        SKIP = "skip"
+        ERROR = "error"
 
 class SkipReason(Enum):
     """Valid reasons for skipping tests."""
@@ -56,7 +54,6 @@ class SkipReason(Enum):
     INFRASTRUCTURE_DEPENDENCY = "infrastructure_dependency"
     RESOURCE_CONSTRAINT = "resource_constraint"
     FLAKY_TEST = "flaky_test"
-
 
 @dataclass
 class TestResult:
@@ -70,7 +67,6 @@ class TestResult:
     skip_reason: Optional[SkipReason] = None
     skip_justification: str = ""
 
-
 @dataclass
 class TestAnalysis:
     """Test analysis result."""
@@ -82,13 +78,14 @@ class TestAnalysis:
     resources_used: List[str]
     complexity_score: int  # 1-10 scale
 
-
 class SharedTestInstructions:
     """Shared instruction framework for test agents."""
 
     def __init__(self, config: Optional[AgentConfig] = None):
         self.config = config or AgentConfig(
-            agent_id="shared_test_instructions", name="Shared Test Instructions"
+            name="Shared Test Instructions", 
+            version="1.0.0", 
+            capabilities=["test_analysis", "test_validation"]
         )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.error_handler = ErrorHandler() if "ErrorHandler" in globals() else None

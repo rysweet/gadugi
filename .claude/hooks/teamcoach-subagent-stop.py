@@ -1,4 +1,10 @@
+import json
+import sys
+import subprocess
+import os
+
 #!/usr/bin/env python3
+
 """
 TeamCoach SubagentStop Hook - Agent Performance Analysis
 
@@ -9,12 +15,7 @@ Hook Type: SubagentStop
 Purpose: Analyze individual agent performance and update capability assessments
 """
 
-import json
-import sys
-import subprocess
-import os
 from datetime import datetime
-
 
 def invoke_teamcoach_agent_analysis(agent_data):
     """Invoke TeamCoach for specific agent performance analysis."""
@@ -89,7 +90,6 @@ Agent: {agent_name}
         print(f"⚠️ Error in TeamCoach agent analysis for {agent_name}: {e}")
         return False
 
-
 def main():
     """Main hook handler for subagent completion."""
     try:
@@ -128,7 +128,6 @@ def main():
         }
         print(json.dumps(error_result))
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()

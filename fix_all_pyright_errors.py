@@ -1,14 +1,17 @@
-#!/usr/bin/env python3
-"""
-Comprehensive script to fix all pyright errors systematically.
-"""
+from typing import List
 
 import re
 import subprocess
 import sys
-from pathlib import Path
-from typing import List
+            import json
 
+#!/usr/bin/env python3
+from ..shared.error_handling import ErrorHandler
+"""
+Comprehensive script to fix all pyright errors systematically.
+"""
+
+from pathlib import Path
 
 def fix_indentation_errors(file_path: Path) -> bool:
     """Fix indentation errors caused by incorrectly inserted lines."""
@@ -40,7 +43,6 @@ def fix_indentation_errors(file_path: Path) -> bool:
         print(f"Error fixing {file_path}: {e}")
         return False
 
-
 def fix_unused_imports(file_path: Path) -> bool:
     """Remove unused imports from a file."""
     try:
@@ -52,7 +54,6 @@ def fix_unused_imports(file_path: Path) -> bool:
         )
 
         if result.returncode != 0:
-            import json
 
             try:
                 output = json.loads(result.stdout)
@@ -91,7 +92,6 @@ def fix_unused_imports(file_path: Path) -> bool:
         print(f"Error fixing imports in {file_path}: {e}")
         return False
 
-
 def fix_optional_access(file_path: Path) -> bool:
     """Add None checks for optional member access."""
     try:
@@ -118,11 +118,9 @@ def fix_optional_access(file_path: Path) -> bool:
         print(f"Error fixing optional access in {file_path}: {e}")
         return False
 
-
 def get_all_python_files() -> List[Path]:
     """Get all Python files in the project."""
     return list(Path(".").rglob("*.py"))
-
 
 def main():
     """Main function to fix all pyright errors."""
@@ -192,7 +190,6 @@ def main():
                     print(f"  {line}")
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

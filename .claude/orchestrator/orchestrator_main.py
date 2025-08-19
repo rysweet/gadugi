@@ -1,4 +1,24 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import json
+import logging
+import sys
+import threading
+import time
+    import argparse
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.error_handling import ErrorHandler
+
+from ..shared.state_management import StateManager
 """
 OrchestratorMain - Central Coordinator for Parallel Workflow Execution
 
@@ -12,16 +32,10 @@ Key Features:
 - Integrates with Enhanced Separation shared modules for reliability
 """
 
-import json
-import logging
-import sys
-import threading
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 # Import existing orchestrator components
 try:
@@ -89,7 +103,6 @@ ProcessRegistry = None
 ProcessStatus = None
 ProcessInfo = None
 
-
 @dataclass
 class OrchestrationConfig:
     """Configuration for orchestration execution"""
@@ -100,7 +113,6 @@ class OrchestrationConfig:
     fallback_to_sequential: bool = True
     worktrees_dir: str = ".worktrees"
     monitoring_dir: str = ".gadugi/monitoring"
-
 
 @dataclass
 class OrchestrationResult:
@@ -113,7 +125,6 @@ class OrchestrationResult:
     parallel_speedup: Optional[float] = None
     task_results: List[ExecutionResult] = None
     error_summary: Optional[str] = None
-
 
 class OrchestratorCoordinator:
     """
@@ -276,7 +287,6 @@ class OrchestratorCoordinator:
         except Exception as e:
             logger.error(f"Task analysis failed: {e}")
             return []
-
 
     def _setup_worktrees(self, task_infos: List[TaskInfo]) -> Dict[str, WorktreeInfo]:
         """Set up isolated git worktrees for parallel execution"""
@@ -613,10 +623,8 @@ class OrchestratorCoordinator:
 
         logger.info("Orchestrator shutdown complete")
 
-
 def main():
     """Main entry point for direct execution"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Orchestrator Main - Parallel Workflow Coordination")
     parser.add_argument("prompt_files", nargs="+", help="Prompt files to execute in parallel")
@@ -658,7 +666,6 @@ def main():
         logger.error(f"Orchestrator execution failed: {e}")
         orchestrator.shutdown()
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

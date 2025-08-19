@@ -1,3 +1,7 @@
+import os
+import sys
+import tempfile
+
 #!/usr/bin/env python3
 """
 Basic functionality test for orchestrator implementation
@@ -6,9 +10,6 @@ This test validates that the orchestrator components can be imported and
 basic functionality works without complex dependencies.
 """
 
-import os
-import sys
-import tempfile
 from pathlib import Path
 
 # Add orchestrator to path

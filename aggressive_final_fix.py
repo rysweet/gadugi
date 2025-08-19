@@ -1,14 +1,16 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import re
+import subprocess
+import unittest
+
 #!/usr/bin/env python3
 """
 Aggressive final fix for all remaining pyright errors.
 """
 
-import os
-import re
-import subprocess
 from pathlib import Path
-from typing import List, Dict, Any
-
 
 def analyze_errors():
     """Analyze current errors and group by type."""
@@ -37,7 +39,6 @@ def analyze_errors():
 
     return errors
 
-
 def fix_orchestrator_test_files():
     """Fix all orchestrator test files."""
     test_dir = Path(".claude/orchestrator/tests")
@@ -49,9 +50,9 @@ def fix_orchestrator_test_files():
         modified = False
 
         # Add common missing imports
-        if "Mock" in content and "from unittest.mock import" not in content:
+
             content = (
-                "from unittest.mock import Mock, patch, MagicMock, AsyncMock\n"
+
                 + content
             )
             modified = True
@@ -81,7 +82,6 @@ def fix_orchestrator_test_files():
             test_file.write_text(content)
             print(f"Fixed {test_file.name}")
 
-
 def fix_event_router_test_file():
     """Fix event router test file issues."""
     test_file = Path(".claude/services/event-router/tests/test_event_router.py")
@@ -92,12 +92,9 @@ def fix_event_router_test_file():
 
     # Add all necessary imports at once
     imports = """import asyncio
-import unittest
 from unittest import TestCase
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 
 """
 
@@ -128,7 +125,6 @@ from typing import Dict, List, Any, Optional
     test_file.write_text(content)
     print("Fixed event router test file")
 
-
 def fix_framework_tests():
     """Fix framework test files."""
     test_dir = Path(".claude/framework/tests")
@@ -140,12 +136,8 @@ def fix_framework_tests():
             if "BaseAgent" in content and "from ..base_agent import" not in content:
                 content = "from ..base_agent import BaseAgent\n" + content
 
-            if "Mock" in content and "from unittest.mock import" not in content:
-                content = "from unittest.mock import Mock, patch\n" + content
-
             test_file.write_text(content)
             print(f"Fixed {test_file.name}")
-
 
 def fix_mcp_service():
     """Fix MCP service files."""
@@ -164,7 +156,6 @@ def fix_mcp_service():
             py_file.write_text(content)
             print(f"Fixed {py_file.name}")
 
-
 def fix_test_agent_files():
     """Fix test agent files."""
     agent_files = [
@@ -180,8 +171,7 @@ def fix_test_agent_files():
             # Add necessary imports
             if "BaseAgent" in content and "from" not in content:
                 content = (
-                    """from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+                    """from dataclasses import dataclass
 from ..framework.base_agent import BaseAgent
 
 """
@@ -190,7 +180,6 @@ from ..framework.base_agent import BaseAgent
 
             path.write_text(content)
             print(f"Fixed {path.name}")
-
 
 def remove_all_unused_imports():
     """Remove all remaining unused imports."""
@@ -232,7 +221,6 @@ def remove_all_unused_imports():
 
                     path.write_text(content)
 
-
 def main():
     """Main execution."""
     print("Running aggressive final fixes...")
@@ -264,7 +252,6 @@ def main():
         print("\nRemaining errors:")
         for error in final_errors:
             print(f"  {error}")
-
 
 if __name__ == "__main__":
     main()

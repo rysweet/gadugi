@@ -1,3 +1,7 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+
 """
 Delegation Coordinator for PR Backlog Manager.
 
@@ -5,14 +9,11 @@ Coordinates delegation of issue resolution tasks to appropriate agents
 including WorkflowMaster for complex resolutions and code-reviewer for AI reviews.
 """
 
-import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
-
 
 class DelegationType(Enum):
     """Types of delegation tasks."""
@@ -23,7 +24,6 @@ class DelegationType(Enum):
     AI_CODE_REVIEW = "ai_code_review"
     METADATA_IMPROVEMENT = "metadata_improvement"
 
-
 class DelegationPriority(Enum):
     """Priority levels for delegation tasks."""
 
@@ -31,7 +31,6 @@ class DelegationPriority(Enum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class DelegationStatus(Enum):
     """Status of delegation tasks."""
@@ -41,7 +40,6 @@ class DelegationStatus(Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 @dataclass
 class DelegationTask:
@@ -60,7 +58,6 @@ class DelegationTask:
     last_attempt: Optional[datetime] = None
     completion_time: Optional[datetime] = None
     error_message: Optional[str] = None
-
 
 class DelegationCoordinator:
     """

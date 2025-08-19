@@ -1,14 +1,15 @@
-"""
-GitHub operations module for Enhanced Separation architecture.
-Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowManager.
-"""
+from typing import Any, Dict, List, Optional
 
+from ..shared.github_operations import GitHubOperations
 import subprocess
 import json
 import time
 import logging
-from typing import Dict, Any, List, Optional
 
+"""
+GitHub operations module for Enhanced Separation architecture.
+Provides unified GitHub CLI operations for OrchestratorAgent and WorkflowManager.
+"""
 
 # Custom exceptions
 class GitHubError(Exception):
@@ -19,7 +20,6 @@ class GitHubError(Exception):
         self.operation = operation
         self.context = context
         self.details = details or {}
-
 
 class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
@@ -36,9 +36,7 @@ class RateLimitError(GitHubError):
         current_time = int(time.time())
         return max(0, self.reset_time - current_time)
 
-
 logger = logging.getLogger(__name__)
-
 
 class GitHubOperations:
     """

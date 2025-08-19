@@ -1,3 +1,11 @@
+from typing import Any, Any  # type: ignore, Dict, List, Optional
+
+import json
+import argparse
+import subprocess
+import tempfile  # type: ignore
+import shutil
+
 #!/usr/bin/env python3
 """
 Workflow Reflection Data Collector
@@ -12,15 +20,8 @@ Usage:
     python3 workflow-reflection-collector.py --create-improvement-issues
 """
 
-import json
-import argparse
-import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any  # type: ignore
-import tempfile  # type: ignore
-import shutil
-
 
 class WorkflowReflectionCollector:
     """Safely collects and analyzes workflow session data for improvement insights."""
@@ -419,7 +420,6 @@ class WorkflowReflectionCollector:
         # Limit to 3 most actionable items to avoid spam
         return action_items[:3]
 
-
 def main():
     """Command-line interface for workflow reflection collector."""
 
@@ -473,7 +473,6 @@ def main():
 
     else:
         parser.print_help()
-
 
 if __name__ == "__main__":
     main()

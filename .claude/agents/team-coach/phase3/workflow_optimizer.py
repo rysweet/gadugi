@@ -1,3 +1,7 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+import logging
+
 """
 TeamCoach Phase 3: Workflow Optimizer
 
@@ -5,14 +9,11 @@ Analyzes and optimizes team workflows to improve efficiency, reduce bottlenecks,
 and enhance overall productivity.
 """
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
-
 
 class BottleneckType(Enum):
     """Types of workflow bottlenecks."""
@@ -25,7 +26,6 @@ class BottleneckType(Enum):
     CAPACITY_LIMIT = "capacity_limit"
     COORDINATION_OVERHEAD = "coordination_overhead"
 
-
 class OptimizationType(Enum):
     """Types of workflow optimizations."""
 
@@ -36,7 +36,6 @@ class OptimizationType(Enum):
     SKILL_DEVELOPMENT = "skill_development"
     PROCESS_STREAMLINING = "process_streamlining"
     COMMUNICATION_IMPROVEMENT = "communication_improvement"
-
 
 @dataclass
 class WorkflowMetrics:
@@ -49,7 +48,6 @@ class WorkflowMetrics:
     throughput: float  # tasks per hour
     bottleneck_impact: float  # percentage of time lost to bottlenecks
     parallel_efficiency: float  # how well parallelization is utilized
-
 
 @dataclass
 class Bottleneck:
@@ -64,7 +62,6 @@ class Bottleneck:
     description: str
     evidence: Dict[str, Any]
     detected_at: datetime
-
 
 @dataclass
 class WorkflowOptimization:
@@ -81,7 +78,6 @@ class WorkflowOptimization:
     prerequisites: List[str]
     risks: List[str]
 
-
 @dataclass
 class WorkflowAnalysis:
     """Comprehensive workflow analysis results."""
@@ -92,7 +88,6 @@ class WorkflowAnalysis:
     optimizations: List[WorkflowOptimization]
     projected_metrics: WorkflowMetrics
     analysis_timestamp: datetime
-
 
 class WorkflowOptimizer:
     """

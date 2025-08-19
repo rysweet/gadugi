@@ -1,18 +1,19 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import yaml
+import logging
+
 """
 Configuration management for Gadugi Event Service
 
 Handles loading, validation, and saving of service configuration.
 """
 
-import os
-import yaml
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-import logging
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class LogConfig:
@@ -25,7 +26,6 @@ class LogConfig:
     enable_audit: bool = True
     audit_file_path: Optional[str] = None
 
-
 @dataclass
 class AgentInvocation:
     """Agent invocation configuration."""
@@ -36,7 +36,6 @@ class AgentInvocation:
     working_directory: Optional[str] = None
     environment: Dict[str, str] = field(default_factory=dict)
     prompt_template: str = ""
-
 
 @dataclass
 class GitHubFilter:
@@ -50,7 +49,6 @@ class GitHubFilter:
     refs: List[str] = field(default_factory=list)
     milestones: List[str] = field(default_factory=list)
 
-
 @dataclass
 class EventFilter:
     """Event filtering configuration."""
@@ -59,7 +57,6 @@ class EventFilter:
     sources: List[str] = field(default_factory=list)
     metadata_match: Dict[str, str] = field(default_factory=dict)
     github_filter: Optional[GitHubFilter] = None
-
 
 @dataclass
 class EventHandlerConfig:
@@ -72,7 +69,6 @@ class EventHandlerConfig:
     priority: int = 100
     timeout_seconds: int = 300
     async_execution: bool = False
-
 
 @dataclass
 class ServiceConfig:
@@ -88,13 +84,11 @@ class ServiceConfig:
     handlers: List[EventHandlerConfig] = field(default_factory=list)
     log_config: LogConfig = field(default_factory=LogConfig)
 
-
 def get_default_config_path() -> str:
     """Get the default configuration file path."""
     config_dir = Path.home() / ".gadugi"
     config_dir.mkdir(exist_ok=True)
     return str(config_dir / "config.yaml")
-
 
 def get_default_socket_path() -> str:
     """Get the default Unix socket path."""
@@ -102,20 +96,17 @@ def get_default_socket_path() -> str:
     socket_dir.mkdir(exist_ok=True)
     return str(socket_dir / "events.sock")
 
-
 def get_default_log_path() -> str:
     """Get the default log file path."""
     log_dir = Path.home() / ".gadugi" / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     return str(log_dir / "gadugi-service.log")
 
-
 def get_default_audit_log_path() -> str:
     """Get the default audit log file path."""
     log_dir = Path.home() / ".gadugi" / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     return str(log_dir / "gadugi-audit.log")
-
 
 def create_default_config() -> ServiceConfig:
     """Create a default service configuration."""
@@ -185,7 +176,6 @@ def create_default_config() -> ServiceConfig:
         ],
     )
 
-
 def load_config(config_path: Optional[str] = None) -> ServiceConfig:
     """Load service configuration from file or create default."""
     if config_path is None:
@@ -221,7 +211,6 @@ def load_config(config_path: Optional[str] = None) -> ServiceConfig:
 
         return config
 
-
 def save_config(config: ServiceConfig, config_path: Optional[str] = None) -> None:
     """Save service configuration to file."""
     if config_path is None:
@@ -237,7 +226,6 @@ def save_config(config: ServiceConfig, config_path: Optional[str] = None) -> Non
         yaml.dump(config_data, f, default_flow_style=False, indent=2)
 
     logger.info(f"Configuration saved to {config_path}")
-
 
 def _dict_to_config(data: Dict[str, Any]) -> ServiceConfig:
     """Convert dictionary to ServiceConfig object."""
@@ -259,7 +247,6 @@ def _dict_to_config(data: Dict[str, Any]) -> ServiceConfig:
 
     return ServiceConfig(**config_data)
 
-
 def _config_to_dict(config: ServiceConfig) -> Dict[str, Any]:
     """Convert ServiceConfig object to dictionary."""
     data = asdict(config)
@@ -274,7 +261,6 @@ def _config_to_dict(config: ServiceConfig) -> Dict[str, Any]:
             return obj
 
     return remove_none(data)
-
 
 def _validate_config(config: ServiceConfig) -> None:
     """Validate service configuration."""
@@ -303,7 +289,6 @@ def _validate_config(config: ServiceConfig) -> None:
 
     if errors:
         raise ValueError(f"Configuration validation errors: {', '.join(errors)}")
-
 
 # Environment variable configuration
 def load_config_from_env() -> Dict[str, Any]:
@@ -343,7 +328,6 @@ def load_config_from_env() -> Dict[str, Any]:
         env_config["log_config"] = log_config
 
     return env_config
-
 
 def merge_config_with_env(config: ServiceConfig) -> ServiceConfig:
     """Merge configuration with environment variable overrides."""

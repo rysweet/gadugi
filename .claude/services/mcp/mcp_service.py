@@ -1,3 +1,9 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import uuid
+import uvicorn
+
 #!/usr/bin/env python3
 """
 MCP (Model Context Protocol) Service for Gadugi v0.3
@@ -6,16 +12,11 @@ A REAL, working FastAPI service that integrates with Neo4j for context storage
 
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-import os
-import uuid
 
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from neo4j import AsyncGraphDatabase
 from pydantic import BaseModel, Field
-import uvicorn
-
 
 # Pydantic Models for MCP Protocol
 class ContextCreateRequest(BaseModel):
@@ -24,7 +25,6 @@ class ContextCreateRequest(BaseModel):
     source: str = Field(..., description="Source of the context (e.g., agent name)")
     metadata: Optional[Dict[str, Any]] = Field(default={}, description="Additional metadata")
     tags: Optional[List[str]] = Field(default=[], description="Tags for categorization")
-
 
 class ContextResponse(BaseModel):
     """Response model for context operations"""
@@ -36,14 +36,12 @@ class ContextResponse(BaseModel):
     timestamp: str = Field(..., description="ISO format timestamp")
     relationships: List[Dict[str, str]] = Field(default=[], description="Related contexts")
 
-
 class ContextSearchRequest(BaseModel):
     """Request model for searching contexts"""
     query: str = Field(..., description="Search query")
     source: Optional[str] = Field(None, description="Filter by source")
     tags: Optional[List[str]] = Field(None, description="Filter by tags")
     limit: int = Field(10, ge=1, le=100, description="Maximum results to return")
-
 
 class HealthResponse(BaseModel):
     """Health check response"""
@@ -52,14 +50,12 @@ class HealthResponse(BaseModel):
     timestamp: str = Field(..., description="Current timestamp")
     version: str = Field(..., description="Service version")
 
-
 class MetricsResponse(BaseModel):
     """Service metrics response"""
     total_contexts: int = Field(..., description="Total number of stored contexts")
     total_agents: int = Field(..., description="Total number of agents")
     total_relationships: int = Field(..., description="Total number of relationships")
     uptime_seconds: float = Field(..., description="Service uptime in seconds")
-
 
 # Neo4j Database Manager
 class Neo4jManager:
@@ -211,11 +207,9 @@ class Neo4jManager:
                 "total_relationships": rels_count
             }
 
-
 # Global database manager
 db_manager: Optional[Neo4jManager] = None
 start_time = datetime.utcnow()
-
 
 # FastAPI Application Lifespan
 @asynccontextmanager
@@ -239,7 +233,6 @@ async def lifespan(app: FastAPI):
         await db_manager.close()
         print("✅ Disconnected from Neo4j")
 
-
 # Create FastAPI app
 app = FastAPI(
     title="Gadugi MCP Service",
@@ -257,7 +250,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # API Endpoints
 @app.post("/context/store", response_model=ContextResponse, status_code=status.HTTP_201_CREATED)
 async def store_context(request: ContextCreateRequest):
@@ -274,7 +266,6 @@ async def store_context(request: ContextCreateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/context/retrieve/{context_id}", response_model=ContextResponse)
 async def retrieve_context(context_id: str):
     """Retrieve context by ID"""
@@ -285,7 +276,6 @@ async def retrieve_context(context_id: str):
     if not context:
         raise HTTPException(status_code=404, detail="Context not found")
     return context
-
 
 @app.post("/context/search", response_model=List[ContextResponse])
 async def search_contexts(request: ContextSearchRequest):
@@ -298,7 +288,6 @@ async def search_contexts(request: ContextSearchRequest):
         return contexts
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
@@ -320,7 +309,6 @@ async def health_check():
         version="0.3.0"
     )
 
-
 @app.get("/metrics", response_model=MetricsResponse)
 async def get_metrics():
     """Get service metrics"""
@@ -340,7 +328,6 @@ async def get_metrics():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -357,7 +344,6 @@ async def root():
             "/docs"
         ]
     }
-
 
 if __name__ == "__main__":
     # Run with uvicorn

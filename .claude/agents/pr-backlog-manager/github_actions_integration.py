@@ -1,3 +1,9 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+import os
+import json
+import logging
+
 """
 GitHub Actions Integration for PR Backlog Manager.
 
@@ -5,16 +11,11 @@ Provides specialized integration capabilities for running PR Backlog Manager
 in GitHub Actions environments with auto-approve and security constraints.
 """
 
-import os
-import json
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
-
 
 class GitHubEventType(Enum):
     """GitHub Actions event types."""
@@ -25,14 +26,12 @@ class GitHubEventType(Enum):
     PUSH = "push"
     UNKNOWN = "unknown"
 
-
 class ProcessingMode(Enum):
     """Processing modes for different GitHub events."""
 
     SINGLE_PR = "single_pr"
     FULL_BACKLOG = "full_backlog"
     TARGETED_BATCH = "targeted_batch"
-
 
 @dataclass
 class GitHubContext:
@@ -85,7 +84,6 @@ class GitHubContext:
         except Exception:
             return None
 
-
 @dataclass
 class SecurityConstraints:
     """Security constraints for GitHub Actions environment."""
@@ -113,7 +111,6 @@ class SecurityConstraints:
             ),  # 10 minutes
             rate_limit_threshold=int(os.getenv("RATE_LIMIT_THRESHOLD", "50")),
         )
-
 
 class GitHubActionsIntegration:
     """
@@ -610,7 +607,6 @@ class GitHubActionsIntegration:
             # Conservative approach - don't throttle if we can't check
             return False
 
-
 def main():
     """Main entry point for GitHub Actions integration."""
     # Configure logging for GitHub Actions
@@ -661,7 +657,6 @@ def main():
         logger.error(f"GitHub Actions integration failed: {e}")
         print(f"❌ Fatal error: {e}")
         exit(1)
-
 
 if __name__ == "__main__":
     main()

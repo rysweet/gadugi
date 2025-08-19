@@ -1,11 +1,12 @@
+import re
+    import sys
+
 #!/usr/bin/env python3
 """
 Clean up all commented out imports from previous fixes.
 """
 
-import re
 from pathlib import Path
-
 
 def fix_commented_imports(file_path: Path) -> bool:
     """Uncomment imports that were mistakenly commented out."""
@@ -29,7 +30,6 @@ def fix_commented_imports(file_path: Path) -> bool:
 
     return False
 
-
 def main():
     """Main function to clean up all commented imports."""
     print("Cleaning up commented imports...")
@@ -42,8 +42,6 @@ def main():
     print(f"Fixed {fixed_count} files with commented imports")
     return 0
 
-
 if __name__ == "__main__":
-    import sys
 
     sys.exit(main())

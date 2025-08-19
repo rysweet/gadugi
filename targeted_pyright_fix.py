@@ -1,13 +1,17 @@
-#!/usr/bin/env python3
-"""
-Targeted script to fix the most common pyright errors.
-"""
+
 
 import json
 import re
 import subprocess
-from pathlib import Path
+    import sys
 
+#!/usr/bin/env python3
+
+"""
+Targeted script to fix the most common pyright errors.
+"""
+
+from pathlib import Path
 
 def get_pyright_diagnostics() -> Dict:
     """Get full pyright diagnostics in JSON format."""
@@ -19,7 +23,6 @@ def get_pyright_diagnostics() -> Dict:
         return json.loads(result.stdout)
     except json.JSONDecodeError:
         return {}
-
 
 def fix_missing_type_imports(file_path: Path) -> bool:
     """Add missing type imports."""
@@ -49,21 +52,18 @@ def fix_missing_type_imports(file_path: Path) -> bool:
             # Find existing typing import line
             typing_line_idx = -1
             for i, line in enumerate(lines):
-                if line.startswith("from typing import"):
-                    typing_line_idx = i
+                if line.startswith("                    typing_line_idx = i
                     break
 
             if typing_line_idx >= 0:
                 # Update existing import
                 existing_imports = set()
-                match = re.search(r"from typing import (.+)", lines[typing_line_idx])
-                if match:
+                match = re.search(r"                if match:
                     existing_imports = {t.strip() for t in match.group(1).split(",")}
 
                 all_imports = existing_imports | missing_types
                 lines[typing_line_idx] = (
-                    f"from typing import {', '.join(sorted(all_imports))}"
-                )
+                    f"                )
             else:
                 # Add new typing import after other imports
                 import_idx = 0
@@ -78,8 +78,7 @@ def fix_missing_type_imports(file_path: Path) -> bool:
                         break
 
                 lines.insert(
-                    import_idx, f"from typing import {', '.join(sorted(missing_types))}"
-                )
+                    import_idx, f"                )
 
             file_path.write_text("\n".join(lines) + "\n")
             print(f"Fixed type imports in {file_path}")
@@ -89,7 +88,6 @@ def fix_missing_type_imports(file_path: Path) -> bool:
         print(f"Error fixing type imports in {file_path}: {e}")
 
     return False
-
 
 def remove_unused_variables_and_imports(
     file_path: Path, diagnostics: List[Dict]
@@ -149,7 +147,6 @@ def remove_unused_variables_and_imports(
         print(f"Error fixing unused items in {file_path}: {e}")
 
     return False
-
 
 def main():
     """Main function to fix targeted pyright errors."""
@@ -218,8 +215,6 @@ def main():
 
     return 0
 
-
 if __name__ == "__main__":
-    import sys
 
     sys.exit(main())

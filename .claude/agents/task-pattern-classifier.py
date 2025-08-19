@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 """
 Task Pattern Classification System with Machine Learning
 Part of the Enhanced Task Decomposition Analyzer
@@ -5,11 +7,9 @@ Part of the Enhanced Task Decomposition Analyzer
 This module provides ML-based task pattern recognition and optimization
 for the Gadugi multi-agent system.
 """
-from typing import Any, Dict, List
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import Counter, defaultdict
-
 
 class TaskType(Enum):
     """Primary task type classifications"""
@@ -25,7 +25,6 @@ class TaskType(Enum):
     SECURITY = "security"
     MAINTENANCE = "maintenance"
 
-
 class ComplexityLevel(Enum):
     """Task complexity levels"""
 
@@ -34,7 +33,6 @@ class ComplexityLevel(Enum):
     MEDIUM = 3
     HIGH = 4
     CRITICAL = 5
-
 
 @dataclass
 class TaskFeatures:
@@ -71,7 +69,6 @@ class TaskFeatures:
     has_performance_requirements: bool = False
     has_integration_requirements: bool = False
 
-
 @dataclass
 class TaskClassification:
     """Task classification result"""
@@ -84,7 +81,6 @@ class TaskClassification:
     optimizations: List[str] = field(default_factory=list)
     risk_factors: List[str] = field(default_factory=list)
     recommended_approach: str = ""
-
 
 class TaskPatternClassifier:
     """
@@ -833,7 +829,6 @@ class TaskPatternClassifier:
                     optimizations.append(optimization)
 
         return optimizations
-
 
 # Example usage and testing
 if __name__ == "__main__":

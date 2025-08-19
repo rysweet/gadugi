@@ -1,12 +1,22 @@
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Protocol,
+    TypeVar
+)
+
+import logging
+
 """
 Shared interfaces, protocols, and contracts for Gadugi Enhanced Separation architecture.
 Provides type-safe contracts for inter-component communication and dependency injection.
 """
-from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +24,6 @@ logger = logging.getLogger(__name__)
 T = TypeVar('T')
 ConfigType = TypeVar('ConfigType')
 ResultType = TypeVar('ResultType')
-
 
 # ============================================================================
 # Core Abstract Interfaces
@@ -62,7 +71,6 @@ class AgentInterface(ABC):
             Dictionary containing agent status information
         """
         return {"status": "ready", "agent": self.__class__.__name__}
-
 
 class StateManagerInterface(ABC):
     """
@@ -134,7 +142,6 @@ class StateManagerInterface(ABC):
         if state_data:
             return self.save_state(backup_id, state_data)
         return False
-
 
 class GitHubOperationsInterface(ABC):
     """
@@ -223,7 +230,6 @@ class GitHubOperationsInterface(ABC):
         """
         return False
 
-
 class TaskTrackerInterface(ABC):
     """
     Interface for task tracking and management.
@@ -295,7 +301,6 @@ class TaskTrackerInterface(ABC):
         """
         return False
 
-
 class ErrorHandlerInterface(ABC):
     """
     Interface for error handling and recovery.
@@ -335,7 +340,6 @@ class ErrorHandlerInterface(ABC):
         """
         return {"total_errors": 0, "recovery_success_rate": 0.0}
 
-
 # ============================================================================
 # Data Models
 # ============================================================================
@@ -369,7 +373,6 @@ class AgentConfig:
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
-
 @dataclass
 class WorkflowPhase:
     """Represents a workflow phase."""
@@ -391,7 +394,6 @@ class WorkflowPhase:
             errors.append("Timeout must be positive")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
-
 
 @dataclass
 class TaskData:
@@ -437,7 +439,6 @@ class TaskData:
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
-
 @dataclass
 class StateData:
     """State data model."""
@@ -459,7 +460,6 @@ class StateData:
             errors.append("State data cannot be None")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
-
 
 @dataclass
 class GitHubIssue:
@@ -489,7 +489,6 @@ class GitHubIssue:
             errors.append(f"Invalid issue state: {self.state}")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
-
 
 @dataclass
 class GitHubPR:
@@ -525,7 +524,6 @@ class GitHubPR:
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
-
 @dataclass
 class ErrorContext:
     """Error context information."""
@@ -548,7 +546,6 @@ class ErrorContext:
             errors.append(f"Invalid severity: {self.severity}")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
-
 
 # ============================================================================
 # Result Types
@@ -575,7 +572,6 @@ class OperationResult(Generic[T]):
         """Create error result."""
         return cls(success=False, error=error, error_code=error_code, metadata=metadata or {})
 
-
 @dataclass
 class ValidationResult:
     """Validation result."""
@@ -601,7 +597,6 @@ class ValidationResult:
         """Check if validation has warnings."""
         return len(self.warnings) > 0
 
-
 # ============================================================================
 # Protocols for Dependency Injection
 # ============================================================================
@@ -616,7 +611,6 @@ class TodoWriteProvider(Protocol):
     def update_task_status(self, task_id: str, status: str) -> Dict[str, Any]:
         """Update single task status."""
         ...
-
 
 class LoggerProvider(Protocol):
     """Protocol for logging functionality."""
@@ -637,7 +631,6 @@ class LoggerProvider(Protocol):
         """Log debug message."""
         ...
 
-
 class FileSystemProvider(Protocol):
     """Protocol for file system operations."""
 
@@ -657,7 +650,6 @@ class FileSystemProvider(Protocol):
         """Create directory."""
         ...
 
-
 class GitProvider(Protocol):
     """Protocol for Git operations."""
 
@@ -676,7 +668,6 @@ class GitProvider(Protocol):
     def push_branch(self, branch_name: str) -> bool:
         """Push branch to remote."""
         ...
-
 
 # ============================================================================
 # Configuration Schemas
@@ -714,7 +705,6 @@ class AgentConfigSchema:
                 result.add_error("Max retries must be a non-negative integer")
 
         return result
-
 
 class WorkflowConfigSchema:
     """Schema for workflow configuration validation."""
@@ -757,7 +747,6 @@ class WorkflowConfigSchema:
 
         return result
 
-
 class TaskConfigSchema:
     """Schema for task configuration validation."""
 
@@ -784,7 +773,6 @@ class TaskConfigSchema:
                 result.add_error(f"Invalid priority: {config['priority']}")
 
         return result
-
 
 # ============================================================================
 # Factory Interfaces
@@ -829,7 +817,6 @@ class ComponentFactory(ABC):
         """
         return ValidationResult(is_valid=True)
 
-
 class AgentFactory(ABC):
     """Abstract factory for creating agents."""
 
@@ -868,7 +855,6 @@ class AgentFactory(ABC):
             Validation result
         """
         return config.validate()
-
 
 # ============================================================================
 # Service Locator Interface
@@ -929,7 +915,6 @@ class ServiceLocator(ABC):
         """
         return False
 
-
 # ============================================================================
 # Event System Interfaces
 # ============================================================================
@@ -940,7 +925,6 @@ class EventHandler(Protocol):
     def handle_event(self, event_type: str, event_data: Dict[str, Any]) -> None:
         """Handle an event."""
         ...
-
 
 class EventBus(ABC):
     """Abstract event bus for component communication."""
@@ -989,7 +973,6 @@ class EventBus(ABC):
             List of event handlers
         """
         return []
-
 
 # ============================================================================
 # Configuration Management
@@ -1050,7 +1033,6 @@ class ConfigurationManager(ABC):
         """
         return False
 
-
 # ============================================================================
 # Utility Functions
 # ============================================================================
@@ -1082,7 +1064,6 @@ def validate_interface_implementation(instance: Any, interface_class: type) -> V
 
     return result
 
-
 def create_operation_result(success: bool, data: Any = None,
                           error: Optional[str] = None) -> OperationResult:
     """
@@ -1100,7 +1081,6 @@ def create_operation_result(success: bool, data: Any = None,
         return OperationResult.success_result(data)
     else:
         return OperationResult.error_result(error or "Operation failed")
-
 
 # ============================================================================
 # Interface Registry
@@ -1150,7 +1130,6 @@ class InterfaceRegistry:
             True if implementations exist
         """
         return len(self.get_implementations(interface_class)) > 0
-
 
 # Global interface registry instance
 interface_registry = InterfaceRegistry()

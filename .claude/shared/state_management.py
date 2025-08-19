@@ -1,20 +1,29 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Union
+)
+
+from ..shared.state_management import StateManager
+import json
+import gzip
+import fcntl
+import shutil
+import logging
+import uuid
+
 """
 State management module for Enhanced Separation architecture.
 Provides unified state persistence for OrchestratorAgent and WorkflowManager.
 """
 
-import json
-import gzip
-import fcntl
-import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, asdict, field
 from enum import Enum
-import logging
-import uuid
-
 
 # Custom exceptions
 class StateError(Exception):
@@ -25,14 +34,12 @@ class StateError(Exception):
         self.operation = operation
         self.context = context
 
-
 class StateValidationError(StateError):
     """Exception for state validation errors."""
 
     def __init__(self, message: str, validation_errors: List[str]):
         super().__init__(message, 'validation', {})
         self.validation_errors = validation_errors
-
 
 # Enums and data classes
 class WorkflowPhase(Enum):
@@ -75,7 +82,6 @@ class WorkflowPhase(Enum):
         if not isinstance(phase_number, int):
             return False
         return 0 <= phase_number <= 9
-
 
 @dataclass
 class TaskState:
@@ -185,9 +191,7 @@ class TaskState:
 
         return True
 
-
 logger = logging.getLogger(__name__)
-
 
 class StateManager:
     """
@@ -639,7 +643,6 @@ class StateManager:
         except Exception as e:
             self.logger.error(f"Failed to restore state from backup {backup_path}: {e}")
             return False
-
 
 class CheckpointManager:
     """

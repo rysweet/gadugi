@@ -1,3 +1,7 @@
+import os
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """
 CLI entry point for executing the System Design Review Agent.
@@ -9,11 +13,7 @@ remains concise and maintainable.
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
 from textwrap import dedent
-
 
 def _post_pr_comment(pr_number: str, body: str) -> None:
     """Post a comment to the PR via the GitHub CLI."""
@@ -26,7 +26,6 @@ def _post_pr_comment(pr_number: str, body: str) -> None:
         print("Posted PR comment successfully")
     except subprocess.CalledProcessError as exc:
         print(f"Failed to post PR comment: {exc}")
-
 
 def _fallback_comment() -> str:
     """Return a fallback comment when automated review is unavailable."""
@@ -49,7 +48,6 @@ def _fallback_comment() -> str:
         """
     )
 
-
 def _error_comment(error: Exception) -> str:
     """Return a comment body describing an unexpected error."""
     return dedent(
@@ -68,7 +66,6 @@ def _error_comment(error: Exception) -> str:
         Please review architectural changes manually or contact the development team.
         """
     )
-
 
 def main() -> None:
     pr_number = os.getenv("PR_NUMBER")
@@ -123,7 +120,6 @@ def main() -> None:
         print(f"Unexpected error during review: {exc}")
         _post_pr_comment(pr_number, _error_comment(exc))
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

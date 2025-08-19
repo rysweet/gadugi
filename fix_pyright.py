@@ -1,10 +1,10 @@
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """Quick script to fix common pyright type errors."""
 
-import subprocess
-import sys
 from pathlib import Path
-
 
 def run_pyright(path: str) -> list[str]:
     """Run pyright and return errors."""
@@ -14,7 +14,6 @@ def run_pyright(path: str) -> list[str]:
         text=True,
     )
     return result.stdout.split("\n")
-
 
 def main():
     """Main function to check pyright errors."""
@@ -41,7 +40,6 @@ def main():
     else:
         print("❌ Fix the remaining type errors")
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

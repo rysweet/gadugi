@@ -1,11 +1,12 @@
+from typing import Optional
+
+import os
+
 """
 Configuration for event-router.
 """
 
-import os
-from typing import Optional
 from pydantic import BaseSettings
-
 
 class Settings(BaseSettings):  # type: ignore
     """Application settings."""
@@ -36,11 +37,9 @@ class Settings(BaseSettings):  # type: ignore
         env_prefix = "EVENT-ROUTER_"
         env_file = ".env"
 
-
 def get_settings() -> Settings:
     """Get application settings."""
     return Settings()
-
 
 # Flask-specific config class
 class Config:

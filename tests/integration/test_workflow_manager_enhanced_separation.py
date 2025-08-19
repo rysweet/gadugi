@@ -1,4 +1,17 @@
+import os
+import shutil
+import sys
+import tempfile
+import pytest
+import datetime
+            import time
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+from unittest.mock import Mock, patch, MagicMock
 """
 Integration tests for WorkflowManager with Enhanced Separation shared modules.
 
@@ -17,12 +30,7 @@ Validates that the Enhanced Separation architecture provides:
 - Seamless TodoWrite integration
 """
 
-import os
-import shutil
-import sys
-import tempfile
-
-import pytest
+from unittest.mock import Mock, patch
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -39,7 +47,6 @@ from task_tracking import (
     WorkflowPhaseTracker,
 )
 from utils.error_handling import CircuitBreaker, ErrorHandler, retry
-
 
 class TestWorkflowManagerIntegration:
     """Integration tests for WorkflowManager with shared modules"""
@@ -440,7 +447,6 @@ class TestWorkflowManagerIntegration:
             self.task_metrics.record_phase_start(phase.name.lower())
 
             # Simulate phase work (mock)
-            import time
 
             time.sleep(0.01)  # Minimal sleep to show duration
 
@@ -595,7 +601,6 @@ class TestWorkflowManagerIntegration:
         assert "completed_at" in workflow_state.context
         assert workflow_state.created_at is not None
 
-
 class TestWorkflowManagerTaskValidation:
     """Test task validation and dependency management"""
 
@@ -706,7 +711,6 @@ class TestWorkflowManagerTaskValidation:
 
         # Verify task tracking is working
         assert task is not None
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

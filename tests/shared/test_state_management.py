@@ -1,23 +1,30 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    TYPE_CHECKING,
+    Union
+)
+
+from ..shared.state_management import StateManager
+import json
+import os
+import shutil
+import sys
+import tempfile
+import pytest
+
 """
 Comprehensive tests for state_management.py module.
 Tests the Enhanced Separation architecture implementation for state persistence.
 """
 
-import json
-import os
-import shutil
-
 # Import the module we're testing (will be implemented after tests)
-import sys
-import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
-
-import pytest
 
 # For type checking only
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from claude.shared.state_management import (
@@ -32,7 +39,6 @@ if TYPE_CHECKING:
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.state_management import (
         CheckpointManager,
         StateError,
         StateManager,
@@ -46,7 +52,6 @@ except ImportError as e:
 
     # Define stubs for all needed classes
     from enum import Enum
-from typing import Dict, Any, Optional, List, Union
     from datetime import datetime
 
     class WorkflowPhase(Enum):
@@ -453,7 +458,6 @@ from typing import Dict, Any, Optional, List, Union
             self.lock_dir = Path(lock_dir)
             self.lock_dir.mkdir(parents=True, exist_ok=True)
 
-
 class TestTaskState:
     """Test suite for TaskState data class."""
 
@@ -649,7 +653,6 @@ class TestTaskState:
         )
         assert invalid_phase.is_valid  # is_valid is a property, not a method
 
-
 class TestWorkflowPhase:
     """Test suite for WorkflowPhase enum."""
 
@@ -677,7 +680,6 @@ class TestWorkflowPhase:
         assert WorkflowPhase.is_valid_phase(5) is True
         assert WorkflowPhase.is_valid_phase(15) is False
         assert WorkflowPhase.is_valid_phase(-1) is False
-
 
 class TestStateManager:
     """Test suite for StateManager class."""
@@ -1008,7 +1010,6 @@ class TestStateManager:
         lock_fd_after_release = state_manager._acquire_lock("test-resource")
         assert lock_fd_after_release is not None
 
-
 class TestCheckpointManager:
     """Test suite for CheckpointManager class."""
 
@@ -1154,7 +1155,6 @@ class TestCheckpointManager:
         assert restored_data is not None
         assert restored_data.context["large_data"] == "x" * 10000
 
-
 class TestStateError:
     """Test suite for StateError exception class."""
 
@@ -1171,7 +1171,6 @@ class TestStateError:
         error = StateValidationError("Validation failed", errors)
         assert str(error) == "Validation failed"
         assert error.validation_errors == errors
-
 
 # Integration tests
 class TestStateManagementIntegration:

@@ -1,3 +1,10 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+import logging
+import itertools
+
 """
 TeamCoach Phase 2: Team Composition Optimizer
 
@@ -14,10 +21,7 @@ Key Features:
 - Performance prediction for team compositions
 """
 
-import logging
-import itertools
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -33,7 +37,6 @@ from ..phase1.capability_assessment import (
 from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 from .task_matcher import TaskAgentMatcher, TaskRequirements
 
-
 class OptimizationObjective(Enum):
     """Optimization objectives for team formation"""
 
@@ -43,7 +46,6 @@ class OptimizationObjective(Enum):
     OPTIMIZE_COLLABORATION = "optimize_collaboration"
     MINIMIZE_COST = "minimize_cost"
     MAXIMIZE_LEARNING = "maximize_learning"
-
 
 @dataclass
 class ProjectRequirements:
@@ -77,7 +79,6 @@ class ProjectRequirements:
     success_metrics: Dict[str, float] = field(default_factory=dict)
     quality_requirements: Dict[str, float] = field(default_factory=dict)
 
-
 @dataclass
 class TeamComposition:
     """Represents a potential team composition"""
@@ -110,7 +111,6 @@ class TeamComposition:
     weaknesses: List[str] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
 
-
 @dataclass
 class OptimizationResult:
     """Result of team optimization process"""
@@ -135,7 +135,6 @@ class OptimizationResult:
     # Monitoring recommendations
     success_indicators: List[str] = field(default_factory=list)
     risk_mitigation: List[str] = field(default_factory=list)
-
 
 class TeamCompositionOptimizer:
     """
@@ -1009,7 +1008,6 @@ class TeamCompositionOptimizer:
         except Exception as e:
             self.logger.error(f"Failed to compare team compositions: {e}")
             return {}
-
 
 class OptimizationError(Exception):
     """Exception raised when team optimization fails."""

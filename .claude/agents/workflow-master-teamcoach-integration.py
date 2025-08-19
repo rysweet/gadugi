@@ -1,3 +1,8 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import logging
+
 #!/usr/bin/env python3
 """
 TeamCoach Integration for Enhanced WorkflowMaster
@@ -6,15 +11,11 @@ Provides intelligent workflow optimization through TeamCoach agent integration,
 including performance analysis, capability assessment, and continuous improvement.
 """
 
-import json
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
-
 
 class OptimizationStrategy(Enum):
     """Workflow optimization strategies."""
@@ -24,7 +25,6 @@ class OptimizationStrategy(Enum):
     SPEED = "speed"
     QUALITY = "quality"
     RESOURCE_EFFICIENCY = "resource_efficiency"
-
 
 @dataclass
 class WorkflowOptimization:
@@ -40,7 +40,6 @@ class WorkflowOptimization:
     reasoning: str
     metrics_impact: Dict[str, float]
 
-
 @dataclass
 class PerformanceMetrics:
     """Comprehensive performance metrics."""
@@ -55,7 +54,6 @@ class PerformanceMetrics:
     quality_score: float
     user_satisfaction: float
     improvement_trends: Dict[str, List[float]]
-
 
 class TeamCoachIntegration:
     """
@@ -742,14 +740,12 @@ class TeamCoachIntegration:
         except Exception as e:
             logger.error(f"Failed to load integration state: {e}")
 
-
 # Integration helper functions
 def create_teamcoach_integration(
     workflow_master, config: Optional[Dict[str, Any]] = None
 ):
     """Create TeamCoach integration for WorkflowMaster."""
     return TeamCoachIntegration(workflow_master, config)
-
 
 def optimize_workflow_with_teamcoach(
     workflow_master, workflow_state, config: Optional[Dict[str, Any]] = None

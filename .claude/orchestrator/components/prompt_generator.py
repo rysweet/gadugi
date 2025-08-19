@@ -1,3 +1,8 @@
+from typing import Dict, List, Optional
+
+import tempfile  # type: ignore
+    import argparse
+
 #!/usr/bin/env python3
 """
 PromptGenerator Component for OrchestratorAgent
@@ -7,11 +12,8 @@ This component addresses the critical issue where WorkflowManagers were receivin
 generic prompts instead of implementation-specific instructions.
 """
 
-import tempfile  # type: ignore
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
-
 
 @dataclass
 class PromptContext:
@@ -23,7 +25,6 @@ class PromptContext:
     dependencies: List[str] = None
     target_files: List[str] = None
     implementation_requirements: Dict = None
-
 
 class PromptGenerator:
     """Generates phase-specific prompts for WorkflowManager execution"""
@@ -286,10 +287,8 @@ for WorkflowManager execution in parallel worktree environments.
 
         return issues
 
-
 def main():
     """CLI entry point for PromptGenerator"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Generate WorkflowManager prompts")
     parser.add_argument("--task-id", required=True, help="Task ID")
@@ -334,7 +333,6 @@ def main():
     except Exception as e:
         print(f"❌ Failed to generate prompt: {e}")
         return 1
-
 
 if __name__ == "__main__":
     exit(main())

@@ -1,14 +1,18 @@
+from typing import Any, Callable, Dict, List, Optional
+
+import unittest
+import tempfile
+import os
+        import shutil
+import asyncio
+    import smtplib
+
 """
 Test cases for code-reviewer agent's design simplicity and over-engineering detection.
 
 These tests validate the enhanced functionality added in Issue #104 to help the
 CodeReviewer agent identify over-engineering patterns and suggest simpler alternatives.
 """
-
-import unittest
-import tempfile
-import os
-
 
 class TestCodeReviewerSimplicityDetection(unittest.TestCase):
     """Test cases for design simplicity evaluation in code reviews."""
@@ -19,7 +23,6 @@ class TestCodeReviewerSimplicityDetection(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        import shutil
 
         shutil.rmtree(self.test_cases_dir, ignore_errors=True)
 
@@ -54,7 +57,6 @@ class CreditCardProcessor(PaymentProcessor):
     def test_appropriate_abstraction_acceptance(self):
         """Test that appropriate abstractions are not flagged as over-engineered."""
         appropriate_code = """
-from abc import ABC, abstractmethod
 
 class PaymentProcessor(ABC):
     @abstractmethod
@@ -188,8 +190,6 @@ class Person:
     def test_appropriate_complexity_for_complex_problem(self):
         """Test that complex solutions are accepted for genuinely complex problems."""
         complex_but_justified_code = '''
-import asyncio
-from typing import Callable, Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
 
@@ -271,7 +271,6 @@ class UserManager:
         # Should detect features built for imagined future requirements
         self.assertTrue(os.path.exists(filepath))
 
-
 class TestSimplicityRecommendations(unittest.TestCase):
     """Test cases for simplicity recommendations and alternatives."""
 
@@ -338,7 +337,6 @@ def process_order(order_data):
         # Should suggest extracting complex conditions and reducing nesting
         self.assertTrue(True)  # Placeholder for actual implementation
 
-
 class TestContextAwareAssessment(unittest.TestCase):
     """Test cases for context-aware simplicity assessment."""
 
@@ -349,7 +347,6 @@ class TestContextAwareAssessment(unittest.TestCase):
 # Quick prototype - direct approach acceptable
 def send_notification(user, message):
     # Direct email sending - no abstraction layer yet
-    import smtplib
     server = smtplib.SMTP('localhost')
     server.send(user.email, message)
     server.quit()
@@ -391,7 +388,6 @@ class ShippingCalculator:
 """
 
         self.assertTrue(True)  # Placeholder for actual implementation
-
 
 if __name__ == "__main__":
     unittest.main()

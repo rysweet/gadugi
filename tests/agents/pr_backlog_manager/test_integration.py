@@ -1,3 +1,8 @@
+from ..shared.github_operations import GitHubOperations
+
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from unittest.mock import Mock, patch, MagicMock
 """
 Integration tests for PR Backlog Manager.
 
@@ -13,7 +18,6 @@ from datetime import datetime
 
 # Add the source directories to the Python path for imports
 import sys
-from typing import Set
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
@@ -53,7 +57,6 @@ from .test_stubs import (
     ProcessingMode,
     AgentConfig,
 )
-
 
 class TestEndToEndWorkflow:
     """Test complete end-to-end PR Backlog Manager workflows."""
@@ -282,7 +285,6 @@ class TestEndToEndWorkflow:
             # Verify processing was called for each PR
             assert manager.process_single_pr.call_count == 2
 
-
 class TestComponentIntegration:
     """Test integration between PR Backlog Manager components."""
 
@@ -359,7 +361,6 @@ class TestComponentIntegration:
             ]
             for task in tasks
         )
-
 
 class TestGitHubActionsIntegration:
     """Test GitHub Actions integration scenarios."""
@@ -490,7 +491,6 @@ class TestGitHubActionsIntegration:
             assert result["processing_mode"] == "single_pr"
             mock_manager.process_single_pr.assert_called_once()
 
-
 class TestErrorScenarios:
     """Test error handling and recovery scenarios."""
 
@@ -573,7 +573,6 @@ class TestErrorScenarios:
             # Verify processing completed despite delay
             assert assessment.pr_number == 123
             assert processing_time >= 0.1  # At least the simulated delay
-
 
 class TestRealWorldScenarios:
     """Test realistic real-world scenarios."""
@@ -727,7 +726,6 @@ class TestRealWorldScenarios:
 
             # Verify reasonable processing time (should be fast with mocks)
             assert processing_time < 5.0  # Should complete quickly with mocks
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

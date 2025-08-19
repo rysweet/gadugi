@@ -1,11 +1,11 @@
+from typing import Any, Dict, List, Optional
+
 """Data models for the Memory System."""
 
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
 
 class MemoryType(Enum):
     """Types of memories stored in the system."""
@@ -16,7 +16,6 @@ class MemoryType(Enum):
     ACHIEVEMENT = "achievement"
     TODO = "todo"
     REFLECTION = "reflection"
-
 
 @dataclass
 class Memory:
@@ -64,7 +63,6 @@ class Memory:
             github_issue_id=data.get("github_issue_id"),
         )
 
-
 @dataclass
 class Pattern:
     """Represents a pattern extracted from memories."""
@@ -88,7 +86,6 @@ class Pattern:
             "confidence": self.confidence,
             "metadata": self.metadata,
         }
-
 
 @dataclass
 class SyncResult:
@@ -114,7 +111,6 @@ class SyncResult:
             "errors": self.errors,
         }
 
-
 @dataclass
 class ImportResult:
     """Result of importing from Memory.md."""
@@ -136,7 +132,6 @@ class ImportResult:
             "errors": self.errors,
             "filepath": str(self.filepath) if self.filepath else None,
         }
-
 
 @dataclass
 class PruneResult:

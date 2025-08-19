@@ -1,3 +1,14 @@
+from typing import Any, Callable, Dict, List, Optional
+
+from ..shared.github_operations import GitHubOperations
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+import os
+        import builtins
+        import re
+            import json
+        import time
+
 """
 Stub implementations for PR backlog manager tests.
 
@@ -5,12 +16,9 @@ Provides minimal stub implementations for classes and functions that
 cannot be imported during type checking.
 """
 
-import os
 from enum import Enum
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Set
-
 
 # Pytest stubs
 class PytestStub:
@@ -49,7 +57,6 @@ class PytestStub:
     @staticmethod
     def approx(value: float, *, abs_tol: float = 1e-6, rel_tol: float = 1e-6):
         """Approximate comparison stub."""
-        import builtins
 
         class ApproxValue:
             def __init__(self, value, abs_tol, rel_tol):
@@ -62,10 +69,8 @@ class PytestStub:
 
         return ApproxValue(value, abs_tol, rel_tol)
 
-
 # Create pytest alias for import compatibility
 pytest = PytestStub()
-
 
 class PRStatus(Enum):
     """PR processing status."""
@@ -77,7 +82,6 @@ class PRStatus(Enum):
     ERROR = "error"
     FAILED = "failed"
 
-
 class ReadinessCriteria(Enum):
     """PR readiness criteria."""
 
@@ -87,7 +91,6 @@ class ReadinessCriteria(Enum):
     HUMAN_REVIEW_COMPLETE = "human_review_complete"
     AI_REVIEW_COMPLETE = "ai_review_complete"
     METADATA_COMPLETE = "metadata_complete"
-
 
 class ConflictComplexity(Enum):
     """Merge conflict complexity levels."""
@@ -100,7 +103,6 @@ class ConflictComplexity(Enum):
     HIGH = "high"
     COMPLEX = "complex"
 
-
 class CIFailureType(Enum):
     """CI failure types."""
 
@@ -111,7 +113,6 @@ class CIFailureType(Enum):
     SECURITY_FAILURE = "security_failure"
     UNKNOWN = "unknown"
 
-
 @dataclass
 class AgentConfig:
     """Agent configuration."""
@@ -121,7 +122,6 @@ class AgentConfig:
     auto_approve: bool = False
     max_retries: int = 3
     timeout: int = 300
-
 
 @dataclass
 class PRAssessment:
@@ -152,7 +152,6 @@ class PRAssessment:
                 (met_count / total_count * 100) if total_count > 0 else 0.0
             )
 
-
 @dataclass
 class BacklogMetrics:
     """Backlog processing metrics."""
@@ -164,7 +163,6 @@ class BacklogMetrics:
     automation_rate: float = 0.0
     success_rate: float = 0.0
     timestamp: Optional[datetime] = None
-
 
 @dataclass
 class ConflictAssessment:
@@ -178,7 +176,6 @@ class ConflictAssessment:
     resolution_estimate: timedelta = timedelta(0)
     auto_resolvable: bool = True
     is_blocking: bool = False
-
 
 @dataclass
 class CIAssessment:
@@ -204,7 +201,6 @@ class CIAssessment:
             self.retriable_failures = []
         if self.blocking_failures is None:
             self.blocking_failures = []
-
 
 @dataclass
 class ReviewAssessment:
@@ -233,7 +229,6 @@ class ReviewAssessment:
                 self.has_approved_review and self.ai_review_complete
             )
 
-
 @dataclass
 class SyncAssessment:
     """Branch sync assessment."""
@@ -246,7 +241,6 @@ class SyncAssessment:
     requires_update: bool = False
     is_auto_updatable: bool = True
     sync_complexity: str = "simple"
-
 
 @dataclass
 class MetadataAssessment:
@@ -262,7 +256,6 @@ class MetadataAssessment:
     is_complete: bool = True
     completeness_score: float = 100.0
 
-
 class DelegationType(Enum):
     """Types of delegation tasks."""
 
@@ -272,7 +265,6 @@ class DelegationType(Enum):
     AI_CODE_REVIEW = "ai_code_review"
     METADATA_IMPROVEMENT = "metadata_improvement"
 
-
 class DelegationPriority(Enum):
     """Priority levels for delegation tasks."""
 
@@ -280,7 +272,6 @@ class DelegationPriority(Enum):
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class DelegationStatus(Enum):
     """Status of delegation tasks."""
@@ -290,7 +281,6 @@ class DelegationStatus(Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 @dataclass
 class DelegationTask:
@@ -310,10 +300,8 @@ class DelegationTask:
     completion_time: Optional[datetime] = None
     error_message: Optional[str] = None
 
-
 class GadugiError(Exception):
     """Base exception for Gadugi operations."""
-
 
 class DelegationCoordinator:
     """Delegation coordinator implementation."""
@@ -658,7 +646,6 @@ Improve metadata for PR #{pr_number}.
 
     def _create_workflow_master_prompt(self, task: DelegationTask) -> None:
         """Create WorkflowMaster prompt file."""
-        import os
 
         # Create the expected file path
         task_type_name = task.task_type.value.lower()
@@ -681,7 +668,6 @@ Improve metadata for PR #{pr_number}.
 
     def _create_code_review_workflow(self, task: DelegationTask) -> None:
         """Create code review workflow."""
-        import os
 
         # Create the expected workflow file
         file_path = f".github/workflows/ai-review-pr-{task.pr_number}.yml"
@@ -836,7 +822,6 @@ This task has been automatically delegated for resolution."""
             "average_completion_time_seconds": avg_completion_time,
             "task_types": task_types,
         }
-
 
 class PRBacklogManager:
     """PR backlog manager implementation."""
@@ -1048,7 +1033,6 @@ class PRBacklogManager:
 
         # Default empty metrics
         return BacklogMetrics()
-
 
 class ReadinessAssessor:
     """Readiness assessment component."""
@@ -1402,8 +1386,6 @@ class ReadinessAssessor:
         if not body:
             return False
 
-        import re
-
         # Check for various issue reference patterns
         patterns = [
             r"fixes #\d+",
@@ -1484,10 +1466,8 @@ class ReadinessAssessor:
 
         return recommendations
 
-
 # Removed duplicate DelegationType, DelegationPriority, DelegationStatus, and DelegationTask definitions
 # These are already defined earlier in the file starting at line 240
-
 
 class MetricsCollector:
     """Metrics collection component."""
@@ -1521,7 +1501,6 @@ class MetricsCollector:
         """Generate metrics report."""
         return f"Processed {metrics.total_prs} PRs"
 
-
 class NotificationHandler:
     """Notification handling component."""
 
@@ -1550,7 +1529,6 @@ class NotificationHandler:
     def _format_summary_report(self, metrics: BacklogMetrics) -> str:
         """Format summary report."""
         return f"Processed {metrics.total_prs} PRs"
-
 
 class ConflictDetector:
     """Conflict detection component."""
@@ -1586,7 +1564,6 @@ class ConflictDetector:
         """Estimate resolution time."""
         return 0
 
-
 class LabelManager:
     """Label management component."""
 
@@ -1615,7 +1592,6 @@ class LabelManager:
     def _get_status_labels(self, status: PRStatus) -> List[str]:
         """Get status labels."""
         return [status.value]
-
 
 class AutoMerger:
     """Auto-merge component."""
@@ -1647,7 +1623,6 @@ class AutoMerger:
     def _cleanup_after_merge(self, pr_number: int) -> None:
         """Cleanup after merge."""
 
-
 class GitHubEventType(Enum):
     """GitHub event types."""
 
@@ -1657,14 +1632,12 @@ class GitHubEventType(Enum):
     WORKFLOW_DISPATCH = "workflow_dispatch"
     UNKNOWN = "unknown"
 
-
 class ProcessingMode(Enum):
     """Processing modes."""
 
     SINGLE_PR = "single_pr"
     FULL_BACKLOG = "full_backlog"
     TARGETED_BATCH = "targeted_batch"
-
 
 class GitHubContext:
     """GitHub Actions context."""
@@ -1782,14 +1755,12 @@ class GitHubContext:
     @staticmethod
     def _extract_pr_number(ref: str) -> Optional[int]:
         """Extract PR number from ref."""
-        import re
 
         if not ref:
             return None
 
         match = re.match(r"refs/pull/(\d+)/", ref)
         return int(match.group(1)) if match else None
-
 
 @dataclass
 class SecurityConstraints:
@@ -1827,7 +1798,6 @@ class SecurityConstraints:
             if auto_approve
             else [],
         )
-
 
 # Additional stub classes for GitHub Actions integration
 class GitHubActionsIntegration:
@@ -1924,7 +1894,6 @@ class GitHubActionsIntegration:
             )
         elif self.github_context.event_type == GitHubEventType.WORKFLOW_DISPATCH:
             # Check for PR number in inputs
-            import json
 
             try:
                 if os.path.exists(self.github_context.event_path):
@@ -1958,7 +1927,6 @@ class GitHubActionsIntegration:
         config: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Execute processing."""
-        import time
 
         start_time = time.time()
 
@@ -2063,8 +2031,6 @@ class GitHubActionsIntegration:
 
     def _create_workflow_artifacts(self, result: Dict[str, Any]):
         """Create workflow artifacts."""
-        import os
-        import json
 
         # Create artifacts directory
         os.makedirs(".github/artifacts", exist_ok=True)
@@ -2079,7 +2045,6 @@ class GitHubActionsIntegration:
 
     def _generate_workflow_summary(self, result: Dict[str, Any]):
         """Generate workflow summary."""
-        import os
 
         summary_path = os.environ.get("GITHUB_STEP_SUMMARY", "/tmp/summary.md")
         summary = self._format_github_summary(result)
@@ -2089,8 +2054,6 @@ class GitHubActionsIntegration:
 
     def _create_error_artifacts(self, result: Dict[str, Any]):
         """Create error artifacts."""
-        import os
-        import json
 
         # Create artifacts directory
         os.makedirs(".github/artifacts", exist_ok=True)
@@ -2200,7 +2163,6 @@ class GitHubActionsIntegration:
 
     def set_github_outputs(self, result: Dict[str, Any]):
         """Set GitHub outputs."""
-        import os
 
         output_path = os.environ.get("GITHUB_OUTPUT", "/tmp/outputs.txt")
 
@@ -2246,7 +2208,6 @@ class GitHubActionsIntegration:
         except Exception:
             return False
 
-
 class WorkflowStatus(Enum):
     """Workflow run status."""
 
@@ -2254,7 +2215,6 @@ class WorkflowStatus(Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 @dataclass
 class WorkflowRun:

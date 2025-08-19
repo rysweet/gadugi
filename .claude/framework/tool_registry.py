@@ -1,13 +1,25 @@
-"""Tool registry and management for agents."""
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Union,
+    Union  # type: ignore
+)
 
 import asyncio
 import inspect
 import logging
+        import subprocess
+            import httpx
+
+"""Tool registry and management for agents."""
+
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Union  # type: ignore
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class Tool:
@@ -45,7 +57,6 @@ class Tool:
             params[name] = param_info
 
         return params
-
 
 class ToolRegistry:
     """Registry for managing tools available to agents."""
@@ -270,7 +281,6 @@ class ToolRegistry:
         self._execution_count.clear()
         self._error_count.clear()
 
-
 # Standard tool implementations
 class StandardTools:
     """Collection of standard tools for agents."""
@@ -298,7 +308,6 @@ class StandardTools:
             content: Content to write
             encoding: File encoding
         """
-        from pathlib import Path
         Path(filepath).write_text(content, encoding=encoding)
 
     @staticmethod
@@ -312,7 +321,6 @@ class StandardTools:
         Returns:
             Command result with stdout, stderr, and return code
         """
-        import subprocess
 
         try:
             result = subprocess.run(
@@ -353,7 +361,6 @@ class StandardTools:
             Response data
         """
         try:
-            import httpx
 
             async with httpx.AsyncClient() as client:
                 response = await client.request(
@@ -373,7 +380,6 @@ class StandardTools:
                 "status_code": -1,
                 "content": "",
             }
-
 
 def create_standard_registry() -> ToolRegistry:
     """Create a tool registry with standard tools.

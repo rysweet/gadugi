@@ -1,4 +1,11 @@
+
+import argparse
+import json
+import os
+import sys
+
 #!/usr/bin/env python3
+
 """
 Memory Manager CLI - Main interface for Memory.md to GitHub Issues integration
 
@@ -6,18 +13,12 @@ This module provides the command-line interface for managing Memory.md synchroni
 with GitHub Issues, including pruning, syncing, and conflict resolution.
 """
 
-import argparse
-import json
-import os
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
 
 from github_integration import GitHubIntegration
 
 # Import our components
 from memory_compactor import MemoryCompactor
-
 
 class MemoryManager:
     """Main Memory Manager class"""
@@ -265,7 +266,6 @@ class MemoryManager:
             "config_path": self.config_manager._find_config_file(),
         }
 
-
 def main():
     """Main CLI interface"""
     parser = argparse.ArgumentParser(
@@ -470,7 +470,6 @@ def main():
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

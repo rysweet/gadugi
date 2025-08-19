@@ -1,14 +1,16 @@
-#!/usr/bin/env python3
-"""
-Systematically fix all pyright errors in the .claude directory.
-"""
+
 
 import os
 import re
 import subprocess
-from pathlib import Path
-from typing import List, Tuple, Dict, Any
 
+#!/usr/bin/env python3
+
+"""
+Systematically fix all pyright errors in the .claude directory.
+"""
+
+from pathlib import Path
 
 def run_pyright(path: str) -> List[str]:
     """Run pyright and return list of errors."""
@@ -21,7 +23,6 @@ def run_pyright(path: str) -> List[str]:
             errors.append(line)
     return errors
 
-
 def fix_unused_imports(file_path: Path) -> bool:
     """Remove unused imports from a file."""
     if not file_path.exists():
@@ -32,8 +33,7 @@ def fix_unused_imports(file_path: Path) -> bool:
 
     # Common unused imports to remove
     patterns = [
-        r"^from typing import .*\bSet\b.*$",  # Unused Set import
-        r"^import Set\s*$",
+        r"^        r"^import Set\s*$",
     ]
 
     for pattern in patterns:
@@ -47,10 +47,8 @@ def fix_unused_imports(file_path: Path) -> bool:
                 temp_content = content.replace(import_line, "")
                 if "Set[" not in temp_content and "Set(" not in temp_content:
                     # Remove just 'Set' from the import
-                    if "from typing import" in import_line:
-                        # Parse the imports
-                        imports = re.search(r"from typing import (.+)", import_line)
-                        if imports:
+                    if "                        # Parse the imports
+                        imports = re.search(r"                        if imports:
                             import_list = [
                                 i.strip() for i in imports.group(1).split(",")
                             ]
@@ -58,8 +56,7 @@ def fix_unused_imports(file_path: Path) -> bool:
                                 import_list.remove("Set")
                                 if import_list:
                                     new_import = (
-                                        f"from typing import {', '.join(import_list)}"
-                                    )
+                                        f"                                    )
                                     content = content.replace(import_line, new_import)
                                 else:
                                     # Remove the entire line if Set was the only import
@@ -69,7 +66,6 @@ def fix_unused_imports(file_path: Path) -> bool:
         file_path.write_text(content)
         return True
     return False
-
 
 def fix_undefined_variables(file_path: Path) -> bool:
     """Fix undefined variable errors."""
@@ -103,7 +99,6 @@ def fix_undefined_variables(file_path: Path) -> bool:
         file_path.write_text(content)
         return True
     return False
-
 
 def fix_syntax_errors(file_path: Path) -> bool:
     """Fix syntax errors in files."""
@@ -139,7 +134,6 @@ def fix_syntax_errors(file_path: Path) -> bool:
         return True
     return False
 
-
 def fix_parameter_mismatches(file_path: Path) -> bool:
     """Fix parameter mismatch errors in test files."""
     if not file_path.exists():
@@ -162,7 +156,6 @@ def fix_parameter_mismatches(file_path: Path) -> bool:
         return True
     return False
 
-
 def fix_file(file_path: Path) -> int:
     """Fix all issues in a single file. Returns number of fixes applied."""
     fixes_applied = 0
@@ -184,7 +177,6 @@ def fix_file(file_path: Path) -> int:
         print(f"  Fixed parameter mismatches in {file_path.name}")
 
     return fixes_applied
-
 
 def main():
     """Main execution function."""
@@ -216,7 +208,6 @@ def main():
         print("\nRemaining errors (first 10):")
         for error in final_errors[:10]:
             print(f"  {error}")
-
 
 if __name__ == "__main__":
     main()

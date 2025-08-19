@@ -1,13 +1,15 @@
-from unittest.mock import Mock, patch
-"""Tests for the BaseAgent class."""
+from typing import Any, Dict, List, Optional
 
+from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, patch, MagicMock
 import asyncio
-from pathlib import Path
-
 import pytest
 
-from ..base_agent import AgentMetadata, AgentResponse, BaseAgent
+"""Tests for the BaseAgent class."""
 
+from pathlib import Path
+
+from ..base_agent import AgentMetadata, AgentResponse, BaseAgent
 
 class TestAgentImpl(BaseAgent):
     """Test implementation of BaseAgent."""
@@ -22,7 +24,6 @@ class TestAgentImpl(BaseAgent):
             success=True,
             result=f"Processed: {event}",
         )
-
 
 class TestBaseAgent:
     """Test suite for BaseAgent."""
@@ -170,7 +171,6 @@ class TestBaseAgent:
 
         assert test_agent.state["test_key"] == "loaded_value"
 
-
 class TestAgentMetadata:
     """Test suite for AgentMetadata."""
 
@@ -201,7 +201,6 @@ class TestAgentMetadata:
         assert metadata.version == "1.5.0"
         assert len(metadata.tools) == 1
         assert "subscribes" in metadata.events
-
 
 class TestAgentResponse:
     """Test suite for AgentResponse."""

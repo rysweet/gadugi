@@ -1,8 +1,8 @@
+from typing import Any, Dict, List, Optional
+
 """Tests for event handlers and filtering."""
 
-
 from gadugi.event_service.events import (
-from typing import Any
     Event,
     create_github_event,
     create_local_event,
@@ -16,7 +16,6 @@ from gadugi.event_service.handlers import (
     CommonFilters,
 )
 from gadugi.event_service.config import AgentInvocation
-
 
 class TestGitHubFilter:
     """Test GitHub event filtering."""
@@ -125,7 +124,6 @@ class TestGitHubFilter:
         assert filter.actions == ["opened"]
         assert filter.labels == ["bug"]
 
-
 class TestEventFilter:
     """Test general event filtering."""
 
@@ -213,7 +211,6 @@ class TestEventFilter:
         assert filter.github_filter is not None
         assert filter.github_filter.repositories == ["owner/repo"]
 
-
 class TestEventHandler:
     """Test event handler."""
 
@@ -259,7 +256,6 @@ class TestEventHandler:
 
         event = create_github_event("issues", "owner/repo", "opened")
         assert not handler.matches(event)
-
 
 class TestEventMatcher:
     """Test event matcher."""
@@ -343,7 +339,6 @@ class TestEventMatcher:
         assert not matcher.remove_handler("non-existent")
         assert not matcher.enable_handler("non-existent")
         assert not matcher.disable_handler("non-existent")
-
 
 class TestCommonFilters:
     """Test predefined common filters."""

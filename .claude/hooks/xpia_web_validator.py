@@ -1,11 +1,12 @@
+import sys
+import json
+
 #!/usr/bin/env python3
 """
 XPIA Web Validator - Claude Code Hook for Web Operations
 Validates WebFetch and WebSearch operations for security threats
 """
 
-import sys
-import json
 from pathlib import Path
 
 # Add shared modules to path
@@ -13,7 +14,6 @@ shared_path = Path(__file__).parent.parent / "shared"
 sys.path.insert(0, str(shared_path))
 
 from xpia_defense import XPIADefenseAgent, SecurityMode
-
 
 def validate_web_operation(hook_data):
     """Validate web operations for XPIA threats"""
@@ -124,7 +124,6 @@ def validate_web_operation(hook_data):
         # Log error but don't block on failure
         return {"warning": f"XPIA validation error: {str(e)}", "allow": True}
 
-
 def main():
     """Main entry point for the hook"""
     try:
@@ -168,7 +167,6 @@ def main():
     except Exception as e:
         print(f"XPIA hook error: {str(e)}", file=sys.stderr)
         sys.exit(0)  # Don't block on errors
-
 
 if __name__ == "__main__":
     main()

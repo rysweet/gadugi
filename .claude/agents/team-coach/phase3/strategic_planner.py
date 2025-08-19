@@ -1,3 +1,7 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+
 """
 TeamCoach Phase 3: Strategic Planner
 
@@ -5,17 +9,14 @@ Provides long-term strategic planning for multi-agent teams including
 capacity planning, skill development roadmaps, and team evolution strategies.
 """
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
 
 from ..phase1.capability_assessment import CapabilityAssessment
 from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 
 logger = logging.getLogger(__name__)
-
 
 class PlanningHorizon(Enum):
     """Time horizons for strategic planning."""
@@ -23,7 +24,6 @@ class PlanningHorizon(Enum):
     SHORT_TERM = "short_term"  # 1-4 weeks
     MEDIUM_TERM = "medium_term"  # 1-3 months
     LONG_TERM = "long_term"  # 3-12 months
-
 
 class StrategyType(Enum):
     """Types of strategic initiatives."""
@@ -36,7 +36,6 @@ class StrategyType(Enum):
     QUALITY_ENHANCEMENT = "quality_enhancement"
     EFFICIENCY_OPTIMIZATION = "efficiency_optimization"
 
-
 class StrategyPriority(Enum):
     """Priority levels for strategic initiatives."""
 
@@ -44,7 +43,6 @@ class StrategyPriority(Enum):
     HIGH = "high"
     MEDIUM = "medium"
     LOW = "low"
-
 
 @dataclass
 class StrategicGoal:
@@ -59,7 +57,6 @@ class StrategicGoal:
     deadline: datetime
     priority: StrategyPriority
     dependencies: List[str]
-
 
 @dataclass
 class StrategicInitiative:
@@ -77,7 +74,6 @@ class StrategicInitiative:
     success_criteria: List[str]
     owner: Optional[str]
 
-
 @dataclass
 class CapacityPlan:
     """Team capacity planning information."""
@@ -87,7 +83,6 @@ class CapacityPlan:
     gaps: Dict[str, Dict[str, float]]  # timeframe -> skill -> gap
     recommendations: List[str]
 
-
 @dataclass
 class SkillDevelopmentPlan:
     """Plan for developing team skills."""
@@ -96,7 +91,6 @@ class SkillDevelopmentPlan:
     development_paths: Dict[str, List[Dict[str, Any]]]  # agent -> path
     training_calendar: Dict[datetime, List[str]]  # date -> training events
     investment_required: Dict[str, float]  # resource -> amount
-
 
 @dataclass
 class TeamEvolutionPlan:
@@ -110,7 +104,6 @@ class TeamEvolutionPlan:
     roadmap: Dict[PlanningHorizon, List[str]]  # horizon -> initiative IDs
     success_metrics: Dict[str, float]
     review_schedule: List[datetime]
-
 
 class StrategicPlanner:
     """

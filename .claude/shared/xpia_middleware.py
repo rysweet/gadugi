@@ -1,3 +1,9 @@
+from typing import Any, Dict, Optional
+
+import logging
+import time
+import sys
+
 #!/usr/bin/env python3
 """
 XPIA Defense Middleware - Integration with agent-manager hook system
@@ -7,18 +13,13 @@ agent-manager hook system, protecting all agent communications without
 requiring changes to existing agent code.
 """
 
-import logging
-import time
-from typing import Dict, Any, Optional
 from pathlib import Path
-import sys
 
 # Add shared modules to path
 shared_path = Path(__file__).parent
 sys.path.insert(0, str(shared_path))
 
 from xpia_defense import XPIADefenseAgent, SecurityMode, ValidationResult
-
 
 class XPIAMiddleware:
     """
@@ -425,10 +426,8 @@ class XPIAMiddleware:
             "new_config": self.config.copy(),
         }
 
-
 # Global middleware instance for hook integration
 _xpia_middleware_instance = None
-
 
 def get_xpia_middleware(
     security_mode: SecurityMode = SecurityMode.BALANCED,
@@ -441,14 +440,12 @@ def get_xpia_middleware(
 
     return _xpia_middleware_instance
 
-
 def xpia_validate_user_input(
     content: str, context: Dict[str, Any] = None
 ) -> Dict[str, Any]:
     """Hook function for validating user input"""
     middleware = get_xpia_middleware()
     return middleware.validate_user_input(content, context)
-
 
 def xpia_validate_agent_communication(
     content: str, source_agent: str = "unknown", target_agent: str = "unknown"
@@ -457,7 +454,6 @@ def xpia_validate_agent_communication(
     middleware = get_xpia_middleware()
     return middleware.validate_agent_communication(content, source_agent, target_agent)
 
-
 def xpia_validate_file_content(
     content: str, filename: str = "unknown", file_type: str = "unknown"
 ) -> Dict[str, Any]:
@@ -465,12 +461,10 @@ def xpia_validate_file_content(
     middleware = get_xpia_middleware()
     return middleware.validate_file_content(content, filename, file_type)
 
-
 def xpia_get_status() -> Dict[str, Any]:
     """Hook function for getting XPIA middleware status"""
     middleware = get_xpia_middleware()
     return middleware.get_middleware_status()
-
 
 def xpia_update_config(new_config: Dict[str, Any]) -> Dict[str, Any]:
     """Hook function for updating XPIA configuration"""

@@ -1,24 +1,24 @@
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+
 #!/usr/bin/env python3
+
 """
 Test suite for WorktreeManager component of OrchestratorAgent
 
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import shutil
-import subprocess
-
 # Add the components directory to the path
-import sys
-import tempfile
-import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import Mock, patch, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
 from worktree_manager import WorktreeInfo, WorktreeManager
-
 
 class TestWorktreeManager(unittest.TestCase):
     """Test cases for WorktreeManager"""
@@ -39,7 +39,6 @@ class TestWorktreeManager(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def init_fake_git_repo(self):
@@ -426,7 +425,6 @@ detached
         self.assertEqual(summary['failed'], 1)
         self.assertEqual(summary.get('cleaning', 0), 0)
 
-
 class TestWorktreeManagerIntegration(unittest.TestCase):
     """Integration tests for WorktreeManager with actual git operations"""
 
@@ -458,7 +456,6 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         except:
             pass  # Ignore cleanup errors
 
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     @unittest.skipIf(not shutil.which('git'), "Git not available")
@@ -498,9 +495,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         )
         self.assertNotIn(str(worktree_info.worktree_path), result.stdout)
 
-
 if __name__ == '__main__':
-    import shutil
 
     # Skip integration tests if git is not available
     if not shutil.which('git'):

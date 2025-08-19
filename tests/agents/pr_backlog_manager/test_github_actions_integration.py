@@ -1,3 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+from unittest.mock import Mock, patch, MagicMock
+import pytest  # type: ignore[import]
+import os
+import json
+import sys
+
 """
 Tests for GitHub Actions Integration module.
 
@@ -5,14 +13,9 @@ Tests the GitHubActionsIntegration class and GitHub Actions-specific
 functionality including event handling, security validation, and workflow artifacts.
 """
 
-import pytest  # type: ignore[import]
-
-import os
-import json
-from unittest.mock import Mock, patch, mock_open
+from unittest.mock import Mock, patch
 
 # Add the source directories to the Python path for imports
-import sys
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
@@ -47,7 +50,6 @@ from .test_stubs import (
     ProcessingMode,
 )
 
-
 @pytest.fixture
 def mock_pr_backlog_manager():
     """Create mock PR backlog manager."""
@@ -71,7 +73,6 @@ def mock_pr_backlog_manager():
     )
     return mock
 
-
 @pytest.fixture
 def github_env_vars():
     """Standard GitHub Actions environment variables."""
@@ -86,7 +87,6 @@ def github_env_vars():
         "GITHUB_RUN_ID": "456789",
         "GITHUB_RUN_ATTEMPT": "1",
     }
-
 
 class TestGitHubContext:
     """Test GitHubContext functionality."""
@@ -196,7 +196,6 @@ class TestGitHubContext:
             pr_number = GitHubContext._extract_pr_number("refs/heads/main")
             assert pr_number is None
 
-
 class TestSecurityConstraints:
     """Test SecurityConstraints functionality."""
 
@@ -240,7 +239,6 @@ class TestSecurityConstraints:
             constraints = SecurityConstraints.from_environment()
 
             assert constraints.auto_approve_enabled is False
-
 
 class TestGitHubActionsIntegration:
     """Test GitHubActionsIntegration functionality."""
@@ -298,7 +296,6 @@ class TestGitHubActionsIntegration:
                 RuntimeError, match="Auto-approve not allowed for event type: push"
             ):
                 GitHubActionsIntegration(mock_pr_backlog_manager)
-
 
 class TestProcessingModeDetection:
     """Test processing mode detection functionality."""
@@ -373,7 +370,6 @@ class TestProcessingModeDetection:
 
         assert mode == ProcessingMode.FULL_BACKLOG
         assert config["reason"] == "unknown_event_unknown"
-
 
 class TestProcessingExecution:
     """Test processing execution functionality."""
@@ -473,7 +469,6 @@ class TestProcessingExecution:
         assert result["error_type"] == "Exception"
 
         integration._create_error_artifacts.assert_called_once()
-
 
 class TestArtifactCreation:
     """Test workflow artifact creation functionality."""
@@ -632,7 +627,6 @@ class TestArtifactCreation:
             assert "ready_prs=5" in written_content
             assert "automation_rate=75.0" in written_content
 
-
 class TestSummaryFormatting:
     """Test summary formatting functionality."""
 
@@ -774,7 +768,6 @@ class TestSummaryFormatting:
         assert "Ready PRs: 3" in summary
         assert "Blocked PRs: 2" in summary
 
-
 class TestRateLimitHandling:
     """Test rate limit handling functionality."""
 
@@ -825,7 +818,6 @@ class TestRateLimitHandling:
 
         # Should not throttle if we can't check (conservative approach)
         assert should_throttle is False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

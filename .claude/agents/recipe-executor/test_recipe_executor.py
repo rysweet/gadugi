@@ -1,14 +1,14 @@
+import json
+import pytest
+
 """
 Comprehensive tests for Recipe Executor Agent.
 """
 
-import json
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import Mock, patch, MagicMock
 
 from recipe_executor import RecipeExecutor, Recipe, Implementation
-
 
 @pytest.fixture
 def temp_recipe_dir(tmp_path):
@@ -61,12 +61,10 @@ def temp_recipe_dir(tmp_path):
 
     return recipe_dir
 
-
 @pytest.fixture
 def executor():
     """Create Recipe Executor instance."""
     return RecipeExecutor()
-
 
 class TestRecipeLoading:
     """Test recipe loading functionality."""
@@ -110,7 +108,6 @@ class TestRecipeLoading:
         # Check that MUST/SHALL/SHOULD requirements are captured
         criteria_text = " ".join(recipe.validation_criteria).lower()
         assert "must" in criteria_text or "shall" in criteria_text or "should" in criteria_text
-
 
 class TestComponentTypeIdentification:
     """Test component type identification."""
@@ -162,7 +159,6 @@ class TestComponentTypeIdentification:
 
         component_type = executor._identify_component_type(recipe)
         assert component_type == "generic"
-
 
 class TestImplementationGeneration:
     """Test implementation generation."""
@@ -239,7 +235,6 @@ class TestImplementationGeneration:
         assert "@app.route" in service_code
         assert "/health" in service_code
 
-
 class TestFileWriting:
     """Test writing implementation to disk."""
 
@@ -273,7 +268,6 @@ class TestFileWriting:
 
         # Check content
         assert (output_path / "main.py").read_text() == "# Main file"
-
 
 class TestValidation:
     """Test implementation validation."""
@@ -336,7 +330,6 @@ class TestValidation:
 
         assert result is False
 
-
 class TestEndToEnd:
     """Test end-to-end workflow."""
 
@@ -370,7 +363,6 @@ class TestEndToEnd:
         assert recipe.name in executor.recipes
         assert recipe.name in executor.implementations
         assert executor.implementations[recipe.name] == impl
-
 
 class TestCodeGeneration:
     """Test specific code generation functions."""

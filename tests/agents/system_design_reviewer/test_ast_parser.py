@@ -1,3 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+import pytest
+import tempfile
+import os
+import asyncio
+import json  # New import
+
 """
 Test suite for AST Parser functionality
 
@@ -5,9 +13,6 @@ Tests the pluggable AST parsing architecture, architectural element extraction,
 and change detection algorithms.
 """
 
-import pytest
-import tempfile
-import os
 from agents.system_design_reviewer.ast_parser import (
     ASTParserFactory,
     PythonASTParser,
@@ -18,15 +23,11 @@ from agents.system_design_reviewer.ast_parser import (
     ImpactLevel,
 )
 
-
 @pytest.fixture
 def sample_python_code():
     """Sample Python code for testing"""
     return '''
-import os
-import asyncio
 from abc import ABC, abstractmethod
-from typing import Dict, List
 
 class BaseService(ABC):
     """Abstract base class for services"""
@@ -72,16 +73,10 @@ def utility_function(value: str) -> str:
 CONSTANT_VALUE = "test_constant"
 '''
 
-
 @pytest.fixture
 def modified_python_code():
     """Modified Python code for change detection testing"""
     return '''
-import os
-import asyncio
-import json  # New import
-from abc import ABC, abstractmethod
-from typing import Dict, List
 
 class BaseService(ABC):
     """Abstract base class for services"""
@@ -146,7 +141,6 @@ CONSTANT_VALUE = "test_constant_updated"  # Modified constant
 NEW_CONSTANT = "new_value"  # New constant
 '''
 
-
 class TestASTParserFactory:
     """Test the AST parser factory"""
 
@@ -183,7 +177,6 @@ class TestASTParserFactory:
 
         factory.register_parser("custom", custom_parser)
         assert factory.get_parser_by_name("custom") == custom_parser
-
 
 class TestPythonASTParser:
     """Test Python AST parser functionality"""
@@ -447,7 +440,6 @@ class TestPythonASTParser:
             for keyword in ["singleton", "async", "coupling"]
         )
 
-
 class TestArchitecturalElements:
     """Test architectural element data structures"""
 
@@ -511,7 +503,6 @@ class TestArchitecturalElements:
             "Renamed function 'old_function' to 'test_function'" in rename_description
         )
 
-
 class TestPatternDetection:
     """Test architectural pattern detection"""
 
@@ -564,7 +555,6 @@ class ServiceFactory:
         parser = PythonASTParser()
 
         complex_code = """
-from abc import ABC, abstractmethod
 
 class AbstractFactory(ABC):
     @abstractmethod
@@ -586,7 +576,6 @@ class AbstractFactory(ABC):
         assert "abc" in patterns
         assert "factory" in patterns
         assert "observer" in patterns
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

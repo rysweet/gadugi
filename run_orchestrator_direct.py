@@ -1,14 +1,16 @@
+from typing import Optional
+
+import asyncio
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """
 Direct orchestrator execution script to fix remaining pyright errors.
 Uses the fixed parallel_executor with --yes flag.
 """
 
-import asyncio
-import subprocess
-import sys
 from pathlib import Path
-
 
 async def execute_workflow_manager(task_name, prompt_content, worktree_path):
     """Execute WorkflowManager with --yes flag to avoid permission prompts."""
@@ -42,7 +44,6 @@ async def execute_workflow_manager(task_name, prompt_content, worktree_path):
             print(f"   Error: {stderr.decode()}")
 
     return process.returncode == 0
-
 
 async def main():
     """Main execution function."""
@@ -109,7 +110,6 @@ Execute complete workflow to achieve ZERO pyright errors.
         print("\n⚠️ Some tasks failed, please check the logs")
 
     return 0 if success else 1
-
 
 if __name__ == "__main__":
     sys.exit(asyncio.run(main()))

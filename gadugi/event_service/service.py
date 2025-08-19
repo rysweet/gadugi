@@ -1,3 +1,15 @@
+
+import asyncio
+import json
+import logging
+import time
+import hmac
+import hashlib
+import signal
+import sys
+import datetime
+    import argparse
+
 """
 Main Gadugi Event Service Implementation
 
@@ -8,23 +20,12 @@ Provides the core event-driven service that handles:
 - Event filtering and agent invocation
 """
 
-import asyncio
-import json
-import logging
-import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
-import hmac
-import hashlib
-import signal
-import sys
-
 
 from .github_client import GitHubClient
 from .agent_invoker import AgentInvoker
 
 logger = logging.getLogger(__name__)
-
 
 class GadugiEventService:
     """
@@ -568,10 +569,8 @@ class GadugiEventService:
         except Exception as e:
             logger.error(f"Handler {handler.name} failed: {e}")
 
-
 def main():
     """Main entry point for the Gadugi event service."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Gadugi Event-Driven Agent Service")
     parser.add_argument("--config", "-c", help="Configuration file path")
@@ -594,7 +593,6 @@ def main():
     except Exception as e:
         logger.error(f"Service failed: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

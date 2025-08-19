@@ -1,3 +1,11 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+import tempfile
+import os
+import json
+import sys
+        import shutil
+
 """
 Unit tests for WorkflowValidator
 
@@ -5,14 +13,10 @@ Tests the comprehensive validation and integrity checking system
 for workflow execution.
 """
 
-import pytest
-import tempfile
-import os
-import json
 from datetime import datetime
+from unittest.mock import Mock, patch
 
 # Import the module under test
-import sys
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -31,7 +35,6 @@ from workflow_validator import (
 
 # Import workflow engine for WorkflowPhase and WorkflowState
 from workflow_engine import WorkflowPhase, WorkflowState
-
 
 class TestWorkflowValidator:
     """Test suite for WorkflowValidator class"""
@@ -106,7 +109,6 @@ It also doesn't have enough content to be considered a valid prompt.
 
     def teardown_method(self):
         """Cleanup after each test"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -739,7 +741,6 @@ It also doesn't have enough content to be considered a valid prompt.
         # Comprehensive should have more checks
         assert comprehensive_report.total_checks >= minimal_report.total_checks
 
-
 class TestConvenienceFunctions:
     """Test suite for convenience functions"""
 
@@ -764,7 +765,6 @@ Test implementation details.
 
     def teardown_method(self):
         """Cleanup after each test"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -796,7 +796,6 @@ Test implementation details.
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD
         assert report.total_checks > 0
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

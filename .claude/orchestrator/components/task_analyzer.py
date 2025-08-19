@@ -1,4 +1,21 @@
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import ast
+import json
+import logging
+import os
+import re
+    import argparse
+
 #!/usr/bin/env python3
+
 """
 TaskAnalyzer Component for OrchestratorAgent
 
@@ -11,15 +28,9 @@ Security Features:
 - Sanitized output to prevent injection attacks
 """
 
-import ast
-import json
-import logging
-import os
-import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
@@ -30,14 +41,12 @@ ALLOWED_FILE_EXTENSIONS = {'.md', '.txt', '.py', '.js', '.json'}
 # Configure secure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 class TaskComplexity(Enum):
     """Task complexity classification"""
     LOW = 1
     MEDIUM = 2
     HIGH = 3
     CRITICAL = 4
-
 
 class TaskType(Enum):
     """Task type classification"""
@@ -47,7 +56,6 @@ class TaskType(Enum):
     REFACTORING = "refactoring"
     DOCUMENTATION = "documentation"
     CONFIGURATION = "configuration"
-
 
 @dataclass
 class TaskInfo:
@@ -65,7 +73,6 @@ class TaskInfo:
     conflicts: List[str]
     parallelizable: bool
     description: str
-
 
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
@@ -685,10 +692,8 @@ class TaskAnalyzer:
 
         print(f"📄 Analysis saved to: {output_file}")
 
-
 def main():
     """CLI entry point for TaskAnalyzer"""))
-    import argparse
 
     parser = argparse.ArgumentParser(description="Analyze prompt files for parallel execution")
     parser.add_argument("--prompts-dir", default="/prompts/", help="Directory containing prompt files")
@@ -718,7 +723,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     exit(main())

@@ -1,22 +1,17 @@
+from typing import Any, Dict, List, Optional
+
 import asyncio
 import unittest
 from unittest import TestCase
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-
+import json
+import pytest
 
 """
 Comprehensive tests for Event Router.
 """
-
-import asyncio
-import json
-from datetime import datetime, timedelta
-from pathlib import
-
-import pytest
 
 from ..event_router import (
     Event,
@@ -29,18 +24,15 @@ from ..event_router import (
     DeadLetterQueue
 )
 
-
 @pytest.fixture
 def event_router():
     """Create event router instance."""
     return EventRouter()
 
-
 @pytest.fixture
 def process_manager():
     """Create process manager instance."""
     return ProcessManager()
-
 
 @pytest.fixture
 def sample_event():
@@ -53,12 +45,10 @@ def sample_event():
         data={"message": "test"}
     )
 
-
 @pytest.fixture
 async def dlq(tmp_path):
     """Create DLQ with temp storage."""
     return DeadLetterQueue(storage_path=tmp_path / "dlq")
-
 
 class TestEvent:
     """Test Event class."""
@@ -105,7 +95,6 @@ class TestEvent:
         assert event.type == EventType.AGENT_STARTED
         assert event.priority == EventPriority.HIGH
 
-
 class TestSubscription:
     """Test Subscription class."""
 
@@ -140,7 +129,6 @@ class TestSubscription:
 
         assert sub.matches("any.topic", "production") is True
         assert sub.matches("any.topic", "development") is False
-
 
 class TestProcessManager:
     """Test ProcessManager class."""
@@ -230,7 +218,6 @@ class TestProcessManager:
         agent.last_heartbeat = datetime.utcnow() - timedelta(minutes=5)
         assert agent.is_healthy is False
 
-
 class TestDeadLetterQueue:
     """Test DeadLetterQueue class."""
 
@@ -284,7 +271,6 @@ class TestDeadLetterQueue:
         # Check file was removed
         file_path = dlq.storage_path / f"{sample_event.id}.json"
         assert not file_path.exists()
-
 
 class TestEventRouter:
     """Test EventRouter class."""

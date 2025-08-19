@@ -1,17 +1,16 @@
+from typing import Any, Dict, List, Optional
+
+import subprocess
+import json
+import time
+import logging
+
 """
 GitHub integration utilities for Gadugi multi-agent system.
 Provides common GitHub operations used across multiple agents.
 """
 
-import subprocess
-import json
-import time
-from typing import Dict, Any, List, Optional
-import logging
-
-
 logger = logging.getLogger(__name__)
-
 
 class GitHubIntegration:
     """Handles GitHub operations via gh CLI."""

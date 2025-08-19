@@ -1,4 +1,10 @@
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch, MagicMock
+import os
+import shutil
+import sys
+import tempfile
+import unittest
+
 #!/usr/bin/env python3
 """
 Test Suite for OrchestratorAgent → WorkflowManager Implementation Fixes
@@ -13,11 +19,6 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import os
-import shutil
-import sys
-import tempfile
-import unittest
 from pathlib import Path
 
 # Add parent directory to path to import components
@@ -26,7 +27,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from components.execution_engine import ExecutionEngine, TaskExecutor
 from components.prompt_generator import PromptContext, PromptGenerator
 from components.worktree_manager import WorktreeManager
-
 
 class TestClaudeCLICommandFix(unittest.TestCase):
     """Test the critical Claude CLI command construction fix"""
@@ -111,7 +111,6 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         # Verify new pattern is correct
         self.assertNotIn("-p", new_cmd, "New pattern should not contain -p flag")
         self.assertIn("/agent:workflow-manager", new_cmd, "New pattern should contain agent invocation")
-
 
 class TestPromptGenerator(unittest.TestCase):
     """Test the PromptGenerator component"""
@@ -252,7 +251,6 @@ Missing required sections
         issue_text = " ".join(issues)
         self.assertIn("Missing required section", issue_text, "Should detect missing sections")
 
-
 class TestExecutionEngineIntegration(unittest.TestCase):
     """Test ExecutionEngine integration with fixes"""
 
@@ -309,7 +307,6 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             self.assertEqual(executor.task_context['name'], 'Test Task')
             self.assertEqual(executor.task_context['dependencies'], ['dep1'])
             self.assertEqual(executor.task_context['target_files'], ['output.py'])
-
 
 class TestEndToEndWorkflowValidation(unittest.TestCase):
     """Test end-to-end workflow validation"""
@@ -386,7 +383,6 @@ class TestEndToEndWorkflowValidation(unittest.TestCase):
         # Cleanup
         worktree_manager.cleanup_worktree(task_id, force=True)
 
-
 class TestRegressionPrevention(unittest.TestCase):
     """Test suite to prevent regression of the original issue"""
 
@@ -438,7 +434,6 @@ class TestRegressionPrevention(unittest.TestCase):
         self.assertIn("Phase 5: Implementation", agent_content, "Should have implementation phase")
         self.assertIn("CREATE", agent_content.upper(), "Should mention file creation")
 
-
 def run_test_suite():
     """Run the complete test suite"""
 
@@ -464,7 +459,6 @@ def run_test_suite():
 
     # Return success status
     return result.wasSuccessful()
-
 
 if __name__ == "__main__":
     print("🧪 Running OrchestratorAgent → WorkflowManager Fix Test Suite")

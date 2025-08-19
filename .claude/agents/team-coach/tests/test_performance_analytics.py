@@ -1,3 +1,7 @@
+
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+from unittest.mock import Mock, patch, MagicMock
 """
 Tests for TeamCoach Performance Analytics
 
@@ -18,7 +22,6 @@ from ..phase1.performance_analytics import (
 from ...shared.task_tracking import TaskMetrics
 from ...shared.state_management import StateManager
 from ...shared.utils.error_handling import ErrorHandler
-
 
 class TestAgentPerformanceAnalyzer(unittest.TestCase):
     """Test cases for AgentPerformanceAnalyzer"""
@@ -301,7 +304,6 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         self.assertIn("Resource efficiency", improvement_text)
         self.assertIn("Code quality", improvement_text)
 
-
 class TestAgentPerformanceData(unittest.TestCase):
     """Test cases for AgentPerformanceData dataclass"""
 
@@ -322,7 +324,6 @@ class TestAgentPerformanceData(unittest.TestCase):
         self.assertIsInstance(data.recent_improvements, list)
         self.assertIsInstance(data.areas_for_improvement, list)
 
-
 class TestTeamPerformanceData(unittest.TestCase):
     """Test cases for TeamPerformanceData dataclass"""
 
@@ -341,7 +342,6 @@ class TestTeamPerformanceData(unittest.TestCase):
         self.assertIsInstance(data.agent_performances, dict)
         self.assertIsInstance(data.performance_trajectory, list)
         self.assertIsInstance(data.optimization_opportunities, list)
-
 
 if __name__ == "__main__":
     unittest.main()

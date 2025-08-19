@@ -1,15 +1,16 @@
-"""Tests for the Memory System Integration."""
+from typing import Any, Dict, List, Optional
 
 import asyncio
-from datetime import datetime, timedelta
-from pathlib import
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
+
+"""Tests for the Memory System Integration."""
+
+from datetime import datetime, timedelta
+
+from unittest.mock import Mock, patch, MagicMock
 
 from ..memory_system import MemorySystem
 from ..models import Memory, MemoryType, Pattern
-
 
 class TestMemorySystem:
     """Test suite for MemorySystem."""
@@ -180,7 +181,6 @@ Need to focus on edge cases.
 
         assert result.success
         assert result.issues_created == 1
-
 
 class TestMemoryModels:
     """Test suite for Memory models."""

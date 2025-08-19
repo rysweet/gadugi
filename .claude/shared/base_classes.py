@@ -1,15 +1,17 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+import time
+import json
+        import resource
+
 """
 Shared base classes for Gadugi multi-agent system.
 These base classes provide common functionality to avoid duplication across agents.
 """
 
-import logging
-import time
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List
-import json
 from datetime import datetime
-
 
 class BaseAgent(ABC):
     """Base class for all Gadugi agents."""
@@ -33,7 +35,6 @@ class BaseAgent(ABC):
     def log_error(self, message: str, exception: Optional[Exception] = None):
         """Log error message."""
         self.logger.error(f"[{self.name}] {message}", exc_info=exception)
-
 
 class SecurityAwareAgent(BaseAgent):
     """Base class for agents that require security awareness."""
@@ -99,7 +100,6 @@ class SecurityAwareAgent(BaseAgent):
         """Retrieve security audit log."""
         return self.audit_log.copy()
 
-
 class PerformanceMonitoredAgent(BaseAgent):
     """Base class for agents with performance monitoring capabilities."""
 
@@ -141,7 +141,6 @@ class PerformanceMonitoredAgent(BaseAgent):
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB."""
         # Simplified - in production would use psutil or similar
-        import resource
 
         return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
 
@@ -166,7 +165,6 @@ class PerformanceMonitoredAgent(BaseAgent):
         duration = time.time() - start
         self.log_info(f"Benchmark: {func.__name__} took {duration:.4f}s")
         return result
-
 
 class LearningEnabledAgent(BaseAgent):
     """Base class for agents that can learn and adapt."""
@@ -242,7 +240,6 @@ class LearningEnabledAgent(BaseAgent):
             )[:5],
             "current_adaptations": self.adaptations,
         }
-
 
 class IntegratedAgent(
     SecurityAwareAgent, PerformanceMonitoredAgent, LearningEnabledAgent

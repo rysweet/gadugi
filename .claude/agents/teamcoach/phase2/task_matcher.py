@@ -1,3 +1,11 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+import logging
+import sys
+import os
+
 """
 TeamCoach Phase 2: Task-Agent Matching System
 
@@ -14,15 +22,11 @@ Key Features:
 - Collaborative assignment optimization
 """
 
-import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules with absolute path resolution
-import sys
-import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
@@ -42,7 +46,6 @@ except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
-
 
 # Import Phase 1 components (will be available when all imports are fixed)
 try:
@@ -72,7 +75,6 @@ except ImportError:
     class AgentPerformanceAnalyzer:
         pass
 
-
 class MatchingStrategy(Enum):
     """Strategies for task-agent matching"""
 
@@ -81,7 +83,6 @@ class MatchingStrategy(Enum):
     SKILL_DEVELOPMENT = "skill_development"  # Optimize for learning
     COLLABORATIVE = "collaborative"  # Multi-agent assignments
     RISK_MINIMIZED = "risk_minimized"  # Minimize failure risk
-
 
 class TaskPriority(Enum):
     """Task priority levels"""
@@ -92,7 +93,6 @@ class TaskPriority(Enum):
     LOW = 2
     BACKGROUND = 1
 
-
 class TaskUrgency(Enum):
     """Task urgency levels"""
 
@@ -100,7 +100,6 @@ class TaskUrgency(Enum):
     URGENT = 3
     NORMAL = 2
     FLEXIBLE = 1
-
 
 @dataclass
 class TaskRequirements:
@@ -132,7 +131,6 @@ class TaskRequirements:
     constraints: Dict[str, Any] = field(default_factory=dict)
     success_criteria: List[str] = field(default_factory=list)
 
-
 @dataclass
 class AgentAvailability:
     """Agent availability and workload information"""
@@ -146,7 +144,6 @@ class AgentAvailability:
         default_factory=list
     )
     blackout_periods: List[Tuple[datetime, datetime]] = field(default_factory=list)
-
 
 @dataclass
 class MatchingScore:
@@ -174,7 +171,6 @@ class MatchingScore:
     calculated_at: datetime = field(default_factory=datetime.now)
     calculation_factors: Dict[str, float] = field(default_factory=dict)
 
-
 @dataclass
 class MatchingRecommendation:
     """Complete recommendation for task assignment"""
@@ -199,7 +195,6 @@ class MatchingRecommendation:
     # Monitoring recommendations
     monitoring_points: List[str] = field(default_factory=list)
     fallback_options: List[str] = field(default_factory=list)
-
 
 class TaskAgentMatcher:
     """
@@ -1314,7 +1309,6 @@ class TaskAgentMatcher:
 
         except Exception as e:
             self.logger.error(f"Failed to simulate assignment impact: {e}")
-
 
 class MatchingError(Exception):
     """Exception raised when task-agent matching fails."""

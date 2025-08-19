@@ -1,4 +1,10 @@
+import sys
+import unittest
+    import argparse
+    import logging
+
 #!/usr/bin/env python3
+
 """
 Test Runner for Orchestrator Implementation
 
@@ -6,8 +12,6 @@ This script runs comprehensive tests for the orchestrator implementation,
 validating all components and their integration.
 """
 
-import sys
-import unittest
 from pathlib import Path
 
 # Add orchestrator components to path
@@ -17,7 +21,6 @@ sys.path.insert(0, str(orchestrator_dir))
 # Import test modules
 from tests.test_orchestrator_integration import TestOrchestratorIntegration, TestOrchestratorPerformance
 from tests.test_process_registry import TestProcessRegistry, TestProcessInfo
-
 
 def run_all_tests():
     """Run all orchestrator tests"""
@@ -66,7 +69,6 @@ def run_all_tests():
         print(f"\n❌ {len(result.failures) + len(result.errors)} TESTS FAILED")
         return 1
 
-
 def run_specific_test(test_name):
     """Run a specific test class or method"""
     print(f"🧪 Running Specific Test: {test_name}")
@@ -89,7 +91,6 @@ def run_specific_test(test_name):
         print(f"Unknown test: {test_name}")
         print(f"Available tests: {', '.join(test_classes.keys())}")
         return 1
-
 
 def validate_environment():
     """Validate test environment setup"""
@@ -144,10 +145,8 @@ def validate_environment():
         print(f"\n✅ Environment validation passed!")
         return 0
 
-
 def main():
     """Main entry point"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Orchestrator Test Runner")
     parser.add_argument("--test", help="Run specific test (integration, performance, registry, process_info)")
@@ -157,7 +156,6 @@ def main():
     args = parser.parse_args()
 
     # Set up logging
-    import logging
     if args.quiet:
         logging.basicConfig(level=logging.ERROR)
     else:
@@ -170,7 +168,6 @@ def main():
         return run_specific_test(args.test)
     else:
         return run_all_tests()
-
 
 if __name__ == "__main__":
     exit_code = main()

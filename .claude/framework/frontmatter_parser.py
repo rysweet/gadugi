@@ -1,13 +1,13 @@
-"""YAML frontmatter parser for agent definitions."""
-
-import re
-from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+import re
 import yaml
 
-from .base_agent import AgentMetadata
+"""YAML frontmatter parser for agent definitions."""
 
+from pathlib import Path
+
+from .base_agent import AgentMetadata
 
 def parse_agent_definition(filepath: Path) -> AgentMetadata:
     """Parse agent definition from markdown file with YAML frontmatter.
@@ -48,7 +48,6 @@ def parse_agent_definition(filepath: Path) -> AgentMetadata:
 
     return metadata
 
-
 def extract_frontmatter(content: str) -> Tuple[Optional[str], str]:
     """Extract YAML frontmatter and body from markdown content.
 
@@ -69,7 +68,6 @@ def extract_frontmatter(content: str) -> Tuple[Optional[str], str]:
 
     # No frontmatter found
     return None, content
-
 
 def validate_agent_specification(metadata: AgentMetadata) -> bool:
     """Validate agent specification for completeness.
@@ -113,7 +111,6 @@ def validate_agent_specification(metadata: AgentMetadata) -> bool:
             raise ValueError("Settings must be a dictionary")
 
     return True
-
 
 def generate_agent_template(
     name: str,
@@ -222,7 +219,6 @@ settings:
 - Clean up resources properly
 """
     return template
-
 
 def update_agent_metadata(
     filepath: Path,

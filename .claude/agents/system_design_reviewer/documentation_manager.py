@@ -1,3 +1,15 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import os
+import re
+
 """
 Documentation Manager - Automated architecture documentation maintenance
 
@@ -5,15 +17,11 @@ Handles updating ARCHITECTURE.md and other system design documentation
 based on detected architectural changes.
 """
 
-import os
-import re
 from datetime import datetime
 from pathlib import Path  # type: ignore
-from typing import Dict, List, Any, Optional, Tuple  # type: ignore
 from dataclasses import dataclass
 
 from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel  # type: ignore
-
 
 @dataclass
 class DocumentationUpdate:
@@ -23,7 +31,6 @@ class DocumentationUpdate:
     update_type: str  # add, modify, remove
     content: str
     line_number: Optional[int] = None
-
 
 class DocumentationManager:
     """Manages automated updates to architecture documentation"""

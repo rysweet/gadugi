@@ -1,3 +1,11 @@
+import sys
+import logging
+import os
+import platform
+import math
+        import docker
+        import traceback
+
 #!/usr/bin/env python3
 """
 Container Execution Environment Demo
@@ -6,8 +14,6 @@ Demonstrates the capabilities of the Gadugi Container Execution Environment
 with various security policies and execution scenarios.
 """
 
-import sys
-import logging
 from pathlib import Path
 
 # Add the container runtime to Python path
@@ -16,14 +22,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from container_runtime.execution_engine import ContainerExecutionEngine
 from container_runtime.agent_integration import AgentContainerExecutor
 
-
 def setup_logging():
     """Setup logging for the demo."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-
 
 def demo_python_execution():
     """Demonstrate Python code execution."""
@@ -33,9 +37,6 @@ def demo_python_execution():
         engine = ContainerExecutionEngine()
 
         python_code = """
-import sys
-import os
-import platform
 
 print("Python Execution Environment:")
 print(f"  Python version: {sys.version}")
@@ -45,7 +46,6 @@ print(f"  Working directory: {os.getcwd()}")
 print(f"  Available disk space: {os.statvfs('.').f_bavail * os.statvfs('.').f_frsize / (1024*1024):.1f} MB")
 
 # Test some calculations
-import math
 result = sum(math.sqrt(i) for i in range(1000))
 print(f"  Calculation result: {result:.2f}")
 
@@ -78,15 +78,12 @@ for key in sorted(os.environ.keys()):
     except Exception as e:
         print(f"Error: {e}")
 
-
 def demo_security_policies():
     """Demonstrate different security policies."""
     print("\n=== Security Policy Demo ===")
 
     policies_to_test = ["minimal", "standard", "hardened"]
     test_code = """
-import os
-import sys
 
 print(f"Security Policy Test - User: {os.getenv('USER', 'unknown')}")
 print(f"Available commands in /bin: {len(os.listdir('/bin')) if os.path.exists('/bin') else 'N/A'}")
@@ -132,7 +129,6 @@ except:
 
     except Exception as e:
         print(f"Error: {e}")
-
 
 def demo_shell_execution():
     """Demonstrate shell script execution."""
@@ -194,7 +190,6 @@ if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_
     except Exception as e:
         print(f"Error: {e}")
 
-
 def demo_node_execution():
     """Demonstrate Node.js code execution."""
     print("\n=== Node.js Code Execution Demo ===")
@@ -203,46 +198,43 @@ def demo_node_execution():
         engine = ContainerExecutionEngine()
 
         node_code = """
-console.log("Node.js Execution Environment:");
-console.log("  Node version:", process.version);
-console.log("  Platform:", process.platform);
-console.log("  Architecture:", process.arch);
-console.log("  Current directory:", process.cwd());
-console.log("  Process ID:", process.pid);
-console.log("  Memory usage:", process.memoryUsage());
-
+console.log("Node.js Execution Environment:")
+console.log("  Node version:", process.version)
+console.log("  Platform:", process.platform)
+console.log("  Architecture:", process.arch)
+console.log("  Current directory:", process.cwd())
+console.log("  Process ID:", process.pid)
+console.log("  Memory usage:", process.memoryUsage())
 // Test some calculations
-const start = Date.now();
-let sum = 0;
+const start = Date.now()
+let sum = 0
 for (let i = 0; i < 100000; i++) {
-    sum += Math.sqrt(i);
+    sum += Math.sqrt(i)
 }
-const duration = Date.now() - start;
-console.log(`  Calculation result: ${sum.toFixed(2)} (took ${duration}ms)`);
-
+const duration = Date.now() - start
+console.log(`  Calculation result: ${sum.toFixed(2)} (took ${duration}ms)`)
 // Environment variables
-console.log("\\nEnvironment variables:");
+console.log("\\nEnvironment variables:")
 Object.keys(process.env).sort().forEach(key => {
-    console.log(`  ${key}=${process.env[key]}`);
-});
-
+    console.log(`  ${key}=${process.env[key]}`)
+})
 // Test filesystem access
-const fs = require('fs');
-console.log("\\nFilesystem tests:");
+const fs = require('fs')
+console.log("\\nFilesystem tests:")
 try {
-    fs.writeFileSync('/tmp/test.txt', 'Hello from Node.js!');
-    const content = fs.readFileSync('/tmp/test.txt', 'utf8');
-    console.log("  /tmp write/read: SUCCESS -", content);
-    fs.unlinkSync('/tmp/test.txt');
+    fs.writeFileSync('/tmp/test.txt', 'Hello from Node.js!')
+    const content = fs.readFileSync('/tmp/test.txt', 'utf8')
+    console.log("  /tmp write/read: SUCCESS -", content)
+    fs.unlinkSync('/tmp/test.txt')
 } catch (error) {
-    console.log("  /tmp write/read: FAILED -", error.message);
+    console.log("  /tmp write/read: FAILED -", error.message)
 }
 
 try {
-    fs.writeFileSync('/test_root.txt', 'This should fail');
-    console.log("  Root write: SUCCESS (SECURITY ISSUE!)");
+    fs.writeFileSync('/test_root.txt', 'This should fail')
+    console.log("  Root write: SUCCESS (SECURITY ISSUE!)")
 } catch (error) {
-    console.log("  Root write: BLOCKED (Good!) -", error.message);
+    console.log("  Root write: BLOCKED (Good!) -", error.message)
 }
 """
 
@@ -267,7 +259,6 @@ try {
 
     except Exception as e:
         print(f"Error: {e}")
-
 
 def demo_system_status():
     """Demonstrate system status and monitoring."""
@@ -306,7 +297,6 @@ def demo_system_status():
     except Exception as e:
         print(f"Error: {e}")
 
-
 def main():
     """Run all demos."""
     print("Gadugi Container Execution Environment Demo")
@@ -316,7 +306,6 @@ def main():
 
     # Check if Docker is available
     try:
-        import docker
 
         client = docker.from_env()
         client.ping()
@@ -353,11 +342,9 @@ def main():
         return 1
     except Exception as e:
         print(f"\nDemo failed with error: {e}")
-        import traceback
 
         traceback.print_exc()
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

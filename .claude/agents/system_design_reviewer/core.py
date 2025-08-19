@@ -1,3 +1,17 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+from ..shared.error_handling import ErrorHandler
+import json
+import os
+import subprocess
+
 """
 System Design Reviewer Core - Main implementation for architectural review
 
@@ -5,12 +19,8 @@ Coordinates AST parsing, change analysis, documentation updates, and ADR generat
 to provide comprehensive architectural review capabilities.
 """
 
-import json
-import os
-import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -60,14 +70,12 @@ from .ast_parser import (
 from .documentation_manager import DocumentationManager
 from .adr_generator import ADRGenerator
 
-
 class ReviewStatus(Enum):
     """Status of a design review"""
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
-
 
 @dataclass
 class ReviewResult:
@@ -100,7 +108,6 @@ class ReviewResult:
                 for change in self.changes_detected
             ]
         }
-
 
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
@@ -554,7 +561,6 @@ class SystemDesignReviewer:
     def analyze_pr(self, pr_number: str, **kwargs) -> ReviewResult:
         """Alias for review_pr for CLI compatibility"""
         return self.review_pr(pr_number, **kwargs)
-
 
 class SystemDesignStateManager(StateManager):  # type: ignore
     """State manager for System Design Review Agent"""

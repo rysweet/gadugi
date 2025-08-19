@@ -1,3 +1,7 @@
+import pytest
+import tempfile
+import os
+
 """
 Test suite for Documentation Manager
 
@@ -5,9 +9,6 @@ Tests automated ARCHITECTURE.md updates, section management,
 and evolution history tracking.
 """
 
-import pytest
-import tempfile
-import os
 from agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,
@@ -19,7 +20,6 @@ from agents.system_design_reviewer.ast_parser import (
     ChangeType,
     ImpactLevel,
 )
-
 
 @pytest.fixture
 def sample_architecture_doc():
@@ -62,7 +62,6 @@ Gadugi is a multi-agent development orchestration system.
 *Last updated: 2024-01-01T00:00:00*
 """
 
-
 @pytest.fixture
 def sample_changes():
     """Sample architectural changes for testing"""
@@ -104,7 +103,6 @@ def sample_changes():
         ),
     ]
 
-
 @pytest.fixture
 def sample_pr_info():
     """Sample PR information for testing"""
@@ -114,7 +112,6 @@ def sample_pr_info():
         "author": {"login": "developer"},
         "body": "This PR adds automated architectural review capabilities",
     }
-
 
 class TestDocumentationManager:
     """Test the DocumentationManager class"""
@@ -479,7 +476,6 @@ Basic overview."""
         assert len(updates) >= 1
         assert any("Error" in update for update in updates)
 
-
 class TestDocumentationUpdate:
     """Test the DocumentationUpdate data structure"""
 
@@ -498,7 +494,6 @@ class TestDocumentationUpdate:
         assert update.update_type == "modify"
         assert update.content == "Updated content"
         assert update.line_number == 42
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

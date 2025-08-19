@@ -1,9 +1,10 @@
+import logging
+
 """
 event-router Service - Flask Implementation
 Generated from recipe: event-router
 """
 
-import logging
 from flask import Flask, jsonify, request
 
 from .config import Config

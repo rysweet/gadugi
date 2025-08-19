@@ -1,16 +1,19 @@
+import os
+import tempfile
+import unittest
+import sys
+import importlib.util
+import datetime
+        import shutil
+
 #!/usr/bin/env python3
+
 """
 Tests for Memory Compactor - Automatic Memory.md compaction functionality
 """
 
-import os
-import tempfile
-import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
-
-import sys
-from typing import Set
+from unittest.mock import Mock, patch, MagicMock
 
 # Add the memory-manager directory to the path
 sys.path.insert(
@@ -18,7 +21,6 @@ sys.path.insert(
 )
 
 from memory_compactor import CompactionRule, MemoryCompactor
-
 
 class TestCompactionRule(unittest.TestCase):
     """Test CompactionRule functionality"""
@@ -73,11 +75,7 @@ class TestCompactionRule(unittest.TestCase):
         # Normal content should not be preserved
         self.assertFalse(rule.should_preserve("Regular task", age_days=100))
 
-
-import importlib.util
-
 MEMORY_PARSER_AVAILABLE = importlib.util.find_spec("memory_parser") is not None
-
 
 @unittest.skipUnless(
     MEMORY_PARSER_AVAILABLE, "memory_parser not available, skipping execution tests"
@@ -130,7 +128,6 @@ Last Updated: 2025-08-05T10:00:00-08:00
 
     def tearDown(self):
         """Clean up test fixtures"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -380,7 +377,6 @@ Last Updated: 2025-08-05T10:00:00-08:00
         self.assertIn("2 items archived", compacted_content)
         self.assertIn("LongTermMemoryDetails.md", compacted_content)
 
-
 class TestMemoryCompactorIntegration(unittest.TestCase):
     """Integration tests for Memory Compactor"""
 
@@ -392,7 +388,6 @@ class TestMemoryCompactorIntegration(unittest.TestCase):
 
     def tearDown(self):
         """Clean up integration test fixtures"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -559,7 +554,6 @@ Last Updated: 2025-08-05T10:00:00-08:00
 
         # Verify reference to archive
         self.assertIn("LongTermMemoryDetails.md", compacted_content)
-
 
 if __name__ == "__main__":
     unittest.main()

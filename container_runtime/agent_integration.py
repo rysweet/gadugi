@@ -1,3 +1,10 @@
+from typing import Any, Dict, List, Optional, Union
+
+import logging
+    import subprocess
+import sys
+import os
+
 """
 Agent-Manager Integration for Container Execution Environment.
 
@@ -5,8 +12,6 @@ Provides integration points for the container execution environment
 with the existing agent-manager system in Gadugi.
 """
 
-import logging
-from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 
 from .execution_engine import (
@@ -16,7 +21,6 @@ from .execution_engine import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 class AgentContainerExecutor:
     """
@@ -253,7 +257,6 @@ class AgentContainerExecutor:
         """Shutdown executor."""
         self.execution_engine.shutdown()
 
-
 def create_agent_executor(policy: str = "standard") -> AgentContainerExecutor:
     """
     Create an agent container executor with specified policy.
@@ -266,7 +269,6 @@ def create_agent_executor(policy: str = "standard") -> AgentContainerExecutor:
     """
     return AgentContainerExecutor(default_policy=policy)
 
-
 def replace_shell_execution():
     """
     Replace shell execution with container execution.
@@ -274,7 +276,6 @@ def replace_shell_execution():
     This function can be called to monkey-patch subprocess calls
     to use container execution instead.
     """
-    import subprocess
 
     # Store original subprocess functions
     original_run = subprocess.run
@@ -318,15 +319,12 @@ def replace_shell_execution():
 
     return restore_shell_execution
 
-
 # Example usage functions
 def example_python_execution():
     """Example of Python code execution."""
     executor = create_agent_executor("development")
 
     python_code = """
-import sys
-import os
 
 print("Python version:", sys.version)
 print("Environment variables:")
@@ -340,7 +338,6 @@ print("Hello from containerized Python!")
     print("Execution result:", result)
 
     executor.shutdown()
-
 
 def example_shell_execution():
     """Example of shell script execution."""
@@ -361,7 +358,6 @@ free -h || echo "free command not available"
     print("Execution result:", result)
 
     executor.shutdown()
-
 
 if __name__ == "__main__":
     # Run examples

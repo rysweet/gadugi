@@ -1,8 +1,9 @@
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
 import logging
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import matplotlib.pyplot as plt
@@ -16,6 +17,8 @@ from ...shared.state_management import StateManager
 from .performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
 from .capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from .metrics_collector import MetricsCollector
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
 
 """
 TeamCoach Phase 1: Performance Reporting System
@@ -33,9 +36,7 @@ Key Features:
 - Multiple output formats (JSON, HTML, PDF)
 """
 
-
 # Import shared modules and Phase 1 components
-
 
 class ReportType(Enum):
     """Types of reports available"""
@@ -47,7 +48,6 @@ class ReportType(Enum):
     COMPARATIVE_ANALYSIS = "comparative_analysis"
     EXECUTIVE_SUMMARY = "executive_summary"
 
-
 class ReportFormat(Enum):
     """Output formats for reports"""
 
@@ -55,7 +55,6 @@ class ReportFormat(Enum):
     HTML = "html"
     PDF = "pdf"
     MARKDOWN = "markdown"
-
 
 @dataclass
 class ReportConfig:
@@ -70,7 +69,6 @@ class ReportConfig:
     detailed_metrics: bool = True
     comparison_baseline: Optional[str] = None
 
-
 @dataclass
 class ReportSection:
     """Individual section of a report"""
@@ -80,7 +78,6 @@ class ReportSection:
     charts: List[str] = field(default_factory=list)  # Base64 encoded chart images
     data: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
-
 
 @dataclass
 class GeneratedReport:
@@ -105,7 +102,6 @@ class GeneratedReport:
     agents_included: List[str] = field(default_factory=list)
     metrics_included: List[str] = field(default_factory=list)
     generation_time: float = 0.0
-
 
 class ReportingSystem:
     """
@@ -1226,7 +1222,6 @@ class ReportingSystem:
         except Exception as e:
             self.logger.error(f"Failed to export report {report_id}: {e}")
             return False
-
 
 class ReportGenerationError(Exception):
     """Exception raised when report generation fails."""

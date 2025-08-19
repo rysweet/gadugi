@@ -1,20 +1,21 @@
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch, MagicMock
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+
 #!/usr/bin/env python3
+
 """
 Test suite for ExecutionEngine component of OrchestratorAgent
 
 Tests parallel execution, resource monitoring, and process management.
 """
 
-import json
-import shutil
-import subprocess
-
 # Add the components directory to the path
-import sys
-import tempfile
-import time
-import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -27,7 +28,6 @@ from execution_engine import (
     SystemResources,
     TaskExecutor,
 )
-
 
 class TestResourceMonitor(unittest.TestCase):
     """Test cases for ResourceMonitor"""
@@ -142,7 +142,6 @@ class TestResourceMonitor(unittest.TestCase):
         optimal = self.monitor.get_optimal_concurrency()
         self.assertEqual(optimal, 1)  # Reduced due to high usage
 
-
 class TestTaskExecutor(unittest.TestCase):
     """Test cases for TaskExecutor"""
 
@@ -160,7 +159,6 @@ class TestTaskExecutor(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     @patch('subprocess.Popen')
@@ -271,7 +269,6 @@ class TestTaskExecutor(unittest.TestCase):
 
         mock_process.terminate.assert_called_once()
 
-
 class TestExecutionEngine(unittest.TestCase):
     """Test cases for ExecutionEngine"""
 
@@ -282,7 +279,6 @@ class TestExecutionEngine(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test environment"""
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_initialization(self):
@@ -483,7 +479,6 @@ class TestExecutionEngine(unittest.TestCase):
         self.assertEqual(data['execution_summary']['statistics']['completed_tasks'], 1)
         self.assertIn('task1', data['task_results'])
 
-
 class TestExecutionEngineIntegration(unittest.TestCase):
     """Integration tests for ExecutionEngine"""
 
@@ -495,7 +490,6 @@ class TestExecutionEngineIntegration(unittest.TestCase):
     def tearDown(self):
         """Clean up test environment"""
         self.engine.cancel_all_tasks()
-        import shutil
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     @unittest.skipIf(not shutil.which('echo'), "echo command not available")
@@ -531,9 +525,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             self.assertEqual(result.status, "success")
             self.assertIsNotNone(result.duration)
 
-
 if __name__ == '__main__':
-    import shutil
 
     # Check for required tools
     missing_tools = []

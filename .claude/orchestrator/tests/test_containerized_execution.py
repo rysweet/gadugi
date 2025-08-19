@@ -1,8 +1,13 @@
 from datetime import datetime, timedelta
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from unittest import TestCase
+import asyncio
+import tempfile
+
 #!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Comprehensive tests for containerized orchestrator execution.
 
@@ -17,8 +22,6 @@ Key test scenarios:
 - Performance improvements vs subprocess execution
 """
 
-import asyncio
-import tempfile
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -29,7 +32,6 @@ try:
 except ImportError as e:
     print(f"Warning: Could not import modules for testing: {e}")
     IMPORTS_AVAILABLE = False
-
 
 class TestContainerConfig(unittest.TestCase):
     """Test ContainerConfig dataclass and validation"""
@@ -69,7 +71,6 @@ class TestContainerConfig(unittest.TestCase):
         self.assertEqual(config.timeout_seconds, 7200)
         self.assertEqual(config.max_turns, 100)
         self.assertEqual(config.claude_flags, custom_flags)
-
 
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
 class TestContainerManager(unittest.TestCase):
@@ -280,7 +281,6 @@ class TestContainerManager(unittest.TestCase):
         config = ContainerConfig(timeout_seconds=1800)
         self.assertEqual(config.timeout_seconds, 1800)
 
-
 @unittest.skipUnless(IMPORTS_AVAILABLE, "ExecutionEngine modules not available")
 class TestExecutionEngineContainerization(unittest.TestCase):
     """Test ExecutionEngine integration with ContainerManager"""
@@ -364,7 +364,6 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         self.assertEqual(result.status, "success")
         self.assertEqual(result.exit_code, 0)
 
-
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Monitoring modules not available")
 class TestOrchestrationMonitoring(unittest.TestCase):
     """Test real-time monitoring capabilities"""
@@ -440,7 +439,6 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         self.assertIn('stats', container_info)
         self.assertIn('recent_logs', container_info)
 
-
 class TestPerformanceComparisons(unittest.TestCase):
     """Test performance improvements of containerized vs subprocess execution"""
 
@@ -467,7 +465,6 @@ class TestPerformanceComparisons(unittest.TestCase):
         self.assertGreater(speedup, 3.0)  # Should achieve 3-5x speedup
         self.assertEqual(mock_stats['execution_mode'], 'containerized')
         self.assertEqual(mock_stats['total_tasks'], 5)
-
 
 class TestIntegrationWorkflow(unittest.TestCase):
     """Integration tests for complete containerized workflow"""
@@ -549,7 +546,6 @@ Test containerized execution
             self.assertIn('--dangerously-skip-permissions', command)
             self.assertIn('--output-format=json', command)
 
-
 def run_containerized_tests():
     """Run all containerized orchestrator tests"""
 
@@ -599,7 +595,6 @@ def run_containerized_tests():
             print(f"- {test}: {traceback.split(chr(10))[-2]}")
 
     return result.wasSuccessful()
-
 
 if __name__ == "__main__":
     success = run_containerized_tests()

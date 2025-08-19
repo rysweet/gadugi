@@ -1,3 +1,10 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import shutil
+import time
+        import re
+
 #!/usr/bin/env python3
 """
 Memory-GitHub Sync Engine - Bidirectional synchronization between Memory.md and GitHub Issues
@@ -6,17 +13,12 @@ This module orchestrates the synchronization between Memory.md tasks and GitHub 
 handling conflict resolution, status updates, and maintaining data consistency.
 """
 
-import json
-import shutil
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
 
 from github_integration import GitHubIntegration, GitHubIssue
-from typing import Any, Dict, List, Optional
-
 
 class SyncDirection(Enum):
     """Synchronization direction"""
@@ -24,7 +26,6 @@ class SyncDirection(Enum):
     MEMORY_TO_GITHUB = "memory_to_github"
     GITHUB_TO_MEMORY = "github_to_memory"
     BIDIRECTIONAL = "bidirectional"
-
 
 class ConflictResolution(Enum):
     """Conflict resolution strategies"""
@@ -34,7 +35,6 @@ class ConflictResolution(Enum):
     GITHUB_WINS = "github_wins"
     LATEST_WINS = "latest_wins"
     AUTO_MERGE = "auto_merge"
-
 
 @dataclass
 class SyncConflict:
@@ -53,7 +53,6 @@ class SyncConflict:
         result = asdict(self)
         result["timestamp"] = self.timestamp.isoformat()
         return result
-
 
 @dataclass
 class SyncResult:
@@ -89,7 +88,6 @@ class SyncResult:
         ]
         return result
 
-
 @dataclass
 class SyncConfig:
     """Synchronization configuration"""
@@ -110,7 +108,6 @@ class SyncConfig:
             self.include_sections = []
         if self.exclude_sections is None:
             self.exclude_sections = ["Reflections", "Important Context"]
-
 
 class SyncEngine:
     """Bidirectional synchronization engine"""
@@ -371,7 +368,6 @@ class SyncEngine:
 
     def _clean_content_for_comparison(self, content: str) -> str:
         """Clean content for comparison"""
-        import re
 
         # Remove markdown, normalize whitespace, convert to lowercase
         cleaned = re.sub(r"\*\*([^*]+)\*\*", r"\1", content)  # Remove bold
@@ -449,7 +445,6 @@ class SyncEngine:
         """List all pending conflicts"""
         return [conflict.to_dict() for conflict in self.conflicts]
 
-
 def main():
     """Example usage of SyncEngine"""
     try:
@@ -487,7 +482,6 @@ def main():
 
     except Exception as e:
         print(f"Error: {e}")
-
 
 if __name__ == "__main__":
     main()

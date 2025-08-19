@@ -1,10 +1,11 @@
+from typing import Any, Dict, List, Optional, Tuple
+
 from datetime import timedelta
 import json
 import os
 import re
 import subprocess
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 import sys
@@ -15,7 +16,6 @@ Program Manager Agent Implementation
 Manages project health through issue lifecycle management, priority tracking,
 and documentation maintenance.
 """
-
 
 # Add parent directory to path for imports
 
@@ -45,7 +45,6 @@ except ImportError:
         def record_agent_memory(self, category: str, content: str):
             print(f"[Agent Memory] {category}: {content}")
 
-
 class IssueStage(Enum):
     """Issue lifecycle stages as defined in issue #44"""
 
@@ -59,7 +58,6 @@ class IssueStage(Enum):
     FUTURE = "future"
     BUG = "bug"
 
-
 @dataclass
 class Issue:
     """Represents a GitHub issue"""
@@ -72,7 +70,6 @@ class Issue:
     author: str
     created_at: str
     updated_at: str
-
 
 class ProgramManager:
     """Program Manager agent for project orchestration"""
@@ -903,10 +900,8 @@ class ProgramManager:
             f"Completed full project maintenance cycle at {datetime.now().isoformat()}",
         )
 
-
 if __name__ == "__main__":
     # Example usage
-    import sys
 
     pm = ProgramManager()
 

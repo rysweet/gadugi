@@ -1,3 +1,4 @@
+
 """
 Tests for TeamCoach Phase 3: Conflict Resolver
 """
@@ -12,7 +13,6 @@ from ..phase3.conflict_resolver import (
     ConflictSeverity,
     ResolutionStrategy,
 )
-
 
 class TestConflictResolver(unittest.TestCase):
     """Test cases for the ConflictResolver."""
@@ -351,7 +351,6 @@ class TestConflictResolver(unittest.TestCase):
 
         # Should include general recommendations
         self.assertGreater(len(recommendations), 2)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,16 +1,15 @@
+import asyncio
+import httpx
+import pytest
+
 #!/usr/bin/env python3
 """
 Test suite for MCP Service
 """
 
-import asyncio
-import httpx
-import pytest
 from  import
 
-
 BASE_URL = "http://localhost:8000"
-
 
 @pytest.mark.asyncio
 async def test_health_endpoint():
@@ -23,7 +22,6 @@ async def test_health_endpoint():
         assert "neo4j_connected" in data
         assert "timestamp" in data
         assert "version" in data
-
 
 @pytest.mark.asyncio
 async def test_store_context():
@@ -47,7 +45,6 @@ async def test_store_context():
 
         return data["id"]  # Return for use in other tests
 
-
 @pytest.mark.asyncio
 async def test_retrieve_context():
     """Test retrieving a context by ID"""
@@ -70,7 +67,6 @@ async def test_retrieve_context():
         assert data["id"] == context_id
         assert data["content"] == context_data["content"]
         assert data["source"] == context_data["source"]
-
 
 @pytest.mark.asyncio
 async def test_search_contexts():
@@ -99,7 +95,6 @@ async def test_search_contexts():
         assert len(data) >= 3
         assert all("Searchable" in ctx["content"] for ctx in data)
 
-
 @pytest.mark.asyncio
 async def test_metrics_endpoint():
     """Test metrics endpoint"""
@@ -114,7 +109,6 @@ async def test_metrics_endpoint():
         assert "uptime_seconds" in data
         assert data["uptime_seconds"] >= 0
 
-
 @pytest.mark.asyncio
 async def test_root_endpoint():
     """Test root endpoint"""
@@ -127,14 +121,12 @@ async def test_root_endpoint():
         assert data["status"] == "running"
         assert "endpoints" in data
 
-
 @pytest.mark.asyncio
 async def test_404_context():
     """Test retrieving non-existent context"""
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{BASE_URL}/context/retrieve/non-existent-id")
         assert response.status_code == 404
-
 
 def test_mcp_service_integration():
     """Run all integration tests"""
@@ -163,7 +155,6 @@ def test_mcp_service_integration():
             print(f"❌ {test_name} error: {e}")
 
     print("\n✅ MCP Service tests completed!\n")
-
 
 if __name__ == "__main__":
     # For standalone testing

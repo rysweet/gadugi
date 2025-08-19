@@ -1,13 +1,22 @@
-"""Main Orchestrator implementation with parallel execution support."""
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
 
 import asyncio
 import logging
 import time
 import uuid
+
+"""Main Orchestrator implementation with parallel execution support."""
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path  # type: ignore
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 from ...framework import BaseAgent, AgentMetadata, AgentResponse
 from ...services.event_router import EventRouter, Event, EventType, EventPriority  # type: ignore
@@ -16,7 +25,6 @@ from .parallel_executor import ParallelExecutor, ExecutionMode
 from .task_analyzer import TaskAnalyzer, TaskDependency  # type: ignore
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class TaskDefinition:
@@ -36,7 +44,6 @@ class TaskDefinition:
     def __hash__(self) -> int:
         """Make hashable for use in sets."""
         return hash(self.id)
-
 
 @dataclass
 class ExecutionPlan:
@@ -82,7 +89,6 @@ class ExecutionPlan:
                         if in_degree[dependent_id] == 0:
                             queue.append(dependent_id)
 
-
 @dataclass
 class ExecutionResult:
     """Result of task execution."""
@@ -103,7 +109,6 @@ class ExecutionResult:
         self.error = error
         self.end_time = datetime.now()
         self.duration_seconds = (self.end_time - self.start_time).total_seconds()
-
 
 class Orchestrator(BaseAgent):
     """Orchestrator agent for coordinating parallel task execution.

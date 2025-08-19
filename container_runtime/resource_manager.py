@@ -1,3 +1,12 @@
+from typing import Any, Callable, Dict, List, Optional
+
+import logging
+import time
+import threading
+import psutil
+import sys
+import os
+
 """
 Resource Manager for Container Execution.
 
@@ -5,24 +14,16 @@ Monitors and enforces resource limits for container execution,
 including CPU, memory, disk, and network usage tracking.
 """
 
-import logging
-import time
-import threading
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import psutil
 
 # Import Enhanced Separation shared modules
-import sys
-import os
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
 )
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ResourceUsage:
@@ -38,7 +39,6 @@ class ResourceUsage:
     processes: int
     open_files: int
 
-
 @dataclass
 class ResourceAlert:
     """Resource usage alert."""
@@ -50,7 +50,6 @@ class ResourceAlert:
     timestamp: datetime
     severity: str
     message: str
-
 
 class ResourceMonitor:
     """Monitors resource usage for a single container."""
@@ -264,7 +263,6 @@ class ResourceMonitor:
             return self.alerts.copy()
 
         return [a for a in self.alerts if a.severity == severity]
-
 
 class ResourceManager:
     """

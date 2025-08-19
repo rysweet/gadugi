@@ -1,14 +1,19 @@
-"""
-Test Solver Agent Implementation
-Analyzes and resolves failing tests through systematic failure analysis.
-"""
+from typing import Any, Dict, List, Optional, Tuple
 
+from .shared.error_handling import ErrorHandler
+from ..shared.error_handling import ErrorHandler
+import pytest
 import os
 import sys
 import subprocess
 import logging
 import shutil
-from typing import Any, Dict, List, Optional, Tuple
+
+"""
+Test Solver Agent Implementation
+Analyzes and resolves failing tests through systematic failure analysis.
+"""
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -19,7 +24,6 @@ try:
     from utils.error_handling import CircuitBreaker
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass
 
     @dataclass
     class OperationResult:
@@ -39,7 +43,6 @@ except ImportError:
         def __call__(self, func):
             return func
 
-
 # Import shared test instructions
 from shared_test_instructions import (
     SharedTestInstructions,
@@ -47,7 +50,6 @@ from shared_test_instructions import (
     SkipReason,
     TestAnalysis,
 )
-
 
 class FailureCategory(Enum):
     """Categories of test failures."""
@@ -59,7 +61,6 @@ class FailureCategory(Enum):
     RESOURCE_ISSUE = "resource_issue"
     TIMING_ISSUE = "timing_issue"
     CONFIGURATION_ISSUE = "configuration_issue"
-
 
 @dataclass
 class FailureAnalysis:
@@ -73,7 +74,6 @@ class FailureAnalysis:
     investigation_steps: List[str]
     confidence_score: float  # 0.0 to 1.0
 
-
 @dataclass
 class ResolutionPlan:
     """Plan for resolving test failure."""
@@ -84,13 +84,12 @@ class ResolutionPlan:
     rollback_plan: str
     validation_steps: List[str]
 
-
 @dataclass
 class TestSolverResult:
     """Result of test solving operation."""
 
     test_name: str
-    original_status: TestStatus
+    status: TestStatus
     final_status: TestStatus
     analysis: TestAnalysis
     failure_analysis: Optional[FailureAnalysis]
@@ -100,7 +99,6 @@ class TestSolverResult:
     skip_justification: str
     validation_results: List[str]
     recommendations: List[str]
-
 
 class TestSolverAgent:
     """
@@ -118,6 +116,7 @@ class TestSolverAgent:
 
         # Setup error handling
         try:
+from .shared.error_handling import ErrorHandler
             self.error_handler = ErrorHandler()
         except NameError:
             self.error_handler = None
@@ -175,8 +174,8 @@ class TestSolverAgent:
 
                 return TestSolverResult(
                     test_name=test_identifier,
-                    original_status=TestStatus.FAIL,
-                    final_status=TestStatus.PASS
+                    status: TestStatus = TestStatus.FAIL,
+                    final_status: TestStatus = TestStatus.PASS
                     if validation_results["success"]
                     else TestStatus.FAIL,
                     analysis=test_analysis,
@@ -198,8 +197,8 @@ class TestSolverAgent:
 
                 return TestSolverResult(
                     test_name=test_identifier,
-                    original_status=TestStatus.FAIL,
-                    final_status=TestStatus.SKIP,
+                    status: TestStatus = TestStatus.FAIL,
+                    final_status: TestStatus = TestStatus.SKIP,
                     analysis=test_analysis,
                     failure_analysis=failure_analysis,
                     resolution_plan=None,
@@ -772,8 +771,8 @@ class TestSolverAgent:
         """Create error result when analysis fails."""
         return TestSolverResult(
             test_name=test_identifier,
-            original_status=TestStatus.ERROR,
-            final_status=TestStatus.ERROR,
+            status: TestStatus = TestStatus.ERROR,
+            final_status: TestStatus = TestStatus.ERROR,
             analysis=TestAnalysis(
                 purpose="Error during analysis",
                 requirements=[],

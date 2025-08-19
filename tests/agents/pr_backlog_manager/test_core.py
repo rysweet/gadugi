@@ -1,3 +1,13 @@
+from typing import TYPE_CHECKING
+
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from unittest.mock import Mock, patch, MagicMock
+import pytest  # type: ignore[import]
+import os
+import sys
+
 """
 Tests for PR Backlog Manager core functionality.
 
@@ -5,14 +15,10 @@ Tests the main PRBacklogManager class including PR discovery, assessment,
 and overall backlog management workflows.
 """
 
-import pytest  # type: ignore[import]
-
-import os
 from unittest.mock import Mock, patch
 from datetime import datetime
 
 # Add the source directories to the Python path for imports
-import sys
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
@@ -38,7 +44,6 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 # TYPE_CHECKING is always False at runtime but True for type checkers
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     # For type checking, use stubs
@@ -65,7 +70,6 @@ else:
         from interfaces import AgentConfig  # type: ignore[import]
     except ImportError:
         # Fall back to stubs if real imports fail
-        from .test_stubs import (
             PRBacklogManager,
             PRAssessment,
             PRStatus,
@@ -74,7 +78,6 @@ else:
             GadugiError,
             AgentConfig,
         )
-
 
 class TestPRBacklogManager:
     """Test suite for PRBacklogManager core functionality."""
@@ -616,7 +619,6 @@ class TestPRBacklogManager:
         assert metrics.automation_rate > 0
         assert metrics.success_rate == 100.0  # All processed successfully
 
-
 class TestPRAssessment:
     """Test suite for PRAssessment data class."""
 
@@ -666,7 +668,6 @@ class TestPRAssessment:
         assert assessment.readiness_score == 100.0
         assert len(assessment.blocking_issues) == 0
 
-
 class TestBacklogMetrics:
     """Test suite for BacklogMetrics data class."""
 
@@ -689,7 +690,6 @@ class TestBacklogMetrics:
         assert metrics.automation_rate == 85.0
         assert metrics.success_rate == 90.0
         assert isinstance(metrics.timestamp, datetime)
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

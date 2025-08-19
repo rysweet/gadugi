@@ -1,4 +1,18 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import shutil
+import sys
+import tempfile
+import pytest
+        import time
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
 """
 Basic integration tests for Enhanced Separation architecture.
 
@@ -6,14 +20,7 @@ Tests basic functionality of shared modules and their integration.
 Validates that the Enhanced Separation architecture is functional.
 """
 
-import os
-import shutil
-import sys
-import tempfile
 from datetime import datetime
-
-import pytest
-from typing import List, Set
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -30,7 +37,6 @@ from task_tracking import (
     TodoWriteIntegration,
 )
 from utils.error_handling import CircuitBreaker, ErrorHandler
-
 
 class TestEnhancedSeparationBasic:
     """Basic integration tests for Enhanced Separation shared modules"""
@@ -366,8 +372,6 @@ class TestEnhancedSeparationBasic:
     def test_performance_basic_validation(self):
         """Test basic performance characteristics of shared modules"""
 
-        import time
-
         # Test state management performance
         start_time = time.time()
 
@@ -417,7 +421,6 @@ class TestEnhancedSeparationBasic:
 
         print(f"State operations: {state_ops_time:.3f}s for 10 operations")
         print(f"Task operations: {task_ops_time:.3f}s for 10 operations")
-
 
 class TestEnhancedSeparationCodeReduction:
     """Test code reduction benefits of Enhanced Separation"""
@@ -515,7 +518,6 @@ class TestEnhancedSeparationCodeReduction:
         print(
             f"✅ Enhanced Separation eliminates {duplication_reduction_percentage:.1f}% of code duplication"
         )
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,16 +1,15 @@
-"""
-Basic tests for Test Solver and Test Writer agents - import and initialization.
-"""
-
 import pytest
 import sys
 import os
+
+"""
+Basic tests for Test Solver and Test Writer agents - import and initialization.
+"""
 
 # Add agents to path for testing
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "agents")
 )
-
 
 def test_shared_test_instructions_import():
     """Test that shared test instructions can be imported."""
@@ -27,7 +26,6 @@ def test_shared_test_instructions_import():
     except ImportError as e:
         pytest.fail(f"Failed to import shared_test_instructions: {e}")
 
-
 def test_test_solver_agent_import():
     """Test that TestSolverAgent can be imported."""
     try:
@@ -38,7 +36,6 @@ def test_test_solver_agent_import():
     except ImportError as e:
         pytest.fail(f"Failed to import test_solver_agent: {e}")
 
-
 def test_test_writer_agent_import():
     """Test that TestWriterAgent can be imported."""
     try:
@@ -48,7 +45,6 @@ def test_test_writer_agent_import():
         assert TestType.UNIT is not None
     except ImportError as e:
         pytest.fail(f"Failed to import test_writer_agent: {e}")
-
 
 def test_test_solver_initialization():
     """Test TestSolverAgent initialization."""
@@ -61,7 +57,6 @@ def test_test_solver_initialization():
     except Exception as e:
         pytest.fail(f"Failed to initialize TestSolverAgent: {e}")
 
-
 def test_test_writer_initialization():
     """Test TestWriterAgent initialization."""
     try:
@@ -72,7 +67,6 @@ def test_test_writer_initialization():
         assert writer.shared_instructions is not None
     except Exception as e:
         pytest.fail(f"Failed to initialize TestWriterAgent: {e}")
-
 
 def test_shared_instructions_basic_functionality():
     """Test basic functionality of SharedTestInstructions."""
@@ -93,12 +87,9 @@ def test_shared_instructions_basic_functionality():
     except Exception as e:
         pytest.fail(f"SharedTestInstructions basic functionality failed: {e}")
 
-
 def test_agent_config_fallback():
     """Test that agents work with fallback config when enhanced separation is not available."""
     try:
-        from test_solver_agent import TestSolverAgent
-        from test_writer_agent import TestWriterAgent
 
         # Should work even if enhanced separation modules are not available
         solver = TestSolverAgent()
@@ -109,7 +100,6 @@ def test_agent_config_fallback():
 
     except Exception as e:
         pytest.fail(f"Agent fallback configuration failed: {e}")
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

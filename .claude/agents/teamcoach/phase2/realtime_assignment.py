@@ -1,19 +1,21 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.error_handling import ErrorHandler
+import logging
+import threading
+
 """
 TeamCoach Phase 2: Real-time Task Assignment
 
 This module provides real-time task assignment optimization and monitoring.
 """
 
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
-import threading
 from queue import Queue
 
 from ...shared.utils.error_handling import ErrorHandler
 from .task_matcher import TaskAgentMatcher, TaskRequirements, MatchingStrategy
-
 
 @dataclass
 class AssignmentRequest:
@@ -25,7 +27,6 @@ class AssignmentRequest:
     strategy: MatchingStrategy = MatchingStrategy.BEST_FIT
     priority: int = 1
     submitted_at: datetime = datetime.now()
-
 
 class RealtimeAssignment:
     """

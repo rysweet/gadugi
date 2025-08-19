@@ -1,14 +1,15 @@
-"""Task Decomposer Agent - Intelligently decomposes complex tasks into manageable subtasks."""
+from typing import Any, Dict, List, Optional, Tuple
 
 import hashlib
 import json
 import logging
+
+"""Task Decomposer Agent - Intelligently decomposes complex tasks into manageable subtasks."""
+
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class SubTask:
@@ -26,7 +27,6 @@ class SubTask:
     def to_dict(self) -> Dict[str, Any]:
         """Convert SubTask to dictionary representation."""
         return asdict(self)
-
 
 @dataclass
 class DecompositionResult:
@@ -49,7 +49,6 @@ class DecompositionResult:
             "estimated_total_time": self.estimated_total_time,
             "decomposition_pattern": self.decomposition_pattern,
         }
-
 
 class PatternDatabase:
     """Simulated pattern database for learning and retrieval."""
@@ -141,7 +140,6 @@ class PatternDatabase:
             )
 
             self.save_patterns()
-
 
 class TaskDecomposer:
     """Intelligently decomposes complex tasks into manageable subtasks."""

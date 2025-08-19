@@ -1,4 +1,12 @@
+import unittest
+import tempfile
+import shutil
+import sys
+    import logging
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from unittest.mock import Mock, patch, MagicMock
 """
 Test suite for Simple Memory Manager
 
@@ -6,19 +14,13 @@ This test suite validates the GitHub Issues-only memory management system,
 ensuring all operations work correctly without Memory.md file dependencies.
 """
 
-import unittest
-import tempfile
-import shutil
 from unittest.mock import Mock, patch
 from pathlib import Path
-import sys
-from typing import Set
 
 # Add the current directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from simple_memory_manager import SimpleMemoryManager, MemoryUpdate, MemorySection
-
 
 class TestMemoryUpdate(unittest.TestCase):
     """Test MemoryUpdate class"""
@@ -64,7 +66,6 @@ class TestMemoryUpdate(unittest.TestCase):
         self.assertIn("- File: src/test.py", comment)
         self.assertIn("*Added by: WorkflowManager*", comment)
 
-
 class TestMemorySection(unittest.TestCase):
     """Test MemorySection class"""
 
@@ -88,7 +89,6 @@ class TestMemorySection(unittest.TestCase):
         self.assertEqual(data["priority"], "low")
         self.assertEqual(data["related_issues"], [789])
         self.assertIn("timestamp", data)
-
 
 class TestSimpleMemoryManager(unittest.TestCase):
     """Test SimpleMemoryManager class"""
@@ -428,7 +428,6 @@ spanning multiple lines.
         self.assertFalse(result["success"])
         self.assertIn("error", result)
 
-
 class TestIntegration(unittest.TestCase):
     """Integration tests for SimpleMemoryManager"""
 
@@ -527,7 +526,6 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual(goal_data["priority"], "high")
         self.assertEqual(goal_data["agent"], "WorkflowManager")
         self.assertIn("Complete memory manager", goal_data["content"])
-
 
 class TestMemoryLocking(unittest.TestCase):
     """Test memory locking functionality"""
@@ -853,10 +851,8 @@ class TestMemoryLocking(unittest.TestCase):
         manager = SimpleMemoryManager(str(self.repo_path), lock_reason="invalid-reason")
         self.assertEqual(manager.lock_reason, "off-topic")  # Should fallback to default
 
-
 if __name__ == "__main__":
     # Setup test logging
-    import logging
 
     logging.basicConfig(level=logging.WARNING)
 

@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+import re
+import logging
+import time
+import hashlib
+import base64
+import urllib.parse
+
 #!/usr/bin/env python3
 """
 XPIA Defense Engine - Cross-Prompt Injection Attack Protection
@@ -7,16 +16,8 @@ in multi-agent systems by analyzing, detecting, and sanitizing potentially
 malicious content while preserving legitimate functionality.
 """
 
-import re
-import logging
-import time
-import hashlib
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-import base64
-import urllib.parse
-
 
 class ThreatLevel(Enum):
     """Threat severity levels with ordering support"""
@@ -57,14 +58,12 @@ class ThreatLevel(Enum):
             return NotImplemented
         return not self < other
 
-
 class SecurityMode(Enum):
     """Security operation modes"""
 
     STRICT = "strict"  # Block all suspicious content
     BALANCED = "balanced"  # Block obvious threats, warn on suspicious
     PERMISSIVE = "permissive"  # Log threats but allow execution
-
 
 @dataclass
 class ThreatPattern:
@@ -77,7 +76,6 @@ class ThreatPattern:
     regex_flags: int = 0
     category: str = "general"
     confidence: float = 1.0
-
 
 @dataclass
 class ValidationResult:
@@ -92,7 +90,6 @@ class ValidationResult:
     processing_time_ms: float = 0.0
     content_hash: str = ""
     analysis_details: Dict[str, Any] = field(default_factory=dict)
-
 
 class ThreatPatternLibrary:
     """Library of threat detection patterns"""
@@ -258,7 +255,6 @@ class ThreatPatternLibrary:
             self.logger.info(f"Removed threat pattern: {name}")
         return removed
 
-
 class ContentSanitizer:
     """Sanitizes content while preserving legitimate functionality"""
 
@@ -374,7 +370,6 @@ class ContentSanitizer:
             pass
 
         return decoded_content, decoding_actions
-
 
 class XPIADefenseEngine:
     """Core XPIA defense engine"""
@@ -597,7 +592,6 @@ class XPIADefenseEngine:
         self.logger.info(
             f"Security mode changed from {old_mode.value} to {new_mode.value}"
         )
-
 
 class XPIADefenseAgent:
     """Main XPIA Defense Agent class"""

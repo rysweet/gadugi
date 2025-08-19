@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional
+
+import unittest
+import tempfile
+import os
+import json
+        import shutil
+import asyncio
+
 """
 Integration tests for code-reviewer agent with design simplicity features.
 
@@ -5,12 +14,7 @@ These tests validate that the enhanced CodeReviewer agent (Issue #104) correctly
 integrates simplicity detection with existing review functionality.
 """
 
-import unittest
-from unittest.mock import patch, Mock, MagicMock
-import tempfile
-import os
-import json
-
+from unittest.mock import Mock, patch, MagicMock
 
 class TestCodeReviewerIntegration(unittest.TestCase):
     """Integration tests for the enhanced code reviewer."""
@@ -27,7 +31,6 @@ class TestCodeReviewerIntegration(unittest.TestCase):
     def tearDown(self):
         """Clean up test environment."""
         os.chdir(self.original_cwd)
-        import shutil
 
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
@@ -142,8 +145,6 @@ class CreditCardProcessor(PaymentProcessor):
         # Complex but justified code
         pr_files = {
             "src/orchestrator.py": '''
-import asyncio
-from typing import Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
 
@@ -232,7 +233,6 @@ def quick_data_processing(data):
         # These should be remembered and flagged in future reviews
         self.assertTrue(all(pattern for pattern in common_patterns_to_detect))
 
-
 class TestSimplicityDetectionAccuracy(unittest.TestCase):
     """Tests for accuracy of simplicity detection algorithms."""
 
@@ -312,7 +312,6 @@ class PersonBuilder:
 
         # These SHOULD be flagged as over-engineered
         self.assertTrue(True)  # Placeholder for actual validation
-
 
 if __name__ == "__main__":
     unittest.main()

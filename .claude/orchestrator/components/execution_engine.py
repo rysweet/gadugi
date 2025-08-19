@@ -1,3 +1,23 @@
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Optional  # type: ignore
+)
+
+import json
+import logging
+import os
+import queue
+import subprocess
+import sys
+import threading
+import time
+import psutil
+    import argparse
+
 #!/usr/bin/env python3
 """
 ExecutionEngine Component for OrchestratorAgent
@@ -12,21 +32,10 @@ Security Features:
 - Timeout enforcement to prevent runaway processes
 """
 
-import json
-import logging
-import os
-import queue
-import subprocess
-import sys
-import threading
-import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Optional  # type: ignore
-
-import psutil
 
 # Import the PromptGenerator for creating WorkflowMaster prompts
 from .prompt_generator import PromptContext, PromptGenerator  # type: ignore
@@ -34,8 +43,6 @@ from .prompt_generator import PromptContext, PromptGenerator  # type: ignore
 # Import ContainerManager for Docker-based execution (CRITICAL FIX #167)
 try:
     # Try absolute import first (works when run directly)
-    import sys
-    import os
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(0, parent_dir)
     from container_manager import ContainerManager, ContainerConfig, ContainerResult
@@ -63,7 +70,6 @@ MAX_OUTPUT_SIZE_MB = 100
 # Configure secure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 @dataclass
 class ExecutionResult:
     """Result of a task execution"""
@@ -80,7 +86,6 @@ class ExecutionResult:
     error_message: Optional[str]
     resource_usage: Dict[str, float]
 
-
 @dataclass
 class SystemResources:
     """Current system resource usage"""
@@ -90,7 +95,6 @@ class SystemResources:
     available_memory_gb: float
     cpu_count: int
     load_avg: List[float]
-
 
 class ResourceMonitor:
     """Monitors system resources during execution"""
@@ -185,7 +189,6 @@ class ResourceMonitor:
             optimal = max(1, optimal - 1)
 
         return optimal
-
 
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
@@ -466,7 +469,6 @@ class TaskExecutor:
             }
         except (psutil.NoSuchProcess, AttributeError):
             return {'cpu_time': 0.0, 'memory_mb': 0.0}
-
 
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
@@ -899,10 +901,8 @@ class ExecutionEngine:
             resource_usage=container_result.resource_usage
         )
 
-
 def main():
     """CLI entry point for ExecutionEngine"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Execute tasks in parallel")
     parser.add_argument("--max-concurrent", type=int, help="Maximum concurrent tasks")
@@ -959,7 +959,6 @@ def main():
     except Exception as e:
         print(f"❌ Execution failed: {e}")
         return 1
-
 
 if __name__ == "__main__":
     exit(main())

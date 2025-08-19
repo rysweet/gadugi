@@ -1,13 +1,14 @@
+from typing import List, Tuple
+
+import subprocess
+
 #!/usr/bin/env python3
 """
 Validate Gadugi v0.3 Implementation
 Checks what's ACTUALLY implemented vs claimed
 """
 
-import subprocess
 from pathlib import Path
-from typing import List, Tuple
-
 
 class ImplementationValidator:
     def __init__(self):
@@ -233,7 +234,6 @@ class ImplementationValidator:
         else:
             print("❌ MOSTLY NOT IMPLEMENTED - claims don't match reality")
         print("=" * 60)
-
 
 if __name__ == "__main__":
     validator = ImplementationValidator()

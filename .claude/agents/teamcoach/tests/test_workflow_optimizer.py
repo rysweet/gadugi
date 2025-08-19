@@ -1,10 +1,11 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Tests for TeamCoach Phase 3: Workflow Optimizer
 """
 
 import unittest
 from datetime import datetime
-from unittest.mock import patch
 
 from ..phase3.workflow_optimizer import (
     WorkflowOptimizer,
@@ -13,7 +14,6 @@ from ..phase3.workflow_optimizer import (
     BottleneckType,
     OptimizationType,
 )
-
 
 class TestWorkflowOptimizer(unittest.TestCase):
     """Test cases for the WorkflowOptimizer."""
@@ -414,7 +414,6 @@ class TestWorkflowOptimizer(unittest.TestCase):
         )
 
         self.assertEqual(len(patterns["analyses"]), 2)
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+import unittest
 
 # Mock performance data class for testing
 from dataclasses import dataclass
-from typing import Dict, Any
+
+from unittest.mock import Mock, patch, MagicMock
 
 @dataclass
 class MockPerformanceData:
@@ -20,7 +24,6 @@ class MockPerformanceData:
 Tests for TeamCoach Phase 3: Coaching Engine
 """
 
-import unittest
 from datetime import datetime
 from unittest.mock import Mock, patch
 from ..phase3.coaching_engine import (
@@ -31,7 +34,6 @@ from ..phase3.coaching_engine import (
     CoachingCategory,
 )
 from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics
-
 
 class TestCoachingEngine(unittest.TestCase):
     """Test cases for the CoachingEngine."""
@@ -369,7 +371,6 @@ class TestCoachingEngine(unittest.TestCase):
         # Check metric values are reasonable
         self.assertGreater(plan.success_metrics["team_success_rate"], 0.5)
         self.assertLessEqual(plan.success_metrics["team_success_rate"], 1.0)
-
 
 if __name__ == "__main__":
     unittest.main()

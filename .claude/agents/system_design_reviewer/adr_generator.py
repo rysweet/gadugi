@@ -1,3 +1,7 @@
+from typing import Any, Dict, List, Optional
+
+import re
+
 """
 ADR Generator - Architecture Decision Record generation
 
@@ -5,14 +9,11 @@ Automatically generates Architecture Decision Records (ADRs) for significant
 architectural changes detected in pull requests.
 """
 
-import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 from .ast_parser import ArchitecturalChange, ImpactLevel, ChangeType, ElementType  # type: ignore
-
 
 @dataclass
 class ADRData:
@@ -29,7 +30,6 @@ class ADRData:
     implementation_notes: str
     related_changes: List[str]
     pr_number: Optional[str] = None
-
 
 class ADRGenerator:
     """Generates Architecture Decision Records for significant changes"""

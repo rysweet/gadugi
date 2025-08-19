@@ -1,4 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+import sys
+import os
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
 """
 Simple Memory Manager - GitHub Issues as Single Source of Truth
 
@@ -7,19 +14,14 @@ exclusively for project memory storage, eliminating the complexity of Memory.md
 synchronization and providing native GitHub integration.
 """
 
-import logging
-from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
-import sys
-import os
 
 # Add .claude/shared to path for imports
 shared_path = Path(__file__).parent.parent.parent / ".claude" / "shared"
 sys.path.insert(0, str(shared_path))
 
 from github_operations import GitHubOperations, GitHubError
-
 
 class MemorySection:
     """Represents a section of project memory"""
@@ -42,7 +44,6 @@ class MemorySection:
             "related_issues": self.related_issues,
             "timestamp": self.timestamp,
         }
-
 
 class MemoryUpdate:
     """Represents a memory update"""
@@ -98,7 +99,6 @@ class MemoryUpdate:
         comment += f"\n---\n*Added by: {self.agent}*"
 
         return comment
-
 
 class SimpleMemoryManager:
     """

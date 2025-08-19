@@ -1,7 +1,3 @@
-"""Memory System Integration Service.
-
-Integrates MCP, Neo4j, Event Router, and GitHub for unified memory management.
-"""
 
 import asyncio
 import json
@@ -9,9 +5,15 @@ import logging
 import os
 import re
 import uuid
+    import httpx
+
+"""Memory System Integration Service.
+
+Integrates MCP, Neo4j, Event Router, and GitHub for unified memory management.
+"""
+
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
 
 from .models import (
     ImportResult,
@@ -54,13 +56,10 @@ except ImportError:
 
 # GitHub integration
 try:
-    import httpx
 except ImportError:
     httpx = None
 
-
 logger = logging.getLogger(__name__)
-
 
 class MemorySystem:
     """Unified memory management system for Gadugi platform."""

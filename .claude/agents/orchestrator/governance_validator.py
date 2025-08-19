@@ -1,18 +1,19 @@
+from typing import Dict, List, Optional, Tuple
+
+import logging
+import re
+
 """Governance validation for orchestrator compliance with Issue #148.
 
 This module ensures the orchestrator properly delegates all task execution
 to WorkflowManager instances and never executes tasks directly.
 """
 
-import logging
-import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class GovernanceViolation:
@@ -31,7 +32,6 @@ class GovernanceViolation:
             f"{self.violation_type} - {self.description}"
             f"{f' (Task: {self.task_id})' if self.task_id else ''}"
         )
-
 
 @dataclass
 class GovernanceReport:
@@ -63,7 +63,6 @@ class GovernanceReport:
                 lines.append(f"  ... and {len(self.violations) - 5} more")
 
         return "\n".join(lines)
-
 
 class GovernanceValidator:
     """Validates orchestrator compliance with governance requirements."""
@@ -295,7 +294,6 @@ class GovernanceValidator:
 
         return execution_details
 
-
 def validate_orchestrator_compliance() -> GovernanceReport:
     """Validate current orchestrator implementation for compliance.
 
@@ -331,7 +329,6 @@ def validate_orchestrator_compliance() -> GovernanceReport:
 
     # Generate final report
     return validator.generate_report([])
-
 
 if __name__ == "__main__":
     # Run compliance check

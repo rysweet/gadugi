@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional, Optional  # type: ignore
+
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+import json
+import subprocess
+
 """
 Fallback implementations for shared modules during development/testing
 
@@ -5,13 +14,9 @@ Provides basic implementations when Enhanced Separation shared modules
 are not available, ensuring the system design reviewer can still function.
 """
 
-import json
-import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional  # type: ignore
 from enum import Enum
-
 
 class ErrorCategory(Enum):
     """Error categories for fallback error handler"""
@@ -21,14 +26,12 @@ class ErrorCategory(Enum):
     STATE_MANAGEMENT = "state_management"
     UNKNOWN = "unknown"
 
-
 class ErrorSeverity(Enum):
     """Error severity levels"""
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
-
 
 class GitHubOperations:
     """Fallback GitHub operations implementation"""
@@ -77,7 +80,6 @@ class GitHubOperations:
         except Exception as e:
             print(f"Error posting PR review: {e}")
             return False
-
 
 class StateManager:
     """Fallback state manager implementation"""
@@ -138,7 +140,6 @@ class StateManager:
             print(f"Error saving review result: {e}")
             return False
 
-
 class ErrorHandler:
     """Fallback error handler implementation"""
 
@@ -167,7 +168,6 @@ class ErrorHandler:
             print(f"Context: {context}")
 
         return error_info
-
 
 class TaskTracker:
     """Fallback task tracker implementation"""

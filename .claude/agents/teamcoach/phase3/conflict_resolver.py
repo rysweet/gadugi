@@ -1,3 +1,14 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple
+)
+
+import logging
+
 """
 TeamCoach Phase 3: Conflict Resolver
 
@@ -5,14 +16,11 @@ Detects and resolves conflicts between agents including resource contention,
 task overlap, coordination failures, and capability mismatches.
 """
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
-
 
 class ConflictType(Enum):
     """Types of conflicts that can occur between agents."""
@@ -25,7 +33,6 @@ class ConflictType(Enum):
     COMMUNICATION_BREAKDOWN = "communication_breakdown"
     PRIORITY_CONFLICT = "priority_conflict"
 
-
 class ConflictSeverity(Enum):
     """Severity levels for conflicts."""
 
@@ -33,7 +40,6 @@ class ConflictSeverity(Enum):
     HIGH = "high"  # Significantly impacts productivity
     MEDIUM = "medium"  # Noticeable impact
     LOW = "low"  # Minor impact
-
 
 class ResolutionStrategy(Enum):
     """Strategies for resolving conflicts."""
@@ -44,7 +50,6 @@ class ResolutionStrategy(Enum):
     ESCALATION = "escalation"
     AUTOMATION = "automation"
     PROCESS_CHANGE = "process_change"
-
 
 @dataclass
 class AgentConflict:
@@ -60,7 +65,6 @@ class AgentConflict:
     evidence: Dict[str, Any]
     resolution_deadline: Optional[datetime] = None
 
-
 @dataclass
 class ConflictResolution:
     """Represents a resolution for a conflict."""
@@ -74,7 +78,6 @@ class ConflictResolution:
     assigned_to: Optional[str] = None
     created_at: datetime = None
 
-
 @dataclass
 class ConflictReport:
     """Comprehensive conflict analysis report."""
@@ -84,7 +87,6 @@ class ConflictReport:
     conflict_patterns: Dict[str, Any]
     prevention_recommendations: List[str]
     generated_at: datetime
-
 
 class ConflictResolver:
     """

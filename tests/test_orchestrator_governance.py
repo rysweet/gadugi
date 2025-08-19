@@ -1,13 +1,15 @@
+from unittest.mock import Mock, patch, MagicMock
+import tempfile
+import pytest
+
 """Test orchestrator governance compliance with Issue #148.
 
 This test ensures the orchestrator properly delegates all task execution
 to WorkflowManager instances and never executes tasks directly.
 """
 
-import tempfile
 from pathlib import Path
-
-import pytest
+from unittest.mock import Mock, patch
 
 from ..claude.agents.orchestrator.governance_validator import (
     GovernanceValidator,
@@ -16,7 +18,6 @@ from ..claude.agents.orchestrator.governance_validator import (
 )
 from ..claude.agents.orchestrator.orchestrator import Orchestrator, TaskDefinition
 from ..claude.agents.orchestrator.parallel_executor import ParallelExecutor
-
 
 class TestOrchestratorGovernance:
     """Test suite for orchestrator governance compliance."""
@@ -293,7 +294,6 @@ class TestOrchestratorGovernance:
         assert hasattr(report, "violations")
         assert hasattr(report, "workflow_manager_invocations")
         assert hasattr(report, "direct_executions")
-
 
 if __name__ == "__main__":
     # Run the tests

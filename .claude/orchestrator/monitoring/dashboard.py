@@ -1,4 +1,13 @@
+
+import asyncio
+import json
+import logging
+import os
+    import websockets
+    import docker  # type: ignore
+
 #!/usr/bin/env python3
+
 """
 Real-time Monitoring Dashboard for Containerized Orchestrator
 
@@ -13,16 +22,10 @@ Features:
 - Performance analytics
 """
 
-import asyncio
-import json
-import logging
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Set  # type: ignore
 
 try:
-    import websockets
     from websockets.server import WebSocketServerProtocol  # type: ignore
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
@@ -36,14 +39,12 @@ except ImportError:
     AIOHTTP_AVAILABLE = False
 
 try:
-    import docker  # type: ignore
     DOCKER_AVAILABLE = True
 except ImportError:
     DOCKER_AVAILABLE = False
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 class OrchestrationMonitor:
     """Monitors and tracks orchestrator container execution"""
@@ -359,7 +360,6 @@ class OrchestrationMonitor:
         self.monitoring = False
         logger.info("Stopping orchestrator monitoring...")
 
-
 async def create_web_app():
     """Create web application for monitoring dashboard"""
     if not AIOHTTP_AVAILABLE:
@@ -429,68 +429,59 @@ async def create_web_app():
         </div>
 
         <script>
-            const wsPort = 9001;
-            let ws = null;
-
+            const wsPort = 9001
+            let ws = null
             function connectWebSocket() {
                 try {
-                    ws = new WebSocket(`ws://localhost:${wsPort}`);
-
+                    ws = new WebSocket(`ws://localhost:${wsPort}`)
                     ws.onopen = function() {
-                        document.getElementById('wsStatus').textContent = 'Connected';
-                        document.getElementById('wsStatus').style.color = '#27ae60';
-                    };
-
+                        document.getElementById('wsStatus').textContent = 'Connected'
+                        document.getElementById('wsStatus').style.color = '#27ae60'
+                    }
                     ws.onmessage = function(event) {
-                        const data = JSON.parse(event.data);
-                        updateDashboard(data);
-                    };
-
+                        const data = JSON.parse(event.data)
+                        updateDashboard(data)
+                    }
                     ws.onclose = function() {
-                        document.getElementById('wsStatus').textContent = 'Disconnected';
-                        document.getElementById('wsStatus').style.color = '#e74c3c';
+                        document.getElementById('wsStatus').textContent = 'Disconnected'
+                        document.getElementById('wsStatus').style.color = '#e74c3c'
                         // Reconnect after 5 seconds
-                        setTimeout(connectWebSocket, 5000);
-                    };
-
+                        setTimeout(connectWebSocket, 5000)
+                    }
                     ws.onerror = function(error) {
-                        console.error('WebSocket error:', error);
-                    };
-
+                        console.error('WebSocket error:', error)
+                    }
                 } catch (error) {
-                    console.error('Failed to connect WebSocket:', error);
-                    setTimeout(connectWebSocket, 5000);
+                    console.error('Failed to connect WebSocket:', error)
+                    setTimeout(connectWebSocket, 5000)
                 }
             }
 
             function updateDashboard(data) {
-                document.getElementById('lastUpdate').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
-
+                document.getElementById('lastUpdate').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`
                 if (data.summary) {
-                    document.getElementById('totalContainers').textContent = data.summary.total_containers;
-                    document.getElementById('runningContainers').textContent = data.summary.running_containers;
-                    document.getElementById('failedContainers').textContent = data.summary.failed_containers;
+                    document.getElementById('totalContainers').textContent = data.summary.total_containers
+                    document.getElementById('runningContainers').textContent = data.summary.running_containers
+                    document.getElementById('failedContainers').textContent = data.summary.failed_containers
                 }
 
                 if (data.containers) {
-                    updateContainerList(data.containers);
+                    updateContainerList(data.containers)
                 }
             }
 
             function updateContainerList(containers) {
-                const containerList = document.getElementById('containerList');
-
+                const containerList = document.getElementById('containerList')
                 if (Object.keys(containers).length === 0) {
-                    containerList.innerHTML = '<p>No containers found.</p>';
-                    return;
+                    containerList.innerHTML = '<p>No containers found.</p>'
+                    return
                 }
 
-                let html = '';
+                let html = ''
                 for (const [name, container] of Object.entries(containers)) {
-                    const stats = container.stats || {};
-                    const memoryUsageMB = Math.round((stats.memory_usage || 0) / 1024 / 1024);
-                    const memoryLimitMB = Math.round((stats.memory_limit || 0) / 1024 / 1024);
-
+                    const stats = container.stats || {}
+                    const memoryUsageMB = Math.round((stats.memory_usage || 0) / 1024 / 1024)
+                    const memoryLimitMB = Math.round((stats.memory_limit || 0) / 1024 / 1024)
                     html += `
                         <div class="container-item">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -512,14 +503,14 @@ async def create_web_app():
                                 </div>
                             ` : ''}
                         </div>
-                    `;
+                    `
                 }
 
-                containerList.innerHTML = html;
+                containerList.innerHTML = html
             }
 
             // Initialize WebSocket connection
-            connectWebSocket();
+            connectWebSocket()
         </script>
     </body>
     </html>
@@ -535,7 +526,6 @@ async def create_web_app():
     app.router.add_get('/health', health_handler)
 
     return app
-
 
 async def main():
     """Main entry point for monitoring dashboard"""
@@ -563,7 +553,6 @@ async def main():
     except KeyboardInterrupt:
         logger.info("Shutting down monitoring dashboard...")
         monitor.stop_monitoring()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

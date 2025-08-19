@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import os
+import subprocess
+import tempfile
+import time
+        import re
+
 #!/usr/bin/env python3
 """
 GitHub Issues Integration - Manage GitHub issues for Memory.md tasks
@@ -6,16 +15,9 @@ This module provides functionality to create, update, and synchronize GitHub iss
 based on tasks extracted from Memory.md files.
 """
 
-import json
-import os
-import subprocess
-import tempfile
-import time
 from datetime import datetime
 
 from memory_parser import MemoryDocument, Task, TaskPriority, TaskStatus
-from typing import Any, Dict, List, Optional
-
 
 @dataclass
 class GitHubIssue:
@@ -57,11 +59,9 @@ class GitHubIssue:
     @staticmethod
     def _extract_memory_task_id(body: str) -> Optional[str]:
         """Extract memory task ID from issue body"""
-        import re
 
         match = re.search(r"<!-- memory-task-id: ([^>]+) -->", body)
         return match.group(1) if match else None
-
 
 class GitHubIntegration:
     """Manages GitHub Issues integration for Memory.md tasks"""
@@ -380,7 +380,6 @@ This issue was automatically created from a Memory.md task to enable better proj
                 f"Failed to reopen issue #{issue_number}: {result.stderr}"
             )
 
-
 def main():
     """Example usage of GitHubIntegration"""
     from memory_parser import MemoryParser
@@ -407,7 +406,6 @@ def main():
 
     except Exception as e:
         print(f"Error: {e}")
-
 
 if __name__ == "__main__":
     main()

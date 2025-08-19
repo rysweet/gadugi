@@ -1,19 +1,24 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.task_tracking import TaskTracker
+from unittest.mock import Mock, patch, MagicMock
+import os
+import uuid
+import sys
+import time
+import pytest
+import datetime
+
 """
 Comprehensive tests for task_tracking.py module (TodoWrite integration).
 Tests task management, workflow tracking, and Claude Code integration.
 """
 
-import os
-import uuid
+from unittest.mock import Mock, patch
 
 # Import the module we're testing
-import sys
-import time
-
-import pytest
 
 # For type checking only
-from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from claude.shared.task_tracking import (
@@ -33,7 +38,6 @@ if TYPE_CHECKING:
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.task_tracking import (
         Task,
         TaskError,
         TaskList,
@@ -705,12 +709,10 @@ except ImportError as e:
                 phase_task_list.add_task(task)
             return phase_task_list
 
-
 # Add claude_function_call for stub implementation
 def claude_function_call(tool_name: str, **parameters) -> Dict[str, Any]:
     """Stub implementation of claude_function_call for testing."""
     return {"success": True, "result": parameters}
-
 
 class TestTaskStatus:
     """Test TaskStatus enum."""
@@ -733,7 +735,6 @@ class TestTaskStatus:
         assert TaskStatus.PENDING != TaskStatus.COMPLETED
         assert TaskStatus.IN_PROGRESS != TaskStatus.BLOCKED
 
-
 class TestTaskPriority:
     """Test TaskPriority enum."""
 
@@ -748,7 +749,6 @@ class TestTaskPriority:
         """Test all task priorities are defined."""
         priorities = list(TaskPriority)
         assert len(priorities) == 4
-
 
 class TestTask:
     """Test Task class."""
@@ -901,7 +901,6 @@ class TestTask:
         task.complete()
         assert task.completed_at is not None
         assert task.status == TaskStatus.COMPLETED
-
 
 class TestTaskList:
     """Test TaskList class."""
@@ -1086,7 +1085,6 @@ class TestTaskList:
         assert task2.status == TaskStatus.COMPLETED
         assert task2.priority == TaskPriority.MEDIUM
 
-
 class TestTodoWriteIntegration:
     """Test TodoWrite integration functionality."""
 
@@ -1254,7 +1252,6 @@ class TestTodoWriteIntegration:
         assert "last_update" in stats
         assert "current_task_count" in stats
 
-
 class TestWorkflowPhaseTracker:
     """Test workflow phase tracking functionality."""
 
@@ -1391,7 +1388,6 @@ class TestWorkflowPhaseTracker:
             assert result["success"] is True
             assert integration.current_task_list.count() == 2
 
-
 class TestTaskMetrics:
     """Test task metrics and analytics."""
 
@@ -1479,7 +1475,6 @@ class TestTaskMetrics:
         assert "tasks_in_progress" in productivity_metrics
         assert productivity_metrics["total_tasks"] == 2
 
-
 class TestTaskError:
     """Test task error classes."""
 
@@ -1495,7 +1490,6 @@ class TestTaskError:
         assert str(error) == "Validation failed"
         assert isinstance(error, TaskError)
         assert isinstance(error, Exception)
-
 
 class TestTaskTracker:
     """Test the main TaskTracker class."""
@@ -1595,7 +1589,6 @@ class TestTaskTracker:
         assert dashboard["task_summary"]["total_tasks"] == 3
         assert dashboard["task_summary"]["completed_tasks"] == 1
         assert dashboard["task_summary"]["active_tasks"] == 2
-
 
 class TestTaskTrackingIntegration:
     """Integration tests for task tracking components."""

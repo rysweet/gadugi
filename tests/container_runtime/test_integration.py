@@ -1,22 +1,23 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+import tempfile
+            import yaml
+
 """
 Integration tests for Container Execution Environment.
 """
 
-import pytest
-import tempfile
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from container_runtime import ContainerExecutionEngine
 from container_runtime.agent_integration import AgentContainerExecutor
-
 
 @pytest.fixture
 def temp_dir():
     """Temporary directory fixture."""
     with tempfile.TemporaryDirectory() as tmp_dir:
         yield Path(tmp_dir)
-
 
 @pytest.fixture
 def mock_execution_engine():
@@ -27,7 +28,6 @@ def mock_execution_engine():
         engine_instance = Mock()
         mock_engine.return_value = engine_instance
         yield engine_instance
-
 
 class TestContainerExecutionEngine:
     """Test container execution engine integration."""
@@ -196,7 +196,6 @@ class TestContainerExecutionEngine:
             # Should have built-in policies
             assert len(stats["available_policies"]) >= 4
 
-
 class TestAgentContainerExecutor:
     """Test agent container executor integration."""
 
@@ -237,7 +236,6 @@ class TestAgentContainerExecutor:
 
     def test_shell_script_execution(self, mock_execution_engine, temp_dir):
         """Test shell script execution through executor."""
-        from container_runtime.execution_engine import ExecutionResponse
 
         # Create test script
         script_file = temp_dir / "test_script.sh"
@@ -267,7 +265,6 @@ class TestAgentContainerExecutor:
 
     def test_command_execution(self, mock_execution_engine):
         """Test command execution through executor."""
-        from container_runtime.execution_engine import ExecutionResponse
 
         # Mock response
         mock_response = ExecutionResponse(
@@ -338,7 +335,6 @@ class TestAgentContainerExecutor:
         assert result["exit_code"] == 1
         assert "not found" in result["stderr"].lower()
 
-
 class TestSecurityPolicyIntegration:
     """Test security policy integration."""
 
@@ -359,7 +355,6 @@ class TestSecurityPolicyIntegration:
 
         policy_file = temp_dir / "test_policies.yaml"
         with open(policy_file, "w") as f:
-            import yaml
 
             yaml.dump(policy_data, f)
 
@@ -371,7 +366,6 @@ class TestSecurityPolicyIntegration:
         policy = engine.get_policy("test_policy")
         assert policy.resource_limits.memory == "256m"
         assert policy.security_constraints.user_id == 1000
-
 
 class TestCleanupAndShutdown:
     """Test cleanup and shutdown functionality."""

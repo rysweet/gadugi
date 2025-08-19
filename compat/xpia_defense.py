@@ -1,3 +1,6 @@
+import importlib.util
+import sys
+
 """
 Compatibility shim for legacy `xpia_defense` imports.
 
@@ -9,8 +12,6 @@ statements.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from pathlib import Path
 from types import ModuleType
 

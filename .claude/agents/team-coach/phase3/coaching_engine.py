@@ -1,9 +1,10 @@
+from typing import Any, Dict, List, Optional
+
 from datetime import timedelta
 import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional
 from ..phase1.performance_analytics import AgentPerformanceAnalyzer, PerformanceMetrics
 from ..phase1.capability_assessment import CapabilityAssessment, AgentCapability  # type: ignore
 from ..phase2.task_matcher import TaskAgentMatcher
@@ -15,9 +16,7 @@ Provides intelligent coaching recommendations for agent performance improvement,
 skill development guidance, and team optimization strategies.
 """
 
-
 logger = logging.getLogger(__name__)
-
 
 class CoachingPriority(Enum):
     """Priority levels for coaching recommendations."""
@@ -27,7 +26,6 @@ class CoachingPriority(Enum):
     MEDIUM = "medium"
     LOW = "low"
     INFORMATIONAL = "informational"
-
 
 class CoachingCategory(Enum):
     """Categories of coaching recommendations."""
@@ -40,7 +38,6 @@ class CoachingCategory(Enum):
     SKILL_DEVELOPMENT = "skill_development"
     WORKLOAD = "workload"
     QUALITY = "quality"
-
 
 @dataclass
 class CoachingRecommendation:
@@ -59,7 +56,6 @@ class CoachingRecommendation:
     created_at: datetime
     evidence: Dict[str, Any]
 
-
 @dataclass
 class TeamCoachingPlan:
     """Comprehensive coaching plan for a team."""
@@ -71,7 +67,6 @@ class TeamCoachingPlan:
     timeline: str
     created_at: datetime
     review_date: datetime
-
 
 class CoachingEngine:
     """
@@ -280,7 +275,7 @@ class CoachingEngine:
             recommendations.append(recommendation)
 
         # Check efficiency
-        avg_time = performance.average_execution_time  # type: ignore
+        avg_time = performance.average_execution_time if performance is not None else None
         if (
             avg_time and avg_time > self.efficiency_thresholds["slow"] * 60
         ):  # Convert to seconds
@@ -743,7 +738,7 @@ class CoachingEngine:
         self, agent_id: str, domain: str, performance: PerformanceMetrics
     ) -> float:
         """Calculate how much a capability is being utilized."""
-        total_tasks = performance.total_tasks  # type: ignore
+        total_tasks = performance.total_tasks if performance is not None else None
         domain_tasks = performance.metrics.get(f"{domain}_task_count", 0)
 
         if total_tasks == 0:
@@ -830,6 +825,5 @@ class CoachingEngine:
                 parts.append(f"{counts[priority]} {priority}")
 
         return ", ".join(parts)
-
 
 # Import timedelta for date calculations

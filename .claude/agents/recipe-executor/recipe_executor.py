@@ -1,4 +1,26 @@
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import json
+import logging
+import subprocess
+import sys
+    import uvicorn
+import os
+import asyncio
+import hashlib
+    import time
+import argparse
+import pytest
+
 #!/usr/bin/env python3
+from ..shared.state_management import StateManager
 """
 Recipe Executor Agent - Reads recipe files and generates REAL implementations.
 
@@ -6,18 +28,12 @@ This agent reads structured recipe files (requirements.md, design.md, dependenci
 and generates actual working code, not stubs or placeholders.
 """
 
-import json
-import logging
-import subprocess
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple  # type: ignore
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class Recipe:
@@ -31,7 +47,6 @@ class Recipe:
     tests: List[str] = field(default_factory=list)
     validation_criteria: List[str] = field(default_factory=list)
 
-
 @dataclass
 class Implementation:
     """Represents generated implementation code."""
@@ -41,7 +56,6 @@ class Implementation:
     test_files: Dict[str, str] = field(default_factory=dict)
     config_files: Dict[str, str] = field(default_factory=dict)
     validation_results: Dict[str, bool] = field(default_factory=dict)
-
 
 class RecipeExecutor:
     """Main Recipe Executor that generates real implementations."""
@@ -254,9 +268,7 @@ class RecipeExecutor:
 Generated from recipe: {recipe_name}
 """
 
-import logging
 from contextlib import asynccontextmanager
-from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -348,7 +360,6 @@ async def status():
     }}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 '''.format(name=recipe.name, recipe_name=recipe.name)
 
@@ -360,7 +371,6 @@ if __name__ == "__main__":
 Generated from recipe: {recipe_name}
 """
 
-import logging
 from flask import Flask, jsonify, request
 
 from .config import Config
@@ -423,9 +433,7 @@ Data models for {name}.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, validator
-
 
 class RequestModel(BaseModel):
     """Request model for incoming data."""
@@ -442,7 +450,6 @@ class RequestModel(BaseModel):
             raise ValueError("Data cannot be empty")
         return v
 
-
 class ResponseModel(BaseModel):
     """Response model for outgoing data."""
 
@@ -452,14 +459,12 @@ class ResponseModel(BaseModel):
     errors: List[str] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
-
 class ValidationResult(BaseModel):
     """Validation result model."""
 
     is_valid: bool = Field(..., description="Validation status")
     error: Optional[str] = Field(None, description="Validation error message")
     warnings: List[str] = Field(default_factory=list)
-
 
 class StateModel(BaseModel):
     """State model for tracking."""
@@ -485,19 +490,14 @@ class StateModel(BaseModel):
 Request handlers for {name}.
 """
 
-import logging
-from typing import Any, Dict, Optional
-
 from .models import RequestModel, ValidationResult
 
 logger = logging.getLogger(__name__)
-
 
 async def health_check() -> Dict[str, str]:
     """Perform health check."""
     # Add actual health checks here
     return {{"status": "healthy", "service": "{name}"}}
-
 
 async def validate_input(request: RequestModel) -> ValidationResult:
     """Validate incoming request."""
@@ -526,7 +526,6 @@ async def validate_input(request: RequestModel) -> ValidationResult:
             error=str(e)
         )
 
-
 async def process_request(request: RequestModel) -> Dict[str, Any]:
     """Process the incoming request."""
     try:
@@ -553,10 +552,7 @@ async def process_request(request: RequestModel) -> Dict[str, Any]:
 Configuration for {name}.
 """
 
-import os
-from typing import Optional
 from pydantic import BaseSettings
-
 
 class Settings(BaseSettings):
     """Application settings."""
@@ -587,11 +583,9 @@ class Settings(BaseSettings):
         env_prefix = "{name_upper}_"
         env_file = ".env"
 
-
 def get_settings() -> Settings:
     """Get application settings."""
     return Settings()
-
 
 # Flask-specific config class
 class Config:
@@ -608,16 +602,10 @@ class Config:
 Generated from recipe: {recipe_name}
 """
 
-import asyncio
-import logging
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
-
 from .tools import ToolRegistry, Tool
 from .state import StateManager, AgentState
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AgentConfig:
@@ -627,7 +615,6 @@ class AgentConfig:
     max_retries: int = 3
     timeout: int = 300
     tools: List[str] = field(default_factory=list)
-
 
 class {name_class}Agent:
     """Main agent implementation."""
@@ -714,7 +701,6 @@ class {name_class}Agent:
         # Implement validation logic
         return {{"validated": True, "data": data}}
 
-
 async def main():
     """Main entry point."""
     agent = {name_class}Agent()
@@ -727,7 +713,6 @@ async def main():
 
     result = await agent.execute(task)
     print(f"Result: {{result}}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -745,8 +730,6 @@ Tools for {name} agent.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
-
 
 class Tool(ABC):
     """Base tool class."""
@@ -759,7 +742,6 @@ class Tool(ABC):
     async def execute(self, **kwargs) -> Any:
         """Execute the tool."""
         pass
-
 
 class AnalysisTool(Tool):
     """Tool for analysis operations."""
@@ -779,7 +761,6 @@ class AnalysisTool(Tool):
             "data": data
         }}
 
-
 class GenerationTool(Tool):
     """Tool for generation operations."""
 
@@ -794,7 +775,6 @@ class GenerationTool(Tool):
         # Implement actual generation
         return f"Generated content with template: {{template}}"
 
-
 class ValidationTool(Tool):
     """Tool for validation operations."""
 
@@ -808,7 +788,6 @@ class ValidationTool(Tool):
         """Execute validation."""
         # Implement actual validation
         return True
-
 
 class ToolRegistry:
     """Registry for managing tools."""
@@ -843,10 +822,7 @@ class ToolRegistry:
 State management for {name} agent.
 """
 
-from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
-
 
 class AgentState(Enum):
     """Agent state enumeration."""
@@ -855,7 +831,6 @@ class AgentState(Enum):
     PAUSED = "paused"
     COMPLETED = "completed"
     ERROR = "error"
-
 
 class StateManager:
     """Manages agent state."""
@@ -916,11 +891,7 @@ Core library implementation for {name}.
 Generated from recipe: {recipe_name}
 """
 
-import logging
-from typing import Any, Dict, List, Optional
-
 logger = logging.getLogger(__name__)
-
 
 class {name_class}:
     """Main library class."""
@@ -967,7 +938,6 @@ class {name_class}:
         """Transform data to specified format."""
         # Add transformation logic
         if format == "json":
-            import json
             return json.dumps(data) if not isinstance(data, str) else data
         return data
 
@@ -975,7 +945,6 @@ class {name_class}:
         """Cleanup resources."""
         self._initialized = False
         logger.info("Library cleaned up")
-
 
 def create_instance(config: Optional[Dict[str, Any]] = None) -> {name_class}:
     """Factory function to create library instance."""
@@ -993,15 +962,7 @@ def create_instance(config: Optional[Dict[str, Any]] = None) -> {name_class}:
 Utility functions for {name}.
 """
 
-import hashlib
-import json
-import logging
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-
 logger = logging.getLogger(__name__)
-
 
 def load_json_file(file_path: Path) -> Dict[str, Any]:
     """Load JSON file."""
@@ -1011,7 +972,6 @@ def load_json_file(file_path: Path) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Failed to load JSON file {{file_path}}: {{e}}")
         return {{}}
-
 
 def save_json_file(data: Dict[str, Any], file_path: Path) -> bool:
     """Save data to JSON file."""
@@ -1023,18 +983,15 @@ def save_json_file(data: Dict[str, Any], file_path: Path) -> bool:
         logger.error(f"Failed to save JSON file {{file_path}}: {{e}}")
         return False
 
-
 def generate_id(prefix: str = "") -> str:
     """Generate unique ID."""
     timestamp = datetime.utcnow().isoformat()
     hash_input = f"{{prefix}}{{timestamp}}"
     return hashlib.sha256(hash_input.encode()).hexdigest()[:12]
 
-
 def validate_structure(data: Dict[str, Any], required_fields: List[str]) -> bool:
     """Validate data structure."""
     return all(field in data for field in required_fields)
-
 
 def merge_configs(*configs: Dict[str, Any]) -> Dict[str, Any]:
     """Merge multiple configuration dictionaries."""
@@ -1043,10 +1000,8 @@ def merge_configs(*configs: Dict[str, Any]) -> Dict[str, Any]:
         result.update(config)
     return result
 
-
 def retry_operation(func, max_retries: int = 3, delay: float = 1.0):
     """Retry an operation with exponential backoff."""
-    import time
 
     for attempt in range(max_retries):
         try:
@@ -1066,19 +1021,12 @@ Main implementation for {name}.
 Generated from recipe: {recipe_name}
 """
 
-import argparse
-import logging
-import sys
-from pathlib import Path
-from typing import Any, Dict, Optional
-
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
 
 class {name_class}:
     """Main implementation class."""
@@ -1091,7 +1039,6 @@ class {name_class}:
     def _load_config(self, config_path: Optional[Path]) -> Dict[str, Any]:
         """Load configuration."""
         if config_path and config_path.exists():
-            import json
             with open(config_path) as f:
                 return json.load(f)
         return {{}}
@@ -1135,7 +1082,6 @@ class {name_class}:
         logger.info("Shutting down {name}...")
         self.initialized = False
 
-
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(description="{name} implementation")
@@ -1167,7 +1113,6 @@ def main():
     finally:
         instance.shutdown()
 
-
 if __name__ == "__main__":
     sys.exit(main())
 '''.format(
@@ -1195,19 +1140,15 @@ if __name__ == "__main__":
 Tests for {name} service.
 """
 
-import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch
 
 from ..main import app
 from ..models import RequestModel, ResponseModel
-
 
 @pytest.fixture
 def client():
     """Create test client."""
     return TestClient(app)
-
 
 @pytest.fixture
 def sample_request():
@@ -1218,7 +1159,6 @@ def sample_request():
         metadata={{"source": "test"}}
     )
 
-
 class TestHealthEndpoint:
     """Test health endpoint."""
 
@@ -1227,7 +1167,6 @@ class TestHealthEndpoint:
         response = client.get("/health")
         assert response.status_code == 200
         assert response.json()["status"] == "healthy"
-
 
 class TestRootEndpoint:
     """Test root endpoint."""
@@ -1239,7 +1178,6 @@ class TestRootEndpoint:
         data = response.json()
         assert data["service"] == "{name}"
         assert data["status"] == "running"
-
 
 class TestProcessEndpoint:
     """Test process endpoint."""
@@ -1272,7 +1210,6 @@ class TestProcessEndpoint:
         # Should still work with empty data dict
         assert response.status_code == 200
 
-
 class TestStatusEndpoint:
     """Test status endpoint."""
 
@@ -1283,7 +1220,6 @@ class TestStatusEndpoint:
         data = response.json()
         assert data["service"] == "{name}"
         assert data["status"] == "operational"
-
 
 class TestErrorHandling:
     """Test error handling."""
@@ -1310,14 +1246,9 @@ class TestErrorHandling:
 Tests for {recipe.name} agent.
 """
 
-import asyncio
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
-
 from ..agent import {name_class}Agent, AgentConfig
 from ..state import AgentState, StateManager
 from ..tools import ToolRegistry
-
 
 @pytest.fixture
 def agent_config():
@@ -1328,12 +1259,10 @@ def agent_config():
         timeout=60
     )
 
-
 @pytest.fixture
 def agent(agent_config):
     """Create test agent instance."""
     return {name_class}Agent(agent_config)
-
 
 @pytest.fixture
 def sample_task():
@@ -1342,7 +1271,6 @@ def sample_task():
         "type": "analyze",
         "data": {{"input": "test data"}}
     }}
-
 
 class TestAgentInitialization:
     """Test agent initialization."""
@@ -1357,7 +1285,6 @@ class TestAgentInitialization:
         """Test tools are registered."""
         assert agent.tool_registry is not None
         assert len(agent.tool_registry.list_tools()) > 0
-
 
 class TestAgentExecution:
     """Test agent execution."""
@@ -1389,7 +1316,6 @@ class TestAgentExecution:
 
         with pytest.raises(ValueError, match="Unknown task type"):
             await agent.execute(unknown_task)
-
 
 class TestTaskHandlers:
     """Test task handlers."""
@@ -1430,7 +1356,6 @@ class TestTaskHandlers:
         assert result["success"] is True
         assert result["result"]["validated"] is True
 
-
 class TestStateManagement:
     """Test state management."""
 
@@ -1450,7 +1375,6 @@ class TestStateManagement:
             await agent.execute({{}})
 
         assert agent.current_state == AgentState.ERROR
-
 
 class TestErrorHandling:
     """Test error handling."""
@@ -1474,18 +1398,13 @@ class TestErrorHandling:
 Tests for {recipe.name} library.
 """
 
-import pytest
-from unittest.mock import Mock, patch
-
 from ..core import {name_class}, create_instance
 from ..utils import generate_id, validate_structure
-
 
 @pytest.fixture
 def library_instance():
     """Create library instance."""
     return create_instance()
-
 
 @pytest.fixture
 def sample_data():
@@ -1495,7 +1414,6 @@ def sample_data():
         "value": "test data",
         "metadata": {{}}
     }}
-
 
 class TestLibraryInitialization:
     """Test library initialization."""
@@ -1518,7 +1436,6 @@ class TestLibraryInitialization:
         instance = create_instance(config)
         assert instance.config == config
 
-
 class TestProcessing:
     """Test processing functionality."""
 
@@ -1535,7 +1452,6 @@ class TestProcessing:
         with pytest.raises(RuntimeError, match="Library not initialized"):
             library_instance.process(sample_data)
 
-
 class TestValidation:
     """Test validation functionality."""
 
@@ -1547,7 +1463,6 @@ class TestValidation:
         """Test validating None."""
         assert library_instance.validate(None) is False
 
-
 class TestTransformation:
     """Test transformation functionality."""
 
@@ -1556,7 +1471,6 @@ class TestTransformation:
         result = library_instance.transform(sample_data, "json")
         assert isinstance(result, str)
 
-        import json
         parsed = json.loads(result)
         assert parsed == sample_data
 
@@ -1564,7 +1478,6 @@ class TestTransformation:
         """Test transforming string."""
         result = library_instance.transform("test", "json")
         assert result == "test"
-
 
 class TestCleanup:
     """Test cleanup functionality."""
@@ -1576,7 +1489,6 @@ class TestCleanup:
 
         library_instance.cleanup()
         assert library_instance._initialized is False
-
 
 class TestUtilities:
     """Test utility functions."""
@@ -1607,18 +1519,12 @@ class TestUtilities:
 Tests for {recipe.name} implementation.
 """
 
-import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
-
 from ..main import {name_class}, main
-
 
 @pytest.fixture
 def instance():
     """Create test instance."""
     return {name_class}()
-
 
 @pytest.fixture
 def config_file(tmp_path):
@@ -1626,7 +1532,6 @@ def config_file(tmp_path):
     config = tmp_path / "config.json"
     config.write_text('{{"test": "config"}}')
     return config
-
 
 class TestInitialization:
     """Test initialization."""
@@ -1647,7 +1552,6 @@ class TestInitialization:
         result = instance.initialize()
         assert result is True
         assert instance.initialized is True
-
 
 class TestExecution:
     """Test execution."""
@@ -1672,7 +1576,6 @@ class TestExecution:
         result = instance.run()
         assert result == 1
 
-
 class TestShutdown:
     """Test shutdown."""
 
@@ -1683,7 +1586,6 @@ class TestShutdown:
 
         instance.shutdown()
         assert instance.initialized is False
-
 
 class TestMain:
     """Test main entry point."""
@@ -1843,11 +1745,8 @@ CMD ["python", "-m", "main"]
         logger.info("Implementation validated successfully!")
         return True
 
-
 def main():
     """Main entry point for Recipe Executor."""
-
-    import argparse
 
     parser = argparse.ArgumentParser(description="Recipe Executor - Generate real implementations from recipes")
     parser.add_argument("recipe_path", type=Path, help="Path to recipe directory")
@@ -1887,7 +1786,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

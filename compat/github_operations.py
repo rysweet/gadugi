@@ -1,3 +1,9 @@
+from typing import Any, Any as _Any
+
+from ..shared.github_operations import GitHubOperations
+import importlib.util
+import sys
+
 """
 Compatibility shim for legacy `github_operations` imports.
 
@@ -11,8 +17,6 @@ changing the import paths, while maintaining a single source of truth.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -42,8 +46,6 @@ globals().update({k: v for k, v in _module.__dict__.items() if not k.startswith(
 __all__ = [name for name in globals() if not name.startswith("_")]
 
 # Fallback for static type checkers – dynamically expose missing attributes
-from typing import Any as _Any
-
 
 def __getattr__(name: str) -> _Any:  # type: ignore[misc]
     """Return attribute from underlying implementation or Any for unknown names."""

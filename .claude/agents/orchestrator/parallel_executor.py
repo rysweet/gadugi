@@ -1,4 +1,11 @@
-"""Parallel task executor with worktree isolation support."""
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
 
 import asyncio
 import json
@@ -6,14 +13,16 @@ import logging
 import os
 import subprocess
 import uuid
+                        import re
+
+"""Parallel task executor with worktree isolation support."""
+
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 logger = logging.getLogger(__name__)
-
 
 class ExecutionMode(Enum):
     """Execution mode for tasks."""
@@ -21,7 +30,6 @@ class ExecutionMode(Enum):
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
     DISTRIBUTED = "distributed"
-
 
 @dataclass
 class WorktreeInfo:
@@ -45,7 +53,6 @@ class WorktreeInfo:
                 logger.debug(f"Cleaned up worktree at {self.path}")
             except Exception as e:
                 logger.error(f"Failed to clean up worktree: {e}")
-
 
 class ParallelExecutor:
     """Executor for parallel task execution with isolation."""
@@ -179,7 +186,6 @@ class ParallelExecutor:
         Returns:
             Execution result
         """
-        from .orchestrator import ExecutionResult
 
         task_id = task.id if hasattr(task, "id") else str(uuid.uuid4())
         result = ExecutionResult(task_id=task_id)  # type: ignore
@@ -282,13 +288,11 @@ class ParallelExecutor:
                 for line in output.split("\n"):
                     if "PR #" in line or "Pull request #" in line:
                         # Extract PR number
-                        import re
                         match = re.search(r"#(\d+)", line)
                         if match:
                             pr_number = match.group(1)
                     elif "Issue #" in line:
                         # Extract issue number
-                        import re
                         match = re.search(r"#(\d+)", line)
                         if match:
                             issues_created.append(match.group(1))

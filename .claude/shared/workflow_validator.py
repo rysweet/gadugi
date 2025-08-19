@@ -1,3 +1,10 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import json
+import subprocess
+    import sys
+
 """
 Workflow Validation System for WorkflowManager
 
@@ -12,11 +19,7 @@ Key Features:
 - Performance and quality metrics
 """
 
-import os
-import json
-import subprocess
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -29,9 +32,7 @@ except ImportError:
         from workflow_engine import WorkflowPhase, WorkflowState
     except ImportError:
         # Minimal definitions if workflow_engine not available
-        from enum import Enum, auto
         from dataclasses import dataclass
-from typing import Dict, Any, Optional
 
         class WorkflowPhase(Enum):
             INIT = auto()
@@ -51,14 +52,12 @@ from typing import Dict, Any, Optional
                 if self.context is None:
                     self.context = {}
 
-
 class ValidationLevel(Enum):
     """Validation strictness levels"""
     MINIMAL = auto()
     STANDARD = auto()
     STRICT = auto()
     COMPREHENSIVE = auto()
-
 
 class ValidationCategory(Enum):
     """Categories of validation checks"""
@@ -68,7 +67,6 @@ class ValidationCategory(Enum):
     PHASE_COMPLETION = auto()
     WORKFLOW_INTEGRITY = auto()
     PERFORMANCE = auto()
-
 
 @dataclass
 class ValidationRule:
@@ -82,7 +80,6 @@ class ValidationRule:
     error_message: str = ""
     warning_message: str = ""
 
-
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
@@ -94,7 +91,6 @@ class ValidationResult:
     details: Dict[str, Any] = field(default_factory=dict)
     execution_time: float = 0.0
     suggestions: List[str] = field(default_factory=list)
-
 
 @dataclass
 class ValidationReport:
@@ -110,7 +106,6 @@ class ValidationReport:
     results: List[ValidationResult] = field(default_factory=list)
     metrics: Dict[str, Any] = field(default_factory=dict)
     recommendations: List[str] = field(default_factory=list)
-
 
 class WorkflowValidator:
     """
@@ -881,7 +876,6 @@ class WorkflowValidator:
 
         return filename
 
-
 # Convenience functions for standalone usage
 
 def validate_prompt(prompt_file: str, level: ValidationLevel = ValidationLevel.STANDARD) -> ValidationReport:
@@ -889,15 +883,12 @@ def validate_prompt(prompt_file: str, level: ValidationLevel = ValidationLevel.S
     validator = WorkflowValidator(level)
     return validator.validate_prompt_file(prompt_file)
 
-
 def validate_workflow(prompt_file: str, workflow_state, level: ValidationLevel = ValidationLevel.STANDARD) -> ValidationReport:
     """Convenience function to validate complete workflow"""
     validator = WorkflowValidator(level)
     return validator.validate_end_to_end(prompt_file, workflow_state)
 
-
 if __name__ == "__main__":
-    import sys
 
     if len(sys.argv) < 2:
         print("Usage: python workflow_validator.py <prompt_file> [validation_level]")

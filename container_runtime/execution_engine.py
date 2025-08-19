@@ -1,3 +1,11 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import logging
+import threading
+import sys
+import os
+
 """
 Container Execution Engine for Gadugi Multi-Agent System.
 
@@ -5,10 +13,6 @@ Main interface for secure containerized execution that integrates
 all container runtime components with enhanced separation architecture.
 """
 
-import json
-import logging
-import threading
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime
@@ -20,8 +24,6 @@ from .audit_logger import AuditLogger
 from .image_manager import ImageManager
 
 # Import Enhanced Separation shared modules
-import sys
-import os
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
@@ -29,7 +31,6 @@ sys.path.append(
 from error_handling import GadugiError
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ExecutionRequest:
@@ -45,7 +46,6 @@ class ExecutionRequest:
     user_id: Optional[str] = None
     working_directory: str = "/workspace"
 
-
 @dataclass
 class ExecutionResponse:
     """Container execution response."""
@@ -60,7 +60,6 @@ class ExecutionResponse:
     security_events: List[Dict[str, Any]]
     audit_events: List[str]
     error_message: Optional[str] = None
-
 
 class ContainerExecutionEngine:
     """
@@ -543,7 +542,6 @@ class ContainerExecutionEngine:
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
 
-
 # Convenience functions for direct usage
 def execute_python(
     code: str,
@@ -558,7 +556,6 @@ def execute_python(
     finally:
         engine.shutdown()
 
-
 def execute_shell(
     script: str, security_policy: str = "standard", timeout: int = 300
 ) -> ExecutionResponse:
@@ -568,7 +565,6 @@ def execute_shell(
         return engine.execute_shell_script(script, security_policy, timeout)
     finally:
         engine.shutdown()
-
 
 def execute_node(
     code: str,

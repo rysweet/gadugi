@@ -1,3 +1,8 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+import sys
+
 #!/usr/bin/env python3
 """
 Agent Integration Helpers for Simple Memory Manager
@@ -6,17 +11,13 @@ This module provides helper functions and patterns for integrating all agents
 with the GitHub Issues-only memory management system, replacing Memory.md operations.
 """
 
-import logging
-from typing import Any, Dict, List, Optional
 from pathlib import Path
-import sys
 
 # Add path for SimpleMemoryManager import
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
 from simple_memory_manager import SimpleMemoryManager
-
 
 class AgentMemoryIntegration:
     """
@@ -165,7 +166,6 @@ class AgentMemoryIntegration:
             "last_updated": status["memory_content"]["last_updated"],
         }
 
-
 class WorkflowManagerMemoryMixin:
     """
     Mixin class for WorkflowManager memory integration.
@@ -220,7 +220,6 @@ class WorkflowManagerMemoryMixin:
             insight="\n".join([f"- {insight}" for insight in insights]),
             category="workflow-execution",
         )
-
 
 class OrchestratorAgentMemoryMixin:
     """
@@ -279,7 +278,6 @@ class OrchestratorAgentMemoryMixin:
             insight=content, category="performance-optimization", priority="medium"
         )
 
-
 class CodeReviewerMemoryMixin:
     """
     Mixin class for Code-Reviewer memory integration.
@@ -321,7 +319,6 @@ class CodeReviewerMemoryMixin:
             insight=content, category="architectural-patterns", priority="medium"
         )
 
-
 def create_agent_memory_helper(
     agent_name: str, repo_path: Optional[str] = None
 ) -> AgentMemoryIntegration:
@@ -337,7 +334,6 @@ def create_agent_memory_helper(
     """
     return AgentMemoryIntegration(agent_name, repo_path)
 
-
 def migrate_memory_md_to_github(
     memory_md_path: str, agent_name: str = "MigrationTool"
 ) -> Dict[str, Any]:
@@ -352,7 +348,6 @@ def migrate_memory_md_to_github(
         Migration results
     """
     try:
-        from pathlib import Path
 
         memory_path = Path(memory_md_path)
         if not memory_path.exists():
@@ -452,14 +447,12 @@ def migrate_memory_md_to_github(
     except Exception as e:
         return {"success": False, "error": f"Migration failed: {str(e)}"}
 
-
 # Convenience functions for common memory operations
 def quick_update_goals(goals: List[str], agent_name: str = "QuickUpdate") -> bool:
     """Quickly update current goals"""
     memory = AgentMemoryIntegration(agent_name)
     result = memory.update_current_goals(goals)
     return result.get("success", False)
-
 
 def quick_add_accomplishment(
     task: str, agent_name: str = "QuickUpdate", pr_number: Optional[int] = None
@@ -470,7 +463,6 @@ def quick_add_accomplishment(
         task, related_prs=[pr_number] if pr_number else None
     )
     return result.get("success", False)
-
 
 def quick_search_memory(query: str) -> List[str]:
     """Quick memory search returning content strings"""

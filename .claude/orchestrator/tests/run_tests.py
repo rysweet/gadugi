@@ -1,3 +1,7 @@
+import sys
+import time
+import unittest
+
 #!/usr/bin/env python3
 """
 Test runner for OrchestratorAgent components
@@ -5,15 +9,11 @@ Test runner for OrchestratorAgent components
 Runs all test suites and generates a comprehensive test report.
 """
 
-import sys
-import time
-import unittest
 from io import StringIO
 from pathlib import Path
 
 # Add components to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "components"))
-
 
 def run_test_suite():
     """Run all OrchestratorAgent test suites"""
@@ -83,7 +83,6 @@ def run_test_suite():
 
     return result.wasSuccessful()
 
-
 def main():
     """Main entry point"""
     try:
@@ -92,7 +91,6 @@ def main():
     except Exception as e:
         print(f"❌ Test runner failed: {e}")
         return 1
-
 
 if __name__ == "__main__":
     exit(main())

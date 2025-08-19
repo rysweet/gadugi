@@ -1,3 +1,7 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+
 """
 PR Readiness Assessment module.
 
@@ -5,14 +9,11 @@ Provides specialized assessment capabilities for evaluating PR readiness
 across multiple dimensions including conflicts, CI status, reviews, and metadata.
 """
 
-import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
-
 
 class ConflictComplexity(Enum):
     """Merge conflict complexity levels."""
@@ -21,7 +22,6 @@ class ConflictComplexity(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-
 
 class CIFailureType(Enum):
     """Types of CI failures."""
@@ -32,7 +32,6 @@ class CIFailureType(Enum):
     LINT_FAILURE = "lint_failure"
     SECURITY_FAILURE = "security_failure"
     UNKNOWN = "unknown"
-
 
 @dataclass
 class ConflictAssessment:
@@ -52,7 +51,6 @@ class ConflictAssessment:
             ConflictComplexity.HIGH,
         ]
 
-
 @dataclass
 class CIAssessment:
     """Assessment of CI/CD status."""
@@ -67,7 +65,6 @@ class CIAssessment:
     def can_auto_retry(self) -> bool:
         """Check if failures can be automatically retried."""
         return bool(self.retriable_failures) and not self.blocking_failures
-
 
 @dataclass
 class ReviewAssessment:
@@ -89,7 +86,6 @@ class ReviewAssessment:
             and self.ai_review_complete
         )
 
-
 @dataclass
 class SyncAssessment:
     """Assessment of branch synchronization."""
@@ -110,7 +106,6 @@ class SyncAssessment:
         """Check if branch can be automatically updated."""
         return self.commits_behind <= 10 and self.sync_complexity == "simple"
 
-
 @dataclass
 class MetadataAssessment:
     """Assessment of PR metadata completeness."""
@@ -129,7 +124,6 @@ class MetadataAssessment:
             and self.has_description
             and self.has_appropriate_labels
         )
-
 
 class ReadinessAssessor:
     """

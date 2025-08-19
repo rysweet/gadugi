@@ -1,3 +1,8 @@
+from typing import Any, Dict, List, Optional
+
+import os
+import yaml
+
 #!/usr/bin/env python3
 """
 Memory-GitHub Integration Configuration Management
@@ -6,14 +11,10 @@ This module handles configuration for the Memory.md to GitHub Issues integration
 including sync policies, pruning rules, and operational parameters.
 """
 
-import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-import yaml
 from sync_engine import ConflictResolution, SyncDirection
-from typing import Any, Dict, List, Optional
-
 
 @dataclass
 class CompactionConfig:
@@ -43,7 +44,6 @@ class CompactionConfig:
         }
     )
 
-
 @dataclass
 class PruningConfig:
     """Configuration for Memory.md content pruning (legacy - use CompactionConfig)"""
@@ -68,7 +68,6 @@ class PruningConfig:
         }
     )
 
-
 @dataclass
 class SyncConfig:
     """Configuration for Memory.md-GitHub synchronization"""
@@ -92,7 +91,6 @@ class SyncConfig:
     exclude_sections: List[str] = field(
         default_factory=lambda: ["Reflections", "Important Context"]
     )
-
 
 @dataclass
 class IssueCreationConfig:
@@ -119,7 +117,6 @@ class IssueCreationConfig:
             "low": "priority:low",
         }
     )
-
 
 @dataclass
 class ContentRules:
@@ -157,7 +154,6 @@ class ContentRules:
     preserve_context_links: bool = True
     normalize_task_format: bool = True
 
-
 @dataclass
 class MonitoringConfig:
     """Configuration for monitoring and logging"""
@@ -175,7 +171,6 @@ class MonitoringConfig:
     alert_on_conflicts: bool = True
     alert_on_failures: bool = True
     alert_email: Optional[str] = None
-
 
 @dataclass
 class MemoryManagerConfig:
@@ -270,7 +265,6 @@ class MemoryManagerConfig:
                 setattr(config, field_name, data[field_name])
 
         return config
-
 
 class ConfigManager:
     """Manages Memory Manager configuration"""
@@ -378,7 +372,6 @@ class ConfigManager:
 
         return effective
 
-
 def create_default_config() -> MemoryManagerConfig:
     """Create default configuration with sensible defaults"""
     return MemoryManagerConfig(
@@ -402,7 +395,6 @@ def create_default_config() -> MemoryManagerConfig:
         ),
         monitoring=MonitoringConfig(enable_logging=True, track_sync_performance=True),
     )
-
 
 def main():
     """Example usage of configuration system"""
@@ -434,7 +426,6 @@ def main():
 
     except Exception as e:
         print(f"Error: {e}")
-
 
 if __name__ == "__main__":
     main()

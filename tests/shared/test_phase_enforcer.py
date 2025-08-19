@@ -1,3 +1,9 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+import os
+import json
+import time
+
 """
 Unit tests for PhaseEnforcer
 
@@ -5,10 +11,7 @@ Tests the phase enforcement system that guarantees Phase 9 and 10
 execution without manual intervention.
 """
 
-import pytest
-import os
-import json
-import time
+from unittest.mock import Mock, patch
 
 # Import the module under test
 
@@ -24,7 +27,6 @@ from claude.shared.phase_enforcer import (
 
 # Import workflow engine for WorkflowPhase and WorkflowState
 from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
-
 
 class TestPhaseEnforcer:
     """Test suite for PhaseEnforcer class"""
@@ -669,7 +671,6 @@ class TestPhaseEnforcer:
         # Cleanup
         os.remove(filename)
 
-
 class TestConvenienceFunctions:
     """Test suite for convenience functions"""
 
@@ -724,7 +725,6 @@ class TestConvenienceFunctions:
         result = enforce_phase_10(123)
 
         assert result is False
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

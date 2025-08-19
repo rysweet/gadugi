@@ -1,13 +1,15 @@
-"""Base Agent class for the Gadugi agent framework."""
+from typing import Any, Dict, List, Optional
 
 import asyncio
 import logging
 import uuid
+
+"""Base Agent class for the Gadugi agent framework."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set  # type: ignore
 
 from .frontmatter_parser import parse_agent_definition
 from .tool_registry import ToolRegistry
@@ -43,9 +45,7 @@ except ImportError:
     class MemoryType:
         CONTEXT = "context"
 
-
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class AgentMetadata:
@@ -70,7 +70,6 @@ class AgentMetadata:
             settings=data.get("settings", {}),
         )
 
-
 @dataclass
 class AgentResponse:
     """Response from agent processing."""
@@ -88,7 +87,6 @@ class AgentResponse:
             "error": self.error,
             "metadata": self.metadata,
         }
-
 
 class BaseAgent(ABC):
     """Base class for all agents in the Gadugi platform."""

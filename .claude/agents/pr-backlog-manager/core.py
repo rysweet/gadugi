@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+import os
+import sys
+import logging
+
 """
 Core PR Backlog Manager implementation.
 
@@ -5,11 +14,7 @@ Provides the main orchestration logic for automated PR backlog management
 including readiness assessment, issue delegation, and labeling coordination.
 """
 
-import os
-import sys
-import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -80,9 +85,7 @@ except ImportError as e:
 
     OperationResult = Dict[str, Any]
 
-
 logger = logging.getLogger(__name__)
-
 
 class PRStatus(Enum):
     """PR processing status."""
@@ -93,7 +96,6 @@ class PRStatus(Enum):
     BLOCKED = "blocked"
     FAILED = "failed"
 
-
 class ReadinessCriteria(Enum):
     """PR readiness criteria."""
 
@@ -103,7 +105,6 @@ class ReadinessCriteria(Enum):
     HUMAN_REVIEW_COMPLETE = "human_review_complete"
     AI_REVIEW_COMPLETE = "ai_review_complete"
     METADATA_COMPLETE = "metadata_complete"
-
 
 @dataclass
 class PRAssessment:
@@ -129,7 +130,6 @@ class PRAssessment:
             return 0.0
         return sum(self.criteria_met.values()) / len(self.criteria_met) * 100
 
-
 @dataclass
 class BacklogMetrics:
     """Backlog processing metrics."""
@@ -141,7 +141,6 @@ class BacklogMetrics:
     automation_rate: float
     success_rate: float
     timestamp: datetime
-
 
 class PRBacklogManager:
     """
@@ -800,7 +799,6 @@ class PRBacklogManager:
         except Exception as e:
             logger.warning(f"Failed to generate backlog report: {e}")
 
-
 def main():
     """Main entry point for PR Backlog Manager."""
     # Configure logging
@@ -832,7 +830,6 @@ def main():
             f"Backlog processing complete: {metrics.ready_prs}/{metrics.total_prs} PRs ready "
             f"(Automation rate: {metrics.automation_rate:.1f}%)"
         )
-
 
 if __name__ == "__main__":
     main()

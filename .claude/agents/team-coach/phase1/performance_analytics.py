@@ -1,3 +1,12 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+from ..shared.error_handling import ErrorHandler
+from ..shared.state_management import StateManager
+import logging
+import statistics
+import sys
+import os
+
 """
 TeamCoach Phase 1: Agent Performance Analytics
 
@@ -14,16 +23,11 @@ Key Features:
 - Performance report generation
 """
 
-import logging
-import statistics
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules with absolute path resolution
-import sys
-import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
@@ -41,7 +45,6 @@ except ImportError:
         def __init__(self, *args, **kwargs):
             pass
 
-
 # Define TeamCoach-specific data classes
 @dataclass
 class AgentMetrics:
@@ -55,7 +58,6 @@ class AgentMetrics:
     completed_tasks: int = 0
     error_rate: float = 0.0
 
-
 @dataclass
 class PerformanceMetrics:
     """Performance metrics container"""
@@ -63,10 +65,8 @@ class PerformanceMetrics:
     timestamp: datetime = field(default_factory=datetime.now)
     metrics: Dict[str, Any] = field(default_factory=dict)
 
-
 # Use OperationResult as TaskResult
 TaskResult = OperationResult
-
 
 class PerformanceCategory(Enum):
     """Categories for performance analysis"""
@@ -76,7 +76,6 @@ class PerformanceCategory(Enum):
     EFFICIENCY = "efficiency"
     RELIABILITY = "reliability"
     COLLABORATION = "collaboration"
-
 
 @dataclass
 class AgentPerformanceData:
@@ -118,7 +117,6 @@ class AgentPerformanceData:
     recent_improvements: List[str] = field(default_factory=list)
     areas_for_improvement: List[str] = field(default_factory=list)
 
-
 @dataclass
 class TeamPerformanceData:
     """Data structure for team-wide performance metrics"""
@@ -138,7 +136,6 @@ class TeamPerformanceData:
     # Team trends
     performance_trajectory: List[float] = field(default_factory=list)
     optimization_opportunities: List[str] = field(default_factory=list)
-
 
 class AgentPerformanceAnalyzer:
     """
@@ -716,12 +713,10 @@ class AgentPerformanceAnalyzer:
 
         return min(100.0, score * 100.0)
 
-
 class AnalysisError(Exception):
     """Exception raised when performance analysis fails."""
 
     pass
-
 
 class ReportGenerationError(Exception):
     """Exception raised when report generation fails."""

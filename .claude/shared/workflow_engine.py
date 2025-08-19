@@ -1,3 +1,16 @@
+from typing import Any, Dict, List, Optional, Tuple
+
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
+import os
+import subprocess
+import json
+import time
+            import re
+    import sys
+
 """
 Deterministic Workflow Engine for WorkflowManager
 
@@ -13,13 +26,8 @@ Key Features:
 - Integration with existing shared modules
 """
 
-import os
-import subprocess
-import json
-import time
 from datetime import datetime
 from pathlib import   # type: ignore
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum, auto
 
@@ -58,7 +66,6 @@ except ImportError:
     class ErrorSeverity:
         HIGH = "high"
 
-
 class WorkflowPhase(Enum):
     """Enumeration of all workflow phases that must be executed"""
     INIT = auto()
@@ -74,7 +81,6 @@ class WorkflowPhase(Enum):
     CODE_REVIEW = auto()
     REVIEW_RESPONSE = auto()
     FINALIZATION = auto()
-
 
 @dataclass
 class WorkflowState:
@@ -97,7 +103,6 @@ class WorkflowState:
         if self.start_time is None:
             self.start_time = datetime.now()
 
-
 @dataclass
 class PhaseResult:
     """Result of executing a workflow phase"""
@@ -111,7 +116,6 @@ class PhaseResult:
     def __post_init__(self):
         if self.data is None:
             self.data = {}
-
 
 class WorkflowEngine:
     """
@@ -294,7 +298,7 @@ class WorkflowEngine:
 
             return True, "Workflow initialization successful", {
                 "task_id": self.workflow_state.task_id,  # type: ignore
-                "prompt_file": self.workflow_state.prompt_file  # type: ignore
+                "prompt_file": self.workflow_state.prompt_file if workflow_state is not None else None
             }
 
         except Exception as e:
@@ -328,7 +332,6 @@ class WorkflowEngine:
             prompt_filename = os.path.basename(self.workflow_state.prompt_file)  # type: ignore
 
             # Try to extract issue number from filename
-            import re
             issue_match = re.search(r'issue-(\d+)', prompt_filename)
             if issue_match:
                 issue_number = issue_match.group(1)
@@ -466,7 +469,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     def _phase_push_remote(self) -> Tuple[bool, str, Dict[str, Any]]:
         """Push changes to remote repository"""
         try:
-            branch_name = self.workflow_state.branch_name  # type: ignore
+            branch_name = self.workflow_state.branch_name if workflow_state is not None else None
             if not branch_name:
                 return False, "No branch name available for push", {}
 
@@ -658,7 +661,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Create minimal error handler if not provided"""
         return ErrorHandler()
 
-
 # Convenience function for standalone usage
 def execute_workflow(prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -674,9 +676,7 @@ def execute_workflow(prompt_file: str, task_id: Optional[str] = None) -> Dict[st
     engine = WorkflowEngine()
     return engine.execute_workflow(prompt_file, task_id)
 
-
 if __name__ == "__main__":
-    import sys
 
     if len(sys.argv) < 2:
         print("Usage: python workflow_engine.py <prompt_file> [task_id]")

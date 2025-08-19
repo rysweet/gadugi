@@ -1,11 +1,11 @@
+from typing import Any, Dict, List, Optional
+
 """
 Data models for event-router.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field, validator
-
 
 class RequestModel(BaseModel):
     """Request model for incoming data."""
@@ -22,7 +22,6 @@ class RequestModel(BaseModel):
             raise ValueError("Data cannot be empty")
         return v
 
-
 class ResponseModel(BaseModel):
     """Response model for outgoing data."""
     
@@ -32,14 +31,12 @@ class ResponseModel(BaseModel):
     errors: List[str] = Field(default_factory=list)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
-
 class ValidationResult(BaseModel):
     """Validation result model."""
     
     is_valid: bool = Field(..., description="Validation status")
     error: Optional[str] = Field(None, description="Validation error message")
     warnings: List[str] = Field(default_factory=list)
-
 
 class StateModel(BaseModel):
     """State model for tracking."""

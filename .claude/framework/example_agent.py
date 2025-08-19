@@ -1,13 +1,14 @@
-"""Example agent implementation using the BaseAgent framework."""
+from typing import Any, Dict
 
 import logging
+
+"""Example agent implementation using the BaseAgent framework."""
+
 from pathlib import   # type: ignore
-from typing import Any, Dict
 
 from .base_agent import AgentResponse, BaseAgent
 
 logger = logging.getLogger(__name__)
-
 
 class ExampleAgent(BaseAgent):
     """Example agent that demonstrates the agent framework capabilities."""

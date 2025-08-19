@@ -1,14 +1,15 @@
-#!/usr/bin/env python3
-"""
-Test the checksum verification functionality for downloaded scripts.
-"""
-
 import shutil
 import subprocess
 import tempfile
 import unittest
-from pathlib import Path
 
+#!/usr/bin/env python3
+
+"""
+Test the checksum verification functionality for downloaded scripts.
+"""
+
+from pathlib import Path
 
 class TestChecksumVerification(unittest.TestCase):
     """Test checksum verification for script downloads."""
@@ -131,7 +132,6 @@ verify_script_integrity "$1" "$2"
 
         self.assertNotEqual(result.returncode, 0, "Verification should have failed")
         self.assertIn("Integrity check failed", result.stdout)
-
 
 if __name__ == "__main__":
     unittest.main()

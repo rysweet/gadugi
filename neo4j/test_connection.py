@@ -1,15 +1,16 @@
+from typing import Any, Dict, List, Optional
+
+import sys
+
 #!/usr/bin/env python3
 """
 Test Neo4j connection and initialization for Gadugi.
 """
 
-import sys
 from datetime import datetime
 
 from neo4j import GraphDatabase, basic_auth
 from neo4j.exceptions import ServiceUnavailable, AuthError
-from typing import List
-
 
 class Neo4jConnection:
     """Manages Neo4j database connection."""
@@ -246,7 +247,6 @@ class Neo4jConnection:
             except:
                 return {}
 
-
 def main():
     """Main test function."""
     print("🚀 Testing Neo4j Connection for Gadugi\n")
@@ -283,7 +283,6 @@ def main():
 
     print("\n✅ Neo4j connection test completed!")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

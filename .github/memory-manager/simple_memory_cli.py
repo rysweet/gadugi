@@ -1,3 +1,9 @@
+import argparse
+import json
+import sys
+import logging
+            import traceback
+
 #!/usr/bin/env python3
 """
 Simple Memory CLI - Command-line interface for GitHub Issues-only memory management
@@ -6,13 +12,7 @@ This provides a streamlined CLI for the SimpleMemoryManager, replacing the compl
 configuration and sync operations with straightforward GitHub Issues operations.
 """
 
-import argparse
-import json
-import sys
-import logging
-
 from simple_memory_manager import SimpleMemoryManager
-
 
 def setup_logging(verbose: bool = False):
     """Setup logging configuration"""
@@ -20,7 +20,6 @@ def setup_logging(verbose: bool = False):
     logging.basicConfig(
         level=level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
-
 
 def handle_status(manager: SimpleMemoryManager, args) -> int:
     """Handle status command"""
@@ -54,7 +53,6 @@ def handle_status(manager: SimpleMemoryManager, args) -> int:
             return 1
 
     return 0
-
 
 def handle_read(manager: SimpleMemoryManager, args) -> int:
     """Handle read command"""
@@ -98,7 +96,6 @@ def handle_read(manager: SimpleMemoryManager, args) -> int:
                 print()
 
     return 0
-
 
 def handle_update(manager: SimpleMemoryManager, args) -> int:
     """Handle update command"""
@@ -156,7 +153,6 @@ def handle_update(manager: SimpleMemoryManager, args) -> int:
 
     return 0
 
-
 def handle_search(manager: SimpleMemoryManager, args) -> int:
     """Handle search command"""
     results = manager.search_memory(args.query, section=args.section)
@@ -192,7 +188,6 @@ def handle_search(manager: SimpleMemoryManager, args) -> int:
 
     return 0
 
-
 def handle_cleanup(manager: SimpleMemoryManager, args) -> int:
     """Handle cleanup command"""
     result = manager.cleanup_old_memory(days_old=args.days, dry_run=args.dry_run)
@@ -213,7 +208,6 @@ def handle_cleanup(manager: SimpleMemoryManager, args) -> int:
             return 1
 
     return 0
-
 
 def handle_lock_status(manager: SimpleMemoryManager, args) -> int:
     """Handle lock status command"""
@@ -243,7 +237,6 @@ def handle_lock_status(manager: SimpleMemoryManager, args) -> int:
 
     return 0
 
-
 def handle_unlock(manager: SimpleMemoryManager, args) -> int:
     """Handle unlock command"""
     if not args.confirm:
@@ -267,7 +260,6 @@ def handle_unlock(manager: SimpleMemoryManager, args) -> int:
             return 1
 
     return 0
-
 
 def main():
     """Main CLI interface"""
@@ -416,13 +408,11 @@ Examples:
 
     except Exception as e:
         if args.verbose:
-            import traceback
 
             traceback.print_exc()
         else:
             print(f"Error: {e}")
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

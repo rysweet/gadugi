@@ -1,20 +1,24 @@
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from ..shared.github_operations import GitHubOperations
+from unittest.mock import Mock, patch, MagicMock
+import json
+import os
+import subprocess
+import sys
+import pytest
+    import time
+
 """
 Comprehensive tests for github_operations.py module.
 Tests the Enhanced Separation architecture implementation.
 """
 
-import json
-import os
-import subprocess
+from unittest.mock import Mock, patch
 
 # Import the module we're testing (will be implemented after tests)
-import sys
-from typing import Any, Dict, List, Optional
-
-import pytest
 
 # For type checking only
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_operations import GitHubError, GitHubOperations, RateLimitError
@@ -24,11 +28,8 @@ sys.path.insert(
 )
 
 try:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
-    import subprocess
-    import time
 
     class GitHubError(Exception):
         """Base exception for GitHub operations."""
@@ -374,7 +375,6 @@ except ImportError:
             """Context manager exit."""
             # Clean up any resources if needed
             return False
-
 
 class TestGitHubOperations:
     """Test suite for GitHubOperations class."""
@@ -840,7 +840,6 @@ class TestGitHubOperations:
                 result = gh.create_issue("Test", "Body")
                 assert result["success"] is True
 
-
 class TestGitHubError:
     """Test suite for GitHubError exception class."""
 
@@ -861,7 +860,6 @@ class TestGitHubError:
         )
         assert error.details["status_code"] == 404
 
-
 class TestRateLimitError:
     """Test suite for RateLimitError exception class."""
 
@@ -873,7 +871,6 @@ class TestRateLimitError:
 
     def test_rate_limit_error_wait_time(self):
         """Test rate limit wait time calculation."""
-        import time
 
         current_time = int(time.time())
         future_time = current_time + 3600  # 1 hour from now
@@ -883,7 +880,6 @@ class TestRateLimitError:
 
         # Should be close to 3600 seconds (within 5 seconds for test execution time)
         assert 3595 <= wait_time <= 3605
-
 
 # Integration tests
 class TestGitHubOperationsIntegration:

@@ -1,12 +1,13 @@
+import subprocess
+import json
+import os
+import sys
+    import tempfile
+
 #!/usr/bin/env python3
 """
 Direct test of TeamCoach hook script execution
 """
-
-import subprocess
-import json
-import os
-
 
 def test_hook_direct_execution():
     """Test that the hook scripts can be executed directly."""
@@ -98,7 +99,6 @@ def test_hook_direct_execution():
     except Exception as e:
         print(f"   ❌ Error: {e}")
 
-
 def test_claude_in_path():
     """Test if claude command is available in PATH."""
 
@@ -124,7 +124,6 @@ def test_claude_in_path():
     except Exception as e:
         print(f"❌ Error checking claude command: {e}")
 
-
 def test_hook_with_mock_claude():
     """Test hook with a mock claude command to see if it would invoke TeamCoach."""
 
@@ -133,14 +132,11 @@ def test_hook_with_mock_claude():
 
     # Create a mock claude script
     mock_claude = """#!/usr/bin/env python3
-import sys
 print(f"MOCK CLAUDE CALLED WITH: {sys.argv}")
 if '/agent:teamcoach' in sys.argv:
     print("✅ TeamCoach agent would be invoked!")
 sys.exit(0)
 """
-
-    import tempfile
 
     with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(mock_claude)
@@ -192,7 +188,6 @@ sys.exit(0)
         # Clean up
         os.unlink(claude_link)
         os.unlink(mock_path)
-
 
 if __name__ == "__main__":
     test_hook_direct_execution()

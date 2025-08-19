@@ -1,3 +1,8 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.error_handling import ErrorHandler
+import logging
+
 """
 TeamCoach Phase 2: Recommendation Engine
 
@@ -5,16 +10,13 @@ This module provides intelligent recommendations with detailed explanations
 for task assignments, team formations, and optimization strategies.
 """
 
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
 from ...shared.utils.error_handling import ErrorHandler
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
-
 
 class RecommendationType(Enum):
     """Types of recommendations"""
@@ -23,7 +25,6 @@ class RecommendationType(Enum):
     TEAM_FORMATION = "team_formation"
     PERFORMANCE_IMPROVEMENT = "performance_improvement"
     WORKFLOW_OPTIMIZATION = "workflow_optimization"
-
 
 @dataclass
 class Recommendation:
@@ -52,7 +53,6 @@ class Recommendation:
     generated_at: datetime = field(default_factory=datetime.now)
     applicable_until: Optional[datetime] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
-
 
 class RecommendationEngine:
     """
@@ -177,7 +177,6 @@ class RecommendationEngine:
         except Exception as e:
             self.logger.error(f"Failed to generate team formation recommendation: {e}")
             raise
-
 
 class RecommendationError(Exception):
     """Exception raised when recommendation generation fails."""

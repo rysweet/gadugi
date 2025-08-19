@@ -1,14 +1,24 @@
-#!/usr/bin/env python3
-"""
-Final comprehensive script to fix ALL pyright errors and achieve 0 errors.
-"""
+from typing import ", " appearing in wrong places, " in line, " in line):, " in line:, " in next_line, " not in lines[i]:, " that's indented or after an opening parenthesis, '.join(sorted(all_imports))}", '.join(sorted(imports_needed))}", (, (.+)", ([\w, (\1)", .+)$", ]+), content, lines[typing_line_idx]), r"from typing import \1", {'
+
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple
+)
 
 import re
 import subprocess
 import sys
-from pathlib import Path
-from typing import List, Set, Dict, Tuple
 
+#!/usr/bin/env python3
+
+"""
+Final comprehensive script to fix ALL pyright errors and achieve 0 errors.
+"""
+
+from pathlib import Path
 
 def fix_broken_imports(file_path: Path) -> bool:
     """Fix imports that were broken by previous automated fixes."""
@@ -26,12 +36,10 @@ def fix_broken_imports(file_path: Path) -> bool:
             # Check for broken import pattern (typing import in middle of another import)
             if i + 1 < len(lines):
                 next_line = lines[i + 1]
-                # Pattern: import statement followed by "from typing import"
-                if (
+                # Pattern: import statement followed by "                if (
                     "from .." in line
                     and line.strip().endswith("(")
-                    and "from typing import" in next_line
-                ):
+                    and "                ):
                     # This is a broken multi-line import
                     # Move the typing import before this import
                     new_lines.append(next_line)  # Add typing import first
@@ -41,8 +49,7 @@ def fix_broken_imports(file_path: Path) -> bool:
                     i += 2
                     while i < len(lines) and not lines[i].strip().endswith(")"):
                         # Skip any other misplaced imports
-                        if "from typing import" not in lines[i]:
-                            new_lines.append(lines[i])
+                        if "                            new_lines.append(lines[i])
                         i += 1
                     if i < len(lines):
                         new_lines.append(lines[i])  # Add the closing parenthesis
@@ -63,26 +70,21 @@ def fix_broken_imports(file_path: Path) -> bool:
 
     return False
 
-
 def fix_syntax_errors(file_path: Path) -> bool:
     """Fix common syntax errors."""
     try:
         content = file_path.read_text()
         original = content
 
-        # Fix "from typing import" appearing in wrong places
-        # Pattern: Line starting with "from typing import" that's indented or after an opening parenthesis
-        content = re.sub(
-            r"^(\s+)(from typing import .+)$",
-            r"# Fixed misplaced import: \2",
+        # Fix "        # Pattern: Line starting with "        content = re.sub(
+            r"^(\s+)(            r"# Fixed misplaced import: \2",
             content,
             flags=re.MULTILINE,
         )
 
         # Fix duplicate type imports on same line
         content = re.sub(
-            r"from typing import ([\w, ]+), (\1)", r"from typing import \1", content
-        )
+            r"        )
 
         # Fix "Path" import issues - ensure it's imported from pathlib
         lines = content.splitlines()
@@ -111,7 +113,6 @@ def fix_syntax_errors(file_path: Path) -> bool:
 
     return False
 
-
 def add_missing_imports(file_path: Path) -> bool:
     """Add commonly missing imports."""
     try:
@@ -125,53 +126,44 @@ def add_missing_imports(file_path: Path) -> bool:
         # Common missing imports based on usage
         if "Dict[" in content or "Dict " in content:
             if not any(
-                "Dict" in line for line in lines if "from typing import" in line
-            ):
+                "Dict" in line for line in lines if "            ):
                 imports_needed.add("Dict")
 
         if "List[" in content or "List " in content:
             if not any(
-                "List" in line for line in lines if "from typing import" in line
-            ):
+                "List" in line for line in lines if "            ):
                 imports_needed.add("List")
 
         if "Optional[" in content:
             if not any(
-                "Optional" in line for line in lines if "from typing import" in line
-            ):
+                "Optional" in line for line in lines if "            ):
                 imports_needed.add("Optional")
 
         if "Tuple[" in content or "Tuple " in content:
             if not any(
-                "Tuple" in line for line in lines if "from typing import" in line
-            ):
+                "Tuple" in line for line in lines if "            ):
                 imports_needed.add("Tuple")
 
         if "Set[" in content or "Set " in content:
-            if not any("Set" in line for line in lines if "from typing import" in line):
-                imports_needed.add("Set")
+            if not any("Set" in line for line in lines if "                imports_needed.add("Set")
 
         if "Any " in content or "Any[" in content or "Any]" in content:
-            if not any("Any" in line for line in lines if "from typing import" in line):
-                imports_needed.add("Any")
+            if not any("Any" in line for line in lines if "                imports_needed.add("Any")
 
         if imports_needed:
             # Find or create typing import line
             typing_line_idx = -1
             for i, line in enumerate(lines):
-                if "from typing import" in line:
-                    typing_line_idx = i
+                if "                    typing_line_idx = i
                     break
 
             if typing_line_idx >= 0:
                 # Update existing typing import
-                match = re.search(r"from typing import (.+)", lines[typing_line_idx])
-                if match:
+                match = re.search(r"                if match:
                     existing = set(t.strip() for t in match.group(1).split(","))
                     all_imports = existing | imports_needed
                     lines[typing_line_idx] = (
-                        f"from typing import {', '.join(sorted(all_imports))}"
-                    )
+                        f"                    )
             else:
                 # Add new typing import after other imports
                 import_idx = 0
@@ -180,8 +172,7 @@ def add_missing_imports(file_path: Path) -> bool:
                         import_idx = i + 1
                 lines.insert(
                     import_idx,
-                    f"from typing import {', '.join(sorted(imports_needed))}",
-                )
+                    f"                )
 
             file_path.write_text("\n".join(lines) + "\n")
             print(f"Added missing imports to {file_path}: {imports_needed}")
@@ -191,7 +182,6 @@ def add_missing_imports(file_path: Path) -> bool:
         print(f"Error adding imports to {file_path}: {e}")
 
     return False
-
 
 def fix_teamcoach_files():
     """Fix all TeamCoach test files with syntax errors."""
@@ -212,7 +202,6 @@ def fix_teamcoach_files():
 
     print(f"Fixed {files_fixed} TeamCoach test files")
     return files_fixed
-
 
 def main():
     """Main function to achieve 0 pyright errors."""
@@ -264,7 +253,6 @@ def main():
                     print(f"  {line.strip()}")
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -1,3 +1,7 @@
+import pytest
+import tempfile
+import os
+
 """
 Test suite for ADR Generator
 
@@ -5,9 +9,6 @@ Tests Architecture Decision Record generation, templates,
 and file management functionality.
 """
 
-import pytest
-import tempfile
-import os
 from pathlib import Path
 from datetime import datetime
 from agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
@@ -18,7 +19,6 @@ from agents.system_design_reviewer.ast_parser import (
     ChangeType,
     ImpactLevel,
 )
-
 
 @pytest.fixture
 def sample_changes_requiring_adr():
@@ -51,7 +51,6 @@ def sample_changes_requiring_adr():
         ),
     ]
 
-
 @pytest.fixture
 def sample_pr_info():
     """Sample PR information for ADR generation"""
@@ -61,7 +60,6 @@ def sample_pr_info():
         "body": "This PR implements a new centralized security architecture\n\nCloses #789",
         "author": {"login": "security-engineer"},
     }
-
 
 class TestADRGenerator:
     """Test the ADR Generator class"""
@@ -455,7 +453,6 @@ class TestADRGenerator:
                     or "security" in content.lower()
                 )
 
-
 class TestADRData:
     """Test the ADRData data structure"""
 
@@ -483,7 +480,6 @@ class TestADRData:
         assert len(adr_data.consequences) == 2
         assert len(adr_data.alternatives) == 2
         assert len(adr_data.related_changes) == 1
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

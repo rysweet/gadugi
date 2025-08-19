@@ -14,11 +14,9 @@ __license__ = "MIT"
 # Core version info
 VERSION_INFO = {"major": 0, "minor": 1, "patch": 0, "release": "stable"}
 
-
 def get_version():
     """Get the current version string."""
     return __version__
-
 
 def get_version_info():
     """Get detailed version information."""

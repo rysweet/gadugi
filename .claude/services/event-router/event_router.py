@@ -1,3 +1,21 @@
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Tuple  # type: ignore
+)
+
+import asyncio
+import json
+import os
+import subprocess  # type: ignore
+import sys  # type: ignore
+import psutil  # type: ignore
+import structlog
+
 #!/usr/bin/env python3
 """
 Event Router - Central message broker for agent communication.
@@ -6,20 +24,12 @@ This is the REAL implementation that actually works, not a stub.
 Handles protobuf events, spawns agent processes, and manages routing.
 """
 
-import asyncio
-import json
-import os
-import subprocess  # type: ignore
-import sys  # type: ignore
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
-import psutil  # type: ignore
-import structlog
 from pydantic import BaseModel, Field  # type: ignore
 
 try:
@@ -48,14 +58,12 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
-
 class EventPriority(Enum):
     """Event priority levels."""
     CRITICAL = 0
     HIGH = 1
     NORMAL = 2
     LOW = 3
-
 
 class EventType(Enum):
     """Standard event types."""
@@ -68,7 +76,6 @@ class EventType(Enum):
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
     CUSTOM = "custom"
-
 
 @dataclass
 class Event:
@@ -116,7 +123,6 @@ class Event:
             retry_count=data.get("retry_count", 0)
         )
 
-
 @dataclass
 class Subscription:
     """Topic subscription."""
@@ -149,7 +155,6 @@ class Subscription:
 
         return True
 
-
 @dataclass
 class AgentProcess:
     """Represents a running agent process."""
@@ -172,7 +177,6 @@ class AgentProcess:
         """Check if agent is healthy based on heartbeat."""
         heartbeat_timeout = timedelta(seconds=30)
         return (datetime.utcnow() - self.last_heartbeat) < heartbeat_timeout
-
 
 class ProcessManager:
     """Manages agent subprocess lifecycle."""
@@ -432,7 +436,6 @@ class ProcessManager:
         """List all running agents."""
         return list(self.processes.keys())
 
-
 class DeadLetterQueue:
     """Persistent storage for failed events."""
 
@@ -496,7 +499,6 @@ class DeadLetterQueue:
             file_path.unlink()
 
         self.failed_events.clear()
-
 
 class EventRouter:
     """Main event routing engine."""
@@ -712,7 +714,6 @@ class EventRouter:
 
             await self.publish(approval_event)
 
-
 async def main():
     """Main entry point with authentication examples."""
 
@@ -765,7 +766,6 @@ async def main():
             await asyncio.sleep(1)
     except KeyboardInterrupt:
         await router.stop()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

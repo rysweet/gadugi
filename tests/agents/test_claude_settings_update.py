@@ -1,15 +1,22 @@
-#!/usr/bin/env python3
-"""
-Test suite for claude-settings-update agent functionality.
-Tests JSON merging, sorting, change detection, and PR creation logic.
-"""
+from typing import Any, Dict, List, Optional
 
 import json
 import os
 import tempfile
 import unittest
-from typing import Set
+        import shutil
+        import subprocess
+        import datetime
 
+#!/usr/bin/env python3
+from unittest.mock import Mock, patch, MagicMock
+
+"""
+Test suite for claude-settings-update agent functionality.
+Tests JSON merging, sorting, change detection, and PR creation logic.
+"""
+
+from unittest.mock import Mock, patch
 
 class TestClaudeSettingsUpdate(unittest.TestCase):
     """Test cases for claude-settings-update agent functionality."""
@@ -56,7 +63,6 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
 
     def tearDown(self):
         """Clean up test fixtures."""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -156,7 +162,6 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
 
     def test_duplicate_removal(self):
         """Test duplicate removal in allow-list."""
-        from collections import OrderedDict
 
         allow_with_dupes = [
             "Bash(git add:*)",
@@ -269,7 +274,6 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
 
         def deep_merge(global_dict, local_dict):
             """Deep merge with local taking precedence."""
-            from collections import OrderedDict
 
             result = global_dict.copy()
 
@@ -308,7 +312,6 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         mock_run.return_value = Mock(returncode=0, stdout="success")
 
         # These would be the git commands executed by the agent
-        import subprocess
 
         # Test branch creation
         result = subprocess.run(
@@ -327,8 +330,6 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         """Test git operation failures."""
         mock_run.return_value = Mock(returncode=1, stderr="error")
 
-        import subprocess
-
         result = subprocess.run(
             ["git", "checkout", "-b", "test-branch"], capture_output=True, text=True
         )
@@ -336,10 +337,9 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
 
     def test_branch_name_generation(self):
         """Test branch name generation with timestamp."""
-        import datetime
 
         # Test timestamp format
-        now = datetime.datetime.now()
+        now = datetime.now()
         timestamp = now.strftime("%Y%m%d-%H%M%S")
         branch_name = f"chore/update-claude-settings-{timestamp}"
 
@@ -437,7 +437,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 error_handled = True  # Would be actual error handling logic
                 self.assertTrue(error_handled, f"Failed to handle {scenario}")
 
-
 class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
     """Integration tests for claude-settings-update agent."""
 
@@ -466,7 +465,6 @@ class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
         # Settings update should be optional
         workflow_continues_on_failure = True
         self.assertTrue(workflow_continues_on_failure)
-
 
 if __name__ == "__main__":
     # Run all tests

@@ -1,3 +1,15 @@
+from typing import Any, Dict, List, Optional
+
+import logging
+import hashlib
+import subprocess
+import json
+import tempfile
+    import docker
+    import docker  # type: ignore[import-untyped]
+import sys
+import os
+
 """
 Container Image Manager for secure image building and management.
 
@@ -5,32 +17,22 @@ Manages container images with security scanning, hardening,
 and efficient caching for the Gadugi execution environment.
 """
 
-import logging
-import hashlib
-import subprocess
-from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
 from dataclasses import dataclass
 from pathlib import Path
 from datetime import datetime, timedelta
-import json
-import tempfile
 
 if TYPE_CHECKING:
-    import docker
 else:
     docker = None
 
 # Runtime import attempt
 try:
-    import docker  # type: ignore[import-untyped]
 
     docker_available = True
 except ImportError:
     docker_available = False
 
 # Import Enhanced Separation shared modules
-import sys
-import os
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
@@ -38,7 +40,6 @@ sys.path.append(
 from error_handling import GadugiError
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class ImageInfo:
@@ -54,7 +55,6 @@ class ImageInfo:
     vulnerability_count: Optional[int] = None
     security_score: Optional[float] = None
 
-
 @dataclass
 class BuildContext:
     """Container image build context."""
@@ -66,7 +66,6 @@ class BuildContext:
     minimal_install: bool = True
     user_id: int = 1000
     group_id: int = 1000
-
 
 class ImageManager:
     """

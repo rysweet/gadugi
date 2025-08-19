@@ -1,10 +1,11 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+
 """
 Tests for Security Policy Engine.
 """
 
-import pytest
 from pathlib import Path
-from unittest.mock import patch, mock_open
 
 from container_runtime.security_policy import (
     SecurityPolicyEngine,
@@ -15,12 +16,10 @@ from container_runtime.security_policy import (
     SecurityConstraints,
 )
 
-
 @pytest.fixture
 def policy_engine():
     """Security policy engine fixture."""
     return SecurityPolicyEngine()
-
 
 @pytest.fixture
 def sample_policy_yaml():
@@ -53,7 +52,6 @@ policies:
     audit_required: true
 """
 
-
 def test_policy_engine_initialization():
     """Test policy engine initialization."""
     engine = SecurityPolicyEngine()
@@ -65,7 +63,6 @@ def test_policy_engine_initialization():
     assert "hardened" in engine.policies
     assert "paranoid" in engine.policies
     assert engine.default_policy_name == "standard"
-
 
 def test_policy_engine_with_custom_file(sample_policy_yaml):
     """Test policy engine with custom policy file."""
@@ -80,7 +77,6 @@ def test_policy_engine_with_custom_file(sample_policy_yaml):
     assert policy.security_level == SecurityLevel.HARDENED
     assert policy.network_policy == NetworkPolicy.NONE
     assert policy.resource_limits.memory == "128m"
-
 
 def test_builtin_policies(policy_engine):
     """Test built-in security policies."""
@@ -109,18 +105,15 @@ def test_builtin_policies(policy_engine):
     assert paranoid.resource_limits.memory == "128m"
     assert len(paranoid.allowed_images) == 2  # scratch and distroless/static
 
-
 def test_get_policy_default(policy_engine):
     """Test getting default policy."""
     policy = policy_engine.get_policy()
     assert policy.name == "standard"
 
-
 def test_get_policy_not_found(policy_engine):
     """Test getting non-existent policy."""
     with pytest.raises(Exception, match="Security policy 'nonexistent' not found"):
         policy_engine.get_policy("nonexistent")
-
 
 def test_validate_execution_request_allowed(policy_engine):
     """Test validation of allowed execution request."""
@@ -132,7 +125,6 @@ def test_validate_execution_request_allowed(policy_engine):
     )
     assert result is True
 
-
 def test_validate_execution_request_blocked_image(policy_engine):
     """Test validation with blocked image."""
     with pytest.raises(Exception, match="Image .* not allowed by policy"):
@@ -142,7 +134,6 @@ def test_validate_execution_request_blocked_image(policy_engine):
             policy_name="hardened",
         )
 
-
 def test_validate_execution_request_blocked_command(policy_engine):
     """Test validation with blocked command."""
     with pytest.raises(Exception, match="Command contains blocked element"):
@@ -151,7 +142,6 @@ def test_validate_execution_request_blocked_command(policy_engine):
             command=["sudo", "rm", "-rf", "/"],
             policy_name="standard",
         )
-
 
 def test_apply_policy_to_container_config(policy_engine):
     """Test applying policy to container configuration."""
@@ -170,7 +160,6 @@ def test_apply_policy_to_container_config(policy_engine):
     assert config["user"] == "1000:1000"
     assert "no-new-privileges:true" in config["security_opt"]
     assert config["cap_drop"] == ["ALL"]
-
 
 def test_apply_hardened_policy_to_container_config(policy_engine):
     """Test applying hardened policy to container configuration."""
@@ -197,7 +186,6 @@ def test_apply_hardened_policy_to_container_config(policy_engine):
     assert "/tmp" in config["tmpfs"]
     assert "noexec" in config["tmpfs"]["/tmp"]
 
-
 def test_list_policies(policy_engine):
     """Test listing available policies."""
     policies = policy_engine.list_policies()
@@ -208,7 +196,6 @@ def test_list_policies(policy_engine):
     assert "standard" in policies
     assert "hardened" in policies
     assert "paranoid" in policies
-
 
 def test_get_policy_summary(policy_engine):
     """Test getting policy summary."""
@@ -224,7 +211,6 @@ def test_get_policy_summary(policy_engine):
     assert isinstance(summary["allowed_images"], int)
     assert isinstance(summary["blocked_commands"], int)
     assert isinstance(summary["audit_required"], bool)
-
 
 def test_export_policy(policy_engine):
     """Test exporting policy configuration."""
@@ -245,7 +231,6 @@ def test_export_policy(policy_engine):
     assert exported["security"]["read_only_root"] is True
     assert exported["security"]["user_id"] == 1000
 
-
 def test_parse_policy_config_invalid():
     """Test parsing invalid policy configuration."""
     engine = SecurityPolicyEngine()
@@ -256,7 +241,6 @@ def test_parse_policy_config_invalid():
 
     with pytest.raises(Exception):
         engine._parse_policy_config("invalid", invalid_config)
-
 
 def test_resource_limits_dataclass():
     """Test ResourceLimits dataclass."""
@@ -273,7 +257,6 @@ def test_resource_limits_dataclass():
     assert limits.cpu == "2.0"
     assert limits.execution_time == 3600
 
-
 def test_security_constraints_dataclass():
     """Test SecurityConstraints dataclass."""
     constraints = SecurityConstraints(
@@ -289,7 +272,6 @@ def test_security_constraints_dataclass():
     assert constraints.drop_capabilities == ["NET_RAW"]
     assert constraints.add_capabilities == ["SYS_TIME"]
     assert constraints.user_id == 500
-
 
 def test_execution_policy_dataclass():
     """Test ExecutionPolicy dataclass."""
@@ -309,14 +291,12 @@ def test_execution_policy_dataclass():
     assert "python:3.11" in policy.allowed_images
     assert "rm" in policy.blocked_commands
 
-
 def test_network_policy_enum():
     """Test NetworkPolicy enum values."""
     assert NetworkPolicy.NONE.value == "none"
     assert NetworkPolicy.INTERNAL.value == "internal"
     assert NetworkPolicy.LIMITED.value == "limited"
     assert NetworkPolicy.FULL.value == "full"
-
 
 def test_security_level_enum():
     """Test SecurityLevel enum values."""
@@ -325,14 +305,12 @@ def test_security_level_enum():
     assert SecurityLevel.HARDENED.value == "hardened"
     assert SecurityLevel.PARANOID.value == "paranoid"
 
-
 def test_load_policies_from_invalid_file():
     """Test loading policies from invalid file."""
     with patch("builtins.open", mock_open(read_data="invalid: yaml: content:")):
         with patch("pathlib.Path.exists", return_value=True):
             with pytest.raises(Exception, match="Failed to load policies"):
                 SecurityPolicyEngine(policy_file=Path("invalid.yaml"))
-
 
 def test_policy_engine_file_not_exists():
     """Test policy engine with non-existent file."""

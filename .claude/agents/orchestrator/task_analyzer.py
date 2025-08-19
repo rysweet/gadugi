@@ -1,14 +1,23 @@
-"""Task analyzer for dependency detection and optimization."""
+from typing import (
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Tuple  # type: ignore
+)
 
 import ast
 import logging
 import re
+
+"""Task analyzer for dependency detection and optimization."""
+
 from dataclasses import dataclass
 from pathlib import   # type: ignore
-from typing import Any, Dict, List, Optional, Set, Tuple  # type: ignore
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class TaskDependency:
@@ -19,7 +28,6 @@ class TaskDependency:
     dependency_type: str  # "file", "import", "explicit", "resource"
     confidence: float = 1.0  # 0.0 to 1.0
     reason: str = ""
-
 
 class TaskAnalyzer:
     """Analyzer for task dependencies and optimization opportunities."""

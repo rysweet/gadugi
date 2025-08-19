@@ -1,4 +1,10 @@
+import json
+import sys
+import subprocess
+import os
+
 #!/usr/bin/env python3
+
 """
 TeamCoach Stop Hook - Automated Team Performance Analysis
 
@@ -9,12 +15,7 @@ Hook Type: Stop
 Purpose: Analyze session performance and provide team coaching insights
 """
 
-import json
-import sys
-import subprocess
-import os
 from datetime import datetime
-
 
 def invoke_teamcoach():
     """Invoke TeamCoach agent for session analysis."""
@@ -82,7 +83,6 @@ Mode: Post-session analysis with focus on continuous improvement
         print(f"⚠️ Error invoking TeamCoach: {e}")
         return False
 
-
 def main():
     """Main hook handler."""
     try:
@@ -115,7 +115,6 @@ def main():
         }
         print(json.dumps(error_result))
         sys.exit(0)
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,13 @@
+from typing import Dict, List, Optional, Tuple, Tuple  # type: ignore
+
+import json
+import os
+import shutil
+import subprocess
+    import argparse
+
 #!/usr/bin/env python3
+
 """
 WorktreeManager Component for OrchestratorAgent
 
@@ -6,14 +15,8 @@ Manages git worktrees for isolated parallel execution environments,
 including creation, synchronization, and cleanup operations.
 """
 
-import json
-import os
-import shutil
-import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Tuple  # type: ignore
-
 
 @dataclass
 class WorktreeInfo:
@@ -25,7 +28,6 @@ class WorktreeInfo:
     status: str  # 'active', 'completed', 'failed', 'cleaning'
     created_at: str
     pid: Optional[int] = None  # Process ID if task is running
-
 
 class WorktreeManager:
     """Manages git worktrees for parallel task execution"""
@@ -455,10 +457,8 @@ class WorktreeManager:
 
         return summary
 
-
 def main():
     """CLI entry point for WorktreeManager"""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Manage git worktrees for parallel execution")
     parser.add_argument("command", choices=["list", "create", "cleanup", "validate", "status"])
@@ -514,7 +514,6 @@ def main():
         return 1
 
     return 0
-
 
 if __name__ == "__main__":
     exit(main())

@@ -1,10 +1,12 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Tests for TeamCoach Phase 3: Strategic Planner
 """
 
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import Mock
+
 from ..phase3.strategic_planner import (
     StrategicPlanner,
     TeamEvolutionPlan,
@@ -17,7 +19,6 @@ from ..phase3.strategic_planner import (
     StrategyPriority,
 )
 from ..phase1.performance_analytics import PerformanceMetrics
-
 
 class TestStrategicPlanner(unittest.TestCase):
     """Test cases for the StrategicPlanner."""
@@ -442,7 +443,6 @@ class TestStrategicPlanner(unittest.TestCase):
 
         # External training cost should be based on calendar
         self.assertEqual(investment["external_training"], len(training_calendar) * 2000)
-
 
 if __name__ == "__main__":
     unittest.main()

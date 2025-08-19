@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch, MagicMock
+
 """
 Test suite for System Design Reviewer Core functionality
 
@@ -10,8 +12,8 @@ import tempfile
 import json
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import Mock, patch
 from agents.system_design_reviewer.core import (
-from typing import Set
     SystemDesignReviewer,
     ReviewResult,
     ReviewStatus,
@@ -24,7 +26,6 @@ from agents.system_design_reviewer.ast_parser import (
     ChangeType,
     ImpactLevel,
 )
-
 
 @pytest.fixture
 def mock_pr_info():
@@ -42,7 +43,6 @@ def mock_pr_info():
             "tests/test_new_service.py",
         ],
     }
-
 
 @pytest.fixture
 def sample_architectural_changes():
@@ -73,7 +73,6 @@ def sample_architectural_changes():
             design_implications=["Service initialization order changed"],
         ),
     ]
-
 
 class TestSystemDesignReviewer:
     """Test the main System Design Reviewer class"""
@@ -372,7 +371,6 @@ class TestSystemDesignReviewer:
 
         assert content is None
 
-
 class TestSystemDesignStateManager:
     """Test the state manager for system design reviewer"""
 
@@ -482,7 +480,6 @@ class TestSystemDesignStateManager:
             assert len(state["completed_reviews"]) == 100
             assert state["completed_reviews"][-1]["pr_number"] == "new"
 
-
 class TestReviewResult:
     """Test the ReviewResult data structure"""
 
@@ -548,7 +545,6 @@ class TestReviewResult:
         assert change_dict["impact_level"] == "medium"
         assert change_dict["element"]["element_type"] == "class"
         assert change_dict["element"]["name"] == "TestClass"
-
 
 if __name__ == "__main__":
     pytest.main([__file__])

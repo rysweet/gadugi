@@ -1,4 +1,19 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import logging
+import secrets
+import time
+import sys
+import os
+import subprocess
+    import argparse
+
 #!/usr/bin/env python3
+from ..shared.github_operations import GitHubOperations
+from ..shared.task_tracking import TaskTracker
+from ..shared.state_management import StateManager
+from ..shared.error_handling import ErrorHandler
 """
 Enhanced WorkflowMaster Implementation
 
@@ -14,18 +29,12 @@ Key improvements:
 - Comprehensive monitoring
 """
 
-import json
-import logging
-import secrets
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
 # Enhanced Separation Architecture imports
-import sys
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
@@ -50,7 +59,6 @@ from test_writer_agent import TestWriterAgent
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class WorkflowDecision(Enum):
     """Autonomous workflow decisions."""
 
@@ -59,7 +67,6 @@ class WorkflowDecision(Enum):
     SKIP = "skip"
     ABORT = "abort"
     ESCALATE = "escalate"
-
 
 @dataclass
 class TaskInfo:
@@ -87,7 +94,6 @@ class TaskInfo:
             self.dependencies = []
         if self.created_at is None:
             self.created_at = datetime.now()
-
 
 @dataclass
 class WorkflowState:
@@ -124,7 +130,6 @@ class WorkflowState:
             self.autonomous_decisions = []
         if self.performance_metrics is None:
             self.performance_metrics = {}
-
 
 class EnhancedWorkflowMaster:
     """
@@ -463,9 +468,6 @@ class EnhancedWorkflowMaster:
 
             # Initialize workspace
             workspace_code = f"""
-import os
-import json
-from pathlib import Path
 
 # Create workspace structure
 workspace_dir = Path('/workspace/{workflow.task_id}')
@@ -966,10 +968,6 @@ echo "Branch {branch_name} created and pushed successfully"
         try:
             # Analyze existing codebase for patterns and dependencies
             analysis_code = """
-import os
-import json
-from pathlib import Path
-import subprocess
 
 # Codebase analysis
 analysis_results = {
@@ -1040,9 +1038,6 @@ print(json.dumps(analysis_results, indent=2))
         try:
             # Implementation placeholder - would be specific to the feature being implemented
             implementation_code = f"""
-import os
-import json
-from pathlib import Path
 
 # This would contain the actual implementation logic
 # For this example, we'll create a comprehensive enhancement
@@ -1173,7 +1168,6 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
         try:
             # Documentation generation
             documentation_code = f"""
-from pathlib import Path
 from datetime import datetime
 
 # Generate comprehensive documentation
@@ -1240,7 +1234,6 @@ with open(docs_dir / 'enhanced_workflowmaster.md', 'w') as f:
     f.write(doc_content)
 
 with open(docs_dir / 'metadata.json', 'w') as f:
-    import json
     json.dump(docs, f, indent=2)
 
 print(f"Documentation generated successfully in {{docs_dir}}")
@@ -1362,8 +1355,6 @@ Co-Authored-By: Claude <noreply@anthropic.com>
         try:
             # Check if review already exists
             review_check_code = f"""
-import subprocess
-import json
 
 # Check for existing reviews
 result = subprocess.run([
@@ -1608,7 +1599,6 @@ print(f"Review status saved: {{review_status}}")
     def write_test_suite(self, test_file_path: str, test_writer_result) -> bool:
         """Write generated test suite to file."""
         try:
-            from pathlib import Path
 
             # Create directory if it doesn't exist
             test_file = Path(test_file_path)
@@ -1642,7 +1632,7 @@ print(f"Review status saved: {{review_status}}")
         # Add imports
         content_parts.append("import pytest")
         content_parts.append("import unittest")
-        content_parts.append("from unittest.mock import Mock, patch")
+
         content_parts.append("")
 
         # Add fixtures
@@ -1748,10 +1738,8 @@ print(f"Review status saved: {{review_status}}")
         workflow.execution_log.append(step)
         logger.info(f"[{workflow.task_id}] {message}")
 
-
 def main():
     """Main entry point for enhanced workflow master."""
-    import argparse
 
     parser = argparse.ArgumentParser(description="Enhanced WorkflowMaster")
     parser.add_argument("--prompt", help="Prompt file to execute")
@@ -1802,7 +1790,6 @@ def main():
         return 1
     finally:
         wm.shutdown()
-
 
 if __name__ == "__main__":
     exit(main())

@@ -1,16 +1,17 @@
-#!/usr/bin/env python3
-"""
-Tests for TeamCoach hooks functionality.
-"""
-
 import unittest
 import json
 import subprocess
 import os
-from unittest.mock import patch, MagicMock
 import sys
 import shutil
-from typing import Set
+
+#!/usr/bin/env python3
+
+"""
+Tests for TeamCoach hooks functionality.
+"""
+
+from unittest.mock import Mock, patch, MagicMock
 
 # Add the project root to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,7 +21,6 @@ CLAUDE_CLI_AVAILABLE = shutil.which("claude") is not None
 skip_if_no_claude = unittest.skipUnless(
     CLAUDE_CLI_AVAILABLE, "Claude CLI not available"
 )
-
 
 class TestTeamCoachStopHook(unittest.TestCase):
     """Test TeamCoach stop hook functionality."""
@@ -106,7 +106,6 @@ class TestTeamCoachStopHook(unittest.TestCase):
         )  # Updated to match actual content
         self.assertIn("coaching recommendations", content)
 
-
 class TestTeamCoachSubagentStopHook(unittest.TestCase):
     """Test TeamCoach subagent stop hook functionality."""
 
@@ -170,7 +169,6 @@ class TestTeamCoachSubagentStopHook(unittest.TestCase):
 
         # Should have 3-minute timeout (shorter than main hook)
         self.assertIn("timeout=180", content)
-
 
 class TestTeamCoachHookConfiguration(unittest.TestCase):
     """Test TeamCoach hook configuration in settings.json."""
@@ -299,7 +297,6 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                                     "No TeamCoach hooks allowed",
                                 )
 
-
 class TestTeamCoachHookIntegration(unittest.TestCase):
     """Test TeamCoach hook integration with the overall system."""
 
@@ -352,7 +349,6 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
 
                 # Should return 'continue' action
                 self.assertIn('"action": "continue"', content)
-
 
 if __name__ == "__main__":
     unittest.main()

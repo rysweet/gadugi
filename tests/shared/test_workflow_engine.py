@@ -1,3 +1,11 @@
+from unittest.mock import Mock, patch, MagicMock
+import pytest
+import tempfile
+import os
+import json
+import sys
+        import shutil
+
 """
 Unit tests for WorkflowEngine
 
@@ -5,13 +13,9 @@ Tests the deterministic workflow execution engine to ensure
 consistent and reliable workflow phase execution.
 """
 
-import pytest
-import tempfile
-import os
-import json
+from unittest.mock import Mock, patch
 
 # Import the module under test
-import sys
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -24,7 +28,6 @@ from workflow_engine import (
     PhaseResult,
     execute_workflow,
 )
-
 
 class TestWorkflowEngine:
     """Test suite for WorkflowEngine class"""
@@ -63,7 +66,6 @@ Test the deterministic execution of workflow phases.
 
     def teardown_method(self):
         """Cleanup after each test"""
-        import shutil
 
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
@@ -578,7 +580,6 @@ Test the deterministic execution of workflow phases.
             mock_execute.assert_called_once_with(self.prompt_file, "test-convenience")
             assert result["success"] is True
 
-
 class TestWorkflowPhases:
     """Test suite for WorkflowPhase enum"""
 
@@ -610,7 +611,6 @@ class TestWorkflowPhases:
         assert WorkflowPhase.INIT.name == "INIT"
         assert WorkflowPhase.CODE_REVIEW.name == "CODE_REVIEW"
         assert WorkflowPhase.FINALIZATION.name == "FINALIZATION"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -1,14 +1,15 @@
+from typing import Any, Dict, List, Optional
+
+import re
+import logging
+
 """
 Event handler and filtering system for Gadugi Event Service
 
 Provides event filtering logic and handler execution coordination.
 """
 
-import re
-import logging
-
 from .config import (
-from typing import Any, Dict, List, Optional
     EventHandlerConfig,
     EventFilter as EventFilterConfig,
     GitHubFilter as GitHubFilterConfig,
@@ -16,7 +17,6 @@ from typing import Any, Dict, List, Optional
 )
 
 logger = logging.getLogger(__name__)
-
 
 class GitHubFilter:
     """GitHub-specific event filtering."""
@@ -103,7 +103,6 @@ class GitHubFilter:
             milestones=config.get("milestones", []),
         )
 
-
 class EventFilter:
     """General event filtering logic."""
 
@@ -169,7 +168,6 @@ class EventFilter:
             github_filter=github_filter,
         )
 
-
 @dataclass
 class EventHandler:
     """Event handler configuration and execution."""
@@ -204,7 +202,6 @@ class EventHandler:
             timeout_seconds=config.timeout_seconds,
             async_execution=config.async_execution,
         )
-
 
 class EventMatcher:
     """Utility class for event matching and routing."""
@@ -266,7 +263,6 @@ class EventMatcher:
             handler.enabled = False
             return True
         return False
-
 
 # Predefined common filters
 class CommonFilters:

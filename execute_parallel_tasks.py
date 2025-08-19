@@ -1,3 +1,11 @@
+from typing import Any, Dict
+
+import asyncio
+import json
+import logging
+import subprocess
+import sys
+
 #!/usr/bin/env python3
 """Execute the three specified tasks in parallel using the Orchestrator.
 
@@ -8,14 +16,8 @@ This script:
 4. Monitors until 100% complete
 """
 
-import asyncio
-import json
-import logging
-import subprocess
-import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -25,7 +27,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
 
 class TaskOrchestrator:
     """Simplified orchestrator for executing the three parallel tasks."""
@@ -291,7 +292,6 @@ Execute complete workflow for {task_id} using prompt file {prompt_file}
 
         return self.results
 
-
 async def main():
     """Main entry point."""
     orchestrator = TaskOrchestrator()
@@ -316,7 +316,6 @@ async def main():
     except Exception as e:
         logger.error(f"\n❌ Fatal error: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,15 +1,16 @@
+from typing import Any, Dict, List, Optional
+
+import json
+import time
+
 """
 Event data models for Gadugi Event Service
 
 Defines the core event structures used throughout the system.
 """
 
-import json
-import time
 from dataclasses import dataclass, field, asdict
 from uuid import uuid4
-from typing import Any, Dict, List, Optional
-
 
 @dataclass
 class GitHubEvent:
@@ -28,7 +29,6 @@ class GitHubEvent:
     milestone: str = ""
     assignees: List[str] = field(default_factory=list)
 
-
 @dataclass
 class LocalEvent:
     """Local system event data."""
@@ -37,7 +37,6 @@ class LocalEvent:
     working_directory: str = ""
     environment: Dict[str, str] = field(default_factory=dict)
     files_changed: List[str] = field(default_factory=list)
-
 
 @dataclass
 class AgentEvent:
@@ -49,7 +48,6 @@ class AgentEvent:
     status: str = ""
     message: str = ""
     context: Dict[str, str] = field(default_factory=dict)
-
 
 @dataclass
 class Event:
@@ -135,7 +133,6 @@ class Event:
         """Check if this is an agent event."""
         return "agent_event" in self.payload
 
-
 def create_github_event(
     event_type: str,
     repository: str,
@@ -168,7 +165,6 @@ def create_github_event(
         payload={"github_event": github_event},
     )
 
-
 def create_local_event(
     event_name: str,
     working_directory: str = "",
@@ -190,7 +186,6 @@ def create_local_event(
         metadata=kwargs,
         payload={"local_event": local_event},
     )
-
 
 def create_agent_event(
     agent_name: str,

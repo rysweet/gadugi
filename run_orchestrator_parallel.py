@@ -1,3 +1,8 @@
+import json
+import logging
+import sys
+        import traceback
+
 #!/usr/bin/env python3
 """
 Execute the orchestrator agent to run three tasks in parallel.
@@ -8,9 +13,6 @@ This script invokes the orchestrator to handle:
 3. Clean up all worktrees
 """
 
-import json
-import logging
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -19,7 +21,6 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
 
 def main():
     """Main execution function."""
@@ -164,7 +165,6 @@ Configuration:
 
     except Exception as e:
         logger.error(f"Orchestrator execution failed: {e}")
-        import traceback
 
         traceback.print_exc()
         return 1
@@ -174,7 +174,6 @@ Configuration:
         if config_file.exists():
             config_file.unlink()
             logger.info("Cleaned up configuration file")
-
 
 if __name__ == "__main__":
     sys.exit(main())

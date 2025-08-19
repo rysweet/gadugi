@@ -1,14 +1,19 @@
+from typing import Any, Dict, List, Optional
+
+from ..shared.error_handling import ErrorHandler
+import pytest
+from unittest.mock import Mock, patch, MagicMock
+import os
+import sys
+import ast
+import logging
+
 """
 Test Writer Agent Implementation
 Authors comprehensive tests for new functionality with TDD alignment.
 """
 
-import os
-import sys
-import ast
-import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -19,7 +24,6 @@ try:
     from utils.error_handling import CircuitBreaker
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass
 
     @dataclass
     class OperationResult:
@@ -39,10 +43,8 @@ except ImportError:
         def __call__(self, func):
             return func
 
-
 # Import shared test instructions
 from shared_test_instructions import SharedTestInstructions
-
 
 class TestType(Enum):
     """Types of tests to create."""
@@ -52,7 +54,6 @@ class TestType(Enum):
     PERFORMANCE = "performance"
     SECURITY = "security"
     ERROR_HANDLING = "error_handling"
-
 
 @dataclass
 class CodeAnalysis:
@@ -66,7 +67,6 @@ class CodeAnalysis:
     complexity_score: int
     test_requirements: List[str]
 
-
 @dataclass
 class TestPlan:
     """Plan for creating tests."""
@@ -78,7 +78,6 @@ class TestPlan:
     cleanup_requirements: List[str]
     coverage_targets: Dict[str, float]
 
-
 @dataclass
 class FixtureSpec:
     """Specification for a test fixture."""
@@ -89,7 +88,6 @@ class FixtureSpec:
     setup_code: str
     cleanup_code: str
     dependencies: List[str]
-
 
 @dataclass
 class TestSpec:
@@ -106,7 +104,6 @@ class TestSpec:
     cleanup_code: str
     documentation: str
 
-
 @dataclass
 class TestWriterResult:
     """Result of test writing operation."""
@@ -118,7 +115,6 @@ class TestWriterResult:
     tdd_alignment: Dict[str, bool]
     quality_metrics: Dict[str, bool]
     validation_results: List[str]
-
 
 class TestWriterAgent:
     """
@@ -1115,7 +1111,6 @@ Validation Strategy:
         if "External dependencies should be mocked" in issues:
             # Add mock imports and setup
             if "import" not in test_code:
-                test_code = "from unittest.mock import Mock, patch\n" + test_code
 
         return test_code
 

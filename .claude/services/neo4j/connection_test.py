@@ -1,13 +1,15 @@
+from typing import Optional
+
+import sys
+import datetime
+
 #!/usr/bin/env python3
 """
 Neo4j Connection Test for Gadugi
 Tests the connection to Neo4j and verifies schema initialization
 """
 
-import sys
 from neo4j import GraphDatabase
-from typing import Optional
-
 
 class Neo4jConnectionTest:
     def __init__(self, uri: str, user: str, password: str):
@@ -120,7 +122,6 @@ class Neo4jConnectionTest:
             self.driver.close()
             print("✅ Connection closed")
 
-
 def main():
     """Run connection test"""
     print("\n🧪 Testing Neo4j Connection for Gadugi\n")
@@ -153,7 +154,6 @@ def main():
     print(f"🔌 Bolt URL: {uri}")
     print(f"👤 Username: {user}")
     print(f"🔑 Password: {password}\n")
-
 
 if __name__ == "__main__":
     main()
