@@ -9,7 +9,7 @@ import os
 from enum import Enum
 from datetime import datetime, timedelta
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 
 # Pytest stubs
