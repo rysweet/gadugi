@@ -80,7 +80,7 @@ class ADRGenerator:
             if not change.requires_adr:
                 continue
 
-            _element = change._element
+            _element = change.element
             decision_type = self._classify_decision_type(change)
 
             if decision_type in groups:

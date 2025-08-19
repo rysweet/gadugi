@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
+from typing import Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 
 @dataclass

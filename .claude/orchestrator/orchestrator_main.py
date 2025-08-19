@@ -21,7 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
+from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 # Import existing orchestrator components
 try:

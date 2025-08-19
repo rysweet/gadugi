@@ -17,7 +17,6 @@ sys.path.insert(0, str(orchestrator_dir))
 # Import test modules
 from tests.test_orchestrator_integration import TestOrchestratorIntegration, TestOrchestratorPerformance
 from tests.test_process_registry import TestProcessRegistry, TestProcessInfo
-from typing import Set
 
 
 def run_all_tests():

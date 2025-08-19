@@ -1,3 +1,4 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 #!/usr/bin/env python3
 """
 Integration tests for the Orchestrator implementation
@@ -13,7 +14,6 @@ from pathlib import Path
 
 # Add orchestrator components to path
 import sys
-from typing import Set
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from orchestrator_cli import OrchestrationCLI

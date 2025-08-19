@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Set  # type: ignore
+from typing import Any, Dict, List, Optional, Set  # type: ignore
 
 from .frontmatter_parser import parse_agent_definition
 from .tool_registry import ToolRegistry

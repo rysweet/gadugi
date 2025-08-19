@@ -2,7 +2,7 @@
 Shared interfaces, protocols, and contracts for Gadugi Enhanced Separation architecture.
 Provides type-safe contracts for inter-component communication and dependency injection.
 """
-from typing import Any, Dict, Generic, List, Optional, Protocol, Set, TypeVar
+from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime

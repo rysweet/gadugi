@@ -6,8 +6,8 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
-from pathlib import   # type: ignore
-from typing import Any, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
+from pathlib import Path  # type: ignore
+from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 from ...framework import BaseAgent, AgentMetadata, AgentResponse
 from ...services.event_router import EventRouter, Event, EventType, EventPriority  # type: ignore

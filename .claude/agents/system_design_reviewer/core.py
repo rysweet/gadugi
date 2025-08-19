@@ -10,7 +10,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
+from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -28,8 +28,7 @@ try:
     from shared.error_handling import (
         ErrorHandler,
         ErrorCategory,
-        ErrorSeverity,
-    )
+        ErrorSeverity)
     from shared.task_tracking import TaskTracker
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
@@ -39,8 +38,7 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
         from ..shared.error_handling import (
             ErrorHandler,
             ErrorCategory,
-            ErrorSeverity,
-        )
+            ErrorSeverity)
         from ..shared.task_tracking import TaskTracker
     except ImportError:
         # 3) Final fallback – use lightweight stub implementations
@@ -54,12 +52,10 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
             ErrorHandler,
             ErrorCategory,
             ErrorSeverity,
-            TaskTracker,
-        )
+            TaskTracker)
 
 from .ast_parser import (
-    ASTParserFactory, ArchitecturalElement, ArchitecturalChange,
-    ChangeType, ImpactLevel, ElementType
+    ASTParserFactory, ArchitecturalChange, ImpactLevel
 )
 from .documentation_manager import DocumentationManager
 from .adr_generator import ADRGenerator

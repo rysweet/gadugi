@@ -6,6 +6,19 @@ Contains common patterns, utilities, and validation logic.
 import os
 import sys
 import logging
+from typing import Any, Optional
+from dataclasses import dataclass
+
+@dataclass
+class AgentConfig:
+    name: str
+    version: str
+    capabilities: list
+
+class ErrorHandler:
+    def __init__(self):
+        pass
+
 from typing import Any, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
@@ -25,13 +38,7 @@ except ImportError:
         data: Any = None
         error: str = ""
 
-    @dataclass
-    class AgentConfig:
-        agent_id: str
-        name: str
-
-
-class TestStatus(Enum):
+    class TestStatus(Enum):
     """Test execution status."""
 
     PASS = "pass"
@@ -119,8 +126,7 @@ class SharedTestInstructions:
             expected_outcome=SharedTestInstructions._derive_expected_outcome(test_code),
             dependencies=dependencies,
             resources_used=resources,
-            complexity_score=complexity,
-        )
+            complexity_score=complexity)
 
     @staticmethod
     def validate_test_structure(test_code: str) -> Tuple[bool, List[str]]:

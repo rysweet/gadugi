@@ -6,10 +6,10 @@ Provides comprehensive task management, workflow tracking, and Claude Code integ
 import uuid
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
-from pathlib import   # type: ignore
+from pathlib import Path  # type: ignore
 
 logger = logging.getLogger(__name__)
 

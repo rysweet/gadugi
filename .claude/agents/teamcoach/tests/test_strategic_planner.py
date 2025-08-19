@@ -5,7 +5,6 @@ Tests for TeamCoach Phase 3: Strategic Planner
 import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock
-from typing import Set
 from ..phase3.strategic_planner import (
     StrategicPlanner,
     TeamEvolutionPlan,
@@ -55,16 +54,7 @@ class TestStrategicPlanner(unittest.TestCase):
         ]
 
         # Mock performance data
-        self.mock_performance = PerformanceMetrics(
-            agent_id="agent_1",
-            success_rate=0.75,
-            average_execution_time=120,
-            total_tasks=100,
-            successful_tasks=75,
-            failed_tasks=25,
-            error_count=25,
-            error_types={},
-            metrics={"efficiency_ratio": 0.65, "capacity_multiplier": 1.0},
+        self.mock_performance = PerformanceMetrics(metrics={"efficiency_ratio": 0.65, "capacity_multiplier": 1.0},
         )
 
         # Mock capability data

@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 
 # Import components to test
-from typing import Set
 from ..phase1.performance_analytics import (
     AgentPerformanceAnalyzer,
     AgentPerformanceData,

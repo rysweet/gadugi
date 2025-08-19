@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import   # type: ignore
-from typing import Any, Dict, Set
+from typing import Any, Dict
 
 from .base_agent import AgentResponse, BaseAgent
 

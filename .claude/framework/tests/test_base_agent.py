@@ -1,12 +1,12 @@
+from unittest.mock import Mock, patch
 """Tests for the BaseAgent class."""
 
 import asyncio
-from pathlib import
+from pathlib import Path
 
 import pytest
 
 from ..base_agent import AgentMetadata, AgentResponse, BaseAgent
-from typing import Set
 
 
 class TestAgentImpl(BaseAgent):

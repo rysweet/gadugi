@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import tempfile
 """
 Test the agent-manager hook setup functionality with external scripts.
 
@@ -12,7 +13,6 @@ import shutil
 import subprocess
 import unittest
 from pathlib import Path
-from typing import Set
 
 
 class TestAgentManagerHookSetup(unittest.TestCase):

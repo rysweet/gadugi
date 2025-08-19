@@ -9,7 +9,6 @@ from unittest.mock import Mock, patch
 from datetime import datetime
 
 # Import components to test
-from typing import Set
 from ..phase2.task_matcher import (
     TaskAgentMatcher,
     TaskRequirements,

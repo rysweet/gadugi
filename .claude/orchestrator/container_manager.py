@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable  # type: ignore, Dict, List, Optional, Set
+from typing import Any, AsyncGenerator, Callable  # type: ignore, Dict, List, Optional
 import uuid
 
 try:
