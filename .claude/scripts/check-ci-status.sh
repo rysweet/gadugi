@@ -53,7 +53,7 @@ check_ci_status() {
     # Get PR info including CI status
     # Log errors instead of suppressing them
     local pr_info=$(gh pr view "$pr_number" --json state,mergeable,statusCheckRollup 2>&1)
-    
+
     # Check if the command failed
     if [[ "$pr_info" == *"error"* ]] || [[ "$pr_info" == *"failed"* ]]; then
         echo -e "${RED}Error fetching PR info: $pr_info${NC}" >&2

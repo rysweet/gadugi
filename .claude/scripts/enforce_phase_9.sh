@@ -70,7 +70,7 @@ check_review_exists() {
     local pr_num="$1"
     local review_count
 
-    # Error suppression justified: gh command may fail if PR doesn't exist yet, 
+    # Error suppression justified: gh command may fail if PR doesn't exist yet,
     # but we handle that case with the echo "0" fallback
     review_count=$(gh pr view "$pr_num" --json reviews --jq '.reviews | length' 2>/dev/null || echo "0")
 

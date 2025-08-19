@@ -15,7 +15,7 @@ Add Phase 13 to the mandatory 11-phase workflow (making it 12 phases total):
 - Must be clearly marked as mandatory for all workflows
 - Should include description of what Team Coach does in this phase
 
-### 2. Update workflow-manager.md  
+### 2. Update workflow-manager.md
 Modify the WorkflowManager agent to:
 - Add Phase 13 execution logic after Phase 12
 - Ensure Team Coach is invoked safely without subprocess spawning

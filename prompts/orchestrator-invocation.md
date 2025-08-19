@@ -15,7 +15,7 @@ Execute the following task in an isolated worktree environment:
 4. Ensure proper testing and validation
 5. Create PR with the implementation
 
-**Context**: 
+**Context**:
 The Team Coach agent is already implemented and functional. This task adds it as a mandatory Phase 13 that executes automatically at the end of every workflow session to provide performance analysis and improvement recommendations.
 
 **Expected Changes**:
