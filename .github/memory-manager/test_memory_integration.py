@@ -148,7 +148,7 @@ class TestGitHubIntegration(unittest.TestCase):
 
         # Should not raise exception
         try:
-            github = GitHubIntegration(self.temp_dir)
+            GitHubIntegration(self.temp_dir)
         except RuntimeError:
             self.fail("GitHubIntegration raised RuntimeError unexpectedly")
 

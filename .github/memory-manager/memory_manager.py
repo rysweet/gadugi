@@ -10,16 +10,15 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from config import ConfigManager, MemoryManagerConfig, create_default_config
+from config import ConfigManager, create_default_config
 from github_integration import GitHubIntegration
 
 # Import our components
-from memory_parser import MemoryDocument, MemoryParser, TaskStatus
-from sync_engine import ConflictResolution, SyncDirection, SyncEngine
+from memory_parser import MemoryParser, TaskStatus
+from sync_engine import SyncDirection, SyncEngine
 from memory_compactor import MemoryCompactor
 
 
@@ -284,7 +283,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Status command
-    status_parser = subparsers.add_parser("status", help="Show current status")
+    subparsers.add_parser("status", help="Show current status")
 
     # Sync command
     sync_parser = subparsers.add_parser(
@@ -320,7 +319,7 @@ def main():
     )
 
     # Auto-compact command
-    auto_compact_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "auto-compact",
         help="Check and automatically compact if thresholds are exceeded",
     )
@@ -337,9 +336,7 @@ def main():
     )
 
     # Conflicts command
-    conflicts_parser = subparsers.add_parser(
-        "conflicts", help="List synchronization conflicts"
-    )
+    subparsers.add_parser("conflicts", help="List synchronization conflicts")
 
     # Resolve conflict command
     resolve_parser = subparsers.add_parser(
@@ -349,12 +346,10 @@ def main():
     resolve_parser.add_argument("resolution", help="Resolution strategy")
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate configuration")
+    subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    init_parser = subparsers.add_parser(
-        "init", help="Initialize Memory Manager configuration"
-    )
+    subparsers.add_parser("init", help="Initialize Memory Manager configuration")
 
     args = parser.parse_args()
 

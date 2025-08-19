@@ -7,7 +7,7 @@ cannot be imported during type checking.
 
 import os
 from enum import Enum
-from typing import Dict, List, Any, Optional, Callable, Union
+from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
@@ -1193,7 +1193,7 @@ class ReadinessAssessor:
         )
         behind_by = comparison.get("behind_by", 0)
         ahead_by = comparison.get("ahead_by", 1)
-        commits = comparison.get("commits", [])
+        comparison.get("commits", [])
 
         sync_complexity = self._assess_sync_complexity(comparison)
 

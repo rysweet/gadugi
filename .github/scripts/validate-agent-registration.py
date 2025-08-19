@@ -10,7 +10,7 @@ import yaml
 from pathlib import Path
 import re
 import argparse
-from typing import Dict, List, Tuple, Optional
+from typing import List, Tuple, Optional
 
 
 class AgentValidator:

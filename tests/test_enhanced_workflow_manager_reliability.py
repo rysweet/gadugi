@@ -20,17 +20,13 @@ Test Categories:
 7. End-to-end reliability tests
 """
 
-import json
-import os
 import shutil
 import sys
 import tempfile
 import time
-import threading
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch, call, ANY
-from typing import Dict, Any, List
+from unittest.mock import Mock, patch, ANY
 
 import pytest
 
@@ -1082,7 +1078,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 },
             ),
         ):
-            result = manager.execute_workflow(str(self.test_prompt_file))
+            manager.execute_workflow(str(self.test_prompt_file))
 
             # Verify health checks were performed
             assert len(health_check_calls) > 0
@@ -1218,9 +1214,7 @@ class TestWorkflowReliabilityContextManager:
         mock_manager.stop_workflow_monitoring.return_value = True
 
         with pytest.raises(Exception):
-            with monitor_workflow(
-                workflow_id, workflow_context, mock_manager
-            ) as manager:
+            with monitor_workflow(workflow_id, workflow_context, mock_manager):
                 # Simulate workflow error
                 raise test_error
 

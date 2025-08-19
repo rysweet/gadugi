@@ -7,7 +7,7 @@ Defines the core event structures used throughout the system.
 import json
 import time
 from dataclasses import dataclass, field, asdict
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from uuid import uuid4
 
 
