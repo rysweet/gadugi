@@ -384,8 +384,6 @@ class TaskExecutor:
             output_file_path = None
             if stdout_content.strip():
                 try:  # type: ignore
-                output_file_path = None  # type: ignore
-                output_file_path = None
                     json_data = json.loads(stdout_content)  # type: ignore
                     with open(json_output_file, 'w') as f:
                         json.dump(json_data, f, indent=2)

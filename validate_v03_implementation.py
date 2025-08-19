@@ -98,6 +98,8 @@ class ImplementationValidator:
                 # Run pyright
                 errors, warnings, infos = self.run_pyright(path)
                 result["pyright_errors"] = errors
+                result["pyright_warnings"] = warnings  # Use warnings
+                result["pyright_infos"] = infos  # Use infos
 
                 # Determine status
                 if errors == 0:

@@ -1,8 +1,7 @@
 """Tests for event handlers and filtering."""
 
-
-from gadugi.event_service.events import (
 from typing import Any
+from gadugi.event_service.events import (
     Event,
     create_github_event,
     create_local_event,

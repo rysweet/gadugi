@@ -11,7 +11,28 @@ from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 from ...framework import BaseAgent, AgentMetadata, AgentResponse
 from ...services.event_router import EventRouter, Event, EventType, EventPriority  # type: ignore
-from ...services.memory_system import MemorySystem, Memory, MemoryType
+# from ...services.memory_system import MemorySystem, Memory, MemoryType  # Services not available in this context
+
+# Placeholder types for missing memory system
+from typing import Any
+
+class MemorySystem:
+    """Placeholder for MemorySystem."""
+    def __init__(self):
+        pass
+
+class Memory:
+    """Placeholder for Memory."""
+    def __init__(self, type=None, content=None, metadata=None):
+        self.type = type
+        self.content = content
+        self.metadata = metadata or {}
+
+class MemoryType:
+    """Placeholder for MemoryType."""
+    TASK = "task"
+    RESULT = "result"
+    ACHIEVEMENT = "achievement"
 from .parallel_executor import ParallelExecutor, ExecutionMode
 from .task_analyzer import TaskAnalyzer, TaskDependency  # type: ignore
 

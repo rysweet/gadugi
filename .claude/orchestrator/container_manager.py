@@ -101,11 +101,10 @@ class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
     def __init__(self, container_id: str, task_id: str):
-    websockets = None  # type: ignore
         self.container_id = container_id  # type: ignore
         self.task_id = task_id  # type: ignore
         self.streaming = False  # type: ignore
-        self.clients: List[websockets.WebSocketServerProtocol] = []  # type: ignore
+        self.clients: List = []  # type: ignore
 
     async def start_streaming(self, container):
         """Start streaming container output"""
