@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-18T16:14:37.364077",
+  "timestamp": "2025-08-19T12:16:58.307656",
   "processes": {
     "fix-types-pr-backlog-manager": {
       "task_id": "fix-types-pr-backlog-manager",
@@ -100,17 +100,49 @@
     "workflow-manager-pr-262": {
       "task_id": "workflow-manager-pr-262",
       "task_name": "Complete PR #262 Workflow Phases",
-      "status": "running",
+      "status": "failed",
       "command": "claude /agent:workflow-manager",
       "working_directory": "/home/rysweet/gadugi/.worktrees/task-workflow-manager-pr-262",
       "created_at": "2025-08-18T16:14:37.362059",
       "prompt_file": "/home/rysweet/gadugi/.worktrees/task-workflow-manager-pr-262/prompts/workflow-manager-pr-262-workflow.md",
       "pid": null,
       "started_at": "2025-08-18T16:14:37.364075",
-      "completed_at": null,
-      "last_heartbeat": "2025-08-18T16:14:37.364073",
+      "completed_at": "2025-08-19T08:11:34.962566",
+      "last_heartbeat": "2025-08-19T08:11:34.962561",
       "exit_code": null,
-      "error_message": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "fix-orchestrator-subprocess-execution": {
+      "task_id": "fix-orchestrator-subprocess-execution",
+      "task_name": "Fix Orchestrator Subprocess Execution for Real Parallel Workflows",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-orchestrator-subprocess-execution",
+      "created_at": "2025-08-19T08:11:34.963798",
+      "prompt_file": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-orchestrator-subprocess-execution/prompts/fix-orchestrator-subprocess-execution-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-19T08:11:34.984477",
+      "completed_at": "2025-08-19T09:45:10.203578",
+      "last_heartbeat": "2025-08-19T09:45:10.203574",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "achieve-zero-pyright-errors": {
+      "task_id": "achieve-zero-pyright-errors",
+      "task_name": "Achieve Zero Pyright Errors for Team Coach Implementation",
+      "status": "failed",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-achieve-zero-pyright-errors",
+      "created_at": "2025-08-19T12:14:58.242067",
+      "prompt_file": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-achieve-zero-pyright-errors/prompts/achieve-zero-pyright-errors-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-19T12:14:58.245579",
+      "completed_at": "2025-08-19T12:16:58.307652",
+      "last_heartbeat": "2025-08-19T12:16:58.307647",
+      "exit_code": null,
+      "error_message": "Process became unresponsive (heartbeat timeout)",
       "resource_usage": null
     }
   }

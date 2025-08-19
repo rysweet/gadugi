@@ -4,7 +4,7 @@
 
 ### Requirements
 1. Team Coach should create a 'CreatedByTeamCoach' label if it doesn't exist
-2. All issues created by Team Coach should use this label  
+2. All issues created by Team Coach should use this label
 3. The label should have purple color (7057ff)
 4. Update the team-coach.md agent file with these changes
 

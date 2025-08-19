@@ -15,7 +15,6 @@ Key Features:
 
 import argparse
 import logging
-import os
 import sys
 from pathlib import Path
 from typing import List
@@ -199,11 +198,11 @@ class OrchestrationCLI:
         if result.task_results:
             print("\nTask Details:")
             for task_result in result.task_results:
-                status = "✅ SUCCESS" if task_result.success else "❌ FAILED"
-                exec_time = getattr(task_result, 'execution_time', 0) or 0
+                status = "✅ SUCCESS" if task_result.status == 'success' else "❌ FAILED"
+                exec_time = getattr(task_result, 'duration', 0) or 0
                 print(f"  {task_result.task_id}: {status} ({exec_time:.1f}s)")
 
-                if not task_result.success and hasattr(task_result, 'error_message'):
+                if task_result.status != 'success' and hasattr(task_result, 'error_message'):
                     error_msg = getattr(task_result, 'error_message', 'Unknown error')
                     print(f"    Error: {error_msg}")
 

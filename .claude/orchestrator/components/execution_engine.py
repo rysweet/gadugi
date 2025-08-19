@@ -12,50 +12,48 @@ Security Features:
 - Timeout enforcement to prevent runaway processes
 """
 
-import asyncio
 import json
 import logging
 import os
 import queue
-
-# Set up logging
-logger = logging.getLogger(__name__)
-import signal
 import subprocess
 import sys
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import psutil
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # Import the PromptGenerator for creating WorkflowMaster prompts
-from .prompt_generator import PromptContext, PromptGenerator
+from .prompt_generator import PromptGenerator
 
 # Import ContainerManager for Docker-based execution (CRITICAL FIX #167)
+container_execution_available = False
+ContainerManager = None
+ContainerConfig = None
+ContainerResult = None
+
 try:
     # Try absolute import first (works when run directly)
-    import sys
-    import os
     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(0, parent_dir)
-    from container_manager import ContainerManager, ContainerConfig, ContainerResult
-    CONTAINER_EXECUTION_AVAILABLE = True
+    from container_manager import ContainerManager, ContainerConfig
+    container_execution_available = True
 except ImportError:
     try:
         # Fallback to relative import (works when imported as module)
-        from ..container_manager import ContainerManager, ContainerConfig, ContainerResult
-        CONTAINER_EXECUTION_AVAILABLE = True
+        from ..container_manager import ContainerManager, ContainerConfig
+        container_execution_available = True
     except ImportError:
         logging.warning("ContainerManager not available - falling back to subprocess execution")
-        CONTAINER_EXECUTION_AVAILABLE = False
-        ContainerManager = None
-        ContainerConfig = None
-        ContainerResult = None
+        container_execution_available = False
 
 # Security: Define strict resource limits
 MAX_CONCURRENT_TASKS = 8
@@ -206,9 +204,9 @@ class TaskExecutor:
         self.prompt_generator = PromptGenerator()
 
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
-        if CONTAINER_EXECUTION_AVAILABLE:
+        if container_execution_available:
             try:
-                container_config = ContainerConfig(
+                container_config = ContainerConfig(  # type: ignore
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -221,7 +219,7 @@ class TaskExecutor:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)
+                self.container_manager = ContainerManager(container_config)  # type: ignore
             except (RuntimeError, ImportError) as e:
                 logger.info(f"Container manager unavailable for task {task_id}: {e}")
                 logger.info("Will use subprocess fallback")
@@ -234,7 +232,7 @@ class TaskExecutor:
         self.start_time = datetime.now()
 
         # CRITICAL FIX #167: Use ContainerManager for true containerized execution
-        if self.container_manager and CONTAINER_EXECUTION_AVAILABLE:
+        if self.container_manager and container_execution_available:
             print(f"🐳 Starting containerized task execution: {self.task_id}")
 
             try:
@@ -312,7 +310,7 @@ class TaskExecutor:
         """Progress callback for containerized execution"""
         print(f"📊 Task progress: {task_id}, status={result.status}")
 
-    def _convert_container_result(self, container_result: 'ContainerResult') -> ExecutionResult:
+    def _convert_container_result(self, container_result) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=container_result.task_id,
@@ -364,6 +362,7 @@ class TaskExecutor:
         stderr_content = ""
         exit_code = None
         error_message = None
+        output_file_path = None
 
         try:
             # Start the process with proper Claude CLI flags
@@ -397,7 +396,6 @@ class TaskExecutor:
                 f.write(stderr_content)
 
             # Try to parse JSON output if available
-            output_file_path = None
             if stdout_content.strip():
                 try:
                     json_data = json.loads(stdout_content)
@@ -418,7 +416,7 @@ class TaskExecutor:
             stderr_content = error_message
 
         end_time = datetime.now()
-        duration = (end_time - self.start_time).total_seconds()
+        duration = (end_time - self.start_time).total_seconds() if self.start_time else 0.0
 
         # Determine status
         if error_message and "timed out" in error_message:
@@ -432,6 +430,7 @@ class TaskExecutor:
 
         # Get resource usage (approximate)
         resource_usage = self._get_resource_usage()
+
 
         self.result = ExecutionResult(
             task_id=self.task_id,
@@ -495,10 +494,10 @@ class ExecutionEngine:
         self.stop_event = threading.Event()
 
         # CRITICAL FIX #167: Initialize ContainerManager for true parallel containerized execution
-        if CONTAINER_EXECUTION_AVAILABLE:
+        if container_execution_available:
             print("🐳 Initializing containerized execution engine...")
             try:
-                container_config = ContainerConfig(
+                container_config = ContainerConfig(  # type: ignore
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -510,7 +509,7 @@ class ExecutionEngine:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)
+                self.container_manager = ContainerManager(container_config)  # type: ignore
                 self.execution_mode = "containerized"
             except (RuntimeError, ImportError) as e:
                 print(f"⚠️  Container manager unavailable: {e}")
@@ -541,7 +540,7 @@ class ExecutionEngine:
         memory_gb = psutil.virtual_memory().total / (1024**3)
 
         # Conservative defaults
-        cpu_based = max(1, cpu_count - 1)
+        cpu_based = max(1, (cpu_count or 1) - 1)
         memory_based = max(1, int(memory_gb / 2))
 
         return min(cpu_based, memory_based, 4)
@@ -563,7 +562,7 @@ class ExecutionEngine:
         print(f"   Max concurrent: {self.max_concurrent}")
 
         # CRITICAL FIX #167: Use ContainerManager for true parallel containerized execution
-        if self.container_manager and CONTAINER_EXECUTION_AVAILABLE:
+        if self.container_manager and container_execution_available:
             print("🐳 Using containerized parallel execution...")
             return self._execute_tasks_containerized(tasks, worktree_manager, progress_callback)
         else:
@@ -620,11 +619,14 @@ class ExecutionEngine:
 
             # Execute with ContainerManager
             print(f"🐳 Executing {len(container_tasks)} tasks in containers...")
-            container_results = self.container_manager.execute_parallel_tasks(
-                container_tasks,
-                max_parallel=self.max_concurrent,
-                progress_callback=self._container_progress_callback
-            )
+            if self.container_manager:
+                container_results = self.container_manager.execute_parallel_tasks(
+                    container_tasks,
+                    max_parallel=self.max_concurrent,
+                    progress_callback=self._container_progress_callback
+                )
+            else:
+                container_results = {}
 
             # Convert container results to execution results
             results = {}
@@ -838,7 +840,7 @@ class ExecutionEngine:
 
         self.stop_event.set()
 
-        for task_id, executor in self.active_executors.items():
+        for executor in self.active_executors.values():
             executor.cancel()
 
         print("✅ All tasks cancelled")
@@ -902,7 +904,7 @@ class ExecutionEngine:
         """Progress callback for containerized execution"""
         print(f"🐳 Container task progress: {task_id}, status={result.status}")
 
-    def _convert_container_to_execution_result(self, container_result: 'ContainerResult') -> ExecutionResult:
+    def _convert_container_to_execution_result(self, container_result) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=container_result.task_id,

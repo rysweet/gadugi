@@ -1,12 +1,12 @@
 {
   "worktrees": {
-    "workflow-manager-pr-262": {
-      "task_id": "workflow-manager-pr-262",
-      "task_name": "Complete PR #262 Workflow Phases",
-      "worktree_path": "/home/rysweet/gadugi/.worktrees/task-workflow-manager-pr-262",
-      "branch_name": "feature/parallel-complete-pr-#262-workflow-phases-workflow-manager-pr-262",
+    "achieve-zero-pyright-errors": {
+      "task_id": "achieve-zero-pyright-errors",
+      "task_name": "Achieve Zero Pyright Errors for Team Coach Implementation",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-achieve-zero-pyright-errors",
+      "branch_name": "feature/parallel-achieve-zero-pyright-errors-for-team-coach-implementation-achieve-zero-pyright-errors",
       "status": "active",
-      "created_at": "2025-08-18T16:14:37.358121",
+      "created_at": "2025-08-19T12:14:58.240095",
       "pid": null
     }
   }

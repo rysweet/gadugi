@@ -7,9 +7,6 @@ This component addresses the critical issue where WorkflowManagers were receivin
 generic prompts instead of implementation-specific instructions.
 """
 
-import json
-import os
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional

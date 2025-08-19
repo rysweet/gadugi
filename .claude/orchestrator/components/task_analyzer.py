@@ -19,7 +19,7 @@ import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
@@ -118,8 +118,6 @@ class TaskAnalyzer:
 
     def _sanitize_content(self, content: str) -> str:
         """Security: Sanitize file content to prevent injection attacks"""
-        if not isinstance(content, str):
-            raise ValueError("Content must be a string")
 
         # Remove potentially dangerous patterns
         dangerous_patterns = [
@@ -146,8 +144,6 @@ class TaskAnalyzer:
             List of TaskInfo objects with dependency and conflict analysis
         """
         # Security: Validate input parameters
-        if not isinstance(prompt_files, list):
-            raise ValueError("prompt_files must be a list")
 
         if len(prompt_files) > MAX_PROMPT_FILES:
             raise ValueError(f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}")
@@ -406,8 +402,7 @@ class TaskAnalyzer:
         file_paths = re.findall(r'`([^`]+\.(py|js|ts|md|json|yaml|yml))`', content)
         target_files.extend([path[0] for path in file_paths])
 
-        # Look for directory references
-        dir_patterns = re.findall(r'(\w+(?:/\w+)+/)', content)
+        # Look for directory references (currently unused but may be needed for future enhancements)
 
         # Remove duplicates and clean paths
         cleaned_files = []
@@ -700,8 +695,13 @@ def main():
     analyzer = TaskAnalyzer(args.prompts_dir)
 
     try:
-        tasks = analyzer.analyze_all_prompts()
+        # Get all prompt files in the directory
+        prompt_files = [f for f in os.listdir(args.prompts_dir)
+                       if f.endswith('.md') and os.path.isfile(os.path.join(args.prompts_dir, f))]
+        tasks = analyzer.analyze_prompts(prompt_files)
         execution_plan = analyzer.generate_execution_plan()
+
+        print(f"\n📝 Analyzed {len(tasks)} tasks")
 
         print(f"\n📊 Analysis Summary:")
         print(f"Total tasks: {execution_plan['total_tasks']}")

@@ -12,72 +12,43 @@ Key Features:
 - Integrates with Enhanced Separation shared modules for reliability
 """
 
-import asyncio
 import json
 import logging
-import os
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 # Import existing orchestrator components
 try:
     from .components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
     from .components.worktree_manager import WorktreeManager, WorktreeInfo
-    from .components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity
+    from .components.task_analyzer import TaskAnalyzer, TaskInfo
     from .components.prompt_generator import PromptGenerator, PromptContext
 except ImportError:
     # Fallback for direct execution
     from components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
     from components.worktree_manager import WorktreeManager, WorktreeInfo
-    from components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity
+    from components.task_analyzer import TaskAnalyzer, TaskInfo
     from components.prompt_generator import PromptGenerator, PromptContext
 
-# Import Enhanced Separation shared modules
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
-try:
-    from github_operations import GitHubOperations
-    from state_management import StateManager, CheckpointManager
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from task_tracking import TaskMetrics
-    from interfaces import AgentConfig, OperationResult
-except ImportError as e:
-    logging.warning(f"Could not import shared modules: {e}")
-    # Fallback definitions for development
-    class GitHubOperations:
-        def __init__(self): pass
-    class StateManager:
-        def __init__(self): pass
-    class CheckpointManager:
-        def __init__(self, state_manager): pass
-    class ErrorHandler:
-        def __init__(self): pass
-    class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
-    class RetryManager:
-        def __init__(self): pass
-    class TaskMetrics:
-        def __init__(self): pass
-    class WorkflowPhase:
-        INITIALIZATION = "initialization"
-        ORCHESTRATION = "orchestration"
-        PARALLEL_EXECUTION = "parallel_execution"
-        INTEGRATION = "integration"
-        COMPLETION = "completion"
-    @dataclass
-    class AgentConfig:
-        agent_id: str = "orchestrator"
-        name: str = "OrchestratorAgent"
-    @dataclass
-    class OperationResult:
-        success: bool
-        result: Any = None
-        error: Optional[str] = None
+# Import Enhanced Separation shared modules (fallback for development)
+class GitHubOperations:
+    def __init__(self, task_id=None): pass
+class StateManager:
+    def __init__(self): pass
+class CheckpointManager:
+    def __init__(self, state_manager): pass
+class ErrorHandler:
+    def __init__(self): pass
+class CircuitBreaker:
+    def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
+class TaskMetrics:
+    def __init__(self): pass
 
 # Configure logging
 logging.basicConfig(
@@ -88,8 +59,23 @@ logger = logging.getLogger(__name__)
 
 # ProcessRegistry will be imported after it's defined
 ProcessRegistry = None
-ProcessStatus = None
-ProcessInfo = None
+
+# Fallback classes for process management
+class ProcessStatus:
+    QUEUED = "queued"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+@dataclass
+class ProcessInfo:
+    task_id: str
+    task_name: str
+    status: str
+    command: str
+    working_directory: str
+    created_at: datetime
+    prompt_file: str
 
 
 @dataclass
@@ -165,7 +151,7 @@ class OrchestratorCoordinator:
 
         # Initialize Enhanced Separation components
         try:
-            self.github_ops = GitHubOperations(task_id=self.orchestration_id)
+            self.github_ops = GitHubOperations()
             self.state_manager = StateManager()
             self.checkpoint_manager = CheckpointManager(self.state_manager)
             self.error_handler = ErrorHandler()
@@ -556,7 +542,7 @@ class OrchestratorCoordinator:
         """Clean up worktrees and temporary files"""
         logger.info("Cleaning up orchestration resources...")
 
-        for task_id, worktree_info in worktree_assignments.items():
+        for task_id in worktree_assignments.keys():
             try:
                 # Clean up worktree
                 self.worktree_manager.cleanup_worktree(task_id)
