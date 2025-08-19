@@ -358,7 +358,7 @@ class ContainerAuthBuilder:
     def build_entrypoint_script(self) -> str:
         """Build entrypoint script for containers."""
 
-        return '''#!/bin/bash
+        return """#!/bin/bash
 set -e
 
 # Copy Claude auth if mounted
@@ -378,7 +378,7 @@ fi
 
 # Execute the actual command
 exec "$@"
-'''
+"""
 
     def build_compose_service(
         self,

@@ -5,7 +5,7 @@ Set up and verify Neo4j database for the Gadugi v0.3 implementation.
 
 ## Requirements
 1. Start Neo4j container specifically for Gadugi on port 7475
-2. Initialize the database schema 
+2. Initialize the database schema
 3. Verify the connection is working
 4. Create test data to confirm operation
 

@@ -64,27 +64,27 @@ class DecompositionResult:
 
 class TaskDecomposer(BaseAgent):
     """Intelligently decomposes complex tasks into manageable subtasks"""
-    
+
     def __init__(self):
         super().__init__("TaskDecomposer")
         self.patterns_db = self._init_patterns_db()
-    
+
     async def decompose_task(self, task_description: str) -> DecompositionResult:
         """Main decomposition logic"""
         pass
-    
+
     async def analyze_dependencies(self, subtasks: List[SubTask]) -> Dict[str, List[str]]:
         """Identify dependencies between subtasks"""
         pass
-    
+
     async def estimate_parallelization(self, subtasks: List[SubTask], dependencies: Dict) -> float:
         """Calculate parallelization potential (0-1 scale)"""
         pass
-    
+
     async def learn_pattern(self, result: DecompositionResult, success_metrics: Dict):
         """Store successful decomposition patterns"""
         pass
-    
+
     async def find_similar_patterns(self, task_description: str) -> List[str]:
         """Retrieve similar decomposition patterns from history"""
         pass
@@ -109,7 +109,7 @@ inputs:
     type: string
     required: true
     description: Complex task to decompose
-  
+
   context:
     type: object
     required: false
@@ -119,11 +119,11 @@ outputs:
   subtasks:
     type: array
     description: List of atomic subtasks
-  
+
   dependency_graph:
     type: object
     description: Dependencies between subtasks
-  
+
   parallelization_score:
     type: number
     description: Score indicating parallelization potential (0-1)
@@ -132,11 +132,11 @@ patterns:
   - name: feature_implementation
     triggers: ["implement", "create", "build", "develop"]
     subtasks: ["design", "implement", "test", "document", "review"]
-  
+
   - name: bug_fix
     triggers: ["fix", "resolve", "debug", "patch"]
     subtasks: ["reproduce", "diagnose", "fix", "test", "verify"]
-  
+
   - name: refactoring
     triggers: ["refactor", "optimize", "improve", "enhance"]
     subtasks: ["analyze", "plan", "refactor", "test", "validate"]

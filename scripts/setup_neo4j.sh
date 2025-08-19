@@ -25,7 +25,7 @@ while [ $attempt -lt $max_attempts ]; do
         echo "✅ Neo4j is ready!"
         break
     fi
-    
+
     attempt=$((attempt + 1))
     echo "   Attempt $attempt/$max_attempts..."
     sleep 2

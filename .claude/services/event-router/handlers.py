@@ -15,7 +15,17 @@ async def health_check() -> Dict[str, str]:
 
 
 def validate_input(data: Optional[Dict[str, Any]]) -> tuple[bool, Optional[str]]:
-    """Validate incoming request data."""
+    """Validate incoming request data.
+
+    Args:
+        data: Optional dictionary containing request data to validate
+
+    Returns:
+        Tuple of (is_valid: bool, error_message: Optional[str])
+
+    Raises:
+        None - all exceptions are caught and returned as validation errors
+    """
     try:
         # Basic validation
         if not data:
@@ -29,7 +39,17 @@ def validate_input(data: Optional[Dict[str, Any]]) -> tuple[bool, Optional[str]]
 
 
 def process_request(data: Dict[str, Any]) -> Dict[str, Any]:
-    """Process the incoming request."""
+    """Process the incoming request data.
+
+    Args:
+        data: Dictionary containing validated request data
+
+    Returns:
+        Dictionary containing processed result with metadata
+
+    Raises:
+        Exception: Re-raises any processing errors for proper error handling
+    """
     try:
         # Add actual processing logic here
         result = {

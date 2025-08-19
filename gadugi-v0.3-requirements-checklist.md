@@ -101,7 +101,7 @@
 
 ## Truth Status
 
-**CURRENT REALITY**: 
+**CURRENT REALITY**:
 - 0% of requirements actually implemented
 - 0% of services running
 - 0% of quality gates passing
