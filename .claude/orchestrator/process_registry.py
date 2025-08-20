@@ -87,7 +87,7 @@ class ProcessRegistry:
 
     def __init__(self, registry_dir: str = ".gadugi/monitoring", clean_start: bool = False):
         """Initialize the process registry
-        
+
         Args:
             registry_dir: Directory for registry files
             clean_start: If True, start with empty registry (ignore existing state)
