@@ -14,7 +14,19 @@ curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
 
 This downloads the `gadugi-updater` agent to `.claude/agents/`.
 
-**Step 2: Install Gadugi**
+**Step 2: Configure environment**
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit with your configuration (required for Neo4j and Claude API)
+nano .env
+```
+
+See [Environment Setup Guide](docs/environment-setup.md) for detailed configuration instructions.
+
+**Step 3: Install Gadugi**
 
 ```
 /agent:gadugi-updater install

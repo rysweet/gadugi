@@ -18,6 +18,8 @@ Integration with Enhanced Separation:
 - Leverages task tracking for comprehensive monitoring
 """
 
+from typing import Tuple
+
 import logging
 import os
 import psutil

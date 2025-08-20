@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5.19
+    container_name: gadugi-neo4j
+    ports:
+      - "${NEO4J_HTTP_PORT:-7475}:7474"  # HTTP port with default
+      - "${NEO4J_BOLT_PORT:-7688}:7687"  # Bolt port with default
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD}  # Password is required
+      - NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - NEO4J_dbms_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-1G}
+      - NEO4J_dbms_memory_heap_initial__size=${NEO4J_HEAP_INITIAL:-1G}
+      - NEO4J_dbms_memory_heap_max__size=${NEO4J_HEAP_MAX:-2G}
+      - NEO4J_dbms_default__listen__address=0.0.0.0
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
+    volumes:
+      - gadugi_neo4j_data:/data
+      - gadugi_neo4j_logs:/logs
+      - gadugi_neo4j_import:/var/lib/neo4j/import
+      - gadugi_neo4j_plugins:/plugins
+      - ./neo4j/init:/var/lib/neo4j/init
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "${NEO4J_USER:-neo4j}", "-p", "${NEO4J_PASSWORD}", "MATCH (n) RETURN count(n) LIMIT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gadugi-network
+    restart: unless-stopped
+
+  # Redis for Event Router caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: gadugi-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - gadugi_redis_data:/data
+    command: redis-server --appendonly yes ${REDIS_EXTRA_ARGS}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - gadugi-network
+    restart: unless-stopped
+
+volumes:
+  gadugi_neo4j_data:
+    driver: local
+  gadugi_neo4j_logs:
+    driver: local
+  gadugi_neo4j_import:
+    driver: local
+  gadugi_neo4j_plugins:
+    driver: local
+  gadugi_redis_data:
+    driver: local
+
+networks:
+  gadugi-network:
+    driver: bridge
+    name: gadugi-network
