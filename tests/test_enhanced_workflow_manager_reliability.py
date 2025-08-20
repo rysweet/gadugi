@@ -26,9 +26,9 @@ import tempfile
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
+from unittest.mock import Mock, patch, ANY
 
 import pytest
-# from typing import Set  # Unused import
 
 # Add project paths
 test_dir = Path(__file__).parent
@@ -38,17 +38,16 @@ sys.path.insert(0, str(project_root / ".claude" / "agents"))
 
 # Import modules under test
 try:
-    # from workflow_reliability import (  # Module not available
-    #     WorkflowReliabilityManager,
-    #     WorkflowStage,
-    #     HealthStatus,
-    #     SystemHealthCheck,
-    #     WorkflowMonitoringState,
-    #     monitor_workflow,
-    #     create_reliability_manager,
-    # )
-    # from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration  # Module not available
-    raise ImportError("Required modules not available")
+    from workflow_reliability import (
+        WorkflowReliabilityManager,
+        WorkflowStage,
+        HealthStatus,
+        SystemHealthCheck,
+        WorkflowMonitoringState,
+        monitor_workflow,
+        create_reliability_manager,
+    )
+    from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration
 except ImportError as e:
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
 

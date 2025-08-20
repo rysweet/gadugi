@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 
 import pytest
+from unittest.mock import call, patch
 
 # For type checking only
 from typing import TYPE_CHECKING
@@ -242,7 +243,7 @@ except ImportError:
                     self.failure_count = 0
                     self.last_failure_time = None
                     return result
-                except Exception as e:
+                except Exception:
                     self.failure_count += 1
                     self.last_failure_time = datetime.now()
 

@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package gadugi.agent;
+
+import "common.proto";
+
+// Event emitted when an agent starts
+message AgentStarted {
+  string agent_id = 1;              // Unique agent identifier
+  string agent_type = 2;            // Type of agent (e.g., "WorkflowManager")
+  string agent_name = 3;            // Human-readable agent name
+  common.Timestamp timestamp = 4;   // Start timestamp
+  common.Metadata metadata = 5;     // Additional metadata
+  string version = 6;               // Agent version
+  repeated string capabilities = 7; // List of agent capabilities
+  common.ResourceRequirements resources = 8; // Resource requirements
+  string parent_agent_id = 9;       // Parent agent if spawned
+  map<string, string> config = 10;  // Agent configuration
+}
+
+// Event emitted when an agent stops
+message AgentStopped {
+  string agent_id = 1;            // Agent identifier
+  common.Timestamp timestamp = 2; // Stop timestamp
+  string reason = 3;              // Reason for stopping
+  int32 exit_code = 4;           // Exit code (0 for success)
+  common.Error error = 5;        // Error if abnormal stop
+  int64 runtime_ms = 6;          // Total runtime in milliseconds
+  map<string, double> final_metrics = 7; // Final performance metrics
+  bool will_restart = 8;         // Whether agent will restart
+}
+
+// Event emitted when an agent has a question requiring user input
+message AgentHasQuestion {
+  string agent_id = 1;              // Agent identifier
+  string question_id = 2;           // Unique question ID
+  string question = 3;              // The question text
+  repeated string options = 4;      // Possible answer options
+  common.Priority priority = 5;     // Question priority
+  common.Timestamp timestamp = 6;   // When question was asked
+  int32 timeout_seconds = 7;        // Timeout for response
+  string context = 8;               // Context for the question
+  bool requires_confirmation = 9;   // If true, requires explicit confirmation
+  string default_answer = 10;       // Default answer if timeout
+}
+
+// Event emitted when an agent needs approval for an action
+message AgentNeedsApproval {
+  string agent_id = 1;                // Agent identifier
+  string approval_id = 2;             // Unique approval ID
+  string action = 3;                  // Action requiring approval
+  string description = 4;             // Detailed description
+  map<string, string> parameters = 5; // Action parameters
+  common.Priority priority = 6;       // Approval priority
+  common.Timestamp timestamp = 7;     // When approval was requested
+  repeated string approvers = 8;      // List of potential approvers
+  int32 timeout_seconds = 9;          // Timeout for approval
+  string risk_level = 10;             // Risk level (LOW, MEDIUM, HIGH)
+  repeated string impacts = 11;       // Potential impacts
+  bool auto_approve_on_timeout = 12;  // Auto-approve if timeout
+}
+
+// Response to agent question or approval request
+message AgentResponse {
+  string agent_id = 1;           // Agent identifier
+  string request_id = 2;         // Question or approval ID
+  oneof response {
+    string answer = 3;         // Text answer to question
+    bool approval = 4;         // Approval decision
+    common.Error error = 5;    // Error in processing request
+  }
+  common.Timestamp timestamp = 6; // Response timestamp
+  common.Metadata metadata = 7;   // Additional metadata
+  string responder_id = 8;        // ID of responder (user or agent)
+  string justification = 9;       // Justification for response
+}
+
+// Agent heartbeat for health monitoring
+message AgentHeartbeat {
+  string agent_id = 1;              // Agent identifier
+  common.Timestamp timestamp = 2;   // Heartbeat timestamp
+  common.AgentStatus status = 3;    // Current agent status
+  map<string, double> metrics = 4;  // Performance metrics
+  int64 memory_usage_mb = 5;        // Current memory usage
+  double cpu_usage_percent = 6;     // Current CPU usage
+  int32 active_tasks = 7;           // Number of active tasks
+  int32 queued_tasks = 8;           // Number of queued tasks
+  string health_status = 9;         // Health status (HEALTHY, DEGRADED, UNHEALTHY)
+  repeated string warnings = 10;    // Any warnings
+}
+
+// Agent state change notification
+message AgentStateChanged {
+  string agent_id = 1;                  // Agent identifier
+  common.AgentStatus previous_status = 2; // Previous status
+  common.AgentStatus new_status = 3;      // New status
+  common.Timestamp timestamp = 4;         // Change timestamp
+  string reason = 5;                      // Reason for change
+  string triggered_by = 6;               // What triggered the change
+}
+
+// Agent capability registration
+message AgentCapabilityRegistered {
+  string agent_id = 1;           // Agent identifier
+  string capability_name = 2;    // Capability name
+  string capability_version = 3; // Capability version
+  string description = 4;        // Capability description
+  repeated string dependencies = 5; // Required dependencies
+  common.Timestamp timestamp = 6;   // Registration timestamp
+  map<string, string> parameters = 7; // Capability parameters
+}
+
+// Agent communication event
+message AgentMessage {
+  string from_agent_id = 1;        // Sender agent ID
+  string to_agent_id = 2;          // Recipient agent ID
+  string message_id = 3;           // Unique message ID
+  string message_type = 4;         // Type of message
+  bytes payload = 5;               // Message payload
+  common.Priority priority = 6;    // Message priority
+  common.Timestamp timestamp = 7;  // Message timestamp
+  string correlation_id = 8;       // For request-response tracking
+  bool requires_response = 9;      // Whether response is expected
+  int32 timeout_seconds = 10;      // Response timeout
+}

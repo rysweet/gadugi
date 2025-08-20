@@ -9,10 +9,10 @@ import logging
 import os
 import tempfile
 from pathlib import Path
+from typing import Dict, Any
 
 from .config import AgentInvocation
 from .events import Event
-from typing import Any, Dict, Set
 
 logger = logging.getLogger(__name__)
 

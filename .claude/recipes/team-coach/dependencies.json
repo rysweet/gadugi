@@ -1,0 +1,98 @@
+{
+  "name": "team-coach",
+  "version": "0.3.0",
+  "dependencies": {
+    "internal": [
+      {
+        "component": "agent-framework",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Agent management and team formation"
+      },
+      {
+        "component": "event-system",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Monitoring agent events and activities"
+      },
+      {
+        "component": "memory-system",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Storing coaching history and learning patterns"
+      },
+      {
+        "component": "orchestrator",
+        "version": ">=0.3.0",
+        "required": false,
+        "purpose": "Coordinating team task execution (optional)"
+      }
+    ],
+    "external": [
+      {
+        "package": "networkx",
+        "version": ">=3.0",
+        "required": true,
+        "purpose": "Team communication graph analysis"
+      },
+      {
+        "package": "numpy",
+        "version": ">=1.24.0",
+        "required": true,
+        "purpose": "Performance metrics calculations"
+      },
+      {
+        "package": "pandas",
+        "version": ">=2.0.0",
+        "required": true,
+        "purpose": "Performance data analysis and reporting"
+      },
+      {
+        "package": "scikit-learn",
+        "version": ">=1.3.0",
+        "required": true,
+        "purpose": "ML models for performance prediction and pattern recognition"
+      },
+      {
+        "package": "scipy",
+        "version": ">=1.10.0",
+        "required": true,
+        "purpose": "Statistical analysis and optimization"
+      },
+      {
+        "package": "plotly",
+        "version": ">=5.0.0",
+        "required": false,
+        "purpose": "Interactive performance dashboards (optional)"
+      },
+      {
+        "package": "asyncio",
+        "version": "builtin",
+        "required": true,
+        "purpose": "Async coaching operations"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "interface": "TeamCoach",
+      "version": "1.0.0",
+      "description": "Main coaching and guidance interface"
+    },
+    {
+      "interface": "PerformanceAnalytics",
+      "version": "1.0.0",
+      "description": "Performance analysis and metrics"
+    },
+    {
+      "interface": "CollaborationFacilitator",
+      "version": "1.0.0",
+      "description": "Team collaboration optimization"
+    },
+    {
+      "interface": "TeamOptimizer",
+      "version": "1.0.0",
+      "description": "Team composition and role optimization"
+    }
+  ]
+}

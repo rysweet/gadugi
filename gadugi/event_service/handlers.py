@@ -6,12 +6,12 @@ Provides event filtering logic and handler execution coordination.
 
 import re
 import logging
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
 
+from .events import Event, GitHubEvent
 from .config import (
-from typing import Any, Dict, List, Optional
     EventHandlerConfig,
-    EventFilter as EventFilterConfig,
-    GitHubFilter as GitHubFilterConfig,
     AgentInvocation,
 )
 

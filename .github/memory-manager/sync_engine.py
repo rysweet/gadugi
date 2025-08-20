@@ -13,9 +13,10 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from github_integration import GitHubIntegration, GitHubIssue
-from typing import Any, Dict, List, Optional
+from memory_parser import MemoryDocument, MemoryParser, Task, TaskStatus
 
 
 class SyncDirection(Enum):

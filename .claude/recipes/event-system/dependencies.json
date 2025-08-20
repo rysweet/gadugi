@@ -1,0 +1,80 @@
+{
+  "name": "event-system",
+  "version": "0.3.0",
+  "dependencies": {
+    "internal": [
+      {
+        "component": "memory-system",
+        "version": ">=0.3.0",
+        "required": false,
+        "purpose": "Optional integration for persisting event-related memories"
+      },
+      {
+        "component": "agent-framework",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Base agent interfaces and lifecycle management"
+      }
+    ],
+    "external": [
+      {
+        "package": "protobuf",
+        "version": ">=4.0.0",
+        "required": true,
+        "purpose": "Event serialization and schema validation"
+      },
+      {
+        "package": "aiohttp",
+        "version": ">=3.8.0",
+        "required": true,
+        "purpose": "Async HTTP server for event API endpoints"
+      },
+      {
+        "package": "asyncio",
+        "version": "builtin",
+        "required": true,
+        "purpose": "Async event processing and queue management"
+      },
+      {
+        "package": "neo4j",
+        "version": ">=5.0.0",
+        "required": true,
+        "purpose": "Persistent storage for subscriptions and event history"
+      },
+      {
+        "package": "redis",
+        "version": ">=4.5.0",
+        "required": false,
+        "purpose": "High-performance caching and pub/sub (optional)"
+      },
+      {
+        "package": "pydantic",
+        "version": ">=2.0.0",
+        "required": true,
+        "purpose": "Event validation and serialization"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "interface": "EventPublisher",
+      "version": "1.0.0",
+      "description": "Interface for publishing events to the event bus"
+    },
+    {
+      "interface": "EventSubscriber",
+      "version": "1.0.0",
+      "description": "Interface for subscribing to and handling events"
+    },
+    {
+      "interface": "EventRouter",
+      "version": "1.0.0",
+      "description": "Core routing engine for event distribution"
+    },
+    {
+      "interface": "EventStore",
+      "version": "1.0.0",
+      "description": "Persistent storage and replay of events"
+    }
+  ]
+}

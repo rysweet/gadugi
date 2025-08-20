@@ -13,7 +13,6 @@ import tempfile
 from datetime import datetime
 
 import pytest
-from typing import List, Set
 
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
@@ -21,10 +20,10 @@ sys.path.append(
 
 from task_tracking import Task, TaskList, TaskStatus, TaskPriority
 
-from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
+from github_operations import GitHubOperations
+from state_management import CheckpointManager, StateManager, TaskState
 from task_tracking import (
     Task,
-    TaskMetrics,
     TaskStatus,
     TaskTracker,
     TodoWriteIntegration,
