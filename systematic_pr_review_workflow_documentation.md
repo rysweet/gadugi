@@ -21,6 +21,7 @@ User Request → OrchestratorAgent → Multiple WorkflowManager instances → Co
 
 ### Phase 1: Initial Setup
 - **Purpose**: Environment validation and context establishment
+- **Estimated Duration**: 30-60 minutes
 - **Activities**:
   - Analyze systematic review requirements
   - Validate orchestrator configuration
@@ -42,6 +43,7 @@ User Request → OrchestratorAgent → Multiple WorkflowManager instances → Co
 
 ### Phase 4: Research and Planning
 - **Purpose**: Comprehensive analysis of all target PRs
+- **Estimated Duration**: 2-4 hours (varies with PR count)
 - **Activities**:
   - PR status analysis (conflicts, reviews, CI/CD)
   - Dependency mapping
