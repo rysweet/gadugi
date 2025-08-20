@@ -8,8 +8,9 @@ The Recipe Executor is a self-hosting build system that executes recipes to gene
 ### 1. Recipe Structure Management
 - MUST read and parse recipe files (requirements.md, design.md, components.json)
 - MUST validate recipe structure and completeness
-- MUST support hierarchical recipe dependencies
+- MUST support hierarchical recipe dependencies (components.json lists other recipes, not Python packages)
 - MUST detect circular dependencies and fail fast
+- MUST use UV/pyproject.toml for Python package dependencies (NOT in components.json)
 
 ### 2. Dependency Resolution
 - MUST build a directed acyclic graph (DAG) of dependencies

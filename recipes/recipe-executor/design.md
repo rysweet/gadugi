@@ -1,5 +1,15 @@
 # Recipe Executor Design
 
+## Key Design Principles
+
+### Separation of Concerns
+
+1. **Recipe Dependencies (components.json)**: Lists other recipes that this recipe depends on. These are build-time dependencies for the Recipe Executor to resolve build order.
+
+2. **Python Dependencies (pyproject.toml)**: Managed by UV. Lists Python packages needed at runtime. The Recipe Executor does NOT generate pyproject.toml - that's managed directly by UV.
+
+3. **Generated Code Location**: Convention-based. Code for recipe "foo-bar" goes to `src/foo_bar/`. Tests go to `tests/`. No need to specify output paths in recipes.
+
 ## Architecture Overview
 
 The Recipe Executor follows a layered architecture with clear separation of concerns:
@@ -52,10 +62,12 @@ class Design:
 
 @dataclass
 class Components:
-    """Dependencies from components.json."""
-    dependencies: list[str]
-    version: str
-    type: str  # "service", "agent", "library", "tool"
+    """Recipe dependencies from components.json."""
+    name: str  # Recipe name
+    version: str  # Recipe version
+    type: str  # "service", "agent", "library", "tool", "core"
+    dependencies: list[str]  # Names of other recipes this depends on
+    metadata: dict[str, Any]  # Additional metadata (e.g., self_hosting flag)
 ```
 
 ### 2. Recipe Parser (`recipe_parser.py`)
@@ -106,20 +118,29 @@ class DependencyResolver:
 ### 4. Code Generator (`code_generator.py`)
 ```python
 class CodeGenerator:
-    """Generates code from design specifications."""
+    """Generates code from design specifications using Claude Code."""
     
     def generate(self, recipe: Recipe, context: BuildContext) -> GeneratedCode:
-        """Generate code based on design and requirements."""
-        template = self._select_template(recipe.design)
-        code = self._generate_from_template(template, recipe)
+        """Generate code using Claude Code based on recipe."""
+        # Create prompt for Claude Code
+        prompt = self._create_generation_prompt(recipe)
+        
+        # Invoke Claude Code to generate implementation
+        code = self._invoke_claude_code(prompt, recipe)
+        
+        # Validate and format with Python standards
+        code = self._apply_python_standards(code)
+        
         return self._validate_against_requirements(code, recipe.requirements)
     
-    def _generate_from_template(self, template: Template, recipe: Recipe) -> str:
-        """Use Jinja2 templates to generate code."""
+    def _create_generation_prompt(self, recipe: Recipe) -> str:
+        """Create a prompt for Claude Code from recipe."""
+        # Combine requirements and design into prompt
         pass
     
-    def _extract_code_from_design(self, design: Design) -> list[CodeBlock]:
-        """Extract code blocks from design markdown."""
+    def _invoke_claude_code(self, prompt: str, recipe: Recipe) -> str:
+        """Use Claude Code CLI to generate implementation."""
+        # Execute: claude -p prompt.md --output src/{recipe_name}/
         pass
 ```
 

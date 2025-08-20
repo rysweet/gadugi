@@ -6,58 +6,6 @@
   "description": "Self-hosting recipe execution engine for Gadugi",
   "metadata": {
     "self_hosting": true,
-    "bootstrap_required": true,
-    "python_version": ">=3.10"
-  },
-  "external_dependencies": {
-    "python": [
-      "pathlib",
-      "dataclasses", 
-      "json",
-      "typing",
-      "abc",
-      "enum",
-      "hashlib",
-      "subprocess",
-      "asyncio"
-    ],
-    "third_party": [
-      "jinja2>=3.0.0",
-      "pydantic>=2.0.0",
-      "networkx>=3.0",
-      "pytest>=7.0.0",
-      "pyright>=1.1.0",
-      "ruff>=0.1.0"
-    ]
-  },
-  "outputs": {
-    "code": [
-      "src/recipe_executor/__init__.py",
-      "src/recipe_executor/recipe_model.py",
-      "src/recipe_executor/recipe_parser.py",
-      "src/recipe_executor/dependency_resolver.py",
-      "src/recipe_executor/code_generator.py",
-      "src/recipe_executor/test_generator.py",
-      "src/recipe_executor/validator.py",
-      "src/recipe_executor/orchestrator.py",
-      "src/recipe_executor/state_manager.py",
-      "src/recipe_executor/self_hosting.py",
-      "src/recipe_executor/cli.py"
-    ],
-    "tests": [
-      "tests/recipe_executor/test_recipe_model.py",
-      "tests/recipe_executor/test_recipe_parser.py",
-      "tests/recipe_executor/test_dependency_resolver.py",
-      "tests/recipe_executor/test_code_generator.py",
-      "tests/recipe_executor/test_validator.py",
-      "tests/recipe_executor/test_orchestrator.py",
-      "tests/recipe_executor/test_self_hosting.py"
-    ],
-    "docs": [
-      "docs/recipe-executor/README.md",
-      "docs/recipe-executor/user-guide.md",
-      "docs/recipe-executor/developer-guide.md",
-      "docs/recipe-executor/recipe-format.md"
-    ]
+    "bootstrap_required": true
   }
 }
