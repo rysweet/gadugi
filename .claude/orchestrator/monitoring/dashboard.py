@@ -17,28 +17,58 @@ import asyncio
 import json
 import logging
 import os
+import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Union
+
+try:
+    import psutil
+
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    psutil = None
 
 try:
     import websockets
-    from websockets.server import WebSocketServerProtocol
+    from websockets.asyncio.server import ServerConnection
+
     WEBSOCKETS_AVAILABLE = True
+    # Define type for backward compatibility
+    WebSocketServerProtocol = ServerConnection
 except ImportError:
-    WEBSOCKETS_AVAILABLE = False
-    WebSocketServerProtocol = None
+    try:
+        # Fallback to legacy import for older versions
+        import websockets
+        from websockets.server import WebSocketServerProtocol
+
+        WEBSOCKETS_AVAILABLE = True
+    except ImportError:
+        WEBSOCKETS_AVAILABLE = False
+        WebSocketServerProtocol = None
 
 try:
     from aiohttp import web, WSMsgType
-    import aiofiles
+
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
+    web = None
+    WSMsgType = None
+
+try:
+    import aiofiles
+
+    AIOFILES_AVAILABLE = True
+except ImportError:
+    AIOFILES_AVAILABLE = False
+    aiofiles = None
 
 try:
     import docker
+
     DOCKER_AVAILABLE = True
 except ImportError:
     DOCKER_AVAILABLE = False
@@ -57,6 +87,8 @@ class OrchestrationMonitor:
         self.websocket_clients: Set[WebSocketServerProtocol] = set()
         self.docker_client = None
         self.active_containers: Dict[str, Dict] = {}
+        self.active_processes: Dict[int, Dict] = {}
+        self.active_worktrees: List[Dict] = []
         self.monitoring = False
 
         # Initialize Docker client
@@ -85,6 +117,12 @@ class OrchestrationMonitor:
                 # Update container status
                 await self.update_container_status()
 
+                # Update process status
+                await self.update_process_status()
+
+                # Update worktree status
+                await self.update_worktree_status()
+
                 # Broadcast updates to WebSocket clients
                 await self.broadcast_status_update()
 
@@ -105,50 +143,66 @@ class OrchestrationMonitor:
         try:
             # Find orchestrator containers
             containers = self.docker_client.containers.list(
-                filters={"name": "orchestrator-"},
-                all=True
+                filters={"name": "orchestrator-"}, all=True
             )
 
             current_containers = {}
 
             for container in containers:
                 container_info = {
-                    'id': container.id,
-                    'name': container.name,
-                    'status': container.status,
-                    'created': container.attrs['Created'],
-                    'image': container.image.tags[0] if container.image.tags else 'unknown',
-                    'labels': container.labels,
-                    'ports': container.ports,
-                    'mounts': [mount['Source'] + ':' + mount['Destination'] for mount in container.attrs.get('Mounts', [])],
-                    'environment': container.attrs['Config'].get('Env', []),
-                    'task_id': container.labels.get('task_id', 'unknown'),
-                    'updated_at': datetime.now().isoformat()
+                    "id": container.id,
+                    "name": container.name,
+                    "status": container.status,
+                    "created": container.attrs["Created"],
+                    "image": container.image.tags[0]
+                    if container.image.tags
+                    else "unknown",
+                    "labels": container.labels,
+                    "ports": container.ports,
+                    "mounts": [
+                        mount["Source"] + ":" + mount["Destination"]
+                        for mount in container.attrs.get("Mounts", [])
+                    ],
+                    "environment": container.attrs["Config"].get("Env", []),
+                    "task_id": container.labels.get("task_id", "unknown"),
+                    "updated_at": datetime.now().isoformat(),
                 }
 
                 # Get resource stats for running containers
-                if container.status == 'running':
+                if container.status == "running":
                     try:
                         stats = container.stats(stream=False)
-                        container_info['stats'] = {
-                            'cpu_percent': self._calculate_cpu_percent(stats),
-                            'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
-                            'memory_limit': stats.get('memory_stats', {}).get('limit', 0),
-                            'network_rx': sum(net.get('rx_bytes', 0) for net in stats.get('networks', {}).values()),
-                            'network_tx': sum(net.get('tx_bytes', 0) for net in stats.get('networks', {}).values())
+                        container_info["stats"] = {
+                            "cpu_percent": self._calculate_cpu_percent(stats),
+                            "memory_usage": stats.get("memory_stats", {}).get(
+                                "usage", 0
+                            ),
+                            "memory_limit": stats.get("memory_stats", {}).get(
+                                "limit", 0
+                            ),
+                            "network_rx": sum(
+                                net.get("rx_bytes", 0)
+                                for net in stats.get("networks", {}).values()
+                            ),
+                            "network_tx": sum(
+                                net.get("tx_bytes", 0)
+                                for net in stats.get("networks", {}).values()
+                            ),
                         }
 
                         # Get recent logs
-                        logs = container.logs(tail=10).decode('utf-8').split('\n')
-                        container_info['recent_logs'] = [log for log in logs if log.strip()]
+                        logs = container.logs(tail=10).decode("utf-8").split("\n")
+                        container_info["recent_logs"] = [
+                            log for log in logs if log.strip()
+                        ]
 
                     except Exception as e:
                         logger.warning(f"Failed to get stats for {container.name}: {e}")
-                        container_info['stats'] = {}
-                        container_info['recent_logs'] = []
+                        container_info["stats"] = {}
+                        container_info["recent_logs"] = []
                 else:
-                    container_info['stats'] = {}
-                    container_info['recent_logs'] = []
+                    container_info["stats"] = {}
+                    container_info["recent_logs"] = []
 
                 current_containers[container.name] = container_info
 
@@ -160,37 +214,201 @@ class OrchestrationMonitor:
     def _calculate_cpu_percent(self, stats: Dict) -> float:
         """Calculate CPU usage percentage"""
         try:
-            cpu_stats = stats.get('cpu_stats', {})
-            precpu_stats = stats.get('precpu_stats', {})
+            cpu_stats = stats.get("cpu_stats", {})
+            precpu_stats = stats.get("precpu_stats", {})
 
-            cpu_usage = cpu_stats.get('cpu_usage', {})
-            precpu_usage = precpu_stats.get('cpu_usage', {})
+            cpu_usage = cpu_stats.get("cpu_usage", {})
+            precpu_usage = precpu_stats.get("cpu_usage", {})
 
-            cpu_delta = cpu_usage.get('total_usage', 0) - precpu_usage.get('total_usage', 0)
-            system_delta = cpu_stats.get('system_cpu_usage', 0) - precpu_stats.get('system_cpu_usage', 0)
+            cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get(
+                "total_usage", 0
+            )
+            system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
+                "system_cpu_usage", 0
+            )
 
             if system_delta > 0 and cpu_delta > 0:
-                cpu_percent = (cpu_delta / system_delta) * len(cpu_usage.get('percpu_usage', [])) * 100
+                cpu_percent = (
+                    (cpu_delta / system_delta)
+                    * len(cpu_usage.get("percpu_usage", []))
+                    * 100
+                )
                 return round(cpu_percent, 2)
 
             return 0.0
         except Exception:
             return 0.0
 
+    async def update_process_status(self):
+        """Update status of Claude and orchestrator processes"""
+        if not PSUTIL_AVAILABLE:
+            return
+
+        try:
+            current_processes = {}
+
+            for proc in psutil.process_iter(
+                [
+                    "pid",
+                    "name",
+                    "cmdline",
+                    "create_time",
+                    "cpu_percent",
+                    "memory_info",
+                    "status",
+                ]
+            ):
+                try:
+                    cmdline = " ".join(proc.info["cmdline"] or [])
+
+                    # Look for Claude, orchestrator, or Python processes related to our work
+                    if any(
+                        keyword in cmdline.lower()
+                        for keyword in ["claude", "orchestrator", "gadugi", "workflow"]
+                    ):
+                        process_info = {
+                            "pid": proc.info["pid"],
+                            "name": proc.info["name"],
+                            "cmdline": cmdline,
+                            "status": proc.info["status"],
+                            "cpu_percent": proc.info["cpu_percent"] or 0.0,
+                            "memory_mb": round(
+                                proc.info["memory_info"].rss / 1024 / 1024, 1
+                            )
+                            if proc.info["memory_info"]
+                            else 0,
+                            "create_time": datetime.fromtimestamp(
+                                proc.info["create_time"]
+                            ).isoformat(),
+                            "updated_at": datetime.now().isoformat(),
+                        }
+                        current_processes[proc.info["pid"]] = process_info
+
+                except (
+                    psutil.NoSuchProcess,
+                    psutil.AccessDenied,
+                    psutil.ZombieProcess,
+                ):
+                    continue
+
+            self.active_processes = current_processes
+
+        except Exception as e:
+            logger.error(f"Failed to update process status: {e}")
+
+    async def update_worktree_status(self):
+        """Update status of active worktrees"""
+        try:
+            worktrees = []
+
+            # Check for .worktrees directory
+            worktrees_dir = Path(".worktrees")
+            if worktrees_dir.exists():
+                for worktree_path in worktrees_dir.iterdir():
+                    if worktree_path.is_dir():
+                        try:
+                            # Get basic info about the worktree
+                            task_file = worktree_path / ".task" / "metadata.json"
+                            git_status_cmd = ["git", "status", "--porcelain"]
+
+                            worktree_info = {
+                                "path": str(worktree_path),
+                                "name": worktree_path.name,
+                                "created": datetime.fromtimestamp(
+                                    worktree_path.stat().st_ctime
+                                ).isoformat(),
+                                "modified": datetime.fromtimestamp(
+                                    worktree_path.stat().st_mtime
+                                ).isoformat(),
+                                "updated_at": datetime.now().isoformat(),
+                            }
+
+                            # Try to get task metadata
+                            if task_file.exists():
+                                try:
+                                    with open(task_file, "r") as f:
+                                        task_data = json.load(f)
+                                        worktree_info["task_id"] = task_data.get(
+                                            "task_id", "unknown"
+                                        )
+                                        worktree_info["task_name"] = task_data.get(
+                                            "task_name", "unknown"
+                                        )
+                                        worktree_info["phase"] = task_data.get(
+                                            "current_phase", "unknown"
+                                        )
+                                except Exception:
+                                    worktree_info["task_id"] = "unknown"
+
+                            # Get git status
+                            try:
+                                result = subprocess.run(
+                                    git_status_cmd,
+                                    cwd=worktree_path,
+                                    capture_output=True,
+                                    text=True,
+                                    timeout=5,
+                                )
+                                if result.returncode == 0:
+                                    changes = (
+                                        result.stdout.strip().split("\n")
+                                        if result.stdout.strip()
+                                        else []
+                                    )
+                                    worktree_info["git_status"] = {
+                                        "clean": len(changes) == 0,
+                                        "changes_count": len(changes),
+                                        "changes": changes[:5],  # First 5 changes only
+                                    }
+                            except Exception:
+                                worktree_info["git_status"] = {
+                                    "clean": None,
+                                    "changes_count": 0,
+                                    "changes": [],
+                                }
+
+                            worktrees.append(worktree_info)
+
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to get info for worktree {worktree_path}: {e}"
+                            )
+
+            self.active_worktrees = worktrees
+
+        except Exception as e:
+            logger.error(f"Failed to update worktree status: {e}")
+
     async def broadcast_status_update(self):
         """Broadcast status update to all WebSocket clients"""
-        if not self.websocket_clients or not self.active_containers:
+        if not self.websocket_clients:
             return
 
         message = {
-            'type': 'status_update',
-            'timestamp': datetime.now().isoformat(),
-            'containers': self.active_containers,
-            'summary': {
-                'total_containers': len(self.active_containers),
-                'running_containers': len([c for c in self.active_containers.values() if c['status'] == 'running']),
-                'failed_containers': len([c for c in self.active_containers.values() if c['status'] == 'exited'])
-            }
+            "type": "status_update",
+            "timestamp": datetime.now().isoformat(),
+            "containers": self.active_containers,
+            "processes": self.active_processes,
+            "worktrees": self.active_worktrees,
+            "summary": {
+                "total_containers": len(self.active_containers),
+                "running_containers": len(
+                    [
+                        c
+                        for c in self.active_containers.values()
+                        if c["status"] == "running"
+                    ]
+                ),
+                "failed_containers": len(
+                    [
+                        c
+                        for c in self.active_containers.values()
+                        if c["status"] == "exited"
+                    ]
+                ),
+                "active_processes": len(self.active_processes),
+                "active_worktrees": len(self.active_worktrees),
+            },
         }
 
         # Send to all connected clients
@@ -206,28 +424,39 @@ class OrchestrationMonitor:
 
     async def save_monitoring_data(self):
         """Save current monitoring data to file"""
-        if not self.active_containers:
+        if (
+            not self.active_containers
+            and not self.active_processes
+            and not self.active_worktrees
+        ):
             return
 
-        monitoring_file = self.monitoring_dir / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        monitoring_file = (
+            self.monitoring_dir
+            / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         try:
             data = {
-                'timestamp': datetime.now().isoformat(),
-                'containers': self.active_containers,
-                'monitoring_metadata': {
-                    'monitor_version': '1.0.0',
-                    'docker_available': DOCKER_AVAILABLE,
-                    'websockets_available': WEBSOCKETS_AVAILABLE,
-                    'connected_clients': len(self.websocket_clients)
-                }
+                "timestamp": datetime.now().isoformat(),
+                "containers": self.active_containers,
+                "processes": self.active_processes,
+                "worktrees": self.active_worktrees,
+                "monitoring_metadata": {
+                    "monitor_version": "1.1.0",
+                    "docker_available": DOCKER_AVAILABLE,
+                    "websockets_available": WEBSOCKETS_AVAILABLE,
+                    "psutil_available": PSUTIL_AVAILABLE,
+                    "aiofiles_available": AIOFILES_AVAILABLE,
+                    "connected_clients": len(self.websocket_clients),
+                },
             }
 
-            if AIOHTTP_AVAILABLE:
-                async with aiofiles.open(monitoring_file, 'w') as f:
+            if AIOFILES_AVAILABLE:
+                async with aiofiles.open(monitoring_file, "w") as f:
                     await f.write(json.dumps(data, indent=2))
             else:
-                with open(monitoring_file, 'w') as f:
+                with open(monitoring_file, "w") as f:
                     json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -239,7 +468,7 @@ class OrchestrationMonitor:
             logger.warning("WebSockets not available - install websockets package")
             return
 
-        port = int(os.getenv('WEBSOCKET_PORT', 9001))
+        port = int(os.getenv("WEBSOCKET_PORT", 9001))
 
         async def handle_websocket(websocket, path):
             """Handle WebSocket connection"""
@@ -250,9 +479,9 @@ class OrchestrationMonitor:
                 # Send initial status
                 if self.active_containers:
                     initial_message = {
-                        'type': 'initial_status',
-                        'timestamp': datetime.now().isoformat(),
-                        'containers': self.active_containers
+                        "type": "initial_status",
+                        "timestamp": datetime.now().isoformat(),
+                        "containers": self.active_containers,
                     }
                     await websocket.send(json.dumps(initial_message))
 
@@ -269,7 +498,9 @@ class OrchestrationMonitor:
                 logger.warning(f"WebSocket client error: {e}")
             finally:
                 self.websocket_clients.discard(websocket)
-                logger.info(f"WebSocket client disconnected: {websocket.remote_address}")
+                logger.info(
+                    f"WebSocket client disconnected: {websocket.remote_address}"
+                )
 
         try:
             await websockets.serve(handle_websocket, "0.0.0.0", port)
@@ -279,13 +510,13 @@ class OrchestrationMonitor:
 
     async def handle_client_message(self, websocket, data):
         """Handle messages from WebSocket clients"""
-        message_type = data.get('type')
+        message_type = data.get("type")
 
-        if message_type == 'get_container_logs':
-            container_name = data.get('container_name')
+        if message_type == "get_container_logs":
+            container_name = data.get("container_name")
             await self.send_container_logs(websocket, container_name)
-        elif message_type == 'get_detailed_stats':
-            container_name = data.get('container_name')
+        elif message_type == "get_detailed_stats":
+            container_name = data.get("container_name")
             await self.send_detailed_stats(websocket, container_name)
 
     async def send_container_logs(self, websocket, container_name):
@@ -295,21 +526,21 @@ class OrchestrationMonitor:
 
         try:
             container = self.docker_client.containers.get(container_name)
-            logs = container.logs(tail=100).decode('utf-8')
+            logs = container.logs(tail=100).decode("utf-8")
 
             message = {
-                'type': 'container_logs',
-                'container_name': container_name,
-                'logs': logs.split('\n'),
-                'timestamp': datetime.now().isoformat()
+                "type": "container_logs",
+                "container_name": container_name,
+                "logs": logs.split("\n"),
+                "timestamp": datetime.now().isoformat(),
             }
 
             await websocket.send(json.dumps(message))
 
         except Exception as e:
             error_message = {
-                'type': 'error',
-                'message': f"Failed to get logs for {container_name}: {e}"
+                "type": "error",
+                "message": f"Failed to get logs for {container_name}: {e}",
             }
             await websocket.send(json.dumps(error_message))
 
@@ -321,22 +552,22 @@ class OrchestrationMonitor:
         try:
             container = self.docker_client.containers.get(container_name)
 
-            if container.status == 'running':
+            if container.status == "running":
                 stats = container.stats(stream=False)
 
                 detailed_stats = {
-                    'type': 'detailed_stats',
-                    'container_name': container_name,
-                    'stats': stats,
-                    'timestamp': datetime.now().isoformat()
+                    "type": "detailed_stats",
+                    "container_name": container_name,
+                    "stats": stats,
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 await websocket.send(json.dumps(detailed_stats))
 
         except Exception as e:
             error_message = {
-                'type': 'error',
-                'message': f"Failed to get detailed stats for {container_name}: {e}"
+                "type": "error",
+                "message": f"Failed to get detailed stats for {container_name}: {e}",
             }
             await websocket.send(json.dumps(error_message))
 
@@ -355,7 +586,7 @@ async def create_web_app():
     app = web.Application()
 
     # Serve static monitoring dashboard
-    dashboard_html = '''
+    dashboard_html = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -401,6 +632,14 @@ async def create_web_app():
                     <div id="failedContainers" style="font-size: 24px; font-weight: bold; color: #e74c3c;">0</div>
                 </div>
                 <div class="stat-card">
+                    <h3>Active Processes</h3>
+                    <div id="activeProcesses" style="font-size: 24px; font-weight: bold; color: #3498db;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Active Worktrees</h3>
+                    <div id="activeWorktrees" style="font-size: 24px; font-weight: bold; color: #9b59b6;">0</div>
+                </div>
+                <div class="stat-card">
                     <h3>WebSocket Status</h3>
                     <div id="wsStatus" style="font-size: 16px; font-weight: bold; color: #e74c3c;">Disconnected</div>
                 </div>
@@ -410,6 +649,20 @@ async def create_web_app():
                 <h2>Active Containers</h2>
                 <div id="containerList">
                     <p>No containers found. Waiting for updates...</p>
+                </div>
+            </div>
+
+            <div class="containers">
+                <h2>Active Processes</h2>
+                <div id="processList">
+                    <p>No processes found. Waiting for updates...</p>
+                </div>
+            </div>
+
+            <div class="containers">
+                <h2>Active Worktrees</h2>
+                <div id="worktreeList">
+                    <p>No worktrees found. Waiting for updates...</p>
                 </div>
             </div>
         </div>
@@ -453,13 +706,23 @@ async def create_web_app():
                 document.getElementById('lastUpdate').textContent = `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
 
                 if (data.summary) {
-                    document.getElementById('totalContainers').textContent = data.summary.total_containers;
-                    document.getElementById('runningContainers').textContent = data.summary.running_containers;
-                    document.getElementById('failedContainers').textContent = data.summary.failed_containers;
+                    document.getElementById('totalContainers').textContent = data.summary.total_containers || 0;
+                    document.getElementById('runningContainers').textContent = data.summary.running_containers || 0;
+                    document.getElementById('failedContainers').textContent = data.summary.failed_containers || 0;
+                    document.getElementById('activeProcesses').textContent = data.summary.active_processes || 0;
+                    document.getElementById('activeWorktrees').textContent = data.summary.active_worktrees || 0;
                 }
 
                 if (data.containers) {
                     updateContainerList(data.containers);
+                }
+
+                if (data.processes) {
+                    updateProcessList(data.processes);
+                }
+
+                if (data.worktrees) {
+                    updateWorktreeList(data.worktrees);
                 }
             }
 
@@ -504,21 +767,86 @@ async def create_web_app():
                 containerList.innerHTML = html;
             }
 
+            function updateProcessList(processes) {
+                const processList = document.getElementById('processList');
+
+                if (Object.keys(processes).length === 0) {
+                    processList.innerHTML = '<p>No active processes found.</p>';
+                    return;
+                }
+
+                let html = '';
+                for (const [pid, process] of Object.entries(processes)) {
+                    html += `
+                        <div class="container-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>PID ${process.pid}</strong> - ${process.name}
+                                    <span class="status ${process.status.toLowerCase()}">${process.status}</span>
+                                </div>
+                                <div class="timestamp">CPU: ${process.cpu_percent}% | RAM: ${process.memory_mb}MB</div>
+                            </div>
+                            <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                                ${process.cmdline.length > 100 ? process.cmdline.substring(0, 100) + '...' : process.cmdline}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                processList.innerHTML = html;
+            }
+
+            function updateWorktreeList(worktrees) {
+                const worktreeList = document.getElementById('worktreeList');
+
+                if (worktrees.length === 0) {
+                    worktreeList.innerHTML = '<p>No active worktrees found.</p>';
+                    return;
+                }
+
+                let html = '';
+                for (const worktree of worktrees) {
+                    const statusColor = worktree.git_status && worktree.git_status.clean ? '#27ae60' : '#f39c12';
+                    const statusText = worktree.git_status && worktree.git_status.clean ? 'Clean' :
+                                     `${worktree.git_status ? worktree.git_status.changes_count : 0} changes`;
+
+                    html += `
+                        <div class="container-item">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${worktree.name}</strong>
+                                    <span class="status" style="background: ${statusColor};">${statusText}</span>
+                                </div>
+                                <div class="timestamp">${worktree.task_id || 'Unknown task'}</div>
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <div>Phase: ${worktree.phase || 'Unknown'}</div>
+                                <div style="font-size: 12px; color: #666;">
+                                    Created: ${new Date(worktree.created).toLocaleString()}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                worktreeList.innerHTML = html;
+            }
+
             // Initialize WebSocket connection
             connectWebSocket();
         </script>
     </body>
     </html>
-    '''
+    """
 
     async def dashboard_handler(request):
-        return web.Response(text=dashboard_html, content_type='text/html')
+        return web.Response(text=dashboard_html, content_type="text/html")
 
     async def health_handler(request):
-        return web.Response(text='OK', status=200)
+        return web.Response(text="OK", status=200)
 
-    app.router.add_get('/', dashboard_handler)
-    app.router.add_get('/health', health_handler)
+    app.router.add_get("/", dashboard_handler)
+    app.router.add_get("/health", health_handler)
 
     return app
 
@@ -535,10 +863,10 @@ async def main():
     if AIOHTTP_AVAILABLE:
         app = await create_web_app()
         if app:
-            port = int(os.getenv('HTTP_PORT', 8080))
+            port = int(os.getenv("HTTP_PORT", 8080))
             runner = web.AppRunner(app)
             await runner.setup()
-            site = web.TCPSite(runner, '0.0.0.0', port)
+            site = web.TCPSite(runner, "0.0.0.0", port)
             await site.start()
             logger.info(f"Monitoring dashboard available at http://localhost:{port}")
 

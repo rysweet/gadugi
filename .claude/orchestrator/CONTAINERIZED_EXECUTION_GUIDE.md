@@ -96,13 +96,23 @@ results = engine.execute_tasks_parallel(tasks, worktree_manager)
 ```
 
 ### Monitoring Dashboard (`monitoring/dashboard.py`)
-**Real-time monitoring interface with WebSocket streaming**
+**Enhanced real-time monitoring interface with WebSocket streaming**
 
 Features:
 - **Live Container Status**: Real-time tracking of all orchestrator containers
+- **Process Monitoring**: Active Claude/orchestrator/gadugi processes with CPU and memory usage
+- **Worktree Status**: Active worktree monitoring with git status and task phases
 - **Resource Monitoring**: CPU, memory, network usage per container
 - **Log Streaming**: Live output from each container
 - **Performance Analytics**: Speedup calculations and efficiency metrics
+- **WebSocket Updates**: Real-time updates at 5-second intervals
+
+Recent improvements:
+- ✅ Fixed deprecated websockets API (websockets 15.0+)
+- ✅ Enhanced dependency handling with graceful fallbacks
+- ✅ Added process monitoring for all related workflows
+- ✅ Added worktree status monitoring with git integration
+- ✅ Improved UV environment compatibility
 
 Access at: `http://localhost:8080` (when monitoring is enabled)
 
@@ -126,7 +136,11 @@ Access at: `http://localhost:8080` (when monitoring is enabled)
 
 2. **Python Dependencies**
    ```bash
-   pip install docker psutil websockets aiohttp
+   # For UV projects (recommended)
+   uv add docker psutil websockets aiohttp aiofiles
+
+   # For standard pip installations
+   pip install docker psutil websockets aiohttp aiofiles
    ```
 
 3. **Claude CLI Installation**
