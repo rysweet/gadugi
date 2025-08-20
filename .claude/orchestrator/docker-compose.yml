@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
     image: claude-orchestrator:latest
     command: ["echo", "Base image built successfully"]
-    
+
   # Monitoring dashboard service
   orchestrator-monitor:
     image: claude-orchestrator:latest
@@ -32,7 +32,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    
+
   # Template service for parallel task execution
   # This is used as a template - actual services are created dynamically
   orchestrator-task-template:
@@ -50,7 +50,7 @@ services:
     cpu_count: 2.0
     mem_limit: 4g
     restart: "no"
-    
+
 networks:
   default:
     name: orchestrator-network
@@ -63,9 +63,9 @@ volumes:
       type: none
       device: ./results
       o: bind
-      
+
   orchestrator-monitoring:
-    driver: local  
+    driver: local
     driver_opts:
       type: none
       device: ./monitoring

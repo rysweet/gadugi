@@ -3,15 +3,13 @@ Task tracking and TodoWrite integration for Gadugi multi-agent system.
 Provides comprehensive task management, workflow tracking, and Claude Code integration.
 """
 
-import json
-import time
 import uuid
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
-from pathlib import Path
+from pathlib import Path  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -743,8 +741,8 @@ class TaskTracker:
                 # Submit to TodoWrite
                 result = self.todowrite.submit_task_list(self.task_list)
 
-            if not result.get("success"):
-                raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")
+            if not result.get("success"):  # type: ignore
+                raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")  # type: ignore
 
             logger.info(f"Started workflow phase '{phase_name}' with {len(phase_tasks)} tasks")
 

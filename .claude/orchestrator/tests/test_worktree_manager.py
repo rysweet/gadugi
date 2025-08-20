@@ -5,7 +5,6 @@ Test suite for WorktreeManager component of OrchestratorAgent
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import json
 import shutil
 import subprocess
 

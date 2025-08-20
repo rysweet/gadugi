@@ -1,3 +1,4 @@
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
 #!/usr/bin/env python3
 """
 Test suite for ExecutionEngine component of OrchestratorAgent
@@ -16,7 +17,6 @@ import time
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 

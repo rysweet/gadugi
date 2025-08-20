@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+import unittest
+from unittest.mock import Mock, patch, MagicMock
+from unittest import TestCase
 #!/usr/bin/env python3
 """
 Comprehensive tests for containerized orchestrator execution.
@@ -7,29 +11,18 @@ to ensure proper Docker-based parallel execution meets requirements from Issue #
 
 Key test scenarios:
 - Container lifecycle management
-- Proper Claude CLI invocation with automation flags  
+- Proper Claude CLI invocation with automation flags
 - Real-time monitoring and output streaming
 - Resource limits and error handling
 - Performance improvements vs subprocess execution
 """
 
 import asyncio
-import json
-import os
 import tempfile
-import threading
-import time
-import unittest
-from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, call
-import shutil
-
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from container_manager import ContainerManager, ContainerConfig, ContainerResult
     from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
     from monitoring.dashboard import OrchestrationMonitor
     IMPORTS_AVAILABLE = True
@@ -44,14 +37,14 @@ class TestContainerConfig(unittest.TestCase):
     def test_default_config(self):
         """Test default configuration values"""
         config = ContainerConfig()
-        
+
         self.assertEqual(config.image, "claude-orchestrator:latest")
         self.assertEqual(config.cpu_limit, "2.0")
         self.assertEqual(config.memory_limit, "4g")
         self.assertEqual(config.timeout_seconds, 3600)
         self.assertEqual(config.max_turns, 50)
         self.assertEqual(config.output_format, "json")
-        
+
         # Test automation flags are included
         self.assertIn("--dangerously-skip-permissions", config.claude_flags)
         self.assertIn("--verbose", config.claude_flags)
@@ -69,7 +62,7 @@ class TestContainerConfig(unittest.TestCase):
             max_turns=100,
             claude_flags=custom_flags
         )
-        
+
         self.assertEqual(config.image, "custom-claude:test")
         self.assertEqual(config.cpu_limit, "4.0")
         self.assertEqual(config.memory_limit, "8g")
@@ -87,16 +80,16 @@ class TestContainerManager(unittest.TestCase):
         self.test_dir = Path(tempfile.mkdtemp())
         self.test_worktree = self.test_dir / "test-worktree"
         self.test_worktree.mkdir(parents=True)
-        
+
         # Create test prompt file
         self.test_prompt = self.test_worktree / "test-prompt.md"
         self.test_prompt.write_text("# Test Prompt\nTest task execution")
-        
+
         # Mock Docker to avoid requiring actual Docker for tests
         self.docker_mock = Mock()
         self.container_mock = Mock()
         self.docker_mock.containers.run.return_value = self.container_mock
-        
+
     def tearDown(self):
         """Clean up test environment"""
         if self.test_dir.exists():
@@ -108,10 +101,10 @@ class TestContainerManager(unittest.TestCase):
         mock_docker.from_env.return_value = self.docker_mock
         self.docker_mock.ping.return_value = True
         self.docker_mock.images.get.return_value = Mock()  # Image exists
-        
+
         config = ContainerConfig()
         manager = ContainerManager(config)
-        
+
         self.assertEqual(manager.config, config)
         self.assertIsNotNone(manager.docker_client)
         mock_docker.from_env.assert_called_once()
@@ -121,12 +114,12 @@ class TestContainerManager(unittest.TestCase):
     def test_docker_not_available_error(self, mock_docker):
         """Test ContainerManager handles Docker unavailability"""
         mock_docker.from_env.side_effect = Exception("Docker daemon not running")
-        
+
         config = ContainerConfig()
-        
+
         with self.assertRaises(RuntimeError) as context:
             ContainerManager(config)
-        
+
         self.assertIn("Docker initialization failed", str(context.exception))
 
     @patch('container_manager.docker')
@@ -136,7 +129,7 @@ class TestContainerManager(unittest.TestCase):
         mock_docker.from_env.return_value = self.docker_mock
         self.docker_mock.ping.return_value = True
         self.docker_mock.images.get.return_value = Mock()  # Image exists
-        
+
         # Configure container behavior
         self.container_mock.wait.return_value = {'StatusCode': 0}
         self.container_mock.logs.return_value = b"Task completed successfully"
@@ -146,19 +139,19 @@ class TestContainerManager(unittest.TestCase):
             'networks': {'eth0': {'rx_bytes': 1000, 'tx_bytes': 2000}}
         }
         self.container_mock.id = "test-container-id"
-        
+
         # Create manager and execute task
         config = ContainerConfig()
         manager = ContainerManager(config)
         manager.docker_client = self.docker_mock  # Use our mock
-        
+
         result = manager.execute_containerized_task(
             task_id="test-task-1",
             worktree_path=self.test_worktree,
             prompt_file=str(self.test_prompt),
             task_context={'timeout_seconds': 3600}
         )
-        
+
         # Verify result
         self.assertIsInstance(result, ContainerResult)
         self.assertEqual(result.task_id, "test-task-1")
@@ -168,11 +161,11 @@ class TestContainerManager(unittest.TestCase):
         self.assertIsNotNone(result.start_time)
         self.assertIsNotNone(result.end_time)
         self.assertIsNotNone(result.duration)
-        
+
         # Verify Docker was called correctly
         self.docker_mock.containers.run.assert_called_once()
         call_args = self.docker_mock.containers.run.call_args
-        
+
         # Verify Claude CLI command with automation flags
         command = call_args[1]['command']
         self.assertIn('claude', command)
@@ -180,7 +173,7 @@ class TestContainerManager(unittest.TestCase):
         self.assertIn('--dangerously-skip-permissions', command)
         self.assertIn('--verbose', command)
         self.assertIn('--output-format=json', command)
-        
+
         # Verify container configuration
         self.assertEqual(call_args[1]['cpu_count'], 2.0)
         self.assertEqual(call_args[1]['mem_limit'], '4g')
@@ -194,7 +187,7 @@ class TestContainerManager(unittest.TestCase):
         mock_docker.from_env.return_value = self.docker_mock
         self.docker_mock.ping.return_value = True
         self.docker_mock.images.get.return_value = Mock()  # Image exists
-        
+
         # Configure container behavior for multiple tasks
         containers = []
         for i in range(3):
@@ -208,14 +201,14 @@ class TestContainerManager(unittest.TestCase):
             }
             container.id = f"container-{i}"
             containers.append(container)
-        
+
         self.docker_mock.containers.run.side_effect = containers
-        
+
         # Create manager
         config = ContainerConfig()
         manager = ContainerManager(config)
         manager.docker_client = self.docker_mock
-        
+
         # Prepare parallel tasks
         tasks = [
             {
@@ -226,14 +219,14 @@ class TestContainerManager(unittest.TestCase):
             }
             for i in range(3)
         ]
-        
+
         # Execute parallel tasks
         results = manager.execute_parallel_tasks(
             tasks,
             max_parallel=2,  # Test concurrency limit
             progress_callback=Mock()
         )
-        
+
         # Verify results
         self.assertEqual(len(results), 3)
         for i in range(3):
@@ -241,7 +234,7 @@ class TestContainerManager(unittest.TestCase):
             self.assertIn(task_id, results)
             self.assertEqual(results[task_id].status, 'success')
             self.assertEqual(results[task_id].exit_code, 0)
-        
+
         # Verify Docker was called for each task
         self.assertEqual(self.docker_mock.containers.run.call_count, 3)
 
@@ -252,7 +245,7 @@ class TestContainerManager(unittest.TestCase):
         mock_docker.from_env.return_value = self.docker_mock
         self.docker_mock.ping.return_value = True
         self.docker_mock.images.get.return_value = Mock()
-        
+
         # Configure container to fail
         self.container_mock.wait.return_value = {'StatusCode': 1}
         self.container_mock.logs.return_value = b"Error: Task failed"
@@ -261,19 +254,19 @@ class TestContainerManager(unittest.TestCase):
             'cpu_stats': {'cpu_usage': {'total_usage': 100000}},
             'networks': {}
         }
-        
+
         # Create manager and execute failing task
         config = ContainerConfig()
         manager = ContainerManager(config)
         manager.docker_client = self.docker_mock
-        
+
         result = manager.execute_containerized_task(
             task_id="failing-task",
             worktree_path=self.test_worktree,
             prompt_file=str(self.test_prompt),
             task_context={}
         )
-        
+
         # Verify failure is handled correctly
         self.assertEqual(result.status, "failed")
         self.assertEqual(result.exit_code, 1)
@@ -295,7 +288,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
     def setUp(self):
         """Set up test environment"""
         self.test_dir = Path(tempfile.mkdtemp())
-        
+
     def tearDown(self):
         """Clean up test environment"""
         if self.test_dir.exists():
@@ -307,9 +300,9 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         """Test that ExecutionEngine uses ContainerManager when available"""
         mock_manager = Mock()
         mock_container_manager.return_value = mock_manager
-        
+
         engine = ExecutionEngine()
-        
+
         # Verify ContainerManager was initialized
         mock_container_manager.assert_called_once()
         self.assertEqual(engine.execution_mode, "containerized")
@@ -319,14 +312,15 @@ class TestExecutionEngineContainerization(unittest.TestCase):
     def test_execution_engine_fallback_subprocess(self):
         """Test that ExecutionEngine falls back to subprocess when containers unavailable"""
         engine = ExecutionEngine()
-        
+
         self.assertEqual(engine.execution_mode, "subprocess")
         self.assertIsNone(engine.container_manager)
 
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('components.execution_engine.ContainerManager')
     def test_task_executor_containerized_execution(self, mock_container_manager):
-        """Test TaskExecutor uses containerized execution"""
+            TaskExecutor = None
+    """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
         mock_container_result.task_id = "test-task"
@@ -339,10 +333,10 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         mock_container_result.stderr = ""
         mock_container_result.error_message = None
         mock_container_result.resource_usage = {}
-        
+
         mock_manager.execute_containerized_task.return_value = mock_container_result
         mock_container_manager.return_value = mock_manager
-        
+
         # Create TaskExecutor
         executor = TaskExecutor(
             task_id="test-task",
@@ -350,13 +344,13 @@ class TestExecutionEngineContainerization(unittest.TestCase):
             prompt_file="test-prompt.md",
             task_context={'timeout_seconds': 3600}
         )
-        
+
         # Mock prompt generation to avoid file dependencies
         executor._generate_workflow_prompt = Mock(return_value="test-prompt.md")
-        
+
         # Execute task
         result = executor.execute()
-        
+
         # Verify containerized execution was used
         mock_manager.execute_containerized_task.assert_called_once_with(
             task_id="test-task",
@@ -365,13 +359,13 @@ class TestExecutionEngineContainerization(unittest.TestCase):
             task_context={'timeout_seconds': 3600},
             progress_callback=executor._progress_callback
         )
-        
+
         # Verify result conversion
         self.assertEqual(result.status, "success")
         self.assertEqual(result.exit_code, 0)
 
 
-@unittest.skipUnless(IMPORTS_AVAILABLE, "Monitoring modules not available") 
+@unittest.skipUnless(IMPORTS_AVAILABLE, "Monitoring modules not available")
 class TestOrchestrationMonitoring(unittest.TestCase):
     """Test real-time monitoring capabilities"""
 
@@ -379,7 +373,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         """Set up monitoring test environment"""
         self.test_dir = Path(tempfile.mkdtemp())
         self.monitor = OrchestrationMonitor(str(self.test_dir))
-        
+
     def tearDown(self):
         """Clean up monitoring test environment"""
         if hasattr(self, 'monitor'):
@@ -392,9 +386,9 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         """Test OrchestrationMonitor initialization"""
         mock_docker_client = Mock()
         mock_docker.from_env.return_value = mock_docker_client
-        
+
         monitor = OrchestrationMonitor(str(self.test_dir))
-        
+
         self.assertEqual(monitor.monitoring_dir, self.test_dir)
         self.assertTrue(monitor.monitoring_dir.exists())
         self.assertIsNotNone(monitor.docker_client)
@@ -404,7 +398,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         """Test container status monitoring"""
         mock_docker_client = Mock()
         mock_docker.from_env.return_value = mock_docker_client
-        
+
         # Mock container list
         mock_container = Mock()
         mock_container.id = "test-container"
@@ -427,19 +421,19 @@ class TestOrchestrationMonitoring(unittest.TestCase):
             },
             'networks': {'eth0': {'rx_bytes': 1000, 'tx_bytes': 2000}}
         }
-        
+
         mock_docker_client.containers.list.return_value = [mock_container]
-        
+
         monitor = OrchestrationMonitor(str(self.test_dir))
         monitor.docker_client = mock_docker_client
-        
+
         # Test status update
         asyncio.run(monitor.update_container_status())
-        
+
         # Verify container information was collected
         self.assertIn("orchestrator-test-task", monitor.active_containers)
         container_info = monitor.active_containers["orchestrator-test-task"]
-        
+
         self.assertEqual(container_info['name'], "orchestrator-test-task")
         self.assertEqual(container_info['status'], "running")
         self.assertEqual(container_info['task_id'], "test-task")
@@ -454,7 +448,7 @@ class TestPerformanceComparisons(unittest.TestCase):
         """Test that execution statistics properly track performance metrics"""
         # This would be an integration test measuring actual execution times
         # For unit testing, we verify the statistics structure
-        
+
         mock_stats = {
             'total_tasks': 5,
             'completed_tasks': 4,
@@ -466,10 +460,10 @@ class TestPerformanceComparisons(unittest.TestCase):
             'containerized_tasks': 4,
             'subprocess_tasks': 1
         }
-        
+
         # Calculate speedup
         speedup = mock_stats['total_execution_time'] / mock_stats['parallel_execution_time']
-        
+
         self.assertGreater(speedup, 3.0)  # Should achieve 3-5x speedup
         self.assertEqual(mock_stats['execution_mode'], 'containerized')
         self.assertEqual(mock_stats['total_tasks'], 5)
@@ -481,7 +475,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
     def setUp(self):
         """Set up integration test environment"""
         self.test_dir = Path(tempfile.mkdtemp())
-        
+
     def tearDown(self):
         """Clean up integration test environment"""
         if self.test_dir.exists():
@@ -496,7 +490,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
         mock_docker.from_env.return_value = mock_docker_client
         mock_docker_client.ping.return_value = True
         mock_docker_client.images.get.return_value = Mock()
-        
+
         # Mock successful container execution
         mock_container = Mock()
         mock_container.wait.return_value = {'StatusCode': 0}
@@ -507,7 +501,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
             'networks': {'eth0': {'rx_bytes': 1000, 'tx_bytes': 2000}}
         }
         mock_docker_client.containers.run.return_value = mock_container
-        
+
         # Create test prompt file
         prompt_file = self.test_dir / "test-workflow.md"
         prompt_file.write_text("""
@@ -519,16 +513,16 @@ Test containerized execution
 2. Execute task
 3. Generate results
 """)
-        
+
         # Mock worktree manager
         mock_worktree_manager = Mock()
         mock_worktree_info = Mock()
         mock_worktree_info.worktree_path = self.test_dir
         mock_worktree_manager.get_worktree.return_value = mock_worktree_info
-        
+
         # Create ExecutionEngine and execute
         engine = ExecutionEngine()
-        
+
         tasks = [
             {
                 'id': 'test-workflow-task',
@@ -536,19 +530,19 @@ Test containerized execution
                 'prompt_file': str(prompt_file)
             }
         ]
-        
+
         # Execute tasks
         results = engine.execute_tasks_parallel(tasks, mock_worktree_manager)
-        
+
         # Verify results
         self.assertEqual(len(results), 1)
         result = results['test-workflow-task']
-        
+
         # Verify containerized execution characteristics
         if engine.execution_mode == "containerized":
             # Should have used Docker
             mock_docker_client.containers.run.assert_called()
-            
+
             # Should have proper Claude CLI flags
             call_args = mock_docker_client.containers.run.call_args
             command = call_args[1]['command']
@@ -558,15 +552,15 @@ Test containerized execution
 
 def run_containerized_tests():
     """Run all containerized orchestrator tests"""
-    
+
     if not IMPORTS_AVAILABLE:
         print("⚠️  Cannot run tests - required modules not available")
         print("This is expected if Docker SDK or other dependencies are not installed")
         return
-    
+
     # Create test suite
     suite = unittest.TestSuite()
-    
+
     # Add all test classes
     test_classes = [
         TestContainerConfig,
@@ -576,15 +570,15 @@ def run_containerized_tests():
         TestPerformanceComparisons,
         TestIntegrationWorkflow
     ]
-    
+
     for test_class in test_classes:
         tests = unittest.TestLoader().loadTestsFromTestCase(test_class)
         suite.addTests(tests)
-    
+
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
-    
+
     # Print summary
     print(f"\n{'='*50}")
     print(f"Containerized Execution Tests Summary")
@@ -593,17 +587,17 @@ def run_containerized_tests():
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
     print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
-    
+
     if result.failures:
         print(f"\nFailures:")
         for test, traceback in result.failures:
             print(f"- {test}: {traceback.split(chr(10))[-2]}")
-    
+
     if result.errors:
         print(f"\nErrors:")
         for test, traceback in result.errors:
             print(f"- {test}: {traceback.split(chr(10))[-2]}")
-    
+
     return result.wasSuccessful()
 
 

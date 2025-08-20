@@ -46,7 +46,7 @@ except ImportError as e:
 
     # Define stubs for all needed classes
     from enum import Enum
-    from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List, Union
     from datetime import datetime
 
     class WorkflowPhase(Enum):

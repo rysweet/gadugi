@@ -32,6 +32,7 @@ Our pre-commit configuration automatically runs these checks:
 - **ruff**: Python linting with auto-fixes
 - **ruff-format**: Code formatting
 - **debug-statements**: Removes debug print statements
+- **pyright**: Type checking (runs on push)
 
 ### File Quality
 - **trailing-whitespace**: Removes trailing spaces
@@ -44,6 +45,7 @@ Our pre-commit configuration automatically runs these checks:
 
 ### Testing (on push)
 - **pytest**: Runs test suite before pushing
+- **pyright**: Type checking validation
 
 ## Usage
 
@@ -72,6 +74,10 @@ pre-commit run --all-files         # Standard projects
 # Run specific hook
 uv run pre-commit run ruff          # UV projects
 pre-commit run ruff                 # Standard projects
+
+# Run type checking specifically (pre-push stage)
+uv run pre-commit run pyright --hook-stage pre-push  # UV projects
+pre-commit run pyright --hook-stage pre-push         # Standard projects
 ```
 
 ## Troubleshooting
@@ -110,6 +116,10 @@ git commit -m "message" --no-verify
 # Run individual hook to see details
 uv run pre-commit run ruff --verbose
 uv run pre-commit run trailing-whitespace --verbose
+
+# Debug pyright type checking issues
+uv run pre-commit run pyright --hook-stage pre-push --verbose
+pyright container_runtime/  # Run pyright on specific directory
 ```
 
 ### Configuration Updates
@@ -161,6 +171,17 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
         exclude: .*\.lock$|package-lock\.json$
+
+  # Type checking (runs on push)
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright type checker
+        entry: pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
 
   # Testing (runs on push, not commit)
   - repo: local
@@ -220,3 +241,78 @@ Pre-commit hooks integrate with our development workflow:
 - **CI/CD**: Hooks run again in continuous integration
 
 This ensures consistent code quality across all development activities.
+
+## Pyright Type Checking
+
+### Overview
+
+Pyright provides static type checking for Python code, helping catch type-related errors before runtime. It's configured to run during the pre-push stage to avoid slowing down commits.
+
+### Configuration
+
+Pyright is configured via `pyrightconfig.json`:
+
+```json
+{
+  "typeCheckingMode": "standard",
+  "pythonVersion": "3.11",
+  "pythonPlatform": "All",
+  "reportMissingImports": "warning",
+  "reportMissingTypeStubs": "none",
+  "include": ["**/*.py"],
+  "exclude": [".venv", ".git", ".worktrees", "__pycache__"]
+}
+```
+
+### Key Features
+
+- **Docker Import Handling**: Uses `TYPE_CHECKING` guards for optional dependencies
+- **Standard Mode**: Balanced type checking that catches errors without being too strict
+- **Import Warnings**: Reports missing imports but allows development flexibility
+- **CI Integration**: Runs automatically on push to catch type issues early
+
+### Troubleshooting Type Issues
+
+**Common Docker Import Errors:**
+```python
+# ✅ Correct approach using TYPE_CHECKING
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import docker
+else:
+    docker = None
+
+try:
+    import docker  # type: ignore[import-untyped]
+    docker_available = True
+except ImportError:
+    docker_available = False
+```
+
+**Type Ignore Comments:**
+```python
+# Use specific ignore codes for better maintainability
+docker.from_env()  # type: ignore[attr-defined]
+```
+
+**Running Pyright Manually:**
+```bash
+# Check specific files
+pyright container_runtime/
+
+# Get verbose output
+pyright --verbose
+
+# Generate statistics
+pyright . --stats
+```
+
+### Integration with Development Workflow
+
+1. **Phase 6 Testing**: WorkflowManager agents verify pyright passes
+2. **Pre-push Hooks**: Automatic type checking before code sharing
+3. **PR Reviews**: Type issues block PR approval
+4. **CI/CD**: Additional verification in continuous integration
+
+This multi-layer approach ensures type safety without impeding development velocity.

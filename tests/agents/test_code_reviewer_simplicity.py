@@ -189,7 +189,7 @@ class Person:
         """Test that complex solutions are accepted for genuinely complex problems."""
         complex_but_justified_code = '''
 import asyncio
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
 

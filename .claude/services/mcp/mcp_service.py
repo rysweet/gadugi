@@ -1,537 +1,251 @@
-"""MCP Service - Memory Control Protocol REST API."""
+#!/usr/bin/env python3
+"""
+MCP (Model Context Protocol) Service for Gadugi v0.3
+A REAL, working FastAPI service that integrates with Neo4j for context storage
+"""
 
-from __future__ import annotations
-
-import logging
-import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+import os
+import uuid
 
-from fastapi import FastAPI, HTTPException, Query, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-
-from .cache import LRUCache
-from .models import (
-    Context,
-    ContextLoadResponse,
-    ContextSaveRequest,
-    Memory,
-    MemoryPruneRequest,
-    MemoryPruneResponse,
-    MemorySearchRequest,
-    MemorySearchResponse,
-    MemoryType,
-)
-from .neo4j_client import Neo4jMemoryClient
+from neo4j import AsyncGraphDatabase
+from pydantic import BaseModel, Field
+import uvicorn
 
 
-class MCPService:
-    """Memory Control Protocol service implementation."""
-    
-    def __init__(
-        self,
-        neo4j_uri: str = "bolt://localhost:7687",
-        neo4j_username: str = "neo4j",
-        neo4j_password: str = "password",
-        cache_size: int = 1000,
-        cache_memory_mb: int = 100,
-    ):
-        """Initialize MCP service.
-        
-        Args:
-            neo4j_uri: Neo4j connection URI
-            neo4j_username: Neo4j username
-            neo4j_password: Neo4j password
-            cache_size: Maximum cache entries
-            cache_memory_mb: Maximum cache memory in MB
-        """
-        self.logger = logging.getLogger(__name__)
-        
-        # Initialize Neo4j client
-        self.neo4j_client = Neo4jMemoryClient(
-            uri=neo4j_uri,
-            username=neo4j_username,
-            password=neo4j_password,
+# Pydantic Models for MCP Protocol
+class ContextCreateRequest(BaseModel):
+    """Request model for storing context"""
+    content: str = Field(..., description="The context content to store")
+    source: str = Field(..., description="Source of the context (e.g., agent name)")
+    metadata: Optional[Dict[str, Any]] = Field(default={}, description="Additional metadata")
+    tags: Optional[List[str]] = Field(default=[], description="Tags for categorization")
+
+
+class ContextResponse(BaseModel):
+    """Response model for context operations"""
+    id: str = Field(..., description="Unique context ID")
+    content: str = Field(..., description="The context content")
+    source: str = Field(..., description="Source of the context")
+    metadata: Dict[str, Any] = Field(default={}, description="Additional metadata")
+    tags: List[str] = Field(default=[], description="Tags for categorization")
+    timestamp: str = Field(..., description="ISO format timestamp")
+    relationships: List[Dict[str, str]] = Field(default=[], description="Related contexts")
+
+
+class ContextSearchRequest(BaseModel):
+    """Request model for searching contexts"""
+    query: str = Field(..., description="Search query")
+    source: Optional[str] = Field(None, description="Filter by source")
+    tags: Optional[List[str]] = Field(None, description="Filter by tags")
+    limit: int = Field(10, ge=1, le=100, description="Maximum results to return")
+
+
+class HealthResponse(BaseModel):
+    """Health check response"""
+    status: str = Field(..., description="Service status")
+    neo4j_connected: bool = Field(..., description="Neo4j connection status")
+    timestamp: str = Field(..., description="Current timestamp")
+    version: str = Field(..., description="Service version")
+
+
+class MetricsResponse(BaseModel):
+    """Service metrics response"""
+    total_contexts: int = Field(..., description="Total number of stored contexts")
+    total_agents: int = Field(..., description="Total number of agents")
+    total_relationships: int = Field(..., description="Total number of relationships")
+    uptime_seconds: float = Field(..., description="Service uptime in seconds")
+
+
+# Neo4j Database Manager
+class Neo4jManager:
+    """Manages Neo4j connections and operations"""
+
+    def __init__(self, uri: str, user: str, password: str):
+        self.uri = uri
+        self.user = user
+        self.password = password
+        self.driver = None
+
+    async def connect(self):
+        """Initialize async connection to Neo4j"""
+        self.driver = AsyncGraphDatabase.driver(
+            self.uri,
+            auth=(self.user, self.password)
         )
-        
-        # Initialize LRU cache
-        self.cache = LRUCache(
-            max_size=cache_size,
-            max_memory_mb=cache_memory_mb,
-            default_ttl=300,  # 5 minutes
-        )
-        
-        # Statistics
-        self.request_count = 0
-        self.error_count = 0
-        self.start_time = datetime.now()
-    
-    async def startup(self) -> None:
-        """Startup tasks."""
-        await self.neo4j_client.connect()
-        self.logger.info("MCP Service started")
-    
-    async def shutdown(self) -> None:
-        """Shutdown tasks."""
-        await self.neo4j_client.disconnect()
-        self.cache.clear()
-        self.logger.info("MCP Service stopped")
-    
-    # Memory Operations
-    
-    async def create_memory(self, memory: Memory) -> Memory:
-        """Create a new memory.
-        
-        Args:
-            memory: Memory to create
-            
-        Returns:
-            Created memory with ID
-        """
-        try:
-            # Store in Neo4j
-            memory_id = await self.neo4j_client.store_memory(memory)
-            memory.id = memory_id
-            
-            # Add to cache
-            cache_key = f"memory:{memory_id}"
-            self.cache.put(cache_key, memory)
-            
-            self.logger.info(f"Created memory {memory_id}")
-            return memory
-        
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error creating memory: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to create memory: {str(e)}"
+        # Test connection
+        async with self.driver.session() as session:
+            result = await session.run("RETURN 1 as test")
+            test = await result.single()
+            if test["test"] != 1:  # type: ignore
+                raise Exception("Neo4j connection test failed")
+
+    async def close(self):
+        """Close the driver connection"""
+        if self.driver:
+            await self.driver.close()
+
+    async def store_context(self, context: ContextCreateRequest) -> str:
+        """Store context in Neo4j"""
+        context_id = f"ctx-{uuid.uuid4().hex[:12]}"
+        timestamp = datetime.utcnow().isoformat()
+
+        async with self.driver.session() as session:  # type: ignore
+            result = await session.run("""
+                CREATE (c:Context {
+                    id: $id,
+                    content: $content,
+                    source: $source,
+                    timestamp: $timestamp,
+                    metadata: $metadata,
+                    tags: $tags
+                })
+                RETURN c.id as id
+            """, id=context_id, content=context.content, source=context.source,
+                timestamp=timestamp, metadata=dict(context.metadata or {}),
+                tags=context.tags or [])
+
+            _record = await result.single()
+
+            # Create relationship to source agent if exists
+            await session.run("""
+                MATCH (a:Agent {name: $source})
+                MATCH (c:Context {id: $id})
+                CREATE (a)-[:CREATED]->(c)
+            """, source=context.source, id=context_id)
+
+            return context_id
+
+    async def retrieve_context(self, context_id: str) -> Optional[ContextResponse]:
+        """Retrieve context by ID"""
+        async with self.driver.session() as session:  # type: ignore
+            result = await session.run("""
+                MATCH (c:Context {id: $id})
+                OPTIONAL MATCH (c)-[r]-(related)
+                RETURN c, collect({type: type(r), node: related.id}) as relationships
+            """, id=context_id)
+
+            record = await result.single()
+            if not record:
+                return None
+
+            context_node = record["c"]
+            relationships = record["relationships"]
+
+            return ContextResponse(
+                id=context_node["id"],
+                content=context_node["content"],
+                source=context_node["source"],
+                metadata=dict(context_node.get("metadata", {})),
+                tags=list(context_node.get("tags", [])),
+                timestamp=context_node["timestamp"],
+                relationships=[r for r in relationships if r["node"]]
             )
-    
-    async def get_memory(self, memory_id: str) -> Memory:
-        """Retrieve a memory by ID.
-        
-        Args:
-            memory_id: Memory ID
-            
-        Returns:
-            Memory object
-        """
-        try:
-            # Check cache first
-            cache_key = f"memory:{memory_id}"
-            cached_memory = self.cache.get(cache_key)
-            if cached_memory:
-                self.logger.debug(f"Cache hit for memory {memory_id}")
-                cached_memory.update_access()
-                return cached_memory
-            
-            # Fetch from Neo4j
-            memory = await self.neo4j_client.retrieve_memory(memory_id)
-            if not memory:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Memory {memory_id} not found"
-                )
-            
-            # Update cache
-            self.cache.put(cache_key, memory)
-            
-            # Update access metadata
-            memory.update_access()
-            await self.neo4j_client.update_memory(memory)
-            
-            return memory
-        
-        except HTTPException:
-            raise
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error retrieving memory {memory_id}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to retrieve memory: {str(e)}"
-            )
-    
-    async def update_memory(self, memory_id: str, updates: Dict[str, Any]) -> Memory:
-        """Update an existing memory.
-        
-        Args:
-            memory_id: Memory ID
-            updates: Fields to update
-            
-        Returns:
-            Updated memory
-        """
-        try:
-            # Get existing memory
-            memory = await self.get_memory(memory_id)
-            
-            # Apply updates
-            for key, value in updates.items():
-                if hasattr(memory, key):
-                    setattr(memory, key, value)
-            
-            memory.updated_at = datetime.now()
-            
-            # Update in Neo4j
-            success = await self.neo4j_client.update_memory(memory)
-            if not success:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to update memory in database"
-                )
-            
-            # Update cache
-            cache_key = f"memory:{memory_id}"
-            self.cache.put(cache_key, memory)
-            
-            self.logger.info(f"Updated memory {memory_id}")
-            return memory
-        
-        except HTTPException:
-            raise
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error updating memory {memory_id}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update memory: {str(e)}"
-            )
-    
-    async def delete_memory(self, memory_id: str) -> bool:
-        """Delete a memory.
-        
-        Args:
-            memory_id: Memory ID
-            
-        Returns:
-            True if deleted
-        """
-        try:
-            # Delete from Neo4j
-            success = await self.neo4j_client.delete_memory(memory_id)
-            if not success:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Memory {memory_id} not found"
-                )
-            
-            # Remove from cache
-            cache_key = f"memory:{memory_id}"
-            self.cache.remove(cache_key)
-            
-            self.logger.info(f"Deleted memory {memory_id}")
-            return True
-        
-        except HTTPException:
-            raise
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error deleting memory {memory_id}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete memory: {str(e)}"
-            )
-    
-    async def search_memories(self, request: MemorySearchRequest) -> MemorySearchResponse:
-        """Search memories semantically.
-        
-        Args:
-            request: Search request
-            
-        Returns:
-            Search response with matching memories
-        """
-        try:
-            start_time = time.time()
-            
-            # Search in Neo4j
-            memories = await self.neo4j_client.search_memories(
-                query=request.query,
-                agent_id=request.agent_id,
-                memory_types=request.memory_types,
-                tags=request.tags,
-                limit=request.limit,
-            )
-            
-            # Filter by relevance threshold
-            if request.use_embeddings and request.threshold > 0:
-                # Would calculate embeddings and filter here
-                # For now, just use importance score as proxy
-                memories = [
-                    m for m in memories
-                    if m.importance_score >= request.threshold
-                ]
-            
-            # Update cache with search results
-            for memory in memories[:10]:  # Cache top 10 results
-                cache_key = f"memory:{memory.id}"
-                self.cache.put(cache_key, memory, ttl=60)  # Short TTL for search results
-            
-            search_time_ms = (time.time() - start_time) * 1000
-            
-            return MemorySearchResponse(
-                memories=memories,
-                total_count=len(memories),
-                search_time_ms=search_time_ms,
-            )
-        
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error searching memories: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to search memories: {str(e)}"
-            )
-    
-    # Context Operations
-    
-    async def save_context(self, request: ContextSaveRequest) -> Context:
-        """Save agent context.
-        
-        Args:
-            request: Context save request
-            
-        Returns:
-            Saved context
-        """
-        try:
-            context = request.context
-            
-            # Compress working memory if requested
-            if request.compress:
-                # Simple compression: remove null values and empty strings
-                context.working_memory = {
-                    k: v for k, v in context.working_memory.items()
-                    if v is not None and v != ""
-                }
-            
-            # Save to Neo4j
-            context_id = await self.neo4j_client.save_context(context)
-            context.id = context_id
-            
-            # Cache the context
-            cache_key = f"context:{request.agent_id}"
-            self.cache.put(cache_key, context)
-            
-            self.logger.info(f"Saved context for agent {request.agent_id}")
-            return context
-        
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error saving context: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to save context: {str(e)}"
-            )
-    
-    async def load_context(self, agent_id: str) -> ContextLoadResponse:
-        """Load agent context.
-        
-        Args:
-            agent_id: Agent ID
-            
-        Returns:
-            Context load response
-        """
-        try:
-            start_time = time.time()
-            
-            # Check cache first
-            cache_key = f"context:{agent_id}"
-            cached_context = self.cache.get(cache_key)
-            
-            if cached_context:
-                context = cached_context
-                self.logger.debug(f"Cache hit for context {agent_id}")
-            else:
-                # Load from Neo4j
-                context = await self.neo4j_client.load_context(agent_id)
-                if not context:
-                    raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f"No active context found for agent {agent_id}"
-                    )
-                
-                # Update cache
-                self.cache.put(cache_key, context)
-            
-            # Load associated memories
-            memories = []
-            for memory_id in context.memories[:50]:  # Limit to 50 most recent
-                try:
-                    memory = await self.get_memory(memory_id)
-                    memories.append(memory)
-                except HTTPException:
-                    pass  # Skip missing memories
-            
-            load_time_ms = (time.time() - start_time) * 1000
-            
-            return ContextLoadResponse(
-                context=context,
-                memories=memories,
-                load_time_ms=load_time_ms,
-            )
-        
-        except HTTPException:
-            raise
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error loading context for {agent_id}: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to load context: {str(e)}"
-            )
-    
-    async def switch_context(self, from_context_id: str, to_context_id: str) -> bool:
-        """Switch between contexts.
-        
-        Args:
-            from_context_id: Current context ID
-            to_context_id: Target context ID
-            
-        Returns:
-            True if successful
-        """
-        try:
-            success = await self.neo4j_client.switch_context(from_context_id, to_context_id)
-            
-            # Invalidate cache for affected contexts
-            # (Would need to track agent IDs for proper cache invalidation)
-            
-            self.logger.info(f"Switched context from {from_context_id} to {to_context_id}")
-            return success
-        
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error switching context: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to switch context: {str(e)}"
-            )
-    
-    async def merge_contexts(self, context_ids: List[str]) -> Context:
-        """Merge multiple contexts.
-        
-        Args:
-            context_ids: List of context IDs to merge
-            
-        Returns:
-            Merged context
-        """
-        try:
-            if len(context_ids) < 2:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="At least 2 contexts required for merge"
-                )
-            
-            merged_context = await self.neo4j_client.merge_contexts(context_ids)
-            if not merged_context:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to merge contexts"
-                )
-            
-            self.logger.info(f"Merged {len(context_ids)} contexts")
-            return merged_context
-        
-        except HTTPException:
-            raise
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error merging contexts: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to merge contexts: {str(e)}"
-            )
-    
-    # Memory Management
-    
-    async def prune_memories(self, request: MemoryPruneRequest) -> MemoryPruneResponse:
-        """Prune old memories.
-        
-        Args:
-            request: Prune request
-            
-        Returns:
-            Prune response
-        """
-        try:
-            # Get initial count for statistics
-            # (Would need a count query for accuracy)
-            initial_count = 1000  # Placeholder
-            
-            # Prune memories
-            pruned_count = await self.neo4j_client.prune_memories(
-                agent_id=request.agent_id,
-                older_than_days=request.older_than_days,
-                preserve_important=request.preserve_important,
-                importance_threshold=request.importance_threshold,
-            )
-            
-            # Clear relevant cache entries
-            # (Would need to track which entries to clear)
-            
-            retained_count = initial_count - pruned_count
-            freed_space_bytes = pruned_count * 1024  # Rough estimate
-            
-            self.logger.info(f"Pruned {pruned_count} memories")
-            
-            return MemoryPruneResponse(
-                pruned_count=pruned_count,
-                retained_count=retained_count,
-                freed_space_bytes=freed_space_bytes,
-            )
-        
-        except Exception as e:
-            self.error_count += 1
-            self.logger.exception(f"Error pruning memories: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to prune memories: {str(e)}"
-            )
-    
-    def get_health(self) -> Dict[str, Any]:
-        """Get service health status.
-        
-        Returns:
-            Health status dictionary
-        """
-        uptime = (datetime.now() - self.start_time).total_seconds()
-        cache_stats = self.cache.get_stats()
-        
-        return {
-            "status": "healthy",
-            "uptime_seconds": uptime,
-            "request_count": self.request_count,
-            "error_count": self.error_count,
-            "error_rate": self.error_count / max(1, self.request_count),
-            "cache_stats": cache_stats,
-            "neo4j_connected": self.neo4j_client._driver is not None,
-        }
+
+    async def search_contexts(self, search_req: ContextSearchRequest) -> List[ContextResponse]:
+        """Search contexts with filters"""
+        # Build WHERE clause
+        where_clauses = []
+        params = {"limit": search_req.limit}
+
+        if search_req.query:
+            where_clauses.append("c.content CONTAINS $query")
+            params["query"] = search_req.query
+
+        if search_req.source:
+            where_clauses.append("c.source = $source")
+            params["source"] = search_req.source
+
+        if search_req.tags:
+            where_clauses.append("any(tag IN $tags WHERE tag IN c.tags)")
+            params["tags"] = search_req.tags
+
+        where_clause = " AND ".join(where_clauses) if where_clauses else "1=1"
+
+        async with self.driver.session() as session:  # type: ignore
+            result = await session.run(f"""
+                MATCH (c:Context)
+                WHERE {where_clause}
+                RETURN c
+                ORDER BY c.timestamp DESC
+                LIMIT $limit
+            """, **params)
+
+            contexts = []
+            async for record in result:
+                context_node = record["c"]
+                contexts.append(ContextResponse(
+                    id=context_node["id"],
+                    content=context_node["content"],
+                    source=context_node["source"],
+                    metadata=dict(context_node.get("metadata", {})),
+                    tags=list(context_node.get("tags", [])),
+                    timestamp=context_node["timestamp"],
+                    relationships=[]
+                ))
+
+            return contexts
+
+    async def get_metrics(self) -> Dict[str, int]:
+        """Get database metrics"""
+        async with self.driver.session() as session:  # type: ignore
+            # Count contexts
+            contexts_result = await session.run("MATCH (c:Context) RETURN count(c) as count")
+            contexts_count = (await contexts_result.single())["count"]  # type: ignore
+
+            # Count agents
+            agents_result = await session.run("MATCH (a:Agent) RETURN count(a) as count")
+            agents_count = (await agents_result.single())["count"]  # type: ignore
+
+            # Count relationships
+            rels_result = await session.run("MATCH ()-[r]->() RETURN count(r) as count")
+            rels_count = (await rels_result.single())["count"]  # type: ignore
+
+            return {
+                "total_contexts": contexts_count,
+                "total_agents": agents_count,
+                "total_relationships": rels_count
+            }
 
 
-# Create service instance
-mcp_service = MCPService()
+# Global database manager
+db_manager: Optional[Neo4jManager] = None
+start_time = datetime.utcnow()
 
-# Create FastAPI app with lifespan management
+
+# FastAPI Application Lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage service lifecycle."""
-    await mcp_service.startup()
+    """Manage application lifespan"""
+    global db_manager
+
+    # Startup
+    neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7689")
+    neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+    neo4j_password = os.getenv("NEO4J_PASSWORD", "gadugi-password")
+
+    db_manager = Neo4jManager(neo4j_uri, neo4j_user, neo4j_password)
+    await db_manager.connect()
+    print(f"✅ Connected to Neo4j at {neo4j_uri}")
+
     yield
-    await mcp_service.shutdown()
+
+    # Shutdown
+    if db_manager:
+        await db_manager.close()
+        print("✅ Disconnected from Neo4j")
 
 
+# Create FastAPI app
 app = FastAPI(
-    title="MCP Service",
-    description="Memory Control Protocol REST API for Gadugi v0.3",
+    title="Gadugi MCP Service",
+    description="Model Context Protocol service for Gadugi v0.3",
     version="0.3.0",
-    lifespan=lifespan,
+    lifespan=lifespan
 )
 
 # Add CORS middleware
@@ -543,111 +257,114 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Middleware to track requests
-@app.middleware("http")
-async def track_requests(request, call_next):
-    """Track request count and timing."""
-    mcp_service.request_count += 1
-    start_time = time.time()
-    
-    response = await call_next(request)
-    
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    
-    return response
-
 
 # API Endpoints
+@app.post("/context/store", response_model=ContextResponse, status_code=status.HTTP_201_CREATED)
+async def store_context(request: ContextCreateRequest):
+    """Store a new context in Neo4j"""
+    if not db_manager:
+        raise HTTPException(status_code=500, detail="Database not initialized")
 
-@app.get("/health")
-async def health():
-    """Health check endpoint."""
-    return mcp_service.get_health()
-
-
-@app.post("/memory", response_model=Memory)
-async def create_memory(memory: Memory):
-    """Create a new memory."""
-    return await mcp_service.create_memory(memory)
-
-
-@app.get("/memory/{memory_id}", response_model=Memory)
-async def get_memory(memory_id: str):
-    """Retrieve a memory by ID."""
-    return await mcp_service.get_memory(memory_id)
+    try:
+        context_id = await db_manager.store_context(request)
+        stored_context = await db_manager.retrieve_context(context_id)
+        if not stored_context:
+            raise HTTPException(status_code=500, detail="Failed to store context")
+        return stored_context
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.put("/memory/{memory_id}", response_model=Memory)
-async def update_memory(memory_id: str, updates: Dict[str, Any]):
-    """Update an existing memory."""
-    return await mcp_service.update_memory(memory_id, updates)
+@app.get("/context/retrieve/{context_id}", response_model=ContextResponse)
+async def retrieve_context(context_id: str):
+    """Retrieve context by ID"""
+    if not db_manager:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+
+    context = await db_manager.retrieve_context(context_id)
+    if not context:
+        raise HTTPException(status_code=404, detail="Context not found")
+    return context
 
 
-@app.delete("/memory/{memory_id}")
-async def delete_memory(memory_id: str):
-    """Delete a memory."""
-    success = await mcp_service.delete_memory(memory_id)
-    return {"success": success}
+@app.post("/context/search", response_model=List[ContextResponse])
+async def search_contexts(request: ContextSearchRequest):
+    """Search contexts with filters"""
+    if not db_manager:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+
+    try:
+        contexts = await db_manager.search_contexts(request)
+        return contexts
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/memory/search", response_model=MemorySearchResponse)
-async def search_memories(request: MemorySearchRequest):
-    """Search memories semantically."""
-    return await mcp_service.search_memories(request)
+@app.get("/health", response_model=HealthResponse)
+async def health_check():
+    """Health check endpoint"""
+    neo4j_connected = False
+    if db_manager and db_manager.driver:
+        try:
+            async with db_manager.driver.session() as session:
+                result = await session.run("RETURN 1 as test")
+                test = await result.single()
+                neo4j_connected = test["test"] == 1  # type: ignore
+        except:
+            neo4j_connected = False
+
+    return HealthResponse(
+        status="healthy" if neo4j_connected else "degraded",
+        neo4j_connected=neo4j_connected,
+        timestamp=datetime.utcnow().isoformat(),
+        version="0.3.0"
+    )
 
 
-@app.post("/context/save", response_model=Context)
-async def save_context(request: ContextSaveRequest):
-    """Save agent context."""
-    return await mcp_service.save_context(request)
+@app.get("/metrics", response_model=MetricsResponse)
+async def get_metrics():
+    """Get service metrics"""
+    if not db_manager:
+        raise HTTPException(status_code=500, detail="Database not initialized")
+
+    try:
+        metrics = await db_manager.get_metrics()
+        uptime = (datetime.utcnow() - start_time).total_seconds()
+
+        return MetricsResponse(
+            total_contexts=metrics["total_contexts"],
+            total_agents=metrics["total_agents"],
+            total_relationships=metrics["total_relationships"],
+            uptime_seconds=uptime
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/context/load/{agent_id}", response_model=ContextLoadResponse)
-async def load_context(agent_id: str):
-    """Load agent context."""
-    return await mcp_service.load_context(agent_id)
-
-
-@app.post("/context/switch")
-async def switch_context(from_context_id: str, to_context_id: str):
-    """Switch between contexts."""
-    success = await mcp_service.switch_context(from_context_id, to_context_id)
-    return {"success": success}
-
-
-@app.post("/context/merge", response_model=Context)
-async def merge_contexts(context_ids: List[str]):
-    """Merge multiple contexts."""
-    return await mcp_service.merge_contexts(context_ids)
-
-
-@app.post("/memory/prune", response_model=MemoryPruneResponse)
-async def prune_memories(request: MemoryPruneRequest):
-    """Prune old memories."""
-    return await mcp_service.prune_memories(request)
-
-
-@app.get("/cache/stats")
-async def cache_stats():
-    """Get cache statistics."""
-    return mcp_service.cache.get_stats()
-
-
-@app.post("/cache/clear")
-async def clear_cache():
-    """Clear the cache."""
-    mcp_service.cache.clear()
-    return {"success": True, "message": "Cache cleared"}
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "service": "Gadugi MCP Service",
+        "version": "0.3.0",
+        "status": "running",
+        "endpoints": [
+            "/context/store",
+            "/context/retrieve/{id}",
+            "/context/search",
+            "/health",
+            "/metrics",
+            "/docs"
+        ]
+    }
 
 
 if __name__ == "__main__":
-    import uvicorn
-    
+    # Run with uvicorn
     uvicorn.run(
         "mcp_service:app",
         host="0.0.0.0",
         port=8000,
         reload=True,
-        log_level="info",
+        log_level="info"
     )

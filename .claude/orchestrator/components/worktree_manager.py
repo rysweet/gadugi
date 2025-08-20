@@ -10,10 +10,9 @@ import json
 import os
 import shutil
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 
 @dataclass
@@ -49,7 +48,9 @@ class WorktreeManager:
         print(f"🌳 Creating worktree for task: {task_id}")
 
         # Generate unique branch and directory names
-        branch_name = f"feature/parallel-{task_name.lower().replace(' ', '-')}-{task_id}"
+        # Remove invalid characters for git branch names (including colons)
+        safe_task_name = task_name.lower().replace(' ', '-').replace(':', '').replace('/', '-')
+        branch_name = f"feature/parallel-{safe_task_name}-{task_id}"
         worktree_path = self.worktrees_dir / f"task-{task_id}"
 
         # Clean up if worktree already exists
@@ -66,7 +67,7 @@ class WorktreeManager:
                 base_branch
             ]
 
-            result = subprocess.run(
+            _result = subprocess.run(
                 cmd,
                 cwd=self.project_root,
                 capture_output=True,

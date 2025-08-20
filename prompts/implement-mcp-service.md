@@ -1,49 +1,30 @@
-# Task: Implement MCP Service
+# Implement MCP Service
 
-## Description
-Implement the MCP (Memory Control Protocol) service as frontend to Neo4j for memory management.
+## Objective
+Fix pyright errors and implement MCP (Model Context Protocol) service for Gadugi v0.3
 
 ## Requirements
-1. **Location**: `.claude/services/mcp/`
-2. **Recipe**: `.claude/recipes/memory-system/requirements.md`
-3. **Integration**: Neo4j database client
+1. Fix the 11 pyright errors in .claude/services/mcp/mcp_service.py
+2. Ensure FastAPI service connects to Neo4j on port 7475
+3. Run the test suite at .claude/services/mcp/test_mcp_service.py
 
-## Implementation Requirements
-- REST API for memory operations (CRUD)
-- Caching layer with in-memory LRU cache
-- Context retrieval by relevance using semantic search
-- Integration with Neo4j client for persistent storage
-- Memory pruning capabilities for old/irrelevant memories
-- Session context tracking and restoration
+## Technical Details
+- MCP service is built with FastAPI
+- Must integrate with Neo4j database on port 7475
+- Service handles model context protocol operations
+- Existing test suite needs to pass
 
-## Memory Types to Support
-- Episodic memories (specific events and interactions)
-- Semantic memories (facts and knowledge)
-- Procedural memories (how-to knowledge)
-- Working memories (current task context)
-- Shared memories (team knowledge base)
+## Error Resolution
+- Address all 11 pyright type checking errors
+- Ensure proper type annotations
+- Fix any import or dependency issues
 
-## API Endpoints
-- `POST /memory` - Store new memory
-- `GET /memory/{id}` - Retrieve specific memory
-- `PUT /memory/{id}` - Update memory
-- `DELETE /memory/{id}` - Delete memory
-- `POST /memory/search` - Search memories semantically
-- `POST /context/save` - Save session context
-- `GET /context/load/{agent_id}` - Load session context
-- `POST /memory/prune` - Prune old memories
+## Testing Requirements
+- Run existing test suite: `uv run pytest .claude/services/mcp/test_mcp_service.py`
+- Ensure all tests pass
+- Verify Neo4j connection works properly
 
-## Quality Requirements
-- All Python code must use `uv run` for commands
-- Code must be pyright clean
-- Code must be ruff formatted
-- All tests must pass
-- Sub-100ms response time for recent items
-
-## Files to Create/Modify
-1. `.claude/services/mcp/mcp_service.py` - Main MCP service with FastAPI
-2. `.claude/services/mcp/models.py` - Memory and context models
-3. `.claude/services/mcp/cache.py` - LRU cache implementation
-4. `.claude/services/mcp/neo4j_client.py` - Neo4j integration
-5. `.claude/services/mcp/tests/test_mcp_service.py` - Unit tests
-6. `.claude/services/mcp/__init__.py` - Module exports
+## Success Criteria
+- All pyright errors resolved
+- FastAPI service connects successfully to Neo4j
+- Test suite passes completely

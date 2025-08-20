@@ -143,7 +143,7 @@ class CreditCardProcessor(PaymentProcessor):
         pr_files = {
             "src/orchestrator.py": '''
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 from dataclasses import dataclass
 from enum import Enum
 
@@ -240,7 +240,7 @@ class TestSimplicityDetectionAccuracy(unittest.TestCase):
         """Test that appropriate complexity is not flagged as over-engineering."""
 
         # Case 1: Multiple implementations justify abstraction
-        justified_abstraction = """
+        _justified_abstraction = """
 class PaymentProcessor(ABC):
     @abstractmethod
     def process(self, amount: float) -> bool: pass
@@ -256,7 +256,7 @@ class BankTransferProcessor(PaymentProcessor):
 """
 
         # Case 2: Complex domain requires complex solution
-        justified_complexity = '''
+        _justified_complexity = '''
 class TradingAlgorithm:
     """
     High-frequency trading algorithm with complex requirements:
@@ -279,7 +279,7 @@ class TradingAlgorithm:
         """Test accurate detection of genuine over-engineering."""
 
         # Case 1: Abstract class with single implementation
-        over_engineered_1 = """
+        _over_engineered_1 = """
 class ReportGenerator(ABC):
     @abstractmethod
     def generate(self) -> str: pass
@@ -290,7 +290,7 @@ class PDFReportGenerator(ReportGenerator):
 """
 
         # Case 2: Configuration that's never varied
-        over_engineered_2 = """
+        _over_engineered_2 = """
 class AppConfig:
     def __init__(self):
         # These are never actually configured differently
@@ -301,7 +301,7 @@ class AppConfig:
 """
 
         # Case 3: Builder for simple data
-        over_engineered_3 = """
+        _over_engineered_3 = """
 class PersonBuilder:
     def name(self, name): self._name = name; return self
     def age(self, age): self._age = age; return self

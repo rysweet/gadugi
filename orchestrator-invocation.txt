@@ -1,0 +1,16 @@
+/agent:orchestrator-agent
+
+Execute these specific prompts for Gadugi v0.3 implementation:
+- setup-neo4j-gadugi.md
+- implement-mcp-service.md
+- implement-agent-framework.md
+- fix-remaining-pyright-errors.md
+
+CRITICAL REQUIREMENTS:
+1. This is a UV Python project - ALL Python commands must use 'uv run' prefix
+2. Neo4j runs on port 7475 (non-standard)
+3. Use parallel execution where possible:
+   - Group 1 (parallel): setup-neo4j-gadugi.md, implement-agent-framework.md
+   - Group 2 (sequential): implement-mcp-service.md (needs Neo4j), fix-remaining-pyright-errors.md (run last)
+4. Each task MUST follow complete 11-phase WorkflowManager workflow
+5. Ensure proper worktree isolation for all tasks

@@ -13,6 +13,7 @@ from datetime import datetime
 
 # Add the source directories to the Python path for imports
 import sys
+from typing import Set
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(

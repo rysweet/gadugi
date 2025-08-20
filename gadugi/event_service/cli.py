@@ -25,6 +25,7 @@ from .config import (
 )
 from .events import create_local_event
 from .github_client import GitHubClient
+from typing import List
 
 logger = logging.getLogger(__name__)
 

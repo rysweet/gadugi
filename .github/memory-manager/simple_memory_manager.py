@@ -8,7 +8,7 @@ synchronization and providing native GitHub integration.
 """
 
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from pathlib import Path
 import sys
@@ -331,7 +331,7 @@ enhanced integration with GitHub's collaboration features."""
 
             # Look for section header (### SECTION - TIMESTAMP)
             section_line = None
-            for i, line in enumerate(lines):
+            for _i, line in enumerate(lines):
                 if line.startswith("### ") and " - " in line:
                     section_line = line
                     break

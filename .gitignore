@@ -74,6 +74,8 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
+.coverage
+htmlcov/
 
 # nyc test coverage
 .nyc_output
@@ -95,6 +97,9 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+tmp-*
+*.bak
+*-checkpoint.md
 
 # Python
 __pycache__/
@@ -145,4 +150,15 @@ Pipfile.lock
 .github/workflow-checkpoints/
 .task/
 
-.task/
+# Gadugi monitoring and orchestrator runtime files
+.gadugi/monitoring/
+.gadugi/logs/
+.gadugi/cache/
+
+# Git worktrees (used for parallel development)
+.worktrees/
+
+# Temporary orchestrator files
+orchestration-*/
+*_orchestration.json
+*_orchestration.log

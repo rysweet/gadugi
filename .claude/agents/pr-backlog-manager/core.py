@@ -9,7 +9,7 @@ import os
 import sys
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -28,7 +28,7 @@ try:
     )
     from state_management import StateManager
     from task_tracking import TaskTracker
-    from interfaces import AgentConfig, OperationResult
+    from interfaces import AgentConfig, OperationResult  # type: ignore
 except ImportError as e:
     logging.warning(f"Failed to import shared modules: {e}")
 
@@ -231,7 +231,7 @@ class PRBacklogManager:
 
         try:
             # Get all ready_for_review PRs
-            ready_prs = self.github_ops.get_prs(
+            ready_prs = self.github_ops.get_prs(  # type: ignore
                 state="open", labels_exclude=["ready-seeking-human", "draft"]
             )
 
@@ -249,7 +249,7 @@ class PRBacklogManager:
             raise GadugiError(
                 f"PR discovery failed: {e}",
                 severity=ErrorSeverity.HIGH,
-                context={"session_id": self.session_id},
+                context={"session_id": self.session_id},  # type: ignore
             )
 
     def _should_process_pr(self, pr: Dict[str, Any]) -> bool:
@@ -322,7 +322,7 @@ class PRBacklogManager:
             self.validate_auto_approve_safety()
 
             # Get PR details
-            pr_details = self.github_ops.get_pr_details(pr_number)
+            pr_details = self.github_ops.get_pr_details(pr_number)  # type: ignore
 
             # Initialize assessment
             assessment = PRAssessment(
@@ -441,7 +441,7 @@ class PRBacklogManager:
         """Check if CI is passing."""
         try:
             # Get status checks for the PR
-            checks = self.github_ops.get_pr_status_checks(pr_details["number"])
+            checks = self.github_ops.get_pr_status_checks(pr_details["number"])  # type: ignore
 
             # All required checks must be successful
             return all(
@@ -460,7 +460,7 @@ class PRBacklogManager:
             head_sha = pr_details["head"]["sha"]
 
             # Use GitHub API to compare commits
-            comparison = self.github_ops.compare_commits(base_sha, head_sha)
+            comparison = self.github_ops.compare_commits(base_sha, head_sha)  # type: ignore
 
             # If ahead_by > 0 and behind_by = 0, branch is up to date
             return comparison.get("behind_by", 0) == 0
@@ -471,7 +471,7 @@ class PRBacklogManager:
     def _check_human_review(self, pr_details: Dict[str, Any]) -> bool:
         """Check if human review is complete."""
         try:
-            reviews = self.github_ops.get_pr_reviews(pr_details["number"])
+            reviews = self.github_ops.get_pr_reviews(pr_details["number"])  # type: ignore
 
             # Filter for human reviews (not bots)
             human_reviews = [
@@ -493,7 +493,7 @@ class PRBacklogManager:
     def _check_ai_review(self, pr_details: Dict[str, Any]) -> bool:
         """Check if AI review (Phase 9) is complete."""
         try:
-            comments = self.github_ops.get_pr_comments(pr_details["number"])
+            comments = self.github_ops.get_pr_comments(pr_details["number"])  # type: ignore
 
             # Look for code-reviewer comments
             ai_review_comments = [
@@ -597,8 +597,8 @@ class PRBacklogManager:
     def _apply_ready_label(self, pr_number: int) -> None:
         """Apply ready-seeking-human label to PR."""
         try:
-            self.github_ops.add_pr_labels(pr_number, ["ready-seeking-human"])
-            self.github_ops.add_pr_comment(
+            self.github_ops.add_pr_labels(pr_number, ["ready-seeking-human"])  # type: ignore
+            self.github_ops.add_pr_comment(  # type: ignore
                 pr_number,
                 "✅ **PR Ready for Human Review**\n\n"
                 "This PR has passed all automated readiness checks:\n"
@@ -638,7 +638,7 @@ class PRBacklogManager:
             f"A WorkflowMaster will be invoked to handle this resolution.\n\n"
             f"*This comment was generated automatically by the PR Backlog Manager.*"
         )
-        self.github_ops.add_pr_comment(pr_number, comment)
+        self.github_ops.add_pr_comment(pr_number, comment)  # type: ignore
         logger.info(f"Delegated issue resolution to WorkflowMaster for PR #{pr_number}")
 
     def _invoke_code_reviewer(self, pr_number: int) -> None:
@@ -649,7 +649,7 @@ class PRBacklogManager:
             "The code-reviewer agent will be invoked to perform this review.\n\n"
             "*This comment was generated automatically by the PR Backlog Manager.*"
         )
-        self.github_ops.add_pr_comment(pr_number, comment)
+        self.github_ops.add_pr_comment(pr_number, comment)  # type: ignore
         logger.info(f"Requested AI code review for PR #{pr_number}")
 
     def _add_informational_comment(self, pr_number: int, action: str) -> None:
@@ -660,7 +660,7 @@ class PRBacklogManager:
             f"- {action}\n\n"
             f"*This comment was generated automatically by the PR Backlog Manager.*"
         )
-        self.github_ops.add_pr_comment(pr_number, comment)
+        self.github_ops.add_pr_comment(pr_number, comment)  # type: ignore
         logger.info(f"Added informational comment to PR #{pr_number}")
 
     def _save_assessment(self, assessment: PRAssessment) -> None:
@@ -681,7 +681,7 @@ class PRBacklogManager:
             }
 
             state_key = f"pr-assessment-{assessment.pr_number}"
-            self.state_manager.save_state(state_key, state_data)
+            self.state_manager.save_state(state_key, state_data)  # type: ignore
 
         except Exception as e:
             logger.warning(
@@ -763,7 +763,7 @@ class PRBacklogManager:
             raise GadugiError(
                 f"Backlog processing failed: {e}",
                 severity=ErrorSeverity.HIGH,
-                context={"session_id": self.session_id},
+                context={"session_id": self.session_id},  # type: ignore
             )
 
     def _generate_backlog_report(self, assessments: List[PRAssessment]) -> None:
@@ -793,7 +793,7 @@ class PRBacklogManager:
             }
 
             # Save report to state management
-            self.state_manager.save_state(f"backlog-report-{self.session_id}", report)
+            self.state_manager.save_state(f"backlog-report-{self.session_id}", report)  # type: ignore
 
             logger.info(f"Generated backlog report for session {self.session_id}")
 

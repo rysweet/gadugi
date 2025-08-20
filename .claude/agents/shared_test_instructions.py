@@ -6,35 +6,23 @@ Contains common patterns, utilities, and validation logic.
 import os
 import sys
 import logging
-from typing import List, Any, Optional, Tuple
+from typing import Any, Optional
+from dataclasses import dataclass
+
+from typing import Any, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+
+
+class ErrorHandler:
+    def __init__(self):
+        pass
 
 # Add shared modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
-try:
-    from utils.error_handling import ErrorHandler
-    from interfaces import AgentConfig, OperationResult
-except ImportError:
-    # Fallback definitions for missing imports
-    from dataclasses import dataclass
-
-    @dataclass
-    class OperationResult:
-        success: bool
-        data: Any = None
-        error: str = ""
-
-    @dataclass
-    class AgentConfig:
-        agent_id: str
-        name: str
-
-
 class TestStatus(Enum):
     """Test execution status."""
-
     PASS = "pass"
     FAIL = "fail"
     SKIP = "skip"
@@ -43,13 +31,40 @@ class TestStatus(Enum):
 
 class SkipReason(Enum):
     """Valid reasons for skipping tests."""
-
     API_KEY_MISSING = "api_key_missing"
     PLATFORM_CONSTRAINT = "platform_constraint"
     UPSTREAM_BUG = "upstream_bug"
     INFRASTRUCTURE_DEPENDENCY = "infrastructure_dependency"
     RESOURCE_CONSTRAINT = "resource_constraint"
     FLAKY_TEST = "flaky_test"
+
+
+@dataclass
+class OperationResult:
+    """General operation result."""
+    success: bool
+    data: Any = None
+    error: str = ""
+
+
+@dataclass
+class AgentConfig:
+    """Basic agent configuration."""
+    agent_id: str
+    name: str
+    version: str = "1.0.0"
+    capabilities: Optional[List[str]] = None
+
+    def __post_init__(self):
+        if self.capabilities is None:
+            self.capabilities = []
+
+
+try:
+    from utils.error_handling import ErrorHandler
+except ImportError:
+    # Fallback for missing ErrorHandler
+    pass
 
 
 @dataclass
@@ -120,8 +135,7 @@ class SharedTestInstructions:
             expected_outcome=SharedTestInstructions._derive_expected_outcome(test_code),
             dependencies=dependencies,
             resources_used=resources,
-            complexity_score=complexity,
-        )
+            complexity_score=complexity)
 
     @staticmethod
     def validate_test_structure(test_code: str) -> Tuple[bool, List[str]]:

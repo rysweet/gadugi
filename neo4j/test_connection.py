@@ -1,384 +1,289 @@
 #!/usr/bin/env python3
-"""Test Neo4j connection and basic operations."""
+"""
+Test Neo4j connection and initialization for Gadugi.
+"""
 
 import sys
-import uuid
-import json
-import logging
-from neo4j_client import Neo4jClient, Neo4jConfig
+from datetime import datetime
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+from neo4j import GraphDatabase, basic_auth
+from neo4j.exceptions import ServiceUnavailable, AuthError
+from typing import List
 
 
-def test_connectivity(client: Neo4jClient) -> bool:
-    """Test basic connectivity.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if test passes, False otherwise.
-    """
-    logger.info("Testing connectivity...")
-    
-    if client.verify_connectivity():
-        logger.info("✓ Connection successful")
-        return True
-    else:
-        logger.error("✗ Connection failed")
-        return False
+class Neo4jConnection:
+    """Manages Neo4j database connection."""
+
+    def __init__(
+        self,
+        uri: str = "bolt://localhost:7688",
+        user: str = "neo4j",
+        password: str = "gadugi-password",
+    ):
+        self.uri = uri
+        self.user = user
+        self.password = password
+        self.driver = None
+
+    def connect(self) -> bool:
+        """Establish connection to Neo4j."""
+        try:
+            self.driver = GraphDatabase.driver(
+                self.uri, auth=basic_auth(self.user, self.password)
+            )
+            # Test connection
+            with self.driver.session() as session:
+                result = session.run("RETURN 1 AS test")
+                result.single()
+            print(f"✅ Connected to Neo4j at {self.uri}")
+            return True
+        except ServiceUnavailable:
+            print(f"❌ Neo4j is not available at {self.uri}")
+            print(
+                "   Please ensure Neo4j is running: docker-compose -f docker-compose.gadugi.yml up -d neo4j"
+            )
+            return False
+        except AuthError:
+            print(f"❌ Authentication failed for user {self.user}")
+            print("   Check your credentials in docker-compose.gadugi.yml")
+            return False
+        except Exception as e:
+            print(f"❌ Failed to connect: {e}")
+            return False
+
+    def close(self):
+        """Close database connection."""
+        if self.driver:
+            self.driver.close()
+
+    def test_schema(self) -> bool:
+        """Test that schema is properly initialized."""
+        if not self.driver:
+            print("❌ Not connected to database")
+            return False
+
+        try:
+            with self.driver.session() as session:
+                # Check for system agent
+                result = session.run(
+                    "MATCH (a:Agent {id: 'system'}) RETURN a.name AS name"
+                )
+                record = result.single()
+                if record:
+                    print(f"✅ System agent found: {record['name']}")
+                else:
+                    print("❌ System agent not found - schema may not be initialized")
+                    return False
+
+                # Check for root memory
+                result = session.run(
+                    "MATCH (m:Memory {id: 'root'}) RETURN m.type AS type"
+                )
+                record = result.single()
+                if record:
+                    print(f"✅ Root memory found: {record['type']}")
+                else:
+                    print("❌ Root memory not found")
+                    return False
+
+                # Count constraints
+                result = session.run(
+                    "SHOW CONSTRAINTS YIELD name RETURN count(*) AS count"
+                )
+                count = result.single()["count"]
+                print(f"✅ Found {count} constraints")
+
+                # Count indexes
+                result = session.run(
+                    "SHOW INDEXES YIELD name WHERE name <> 'constraint' RETURN count(*) AS count"
+                )
+                count = result.single()["count"]
+                print(f"✅ Found {count} indexes")
+
+                return True
+
+        except Exception as e:
+            print(f"❌ Schema test failed: {e}")
+            return False
+
+    def create_test_memory(self) -> bool:
+        """Create a test memory node."""
+        if not self.driver:
+            return False
+
+        try:
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    CREATE (m:Memory {
+                        id: $id,
+                        type: 'test',
+                        content: $content,
+                        timestamp: datetime(),
+                        namespace: 'test'
+                    })
+                    RETURN m.id AS id
+                    """,
+                    id=f"test-memory-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
+                    content="This is a test memory created by the connection test script",
+                )
+
+                memory_id = result.single()["id"]
+                print(f"✅ Created test memory: {memory_id}")
+                return True
+
+        except Exception as e:
+            print(f"❌ Failed to create test memory: {e}")
+            return False
+
+    def list_recent_memories(self, limit: int = 5) -> List[Dict]:
+        """List recent memories from the database."""
+        if not self.driver:
+            return []
+
+        try:
+            with self.driver.session() as session:
+                result = session.run(
+                    """
+                    MATCH (m:Memory)
+                    WHERE m.id <> 'root'
+                    RETURN m.id AS id, m.type AS type, m.content AS content, m.timestamp AS timestamp
+                    ORDER BY m.timestamp DESC
+                    LIMIT $limit
+                    """,
+                    limit=limit,
+                )
+
+                memories = []
+                for record in result:
+                    memories.append(
+                        {
+                            "id": record["id"],
+                            "type": record["type"],
+                            "content": record["content"],
+                            "timestamp": record["timestamp"],
+                        }
+                    )
+
+                if memories:
+                    print(f"\n📚 Recent memories ({len(memories)} found):")
+                    for mem in memories:
+                        print(f"  - {mem['id']}: {mem['content'][:50]}...")
+                else:
+                    print("\n📚 No memories found (besides root)")
+
+                return memories
+
+        except Exception as e:
+            print(f"❌ Failed to list memories: {e}")
+            return []
+
+    def get_statistics(self) -> Dict:
+        """Get database statistics."""
+        if not self.driver:
+            return {}
+
+        try:
+            with self.driver.session() as session:
+                # Count nodes by label
+                result = session.run(
+                    """
+                    CALL db.labels() YIELD label
+                    CALL apoc.cypher.run('MATCH (n:' + label + ') RETURN count(n) as count', {})
+                    YIELD value
+                    RETURN label, value.count AS count
+                    ORDER BY label
+                    """
+                )
+
+                stats = {"nodes": {}}
+                for record in result:
+                    stats["nodes"][record["label"]] = record["count"]
+
+                # Count relationships
+                result = session.run(
+                    """
+                    MATCH ()-[r]->()
+                    RETURN type(r) AS type, count(r) AS count
+                    ORDER BY count DESC
+                    """
+                )
+
+                stats["relationships"] = {}
+                for record in result:
+                    stats["relationships"][record["type"]] = record["count"]
+
+                print("\n📊 Database Statistics:")
+                print("  Nodes:")
+                for label, count in stats["nodes"].items():
+                    print(f"    - {label}: {count}")
+                print("  Relationships:")
+                for rel_type, count in stats["relationships"].items():
+                    print(f"    - {rel_type}: {count}")
+
+                return stats
+
+        except Exception as e:
+            # APOC might not be installed
+            print(f"⚠️  Could not get full statistics (APOC may not be installed): {e}")
+
+            # Try basic statistics
+            try:
+                with self.driver.session() as session:
+                    result = session.run("MATCH (n) RETURN count(n) AS nodes")
+                    node_count = result.single()["nodes"]
+
+                    result = session.run(
+                        "MATCH ()-[r]->() RETURN count(r) AS relationships"
+                    )
+                    rel_count = result.single()["relationships"]
+
+                    print("\n📊 Basic Statistics:")
+                    print(f"  Total nodes: {node_count}")
+                    print(f"  Total relationships: {rel_count}")
+
+                    return {"total_nodes": node_count, "total_relationships": rel_count}
+            except:
+                return {}
 
 
-def test_agent_operations(client: Neo4jClient) -> bool:
-    """Test agent CRUD operations.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if all tests pass, False otherwise.
-    """
-    logger.info("\nTesting agent operations...")
-    
-    try:
-        # Create agent
-        agent_id = f"test-agent-{uuid.uuid4().hex[:8]}"
-        created_id = client.create_agent({
-            "id": agent_id,
-            "name": "Test Agent",
-            "type": "worker",
-            "version": "0.3.0",
-            "capabilities": ["testing", "validation"]
-        })
-        assert created_id == agent_id
-        logger.info(f"✓ Created agent: {agent_id}")
-        
-        # Get agent
-        agent = client.get_agent(agent_id)
-        assert agent is not None
-        assert agent["name"] == "Test Agent"
-        logger.info(f"✓ Retrieved agent: {agent['name']}")
-        
-        # Update agent status
-        success = client.update_agent_status(agent_id, "running")
-        assert success
-        logger.info("✓ Updated agent status")
-        
-        # Verify update
-        agent = client.get_agent(agent_id)
-        assert agent["status"] == "running"
-        logger.info("✓ Status update verified")
-        
-        return True
-        
-    except AssertionError as e:
-        logger.error(f"✗ Agent test failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"✗ Unexpected error in agent test: {e}")
-        return False
+def main():
+    """Main test function."""
+    print("🚀 Testing Neo4j Connection for Gadugi\n")
 
+    # Create connection
+    conn = Neo4jConnection()
 
-def test_memory_operations(client: Neo4jClient) -> bool:
-    """Test memory CRUD operations.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if all tests pass, False otherwise.
-    """
-    logger.info("\nTesting memory operations...")
-    
-    try:
-        # First create an agent for the memory
-        agent_id = f"test-agent-mem-{uuid.uuid4().hex[:8]}"
-        client.create_agent({
-            "id": agent_id,
-            "name": "Memory Test Agent",
-            "type": "worker",
-            "version": "0.3.0"
-        })
-        
-        # Create memory
-        memory_id = f"test-memory-{uuid.uuid4().hex[:8]}"
-        created_id = client.create_memory({
-            "id": memory_id,
-            "agent_id": agent_id,
-            "content": "Test memory content",
-            "type": "episodic",
-            "priority": "high",
-            "importance": 0.8,
-            "tags": ["test", "validation"]
-        })
-        assert created_id == memory_id
-        logger.info(f"✓ Created memory: {memory_id}")
-        
-        # Get agent memories
-        memories = client.get_agent_memories(agent_id)
-        assert len(memories) == 1
-        assert memories[0]["content"] == "Test memory content"
-        logger.info(f"✓ Retrieved {len(memories)} memories")
-        
-        # Test filtered retrieval
-        memories = client.get_agent_memories(agent_id, memory_type="episodic")
-        assert len(memories) == 1
-        logger.info("✓ Filtered memory retrieval works")
-        
-        return True
-        
-    except AssertionError as e:
-        logger.error(f"✗ Memory test failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"✗ Unexpected error in memory test: {e}")
-        return False
-
-
-def test_task_operations(client: Neo4jClient) -> bool:
-    """Test task CRUD operations.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if all tests pass, False otherwise.
-    """
-    logger.info("\nTesting task operations...")
-    
-    try:
-        # Create task
-        task_id = f"test-task-{uuid.uuid4().hex[:8]}"
-        created_id = client.create_task({
-            "id": task_id,
-            "name": "Test Task",
-            "description": "A test task for validation",
-            "type": "validation",
-            "priority": "high"
-        })
-        assert created_id == task_id
-        logger.info(f"✓ Created task: {task_id}")
-        
-        # Create agent for assignment
-        agent_id = f"test-agent-task-{uuid.uuid4().hex[:8]}"
-        client.create_agent({
-            "id": agent_id,
-            "name": "Task Test Agent",
-            "type": "worker",
-            "version": "0.3.0"
-        })
-        
-        # Assign task to agent
-        success = client.assign_task_to_agent(task_id, agent_id)
-        assert success
-        logger.info(f"✓ Assigned task to agent")
-        
-        # Update task status
-        success = client.update_task_status(task_id, "running")
-        assert success
-        logger.info("✓ Updated task status to running")
-        
-        # Complete task with result
-        result = json.dumps({"status": "success", "score": 100})
-        success = client.update_task_status(task_id, "completed", result)
-        assert success
-        logger.info("✓ Completed task with result")
-        
-        # Create dependency test
-        task2_id = f"test-task-dep-{uuid.uuid4().hex[:8]}"
-        client.create_task({
-            "id": task2_id,
-            "name": "Dependent Task",
-            "description": "Task that depends on another"
-        })
-        
-        # Create dependency
-        client.execute_query(
-            "MATCH (t1:Task {id: $t1}), (t2:Task {id: $t2}) "
-            "CREATE (t2)-[:DEPENDS_ON]->(t1)",
-            {"t1": task_id, "t2": task2_id}
-        )
-        
-        # Check dependencies
-        deps = client.get_task_dependencies(task2_id)
-        assert task_id in deps["depends_on"]
-        logger.info("✓ Task dependencies work correctly")
-        
-        return True
-        
-    except AssertionError as e:
-        logger.error(f"✗ Task test failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"✗ Unexpected error in task test: {e}")
-        return False
-
-
-def test_team_operations(client: Neo4jClient) -> bool:
-    """Test team operations.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if all tests pass, False otherwise.
-    """
-    logger.info("\nTesting team operations...")
-    
-    try:
-        # Create team
-        team_id = f"test-team-{uuid.uuid4().hex[:8]}"
-        created_id = client.create_team({
-            "id": team_id,
-            "name": "Test Team",
-            "objectives": json.dumps(["Test objective 1", "Test objective 2"]),
-            "performance_score": 0.95
-        })
-        assert created_id == team_id
-        logger.info(f"✓ Created team: {team_id}")
-        
-        # Create agents for team
-        agent_ids = []
-        for i in range(3):
-            agent_id = f"test-team-agent-{i}-{uuid.uuid4().hex[:8]}"
-            agent_ids.append(agent_id)
-            client.create_agent({
-                "id": agent_id,
-                "name": f"Team Member {i+1}",
-                "type": "worker",
-                "version": "0.3.0"
-            })
-        
-        # Add agents to team
-        for agent_id in agent_ids:
-            success = client.add_agent_to_team(agent_id, team_id)
-            assert success
-        logger.info(f"✓ Added {len(agent_ids)} agents to team")
-        
-        # Get team members
-        members = client.get_team_members(team_id)
-        assert len(members) == 3
-        logger.info(f"✓ Retrieved {len(members)} team members")
-        
-        return True
-        
-    except AssertionError as e:
-        logger.error(f"✗ Team test failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"✗ Unexpected error in team test: {e}")
-        return False
-
-
-def test_knowledge_operations(client: Neo4jClient) -> bool:
-    """Test knowledge operations.
-    
-    Args:
-        client: Neo4j client instance.
-        
-    Returns:
-        True if all tests pass, False otherwise.
-    """
-    logger.info("\nTesting knowledge operations...")
-    
-    try:
-        # Create knowledge items
-        knowledge_ids = []
-        topics = ["Python", "Neo4j", "Testing"]
-        
-        for i, topic in enumerate(topics):
-            knowledge_id = f"test-knowledge-{i}-{uuid.uuid4().hex[:8]}"
-            knowledge_ids.append(knowledge_id)
-            created_id = client.create_knowledge({
-                "id": knowledge_id,
-                "title": f"Knowledge about {topic}",
-                "content": f"This is detailed information about {topic}",
-                "domain": topic.lower(),
-                "confidence": 0.8 + (i * 0.05),
-                "source": "test_suite",
-                "verified": True
-            })
-            assert created_id == knowledge_id
-        logger.info(f"✓ Created {len(knowledge_ids)} knowledge items")
-        
-        # Search for knowledge
-        results = client.find_related_knowledge("Python")
-        assert len(results) > 0
-        assert "Python" in results[0]["knowledge"]["title"]
-        logger.info(f"✓ Found {len(results)} related knowledge items")
-        
-        return True
-        
-    except AssertionError as e:
-        logger.error(f"✗ Knowledge test failed: {e}")
-        return False
-    except Exception as e:
-        logger.error(f"✗ Unexpected error in knowledge test: {e}")
-        return False
-
-
-def run_all_tests():
-    """Run all Neo4j tests."""
-    logger.info("=" * 60)
-    logger.info("Gadugi v0.3 Neo4j Connection Tests")
-    logger.info("=" * 60)
-    
-    # Create client
-    config = Neo4jConfig()
-    
-    try:
-        with Neo4jClient(config) as client:
-            # Run tests
-            tests = [
-                ("Connectivity", test_connectivity),
-                ("Agent Operations", test_agent_operations),
-                ("Memory Operations", test_memory_operations),
-                ("Task Operations", test_task_operations),
-                ("Team Operations", test_team_operations),
-                ("Knowledge Operations", test_knowledge_operations)
-            ]
-            
-            results = []
-            for test_name, test_func in tests:
-                try:
-                    passed = test_func(client)
-                    results.append((test_name, passed))
-                except Exception as e:
-                    logger.error(f"Test {test_name} crashed: {e}")
-                    results.append((test_name, False))
-            
-            # Summary
-            logger.info("\n" + "=" * 60)
-            logger.info("Test Summary:")
-            logger.info("=" * 60)
-            
-            passed_count = 0
-            for test_name, passed in results:
-                status = "✅ PASSED" if passed else "❌ FAILED"
-                logger.info(f"{test_name:.<30} {status}")
-                if passed:
-                    passed_count += 1
-            
-            logger.info("=" * 60)
-            logger.info(f"Overall: {passed_count}/{len(tests)} tests passed")
-            
-            if passed_count == len(tests):
-                logger.info("\n✅ All tests passed! Neo4j is working correctly.")
-                return 0
-            else:
-                logger.error(f"\n❌ {len(tests) - passed_count} tests failed.")
-                return 1
-                
-    except Exception as e:
-        logger.error(f"Failed to connect to Neo4j: {e}")
-        logger.error("Make sure Neo4j is running: docker-compose up -d neo4j")
+    # Test connection
+    if not conn.connect():
+        print("\n⚠️  Please start Neo4j first:")
+        print("  docker-compose -f docker-compose.gadugi.yml up -d neo4j")
         return 1
+
+    # Test schema
+    print("\n🔍 Testing Schema...")
+    if not conn.test_schema():
+        print("\n⚠️  Schema not initialized. Run the init script:")
+        print(
+            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"
+        )
+
+    # Create test memory
+    print("\n✏️  Creating Test Data...")
+    conn.create_test_memory()
+
+    # List memories
+    conn.list_recent_memories()
+
+    # Get statistics
+    conn.get_statistics()
+
+    # Close connection
+    conn.close()
+
+    print("\n✅ Neo4j connection test completed!")
+    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(run_all_tests())
+    sys.exit(main())

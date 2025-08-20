@@ -9,6 +9,21 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ---
 
+## CRITICAL: Development Guidelines - MANDATORY
+
+⚠️ **YOU MUST FOLLOW THE GUIDELINES IN @.claude/Guidelines.md** ⚠️
+
+Key principles you MUST follow:
+- **Zero BS Principle**: NO false claims of completion. If it's not implemented, say so.
+- **Recipe-Driven Development**: Requirements → Design → Implementation → Tests → Review
+- **Quality Gates**: All code MUST pass pyright, ruff, pytest before claiming completion
+- **Review Requirements**: Design review, code review, system review for EVERY component
+- **Dependency Order**: Build foundations first, no building on stubs
+
+Read @.claude/Guidelines.md for complete requirements.
+
+---
+
 ## CRITICAL: Workflow Execution Pattern
 
 ⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
@@ -139,7 +154,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 ## Project-Specific Instructions
 
-@claude-project-specific.md
+Note: Project-specific instructions are integrated directly into this file above.
 
 ---
 

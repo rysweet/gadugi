@@ -1,0 +1,104 @@
+{
+  "feature_implementation": {
+    "triggers": [
+      "implement",
+      "create",
+      "build",
+      "develop",
+      "add"
+    ],
+    "subtasks": [
+      "design",
+      "implement",
+      "test",
+      "document",
+      "review"
+    ],
+    "avg_parallelization": 0.5967419999999999,
+    "success_rate": 0.901585
+  },
+  "bug_fix": {
+    "triggers": [
+      "fix",
+      "resolve",
+      "debug",
+      "patch",
+      "repair"
+    ],
+    "subtasks": [
+      "reproduce",
+      "diagnose",
+      "fix",
+      "test",
+      "verify"
+    ],
+    "avg_parallelization": 0.3,
+    "success_rate": 0.9
+  },
+  "refactoring": {
+    "triggers": [
+      "refactor",
+      "optimize",
+      "improve",
+      "enhance",
+      "clean"
+    ],
+    "subtasks": [
+      "analyze",
+      "plan",
+      "refactor",
+      "test",
+      "validate"
+    ],
+    "avg_parallelization": 0.5,
+    "success_rate": 0.8
+  },
+  "testing": {
+    "triggers": [
+      "test",
+      "validate",
+      "verify",
+      "check",
+      "ensure"
+    ],
+    "subtasks": [
+      "setup",
+      "execute",
+      "analyze",
+      "report",
+      "cleanup"
+    ],
+    "avg_parallelization": 0.7,
+    "success_rate": 0.95
+  },
+  "documentation": {
+    "triggers": [
+      "document",
+      "write",
+      "describe",
+      "explain"
+    ],
+    "subtasks": [
+      "outline",
+      "draft",
+      "review",
+      "revise",
+      "publish"
+    ],
+    "avg_parallelization": 0.8,
+    "success_rate": 0.9
+  },
+  "learned_d1fd6c2f": {
+    "triggers": [
+      "optimize"
+    ],
+    "subtasks": [
+      "analyze",
+      "optimize",
+      "test"
+    ],
+    "avg_parallelization": 0.3,
+    "success_rate": 1.0,
+    "learned_from": "optimize database queries"
+  }
+}

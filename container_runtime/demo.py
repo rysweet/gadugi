@@ -173,8 +173,8 @@ if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_
 """
 
         print("Executing shell script...")
-        result = executor.execute_shell_script(
-            script=shell_script, security_policy="standard", timeout=60
+        result = executor.execute_command(
+            command=["sh", "-c", shell_script], security_policy="standard", timeout=60
         )
 
         print(f"Exit code: {result['exit_code']}")
