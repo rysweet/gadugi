@@ -139,7 +139,8 @@ class OrchestratorCoordinator:
                 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 
             self.process_registry = ProcessRegistry(
-                registry_dir=str(self.monitoring_dir)
+                registry_dir=str(self.monitoring_dir),
+                clean_start=True  # Always start fresh for new orchestration
             )
             # Set module-level references for other methods
             globals()['ProcessRegistry'] = ProcessRegistry

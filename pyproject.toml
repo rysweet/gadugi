@@ -18,6 +18,7 @@ dependencies = [
     "protobuf>=4.0.0",
     "websockets>=15.0.1",
     "docker>=7.1.0",
+    "aiofiles>=24.1.0",
 ]
 dynamic = ["version"]
 
