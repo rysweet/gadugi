@@ -9,10 +9,10 @@ including sync policies, pruning rules, and operational parameters.
 import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import yaml
 from sync_engine import ConflictResolution, SyncDirection
-from typing import Any, Dict, List, Optional
 
 
 @dataclass

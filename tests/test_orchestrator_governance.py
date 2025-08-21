@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 
+<<<<<<< HEAD
 import sys
 import os
 
@@ -42,6 +43,15 @@ except ImportError:
 
     class ParallelExecutor:
         pass
+=======
+from ..claude.agents.orchestrator.governance_validator import (
+    GovernanceValidator,
+    GovernanceViolation,
+    validate_orchestrator_compliance,
+)
+from ..claude.agents.orchestrator.orchestrator import Orchestrator, TaskDefinition
+from ..claude.agents.orchestrator.parallel_executor import ParallelExecutor
+>>>>>>> feature/gadugi-v0.3-regeneration
 
 
 class TestOrchestratorGovernance:

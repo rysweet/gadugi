@@ -9,11 +9,14 @@ import uuid
 # Import the module we're testing
 import sys
 import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 import pytest
+from unittest.mock import Mock, patch
 
 # For type checking only
-from typing import Any, Dict, List, Optional, Set, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from claude.shared.task_tracking import (

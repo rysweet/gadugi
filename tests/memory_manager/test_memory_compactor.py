@@ -6,11 +6,11 @@ Tests for Memory Compactor - Automatic Memory.md compaction functionality
 import os
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
 
 import sys
-from typing import Set
 
 # Add the memory-manager directory to the path
 sys.path.insert(

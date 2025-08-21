@@ -1,0 +1,78 @@
+{
+  "name": "agent-framework",
+  "version": "0.3.0",
+  "dependencies": {
+    "internal": [],
+    "external": [
+      {
+        "package": "asyncio",
+        "version": "builtin",
+        "required": true,
+        "purpose": "Async agent operations and message handling"
+      },
+      {
+        "package": "pydantic",
+        "version": ">=2.0.0",
+        "required": true,
+        "purpose": "Agent configuration validation and serialization"
+      },
+      {
+        "package": "psutil",
+        "version": ">=5.9.0",
+        "required": true,
+        "purpose": "Resource monitoring and management"
+      },
+      {
+        "package": "aiohttp",
+        "version": ">=3.8.0",
+        "required": false,
+        "purpose": "HTTP API for agent management (optional)"
+      },
+      {
+        "package": "prometheus-client",
+        "version": ">=0.19.0",
+        "required": false,
+        "purpose": "Metrics collection and exposure (optional)"
+      },
+      {
+        "package": "structlog",
+        "version": ">=23.0.0",
+        "required": true,
+        "purpose": "Structured logging for agent activities"
+      },
+      {
+        "package": "tenacity",
+        "version": ">=8.0.0",
+        "required": true,
+        "purpose": "Retry logic with configurable strategies"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "interface": "BaseAgent",
+      "version": "1.0.0",
+      "description": "Abstract base class for all agents"
+    },
+    {
+      "interface": "AgentManager",
+      "version": "1.0.0",
+      "description": "Agent lifecycle and coordination management"
+    },
+    {
+      "interface": "CapabilityRegistry",
+      "version": "1.0.0",
+      "description": "Capability registration and discovery"
+    },
+    {
+      "interface": "MessageBus",
+      "version": "1.0.0",
+      "description": "Inter-agent communication infrastructure"
+    },
+    {
+      "interface": "AgentSupervisor",
+      "version": "1.0.0",
+      "description": "Fault-tolerant agent supervision"
+    }
+  ]
+}

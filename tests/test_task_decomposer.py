@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+<<<<<<< HEAD
 from typing import Dict, List
 
 try:
@@ -28,6 +29,15 @@ except ImportError:
 
     class TaskDecomposer:
         pass
+=======
+from decomposer.task_decomposer import (
+from typing import Dict, List
+    DecompositionResult,
+    PatternDatabase,
+    SubTask,
+    TaskDecomposer,
+)
+>>>>>>> feature/gadugi-v0.3-regeneration
 
 
 class TestSubTask:

@@ -11,10 +11,11 @@ import os
 import subprocess
 import tempfile
 import time
+from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from memory_parser import MemoryDocument, Task, TaskPriority, TaskStatus
-from typing import Any, Dict, List, Optional
 
 
 @dataclass

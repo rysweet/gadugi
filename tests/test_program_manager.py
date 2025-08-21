@@ -10,7 +10,6 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta
-from typing import Set
 from unittest.mock import Mock, patch
 
 # Add parent directory to path
