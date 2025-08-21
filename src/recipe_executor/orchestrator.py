@@ -1,17 +1,15 @@
 """Main orchestration engine for Recipe Executor."""
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass, field
+from typing import List, Dict, Any, Optional, Set
+from dataclasses import dataclass
 from pathlib import Path
 import time
 
 from .recipe_model import (
     Recipe,
-    GeneratedCode,
     BuildContext,
     BuildResult,
     SingleBuildResult,
-    RecipeTestSuite,
 )
 from .recipe_parser import RecipeParser
 from .dependency_resolver import DependencyResolver
@@ -159,7 +157,7 @@ class RecipeOrchestrator:
         """Discover all recipes including dependencies."""
         recipes: Dict[str, Recipe] = {}
         to_process = [recipe_path]
-        processed = set()
+        processed: Set[str] = set()
 
         while to_process:
             current_path = to_process.pop(0)

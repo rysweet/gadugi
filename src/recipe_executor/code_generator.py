@@ -236,7 +236,7 @@ class {{ component.class_name }}:
         needs_datetime = "datetime" in code or "timestamp" in code
 
         # Build import block
-        imports = []
+        imports: List[str] = []
         if needs_typing:
             imports.append("from typing import Any, Optional, Dict, List, Tuple, Union")
         if needs_dataclasses:
@@ -275,7 +275,7 @@ class {{ component.class_name }}:
     def _add_docstrings(self, code: str, component: ComponentDesign) -> str:
         """Add docstrings to functions and classes if missing."""
         lines = code.split("\n")
-        result = []
+        result: List[str] = []
 
         for i, line in enumerate(lines):
             result.append(line)
@@ -422,7 +422,7 @@ class {{ component.class_name }}:
             name=recipe.name,
             version=recipe.components.version,
             description=recipe.components.description or recipe.requirements.purpose,
-            dependencies=json.dumps(recipe.components.external_dependencies.get("third_party", [])),
+            dependencies=json.dumps([]),  # External dependencies would come from metadata
         )
         files["pyproject.toml"] = pyproject_content
 

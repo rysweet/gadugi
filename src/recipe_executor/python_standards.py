@@ -2,11 +2,9 @@
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional, List, Tuple
 import subprocess
-import json
 import tempfile
-import shutil
 
 
 @dataclass
@@ -203,7 +201,7 @@ __all__ = {exports}
                 )
 
                 # Parse output for errors
-                errors = []
+                errors: List[str] = []
                 for line in result.stdout.split("\n"):
                     if "error:" in line.lower():
                         errors.append(line.strip())

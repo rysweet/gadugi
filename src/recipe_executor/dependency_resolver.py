@@ -1,6 +1,6 @@
 """Dependency resolution for Recipe Executor."""
 
-from typing import Optional, Set, List, Dict, Tuple, Any
+from typing import Optional, Set, List, Dict, Any
 from dataclasses import dataclass, field
 from pathlib import Path
 import networkx as nx
@@ -75,7 +75,7 @@ class DependencyGraph:
 
     def get_missing_dependencies(self) -> Set[str]:
         """Get dependencies that are referenced but not defined."""
-        all_deps = set()
+        all_deps: Set[str] = set()
         for recipe in self.recipes.values():
             all_deps.update(recipe.get_dependencies())
 
@@ -160,7 +160,7 @@ class DependencyResolver:
 
         while remaining:
             # Find recipes with no dependencies in remaining set
-            current_level = []
+            current_level: List[Recipe] = []
             for name in remaining:
                 deps = set(graph.recipes[name].get_dependencies())
                 if not deps.intersection(remaining):
@@ -177,7 +177,7 @@ class DependencyResolver:
 
     def validate_dependencies(self, recipe: Recipe, available: Set[str]) -> List[str]:
         """Validate that a recipe's dependencies are available."""
-        issues = []
+        issues: List[str] = []
 
         for dep in recipe.get_dependencies():
             if dep not in available:
@@ -199,7 +199,7 @@ class DependencyResolver:
         groups = self.get_parallel_groups(needed)
 
         # Convert to execution plan
-        plan = []
+        plan: List[Dict[str, Any]] = []
         for i, group in enumerate(groups):
             plan.append((i, [r.name for r in group]))
 
