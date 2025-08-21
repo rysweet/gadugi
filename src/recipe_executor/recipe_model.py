@@ -211,7 +211,7 @@ class GeneratedCode:
 
 
 @dataclass
-class TestSuite:
+class RecipeTestSuite:
     """Generated test suite for a recipe."""
 
     recipe_name: str
@@ -272,7 +272,7 @@ class SingleBuildResult:
 
     recipe: Recipe
     code: Optional[GeneratedCode]
-    tests: Optional[TestSuite]
+    tests: Optional[RecipeTestSuite]
     validation: Optional[ValidationResult]
     quality_result: dict[str, bool]  # tool_name -> passed
     success: bool

@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .recipe_model import Recipe, GeneratedCode, ValidationResult, TestSuite
+from .recipe_model import Recipe, GeneratedCode, ValidationResult, RecipeTestSuite
 
 
 @dataclass
@@ -12,7 +12,7 @@ class Implementation:
     """Represents an implementation to validate."""
 
     code: GeneratedCode
-    tests: Optional[TestSuite] = None
+    tests: Optional[RecipeTestSuite] = None
 
     def get_all_code(self) -> str:
         """Get all code as a single string."""

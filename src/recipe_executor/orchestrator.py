@@ -11,7 +11,7 @@ from .recipe_model import (
     BuildContext,
     BuildResult,
     SingleBuildResult,
-    TestSuite,
+    RecipeTestSuite,
 )
 from .recipe_parser import RecipeParser
 from .dependency_resolver import DependencyResolver

@@ -41,9 +41,9 @@ class DependencyGraph:
         try:
             # Returns nodes in topological order (dependencies first)
             return list(nx.topological_sort(self.graph))
-        except nx.NetworkXError as e:
+        except (nx.NetworkXError, nx.NetworkXUnfeasible) as e:
             # This happens when there's a cycle
-            cycles = list(nx.simple_cycles(self.graph))
+            cycles = self.get_cycles()
             raise CircularDependencyError(f"Circular dependencies detected: {cycles}") from e
 
     def get_dependencies(self, recipe_name: str) -> Set[str]:
@@ -68,7 +68,10 @@ class DependencyGraph:
 
     def get_cycles(self) -> List[List[str]]:
         """Get all circular dependencies."""
-        return list(nx.simple_cycles(self.graph))
+        try:
+            return list(nx.simple_cycles(self.graph))
+        except nx.NetworkXError:
+            return []
 
     def get_missing_dependencies(self) -> Set[str]:
         """Get dependencies that are referenced but not defined."""

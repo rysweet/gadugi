@@ -1,14 +1,14 @@
 """Code generation from recipes with Python standards enforcement."""
 
-from typing import Optional, Dict, List, Any, Tuple
-from dataclasses import dataclass, field
+from typing import Optional, Dict, List, Any
+from dataclasses import dataclass
 from pathlib import Path
 import re
 import json
 from datetime import datetime
-from jinja2 import Template, Environment, FileSystemLoader
+from jinja2 import Template
 
-from .recipe_model import Recipe, GeneratedCode, BuildContext, ComponentDesign, Requirements, Design
+from .recipe_model import Recipe, GeneratedCode, BuildContext, ComponentDesign, Requirements
 from .python_standards import PythonStandards
 
 
@@ -141,7 +141,7 @@ class CodeGenerator:
             # Module-level functions
             return self.templates["module"]
 
-    def _load_templates(self) -> Dict[str, CodeTemplate]:
+    def _load_templates(self) -> Dict[str, "CodeTemplate"]:
         """Load code generation templates."""
         templates = {}
 

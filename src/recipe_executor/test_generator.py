@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
 
-from .recipe_model import Recipe, GeneratedCode, TestSuite, Requirement
+from .recipe_model import Recipe, GeneratedCode, RecipeTestSuite, Requirement
 from .python_standards import PythonStandards
 
 
@@ -21,13 +21,13 @@ class TestGenerator:
         """Initialize test generator with Python standards."""
         self.standards = standards or PythonStandards()
 
-    def generate_tests(self, recipe: Recipe, code: GeneratedCode) -> TestSuite:
+    def generate_tests(self, recipe: Recipe, code: GeneratedCode) -> RecipeTestSuite:
         """Generate comprehensive tests based on requirements."""
         unit_tests = self._generate_unit_tests(recipe, code)
         integration_tests = self._generate_integration_tests(recipe, code)
         test_files = self._generate_test_files(recipe, code, unit_tests, integration_tests)
 
-        return TestSuite(
+        return RecipeTestSuite(
             recipe_name=recipe.name,
             unit_tests=unit_tests,
             integration_tests=integration_tests,
