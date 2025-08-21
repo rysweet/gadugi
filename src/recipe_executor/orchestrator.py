@@ -150,14 +150,26 @@ class RecipeOrchestrator:
             if not options.dry_run:
                 if options.verbose:
                     print(f"Running quality gates for {recipe.name}...")
-                # Would write files and run quality gates here
-                # For now, simulate success
-                quality_result = {
-                    "pyright": True,
-                    "ruff_format": True,
-                    "ruff_lint": True,
-                    "pytest": True,
-                }
+                
+                # Write generated files to disk
+                output_dir = options.output_dir or Path.cwd()
+                for filepath, content in code.files.items():
+                    full_path = output_dir / filepath
+                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                    full_path.write_text(content)
+                    if options.verbose:
+                        print(f"  Created: {full_path}")
+                
+                # Write test files
+                for filepath, content in tests.files.items():
+                    full_path = output_dir / filepath
+                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                    full_path.write_text(content)
+                    if options.verbose:
+                        print(f"  Created test: {full_path}")
+                
+                # Run quality gates on the output directory
+                quality_result = self.quality_gates.run_quality_checks(output_dir)
 
             # Determine success
             success = validation.passed and all(quality_result.values())

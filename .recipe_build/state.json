@@ -1,0 +1,12 @@
+{
+  "recipe-executor": {
+    "recipe_name": "recipe-executor",
+    "recipe_checksum": "2cfde4859b7637f69e2f2feda6e9d899fa7a2ddf64a77044694868864ea9d111",
+    "build_time": "2025-08-20T20:49:32.978074",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "'RecipeTestSuite' object has no attribute 'files'"
+    ]
+  }
+}
