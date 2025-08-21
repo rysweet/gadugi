@@ -2,7 +2,6 @@
 name: program-manager
 model: inherit
 specialization: Program manager for project orchestration and issue lifecycle management
-tools:
   - read
   - write
   - edit

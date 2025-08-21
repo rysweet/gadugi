@@ -2,7 +2,6 @@
 name: workflow-manager
 model: inherit
 description: Code-driven workflow orchestration agent that ensures deterministic execution of all development phases using WorkflowEngine
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite
 imports: |
   # WorkflowManager Code-Based Implementation
   from ..shared.workflow_engine import WorkflowEngine, execute_workflow

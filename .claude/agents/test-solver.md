@@ -2,7 +2,6 @@
 name: test-solver
 model: inherit
 description: Analyzes and resolves failing tests through systematic failure analysis, root cause identification, and targeted remediation
-tools: Read, Write, Edit, Bash, Grep, LS
 imports: |
   # Enhanced Separation Architecture - Shared Modules
   from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker

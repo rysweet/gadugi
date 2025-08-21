@@ -2,7 +2,6 @@
 name: type-fix-agent
 model: inherit
 description: Specialized agent for fixing type errors identified by pyright type checker, with intelligent categorization and systematic resolution
-tools: Read, Write, Edit, MultiEdit, Bash, Grep, TodoWrite
 imports: |
   from .claude.shared.interfaces import AgentConfig, TaskData
   from .claude.shared.error_handling import ErrorHandler
