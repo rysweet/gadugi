@@ -7,8 +7,35 @@ from .recipe_model import Recipe, RecipeTestSuite, RequirementPriority, Componen
 
 
 class TestGenerationError(Exception):
-    """Raised when test generation fails."""
-    pass
+    """Raised when test generation fails.
+    
+    Provides context about what component or requirement failed during
+    test generation to aid in debugging.
+    """
+    
+    def __init__(self, message: str, component_name: Optional[str] = None,
+                 test_type: Optional[str] = None):
+        """Initialize with test generation context.
+        
+        Args:
+            message: Description of what went wrong
+            component_name: Component being tested when failure occurred
+            test_type: Type of test being generated (unit, integration, etc.)
+        """
+        super().__init__(message)
+        self.component_name = component_name
+        self.test_type = test_type
+        
+        # Build detailed message
+        if component_name or test_type:
+            details = []
+            if component_name:
+                details.append(f"Component: {component_name}")
+            if test_type:
+                details.append(f"Test type: {test_type}")
+            self.message = f"{message} ({', '.join(details)})"
+        else:
+            self.message = message
 
 
 class TestGenerator:
