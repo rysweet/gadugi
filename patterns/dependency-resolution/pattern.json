@@ -1,0 +1,12 @@
+{
+  "name": "dependency-resolution",
+  "version": "1.0.0",
+  "description": "Pattern for resolving and managing dependencies between components",
+  "depends_on": [],
+  "target_types": ["service", "library", "agent"],
+  "auto_apply": true,
+  "metadata": {
+    "author": "Recipe Executor",
+    "tags": ["dependencies", "architecture", "resolution"]
+  }
+}

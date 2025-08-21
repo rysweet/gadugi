@@ -1,0 +1,12 @@
+{
+  "name": "code-generation",
+  "version": "1.0.0",
+  "description": "Pattern for generating real, working code using AI models with proper error handling",
+  "depends_on": ["validation-framework"],
+  "target_types": ["generator", "service"],
+  "auto_apply": false,
+  "metadata": {
+    "author": "Recipe Executor",
+    "tags": ["generation", "ai", "claude"]
+  }
+}

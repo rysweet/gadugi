@@ -1,0 +1,12 @@
+{
+  "name": "validation-framework",
+  "version": "1.0.0",
+  "description": "Pattern for comprehensive input validation and recipe structure verification",
+  "depends_on": [],
+  "target_types": ["service", "library", "api"],
+  "auto_apply": true,
+  "metadata": {
+    "author": "Recipe Executor",
+    "tags": ["validation", "quality", "security"]
+  }
+}

@@ -48,12 +48,11 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST provide a visual or textual representation of the planned execution order for verification
 - MUST support partial builds by analyzing which recipes are affected by changes
 
-#### 2.3 Caching and Incremental Builds
-- MUST cache successfully built components with checksums of their recipe files
+#### 2.3 Incremental Builds
 - MUST detect when a recipe or its dependencies have changed by comparing checksums
 - MUST trigger rebuilds only for changed recipes and their dependents, not the entire graph
 - MUST provide options to force rebuild even when cache indicates no changes
-- MUST store cache metadata including build timestamps, recipe versions, and dependency snapshots
+- MUST track build state to know which recipes need rebuilding
 
 ### 3. Design Patterns Support
 
@@ -208,15 +207,15 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST support incremental builds that only rebuild changed components
 - MUST detect changes through file checksums and timestamps
 - MUST propagate rebuilds to dependent components when dependencies change
-- MUST optimize build times by reusing unchanged artifacts
+- MUST reuse unchanged artifacts when possible
 - MUST provide options to force full rebuilds when needed
 
 #### 8.3 Build History and Artifacts
-- MUST maintain build history with timestamps, durations, and outcomes
+- MUST maintain build history with timestamps and outcomes
 - MUST store all generated artifacts in a structured directory layout
 - MUST support rollback to previous builds by restoring earlier artifacts
 - MUST clean up old artifacts based on configurable retention policies
-- MUST provide metrics on build performance and success rates
+- MUST track build success rates
 
 ### 9. Stub Detection and Prevention
 
@@ -272,9 +271,10 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST distinguish between recoverable and non-recoverable errors
 - MUST include context about where and why the error occurred
 
-#### 11.2 Recovery and Retry Logic
-- MUST support retry logic for transient failures such as network issues or temporary file locks
-- MUST implement exponential backoff for retry attempts to avoid overwhelming resources
+#### 11.2 Recovery and Retry Logic  
+- MUST support retry logic for transient failures such as Claude API timeouts
+- MUST implement exponential backoff for retry attempts (e.g., 2s, 4s, 8s delays)
+- MUST retry Claude API calls up to 3 times before failing
 - MUST allow manual retry of failed operations after fixes have been applied
 - MUST support skipping failed optional components to continue build process
 - MUST provide rollback capability when builds fail partway through
@@ -296,7 +296,7 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST handle file system issues such as insufficient permissions, disk space constraints, and locked files
 
 ### Usability
-- MUST provide clear progress indicators showing current operation, percentage complete, and estimated time remaining
+- MUST provide clear progress indicators showing current operation
 - MUST generate human-readable error messages that non-experts can understand and act upon
 - MUST support dry-run mode for validation that checks everything without making any changes
 - MUST provide detailed logs for troubleshooting at multiple verbosity levels
@@ -309,12 +309,6 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST support plugin architecture for extensions without modifying core functionality
 - MUST use consistent coding standards enforced through automated tooling
 
-### Performance
-- MUST execute simple single-component recipes in under 5 seconds from start to finish
-- MUST utilize all available CPU cores for parallel recipe execution when dependencies allow
-- MUST cache aggressively to avoid redundant work, with cache lookups completing in under 100ms
-- MUST support streaming output for long-running operations to provide real-time feedback
-- SHOULD optimize Claude Code prompts to minimize API calls and response time
 
 ### Security
 - MUST validate all input files to prevent injection attacks and malicious content
@@ -342,9 +336,9 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
    - Generation failures with recovery suggestions
    - Test failures with debugging information
 
-5. **Performance Benchmark**: Executes the entire Gadugi recipe set (20+ recipes) in under 60 seconds on standard development hardware (8-core CPU, 16GB RAM), with proper parallelization.
+5. **Incremental Build Test**: Correctly identifies changed recipes and rebuilds only affected components, skipping unchanged recipes to avoid unnecessary Claude API calls.
 
-6. **Incremental Build Test**: Correctly identifies changed recipes and rebuilds only affected components, reducing build time by at least 80% for single recipe changes compared to full rebuild.
+6. **Parallel Build Test**: When building multiple independent recipes, executes them in parallel rather than sequentially.
 
 7. **Documentation Quality**: Every generated component includes:
    - Complete README with installation and usage examples
@@ -376,7 +370,7 @@ When a developer modifies the requirements.md file for a utility recipe that thr
 2. Mark the utility recipe and its three dependents for rebuild
 3. Skip rebuilding the dozens of unaffected recipes in the repository
 4. Execute the rebuild in parallel where dependencies allow
-5. Complete the incremental build in 20% of the time required for a full rebuild
+5. Skip unaffected recipes and only rebuild what changed
 
 ### Scenario 4: Failed Test Recovery
 When generated tests fail during execution:

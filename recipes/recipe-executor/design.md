@@ -22,15 +22,20 @@ The Recipe Executor follows a layered architecture with clear separation of conc
 │         - Command parsing, progress display              │
 ├─────────────────────────────────────────────────────────┤
 │         Orchestration Layer (orchestrator.py)            │
-│    - Workflow coordination, parallel execution control   │
+│    - Workflow coordination, state management             │
+├─────────────────────────────────────────────────────────┤
+│         Parallel Builder (parallel_builder.py)           │
+│    - Independent group identification                    │
+│    - Concurrent execution of independent recipes         │
 ├─────────────────────────────────────────────────────────┤
 │  Recipe Parser │ Dependency Resolver │ State Manager    │
-│  - File parsing │ - DAG construction  │ - Build cache   │
+│  - File parsing │ - DAG construction  │ - Build state   │
 │  - Validation   │ - Cycle detection   │ - Checksums     │
 ├─────────────────────────────────────────────────────────┤
 │ Claude Code Gen │ Test Generator │ Python Standards     │
 │ - TDD prompts   │ - pytest tests │ - UV projects       │
-│ - Code parsing  │ - Fixtures     │ - pyright/ruff      │
+│ - Retry logic   │ - Fixtures     │ - pyright/ruff      │
+│ - Code parsing  │ - Coverage     │ - Type checking     │
 ├─────────────────────────────────────────────────────────┤
 │    Validator    │ Quality Gates  │ Error Handler        │
 │ - Requirements  │ - Type check   │ - Clear messages    │
@@ -159,7 +164,7 @@ class RecipeParser:
         # Parse markdown to find requirements like:
         # - MUST validate input files
         # - SHOULD support caching
-        # - COULD provide metrics
+        # - COULD provide timing information
         pass
 ```
 
@@ -550,9 +555,9 @@ class RecipeOrchestrator:
 class StateManager:
     """Manages build state, caching, and incremental builds."""
     
-    def __init__(self, cache_dir: Path = Path(".recipe-cache")):
-        self.cache_dir = cache_dir
-        self.cache_dir.mkdir(exist_ok=True)
+    def __init__(self, state_dir: Path = Path(".recipe-state")):
+        self.state_dir = state_dir
+        self.state_dir.mkdir(exist_ok=True)
         self._state = self._load_state()
     
     def needs_rebuild(self, recipe: Recipe, force: bool = False) -> bool:
@@ -566,8 +571,8 @@ class StateManager:
         
         # Check if recipe files changed (via checksum)
         current_checksum = recipe.get_checksum()
-        cached_checksum = self._state[recipe.name].get("checksum")
-        if current_checksum != cached_checksum:
+        stored_checksum = self._state[recipe.name].get("checksum")
+        if current_checksum != stored_checksum:
             return True
         
         # Check if any dependencies changed
@@ -600,7 +605,7 @@ class StateManager:
     
     def _save_artifacts(self, recipe: Recipe, code: GeneratedCode):
         """Save generated code artifacts for caching."""
-        artifact_dir = self.cache_dir / recipe.name
+        artifact_dir = self.state_dir / recipe.name
         artifact_dir.mkdir(exist_ok=True)
         
         for filepath, content in code.files.items():
@@ -669,7 +674,85 @@ class PythonStandards:
             return result.returncode == 0, errors
 ```
 
-### 10. Quality Gates (`quality_gates.py`)
+### 10. Parallel Builder (`parallel_builder.py`)
+```python
+class ParallelRecipeBuilder:
+    """Builds multiple independent recipes in parallel for improved performance."""
+    
+    def __init__(self, orchestrator: RecipeOrchestrator, max_workers: int = 4):
+        """Initialize with reference to orchestrator and worker limit."""
+        self.orchestrator = orchestrator
+        self.max_workers = max_workers
+    
+    def build_parallel(self, recipes: list[Recipe], options: BuildOptions) -> ParallelBuildResult:
+        """Build recipes in parallel based on dependency groups."""
+        # Identify independent groups through topological analysis
+        independent_groups = self._identify_independent_groups(recipes)
+        
+        results = {}
+        # Build each group sequentially, but recipes within groups in parallel
+        for group in independent_groups:
+            with ThreadPoolExecutor(max_workers=min(self.max_workers, len(group))) as executor:
+                # Submit all recipes in group for parallel execution
+                futures = {
+                    executor.submit(self.orchestrator._execute_single, recipe, options): recipe
+                    for recipe in group
+                }
+                
+                # Collect results as they complete
+                for future in as_completed(futures):
+                    recipe = futures[future]
+                    results[recipe.name] = future.result()
+        
+        return ParallelBuildResult(results=results)
+    
+    def _identify_independent_groups(self, recipes: list[Recipe]) -> list[list[Recipe]]:
+        """Group recipes that can be built in parallel (no interdependencies)."""
+        # Topological sort with level assignment
+        # Level 0: No dependencies
+        # Level 1: Depends only on Level 0
+        # Level 2: Depends on Level 0 or 1
+        # Recipes in same level can build in parallel
+        pass
+```
+
+### 11. Retry Helper (`retry_helper.py`)
+```python
+def exponential_backoff(max_retries=3, base_delay=2.0, max_delay=30.0):
+    """Decorator for retry logic with exponential backoff."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == max_retries - 1:
+                        raise
+                    delay = min(base_delay * (2 ** attempt), max_delay)
+                    print(f"Attempt {attempt + 1} failed: {e}")
+                    print(f"Retrying in {delay}s...")
+                    time.sleep(delay)
+        return wrapper
+    return decorator
+
+class ClaudeCodeGenerator:
+    """Modified to use retry logic for Claude API calls."""
+    
+    @exponential_backoff(max_retries=3)
+    def _invoke_claude_code(self, prompt: str) -> str:
+        """Invoke Claude with automatic retry on failure."""
+        result = subprocess.run(
+            ["claude", "-p", prompt],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=True  # Raises on non-zero exit
+        )
+        return result.stdout
+```
+
+### 12. Quality Gates (`quality_gates.py`)
 ```python
 class QualityGates:
     """Runs quality checks on generated code."""
@@ -867,8 +950,8 @@ class IncrementalBuilder:
     def _has_recipe_changed(self, recipe: Recipe) -> bool:
         """Check if recipe has changed since last build."""
         current_checksum = self._calculate_checksum(recipe)
-        cached_checksum = self.cache.get_checksum(recipe.name)
-        return current_checksum != cached_checksum
+        stored_checksum = self.state_manager.get_checksum(recipe.name)
+        return current_checksum != stored_checksum
 ```
 
 ## Progress Tracking and Reporting

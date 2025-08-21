@@ -17,6 +17,9 @@
 - Acknowledge what's broken
 - Report actual status, not aspirational status
 - If you haven't tested it, don't claim it works
+- NEVER guess at API/CLI syntax - stop and research documentation
+- NEVER create empty exception classes with just `pass` - provide context
+- NEVER claim you tested something if you didn't actually run it
 
 ### 2. Implementation Before Claims
 - Write the code first
@@ -77,9 +80,11 @@ For EVERY component:
 
 ## Humility Principle
 - No performance claims without benchmarks
-- No "production-ready" claims without production testing
+- NEVER claim "production-ready" - humility is a virtue
 - No "complete" claims without end-to-end validation
 - Let the code speak for itself
+- Say "working" or "functional", not "production-ready"
+- Users decide what's production-ready, not developers
 
 ## The Truth Test
 Before claiming anything:

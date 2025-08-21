@@ -1,0 +1,12 @@
+{
+  "name": "tdd-testing",
+  "version": "1.0.0",
+  "description": "Test-Driven Development pattern for generating tests before implementation",
+  "depends_on": ["python-quality"],
+  "target_types": ["service", "library", "agent"],
+  "auto_apply": false,
+  "metadata": {
+    "author": "Recipe Executor",
+    "tags": ["testing", "tdd", "quality"]
+  }
+}

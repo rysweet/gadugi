@@ -10,6 +10,7 @@ from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, Com
 from .python_standards import PythonStandards
 from .base_generator import BaseCodeGenerator, CodeGenerationError
 from .stub_detector import StubDetector
+from .retry_helper import exponential_backoff, RetryError
 
 
 class ClaudeCodeGenerationError(CodeGenerationError):
@@ -324,47 +325,41 @@ You MUST follow this TDD workflow:
         
         return '\n'.join(lines)
     
-    def _invoke_claude_code(self, prompt: str, recipe: Recipe) -> str:
+    @exponential_backoff(max_retries=3, base_delay=2.0, max_delay=30.0)
+    def _invoke_claude_code(self, prompt: str, recipe: Recipe) -> str:  # noqa: ARG002
         """Invoke Claude Code CLI to generate implementation.
         
         Uses Claude's actual CLI interface to generate code based on the recipe.
-        Falls back to a simple generator if Claude is not available.
+        NO FALLBACK - must use Claude or fail.
         """
-        # First, try to invoke Claude properly
-        try:
-            # Build Claude command - use -p flag for non-interactive output
-            cmd = [
-                self.claude_command,
-                "-p",  # Print mode (non-interactive)
-                prompt
-            ]
-            
-            # Execute Claude with the prompt as an argument
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=300,  # 5 minute timeout
-                check=False  # Don't raise on non-zero exit
-            )
-            
-            if result.returncode == 0:
-                return result.stdout
-            else:
-                # Log the failure but continue with fallback
-                print(f"Claude CLI returned non-zero exit code: {result.returncode}")
-                if result.stderr:
-                    print(f"Error: {result.stderr}")
-                    
-        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
-            # Claude is not available or timed out, use fallback
-            print(f"Claude CLI not available or timed out: {e}")
-            print("Falling back to simple code generator")
+        # Build Claude command - use -p flag for non-interactive output
+        cmd = [
+            self.claude_command,
+            "-p",  # Print mode (non-interactive)
+            prompt
+        ]
         
-        # Fallback: Generate simple but working code when Claude is not available
-        return self._generate_fallback_code(recipe)
-    
-    def _generate_fallback_code(self, recipe: Recipe) -> str:
+        # Execute Claude with the prompt as an argument
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300,  # 5 minute timeout
+            check=False  # Don't raise on non-zero exit
+        )
+        
+        if result.returncode == 0:
+            return result.stdout
+        else:
+            # Claude failed - NO FALLBACK, must fail
+            error_msg = f"Claude CLI failed with exit code {result.returncode}"
+            if result.stderr:
+                error_msg += f"\nStderr: {result.stderr}"
+            raise ClaudeCodeGenerationError(
+                error_msg,
+                command=' '.join(cmd[:2] + ['<prompt>']),  # Don't log full prompt
+                stderr=result.stderr
+            )
         """Generate simple working code as a fallback when Claude is not available.
         
         This is NOT a stub - it generates actual working code that implements
@@ -511,7 +506,6 @@ class Test{class_name}:
             files_content.append(test_code)
             files_content.append("```")
         
-        return "\n".join(files_content)
     
     def _to_class_name(self, name: str) -> str:
         """Convert kebab-case to CamelCase."""

@@ -19,6 +19,7 @@ from .validator import Validator, Implementation
 from .state_manager import StateManager
 from .python_standards import QualityGates
 from .pattern_manager import PatternManager
+from .parallel_builder import ParallelRecipeBuilder
 
 
 @dataclass
@@ -47,6 +48,7 @@ class RecipeOrchestrator:
         self.state_manager = StateManager()
         self.quality_gates = QualityGates()
         self.pattern_manager = PatternManager()
+        self.parallel_builder = None  # Initialized on demand
 
     def execute(self, recipe_path: Path, options: Optional[BuildOptions] = None) -> BuildResult:
         """Execute a recipe and all its dependencies."""
@@ -80,15 +82,39 @@ class RecipeOrchestrator:
         # 2. Resolve dependencies
         build_order = self.resolver.resolve(recipes)
 
-        # 3. Execute in order
+        # 3. Execute based on parallel option
         results: List[SingleBuildResult] = []
-        for recipe in build_order:
-            if self.state_manager.needs_rebuild(recipe, options.force_rebuild):
-                result = self._execute_single(recipe, options)
-                results.append(result)
-                self.state_manager.record_build(recipe, result)
-            elif options.verbose:
-                print(f"Skipping {recipe.name} - no rebuild needed")
+        
+        if options.parallel:
+            # Use parallel builder for better performance
+            if self.parallel_builder is None:
+                self.parallel_builder = ParallelRecipeBuilder(self, max_workers=4)
+            
+            # Filter recipes that need rebuilding
+            recipes_to_build = [
+                recipe for recipe in build_order
+                if self.state_manager.needs_rebuild(recipe, options.force_rebuild)
+            ]
+            
+            if recipes_to_build:
+                parallel_result = self.parallel_builder.build_parallel(recipes_to_build, options)
+                results = list(parallel_result.results.values())
+                
+                # Record builds in state manager
+                for result in results:
+                    self.state_manager.record_build(result.recipe, result)
+                
+                if options.verbose:
+                    print(f"\nParallel build complete: {parallel_result.parallel_speedup:.1f}x speedup")
+        else:
+            # Sequential execution (original logic)
+            for recipe in build_order:
+                if self.state_manager.needs_rebuild(recipe, options.force_rebuild):
+                    result = self._execute_single(recipe, options)
+                    results.append(result)
+                    self.state_manager.record_build(recipe, result)
+                elif options.verbose:
+                    print(f"Skipping {recipe.name} - no rebuild needed")
 
         # Calculate total time
         total_time = time.time() - start_time

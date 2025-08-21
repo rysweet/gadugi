@@ -1,0 +1,12 @@
+{
+  "name": "state-management",
+  "version": "1.0.0",
+  "description": "Pattern for managing state transitions and progress tracking in multi-phase operations",
+  "depends_on": [],
+  "target_types": ["service", "orchestrator", "workflow"],
+  "auto_apply": false,
+  "metadata": {
+    "author": "Recipe Executor",
+    "tags": ["state", "workflow", "orchestration"]
+  }
+}
