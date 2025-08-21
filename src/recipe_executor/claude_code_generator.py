@@ -10,7 +10,6 @@ from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, Com
 from .python_standards import PythonStandards
 from .base_generator import BaseCodeGenerator, CodeGenerationError
 from .stub_detector import StubDetector
-from .retry_helper import exponential_backoff, RetryError
 
 
 class ClaudeCodeGenerationError(CodeGenerationError):
@@ -325,7 +324,6 @@ You MUST follow this TDD workflow:
         
         return '\n'.join(lines)
     
-    @exponential_backoff(max_retries=3, base_delay=2.0, max_delay=30.0)
     def _invoke_claude_code(self, prompt: str, recipe: Recipe) -> str:  # noqa: ARG002
         """Invoke Claude Code CLI to generate implementation.
         

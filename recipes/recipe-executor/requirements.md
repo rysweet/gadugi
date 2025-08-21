@@ -23,7 +23,19 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST check that success criteria are measurable and linked to specific requirements
 - MUST validate that component types (service, agent, library, tool) are recognized and supported
 
-#### 1.3 Dependency Management
+#### 1.3 Requirements vs Design Separation Validation
+- MUST validate that requirements.md contains only WHAT needs to be done, not HOW
+- MUST detect design details (implementation specifics, technology choices, algorithms) in requirements
+- MUST validate that design.md contains only HOW to implement, not WHAT to implement
+- MUST detect requirements (functional needs, business rules) incorrectly placed in design
+- MUST propose corrections when requirements and design are mixed
+- MUST use AI to generate improved versions that properly separate concerns
+- MUST check for common violations:
+  - Implementation details in requirements (e.g., "MUST use PostgreSQL" vs "MUST persist data")
+  - Functional requirements in design (e.g., "The system validates user input" vs "Uses Zod schema validation")
+  - Technology choices in requirements (e.g., "MUST use React" vs "MUST provide web interface")
+
+#### 1.4 Dependency Management
 - MUST support hierarchical recipe dependencies where recipes can depend on other recipes (not Python packages)
   - Example: A "web-server" recipe might depend on "http-handler", "request-router", and "response-formatter" recipes
 - MUST clearly distinguish between recipe dependencies (in components.json) and Python package dependencies (in pyproject.toml)
@@ -86,27 +98,44 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
   - `cli-interface`: Click-based CLI scaffolding
   - `api-service`: REST API boilerplate
 
-### 4. Execution Engine
+### 4. Recipe Complexity Evaluation
 
-#### 4.1 Test-Driven Development (TDD) Approach
-- MUST follow strict TDD methodology by generating comprehensive tests before implementation code
+#### 4.1 Recipe Decomposition Analysis
+- MUST evaluate each recipe for complexity before execution
+- MUST determine if a recipe should be decomposed into smaller component recipes
+- MUST check for indicators of excessive complexity:
+  - More than 10 distinct components in design
+  - More than 20 MUST requirements
+  - Multiple unrelated functional areas
+  - Mixing infrastructure, business logic, and UI concerns
+- MUST recommend decomposition strategy when complexity threshold exceeded
+- MUST support automatic recipe splitting into logical sub-recipes
+- MUST validate that Recipe Executor's own recipe has been properly decomposed
+
+### 5. Execution Engine
+
+#### 5.1 Test-Driven Development (TDD) Red-Green-Refactor Cycle
+- MUST follow strict TDD methodology with complete red-green-refactor cycles
 - MUST create test files that cover all MUST requirements with specific test cases
   - Example: For a requirement "MUST parse JSON files", generate tests for valid JSON, invalid JSON, empty files, and missing files
 - MUST ensure tests initially fail (red phase) before generating implementation
-- MUST generate implementation code that makes all tests pass (green phase)
+- MUST run generated tests to verify they fail appropriately
+- MUST generate implementation code targeting test passage (green phase)
+- MUST iteratively fix failing tests using dedicated test-solver agent
+- MUST continue AI generation iterations until ALL tests pass
 - MUST support refactoring phase while maintaining passing tests
 
-#### 4.2 Claude Code Integration
-- MUST use Claude Code CLI (`claude`) for intelligent code generation, not template-based generation
-- MUST create detailed prompts that include:
+#### 5.2 AI-Powered Code Generation
+- MUST use AI-powered code generation, not template-based generation
+- MUST create detailed generation prompts that include:
   - Complete requirements with validation criteria
   - Design specifications with architectural decisions
   - Existing test files that need to pass
   - Quality standards and coding conventions
-- MUST parse Claude's output to extract generated files and their content
-- MUST validate that Claude-generated code satisfies requirements before proceeding
+- MUST parse generated output to extract files and their content
+- MUST validate that generated code satisfies requirements before proceeding
 
-#### 4.3 Code Quality Enforcement
+#### 5.3 Code Quality Enforcement
 - MUST ensure all generated Python code includes comprehensive type hints for every function, method, and variable
 - MUST generate code that passes strict pyright type checking with absolutely zero errors
 - MUST format all generated code with ruff for consistent style
@@ -114,43 +143,84 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST generate code that handles errors appropriately with try-except blocks and logging
 - MUST support parallel execution where dependencies allow, utilizing available CPU cores efficiently
 
-### 5. Self-Hosting Capability
+### 6. Code Review and Iteration
 
-#### 5.1 Bootstrap Process
+#### 6.1 Automated Code Review
+- MUST perform automated code review on all generated code using dedicated code-reviewer agent
+- MUST review for:
+  - Adherence to Zero BS principle (no stubs, no placeholders)
+  - Simplicity and avoiding over-engineering
+  - Security vulnerabilities and unsafe patterns
+  - Code quality and maintainability
+  - Test coverage and quality
+- MUST generate detailed review feedback with specific line-by-line comments
+- MUST categorize issues as critical (must fix) or suggestions (nice to have)
+
+#### 6.2 Review Response and Iteration
+- MUST process code review feedback using code-review-response agent
+- MUST fix all critical issues identified in review
+- MUST iterate between implementation and review until all critical issues resolved
+- MUST document review decisions and rationale for any suggestions not implemented
+- MUST maintain review history for learning and pattern recognition
+
+### 7. Post-Generation Validation
+
+#### 7.1 Requirements Compliance Validation
+- MUST validate generated artifacts against original recipe requirements
+- MUST use dedicated validation agent to verify:
+  - All MUST requirements have corresponding implementation
+  - All design components are properly implemented
+  - All interfaces match specifications
+  - All success criteria can be demonstrated
+- MUST generate compliance matrix showing requirement-to-code mapping
+- MUST fail the build if any MUST requirement is not satisfied
+
+#### 7.2 Artifact Completeness Check
+- MUST verify all expected artifacts are generated:
+  - Source code in proper directory structure
+  - Comprehensive test suites with > 80% coverage
+  - Configuration files (pyproject.toml, pyrightconfig.json, etc.)
+  - Documentation (README.md, API docs, etc.)
+- MUST validate artifact quality and completeness
+- MUST ensure no partial or incomplete files
+
+### 8. Self-Hosting Capability
+
+#### 8.1 Bootstrap Process
 - MUST be able to regenerate itself from its own recipe located in `recipes/recipe-executor/`
 - MUST start from a minimal Python implementation that can read and execute the recipe-executor recipe
 - MUST produce a new version of itself that is functionally identical to the current implementation
 - MUST support iterative self-improvement where each generation can build the next
 
-#### 5.2 Self-Protection
+#### 8.2 Self-Protection
 - MUST detect when output would overwrite Recipe Executor's own source files
 - MUST refuse to overwrite files in `src/recipe_executor/` when running
 - MUST provide clear error message when self-overwrite is attempted
 - MUST suggest using a different output directory or git worktree for self-regeneration
 - SHOULD support a `--allow-self-overwrite` flag only with explicit confirmation
 
-#### 5.3 Self-Validation
+#### 8.3 Self-Validation
 - MUST validate that regenerated code capability matches current implementation through comprehensive testing
 - MUST compare generated code structure with current implementation to ensure completeness
 - MUST run the full test suite on the regenerated version to ensure no regressions
 - MUST maintain backward compatibility with existing recipe formats during regeneration
 
-#### 5.4 Version Management
+#### 8.4 Version Management
 - MUST track version numbers and ensure compatibility during self-regeneration
 - MUST support upgrading from older versions while maintaining data and state
 - MUST provide rollback capability if regeneration produces an incompatible version
 - MUST document any breaking changes between versions
 
-### 6. Component Generation
+### 9. Component Generation
 
-#### 6.1 Multi-Language Support
+#### 9.1 Multi-Language Support
 - MUST generate Python code as the primary implementation language
 - MUST support generation of configuration files (JSON, YAML, TOML) from specifications
 - MUST generate comprehensive documentation in Markdown format
 - MUST support generation of shell scripts for automation tasks
 - SHOULD support other languages through extensible generation plugins
 
-#### 6.2 Project Structure
+#### 9.2 Project Structure
 - MUST generate complete Python project structure including:
   - `src/` directory with proper package organization
   - `tests/` directory with comprehensive test coverage
@@ -161,30 +231,30 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST create `__init__.py` files with proper exports for all packages
 - MUST organize code into logical modules following clean architecture principles
 
-#### 6.3 Test Generation
+#### 9.3 Test Generation
 - MUST generate pytest-compatible test files for all components
 - MUST create unit tests for individual functions and methods
 - MUST generate integration tests for component interactions
 - MUST include fixtures and parameterized tests where appropriate
 - MUST achieve minimum 80% code coverage with generated tests
 
-### 7. Validation and Testing
+### 10. Validation and Testing
 
-#### 7.1 Requirements Validation
+#### 10.1 Requirements Validation
 - MUST validate that implementations match requirements from the recipe
 - MUST check that public APIs match the design specification
 - MUST verify that all success criteria defined in the recipe are met
 - MUST generate a requirements traceability matrix showing which code satisfies each requirement
 - MUST fail the build if any MUST requirement is not satisfied
 
-#### 7.2 Dependency Validation
+#### 10.2 Dependency Validation
 - MUST ensure all dependencies are satisfied before execution begins
 - MUST verify that dependency versions are compatible with requirements
 - MUST check that dependency interfaces match expected contracts
 - MUST validate that transitive dependencies don't introduce conflicts
 - MUST provide clear error messages when dependencies are missing or incompatible
 
-#### 7.3 Quality Gates
+#### 10.3 Quality Gates
 - MUST run generated tests and report results with detailed failure information
 - MUST enforce quality gates at each stage of the build process
 - MUST ensure all generated Python code passes strict pyright type checking with zero errors
@@ -194,32 +264,32 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST execute all generated tests with pytest and fail if any test fails
 - MUST check code coverage and warn if below 80% threshold
 
-### 8. State Management
+### 11. State Management
 
-#### 8.1 Build State Tracking
+#### 11.1 Build State Tracking
 - MUST track build state and progress throughout the entire execution lifecycle
 - MUST record which recipes have been built, when, and with what result
 - MUST track dependencies between builds to understand impact of changes
 - MUST support resuming interrupted builds from the last successful state
 - MUST provide detailed build logs for troubleshooting failures
 
-#### 8.2 Incremental Build Support
+#### 11.2 Incremental Build Support
 - MUST support incremental builds that only rebuild changed components
 - MUST detect changes through file checksums and timestamps
 - MUST propagate rebuilds to dependent components when dependencies change
 - MUST reuse unchanged artifacts when possible
 - MUST provide options to force full rebuilds when needed
 
-#### 8.3 Build History and Artifacts
+#### 11.3 Build History and Artifacts
 - MUST maintain build history with timestamps and outcomes
 - MUST store all generated artifacts in a structured directory layout
 - MUST support rollback to previous builds by restoring earlier artifacts
 - MUST clean up old artifacts based on configurable retention policies
 - MUST track build success rates
 
-### 9. Stub Detection and Prevention
+### 12. Stub Detection and Prevention
 
-#### 9.1 Zero Stub Enforcement
+#### 12.1 Zero Stub Enforcement
 - MUST detect stub implementations in generated code including:
   - `raise NotImplementedError` statements
   - Empty `pass` statements as function bodies
@@ -229,23 +299,25 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST fail the build if stubs cannot be remediated after 3 attempts
 - MUST provide clear reports showing exact location of detected stubs
 
-#### 9.2 Code Completeness Validation
+#### 12.2 Code Completeness Validation
 - MUST verify that all generated functions have actual implementations
 - MUST check that generated tests actually test functionality (not just pass)
 - MUST ensure no placeholder or template code remains in output
 - MUST validate that all methods have more than trivial implementations
 
-### 10. Claude Code Agent Integration
+### 13. Recipe Execution Agents
 
-#### 10.1 Agent Support
-- MUST provide three Claude Code subagents for recipe workflows:
-  - **RecipeExecutor Agent**: Executes recipes via Claude Code interface
-  - **RecipeWriter Agent**: Writes recipes from natural language requirements
-  - **RecipeExtractor Agent**: Extracts recipes from existing codebases
-- MUST include installer function to deploy agents to .claude/agents directory
-- MUST ensure agents follow Claude Code agent specification format
+#### 13.1 Core Recipe Agents
+- MUST provide dedicated agents for recipe execution stages:
+  - **RecipeDecomposer Agent**: Evaluates and decomposes complex recipes
+  - **TestGenerator Agent**: Generates comprehensive test suites following TDD
+  - **TestSolver Agent**: Iteratively fixes failing tests until all pass
+  - **CodeReviewer Agent**: Reviews generated code for quality and compliance
+  - **CodeReviewResponse Agent**: Addresses review feedback and fixes issues
+  - **RequirementsValidator Agent**: Validates artifacts against recipe requirements
+- MUST ensure agents follow proper specification format with defined tools and capabilities
 
-#### 10.2 Agent Capabilities
+#### 13.2 Agent Capabilities
 - **RecipeExecutor Agent** MUST:
   - Execute any recipe with proper options
   - Validate no stubs in output
@@ -262,24 +334,21 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
   - Generate complete recipe sets
   - Create composite recipes for systems
 
-### 11. Error Handling
+### 14. Error Handling
 
-#### 11.1 Error Detection and Reporting
+#### 14.1 Error Detection and Reporting
 - MUST provide clear error messages for recipe issues that explain what went wrong and how to fix it
   - Example: "Error in recipe 'web-server': Missing required file 'design.md'. Please create this file with the component design specifications."
 - MUST fail fast on critical errors to avoid cascading failures
 - MUST distinguish between recoverable and non-recoverable errors
 - MUST include context about where and why the error occurred
 
-#### 11.2 Recovery and Retry Logic  
-- MUST support retry logic for transient failures such as Claude API timeouts
-- MUST implement exponential backoff for retry attempts (e.g., 2s, 4s, 8s delays)
-- MUST retry Claude API calls up to 3 times before failing
+#### 14.2 Recovery Logic  
 - MUST allow manual retry of failed operations after fixes have been applied
 - MUST support skipping failed optional components to continue build process
 - MUST provide rollback capability when builds fail partway through
 
-#### 11.3 Logging and Debugging
+#### 14.3 Logging and Debugging
 - MUST log all operations for debugging with configurable verbosity levels
 - MUST support structured logging with timestamps, severity levels, and categories
 - MUST provide trace-level logging for detailed troubleshooting

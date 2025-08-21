@@ -716,32 +716,17 @@ class ParallelRecipeBuilder:
         pass
 ```
 
-### 11. Retry Helper (`retry_helper.py`)
+### 11. Claude CLI Integration (`claude_code_generator.py`)
 ```python
-def exponential_backoff(max_retries=3, base_delay=2.0, max_delay=30.0):
-    """Decorator for retry logic with exponential backoff."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_retries):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    if attempt == max_retries - 1:
-                        raise
-                    delay = min(base_delay * (2 ** attempt), max_delay)
-                    print(f"Attempt {attempt + 1} failed: {e}")
-                    print(f"Retrying in {delay}s...")
-                    time.sleep(delay)
-        return wrapper
-    return decorator
-
 class ClaudeCodeGenerator:
-    """Modified to use retry logic for Claude API calls."""
+    """Generates code using Claude Code CLI - the chosen AI implementation."""
     
-    @exponential_backoff(max_retries=3)
     def _invoke_claude_code(self, prompt: str) -> str:
-        """Invoke Claude with automatic retry on failure."""
+        """Invoke Claude CLI for code generation.
+        
+        Note: Claude CLI has built-in retry logic with exponential backoff,
+        so we don't need to implement our own retry mechanism.
+        """
         result = subprocess.run(
             ["claude", "-p", prompt],
             capture_output=True,
@@ -750,6 +735,20 @@ class ClaudeCodeGenerator:
             check=True  # Raises on non-zero exit
         )
         return result.stdout
+    
+    def generate(self, recipe: Recipe, context: BuildContext) -> GeneratedCode:
+        """Generate code following TDD approach."""
+        # Phase 1: Generate tests first (RED phase)
+        test_prompt = self._create_test_prompt(recipe)
+        test_output = self._invoke_claude_code(test_prompt)
+        tests = self._parse_test_files(test_output)
+        
+        # Phase 2: Generate implementation to pass tests (GREEN phase)
+        impl_prompt = self._create_implementation_prompt(recipe, tests)
+        impl_output = self._invoke_claude_code(impl_prompt)
+        code = self._parse_code_files(impl_output)
+        
+        return GeneratedCode(files=code, tests=tests)
 ```
 
 ### 12. Quality Gates (`quality_gates.py`)
