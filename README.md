@@ -231,7 +231,33 @@ pip install uv
    uv run python -c "import gadugi; print(f'Gadugi {gadugi.get_version()} ready!')"
    ```
 
-2. **Run tests to verify setup**:
+2. **Configure environment variables**:
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env and set your secure passwords
+   # IMPORTANT: Never commit the .env file to version control
+   nano .env  # or use your preferred editor
+   ```
+
+   Required environment variables:
+   - `NEO4J_PASSWORD`: Secure password for Neo4j database
+   - `NEO4J_AUTH`: Full auth string (neo4j/your_password)
+   - `NEO4J_HOST`: Database host (default: localhost)
+   - `NEO4J_BOLT_PORT`: Bolt protocol port (default: 7687)
+   - `NEO4J_DATABASE`: Database name (default: gadugi)
+
+3. **Start services (if using Neo4j)**:
+   ```bash
+   # Start Neo4j using Docker Compose
+   docker-compose up -d neo4j
+   
+   # Verify Neo4j is running
+   docker-compose logs neo4j
+   ```
+
+4. **Run tests to verify setup**:
    ```bash
    uv run pytest tests/ -v
    ```
