@@ -149,30 +149,32 @@ class TestRecipeOrchestrator:
         # Mock other components
         orchestrator.state_manager.needs_rebuild = Mock(return_value=True)
         orchestrator.state_manager.record_build = Mock()
+        
+        # Mock discovery to return the sample recipe
+        with patch.object(orchestrator, "_discover_recipes", return_value={"test-recipe": sample_recipe}):
+            with patch.object(orchestrator, "_execute_single") as mock_execute:
+                mock_result = SingleBuildResult(
+                    recipe=sample_recipe,
+                    code=GeneratedCode(recipe_name="test-recipe", files={}),
+                    tests=None,
+                    validation=None,
+                    quality_result={},
+                    success=True,
+                    build_time=1.0,
+                )
+                mock_execute.return_value = mock_result
 
-        with patch.object(orchestrator, "_execute_single") as mock_execute:
-            mock_result = SingleBuildResult(
-                recipe=sample_recipe,
-                code=GeneratedCode(recipe_name="test-recipe", files={}),
-                tests=None,
-                validation=None,
-                quality_result={},
-                success=True,
-                build_time=1.0,
-            )
-            mock_execute.return_value = mock_result
+                # Execute
+                result = orchestrator.execute(
+                    tmp_path / "recipes" / "test-recipe", BuildOptions()
+                )
 
-            # Execute
-            result = orchestrator.execute(
-                tmp_path / "recipes" / "test-recipe", BuildOptions()
-            )
-
-            # Verify
-            assert result.success is True
-            assert len(result.results) == 1
-            assert result.results[0] == mock_result
-            mock_execute.assert_called_once()
-            orchestrator.state_manager.record_build.assert_called_once()
+                # Verify
+                assert result.success is True
+                assert len(result.results) == 1
+                assert result.results[0] == mock_result
+                mock_execute.assert_called_once()
+                orchestrator.state_manager.record_build.assert_called_once()
 
     def test_execute_single_recipe_implementation(
         self,
@@ -526,7 +528,7 @@ class TestRecipeOrchestrator:
         # Create multiple single results
         successful_result = SingleBuildResult(
             recipe=sample_recipe,
-            code=GeneratedCode(recipe_name="recipe1", files={}),
+            code=GeneratedCode(recipe_name="test-recipe", files={}),
             tests=None,
             validation=None,
             quality_result={},
@@ -562,7 +564,7 @@ class TestRecipeOrchestrator:
         )
 
         # Verify aggregation
-        assert build_result.get_successful_recipes() == ["recipe1"]
+        assert build_result.get_successful_recipes() == ["test-recipe"]
         assert build_result.get_failed_recipes() == ["recipe2"]
         assert build_result.success is False
         assert build_result.total_time == 1.5

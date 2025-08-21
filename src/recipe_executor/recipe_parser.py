@@ -3,9 +3,9 @@
 import json
 import re
 from pathlib import Path
-from typing import Optional
 from datetime import datetime
 import hashlib
+from typing import Optional
 
 from .recipe_model import (
     Recipe,
@@ -163,7 +163,7 @@ class RecipeParser:
 
     def _extract_requirements(self, content: str, section_name: str) -> list[Requirement]:
         """Extract requirements from a specific section."""
-        requirements = []
+        requirements: list[Requirement] = []
 
         # Find the section
         section_pattern = re.compile(rf"##?\s*{section_name}.*?\n(.*?)(?:\n##|\Z)", re.DOTALL)
@@ -202,7 +202,7 @@ class RecipeParser:
 
     def _extract_success_criteria(self, content: str) -> list[str]:
         """Extract success criteria from content."""
-        criteria = []
+        criteria: list[str] = []
 
         # Find Success Criteria section
         section_pattern = re.compile(r"##?\s*Success\s+Criteria.*?\n(.*?)(?:\n##|\Z)", re.DOTALL)
@@ -229,7 +229,7 @@ class RecipeParser:
 
     def _extract_component_designs(self, content: str) -> list[ComponentDesign]:
         """Extract component designs from design content."""
-        components = []
+        components: list[ComponentDesign] = []
 
         # Look for component definitions in code blocks or sections
         component_pattern = re.compile(
@@ -238,7 +238,7 @@ class RecipeParser:
 
         for match in component_pattern.finditer(content):
             component_name = match.group(1).strip()
-            file_name = match.group(2).strip()
+            _file_name = match.group(2).strip()  # Not used currently
 
             # Find the content after this component header
             start_pos = match.end()
@@ -271,7 +271,7 @@ class RecipeParser:
 
     def _extract_interfaces(self, content: str) -> list[Interface]:
         """Extract interface definitions from design."""
-        interfaces = []
+        interfaces: list[Interface] = []
 
         # Look for interface definitions
         interface_section = self._extract_section(content, "Interfaces")
@@ -279,7 +279,7 @@ class RecipeParser:
             # Parse interface definitions
             # This is a simplified implementation
             lines = interface_section.split("\n")
-            current_interface = None
+            current_interface: Optional[Interface] = None
 
             for line in lines:
                 if line.strip().startswith("-") or line.strip().startswith("*"):
@@ -317,7 +317,7 @@ class RecipeParser:
 
     def validate_recipe(self, recipe: Recipe) -> list[str]:
         """Validate a parsed recipe and return list of issues."""
-        issues = []
+        issues: list[str] = []
 
         # Check recipe validity
         if not recipe.is_valid():

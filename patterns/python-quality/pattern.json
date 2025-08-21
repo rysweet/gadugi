@@ -1,0 +1,13 @@
+{
+  "name": "python-quality",
+  "version": "1.0.0",
+  "description": "Python code quality standards including linting, formatting, and type checking",
+  "target_types": ["library", "service", "tool"],
+  "auto_apply": false,
+  "depends_on": [],
+  "metadata": {
+    "author": "Recipe Executor",
+    "category": "quality",
+    "language": "python"
+  }
+}

@@ -141,9 +141,9 @@ class CodeGenerator:
             # Module-level functions
             return self.templates["module"]
 
-    def _load_templates(self) -> Dict[str, "CodeTemplate"]:
+    def _load_templates(self) -> Dict[str, CodeTemplate]:
         """Load code generation templates."""
-        templates = {}
+        templates: Dict[str, CodeTemplate] = {}
 
         # Basic class template
         templates["class"] = CodeTemplate(
@@ -316,7 +316,7 @@ class {{ component.class_name }}:
     def _add_return_types(self, code: str) -> str:
         """Add return type annotations to functions."""
         lines = code.split("\n")
-        result = []
+        result: List[str] = []
 
         for line in lines:
             if line.strip().startswith("def ") and "->" not in line and line.rstrip().endswith(":"):
@@ -415,7 +415,7 @@ class {{ component.class_name }}:
 
     def _generate_project_files(self, recipe: Recipe) -> Dict[str, str]:
         """Generate project configuration files."""
-        files = {}
+        files: Dict[str, str] = {}
 
         # Generate pyproject.toml
         pyproject_content = self.standards.get_pyproject_template().format(

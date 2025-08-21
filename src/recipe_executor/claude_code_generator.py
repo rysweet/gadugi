@@ -8,21 +8,33 @@ from datetime import datetime
 
 from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, ComponentDesign, Design
 from .python_standards import PythonStandards
+from .base_generator import BaseCodeGenerator, CodeGenerationError
+from .stub_detector import StubDetector
 
 
-class ClaudeCodeGenerationError(Exception):
+class ClaudeCodeGenerationError(CodeGenerationError):
     """Raised when Claude Code generation fails."""
     pass
 
 
-class ClaudeCodeGenerator:
+class ClaudeCodeGenerator(BaseCodeGenerator):
     """Generates code from recipes using Claude Code CLI."""
     
-    def __init__(self, standards: Optional[PythonStandards] = None, guidelines_path: Optional[Path] = None, claude_command: str = "claude"):
-        """Initialize with Python standards enforcement."""
+    def __init__(self, standards: Optional[PythonStandards] = None, guidelines_path: Optional[Path] = None, claude_command: str = "claude", enforce_no_stubs: bool = True):
+        """Initialize with Python standards enforcement.
+        
+        Args:
+            standards: Python standards enforcer
+            guidelines_path: Path to guidelines file
+            claude_command: Command to invoke Claude
+            enforce_no_stubs: If True, strictly enforce no stub implementations
+        """
         self.standards = standards or PythonStandards()
         self.guidelines_path = guidelines_path or Path(".claude/Guidelines.md")
         self.claude_command = claude_command
+        self.enforce_no_stubs = enforce_no_stubs
+        self.stub_detector = StubDetector(strict_mode=True)
+        self.stub_remediator = None  # Will be set to StubRemediator(self) if needed
     
     def generate(self, recipe: Recipe, context: Optional[BuildContext] = None) -> GeneratedCode:
         """Generate code using Claude Code based on recipe (TDD approach)."""
@@ -51,6 +63,26 @@ class ClaudeCodeGenerator:
                 content = generated_files[file_path]
                 formatted = self.standards.format_code_with_ruff(content)
                 generated_files[file_path] = formatted
+            
+            # Step 3: Detect and remediate any stub implementations
+            if self.enforce_no_stubs:
+                is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
+                
+                if not is_valid:
+                    # Try to remediate stubs automatically
+                    if not self.stub_remediator:
+                        from .stub_detector import StubRemediator
+                        self.stub_remediator = StubRemediator(self)
+                    
+                    fixed_files, success, errors = self.stub_remediator.remediate_stubs(
+                        generated_files, recipe
+                    )
+                    
+                    if success:
+                        generated_files = fixed_files
+                    else:
+                        error_msg = "Generated code contains stub implementations:\n" + "\n".join(errors)
+                        raise ClaudeCodeGenerationError(error_msg)
         
         # Create GeneratedCode object
         generated = GeneratedCode(
@@ -188,7 +220,7 @@ You MUST follow this TDD workflow:
         """Load guidelines from file."""
         if self.guidelines_path.exists():
             return self.guidelines_path.read_text()
-        return ""
+        return "# Guidelines not found\n\nUsing default guidelines."
     
     def _format_requirements(self, requirements: Requirements) -> str:
         """Format requirements for inclusion in prompt."""
@@ -229,7 +261,7 @@ You MUST follow this TDD workflow:
             lines.append(f"**{component.name}**")
             lines.append(f"{component.description}")
             if component.class_name:
-                lines.append(f"- Class Name: `{component.class_name}`")
+                lines.append(f"- Class: `{component.class_name}`")
             if component.methods:
                 lines.append(f"- Methods: {', '.join(component.methods)}")
             if component.code_snippet:
@@ -331,7 +363,10 @@ You MUST follow this TDD workflow:
                 # Normalize path - ensure it's relative to the recipe
                 if not file_path.startswith('src/') and not file_path.startswith('tests/'):
                     # If path doesn't have proper prefix, add it
-                    if '/' not in file_path:
+                    if file_path.startswith(f"{recipe.name}/"):
+                        # Recipe-relative path, normalize it
+                        file_path = file_path.replace(f"{recipe.name}/", f"src/{recipe.name.replace('-', '_')}/")
+                    elif '/' not in file_path:
                         # Simple filename, put in recipe src dir
                         file_path = f"src/{recipe.name.replace('-', '_')}/{file_path}"
                 current_file = file_path
@@ -444,7 +479,7 @@ Implement the code needed to make all the following tests pass.
 1. Write the minimal code needed to make tests pass
 2. Follow the design specification closely
 3. Use proper type hints throughout
-4. Ensure all tests pass
+4. Ensure all tests pass (make all tests pass)
 5. No stub implementations - everything must work
 
 Generate the implementation that makes all tests pass.

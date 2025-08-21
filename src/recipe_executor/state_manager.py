@@ -18,8 +18,8 @@ class BuildState:
     recipe_checksum: str
     build_time: datetime
     success: bool
-    outputs: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    outputs: List[str] = field(default_factory=lambda: [])
+    errors: List[str] = field(default_factory=lambda: [])
 
 
 class StateManager:

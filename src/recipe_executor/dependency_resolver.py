@@ -1,6 +1,6 @@
 """Dependency resolution for Recipe Executor."""
 
-from typing import Optional, Set, List, Dict, Any
+from typing import Optional, Set, List, Dict, Any, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
 import networkx as nx
@@ -24,8 +24,8 @@ class MissingDependencyError(Exception):
 class DependencyGraph:
     """Represents the dependency graph of recipes."""
 
-    graph: Any = field(default_factory=nx.DiGraph)  # nx.DiGraph doesn't support type parameters
-    recipes: Dict[str, Recipe] = field(default_factory=dict)
+    graph: Any = field(default_factory=lambda: nx.DiGraph())  # type: ignore[misc]  # nx.DiGraph doesn't support type parameters
+    recipes: Dict[str, Recipe] = field(default_factory=lambda: {})
 
     def add_recipe(self, recipe: Recipe) -> None:
         """Add a recipe to the graph."""
@@ -52,7 +52,7 @@ class DependencyGraph:
             return set()
 
         # Get all ancestors (dependencies) of this node
-        return nx.ancestors(self.graph, recipe_name)
+        return nx.ancestors(self.graph, recipe_name)  # type: ignore[no-any-return]
 
     def get_dependents(self, recipe_name: str) -> Set[str]:
         """Get all recipes that depend on this one."""
@@ -60,7 +60,7 @@ class DependencyGraph:
             return set()
 
         # Get all descendants (dependents) of this node
-        return nx.descendants(self.graph, recipe_name)
+        return nx.descendants(self.graph, recipe_name)  # type: ignore[no-any-return]
 
     def has_cycles(self) -> bool:
         """Check if the graph has circular dependencies."""
@@ -199,7 +199,7 @@ class DependencyResolver:
         groups = self.get_parallel_groups(needed)
 
         # Convert to execution plan
-        plan: List[Dict[str, Any]] = []
+        plan: List[Tuple[int, List[str]]] = []
         for i, group in enumerate(groups):
             plan.append((i, [r.name for r in group]))
 

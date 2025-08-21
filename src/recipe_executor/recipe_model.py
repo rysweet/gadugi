@@ -33,7 +33,7 @@ class Requirement:
     id: str
     description: str
     priority: RequirementPriority
-    validation_criteria: list[str] = field(default_factory=list)
+    validation_criteria: list[str] = field(default_factory=lambda: [])
     implemented: bool = False
 
 
@@ -62,8 +62,8 @@ class ComponentDesign:
     name: str
     description: str
     class_name: Optional[str] = None
-    methods: list[str] = field(default_factory=list)
-    properties: list[str] = field(default_factory=list)
+    methods: list[str] = field(default_factory=lambda: [])
+    properties: list[str] = field(default_factory=lambda: [])
     code_snippet: Optional[str] = None
 
 
@@ -73,9 +73,9 @@ class Interface:
 
     name: str
     description: str
-    methods: list[str] = field(default_factory=list)
-    events: list[str] = field(default_factory=list)
-    data_types: list[str] = field(default_factory=list)
+    methods: list[str] = field(default_factory=lambda: [])
+    events: list[str] = field(default_factory=lambda: [])
+    data_types: list[str] = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -86,7 +86,7 @@ class Design:
     components: list[ComponentDesign]
     interfaces: list[Interface]
     implementation_notes: str
-    code_blocks: list[str] = field(default_factory=list)
+    code_blocks: list[str] = field(default_factory=lambda: [])
 
     def get_component_by_name(self, name: str) -> Optional[ComponentDesign]:
         """Find a component by name."""
@@ -103,9 +103,9 @@ class Components:
     name: str
     version: str
     type: ComponentType
-    dependencies: list[str] = field(default_factory=list)  # Other recipe names this depends on
+    dependencies: list[str] = field(default_factory=lambda: [])  # Other recipe names this depends on
     description: str = ""
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=lambda: {})
 
     def is_self_hosting(self) -> bool:
         """Check if this recipe is self-hosting."""
@@ -123,7 +123,7 @@ class RecipeMetadata:
     created_at: datetime
     updated_at: datetime
     author: str = "Recipe Executor"
-    tags: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=lambda: [])
     build_count: int = 0
     last_build: Optional[datetime] = None
     checksum: Optional[str] = None
@@ -176,9 +176,9 @@ class BuildContext:
     """Context for building a recipe."""
 
     recipe: Recipe
-    dependencies: dict[str, Any] = field(default_factory=dict)
-    options: dict[str, Any] = field(default_factory=dict)
-    environment: dict[str, str] = field(default_factory=dict)
+    dependencies: dict[str, Any] = field(default_factory=lambda: {})
+    options: dict[str, Any] = field(default_factory=lambda: {})
+    environment: dict[str, str] = field(default_factory=lambda: {})
     dry_run: bool = False
     verbose: bool = False
     force_rebuild: bool = False
@@ -233,8 +233,8 @@ class ValidationResult:
     requirements_coverage: dict[str, bool]  # requirement_id -> covered
     design_compliance: dict[str, bool]  # component_name -> compliant
     quality_gates: dict[str, bool]  # gate_name -> passed
-    errors: list[str] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=lambda: [])
+    warnings: list[str] = field(default_factory=lambda: [])
 
     def get_coverage_percentage(self) -> float:
         """Calculate requirement coverage percentage."""
@@ -277,7 +277,7 @@ class SingleBuildResult:
     quality_result: dict[str, bool]  # tool_name -> passed
     success: bool
     build_time: float
-    errors: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=lambda: [])
 
     def get_quality_failures(self) -> list[str]:
         """Get list of failed quality gates."""
