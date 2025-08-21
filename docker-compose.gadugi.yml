@@ -8,11 +8,11 @@ services:
       - "7475:7474"  # HTTP (using 7475 to avoid conflict)
       - "7689:7687"  # Bolt (using 7689 to avoid conflict)
     environment:
-      - NEO4J_AUTH=neo4j/gadugi-password  # Change in production
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/changeme}  # Uses env var or fallback
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-      - NEO4J_dbms_memory_pagecache_size=1G
-      - NEO4J_dbms_memory_heap_initial__size=1G
-      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-1G}
+      - NEO4J_dbms_memory_heap_initial__size=${NEO4J_HEAP_INITIAL_SIZE:-1G}
+      - NEO4J_dbms_memory_heap_max__size=${NEO4J_HEAP_MAX_SIZE:-2G}
       - NEO4J_dbms_default__listen__address=0.0.0.0
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
       - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
@@ -23,7 +23,7 @@ services:
       - gadugi_neo4j_plugins:/plugins
       - ./neo4j/init:/var/lib/neo4j/init
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "gadugi-password", "MATCH (n) RETURN count(n) LIMIT 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5

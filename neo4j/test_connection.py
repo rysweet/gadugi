@@ -4,6 +4,7 @@ Test Neo4j connection and initialization for Gadugi.
 """
 
 import sys
+import os
 from datetime import datetime
 
 from neo4j import GraphDatabase, basic_auth
@@ -16,13 +17,16 @@ class Neo4jConnection:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7688",
-        user: str = "neo4j",
-        password: str = "gadugi-password",
+        uri: str = None,
+        user: str = None,
+        password: str = None,
     ):
-        self.uri = uri
-        self.user = user
-        self.password = password
+        # Use environment variables with fallbacks
+        neo4j_host = os.getenv('NEO4J_HOST', 'localhost')
+        neo4j_port = os.getenv('NEO4J_BOLT_PORT', '7687')
+        self.uri = uri or f"bolt://{neo4j_host}:{neo4j_port}"
+        self.user = user or os.getenv('NEO4J_USERNAME', 'neo4j')
+        self.password = password or os.getenv('NEO4J_PASSWORD', 'changeme')
         self.driver = None
 
     def connect(self) -> bool:

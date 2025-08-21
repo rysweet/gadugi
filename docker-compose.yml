@@ -8,12 +8,12 @@ services:
       - "7474:7474"  # HTTP
       - "7687:7687"  # Bolt
     environment:
-      - NEO4J_AUTH=neo4j/gadugi123  # Default password (change in production)
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/changeme}  # Uses env var or fallback
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
-      - NEO4J_dbms_memory_pagecache_size=512M
-      - NEO4J_dbms_memory_heap_initial__size=512M
-      - NEO4J_dbms_memory_heap_max__size=1G
-      - NEO4J_dbms_default__database=gadugi
+      - NEO4J_dbms_memory_pagecache_size=${NEO4J_PAGECACHE_SIZE:-512M}
+      - NEO4J_dbms_memory_heap_initial__size=${NEO4J_HEAP_INITIAL_SIZE:-512M}
+      - NEO4J_dbms_memory_heap_max__size=${NEO4J_HEAP_MAX_SIZE:-1G}
+      - NEO4J_dbms_default__database=${NEO4J_DATABASE:-gadugi}
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
       - NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*
     volumes:

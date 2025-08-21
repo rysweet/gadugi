@@ -307,7 +307,7 @@ def main():
                 logger.info("\nYou can now:")
                 logger.info("  - Access Neo4j Browser at http://localhost:7474")
                 logger.info("  - Username: neo4j")
-                logger.info("  - Password: gadugi123")
+                logger.info("  - Password: (configured in .env file)")
                 logger.info("  - Run test script: python neo4j/test_connection.py")
             else:
                 logger.error("❌ Verification failed")

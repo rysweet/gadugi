@@ -2,6 +2,7 @@
 """Neo4j client for Gadugi v0.3."""
 
 import logging
+import os
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -13,10 +14,10 @@ import json
 @dataclass
 class Neo4jConfig:
     """Neo4j connection configuration."""
-    uri: str = "bolt://localhost:7687"
-    username: str = "neo4j"
-    password: str = "gadugi123"
-    database: str = "gadugi"
+    uri: str = field(default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST', 'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7687')}")
+    username: str = field(default_factory=lambda: os.getenv('NEO4J_USERNAME', 'neo4j'))
+    password: str = field(default_factory=lambda: os.getenv('NEO4J_PASSWORD', 'changeme'))
+    database: str = field(default_factory=lambda: os.getenv('NEO4J_DATABASE', 'gadugi'))
     max_connection_lifetime: int = 3600
     max_connection_pool_size: int = 50
     connection_timeout: float = 30.0
