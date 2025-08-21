@@ -145,3 +145,9 @@ ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by format
 docstring-code-format = true
 docstring-code-line-length = 88
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pytest-timeout>=2.4.0",
+    "pytest-xdist>=3.8.0",
+]
