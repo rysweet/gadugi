@@ -69,4 +69,8 @@ Create a sample agent to prove the framework works:
 - `.claude/framework/event_integration.py`
 - `.claude/framework/agent_manager.py`
 - `.claude/framework/sample_agent.py`
+<<<<<<< HEAD
 - `.claude/framework/tests/test_framework.py`
+=======
+- `.claude/framework/tests/test_framework.py`
+>>>>>>> feature/gadugi-v0.3-regeneration

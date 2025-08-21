@@ -25,7 +25,11 @@ while [ $attempt -lt $max_attempts ]; do
         echo "✅ Neo4j is ready!"
         break
     fi
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/gadugi-v0.3-regeneration
     attempt=$((attempt + 1))
     echo "   Attempt $attempt/$max_attempts..."
     sleep 2
@@ -57,4 +61,8 @@ echo "👤 Username: neo4j"
 echo "🔑 Password: gadugi-password"
 echo ""
 echo "To stop Neo4j: docker-compose -f docker-compose.gadugi.yml down"
+<<<<<<< HEAD
 echo "To view logs: docker logs -f gadugi-neo4j"
+=======
+echo "To view logs: docker logs -f gadugi-neo4j"
+>>>>>>> feature/gadugi-v0.3-regeneration

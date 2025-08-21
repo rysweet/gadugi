@@ -94,7 +94,7 @@ ProcessInfo = None
 class OrchestrationConfig:
     """Configuration for orchestration execution"""
     max_parallel_tasks: int = 4
-    execution_timeout_hours: int = 2
+    execution_timeout_hours: int = 12
     monitoring_interval_seconds: int = 30
     enable_checkpoint: bool = True
     fallback_to_sequential: bool = True
@@ -621,7 +621,7 @@ def main():
     parser = argparse.ArgumentParser(description="Orchestrator Main - Parallel Workflow Coordination")
     parser.add_argument("prompt_files", nargs="+", help="Prompt files to execute in parallel")
     parser.add_argument("--max-parallel", type=int, default=4, help="Maximum parallel tasks")
-    parser.add_argument("--timeout", type=int, default=2, help="Execution timeout in hours")
+    parser.add_argument("--timeout", type=int, default=12, help="Execution timeout in hours")
     parser.add_argument("--project-root", default=".", help="Project root directory")
 
     args = parser.parse_args()

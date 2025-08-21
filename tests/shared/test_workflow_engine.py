@@ -9,6 +9,7 @@ import pytest
 import tempfile
 import os
 import json
+from unittest.mock import Mock, patch
 
 # Import the module under test
 import sys

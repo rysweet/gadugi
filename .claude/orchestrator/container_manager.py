@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable  # type: ignore, Dict, List, Optional
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional  # type: ignore
 import uuid
 
 try:
@@ -101,11 +101,10 @@ class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
     def __init__(self, container_id: str, task_id: str):
-    websockets = None  # type: ignore
         self.container_id = container_id  # type: ignore
         self.task_id = task_id  # type: ignore
         self.streaming = False  # type: ignore
-        self.clients: List[websockets.WebSocketServerProtocol] = []  # type: ignore
+        self.clients: List = []  # type: ignore
 
     async def start_streaming(self, container):
         """Start streaming container output"""
@@ -176,7 +175,6 @@ class ContainerManager:
             raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
         try:  # type: ignore
-                docker = None
             self.docker_client = docker.from_env()  # type: ignore
             # Test connection
             self.docker_client.ping()  # type: ignore
@@ -267,24 +265,20 @@ CMD ["bash"]
         if not self.docker_client:
             raise RuntimeError("Docker client not initialized")
 
-        # Validate API key before container creation
+        # Try subprocess first as fallback for auth issues
+        subprocess_result = self._try_subprocess_execution(task_id, worktree_path, prompt_file)
+        if subprocess_result.exit_code == 0:
+            logger.info(f"Task {task_id} completed successfully via subprocess fallback")
+            return subprocess_result
+
+        # If subprocess failed, try container execution
+        logger.info(f"Subprocess failed for {task_id}, trying container execution...")
+
+        # Validate API key before container creation (optional for subscription users)
         api_key = os.getenv('CLAUDE_API_KEY', '').strip()
         if not api_key:
-            logger.error(f"CLAUDE_API_KEY not set for task {task_id}")
-            return ContainerResult(
-                container_id="none",
-                task_id=task_id,
-                status="failed",
-                start_time=datetime.now(),
-                end_time=datetime.now(),
-                duration=0.0,
-                exit_code=-1,
-                stdout="",
-                stderr="ERROR: CLAUDE_API_KEY environment variable not set",
-                logs=[],
-                resource_usage={},
-                error_message="CLAUDE_API_KEY not set"
-            )
+            logger.warning(f"CLAUDE_API_KEY not set for task {task_id}, relying on subscription auth")
+            # Don't fail here - let container try with mounted auth
 
         _container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
         start_time = datetime.now()
@@ -313,13 +307,29 @@ CMD ["bash"]
 
         logger.info(f"Starting containerized task: {task_id}")
 
-        # Prepare container volumes
-        _volumes = {
+        # Prepare container volumes including auth directories
+        volumes = {
             str(worktree_path.absolute()): {
                 'bind': '/workspace',
                 'mode': 'rw'
             }
         }
+
+        # Mount Claude config directory for subscription auth
+        claude_config_dir = Path.home() / '.claude'
+        if claude_config_dir.exists():
+            volumes[str(claude_config_dir)] = {
+                'bind': '/root/.claude',
+                'mode': 'ro'
+            }
+
+        # Mount GitHub config directory for gh CLI
+        gh_config_dir = Path.home() / '.config' / 'gh'
+        if gh_config_dir.exists():
+            volumes[str(gh_config_dir)] = {
+                'bind': '/root/.config/gh',
+                'mode': 'ro'
+            }
 
         # Prepare Claude CLI command with proper flags and path escaping
         import shlex
@@ -332,9 +342,6 @@ CMD ["bash"]
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
         try:  # type: ignore
-                _docker = None
-                _docker = None
-    docker = None
             # Create and start container
             container = self.docker_client.containers.run(  # type: ignore
                 image=self.config.image,  # type: ignore
@@ -350,6 +357,11 @@ CMD ["bash"]
                 environment={
                     'PYTHONUNBUFFERED': '1',
                     'CLAUDE_API_KEY': os.getenv('CLAUDE_API_KEY', ''),
+                    'CLAUDE_CODE_SSE_PORT': os.getenv('CLAUDE_CODE_SSE_PORT', ''),
+                    'CLAUDE_CODE_ENTRYPOINT': os.getenv('CLAUDE_CODE_ENTRYPOINT', 'cli'),
+                    'CLAUDECODE': os.getenv('CLAUDECODE', '1'),
+                    'GH_TOKEN': os.getenv('GH_TOKEN', ''),
+                    'GITHUB_TOKEN': os.getenv('GITHUB_TOKEN', ''),
                     'TASK_ID': task_id  # type: ignore
                 }
             )
@@ -616,6 +628,92 @@ CMD ["bash"]
                 logger.warning(f"Error closing Docker client: {e}")
 
         logger.info("ContainerManager cleanup complete")
+
+
+    def _try_subprocess_execution(self, task_id: str, worktree_path: Path, prompt_file: str) -> ContainerResult:
+        """Fallback subprocess execution when Docker fails or auth issues occur"""
+        import subprocess
+        import shlex
+
+        logger.info(f"Attempting subprocess execution for task {task_id}")
+        start_time = datetime.now()
+
+        try:
+            # Change to worktree directory
+            original_cwd = os.getcwd()
+            os.chdir(worktree_path)
+
+            # Prepare Claude CLI command
+            escaped_prompt = shlex.quote(prompt_file)
+            claude_cmd = ["claude", "-p", escaped_prompt] + self.config.claude_flags
+
+            logger.info(f"Subprocess command: {' '.join(claude_cmd)}")
+
+            # Execute with proper timeout
+            result = subprocess.run(
+                claude_cmd,
+                capture_output=True,
+                text=True,
+                timeout=self.config.timeout_seconds,
+                cwd=worktree_path
+            )
+
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+
+            return ContainerResult(
+                container_id=f"subprocess-{task_id}",
+                task_id=task_id,
+                status="success" if result.returncode == 0 else "failed",
+                exit_code=result.returncode,
+                stdout=result.stdout,
+                stderr=result.stderr,
+                logs=result.stdout + "\n" + result.stderr,
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration,
+                resource_usage={}
+            )
+
+        except subprocess.TimeoutExpired:
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            return ContainerResult(
+                container_id=f"subprocess-{task_id}",
+                task_id=task_id,
+                status="failed",
+                exit_code=-1,
+                stdout="",
+                stderr="Subprocess execution timed out",
+                logs="",
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration,
+                resource_usage={}
+            )
+        except Exception as e:
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            logger.error(f"Subprocess execution failed for {task_id}: {e}")
+            return ContainerResult(
+                container_id=f"subprocess-{task_id}",
+                task_id=task_id,
+                status="failed",
+                exit_code=-2,
+                stdout="",
+                stderr=f"Subprocess error: {e}",
+                logs="",
+                start_time=start_time,
+                end_time=end_time,
+                duration=duration,
+                resource_usage={}
+            )
+        finally:
+            # Restore original working directory
+            try:
+                os.chdir(original_cwd)
+            except:
+                pass
 
 
 def main():

@@ -8,7 +8,7 @@ import json
 import os
 import tempfile
 import unittest
-from typing import Set
+from unittest.mock import Mock, patch
 
 
 class TestClaudeSettingsUpdate(unittest.TestCase):

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package gadugi.common;
+
+// Timestamp message for time representation
+message Timestamp {
+  int64 seconds = 1;  // Seconds since Unix epoch
+  int32 nanos = 2;    // Non-negative nanoseconds
+}
+
+// Metadata for additional context
+message Metadata {
+  map<string, string> labels = 1;      // Key-value labels
+  map<string, string> annotations = 2; // Additional annotations
+  string trace_id = 3;                 // Distributed trace ID
+  string span_id = 4;                  // Span ID for tracing
+}
+
+// Priority levels for events and tasks
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  PRIORITY_LOW = 1;
+  PRIORITY_NORMAL = 2;
+  PRIORITY_HIGH = 3;
+  PRIORITY_CRITICAL = 4;
+}
+
+// Error information
+message Error {
+  string code = 1;         // Error code
+  string message = 2;      // Human-readable message
+  string details = 3;      // Detailed error information
+  string stack_trace = 4;  // Stack trace if available
+  string source = 5;       // Source of the error
+  Timestamp timestamp = 6; // When error occurred
+}
+
+// Resource requirements
+message ResourceRequirements {
+  double cpu_cores = 1;     // Required CPU cores
+  int64 memory_mb = 2;      // Required memory in MB
+  int64 disk_mb = 3;        // Required disk in MB
+  int64 network_mbps = 4;   // Network bandwidth in Mbps
+  int32 gpu_count = 5;      // Number of GPUs required
+  map<string, int32> custom = 6; // Custom resource requirements
+}
+
+// Agent status
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_INITIALIZING = 1;
+  AGENT_STATUS_RUNNING = 2;
+  AGENT_STATUS_PAUSED = 3;
+  AGENT_STATUS_STOPPING = 4;
+  AGENT_STATUS_STOPPED = 5;
+  AGENT_STATUS_ERROR = 6;
+  AGENT_STATUS_MAINTENANCE = 7;
+}
+
+// Task status
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_SCHEDULED = 2;
+  TASK_STATUS_RUNNING = 3;
+  TASK_STATUS_PAUSED = 4;
+  TASK_STATUS_COMPLETED = 5;
+  TASK_STATUS_FAILED = 6;
+  TASK_STATUS_CANCELLED = 7;
+  TASK_STATUS_TIMEOUT = 8;
+}
+
+// Retry policy
+message RetryPolicy {
+  int32 max_attempts = 1;        // Maximum retry attempts
+  int32 initial_delay_ms = 2;    // Initial delay in milliseconds
+  double backoff_multiplier = 3; // Backoff multiplier
+  int32 max_delay_ms = 4;        // Maximum delay in milliseconds
+  repeated string retriable_errors = 5; // Error codes that trigger retry
+}

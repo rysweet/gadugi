@@ -31,6 +31,7 @@ def root():
         "version": "0.1.0"
     }), 200
 
+<<<<<<< HEAD
 @app.route('/status', methods=['GET'])
 def status():
     """Status endpoint."""
@@ -40,6 +41,8 @@ def status():
         "version": "0.1.0"
     }), 200
 
+=======
+>>>>>>> feature/gadugi-v0.3-regeneration
 @app.route('/process', methods=['POST'])
 def process():
     """Process incoming request."""
@@ -47,7 +50,11 @@ def process():
         data = request.get_json()
 
         # Validate input
+<<<<<<< HEAD
         is_valid, error = validate_input(data)
+=======
+        is_valid, error = validate_input(data)  # type: ignore
+>>>>>>> feature/gadugi-v0.3-regeneration
         if not is_valid:
             return jsonify({"error": error}), 400
 

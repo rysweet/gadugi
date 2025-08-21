@@ -4,10 +4,17 @@ Configuration for event-router.
 
 import os
 from typing import Optional
+<<<<<<< HEAD
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+=======
+from pydantic import BaseSettings
+
+
+class Settings(BaseSettings):  # type: ignore
+>>>>>>> feature/gadugi-v0.3-regeneration
     """Application settings."""
 
     # Service configuration
@@ -32,10 +39,16 @@ class Settings(BaseSettings):
     api_key: Optional[str] = None
     secret_key: str = "change-me-in-production"
 
+<<<<<<< HEAD
     model_config = {
         "env_prefix": "EVENT_ROUTER_",
         "env_file": ".env"
     }
+=======
+    class Config:
+        env_prefix = "EVENT-ROUTER_"
+        env_file = ".env"
+>>>>>>> feature/gadugi-v0.3-regeneration
 
 
 def get_settings() -> Settings:

@@ -23,7 +23,11 @@ def main():
         ".claude/services/mcp/",
         ".claude/agents/recipe-implementation/",
     ]
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> feature/gadugi-v0.3-regeneration
     total_errors = 0
     for path in paths:
         if Path(path).exists():
@@ -32,9 +36,15 @@ def main():
             error_count = sum(1 for line in errors if "error:" in line)
             print(f"  Found {error_count} errors")
             total_errors += error_count
+<<<<<<< HEAD
 
     print(f"\nTotal errors: {total_errors}")
 
+=======
+    
+    print(f"\nTotal errors: {total_errors}")
+    
+>>>>>>> feature/gadugi-v0.3-regeneration
     if total_errors == 0:
         print("✅ All code is pyright clean!")
         return 0
@@ -44,4 +54,8 @@ def main():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     sys.exit(main())
+=======
+    sys.exit(main())
+>>>>>>> feature/gadugi-v0.3-regeneration

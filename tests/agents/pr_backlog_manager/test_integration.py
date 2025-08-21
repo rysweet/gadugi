@@ -43,9 +43,7 @@ sys.path.insert(0, shared_path)
 from .test_stubs import (
     PRBacklogManager,
     PRStatus,
-    ReadinessCriteria,
     ReadinessAssessor,
-    ConflictComplexity,
     DelegationCoordinator,
     DelegationType,
     DelegationStatus,

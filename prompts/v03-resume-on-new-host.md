@@ -40,7 +40,11 @@ This fix is committed but needs to be used for proper parallel execution.
 
 ### Critical TODOs (Must Complete in Order):
 - [ ] **TODO #1**: Fix remaining 388 pyright errors to achieve ZERO
+<<<<<<< HEAD
 - [ ] **TODO #2**: Verify Team Coach implementation works properly
+=======
+- [ ] **TODO #2**: Verify Team Coach implementation works properly  
+>>>>>>> feature/gadugi-v0.3-regeneration
 - [ ] **TODO #3**: Run final validation to confirm all components working
 - [ ] **TODO #4**: Create PR with all fixes
 
@@ -221,4 +225,8 @@ docker-compose -f docker-compose.gadugi.yml up -d
 docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password "MATCH (n) RETURN count(n)"
 ```
 
+<<<<<<< HEAD
 This prompt contains everything needed to resume work on a new host and complete the v0.3 implementation.
+=======
+This prompt contains everything needed to resume work on a new host and complete the v0.3 implementation.
+>>>>>>> feature/gadugi-v0.3-regeneration

@@ -1,0 +1,86 @@
+{
+  "name": "orchestrator",
+  "version": "0.3.0",
+  "dependencies": {
+    "internal": [
+      {
+        "component": "agent-framework",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Agent management and coordination"
+      },
+      {
+        "component": "event-system",
+        "version": ">=0.3.0",
+        "required": true,
+        "purpose": "Task and workflow event publishing"
+      },
+      {
+        "component": "task-decomposer",
+        "version": ">=0.3.0",
+        "required": false,
+        "purpose": "Breaking down complex tasks into subtasks (optional)"
+      }
+    ],
+    "external": [
+      {
+        "package": "networkx",
+        "version": ">=3.0",
+        "required": true,
+        "purpose": "Dependency graph analysis and topological sorting"
+      },
+      {
+        "package": "asyncio",
+        "version": "builtin",
+        "required": true,
+        "purpose": "Async task execution and coordination"
+      },
+      {
+        "package": "pydantic",
+        "version": ">=2.0.0",
+        "required": true,
+        "purpose": "Workflow and task validation"
+      },
+      {
+        "package": "prometheus-client",
+        "version": ">=0.19.0",
+        "required": false,
+        "purpose": "Execution metrics collection (optional)"
+      },
+      {
+        "package": "ray",
+        "version": ">=2.0.0",
+        "required": false,
+        "purpose": "Distributed execution support (optional)"
+      },
+      {
+        "package": "tenacity",
+        "version": ">=8.0.0",
+        "required": true,
+        "purpose": "Retry logic for failed tasks"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "interface": "Orchestrator",
+      "version": "1.0.0",
+      "description": "Main orchestration engine for workflow execution"
+    },
+    {
+      "interface": "TaskScheduler",
+      "version": "1.0.0",
+      "description": "Task scheduling and dependency management"
+    },
+    {
+      "interface": "WorkflowBuilder",
+      "version": "1.0.0",
+      "description": "Fluent API for workflow construction"
+    },
+    {
+      "interface": "ResourceManager",
+      "version": "1.0.0",
+      "description": "Resource allocation and management"
+    }
+  ]
+}

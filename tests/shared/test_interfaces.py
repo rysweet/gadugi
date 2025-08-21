@@ -9,6 +9,7 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Protocol
 
 import pytest
 
@@ -48,7 +49,7 @@ except ImportError:
 
     from abc import ABC, abstractmethod
     from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Protocol
+    from typing import Any, Dict, List, Optional, Protocol
 
     # Core interfaces
     class AgentInterface(ABC):

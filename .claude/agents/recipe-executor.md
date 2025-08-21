@@ -136,4 +136,8 @@ An implementation is considered COMPLETE when:
 - ALWAYS validate the implementation works
 - ALWAYS follow Python best practices
 
+<<<<<<< HEAD
 Your implementations should be production-ready and deployable immediately.
+=======
+Your implementations should be production-ready and deployable immediately.
+>>>>>>> feature/gadugi-v0.3-regeneration

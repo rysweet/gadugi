@@ -30,7 +30,7 @@ from ..phase3.coaching_engine import (
     CoachingPriority,
     CoachingCategory,
 )
-from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics
+# from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics  # Unused imports
 
 
 class TestCoachingEngine(unittest.TestCase):

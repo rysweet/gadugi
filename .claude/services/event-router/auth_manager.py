@@ -358,7 +358,11 @@ class ContainerAuthBuilder:
     def build_entrypoint_script(self) -> str:
         """Build entrypoint script for containers."""
 
+<<<<<<< HEAD
         return """#!/bin/bash
+=======
+        return '''#!/bin/bash
+>>>>>>> feature/gadugi-v0.3-regeneration
 set -e
 
 # Copy Claude auth if mounted
@@ -378,7 +382,11 @@ fi
 
 # Execute the actual command
 exec "$@"
+<<<<<<< HEAD
 """
+=======
+'''
+>>>>>>> feature/gadugi-v0.3-regeneration
 
     def build_compose_service(
         self,

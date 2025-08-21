@@ -14,6 +14,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator
+from unittest.mock import patch
 
 import pytest
 
