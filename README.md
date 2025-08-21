@@ -1,56 +1,10 @@
-# Gadugi - Multi-Agent Parallel System for AI-Assisted Coding with built-in reflection loops
+# Gadugi - Multi-Agent System for AI-Assisted Coding
 
 > **Gadugi** is a multi-agent system for AI-assisted coding. It takes its name from the Cherokee word (gah-DOO-gee) that means communal work - where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
-
-## Quick Start
-
-### Installation
-
-**Step 1: Download the Gadugi updater**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/rysweet/gadugi/main/install.sh | sh
-```
-
-This downloads the `gadugi-updater` agent to `.claude/agents/`.
-
-**Step 2: Install Gadugi**
-
-```
-/agent:gadugi-updater install
-```
-
-The gadugi-updater will:
-- Download and run the installation script
-- Install all Gadugi agents to `.claude/agents/`
-- Set up Python environment in `.claude/gadugi/.venv/`
-- Configure the system
-- Keep everything isolated from your project
-
-### Usage
-
-After installation, you can use any Gadugi agent:
-
-```
-/agent:orchestrator-agent    # Coordinate parallel workflows
-/agent:workflow-manager       # Execute development workflows
-/agent:code-reviewer         # Review code changes
-```
-
-### Other Commands
-
-```
-/agent:gadugi-updater update     # Update agents to latest versions
-/agent:gadugi-updater status     # Check installation status
-/agent:gadugi-updater uninstall  # Remove Gadugi (keeps updater)
-/agent:gadugi-updater help       # Show available commands
-```
 
 ## Release Notes
 
 ### v0.1.0 - Initial Release (August 2025)
-
-A first draft-ish version helps with automated coding using Claude Code. It could be adapted to GH Copilot or Roo Code pretty easily  - thats coming. It is already capable of self-hosting - I used a previous draft to rebuild itself into this one, and its now busy building a few versions of the next ones. I gaurantee its buggy and messy and that there are massive inconsistencies and quality gaps, but its starting to be functional. This version is integrated with GitHub, ADO coming soon. 
 
 This initial release of Gadugi provides a multi-agent system for AI-assisted software development. The v0.1 milestone includes 27 completed issues establishing core functionality. The system uses an orchestrator to coordinate task execution across isolated git worktrees. Development follows an 11-phase process from issue creation through code review.
 
@@ -246,16 +200,91 @@ gadugi/
 └── README.md                       # This file
 ```
 
-## Development Installation (Contributors)
+## Quick Start
 
-For development work on Gadugi itself:
+### Prerequisites
+
+Gadugi uses [UV (Ultraviolet)](https://github.com/astral-sh/uv) for fast Python dependency management. Install UV first:
 
 ```bash
-git clone https://github.com/rysweet/gadugi.git
-cd gadugi
-uv sync --extra dev
-uv run pytest tests/ -v
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or using pip
+pip install uv
 ```
+
+### Environment Setup
+
+1. **Clone and set up the repository**:
+   ```bash
+   git clone https://github.com/rysweet/gadugi.git
+   cd gadugi
+
+   # Install dependencies (creates .venv automatically)
+   uv sync --extra dev
+
+   # Verify installation
+   uv run python -c "import gadugi; print(f'Gadugi {gadugi.get_version()} ready!')"
+   ```
+
+2. **Configure environment variables**:
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env and set your secure passwords
+   # IMPORTANT: Never commit the .env file to version control
+   nano .env  # or use your preferred editor
+   ```
+
+   Required environment variables:
+   - `NEO4J_PASSWORD`: Secure password for Neo4j database
+   - `NEO4J_AUTH`: Full auth string (neo4j/your_password)
+   - `NEO4J_HOST`: Database host (default: localhost)
+   - `NEO4J_BOLT_PORT`: Bolt protocol port (default: 7687)
+   - `NEO4J_DATABASE`: Database name (default: gadugi)
+
+3. **Start services (if using Neo4j)**:
+   ```bash
+   # Start Neo4j using Docker Compose
+   docker-compose up -d neo4j
+   
+   # Verify Neo4j is running
+   docker-compose logs neo4j
+   ```
+
+4. **Run tests to verify setup**:
+   ```bash
+   uv run pytest tests/ -v
+   ```
+
+### Bootstrap Agent Manager
+
+The agent-manager is required to sync agents from gadugi:
+
+1. **Download agent-manager locally**:
+   ```bash
+   mkdir -p .claude/agents
+   curl -o .claude/agents/agent-manager.md \
+     https://raw.githubusercontent.com/rysweet/gadugi/main/.claude/agents/agent-manager.md
+   ```
+
+2. **Initialize and configure**:
+   ```
+   /agent:agent-manager init
+   /agent:agent-manager register-repo https://github.com/rysweet/gadugi
+   ```
+
+3. **Install agents**:
+   ```
+   /agent:agent-manager install all
+   ```
+
+The agent-manager will handle all necessary configuration updates.
 
 ### Using Agents
 
@@ -267,43 +296,37 @@ Once installed, invoke agents as needed:
 
 #### Specialized Agents
 - `/agent:code-reviewer` - For comprehensive code reviews
-- `/agent:code-review-response` - For processing review feedback
 - `/agent:prompt-writer` - For creating structured prompts
-- `/agent:test-writer` - For generating test suites
-- `/agent:test-solver` - For diagnosing test failures
+- `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
+- `/agent:program-manager` - For project health and issue lifecycle management
+- `/agent:team-coach` - For team coordination and analytics
+- `/agent:readme-agent` - For README management and maintenance
 
-### Getting Started Example
-
-```bash
-# Create a new feature with complete workflow
-/agent:workflow-manager
-
-Task: Add new authentication endpoint with JWT tokens
-Description: Implement /api/auth/login endpoint that validates credentials
-and returns JWT tokens for authenticated sessions
-```
-
-The WorkflowManager will:
-1. Create a GitHub issue
-2. Set up a feature branch
-3. Research the codebase
-4. Implement the feature
-5. Write tests
-6. Create documentation
-7. Open a pull request
-8. Invoke code review
-9. Process feedback
-10. Update settings
+#### Development Tools
+- `/agent:test-solver` - For diagnosing and fixing failing tests
+- `/agent:test-writer` - For creating comprehensive test suites
+- `/agent:pr-backlog-manager` - For managing PR readiness and backlogs
 
 ## VS Code Extension
 
-Gadugi includes a VS Code extension for enhanced development experience. The extension provides:
+The Gadugi VS Code extension brings the power of AI-assisted development directly into your IDE, providing seamless integration with git worktrees and Claude Code for enhanced parallel development workflows.
 
-- **Resource Monitoring**: Real-time CPU and memory usage tracking
-- **Agent Status Display**: Active agent monitoring in status bar
-- **Workflow Progress**: Live progress tracking for multi-phase workflows
-- **Terminal Integration**: Automatic terminal spawning for Claude sessions
-- **Quick Actions**: Command palette integration for common tasks
+### Overview and Benefits
+
+The extension provides:
+- **🌸 Bloom Command**: Automatically detects all git worktrees, creates named terminals, and starts Claude Code with `--resume` in each
+- **📊 Monitor Panel**: Real-time monitoring of worktrees and Claude processes with live runtime tracking
+- **🔄 Git Integration**: Seamless worktree discovery and branch management
+- **⚡ Process Management**: Start, stop, and monitor Claude Code instances across multiple worktrees
+- **🖥️ IDE Integration**: Native VS Code command palette and sidebar panel integration
+
+### Prerequisites
+
+Before installing the extension, ensure you have:
+- **VS Code 1.74.0+**: Modern VS Code version with extension support
+- **Git Repository**: Extension requires workspace to be a git repository
+- **Claude Code CLI**: Must be installed and accessible via command line
+- **Git Worktrees** (optional): Enhanced functionality with multiple worktrees
 
 ### Installation
 
@@ -338,7 +361,9 @@ For contributors or advanced users:
 ```
 
 ### Configuration and Setup
+
 Configure the extension through VS Code settings:
+
 ```json
 {
   "gadugi.updateInterval": 3000,
@@ -347,15 +372,173 @@ Configure the extension through VS Code settings:
 }
 ```
 
+**Configuration Options**:
+- `gadugi.updateInterval` (3000ms): Process monitoring refresh rate
+- `gadugi.claudeCommand` ("claude --resume"): Command executed when starting Claude
+- `gadugi.showResourceUsage` (true): Display memory usage information
+
+### Usage Examples
+
+#### Basic Workflow with Bloom Command
+```bash
+# Quick start for parallel development
+1. Open Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
+2. Type "Gadugi: Bloom" and select
+3. Extension automatically:
+   - Discovers all git worktrees
+   - Creates named terminals (Claude: [worktree-name])
+   - Navigates to each worktree directory
+   - Executes "claude --resume" in each terminal
+4. Monitor progress in the Gadugi sidebar panel
+```
+
+#### Using the Monitor Panel
+Access real-time insights through the **Gadugi** panel in the sidebar:
+
+**Worktrees Section**:
+```
+📁 Worktrees (3)
+├── 🏠 main (main)
+│   └── ⚡ Claude: 1234 (Running - 02:34:12)
+├── 🌿 feature-branch (feature-branch)
+│   └── ⚡ Claude: 5678 (Running - 00:45:33)
+└── 🔧 hotfix-123 (hotfix-123)
+    └── ❌ No Claude process
+```
+
+**Process Management**:
+- **▶️ Launch**: Click play icon to start Claude in specific worktree
+- **🛑 Terminate**: Click stop icon to end Claude process
+- **📁 Navigate**: Click folder icon to open worktree in VS Code
+- **🔄 Refresh**: Update all status information
+
+#### Command Palette Integration
+All Gadugi commands are accessible via Command Palette:
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `Gadugi: Bloom` | Start Claude in all worktrees | Initial parallel setup |
+| `Gadugi: Refresh` | Update monitor panel data | Manual status refresh |
+| `Gadugi: Launch Claude` | Start Claude in specific worktree | Individual worktree setup |
+| `Gadugi: Terminate Process` | Stop specific Claude process | Resource cleanup |
+| `Gadugi: Navigate to Worktree` | Open worktree folder | Quick navigation |
+| `Gadugi: Validate Setup` | Check prerequisites | Troubleshoot issues |
+
+### Features
+
+#### 🌸 Bloom Command (Automated Setup)
+The signature feature that implements parallel development workflow:
+- **Smart Discovery**: Automatically finds all git worktrees in workspace
+- **Terminal Management**: Creates uniquely named terminals for each worktree
+- **Process Orchestration**: Launches Claude Code with appropriate flags
+- **Error Handling**: Provides detailed feedback on failures and progress
+- **Cross-Platform**: Works on Windows, macOS, and Linux
+
+#### 📊 Monitor Panel (Real-Time Tracking)
+Comprehensive monitoring system integrated into VS Code sidebar:
+- **Live Updates**: Refreshes every 3 seconds (configurable)
+- **Process Details**: Shows PID, runtime duration, memory usage
+- **Worktree Status**: Displays current branch and git status
+- **Interactive Controls**: Click-to-action buttons for common operations
+- **Resource Monitoring**: Memory usage tracking and system insights
+
+#### 🔧 Git Integration
+Deep integration with git worktree functionality:
+- **Worktree Detection**: Automatically discovers and tracks all worktrees
+- **Branch Awareness**: Shows current branch for each worktree
+- **Status Monitoring**: Tracks git repository state changes
+- **Path Resolution**: Handles complex worktree paths and symbolic links
+
+#### ⚡ Process Management
+Comprehensive Claude Code process lifecycle management:
+- **Launch Control**: Start Claude instances with custom commands
+- **Process Tracking**: Monitor running instances with detailed information
+- **Graceful Termination**: Safe process cleanup and resource management
+- **Health Monitoring**: Detect and report process issues
+
+### Troubleshooting
+
+#### Common Issues and Solutions
+
+**"Extension not activating"**
+- **Cause**: Not in a git repository
+- **Solution**: Open a folder containing a `.git` directory or initialize with `git init`
+
+**"No worktrees found"**
+- **Cause**: Repository doesn't have additional worktrees
+- **Solution**: Create worktrees with `git worktree add <path> <branch>` or use single worktree functionality
+
+**"Claude command failed"**
+- **Cause**: Claude Code CLI not installed or not in PATH
+- **Solution**: Install Claude Code CLI and verify with `claude --version`
+
+**"Failed to create terminal"**
+- **Cause**: VS Code terminal permissions or configuration issues
+- **Solution**: Check VS Code terminal settings and restart VS Code
+
+**"Process monitoring not working"**
+- **Cause**: Platform-specific process monitoring issues
+- **Solution**: Check system permissions and run `Gadugi: Validate Setup`
+
+#### Debug Information
+
+Use `Gadugi: Show Output` command to access detailed logs:
+- Git command execution results
+- Process discovery and monitoring details
+- Terminal creation and management status
+- Error stack traces and diagnostic information
+- Metrics and timing data
+
+#### Validation and Health Checks
+
+Run `Gadugi: Validate Setup` to verify:
+- ✅ VS Code version compatibility (1.74.0+)
+- ✅ Workspace folder and git repository status
+- ✅ Git installation and accessibility
+- ✅ Claude Code CLI installation and version
+- ✅ Terminal creation capabilities and permissions
+
+### Integration with Main Gadugi Workflow
+
+The VS Code extension seamlessly integrates with the broader Gadugi ecosystem:
+
+#### Orchestrator Integration
+- **Parallel Execution**: Bloom command aligns with orchestrator-agent parallel workflows
+- **Worktree Coordination**: Integrates with worktree-manager agent functionality
+- **Process Monitoring**: Provides UI for orchestrator-managed Claude instances
+
+#### Memory and State Management
+- **Memory.md Integration**: Monitor panel can show memory file status
+- **State Persistence**: Tracks extension state across VS Code sessions
+- **GitHub Sync**: Coordinates with memory-manager agent for issue synchronization
+
+#### Workflow Enhancement
+- **Issue to PR Workflow**: Supports complete development lifecycle in IDE
+- **Code Review Integration**: Monitor panel shows review status and PR information
+- **Testing Integration**: Display test results and coverage information
+
+#### Agent Invocation
+The extension serves as a visual frontend for:
+- **workflow-manager**: Start workflows directly from worktree context menu
+- **code-reviewer**: Trigger reviews from PR branches
+- **orchestrator-agent**: Visualize and manage parallel execution
+- **team-coach**: Display team metrics and coaching insights
+
+This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
+
 ## Documentation
 
-### Core Concepts
-- **[Agent Hierarchy](docs/architecture/AGENT_HIERARCHY.md)** - Understanding agent relationships and responsibilities
-- **[System Design](docs/architecture/SYSTEM_DESIGN.md)** - Architecture overview and design principles
-- **[Enhanced Separation Architecture](docs/guides/enhanced-separation-migration-guide.md)** - Migration to shared module architecture
-- **[Shared Module Architecture](docs/design/shared-module-architecture.md)** - Understanding shared components
+Gadugi provides comprehensive documentation to help you understand and use the multi-agent system effectively:
 
-### UV Package Manager
+### Core Documentation
+- **[Getting Started Guide](docs/getting-started.md)** - Quick start tutorial for new users
+- **[Agent Implementation Guide](docs/AGENT_IMPLEMENTATION_GUIDE.md)** - Detailed guide to creating and modifying agents
+- **[Agent Hierarchy](AGENT_HIERARCHY.md)** - Understanding the agent system hierarchy and when to use each agent
+- **[System Design](SYSTEM_DESIGN.md)** - Comprehensive system architecture and design patterns
+- **[API Reference](docs/api-reference.md)** - Complete API documentation
+- **[Architecture Overview](docs/architecture.md)** - High-level system architecture
+
+### Setup and Configuration
 - **[UV Installation Guide](docs/uv-installation-guide.md)** - Installing and configuring UV package manager
 - **[UV Migration Guide](docs/uv-migration-guide.md)** - Migrating from pip to UV
 - **[UV Cheat Sheet](docs/uv-cheat-sheet.md)** - Quick reference for UV commands
@@ -377,42 +560,197 @@ Configure the extension through VS Code settings:
 ### Architecture and Design
 - **[Enhanced Separation Migration Guide](docs/guides/enhanced-separation-migration-guide.md)** - Migration to shared module architecture
 - **[Shared Module Architecture](docs/design/shared-module-architecture.md)** - Understanding shared components
+- **[ADR-002: Orchestrator-WorkflowMaster Architecture](docs/adr/ADR-002-orchestrator-workflowmaster-architecture.md)** - Architecture decision record
 
-## Contributing
+### Analysis and Reference
+- **[Analysis Overview](docs/analysis/README.md)** - System analysis documentation
+- **[Orchestrator-WorkflowMaster Code Analysis](docs/analysis/orchestrator-workflowmaster-code-analysis.md)** - Code analysis insights
+- **[Performance Analysis](docs/analysis/orchestrator-workflowmaster-performance-analysis.md)** - Performance characteristics
+- **[Risk Assessment](docs/analysis/orchestrator-workflowmaster-risk-assessment.md)** - Risk analysis and mitigation
+- **[Task ID Traceability](docs/task-id-traceability.md)** - Tracking task execution
+- **[Troubleshooting Guide](docs/troubleshooting.md)** - Common issues and solutions
+- **[Ruff Version Mismatch Analysis](docs/ruff-version-mismatch-analysis.md)** - Dependency conflict resolution
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+### Templates and Examples
+- **[Claude Template](CLAUDE_TEMPLATE.md)** - Template for Claude Code projects
+- **[Configuration Examples](examples/)** - Example configurations and setups
 
-### Development Setup
+## Quick Reference: Common Workflows
 
-1. Fork the repository
-2. Clone your fork
-3. Install dependencies with UV:
-   ```bash
-   uv sync --extra dev
-   ```
-4. Run tests:
-   ```bash
-   uv run pytest tests/ -v
-   ```
-5. Create a feature branch
-6. Make your changes
-7. Submit a pull request
+### Task Execution Decision Tree
 
-## Community
+```mermaid
+flowchart TD
+    Task[📋 New Task or Request] --> TaskType{Task Type?}
 
-- **Issues**: [GitHub Issues](https://github.com/rysweet/gadugi/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/rysweet/gadugi/discussions)
+    TaskType -->|Multiple Independent Tasks| Orchestrator[🎯 Use orchestrator-agent<br/>Parallel execution<br/>Optimal efficiency]
+
+    TaskType -->|Single Complex Workflow| WorkflowMgr[⚡ Use workflow-manager<br/>11-phase execution<br/>Complete lifecycle]
+
+    TaskType -->|Code Review Needed| CodeReview[👥 Use code-reviewer<br/>PR quality assurance<br/>Automated feedback]
+
+    TaskType -->|Failed Tests| TestSolver[🔧 Use test-solver<br/>Diagnostic analysis<br/>Fix implementation]
+
+    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure enhancement]
+
+    TaskType -->|Project Planning| ProgramMgr[🏗️ Use program-manager<br/>Issue lifecycle<br/>Strategic direction]
+
+    %% Detailed workflows
+    Orchestrator --> |Delegates to| WorkflowMgr
+    WorkflowMgr --> |Invokes| CodeReview
+    CodeReview --> |Response via| ReviewResponse[💬 code-review-response<br/>Feedback processing]
+
+    %% Styling
+    classDef start fill:#3498db,stroke:#2980b9,color:#fff
+    classDef decision fill:#f39c12,stroke:#e67e22,color:#fff
+    classDef orchestration fill:#3498db,stroke:#2980b9,color:#fff
+    classDef implementation fill:#2ecc71,stroke:#27ae60,color:#fff
+    classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff
+    classDef maintenance fill:#e67e22,stroke:#d35400,color:#fff
+
+    class Task start
+    class TaskType decision
+    class Orchestrator orchestration
+    class WorkflowMgr,TestSolver implementation
+    class CodeReview,ReviewResponse review
+    class ReadmeAgent,ProgramMgr maintenance
+```
+
+### Quick Usage Commands
+
+| Use Case | Command | Purpose |
+|----------|---------|---------|
+| **Multiple Tasks** | `/agent:orchestrator-agent` | Parallel execution of independent workflows |
+| **Single Workflow** | `/agent:workflow-manager` | Complete issue-to-PR workflow |
+| **Code Review** | `/agent:code-reviewer` | Automated PR review and feedback |
+| **Fix Tests** | `/agent:test-solver` | Diagnose and fix failing tests |
+| **Create Tests** | `/agent:test-writer` | Generate comprehensive test suites |
+| **Update README** | `/agent:readme-agent` | Documentation management |
+| **Project Planning** | `/agent:program-manager` | Issue lifecycle and strategy |
+| **Team Coordination** | `/agent:team-coach` | Team analytics and coordination |
+
+## Available Agents
+
+### Workflow Management
+- **workflow-manager** - Orchestrates complete development workflows from issue creation to PR review
+- **orchestrator-agent** - Coordinates parallel execution of multiple WorkflowManagers
+- **task-analyzer** - Analyzes prompt files to identify dependencies and parallelization opportunities
+- **worktree-manager** - Manages git worktree lifecycle for isolated parallel execution
+- **execution-monitor** - Monitors parallel Claude Code CLI executions and tracks progress
+
+### Task Analysis & Decomposition
+- **task-bounds-eval** - Evaluates task complexity and scope boundaries
+- **task-decomposer** - Breaks down complex tasks into manageable subtasks
+- **task-research-agent** - Conducts research for task planning and implementation
+
+### Code Quality & Review
+- **code-reviewer** - Performs comprehensive code reviews on pull requests
+- **code-review-response** - Processes code review feedback and implements changes
+- **test-solver** - Diagnoses and fixes failing tests
+- **test-writer** - Creates comprehensive test suites
+
+### Team Coordination & Analytics
+- **team-coach** - Provides intelligent multi-agent team coordination with team analytics
+- **teamcoach-agent** - Alternative implementation of team coaching functionality
+- **pr-backlog-manager** - Manages PR backlogs by ensuring readiness for review and merge
+
+### Project Management
+- **program-manager** - Manages project health, issue lifecycle, and strategic direction
+- **memory-manager** - Maintains and synchronizes Memory.md with GitHub Issues
+
+### Productivity & Content Creation
+- **prompt-writer** - Creates high-quality structured prompts for development workflows
+- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
+### Security & Infrastructure
+- **agent-manager** - Manages external agent repositories with version control
+- **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks
+
+### Specialized Enforcement
+- **workflow-manager-phase9-enforcement** - Ensures Phase 9 code review enforcement in workflows
+
+## Agent Hierarchy and Coordination
+
+### Primary Orchestrators
+- **orchestrator-agent** → Coordinates multiple **workflow-manager** instances for parallel execution
+- **workflow-manager** → Main workflow orchestrator that invokes specialized agents as needed
+
+### Agent Dependencies
+- **orchestrator-agent** uses:
+  - **task-analyzer** - To analyze dependencies and plan parallel execution
+  - **worktree-manager** - To create isolated development environments
+  - **execution-monitor** - To track progress of parallel executions
+- **workflow-manager** integrates with:
+  - **code-reviewer** - For automated code review (Phase 9)
+  - **memory-manager** - For state persistence and GitHub sync
+  - **pr-backlog-manager** - For PR lifecycle management
+- **team-coach** provides optimization for:
+  - **orchestrator-agent** - Performance analytics and team coordination
+  - **workflow-manager** - Intelligent task assignment and coaching
+
+### Usage Patterns
+- **For multiple related tasks**: Use **orchestrator-agent** to coordinate parallel **workflow-manager** instances
+- **For single complex workflows**: Use **workflow-manager** directly
+- **For specialized tasks**: Invoke specific agents (code-reviewer, test-solver, etc.) directly
+- **For project management**: Use **program-manager** for issue lifecycle and strategic direction
+
+## Development Setup
+
+### Working with UV
+
+Gadugi uses UV for fast, reliable Python dependency management:
+
+```bash
+# Install dependencies
+uv sync --extra dev              # Development dependencies
+uv sync                          # Production only
+
+# Run commands
+uv run pytest tests/             # Run tests
+uv run ruff format .             # Format code
+uv run ruff check .              # Lint code
+
+# Manage dependencies
+uv add requests                  # Add dependency
+uv add --group dev mypy          # Add dev dependency
+uv remove package                # Remove dependency
+```
+
+### UV Package Management
+
+UV provides modern Python packaging management:
+- Package installation and dependency resolution
+- **Automatic virtual environment** management
+- **Reproducible builds** with `uv.lock`
+- **Consistent dependency resolution**
+
+### Development Workflow
+
+1. **Setup**: `uv sync --extra dev`
+2. **Test**: `uv run pytest tests/`
+3. **Format**: `uv run ruff format .`
+4. **Lint**: `uv run ruff check .`
+5. **Add deps**: `uv add package`
+
+See the **[UV Migration Guide](docs/uv-migration-guide.md)** for detailed instructions.
+
+## Version Management
+
+We use semantic versioning:
+- **Major**: Breaking changes to agent interfaces
+- **Minor**: New agents or features
+- **Patch**: Bug fixes and improvements
+
+See `manifest.yaml` for current agent versions.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) for details
 
 ## Acknowledgments
 
 - The Cherokee Nation for the inspiring concept of Gadugi
-- The Claude team at Anthropic for enabling AI-assisted development
-- All contributors who have helped shape this project
+- Anthropic for enabling AI-powered development
 
 ---
 
-*Gadugi - Where AI agents work together like a community, sharing wisdom and supporting each other to build better software.*
+*ᎤᎵᎮᎵᏍᏗ (Ulihelisdi) - "We are helping each other"*

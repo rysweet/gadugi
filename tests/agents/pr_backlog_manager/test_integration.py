@@ -13,6 +13,7 @@ from datetime import datetime
 
 # Add the source directories to the Python path for imports
 import sys
+from typing import Set
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
@@ -42,9 +43,7 @@ sys.path.insert(0, shared_path)
 from .test_stubs import (
     PRBacklogManager,
     PRStatus,
-    ReadinessCriteria,
     ReadinessAssessor,
-    ConflictComplexity,
     DelegationCoordinator,
     DelegationType,
     DelegationStatus,

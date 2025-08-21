@@ -9,7 +9,7 @@ import fcntl
 import shutil
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, asdict, field
 from enum import Enum
 import logging
@@ -72,6 +72,8 @@ class WorkflowPhase(Enum):
         """Check if phase number is valid."""
         if isinstance(phase_number, cls):
             phase_number = phase_number.value
+        if not isinstance(phase_number, int):
+            return False
         return 0 <= phase_number <= 9
 
 
@@ -436,7 +438,7 @@ class StateManager:
             for task_dir in self.state_dir.iterdir():
                 if task_dir.is_dir():
                     state = self.load_state(task_dir.name)
-                    if state and state.updated_at < cutoff_date:
+                    if state and state.updated_at and state.updated_at < cutoff_date:
                         if state.status in ['completed', 'cancelled']:
                             self.delete_state(state.task_id)
                             cleaned_count += 1
@@ -666,9 +668,9 @@ class CheckpointManager:
             self.max_checkpoints_per_task = 10
             self.compression_enabled = False
         else:
-            self.checkpoint_dir = Path(self.config.get('checkpoint_dir', '.github/workflow-checkpoints'))
-            self.max_checkpoints_per_task = self.config.get('max_checkpoints_per_task', 10)
-            self.compression_enabled = self.config.get('compression_enabled', False)
+            self.checkpoint_dir = Path(str(self.config.get('checkpoint_dir', '.github/workflow-checkpoints')))  # type: ignore
+            self.max_checkpoints_per_task = int(self.config.get('max_checkpoints_per_task', 10))  # type: ignore
+            self.compression_enabled = bool(self.config.get('compression_enabled', False))  # type: ignore
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Ensure checkpoint directory exists

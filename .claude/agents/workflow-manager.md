@@ -1,40 +1,18 @@
 ---
-description: Orchestrates complete development workflows from prompt files, ensuring
-  all phases from issue creation to PR review are executed systematically
-imports: '# Enhanced Separation Architecture - Shared Modules
-
-  from .claude.shared.github_operations import GitHubOperations
-
-  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager,
-  StateBackupRestore
-
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker,
-  RecoveryManager
-
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker,
-  ProductivityAnalyzer
-
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState,
-  TaskData, ErrorContext, WorkflowPhase
-
-  # Enhanced Reliability Features (Issue #73)
-
-  from .claude.shared.workflow_reliability import WorkflowReliabilityManager, WorkflowStage,
-  monitor_workflow, create_reliability_manager
-
-  from .claude.agents.enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration'
-model: inherit
 name: workflow-manager
-tools:
-- Read
-- Write
-- Edit
-- Bash
-- Grep
-- LS
-- TodoWrite
-- Task
-version: 1.0.0
+model: inherit
+description: Orchestrates complete development workflows from prompt files, ensuring all phases from issue creation to PR review are executed systematically
+tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task
+imports: |
+  # Enhanced Separation Architecture - Shared Modules
+  from .claude.shared.github_operations import GitHubOperations
+  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
+  # Enhanced Reliability Features (Issue #73)
+  from .claude.shared.workflow_reliability import WorkflowReliabilityManager, WorkflowStage, monitor_workflow, create_reliability_manager
+  from .claude.agents.enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration
 ---
 
 # Enhanced WorkflowManager Sub-Agent for Gadugi
@@ -906,12 +884,6 @@ echo "⚡ AUTOMATIC: Triggering Phase 12 - Memory Compaction"
 execute_phase_12_memory_compaction
 
 echo "✅ Phase 10, 11, and 12 completed successfully"
-echo "⚡ AUTOMATIC: Triggering Phase 13 - Team Coach Reflection"
-
-# Execute Phase 13 immediately
-execute_phase_13_with_error_handling
-
-echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
 ```
 
 #### **Phase 12 Execution Steps (AUTOMATIC)**
@@ -925,7 +897,6 @@ echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
    cd .github/memory-manager
 
    # Check if compaction is needed
-   # Error suppression justified: Memory compaction is optional, should not fail workflow
    COMPACTION_RESULT=$(python3 memory_manager.py auto-compact 2>/dev/null || echo "failed")
 
    if [[ "$COMPACTION_RESULT" == *"auto_compaction_triggered"* ]]; then
@@ -969,26 +940,9 @@ echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
 - **Intelligent Archiving**: Preserves important current information while archiving historical details
 - **Configurable Thresholds**: Size limits and compaction rules can be customized
 
-#### **Phase 13 Execution Steps (AUTOMATIC)**
-
-The Phase 13 Team Coach Reflection is implemented in the `execute_phase_13_with_error_handling()` function, which:
-- Invokes the Team Coach agent for session analysis
-- Captures performance metrics and improvement recommendations
-- Updates Memory.md with insights
-- Has timeout protection (120 seconds max)
-- Gracefully handles failures without blocking workflow completion
-
-#### **Benefits of Automatic Team Coach Reflection**
-
-- **Continuous Improvement**: Every session contributes to process optimization
-- **Pattern Recognition**: Identifies recurring issues and success factors
-- **Data-Driven Insights**: Metrics-based recommendations for workflow enhancement
-- **Knowledge Accumulation**: Builds institutional memory in Memory.md
-- **Zero Overhead**: Completely automatic with graceful failure handling
-
 #### **State File Updates**
 
-Update state file format to include Phase 11, 12, 13, and 14:
+Update state file format to include Phase 11 and 12:
 
 ```markdown
 ## Phase Completion Status
@@ -1004,13 +958,11 @@ Update state file format to include Phase 11, 12, 13, and 14:
 - [x] Phase 10: Review Response ✅
 - [x] Phase 11: Settings Update ✅
 - [x] Phase 12: Memory Compaction ✅
-- [x] Phase 13: Team Coach Reflection ✅
-- [x] Phase 14: Worktree Cleanup ✅
 ```
 
 #### **Enhanced Task List Integration**
 
-Add Phase 11, 12, 13, and 14 to mandatory workflow tasks:
+Add Phase 11 and 12 to mandatory workflow tasks:
 
 ```python
 TaskData(
@@ -1030,30 +982,12 @@ TaskData(
     phase=WorkflowPhase.MEMORY_COMPACTION,
     auto_invoke=True,
     enforcement_level="MAINTENANCE"  # Memory compaction is automated maintenance
-),
-TaskData(
-    id="13",
-    content="🎯 AUTOMATIC: Team Coach Reflection (Phase 13)",
-    status="pending",
-    priority="medium",
-    phase=WorkflowPhase.TEAM_COACH_REFLECTION,
-    auto_invoke=True,
-    enforcement_level="RECOMMENDED"  # Team Coach analysis is recommended for improvement
-),
-TaskData(
-    id="14",
-    content="🧹 AUTOMATIC: Worktree Cleanup (Phase 14)",
-    status="pending",
-    priority="low",
-    phase=WorkflowPhase.WORKTREE_CLEANUP,
-    auto_invoke=True,
-    enforcement_level="OPTIONAL"  # Worktree cleanup is optional maintenance
 )
 ```
 
-#### **Error Handling for Phase 11, 12, 13, and 14**
+#### **Error Handling for Phase 11 and 12**
 
-Settings update, memory compaction, Team Coach reflection, and worktree cleanup failures should not block workflow completion:
+Settings update and memory compaction failures should not block workflow completion:
 
 ```bash
 execute_phase_11_with_error_handling() {
@@ -1075,7 +1009,6 @@ execute_phase_12_with_error_handling() {
     echo "📦 Executing Phase 12: Memory Compaction"
 
     # Memory compaction should not fail the entire workflow
-    # Error suppression justified: Memory compaction is optional, should not fail workflow
     if cd .github/memory-manager && python3 memory_manager.py auto-compact 2>/dev/null; then
         echo "✅ Memory compaction check completed successfully"
         complete_phase 12 "Memory Compaction" "verify_phase_12"
@@ -1087,30 +1020,11 @@ execute_phase_12_with_error_handling() {
     fi
     cd ../..
 }
-
-execute_phase_13_with_error_handling() {
-    echo "🎯 Executing Phase 13: Team Coach Reflection"
-
-    # Team Coach reflection should not fail the entire workflow
-    if timeout 120 /agent:team-coach --session-analysis 2>&1 | tee phase13-output.log; then
-        echo "✅ Team Coach reflection completed successfully"
-        complete_phase 13 "Team Coach Reflection" "verify_phase_13"
-    else
-        echo "⚠️ Team Coach reflection failed or timed out - continuing"
-        echo "💡 Manual session review may provide additional insights"
-        # Mark as completed anyway - this is not a critical failure
-        complete_phase 13 "Team Coach Reflection" "verify_phase_13"
-    fi
-
-    # Trigger Phase 14 automatically
-    echo "⚡ AUTOMATIC: Triggering Phase 14 - Worktree Cleanup"
-    execute_phase_14_with_error_handling
-}
 ```
 
 #### **Execution Pattern Update**
 
-Updated execution pattern with Phase 11, 12, and 13:
+Updated execution pattern with Phase 11 and 12:
 
 1. 📖 **Parse prompt** → Generate task list → ⚡ **START EXECUTION IMMEDIATELY**
 2. 🚀 **Phase 1-4**: Setup, Issue, Branch, Research/Planning
@@ -1119,100 +1033,7 @@ Updated execution pattern with Phase 11, 12, and 13:
 5. 👥 **Phase 9**: Code Review → ✅ **Verification** → ⚡ **IMMEDIATE Phase 10**
 6. 💬 **Phase 10**: Review Response → ⚡ **IMMEDIATE Phase 11**
 7. 🔧 **Phase 11**: Settings Update → ⚡ **IMMEDIATE Phase 12**
-8. 📦 **Phase 12**: Memory Compaction → ⚡ **IMMEDIATE Phase 13**
-9. 🎯 **Phase 13**: Team Coach Reflection → ⚡ **IMMEDIATE Phase 14**
-10. 🧹 **Phase 14**: Worktree Cleanup → 📝 **Final state update** → ✅ **COMPLETE**
-
-### 14. Automatic Worktree Cleanup Phase (AUTOMATIC)
-
-**AUTOMATIC EXECUTION**: This phase runs automatically after Phase 13 to clean up old worktrees and maintain repository hygiene.
-
-After completing Phase 13, automatically clean up old worktrees:
-
-#### **Phase 14 Execution Steps (AUTOMATIC)**
-
-1. **Execute Worktree Cleanup**:
-   ```bash
-   echo "🧹 Phase 14: Automatic Worktree Cleanup"
-   echo "Cleaning up old worktrees..."
-
-   # Run cleanup script with appropriate flags
-   if [ -f ".claude/scripts/cleanup-worktrees.sh" ]; then
-       # First run in dry-run mode to show what will be cleaned
-       .claude/scripts/cleanup-worktrees.sh --dry-run
-
-       # Then execute actual cleanup (skip current worktree)
-       .claude/scripts/cleanup-worktrees.sh
-       echo "✅ Worktree cleanup completed"
-   else
-       echo "⚠️ Cleanup script not found - skipping worktree cleanup"
-   fi
-   ```
-
-2. **Update Workflow State**:
-   ```bash
-   # Mark Phase 14 as completed
-   complete_phase 14 "Worktree Cleanup" "verify_phase_14"
-
-   # Update final workflow state
-   update_state "workflow_completed" "true"
-   update_state "completion_time" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-   ```
-
-3. **Verification Function**:
-   ```bash
-   verify_phase_14() {
-       # Phase 14 always succeeds (cleanup is maintenance)
-       echo "✅ Phase 14: Worktree cleanup check completed"
-
-       # Show current worktree status
-       echo "Current worktree status:"
-       git worktree list
-
-       return 0
-   }
-   ```
-
-#### **Error Handling for Phase 14**
-
-Worktree cleanup failures should not block workflow completion:
-
-```bash
-execute_phase_14_with_error_handling() {
-    echo "🧹 Executing Phase 14: Worktree Cleanup"
-
-    # Worktree cleanup should not fail the entire workflow
-    if [ -f ".claude/scripts/cleanup-worktrees.sh" ]; then
-        if .claude/scripts/cleanup-worktrees.sh 2>/dev/null; then
-            echo "✅ Worktree cleanup completed successfully"
-            complete_phase 14 "Worktree Cleanup" "verify_phase_14"
-        else
-            echo "⚠️ Worktree cleanup failed - continuing workflow"
-            echo "💡 Manual cleanup may be needed later"
-            # Mark as completed anyway - this is not a critical failure
-            complete_phase 14 "Worktree Cleanup" "verify_phase_14"
-        fi
-    else
-        echo "⚠️ Cleanup script not found - skipping worktree cleanup"
-        complete_phase 14 "Worktree Cleanup" "verify_phase_14"
-    fi
-}
-```
-
-#### **Integration with Existing Phases**
-
-Update the Phase 13 completion to trigger Phase 14:
-
-```bash
-# After Team Coach reflection completion in Phase 13
-echo "✅ Team Coach reflection completed"
-echo "⚡ AUTOMATIC: Triggering Phase 14 - Worktree Cleanup"
-
-# Execute Phase 14 immediately
-execute_phase_14_with_error_handling
-
-echo "✅ ALL PHASES (1-14) completed successfully - Workflow complete!"
-```
+8. 📦 **Phase 12**: Memory Compaction → 📝 **Final state update** → ✅ **COMPLETE**
 
 ## Enhanced Progress Tracking (Shared Modules)
 

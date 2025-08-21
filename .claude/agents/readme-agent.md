@@ -1,27 +1,15 @@
 ---
-description: Manages and maintains README.md files on behalf of the Product Manager,
-  ensuring consistency with project state and documentation standards
-imports: '# Enhanced Separation Architecture - Shared Modules
-
-  from .claude.shared.github_operations import GitHubOperations
-
-  from .claude.shared.state_management import WorkflowStateManager
-
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
-
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager
-
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, OperationResult'
-model: inherit
 name: readme-agent
-tools:
-- Read
-- Write
-- Edit
-- Bash
-- Grep
-- LS
-version: 1.0.0
+model: inherit
+description: Manages and maintains README.md files on behalf of the Product Manager, ensuring consistency with project state and documentation standards
+tools: Read, Write, Edit, Bash, Grep, LS
+imports: |
+  # Enhanced Separation Architecture - Shared Modules
+  from .claude.shared.github_operations import GitHubOperations
+  from .claude.shared.state_management import WorkflowStateManager
+  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
+  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager
+  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, OperationResult
 ---
 
 # README Agent for Gadugi

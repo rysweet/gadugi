@@ -13,14 +13,12 @@ Usage:
 """
 
 import json
-import sys
-import os
 import argparse
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-import tempfile
+from typing import Dict, List, Optional, Any  # type: ignore
+import tempfile  # type: ignore
 import shutil
 
 

@@ -7,8 +7,7 @@ import subprocess
 import json
 import time
 import logging
-from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 
 # Custom exceptions

@@ -1,14 +1,8 @@
 ---
-description: Manages git worktree lifecycle for isolated parallel execution environments,
-  preventing conflicts between concurrent WorkflowManagers
-model: inherit
 name: worktree-manager
-tools:
-- Bash
-- Read
-- Write
-- LS
-version: 1.0.0
+description: Manages git worktree lifecycle for isolated parallel execution environments, preventing conflicts between concurrent WorkflowManagers
+tools: Bash, Read, Write, LS
+model: inherit
 ---
 
 # WorktreeManager Sub-Agent

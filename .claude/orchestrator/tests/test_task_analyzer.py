@@ -206,7 +206,9 @@ class TestTaskAnalyzer(unittest.TestCase):
         from_import_node.module = 'gadugi.utils.helper'
 
         # Mock ast.walk to return our mock nodes
-        mock_walk.return_value = [import_node, from_import_node]
+        mock_walk.return_value = []
+import_node, from_import
+import_node]
 
         # Mock file content
         mock_file.return_value.read.return_value = "import gadugi.agents.workflow_manager"
@@ -468,7 +470,9 @@ Improve test coverage for the definition_node.py module from 32.09% to 80%+ by w
         bug_fix_prompt = """# Fix Circular Import in LSP Helper
 
 ## Problem
-There's a circular import issue between DefinitionNode and lsp_helper causing import failures.
+There's a circular import
+import issue between DefinitionNode and lsp_helper causing import
+import failures.
 
 ## Target Files
 - `gadugi/shared/github_operations.py`

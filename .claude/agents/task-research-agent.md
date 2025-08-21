@@ -1,18 +1,8 @@
 ---
-description: Researches solutions, technologies, and approaches for unknown or novel
-  tasks requiring investigation before implementation
-model: inherit
 name: task-research-agent
-tools:
-- Read
-- Write
-- Edit
-- Grep
-- LS
-- Glob
-- Bash
-- TodoWrite
-version: 1.0.0
+model: inherit
+description: Researches solutions, technologies, and approaches for unknown or novel tasks requiring investigation before implementation
+tools: Read, Write, Edit, Grep, LS, Glob, Bash, TodoWrite
 ---
 
 # Task Research Agent - Investigation and Solution Discovery

@@ -8,7 +8,7 @@ import sys
 import subprocess
 import logging
 import shutil
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -16,8 +16,7 @@ from enum import Enum
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from interfaces import AgentConfig, OperationResult
+    from utils.error_handling import CircuitBreaker
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass

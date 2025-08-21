@@ -1,8 +1,6 @@
 """Tests for event data models."""
 
 import json
-import time
-import pytest
 
 from gadugi.event_service.events import (
     Event,

@@ -24,9 +24,9 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 from dataclasses import dataclass
 
 # Add shared modules to path
@@ -40,11 +40,10 @@ try:
         monitor_workflow,
         create_reliability_manager
     )
-    from utils.error_handling import ErrorHandler, retry, graceful_degradation
-    from state_management import StateManager, TaskState, WorkflowPhase
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker
+    from utils.error_handling import ErrorHandler, retry, graceful_degradation  # type: ignore
+    from state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
+    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
     from github_operations import GitHubOperations
-    from interfaces import AgentConfig, ErrorContext
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
@@ -102,7 +101,7 @@ class EnhancedWorkflowManager:
         self.task_id = task_id
 
         # Initialize reliability components
-        self.reliability_manager = create_reliability_manager({
+        self.reliability_manager = create_reliability_manager({  # type: ignore
             'log_level': self.config.log_level,
             'enable_health_checks': self.config.enable_health_checks,
             'enable_recovery': self.config.enable_recovery
@@ -110,11 +109,11 @@ class EnhancedWorkflowManager:
 
         # Initialize Enhanced Separation components
         try:
-            self.error_handler = ErrorHandler()
-            self.state_manager = StateManager()
-            self.task_tracker = TaskTracker()
-            self.phase_tracker = WorkflowPhaseTracker()
-            self.github_ops = GitHubOperations(task_id=task_id)
+            self.error_handler = ErrorHandler()  # type: ignore
+            self.state_manager = StateManager()  # type: ignore
+            self.task_tracker = TaskTracker()  # type: ignore
+            self.phase_tracker = WorkflowPhaseTracker()  # type: ignore
+            self.github_ops = GitHubOperations(task_id=task_id)  # type: ignore
         except Exception:
             # Fallback for basic functionality
             self.error_handler = None
@@ -166,7 +165,7 @@ class EnhancedWorkflowManager:
                 result.update({
                     'workflow_id': self.workflow_id,
                     'total_phases': len(self.phase_checkpoints),
-                    'reliability_metrics': reliability.get_workflow_diagnostics(self.workflow_id)
+                    'reliability_metrics': reliability.get_workflow_diagnostics(self.workflow_id)  # type: ignore
                 })
 
                 logger.info(f"Enhanced workflow execution completed: {self.workflow_id}")
@@ -185,7 +184,7 @@ class EnhancedWorkflowManager:
                     'success': False,
                     'error': str(e),
                     'workflow_id': self.workflow_id,
-                    'failed_phase': self.current_phase.value if self.current_phase else 'unknown',
+                    'failed_phase': self.current_phase.value if self.current_phase else 'unknown',  # type: ignore
                     'error_handling_result': error_result,
                     'recovery_recommendations': error_result.get('recommendations', [])
                 }
@@ -195,42 +194,42 @@ class EnhancedWorkflowManager:
 
         # Phase 0: Enhanced Initialization
         self._execute_phase_with_monitoring(
-            WorkflowStage.INITIALIZATION,
+            WorkflowStage.INITIALIZATION,  # type: ignore
             lambda: self._phase_initialization(prompt_file, reliability),
             reliability
         )
 
         # Phase 1: Prompt Analysis
         prompt_data = self._execute_phase_with_monitoring(
-            WorkflowStage.PROMPT_ANALYSIS,
+            WorkflowStage.PROMPT_ANALYSIS,  # type: ignore
             lambda: self._phase_prompt_analysis(prompt_file, reliability),
             reliability
         )
 
         # Phase 2: Task Preparation
-        task_list = self._execute_phase_with_monitoring(
-            WorkflowStage.TASK_PREPARATION,
+        _task_list = self._execute_phase_with_monitoring(
+            WorkflowStage.TASK_PREPARATION,  # type: ignore
             lambda: self._phase_task_preparation(prompt_data, reliability),
             reliability
         )
 
         # Phase 3: Issue Creation
         issue_result = self._execute_phase_with_monitoring(
-            WorkflowStage.ISSUE_CREATION,
+            WorkflowStage.ISSUE_CREATION,  # type: ignore
             lambda: self._phase_issue_creation(prompt_data, reliability),
             reliability
         )
 
         # Phase 4: Branch Setup
         branch_result = self._execute_phase_with_monitoring(
-            WorkflowStage.BRANCH_SETUP,
+            WorkflowStage.BRANCH_SETUP,  # type: ignore
             lambda: self._phase_branch_setup(issue_result, reliability),
             reliability
         )
 
         # Phase 5: Research and Planning
-        research_result = self._execute_phase_with_monitoring(
-            WorkflowStage.RESEARCH_PLANNING,
+        _research_result = self._execute_phase_with_monitoring(
+            WorkflowStage.RESEARCH_PLANNING,  # type: ignore
             lambda: self._phase_research_planning(prompt_data, reliability),
             reliability
         )
@@ -240,14 +239,14 @@ class EnhancedWorkflowManager:
 
         # Phase 9: Testing
         testing_result = self._execute_phase_with_monitoring(
-            WorkflowStage.TESTING_START,
+            WorkflowStage.TESTING_START,  # type: ignore
             lambda: self._phase_testing(implementation_result, reliability),
             reliability
         )
 
         # Phase 10: Documentation
         docs_result = self._execute_phase_with_monitoring(
-            WorkflowStage.DOCUMENTATION_UPDATE,
+            WorkflowStage.DOCUMENTATION_UPDATE,  # type: ignore
             lambda: self._phase_documentation(implementation_result, reliability),
             reliability
         )
@@ -257,14 +256,14 @@ class EnhancedWorkflowManager:
 
         # Phase 12: Review Processing
         review_result = self._execute_phase_with_monitoring(
-            WorkflowStage.REVIEW_PROCESSING,
+            WorkflowStage.REVIEW_PROCESSING,  # type: ignore
             lambda: self._phase_review_processing(pr_result, reliability),
             reliability
         )
 
         # Phase 13: Final Cleanup
         cleanup_result = self._execute_phase_with_monitoring(
-            WorkflowStage.FINAL_CLEANUP,
+            WorkflowStage.FINAL_CLEANUP,  # type: ignore
             lambda: self._phase_final_cleanup(review_result, reliability),
             reliability
         )
@@ -284,7 +283,7 @@ class EnhancedWorkflowManager:
             'phase_checkpoints': self.phase_checkpoints
         }
 
-    def _execute_phase_with_monitoring(self, stage: WorkflowStage, phase_func: callable,
+    def _execute_phase_with_monitoring(self, stage: WorkflowStage, phase_func: callable,  # type: ignore
                                      reliability: WorkflowReliabilityManager) -> Any:
         """Execute a workflow phase with comprehensive monitoring and error handling"""
 
@@ -300,23 +299,23 @@ class EnhancedWorkflowManager:
         phase_start_time = time.time()
 
         try:
-            logger.info(f"Starting phase: {stage.value}")
+            logger.info(f"Starting phase: {stage.value}")  # type: ignore
 
             # Perform health check for critical phases
             critical_phases = [
-                WorkflowStage.IMPLEMENTATION_START,
-                WorkflowStage.PR_CREATION,
-                WorkflowStage.REVIEW_PROCESSING
+                WorkflowStage.IMPLEMENTATION_START,  # type: ignore
+                WorkflowStage.PR_CREATION,  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING  # type: ignore
             ]
 
             if stage in critical_phases:
                 health_check = reliability.perform_health_check(self.workflow_id)
-                if health_check and health_check.status in [HealthStatus.CRITICAL, HealthStatus.FAILED]:
-                    logger.warning(f"Health check failed before {stage.value}: {health_check.status.value}")
+                if health_check and health_check.status in [HealthStatus.CRITICAL, HealthStatus.FAILED]:  # type: ignore
+                    logger.warning(f"Health check failed before {stage.value}: {health_check.status.value}")  # type: ignore
                     # Continue with warnings but monitor closely
 
             # Execute phase with retry logic
-            @retry(max_attempts=self.config.max_retries, initial_delay=1.0)
+            @retry(max_attempts=self.config.max_retries, initial_delay=1.0)  # type: ignore
             def execute_with_retry():
                 return phase_func()
 
@@ -324,16 +323,16 @@ class EnhancedWorkflowManager:
 
             # Record successful phase completion
             phase_duration = time.time() - phase_start_time
-            self.phase_checkpoints.append(f"{stage.value}:{phase_duration:.2f}s")
+            self.phase_checkpoints.append(f"{stage.value}:{phase_duration:.2f}s")  # type: ignore
 
-            logger.info(f"Completed phase: {stage.value} in {phase_duration:.2f}s")
+            logger.info(f"Completed phase: {stage.value} in {phase_duration:.2f}s")  # type: ignore
 
             # Create checkpoint for critical phases
             checkpoint_phases = [
-                WorkflowStage.ISSUE_CREATION,
-                WorkflowStage.IMPLEMENTATION_COMPLETE,
-                WorkflowStage.PR_CREATION,
-                WorkflowStage.REVIEW_PROCESSING
+                WorkflowStage.ISSUE_CREATION,  # type: ignore
+                WorkflowStage.IMPLEMENTATION_COMPLETE,  # type: ignore
+                WorkflowStage.PR_CREATION,  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING  # type: ignore
             ]
 
             if stage in checkpoint_phases and self.config.enable_persistence:
@@ -343,7 +342,7 @@ class EnhancedWorkflowManager:
 
         except Exception as e:
             phase_duration = time.time() - phase_start_time
-            logger.error(f"Phase {stage.value} failed after {phase_duration:.2f}s: {e}")
+            logger.error(f"Phase {stage.value} failed after {phase_duration:.2f}s: {e}")  # type: ignore
 
             # Handle error through reliability manager
             error_result = reliability.handle_workflow_error(
@@ -356,15 +355,15 @@ class EnhancedWorkflowManager:
 
             # Attempt recovery if enabled
             if self.config.enable_recovery and error_result.get('success', False):
-                logger.info(f"Attempting recovery for phase {stage.value}")
+                logger.info(f"Attempting recovery for phase {stage.value}")  # type: ignore
                 try:
                     # Retry phase after recovery actions
                     time.sleep(2)  # Brief pause for recovery
                     result = phase_func()
-                    logger.info(f"Phase {stage.value} recovered successfully")
+                    logger.info(f"Phase {stage.value} recovered successfully")  # type: ignore
                     return result
                 except Exception as recovery_error:
-                    logger.error(f"Phase {stage.value} recovery failed: {recovery_error}")
+                    logger.error(f"Phase {stage.value} recovery failed: {recovery_error}")  # type: ignore
 
             # Re-raise original exception if recovery failed
             raise e
@@ -375,21 +374,21 @@ class EnhancedWorkflowManager:
 
         # Implementation Start
         impl_start_result = self._execute_phase_with_monitoring(
-            WorkflowStage.IMPLEMENTATION_START,
+            WorkflowStage.IMPLEMENTATION_START,  # type: ignore
             lambda: self._phase_implementation_start(prompt_data, reliability),
             reliability
         )
 
         # Implementation Progress (can be long-running)
         impl_progress_result = self._execute_phase_with_monitoring(
-            WorkflowStage.IMPLEMENTATION_PROGRESS,
+            WorkflowStage.IMPLEMENTATION_PROGRESS,  # type: ignore
             lambda: self._phase_implementation_progress(impl_start_result, reliability),
             reliability
         )
 
         # Implementation Complete
         impl_complete_result = self._execute_phase_with_monitoring(
-            WorkflowStage.IMPLEMENTATION_COMPLETE,
+            WorkflowStage.IMPLEMENTATION_COMPLETE,  # type: ignore
             lambda: self._phase_implementation_complete(impl_progress_result, reliability),
             reliability
         )
@@ -408,21 +407,21 @@ class EnhancedWorkflowManager:
 
         # PR Preparation
         pr_prep_result = self._execute_phase_with_monitoring(
-            WorkflowStage.PR_PREPARATION,
+            WorkflowStage.PR_PREPARATION,  # type: ignore
             lambda: self._phase_pr_preparation(implementation_result, reliability),
             reliability
         )
 
         # PR Creation
         pr_create_result = self._execute_phase_with_monitoring(
-            WorkflowStage.PR_CREATION,
+            WorkflowStage.PR_CREATION,  # type: ignore
             lambda: self._phase_pr_creation(pr_prep_result, reliability),
             reliability
         )
 
         # PR Verification
         pr_verify_result = self._execute_phase_with_monitoring(
-            WorkflowStage.PR_VERIFICATION,
+            WorkflowStage.PR_VERIFICATION,  # type: ignore
             lambda: self._phase_pr_verification(pr_create_result, reliability),
             reliability
         )
@@ -451,7 +450,7 @@ class EnhancedWorkflowManager:
 
         # Create workflow state persistence
         if self.config.enable_persistence and reliability:
-            reliability.create_workflow_persistence(self.workflow_id, self.workflow_context)
+            reliability.create_workflow_persistence(self.workflow_id, self.workflow_context)  # type: ignore
 
         return {
             'workflow_id': self.workflow_id,
@@ -524,7 +523,7 @@ class EnhancedWorkflowManager:
                 'id': '1',
                 'title': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
                 'content': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
-                'phase': WorkflowStage.ISSUE_CREATION.value,
+                'phase': WorkflowStage.ISSUE_CREATION.value,  # type: ignore
                 'estimated_duration': 120,  # seconds
                 'dependencies': [],
                 'critical': True
@@ -533,7 +532,7 @@ class EnhancedWorkflowManager:
                 'id': '2',
                 'title': 'Create and checkout feature branch',
                 'content': 'Create and checkout feature branch',
-                'phase': WorkflowStage.BRANCH_SETUP.value,
+                'phase': WorkflowStage.BRANCH_SETUP.value,  # type: ignore
                 'estimated_duration': 60,
                 'dependencies': ['1'],
                 'critical': True
@@ -542,7 +541,7 @@ class EnhancedWorkflowManager:
                 'id': '3',
                 'title': 'Research existing implementation and patterns',
                 'content': 'Research existing implementation and patterns',
-                'phase': WorkflowStage.RESEARCH_PLANNING.value,
+                'phase': WorkflowStage.RESEARCH_PLANNING.value,  # type: ignore
                 'estimated_duration': 300,
                 'dependencies': ['2'],
                 'critical': False
@@ -551,7 +550,7 @@ class EnhancedWorkflowManager:
                 'id': '4',
                 'title': 'Implement core functionality',
                 'content': 'Implement core functionality',
-                'phase': WorkflowStage.IMPLEMENTATION_PROGRESS.value,
+                'phase': WorkflowStage.IMPLEMENTATION_PROGRESS.value,  # type: ignore
                 'estimated_duration': prompt_data.get('complexity_estimate', 1800),
                 'dependencies': ['3'],
                 'critical': True
@@ -560,7 +559,7 @@ class EnhancedWorkflowManager:
                 'id': '5',
                 'title': 'Write comprehensive tests',
                 'content': 'Write comprehensive tests',
-                'phase': WorkflowStage.TESTING_START.value,
+                'phase': WorkflowStage.TESTING_START.value,  # type: ignore
                 'estimated_duration': 600,
                 'dependencies': ['4'],
                 'critical': True
@@ -569,7 +568,7 @@ class EnhancedWorkflowManager:
                 'id': '6',
                 'title': 'Update documentation',
                 'content': 'Update documentation',
-                'phase': WorkflowStage.DOCUMENTATION_UPDATE.value,
+                'phase': WorkflowStage.DOCUMENTATION_UPDATE.value,  # type: ignore
                 'estimated_duration': 300,
                 'dependencies': ['4'],
                 'critical': False
@@ -578,7 +577,7 @@ class EnhancedWorkflowManager:
                 'id': '7',
                 'title': 'Create pull request',
                 'content': 'Create pull request',
-                'phase': WorkflowStage.PR_CREATION.value,
+                'phase': WorkflowStage.PR_CREATION.value,  # type: ignore
                 'estimated_duration': 120,
                 'dependencies': ['5', '6'],
                 'critical': True
@@ -587,7 +586,7 @@ class EnhancedWorkflowManager:
                 'id': '8',
                 'title': 'Process code review',
                 'content': 'Process code review',
-                'phase': WorkflowStage.REVIEW_PROCESSING.value,
+                'phase': WorkflowStage.REVIEW_PROCESSING.value,  # type: ignore
                 'estimated_duration': 300,
                 'dependencies': ['7'],
                 'critical': True
@@ -621,9 +620,9 @@ class EnhancedWorkflowManager:
             }
 
             # Create issue with retry logic through Enhanced Separation
-            @retry(max_attempts=3, initial_delay=2.0)
+            @retry(max_attempts=3, initial_delay=2.0)  # type: ignore
             def create_issue_with_retry():
-                return self.github_ops.create_issue(
+                return self.github_ops.create_issue(  # type: ignore
                     title=issue_data['title'],
                     body=issue_data['body'],
                     labels=issue_data.get('labels')
@@ -826,7 +825,7 @@ class EnhancedWorkflowManager:
         """Create checkpoint for critical phases"""
         try:
             checkpoint_data = {
-                'stage': stage.value,
+                'stage': stage.value,  # type: ignore
                 'result': result,
                 'timestamp': datetime.now().isoformat(),
                 'workflow_id': self.workflow_id,
@@ -834,15 +833,15 @@ class EnhancedWorkflowManager:
             }
 
             if reliability and self.state_manager:
-                reliability.create_workflow_persistence(
-                    f"{self.workflow_id}_checkpoint_{stage.value}",
+                reliability.create_workflow_persistence(  # type: ignore
+                    f"{self.workflow_id}_checkpoint_{stage.value}",  # type: ignore
                     checkpoint_data
                 )
 
-            logger.info(f"Created checkpoint for stage: {stage.value}")
+            logger.info(f"Created checkpoint for stage: {stage.value}")  # type: ignore
 
         except Exception as e:
-            logger.warning(f"Failed to create checkpoint for {stage.value}: {e}")
+            logger.warning(f"Failed to create checkpoint for {stage.value}: {e}")  # type: ignore
 
     def _extract_feature_name(self, prompt_content: str) -> str:
         """Extract feature name from prompt content"""

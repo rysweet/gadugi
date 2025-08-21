@@ -10,7 +10,7 @@ This module provides sophisticated pattern recognition capabilities including:
 """
 
 import re
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
 from datetime import datetime
@@ -393,7 +393,7 @@ class TaskPatternRecognitionSystem:
 
         pattern_matches = []
 
-        for pattern_id, pattern in self.patterns.items():
+        for _pattern_id, pattern in self.patterns.items():
             match = self._evaluate_pattern_match(
                 pattern, task_description, task_context, historical_context
             )

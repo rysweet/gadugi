@@ -18,27 +18,25 @@ Integration with Enhanced Separation:
 - Leverages task tracking for comprehensive monitoring
 """
 
-import json
 import logging
-import os
 import psutil
-import signal
-import sys
+import signal  # type: ignore
+import sys  # type: ignore
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone  # type: ignore
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # type: ignore
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid
+import uuid  # type: ignore
 
 # Import Enhanced Separation shared modules
 try:
-    from utils.error_handling import ErrorHandler, CircuitBreaker, retry, ErrorContext
-    from state_management import StateManager, TaskState, WorkflowPhase, CheckpointManager
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker
-    from github_operations import GitHubOperations
+    from .utils.error_handling import ErrorHandler, CircuitBreaker, retry  # type: ignore
+    from .state_management import StateManager, TaskState, WorkflowPhase, CheckpointManager  # type: ignore
+    from .task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
+    from .github_operations import GitHubOperations  # type: ignore
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for testing/development
@@ -152,10 +150,10 @@ class WorkflowReliabilityManager:
 
         # Initialize Enhanced Separation components
         self.error_handler = ErrorHandler()
-        self.state_manager = StateManager()
-        self.checkpoint_manager = CheckpointManager(self.state_manager)
-        self.task_tracker = TaskTracker()
-        self.phase_tracker = WorkflowPhaseTracker()
+        self.state_manager = StateManager()  # type: ignore
+        self.checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore
+        self.task_tracker = TaskTracker()  # type: ignore
+        self.phase_tracker = WorkflowPhaseTracker()  # type: ignore
 
         # Configure circuit breakers for different operations
         self.github_circuit_breaker = CircuitBreaker(
@@ -534,6 +532,7 @@ class WorkflowReliabilityManager:
             Recovery result with actions taken and recommendations
         """
         try:
+            monitoring_state = None
             if workflow_id in self.monitoring_states:
                 monitoring_state = self.monitoring_states[workflow_id]
                 monitoring_state.error_count += 1
@@ -542,8 +541,10 @@ class WorkflowReliabilityManager:
                 current_stage = stage or WorkflowStage.INITIALIZATION
 
             # Create comprehensive error context
-            error_context = ErrorContext(
-                operation_name=f"workflow_stage_{current_stage.value}"
+            _error_context = ErrorContext(
+                error=error,
+                operation=f"workflow_stage_{current_stage.value}",
+                workflow_id=workflow_id
             )
             # Store error information separately
             error_details = {
@@ -563,7 +564,7 @@ class WorkflowReliabilityManager:
                     'error_type': type(error).__name__,
                     'error_message': str(error),
                     'recovery_context': recovery_context or {},
-                    'error_count': monitoring_state.error_count if workflow_id in self.monitoring_states else 1
+                    'error_count': monitoring_state.error_count if monitoring_state else 1
                 },
                 exc_info=True
             )
@@ -680,7 +681,7 @@ class WorkflowReliabilityManager:
         """
         try:
             # Create TaskState for Enhanced Separation state management
-            task_state = TaskState(
+            task_state = TaskState(  # type: ignore
                 task_id=workflow_id,
                 prompt_file=workflow_state.get('prompt_file', 'unknown'),
                 status='in_progress',
@@ -930,7 +931,7 @@ class WorkflowReliabilityManager:
                 # Check all active workflows
                 for workflow_id in list(self.monitoring_states.keys()):
                     # Check for timeouts
-                    timeout_result = self.check_workflow_timeouts(workflow_id)
+                    _timeout_result = self.check_workflow_timeouts(workflow_id)
 
                     # Perform periodic health checks (every 5 minutes)
                     monitoring_state = self.monitoring_states[workflow_id]
@@ -1086,7 +1087,7 @@ class WorkflowReliabilityManager:
             if workflow_id in self.monitoring_states:
                 monitoring_state = self.monitoring_states[workflow_id]
 
-                checkpoint_state = TaskState(
+                checkpoint_state = TaskState(  # type: ignore
                     task_id=workflow_id,
                     prompt_file=self.active_workflows.get(workflow_id, {}).get('prompt_file', 'unknown'),
                     status='in_progress',
@@ -1119,7 +1120,7 @@ class WorkflowReliabilityManager:
     def _create_error_checkpoint(self, workflow_id: str, error: Exception, stage: WorkflowStage):
         """Create an error checkpoint for debugging and recovery"""
         try:
-            error_state = TaskState(
+            error_state = TaskState(  # type: ignore
                 task_id=f"{workflow_id}_error_{int(time.time())}",
                 prompt_file=self.active_workflows.get(workflow_id, {}).get('prompt_file', 'unknown'),
                 status='error',

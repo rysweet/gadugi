@@ -1,24 +1,13 @@
 ---
-description: Analyzes and resolves failing tests through systematic failure analysis,
-  root cause identification, and targeted remediation
-imports: '# Enhanced Separation Architecture - Shared Modules
-
-  from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker
-
-  from .claude.shared.interfaces import AgentConfig, OperationResult
-
-  from .shared_test_instructions import SharedTestInstructions, TestResult, TestStatus,
-  SkipReason, TestAnalysis'
-model: inherit
 name: test-solver
-tools:
-- Read
-- Write
-- Edit
-- Bash
-- Grep
-- LS
-version: 1.0.0
+model: inherit
+description: Analyzes and resolves failing tests through systematic failure analysis, root cause identification, and targeted remediation
+tools: Read, Write, Edit, Bash, Grep, LS
+imports: |
+  # Enhanced Separation Architecture - Shared Modules
+  from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker
+  from .claude.shared.interfaces import AgentConfig, OperationResult
+  from .shared_test_instructions import SharedTestInstructions, TestResult, TestStatus, SkipReason, TestAnalysis
 ---
 
 # Test Solver Agent

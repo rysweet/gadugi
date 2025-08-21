@@ -5,7 +5,7 @@ Container Manager for secure container lifecycle management.
 import logging
 import time
 import uuid
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
 

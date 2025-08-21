@@ -1,24 +1,13 @@
 ---
-description: Authors new tests for code coverage and TDD alignment, ensuring proper
-  test structure, documentation, and quality
-imports: '# Enhanced Separation Architecture - Shared Modules
-
-  from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker
-
-  from .claude.shared.interfaces import AgentConfig, OperationResult
-
-  from .shared_test_instructions import SharedTestInstructions, TestResult, TestStatus,
-  TestAnalysis'
-model: inherit
 name: test-writer
-tools:
-- Read
-- Write
-- Edit
-- Bash
-- Grep
-- LS
-version: 1.0.0
+model: inherit
+description: Authors new tests for code coverage and TDD alignment, ensuring proper test structure, documentation, and quality
+tools: Read, Write, Edit, Bash, Grep, LS
+imports: |
+  # Enhanced Separation Architecture - Shared Modules
+  from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker
+  from .claude.shared.interfaces import AgentConfig, OperationResult
+  from .shared_test_instructions import SharedTestInstructions, TestResult, TestStatus, TestAnalysis
 ---
 
 # Test Writer Agent

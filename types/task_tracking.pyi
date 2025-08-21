@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 import typing_extensions
 
 # Basic enums reflecting runtime constants

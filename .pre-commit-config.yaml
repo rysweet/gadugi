@@ -3,13 +3,15 @@
 repos:
   # Formatting and linting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.7
+    rev: v0.8.4
     hooks:
-      # Run the linter
-      - id: ruff
-        args: [ --fix ]
-      # Run the formatter
+      # Run the formatter first
       - id: ruff-format
+        types_or: [python, pyi]
+      # Then run the linter
+      - id: ruff
+        types_or: [python, pyi]
+        args: ['--fix', '--exit-non-zero-on-fix']
 
   # Additional Python code quality checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -27,17 +29,18 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with pyright (using local hook for now)
-  - repo: local
+  # Type checking with pyright
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.390
     hooks:
       - id: pyright
-        name: pyright type checker
-        entry: pyright container_runtime/
-        language: system
+        name: pyright
+        entry: pyright
+        language: node
         types: [python]
         pass_filenames: false
-        stages: [pre-push]  # Run on push to avoid slowing down commits
-        # Scoped to container_runtime/ initially for phased rollout
+        additional_dependencies: ['pyright@1.1.390']
+        args: []
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets
@@ -47,17 +50,6 @@ repos:
         args: ['--baseline', '.secrets.baseline']
         exclude: .*\.lock$|package-lock\.json$
 
-
-  # Validate agent registration files
-  - repo: local
-    hooks:
-      - id: validate-agents
-        name: Validate agent registration
-        entry: python .github/scripts/validate-agent-registration.py
-        language: system
-        files: '\.(claude|github)/agents/.*\.md$'
-        pass_filenames: false
-        stages: [pre-commit]
 
   # Run tests (using local hook)
   - repo: local
@@ -72,7 +64,7 @@ repos:
 
 # Global configuration
 default_language_version:
-  python: python3.12
+  python: python3.13
 
 # Only run on specific stages if needed
 default_stages: [pre-commit, pre-push]

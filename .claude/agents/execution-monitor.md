@@ -1,14 +1,8 @@
 ---
-description: Monitors parallel Claude Code CLI executions, tracks progress, handles
-  failures, and coordinates result aggregation for the OrchestratorAgent
-model: inherit
 name: execution-monitor
-tools:
-- Bash
-- Read
-- Write
-- TodoWrite
-version: 1.0.0
+model: inherit
+description: Monitors parallel Claude Code CLI executions, tracks progress, handles failures, and coordinates result aggregation for the OrchestratorAgent
+tools: Bash, Read, Write, TodoWrite
 ---
 
 # ExecutionMonitor Sub-Agent

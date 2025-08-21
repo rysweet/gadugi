@@ -13,12 +13,10 @@ Key Features:
 """
 
 import os
-import re
 import json
 import subprocess
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -33,7 +31,7 @@ except ImportError:
         # Minimal definitions if workflow_engine not available
         from enum import Enum, auto
         from dataclasses import dataclass
-        from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional
 
         class WorkflowPhase(Enum):
             INIT = auto()
@@ -326,7 +324,7 @@ class WorkflowValidator:
             )
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(prompt_file, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             return ValidationResult(
@@ -357,7 +355,7 @@ class WorkflowValidator:
         start_time = datetime.now()
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(prompt_file, 'r', encoding='utf-8') as f:  # type: ignore
                 content = f.read()
 
             issues = []
@@ -940,7 +938,7 @@ if __name__ == "__main__":
             print(f"  • {rec}")
 
     # Export detailed report
-    report_file = report.export_validation_report(report)
+    report_file = report.export_validation_report(report)  # type: ignore
     print(f"\n📄 Detailed report saved to: {report_file}")
 
     # Exit with appropriate code

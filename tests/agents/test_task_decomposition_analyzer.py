@@ -814,7 +814,7 @@ class TestPerformanceBenchmarks:
         }
 
         # Verify performance targets
-        for task_type, metrics in performance_data.items():
+        for _task_type, metrics in performance_data.items():
             assert metrics["analysis_time_ms"] < 3000  # Max 3 seconds
             overhead_pct = int(metrics["enhancement_overhead"].rstrip("%"))
             assert overhead_pct < 40  # Max 40% overhead
@@ -839,7 +839,7 @@ class TestPerformanceBenchmarks:
             },
         }
 
-        for scenario, data in speedup_data.items():
+        for _scenario, data in speedup_data.items():
             assert data["speedup"] > 1.5  # Minimum 50% improvement
             assert data["parallel_time"] < data["sequential_time"]
 

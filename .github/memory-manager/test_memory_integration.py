@@ -18,6 +18,7 @@ from github_integration import GitHubIntegration, GitHubIssue
 # Import our modules
 from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
 from sync_engine import SyncConfig, SyncDirection, SyncEngine
+from typing import Set
 
 
 class TestMemoryParser(unittest.TestCase):

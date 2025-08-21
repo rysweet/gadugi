@@ -1,3 +1,7 @@
+from datetime import datetime, timedelta
+import unittest
+from unittest.mock import Mock, patch, MagicMock
+from unittest import TestCase
 #!/usr/bin/env python3
 """
 Comprehensive tests for containerized orchestrator execution.
@@ -14,22 +18,11 @@ Key test scenarios:
 """
 
 import asyncio
-import json
-import os
 import tempfile
-import threading
-import time
-import unittest
-from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, call
-import shutil
-
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from container_manager import ContainerManager, ContainerConfig, ContainerResult
     from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
     from monitoring.dashboard import OrchestrationMonitor
     IMPORTS_AVAILABLE = True
@@ -326,7 +319,8 @@ class TestExecutionEngineContainerization(unittest.TestCase):
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('components.execution_engine.ContainerManager')
     def test_task_executor_containerized_execution(self, mock_container_manager):
-        """Test TaskExecutor uses containerized execution"""
+            TaskExecutor = None
+    """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
         mock_container_result.task_id = "test-task"

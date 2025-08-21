@@ -1,22 +1,12 @@
 ---
-description: Specialized agent for fixing type errors identified by pyright type checker,
-  with intelligent categorization and systematic resolution
-imports: 'from .claude.shared.interfaces import AgentConfig, TaskData
-
-  from .claude.shared.error_handling import ErrorHandler
-
-  from .claude.shared.task_tracking import TaskTracker'
-model: inherit
 name: type-fix-agent
-tools:
-- Read
-- Write
-- Edit
-- MultiEdit
-- Bash
-- Grep
-- TodoWrite
-version: 1.0.0
+model: inherit
+description: Specialized agent for fixing type errors identified by pyright type checker, with intelligent categorization and systematic resolution
+tools: Read, Write, Edit, MultiEdit, Bash, Grep, TodoWrite
+imports: |
+  from .claude.shared.interfaces import AgentConfig, TaskData
+  from .claude.shared.error_handling import ErrorHandler
+  from .claude.shared.task_tracking import TaskTracker
 ---
 
 # Type-Fix Agent - Specialized Type Error Resolution

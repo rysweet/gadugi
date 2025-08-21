@@ -9,54 +9,26 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ---
 
-## CRITICAL: UV Python Environment Usage
+## CRITICAL: Development Guidelines - MANDATORY
 
-**In UV projects (with `pyproject.toml` and `uv.lock`), ALWAYS prefix Python commands with `uv run`:**
-- ✅ `uv run python script.py`
-- ✅ `uv run pytest tests/`
-- ❌ Never: `python script.py` or `pytest tests/`
+⚠️ **YOU MUST FOLLOW THE GUIDELINES IN @.claude/Guidelines.md** ⚠️
+
+Key principles you MUST follow:
+- **Zero BS Principle**: NO false claims of completion. If it's not implemented, say so.
+- **Recipe-Driven Development**: Requirements → Design → Implementation → Tests → Review
+- **Quality Gates**: All code MUST pass pyright, ruff, pytest before claiming completion
+- **Review Requirements**: Design review, code review, system review for EVERY component
+- **Dependency Order**: Build foundations first, no building on stubs
+
+Read @.claude/Guidelines.md for complete requirements.
 
 ---
 
 ## CRITICAL: Workflow Execution Pattern
 
-⚠️ **MANDATORY ORCHESTRATOR AND WORKFLOW MANAGER USAGE** ⚠️
+⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
 
-## Every Repository File Change Must Use the Orchestrator to Invoke the Workflow via the Workflow Manager - No Exceptions
-
-Any time there are changes to repository files required - whether it's fixing YAML
-frontmatter, updating documentation, modifying configs, or writing code - you must
-use the orchestrator to invoke the workflow via the workflow manager.
-
-This means:
-1. You invoke /agent:orchestrator-agent with a prompt file
-2. The orchestrator creates worktrees and invokes workflow-manager
-3. The workflow-manager executes all 13 phases
-4. You NEVER edit files directly
-
-This includes:
-- Fixing CI failures (even "simple" ones)
-- Adding missing metadata to agent files
-- Updating README or documentation
-- Changing configuration files
-- Modifying ANY file that gets committed to git
-
-Your brain will try to categorize some changes as "too trivial" or "not really code"
-to justify skipping this chain. Don't. If it's going to be committed to the
-repository, it must go through orchestrator → workflow-manager → 13 phases.
-
-The complete chain is mandatory because:
-- Orchestrator alone isn't enough (it must delegate to workflow-manager)
-- Workflow-manager ensures Phase 9 (Code Review) happens
-- Phase 10 (Review Response) addresses feedback
-- All changes get proper tracking and validation
-
-**VERIFICATION CHECKLIST:**
-- ✅ Worktree created in `.worktrees/` directory
-- ✅ Workflow state in `.github/workflow-states/task-*`
-- ✅ All 13 phases documented in PR
-- ✅ Phase tracking shows completion
-- ❌ If these don't exist, workflow was NOT properly executed
+**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
 
 This ensures:
 - Proper worktree isolation for all changes
@@ -68,98 +40,20 @@ This ensures:
 **For ANY task that modifies code, configuration, or documentation files:**
 
 1. **NEVER manually edit files directly**
-2. **ALWAYS use the orchestrator agent as the entry point**
+2. **ALWAYS use the orchestrator agent as the entry point**:
 
-## ⚠️ CRITICAL: How the Orchestrator ACTUALLY Works
+   ```
+   /agent:orchestrator-agent
 
-The orchestrator is NOT just a concept - it's a fully working implementation that:
+   Execute the following task:
+   - [description of changes needed]
+   ```
 
-### 1. Creates Prompt Files
-For each task, create a prompt file in `/prompts/` directory:
-```bash
-# Example: /prompts/fix-bug-issue-256.md
-Task: Fix the code-review-response agent merge policy violation
-Issue: #256
-Requirements:
-- Update agent to ask for user approval before merging
-- Add clear prompt waiting for user permission
-```
-
-### 2. Invokes via Claude CLI with SPECIFIC FLAGS
-The orchestrator uses this EXACT command structure:
-```bash
-claude \
-  -p "Read and follow the instructions in the file: /prompts/[task].md" \
-  --dangerously-skip-permissions \
-  --verbose \
-  --max-turns=2000 \
-  --output-format json
-```
-
-### 3. Parallel Execution Architecture
-- **orchestrator_main.py**: Central coordination engine
-- **process_registry.py**: Process tracking and monitoring
-- **execution_engine.py**: Spawns subprocess.Popen with claude commands
-- **worktree_manager.py**: Creates isolated `.worktrees/task-*` directories
-
-### 4. CORRECT Invocation Pattern
-```
-/agent:orchestrator-agent
-
-Execute these specific prompts in parallel:
-- fix-bug-issue-256.md
-- add-validation-issue-248.md
-- remove-suppression-issue-249.md
-```
-
-### 5. What Actually Happens
-1. Orchestrator reads prompt files from `/prompts/`
-2. Creates worktrees in `.worktrees/task-[id]/`
-3. Spawns parallel `claude` processes with JSON output
-4. Each process runs workflow-manager in its worktree
-5. Monitors execution via process_registry
-6. Collects results and handles failures
-
-**The Orchestrator will automatically**:
-   - Create worktrees using worktree-manager
-   - Spawn REAL parallel claude processes
-   - Monitor execution with process tracking
-   - Handle failures with fallback to sequential
-
-## ❌ DO NOT DO THESE (Common Mistakes)
-
-### Wrong Way 1: Direct Claude Invocation
-```bash
-# NEVER DO THIS - loses all tracking and logs
-claude -p prompts/fix-bug.md
-```
-
-### Wrong Way 2: Made-up Commands
-```bash
-# NEVER INVENT COMMANDS - orchestrator has specific implementation
-orchestrator-agent execute --parallel --tasks="..."  # NOT A REAL COMMAND
-```
-
-### Wrong Way 3: Direct File Editing
-```python
-# NEVER EDIT FILES DIRECTLY - always use orchestrator
-with open('file.py', 'w') as f:
-    f.write(new_content)
-```
-
-### Wrong Way 4: Skipping Prompt Files
-```
-# NEVER TRY TO EXECUTE WITHOUT PROMPT FILES
-/agent:orchestrator-agent
-Fix these bugs: [list]  # WRONG - need actual prompt files
-```
-
-## ✅ CORRECT WAY (The ONLY Way)
-
-1. **Create prompt files** in `/prompts/` for each task
-2. **Invoke orchestrator** with list of prompt files
-3. **Let it handle everything** - worktrees, parallel execution, monitoring
-4. **Check results** in `.worktrees/task-*/` and workflow states
+3. **The Orchestrator will automatically**:
+   - Invoke the worktree-manager to create isolated environments
+   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
+   - Coordinate parallel execution when multiple tasks exist
+   - Ensure proper branch creation and PR workflow
 
 4. **Agent Hierarchy**:
    - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
@@ -167,15 +61,7 @@ Fix these bugs: [list]  # WRONG - need actual prompt files
    - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
    - **Code-Reviewer**: Executes Phase 9 reviews
 
-**⚠️ GOVERNANCE ENFORCEMENT**:
-- The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances
-- Direct execution is STRICTLY PROHIBITED
-- If orchestrator executes directly without workflow-manager, this is a CRITICAL VIOLATION
-- Every task MUST show evidence of:
-  - Worktree creation (`.worktrees/task-*`)
-  - Workflow state (`.github/workflow-states/task-*`)
-  - 13 phase execution
-- WITHOUT this evidence, the task was improperly executed and must be rejected
+**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
 
 5. **Automated Workflow Handling**:
    - Issue creation
@@ -185,7 +71,7 @@ Fix these bugs: [list]  # WRONG - need actual prompt files
    - Code review invocation (Phase 9)
    - State management
 
-6. **Mandatory 13-Phase Workflow** (ALL tasks MUST follow):
+6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
    - Phase 1: Initial Setup
    - Phase 2: Issue Creation
    - Phase 3: Branch Management
@@ -197,8 +83,6 @@ Fix these bugs: [list]  # WRONG - need actual prompt files
    - Phase 9: Review (code-reviewer invocation)
    - Phase 10: Review Response
    - Phase 11: Settings Update
-   - Phase 12: Deployment Readiness (when applicable)
-   - Phase 13: Team Coach Reflection (MANDATORY - session end)
 
 **Only execute manual steps for**:
 - Read-only operations (searching, viewing files)
@@ -214,11 +98,10 @@ Fix these bugs: [list]  # WRONG - need actual prompt files
 
 **Workflow Validation Requirements**:
 - Orchestrator MUST delegate ALL tasks to WorkflowManager
-- ALL 13 workflow phases MUST be executed for every task
+- ALL 11 workflow phases MUST be executed for every task
 - NO direct execution bypassing workflow phases
 - State tracking MUST be maintained throughout all phases
 - Quality gates MUST be validated at each phase transition
-- Phase 13 (Team Coach Reflection) MUST execute at session end for continuous improvement
 
 **Enforcement Examples**:
 - ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
@@ -226,36 +109,6 @@ Fix these bugs: [list]  # WRONG - need actual prompt files
 - ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
 - ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
 - ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
-
-### Phase 13: Team Coach Reflection Details
-
-**Purpose**: Automatic session-end analysis for continuous improvement and learning.
-
-**When Executed**:
-- Automatically after Phase 12 completion
-- At the end of every workflow session
-- Before final state cleanup
-
-**What It Does**:
-1. **Performance Analysis**: Reviews metrics from all completed phases
-2. **Pattern Recognition**: Identifies success patterns and improvement areas
-3. **Recommendation Generation**: Creates actionable improvement suggestions
-4. **Memory Update**: Saves insights to Memory.md for future reference
-5. **Issue Creation**: Optionally creates GitHub issues for significant improvements
-
-**Implementation Safety**:
-- No subprocess spawning - uses direct agent invocation
-- Timeout protection (max 2 minutes)
-- Graceful degradation if Team Coach fails
-- Non-blocking - workflow completes even on failure
-- Prevents infinite loops through state tracking
-
-**Benefits**:
-- Automated performance tracking
-- Continuous process improvement
-- Knowledge accumulation in Memory.md
-- Reduced manual review overhead
-- Data-driven workflow optimization
 
 ### Emergency Procedures (Critical Production Issues)
 
@@ -303,10 +156,6 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 Note: Project-specific instructions are integrated directly into this file above.
 
-## Gadugi Development Guidelines
-
-@.claude/Guidelines.md
-
 ---
 
 ## Worktree Lifecycle Management
@@ -344,7 +193,6 @@ Use worktrees for:
    - Push branch from within worktree
    - Create PR using `gh pr create` from worktree directory
    - Reference issue number in PR description
-   - **CRITICAL: Never merge PRs without explicit user approval** (see PR Merge Policy below)
 
 4. **Cleanup Phase**:
    - After PR is merged, remove worktree:
@@ -405,50 +253,6 @@ The worktree-manager agent handles:
 - Integration with orchestrator for parallel work
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
-
-## PR Merge Approval Policy
-
-**⚠️ CRITICAL: NEVER merge PRs without explicit user approval**
-
-### Required Workflow for PR Completion
-
-1. **Create PR** - Use `gh pr create` with proper description
-2. **Execute Code Review** - Phase 9 with code-reviewer agent
-3. **Address Feedback** - Phase 10 with review response
-4. **STOP AND WAIT** - Report PR status to user
-5. **Only merge when user explicitly says to** - Wait for "merge it", "please merge", or similar
-
-### Correct Pattern
-```
-Assistant: "PR #123 has passed review and all checks are green.
-          Ready for merge. Awaiting your approval to proceed."
-User: "Please merge it"
-Assistant: [Now executes: gh pr merge 123]
-```
-
-### Incorrect Pattern (DO NOT DO THIS)
-```
-Assistant: "PR passed review, merging now..."  ❌
-Assistant: [Auto-merges without asking]        ❌
-```
-
-### Why This Policy Exists
-- User maintains control over main branch
-- Allows final review before merge
-- Prevents unwanted changes from entering production
-- Ensures user awareness of all merges
-
-### Commands Reference
-```bash
-# View PR status (always allowed)
-gh pr view <pr-number>
-gh pr checks <pr-number>
-
-# Merge PR (ONLY with explicit user approval)
-gh pr merge <pr-number> --merge --delete-branch
-```
-
-Remember: Even if all checks pass and review is approved, ALWAYS wait for explicit user permission before merging.
 
 ## UV Virtual Environment Setup for Agents
 
@@ -1099,3 +903,4 @@ Remember: The goal is to maintain development velocity while preserving quality 
 ## Memories and Best Practices
 
 - Remember to not use artificial dev timescales in planning or estimating.
+- **Core Value - Humility**: Always demonstrate humility in all development and communication. Never make claims of speedup or performance improvements without measured evidence. Focus on functionality and correctness over optimization claims. Let results speak for themselves.
