@@ -1,6 +1,6 @@
 """Code generation from recipes with Python standards enforcement."""
 
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Set
 from dataclasses import dataclass
 from pathlib import Path
 import re
@@ -247,7 +247,7 @@ class {{ component.class_name }}:
             imports.append("from datetime import datetime")
 
         # Add imports after docstring
-        result_lines = []
+        result_lines: List[str] = []
         docstring_ended = False
         imports_added = False
 
@@ -363,10 +363,10 @@ class {{ component.class_name }}:
 
     def _generate_init_files(self, recipe: Recipe, generated: GeneratedCode) -> Dict[str, str]:
         """Generate __init__.py files for packages."""
-        init_files = {}
+        init_files: Dict[str, str] = {}
 
         # Collect all directories that need __init__.py
-        dirs_needing_init = set()
+        dirs_needing_init: Set[Path] = set()
         for file_path in generated.files.keys():
             path = Path(file_path)
             if path.suffix == ".py":
@@ -378,7 +378,7 @@ class {{ component.class_name }}:
         # Generate __init__.py for each directory
         for dir_path in dirs_needing_init:
             # Collect exports from this directory
-            exports = []
+            exports: List[str] = []
             for file_path in generated.files.keys():
                 path = Path(file_path)
                 if path.parent == dir_path and path.stem != "__init__":
@@ -401,7 +401,7 @@ class {{ component.class_name }}:
 
     def _extract_exports(self, code: str) -> List[str]:
         """Extract exportable names from Python code."""
-        exports = []
+        exports: List[str] = []
 
         # Find class definitions
         class_pattern = re.compile(r"^class\s+(\w+)", re.MULTILINE)

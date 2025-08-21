@@ -1,6 +1,6 @@
 """Dependency resolution for Recipe Executor."""
 
-from typing import Optional, Set, List, Dict, Tuple
+from typing import Optional, Set, List, Dict, Tuple, Any
 from dataclasses import dataclass, field
 from pathlib import Path
 import networkx as nx
@@ -24,7 +24,7 @@ class MissingDependencyError(Exception):
 class DependencyGraph:
     """Represents the dependency graph of recipes."""
 
-    graph: nx.DiGraph = field(default_factory=nx.DiGraph)
+    graph: Any = field(default_factory=nx.DiGraph)  # nx.DiGraph doesn't support type parameters
     recipes: Dict[str, Recipe] = field(default_factory=dict)
 
     def add_recipe(self, recipe: Recipe) -> None:
