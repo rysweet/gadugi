@@ -85,8 +85,13 @@ class ProcessRegistry:
     capabilities for the orchestrator system.
     """
 
-    def __init__(self, registry_dir: str = ".gadugi/monitoring"):
-        """Initialize the process registry"""
+    def __init__(self, registry_dir: str = ".gadugi/monitoring", clean_start: bool = False):
+        """Initialize the process registry
+
+        Args:
+            registry_dir: Directory for registry files
+            clean_start: If True, start with empty registry (ignore existing state)
+        """
         self.registry_dir = Path(registry_dir)
         self.registry_dir.mkdir(parents=True, exist_ok=True)
 
@@ -99,8 +104,11 @@ class ProcessRegistry:
         self.heartbeat_interval = 30  # seconds
         self.heartbeat_timeout = 120  # seconds
 
-        # Load existing state
-        self._load_registry()
+        # Load existing state (unless clean start requested)
+        if not clean_start:
+            self._load_registry()
+        else:
+            logger.info("Starting with clean registry (ignoring existing state)")
 
         logger.info(f"ProcessRegistry initialized with {len(self.processes)} existing processes")
 

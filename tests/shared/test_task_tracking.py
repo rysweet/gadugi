@@ -9,7 +9,8 @@ import uuid
 # Import the module we're testing
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pytest
@@ -758,7 +759,7 @@ class TestTask:
 
     def test_task_creation_minimal(self) -> None:
         """Test creating a task with minimal parameters."""
-        task: Task = Task("1", "Test task")
+        task = Task("1", "Test task")
         assert task.id == "1"
         assert task.content == "Test task"
         assert task.status == TaskStatus.PENDING
@@ -766,7 +767,7 @@ class TestTask:
 
     def test_task_creation_full(self) -> None:
         """Test creating a task with all parameters."""
-        task: Task = Task(
+        task = Task(
             id="task-123",
             content="Critical task",
             status=TaskStatus.IN_PROGRESS,
@@ -779,8 +780,8 @@ class TestTask:
 
     def test_task_to_dict(self) -> None:
         """Test converting task to dictionary."""
-        task: Task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
-        task_dict: Dict[str, Any] = task.to_dict()
+        task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
+        task_dict = task.to_dict()
 
         expected = {
             "id": "1",
@@ -792,13 +793,13 @@ class TestTask:
 
     def test_task_from_dict(self) -> None:
         """Test creating task from dictionary."""
-        task_dict: Dict[str, Any] = {
+        task_dict = {
             "id": "2",
             "content": "From dict task",
             "status": "in_progress",
             "priority": "low",
         }
-        task: Task = Task.from_dict(task_dict)
+        task = Task.from_dict(task_dict)
 
         assert task.id == "2"
         assert task.content == "From dict task"
@@ -843,18 +844,16 @@ class TestTask:
     def test_task_validation(self) -> None:
         """Test task validation."""
         # Valid task
-        task: Task = Task("valid-id", "Valid content")
+        task = Task("valid-id", "Valid content")
         task.validate()  # Should not raise
 
         # Invalid ID
         with pytest.raises(TaskValidationError):
-            invalid_task: Task = Task("", "Content")
-            invalid_task.validate()
+            Task("", "Content").validate()
 
         # Invalid content
         with pytest.raises(TaskValidationError):
-            invalid_task: Task = Task("id", "")
-            invalid_task.validate()
+            Task("id", "").validate()
 
     def test_task_estimated_duration(self):
         """Test task estimated duration functionality."""
@@ -1140,8 +1139,6 @@ class TestTodoWriteIntegration:
 
     def test_submit_invalid_task_list(self):
         """Test submitting invalid task list."""
-        integration = TodoWriteIntegration()
-
         task_list = TaskList()
         invalid_task = Task("", "Invalid task")  # Empty ID
 
@@ -1223,9 +1220,9 @@ class TestTodoWriteIntegration:
             mock_call.return_value = {"success": True}
 
             updates = [
-                {"id": "1", "status": TaskStatus.COMPLETED},
-                {"id": "2", "status": TaskStatus.IN_PROGRESS},
-                {"id": "3", "priority": TaskPriority.HIGH},
+                {"task_id": "1", "status": TaskStatus.COMPLETED},
+                {"task_id": "2", "status": TaskStatus.IN_PROGRESS},
+                {"task_id": "3", "priority": TaskPriority.HIGH},
             ]
 
             result = integration.batch_update(updates)
@@ -1514,12 +1511,12 @@ class TestTaskTracker:
 
     def test_create_task(self) -> None:
         """Test creating a task through tracker."""
-        tracker: TaskTracker = TaskTracker()
+        tracker = TaskTracker()
 
         with patch.object(tracker.todowrite, "add_task") as mock_add:
             mock_add.return_value = {"success": True}
 
-            task: Task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
+            task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
 
             assert task.content == "Test task"
             assert task.priority == TaskPriority.HIGH

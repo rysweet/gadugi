@@ -9,6 +9,7 @@ import pytest
 import tempfile
 import os
 import json
+import subprocess
 from unittest.mock import Mock, patch
 
 # Import the module under test
@@ -161,7 +162,7 @@ Test the deterministic execution of workflow phases.
             completed_phases=[],
         )
 
-        success, message, data = engine._phase_init()
+        success, message, _data = engine._phase_init()
 
         assert success is False
         assert "not found" in message.lower()
@@ -198,7 +199,7 @@ Test the deterministic execution of workflow phases.
             completed_phases=[],
         )
 
-        success, message, data = engine._phase_prompt_validation()
+        success, message, _data = engine._phase_prompt_validation()
 
         assert success is False
         assert "too short" in message.lower()
@@ -240,7 +241,7 @@ Test the deterministic execution of workflow phases.
             completed_phases=[],
         )
 
-        success, message, data = engine._phase_branch_creation()
+        success, message, _data = engine._phase_branch_creation()
 
         assert success is False
         assert "failed" in message.lower()
@@ -365,7 +366,7 @@ Test the deterministic execution of workflow phases.
             pr_number=789,
         )
 
-        success, message, data = engine._phase_review_response()
+        success, message, _data = engine._phase_review_response()
 
         assert success is True
         assert "review response" in message.lower()

@@ -48,7 +48,9 @@ class WorktreeManager:
         print(f"🌳 Creating worktree for task: {task_id}")
 
         # Generate unique branch and directory names
-        branch_name = f"feature/parallel-{task_name.lower().replace(' ', '-')}-{task_id}"
+        # Sanitize task_name for valid Git branch name (remove invalid characters)
+        sanitized_name = task_name.lower().replace(' ', '-').replace(':', '').replace('#', '').replace('(', '').replace(')', '').replace('%', '').replace('-', '', 1) if task_name.lower().startswith('resume') else task_name.lower().replace(' ', '-').replace(':', '').replace('#', '').replace('(', '').replace(')', '').replace('%', '')
+        branch_name = f"feature/parallel-{sanitized_name}-{task_id}"
         worktree_path = self.worktrees_dir / f"task-{task_id}"
 
         # Clean up if worktree already exists

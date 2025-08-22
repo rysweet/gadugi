@@ -19,6 +19,7 @@ dependencies = [
     "websockets>=15.0.1",
     "docker>=7.1.0",
     "numpy>=2.0.2",
+    "aiofiles>=24.1.0",
 ]
 dynamic = ["version"]
 

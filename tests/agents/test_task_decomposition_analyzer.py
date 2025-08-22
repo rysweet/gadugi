@@ -64,24 +64,6 @@ class TestTaskBoundsEval:
 
     def test_complex_task_requiring_decomposition(self):
         """Test evaluation of complex tasks requiring decomposition"""
-        complex_task = {
-            "description": "Build complete e-commerce platform with microservices, real-time analytics, and ML recommendations",
-            "complexity_indicators": [
-                "microservices",
-                "real-time",
-                "machine learning",
-                "e-commerce",
-            ],
-            "target_files": ["services/"] * 10,  # Many services
-            "dependencies": [
-                "kafka",
-                "redis",
-                "tensorflow",
-                "postgres",
-                "elasticsearch",
-            ],
-            "estimated_duration": None,
-        }
 
         task_bounds_eval = Mock()
         task_bounds_eval.evaluate.return_value = {
@@ -110,7 +92,26 @@ class TestTaskBoundsEval:
             },
         }
 
-        result = task_bounds_eval.evaluate(complex_task)
+        result = task_bounds_eval.evaluate(
+            {
+                "description": "Build complete e-commerce platform with microservices, real-time analytics, and ML recommendations",
+                "complexity_indicators": [
+                    "microservices",
+                    "real-time",
+                    "machine learning",
+                    "e-commerce",
+                ],
+                "target_files": ["services/"] * 10,  # Many services
+                "dependencies": [
+                    "kafka",
+                    "redis",
+                    "tensorflow",
+                    "postgres",
+                    "elasticsearch",
+                ],
+                "estimated_duration": None,
+            }
+        )
 
         assert result["understanding_level"] == "PARTIALLY_BOUNDED"
         assert result["requires_decomposition"]
@@ -119,13 +120,6 @@ class TestTaskBoundsEval:
 
     def test_research_required_task(self):
         """Test evaluation of tasks requiring research"""
-        research_task = {
-            "description": "Implement quantum-inspired optimization algorithm for task scheduling",
-            "complexity_indicators": ["quantum", "optimization", "novel algorithm"],
-            "target_files": ["quantum/optimizer.py"],
-            "dependencies": ["qiskit", "cirq"],
-            "estimated_duration": None,
-        }
 
         task_bounds_eval = Mock()
         task_bounds_eval.evaluate.return_value = {
@@ -142,7 +136,15 @@ class TestTaskBoundsEval:
             },
         }
 
-        result = task_bounds_eval.evaluate(research_task)
+        result = task_bounds_eval.evaluate(
+            {
+                "description": "Implement quantum-inspired optimization algorithm for task scheduling",
+                "complexity_indicators": ["quantum", "optimization", "novel algorithm"],
+                "target_files": ["quantum/optimizer.py"],
+                "dependencies": ["qiskit", "cirq"],
+                "estimated_duration": None,
+            }
+        )
 
         assert result["understanding_level"] == "RESEARCH_REQUIRED"
         assert result["requires_research"]
@@ -209,12 +211,6 @@ class TestTaskDecomposer:
 
     def test_risk_decomposition(self):
         """Test risk-based decomposition strategy"""
-        high_risk_task = {
-            "task_id": "risky-task-001",
-            "description": "Integrate with legacy financial system using new blockchain technology",
-            "risk_factors": ["legacy_integration", "new_technology", "financial_data"],
-            "complexity_score": 8.2,
-        }
 
         task_decomposer = Mock()
         task_decomposer.decompose.return_value = {
@@ -245,7 +241,18 @@ class TestTaskDecomposer:
             ],
         }
 
-        result = task_decomposer.decompose(high_risk_task)
+        result = task_decomposer.decompose(
+            {
+                "task_id": "risky-task-001",
+                "description": "Integrate with legacy financial system using new blockchain technology",
+                "risk_factors": [
+                    "legacy_integration",
+                    "new_technology",
+                    "financial_data",
+                ],
+                "complexity_score": 8.2,
+            }
+        )
 
         assert result["strategy"] == "RISK_DECOMPOSITION"
         research_tasks = [
@@ -256,7 +263,6 @@ class TestTaskDecomposer:
 
     def test_subtask_quality_validation(self):
         """Test that generated subtasks meet quality criteria"""
-        Mock()
 
         # Mock validation of subtask quality
         def validate_subtask_quality(subtask):
@@ -271,19 +277,19 @@ class TestTaskDecomposer:
             }
             return all(checks.values()), checks
 
-        sample_subtask = {
-            "subtask_id": "test-subtask",
-            "title": "Implement user authentication",
-            "complexity": 4.5,
-            "estimated_duration_minutes": [45, 60],
-            "acceptance_criteria": [
-                "User can login",
-                "Authentication tokens are secure",
-                "All authentication tests pass",
-            ],
-        }
-
-        is_quality, quality_checks = validate_subtask_quality(sample_subtask)
+        is_quality, quality_checks = validate_subtask_quality(
+            {
+                "subtask_id": "test-subtask",
+                "title": "Implement user authentication",
+                "complexity": 4.5,
+                "estimated_duration_minutes": [45, 60],
+                "acceptance_criteria": [
+                    "User can login",
+                    "Authentication tokens are secure",
+                    "All authentication tests pass",
+                ],
+            }
+        )
 
         assert is_quality
         assert quality_checks["is_atomic"]
@@ -318,12 +324,12 @@ class TestTaskResearchAgent:
             },
         }
 
-        research_task = {
-            "topic": "GraphQL implementation",
-            "research_areas": ["GraphQL best practices", "Schema design patterns"],
-        }
-
-        result = research_agent.research(research_task)
+        result = research_agent.research(
+            {
+                "topic": "GraphQL implementation",
+                "research_areas": ["GraphQL best practices", "Schema design patterns"],
+            }
+        )
 
         assert result["research_type"] == "TECHNOLOGY_RESEARCH"
         assert (
@@ -407,12 +413,10 @@ class TestTaskPatternClassifier:
             "has_testing_requirements": True,
         }
 
-        task_description = (
-            "Implement REST API with comprehensive testing and integration"
+        features = classifier.extract_features(
+            "Implement REST API with comprehensive testing and integration",
+            ["api/endpoints.py", "api/models.py", "config.yaml"],
         )
-        target_files = ["api/endpoints.py", "api/models.py", "config.yaml"]
-
-        features = classifier.extract_features(task_description, target_files)
 
         assert features["description_length"] == 150
         assert features["keyword_counts"]["api"] == 2
@@ -437,8 +441,7 @@ class TestTaskPatternClassifier:
             "recommended_approach": "iterative_implementation",
         }
 
-        mock_features = {"technical_depth_score": 4.5}
-        result = classifier.classify_task(mock_features)
+        result = classifier.classify_task({"technical_depth_score": 4.5})
 
         assert result["primary_type"] == "FEATURE"
         assert result["confidence"] > 0.8
@@ -463,11 +466,9 @@ class TestTaskPatternClassifier:
             },
         ]
 
-        task_description = (
+        patterns = pattern_system.recognize_patterns(
             "Design API interface first, then implement with TDD approach"
         )
-
-        patterns = pattern_system.recognize_patterns(task_description)
 
         assert len(patterns) == 2
         assert patterns[0]["confidence"] > 0.8
@@ -492,18 +493,20 @@ class TestEnhancedTaskAnalyzer:
             "test_conflicts": [],
         }
 
-        task1 = {
-            "id": "task1",
-            "modifies": ["user_service.py"],
-            "memory_intensive": True,
-        }
-        task2 = {
-            "id": "task2",
-            "modifies": ["payment_service.py"],
-            "memory_intensive": True,
-        }
-
-        conflicts = enhanced_analyzer.detect_conflicts([task1, task2])
+        conflicts = enhanced_analyzer.detect_conflicts(
+            [
+                {
+                    "id": "task1",
+                    "modifies": ["user_service.py"],
+                    "memory_intensive": True,
+                },
+                {
+                    "id": "task2",
+                    "modifies": ["payment_service.py"],
+                    "memory_intensive": True,
+                },
+            ]
+        )
 
         assert len(conflicts["semantic_conflicts"]) == 1
         assert len(conflicts["resource_conflicts"]) == 1
@@ -556,8 +559,9 @@ class TestEnhancedTaskAnalyzer:
             },
         }
 
-        prompt_files = ["task1.md", "task2.md", "task3.md"]
-        result = orchestrator.analyze_tasks_enhanced(prompt_files)
+        result = orchestrator.analyze_tasks_enhanced(
+            ["task1.md", "task2.md", "task3.md"]
+        )
 
         assert result["enhanced_task_count"] > result["original_task_count"]
         assert result["decomposition_applied"] == 1
@@ -657,17 +661,17 @@ class TestIntegrationScenarios:
             "actual_vs_predicted_accuracy": 0.87,
         }
 
-        analysis_session = {
-            "session_id": "metrics-test-001",
-            "tasks_analyzed": 4,
-            "enhancements_applied": [
-                "decomposition",
-                "ml_classification",
-                "pattern_recognition",
-            ],
-        }
-
-        metrics = metrics_tracker.track_enhanced_analysis(analysis_session)
+        metrics = metrics_tracker.track_enhanced_analysis(
+            {
+                "session_id": "metrics-test-001",
+                "tasks_analyzed": 4,
+                "enhancements_applied": [
+                    "decomposition",
+                    "ml_classification",
+                    "pattern_recognition",
+                ],
+            }
+        )
 
         assert metrics["total_enhancement_overhead"] < 70  # Acceptable overhead
         assert metrics["actual_vs_predicted_accuracy"] > 0.8
@@ -814,7 +818,7 @@ class TestPerformanceBenchmarks:
         }
 
         # Verify performance targets
-        for task_type, metrics in performance_data.items():
+        for _, metrics in performance_data.items():
             assert metrics["analysis_time_ms"] < 3000  # Max 3 seconds
             overhead_pct = int(metrics["enhancement_overhead"].rstrip("%"))
             assert overhead_pct < 40  # Max 40% overhead
@@ -839,7 +843,7 @@ class TestPerformanceBenchmarks:
             },
         }
 
-        for scenario, data in speedup_data.items():
+        for _, data in speedup_data.items():
             assert data["speedup"] > 1.5  # Minimum 50% improvement
             assert data["parallel_time"] < data["sequential_time"]
 

@@ -142,3 +142,108 @@ EOF < /dev/null
 - **YAGNI Compliance**: Only implements current needs (validation), defers auto-fix
 - **Clear Code Flow**: Linear validation process easy to follow
 - **Minimal Dependencies**: Only requires PyYAML, uses standard library otherwise
+## Code Review Memory - 2025-08-19
+
+### PR #287: Fix Orchestrator Subprocess Execution for Real Parallel Workflows
+
+#### What I Learned
+- **Critical Architecture Fix**: Orchestrator was generating text responses instead of spawning real subprocess execution
+- **Security Issue Resolution**: Added shell=False and proper command list construction to prevent injection
+- **Resource Management Enhancement**: Progressive process termination and max_concurrent_processes limits added
+- **WorkflowManager Delegation**: Command changed from generic prompts to proper '/agent:workflow-manager' delegation
+- **Docker SDK Integration**: Docker dependency added for containerized execution with secure auth mounting
+- **Subprocess Fallback**: Automatic fallback when Docker unavailable, maintaining execution capability
+- **Governance Compliance**: All tasks now follow complete 11-phase WorkflowManager workflow
+
+#### Patterns to Watch
+- **Dual Execution Modes**: Container execution with subprocess fallback requires consistent patterns
+- **Progressive Termination**: terminate → wait → kill → wait sequence for safe process cleanup
+- **Resource Limit Enforcement**: max_concurrent_processes prevents system overload
+- **Command Security**: subprocess.Popen with shell=False and list commands prevents injection
+- **Workflow Validation**: validate_workflow_execution() ensures 11-phase compliance
+- **Auth Token Management**: Secure mounting of Claude and GitHub tokens in containers
+
+#### Code Quality Assessment
+- **Major Security Fix**: Replaced shell=True with shell=False in subprocess calls
+- **Resource Management**: Added progressive termination and concurrent process limits
+- **Error Handling**: Enhanced error context extraction and cleanup on failures
+- **Type Safety**: Some type: ignore comments need specific error codes (ruff PGH003)
+- **Import Issues**: Relative imports and logging usage flagged by linting tools
+- **Test Infrastructure**: Some test import issues need resolution
+
+#### Security Review Results
+- **Fixed**: Command injection vulnerability through shell=False usage
+- **Fixed**: Resource exhaustion through max_concurrent_processes limit (default: 10)
+- **Fixed**: Zombie processes through progressive termination sequence
+- **Fixed**: Missing timeout handling for stuck processes
+- **Good**: Container isolation with proper resource limits
+- **Good**: Auth token injection with secure mounting
+- **Good**: Input validation for subprocess command construction
+
+#### Implementation Quality
+- **Excellent**: Real subprocess spawning with PID tracking working
+- **Excellent**: WorkflowManager delegation pattern correctly implemented
+- **Good**: Manual testing shows 100% success rate for simple tasks
+- **Good**: CI/CD tests passing (lint, tests, security checks)
+- **Needs Work**: Some linting issues with imports and type annotations
+- **Needs Work**: Test import errors need resolution
+
+## Code Review Memory - 2025-08-19
+
+### PR #286: Code Quality Compliance Foundation with 24% Pyright Error Reduction
+
+#### What I Learned
+- **Critical Documentation Accuracy Issue**: PR claims must match actual implementation - false claims undermine trust
+- **Pyright Configuration Reality**: Current config still shows "standard" mode despite claims of "strict" mode implementation
+- **Error Reduction Verification**: Always verify claimed improvements with actual tool output (1338 vs claimed 1021 errors)
+- **Test Infrastructure Fragility**: Test suite timeout issues (2+ minutes) indicate potential regressions from changes
+- **Pre-commit Hook Scope**: Current pyright hook only covers container_runtime/ directory, not full codebase
+- **UV Integration Gap**: Claims of UV environment integration not implemented in actual hook configuration
+
+#### Patterns to Watch
+- **False Completion Claims**: Claiming configuration changes that weren't actually applied
+- **Unverified Improvement Metrics**: Error reduction claims without tool verification
+- **Test Compatibility Assumptions**: Claiming test compatibility without running full suite
+- **Configuration vs Implementation Gap**: Documented requirements not reflected in actual config files
+- **Minimal Changes Overstated**: Small exclusion pattern changes described as "enhanced configuration"
+
+#### Code Quality Assessment Issues
+- **Major**: Pyright configuration claims false - still standard mode not strict
+- **Major**: Error reduction claims contradict actual pyright output (1338 errors, not 1021)
+- **Major**: Test suite timeout suggests compatibility issues, contradicting claims
+- **Major**: Pre-commit UV integration claimed but not implemented
+- **Good**: Concept of quality compliance foundation is sound
+- **Good**: Exclusion pattern addition (.gadugi/.*) is appropriate
+
+#### Design Simplicity Violations
+- **Over-promising**: Claims of comprehensive changes when only minimal changes made
+- **Implementation Gap**: Simple configuration changes not completed despite complex claims
+- **Complexity Mismatch**: Sophisticated documentation for basic configuration changes
+- **Scope Creep**: Claiming multiple advanced features without implementing basics
+
+#### Security and Risk Assessment
+- **Low Risk**: Configuration changes themselves are safe
+- **Medium Risk**: False claims about test compatibility may hide introduced issues
+- **Medium Risk**: Incomplete error reduction may give false confidence in code quality
+- **Documentation Risk**: Future maintainers may rely on false information about configuration state
+
+#### Critical Review Process Learnings
+- **Always verify claims**: Run tools to check claimed improvements
+- **Test infrastructure first**: Ensure test suite health before claiming compatibility
+- **Configuration audit**: Compare claimed vs actual configuration changes
+- **Evidence-based review**: Request evidence for all improvement claims
+- **Truth in documentation**: PR descriptions must accurately reflect implementation
+
+#### Recommendations for Future PRs
+- **Implement before claiming**: Apply configuration changes before documenting them
+- **Provide evidence**: Include tool output showing actual improvements
+- **Test verification**: Run full test suite and provide timing/result evidence
+- **Incremental approach**: Complete basic configuration before claiming advanced features
+- **Accuracy over ambition**: Focus on truthful, verifiable accomplishments
+
+#### Anti-patterns Identified
+- **False Achievement Claims**: Documenting improvements that don't exist
+- **Configuration Theater**: Claiming strict settings while keeping standard mode
+- **Improvement Inflation**: Claiming 24% improvement when actual improvement is 0.4%
+- **Test Compatibility Fiction**: Claiming passing tests without verification
+- **Enhancement Exaggeration**: Describing minimal changes as comprehensive improvements

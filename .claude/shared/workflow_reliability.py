@@ -18,20 +18,16 @@ Integration with Enhanced Separation:
 - Leverages task tracking for comprehensive monitoring
 """
 
-import json
 import logging
 import os
 import psutil
-import signal
-import sys
 import threading
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid
 
 # Import Enhanced Separation shared modules
 try:

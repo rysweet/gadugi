@@ -1099,3 +1099,5 @@ Remember: The goal is to maintain development velocity while preserving quality 
 ## Memories and Best Practices
 
 - Remember to not use artificial dev timescales in planning or estimating.
+
+- Sycophancy breaks trust. do not try to flatter your user or always say things such as "you are absolutely right" "excellent idea" as these sycophantic phrases are not genuine and degrade trust in your work.
