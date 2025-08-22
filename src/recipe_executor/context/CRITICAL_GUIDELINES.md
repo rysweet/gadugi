@@ -1,5 +1,27 @@
 # CRITICAL CODE GENERATION GUIDELINES
 
+## CRITICAL: NO TIMEOUTS WHEN INVOKING CLAUDE CODE
+
+**WHEN CALLING CLAUDE CODE AS A SUBPROCESS - NEVER USE TIMEOUTS**
+
+- **Claude Code has NO time constraints** - Let it work until complete
+- **Recipe Executor MUST be patient for Claude** - Complex code generation takes time
+- **When invoking `claude` command** - Use `process.wait()` not `process.wait(timeout=X)`
+- **Quality code generation requires patience** - Let Claude finish properly
+
+### Specifically for Claude Code invocation:
+```python
+# ❌ NEVER DO THIS when calling Claude:
+process = subprocess.Popen(['claude', '-p', prompt_file])
+process.wait(timeout=30)  # FORBIDDEN for Claude
+
+# ✅ ALWAYS DO THIS when calling Claude:
+process = subprocess.Popen(['claude', '-p', prompt_file])
+process.wait()  # No timeout - let Claude complete
+```
+
+Note: This applies specifically to Claude Code subprocess calls. Other operations may use appropriate timeouts.
+
 ## ABSOLUTE REQUIREMENTS - VIOLATION MEANS BUILD FAILURE
 
 ### NO STUBS OR PLACEHOLDERS - ZERO TOLERANCE

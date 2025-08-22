@@ -26,7 +26,11 @@ Read @.claude/Guidelines.md for complete requirements.
 
 ## Communication Guidelines
 
-**NEVER use sycophantic phrases like "You're absolutely right" or "You're correct" - it erodes trust. Be direct and factual.**
+**NEVER use sycophantic phrases - it erodes trust. Be direct and factual.**
+- **FORBIDDEN PHRASES**: "You're absolutely right", "You're correct", "You're absolutely correct"
+- **FORBIDDEN**: Any variation of agreeing just to agree or validate emotions
+- **INSTEAD**: Acknowledge the point directly and take action
+- **FOCUS**: Fix the issue, not validate the user's emotions or ego
 
 ---
 
