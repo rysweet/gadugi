@@ -7,7 +7,7 @@ for task assignments, team formations, and optimization strategies.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 

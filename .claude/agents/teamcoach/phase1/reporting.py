@@ -2,7 +2,7 @@ import numpy as np
 import logging
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import matplotlib.pyplot as plt
@@ -98,7 +98,7 @@ class GeneratedReport:
     sections: List[ReportSection] = field(default_factory=list)
 
     # Output content
-    content: str  # type: ignore
+    content: str
     attachments: Dict[str, bytes] = field(default_factory=dict)
 
     # Metadata
@@ -182,7 +182,7 @@ class ReportingSystem:
             )
 
             # Initialize report structure
-            report = GeneratedReport(  # type: ignore
+            report = GeneratedReport(
                 report_id=report_id,
                 report_type=config.report_type,
                 format=config.format,
@@ -599,7 +599,7 @@ class ReportingSystem:
         )
 
         content += "### Success Rate Ranking\n"
-        for i, (_agent_id, performance) in enumerate(sorted_agents, 1):
+        for i, (agent_id, performance) in enumerate(sorted_agents, 1):
             content += (
                 f"{i}. **{performance.agent_name}**: {performance.success_rate:.1%}\n"
             )
@@ -610,7 +610,7 @@ class ReportingSystem:
         )
 
         content += "\n### Execution Time Ranking (Fastest First)\n"
-        for i, (_agent_id, performance) in enumerate(sorted_by_time, 1):
+        for i, (agent_id, performance) in enumerate(sorted_by_time, 1):
             content += f"{i}. **{performance.agent_name}**: {performance.avg_execution_time:.1f}s\n"
 
         return content
@@ -656,7 +656,7 @@ class ReportingSystem:
         try:
             # Performance metrics bar chart
             if performance_data.total_tasks > 0:
-                _fig, ax = plt.subplots(figsize=(10, 6))
+                fig, ax = plt.subplots(figsize=(10, 6))
 
                 metrics = ["Success Rate", "Quality Score", "Resource Efficiency"]
                 values = [
@@ -696,7 +696,7 @@ class ReportingSystem:
                 performance_data.performance_trend
                 and len(performance_data.performance_trend) > 1
             ):
-                _fig, ax = plt.subplots(figsize=(10, 6))
+                fig, ax = plt.subplots(figsize=(10, 6))
 
                 x = range(len(performance_data.performance_trend))
                 ax.plot(
@@ -734,7 +734,7 @@ class ReportingSystem:
         try:
             # Team metrics comparison chart
             if team_aggregates:
-                _fig, ax = plt.subplots(figsize=(12, 8))
+                fig, ax = plt.subplots(figsize=(12, 8))
 
                 metrics = list(team_aggregates.keys())[:5]  # Limit to 5 metrics
                 averages = [team_aggregates[metric]["average"] for metric in metrics]
@@ -778,7 +778,7 @@ class ReportingSystem:
         try:
             # Capability radar chart
             if capability_profile.capability_scores:
-                _fig, ax = plt.subplots(
+                fig, ax = plt.subplots(
                     figsize=(10, 10), subplot_kw=dict(projection="polar")
                 )
 
@@ -859,7 +859,7 @@ class ReportingSystem:
                 performance_data.performance_trend
                 and len(performance_data.performance_trend) > 1
             ):
-                _fig, ax = plt.subplots(figsize=(12, 6))
+                fig, ax = plt.subplots(figsize=(12, 6))
 
                 x = range(len(performance_data.performance_trend))
                 y = performance_data.performance_trend
@@ -933,7 +933,7 @@ class ReportingSystem:
         try:
             # Comparative performance bar chart
             if agent_performances:
-                _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+                fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
 
                 list(agent_performances.keys())
                 agent_names = [perf.agent_name for perf in agent_performances.values()]
@@ -1002,7 +1002,7 @@ class ReportingSystem:
             # KPI dashboard chart
             key_metrics = summary_data.get("key_metrics", {})
             if key_metrics:
-                _fig, ax = plt.subplots(figsize=(10, 6))
+                fig, ax = plt.subplots(figsize=(10, 6))
 
                 # Create a simple KPI dashboard
                 metrics = []
