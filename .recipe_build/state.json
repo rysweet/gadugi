@@ -1,12 +1,23 @@
 {
   "recipe-executor": {
     "recipe_name": "recipe-executor",
-    "recipe_checksum": "2cfde4859b7637f69e2f2feda6e9d899fa7a2ddf64a77044694868864ea9d111",
-    "build_time": "2025-08-20T20:49:32.978074",
+    "recipe_checksum": "81f9efe80ad8b245b1b71d0620d7f8c13375387808dc068328d104ad5522a496",
+    "build_time": "2025-08-22T14:53:52.855650",
     "success": false,
     "outputs": [],
     "errors": [
-      "'RecipeTestSuite' object has no attribute 'files'"
+      "Claude CLI failed with exit code 1"
+    ]
+  },
+  "test-recipe": {
+    "recipe_name": "test-recipe",
+    "recipe_checksum": "fe7fdcb3ef99b484372275f9586d9eeeddff24dccb8eb9d90f5aec3dd977b3a4",
+    "build_time": "2025-08-21T14:01:42.092805",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "Uncovered requirements: ['pattern-fr-1', 'pattern-fr-2', 'pattern-fr-3', 'pattern-fr-4', 'pattern-fr-5', 'pattern-fr-6', 'pattern-fr-7', 'pattern-fr-8', 'pattern-nfr-9', 'pattern-nfr-10', 'pattern-nfr-11', 'pattern-nfr-12', 'pattern-nfr-13']",
+      "Failed quality gates: ['has_code', 'has_type_hints', 'has_imports']"
     ]
   }
 }

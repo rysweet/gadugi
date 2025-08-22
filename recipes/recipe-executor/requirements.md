@@ -112,9 +112,25 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST support automatic recipe splitting into logical sub-recipes
 - MUST validate that Recipe Executor's own recipe has been properly decomposed
 
-### 5. Execution Engine
+### 5. Prompt and Context Management
 
-#### 5.1 Test-Driven Development (TDD) Red-Green-Refactor Cycle
+#### 5.1 Prompt Template System
+- MUST separate all prompts from code into external template files
+- MUST load prompts from `prompts/` directory at runtime
+- MUST support variable substitution in prompt templates
+- MUST include supplementary documentation from recipe directories
+- MUST allow prompts to be updated without code changes
+
+#### 5.2 Context Inclusion
+- MUST always include critical guidelines from `context/` directory
+- MUST include `.claude/Guidelines.md` for Zero BS principle enforcement
+- MUST include language-specific guidelines based on target language
+- MUST prepend context to all generation prompts
+- MUST ensure "NO STUBS, COMPLETE IMPLEMENTATION FIRST TIME" is always included
+
+### 6. Execution Engine
+
+#### 6.1 Test-Driven Development (TDD) Red-Green-Refactor Cycle
 - MUST follow strict TDD methodology with complete red-green-refactor cycles
 - MUST create test files that cover all MUST requirements with specific test cases
   - Example: For a requirement "MUST parse JSON files", generate tests for valid JSON, invalid JSON, empty files, and missing files
@@ -214,28 +230,42 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 ### 9. Component Generation
 
 #### 9.1 Multi-Language Support
-- MUST generate Python code as the primary implementation language
-- MUST support generation of configuration files (JSON, YAML, TOML) from specifications
+- MUST be language-agnostic and support code generation in any programming language
+- MUST determine target language from the design.md specification (e.g., "Language: Python" or code blocks)
+- MUST load language-specific guidelines and patterns from context/languages/ directory
+- MUST apply language-appropriate quality standards and tooling
+- MUST support but not be limited to: Python, JavaScript, TypeScript, Go, Rust, Java, C#, Ruby
+- MUST generate configuration files (JSON, YAML, TOML) from specifications
 - MUST generate comprehensive documentation in Markdown format
-- MUST support generation of shell scripts for automation tasks
-- SHOULD support other languages through extensible generation plugins
 
 #### 9.2 Project Structure
-- MUST generate complete Python project structure including:
+- MUST generate language-appropriate project structure based on target language
+- For Python projects:
   - `src/` directory with proper package organization
-  - `tests/` directory with comprehensive test coverage
-  - `pyproject.toml` with UV configuration and dependencies
-  - `pyrightconfig.json` for strict type checking
-  - `.gitignore` with appropriate Python patterns
-  - `README.md` with usage documentation
-- MUST create `__init__.py` files with proper exports for all packages
-- MUST organize code into logical modules following clean architecture principles
+  - `tests/` directory with pytest-compatible tests
+  - `pyproject.toml` with dependencies
+  - `pyrightconfig.json` for type checking
+  - `__init__.py` files for packages
+- For JavaScript/TypeScript projects:
+  - `src/` directory with modules
+  - `tests/` or `__tests__/` directories
+  - `package.json` with dependencies
+  - `tsconfig.json` for TypeScript
+  - `.eslintrc.json` for linting
+- For other languages: appropriate conventions and tooling
+- MUST include language-appropriate `.gitignore` patterns
+- MUST generate comprehensive README.md documentation
+- MUST organize code following clean architecture principles
 
 #### 9.3 Test Generation
-- MUST generate pytest-compatible test files for all components
+- MUST generate language-appropriate test files using standard testing frameworks
+- For Python: pytest with fixtures and parameterized tests
+- For JavaScript: Jest or Mocha with describe/it blocks
+- For TypeScript: Jest with type-safe tests
+- For Go: standard testing package with TestXxx functions
+- For Rust: built-in #[test] attributes
 - MUST create unit tests for individual functions and methods
 - MUST generate integration tests for component interactions
-- MUST include fixtures and parameterized tests where appropriate
 - MUST achieve minimum 80% code coverage with generated tests
 
 ### 10. Validation and Testing
@@ -261,6 +291,8 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
   - Example: "error: Argument of type 'str | None' cannot be assigned to parameter of type 'str'"
 - MUST format all generated code with ruff, automatically fixing style issues
 - MUST use UV for package management in all Python projects, ensuring consistent dependency resolution
+- MUST automatically create UV virtual environments when generating Python projects using `uv sync`
+- MUST detect UV availability and provide clear instructions if UV is not installed
 - MUST execute all generated tests with pytest and fail if any test fails
 - MUST check code coverage and warn if below 80% threshold
 

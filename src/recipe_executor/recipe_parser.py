@@ -56,8 +56,12 @@ class RecipeParser:
         design = self._parse_design(design_path)
         components = self._parse_components(components_path)
 
-        # Create metadata
+        # Load supplementary documentation files if they exist
+        supplementary_docs = self._load_supplementary_docs(recipe_path)
+
+        # Create metadata including supplementary docs
         metadata = self._create_metadata(recipe_path)
+        metadata.supplementary_docs = supplementary_docs
 
         # Extract recipe name from path or components
         recipe_name = components.name or recipe_path.name
@@ -340,3 +344,45 @@ class RecipeParser:
             issues.append("Component type not specified in components.json")
 
         return issues
+
+    def _load_supplementary_docs(self, recipe_path: Path) -> dict[str, str]:
+        """Load any supplementary documentation files from recipe directory.
+
+        Args:
+            recipe_path: Path to recipe directory
+
+        Returns:
+            Dictionary mapping filename to content for supplementary docs
+        """
+        supplementary_docs = {}
+
+        # List of known supplementary doc patterns to look for
+        supplementary_patterns = [
+            "complete-design.md",
+            "execution-flow.md",
+            "implementation-notes.md",
+            "architecture.md",
+            "examples.md",
+            "validation.md",
+        ]
+
+        for pattern in supplementary_patterns:
+            doc_path = recipe_path / pattern
+            if doc_path.exists():
+                try:
+                    content = doc_path.read_text()
+                    supplementary_docs[pattern] = content
+                except Exception as e:
+                    # Log but don't fail if supplementary doc can't be read
+                    print(f"Warning: Could not read supplementary doc {doc_path}: {e}")
+
+        # Also load any other .md files that aren't the core files
+        core_files = {"requirements.md", "design.md", "README.md"}
+        for md_file in recipe_path.glob("*.md"):
+            if md_file.name not in core_files and md_file.name not in supplementary_docs:
+                try:
+                    supplementary_docs[md_file.name] = md_file.read_text()
+                except Exception as e:
+                    print(f"Warning: Could not read {md_file}: {e}")
+
+        return supplementary_docs

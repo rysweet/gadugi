@@ -162,3 +162,6 @@ Pipfile.lock
 orchestration-*/
 *_orchestration.json
 *_orchestration.log
+# Recipe Executor temporary files
+.recipe-executor/
+.gadugi/

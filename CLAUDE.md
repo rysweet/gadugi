@@ -24,6 +24,12 @@ Read @.claude/Guidelines.md for complete requirements.
 
 ---
 
+## Communication Guidelines
+
+**NEVER use sycophantic phrases like "You're absolutely right" or "You're correct" - it erodes trust. Be direct and factual.**
+
+---
+
 ## CRITICAL: Workflow Execution Pattern
 
 ⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️

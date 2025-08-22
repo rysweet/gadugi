@@ -1,22 +1,22 @@
 """Test generation for Recipe Executor - NO STUBS, real test implementations."""
 
-from typing import List, Dict
-from datetime import datetime
+from typing import List, Optional
 
 from .recipe_model import Recipe, RecipeTestSuite, RequirementPriority, ComponentDesign
 
 
 class TestGenerationError(Exception):
     """Raised when test generation fails.
-    
+
     Provides context about what component or requirement failed during
     test generation to aid in debugging.
     """
-    
-    def __init__(self, message: str, component_name: Optional[str] = None,
-                 test_type: Optional[str] = None):
+
+    def __init__(
+        self, message: str, component_name: Optional[str] = None, test_type: Optional[str] = None
+    ):
         """Initialize with test generation context.
-        
+
         Args:
             message: Description of what went wrong
             component_name: Component being tested when failure occurred
@@ -25,7 +25,7 @@ class TestGenerationError(Exception):
         super().__init__(message)
         self.component_name = component_name
         self.test_type = test_type
-        
+
         # Build detailed message
         if component_name or test_type:
             details = []
@@ -40,91 +40,94 @@ class TestGenerationError(Exception):
 
 class TestGenerator:
     """Generates comprehensive tests for recipes - NO STUBS."""
-    
+
     def generate_tests(self, recipe: Recipe) -> RecipeTestSuite:
         """Generate complete test suite for a recipe.
-        
+
         This generates REAL tests that actually test functionality,
         not placeholder tests with 'pass' statements.
         """
         test_suite = RecipeTestSuite(
-            recipe_name=recipe.name,
-            unit_tests=[],
-            integration_tests=[],
-            test_files={}
+            recipe_name=recipe.name, unit_tests=[], integration_tests=[], test_files={}
         )
-        
+
         # Generate unit tests for each component
         for component in recipe.design.components:
             unit_test_names = self._generate_unit_test_names(component)
             test_suite.unit_tests.extend(unit_test_names)
-            
+
             # Generate actual test file content
             if component.class_name:
                 module_name = component.name.lower().replace(" ", "_")
-                test_content = self._generate_unit_test_file(module_name, component.class_name, recipe, component)
+                test_content = self._generate_unit_test_file(
+                    module_name, component.class_name, recipe, component
+                )
                 test_file_path = f"tests/test_{module_name}.py"
                 test_suite.test_files[test_file_path] = test_content
-        
+
         # Generate integration tests
         integration_test_names = self._generate_integration_test_names(recipe)
         test_suite.integration_tests = integration_test_names
-        
+
         if integration_test_names:
-            integration_content = self._generate_integration_test_file(recipe, integration_test_names)
+            integration_content = self._generate_integration_test_file(
+                recipe, integration_test_names
+            )
             test_suite.test_files["tests/test_integration.py"] = integration_content
-        
+
         # Generate requirements test file
         requirements_content = self._generate_requirements_test_file(recipe)
         test_suite.test_files["tests/test_requirements.py"] = requirements_content
-        
+
         return test_suite
-    
+
     def _generate_unit_test_names(self, component: ComponentDesign) -> List[str]:
         """Generate meaningful unit test names for a component."""
         test_names: List[str] = []
-        
+
         # Always test initialization
         test_names.append(f"test_{component.name.lower()}_initialization")
-        
+
         # Test each method
         if component.methods:
             for method in component.methods:
                 test_names.append(f"test_{component.name.lower()}_{method}")
                 test_names.append(f"test_{component.name.lower()}_{method}_with_invalid_input")
                 test_names.append(f"test_{component.name.lower()}_{method}_edge_cases")
-        
+
         # Test component behavior
         test_names.append(f"test_{component.name.lower()}_state_management")
         test_names.append(f"test_{component.name.lower()}_error_handling")
-        
+
         return test_names
-    
+
     def _generate_integration_test_names(self, recipe: Recipe) -> List[str]:
         """Generate integration test names."""
         test_names: List[str] = []
-        
+
         # Test recipe as a whole
         test_names.append(f"test_{recipe.name.replace('-', '_')}_end_to_end")
         test_names.append(f"test_{recipe.name.replace('-', '_')}_with_dependencies")
-        
+
         # Test interactions between components
         if len(recipe.design.components) > 1:
             test_names.append(f"test_{recipe.name.replace('-', '_')}_component_integration")
-        
+
         # Test against requirements
         for req in recipe.requirements.get_must_requirements():
             test_name = f"test_requirement_{req.id}"
             test_names.append(test_name)
-        
+
         return test_names
-    
-    def _generate_unit_test_file(self, module_name: str, class_name: str, recipe: Recipe, component: ComponentDesign) -> str:
+
+    def _generate_unit_test_file(
+        self, module_name: str, class_name: str, recipe: Recipe, component: ComponentDesign
+    ) -> str:
         """Generate REAL unit test file content - NO STUBS."""
-        
+
         # Build real test methods based on component methods
         test_methods = []
-        
+
         # Always include initialization test
         test_methods.append(f'''
     def test_initialization(self, instance: {class_name}) -> None:
@@ -133,7 +136,7 @@ class TestGenerator:
         assert isinstance(instance, {class_name})
         # Verify all required attributes are initialized
         # This would be expanded based on actual class attributes''')
-        
+
         # Generate real tests for each method
         if component.methods:
             for method in component.methods:
@@ -170,7 +173,7 @@ class TestGenerator:
         large_input = self._get_large_test_data()
         large_result = instance.{method}(large_input)
         assert large_result is not None''')
-        
+
         # Add helper methods for validation
         helper_methods = []
         if component.methods:
@@ -186,7 +189,7 @@ class TestGenerator:
             assert all(isinstance(item, (str, dict)) for item in result)
         else:
             assert result is not None''')
-        
+
         helper_methods.append('''
     def _get_valid_test_data(self) -> Dict[str, Any]:
         """Get valid test data for testing."""
@@ -201,7 +204,7 @@ class TestGenerator:
     def _get_large_test_data(self) -> List[Dict[str, Any]]:
         """Get large dataset for stress testing."""
         return [self._get_valid_test_data() for _ in range(1000)]''')
-        
+
         return f'''"""Unit tests for {module_name}.{class_name}."""
 
 import pytest
@@ -228,14 +231,14 @@ class Test{class_name}:
             "config": Mock(),
             "database": Mock()
         }}
-    {''.join(test_methods)}
-    {''.join(helper_methods)}
+    {"".join(test_methods)}
+    {"".join(helper_methods)}
 '''
-    
+
     def _generate_integration_test_file(self, recipe: Recipe, integration_tests: List[str]) -> str:
         """Generate REAL integration test file content."""
         recipe_module = recipe.name.replace("-", "_")
-        
+
         test_methods: List[str] = []
         for test_name in integration_tests:
             if "end_to_end" in test_name:
@@ -254,7 +257,7 @@ class Test{class_name}:
         assert "output" in result
         self._validate_workflow_output(result["output"])
         self._verify_all_steps_completed(workflow)''')
-            
+
             elif "requirement" in test_name:
                 req_id = test_name.split("_")[-1]
                 test_methods.append(f'''
@@ -269,7 +272,7 @@ class Test{class_name}:
         # Validate requirement is satisfied
         assert self._verify_requirement_{req_id}(result)
         assert result["requirement_{req_id}_satisfied"] is True''')
-            
+
             elif "component_integration" in test_name:
                 test_methods.append(f'''
     def {test_name}(self) -> None:
@@ -289,7 +292,7 @@ class Test{class_name}:
             assert result is not None
             assert "processed_by" in result
             assert len(result["processed_by"]) == i + 2''')
-            
+
             else:
                 test_methods.append(f'''
     def {test_name}(self) -> None:
@@ -303,7 +306,7 @@ class Test{class_name}:
         # Validate
         assert result["success"] is True
         self._validate_{test_name}_result(result)''')
-        
+
         return f'''"""Integration tests for {recipe.name} - complete implementations."""
 
 import pytest
@@ -327,7 +330,7 @@ class TestIntegration:
             "config": self._get_test_config(),
             "mocks": self._setup_mocks()
         }}
-    {''.join(test_methods)}
+    {"".join(test_methods)}
     
     # Helper methods for integration testing
     def _setup_test_environment(self) -> Dict[str, Any]:
@@ -379,16 +382,19 @@ class TestIntegration:
             "file_system": Mock()
         }}
 '''
-    
+
     def _generate_requirements_test_file(self, recipe: Recipe) -> str:
         """Generate tests that validate all requirements are met."""
-        
+
         must_requirements = recipe.requirements.get_must_requirements()
-        should_requirements = [r for r in recipe.requirements.functional_requirements 
-                              if r.priority == RequirementPriority.SHOULD]
-        
+        should_requirements = [
+            r
+            for r in recipe.requirements.functional_requirements
+            if r.priority == RequirementPriority.SHOULD
+        ]
+
         test_methods = []
-        
+
         for req in must_requirements:
             test_methods.append(f'''
     def test_must_requirement_{req.id}(self) -> None:
@@ -409,7 +415,7 @@ class TestIntegration:
         validation_criteria = {req.validation_criteria}
         for criterion in validation_criteria:
             assert self._check_criterion(result, criterion)''')
-        
+
         for req in should_requirements:
             test_methods.append(f'''
     def test_should_requirement_{req.id}(self) -> None:
@@ -429,7 +435,18 @@ class TestIntegration:
         except NotImplementedError:
             # SHOULD requirements may not be implemented yet
             pytest.skip("SHOULD requirement not yet implemented")''')
+
+        # Generate validation methods separately
+        validation_methods = []
+        for req in must_requirements + should_requirements:
+            validation_methods.append(f'''
+    def _validate_requirement_{req.id}(self, result: Dict[str, Any]) -> bool:
+        """Validate requirement {req.id} is satisfied."""
+        # Implement specific validation for this requirement
+        return result.get("requirement_met", False)''')
         
+        validation_methods_str = "".join(validation_methods)
+
         return f'''"""Requirements validation tests for {recipe.name}."""
 
 import pytest
@@ -446,7 +463,7 @@ class TestRequirements:
     def system(self) -> Any:
         """Create system under test."""
         return self._create_system_under_test()
-    {''.join(test_methods)}
+    {"".join(test_methods)}
     
     # Helper methods
     def _create_system_under_test(self) -> Any:
@@ -463,11 +480,5 @@ class TestRequirements:
         """Check if a specific validation criterion is met."""
         # Implement actual criterion checking logic
         return True
-    
-    {"".join([f'''def _validate_requirement_{req.id}(self, result: Dict[str, Any]) -> bool:
-        """Validate requirement {req.id} is satisfied."""
-        # Implement specific validation for this requirement
-        return result.get("requirement_met", False)
-    
-    ''' for req in must_requirements + should_requirements])}
+    {validation_methods_str}
 '''

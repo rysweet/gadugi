@@ -4,6 +4,8 @@ from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass
 from pathlib import Path
 import time
+import logging
+from datetime import datetime
 
 from .recipe_model import (
     Recipe,
@@ -20,6 +22,34 @@ from .state_manager import StateManager
 from .python_standards import QualityGates
 from .pattern_manager import PatternManager
 from .parallel_builder import ParallelRecipeBuilder
+
+# Configure logging
+LOG_DIR = Path(".recipe_build/logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / f"recipe_executor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+
+# Set up logger
+logger = logging.getLogger("recipe_executor")
+logger.setLevel(logging.DEBUG)
+
+# File handler
+file_handler = logging.FileHandler(LOG_FILE)
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(file_formatter)
+
+# Console handler for important messages
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_formatter = logging.Formatter("%(levelname)s: %(message)s")
+console_handler.setFormatter(console_formatter)
+
+# Add handlers
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# Log startup
+logger.info(f"Recipe Executor started - Log file: {LOG_FILE}")
 
 
 @dataclass
@@ -55,6 +85,12 @@ class RecipeOrchestrator:
         if options is None:
             options = BuildOptions()
 
+        print(f"🚀 Executing recipe: {recipe_path}")
+        logger.info(f"Starting execution of recipe: {recipe_path}")
+        if options.dry_run:
+            print("DRY RUN MODE - No files will be created")
+            logger.info("DRY RUN MODE enabled")
+
         # Check for self-overwrite protection
         if self._would_overwrite_self(recipe_path, options):
             if not options.allow_self_overwrite:
@@ -84,28 +120,31 @@ class RecipeOrchestrator:
 
         # 3. Execute based on parallel option
         results: List[SingleBuildResult] = []
-        
+
         if options.parallel:
             # Use parallel builder for better performance
             if self.parallel_builder is None:
                 self.parallel_builder = ParallelRecipeBuilder(self, max_workers=4)
-            
+
             # Filter recipes that need rebuilding
             recipes_to_build = [
-                recipe for recipe in build_order
+                recipe
+                for recipe in build_order
                 if self.state_manager.needs_rebuild(recipe, options.force_rebuild)
             ]
-            
+
             if recipes_to_build:
                 parallel_result = self.parallel_builder.build_parallel(recipes_to_build, options)
                 results = list(parallel_result.results.values())
-                
+
                 # Record builds in state manager
                 for result in results:
                     self.state_manager.record_build(result.recipe, result)
-                
+
                 if options.verbose:
-                    print(f"\nParallel build complete: {parallel_result.parallel_speedup:.1f}x speedup")
+                    print(
+                        f"\nParallel build complete: {parallel_result.parallel_speedup:.1f}x speedup"
+                    )
         else:
             # Sequential execution (original logic)
             for recipe in build_order:
@@ -136,10 +175,14 @@ class RecipeOrchestrator:
                 print(f"Applying {len(patterns)} design patterns to {recipe.name}")
                 for pattern in patterns:
                     print(f"  - {pattern.name} v{pattern.version}")
-            
+
             # Apply patterns to create enhanced recipe
-            enhanced_recipe = self.pattern_manager.apply_patterns_to_recipe(recipe, patterns) if patterns else recipe
-            
+            enhanced_recipe = (
+                self.pattern_manager.apply_patterns_to_recipe(recipe, patterns)
+                if patterns
+                else recipe
+            )
+
             # Build context with dependencies
             context = BuildContext(
                 recipe=enhanced_recipe,
@@ -147,16 +190,30 @@ class RecipeOrchestrator:
                 verbose=options.verbose,
                 force_rebuild=options.force_rebuild,
             )
-            
+
             # Add pattern templates to context
             if patterns:
                 pattern_templates = self.pattern_manager.get_pattern_templates(patterns)
                 context.metadata["pattern_templates"] = pattern_templates
 
             # Generate code
-            if options.verbose:
-                print(f"Generating code for {recipe.name}...")
-            code = self.generator.generate(enhanced_recipe, context)
+            print(f"📚 Phase 1: Parsing {recipe.name}")
+            print(
+                f"   Requirements: {len(enhanced_recipe.requirements.functional_requirements)} functional, {len(enhanced_recipe.requirements.non_functional_requirements)} non-functional"
+            )
+            print(
+                f"   Components: {len(enhanced_recipe.design.components) if enhanced_recipe.design else 0}"
+            )
+            logger.info(
+                f"Recipe {recipe.name}: {len(enhanced_recipe.requirements.functional_requirements)} FR, {len(enhanced_recipe.requirements.non_functional_requirements)} NFR, {len(enhanced_recipe.design.components) if enhanced_recipe.design else 0} components"
+            )
+
+            print(f"🔨 Phase 2: Generating code for {recipe.name}")
+            logger.info(f"Starting code generation for {recipe.name}")
+            code = self.generator.generate(enhanced_recipe, context, output_dir=options.output_dir)
+            logger.info(
+                f"Code generation complete for {recipe.name}: {len(code.files) if code else 0} files generated"
+            )
 
             # Generate tests
             if options.verbose:
@@ -176,7 +233,7 @@ class RecipeOrchestrator:
             if not options.dry_run:
                 if options.verbose:
                     print(f"Running quality gates for {recipe.name}...")
-                
+
                 # Write generated files to disk
                 output_dir = options.output_dir or Path.cwd()
                 for filepath, content in code.files.items():
@@ -185,7 +242,7 @@ class RecipeOrchestrator:
                     full_path.write_text(content)
                     if options.verbose:
                         print(f"  Created: {full_path}")
-                
+
                 # Write test files
                 for filepath, content in tests.files.items():
                     full_path = output_dir / filepath
@@ -193,7 +250,7 @@ class RecipeOrchestrator:
                     full_path.write_text(content)
                     if options.verbose:
                         print(f"  Created test: {full_path}")
-                
+
                 # Run quality gates on the output directory
                 quality_result = self.quality_gates.run_quality_checks(output_dir)
 
@@ -270,18 +327,18 @@ class RecipeOrchestrator:
         target_name = recipe_path.name
         if target_name not in recipes:
             return {"error": f"Target recipe {target_name} not found"}
-        
+
         target = recipes[target_name]
-        
+
         # Analyze dependencies
         impact = self.resolver.analyze_impact(target_name, recipes)
-        
+
         # Get execution plan
         plan = self.resolver.get_execution_plan(target_name, recipes)
-        
+
         # Validate recipe structure
         issues = self.validator.validate_recipe_structure(target)
-        
+
         return {
             "recipe": target.name,
             "version": target.components.version,
@@ -292,51 +349,51 @@ class RecipeOrchestrator:
             "validation_issues": issues,
             "total_recipes": len(recipes),
         }
-    
+
     def _would_overwrite_self(self, recipe_path: Path, options: BuildOptions) -> bool:
         """Check if executing this recipe would overwrite Recipe Executor itself.
-        
+
         Args:
             recipe_path: Path to the recipe being executed
             options: Build options
-            
+
         Returns:
             True if this would overwrite Recipe Executor's own files
         """
         # Check if we're trying to regenerate the recipe-executor
         if "recipe-executor" not in str(recipe_path):
             return False
-        
+
         # If output_dir is specified, check if it would overlap with our source
         if options.output_dir:
             # Resolve to absolute paths for comparison
             output_abs = options.output_dir.resolve()
             our_source = Path(__file__).parent.resolve()  # src/recipe_executor/
-            
+
             # Check if output would write to our source directory
             try:
                 output_abs.relative_to(our_source)
                 return True  # Output is inside our source directory
             except ValueError:
                 pass  # Not a subdirectory
-            
+
             # Check if our source is inside the output directory
             try:
                 our_source.relative_to(output_abs)
                 return True  # Our source is inside output directory
             except ValueError:
                 pass  # Not a subdirectory
-            
+
             return False
         else:
             # No output_dir specified - would write to current directory
             # Check if current directory contains Recipe Executor source
             cwd = Path.cwd()
             our_source = Path(__file__).parent.resolve()
-            
+
             # Check if we would write src/recipe_executor/ in current directory
             potential_output = cwd / "src" / "recipe_executor"
             if potential_output.resolve() == our_source:
                 return True
-            
+
             return False

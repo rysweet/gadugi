@@ -1,5 +1,22 @@
 # Recipe Executor Design
 
+## Key Design Decisions
+
+### AI Implementation Choice: Claude CLI
+- **Technology**: Claude Code CLI (`claude -p`) for all code generation
+- **Rationale**: Built-in retry logic, consistent quality, no need for templates
+- **Note**: Claude CLI handles its own exponential backoff and retry logic
+
+### TDD-First Approach
+- Tests generated before implementation
+- Red-Green-Refactor cycle with iterative fixing
+- TestSolver agent fixes failing tests until all pass
+
+### Multi-Stage Validation
+- Pre-execution: Recipe structure and separation validation
+- During execution: Code review iterations
+- Post-execution: Requirements compliance validation
+
 ## Key Design Principles
 
 ### Separation of Concerns
@@ -14,7 +31,7 @@
 
 ## Architecture Overview
 
-The Recipe Executor follows a layered architecture with clear separation of concerns and support for parallel execution:
+The Recipe Executor follows a multi-stage pipeline architecture with comprehensive validation:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -24,24 +41,96 @@ The Recipe Executor follows a layered architecture with clear separation of conc
 │         Orchestration Layer (orchestrator.py)            │
 │    - Workflow coordination, state management             │
 ├─────────────────────────────────────────────────────────┤
-│         Parallel Builder (parallel_builder.py)           │
-│    - Independent group identification                    │
-│    - Concurrent execution of independent recipes         │
+│      Recipe Validation & Preparation Layer              │
+│  - Recipe Parser: Parse requirements.md, design.md       │
+│  - Recipe Validator: Check WHAT/HOW separation          │
+│  - Recipe Decomposer: Evaluate complexity, split        │
 ├─────────────────────────────────────────────────────────┤
-│  Recipe Parser │ Dependency Resolver │ State Manager    │
-│  - File parsing │ - DAG construction  │ - Build state   │
-│  - Validation   │ - Cycle detection   │ - Checksums     │
+│         Dependency & Parallel Execution Layer           │
+│  - Dependency Resolver: Topological sort, DAG           │
+│  - Parallel Builder: Concurrent independent recipes     │
+│  - State Manager: Track builds, checksums               │
 ├─────────────────────────────────────────────────────────┤
-│ Claude Code Gen │ Test Generator │ Python Standards     │
-│ - TDD prompts   │ - pytest tests │ - UV projects       │
-│ - Retry logic   │ - Fixtures     │ - pyright/ruff      │
-│ - Code parsing  │ - Coverage     │ - Type checking     │
+│         TDD Code Generation Layer                       │
+│  - Test Generator: Create tests (RED phase)             │
+│  - Claude Code Gen: Generate implementation via CLI     │
+│  - Test Solver: Fix failing tests (GREEN phase)        │
 ├─────────────────────────────────────────────────────────┤
-│    Validator    │ Quality Gates  │ Error Handler        │
-│ - Requirements  │ - Type check   │ - Clear messages    │
-│ - Coverage      │ - Format/lint  │ - Recovery logic    │
+│         Quality Assurance Layer                         │
+│  - Code Reviewer: Check Zero BS, simplicity, security   │
+│  - Review Response: Address critical issues             │
+│  - Quality Gates: pyright, ruff, pytest                 │
+│  - Requirements Validator: Verify compliance            │
 └─────────────────────────────────────────────────────────┘
 ```
+
+## End-to-End Execution Flow
+
+```mermaid
+graph TD
+    Start([User: recipe-executor build my-recipe/]) --> Parse
+    
+    %% Stage 1: Parse & Validate Structure
+    Parse[Parse Recipe Files] --> ValidateSeparation{WHAT/HOW<br/>properly<br/>separated?}
+    ValidateSeparation -->|No| FixSeparation[Generate Corrected<br/>Requirements & Design]
+    ValidateSeparation -->|Yes| EvalComplexity
+    FixSeparation --> EvalComplexity
+    
+    %% Stage 2: Complexity Evaluation
+    EvalComplexity[Evaluate Complexity<br/>RecipeDecomposer] --> TooComplex{Exceeds<br/>thresholds?}
+    TooComplex -->|Yes| Decompose[Split into Sub-Recipes]
+    TooComplex -->|No| ResolveDeps
+    Decompose --> ResolveDeps
+    
+    %% Stage 3: Dependency Resolution
+    ResolveDeps[Build Dependency Graph] --> CheckCircular{Circular<br/>deps?}
+    CheckCircular -->|Yes| Error1[Error: Circular dependency]
+    CheckCircular -->|No| GroupParallel[Group Independent Recipes]
+    
+    %% Stage 4: TDD Test Generation
+    GroupParallel --> GenTests[Generate Tests First<br/>TestGenerator]
+    GenTests --> RunTests1[Run Tests<br/>Expect RED]
+    RunTests1 --> TestsFail{Tests fail<br/>as expected?}
+    TestsFail -->|No| Error2[Error: Tests should fail]
+    TestsFail -->|Yes| GenImpl
+    
+    %% Stage 5: Implementation & Test Fixing
+    GenImpl[Generate Implementation<br/>Claude CLI] --> RunTests2[Run Tests]
+    RunTests2 --> TestsPass{All tests<br/>pass?}
+    TestsPass -->|No| FixTests[Fix Failing Tests<br/>TestSolver]
+    FixTests --> RunTests2
+    TestsPass -->|Yes| ReviewCode
+    
+    %% Stage 6: Code Review Cycle
+    ReviewCode[Code Review<br/>CodeReviewer] --> HasIssues{Critical<br/>issues?}
+    HasIssues -->|Yes| FixIssues[Fix Issues<br/>ReviewResponse]
+    FixIssues --> ReviewCode
+    HasIssues -->|No| QualityGates
+    
+    %% Stage 7: Quality & Validation
+    QualityGates[Run Quality Gates<br/>pyright, ruff, pytest] --> ValidateReqs[Validate Requirements<br/>RequirementsValidator]
+    ValidateReqs --> AllMet{All MUST<br/>requirements<br/>met?}
+    AllMet -->|No| Error3[Error: Requirements not met]
+    AllMet -->|Yes| Complete([Build Complete])
+    
+    classDef errorNode fill:#ff6b6b
+    classDef successNode fill:#51cf66
+    classDef agentNode fill:#7950f2
+    
+    class Error1,Error2,Error3 errorNode
+    class Complete successNode
+    class FixSeparation,EvalComplexity,GenTests,FixTests,ReviewCode,FixIssues,ValidateReqs agentNode
+```
+
+## Language Support Architecture
+
+The Recipe Executor is designed to be language-agnostic while providing language-specific enhancements:
+
+1. **Language Detection**: Target language is specified in design.md as "Language: Python" or similar
+2. **Prompt Templates**: Language-agnostic templates in `prompts/` directory
+3. **Context Loading**: Always includes `context/CRITICAL_GUIDELINES.md` and `.claude/Guidelines.md`
+4. **Language Context**: Loads language-specific guidelines from `context/languages/{language}.md`
+5. **Quality Standards**: Applies language-appropriate linting, formatting, and testing tools
 
 ## Core Components
 
@@ -168,7 +257,81 @@ class RecipeParser:
         pass
 ```
 
-### 3. Dependency Resolver (`dependency_resolver.py`)
+### 3. Recipe Validator (`recipe_validator.py`)
+```python
+class RecipeValidator:
+    """Validates recipe structure and WHAT/HOW separation."""
+    
+    def validate_separation(self, recipe: Recipe) -> ValidationResult:
+        """Ensure requirements contain only WHAT, design only HOW."""
+        issues = []
+        
+        # Check for HOW in requirements (implementation details)
+        req_text = recipe.requirements_path.read_text()
+        how_patterns = [
+            r'MUST use (PostgreSQL|MySQL|Redis)',  # Specific technology
+            r'MUST implement using',                 # Implementation detail
+            r'using Claude',                        # Tool choice
+        ]
+        for pattern in how_patterns:
+            if re.search(pattern, req_text):
+                issues.append(f"Requirements contain HOW: {pattern}")
+        
+        # Check for WHAT in design (functional requirements)
+        design_text = recipe.design_path.read_text()  
+        what_patterns = [
+            r'MUST \w+',                           # Requirements language
+            r'system shall',                       # Functional requirement
+        ]
+        for pattern in what_patterns:
+            if re.search(pattern, design_text):
+                issues.append(f"Design contains WHAT: {pattern}")
+        
+        if issues:
+            corrections = self._generate_corrections(recipe, issues)
+            return ValidationResult(valid=False, issues=issues, corrections=corrections)
+        
+        return ValidationResult(valid=True)
+```
+
+### 4. Recipe Decomposer (`recipe_decomposer.py`)
+```python
+class RecipeDecomposer:
+    """Evaluates complexity and decomposes recipes."""
+    
+    THRESHOLDS = {
+        'max_components': 10,
+        'max_requirements': 20,
+        'max_functional_areas': 3
+    }
+    
+    def evaluate_complexity(self, recipe: Recipe) -> ComplexityResult:
+        """Determine if recipe needs decomposition."""
+        score = 0
+        reasons = []
+        
+        if len(recipe.design.components) > self.THRESHOLDS['max_components']:
+            score += 3
+            reasons.append("Too many components")
+        
+        if len(recipe.requirements.get_all()) > self.THRESHOLDS['max_requirements']:
+            score += 3
+            reasons.append("Too many requirements")
+        
+        functional_areas = self._identify_functional_areas(recipe)
+        if len(functional_areas) > self.THRESHOLDS['max_functional_areas']:
+            score += 4
+            reasons.append("Mixed concerns")
+        
+        return ComplexityResult(
+            score=score,
+            needs_decomposition=score >= 5,
+            reasons=reasons,
+            strategy=self._suggest_strategy(recipe)
+        )
+```
+
+### 5. Dependency Resolver (`dependency_resolver.py`)
 ```python
 class DependencyResolver:
     """Resolves and orders recipe dependencies with parallel execution support."""
@@ -382,7 +545,121 @@ class TestGenerator:
         return tests
 ```
 
-### 6. Validator (`validator.py`)
+### 6. Test Solver (`test_solver.py`)
+```python
+class TestSolver:
+    """Iteratively fixes failing tests until all pass."""
+    
+    MAX_ITERATIONS = 5
+    
+    def fix_failing_tests(self, code: CodeFiles, tests: TestFiles) -> FixResult:
+        """TDD GREEN phase - make tests pass."""
+        for iteration in range(self.MAX_ITERATIONS):
+            # Run tests
+            test_result = self._run_tests(tests)
+            
+            if test_result.all_passed:
+                return FixResult(success=True, iterations=iteration)
+            
+            # Analyze failures systematically
+            analysis = self._analyze_failures(test_result)
+            
+            # Generate fixes using Claude
+            prompt = f"""
+            Fix the following test failures:
+            {self._format_failures(analysis)}
+            
+            Current code:
+            {self._format_code(code)}
+            
+            Generate minimal fixes to make tests pass.
+            """
+            
+            result = subprocess.run(["claude", "-p", prompt], ...)
+            fixes = self._parse_fixes(result.stdout)
+            code = self._apply_fixes(code, fixes)
+        
+        return FixResult(success=False, reason="Max iterations reached")
+```
+
+### 7. Code Reviewer (`code_reviewer.py`)
+```python
+class CodeReviewer:
+    """Reviews generated code for quality and compliance."""
+    
+    def review_code(self, code: CodeFiles, recipe: Recipe) -> ReviewResult:
+        """Check for Zero BS, simplicity, security."""
+        prompt = f"""
+        Review this code for:
+        1. Zero BS principle (no stubs, no placeholders)
+        2. Simplicity (no over-engineering)
+        3. Security vulnerabilities
+        4. Code quality and maintainability
+        
+        Code: {self._format_code(code)}
+        Requirements: {self._format_requirements(recipe.requirements)}
+        
+        Categorize issues as CRITICAL or SUGGESTION.
+        """
+        
+        result = subprocess.run(["claude", "-p", prompt], ...)
+        return self._parse_review(result.stdout)
+```
+
+### 8. Code Review Response (`code_review_response.py`)
+```python
+class CodeReviewResponse:
+    """Addresses code review feedback."""
+    
+    def address_feedback(self, code: CodeFiles, review: ReviewResult) -> CodeFiles:
+        """Fix critical issues from review."""
+        if not review.has_critical_issues:
+            return code
+        
+        prompt = f"""
+        Fix these critical issues:
+        {self._format_critical_issues(review.critical_issues)}
+        
+        Current code: {self._format_code(code)}
+        
+        Generate corrected code addressing all critical issues.
+        """
+        
+        result = subprocess.run(["claude", "-p", prompt], ...)
+        return self._parse_corrected_code(result.stdout)
+```
+
+### 9. Requirements Validator (`requirements_validator.py`)
+```python
+class RequirementsValidator:
+    """Validates generated artifacts against recipe requirements."""
+    
+    def validate_compliance(self, artifacts: Artifacts, recipe: Recipe) -> ComplianceResult:
+        """Ensure all MUST requirements are satisfied."""
+        prompt = f"""
+        Validate these artifacts satisfy all requirements:
+        
+        Requirements: {self._format_requirements(recipe.requirements)}
+        Artifacts: {self._format_artifacts(artifacts)}
+        
+        For each MUST requirement:
+        1. Identify where it's implemented
+        2. Confirm it's properly tested
+        3. Verify it fully satisfies the requirement
+        
+        Generate compliance matrix.
+        """
+        
+        result = subprocess.run(["claude", "-p", prompt], ...)
+        compliance = self._parse_compliance(result.stdout)
+        
+        if not compliance.all_must_satisfied:
+            raise ComplianceError(f"Unsatisfied: {compliance.unsatisfied}")
+        
+        return compliance
+```
+
+### 10. Validator (`validator.py`)
 ```python
 class Validator:
     """Validates implementations against requirements."""
@@ -721,20 +998,54 @@ class ParallelRecipeBuilder:
 class ClaudeCodeGenerator:
     """Generates code using Claude Code CLI - the chosen AI implementation."""
     
-    def _invoke_claude_code(self, prompt: str) -> str:
-        """Invoke Claude CLI for code generation.
+    def _invoke_claude_code(self, prompt: str, output_dir: Path) -> None:
+        """Invoke Claude CLI for code generation with proper automation flags.
         
-        Note: Claude CLI has built-in retry logic with exponential backoff,
-        so we don't need to implement our own retry mechanism.
+        CRITICAL FLAGS FOR AUTOMATION:
+        - -p: Print mode for non-interactive execution
+        - --dangerously-skip-permissions: Bypass all permission prompts
+        - --output-format stream-json: Get structured JSON events from Claude
+        - --verbose: Required when using stream-json format
+        - --model opus: Use Opus model (or env var CLAUDE_MODEL)
+        - --allowedTools Write Edit MultiEdit Bash Read: Enable file operations
+        
+        IMPORTANT: 
+        - Do NOT use temp directories - Claude cannot write there
+        - Use the actual output_dir where files should be created
+        - Do NOT set timeouts - let Claude complete its work
         """
-        result = subprocess.run(
-            ["claude", "-p", prompt],
-            capture_output=True,
-            text=True,
-            timeout=300,
-            check=True  # Raises on non-zero exit
-        )
-        return result.stdout
+        # Tell Claude where to write files
+        prompt += f"\n\nWrite all files to: {output_dir}"
+        
+        # Write prompt to file for Claude to read
+        prompt_file = Path(tempfile.mktemp(suffix='.md'))
+        prompt_file.write_text(prompt)
+        
+        try:
+            model = os.environ.get('CLAUDE_MODEL', 'opus')
+            result = subprocess.run(
+                [
+                    "claude", "-p", str(prompt_file),
+                    "--dangerously-skip-permissions",
+                    "--output-format", "stream-json",
+                    "--verbose",
+                    "--model", model,
+                    "--allowedTools", "Write", "Edit", "MultiEdit", "Bash", "Read"
+                ],
+                capture_output=True,
+                text=True,
+                # NO TIMEOUT - let Claude complete
+                check=True  # Raises on non-zero exit
+            )
+            
+            # Parse streaming JSON output to monitor progress
+            for line in result.stdout.splitlines():
+                if line.strip():
+                    event = json.loads(line)
+                    if event.get('type') == 'tool_use':
+                        logger.info(f"Claude using tool: {event.get('name')}")
+        finally:
+            prompt_file.unlink()  # Clean up prompt file
     
     def generate(self, recipe: Recipe, context: BuildContext) -> GeneratedCode:
         """Generate code following TDD approach."""
@@ -751,7 +1062,67 @@ class ClaudeCodeGenerator:
         return GeneratedCode(files=code, tests=tests)
 ```
 
-### 12. Quality Gates (`quality_gates.py`)
+### 12. UV Environment Setup (`uv_environment.py`)
+```python
+class UVEnvironmentManager:
+    """Manages UV virtual environments for generated Python projects."""
+    
+    def setup_environment(self, project_path: Path) -> bool:
+        """Setup UV virtual environment for a generated project.
+        
+        Returns:
+            True if environment setup succeeded, False otherwise
+        """
+        # Check if UV is available
+        if not self._check_uv_installed():
+            print("UV not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh")
+            return False
+        
+        # Create pyproject.toml if missing
+        pyproject_path = project_path / "pyproject.toml"
+        if not pyproject_path.exists():
+            self._create_pyproject(project_path)
+        
+        # Run uv sync to create virtual environment
+        result = subprocess.run(
+            ["uv", "sync", "--all-extras"],
+            cwd=project_path,
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            print(f"✓ UV environment created at {project_path}/.venv")
+            return True
+        else:
+            print(f"UV sync failed: {result.stderr}")
+            return False
+    
+    def _check_uv_installed(self) -> bool:
+        """Check if UV is installed and available."""
+        try:
+            result = subprocess.run(["uv", "--version"], capture_output=True)
+            return result.returncode == 0
+        except FileNotFoundError:
+            return False
+    
+    def _create_pyproject(self, project_path: Path):
+        """Create a basic pyproject.toml for UV."""
+        content = '''[project]
+name = "{name}"
+version = "0.1.0"
+requires-python = ">=3.8"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+'''.format(name=project_path.name)
+        
+        (project_path / "pyproject.toml").write_text(content)
+```
+
+### 13. Quality Gates (`quality_gates.py`)
 ```python
 class QualityGates:
     """Runs quality checks on generated code."""

@@ -103,7 +103,9 @@ class Components:
     name: str
     version: str
     type: ComponentType
-    dependencies: list[str] = field(default_factory=lambda: [])  # Other recipe names this depends on
+    dependencies: list[str] = field(
+        default_factory=lambda: []
+    )  # Other recipe names this depends on
     description: str = ""
     metadata: dict[str, Any] = field(default_factory=lambda: {})
 
@@ -127,6 +129,7 @@ class RecipeMetadata:
     build_count: int = 0
     last_build: Optional[datetime] = None
     checksum: Optional[str] = None
+    supplementary_docs: dict[str, str] = field(default_factory=lambda: {})
 
 
 @dataclass

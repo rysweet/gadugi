@@ -29,73 +29,51 @@ Examples:
   
   # Apply design patterns
   python -m recipe_executor execute recipes/my-service/ --patterns=python-quality
-"""
+""",
     )
-    
+
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
-    
+
     # Execute command
-    execute_parser = subparsers.add_parser(
-        "execute",
-        help="Execute a recipe and generate code"
-    )
-    execute_parser.add_argument(
-        "recipe",
-        type=Path,
-        help="Path to the recipe directory"
-    )
+    execute_parser = subparsers.add_parser("execute", help="Execute a recipe and generate code")
+    execute_parser.add_argument("recipe", type=Path, help="Path to the recipe directory")
     execute_parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be generated without actually creating files"
+        help="Show what would be generated without actually creating files",
     )
+    execute_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
     execute_parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Show detailed output"
-    )
-    execute_parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force rebuild even if nothing has changed"
+        "--force", action="store_true", help="Force rebuild even if nothing has changed"
     )
     execute_parser.add_argument(
         "--output-dir",
         type=Path,
-        help="Directory to write generated files (default: current directory)"
+        help="Directory to write generated files (default: current directory)",
     )
     execute_parser.add_argument(
         "--allow-self-overwrite",
         action="store_true",
-        help="DANGEROUS: Allow overwriting Recipe Executor's own source files"
+        help="DANGEROUS: Allow overwriting Recipe Executor's own source files",
     )
     execute_parser.add_argument(
-        "--patterns",
-        type=str,
-        help="Comma-separated list of design patterns to apply"
+        "--patterns", type=str, help="Comma-separated list of design patterns to apply"
     )
-    
+
     # Analyze command
-    analyze_parser = subparsers.add_parser(
-        "analyze",
-        help="Analyze a recipe without executing it"
-    )
-    analyze_parser.add_argument(
-        "recipe",
-        type=Path,
-        help="Path to the recipe directory"
-    )
-    
+    analyze_parser = subparsers.add_parser("analyze", help="Analyze a recipe without executing it")
+    analyze_parser.add_argument("recipe", type=Path, help="Path to the recipe directory")
+
     # Parse arguments
     args = parser.parse_args(argv)
-    
+
     if not args.command:
         parser.print_help()
         return 1
-    
+
     # Initialize orchestrator
     orchestrator = RecipeOrchestrator()
-    
+
     try:
         if args.command == "execute":
             # Build options from arguments
@@ -104,28 +82,28 @@ Examples:
                 verbose=args.verbose,
                 force_rebuild=args.force,
                 output_dir=args.output_dir,
-                allow_self_overwrite=args.allow_self_overwrite
+                allow_self_overwrite=args.allow_self_overwrite,
             )
-            
+
             # Add patterns to recipe metadata if specified
             if args.patterns:
                 print(f"Applying design patterns: {args.patterns}")
                 # This would need to be integrated with the orchestrator
                 # For now, just note it
-            
+
             # Execute the recipe
             print(f"Executing recipe: {args.recipe}")
             if args.dry_run:
                 print("DRY RUN MODE - No files will be created")
-            
+
             result = orchestrator.execute(args.recipe, options)
-            
+
             # Print results
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"Execution {'SUCCEEDED' if result.success else 'FAILED'}")
             print(f"Total time: {result.total_time:.2f}s")
             print(f"Recipes built: {len(result.results)}")
-            
+
             if args.verbose:
                 for build_result in result.results:
                     print(f"\n  {build_result.recipe.name}:")
@@ -133,47 +111,53 @@ Examples:
                     print(f"    Time: {build_result.build_time:.2f}s")
                     if build_result.errors:
                         print(f"    Errors: {', '.join(build_result.errors)}")
-            
+
             return 0 if result.success else 1
-            
+
         elif args.command == "analyze":
             # Analyze the recipe
             print(f"Analyzing recipe: {args.recipe}")
             analysis = orchestrator.analyze(args.recipe)
-            
+
             # Print analysis results
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"Recipe: {analysis.get('recipe', 'Unknown')}")
             print(f"Version: {analysis.get('version', 'Unknown')}")
             print(f"Type: {analysis.get('type', 'Unknown')}")
             print(f"Total recipes in dependency tree: {analysis.get('total_recipes', 0)}")
-            
-            if deps := analysis.get('dependencies'):
+
+            if deps := analysis.get("dependencies"):
                 print(f"\nDependencies ({len(deps)}):")
                 for dep in deps:
                     print(f"  - {dep}")
-            
-            if dependents := analysis.get('dependents'):
+
+            if dependents := analysis.get("dependents"):
                 print(f"\nDependents ({len(dependents)}):")
                 for dep in dependents:
                     print(f"  - {dep}")
-            
-            if plan := analysis.get('execution_plan'):
-                print(f"\nExecution plan:")
+
+            if plan := analysis.get("execution_plan"):
+                print("\nExecution plan:")
                 for i, step in enumerate(plan, 1):
                     print(f"  {i}. {step}")
-            
-            if issues := analysis.get('validation_issues'):
+
+            if issues := analysis.get("validation_issues"):
                 print(f"\nValidation issues ({len(issues)}):")
                 for issue in issues:
                     print(f"  - {issue}")
-            
+
             return 0
-            
+
+        else:
+            # This shouldn't happen due to argparse configuration
+            parser.print_help()
+            return 1
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 
