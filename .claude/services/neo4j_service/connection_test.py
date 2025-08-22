@@ -4,6 +4,7 @@ Neo4j Connection Test for Gadugi
 Tests the connection to Neo4j and verifies schema initialization
 """
 
+import os
 import sys
 from neo4j import GraphDatabase, Driver
 from typing import Optional
@@ -150,10 +151,15 @@ def main():
     """Run connection test"""
     print("\n🧪 Testing Neo4j Connection for Gadugi\n")
 
-    # Connection parameters
-    uri = "bolt://localhost:7688"  # Correct port for Gadugi
-    user = "neo4j"
-    password = "gadugi-password"  # pragma: allowlist secret
+    # Connection parameters from environment with fallbacks
+    uri = os.getenv("NEO4J_URI", "bolt://localhost:7688")
+    user = os.getenv("NEO4J_USER", "neo4j")
+    password = os.getenv("NEO4J_PASSWORD")
+
+    if not password:
+        print("❌ NEO4J_PASSWORD environment variable not set")
+        print("   Set it with: export NEO4J_PASSWORD=your-password")
+        sys.exit(1)
 
     # Run tests
     tester = Neo4jConnectionTest(uri, user, password)
@@ -177,7 +183,7 @@ def main():
     print("📊 Neo4j Browser: http://localhost:7475")
     print(f"🔌 Bolt URL: {uri}")
     print(f"👤 Username: {user}")
-    print(f"🔑 Password: {password}\n")
+    print("🔑 Password: [HIDDEN]\n")
 
 
 if __name__ == "__main__":

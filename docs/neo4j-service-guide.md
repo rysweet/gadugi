@@ -26,26 +26,43 @@ The Neo4j Service provides graph database functionality for the Gadugi system, o
 - Python 3.9+ with UV package manager
 - Neo4j 5.19+ compatible environment
 
-### 1. Start Neo4j Container
+### 1. Set Environment Variables
 
 ```bash
-# Start Neo4j service
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env and set your secure password
+export NEO4J_PASSWORD=your-secure-password-here
+```
+
+### 2. Start Neo4j Container
+
+```bash
+# Start Neo4j service with environment variables
 docker-compose -f .claude/services/neo4j_service/docker-compose.yml up -d
 
 # Or use the main project compose file
 docker-compose -f docker-compose.gadugi.yml up -d neo4j
 ```
 
-### 2. Initialize Schema
+### 3. Initialize Schema
 
 ```python
 from claude.services.neo4j_service import Neo4jClient, SchemaManager
+import os
 
-# Create client
+# Create client using environment variables
 client = Neo4jClient(
-    uri="bolt://localhost:7688",
-    user="neo4j",
-    password="gadugi-password"  # pragma: allowlist secret
+    # Credentials are read from environment variables:
+    # NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD
+)
+
+# Or specify explicitly
+client = Neo4jClient(
+    uri=os.getenv("NEO4J_URI", "bolt://localhost:7688"),
+    user=os.getenv("NEO4J_USER", "neo4j"),
+    password=os.getenv("NEO4J_PASSWORD")  # Required
 )
 
 # Initialize schema
@@ -53,7 +70,7 @@ schema_manager = SchemaManager(client)
 schema_manager.full_schema_setup()
 ```
 
-### 3. Basic Usage
+### 4. Basic Usage
 
 ```python
 from claude.services.neo4j_service import Agent, Tool, Context
@@ -89,9 +106,18 @@ with client:
 
 ## Configuration
 
+### Environment Variables
+The service uses the following environment variables for configuration:
+
+| Variable | Description | Default |
+|----------|-------------|------|
+| `NEO4J_URI` | Neo4j connection URI | `bolt://localhost:7688` |
+| `NEO4J_USER` | Neo4j username | `neo4j` |
+| `NEO4J_PASSWORD` | Neo4j password | **Required** (no default) |
+
 ### Connection Parameters
-- **URI**: `bolt://localhost:7688` (default)
-- **Authentication**: `neo4j/gadugi-password`
+- **URI**: Set via `NEO4J_URI` environment variable
+- **Authentication**: Uses environment variables for security
 - **Connection Pool**: 100 max connections
 - **Retry Logic**: 3 attempts with exponential backoff
 

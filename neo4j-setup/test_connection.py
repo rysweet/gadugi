@@ -3,12 +3,13 @@
 Test Neo4j connection and initialization for Gadugi.
 """
 
+import os
 import sys
 from datetime import datetime
 
 from neo4j import GraphDatabase, basic_auth
 from neo4j.exceptions import ServiceUnavailable, AuthError
-from typing import List
+from typing import List, Dict
 
 
 class Neo4jConnection:
@@ -16,13 +17,20 @@ class Neo4jConnection:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7688",
-        user: str = "neo4j",
-        password: str = "gadugi-password",
+        uri: str = None,
+        user: str = None,
+        password: str = None,
     ):
-        self.uri = uri
-        self.user = user
-        self.password = password
+        self.uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7688")
+        self.user = user or os.getenv("NEO4J_USER", "neo4j")
+        self.password = password or os.getenv("NEO4J_PASSWORD")
+
+        if not self.password:
+            raise ValueError(
+                "Neo4j password not provided. Set NEO4J_PASSWORD environment variable "
+                "or pass password parameter."
+            )
+
         self.driver = None
 
     def connect(self) -> bool:
@@ -251,6 +259,12 @@ def main():
     """Main test function."""
     print("🚀 Testing Neo4j Connection for Gadugi\n")
 
+    # Check for password
+    if not os.getenv("NEO4J_PASSWORD"):
+        print("❌ NEO4J_PASSWORD environment variable not set")
+        print("   Set it with: export NEO4J_PASSWORD=your-password")
+        return 1
+
     # Create connection
     conn = Neo4jConnection()
 
@@ -265,7 +279,7 @@ def main():
     if not conn.test_schema():
         print("\n⚠️  Schema not initialized. Run the init script:")
         print(
-            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"
+            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p $NEO4J_PASSWORD < neo4j/init/init_schema.cypher"
         )
 
     # Create test memory

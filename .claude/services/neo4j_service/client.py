@@ -6,6 +6,7 @@ error handling, and retry logic.
 """
 
 import logging
+import os
 import time
 from contextlib import contextmanager
 from typing import Dict, List, Optional, Any, Generator
@@ -27,9 +28,9 @@ class Neo4jClient:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7688",
-        user: str = "neo4j",
-        password: str = "gadugi-password",
+        uri: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
         max_connection_lifetime: int = 1000,
         max_connection_pool_size: int = 100,
         connection_acquisition_timeout: int = 60,
@@ -40,18 +41,25 @@ class Neo4jClient:
         Initialize Neo4j client.
 
         Args:
-            uri: Neo4j connection URI
-            user: Username for authentication
-            password: Password for authentication
+            uri: Neo4j connection URI (defaults to NEO4J_URI env var or bolt://localhost:7688)
+            user: Username for authentication (defaults to NEO4J_USER env var or neo4j)
+            password: Password for authentication (defaults to NEO4J_PASSWORD env var)
             max_connection_lifetime: Max lifetime for connections in seconds
             max_connection_pool_size: Max number of connections in pool
             connection_acquisition_timeout: Timeout for acquiring connection
             max_retry_attempts: Maximum number of retry attempts
             retry_delay: Delay between retry attempts in seconds
         """
-        self.uri = uri
-        self.user = user
-        self.password = password
+        # Use environment variables with fallbacks for development
+        self.uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7688")
+        self.user = user or os.getenv("NEO4J_USER", "neo4j")
+        self.password = password or os.getenv("NEO4J_PASSWORD")
+
+        if not self.password:
+            raise ValueError(
+                "Neo4j password not provided. Set NEO4J_PASSWORD environment variable "
+                "or pass password parameter."
+            )
         self.max_retry_attempts = max_retry_attempts
         self.retry_delay = retry_delay
 

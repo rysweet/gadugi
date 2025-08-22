@@ -147,9 +147,17 @@ class Agent(Neo4jEntityBase):
             status: Agent status (active, inactive, error)
             **kwargs: Additional properties
         """
+        # Input validation
+        if not name or not isinstance(name, str):
+            raise ValueError("Agent name must be a non-empty string")
+        if not type or not isinstance(type, str):
+            raise ValueError("Agent type must be a non-empty string")
+        if status not in ["active", "inactive", "error", "pending"]:
+            raise ValueError(f"Invalid agent status: {status}")
+
         super().__init__(**kwargs)
-        self.name = name
-        self.type = type
+        self.name = name.strip()
+        self.type = type.strip()
         self.description = description
         self.capabilities = capabilities or []
         self.config = config or {}
@@ -183,9 +191,15 @@ class Tool(Neo4jEntityBase):
             version: Tool version
             **kwargs: Additional properties
         """
+        # Input validation
+        if not name or not isinstance(name, str):
+            raise ValueError("Tool name must be a non-empty string")
+        if not category or not isinstance(category, str):
+            raise ValueError("Tool category must be a non-empty string")
+
         super().__init__(**kwargs)
-        self.name = name
-        self.category = category
+        self.name = name.strip()
+        self.category = category.strip()
         self.description = description
         self.parameters = parameters or {}
         self.version = version
@@ -218,9 +232,17 @@ class Context(Neo4jEntityBase):
             tags: Context tags for categorization
             **kwargs: Additional properties
         """
+        # Input validation
+        if not content or not isinstance(content, str):
+            raise ValueError("Context content must be a non-empty string")
+        if not source or not isinstance(source, str):
+            raise ValueError("Context source must be a non-empty string")
+        if context_type not in ["general", "error", "success", "warning", "info", "debug"]:
+            raise ValueError(f"Invalid context type: {context_type}")
+
         super().__init__(**kwargs)
-        self.content = content
-        self.source = source
+        self.content = content.strip()
+        self.source = source.strip()
         self.context_type = context_type
         self.metadata = metadata or {}
         self.tags = tags or []

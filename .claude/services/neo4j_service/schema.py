@@ -6,6 +6,7 @@ Manages database schema initialization, constraints, and indexes.
 
 import logging
 import os
+from pathlib import Path
 from typing import Dict, Optional, Any
 
 from .client import Neo4jClient
@@ -31,27 +32,41 @@ class SchemaManager:
         Initialize the database schema.
 
         Args:
-            schema_file: Path to schema file (defaults to neo4j/init/init_schema.cypher)
+            schema_file: Path to schema file (defaults to searching standard locations)
 
         Returns:
             True if initialization succeeded, False otherwise
         """
         if schema_file is None:
-            # Look for schema file in standard locations
+            # Get the base directory (repository root)
+            current_file = Path(__file__).resolve()
+
+            # Try to find the repository root by looking for pyproject.toml or .git
+            repo_root = current_file.parent
+            while repo_root.parent != repo_root:
+                if (repo_root / "pyproject.toml").exists() or (repo_root / ".git").exists():
+                    break
+                repo_root = repo_root.parent
+
+            # Look for schema file in standard locations relative to repo root
             schema_paths = [
-                "neo4j-setup/init/init_schema.cypher",
-                "../../../neo4j-setup/init/init_schema.cypher",
-                "init_schema.cypher",
+                repo_root / "neo4j-setup" / "init" / "init_schema.cypher",
+                repo_root / "neo4j" / "init" / "init_schema.cypher",
+                current_file.parent / "init_schema.cypher",
+                current_file.parent.parent / "init_schema.cypher",
+                Path.cwd() / "neo4j-setup" / "init" / "init_schema.cypher",
+                Path.cwd() / "init_schema.cypher",
             ]
 
             schema_file = None
             for path in schema_paths:
-                if os.path.exists(path):
-                    schema_file = path
+                if path.exists():
+                    schema_file = str(path)
+                    logger.info(f"Found schema file at: {schema_file}")
                     break
 
             if schema_file is None:
-                logger.error("Schema file not found in standard locations")
+                logger.error(f"Schema file not found. Searched locations: {[str(p) for p in schema_paths]}")
                 return False
 
         try:

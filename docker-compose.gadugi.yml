@@ -8,7 +8,7 @@ services:
       - "7475:7474"  # HTTP (using 7475 to avoid conflict)
       - "7688:7687"  # Bolt (using 7688 to avoid conflict)
     environment:
-      - NEO4J_AUTH=neo4j/gadugi-password  # Change in production
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-changeme}  # Uses NEO4J_PASSWORD env var, defaults to 'changeme'
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]
       - NEO4J_dbms_memory_pagecache_size=1G
       - NEO4J_dbms_memory_heap_initial__size=1G
@@ -23,7 +23,8 @@ services:
       - gadugi_neo4j_plugins:/plugins
       - ./neo4j-setup/init:/var/lib/neo4j/init
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "gadugi-password", "MATCH (n) RETURN count(n) LIMIT 1"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p $$NEO4J_INITIAL_PASSWORD 'MATCH (n) RETURN count(n) LIMIT 1' || exit 1"]
+      # Note: Uses NEO4J_INITIAL_PASSWORD which is set automatically by Neo4j container
       interval: 30s
       timeout: 10s
       retries: 5
