@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable  # type: ignore, Dict, List, Optional
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional  # type: ignore
 import uuid
 
 try:
@@ -101,11 +101,10 @@ class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
     def __init__(self, container_id: str, task_id: str):
-    websockets = None  # type: ignore
-        self.container_id = container_id  # type: ignore
-        self.task_id = task_id  # type: ignore
-        self.streaming = False  # type: ignore
-        self.clients: List[websockets.WebSocketServerProtocol] = []  # type: ignore
+        self.container_id = container_id
+        self.task_id = task_id
+        self.streaming = False
+        self.clients: List = []  # List of WebSocketServerProtocol if available
 
     async def start_streaming(self, container):
         """Start streaming container output"""
@@ -175,11 +174,10 @@ class ContainerManager:
         if not DOCKER_AVAILABLE:
             raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
-        try:  # type: ignore
-                docker = None
+        try:
             self.docker_client = docker.from_env()  # type: ignore
             # Test connection
-            self.docker_client.ping()  # type: ignore
+            self.docker_client.ping()
             logger.info("Docker client initialized successfully")
 
             # Ensure orchestrator image exists
@@ -331,10 +329,7 @@ CMD ["bash"]
 
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
-        try:  # type: ignore
-                _docker = None
-                _docker = None
-    docker = None
+        try:
             # Create and start container
             container = self.docker_client.containers.run(  # type: ignore
                 image=self.config.image,  # type: ignore

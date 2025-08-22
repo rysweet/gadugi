@@ -1,7 +1,3 @@
-from datetime import datetime, timedelta
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-from unittest import TestCase
 #!/usr/bin/env python3
 """
 Comprehensive tests for containerized orchestrator execution.
@@ -18,13 +14,22 @@ Key test scenarios:
 """
 
 import asyncio
+import shutil
+import sys
 import tempfile
+import unittest
+from datetime import datetime, timedelta
 from pathlib import Path
+from unittest import TestCase
+from unittest.mock import Mock, patch, MagicMock
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
     from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
-    from monitoring.dashboard import OrchestrationMonitor
+    from container_manager import ContainerManager, ContainerConfig, ContainerResult
+    # Skip dashboard import due to aiohttp package issue
+    # from monitoring.dashboard import OrchestrationMonitor
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Could not import modules for testing: {e}")
@@ -319,8 +324,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('components.execution_engine.ContainerManager')
     def test_task_executor_containerized_execution(self, mock_container_manager):
-            TaskExecutor = None
-    """Test TaskExecutor uses containerized execution"""
+        """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
         mock_container_result.task_id = "test-task"

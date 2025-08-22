@@ -383,15 +383,13 @@ class TaskExecutor:
             # Try to parse JSON output if available
             output_file_path = None
             if stdout_content.strip():
-                try:  # type: ignore
-                output_file_path = None  # type: ignore
-                output_file_path = None
-                    json_data = json.loads(stdout_content)  # type: ignore
+                try:
+                    json_data = json.loads(stdout_content)
                     with open(json_output_file, 'w') as f:
                         json.dump(json_data, f, indent=2)
                     output_file_path = str(json_output_file)
-                except json.JSONDecodeError:  # type: ignore
-                    pass  # Not JSON output, that's okay  # type: ignore
+                except json.JSONDecodeError:
+                    pass  # Not JSON output, that's okay
 
         except FileNotFoundError:
             error_message = "Claude CLI not found - please ensure it's installed and in PATH"

@@ -19,7 +19,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Set  # type: ignore
+from typing import Dict, List, Optional, Set  # type: ignore
 
 try:
     import websockets
@@ -60,7 +60,6 @@ class OrchestrationMonitor:
         # Initialize Docker client
         if DOCKER_AVAILABLE:
             try:
-                docker = None
                 self.docker_client = docker.from_env()  # type: ignore
             except Exception as e:
                 logger.warning(f"Docker client not available: {e}")
@@ -210,9 +209,8 @@ class OrchestrationMonitor:
 
         monitoring_file = self.monitoring_dir / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
-        try:  # type: ignore
-                    aiofiles = None
-            data = {  # type: ignore
+        try:
+            data = {
                 'timestamp': datetime.now().isoformat(),
                 'containers': self.active_containers,
                 'monitoring_metadata': {
@@ -223,15 +221,12 @@ class OrchestrationMonitor:
                 }
             }
 
-            if AIOHTTP_AVAILABLE:  # type: ignore
-                async with aiofiles.open(monitoring_file, 'w') as f:  # type: ignore
-                    await f.write(json.dumps(data, indent=2))
-            else:
-                with open(monitoring_file, 'w') as f:
-                    json.dump(data, f, indent=2)
+            # Save using standard file operations (aiofiles is optional)
+            with open(monitoring_file, 'w') as f:
+                json.dump(data, f, indent=2)
 
-        except Exception as e:  # type: ignore
-            logger.error(f"Failed to save monitoring data: {e}")  # type: ignore
+        except Exception as e:
+            logger.error(f"Failed to save monitoring data: {e}")
 
     async def start_websocket_server(self):
         """Start WebSocket server for real-time updates"""
@@ -246,7 +241,7 @@ class OrchestrationMonitor:
             logger.info(f"New WebSocket client connected: {websocket.remote_address}")
             self.websocket_clients.add(websocket)
 
-            try:  # type: ignore
+            try:
                 # Send initial status
                 if self.active_containers:
                     initial_message = {
@@ -259,20 +254,16 @@ class OrchestrationMonitor:
                 # Keep connection alive
                 async for message in websocket:
                     # Handle client messages if needed
-                    try:  # type: ignore
-            websockets = None  # type: ignore
-                            message = None  # type: ignore
-                            message = None
-            _websockets = None
-                        data = json.loads(message)  # type: ignore
+                    try:
+                        data = json.loads(message)
                         await self.handle_client_message(websocket, data)
-                    except json.JSONDecodeError:  # type: ignore
-                        logger.warning(f"Invalid JSON from client: {message}")  # type: ignore
+                    except json.JSONDecodeError:
+                        logger.warning(f"Invalid JSON from client: {message}")
 
-            except Exception as e:  # type: ignore
-                logger.warning(f"WebSocket client error: {e}")  # type: ignore
-            finally:  # type: ignore
-                self.websocket_clients.discard(websocket)  # type: ignore
+            except Exception as e:
+                logger.warning(f"WebSocket client error: {e}")
+            finally:
+                self.websocket_clients.discard(websocket)
                 logger.info(f"WebSocket client disconnected: {websocket.remote_address}")
 
         try:
@@ -345,16 +336,6 @@ class OrchestrationMonitor:
             await websocket.send(json.dumps(error_message))
 
     def stop_monitoring(self):
-        _web = None
-        _web = None
-        _web = None
-        _web = None
-            web = None  # type: ignore
-        _web = None
-        _web = None
-        _web = None
-        _web = None
-            web = None  # type: ignore
         """Stop monitoring"""
         self.monitoring = False
         logger.info("Stopping orchestrator monitoring...")
