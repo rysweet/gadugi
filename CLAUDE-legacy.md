@@ -1,26 +1,19 @@
-# AI Assistant Instructions with Integrated Orchestration
+# LEGACY VERSION - Preserved from before Issue #305 restructuring
 
-This file combines generic Claude Code best practices with project-specific instructions and INTEGRATED ORCHESTRATION LOGIC.
+This file contains the original CLAUDE.md before the architectural restructuring
+that moved orchestration logic directly into the main instructions.
 
-⚠️ **CRITICAL CHANGE**: Orchestration is now built directly into these instructions. No separate orchestrator agents needed.
+---
+
+
+# AI Assistant Instructions
+
+This file combines generic Claude Code best practices with project-specific instructions for the AI-SIP workshop repository.
 
 ⚠️ **FIRST ACTION**: Check and update @.github/Memory.md ! ⚠️
 ⚠️ **NEW**: Memory.md now syncs with GitHub Issues via MemoryManagerAgent! ⚠️
 
 ⚠️ **SECOND ACTION**: When working on Claude agents or instructions, read https://docs.anthropic.com/en/docs/claude-code/memory ! ⚠️
-
----
-
-## CRITICAL: Orchestration-First Development
-
-**ALL development tasks MUST follow the orchestration workflow defined here. No delegation to external agents.**
-
-### Core Orchestration Principles
-
-1. **Direct Execution**: You orchestrate tasks directly using these instructions
-2. **No Agent Delegation**: Do not invoke separate orchestrator or workflow manager agents
-3. **Parallel When Possible**: Identify independent tasks and execute them in parallel
-4. **Sequential When Necessary**: Handle dependencies by proper task ordering
 
 ---
 
@@ -39,181 +32,91 @@ Read @.claude/Guidelines.md for complete requirements.
 
 ---
 
-## 11-Phase Workflow (MANDATORY for ALL Changes)
+## CRITICAL: Workflow Execution Pattern
 
-Every code change MUST go through these phases IN ORDER:
+⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
 
-### Phase 1: Initial Setup
-- Acknowledge the task requirements
-- Identify affected components
-- Check current branch status
-- Review existing code structure
+**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
 
-### Phase 2: Issue Creation
-```bash
-gh issue create --title "[Type]: Brief description" \
-  --body "## Objective\n[What needs to be done]\n\n## Requirements\n[Specific requirements]\n\n## Success Criteria\n[How to verify completion]"
-```
+This ensures:
+- Proper worktree isolation for all changes
+- Consistent branch management
+- Complete workflow tracking
+- Parallel execution when possible
+- Professional development practices
 
-### Phase 3: Branch and Worktree Management
-```bash
-# Create worktree for isolation
-ISSUE_NUMBER="[number]"
-BRANCH_NAME="feature/issue-${ISSUE_NUMBER}-[description]"
-WORKTREE_DIR=".worktrees/issue-${ISSUE_NUMBER}"
+**For ANY task that modifies code, configuration, or documentation files:**
 
-# Clean up if exists
-git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
+1. **NEVER manually edit files directly**
+2. **ALWAYS use the orchestrator agent as the entry point**:
 
-# Create new worktree
-git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
-cd "$WORKTREE_DIR"
-```
+   ```
+   /agent:orchestrator-agent
 
-### Phase 4: Research and Planning
-- Analyze the codebase for the task
-- Identify dependencies and impacts
-- Create implementation plan
-- Document approach in issue comments
+   Execute the following task:
+   - [description of changes needed]
+   ```
 
-### Phase 5: Implementation
-- Write code following project standards
-- Use atomic commits with clear messages
-- Follow the Guidelines.md principles
-- Implement complete functionality (no stubs)
+3. **The Orchestrator will automatically**:
+   - Invoke the worktree-manager to create isolated environments
+   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
+   - Coordinate parallel execution when multiple tasks exist
+   - Ensure proper branch creation and PR workflow
 
-### Phase 6: Testing (MANDATORY Quality Gates)
-```bash
-# For UV projects (recommended)
-if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
-    uv sync --all-extras
-    uv run pytest tests/ -v
-    uv run ruff check .
-    uv run ruff format .
-    uv run pyright
-    uv run pre-commit run --all-files
-else
-    # Standard Python projects
-    pytest tests/ -v
-    ruff check .
-    ruff format .
-    pyright
-    pre-commit run --all-files
-fi
-```
+4. **Agent Hierarchy**:
+   - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
+   - **WorktreeManager**: Automatically invoked by orchestrator for isolation
+   - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
+   - **Code-Reviewer**: Executes Phase 9 reviews
 
-ALL tests MUST pass before proceeding to Phase 7.
+**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
 
-### Phase 7: Documentation
-- Update relevant documentation
-- Add/update docstrings
-- Update README if needed
-- Document in Memory.md
+5. **Automated Workflow Handling**:
+   - Issue creation
+   - Worktree and branch management
+   - Implementation tracking
+   - PR creation
+   - Code review invocation (Phase 9)
+   - State management
 
-### Phase 8: Pull Request Creation
-```bash
-# Push branch
-git push -u origin "$BRANCH_NAME"
+6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
+   - Phase 1: Initial Setup
+   - Phase 2: Issue Creation
+   - Phase 3: Branch Management
+   - Phase 4: Research and Planning
+   - Phase 5: Implementation
+   - Phase 6: Testing
+   - Phase 7: Documentation
+   - Phase 8: Pull Request
+   - Phase 9: Review (code-reviewer invocation)
+   - Phase 10: Review Response
+   - Phase 11: Settings Update
 
-# Create PR
-gh pr create --base main \
-  --title "[Type]: Brief description (#${ISSUE_NUMBER})" \
-  --body "## Summary\n[What this PR does]\n\n## Changes\n[List of changes]\n\n## Testing\n[How it was tested]\n\nCloses #${ISSUE_NUMBER}"
-```
+**Only execute manual steps for**:
+- Read-only operations (searching, viewing files)
+- Answering questions about the codebase
+- Running tests or builds without changes
+- Direct user requests for specific read-only actions
 
-### Phase 9: Code Review
-- Request review via GitHub
-- Address review feedback
-- Ensure all CI checks pass
+**Before ANY task, ask yourself**:
+- Will this change version-controlled files? → MUST use OrchestratorAgent
+- Multiple related tasks? → Use OrchestratorAgent
+- Single task with code changes? → Use OrchestratorAgent
+- Read-only investigation? → Can execute manually
 
-### Phase 10: Review Response
-- Implement requested changes
-- Re-test after changes
-- Update PR with responses
+**Workflow Validation Requirements**:
+- Orchestrator MUST delegate ALL tasks to WorkflowManager
+- ALL 11 workflow phases MUST be executed for every task
+- NO direct execution bypassing workflow phases
+- State tracking MUST be maintained throughout all phases
+- Quality gates MUST be validated at each phase transition
 
-### Phase 11: Merge and Cleanup
-```bash
-# After approval and merge
-cd ../..
-git worktree remove "$WORKTREE_DIR"
-git branch -d "$BRANCH_NAME"
-```
-
----
-
-## Task Analysis and Dependency Detection
-
-### Identifying Independent Tasks
-Tasks can run in PARALLEL when:
-- They modify different files
-- They have no shared dependencies  
-- They work on separate features
-- They have no import relationships
-
-### Detecting Dependencies
-Tasks must run SEQUENTIALLY when:
-- One task's output is another's input
-- They modify the same files
-- They share state or configuration
-- One creates structure another uses
-
-### Dependency Analysis Process
-```python
-# Pseudo-code for dependency detection
-def analyze_dependencies(tasks):
-    file_map = {}
-    dependencies = []
-    
-    for task in tasks:
-        files = extract_affected_files(task)
-        for file in files:
-            if file in file_map:
-                # Dependency detected
-                dependencies.append((file_map[file], task))
-            file_map[file] = task
-    
-    return dependencies
-```
-
----
-
-## Parallel Execution Guidelines
-
-### When to Execute in Parallel
-1. Multiple independent bug fixes
-2. Separate feature implementations
-3. Documentation updates for different components
-4. Test additions for different modules
-
-### How to Execute Parallel Tasks
-1. **Create separate worktrees** for each task
-2. **Use subprocess or threading** for parallel execution
-3. **Monitor progress** of each task
-4. **Aggregate results** after completion
-
-### Parallel Execution Pattern
-```python
-import subprocess
-import threading
-
-def execute_parallel_tasks(tasks):
-    threads = []
-    results = []
-    
-    for task in tasks:
-        thread = threading.Thread(
-            target=execute_single_task,
-            args=(task, results)
-        )
-        threads.append(thread)
-        thread.start()
-    
-    # Wait for all tasks
-    for thread in threads:
-        thread.join()
-    
-    return results
-```
+**Enforcement Examples**:
+- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
+- ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
+- ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
+- ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
 
 ### Emergency Procedures (Critical Production Issues)
 
