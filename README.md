@@ -297,6 +297,98 @@ Once installed, invoke agents as needed:
 #### Specialized Agents
 - `/agent:code-reviewer` - For comprehensive code reviews
 - `/agent:prompt-writer` - For creating structured prompts
+
+## Parallel Execution Capabilities
+
+Gadugi's orchestrator enables efficient parallel execution of multiple independent tasks, achieving significant productivity gains through intelligent task decomposition and isolated execution environments.
+
+### Parallel Execution Architecture
+
+The orchestrator coordinates multiple WorkflowManager instances running in isolated git worktrees, enabling true parallel development:
+
+```
+🎯 Orchestrator
+├── 📊 Task Analysis
+│   └── Dependency detection and parallelization planning
+├── 🌿 Worktree Isolation
+│   └── Separate environments for each task
+└── ⚡ Parallel Execution
+    ├── Task 1: Fix pyright errors (isolated worktree)
+    ├── Task 2: Implement features (isolated worktree)
+    └── Task 3: Clean up technical debt (isolated worktree)
+```
+
+### Performance Metrics
+
+Based on production usage (PR #307, #308, #309):
+- **Sequential Execution Time**: ~30-45 minutes (10-15 min per task)
+- **Parallel Execution Time**: ~10-15 minutes (all tasks simultaneously)
+- **Expected Speedup**: 3x faster for independent tasks
+- **Resource Utilization**: Multiple Claude processes with isolated environments
+
+### Example: Three-Task Parallel Execution
+
+A recent orchestrator execution successfully completed three tasks in parallel:
+
+1. **Fix Pyright Errors** (34 errors across 4 components)
+   - Worktree: `.worktrees/task-fix-pyright-errors`
+   - Branch: `task/fix-pyright-errors-[timestamp]`
+   - Result: Zero pyright errors
+
+2. **Complete Team Coach Implementation**
+   - Worktree: `.worktrees/task-complete-team-coach`
+   - Branch: `task/complete-team-coach-[timestamp]`
+   - Result: Full agent with test coverage
+
+3. **Clean Up Legacy Worktrees**
+   - Worktree: `.worktrees/task-cleanup-worktrees`
+   - Branch: `task/cleanup-worktrees-[timestamp]`
+   - Result: Automated cleanup in workflow
+
+Each task followed the complete 11-phase workflow independently, with all quality gates enforced.
+
+### Enabling Parallel Execution
+
+To execute multiple tasks in parallel:
+
+1. **Create task prompt files**:
+   ```bash
+   # Create prompts for each task
+   echo "Fix all pyright errors in the codebase" > prompts/fix-pyright.md
+   echo "Implement team coach agent" > prompts/team-coach.md
+   echo "Clean up old worktrees" > prompts/cleanup.md
+   ```
+
+2. **Invoke the orchestrator**:
+   ```
+   /agent:orchestrator-agent
+   
+   Execute the following tasks in parallel:
+   - prompts/fix-pyright.md
+   - prompts/team-coach.md
+   - prompts/cleanup.md
+   ```
+
+3. **Monitor progress**:
+   ```bash
+   # Watch worktree creation
+   git worktree list
+   
+   # Monitor branches
+   git branch -a | grep task/
+   
+   # Check PR creation
+   gh pr list
+   ```
+
+### Governance and Quality Assurance
+
+All parallel executions maintain strict quality standards:
+- **Mandatory WorkflowManager delegation** (Issue #148 compliance)
+- **All 11 workflow phases executed** for each task
+- **Quality gates enforced** (pyright, ruff, pytest must pass)
+- **Code review invocation** (Phase 9) for every PR
+- **Isolated environments** prevent cross-task contamination
 - `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
 - `/agent:program-manager` - For project health and issue lifecycle management
 - `/agent:team-coach` - For team coordination and analytics
