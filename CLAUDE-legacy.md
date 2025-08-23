@@ -1,40 +1,19 @@
+# LEGACY VERSION - Preserved from before Issue #305 restructuring
+
+This file contains the original CLAUDE.md before the architectural restructuring
+that moved orchestration logic directly into the main instructions.
+
+---
+
+
 # AI Assistant Instructions
 
-This file combines generic Claude Code best practices with project-specific instructions for the Gadugi repository.
+This file combines generic Claude Code best practices with project-specific instructions for the AI-SIP workshop repository.
 
 ⚠️ **FIRST ACTION**: Check and update @.github/Memory.md ! ⚠️
 ⚠️ **NEW**: Memory.md now syncs with GitHub Issues via MemoryManagerAgent! ⚠️
 
 ⚠️ **SECOND ACTION**: When working on Claude agents or instructions, read https://docs.anthropic.com/en/docs/claude-code/memory ! ⚠️
-
----
-
-## CRITICAL: Orchestration-First Development
-
-**ALL development tasks MUST follow the orchestration workflow defined here.**
-
-### Core Orchestration Workflow
-
-For complex or multiple tasks:
-1. **Task Analysis**: Decompose work into discrete tasks
-2. **Dependency Detection**: Identify which tasks can run in parallel
-3. **Worktree Isolation**: Create separate worktrees for each task
-4. **Parallel Execution**: Execute independent tasks simultaneously
-5. **Progress Monitoring**: Track all tasks to completion
-6. **Result Aggregation**: Collect and report results
-
-### Implementation Approach
-
-#### For Single Tasks
-- Follow the 11-phase workflow directly
-- Create a single worktree and execute phases sequentially
-- No external agent delegation needed
-
-#### For Multiple Tasks
-- Analyze dependencies using the patterns below
-- Create worktrees for each independent task
-- Execute tasks in parallel using subprocess management
-- Monitor completion using process tracking
 
 ---
 
@@ -53,363 +32,97 @@ Read @.claude/Guidelines.md for complete requirements.
 
 ---
 
-## 11-Phase Workflow (MANDATORY for ALL Changes)
+## CRITICAL: Workflow Execution Pattern
 
-Every code change MUST go through these phases IN ORDER:
+⚠️ **MANDATORY ORCHESTRATOR USAGE** ⚠️
 
-### Phase 1: Initial Setup
-- Acknowledge the task requirements
-- Identify affected components
-- Check current branch status
-- Review existing code structure
+**ALL requests that will result in changes to version-controlled files MUST use the orchestrator agent.**
 
-### Phase 2: Issue Creation
-```bash
-gh issue create --title "[Type]: Brief description" \
-  --body "## Objective\n[What needs to be done]\n\n## Requirements\n[Specific requirements]\n\n## Success Criteria\n[How to verify completion]"
-```
+This ensures:
+- Proper worktree isolation for all changes
+- Consistent branch management
+- Complete workflow tracking
+- Parallel execution when possible
+- Professional development practices
 
-### Phase 3: Branch and Worktree Management
-```bash
-# Create worktree for isolation
-ISSUE_NUMBER="[number]"
-BRANCH_NAME="feature/issue-${ISSUE_NUMBER}-[description]"
-WORKTREE_DIR=".worktrees/issue-${ISSUE_NUMBER}"
+**For ANY task that modifies code, configuration, or documentation files:**
 
-# Clean up if exists
-git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
+1. **NEVER manually edit files directly**
+2. **ALWAYS use the orchestrator agent as the entry point**:
 
-# Create new worktree
-git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
-cd "$WORKTREE_DIR"
-```
+   ```
+   /agent:orchestrator-agent
 
-### Phase 4: Research and Planning
-- Analyze the codebase for the task
-- Identify dependencies and impacts
-- Create implementation plan
-- Document approach in issue comments
+   Execute the following task:
+   - [description of changes needed]
+   ```
 
-### Phase 5: Implementation
-- Write code following project standards
-- Use atomic commits with clear messages
-- Follow the Guidelines.md principles
-- Implement complete functionality (no stubs)
+3. **The Orchestrator will automatically**:
+   - Invoke the worktree-manager to create isolated environments
+   - Delegate to appropriate sub-agents (WorkflowManager, etc.)
+   - Coordinate parallel execution when multiple tasks exist
+   - Ensure proper branch creation and PR workflow
 
-### Phase 6: Testing (MANDATORY Quality Gates)
-```bash
-# For UV projects (recommended)
-if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
-    uv sync --all-extras
-    uv run pytest tests/ -v
-    uv run ruff check .
-    uv run ruff format .
-    uv run pyright
-    uv run pre-commit run --all-files
-else
-    # Standard Python projects
-    pytest tests/ -v
-    ruff check .
-    ruff format .
-    pyright
-    pre-commit run --all-files
-fi
-```
+4. **Agent Hierarchy**:
+   - **OrchestratorAgent**: REQUIRED entry point for ALL code changes
+   - **WorktreeManager**: Automatically invoked by orchestrator for isolation
+   - **WorkflowManager**: Handles individual workflow execution (MANDATORY for all tasks)
+   - **Code-Reviewer**: Executes Phase 9 reviews
 
-ALL tests MUST pass before proceeding to Phase 7.
+**⚠️ GOVERNANCE ENFORCEMENT**: The OrchestratorAgent MUST ALWAYS delegate ALL task execution to WorkflowManager instances. Direct execution is PROHIBITED to ensure complete workflow phases are followed (Issue #148).
 
-### Phase 7: Documentation
-- Update relevant documentation
-- Add/update docstrings
-- Update README if needed
-- Document in Memory.md
+5. **Automated Workflow Handling**:
+   - Issue creation
+   - Worktree and branch management
+   - Implementation tracking
+   - PR creation
+   - Code review invocation (Phase 9)
+   - State management
 
-### Phase 8: Pull Request Creation
-```bash
-# Push branch
-git push -u origin "$BRANCH_NAME"
+6. **Mandatory 11-Phase Workflow** (ALL tasks MUST follow):
+   - Phase 1: Initial Setup
+   - Phase 2: Issue Creation
+   - Phase 3: Branch Management
+   - Phase 4: Research and Planning
+   - Phase 5: Implementation
+   - Phase 6: Testing
+   - Phase 7: Documentation
+   - Phase 8: Pull Request
+   - Phase 9: Review (code-reviewer invocation)
+   - Phase 10: Review Response
+   - Phase 11: Settings Update
 
-# Create PR
-gh pr create --base main \
-  --title "[Type]: Brief description (#${ISSUE_NUMBER})" \
-  --body "## Summary\n[What this PR does]\n\n## Changes\n[List of changes]\n\n## Testing\n[How it was tested]\n\nCloses #${ISSUE_NUMBER}"
-```
+**Only execute manual steps for**:
+- Read-only operations (searching, viewing files)
+- Answering questions about the codebase
+- Running tests or builds without changes
+- Direct user requests for specific read-only actions
 
-### Phase 9: Code Review
-- Request review via GitHub
-- Address review feedback
-- Ensure all CI checks pass
+**Before ANY task, ask yourself**:
+- Will this change version-controlled files? → MUST use OrchestratorAgent
+- Multiple related tasks? → Use OrchestratorAgent
+- Single task with code changes? → Use OrchestratorAgent
+- Read-only investigation? → Can execute manually
 
-### Phase 10: Review Response
-- Implement requested changes
-- Re-test after changes
-- Update PR with responses
+**Workflow Validation Requirements**:
+- Orchestrator MUST delegate ALL tasks to WorkflowManager
+- ALL 11 workflow phases MUST be executed for every task
+- NO direct execution bypassing workflow phases
+- State tracking MUST be maintained throughout all phases
+- Quality gates MUST be validated at each phase transition
 
-### Phase 11: Merge and Cleanup
-```bash
-# After approval and merge
-cd ../..
-git worktree remove "$WORKTREE_DIR"
-git branch -d "$BRANCH_NAME"
-```
-
----
-
-## Task Analysis and Dependency Detection
-
-### Identifying Independent Tasks
-Tasks can run in PARALLEL when:
-- They modify different files
-- They have no shared dependencies  
-- They work on separate features
-- They have no import relationships
-
-### Detecting Dependencies
-Tasks must run SEQUENTIALLY when:
-- One task's output is another's input
-- They modify the same files
-- They share state or configuration
-- One creates structure another uses
-
-### Dependency Analysis Implementation
-
-Use this approach to detect task dependencies:
-
-```bash
-# 1. Extract files affected by each task
-for task in tasks; do
-    # Use grep/git to identify files the task will modify
-    git grep -l "pattern" > task_files.txt
-done
-
-# 2. Check for overlaps
-# If tasks modify the same files, they must run sequentially
-# If tasks modify different files, they can run in parallel
-```
-
-**Key Patterns**:
-- Tasks modifying the same module → Sequential
-- Tasks in different directories → Parallel  
-- Tasks with import dependencies → Sequential
-- Independent bug fixes → Parallel
-
----
-
-## Parallel Execution Guidelines
-
-### When to Execute in Parallel
-1. Multiple independent bug fixes
-2. Separate feature implementations
-3. Documentation updates for different components
-4. Test additions for different modules
-
-### How to Execute Parallel Tasks
-1. **Create separate worktrees** for each task
-2. **Use subprocess or threading** for parallel execution
-3. **Monitor progress** of each task
-4. **Aggregate results** after completion
-
-### Parallel Execution Implementation
-
-#### Using Shell Scripts (Recommended)
-```bash
-#!/bin/bash
-# Execute multiple tasks in parallel
-
-# Create worktrees and launch tasks
-for task in "$@"; do
-    (
-        WORKTREE=".worktrees/task-${task}"
-        BRANCH="feature/task-${task}"
-        
-        # Create isolated worktree
-        git worktree add "$WORKTREE" -b "$BRANCH" origin/main
-        
-        # Execute task in worktree
-        cd "$WORKTREE"
-        # Run the 11-phase workflow for this task
-        # Phase 1-11 implementation...
-    ) &
-    
-    # Store PID for monitoring
-    echo $! >> .task_pids
-done
-
-# Wait for all tasks to complete
-while read pid; do
-    wait $pid
-done < .task_pids
-```
-
-#### Using Python (When Needed)
-```python
-#!/usr/bin/env python3
-import subprocess
-import asyncio
-from pathlib import Path
-
-async def execute_task(task_id, task_description):
-    """Execute a single task in its own worktree."""
-    worktree = Path(f".worktrees/task-{task_id}")
-    branch = f"feature/task-{task_id}"
-    
-    # Create worktree
-    await asyncio.create_subprocess_exec(
-        "git", "worktree", "add", str(worktree), "-b", branch, "origin/main"
-    )
-    
-    # Execute 11-phase workflow
-    # Implementation continues...
-    
-async def execute_parallel(tasks):
-    """Execute multiple tasks in parallel."""
-    tasks_list = [execute_task(t['id'], t['desc']) for t in tasks]
-    results = await asyncio.gather(*tasks_list)
-    return results
-```
-
-### Progress Monitoring and Execution Tracking
-
-#### Real-time Progress Monitoring
-```bash
-#!/bin/bash
-# Monitor parallel task execution
-
-monitor_tasks() {
-    while true; do
-        clear
-        echo "=== Task Execution Status ==="
-        echo "Time: $(date)"
-        echo ""
-        
-        # Check each worktree for status
-        for worktree in .worktrees/task-*/; do
-            if [[ -f "$worktree/.task/state.json" ]]; then
-                TASK_ID=$(jq -r '.task_id' "$worktree/.task/state.json")
-                STATUS=$(jq -r '.status' "$worktree/.task/state.json")
-                PHASE=$(jq -r '.phase' "$worktree/.task/state.json")
-                echo "Task: $TASK_ID - Status: $STATUS - Phase: $PHASE/11"
-            fi
-        done
-        
-        # Check if all tasks complete
-        INCOMPLETE=$(find .worktrees/task-*/.task/state.json -exec jq -r '.status' {} \; | grep -v "complete" | wc -l)
-        if [[ $INCOMPLETE -eq 0 ]]; then
-            echo ""
-            echo "✅ All tasks completed!"
-            break
-        fi
-        
-        sleep 5
-    done
-}
-```
-
-#### Process Registry Pattern
-```python
-#!/usr/bin/env python3
-import json
-import subprocess
-from pathlib import Path
-from datetime import datetime
-
-class ProcessRegistry:
-    """Track and manage parallel task processes."""
-    
-    def __init__(self):
-        self.registry_file = Path(".task_registry.json")
-        self.processes = {}
-    
-    def register_task(self, task_id, pid, worktree):
-        """Register a new task process."""
-        self.processes[task_id] = {
-            "pid": pid,
-            "worktree": str(worktree),
-            "started": datetime.now().isoformat(),
-            "status": "running"
-        }
-        self.save()
-    
-    def check_status(self, task_id):
-        """Check if task process is still running."""
-        if task_id in self.processes:
-            pid = self.processes[task_id]["pid"]
-            try:
-                # Check if process exists
-                subprocess.run(["kill", "-0", str(pid)], check=True, capture_output=True)
-                return "running"
-            except subprocess.CalledProcessError:
-                self.processes[task_id]["status"] = "completed"
-                self.save()
-                return "completed"
-        return "unknown"
-    
-    def save(self):
-        """Persist registry to disk."""
-        with open(self.registry_file, 'w') as f:
-            json.dump(self.processes, f, indent=2)
-```
-
-### State Management and Recovery
-
-#### Task State Tracking
-```bash
-# Create state file for each task
-STATE_FILE=".worktrees/task-${TASK_ID}/.task/state.json"
-
-echo '{
-  "task_id": "'${TASK_ID}'",
-  "status": "in_progress",
-  "phase": 1,
-  "started": "'$(date -Iseconds)'"
-}' > "$STATE_FILE"
-
-# Update state as task progresses
-jq '.phase = 6 | .status = "testing"' "$STATE_FILE" > tmp && mv tmp "$STATE_FILE"
-```
-
-#### Error Recovery
-If a task fails:
-1. Check the state file to identify failure point
-2. Fix the issue in the worktree
-3. Resume from the failed phase
-4. Update state to reflect recovery
-
-#### Result Aggregation
-```bash
-#!/bin/bash
-# Aggregate results from all completed tasks
-
-aggregate_results() {
-    RESULTS_FILE="parallel_execution_results.json"
-    echo '{"tasks": [], "summary": {}}' > "$RESULTS_FILE"
-    
-    for worktree in .worktrees/task-*/; do
-        if [[ -f "$worktree/.task/state.json" ]]; then
-            TASK_RESULT=$(cat "$worktree/.task/state.json")
-            
-            # Add to results
-            jq --argjson task "$TASK_RESULT" '.tasks += [$task]' "$RESULTS_FILE" > tmp
-            mv tmp "$RESULTS_FILE"
-        fi
-    done
-    
-    # Generate summary
-    TOTAL=$(jq '.tasks | length' "$RESULTS_FILE")
-    COMPLETED=$(jq '[.tasks[] | select(.status == "complete")] | length' "$RESULTS_FILE")
-    
-    jq --arg total "$TOTAL" --arg completed "$COMPLETED" \
-       '.summary = {total: $total, completed: $completed}' "$RESULTS_FILE" > tmp
-    mv tmp "$RESULTS_FILE"
-    
-    echo "Results aggregated to $RESULTS_FILE"
-}
+**Enforcement Examples**:
+- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
+- ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
+- ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
+- ⚠️ **Detection**: Governance violations logged with specific error types and task IDs
 
 ### Emergency Procedures (Critical Production Issues)
 
 ⚠️ **EMERGENCY HOTFIX EXCEPTION** ⚠️
 
-For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabilities, system downtime, data corruption), you may bypass the normal workflow:
+For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabilities, system downtime, data corruption), you may bypass the orchestrator requirement:
 
 **Emergency Criteria** (ALL must be true):
 - Production system is down or compromised
@@ -425,7 +138,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
    ```bash
    git commit -m "EMERGENCY: fix critical [issue description]
 
-   Emergency hotfix bypassing normal workflow
+   Emergency hotfix bypassing normal orchestrator workflow
    due to production impact. Full workflow to follow.
 
    Fixes: [issue-number]"
@@ -435,7 +148,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 **Post-Emergency Actions**:
 - Conduct immediate post-mortem
-- Implement proper tests via standard workflow
+- Implement proper tests via orchestrator workflow
 - Update documentation to prevent recurrence
 - Review emergency decision in next team meeting
 
@@ -455,7 +168,7 @@ Note: Project-specific instructions are integrated directly into this file above
 
 ## Worktree Lifecycle Management
 
-**IMPORTANT**: Create and manage worktrees for isolated development environments.
+**IMPORTANT**: Use the worktree-manager agent for creating isolated development environments for issues.
 
 ### When to Use Worktrees
 
@@ -468,20 +181,15 @@ Use worktrees for:
 ### Worktree Lifecycle
 
 1. **Creation Phase**:
-   ```bash
-   # Create a new git worktree for an issue
-   ISSUE_NUMBER="123"
-   BRANCH_NAME="feature/issue-${ISSUE_NUMBER}-description"
-   WORKTREE_DIR=".worktrees/issue-${ISSUE_NUMBER}"
-   
-   # Remove if exists, then create
-   git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
-   git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
-   
-   # Initialize task metadata
-   mkdir -p "$WORKTREE_DIR/.task"
-   echo '{"issue": '${ISSUE_NUMBER}', "created": "'$(date -Iseconds)'"}' > "$WORKTREE_DIR/.task/metadata.json"
    ```
+   /agent:worktree-manager
+
+   Create a new git worktree for issue [number].
+   Branch name: [type]/issue-[number]-[description]
+   ```
+   - Creates isolated worktree in `.worktrees/issue-[number]/`
+   - Sets up new branch from main
+   - Initializes task metadata in `.task/` directory
 
 2. **Development Phase**:
    - Navigate to worktree: `cd .worktrees/issue-[number]/`
@@ -513,11 +221,8 @@ Use worktrees for:
 
 ```bash
 # 1. Create worktree for issue 44
-ISSUE_NUMBER="44"
-BRANCH_NAME="docs/issue-44-worktree-lifecycle"
-WORKTREE_DIR=".worktrees/issue-44"
-
-git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
+/agent:worktree-manager
+Create worktree for issue 44 about documenting lifecycle
 
 # 2. Navigate to worktree
 cd .worktrees/issue-44/
@@ -546,45 +251,14 @@ cd ../..
 git worktree remove .worktrees/issue-44/
 ```
 
-### Worktree Management Patterns
+### Worktree Agent Integration
 
-#### Automatic Branch Naming
-```bash
-# Derive branch type from issue title
-get_branch_type() {
-    case "$1" in
-        *fix*|*bug*) echo "fix" ;;
-        *feat*|*add*) echo "feature" ;;
-        *docs*) echo "docs" ;;
-        *test*) echo "test" ;;
-        *) echo "feature" ;;
-    esac
-}
-
-BRANCH_TYPE=$(get_branch_type "$ISSUE_TITLE")
-BRANCH_NAME="${BRANCH_TYPE}/issue-${ISSUE_NUMBER}-${ISSUE_SLUG}"
-```
-
-#### Task Metadata Management
-```bash
-# Initialize comprehensive task metadata
-cat > "$WORKTREE_DIR/.task/metadata.json" << EOF
-{
-  "issue_number": ${ISSUE_NUMBER},
-  "branch": "${BRANCH_NAME}",
-  "created": "$(date -Iseconds)",
-  "phases_completed": [],
-  "current_phase": 1
-}
-EOF
-```
-
-#### Parallel Work Coordination
-When executing multiple tasks:
-1. Create worktrees for each task
-2. Track PIDs for process monitoring
-3. Aggregate results after completion
-4. Clean up all worktrees when done
+The worktree-manager agent handles:
+- Automatic branch naming based on issue type
+- Task metadata initialization
+- Proper isolation from main repository
+- State tracking for development progress
+- Integration with orchestrator for parallel work
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
 
