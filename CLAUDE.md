@@ -1,8 +1,6 @@
-# AI Assistant Instructions with Integrated Orchestration
+# AI Assistant Instructions
 
-This file combines generic Claude Code best practices with project-specific instructions and INTEGRATED ORCHESTRATION LOGIC.
-
-⚠️ **CRITICAL CHANGE**: Orchestration is now built directly into these instructions. No separate orchestrator agents needed.
+This file combines generic Claude Code best practices with project-specific instructions for the Gadugi repository.
 
 ⚠️ **FIRST ACTION**: Check and update @.github/Memory.md ! ⚠️
 ⚠️ **NEW**: Memory.md now syncs with GitHub Issues via MemoryManagerAgent! ⚠️
@@ -13,14 +11,30 @@ This file combines generic Claude Code best practices with project-specific inst
 
 ## CRITICAL: Orchestration-First Development
 
-**ALL development tasks MUST follow the orchestration workflow defined here. No delegation to external agents.**
+**ALL development tasks MUST follow the orchestration workflow defined here.**
 
-### Core Orchestration Principles
+### Core Orchestration Workflow
 
-1. **Direct Execution**: You orchestrate tasks directly using these instructions
-2. **No Agent Delegation**: Do not invoke separate orchestrator or workflow manager agents
-3. **Parallel When Possible**: Identify independent tasks and execute them in parallel
-4. **Sequential When Necessary**: Handle dependencies by proper task ordering
+For complex or multiple tasks:
+1. **Task Analysis**: Decompose work into discrete tasks
+2. **Dependency Detection**: Identify which tasks can run in parallel
+3. **Worktree Isolation**: Create separate worktrees for each task
+4. **Parallel Execution**: Execute independent tasks simultaneously
+5. **Progress Monitoring**: Track all tasks to completion
+6. **Result Aggregation**: Collect and report results
+
+### Implementation Approach
+
+#### For Single Tasks
+- Follow the 11-phase workflow directly
+- Create a single worktree and execute phases sequentially
+- No external agent delegation needed
+
+#### For Multiple Tasks
+- Analyze dependencies using the patterns below
+- Create worktrees for each independent task
+- Execute tasks in parallel using subprocess management
+- Monitor completion using process tracking
 
 ---
 
@@ -157,23 +171,27 @@ Tasks must run SEQUENTIALLY when:
 - They share state or configuration
 - One creates structure another uses
 
-### Dependency Analysis Process
-```python
-# Pseudo-code for dependency detection
-def analyze_dependencies(tasks):
-    file_map = {}
-    dependencies = []
-    
-    for task in tasks:
-        files = extract_affected_files(task)
-        for file in files:
-            if file in file_map:
-                # Dependency detected
-                dependencies.append((file_map[file], task))
-            file_map[file] = task
-    
-    return dependencies
+### Dependency Analysis Implementation
+
+Use this approach to detect task dependencies:
+
+```bash
+# 1. Extract files affected by each task
+for task in tasks; do
+    # Use grep/git to identify files the task will modify
+    git grep -l "pattern" > task_files.txt
+done
+
+# 2. Check for overlaps
+# If tasks modify the same files, they must run sequentially
+# If tasks modify different files, they can run in parallel
 ```
+
+**Key Patterns**:
+- Tasks modifying the same module → Sequential
+- Tasks in different directories → Parallel  
+- Tasks with import dependencies → Sequential
+- Independent bug fixes → Parallel
 
 ---
 
@@ -191,35 +209,207 @@ def analyze_dependencies(tasks):
 3. **Monitor progress** of each task
 4. **Aggregate results** after completion
 
-### Parallel Execution Pattern
-```python
-import subprocess
-import threading
+### Parallel Execution Implementation
 
-def execute_parallel_tasks(tasks):
-    threads = []
-    results = []
+#### Using Shell Scripts (Recommended)
+```bash
+#!/bin/bash
+# Execute multiple tasks in parallel
+
+# Create worktrees and launch tasks
+for task in "$@"; do
+    (
+        WORKTREE=".worktrees/task-${task}"
+        BRANCH="feature/task-${task}"
+        
+        # Create isolated worktree
+        git worktree add "$WORKTREE" -b "$BRANCH" origin/main
+        
+        # Execute task in worktree
+        cd "$WORKTREE"
+        # Run the 11-phase workflow for this task
+        # Phase 1-11 implementation...
+    ) &
     
-    for task in tasks:
-        thread = threading.Thread(
-            target=execute_single_task,
-            args=(task, results)
-        )
-        threads.append(thread)
-        thread.start()
+    # Store PID for monitoring
+    echo $! >> .task_pids
+done
+
+# Wait for all tasks to complete
+while read pid; do
+    wait $pid
+done < .task_pids
+```
+
+#### Using Python (When Needed)
+```python
+#!/usr/bin/env python3
+import subprocess
+import asyncio
+from pathlib import Path
+
+async def execute_task(task_id, task_description):
+    """Execute a single task in its own worktree."""
+    worktree = Path(f".worktrees/task-{task_id}")
+    branch = f"feature/task-{task_id}"
     
-    # Wait for all tasks
-    for thread in threads:
-        thread.join()
+    # Create worktree
+    await asyncio.create_subprocess_exec(
+        "git", "worktree", "add", str(worktree), "-b", branch, "origin/main"
+    )
     
+    # Execute 11-phase workflow
+    # Implementation continues...
+    
+async def execute_parallel(tasks):
+    """Execute multiple tasks in parallel."""
+    tasks_list = [execute_task(t['id'], t['desc']) for t in tasks]
+    results = await asyncio.gather(*tasks_list)
     return results
 ```
+
+### Progress Monitoring and Execution Tracking
+
+#### Real-time Progress Monitoring
+```bash
+#!/bin/bash
+# Monitor parallel task execution
+
+monitor_tasks() {
+    while true; do
+        clear
+        echo "=== Task Execution Status ==="
+        echo "Time: $(date)"
+        echo ""
+        
+        # Check each worktree for status
+        for worktree in .worktrees/task-*/; do
+            if [[ -f "$worktree/.task/state.json" ]]; then
+                TASK_ID=$(jq -r '.task_id' "$worktree/.task/state.json")
+                STATUS=$(jq -r '.status' "$worktree/.task/state.json")
+                PHASE=$(jq -r '.phase' "$worktree/.task/state.json")
+                echo "Task: $TASK_ID - Status: $STATUS - Phase: $PHASE/11"
+            fi
+        done
+        
+        # Check if all tasks complete
+        INCOMPLETE=$(find .worktrees/task-*/.task/state.json -exec jq -r '.status' {} \; | grep -v "complete" | wc -l)
+        if [[ $INCOMPLETE -eq 0 ]]; then
+            echo ""
+            echo "✅ All tasks completed!"
+            break
+        fi
+        
+        sleep 5
+    done
+}
+```
+
+#### Process Registry Pattern
+```python
+#!/usr/bin/env python3
+import json
+import subprocess
+from pathlib import Path
+from datetime import datetime
+
+class ProcessRegistry:
+    """Track and manage parallel task processes."""
+    
+    def __init__(self):
+        self.registry_file = Path(".task_registry.json")
+        self.processes = {}
+    
+    def register_task(self, task_id, pid, worktree):
+        """Register a new task process."""
+        self.processes[task_id] = {
+            "pid": pid,
+            "worktree": str(worktree),
+            "started": datetime.now().isoformat(),
+            "status": "running"
+        }
+        self.save()
+    
+    def check_status(self, task_id):
+        """Check if task process is still running."""
+        if task_id in self.processes:
+            pid = self.processes[task_id]["pid"]
+            try:
+                # Check if process exists
+                subprocess.run(["kill", "-0", str(pid)], check=True, capture_output=True)
+                return "running"
+            except subprocess.CalledProcessError:
+                self.processes[task_id]["status"] = "completed"
+                self.save()
+                return "completed"
+        return "unknown"
+    
+    def save(self):
+        """Persist registry to disk."""
+        with open(self.registry_file, 'w') as f:
+            json.dump(self.processes, f, indent=2)
+```
+
+### State Management and Recovery
+
+#### Task State Tracking
+```bash
+# Create state file for each task
+STATE_FILE=".worktrees/task-${TASK_ID}/.task/state.json"
+
+echo '{
+  "task_id": "'${TASK_ID}'",
+  "status": "in_progress",
+  "phase": 1,
+  "started": "'$(date -Iseconds)'"
+}' > "$STATE_FILE"
+
+# Update state as task progresses
+jq '.phase = 6 | .status = "testing"' "$STATE_FILE" > tmp && mv tmp "$STATE_FILE"
+```
+
+#### Error Recovery
+If a task fails:
+1. Check the state file to identify failure point
+2. Fix the issue in the worktree
+3. Resume from the failed phase
+4. Update state to reflect recovery
+
+#### Result Aggregation
+```bash
+#!/bin/bash
+# Aggregate results from all completed tasks
+
+aggregate_results() {
+    RESULTS_FILE="parallel_execution_results.json"
+    echo '{"tasks": [], "summary": {}}' > "$RESULTS_FILE"
+    
+    for worktree in .worktrees/task-*/; do
+        if [[ -f "$worktree/.task/state.json" ]]; then
+            TASK_RESULT=$(cat "$worktree/.task/state.json")
+            
+            # Add to results
+            jq --argjson task "$TASK_RESULT" '.tasks += [$task]' "$RESULTS_FILE" > tmp
+            mv tmp "$RESULTS_FILE"
+        fi
+    done
+    
+    # Generate summary
+    TOTAL=$(jq '.tasks | length' "$RESULTS_FILE")
+    COMPLETED=$(jq '[.tasks[] | select(.status == "complete")] | length' "$RESULTS_FILE")
+    
+    jq --arg total "$TOTAL" --arg completed "$COMPLETED" \
+       '.summary = {total: $total, completed: $completed}' "$RESULTS_FILE" > tmp
+    mv tmp "$RESULTS_FILE"
+    
+    echo "Results aggregated to $RESULTS_FILE"
+}
 
 ### Emergency Procedures (Critical Production Issues)
 
 ⚠️ **EMERGENCY HOTFIX EXCEPTION** ⚠️
 
-For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabilities, system downtime, data corruption), you may bypass the orchestrator requirement:
+For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabilities, system downtime, data corruption), you may bypass the normal workflow:
 
 **Emergency Criteria** (ALL must be true):
 - Production system is down or compromised
@@ -235,7 +425,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
    ```bash
    git commit -m "EMERGENCY: fix critical [issue description]
 
-   Emergency hotfix bypassing normal orchestrator workflow
+   Emergency hotfix bypassing normal workflow
    due to production impact. Full workflow to follow.
 
    Fixes: [issue-number]"
@@ -245,7 +435,7 @@ For **CRITICAL PRODUCTION ISSUES** requiring immediate fixes (security vulnerabi
 
 **Post-Emergency Actions**:
 - Conduct immediate post-mortem
-- Implement proper tests via orchestrator workflow
+- Implement proper tests via standard workflow
 - Update documentation to prevent recurrence
 - Review emergency decision in next team meeting
 
@@ -265,7 +455,7 @@ Note: Project-specific instructions are integrated directly into this file above
 
 ## Worktree Lifecycle Management
 
-**IMPORTANT**: Use the worktree-manager agent for creating isolated development environments for issues.
+**IMPORTANT**: Create and manage worktrees for isolated development environments.
 
 ### When to Use Worktrees
 
@@ -278,15 +468,20 @@ Use worktrees for:
 ### Worktree Lifecycle
 
 1. **Creation Phase**:
+   ```bash
+   # Create a new git worktree for an issue
+   ISSUE_NUMBER="123"
+   BRANCH_NAME="feature/issue-${ISSUE_NUMBER}-description"
+   WORKTREE_DIR=".worktrees/issue-${ISSUE_NUMBER}"
+   
+   # Remove if exists, then create
+   git worktree remove --force "$WORKTREE_DIR" 2>/dev/null || true
+   git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
+   
+   # Initialize task metadata
+   mkdir -p "$WORKTREE_DIR/.task"
+   echo '{"issue": '${ISSUE_NUMBER}', "created": "'$(date -Iseconds)'"}' > "$WORKTREE_DIR/.task/metadata.json"
    ```
-   /agent:worktree-manager
-
-   Create a new git worktree for issue [number].
-   Branch name: [type]/issue-[number]-[description]
-   ```
-   - Creates isolated worktree in `.worktrees/issue-[number]/`
-   - Sets up new branch from main
-   - Initializes task metadata in `.task/` directory
 
 2. **Development Phase**:
    - Navigate to worktree: `cd .worktrees/issue-[number]/`
@@ -318,8 +513,11 @@ Use worktrees for:
 
 ```bash
 # 1. Create worktree for issue 44
-/agent:worktree-manager
-Create worktree for issue 44 about documenting lifecycle
+ISSUE_NUMBER="44"
+BRANCH_NAME="docs/issue-44-worktree-lifecycle"
+WORKTREE_DIR=".worktrees/issue-44"
+
+git worktree add "$WORKTREE_DIR" -b "$BRANCH_NAME" origin/main
 
 # 2. Navigate to worktree
 cd .worktrees/issue-44/
@@ -348,14 +546,45 @@ cd ../..
 git worktree remove .worktrees/issue-44/
 ```
 
-### Worktree Agent Integration
+### Worktree Management Patterns
 
-The worktree-manager agent handles:
-- Automatic branch naming based on issue type
-- Task metadata initialization
-- Proper isolation from main repository
-- State tracking for development progress
-- Integration with orchestrator for parallel work
+#### Automatic Branch Naming
+```bash
+# Derive branch type from issue title
+get_branch_type() {
+    case "$1" in
+        *fix*|*bug*) echo "fix" ;;
+        *feat*|*add*) echo "feature" ;;
+        *docs*) echo "docs" ;;
+        *test*) echo "test" ;;
+        *) echo "feature" ;;
+    esac
+}
+
+BRANCH_TYPE=$(get_branch_type "$ISSUE_TITLE")
+BRANCH_NAME="${BRANCH_TYPE}/issue-${ISSUE_NUMBER}-${ISSUE_SLUG}"
+```
+
+#### Task Metadata Management
+```bash
+# Initialize comprehensive task metadata
+cat > "$WORKTREE_DIR/.task/metadata.json" << EOF
+{
+  "issue_number": ${ISSUE_NUMBER},
+  "branch": "${BRANCH_NAME}",
+  "created": "$(date -Iseconds)",
+  "phases_completed": [],
+  "current_phase": 1
+}
+EOF
+```
+
+#### Parallel Work Coordination
+When executing multiple tasks:
+1. Create worktrees for each task
+2. Track PIDs for process monitoring
+3. Aggregate results after completion
+4. Clean up all worktrees when done
 
 Use worktrees whenever working on issues to maintain clean, isolated development environments.
 
