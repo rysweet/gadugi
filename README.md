@@ -752,6 +752,9 @@ flowchart TD
 
 ### Productivity & Content Creation
 - **prompt-writer** - Creates high-quality structured prompts for development workflows
+
+### Service Configuration & Management
+- **llm-proxy-agent** - Interactive configuration wizard for LLM Proxy Service with background execution and logging
 - **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
 ### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
@@ -759,6 +762,33 @@ flowchart TD
 
 ### Specialized Enforcement
 - **workflow-manager-phase9-enforcement** - Ensures Phase 9 code review enforcement in workflows
+
+## Core Services
+
+### LLM Proxy Service
+The LLM Proxy Service provides a unified interface to multiple LLM providers with automatic failover, caching, and load balancing.
+
+**Features:**
+- Multi-provider support (Azure OpenAI, OpenAI, Anthropic, Google, Ollama)
+- Automatic failover between providers
+- Response caching to reduce API costs
+- Load balancing strategies (round-robin, least-loaded, cost-optimized)
+- Background execution with comprehensive logging
+- Real-time monitoring capabilities
+
+**Configuration:**
+Use the `llm-proxy-agent` for interactive setup:
+```
+/agent:llm-proxy-agent
+Help me set up Azure OpenAI with the LLM Proxy
+```
+
+Or run the configuration wizard directly:
+```bash
+python3 .claude/services/llm-proxy/configure_proxy.py
+```
+
+See [LLM Proxy Documentation](.claude/services/llm-proxy/README.md) for detailed usage.
 
 ## Agent Hierarchy and Coordination
 
