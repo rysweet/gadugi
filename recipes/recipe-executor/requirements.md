@@ -331,7 +331,21 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST fail the build if stubs cannot be remediated after 3 attempts
 - MUST provide clear reports showing exact location of detected stubs
 
-#### 12.2 Code Completeness Validation
+#### 12.2 Intelligent Stub Detection
+- MUST provide intelligent context-aware stub detection using Claude
+- MUST distinguish between real stubs and false positives:
+  - Exception classes with `pass` (legitimate Python pattern)
+  - Exception handlers with `pass` (intentional silent handling)
+  - Abstract methods with proper decorators
+  - Type checking blocks (if TYPE_CHECKING)
+  - Test skips (pytest.skip, unittest.skip)
+  - Documentation mentions of "pass" or "TODO"
+- MUST use Claude to evaluate potential stubs in context
+- MUST fall back to basic regex detection if Claude is unavailable
+- MUST use intelligent detection for final validation
+- MUST minimize false positives while maintaining zero tolerance for real stubs
+
+#### 12.3 Code Completeness Validation
 - MUST verify that all generated functions have actual implementations
 - MUST check that generated tests actually test functionality (not just pass)
 - MUST ensure no placeholder or template code remains in output

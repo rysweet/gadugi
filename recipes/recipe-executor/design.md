@@ -993,7 +993,235 @@ class ParallelRecipeBuilder:
         pass
 ```
 
-### 11. Claude CLI Integration (`claude_code_generator.py`)
+### 11. Stub Detection (`stub_detector.py` and `intelligent_stub_detector.py`)
+
+```python
+class StubDetector:
+    """Basic regex-based stub detection for fast initial checks."""
+    
+    STUB_PATTERNS = [
+        r"raise\s+NotImplementedError",
+        r"pass\s*$",  # pass as only statement
+        r"#\s*TODO\b",
+        r"#\s*FIXME\b",
+        r"#\s*STUB\b",
+    ]
+    
+    def detect_stubs_in_code(self, code: str, filename: str) -> list[tuple[int, str, str]]:
+        """Detect potential stubs using regex patterns."""
+        # Returns list of (line_number, pattern_matched, line_content)
+        pass
+    
+    def validate_no_stubs(self, files: dict[str, str]) -> tuple[bool, list[str]]:
+        """Validate files contain no stub implementations."""
+        pass
+
+class IntelligentStubDetector:
+    """Claude-based intelligent stub detection with context awareness."""
+    
+    def detect_stubs_with_claude(self, files: dict[str, str]) -> tuple[bool, list[str]]:
+        """Use Claude to intelligently detect real stubs vs false positives."""
+        # 1. Collect potential stubs using quick patterns
+        # 2. Use Claude to evaluate each potential stub in context
+        # 3. Distinguish between:
+        #    - Real stubs (empty functions needing implementation)
+        #    - False positives (exception classes, handlers, docs)
+        pass
+    
+    def _create_evaluation_prompt(self, potential_stubs: dict) -> str:
+        """Create prompt for Claude to evaluate potential stubs."""
+        # Include context, surrounding code, and ask for JSON response
+        pass
+
+class StubRemediator:
+    """Automatically fixes detected stubs using Claude."""
+    
+    def remediate_stubs(self, files: dict[str, str], recipe: Recipe) -> tuple[dict[str, str], bool, list[str]]:
+        """Attempt to automatically fix stub implementations."""
+        # 1. Detect stubs
+        # 2. Generate remediation prompt
+        # 3. Use Claude to fix stubs
+        # 4. Validate fixed code
+        pass
+```
+
+### 12. Base Generator (`base_generator.py`)
+
+```python
+from abc import ABC, abstractmethod
+
+class BaseCodeGenerator(ABC):
+    """Abstract base class for all code generators."""
+    
+    @abstractmethod
+    def generate(self, recipe: Recipe, context: BuildContext) -> GeneratedCode:
+        """Generate code from recipe - must be implemented by subclasses."""
+        pass
+    
+    @abstractmethod
+    def validate_output(self, code: GeneratedCode) -> bool:
+        """Validate generated code meets requirements."""
+        pass
+
+class CodeGenerationError(Exception):
+    """Base exception for code generation errors."""
+    pass
+```
+
+### 13. Pattern Manager (`pattern_manager.py`)
+
+```python  
+class PatternManager:
+    """Manages Design Patterns - reusable recipe fragments."""
+    
+    def __init__(self, patterns_dir: Path = Path("patterns")):
+        self.patterns_dir = patterns_dir
+        self.loaded_patterns = {}
+    
+    def load_pattern(self, pattern_name: str) -> DesignPattern:
+        """Load a design pattern from patterns directory."""
+        pattern_path = self.patterns_dir / pattern_name
+        # Load pattern.json, requirements.md, design.md, templates/
+        pass
+    
+    def apply_pattern(self, recipe: Recipe, pattern: DesignPattern) -> Recipe:
+        """Apply a design pattern to a recipe."""
+        # Merge pattern requirements with recipe
+        # Apply pattern templates
+        # Handle conflicts
+        pass
+    
+    def resolve_pattern_dependencies(self, patterns: list[str]) -> list[DesignPattern]:
+        """Resolve dependencies between patterns."""
+        # Some patterns depend on others
+        # Return ordered list for application
+        pass
+```
+
+### 14. Prompt Loader (`prompt_loader.py`)
+
+```python
+class PromptLoader:
+    """Loads and manages prompt templates with variable substitution."""
+    
+    def __init__(self, prompts_dir: Path = Path("prompts")):
+        self.prompts_dir = prompts_dir
+        self.cache = {}
+    
+    def load_prompt(self, prompt_name: str, **variables) -> str:
+        """Load a prompt template and substitute variables."""
+        # Load from prompts/ directory
+        # Support {variable} substitution
+        # Include context from context/ directory
+        pass
+    
+    def get_generation_prompt(self, recipe: Recipe, phase: str) -> str:
+        """Get the appropriate generation prompt for a phase."""
+        # Phases: "tests", "implementation", "review", etc.
+        # Include:
+        # - Base prompt for phase
+        # - Recipe requirements and design
+        # - Critical guidelines
+        # - Language-specific context
+        pass
+```
+
+### 15. Language Detector (`language_detector.py`)
+
+```python
+from enum import Enum
+
+class Language(Enum):
+    """Supported programming languages."""
+    PYTHON = "python"
+    JAVASCRIPT = "javascript"
+    TYPESCRIPT = "typescript"
+    GO = "go"
+    RUST = "rust"
+    JAVA = "java"
+    CSHARP = "csharp"
+    RUBY = "ruby"
+    CONFIG = "config"  # JSON, YAML, TOML
+
+class LanguageDetector:
+    """Detects target language from recipe design."""
+    
+    def detect_language(self, recipe: Recipe) -> Language:
+        """Determine target language from design.md."""
+        # Look for explicit "Language: X" declaration
+        # Analyze code blocks for language hints
+        # Check file extensions in examples
+        pass
+    
+    def get_language_context(self, language: Language) -> str:
+        """Get language-specific guidelines and patterns."""
+        # Load from context/languages/{language}.md
+        pass
+    
+    def get_project_structure(self, language: Language) -> dict[str, str]:
+        """Get standard project structure for language."""
+        # Return directory structure template
+        pass
+```
+
+### 16. CLI Entry Point (`__main__.py`)
+
+```python
+"""Command-line interface for Recipe Executor."""
+
+import click
+from pathlib import Path
+from .orchestrator import RecipeOrchestrator, BuildOptions
+
+@click.group()
+@click.version_option(version="0.1.0")
+def cli():
+    """Recipe Executor - Transform recipes into production code."""
+    pass
+
+@cli.command()
+@click.argument('recipe', type=click.Path(exists=True))
+@click.option('--dry-run', is_flag=True, help='Show what would be generated')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
+@click.option('--force', is_flag=True, help='Force rebuild even if cached')
+@click.option('--output-dir', type=click.Path(), help='Output directory')
+@click.option('--parallel/--no-parallel', default=True, help='Enable parallel builds')
+@click.option('--allow-self-overwrite', is_flag=True, help='DANGEROUS: Allow self-overwrite')
+def execute(recipe, dry_run, verbose, force, output_dir, parallel, allow_self_overwrite):
+    """Execute a recipe to generate code."""
+    options = BuildOptions(
+        dry_run=dry_run,
+        verbose=verbose,
+        force_rebuild=force,
+        output_dir=Path(output_dir) if output_dir else None,
+        parallel=parallel,
+        allow_self_overwrite=allow_self_overwrite
+    )
+    
+    orchestrator = RecipeOrchestrator()
+    result = orchestrator.execute(Path(recipe), options)
+    
+    # Display results
+    if result.success:
+        click.echo(click.style("✅ Recipe executed successfully!", fg='green'))
+    else:
+        click.echo(click.style(f"❌ Recipe failed: {result.error}", fg='red'))
+        sys.exit(1)
+
+@cli.command()  
+@click.argument('recipe', type=click.Path(exists=True))
+def analyze(recipe):
+    """Analyze a recipe for complexity and dependencies."""
+    # Show dependency graph
+    # Evaluate complexity
+    # Suggest decomposition if needed
+    pass
+
+if __name__ == '__main__':
+    cli()
+```
+
+### 17. Claude CLI Integration (`claude_code_generator.py`)
 ```python
 class ClaudeCodeGenerator:
     """Generates code using Claude Code CLI - the chosen AI implementation."""
