@@ -1,12 +1,12 @@
 {
   "recipe-executor": {
     "recipe_name": "recipe-executor",
-    "recipe_checksum": "81f9efe80ad8b245b1b71d0620d7f8c13375387808dc068328d104ad5522a496",
-    "build_time": "2025-08-22T14:53:52.855650",
+    "recipe_checksum": "93d4d830f787b38d300ea18e75e8fbf0124dc793c816ac95913601cab8499fbb",
+    "build_time": "2025-08-23T16:45:46.144831",
     "success": false,
     "outputs": [],
     "errors": [
-      "Claude CLI failed with exit code 1"
+      "Failed to generate stub-free code after 5 iterations:\n\nStubs detected in cli.py:\n  Line 312: - All quality gates pass\n    Pattern matched: pass\\s*$\n\nStubs detected in README.md:\n  Line 82: - All tests pass\n    Pattern matched: pass\\s*$\n  Line 83: - Quality gates pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/quality_gates.py:\n  Line 192: True if all tests pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/claude_code_generator.py:\n  Line 21: pass\n    Pattern matched: pass\\s*$\n  Line 251: 1. Write the minimal code needed to make tests pass\n    Pattern matched: pass\\s*$\n  Line 471: 'pass  # TODO',\n    Pattern matched: #\\s*TODO\\b\n  Line 472: 'raise NotImplementedError',\n    Pattern matched: raise\\s+NotImplementedError\n  Line 473: '# TODO: implement',\n    Pattern matched: #\\s*TODO\\b\n  Line 474: 'return None  # placeholder',\n    Pattern matched: '[^']*placeholder[^']*'\n  Line 475: '...  # stub'\n    Pattern matched: #\\s*STUB\\b\n  Line 482: # Check for functions with only pass\n    Pattern matched: pass\\s*$\n  Line 492: pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/test_generator.py:\n  Line 109: pass\n    Pattern matched: pass\\s*$"
     ]
   },
   "test-recipe": {

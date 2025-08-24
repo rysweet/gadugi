@@ -13,6 +13,7 @@ from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, Com
 from .python_standards import PythonStandards
 from .base_generator import BaseCodeGenerator, CodeGenerationError
 from .stub_detector import StubDetector
+from .intelligent_stub_detector import IntelligentStubDetector
 from .prompt_loader import PromptLoader
 
 # Set up logging
@@ -64,6 +65,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         self.claude_command = claude_command
         self.enforce_no_stubs = enforce_no_stubs
         self.stub_detector = StubDetector(strict_mode=True)
+        self.intelligent_detector = IntelligentStubDetector(strict_mode=True)
         self.stub_remediator = None  # Will be set to StubRemediator(self) if needed
         self.prompt_loader = PromptLoader()  # Initialize prompt loader for template management
 
@@ -121,7 +123,18 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                     is_valid = False
                 # Check for stubs and TODOs
                 elif self.enforce_no_stubs:
-                    is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
+                    # Try intelligent detection first (if iteration > 2, use Claude)
+                    if iteration > 2:
+                        try:
+                            logger.info("Using intelligent stub detection with Claude...")
+                            has_stubs, stub_errors = self.intelligent_detector.detect_stubs_with_claude(generated_files)
+                            is_valid = not has_stubs
+                        except Exception as e:
+                            logger.warning(f"Intelligent detection failed: {e}, falling back to regex")
+                            is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
+                    else:
+                        # Use basic detection for early iterations (faster)
+                        is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
 
                     if is_valid:
                         logger.info(f"Code generation successful after {iteration} iteration(s)")
@@ -151,7 +164,14 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
             # Step 3: Detect and remediate any stub implementations
             if self.enforce_no_stubs:
-                is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
+                # Use intelligent detection for final validation
+                try:
+                    logger.info("Final validation using intelligent stub detection...")
+                    has_stubs, stub_errors = self.intelligent_detector.detect_stubs_with_claude(generated_files)
+                    is_valid = not has_stubs
+                except Exception as e:
+                    logger.warning(f"Intelligent detection failed in final validation: {e}")
+                    is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
 
                 if not is_valid:
                     # Try to remediate stubs automatically
