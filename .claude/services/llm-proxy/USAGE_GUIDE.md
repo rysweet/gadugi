@@ -232,6 +232,69 @@ export LLM_PROXY_MAX_RETRIES="3"
 export LLM_PROXY_LOAD_BALANCE="ROUND_ROBIN"
 ```
 
+## Time-Based Scheduling
+
+The LLM Proxy supports automatic shutdown scheduling, perfect for managing rate limits and costs.
+
+### Use Cases
+- **Rate Limit Management**: Run until limits reset (e.g., "until 7pm")
+- **Cost Control**: Limit daily usage (e.g., "run for 2 hours")
+- **Testing**: Time-bounded test sessions
+- **Compliance**: Enforce usage policies
+
+### Configuration Wizard with Scheduling
+
+```python
+# Using the configuration wizard
+python3 configure_proxy.py
+
+# When prompted:
+Would you like to schedule automatic shutdown? [y/N]: y
+
+# Select scheduling option:
+1. Run until specific time (e.g., 7:00 PM)
+2. Run for duration (e.g., 2 hours)
+3. Run until tomorrow at specific time
+
+# Examples:
+Time: 19:00           # 24-hour format
+Time: 7:00 PM        # 12-hour format
+Duration: 2h         # 2 hours
+Duration: 90m        # 90 minutes
+Duration: 2h30m      # 2 hours 30 minutes
+```
+
+### Programmatic Scheduling
+
+```python
+import os
+from datetime import datetime, timedelta
+
+# Set shutdown time via environment
+shutdown_time = datetime.now() + timedelta(hours=2)
+os.environ["LLM_PROXY_SHUTDOWN_TIME"] = shutdown_time.isoformat()
+
+# Start service with environment variable
+service = LLMProxyService()
+await service.start()
+```
+
+### Managing Scheduled Services
+
+```bash
+# Check scheduled shutdown time (in logs)
+tail -f logs/llm_proxy_*.log | grep SCHEDULER
+
+# Cancel scheduled shutdown
+rm scheduler_<PID>.py
+
+# Stop service immediately (ignores schedule)
+kill <PID>
+
+# View remaining time
+ps aux | grep scheduler_
+```
+
 ## Running as a Service
 
 ### Standalone Mode

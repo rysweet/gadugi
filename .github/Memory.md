@@ -264,6 +264,10 @@ Created interactive configuration wizard and agent for LLM Proxy Service:
 - Supports Azure OpenAI, OpenAI, Anthropic, Google, Ollama
 - Background service execution with logging
 - Real-time log monitoring with tail commands
+- **NEW: Time-based scheduling** - Auto-shutdown at specific time or after duration
+  - Perfect for rate limit management (e.g., "run until 7pm")
+  - Three scheduling options: until time today, for duration, until tomorrow
+  - Automatic shutdown with cleanup and logging
 
 **Migration Achievements:**
 - Created 4 single-purpose executors (Code, Test, GitHub, Worktree)

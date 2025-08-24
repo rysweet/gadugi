@@ -775,6 +775,7 @@ The LLM Proxy Service provides a unified interface to multiple LLM providers wit
 - Load balancing strategies (round-robin, least-loaded, cost-optimized)
 - Background execution with comprehensive logging
 - Real-time monitoring capabilities
+- **Time-based scheduling** - Run until specific time or for duration (e.g., "until 7pm" when rate limits reset)
 
 **Configuration:**
 Use the `llm-proxy-agent` for interactive setup:
