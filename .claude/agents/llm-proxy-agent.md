@@ -500,17 +500,86 @@ if __name__ == "__main__":
     configurator.run()
 ```
 
+## Scheduling Features
+
+### Time-Based Service Management
+The LLM Proxy can be configured to run for a specific duration or until a specific time, which is useful when:
+- API rate limits reset at specific times
+- You want to limit usage during peak hours
+- You need temporary access for testing
+- Cost management requires time-based controls
+
+### Scheduling Options
+1. **Run until specific time today** - e.g., "until 7:00 PM"
+2. **Run for duration** - e.g., "for 2 hours" or "for 90 minutes"
+3. **Run until tomorrow** - e.g., "until 9:00 AM tomorrow"
+
+When scheduled, the service will:
+- Start immediately and run until the specified time
+- Automatically shutdown at the scheduled time
+- Log the shutdown event for audit purposes
+- Clean up scheduler processes
+
 ## Usage Examples
 
-### Example 1: Configure Azure OpenAI
+### Example 1: Configure Azure OpenAI with Time Limit
+```
+User: "Use the LLMProxy to help me setup Azure OpenAI and run it until 7pm"
+
+Agent: I'll help you configure Azure OpenAI for the LLM Proxy Service with automatic shutdown at 7:00 PM.
+
+[Runs the configuration wizard]
+
+Would you like to schedule automatic shutdown? [y/N]: y
+
+⏰ Schedule Configuration
+Options:
+  1. Run until specific time (e.g., 7:00 PM)
+  2. Run for duration (e.g., 2 hours)
+  3. Run until tomorrow at specific time
+
+➤ Select scheduling option: 1
+📅 Enter shutdown time for today
+Time: 19:00
+✅ Service will run until 07:00 PM (5 hours and 30 minutes)
+
+The service is now running with scheduled shutdown:
+
+✅ Service Status: Running
+⏰ Scheduled Shutdown: 07:00 PM on January 24
+📁 Log file: /home/user/gadugi/.claude/services/llm-proxy/logs/llm_proxy_20240124_143022.log
+📊 Monitor logs: tail -f /home/user/gadugi/.claude/services/llm-proxy/logs/llm_proxy_20240124_143022.log
+🔴 Auto-stop at: 07:00 PM
+🛑 Stop early: kill 12345
+❌ Cancel timer: rm .claude/services/llm-proxy/scheduler_12345.py
+```
+
+### Example 2: Run for Specific Duration
+```
+User: "Start the LLM proxy for 2 hours"
+
+Agent: I'll start the LLM Proxy Service for 2 hours.
+
+[Configuration wizard with duration selection]
+
+⏱️ Enter duration to run
+Duration: 2h
+✅ Service will run for 2 hours until 03:30 PM
+
+The service is now running with automatic shutdown after 2 hours.
+```
+
+### Example 3: Configure Without Time Limit
 ```
 User: "Use the LLMProxy to help me setup Azure OpenAI"
 
-Agent: I'll help you configure Azure OpenAI for the LLM Proxy Service. Let me start the configuration wizard for you.
+Agent: I'll help you configure Azure OpenAI for the LLM Proxy Service.
 
 [Runs the configuration wizard, collects credentials, saves configuration]
 
-The service is now configured and running! Here are the details:
+Would you like to schedule automatic shutdown? [y/N]: n
+
+The service is now configured and running continuously:
 
 ✅ Service Status: Running
 📁 Log file: /home/user/gadugi/.claude/services/llm-proxy/logs/llm_proxy_20240124_143022.log

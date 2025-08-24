@@ -53,6 +53,13 @@ python3 .claude/services/llm-proxy/configure_proxy.py
 - Provides monitoring commands
 - Saves PID for service control
 
+### Time-Based Scheduling (NEW!)
+- Run until specific time (e.g., "until 7:00 PM")
+- Run for duration (e.g., "for 2 hours")
+- Run until tomorrow at specific time
+- Automatic shutdown at scheduled time
+- Cancel or modify schedule anytime
+
 ### Configuration Testing
 - Validates API keys before starting
 - Tests provider connectivity
@@ -123,6 +130,31 @@ The LLM Proxy is now running with Azure OpenAI!
 - Monitor: tail -f .claude/services/llm-proxy/logs/llm_proxy_20240124_143022.log
 ```
 
+### Example 3: Running with Time Limit
+
+```
+User: Run the LLM proxy until 7pm when my Claude usage resets
+
+Agent: I'll configure the LLM Proxy to run until 7:00 PM with automatic shutdown.
+
+Would you like to schedule automatic shutdown? [y/N]: y
+
+⏰ Schedule Configuration
+  1. Run until specific time (e.g., 7:00 PM)
+  2. Run for duration (e.g., 2 hours)
+  3. Run until tomorrow at specific time
+
+➤ Select: 1
+📅 Enter shutdown time: 19:00
+✅ Service will run until 07:00 PM (4 hours and 30 minutes)
+
+Service started with scheduled shutdown:
+⏰ Auto-stop at: 07:00 PM
+📊 Monitor: tail -f logs/llm_proxy_20240124_143022.log
+🛑 Stop early: kill 12345
+❌ Cancel timer: rm scheduler_12345.py
+```
+
 ## Service Management
 
 ### Starting the Service
@@ -160,6 +192,38 @@ kill $(cat llm_proxy.pid)
 
 # Manual stop
 ps aux | grep llm_proxy
+kill <PID>
+```
+
+### Scheduled Service Management
+
+The LLM Proxy supports automatic shutdown scheduling, perfect for:
+- Working around API rate limits that reset at specific times
+- Cost management by limiting usage hours
+- Testing with time boundaries
+- Compliance with usage policies
+
+**Scheduling Options:**
+```bash
+# Run until 7:00 PM today
+Time: 19:00 or 7:00 PM
+
+# Run for 2 hours
+Duration: 2h or 120m
+
+# Run until 9:00 AM tomorrow
+Tomorrow time: 09:00 or 9:00 AM
+```
+
+**Managing Scheduled Services:**
+```bash
+# Check remaining time (look for SCHEDULER entries in log)
+tail -f logs/llm_proxy_*.log | grep SCHEDULER
+
+# Cancel scheduled shutdown
+rm scheduler_<PID>.py
+
+# Stop service immediately (ignores schedule)
 kill <PID>
 ```
 
