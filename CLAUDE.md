@@ -155,6 +155,226 @@ git branch -d "$BRANCH_NAME"
 
 ---
 
+## NEW: Simplified Executor Architecture (V0.3)
+
+### Overview
+Gadugi V0.3 uses simplified single-purpose executors located in `.claude/executors/`. These executors follow the NO DELEGATION principle - they cannot call other agents, only direct tools.
+
+### Available Executors
+
+#### 1. Code Executor
+Handles all file operations:
+```python
+# Write a new file
+from .claude.executors import execute
+result = execute('code', {
+    'action': 'write',
+    'file_path': 'src/example.py',
+    'content': 'print("Hello, World!")'
+})
+
+# Read a file
+result = execute('code', {
+    'action': 'read',
+    'file_path': 'src/example.py'
+})
+
+# Edit a file
+result = execute('code', {
+    'action': 'edit',
+    'file_path': 'src/example.py',
+    'old_content': 'print("Hello, World!")',
+    'new_content': 'print("Hello, Gadugi!")'
+})
+```
+
+#### 2. Test Executor
+Runs tests with automatic framework detection:
+```python
+# Run pytest (automatically detects UV projects)
+result = execute('test', {
+    'test_framework': 'pytest',
+    'test_path': 'tests/',
+    'options': {
+        'verbose': True,
+        'coverage': True,
+        'coverage_path': 'src'
+    }
+})
+
+# Run unittest
+result = execute('test', {
+    'test_framework': 'unittest',
+    'test_path': 'tests/'
+})
+
+# Run Jest for JavaScript
+result = execute('test', {
+    'test_framework': 'jest',
+    'test_path': 'tests/',
+    'working_dir': './frontend'
+})
+```
+
+#### 3. GitHub Executor
+Manages GitHub operations via gh CLI:
+```python
+# Create an issue
+result = execute('github', {
+    'operation': 'create_issue',
+    'title': 'Fix bug in parser',
+    'body': 'The parser fails on...',
+    'labels': ['bug', 'parser']
+})
+
+# Create a PR
+result = execute('github', {
+    'operation': 'create_pr',
+    'title': 'Fix: Parser bug (#123)',
+    'body': 'This PR fixes...',
+    'base': 'main',
+    'head': 'fix/parser-bug'
+})
+
+# Check PR status
+result = execute('github', {
+    'operation': 'pr_status',
+    'pr_number': 123
+})
+
+# IMPORTANT: Never auto-merge! Always wait for user approval
+# Only merge when user explicitly says to:
+if user_approved:
+    result = execute('github', {
+        'operation': 'merge_pr',
+        'pr_number': 123,
+        'delete_branch': True
+    })
+```
+
+#### 4. Worktree Executor
+Manages git worktrees for isolated development:
+```python
+# Create a worktree
+result = execute('worktree', {
+    'operation': 'create',
+    'task_id': '123',
+    'branch_name': 'feature/task-123',
+    'base_branch': 'main'
+})
+
+# List worktrees
+result = execute('worktree', {
+    'operation': 'list'
+})
+
+# Check worktree status
+result = execute('worktree', {
+    'operation': 'status',
+    'task_id': '123'
+})
+
+# Remove worktree
+result = execute('worktree', {
+    'operation': 'remove',
+    'task_id': '123'
+})
+
+# Cleanup old worktrees
+result = execute('worktree', {
+    'operation': 'cleanup',
+    'max_age_days': 7,
+    'dry_run': False
+})
+```
+
+### Orchestration Patterns
+
+#### Single Task Execution
+For a single task, orchestrate executors directly:
+```python
+# 1. Create worktree
+worktree_result = execute('worktree', {
+    'operation': 'create',
+    'task_id': '123',
+    'branch_name': 'fix/bug-123'
+})
+
+# 2. Write code in worktree
+code_result = execute('code', {
+    'action': 'write',
+    'file_path': f"{worktree_result['worktree_path']}/fix.py",
+    'content': '...'
+})
+
+# 3. Run tests
+test_result = execute('test', {
+    'test_framework': 'pytest',
+    'test_path': 'tests/',
+    'working_dir': worktree_result['worktree_path']
+})
+
+# 4. Create PR if tests pass
+if test_result['success']:
+    pr_result = execute('github', {
+        'operation': 'create_pr',
+        'title': 'Fix bug #123',
+        'body': 'Tests passing, ready for review'
+    })
+```
+
+#### Parallel Task Execution
+For multiple independent tasks, use subprocess or threading:
+```python
+import subprocess
+import json
+from pathlib import Path
+
+def execute_task_in_worktree(task_id, task_description):
+    """Execute a task in its own worktree."""
+    # Create worktree
+    worktree = execute('worktree', {
+        'operation': 'create',
+        'task_id': task_id
+    })
+    
+    # Execute task-specific operations
+    # ... code writing, testing, etc ...
+    
+    return results
+
+# Execute multiple tasks in parallel
+tasks = [
+    {'id': '123', 'desc': 'Fix parser bug'},
+    {'id': '124', 'desc': 'Add logging'},
+    {'id': '125', 'desc': 'Update docs'}
+]
+
+# Use threading or asyncio for parallel execution
+import concurrent.futures
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    futures = [executor.submit(execute_task_in_worktree, t['id'], t['desc']) for t in tasks]
+    results = [f.result() for f in concurrent.futures.as_completed(futures)]
+```
+
+### Important Principles
+
+1. **NO DELEGATION**: Executors never call other agents or executors
+2. **SINGLE PURPOSE**: Each executor has exactly one responsibility
+3. **DIRECT TOOLS**: Executors use only subprocess, file I/O, etc.
+4. **STRUCTURED RESULTS**: All executors return consistent result dicts
+5. **ERROR HANDLING**: All executors handle and report errors gracefully
+
+### Migration Notes
+
+When migrating from old agent patterns:
+- Replace agent delegation chains with direct executor calls
+- Use CLAUDE.md orchestration instead of WorkflowManager
+- Call executors sequentially or in parallel as needed
+- Results from one executor can be passed to another
+
+---
+
 ## Task Analysis and Dependency Detection
 
 ### Identifying Independent Tasks
