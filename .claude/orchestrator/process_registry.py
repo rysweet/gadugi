@@ -123,8 +123,8 @@ class ProcessRegistry:
             logger.warning(f"Process {(process_info.task_id if process_info is not None else None)} already registered, updating...")
 
         # Set initial status if not specified
-        if (process_info.status if process_info is not None else None) is None:
-            (process_info.status if process_info is not None else None) = ProcessStatus.QUEUED
+        if process_info is not None and process_info.status is None:
+            process_info.status = ProcessStatus.QUEUED
 
         # Initialize heartbeat
         process_info.last_heartbeat = datetime.now()
@@ -151,7 +151,9 @@ class ProcessRegistry:
 
         process = self.processes[task_id]
         old_status = (process.status if process is not None else None)
-        (process.status if process is not None else None) = status
+        if process is not None:
+
+            process.status = status
         process.last_heartbeat = datetime.now()
 
         # Update timing information
@@ -185,7 +187,8 @@ class ProcessRegistry:
 
     def get_processes_by_status(self, status: ProcessStatus) -> List[ProcessInfo]:
         """Get all processes with specified status"""
-        return [p for p in self.processes.values() if (p.status if p is not None else None) == status]
+        return [p for p in self.processes.values() if p is not None:
+     p.status == status]
 
     def get_active_processes(self) -> List[ProcessInfo]:
         """Get all active (queued or running) processes"""
@@ -252,10 +255,12 @@ class ProcessRegistry:
         # Count by status
         status_counts = {}
         for status in ProcessStatus:
-            status_counts[status] = len([p for p in processes if (p.status if p is not None else None) == status])
+            status_counts[status] = len([p for p in processes if p is not None:
+     p.status == status])
 
         # Calculate average execution time for completed processes
-        completed_processes = [p for p in processes if (p.status if p is not None else None) == ProcessStatus.COMPLETED]
+        completed_processes = [p for p in processes if p is not None:
+     p.status == ProcessStatus.COMPLETED]
         avg_execution_time = None
         if completed_processes:
             execution_times = []
@@ -268,7 +273,8 @@ class ProcessRegistry:
                 avg_execution_time = sum(execution_times) / len(execution_times)
 
         # Calculate resource usage for running processes
-        running_processes = [p for p in processes if (p.status if p is not None else None) == ProcessStatus.RUNNING]
+        running_processes = [p for p in processes if p is not None:
+     p.status == ProcessStatus.RUNNING]
         total_cpu = 0.0
         total_memory = 0.0
 
@@ -326,7 +332,9 @@ class ProcessRegistry:
             return False
 
         # Try to terminate the process if it's running
-        if (process.status if process is not None else None) == ProcessStatus.RUNNING and process.pid:
+        if process is not None:
+
+            process.status == ProcessStatus.RUNNING and process.pid:
             try:
                 proc = psutil.Process(process.pid)
                 proc.terminate()
@@ -339,7 +347,9 @@ class ProcessRegistry:
                 logger.warning(f"Could not terminate process {task_id}: {e}")
 
         # Update status
-        (process.status if process is not None else None) = ProcessStatus.CANCELLED
+        if process is not None:
+
+            process.status = ProcessStatus.CANCELLED
         process.completed_at = datetime.now()
         process.error_message = "Process cancelled by user"
 

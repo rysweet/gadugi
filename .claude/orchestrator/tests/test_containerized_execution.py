@@ -329,8 +329,8 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
-        (mock_container_result.task_id if mock_container_result is not None else None) = "test-task"
-        (mock_container_result.status if mock_container_result is not None else None) = "success"
+        mock_container_result.task_id = "test-task"
+        mock_container_result.status = "success"
         mock_container_result.start_time = datetime.now()
         mock_container_result.end_time = datetime.now()
         mock_container_result.duration = 120.0
@@ -409,7 +409,8 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         mock_container = Mock()
         mock_container.id = "test-container"
         mock_container.name = "orchestrator-test-task"
-        (mock_container.status if mock_container is not None else None) = "running"
+        if mock_container is not None:
+                    mock_container.status = "running"
         mock_container.attrs = {
             'Created': '2023-01-01T00:00:00Z',
             'Config': {'Env': ['TEST=1']},

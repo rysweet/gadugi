@@ -370,9 +370,9 @@ def main():
             user_input = sys.stdin.read()
             prompt_files = cli.parse_user_input(user_input)
 
-        elif args is not None and (args.prompt_file if args is not None else None)s:
+        elif args is not None and args.prompt_files:
             # Direct command line arguments
-            prompt_files = (args.prompt_file if args is not None else None)s
+            prompt_files = args.prompt_files
 
         else:
             # No input specified

@@ -672,7 +672,7 @@ def main():
     orchestrator = OrchestratorCoordinator(config, args.project_root)
 
     try:
-        result = orchestrator.orchestrate((args.prompt_file if args is not None else None)s)
+        result = orchestrator.orchestrate(args.prompt_file if args is not None else None)
 
         # Print results
         print(f"\nOrchestration Results:")

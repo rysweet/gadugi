@@ -174,9 +174,11 @@ Process these prompts in parallel:
 
         # Mock task analyzer
         mock_analysis = Mock()
-        (mock_analysis.task_id if mock_analysis is not None else None) = "test-task-1"
+        if mock_analysis is not None:
+                    mock_analysis.task_id = "test-task-1"
         mock_analysis.name = "Test Task 1"
-        (mock_analysis.prompt_file if mock_analysis is not None else None) = "test-feature-1.md"
+        if mock_analysis is not None:
+                    mock_analysis.prompt_file = "test-feature-1.md"
         mock_analysis.task_type = "feature_implementation"
         mock_analysis.complexity = "MEDIUM"
         mock_analysis.can_parallelize = True
@@ -187,7 +189,8 @@ Process these prompts in parallel:
 
         # Mock worktree manager
         mock_worktree_info = Mock()
-        (mock_worktree_info.task_id if mock_worktree_info is not None else None) = "test-task-1"
+        if mock_worktree_info is not None:
+                    mock_worktree_info.task_id = "test-task-1"
         mock_worktree_info.worktree_path = self.test_dir / ".worktrees/test-task-1"
         mock_worktree_info.branch_name = "feature/test-task-1"
 
@@ -198,7 +201,8 @@ Process these prompts in parallel:
 
         # Mock execution engine
         mock_result = Mock()
-        (mock_result.task_id if mock_result is not None else None) = "test-task-1"
+        if mock_result is not None:
+                    mock_result.task_id = "test-task-1"
         mock_result.success = True
         mock_result.execution_time = 30.0
         mock_result.error_message = None

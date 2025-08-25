@@ -136,7 +136,9 @@ class DelegationCoordinator:
                 self._execute_delegation(task)
             except Exception as e:
                 logger.error(f"Failed to execute delegation {(task.task_id if task is not None else None)}: {e}")
-                (task.status if task is not None else None) = DelegationStatus.FAILED
+                if task is not None:
+
+                    task.status = DelegationStatus.FAILED
                 task.error_message = str(e)
 
         return delegation_tasks
@@ -427,7 +429,9 @@ Resolve the identified blocking issue for PR #{pr_number}.
         logger.info(f"Executing delegation {(task.task_id if task is not None else None)} to {task.agent_target}")
 
         try:
-            (task.status if task is not None else None) = DelegationStatus.DELEGATED
+            if task is not None:
+
+                task.status = DelegationStatus.DELEGATED
             task.last_attempt = datetime.now()
 
             if task.agent_target == "workflow-master":
@@ -442,7 +446,9 @@ Resolve the identified blocking issue for PR #{pr_number}.
 
         except Exception as e:
             logger.error(f"Delegation execution failed for {(task.task_id if task is not None else None)}: {e}")
-            (task.status if task is not None else None) = DelegationStatus.FAILED
+            if task is not None:
+
+                task.status = DelegationStatus.FAILED
             task.error_message = str(e)
             task.retry_count += 1
 
@@ -466,7 +472,9 @@ Resolve the identified blocking issue for PR #{pr_number}.
                 f.write(task.prompt_template)
 
             logger.info(f"Created WorkflowMaster prompt: {prompt_path}")
-            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
+            if task is not None:
+
+                task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create WorkflowMaster prompt: {e}")
@@ -511,7 +519,9 @@ jobs:
                 f.write(workflow_content)
 
             logger.info(f"Created WorkflowMaster workflow: {workflow_path}")
-            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
+            if task is not None:
+
+                task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create WorkflowMaster workflow: {e}")
@@ -522,7 +532,9 @@ jobs:
             # This would invoke WorkflowMaster with the generated prompt
             # For now, we'll log the intention
             logger.info(f"Would invoke WorkflowMaster for task {(task.task_id if task is not None else None)}")
-            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
+            if task is not None:
+
+                task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to invoke WorkflowMaster: {e}")
@@ -584,7 +596,9 @@ jobs:
                 f.write(workflow_content)
 
             logger.info(f"Created AI code review workflow: {workflow_path}")
-            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
+            if task is not None:
+
+                task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create code review workflow: {e}")
@@ -593,7 +607,9 @@ jobs:
         """Invoke code-reviewer directly."""
         try:
             logger.info(f"Would invoke code-reviewer for PR #{task.pr_number}")
-            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
+            if task is not None:
+
+                task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to invoke code-reviewer: {e}")
@@ -677,7 +693,9 @@ jobs:
         """Mark a delegation task as completed."""
         task = self.active_delegations.get(task_id)
         if task:
-            (task.status if task is not None else None) = (
+            if task is not None:
+
+                task.status = (
                 DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
             )
             task.completion_time = datetime.now()
@@ -744,13 +762,17 @@ jobs:
         completed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if (task.status if task is not None else None) == DelegationStatus.COMPLETED
+            if task is not None:
+
+                task.status == DelegationStatus.COMPLETED
         )
 
         failed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if (task.status if task is not None else None) == DelegationStatus.FAILED
+            if task is not None:
+
+                task.status == DelegationStatus.FAILED
         )
 
         success_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
@@ -759,7 +781,9 @@ jobs:
         completed_with_time = [
             task
             for task in self.active_delegations.values()
-            if (task.status if task is not None else None) == DelegationStatus.COMPLETED and task.completion_time
+            if task is not None:
+
+                task.status == DelegationStatus.COMPLETED and task.completion_time
         ]
 
         avg_completion_time = 0

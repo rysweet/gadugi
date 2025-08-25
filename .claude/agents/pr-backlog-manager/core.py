@@ -348,15 +348,21 @@ class PRBacklogManager:
 
             # Update status based on results
             if assessment is not None and assessment.is_ready:
-                (assessment.status if assessment is not None else None) = PRStatus.READY
+                if assessment is not None:
+
+                    assessment.status = PRStatus.READY
                 self._apply_ready_label(pr_number)
             elif assessment is not None and assessment.blocking_issues:
-                (assessment.status if assessment is not None else None) = PRStatus.BLOCKED
+                if assessment is not None:
+
+                    assessment.status = PRStatus.BLOCKED
                 self._delegate_issue_resolution(
                     pr_number, assessment.resolution_actions
                 )
             else:
-                (assessment.status if assessment is not None else None) = PRStatus.FAILED
+                if assessment is not None:
+
+                    assessment.status = PRStatus.FAILED
 
             # Calculate processing time
             processing_time = (datetime.now() - start_time).total_seconds()
@@ -718,9 +724,12 @@ class PRBacklogManager:
                     assessments.append(assessment)
 
                     # Update metrics
-                    if (assessment.status if assessment is not None else None) == PRStatus.READY:
+                    if assessment is not None:
+
+                        assessment.status == PRStatus.READY:
                         self.metrics.ready_prs += 1
-                    elif (assessment.status if assessment is not None else None) == PRStatus.BLOCKED:
+                    elif if assessment is not None:
+     assessment.status == PRStatus.BLOCKED:
                         self.metrics.blocked_prs += 1
 
                 except Exception as e:

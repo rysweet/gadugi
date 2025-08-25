@@ -319,7 +319,9 @@ class EnhancedWorkflowMaster:
 
         try:
             for task in workflow.tasks:
-                if (task.status if task is not None else None) == "completed":
+                if task is not None:
+
+                    task.status == "completed":
                     continue
 
                 # Check dependencies
@@ -333,8 +335,10 @@ class EnhancedWorkflowMaster:
                 success = self.execute_task(task, workflow)
 
                 if success:
-                    (task.status if task is not None else None) = "completed"
-                    task.completed_at = datetime.now()
+                    if task is not None:
+
+                        task.status = "completed"
+                        task.completed_at = datetime.now()
                     self.execution_stats["completed_tasks"] += 1
                     logger.info(f"Task {task.id} completed successfully")
                 else:
@@ -352,22 +356,32 @@ class EnhancedWorkflowMaster:
                         )
                         success = self.execute_task(task, workflow)
                         if success:
-                            (task.status if task is not None else None) = "completed"
+                            if task is not None:
+
+                                task.status = "completed"
                             task.completed_at = datetime.now()
                         else:
-                            (task.status if task is not None else None) = "failed"
+                            if task is not None:
+
+                                task.status = "failed"
                             self.execution_stats["failed_tasks"] += 1
                     elif decision == WorkflowDecision.SKIP:
-                        (task.status if task is not None else None) = "skipped"
+                        if task is not None:
+
+                            task.status = "skipped"
                         logger.warning(
                             f"Task {task.id} skipped due to autonomous decision"
                         )
                     elif decision == WorkflowDecision.ABORT:
                         logger.error(f"Workflow aborted due to task {task.id} failure")
-                        (workflow.status if workflow is not None else None) = "aborted"
+                        if workflow is not None:
+
+                            workflow.status = "aborted"
                         return False
                     else:
-                        (task.status if task is not None else None) = "failed"
+                        if task is not None:
+
+                            task.status = "failed"
                         self.execution_stats["failed_tasks"] += 1
 
                 # Update state
@@ -375,24 +389,31 @@ class EnhancedWorkflowMaster:
                 self.save_workflow_state(workflow)
 
             # Check if workflow completed successfully
-            completed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "completed"]
+            completed_tasks = [t for t in workflow.tasks if t is not None:
+     t.status == "completed"]
             critical_tasks = [t for t in workflow.tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 
             if (
                 len(completed_critical) >= len(critical_tasks) * 0.8
             ):  # 80% of critical tasks
-                (workflow.status if workflow is not None else None) = "completed"
+                if workflow is not None:
+
+                    workflow.status = "completed"
                 logger.info(f"Workflow {(workflow.task_id if workflow is not None else None)} completed successfully")
                 return True
             else:
-                (workflow.status if workflow is not None else None) = "partial"
+                if workflow is not None:
+
+                    workflow.status = "partial"
                 logger.warning(f"Workflow {(workflow.task_id if workflow is not None else None)} completed partially")
                 return False
 
         except Exception as e:
             logger.error(f"Workflow execution failed: {e}")
-            (workflow.status if workflow is not None else None) = "error"
+            if workflow is not None:
+
+                workflow.status = "error"
             workflow.error_count += 1
             self.save_workflow_state(workflow)
             return False
@@ -402,7 +423,9 @@ class EnhancedWorkflowMaster:
         logger.info(f"Executing task {task.id}: {task.name}")
 
         task.started_at = datetime.now()
-        (task.status if task is not None else None) = "in_progress"
+        if task is not None:
+
+            task.status = "in_progress"
         self.execution_stats["total_tasks"] += 1
 
         try:
@@ -682,7 +705,8 @@ echo "Branch {branch_name} created and pushed successfully"
         if not workflow.tasks:
             return 0.0
 
-        completed = len([t for t in workflow.tasks if (t.status if t is not None else None) == "completed"])
+        completed = len([t for t in workflow.tasks if t is not None:
+     t.status == "completed"])
         return completed / len(workflow.tasks)
 
     def assess_system_health(self) -> float:
@@ -770,8 +794,10 @@ echo "Branch {branch_name} created and pushed successfully"
 
     def generate_workflow_summary(self, workflow: WorkflowState) -> str:
         """Generate human-readable workflow summary."""
-        completed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "completed"]
-        failed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "failed"]
+        completed_tasks = [t for t in workflow.tasks if t is not None:
+     t.status == "completed"]
+        failed_tasks = [t for t in workflow.tasks if t is not None:
+     t.status == "failed"]
 
         summary = f"""# Workflow Summary: {(workflow.task_id if workflow is not None else None)}
 
@@ -867,7 +893,8 @@ echo "Branch {branch_name} created and pushed successfully"
 
         # Resume if no critical failures
         failed_critical = [
-            t for t in workflow.tasks if (t.status if t is not None else None) == "failed" and t.priority == "high"
+            t for t in workflow.tasks if t is not None:
+     t.status == "failed" and t.priority == "high"
         ]
         if failed_critical:
             return False
@@ -886,8 +913,12 @@ echo "Branch {branch_name} created and pushed successfully"
 
             # Reset in-progress tasks to pending
             for task in workflow.tasks:
-                if (task.status if task is not None else None) == "in_progress":
-                    (task.status if task is not None else None) = "pending"
+                if task is not None:
+
+                    task.status == "in_progress":
+                    if task is not None:
+
+                        task.status = "pending"
 
             self.current_workflow = workflow
             logger.info(f"Resumed workflow {task_id}")
