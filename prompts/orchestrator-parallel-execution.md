@@ -10,7 +10,11 @@ Execute the following two tasks in parallel to complete the Gadugi v0.3 implemen
 - Requirements: Break complex tasks into subtasks, identify dependencies, estimate parallelization potential
 - Must inherit from BaseAgent framework and be pyright clean
 
+<<<<<<< HEAD
+### Task 2: implement-team-coach-agent.md
+=======
 ### Task 2: implement-team-coach-agent.md  
+>>>>>>> feature/gadugi-v0.3-regeneration
 - Implement the Team Coach agent (#241)
 - Location: `.claude/agents/team-coach/`
 - Requirements: Auto-analyze sessions, identify improvements, create GitHub issues, track performance
@@ -33,4 +37,8 @@ Execute the following two tasks in parallel to complete the Gadugi v0.3 implemen
 - Recipe files properly configured
 - Documentation complete
 
+<<<<<<< HEAD
 Please execute these tasks in parallel for maximum efficiency.
+=======
+Please execute these tasks in parallel for maximum efficiency.
+>>>>>>> feature/gadugi-v0.3-regeneration

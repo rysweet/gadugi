@@ -20,4 +20,8 @@
     "task_events.proto",
     "system_events.proto"
   ]
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> feature/gadugi-v0.3-regeneration

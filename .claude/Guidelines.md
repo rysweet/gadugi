@@ -88,4 +88,8 @@ Before claiming anything:
 3. Have I tested it with real data?
 4. Would I bet money that it works?
 
+<<<<<<< HEAD
 If any answer is "no", then it's NOT DONE.
+=======
+If any answer is "no", then it's NOT DONE.
+>>>>>>> feature/gadugi-v0.3-regeneration

@@ -12,4 +12,8 @@ pytest-cov>=4.0.0
 pytest>=7.0.0
 python-dotenv>=1.0.0
 structlog>=24.1.0
+<<<<<<< HEAD
 uvloop>=0.19.0
+=======
+uvloop>=0.19.0
+>>>>>>> feature/gadugi-v0.3-regeneration

@@ -59,4 +59,8 @@ Create a REAL, working FastAPI MCP (Model Context Protocol) service that integra
 - `.claude/services/mcp/database.py`
 - `.claude/services/mcp/config.py`
 - `.claude/services/mcp/requirements.txt`
+<<<<<<< HEAD
 - `.claude/services/mcp/test_mcp_service.py`
+=======
+- `.claude/services/mcp/test_mcp_service.py`
+>>>>>>> feature/gadugi-v0.3-regeneration

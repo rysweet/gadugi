@@ -11,6 +11,9 @@ from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 from ...framework import BaseAgent, AgentMetadata, AgentResponse
 from ...services.event_router import EventRouter, Event, EventType, EventPriority  # type: ignore
+<<<<<<< HEAD
+from ...services.memory_system import MemorySystem, Memory, MemoryType
+=======
 # from ...services.memory_system import MemorySystem, Memory, MemoryType  # Services not available in this context
 
 # Placeholder types for missing memory system
@@ -33,6 +36,7 @@ class MemoryType:
     TASK = "task"
     RESULT = "result"
     ACHIEVEMENT = "achievement"
+>>>>>>> feature/gadugi-v0.3-regeneration
 from .parallel_executor import ParallelExecutor, ExecutionMode
 from .task_analyzer import TaskAnalyzer, TaskDependency  # type: ignore
 

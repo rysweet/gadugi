@@ -91,4 +91,8 @@ When orchestrator delegates tasks to agents via `claude -p`:
 - Process isolation prevents cross-agent access
 - Message validation prevents malformed events
 - Rate limiting prevents event flooding
+<<<<<<< HEAD
 - Authentication via agent tokens (future)
+=======
+- Authentication via agent tokens (future)
+>>>>>>> feature/gadugi-v0.3-regeneration

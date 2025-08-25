@@ -9,7 +9,11 @@ from typing import Any, Dict, List, Optional
 
 class MemoryType(Enum):
     """Types of memories stored in the system."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     CONTEXT = "context"
     DECISION = "decision"
     PATTERN = "pattern"
@@ -21,7 +25,11 @@ class MemoryType(Enum):
 @dataclass
 class Memory:
     """Represents a single memory in the system."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     id: str
     type: MemoryType
     content: str
@@ -32,7 +40,11 @@ class Memory:
     tags: List[str] = field(default_factory=list)
     importance: float = 1.0  # 0.0 to 1.0
     github_issue_id: Optional[int] = None
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     def to_dict(self) -> Dict[str, Any]:
         """Convert memory to dictionary for storage."""
         return {
@@ -47,7 +59,11 @@ class Memory:
             "importance": self.importance,
             "github_issue_id": self.github_issue_id,
         }
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Memory":
         """Create memory from dictionary."""
@@ -68,7 +84,11 @@ class Memory:
 @dataclass
 class Pattern:
     """Represents a pattern extracted from memories."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     id: str
     pattern_type: str
     description: str
@@ -76,7 +96,11 @@ class Pattern:
     memory_ids: List[str]
     confidence: float
     metadata: Dict[str, Any] = field(default_factory=dict)
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     def to_dict(self) -> Dict[str, Any]:
         """Convert pattern to dictionary."""
         return {
@@ -93,7 +117,11 @@ class Pattern:
 @dataclass
 class SyncResult:
     """Result of GitHub synchronization."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     success: bool
     issues_created: int = 0
     issues_updated: int = 0
@@ -101,7 +129,11 @@ class SyncResult:
     memories_created: int = 0
     memories_updated: int = 0
     errors: List[str] = field(default_factory=list)
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -118,14 +150,22 @@ class SyncResult:
 @dataclass
 class ImportResult:
     """Result of importing from Memory.md."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     success: bool
     memories_imported: int = 0
     todos_imported: int = 0
     reflections_imported: int = 0
     errors: List[str] = field(default_factory=list)
     filepath: Optional[Path] = None
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -141,13 +181,21 @@ class ImportResult:
 @dataclass
 class PruneResult:
     """Result of pruning old memories."""
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     success: bool
     memories_pruned: int = 0
     memories_archived: int = 0
     space_freed_mb: float = 0.0
     errors: List[str] = field(default_factory=list)
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -156,4 +204,8 @@ class PruneResult:
             "memories_archived": self.memories_archived,
             "space_freed_mb": self.space_freed_mb,
             "errors": self.errors,
+<<<<<<< HEAD
         }
+=======
+        }
+>>>>>>> feature/gadugi-v0.3-regeneration

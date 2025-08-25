@@ -35,4 +35,8 @@ MERGE (orchestrator)-[:USES]->(bash_tool)
 MERGE (workflow_manager)-[:USES]->(bash_tool)
 
 // Return confirmation
+<<<<<<< HEAD
 RETURN "Schema initialized successfully" as message;
+=======
+RETURN "Schema initialized successfully" as message;
+>>>>>>> feature/gadugi-v0.3-regeneration

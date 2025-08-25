@@ -514,4 +514,8 @@ def generate_test_suite(recipe: dict, test_dir: str) -> None:
 - ALWAYS validate the implementation works
 - ALWAYS follow Python best practices
 
+<<<<<<< HEAD
 Your implementations should be production-ready and deployable immediately.
+=======
+Your implementations should be production-ready and deployable immediately.
+>>>>>>> feature/gadugi-v0.3-regeneration

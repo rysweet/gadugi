@@ -15,4 +15,8 @@ __all__ = [
     "parse_agent_definition",
     "ToolRegistry",
     "Tool",
+<<<<<<< HEAD
 ]
+=======
+]
+>>>>>>> feature/gadugi-v0.3-regeneration
