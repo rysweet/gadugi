@@ -57,7 +57,7 @@ except ImportError:
     class RateLimitError(GitHubError):
         """Raised when hitting GitHub API rate limits."""
 
-        def __init__(self, message) -> None: str, reset_time) -> None: Optional[int] = None)) -> None:
+        def __init__(self, message: str, reset_time: Optional) -> None:
             super().__init__(message)
             self.reset_time = reset_time
 

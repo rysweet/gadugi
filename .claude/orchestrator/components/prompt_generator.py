@@ -27,7 +27,7 @@ class PromptContext:
 class PromptGenerator:
     """Generates phase-specific prompts for WorkflowManager execution"""
 
-    def __init__(self, project_root) -> None: str = ".")) -> None:
+    def __init__(self, project_root: str) -> None:
         self.project_root = Path(project_root).resolve()
         self.templates_dir = self.project_root / ".claude" / "orchestrator" / "templates"
         self.templates_dir.mkdir(parents=True, exist_ok=True)

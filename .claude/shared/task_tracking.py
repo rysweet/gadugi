@@ -59,7 +59,7 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, id) -> None: str, content) -> None: str = None, status = TaskStatus.PENDING,
+    def __init__(self, id: str, content: str) -> None:
                  priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
         """Initialize task with compatibility for title parameter."""
         self.id = id
@@ -396,7 +396,7 @@ class TodoWriteIntegration:
 class WorkflowPhaseTracker:
     """Tracks workflow phases and their associated tasks."""
 
-    def __init__(self, workflow_id) -> None: Optional[str] = None)) -> None:
+    def __init__(self, workflow_id: Optional) -> None:
         self.workflow_id = workflow_id or str(uuid.uuid4())
         self.current_phase: Optional[str] = None
         self.phase_history: List[Any] = field(default_factory=list)
@@ -650,7 +650,7 @@ class TaskMetrics:
 class TaskTracker:
     """Main task tracking coordinator that integrates all components."""
 
-    def __init__(self, workflow_id) -> None: Optional[str] = None)) -> None:
+    def __init__(self, workflow_id: Optional) -> None:
         self.task_list = TaskList()
         self.todowrite = TodoWriteIntegration()
         self.phase_tracker = WorkflowPhaseTracker(workflow_id)

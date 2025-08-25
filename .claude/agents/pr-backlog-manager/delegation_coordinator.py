@@ -70,7 +70,7 @@ class DelegationCoordinator:
     and delegating to specialized agents like WorkflowMaster and code-reviewer.
     """
 
-    def __init__(self, github_ops, auto_approve) -> None: bool = False)) -> None:
+    def __init__(self, auto_approve: bool) -> None:
         """Initialize delegation coordinator."""
         self.github_ops = github_ops
         self.auto_approve = auto_approve

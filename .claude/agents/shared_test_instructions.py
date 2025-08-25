@@ -80,7 +80,7 @@ class TestAnalysis:
 class SharedTestInstructions:
     """Shared instruction framework for test agents."""
 
-    def __init__(self, config) -> None: Optional[AgentConfig] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         self.config = config or AgentConfig(
             agent_id="shared_test_instructions", name="Shared Test Instructions"
         )

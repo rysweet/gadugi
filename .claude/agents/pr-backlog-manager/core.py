@@ -46,7 +46,7 @@ except ImportError as e:
             pass
 
     class AgentConfig:
-        def __init__(self, agent_id) -> None: str, name) -> None: str, **kwargs)) -> None:
+        def __init__(self, agent_id: str, name: str) -> None:
             self.agent_id = agent_id
             self.name = name
 
@@ -69,7 +69,7 @@ except ImportError as e:
             self.severity = severity
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold) -> None: int, recovery_timeout) -> None: float)) -> None:
+        def __init__(self, failure_threshold: int, recovery_timeout: float) -> None:
             pass
 
     def retry_with_backoff(max_attempts: int = 3, strategy=None):

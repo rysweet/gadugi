@@ -14,7 +14,7 @@ from datetime import datetime
 class BaseAgent(ABC):
     """Base class for all Gadugi agents."""
 
-    def __init__(self, name) -> None: str, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, name: str, config: Optional) -> None:
         self.name = name
         self.config = config or {}
         self.logger = logging.getLogger(f"gadugi.agents.{name}")
@@ -38,7 +38,7 @@ class BaseAgent(ABC):
 class SecurityAwareAgent(BaseAgent):
     """Base class for agents that require security awareness."""
 
-    def __init__(self, name) -> None: str, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, name: str, config: Optional) -> None:
         super().__init__(name, config)
         self.security_policies = self.config.get("security_policies", {})
         self.audit_log = []
@@ -103,7 +103,7 @@ class SecurityAwareAgent(BaseAgent):
 class PerformanceMonitoredAgent(BaseAgent):
     """Base class for agents with performance monitoring capabilities."""
 
-    def __init__(self, name) -> None: str, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, name: str, config: Optional) -> None:
         super().__init__(name, config)
         self.execution_times = []
         self.resource_metrics = []
@@ -171,7 +171,7 @@ class PerformanceMonitoredAgent(BaseAgent):
 class LearningEnabledAgent(BaseAgent):
     """Base class for agents that can learn and adapt."""
 
-    def __init__(self, name) -> None: str, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, name: str, config: Optional) -> None:
         super().__init__(name, config)
         self.history = []
         self.patterns = {}
@@ -249,7 +249,7 @@ class IntegratedAgent(
 ):
     """Fully integrated agent with all capabilities."""
 
-    def __init__(self, name) -> None: str, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, name: str, config: Optional) -> None:
         # Multiple inheritance initialization
         SecurityAwareAgent.__init__(self, name, config)
         PerformanceMonitoredAgent.__init__(self, name, config)

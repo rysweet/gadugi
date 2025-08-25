@@ -128,7 +128,7 @@ class TestWriterAgent:
     Follows shared test instruction framework and supports TDD practices.
     """
 
-    def __init__(self, config) -> None: Optional[AgentConfig] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         self.config = config or AgentConfig(
             agent_id="test_writer_agent", name="Test Writer Agent"
         )

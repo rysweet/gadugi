@@ -84,7 +84,7 @@ class ProcessRegistry:
     capabilities for the orchestrator system.
     """
 
-    def __init__(self, registry_dir) -> None: str = ".gadugi/monitoring", clean_start) -> None: bool = False)) -> None:
+    def __init__(self, registry_dir: str, clean_start: bool) -> None:
         """Initialize the process registry
 
         Args:

@@ -41,7 +41,7 @@ class OrchestrationCLI:
     main orchestrator for parallel execution.
     """
 
-    def __init__(self, project_root) -> None: str = ".")) -> None:
+    def __init__(self, project_root: str) -> None:
         """Initialize the CLI interface"""
         self.project_root = Path(project_root).resolve()
         self.prompts_dir = self.project_root / "prompts"

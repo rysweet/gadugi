@@ -35,7 +35,7 @@ class ADRData:
 class ADRGenerator:
     """Generates Architecture Decision Records for significant changes"""
 
-    def __init__(self, adr_dir) -> None: str = "docs/adr")) -> None:
+    def __init__(self, adr_dir: str) -> None:
         self.adr_dir = Path(adr_dir)
         self.adr_dir.mkdir(parents=True, exist_ok=True)
 

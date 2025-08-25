@@ -379,7 +379,7 @@ class ContentSanitizer:
 class XPIADefenseEngine:
     """Core XPIA defense engine"""
 
-    def __init__(self, security_mode) -> None: SecurityMode = SecurityMode.BALANCED)) -> None:
+    def __init__(self, security_mode: SecurityMode) -> None:
         self.security_mode = security_mode
         self.pattern_library = ThreatPatternLibrary()
         self.sanitizer = ContentSanitizer()
@@ -602,7 +602,7 @@ class XPIADefenseEngine:
 class XPIADefenseAgent:
     """Main XPIA Defense Agent class"""
 
-    def __init__(self, security_mode) -> None: SecurityMode = SecurityMode.BALANCED)) -> None:
+    def __init__(self, security_mode: SecurityMode) -> None:
         self.engine = XPIADefenseEngine(security_mode)
         self.logger = logging.getLogger(f"{__name__}.XPIADefenseAgent")
 

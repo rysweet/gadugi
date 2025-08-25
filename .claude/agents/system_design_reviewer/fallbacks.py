@@ -82,7 +82,7 @@ class GitHubOperations:
 class StateManager:
     """Fallback state manager implementation"""
 
-    def __init__(self, state_dir) -> None: Path = None, task_id) -> None: str = "fallback")) -> None:
+    def __init__(self, state_dir: Path, task_id: str) -> None:
         self.state_dir = state_dir or Path(".github/workflow-states/system-design-reviewer")
         self.task_id = task_id
         self.state_file = self.state_dir / "fallback_state.json"
@@ -142,7 +142,7 @@ class StateManager:
 class ErrorHandler:
     """Fallback error handler implementation"""
 
-    def __init__(self, agent_type) -> None: str)) -> None:
+    def __init__(self, agent_type: str) -> None:
         self.agent_type = agent_type
         self.error_history = []
 
@@ -172,7 +172,7 @@ class ErrorHandler:
 class TaskTracker:
     """Fallback task tracker implementation"""
 
-    def __init__(self, agent_type) -> None: str)) -> None:
+    def __init__(self, agent_type: str) -> None:
         self.agent_type = agent_type
         self.tasks = {}
 

@@ -294,7 +294,7 @@ class PythonASTParser(ASTParser):
 class PythonASTVisitor(ast.NodeVisitor):
     """AST visitor for extracting architectural elements from Python code"""
 
-    def __init__(self, file_path) -> None: str, content) -> None: str, parser) -> None: PythonASTParser)) -> None:
+    def __init__(self, file_path: str, content: str, parser: PythonASTParser) -> None:
         self.file_path = file_path
         self.content = content
         self.parser = parser

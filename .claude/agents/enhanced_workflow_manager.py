@@ -100,7 +100,7 @@ class EnhancedWorkflowManager:
     """
 
     def __init__(self, config) -> None: Optional[WorkflowConfiguration] = None,
-                 project_root: str = ".", task_id: Optional[str] = None):
+             project_root: str = ".", task_id: Optional[str] = None):
         """Initialize the enhanced workflow manager"""
         self.config = config or WorkflowConfiguration()
         self.project_root = Path(project_root).resolve()

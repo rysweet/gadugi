@@ -70,7 +70,7 @@ class TaskInfo:
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
 
-    def __init__(self, prompts_dir) -> None: str = None, project_root) -> None: str = ".")) -> None:
+    def __init__(self, prompts_dir: str, project_root: str) -> None:
         # Security: Validate and sanitize input paths
         self.project_root = self._validate_directory_path(project_root)
         # If prompts_dir not specified, use project_root/prompts

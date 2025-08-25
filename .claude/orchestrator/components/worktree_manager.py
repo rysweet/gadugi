@@ -30,7 +30,7 @@ class WorktreeInfo:
 class WorktreeManager:
     """Manages git worktrees for parallel task execution"""
 
-    def __init__(self, project_root) -> None: str = ".", worktrees_dir) -> None: str = ".worktrees")) -> None:
+    def __init__(self, project_root: str, worktrees_dir: str) -> None:
         self.project_root = Path(project_root).resolve()
         self.worktrees_dir = self.project_root / worktrees_dir
         self.worktrees: Dict[Any, Any] = field(default_factory=dict)

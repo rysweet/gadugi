@@ -15,7 +15,7 @@ from datetime import datetime
 class GitHubError(Exception):
     """Base exception for GitHub operations."""
 
-    def __init__(self, message) -> None: str, operation) -> None: str, context) -> None: Dict[str, Any], details) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, message: str, operation: str, context: Dict, details: Optional) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -25,7 +25,7 @@ class GitHubError(Exception):
 class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
 
-    def __init__(self, message) -> None: str, reset_time) -> None: Optional[int] = None)) -> None:
+    def __init__(self, message: str, reset_time: Optional) -> None:
         super().__init__(message, 'rate_limit', {})
         self.reset_time = reset_time
 
@@ -47,8 +47,8 @@ class GitHubOperations:
     Reduces 29% code duplication between OrchestratorAgent and WorkflowManager.
     """
 
-    def __init__(self, repo) -> None: Optional[str] = None, retry_config) -> None: Optional[Dict[str, Any]] = None,
-                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None):
+    def __init__(self, repo: Optional, retry_config: Optional) -> None:
+                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None:
         """
         Initialize GitHub operations.
 

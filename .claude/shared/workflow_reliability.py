@@ -134,7 +134,7 @@ class WorkflowReliabilityManager:
     and state persistence for robust workflow execution.
     """
 
-    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """Initialize the reliability manager"""
         self.config = config or {}
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -1250,8 +1250,8 @@ class WorkflowReliabilityManager:
 class WorkflowReliabilityContext:
     """Context manager for workflow execution with comprehensive reliability features"""
 
-    def __init__(self, workflow_id) -> None: str, workflow_context) -> None: Dict[str, Any],
-                 reliability_manager: Optional[WorkflowReliabilityManager] = None):
+    def __init__(self, workflow_id: str, workflow_context: Dict,
+                 reliability_manager: Optional[WorkflowReliabilityManager] = None) -> None:
         self.workflow_id = workflow_id
         self.workflow_context = workflow_context
         self.reliability_manager = reliability_manager or WorkflowReliabilityManager()

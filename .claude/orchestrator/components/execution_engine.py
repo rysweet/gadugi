@@ -98,7 +98,7 @@ class SystemResources:
 class ResourceMonitor:
     """Monitors system resources during execution"""
 
-    def __init__(self, monitoring_interval) -> None: float = 1.0)) -> None:
+    def __init__(self, monitoring_interval: float) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
         self.resource_history: List[Any] = field(default_factory=list)
@@ -193,7 +193,7 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
 
-    def __init__(self, task_id) -> None: str, worktree_path) -> None: Path, prompt_file) -> None: str, task_context) -> None: Optional[Dict] = None)) -> None:
+    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
         self.task_id = prompt_file
@@ -484,7 +484,7 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(self, max_concurrent) -> None: Optional[int] = None, default_timeout) -> None: int = 3600)) -> None:
+    def __init__(self, max_concurrent: Optional, default_timeout: int) -> None:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
         self.resource_monitor = ResourceMonitor()

@@ -102,7 +102,7 @@ class ContainerResult:
 class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
-    def __init__(self, container_id) -> None: str, task_id) -> None: str)) -> None:
+    def __init__(self, container_id: str, task_id: str) -> None:
         self.container_id = container_id
         self.task_id = task_id
         self.streaming = False
@@ -164,7 +164,7 @@ class ContainerOutputStreamer:
 class ContainerManager:
     """Manages Docker container execution for orchestrator tasks"""
 
-    def __init__(self, config) -> None: ContainerConfig = None)) -> None:
+    def __init__(self, config: ContainerConfig) -> None:
         self.config = config or ContainerConfig()
         self.docker_client = None
         self.active_containers: Dict[Any, Any] = field(default_factory=dict)

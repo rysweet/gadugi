@@ -53,7 +53,7 @@ class RecoverableError(GadugiError):
 class NonRecoverableError(GadugiError):
     """Error that cannot be recovered from."""
 
-    def __init__(self, message) -> None: str, context) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, message: str, context: Optional) -> None:
         super().__init__(message, ErrorSeverity.CRITICAL, context)
 
 
@@ -224,7 +224,7 @@ class CircuitBreaker:
     Prevents repeated calls to failing services.
     """
 
-    def __init__(self, failure_threshold) -> None: int = 5, recovery_timeout) -> None: float = 60.0)) -> None:
+    def __init__(self, failure_threshold: int, recovery_timeout: float) -> None:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0

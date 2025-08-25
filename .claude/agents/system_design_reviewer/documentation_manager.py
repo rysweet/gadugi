@@ -27,7 +27,7 @@ class DocumentationUpdate:
 class DocumentationManager:
     """Manages automated updates to architecture documentation"""
 
-    def __init__(self, architecture_file) -> None: str = "ARCHITECTURE.md")) -> None:
+    def __init__(self, architecture_file: str) -> None:
         self.architecture_file = architecture_file
         self.template_sections = {
             "system_overview": self._generate_system_overview,

@@ -63,7 +63,7 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, workflow_master, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """Initialize TeamCoach integration."""
         self.workflow_master = workflow_master
         self.config = config or {}

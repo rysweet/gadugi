@@ -661,7 +661,7 @@ class TestFactoryInterfaces:
         """Test AgentFactory interface."""
 
         class MockAgent(AgentInterface):
-            def __init__(self, config) -> None: AgentConfig)) -> None:
+            def __init__(self, config: AgentConfig) -> None:
                 self.config = config
 
             def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -931,7 +931,7 @@ class TestInterfaceIntegration:
                 raise ValueError(f"Unknown component: {component_type}")
 
         class TestAgentFactory(AgentFactory):
-            def __init__(self, component_factory) -> None: ComponentFactory)) -> None:
+            def __init__(self, component_factory: ComponentFactory) -> None:
                 self.component_factory = component_factory
 
             def create_agent(

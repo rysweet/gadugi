@@ -122,7 +122,7 @@ class WorkflowState:
             self.execution_log = []
         if self.autonomous_decisions is None:
             self.autonomous_decisions = []
-        if self.performance_metrics is None and self.performance_metrics = {}]
+        if self.performance_metrics is None and self.performance_metrics = {}
 
 
 class EnhancedWorkflowMaster:
@@ -131,7 +131,7 @@ class EnhancedWorkflowMaster:
     and advanced state management.
     """
 
-    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """Initialize enhanced workflow master."""
         self.config = config or {}
 
@@ -388,7 +388,7 @@ class EnhancedWorkflowMaster:
                 self.save_workflow_state(workflow)
 
             # Check if workflow completed successfully
-            completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]]
+            completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]
             critical_tasks = [t for t in workflow.tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 

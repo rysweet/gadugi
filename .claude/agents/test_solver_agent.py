@@ -110,7 +110,7 @@ class TestSolverAgent:
     Follows shared test instruction framework for systematic failure resolution.
     """
 
-    def __init__(self, config) -> None: Optional[AgentConfig] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         self.config = config or AgentConfig(
             agent_id="test_solver_agent", name="Test Solver Agent"
         )

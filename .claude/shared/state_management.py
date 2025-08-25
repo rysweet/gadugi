@@ -20,7 +20,7 @@ import uuid
 class StateError(Exception):
     """Base exception for state management operations."""
 
-    def __init__(self, message) -> None: str, operation) -> None: str, context) -> None: Dict[str, Any])) -> None:
+    def __init__(self, message: str, operation: str, context: Dict) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -29,7 +29,7 @@ class StateError(Exception):
 class StateValidationError(StateError):
     """Exception for state validation errors."""
 
-    def __init__(self, message) -> None: str, validation_errors) -> None: List[str])) -> None:
+    def __init__(self, message: str, validation_errors: List) -> None:
         super().__init__(message, 'validation', {})
         self.validation_errors = validation_errors
 
@@ -91,8 +91,8 @@ class TaskState:
     context: Dict[str, Any] = field(default_factory=dict)
     error_info: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, task_id) -> None: str, prompt_file) -> None: str, status) -> None: str = "pending",
-                 phase: Optional[WorkflowPhase] = None, **kwargs):
+    def __init__(self, task_id: str, prompt_file: str, status: str) -> None:
+                 phase: Optional[WorkflowPhase] = None, **kwargs:
         """Initialize TaskState with compatibility for phase parameter."""
         self.task_id = task_id
         self.prompt_file = prompt_file
@@ -193,7 +193,7 @@ class StateManager:
     Handles state persistence, retrieval, and lifecycle management.
     """
 
-    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """
         Initialize StateManager.
 
@@ -645,7 +645,7 @@ class CheckpointManager:
     Provides atomic checkpoint creation and restoration.
     """
 
-    def __init__(self, config) -> None: Optional[Union[Dict[str, Any], 'StateManager']] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """
         Initialize CheckpointManager.
 

@@ -109,7 +109,7 @@ class ReviewResult:
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
 
-    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         """Initialize the system design reviewer"""
         self.config = config or {}
 

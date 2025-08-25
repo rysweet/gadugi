@@ -318,7 +318,7 @@ class GadugiError(Exception):
 class DelegationCoordinator:
     """Delegation coordinator implementation."""
 
-    def __init__(self, github_ops, auto_approve) -> None: bool = False)) -> None:
+    def __init__(self, auto_approve: bool) -> None:
         self.github_ops = github_ops
         self.auto_approve = auto_approve
         self.active_delegations: Dict[Any, Any] = field(default_factory=dict)
@@ -1053,7 +1053,7 @@ class PRBacklogManager:
 class ReadinessAssessor:
     """Readiness assessment component."""
 
-    def __init__(self, github_ops) -> None: Any = None)) -> None:
+    def __init__(self, github_ops: Any) -> None:
         self.github_ops = github_ops
 
     def assess_pr_readiness(self, pr_number: int) -> PRAssessment:
@@ -1525,7 +1525,7 @@ class MetricsCollector:
 class NotificationHandler:
     """Notification handling component."""
 
-    def __init__(self, github_ops) -> None: Any = None)) -> None:
+    def __init__(self, github_ops: Any) -> None:
         self.github_ops = github_ops
 
     def send_ready_notification(self, pr_number: int, assessment: PRAssessment) -> None:
@@ -1555,7 +1555,7 @@ class NotificationHandler:
 class ConflictDetector:
     """Conflict detection component."""
 
-    def __init__(self, github_ops) -> None: Any = None)) -> None:
+    def __init__(self, github_ops: Any) -> None:
         self.github_ops = github_ops
 
     def detect_conflicts(self, pr_number: int) -> ConflictAssessment:
@@ -1590,7 +1590,7 @@ class ConflictDetector:
 class LabelManager:
     """Label management component."""
 
-    def __init__(self, github_ops) -> None: Any = None)) -> None:
+    def __init__(self, github_ops: Any) -> None:
         self.github_ops = github_ops
 
     def apply_readiness_labels(self, pr_number: int, assessment: PRAssessment) -> None:
@@ -1620,7 +1620,7 @@ class LabelManager:
 class AutoMerger:
     """Auto-merge component."""
 
-    def __init__(self, github_ops) -> None: Any = None, auto_approve) -> None: bool = False)) -> None:
+    def __init__(self, github_ops: Any, auto_approve: bool) -> None:
         self.github_ops = github_ops
         self.auto_approve = auto_approve
 
@@ -1833,7 +1833,7 @@ class SecurityConstraints:
 class GitHubActionsIntegration:
     """GitHub Actions integration component."""
 
-    def __init__(self, pr_backlog_manager=None, config) -> None: Optional[AgentConfig] = None)) -> None:
+    def __init__(self, config: Optional) -> None:
         # Handle both signatures
         if pr_backlog_manager is not None:
             self.pr_backlog_manager = pr_backlog_manager

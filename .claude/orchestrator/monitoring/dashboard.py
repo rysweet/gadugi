@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 class OrchestrationMonitor:
     """Monitors and tracks orchestrator container execution"""
 
-    def __init__(self, monitoring_dir) -> None: str = "./monitoring")) -> None:
+    def __init__(self, monitoring_dir: str) -> None:
         self.monitoring_dir = Path(monitoring_dir)
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
 

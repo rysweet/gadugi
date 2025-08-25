@@ -80,7 +80,7 @@ except ImportError as e:
         FAILED = "failed"
 
     class TaskState:
-        def __init__(self, task_id) -> None: str, **kwargs)) -> None:
+        def __init__(self, task_id: str) -> None:
             self.task_id = task_id
             # Handle status as either string or enum
             status = kwargs.get("status", TaskStatus.PENDING)
@@ -198,7 +198,7 @@ except ImportError as e:
             return True
 
     class StateManager:
-        def __init__(self, state_dir) -> None: Optional[str] = None, **kwargs)) -> None:
+        def __init__(self, state_dir: Optional) -> None:
             # Support both string and dict initialization
             if isinstance(state_dir, dict):
                 self.state_dir = Path(state_dir.get("state_dir", ".claude/state"))
@@ -425,7 +425,7 @@ except ImportError as e:
                 checkpoint_file.unlink()
 
     class StateValidationError(Exception):
-        def __init__(self, message) -> None: str, validation_errors) -> None: Optional[List[str]] = None)) -> None:
+        def __init__(self, message: str, validation_errors: Optional) -> None:
             super().__init__(message)
             self.validation_errors = validation_errors or []
 
@@ -441,7 +441,7 @@ except ImportError as e:
             self.context = context or {}
 
     class WorkflowState:
-        def __init__(self, workflow_id) -> None: str, **kwargs)) -> None:
+        def __init__(self, workflow_id: str) -> None:
             self.workflow_id = workflow_id
             self.phase = kwargs.get("phase", WorkflowPhase.PLANNING)
             self.created_at = kwargs.get("created_at", datetime.now())
@@ -450,7 +450,7 @@ except ImportError as e:
             self.tasks = kwargs.get("tasks", [])
 
     class StateLock:
-        def __init__(self, lock_dir) -> None: str = ".claude/locks")) -> None:
+        def __init__(self, lock_dir: str) -> None:
             self.lock_dir = Path(lock_dir)
             self.lock_dir.mkdir(parents=True, exist_ok=True)
 

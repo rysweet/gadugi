@@ -120,7 +120,7 @@ class WorkflowValidator:
     quality, consistency, and integrity of workflow execution.
     """
 
-    def __init__(self, validation_level) -> None: ValidationLevel = ValidationLevel.STANDARD)) -> None:
+    def __init__(self, validation_level: ValidationLevel) -> None:
         """Initialize validator with specified validation level"""
 
         self.validation_level = validation_level
