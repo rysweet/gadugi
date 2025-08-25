@@ -10,7 +10,7 @@ import sys
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 # Add shared modules to path for import resolution
@@ -28,7 +28,7 @@ try:
     )
     from state_management import StateManager
     from task_tracking import TaskTracker
-    from interfaces import AgentConfig, OperationResult
+    from interfaces import AgentConfig
 except ImportError as e:
     logging.warning(f"Failed to import shared modules: {e}")
 
@@ -725,12 +725,10 @@ class PRBacklogManager:
 
                     # Update metrics
                     if assessment is not None:
-
-                        assessment.status == PRStatus.READY:
-                        self.metrics.ready_prs += 1
-                    elif if assessment is not None:
-     assessment.status == PRStatus.BLOCKED:
-                        self.metrics.blocked_prs += 1
+                        if assessment.status == PRStatus.READY:
+                            self.metrics.ready_prs += 1
+                        elif assessment.status == PRStatus.BLOCKED:
+                            self.metrics.blocked_prs += 1
 
                 except Exception as e:
                     logger.error(f"Failed to process PR #{pr['number']}: {e}")

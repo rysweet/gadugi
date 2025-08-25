@@ -91,8 +91,8 @@ class TaskState:
     context: Dict[str, Any] = field(default_factory=dict)
     error_info: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, task_id: str, prompt_file: str, status: str) -> None:
-                 phase: Optional[WorkflowPhase] = None, **kwargs:
+    def __init__(self, task_id: str, prompt_file: str, status: str,
+                 phase: Optional[WorkflowPhase] = None, **kwargs) -> None:
         """Initialize TaskState with compatibility for phase parameter."""
         self.task_id = task_id
         self.prompt_file = prompt_file

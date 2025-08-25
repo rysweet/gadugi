@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -63,9 +63,9 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize TeamCoach integration."""
-        self.workflow_master = workflow_master
+        # self.workflow_master = workflow_master  # TODO: Define workflow_master properly
         self.config = config or {}
 
         # Performance tracking
@@ -326,17 +326,17 @@ class TeamCoachIntegration:
         self, optimization: WorkflowOptimization, workflow_state
     ) -> bool:
         """Apply optimization recommendation to workflow."""
+        # Record optimization attempt - initialize outside try block
+        optimization_record = {
+            "timestamp": datetime.now(),
+            "optimization": asdict(optimization),
+            "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
+            "applied": True,
+            "result": "pending",
+        }
+        
         try:
             logger.info(f"Applying optimization: {optimization.strategy.value}")
-
-            # Record optimization attempt
-            optimization_record = {
-                "timestamp": datetime.now(),
-                "optimization": asdict(optimization),
-                "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
-                "applied": True,
-                "result": "pending",
-            }
 
             # Apply strategy-specific optimizations
             if optimization.strategy == OptimizationStrategy.PERFORMANCE:
@@ -743,17 +743,17 @@ class TeamCoachIntegration:
 
 # Integration helper functions
 def create_teamcoach_integration(
-    workflow_master, config: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None
 ):
     """Create TeamCoach integration for WorkflowMaster."""
-    return TeamCoachIntegration(workflow_master, config)
+    return TeamCoachIntegration(config)
 
 
 def optimize_workflow_with_teamcoach(
-    workflow_master, workflow_state, config: Optional[Dict[str, Any]] = None
+    workflow_state, config: Optional[Dict[str, Any]] = None
 ):
     """Optimize workflow using TeamCoach integration."""
-    integration = TeamCoachIntegration(workflow_master, config)
+    integration = TeamCoachIntegration(config)
 
     # Analyze current performance
     metrics_before = integration.analyze_workflow_performance(workflow_state)

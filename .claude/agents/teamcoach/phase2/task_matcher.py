@@ -51,7 +51,7 @@ try:
         AgentCapabilityProfile,
         CapabilityDomain,
         ProficiencyLevel,
-        TaskCapabilityRequirement,
+        # TaskCapabilityRequirement,  # Currently unused
     )
     from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 except ImportError:

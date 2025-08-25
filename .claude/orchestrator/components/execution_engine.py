@@ -24,7 +24,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import psutil
 
@@ -101,7 +101,7 @@ class ResourceMonitor:
     def __init__(self, monitoring_interval: float) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
-        self.resource_history: List[Any] = field(default_factory=list)
+        self.resource_history: List[Any] = []
         self.monitor_thread: Optional[threading.Thread] = None
 
     def start_monitoring(self):
@@ -193,7 +193,7 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
 
-    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional) -> None:
+    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict[str, Any]] = None) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
         self.task_id = prompt_file
@@ -201,7 +201,7 @@ class TaskExecutor:
         self.process: Optional[subprocess.Popen] = None  # Kept for fallback compatibility
         self.start_time: Optional[datetime] = None
         self.result: Optional[ExecutionResult] = None
-        self.prompt_generator = PromptGenerator()
+        self.prompt_generator = PromptGenerator(project_root=worktree_path)
 
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if container_execution_available:
@@ -484,12 +484,12 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(self, max_concurrent: Optional, default_timeout: int) -> None:
+    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600) -> None:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
-        self.resource_monitor = ResourceMonitor()
-        self.active_executors: Dict[Any, Any] = field(default_factory=dict)
-        self.results: Dict[Any, Any] = field(default_factory=dict)
+        self.resource_monitor = ResourceMonitor(monitoring_interval=1.0)
+        self.active_executors: Dict[str, Any] = {}
+        self.results: Dict[str, Any] = {}
         self.execution_queue: queue.Queue = queue.Queue()
         self.stop_event = threading.Event()
 

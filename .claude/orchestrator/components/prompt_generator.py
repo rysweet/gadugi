@@ -7,9 +7,9 @@ This component addresses the critical issue where WorkflowManagers were receivin
 generic prompts instead of implementation-specific instructions.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -19,9 +19,9 @@ class PromptContext:
     task_name: str
     original_prompt: str
     phase_focus: Optional[str] = None
-    dependencies: List[str] = None
-    target_files: List[str] = None
-    implementation_requirements: Dict = None
+    dependencies: Optional[List[str]] = None
+    target_files: Optional[List[str]] = None
+    implementation_requirements: Optional[Dict[str, Any]] = None
 
 
 class PromptGenerator:
@@ -45,7 +45,7 @@ class PromptGenerator:
         prompt_content = self._build_workflow_prompt(context)
 
         # Save prompt to worktree
-        prompt_file = worktree_path / "prompts" / f"{(context.task_id if context is not None else None)}-workflow.md"
+        prompt_file = worktree_path / "prompts" / f"{context.task_id}-workflow.md"
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(prompt_file, 'w') as f:
@@ -300,10 +300,10 @@ def main():
 
     args = parser.parse_args()
 
-    generator = PromptGenerator()
+    generator = PromptGenerator(project_root=".")
 
     context = PromptContext(
-        task_id=(args.task_id if args is not None else None),
+        task_id=args.task_id,
         task_name=args.task_name,
         original_prompt=args.original_prompt,
         phase_focus=args.phase_focus
@@ -319,7 +319,7 @@ def main():
         print(f"✅ Generated prompt: {prompt_file}")
 
         # Validate if requested
-        if args is not None and args.validate:
+        if args.validate:
             issues = generator.validate_prompt_content(prompt_file)
             if issues:
                 print("⚠️  Validation issues:")

@@ -47,8 +47,8 @@ class GitHubOperations:
     Reduces 29% code duplication between OrchestratorAgent and WorkflowManager.
     """
 
-    def __init__(self, repo: Optional, retry_config: Optional) -> None:
-                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None:
+    def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None,
+                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None) -> None:
         """
         Initialize GitHub operations.
 

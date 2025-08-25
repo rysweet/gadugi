@@ -84,7 +84,7 @@ class ProcessRegistry:
     capabilities for the orchestrator system.
     """
 
-    def __init__(self, registry_dir: str, clean_start: bool) -> None:
+    def __init__(self, registry_dir: str, clean_start: bool = False) -> None:
         """Initialize the process registry
 
         Args:
@@ -99,7 +99,7 @@ class ProcessRegistry:
         self.stats_file = self.registry_dir / "registry_stats.json"
 
         # In-memory process tracking
-        self.processes: Dict[Any, Any] = field(default_factory=dict)
+        self.processes: Dict[str, ProcessInfo] = {}
         self.heartbeat_interval = 30  # seconds
         self.heartbeat_timeout = 120  # seconds
 
@@ -152,23 +152,24 @@ class ProcessRegistry:
         process = self.processes[task_id]
         old_status = (process.status if process is not None else None)
         if process is not None:
-
             process.status = status
-        process.last_heartbeat = datetime.now()
+            process.last_heartbeat = datetime.now()
 
         # Update timing information
         if status == ProcessStatus.RUNNING and old_status == ProcessStatus.QUEUED:
-            process.started_at = datetime.now()
-            if pid:
-                process.pid = pid
+            if process is not None:
+                process.started_at = datetime.now()
+                if pid:
+                    process.pid = pid
 
         elif status in [ProcessStatus.COMPLETED, ProcessStatus.FAILED, ProcessStatus.TIMEOUT]:
-            process.completed_at = datetime.now()
-            if error_message:
-                process.error_message = error_message
+            if process is not None:
+                process.completed_at = datetime.now()
+                if error_message:
+                    process.error_message = error_message
 
         # Update resource usage if process is running
-        if status == ProcessStatus.RUNNING and process.pid:
+        if status == ProcessStatus.RUNNING and process is not None and process.pid:
             process.resource_usage = self._get_process_resource_usage(process.pid)
 
         # Persist changes
@@ -330,23 +331,22 @@ class ProcessRegistry:
         # Try to terminate the process if it's running
         if process is not None:
             if process.status == ProcessStatus.RUNNING and process.pid:
-            try:
-                proc = psutil.Process(process.pid)
-                proc.terminate()
-                # Give it a moment to terminate gracefully
-                time.sleep(2)
-                if proc.is_running():
-                    proc.kill()  # Force kill if necessary
-                logger.info(f"Terminated process {task_id} (PID: {process.pid})")
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                logger.warning(f"Could not terminate process {task_id}: {e}")
+                try:
+                    proc = psutil.Process(process.pid)
+                    proc.terminate()
+                    # Give it a moment to terminate gracefully
+                    time.sleep(2)
+                    if proc.is_running():
+                        proc.kill()  # Force kill if necessary
+                    logger.info(f"Terminated process {task_id} (PID: {process.pid})")
+                except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                    logger.warning(f"Could not terminate process {task_id}: {e}")
 
         # Update status
         if process is not None:
-
             process.status = ProcessStatus.CANCELLED
-        process.completed_at = datetime.now()
-        process.error_message = "Process cancelled by user"
+            process.completed_at = datetime.now()
+            process.error_message = "Process cancelled by user"
 
         self._save_registry()
         logger.info(f"Process cancelled: {task_id}")
@@ -523,7 +523,7 @@ class ProcessRegistry:
                 "memory_mb": memory_info.rss / (1024 * 1024),  # Convert to MB
                 "memory_percent": proc.memory_percent(),
                 "num_threads": proc.num_threads(),
-                "status": (proc.status if proc is not None else None)(),
+                "status": proc.status(),
                 "create_time": proc.create_time()
             }
 

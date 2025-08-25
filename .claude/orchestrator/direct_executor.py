@@ -4,12 +4,10 @@ Direct Executor - Immediate WorkflowManager Subprocess Spawning
 
 This creates real parallel WorkflowManager processes using the successful approach from PRs #278-282.
 """
-import os
 import subprocess
 import sys
 import time
 from pathlib import Path
-import tempfile
 import uuid
 
 
@@ -115,8 +113,9 @@ Begin Phase 1 (Initial Setup) now.
 """
 
     try:
-        process.stdin.write(initial_input)
-        process.stdin.close()
+        if process.stdin is not None:
+            process.stdin.write(initial_input)
+            process.stdin.close()
     except Exception as e:
         print(f"⚠️ Error sending input to {task_name}: {e}")
 
@@ -186,7 +185,7 @@ def main():
 
                 # Get final output (last bit)
                 try:
-                    stdout, stderr = process.communicate(timeout=5)
+                    stdout, _ = process.communicate(timeout=5)
                     if stdout:
                         print(f"📄 Output from {task_name}: ...{stdout[-300:]}")
                 except:

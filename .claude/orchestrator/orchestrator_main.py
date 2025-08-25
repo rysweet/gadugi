@@ -99,7 +99,7 @@ class OrchestrationResult:
     failed_tasks: int
     execution_time_seconds: float
     parallel_speedup: Optional[float] = None
-    task_results: List[ExecutionResult] = None
+    task_results: Optional[List[ExecutionResult]] = None
     error_summary: Optional[str] = None
 
 
@@ -111,7 +111,7 @@ class OrchestratorCoordinator:
     all existing orchestrator components to enable actual parallel execution.
     """
 
-    def __init__(self, config: OrchestrationConfig = None, project_root: str = ".") -> None:
+    def __init__(self, config: Optional[OrchestrationConfig] = None, project_root: str = ".") -> None:
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()

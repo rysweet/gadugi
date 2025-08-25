@@ -59,8 +59,8 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, id: str, content: str) -> None:
-                 priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
+    def __init__(self, id: str, content: str, status: TaskStatus = TaskStatus.PENDING,
+                 priority: TaskPriority = TaskPriority.MEDIUM, title: str = None, **kwargs) -> None:
         """Initialize task with compatibility for title parameter."""
         self.id = id
         # Support both content and title parameters for API compatibility

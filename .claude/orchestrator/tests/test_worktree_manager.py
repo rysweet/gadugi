@@ -5,7 +5,6 @@ Test suite for WorktreeManager component of OrchestratorAgent
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import json
 import shutil
 import subprocess
 
@@ -27,7 +26,8 @@ spec = importlib.util.spec_from_file_location(
 )
 worktree_manager_module = importlib.util.module_from_spec(spec)
 sys.modules['worktree_manager'] = worktree_manager_module
-spec.loader.exec_module(worktree_manager_module)
+if spec.loader is not None:
+    spec.loader.exec_module(worktree_manager_module)
 
 # Import the classes we need
 WorktreeInfo = worktree_manager_module.WorktreeInfo

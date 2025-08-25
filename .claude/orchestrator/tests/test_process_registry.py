@@ -313,7 +313,7 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(self.registry.registry_file.exists())
 
         # Create new registry instance and verify it loads data
-        new_registry = ProcessRegistry(str(self.registry_dir))
+        new_registry = ProcessRegistry(str(self.registry_dir), clean_start=False)
 
         self.assertEqual(len(new_registry.processes), 1)
         self.assertIsNotNone(new_registry.get_process("test-persistence"))

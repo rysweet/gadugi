@@ -762,17 +762,13 @@ jobs:
         completed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task is not None:
-
-                task.status == DelegationStatus.COMPLETED
+            if task is not None and task.status == DelegationStatus.COMPLETED
         )
 
         failed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task is not None:
-
-                task.status == DelegationStatus.FAILED
+            if task is not None and task.status == DelegationStatus.FAILED
         )
 
         success_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
@@ -781,9 +777,7 @@ jobs:
         completed_with_time = [
             task
             for task in self.active_delegations.values()
-            if task is not None:
-
-                task.status == DelegationStatus.COMPLETED and task.completion_time
+            if task is not None and task.status == DelegationStatus.COMPLETED and task.completion_time
         ]
 
         avg_completion_time = 0

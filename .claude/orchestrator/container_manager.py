@@ -23,35 +23,33 @@ import asyncio
 import json
 import logging
 import os
-import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field, asdict
-from datetime import datetime, timedelta
+from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, AsyncGenerator, Callable
+from typing import Any, Dict, List, Optional, Callable
 import uuid
-import shutil
 
 try:
     import docker
-    from docker.errors import DockerException, ContainerError, ImageNotFound
-    DOCKER_AVAILABLE = True
+    from docker.errors import DockerException, ImageNotFound
+    docker_available = True
 except ImportError:
     logging.warning("Docker SDK not available. Install with: pip install docker")
-    DOCKER_AVAILABLE = False
+    docker_available = False
     # Fallback classes
     class DockerException(Exception): pass
-    class ContainerError(Exception): pass
     class ImageNotFound(Exception): pass
+    docker = None
 
+websocket_available = False
 try:
-    import websockets
-    import asyncio
-    WEBSOCKET_AVAILABLE = True
+    import websockets  # type: ignore[import]
+    websocket_available = True
 except ImportError:
     logging.warning("WebSocket support not available. Install with: pip install websockets")
-    WEBSOCKET_AVAILABLE = False
+    websockets = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +66,7 @@ class ContainerConfig:
     detach: bool = False
 
     # Claude CLI specific settings
-    claude_flags: List[str] = None
+    claude_flags: Optional[List[str]] = None
     max_turns: int = 50
     output_format: str = "json"
 
@@ -152,7 +150,7 @@ class ContainerOutputStreamer:
 
     def add_client(self, client):
         """Add WebSocket client for output streaming"""
-        if WEBSOCKET_AVAILABLE:
+        if websocket_available:
             self.clients.append(client)
 
     def remove_client(self, client):
@@ -173,7 +171,7 @@ class ContainerManager:
 
     def _initialize_docker(self):
         """Initialize Docker client"""
-        if not DOCKER_AVAILABLE:
+        if not docker_available:
             raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
         try:
@@ -192,7 +190,8 @@ class ContainerManager:
     def _ensure_orchestrator_image(self):
         """Ensure the Claude orchestrator Docker image exists"""
         try:
-            self.docker_client.images.get(self.config.image)
+            if self.docker_client is not None:
+                self.docker_client.images.get(self.config.image)
             logger.info(f"Docker image {self.config.image} found")
         except ImageNotFound:
             logger.info(f"Building Docker image: {self.config.image}")
@@ -245,8 +244,10 @@ CMD ["bash"]
 
                 # Log build output
                 for log in build_logs:
-                    if 'stream' in log:
-                        logger.info(f"Docker build: {log['stream'].strip()}")
+                    if isinstance(log, dict) and 'stream' in log:
+                        stream_text = log['stream']
+                        if isinstance(stream_text, str):
+                            logger.info(f"Docker build: {stream_text.strip()}")
 
                 logger.info(f"Successfully built image: {self.config.image}")
 
@@ -327,7 +328,7 @@ CMD ["bash"]
         claude_cmd = [
             "claude",
             "-p", escaped_prompt
-        ] + self.config.claude_flags
+        ] + (self.config.claude_flags or [])
 
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
@@ -358,7 +359,7 @@ CMD ["bash"]
             self.output_streamers[task_id] = streamer
 
             # Start streaming in background thread
-            if WEBSOCKET_AVAILABLE:
+            if websocket_available:
                 streaming_thread = threading.Thread(
                     target=lambda: asyncio.run(streamer.start_streaming(container)),
                     daemon=True

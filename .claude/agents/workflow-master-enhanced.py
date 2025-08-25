@@ -122,7 +122,8 @@ class WorkflowState:
             self.execution_log = []
         if self.autonomous_decisions is None:
             self.autonomous_decisions = []
-        if self.performance_metrics is None and self.performance_metrics = {}
+        if self.performance_metrics is None:
+            self.performance_metrics = {}
 
 
 class EnhancedWorkflowMaster:
@@ -131,7 +132,7 @@ class EnhancedWorkflowMaster:
     and advanced state management.
     """
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize enhanced workflow master."""
         self.config = config or {}
 
@@ -141,6 +142,7 @@ class EnhancedWorkflowMaster:
             audit_enabled=True,
         )
 
+        self.current_task_id = None  # Initialize before use
         self.github_ops = GitHubOperations(task_id=self.current_task_id)
         self.state_manager = StateManager()
         self.task_tracker = TaskTracker()
@@ -318,9 +320,7 @@ class EnhancedWorkflowMaster:
 
         try:
             for task in workflow.tasks:
-                if task is not None:
-
-                    task.status == "completed":
+                if task is not None and task.status == "completed":
                     continue
 
                 # Check dependencies
@@ -685,9 +685,12 @@ echo "Branch {branch_name} created and pushed successfully"
 
         error_msg = task.error_message.lower()
 
-        if any(term in error_msg for term in ["timeout", "connection", "network"]) and return "network"]
-        elif any(term in error_msg for term in ["rate limit", "api limit", "quota"]) and return "rate_limit"]
-        elif any(term in error_msg for term in ["permission", "auth", "forbidden"]) and return "permission"]
+        if any(term in error_msg for term in ["timeout", "connection", "network"]):
+            return "network"
+        elif any(term in error_msg for term in ["rate limit", "api limit", "quota"]):
+            return "rate_limit"
+        elif any(term in error_msg for term in ["permission", "auth", "forbidden"]):
+            return "permission"
         elif any(
             term in error_msg for term in ["not found", "missing", "does not exist"]
         ):
@@ -700,7 +703,7 @@ echo "Branch {branch_name} created and pushed successfully"
         if not workflow.tasks:
             return 0.0
 
-        completed = len([t for t in workflow.tasks if t is not None and t.status == "completed"])]
+        completed = len([t for t in workflow.tasks if t is not None and t.status == "completed"])
         return completed / len(workflow.tasks)
 
     def assess_system_health(self) -> float:
@@ -788,8 +791,8 @@ echo "Branch {branch_name} created and pushed successfully"
 
     def generate_workflow_summary(self, workflow: WorkflowState) -> str:
         """Generate human-readable workflow summary."""
-        completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]]
-        failed_tasks = [t for t in workflow.tasks if t is not None and t.status == "failed"]]
+        completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]
+        failed_tasks = [t for t in workflow.tasks if t is not None and t.status == "failed"]
 
         summary = f"""# Workflow Summary: {(workflow.task_id if workflow is not None else None)}
 
@@ -885,7 +888,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
         # Resume if no critical failures
         failed_critical = [
-            t for t in workflow.tasks if t is not None and t.status == "failed" and t.priority == "high"]
+            t for t in workflow.tasks if t is not None and t.status == "failed" and t.priority == "high"
         ]
         if failed_critical:
             return False
@@ -904,12 +907,8 @@ echo "Branch {branch_name} created and pushed successfully"
 
             # Reset in-progress tasks to pending
             for task in workflow.tasks:
-                if task is not None:
-
-                    task.status == "in_progress":
-                    if task is not None:
-
-                        task.status = "pending"
+                if task is not None and task.status == "in_progress":
+                    task.status = "pending"
 
             self.current_workflow = workflow
             logger.info(f"Resumed workflow {task_id}")
@@ -946,9 +945,7 @@ echo "Branch {branch_name} created and pushed successfully"
         stats = {
             **self.execution_stats,
             "runtime_seconds": runtime,
-            "current_workflow": self.(current_workflow.task_id if current_workflow is not None else None)
-            if self.current_workflow
-            else None,
+            "current_workflow": (self.current_workflow.task_id if self.current_workflow is not None else None),
             "autonomous_mode": self.autonomous_mode,
             "github_circuit_breaker_status": {
                 "failure_count": self.github_circuit_breaker.failure_count,
@@ -1123,7 +1120,8 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                 )
                 self.execution_stats["test_solver_invocations"] += 1
 
-                for test_identifier in failing_tests and result = self.test_solver.solve_test_failure(test_identifier)]
+                for test_identifier in failing_tests:
+                    result = self.test_solver.solve_test_failure(test_identifier)
                     self.log_execution_step(
                         workflow, f"Test Solver: {result.resolution_applied}"
                     )

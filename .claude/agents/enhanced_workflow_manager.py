@@ -24,11 +24,10 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
 # WorkflowStage should be properly imported or defined
 from enum import Enum
 class HealthStatus(Enum):
@@ -46,11 +45,11 @@ try:
         monitor_workflow,
         create_reliability_manager
     )
-    from utils.error_handling import ErrorHandler, retry, graceful_degradation
-    from state_management import StateManager, TaskState, WorkflowPhase
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker
+    from utils.error_handling import ErrorHandler, retry
+    from state_management import StateManager
+    from task_tracking import TaskTracker, WorkflowPhaseTracker
     from github_operations import GitHubOperations
-    from interfaces import AgentConfig, ErrorContext
+    # from interfaces import AgentConfig  # Currently unused
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
@@ -58,6 +57,26 @@ except ImportError as e:
         def __init__(self, config=None) -> None: pass
         def start_workflow_monitoring(self, workflow_id, context): return True
         def update_workflow_stage(self, workflow_id, stage, context=None): return True
+        def get_workflow_diagnostics(self): return {}
+    
+    class ErrorHandler:
+        def __init__(self): pass
+        def handle_error(self, error): pass
+    
+    class StateManager:
+        def __init__(self): pass
+    
+    class TaskTracker:
+        def __init__(self): pass
+    
+    class WorkflowPhaseTracker:
+        def __init__(self): pass
+    
+    class GitHubOperations:
+        def __init__(self, task_id=None): pass
+    
+    def create_reliability_manager(config):
+        return WorkflowReliabilityManager(config)
         def handle_workflow_error(self, workflow_id, error, stage=None, context=None): return {}
         def perform_health_check(self, workflow_id): return None
         def stop_workflow_monitoring(self, workflow_id, status='completed'): return True
@@ -99,8 +118,8 @@ class EnhancedWorkflowManager:
     robust error handling, monitoring, recovery, and persistence.
     """
 
-    def __init__(self, config) -> None: Optional[WorkflowConfiguration] = None,
-             project_root: str = ".", task_id: Optional[str] = None):
+    def __init__(self, config: Optional[WorkflowConfiguration] = None,
+                 project_root: str = ".", task_id: Optional[str] = None):
         """Initialize the enhanced workflow manager"""
         self.config = config or WorkflowConfiguration()
         self.project_root = Path(project_root).resolve()
@@ -108,11 +127,14 @@ class EnhancedWorkflowManager:
         self.task_id = task_id
 
         # Initialize reliability components
-        self.reliability_manager = create_reliability_manager({
-            'log_level': self.config.log_level,
-            'enable_health_checks': self.config.enable_health_checks,
-            'enable_recovery': self.config.enable_recovery
-        })
+        try:
+            self.reliability_manager = create_reliability_manager({
+                'log_level': self.config.log_level,
+                'enable_health_checks': self.config.enable_health_checks,
+                'enable_recovery': self.config.enable_recovery
+            })
+        except (NameError, Exception):
+            self.reliability_manager = WorkflowReliabilityManager()
 
         # Initialize Enhanced Separation components
         try:
@@ -121,7 +143,7 @@ class EnhancedWorkflowManager:
             self.task_tracker = TaskTracker()
             self.phase_tracker = WorkflowPhaseTracker()
             self.github_ops = GitHubOperations(task_id=task_id)
-        except Exception:
+        except (NameError, Exception):
             # Fallback for basic functionality
             self.error_handler = None
             self.state_manager = None
@@ -131,8 +153,8 @@ class EnhancedWorkflowManager:
 
         # Workflow state tracking
         self.current_phase: Optional[WorkflowStage] = None
-        self.workflow_context: Dict[Any, Any] = field(default_factory=dict)
-        self.phase_checkpoints: List[Any] = field(default_factory=list)
+        self.workflow_context: Dict[str, Any] = {}
+        self.phase_checkpoints: List[Dict[str, Any]] = []
 
         logger.info("Enhanced WorkflowManager initialized")
 
