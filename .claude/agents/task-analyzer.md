@@ -2,7 +2,6 @@
 name: task-analyzer
 model: inherit
 description: Enhanced task analyzer with intelligent decomposition, dependency analysis, and pattern recognition for optimized parallel execution
-tools: Read, Grep, LS, Glob, Bash, TodoWrite
 imports: |
   # Enhanced Separation Architecture - Shared Modules
   from .claude.shared.github_operations import GitHubOperations

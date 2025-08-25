@@ -14,7 +14,6 @@ This agent handles:
 ## Tools Required
 
 ```yaml
-tools:
   - Read
   - Write
   - Edit

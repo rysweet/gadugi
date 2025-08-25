@@ -2,7 +2,6 @@
 name: orchestrator-agent
 model: inherit
 description: Coordinates parallel execution of multiple WorkflowManagers for independent tasks, enabling 3-5x faster development workflows through intelligent task analysis and git worktree management
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, Glob
 imports: |
   # Enhanced Separation Architecture - Shared Modules
   from .claude.shared.github_operations import GitHubOperations

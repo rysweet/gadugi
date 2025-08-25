@@ -6,6 +6,30 @@ from pathlib import Path
 
 import pytest
 
+<<<<<<< HEAD
+from typing import Dict, List
+
+try:
+    from decomposer.task_decomposer import (
+        DecompositionResult,
+        PatternDatabase,
+        SubTask,
+        TaskDecomposer,
+    )
+except ImportError:
+    # Create stub implementations for testing when modules aren't available
+    class DecompositionResult:
+        pass
+
+    class PatternDatabase:
+        pass
+
+    class SubTask:
+        pass
+
+    class TaskDecomposer:
+        pass
+=======
 from decomposer.task_decomposer import (
 from typing import Dict, List
     DecompositionResult,
@@ -13,6 +37,7 @@ from typing import Dict, List
     SubTask,
     TaskDecomposer,
 )
+>>>>>>> feature/gadugi-v0.3-regeneration
 
 
 class TestSubTask:

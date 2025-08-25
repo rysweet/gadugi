@@ -2,7 +2,6 @@
 name: pr-backlog-manager
 model: inherit
 description: Manages the backlog of PRs by ensuring they are ready for review and merge, automating checks for merge conflicts, CI status, and code review completion
-tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
 imports: |
   # Enhanced Separation Architecture - Shared Modules
   from .claude.shared.github_operations import GitHubOperations

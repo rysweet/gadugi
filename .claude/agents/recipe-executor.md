@@ -1,7 +1,6 @@
 ---
 name: recipe-executor
 specialization: Generate real implementations from recipe files
-tools:
   - Read
   - Write
   - Edit
