@@ -15,6 +15,7 @@ Key Features:
 
 import argparse
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import List
@@ -198,13 +199,23 @@ class OrchestrationCLI:
         if result.task_results:
             print("\nTask Details:")
             for task_result in result.task_results:
-                status = "✅ SUCCESS" if task_result.success else "❌ FAILED"  # type: ignore
-                exec_time = getattr(task_result, 'execution_time', 0) or 0
+                status = "✅ SUCCESS" if task_result.status == 'success' else "❌ FAILED"
+                exec_time = getattr(task_result, 'duration', 0) or 0
                 print(f"  {task_result.task_id}: {status} ({exec_time:.1f}s)")
 
-                if not task_result.success and hasattr(task_result, 'error_message'):  # type: ignore
-                    error_msg = getattr(task_result, 'error_message', 'Unknown error')
+                if task_result.status != 'success':
+                    # Improved error context handling
+                    error_msg = "Unknown error"
+                    if hasattr(task_result, 'error_message') and task_result.error_message:
+                        error_msg = task_result.error_message
+                    elif hasattr(task_result, 'stderr') and task_result.stderr:
+                        error_msg = task_result.stderr[:200] + "..." if len(task_result.stderr) > 200 else task_result.stderr
+                    elif hasattr(task_result, 'stdout') and task_result.stdout:
+                        # Sometimes errors are in stdout
+                        error_msg = task_result.stdout[:200] + "..." if len(task_result.stdout) > 200 else task_result.stdout
+
                     print(f"    Error: {error_msg}")
+                    logger.error(f"Task {task_result.task_id} failed: {error_msg}, result type: {type(task_result)}")
 
         # Error summary
         if result.error_summary:
@@ -309,8 +320,8 @@ Examples:
     parser.add_argument(
         "--timeout",
         type=int,
-        default=12,
-        help="Execution timeout in hours (default: 12)"
+        default=2,
+        help="Execution timeout in hours (default: 2)"
     )
     parser.add_argument(
         "--project-root",

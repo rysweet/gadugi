@@ -23,17 +23,19 @@ import asyncio
 import json
 import logging
 import os
+import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, asdict  # type: ignore
-from datetime import datetime, timedelta  # type: ignore
+from dataclasses import dataclass, asdict
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable, Dict, List, Optional  # type: ignore
+from typing import Any, Dict, List, Optional, AsyncGenerator, Callable
 import uuid
+import shutil
 
 try:
-    import docker  # type: ignore
-    from docker.errors import DockerException, ContainerError, ImageNotFound  # type: ignore
+    import docker
+    from docker.errors import DockerException, ContainerError, ImageNotFound
     DOCKER_AVAILABLE = True
 except ImportError:
     logging.warning("Docker SDK not available. Install with: pip install docker")
@@ -44,7 +46,7 @@ except ImportError:
     class ImageNotFound(Exception): pass
 
 try:
-    import websockets  # type: ignore
+    import websockets
     import asyncio
     WEBSOCKET_AVAILABLE = True
 except ImportError:
@@ -101,10 +103,10 @@ class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
     def __init__(self, container_id: str, task_id: str):
-        self.container_id = container_id  # type: ignore
-        self.task_id = task_id  # type: ignore
-        self.streaming = False  # type: ignore
-        self.clients: List = []  # type: ignore
+        self.container_id = container_id
+        self.task_id = task_id
+        self.streaming = False
+        self.clients: List[websockets.WebSocketServerProtocol] = []
 
     async def start_streaming(self, container):
         """Start streaming container output"""
@@ -119,17 +121,17 @@ class ContainerOutputStreamer:
                 log_text = log_line.decode('utf-8').strip()
 
                 # Broadcast to all WebSocket clients
-                if self.clients:  # type: ignore
+                if self.clients:
                     message = {
-                        "task_id": self.task_id,  # type: ignore
-                        "container_id": self.container_id,  # type: ignore
+                        "task_id": self.task_id,
+                        "container_id": self.container_id,
                         "timestamp": datetime.now().isoformat(),
                         "log": log_text
                     }
 
                     # Send to all connected clients
                     disconnected = []
-                    for client in self.clients:  # type: ignore
+                    for client in self.clients:
                         try:
                             await client.send(json.dumps(message))
                         except Exception:
@@ -137,10 +139,10 @@ class ContainerOutputStreamer:
 
                     # Clean up disconnected clients
                     for client in disconnected:
-                        self.clients.remove(client)  # type: ignore
+                        self.clients.remove(client)
 
         except Exception as e:
-            logger.error(f"Output streaming error for {self.task_id}: {e}")  # type: ignore
+            logger.error(f"Output streaming error for {self.task_id}: {e}")
         finally:
             self.streaming = False
 
@@ -151,12 +153,12 @@ class ContainerOutputStreamer:
     def add_client(self, client):
         """Add WebSocket client for output streaming"""
         if WEBSOCKET_AVAILABLE:
-            self.clients.append(client)  # type: ignore
+            self.clients.append(client)
 
     def remove_client(self, client):
         """Remove WebSocket client"""
-        if client in self.clients:  # type: ignore
-            self.clients.remove(client)  # type: ignore
+        if client in self.clients:
+            self.clients.remove(client)
 
 
 class ContainerManager:
@@ -174,23 +176,23 @@ class ContainerManager:
         if not DOCKER_AVAILABLE:
             raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
-        try:  # type: ignore
-            self.docker_client = docker.from_env()  # type: ignore
+        try:
+            self.docker_client = docker.from_env()
             # Test connection
-            self.docker_client.ping()  # type: ignore
+            self.docker_client.ping()
             logger.info("Docker client initialized successfully")
 
             # Ensure orchestrator image exists
             self._ensure_orchestrator_image()
 
-        except DockerException as e:  # type: ignore
-            logger.error(f"Failed to initialize Docker client: {e}")  # type: ignore
-            raise RuntimeError(f"Docker initialization failed: {e}")  # type: ignore
+        except DockerException as e:
+            logger.error(f"Failed to initialize Docker client: {e}")
+            raise RuntimeError(f"Docker initialization failed: {e}")
 
     def _ensure_orchestrator_image(self):
         """Ensure the Claude orchestrator Docker image exists"""
         try:
-            self.docker_client.images.get(self.config.image)  # type: ignore
+            self.docker_client.images.get(self.config.image)
             logger.info(f"Docker image {self.config.image} found")
         except ImageNotFound:
             logger.info(f"Building Docker image: {self.config.image}")
@@ -235,7 +237,7 @@ CMD ["bash"]
             try:
                 # Build the image
                 logger.info("Building Claude orchestrator Docker image...")
-                image, build_logs = self.docker_client.images.build(  # type: ignore
+                image, build_logs = self.docker_client.images.build(
                     path=build_dir,
                     tag=self.config.image,
                     rm=True
@@ -265,22 +267,26 @@ CMD ["bash"]
         if not self.docker_client:
             raise RuntimeError("Docker client not initialized")
 
-        # Try subprocess first as fallback for auth issues
-        subprocess_result = self._try_subprocess_execution(task_id, worktree_path, prompt_file)
-        if subprocess_result.exit_code == 0:
-            logger.info(f"Task {task_id} completed successfully via subprocess fallback")
-            return subprocess_result
-
-        # If subprocess failed, try container execution
-        logger.info(f"Subprocess failed for {task_id}, trying container execution...")
-
-        # Validate API key before container creation (optional for subscription users)
+        # Validate API key before container creation
         api_key = os.getenv('CLAUDE_API_KEY', '').strip()
         if not api_key:
-            logger.warning(f"CLAUDE_API_KEY not set for task {task_id}, relying on subscription auth")
-            # Don't fail here - let container try with mounted auth
+            logger.error(f"CLAUDE_API_KEY not set for task {task_id}")
+            return ContainerResult(
+                container_id="none",
+                task_id=task_id,
+                status="failed",
+                start_time=datetime.now(),
+                end_time=datetime.now(),
+                duration=0.0,
+                exit_code=-1,
+                stdout="",
+                stderr="ERROR: CLAUDE_API_KEY environment variable not set",
+                logs=[],
+                resource_usage={},
+                error_message="CLAUDE_API_KEY not set"
+            )
 
-        _container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
+        container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
         start_time = datetime.now()
 
         # Validate host system resources
@@ -290,7 +296,7 @@ CMD ["bash"]
             if mem.available < 1024 * 1024 * 1024:  # Less than 1GB available
                 logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
                 if mem.available < 512 * 1024 * 1024:  # Less than 512MB
-                    return ContainerResult(  # type: ignore
+                    return ContainerResult(
                         task_id=task_id,
                         status="failed",
                         exit_code=-1,
@@ -307,29 +313,13 @@ CMD ["bash"]
 
         logger.info(f"Starting containerized task: {task_id}")
 
-        # Prepare container volumes including auth directories
+        # Prepare container volumes
         volumes = {
             str(worktree_path.absolute()): {
                 'bind': '/workspace',
                 'mode': 'rw'
             }
         }
-
-        # Mount Claude config directory for subscription auth
-        claude_config_dir = Path.home() / '.claude'
-        if claude_config_dir.exists():
-            volumes[str(claude_config_dir)] = {
-                'bind': '/root/.claude',
-                'mode': 'ro'
-            }
-
-        # Mount GitHub config directory for gh CLI
-        gh_config_dir = Path.home() / '.config' / 'gh'
-        if gh_config_dir.exists():
-            volumes[str(gh_config_dir)] = {
-                'bind': '/root/.config/gh',
-                'mode': 'ro'
-            }
 
         # Prepare Claude CLI command with proper flags and path escaping
         import shlex
@@ -341,47 +331,42 @@ CMD ["bash"]
 
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
-        try:  # type: ignore
+        try:
             # Create and start container
-            container = self.docker_client.containers.run(  # type: ignore
-                image=self.config.image,  # type: ignore
-                command=claude_cmd,  # type: ignore
-                volumes=volumes,  # type: ignore
+            container = self.docker_client.containers.run(
+                image=self.config.image,
+                command=claude_cmd,
+                volumes=volumes,
                 working_dir="/workspace",
-                cpu_count=float(self.config.cpu_limit),  # type: ignore
-                mem_limit=self.config.memory_limit,  # type: ignore
-                network_mode=self.config.network_mode,  # type: ignore
+                cpu_count=float(self.config.cpu_limit),
+                mem_limit=self.config.memory_limit,
+                network_mode=self.config.network_mode,
                 detach=True,
-                auto_remove=self.config.auto_remove,  # type: ignore
-                name=container_id,  # type: ignore
+                auto_remove=self.config.auto_remove,
+                name=container_id,
                 environment={
                     'PYTHONUNBUFFERED': '1',
                     'CLAUDE_API_KEY': os.getenv('CLAUDE_API_KEY', ''),
-                    'CLAUDE_CODE_SSE_PORT': os.getenv('CLAUDE_CODE_SSE_PORT', ''),
-                    'CLAUDE_CODE_ENTRYPOINT': os.getenv('CLAUDE_CODE_ENTRYPOINT', 'cli'),
-                    'CLAUDECODE': os.getenv('CLAUDECODE', '1'),
-                    'GH_TOKEN': os.getenv('GH_TOKEN', ''),
-                    'GITHUB_TOKEN': os.getenv('GITHUB_TOKEN', ''),
-                    'TASK_ID': task_id  # type: ignore
+                    'TASK_ID': task_id
                 }
             )
 
-            self.active_containers[task_id] = container  # type: ignore
+            self.active_containers[task_id] = container
 
             # Start output streaming
-            streamer = ContainerOutputStreamer(container.id, task_id)  # type: ignore
-            self.output_streamers[task_id] = streamer  # type: ignore
+            streamer = ContainerOutputStreamer(container.id, task_id)
+            self.output_streamers[task_id] = streamer
 
             # Start streaming in background thread
             if WEBSOCKET_AVAILABLE:
                 streaming_thread = threading.Thread(
-                    target=lambda: asyncio.run(streamer.start_streaming(container)),  # type: ignore
+                    target=lambda: asyncio.run(streamer.start_streaming(container)),
                     daemon=True
                 )
                 streaming_thread.start()
 
             # Wait for completion with timeout
-            exit_code = container.wait(timeout=self.config.timeout_seconds)['StatusCode']  # type: ignore
+            exit_code = container.wait(timeout=self.config.timeout_seconds)['StatusCode']
 
             # Get container logs
             logs = container.logs().decode('utf-8')
@@ -400,74 +385,74 @@ CMD ["bash"]
                 'network_tx': stats.get('networks', {}).get('eth0', {}).get('tx_bytes', 0)
             }
 
-        except docker.errors.ImageNotFound as e:  # type: ignore
-            logger.error(f"Docker image not found for {task_id}: {e}")  # type: ignore
+        except docker.errors.ImageNotFound as e:
+            logger.error(f"Docker image not found for {task_id}: {e}")
             exit_code = -2
             status = "failed"
             stdout = ""
-            stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."  # type: ignore
+            stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."
             logs = ""
             resource_usage = {}
-        except docker.errors.APIError as e:  # type: ignore
-            logger.error(f"Docker API error for {task_id}: {e}")  # type: ignore
+        except docker.errors.APIError as e:
+            logger.error(f"Docker API error for {task_id}: {e}")
             exit_code = -3
             status = "failed"
             stdout = ""
-            stderr = f"Docker API error: {e}"  # type: ignore
+            stderr = f"Docker API error: {e}"
             logs = ""
             resource_usage = {}
-        except docker.errors.ContainerError as e:  # type: ignore
-            logger.error(f"Container error for {task_id}: {e}")  # type: ignore
-            exit_code = e.exit_status  # type: ignore
+        except docker.errors.ContainerError as e:
+            logger.error(f"Container error for {task_id}: {e}")
+            exit_code = e.exit_status
             status = "failed"
-            stdout = e.stdout.decode('utf-8') if e.stdout else ""  # type: ignore
-            stderr = e.stderr.decode('utf-8') if e.stderr else str(e)  # type: ignore
+            stdout = e.stdout.decode('utf-8') if e.stdout else ""
+            stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
             logs = ""
             resource_usage = {}
-        except Exception as e:  # type: ignore
-            logger.error(f"Unexpected container execution error for {task_id}: {e}")  # type: ignore
+        except Exception as e:
+            logger.error(f"Unexpected container execution error for {task_id}: {e}")
             exit_code = -99
             status = "failed"
             stdout = ""
-            stderr = f"Unexpected error: {type(e).__name__}: {e}"  # type: ignore
+            stderr = f"Unexpected error: {type(e).__name__}: {e}"
             logs = ""
             resource_usage = {}
 
             # Try to get partial logs
-            if task_id in self.active_containers:  # type: ignore
+            if task_id in self.active_containers:
                 try:
-                    container = self.active_containers[task_id]  # type: ignore
+                    container = self.active_containers[task_id]
                     logs = container.logs().decode('utf-8')
                     stdout = logs
                 except Exception:
                     pass
 
-        finally:  # type: ignore
+        finally:
             # Cleanup
-            if task_id in self.active_containers:  # type: ignore
+            if task_id in self.active_containers:
                 try:
-                    container = self.active_containers[task_id]  # type: ignore
+                    container = self.active_containers[task_id]
                     container.stop(timeout=10)
-                    if not self.config.auto_remove:  # type: ignore
+                    if not self.config.auto_remove:
                         container.remove()
                 except Exception as e:
-                    logger.warning(f"Container cleanup failed for {task_id}: {e}")  # type: ignore
+                    logger.warning(f"Container cleanup failed for {task_id}: {e}")
                 finally:
-                    del self.active_containers[task_id]  # type: ignore
+                    del self.active_containers[task_id]
 
             # Stop output streaming
-            if task_id in self.output_streamers:  # type: ignore
-                self.output_streamers[task_id].stop_streaming()  # type: ignore
-                del self.output_streamers[task_id]  # type: ignore
+            if task_id in self.output_streamers:
+                self.output_streamers[task_id].stop_streaming()
+                del self.output_streamers[task_id]
 
-        end_time = datetime.now()  # type: ignore
-        duration = (end_time - start_time).total_seconds()  # type: ignore
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
 
         result = ContainerResult(
-            container_id=container_id,  # type: ignore
-            task_id=task_id,  # type: ignore
+            container_id=container_id,
+            task_id=task_id,
             status=status,
-            start_time=start_time,  # type: ignore
+            start_time=start_time,
             end_time=end_time,
             duration=duration,
             exit_code=exit_code,
@@ -478,13 +463,13 @@ CMD ["bash"]
             error_message=stderr if status == "failed" else None
         )
 
-        logger.info(f"Container task completed: {task_id}, status={status}, duration={duration:.1f}s")  # type: ignore
+        logger.info(f"Container task completed: {task_id}, status={status}, duration={duration:.1f}s")
 
         # Progress callback
-        if progress_callback:  # type: ignore
-            progress_callback(task_id, result)  # type: ignore
+        if progress_callback:
+            progress_callback(task_id, result)
 
-        return result  # type: ignore
+        return result
 
     def execute_parallel_tasks(
         self,
@@ -628,92 +613,6 @@ CMD ["bash"]
                 logger.warning(f"Error closing Docker client: {e}")
 
         logger.info("ContainerManager cleanup complete")
-
-
-    def _try_subprocess_execution(self, task_id: str, worktree_path: Path, prompt_file: str) -> ContainerResult:
-        """Fallback subprocess execution when Docker fails or auth issues occur"""
-        import subprocess
-        import shlex
-
-        logger.info(f"Attempting subprocess execution for task {task_id}")
-        start_time = datetime.now()
-
-        try:
-            # Change to worktree directory
-            original_cwd = os.getcwd()
-            os.chdir(worktree_path)
-
-            # Prepare Claude CLI command
-            escaped_prompt = shlex.quote(prompt_file)
-            claude_cmd = ["claude", "-p", escaped_prompt] + self.config.claude_flags
-
-            logger.info(f"Subprocess command: {' '.join(claude_cmd)}")
-
-            # Execute with proper timeout
-            result = subprocess.run(
-                claude_cmd,
-                capture_output=True,
-                text=True,
-                timeout=self.config.timeout_seconds,
-                cwd=worktree_path
-            )
-
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-
-            return ContainerResult(
-                container_id=f"subprocess-{task_id}",
-                task_id=task_id,
-                status="success" if result.returncode == 0 else "failed",
-                exit_code=result.returncode,
-                stdout=result.stdout,
-                stderr=result.stderr,
-                logs=result.stdout + "\n" + result.stderr,
-                start_time=start_time,
-                end_time=end_time,
-                duration=duration,
-                resource_usage={}
-            )
-
-        except subprocess.TimeoutExpired:
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            return ContainerResult(
-                container_id=f"subprocess-{task_id}",
-                task_id=task_id,
-                status="failed",
-                exit_code=-1,
-                stdout="",
-                stderr="Subprocess execution timed out",
-                logs="",
-                start_time=start_time,
-                end_time=end_time,
-                duration=duration,
-                resource_usage={}
-            )
-        except Exception as e:
-            end_time = datetime.now()
-            duration = (end_time - start_time).total_seconds()
-            logger.error(f"Subprocess execution failed for {task_id}: {e}")
-            return ContainerResult(
-                container_id=f"subprocess-{task_id}",
-                task_id=task_id,
-                status="failed",
-                exit_code=-2,
-                stdout="",
-                stderr=f"Subprocess error: {e}",
-                logs="",
-                start_time=start_time,
-                end_time=end_time,
-                duration=duration,
-                resource_usage={}
-            )
-        finally:
-            # Restore original working directory
-            try:
-                os.chdir(original_cwd)
-            except:
-                pass
 
 
 def main():

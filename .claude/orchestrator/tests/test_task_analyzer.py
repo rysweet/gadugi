@@ -7,16 +7,31 @@ Tests prompt file analysis, dependency detection, and task classification.
 
 import json
 
-# Add the components directory to the path
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, mock_open, patch
+import importlib.util
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
+# Set up path for imports
+orchestrator_dir = Path(__file__).parent.parent
+components_dir = orchestrator_dir / 'components'
 
-from task_analyzer import TaskAnalyzer, TaskComplexity, TaskInfo, TaskType
+# Import task_analyzer directly (it doesn't have problematic relative imports)
+spec = importlib.util.spec_from_file_location(
+    "task_analyzer",
+    components_dir / "task_analyzer.py"
+)
+task_analyzer_module = importlib.util.module_from_spec(spec)
+sys.modules['task_analyzer'] = task_analyzer_module
+spec.loader.exec_module(task_analyzer_module)
+
+# Import the classes we need
+TaskAnalyzer = task_analyzer_module.TaskAnalyzer
+TaskComplexity = task_analyzer_module.TaskComplexity
+TaskInfo = task_analyzer_module.TaskInfo
+TaskType = task_analyzer_module.TaskType
 
 
 class TestTaskAnalyzer(unittest.TestCase):

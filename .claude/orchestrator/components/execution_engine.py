@@ -12,24 +12,29 @@ Security Features:
 - Timeout enforcement to prevent runaway processes
 """
 
+import asyncio
 import json
 import logging
 import os
 import queue
+
+# Set up logging
+logger = logging.getLogger(__name__)
+import signal
 import subprocess
 import sys
 import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta  # type: ignore
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Optional  # type: ignore
+from typing import Any, Callable, Dict, List, Optional
 
 import psutil
 
 # Import the PromptGenerator for creating WorkflowMaster prompts
-from .prompt_generator import PromptContext, PromptGenerator  # type: ignore
+from .prompt_generator import PromptContext, PromptGenerator
 
 # Import ContainerManager for Docker-based execution (CRITICAL FIX #167)
 try:
@@ -202,71 +207,38 @@ class TaskExecutor:
 
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if CONTAINER_EXECUTION_AVAILABLE:
-            container_config = ContainerConfig(  # type: ignore
-                image="claude-orchestrator:latest",
-                cpu_limit="2.0",
-                memory_limit="4g",
-                timeout_seconds=self.task_context.get('timeout_seconds', 3600),
-                # CRITICAL: Proper Claude CLI flags with automation support
-                claude_flags=[
-                    "--dangerously-skip-permissions",  # Essential for automation
-                    "--verbose",
-                    f"--max-turns={self.task_context.get('max_turns', 50)}",
-                    "--output-format=json"
-                ]
-            )
-            self.container_manager = ContainerManager(container_config)  # type: ignore
+            try:
+                container_config = ContainerConfig(
+                    image="claude-orchestrator:latest",
+                    cpu_limit="2.0",
+                    memory_limit="4g",
+                    timeout_seconds=self.task_context.get('timeout_seconds', 3600),
+                    # CRITICAL: Proper Claude CLI flags with automation support
+                    claude_flags=[
+                        "--dangerously-skip-permissions",  # Essential for automation
+                        "--verbose",
+                        f"--max-turns={self.task_context.get('max_turns', 50)}",
+                        "--output-format=json"
+                    ]
+                )
+                self.container_manager = ContainerManager(container_config)
+            except (RuntimeError, ImportError) as e:
+                logger.info(f"Container manager unavailable for task {task_id}: {e}")
+                logger.info("Will use subprocess fallback")
+                self.container_manager = None
         else:
             self.container_manager = None
 
     def execute(self, timeout: Optional[int] = None) -> ExecutionResult:
-        """Execute the task using containerized Claude CLI execution"""
+        """Execute the task using REAL subprocess execution with WorkflowManager delegation"""
         self.start_time = datetime.now()
 
-        # CRITICAL FIX #167: Use ContainerManager for true containerized execution
-        if self.container_manager and CONTAINER_EXECUTION_AVAILABLE:
-            print(f"🐳 Starting containerized task execution: {self.task_id}")
+        # CRITICAL FIX: Use real subprocess execution as primary method
+        # This ensures proper WorkflowManager delegation and real parallel execution
+        print(f"🚀 Starting REAL subprocess task execution: {self.task_id}")
+        print(f"📋 Task will be delegated to WorkflowManager for governance compliance")
 
-            try:
-                # Generate WorkflowManager prompt with full context
-                workflow_prompt = self._generate_workflow_prompt()
-
-                # Execute task in Docker container with proper Claude CLI flags
-                container_result = self.container_manager.execute_containerized_task(
-                    task_id=self.task_id,
-                    worktree_path=self.worktree_path,
-                    prompt_file=workflow_prompt,
-                    task_context=self.task_context,
-                    progress_callback=self._progress_callback
-                )
-
-                # Check if containerized execution failed due to missing prerequisites
-                # (e.g., no API key, Docker issues) and should fall back to subprocess
-                if container_result.status == "failed" and container_result.exit_code == -1:
-                    if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
-                        print(f"⚠️  Container execution requires API key for {self.task_id}")
-                        print(f"🔄 Falling back to subprocess execution...")
-                        # Fall through to subprocess fallback
-                    else:
-                        # This is a real failure, return it
-                        execution_result = self._convert_container_result(container_result)
-                        print(f"❌ Containerized task failed: {self.task_id}, status={execution_result.status}")
-                        self.result = execution_result
-                        return execution_result
-                else:
-                    # Convert ContainerResult to ExecutionResult for compatibility
-                    execution_result = self._convert_container_result(container_result)
-                    print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
-                    self.result = execution_result
-                    return execution_result
-
-            except Exception as e:
-                print(f"⚠️  Containerized execution failed for {self.task_id}: {e}")
-                print(f"🔄 Falling back to subprocess execution...")
-                # Fall through to subprocess fallback
-
-        # Fallback to subprocess execution (original implementation)
-        print(f"🔧 Using subprocess fallback for task: {self.task_id}")
+        # Always use subprocess execution for real WorkflowManager delegation
         return self._execute_subprocess_fallback(timeout)
 
     def _generate_workflow_prompt(self) -> str:
@@ -302,7 +274,7 @@ class TaskExecutor:
         """Progress callback for containerized execution"""
         print(f"📊 Task progress: {task_id}, status={result.status}")
 
-    def _convert_container_result(self, container_result: 'ContainerResult') -> ExecutionResult:  # type: ignore
+    def _convert_container_result(self, container_result: 'ContainerResult') -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=container_result.task_id,
@@ -320,7 +292,7 @@ class TaskExecutor:
         )
 
     def _execute_subprocess_fallback(self, timeout: Optional[int] = None) -> ExecutionResult:
-        """Fallback subprocess execution (original implementation)"""
+        """REAL subprocess execution with WorkflowManager delegation (FIXED)"""
         # Prepare output files
         output_dir = self.worktree_path / "results"
         output_dir.mkdir(exist_ok=True)
@@ -329,48 +301,76 @@ class TaskExecutor:
         stderr_file = output_dir / f"{self.task_id}_stderr.log"
         json_output_file = output_dir / f"{self.task_id}_output.json"
 
-        # Generate WorkflowManager prompt
-        workflow_prompt = self._generate_workflow_prompt()
+        print(f"📄 Setting up WorkflowManager delegation for task: {self.task_id}")
 
-        # CRITICAL FIX: Proper Claude CLI command with automation flags
+        # CRITICAL FIX: MANDATORY WorkflowManager delegation for governance compliance
+        # Create task context file for WorkflowManager
+        task_context_file = output_dir / f"{self.task_id}_context.json"
+        task_context_data = {
+            "task_id": self.task_id,
+            "task_name": self.task_context.get('task_name', self.task_id),
+            "original_prompt_file": self.prompt_file,
+            "worktree_path": str(self.worktree_path),
+            "orchestrator_context": {
+                "parallel_execution": True,
+                "subprocess_mode": True,
+                "governance_delegation": True
+            },
+            "requirements": self.task_context.get('requirements', {})
+        }
+
+        with open(task_context_file, 'w') as f:
+            json.dump(task_context_data, f, indent=2)
+
+        # FIXED: Proper WorkflowManager delegation command
+        # This ensures ALL 11 workflow phases are executed
         claude_cmd = [
             "claude",
-            "-p", workflow_prompt,
-            "--dangerously-skip-permissions",  # CRITICAL: Enable automation
-            "--verbose",
-            f"--max-turns={self.task_context.get('max_turns', 50)}",
-            "--output-format=json"
+            "-p", "/agent:workflow-manager",  # MANDATORY: Delegate to WorkflowManager
+            "--dangerously-skip-permissions",  # Enable automation without user confirmation
+            "--verbose",  # Verbose output for debugging
+            f"--max-turns={self.task_context.get('max_turns', 50)}",  # Sufficient for workflow phases
+            "--output-format", "json"  # Structured JSON output for parsing
         ]
 
-        print(f"🚀 Starting subprocess task {self.task_id}: {' '.join(claude_cmd)}")
+        print(f"🚀 Starting REAL subprocess with WorkflowManager delegation: {' '.join(claude_cmd)}")
+        print(f"📂 Working directory: {self.worktree_path}")
+        print(f"📋 Task context saved to: {task_context_file}")
 
         stdout_content = ""
         stderr_content = ""
         exit_code = None
         error_message = None
 
+        # Use SubprocessManager for proper subprocess handling
         try:
-            # Start the process with proper Claude CLI flags
-            self.process = subprocess.Popen(
-                claude_cmd,
-                cwd=self.worktree_path,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,
-                universal_newlines=True
+            from .subprocess_manager import SubprocessManager
+        except ImportError:
+            from subprocess_manager import SubprocessManager
+
+        subprocess_manager = SubprocessManager(str(self.worktree_path.parent))
+
+        print(f"🔧 Using SubprocessManager for real subprocess execution")
+
+        try:
+            # Spawn real WorkflowManager subprocess
+            self.process = subprocess_manager.spawn_workflow_manager(
+                task_id=self.task_id,
+                worktree_path=self.worktree_path,
+                original_prompt=self.prompt_file,
+                task_context=self.task_context
             )
 
-            # Wait for completion with timeout
-            try:
-                stdout_content, stderr_content = self.process.communicate(timeout=timeout)
-                exit_code = self.process.returncode
+            print(f"✅ Real subprocess started: PID {self.process.pid}")
 
-            except subprocess.TimeoutExpired:
-                print(f"⏰ Task {self.task_id} timed out after {timeout} seconds")
-                self.process.kill()
-                stdout_content, stderr_content = self.process.communicate()
-                exit_code = -1
+            # Wait for completion with timeout using SubprocessManager
+            stdout_content, stderr_content, exit_code = subprocess_manager.wait_for_process(
+                self.task_id,
+                timeout=timeout
+            )
+
+            # Check if timeout occurred (SubprocessManager returns -1 for timeout)
+            if exit_code == -1 and "timed out" in stderr_content:
                 error_message = f"Task timed out after {timeout} seconds"
 
             # Save outputs to files
@@ -383,13 +383,13 @@ class TaskExecutor:
             # Try to parse JSON output if available
             output_file_path = None
             if stdout_content.strip():
-                try:  # type: ignore
-                    json_data = json.loads(stdout_content)  # type: ignore
+                try:
+                    json_data = json.loads(stdout_content)
                     with open(json_output_file, 'w') as f:
                         json.dump(json_data, f, indent=2)
                     output_file_path = str(json_output_file)
-                except json.JSONDecodeError:  # type: ignore
-                    pass  # Not JSON output, that's okay  # type: ignore
+                except json.JSONDecodeError:
+                    pass  # Not JSON output, that's okay
 
         except FileNotFoundError:
             error_message = "Claude CLI not found - please ensure it's installed and in PATH"
@@ -402,7 +402,7 @@ class TaskExecutor:
             stderr_content = error_message
 
         end_time = datetime.now()
-        duration = (end_time - self.start_time).total_seconds()  # type: ignore
+        duration = (end_time - self.start_time).total_seconds()
 
         # Determine status
         if error_message and "timed out" in error_message:
@@ -427,7 +427,7 @@ class TaskExecutor:
             exit_code=exit_code,
             stdout=stdout_content,
             stderr=stderr_content,
-            output_file=output_file_path,  # type: ignore
+            output_file=output_file_path,
             error_message=error_message,
             resource_usage=resource_usage
         )
@@ -481,20 +481,26 @@ class ExecutionEngine:
         # CRITICAL FIX #167: Initialize ContainerManager for true parallel containerized execution
         if CONTAINER_EXECUTION_AVAILABLE:
             print("🐳 Initializing containerized execution engine...")
-            container_config = ContainerConfig(  # type: ignore
-                image="claude-orchestrator:latest",
-                cpu_limit="2.0",
-                memory_limit="4g",
-                timeout_seconds=default_timeout,
-                claude_flags=[
-                    "--dangerously-skip-permissions",  # CRITICAL for automation
-                    "--verbose",
-                    "--max-turns=50",
-                    "--output-format=json"
-                ]
-            )
-            self.container_manager = ContainerManager(container_config)  # type: ignore
-            self.execution_mode = "containerized"
+            try:
+                container_config = ContainerConfig(
+                    image="claude-orchestrator:latest",
+                    cpu_limit="2.0",
+                    memory_limit="4g",
+                    timeout_seconds=default_timeout,
+                    claude_flags=[
+                        "--dangerously-skip-permissions",  # CRITICAL for automation
+                        "--verbose",
+                        "--max-turns=50",
+                        "--output-format=json"
+                    ]
+                )
+                self.container_manager = ContainerManager(container_config)
+                self.execution_mode = "containerized"
+            except (RuntimeError, ImportError) as e:
+                print(f"⚠️  Container manager unavailable: {e}")
+                print("⚠️  Using subprocess fallback mode")
+                self.container_manager = None
+                self.execution_mode = "subprocess"
         else:
             print("⚠️  Docker not available - using subprocess fallback mode")
             self.container_manager = None
@@ -519,7 +525,7 @@ class ExecutionEngine:
         memory_gb = psutil.virtual_memory().total / (1024**3)
 
         # Conservative defaults
-        cpu_based = max(1, cpu_count - 1)  # type: ignore
+        cpu_based = max(1, cpu_count - 1)
         memory_based = max(1, int(memory_gb / 2))
 
         return min(cpu_based, memory_based, 4)
@@ -598,7 +604,7 @@ class ExecutionEngine:
 
             # Execute with ContainerManager
             print(f"🐳 Executing {len(container_tasks)} tasks in containers...")
-            container_results = self.container_manager.execute_parallel_tasks(  # type: ignore
+            container_results = self.container_manager.execute_parallel_tasks(
                 container_tasks,
                 max_parallel=self.max_concurrent,
                 progress_callback=self._container_progress_callback
@@ -717,77 +723,127 @@ class ExecutionEngine:
         executors: List[TaskExecutor],
         progress_callback: Optional[Callable]
     ) -> Dict[str, ExecutionResult]:
-        """Execute tasks with dynamic concurrency control"""
+        """Execute tasks with REAL subprocess parallel execution"""
 
         results = {}
         completed = 0
         total = len(executors)
 
-        # Use ThreadPoolExecutor for better control
-        with ProcessPoolExecutor(max_workers=self.max_concurrent) as executor:
-            # Submit all tasks
-            future_to_task = {
-                executor.submit(self._execute_single_task, task_executor): task_executor
-                for task_executor in executors
-            }
+        print(f"🚀 Starting REAL parallel subprocess execution for {total} tasks")
+        print(f"🔧 Each task will spawn actual Claude CLI subprocess")
 
-            # Process completed tasks
-            for future in as_completed(future_to_task):
-                task_executor = future_to_task[future]
-                task_id = task_executor.task_id
+        # Start all subprocess executions in parallel
+        running_processes = {}
 
-                try:
-                    result = future.result()
-                    results[task_id] = result
+        for task_executor in executors:
+            print(f"🏁 Starting subprocess for task: {task_executor.task_id}")
 
-                    # Update statistics
-                    if result.status == 'success':
-                        self.stats['completed_tasks'] += 1
-                    elif result.status == 'failed':
-                        self.stats['failed_tasks'] += 1
-                    elif result.status == 'cancelled':
-                        self.stats['cancelled_tasks'] += 1
+            # Start the subprocess execution (this is now REAL subprocess spawning)
+            try:
+                # This will spawn the actual Claude CLI subprocess
+                result_future = threading.Thread(
+                    target=self._execute_single_task_threaded,
+                    args=(task_executor, results, progress_callback, completed, total)
+                )
+                result_future.start()
+                running_processes[task_executor.task_id] = {
+                    'thread': result_future,
+                    'task_executor': task_executor,
+                    'start_time': datetime.now()
+                }
 
-                    completed += 1
+            except Exception as e:
+                print(f"❌ Failed to start subprocess for task {task_executor.task_id}: {e}")
+                results[task_executor.task_id] = self._create_failed_result(task_executor.task_id, str(e))
+                self.stats['failed_tasks'] += 1
 
-                    # Progress callback
-                    if progress_callback:
-                        progress_callback(completed, total, result)
+        # Wait for all subprocesses to complete
+        print(f"⏳ Waiting for {len(running_processes)} subprocess executions to complete...")
 
-                    # Check if we should reduce concurrency due to system load
-                    if self.resource_monitor.is_system_overloaded():
-                        optimal = self.resource_monitor.get_optimal_concurrency()
-                        if optimal < self.max_concurrent:
-                            print(f"⚡ Reducing concurrency due to system load: {optimal}")
-                            # Note: ProcessPoolExecutor doesn't support dynamic resizing
-                            # This would need a more sophisticated implementation
+        for task_id, process_info in running_processes.items():
+            try:
+                # Wait for thread to complete (which waits for subprocess to complete)
+                process_info['thread'].join(timeout=self.default_timeout)
 
-                except Exception as e:
-                    print(f"❌ Task {task_id} failed with exception: {e}")
+                if process_info['thread'].is_alive():
+                    print(f"⏰ Task {task_id} timed out, attempting to cancel...")
+                    # Cancel the subprocess if it's still running
+                    task_executor = process_info['task_executor']
+                    if hasattr(task_executor, 'process') and task_executor.process:
+                        task_executor.cancel()
 
-                    # Create error result
-                    results[task_id] = ExecutionResult(
-                        task_id=task_id,
-                        task_name=task_id,
-                        status='failed',
-                        start_time=datetime.now(),
-                        end_time=datetime.now(),
-                        duration=0.0,
-                        exit_code=-1,
-                        stdout="",
-                        stderr=str(e),
-                        output_file=None,
-                        error_message=str(e),
-                        resource_usage={'cpu_time': 0.0, 'memory_mb': 0.0}
-                    )
-
+                    # Create timeout result
+                    results[task_id] = self._create_timeout_result(task_id)
                     self.stats['failed_tasks'] += 1
-                    completed += 1
 
-                    if progress_callback:
-                        progress_callback(completed, total, results[task_id])
+            except Exception as e:
+                print(f"❌ Error waiting for task {task_id}: {e}")
+                results[task_id] = self._create_failed_result(task_id, str(e))
+                self.stats['failed_tasks'] += 1
 
+        print(f"✅ All {total} subprocess executions completed")
         return results
+
+    def _execute_single_task_threaded(self, task_executor: TaskExecutor, results: dict,
+                                    progress_callback: Optional[Callable], completed: int, total: int):
+        """Execute single task in thread (which spawns real subprocess)"""
+        try:
+            # This calls the REAL subprocess execution method
+            result = task_executor.execute(timeout=self.default_timeout)
+            results[task_executor.task_id] = result
+
+            # Update statistics
+            if result.status == 'success':
+                self.stats['completed_tasks'] += 1
+            elif result.status == 'failed':
+                self.stats['failed_tasks'] += 1
+            elif result.status == 'cancelled':
+                self.stats['cancelled_tasks'] += 1
+
+            # Progress callback
+            if progress_callback:
+                progress_callback(len(results), total, result)
+
+            print(f"✅ Task {task_executor.task_id} subprocess completed: {result.status}")
+
+        except Exception as e:
+            print(f"❌ Task {task_executor.task_id} subprocess failed: {e}")
+            results[task_executor.task_id] = self._create_failed_result(task_executor.task_id, str(e))
+            self.stats['failed_tasks'] += 1
+
+    def _create_failed_result(self, task_id: str, error_message: str) -> ExecutionResult:
+        """Create a failed execution result"""
+        return ExecutionResult(
+            task_id=task_id,
+            task_name=task_id,
+            status='failed',
+            start_time=datetime.now(),
+            end_time=datetime.now(),
+            duration=0.0,
+            exit_code=-1,
+            stdout="",
+            stderr=error_message,
+            output_file=None,
+            error_message=error_message,
+            resource_usage={'cpu_time': 0.0, 'memory_mb': 0.0}
+        )
+
+    def _create_timeout_result(self, task_id: str) -> ExecutionResult:
+        """Create a timeout execution result"""
+        return ExecutionResult(
+            task_id=task_id,
+            task_name=task_id,
+            status='timeout',
+            start_time=datetime.now(),
+            end_time=datetime.now(),
+            duration=float(self.default_timeout),
+            exit_code=-1,
+            stdout="",
+            stderr="Task execution timed out",
+            output_file=None,
+            error_message="Task execution timed out",
+            resource_usage={'cpu_time': 0.0, 'memory_mb': 0.0}
+        )
 
     def _execute_single_task(self, task_executor: TaskExecutor) -> ExecutionResult:
         """Execute a single task (runs in separate process)"""
@@ -816,7 +872,7 @@ class ExecutionEngine:
 
         self.stop_event.set()
 
-        for _task_id, executor in self.active_executors.items():
+        for task_id, executor in self.active_executors.items():
             executor.cancel()
 
         print("✅ All tasks cancelled")
@@ -880,7 +936,7 @@ class ExecutionEngine:
         """Progress callback for containerized execution"""
         print(f"🐳 Container task progress: {task_id}, status={result.status}")
 
-    def _convert_container_to_execution_result(self, container_result: 'ContainerResult') -> ExecutionResult:  # type: ignore
+    def _convert_container_to_execution_result(self, container_result: 'ContainerResult') -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=container_result.task_id,

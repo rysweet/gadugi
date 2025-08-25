@@ -12,28 +12,30 @@ Key Features:
 - Integrates with Enhanced Separation shared modules for reliability
 """
 
+import asyncio
 import json
 import logging
+import os
 import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass  # type: ignore
-from datetime import datetime, timedelta  # type: ignore
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
+from typing import Any, Dict, List, Optional, Tuple
 
 # Import existing orchestrator components
 try:
     from .components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
     from .components.worktree_manager import WorktreeManager, WorktreeInfo
-    from .components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity  # type: ignore
+    from .components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity
     from .components.prompt_generator import PromptGenerator, PromptContext
 except ImportError:
     # Fallback for direct execution
     from components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
     from components.worktree_manager import WorktreeManager, WorktreeInfo
-    from components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity  # type: ignore
+    from components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity
     from components.prompt_generator import PromptGenerator, PromptContext
 
 # Import Enhanced Separation shared modules
@@ -43,7 +45,7 @@ try:
     from state_management import StateManager, CheckpointManager
     from utils.error_handling import ErrorHandler, CircuitBreaker
     from task_tracking import TaskMetrics
-    from interfaces import AgentConfig, OperationResult  # type: ignore
+    from interfaces import AgentConfig, OperationResult
 except ImportError as e:
     logging.warning(f"Could not import shared modules: {e}")
     # Fallback definitions for development
@@ -94,7 +96,7 @@ ProcessInfo = None
 class OrchestrationConfig:
     """Configuration for orchestration execution"""
     max_parallel_tasks: int = 4
-    execution_timeout_hours: int = 12
+    execution_timeout_hours: int = 2
     monitoring_interval_seconds: int = 30
     enable_checkpoint: bool = True
     fallback_to_sequential: bool = True
@@ -163,7 +165,7 @@ class OrchestratorCoordinator:
 
         # Initialize Enhanced Separation components
         try:
-            self.github_ops = GitHubOperations(task_id=self.orchestration_id)  # type: ignore
+            self.github_ops = GitHubOperations(task_id=self.orchestration_id)
             self.state_manager = StateManager()
             self.checkpoint_manager = CheckpointManager(self.state_manager)
             self.error_handler = ErrorHandler()
@@ -535,7 +537,7 @@ class OrchestratorCoordinator:
                     "runtime_seconds": (datetime.now() - p.created_at).total_seconds()
                 }
                 for p in all_processes.values()
-                if p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]  # type: ignore
+                if p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]
             ]
         }
 
@@ -554,7 +556,7 @@ class OrchestratorCoordinator:
         """Clean up worktrees and temporary files"""
         logger.info("Cleaning up orchestration resources...")
 
-        for task_id, _worktree_info in worktree_assignments.items():
+        for task_id, worktree_info in worktree_assignments.items():
             try:
                 # Clean up worktree
                 self.worktree_manager.cleanup_worktree(task_id)
@@ -588,11 +590,58 @@ class OrchestratorCoordinator:
             task_results=[]
         )
 
-        # TODO: Implement sequential fallback using existing WorkflowManager
-        # For now, return partial success
-        result.execution_time_seconds = time.time() - start_time
-        logger.info("Fallback execution completed")
+        # Execute tasks sequentially as fallback
+        for prompt_file in prompt_files:
+            try:
+                logger.info(f"Executing task sequentially: {prompt_file}")
 
+                # Analyze the task
+                task_infos = self._analyze_tasks([prompt_file])
+                if not task_infos:
+                    logger.error(f"Failed to analyze task: {prompt_file}")
+                    result.failed_tasks += 1
+                    continue
+
+                task_info = task_infos[0]
+
+                # Check if worktree already exists from earlier phase
+                worktree_info = None
+                if task_info.id in self.worktree_manager.worktrees:
+                    logger.info(f"Using existing worktree for: {task_info.id}")
+                    worktree_info = self.worktree_manager.worktrees[task_info.id]
+                else:
+                    # Set up new worktree if it doesn't exist
+                    worktree_assignments = self._setup_worktrees([task_info])
+                    if task_info.id not in worktree_assignments:
+                        logger.error(f"Failed to setup worktree for: {prompt_file}")
+                        result.failed_tasks += 1
+                        continue
+                    worktree_info = worktree_assignments[task_info.id]
+
+                # Create task executor
+                executor = TaskExecutor(
+                    task_id=task_info.id,
+                    worktree_path=Path(worktree_info.worktree_path),
+                    prompt_file=prompt_file,
+                    task_context={'name': task_info.name, 'sequential_fallback': True}
+                )
+
+                # Execute the task with subprocess fallback
+                exec_result = executor.execute(timeout=self.config.execution_timeout_hours * 3600)
+
+                if exec_result.status == 'success':
+                    result.successful_tasks += 1
+                else:
+                    result.failed_tasks += 1
+
+                result.task_results.append(exec_result)
+
+            except Exception as e:
+                logger.error(f"Failed to execute task {prompt_file}: {e}")
+                result.failed_tasks += 1
+
+        result.execution_time_seconds = time.time() - start_time
+        logger.info(f"Fallback execution completed: {result.successful_tasks}/{result.total_tasks} succeeded")
         return result
 
     def get_status(self) -> Dict[str, Any]:
@@ -607,7 +656,7 @@ class OrchestratorCoordinator:
 
         # Clean up any remaining resources
         try:
-            self.worktree_manager.cleanup_all()  # type: ignore
+            self.worktree_manager.cleanup_all_worktrees()
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
 
@@ -621,7 +670,7 @@ def main():
     parser = argparse.ArgumentParser(description="Orchestrator Main - Parallel Workflow Coordination")
     parser.add_argument("prompt_files", nargs="+", help="Prompt files to execute in parallel")
     parser.add_argument("--max-parallel", type=int, default=4, help="Maximum parallel tasks")
-    parser.add_argument("--timeout", type=int, default=12, help="Execution timeout in hours")
+    parser.add_argument("--timeout", type=int, default=2, help="Execution timeout in hours")
     parser.add_argument("--project-root", default=".", help="Project root directory")
 
     args = parser.parse_args()
