@@ -1454,6 +1454,68 @@ Escalate to system maintainers when:
 
 Remember: The goal is to maintain development velocity while preserving quality and safety standards.
 
+## LLM Proxy Service (Claude-Code-Proxy Integration)
+
+The Gadugi v0.3 implementation includes the `claude-code-proxy` service that allows Claude Code CLI to use alternative LLM providers (OpenAI, Azure OpenAI, Ollama, etc.) transparently.
+
+### How It Works
+The proxy intercepts Claude API calls at `http://localhost:8082/v1/messages` and translates them to your configured LLM provider format, then translates responses back to Claude format. This allows Claude Code to work with ANY OpenAI-compatible LLM provider.
+
+### Quick Start
+
+1. **Configure your LLM provider**:
+   ```bash
+   cd .claude/services/llm-proxy
+   uv run python configure_and_start_proxy.py --configure
+   ```
+   Choose from: OpenAI, Azure OpenAI, Anthropic, Google, Ollama (local), or custom OpenAI-compatible endpoints.
+
+2. **Start the proxy**:
+   ```bash
+   uv run python configure_and_start_proxy.py --start
+   ```
+   Or with scheduled shutdown (e.g., run until 7pm when Claude usage resets):
+   ```bash
+   uv run python configure_and_start_proxy.py --start-scheduled
+   ```
+
+3. **Use Claude Code with the proxy**:
+   ```bash
+   ANTHROPIC_BASE_URL=http://localhost:8082 claude
+   ```
+   All Claude API calls will now be routed through your configured provider!
+
+### Management Commands
+- `--status` : Check if proxy is running
+- `--stop` : Stop the proxy
+- `--test` : Test the proxy connection
+- `--help` : Show all available commands
+
+### Transparent Usage
+For completely transparent usage, create an alias:
+```bash
+alias claude='ANTHROPIC_BASE_URL=http://localhost:8082 claude'
+```
+
+Or use the provided transparent launcher:
+```bash
+uv run python start_transparent_proxy.py
+```
+This starts the proxy and launches Claude with proper environment variables automatically.
+
+### Scheduling Features
+The proxy supports automatic shutdown to manage API rate limits:
+- **Run until specific time**: "Stop at 7:00 PM when my Claude usage resets"
+- **Run for duration**: "Run for 2 hours"
+- **Run until tomorrow**: "Stop tomorrow at 9:00 AM"
+
+### Architecture
+- **Location**: `.claude/services/llm-proxy/claude-code-proxy/`
+- **Based on**: https://github.com/fuergaosi233/claude-code-proxy
+- **Port**: 8082 (configurable)
+- **Endpoints**: `/health`, `/v1/messages`
+- **Supports**: Streaming, function calling, image inputs, all Claude features
+
 ## Memories and Best Practices
 
 - Remember to not use artificial dev timescales in planning or estimating.

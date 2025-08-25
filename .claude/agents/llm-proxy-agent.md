@@ -600,6 +600,65 @@ Agent: I'll help you configure multiple providers. Let's start with OpenAI, then
 Both providers are now configured! The LLM Proxy will automatically load balance between them based on your selected strategy.
 ```
 
+## Starting and Stopping the Proxy
+
+### When Configuration Already Exists (.env file present)
+
+If the proxy is already configured (has a .env file), skip the configuration wizard and start directly:
+
+```bash
+# Start the proxy service (already configured)
+cd .claude/services/llm-proxy
+uv run python start_configured_proxy.py &
+
+# Or run in background with nohup
+nohup uv run python start_configured_proxy.py > /dev/null 2>&1 &
+echo $! > llm_proxy.pid
+
+# The service will:
+1. Read existing .env configuration
+2. Start immediately without prompts
+3. Log to logs/llm_proxy_TIMESTAMP.log
+4. Show PID for management
+```
+
+### When Configuration Doesn't Exist
+
+Run the configuration wizard first:
+
+```bash
+cd .claude/services/llm-proxy
+uv run python configure_proxy.py
+```
+
+### Stopping the Service
+
+```bash
+# Method 1: Using PID file (if saved)
+kill $(cat .claude/services/llm-proxy/llm_proxy.pid)
+
+# Method 2: Find and kill by process
+ps aux | grep "llm_proxy\|start_configured_proxy"
+kill <PID>
+
+# Method 3: Kill all Python proxy processes
+pkill -f "start_configured_proxy.py"
+```
+
+### Checking Service Status
+
+```bash
+# Check if running (using PID file)
+if ps -p $(cat .claude/services/llm-proxy/llm_proxy.pid 2>/dev/null) > /dev/null 2>&1; then
+    echo "✅ Proxy is running"
+else
+    echo "❌ Proxy is not running"
+fi
+
+# Check process directly
+ps aux | grep -E "llm_proxy|start_configured_proxy" | grep -v grep
+```
+
 ## Service Management Commands
 
 Provide these commands to users after setup:

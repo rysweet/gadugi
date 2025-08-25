@@ -42,6 +42,9 @@ pids/
 .env.test
 .env.production
 .env.local
+# LLM Proxy configurations (may contain API keys)
+.claude/services/llm-proxy/.env
+.claude/services/llm-proxy/config/*.json
 
 # parcel-bundler cache
 .cache
