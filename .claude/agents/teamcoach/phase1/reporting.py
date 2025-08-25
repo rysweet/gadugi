@@ -247,7 +247,7 @@ class ReportingSystem:
                 )
 
                 # Add performance charts if requested
-                if config.include_charts:
+                if config is not None and config.include_charts:
                     charts = self._generate_performance_charts(performance_data)
                     section.charts.extend(charts)
 
@@ -308,7 +308,7 @@ class ReportingSystem:
             )
 
             # Add team charts if requested
-            if config.include_charts:
+            if config is not None and config.include_charts:
                 charts = self._generate_team_charts(team_aggregates, agent_summaries)
                 section.charts.extend(charts)
 
@@ -340,7 +340,7 @@ class ReportingSystem:
                 )
 
                 # Add capability charts if requested
-                if config.include_charts:
+                if config is not None and config.include_charts:
                     charts = self._generate_capability_charts(capability_profile)
                     section.charts.extend(charts)
 
@@ -371,7 +371,7 @@ class ReportingSystem:
                 )
 
                 # Add trend charts if requested
-                if config.include_charts:
+                if config is not None and config.include_charts:
                     charts = self._generate_trend_charts(performance_data)
                     section.charts.extend(charts)
 
@@ -401,7 +401,7 @@ class ReportingSystem:
             )
 
             # Add comparison charts if requested
-            if config.include_charts:
+            if config is not None and config.include_charts:
                 charts = self._generate_comparison_charts(agent_performances)
                 section.charts.extend(charts)
 
@@ -464,7 +464,7 @@ class ReportingSystem:
             )
 
             # Add summary charts if requested
-            if config.include_charts:
+            if config is not None and config.include_charts:
                 charts = self._generate_summary_charts(summary_data)
                 section.charts.extend(charts)
 
@@ -570,7 +570,7 @@ class ReportingSystem:
 
 ### Trend Analysis
 """
-        if performance_data.performance_trend:
+        if performance_data is not None and performance_data.performance_trend:
             trend_direction = (
                 "improving"
                 if performance_data.performance_trend[-1]
@@ -777,7 +777,7 @@ class ReportingSystem:
 
         try:
             # Capability radar chart
-            if capability_profile.capability_scores:
+            if capability_profile is not None and capability_profile.capability_scores:
                 fig, ax = plt.subplots(
                     figsize=(10, 10), subplot_kw=dict(projection="polar")
                 )
@@ -1073,7 +1073,7 @@ class ReportingSystem:
         summary = f"This {config.report_type.value} report analyzes performance data for {len(config.agents)} agent(s) "
         summary += f"from {config.time_period[0].strftime('%Y-%m-%d')} to {config.time_period[1].strftime('%Y-%m-%d')}. "
 
-        if report.sections:
+        if report is not None and report.sections:
             summary += f"The report contains {len(report.sections)} detailed sections covering "
             summary += (
                 "performance metrics, trends, and recommendations for optimization."
@@ -1189,7 +1189,7 @@ class ReportingSystem:
             content += f"{section.content}\n\n"
 
             # Note about charts (can't embed in markdown easily)
-            if section.charts:
+            if section is not None and section.charts:
                 content += f"*{len(section.charts)} chart(s) available in HTML/PDF version*\n\n"
 
         return content

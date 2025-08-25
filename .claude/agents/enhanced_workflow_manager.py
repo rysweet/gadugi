@@ -28,6 +28,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
+from typing import Optional
+# WorkflowStage should be properly imported or defined
+from enum import Enum
+class HealthStatus(Enum):
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
 
 # Add shared modules to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
@@ -311,8 +317,8 @@ class EnhancedWorkflowManager:
 
             if stage in critical_phases:
                 health_check = reliability.perform_health_check(self.workflow_id)
-                if health_check and health_check.status in [HealthStatus.CRITICAL, HealthStatus.FAILED]:
-                    logger.warning(f"Health check failed before {stage.value}: {health_check.status.value}")
+                if health_check and (health_check.status if health_check is not None else None) in [HealthStatus.CRITICAL, HealthStatus.FAILED]:
+                    logger.warning(f"Health check failed before {stage.value}: {(health_check.status if health_check is not None else None).value}")
                     # Continue with warnings but monitor closely
 
             # Execute phase with retry logic
@@ -446,7 +452,7 @@ class EnhancedWorkflowManager:
             raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
 
         # Initialize task tracking if available
-        if self.task_tracker:
+        if self is not None and self.task_tracker:
             self.task_tracker.initialize_workflow(self.workflow_id)
 
         # Create workflow state persistence
@@ -595,7 +601,7 @@ class EnhancedWorkflowManager:
         ]
 
         # Initialize task tracking if available
-        if self.task_tracker:
+        if self is not None and self.task_tracker:
             self.task_tracker.initialize_task_list(tasks, self.workflow_id)
 
         logger.info(f"Prepared {len(tasks)} tasks for execution")
@@ -1013,7 +1019,7 @@ def main():
 
     # Load configuration
     config = WorkflowConfiguration()
-    if args.config:
+    if args is not None and args.config:
         try:
             with open(args.config, 'r') as f:
                 config_data = json.load(f)
@@ -1040,12 +1046,12 @@ def main():
     enhanced_manager = EnhancedWorkflowManager(config)
 
     try:
-        if args.resume:
+        if args is not None and args.resume:
             # Resume existing workflow
             result = enhanced_manager.resume_workflow(args.resume)
         else:
             # Execute new workflow
-            result = enhanced_manager.execute_workflow(args.prompt_file)
+            result = enhanced_manager.execute_workflow((args.prompt_file if args is not None else None))
 
         # Print results
         print(json.dumps(result, indent=2, default=str))

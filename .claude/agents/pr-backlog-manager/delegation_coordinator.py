@@ -123,7 +123,7 @@ class DelegationCoordinator:
                 task = self._create_delegation_task(pr_number, issue, pr_context)
                 if task:
                     delegation_tasks.append(task)
-                    self.active_delegations[task.task_id] = task
+                    self.active_delegations[(task.task_id if task is not None else None)] = task
 
             except Exception as e:
                 logger.error(
@@ -135,8 +135,8 @@ class DelegationCoordinator:
             try:
                 self._execute_delegation(task)
             except Exception as e:
-                logger.error(f"Failed to execute delegation {task.task_id}: {e}")
-                task.status = DelegationStatus.FAILED
+                logger.error(f"Failed to execute delegation {(task.task_id if task is not None else None)}: {e}")
+                (task.status if task is not None else None) = DelegationStatus.FAILED
                 task.error_message = str(e)
 
         return delegation_tasks
@@ -424,10 +424,10 @@ Resolve the identified blocking issue for PR #{pr_number}.
 
     def _execute_delegation(self, task: DelegationTask) -> None:
         """Execute a delegation task by invoking the target agent."""
-        logger.info(f"Executing delegation {task.task_id} to {task.agent_target}")
+        logger.info(f"Executing delegation {(task.task_id if task is not None else None)} to {task.agent_target}")
 
         try:
-            task.status = DelegationStatus.DELEGATED
+            (task.status if task is not None else None) = DelegationStatus.DELEGATED
             task.last_attempt = datetime.now()
 
             if task.agent_target == "workflow-master":
@@ -441,14 +441,14 @@ Resolve the identified blocking issue for PR #{pr_number}.
             self._add_delegation_comment(task)
 
         except Exception as e:
-            logger.error(f"Delegation execution failed for {task.task_id}: {e}")
-            task.status = DelegationStatus.FAILED
+            logger.error(f"Delegation execution failed for {(task.task_id if task is not None else None)}: {e}")
+            (task.status if task is not None else None) = DelegationStatus.FAILED
             task.error_message = str(e)
             task.retry_count += 1
 
     def _delegate_to_workflow_master(self, task: DelegationTask) -> None:
         """Delegate task to WorkflowMaster agent."""
-        if self.auto_approve:
+        if self is not None and self.auto_approve:
             # In GitHub Actions mode, create workflow and prompt file
             self._create_workflow_master_prompt(task)
             self._create_workflow_master_workflow(task)
@@ -466,7 +466,7 @@ Resolve the identified blocking issue for PR #{pr_number}.
                 f.write(task.prompt_template)
 
             logger.info(f"Created WorkflowMaster prompt: {prompt_path}")
-            task.status = DelegationStatus.IN_PROGRESS
+            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create WorkflowMaster prompt: {e}")
@@ -511,7 +511,7 @@ jobs:
                 f.write(workflow_content)
 
             logger.info(f"Created WorkflowMaster workflow: {workflow_path}")
-            task.status = DelegationStatus.IN_PROGRESS
+            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create WorkflowMaster workflow: {e}")
@@ -521,8 +521,8 @@ jobs:
         try:
             # This would invoke WorkflowMaster with the generated prompt
             # For now, we'll log the intention
-            logger.info(f"Would invoke WorkflowMaster for task {task.task_id}")
-            task.status = DelegationStatus.IN_PROGRESS
+            logger.info(f"Would invoke WorkflowMaster for task {(task.task_id if task is not None else None)}")
+            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to invoke WorkflowMaster: {e}")
@@ -530,7 +530,7 @@ jobs:
     def _delegate_to_code_reviewer(self, task: DelegationTask) -> None:
         """Delegate task to code-reviewer agent."""
         try:
-            if self.auto_approve:
+            if self is not None and self.auto_approve:
                 # In GitHub Actions, create a follow-up workflow
                 self._create_code_review_workflow(task)
             else:
@@ -584,7 +584,7 @@ jobs:
                 f.write(workflow_content)
 
             logger.info(f"Created AI code review workflow: {workflow_path}")
-            task.status = DelegationStatus.IN_PROGRESS
+            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to create code review workflow: {e}")
@@ -593,7 +593,7 @@ jobs:
         """Invoke code-reviewer directly."""
         try:
             logger.info(f"Would invoke code-reviewer for PR #{task.pr_number}")
-            task.status = DelegationStatus.IN_PROGRESS
+            (task.status if task is not None else None) = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
             raise Exception(f"Failed to invoke code-reviewer: {e}")
@@ -605,41 +605,41 @@ jobs:
                 DelegationType.MERGE_CONFLICT_RESOLUTION: (
                     "🔧 **Automated Merge Conflict Resolution**\n\n"
                     f"The PR Backlog Manager has detected merge conflicts and delegated resolution to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{task.task_id}`\n"
+                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {task.status.value}\n\n"
+                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
                     "Resolution will be attempted automatically. Monitor this PR for updates."
                 ),
                 DelegationType.CI_FAILURE_FIX: (
                     "🚨 **Automated CI Failure Resolution**\n\n"
                     f"The PR Backlog Manager has detected CI failures and delegated fixes to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{task.task_id}`\n"
+                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {task.status.value}\n\n"
+                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
                     "CI issues will be analyzed and fixed automatically where possible."
                 ),
                 DelegationType.BRANCH_UPDATE: (
                     "🔄 **Automated Branch Update**\n\n"
                     f"The PR Backlog Manager has detected that this branch is behind main and delegated update to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{task.task_id}`\n"
+                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {task.status.value}\n\n"
+                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
                     "The branch will be updated with latest changes from main."
                 ),
                 DelegationType.AI_CODE_REVIEW: (
                     "🤖 **AI Code Review Initiated**\n\n"
                     f"The PR Backlog Manager has initiated AI code review (Phase 9) for this PR.\n\n"
-                    f"**Task ID:** `{task.task_id}`\n"
+                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {task.status.value}\n\n"
+                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
                     "Comprehensive AI review will be performed and feedback provided."
                 ),
                 DelegationType.METADATA_IMPROVEMENT: (
                     "📝 **Metadata Improvement Request**\n\n"
                     f"The PR Backlog Manager has identified metadata improvements needed for this PR.\n\n"
-                    f"**Task ID:** `{task.task_id}`\n"
+                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {task.status.value}\n\n"
+                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
                     "Suggestions for title, description, and labels will be provided."
                 ),
             }
@@ -647,7 +647,7 @@ jobs:
             comment = comment_templates.get(
                 task.task_type,
                 f"🔧 **Automated Issue Resolution**\n\n"
-                f"Task delegated to {task.agent_target} - ID: `{task.task_id}`",
+                f"Task delegated to {task.agent_target} - ID: `{(task.task_id if task is not None else None)}`",
             )
 
             comment += "\n\n*This comment was generated automatically by the PR Backlog Manager.*"
@@ -677,7 +677,7 @@ jobs:
         """Mark a delegation task as completed."""
         task = self.active_delegations.get(task_id)
         if task:
-            task.status = (
+            (task.status if task is not None else None) = (
                 DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
             )
             task.completion_time = datetime.now()
@@ -695,7 +695,7 @@ jobs:
             if success:
                 comment = (
                     f"✅ **Delegation Completed Successfully**\n\n"
-                    f"Task `{task.task_id}` has been completed by {task.agent_target}.\n"
+                    f"Task `{(task.task_id if task is not None else None)}` has been completed by {task.agent_target}.\n"
                     f"Issue type: {task.task_type.value}\n"
                     f"Completion time: {task.completion_time.isoformat() if task.completion_time else 'N/A'}\n\n"
                     "Please verify the resolution and re-run PR readiness assessment."
@@ -703,7 +703,7 @@ jobs:
             else:
                 comment = (
                     f"❌ **Delegation Failed**\n\n"
-                    f"Task `{task.task_id}` could not be completed automatically.\n"
+                    f"Task `{(task.task_id if task is not None else None)}` could not be completed automatically.\n"
                     f"Issue type: {task.task_type.value}\n"
                     f"Error: {task.error_message or 'Unknown error'}\n\n"
                     "Manual intervention may be required."
@@ -723,7 +723,7 @@ jobs:
         to_remove = []
         for task_id, task in self.active_delegations.items():
             if (
-                task.status in [DelegationStatus.COMPLETED, DelegationStatus.FAILED]
+                (task.status if task is not None else None) in [DelegationStatus.COMPLETED, DelegationStatus.FAILED]
                 and task.completion_time
                 and task.completion_time < cutoff_time
             ):
@@ -744,13 +744,13 @@ jobs:
         completed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.COMPLETED
+            if (task.status if task is not None else None) == DelegationStatus.COMPLETED
         )
 
         failed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.FAILED
+            if (task.status if task is not None else None) == DelegationStatus.FAILED
         )
 
         success_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
@@ -759,7 +759,7 @@ jobs:
         completed_with_time = [
             task
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.COMPLETED and task.completion_time
+            if (task.status if task is not None else None) == DelegationStatus.COMPLETED and task.completion_time
         ]
 
         avg_completion_time = 0

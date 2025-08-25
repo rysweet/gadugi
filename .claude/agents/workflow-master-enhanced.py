@@ -200,8 +200,8 @@ class EnhancedWorkflowMaster:
             logger.info(f"Found {len(existing_workflows)} orphaned workflows")
             for workflow in existing_workflows:
                 if self.should_resume_workflow(workflow):
-                    logger.info(f"Resuming workflow {workflow.task_id}")
-                    return self.resume_workflow(workflow.task_id)
+                    logger.info(f"Resuming workflow {(workflow.task_id if workflow is not None else None)}")
+                    return self.resume_workflow((workflow.task_id if workflow is not None else None))
 
         # Create new workflow
         workflow = WorkflowState(task_id=task_id, prompt_file=prompt_file)
@@ -315,11 +315,11 @@ class EnhancedWorkflowMaster:
 
     def execute_workflow(self, workflow: WorkflowState) -> bool:
         """Execute complete workflow with autonomous decision making."""
-        logger.info(f"Starting workflow execution for {workflow.task_id}")
+        logger.info(f"Starting workflow execution for {(workflow.task_id if workflow is not None else None)}")
 
         try:
             for task in workflow.tasks:
-                if task.status == "completed":
+                if (task.status if task is not None else None) == "completed":
                     continue
 
                 # Check dependencies
@@ -333,7 +333,7 @@ class EnhancedWorkflowMaster:
                 success = self.execute_task(task, workflow)
 
                 if success:
-                    task.status = "completed"
+                    (task.status if task is not None else None) = "completed"
                     task.completed_at = datetime.now()
                     self.execution_stats["completed_tasks"] += 1
                     logger.info(f"Task {task.id} completed successfully")
@@ -352,22 +352,22 @@ class EnhancedWorkflowMaster:
                         )
                         success = self.execute_task(task, workflow)
                         if success:
-                            task.status = "completed"
+                            (task.status if task is not None else None) = "completed"
                             task.completed_at = datetime.now()
                         else:
-                            task.status = "failed"
+                            (task.status if task is not None else None) = "failed"
                             self.execution_stats["failed_tasks"] += 1
                     elif decision == WorkflowDecision.SKIP:
-                        task.status = "skipped"
+                        (task.status if task is not None else None) = "skipped"
                         logger.warning(
                             f"Task {task.id} skipped due to autonomous decision"
                         )
                     elif decision == WorkflowDecision.ABORT:
                         logger.error(f"Workflow aborted due to task {task.id} failure")
-                        workflow.status = "aborted"
+                        (workflow.status if workflow is not None else None) = "aborted"
                         return False
                     else:
-                        task.status = "failed"
+                        (task.status if task is not None else None) = "failed"
                         self.execution_stats["failed_tasks"] += 1
 
                 # Update state
@@ -375,24 +375,24 @@ class EnhancedWorkflowMaster:
                 self.save_workflow_state(workflow)
 
             # Check if workflow completed successfully
-            completed_tasks = [t for t in workflow.tasks if t.status == "completed"]
+            completed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "completed"]
             critical_tasks = [t for t in workflow.tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 
             if (
                 len(completed_critical) >= len(critical_tasks) * 0.8
             ):  # 80% of critical tasks
-                workflow.status = "completed"
-                logger.info(f"Workflow {workflow.task_id} completed successfully")
+                (workflow.status if workflow is not None else None) = "completed"
+                logger.info(f"Workflow {(workflow.task_id if workflow is not None else None)} completed successfully")
                 return True
             else:
-                workflow.status = "partial"
-                logger.warning(f"Workflow {workflow.task_id} completed partially")
+                (workflow.status if workflow is not None else None) = "partial"
+                logger.warning(f"Workflow {(workflow.task_id if workflow is not None else None)} completed partially")
                 return False
 
         except Exception as e:
             logger.error(f"Workflow execution failed: {e}")
-            workflow.status = "error"
+            (workflow.status if workflow is not None else None) = "error"
             workflow.error_count += 1
             self.save_workflow_state(workflow)
             return False
@@ -402,7 +402,7 @@ class EnhancedWorkflowMaster:
         logger.info(f"Executing task {task.id}: {task.name}")
 
         task.started_at = datetime.now()
-        task.status = "in_progress"
+        (task.status if task is not None else None) = "in_progress"
         self.execution_stats["total_tasks"] += 1
 
         try:
@@ -438,10 +438,10 @@ class EnhancedWorkflowMaster:
         """Execute setup and validation task."""
         try:
             # Validate prompt file if provided
-            if workflow.prompt_file:
-                prompt_path = Path(workflow.prompt_file)
+            if workflow is not None and (workflow.prompt_file if workflow is not None else None):
+                prompt_path = Path((workflow.prompt_file if workflow is not None else None))
                 if not prompt_path.exists():
-                    logger.error(f"Prompt file not found: {workflow.prompt_file}")
+                    logger.error(f"Prompt file not found: {(workflow.prompt_file if workflow is not None else None)}")
                     return False
 
                 # Read and validate prompt structure
@@ -468,13 +468,13 @@ import json
 from pathlib import Path
 
 # Create workspace structure
-workspace_dir = Path('/workspace/{workflow.task_id}')
+workspace_dir = Path('/workspace/{(workflow.task_id if workflow is not None else None)}')
 workspace_dir.mkdir(parents=True, exist_ok=True)
 
 # Initialize state file
 state_file = workspace_dir / 'state.json'
 initial_state = {{
-    'task_id': '{workflow.task_id}',
+    'task_id': '{(workflow.task_id if workflow is not None else None)}',
     'initialized_at': '{datetime.now().isoformat()}',
     'workspace_dir': str(workspace_dir)
 }}
@@ -489,7 +489,7 @@ print(f"Workspace initialized: {{workspace_dir}}")
                 code=workspace_code,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -511,14 +511,14 @@ print(f"Workspace initialized: {{workspace_dir}}")
         """Execute GitHub issue creation with retry logic."""
         try:
             # Prepare issue data
-            issue_title = f"Enhanced WorkflowMaster Implementation - {workflow.task_id}"
+            issue_title = f"Enhanced WorkflowMaster Implementation - {(workflow.task_id if workflow is not None else None)}"
             issue_body = f"""
 # WorkflowMaster Robustness Enhancement
 
 This issue tracks the implementation of WorkflowMaster robustness and brittleness fixes.
 
 ## Task ID
-{workflow.task_id}
+{(workflow.task_id if workflow is not None else None)}
 
 ## Objectives
 - Reduce shell dependency
@@ -601,7 +601,7 @@ echo "Branch {branch_name} created and pushed successfully"
                 command=git_commands,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -682,7 +682,7 @@ echo "Branch {branch_name} created and pushed successfully"
         if not workflow.tasks:
             return 0.0
 
-        completed = len([t for t in workflow.tasks if t.status == "completed"])
+        completed = len([t for t in workflow.tasks if (t.status if t is not None else None) == "completed"])
         return completed / len(workflow.tasks)
 
     def assess_system_health(self) -> float:
@@ -730,7 +730,7 @@ echo "Branch {branch_name} created and pushed successfully"
         if not task.dependencies:
             return True
 
-        task_status_map = {t.id: t.status for t in all_tasks}
+        task_status_map = {t.id: (t.status if t is not None else None) for t in all_tasks}
 
         for dep_id in task.dependencies:
             if dep_id not in task_status_map or task_status_map[dep_id] != "completed":
@@ -741,7 +741,7 @@ echo "Branch {branch_name} created and pushed successfully"
     def save_workflow_state(self, workflow: WorkflowState):
         """Save workflow state with enhanced persistence."""
         try:
-            state_dir = Path(f".github/workflow-states/{workflow.task_id}")
+            state_dir = Path(f".github/workflow-states/{(workflow.task_id if workflow is not None else None)}")
             state_dir.mkdir(parents=True, exist_ok=True)
 
             state_file = state_dir / "state.json"
@@ -770,12 +770,12 @@ echo "Branch {branch_name} created and pushed successfully"
 
     def generate_workflow_summary(self, workflow: WorkflowState) -> str:
         """Generate human-readable workflow summary."""
-        completed_tasks = [t for t in workflow.tasks if t.status == "completed"]
-        failed_tasks = [t for t in workflow.tasks if t.status == "failed"]
+        completed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "completed"]
+        failed_tasks = [t for t in workflow.tasks if (t.status if t is not None else None) == "failed"]
 
-        summary = f"""# Workflow Summary: {workflow.task_id}
+        summary = f"""# Workflow Summary: {(workflow.task_id if workflow is not None else None)}
 
-## Status: {workflow.status.upper()}
+## Status: {(workflow.status if workflow is not None else None).upper()}
 
 ### Progress
 - Total Tasks: {len(workflow.tasks)}
@@ -803,11 +803,11 @@ echo "Branch {branch_name} created and pushed successfully"
                 "in_progress": "🔄",
                 "pending": "⏳",
                 "skipped": "⏭️",
-            }.get(task.status, "❓")
+            }.get((task.status if task is not None else None), "❓")
 
             summary += f"- {status_emoji} {task.name}: {task.description}\n"
 
-        if workflow.autonomous_decisions:
+        if workflow is not None and workflow.autonomous_decisions:
             summary += "\n### Autonomous Decisions\n"
             for decision in workflow.autonomous_decisions[-5:]:  # Last 5
                 summary += f"- {decision['timestamp']}: {decision['decision']} for task {decision['task_id']}\n"
@@ -867,7 +867,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
         # Resume if no critical failures
         failed_critical = [
-            t for t in workflow.tasks if t.status == "failed" and t.priority == "high"
+            t for t in workflow.tasks if (t.status if t is not None else None) == "failed" and t.priority == "high"
         ]
         if failed_critical:
             return False
@@ -886,8 +886,8 @@ echo "Branch {branch_name} created and pushed successfully"
 
             # Reset in-progress tasks to pending
             for task in workflow.tasks:
-                if task.status == "in_progress":
-                    task.status = "pending"
+                if (task.status if task is not None else None) == "in_progress":
+                    (task.status if task is not None else None) = "pending"
 
             self.current_workflow = workflow
             logger.info(f"Resumed workflow {task_id}")
@@ -924,7 +924,7 @@ echo "Branch {branch_name} created and pushed successfully"
         stats = {
             **self.execution_stats,
             "runtime_seconds": runtime,
-            "current_workflow": self.current_workflow.task_id
+            "current_workflow": self.(current_workflow.task_id if current_workflow is not None else None)
             if self.current_workflow
             else None,
             "autonomous_mode": self.autonomous_mode,
@@ -943,7 +943,7 @@ echo "Branch {branch_name} created and pushed successfully"
     def cleanup(self):
         """Cleanup resources."""
         try:
-            if self.current_workflow:
+            if self is not None and self.current_workflow:
                 self.save_workflow_state(self.current_workflow)
 
             self.container_executor.cleanup()
@@ -1017,7 +1017,7 @@ print(json.dumps(analysis_results, indent=2))
                 code=analysis_code,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -1057,7 +1057,7 @@ implementation_status = {{
 }}
 
 # Create implementation artifacts
-artifacts_dir = Path('/workspace/{workflow.task_id}/artifacts')
+artifacts_dir = Path('/workspace/{(workflow.task_id if workflow is not None else None)}/artifacts')
 artifacts_dir.mkdir(parents=True, exist_ok=True)
 
 # Save implementation status
@@ -1072,7 +1072,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                 code=implementation_code,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -1127,7 +1127,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                 self.execution_stats["test_writer_invocations"] += 1
 
                 for code_file in coverage_gaps:
-                    context = f"Creating tests for {code_file} as part of workflow {workflow.task_id}"
+                    context = f"Creating tests for {code_file} as part of workflow {(workflow.task_id if workflow is not None else None)}"
                     result = self.test_writer.create_tests(code_file, context)
                     self.log_execution_step(
                         workflow,
@@ -1181,7 +1181,7 @@ docs = {{
     'title': 'Enhanced WorkflowMaster Documentation',
     'version': '2.0.0',
     'generated_at': datetime.now().isoformat(),
-    'task_id': '{workflow.task_id}'
+    'task_id': '{(workflow.task_id if workflow is not None else None)}'
 }}
 
 # Create documentation content
@@ -1233,7 +1233,7 @@ Task ID: {{docs['task_id']}}
 '''
 
 # Save documentation
-docs_dir = Path('/workspace/{workflow.task_id}/docs')
+docs_dir = Path('/workspace/{(workflow.task_id if workflow is not None else None)}/docs')
 docs_dir.mkdir(parents=True, exist_ok=True)
 
 with open(docs_dir / 'enhanced_workflowmaster.md', 'w') as f:
@@ -1250,7 +1250,7 @@ print(f"Documentation generated successfully in {{docs_dir}}")
                 code=documentation_code,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -1272,7 +1272,7 @@ print(f"Documentation generated successfully in {{docs_dir}}")
         """Execute pull request creation with comprehensive details."""
         try:
             # Prepare PR data
-            pr_title = f"feat: Enhanced WorkflowMaster with Container Execution and Autonomous Operation - {workflow.task_id}"
+            pr_title = f"feat: Enhanced WorkflowMaster with Container Execution and Autonomous Operation - {(workflow.task_id if workflow is not None else None)}"
             pr_body = f"""# Enhanced WorkflowMaster Implementation
 
 ## Summary
@@ -1290,7 +1290,7 @@ print(f"Documentation generated successfully in {{docs_dir}}")
 - **Error Handling**: Circuit breakers, retry logic, and graceful degradation
 
 ## Implementation Details
-- Task ID: {workflow.task_id}
+- Task ID: {(workflow.task_id if workflow is not None else None)}
 - Issue: #{workflow.issue_number}
 - Branch: {workflow.branch_name}
 - Container Policy: {task.container_policy}
@@ -1395,7 +1395,7 @@ review_status = {{
     'timestamp': '{datetime.now().isoformat()}'
 }}
 
-with open('/workspace/{workflow.task_id}/review_status.json', 'w') as f:
+with open('/workspace/{(workflow.task_id if workflow is not None else None)}/review_status.json', 'w') as f:
     json.dump(review_status, f, indent=2)
 
 print(f"Review status saved: {{review_status}}")
@@ -1405,7 +1405,7 @@ print(f"Review status saved: {{review_status}}")
                 command=review_check_code,
                 security_policy=task.container_policy,
                 timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             self.execution_stats["container_executions"] += 1
@@ -1441,7 +1441,7 @@ print(f"Review status saved: {{review_status}}")
                 ],
                 security_policy="testing",
                 timeout=60,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             if not test_result["success"]:
@@ -1462,7 +1462,7 @@ print(f"Review status saved: {{review_status}}")
                 ],
                 security_policy="testing",
                 timeout=300,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             failing_tests = []
@@ -1516,7 +1516,7 @@ print(f"Review status saved: {{review_status}}")
                 ],
                 security_policy="testing",
                 timeout=300,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             coverage_gaps = []
@@ -1568,7 +1568,7 @@ print(f"Review status saved: {{review_status}}")
                 command=["git", "diff", "--name-only", "main", workflow.branch_name],
                 security_policy="standard",
                 timeout=30,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             new_code_files = []
@@ -1724,7 +1724,7 @@ print(f"Review status saved: {{review_status}}")
                 ],
                 security_policy="testing",
                 timeout=600,
-                user_id=workflow.task_id,
+                user_id=(workflow.task_id if workflow is not None else None),
             )
 
             return {
@@ -1743,10 +1743,10 @@ print(f"Review status saved: {{review_status}}")
         step = {
             "timestamp": datetime.now().isoformat(),
             "message": message,
-            "task_id": workflow.task_id,
+            "task_id": (workflow.task_id if workflow is not None else None),
         }
         workflow.execution_log.append(step)
-        logger.info(f"[{workflow.task_id}] {message}")
+        logger.info(f"[{(workflow.task_id if workflow is not None else None)}] {message}")
 
 
 def main():
@@ -1776,8 +1776,8 @@ def main():
 
     try:
         # Initialize or resume workflow
-        if args.task_id:
-            workflow = wm.resume_workflow(args.task_id)
+        if args is not None and (args.task_id if args is not None else None):
+            workflow = wm.resume_workflow((args.task_id if args is not None else None))
         else:
             workflow = wm.initialize_workflow(args.prompt)
 
@@ -1788,8 +1788,8 @@ def main():
         stats = wm.get_execution_statistics()
         print("\nWorkflow Execution Results:")
         print(f"Success: {success}")
-        print(f"Task ID: {workflow.task_id}")
-        print(f"Status: {workflow.status}")
+        print(f"Task ID: {(workflow.task_id if workflow is not None else None)}")
+        print(f"Status: {(workflow.status if workflow is not None else None)}")
         print(f"Execution Stats: {stats}")
 
         return 0 if success else 1

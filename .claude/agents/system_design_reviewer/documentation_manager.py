@@ -8,7 +8,6 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 
@@ -294,7 +293,7 @@ Specialized Agents
             section += "#### Recently Added Components\n\n"
             for component in new_components:
                 section += f"- **{component.name}**: {component.docstring or 'New component'}\n"
-                if component.patterns:
+                if component is not None and component.patterns:
                     section += f"  - Patterns: {', '.join(component.patterns)}\n"
             section += "\n"
 
@@ -357,7 +356,7 @@ Specialized Agents
 
         for change in security_changes:
             section += f"- **{change.get_description()}**: {change.element.location}\n"
-            if change.design_implications:
+            if change is not None and change.design_implications:
                 for implication in change.design_implications:
                     section += f"  - {implication}\n"
 

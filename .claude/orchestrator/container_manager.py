@@ -121,7 +121,7 @@ class ContainerOutputStreamer:
                 log_text = log_line.decode('utf-8').strip()
 
                 # Broadcast to all WebSocket clients
-                if self.clients:
+                if self is not None and self.clients:
                     message = {
                         "task_id": self.task_id,
                         "container_id": self.container_id,
@@ -562,7 +562,7 @@ CMD ["bash"]
             return {
                 'task_id': task_id,
                 'container_id': container.id,
-                'status': container.status,
+                'status': (container.status if container is not None else None),
                 'created': container.attrs['Created'],
                 'started': container.attrs['State']['StartedAt'],
                 'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
@@ -606,7 +606,7 @@ CMD ["bash"]
         self.output_streamers.clear()
 
         # Close Docker client
-        if self.docker_client:
+        if self is not None and self.docker_client:
             try:
                 self.docker_client.close()
             except Exception as e:
@@ -634,19 +634,19 @@ def main():
     try:
         # Execute single task
         result = manager.execute_containerized_task(
-            task_id=args.task_id,
+            task_id=(args.task_id if args is not None else None),
             worktree_path=Path(args.worktree_path),
-            prompt_file=args.prompt_file
+            prompt_file=(args.prompt_file if args is not None else None)
         )
 
-        print(f"Task completed: {result.status}")
+        print(f"Task completed: {(result.status if result is not None else None)}")
         print(f"Duration: {result.duration:.1f}s")
         print(f"Exit code: {result.exit_code}")
 
-        if result.stdout:
+        if result is not None and result.stdout:
             print(f"Output: {result.stdout[:500]}...")
 
-        return 0 if result.status == 'success' else 1
+        return 0 if (result.status if result is not None else None) == 'success' else 1
 
     except Exception as e:
         logger.error(f"Container execution failed: {e}")

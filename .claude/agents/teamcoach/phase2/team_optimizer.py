@@ -555,7 +555,7 @@ class TeamCompositionOptimizer:
             for agent_id in composition.agents:
                 if agent_id in self.agent_profiles_cache:
                     profile = self.agent_profiles_cache[agent_id]
-                    if profile.collaboration_preferences:
+                    if profile is not None and profile.collaboration_preferences:
                         collaborative_agents += 1
 
             collaboration_preference = collaborative_agents / len(composition.agents)
@@ -657,7 +657,7 @@ class TeamCompositionOptimizer:
         try:
             if objective == OptimizationObjective.MAXIMIZE_CAPABILITY:
                 # Score based on capability coverage
-                if composition.capability_coverage:
+                if composition is not None and composition.capability_coverage:
                     return sum(composition.capability_coverage.values()) / len(
                         composition.capability_coverage
                     )
@@ -754,7 +754,7 @@ class TeamCompositionOptimizer:
                     f"Strong coverage in: {', '.join(strong_capabilities[:3])}"
                 )
 
-            if composition.capability_gaps:
+            if composition is not None and composition.capability_gaps:
                 gap_names = [domain.value for domain in composition.capability_gaps]
                 weaknesses.append(f"Capability gaps in: {', '.join(gap_names[:3])}")
                 recommendations.append(
@@ -787,7 +787,7 @@ class TeamCompositionOptimizer:
             # Team size analysis
             team_size = len(composition.agents)
             if team_size == 1:
-                if project_requirements.requires_coordination:
+                if project_requirements is not None and project_requirements.requires_coordination:
                     weaknesses.append("Single agent for collaborative project")
                     recommendations.append(
                         "Consider expanding team for better coverage"
@@ -817,7 +817,7 @@ class TeamCompositionOptimizer:
             confidence_factors = []
 
             # Capability coverage confidence
-            if optimal_composition.capability_coverage:
+            if optimal_composition is not None and optimal_composition.capability_coverage:
                 avg_coverage = sum(
                     optimal_composition.capability_coverage.values()
                 ) / len(optimal_composition.capability_coverage)
@@ -867,7 +867,7 @@ class TeamCompositionOptimizer:
                 f"Selected {len(optimal.agents)}-agent team with {optimal.overall_score:.2f} overall score"
             )
 
-            if optimal.strengths:
+            if optimal is not None and optimal.strengths:
                 reasoning_parts.append(f"Key strengths: {optimal.strengths[0]}")
 
             result.reasoning = ". ".join(reasoning_parts)
@@ -878,7 +878,7 @@ class TeamCompositionOptimizer:
                 trade_offs.append(
                     "Larger team provides better coverage but increases coordination complexity"
                 )
-            if optimal.capability_gaps:
+            if optimal is not None and optimal.capability_gaps:
                 trade_offs.append(
                     "Some capability gaps accepted to optimize other objectives"
                 )
@@ -907,7 +907,7 @@ class TeamCompositionOptimizer:
 
             # Risk mitigation
             risk_mitigation = []
-            if optimal.capability_gaps:
+            if optimal is not None and optimal.capability_gaps:
                 risk_mitigation.append(
                     "Monitor capability gaps and provide training/support"
                 )

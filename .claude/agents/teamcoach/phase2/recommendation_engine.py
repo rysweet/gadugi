@@ -49,7 +49,7 @@ class Recommendation:
     success_metrics: List[str] = field(default_factory=list)
 
     # Context
-    generated_at: datetime = field(default_factory=datetime.now)
+    generated_at: Optional[datetime] = field(default_factory=datetime.now)
     applicable_until: Optional[datetime] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -88,15 +88,15 @@ class RecommendationEngine:
             )
 
             recommendation = Recommendation(
-                recommendation_id=f"task_assign_{matching_result.task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                recommendation_id=f"task_assign_{(matching_result.task_id if matching_result is not None else None)}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 recommendation_type=RecommendationType.TASK_ASSIGNMENT,
-                title=f"Task Assignment Recommendation for {matching_result.task_id}",
+                title=f"Task Assignment Recommendation for {(matching_result.task_id if matching_result is not None else None)}",
                 description=f"Assign task to {primary_agent} based on capability analysis",
-                primary_action=f"Assign task {matching_result.task_id} to agent {primary_agent}",
+                primary_action=f"Assign task {(matching_result.task_id if matching_result is not None else None)} to agent {primary_agent}",
                 reasoning=matching_result.reasoning,
                 confidence_level=matching_result.success_probability,
                 metadata={
-                    "task_id": matching_result.task_id,
+                    "task_id": (matching_result.task_id if matching_result is not None else None),
                     "strategy": matching_result.assignment_strategy.value,
                 },
             )

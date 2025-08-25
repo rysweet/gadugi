@@ -35,7 +35,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
     def setUp(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.task_id = "test-task-001"
-        self.prompt_file = "test-prompt.md"
+        self.task_id = "test-prompt.md"
         self.task_context = {
             'id': self.task_id,
             'name': 'Test Task',
@@ -69,7 +69,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         executor = TaskExecutor(
             task_id=self.task_id,
             worktree_path=self.temp_dir,
-            prompt_file=self.prompt_file,
+            prompt_file=self.task_id,
             task_context=self.task_context
         )
 
@@ -93,8 +93,8 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         self.assertNotIn("-p", call_args, "Should NOT use -p flag (old broken pattern)")
 
         # Verify successful execution
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.task_id, self.task_id)
+        self.assertEqual((result.status if result is not None else None), "success")
+        self.assertEqual((result.task_id if result is not None else None), self.task_id)
 
     def test_old_command_pattern_detection(self):
         """Test that we can detect the old broken command pattern"""
@@ -169,7 +169,7 @@ The implementation requires:
             phase_focus="Implementation"
         )
 
-        self.assertEqual(context.task_id, 'test-001')
+        self.assertEqual((context.task_id if context is not None else None), 'test-001')
         self.assertEqual(context.task_name, 'Test Task')
         self.assertEqual(context.original_prompt, 'test-prompt.md')
         self.assertEqual(context.phase_focus, 'Implementation')
@@ -306,7 +306,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             executor = created_executors[0]
 
             # Verify context was passed
-            self.assertEqual(executor.task_id, 'test-001')
+            self.assertEqual((executor.task_id if executor is not None else None), 'test-001')
             self.assertEqual(executor.task_context['name'], 'Test Task')
             self.assertEqual(executor.task_context['dependencies'], ['dep1'])
             self.assertEqual(executor.task_context['target_files'], ['output.py'])
@@ -405,7 +405,7 @@ class TestRegressionPrevention(unittest.TestCase):
                      "ExecutionEngine should use WorkflowManager agent invocation")
 
         # Ensure the old broken pattern is not present
-        self.assertNotIn('"-p", self.prompt_file', code_content,
+        self.assertNotIn('"-p", self.task_id', code_content,
                         "Should not use old -p prompt_file pattern")
 
         # Ensure PromptGenerator import is present

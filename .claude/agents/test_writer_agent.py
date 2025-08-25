@@ -718,7 +718,7 @@ Maintenance notes:
                 for alias in node.names:
                     dependencies.append(alias.name)
             elif isinstance(node, ast.ImportFrom):
-                if node.module:
+                if node is not None and node.module:
                     dependencies.append(node.module)
         return dependencies
 
@@ -947,7 +947,7 @@ Maintenance notes:
         """Determine test setup requirements."""
         requirements = []
 
-        if code_analysis.dependencies:
+        if code_analysis is not None and code_analysis.dependencies:
             requirements.append("Mock external dependencies")
 
         if any("file" in dep.lower() for dep in code_analysis.dependencies):

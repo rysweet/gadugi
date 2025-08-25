@@ -155,7 +155,7 @@ Begin workflow execution now.
                     completed.append(task_name)
                     del self.active_processes[task_name]
 
-            if self.active_processes:
+            if self is not None and self.active_processes:
                 time.sleep(10)  # Check every 10 seconds
 
         return self.completed_tasks

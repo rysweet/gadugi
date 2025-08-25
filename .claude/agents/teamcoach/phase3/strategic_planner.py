@@ -430,7 +430,7 @@ class StrategicPlanner:
         initiatives = []
 
         # Generate capacity initiatives
-        if capacity_plan.gaps:
+        if capacity_plan is not None and capacity_plan.gaps:
             for timeframe, gaps in capacity_plan.gaps.items():
                 if any(gap > 0.5 for gap in gaps.values()):
                     initiative = StrategicInitiative(
@@ -470,7 +470,7 @@ class StrategicPlanner:
                     initiatives.append(initiative)
 
         # Generate skill development initiatives
-        if skill_plan.skill_gaps:
+        if skill_plan is not None and skill_plan.skill_gaps:
             critical_gaps = {k: v for k, v in skill_plan.skill_gaps.items() if v > 0.3}
             if critical_gaps:
                 initiative = StrategicInitiative(
@@ -647,7 +647,7 @@ class StrategicPlanner:
         # Aggregate from individual agents
         for agent_id in agent_ids:
             performance = self.performance_analyzer.get_agent_performance(agent_id)
-            if performance.success_rate:
+            if performance is not None and performance.success_rate:
                 metrics["success_rate"] = (
                     metrics["success_rate"] + performance.success_rate
                 ) / 2

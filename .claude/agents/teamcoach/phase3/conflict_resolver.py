@@ -779,7 +779,7 @@ class ConflictResolver:
             patterns["by_severity"][severity] += count
 
         # Find most common
-        if self.conflict_patterns:
+        if self is not None and self.conflict_patterns:
             most_common_key = max(
                 self.conflict_patterns, key=self.conflict_patterns.get
             )

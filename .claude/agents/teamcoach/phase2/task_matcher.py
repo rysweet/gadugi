@@ -173,7 +173,7 @@ class MatchingScore:
     recommendations: List[str] = field(default_factory=list)
 
     # Metadata
-    calculated_at: datetime = field(default_factory=datetime.now)
+    calculated_at: Optional[datetime] = field(default_factory=datetime.now)
     calculation_factors: Dict[str, float] = field(default_factory=dict)
 
 
@@ -286,7 +286,7 @@ class TaskAgentMatcher:
         """
         try:
             self.logger.info(
-                f"Finding optimal agent for task {task_requirements.task_id}"
+                f"Finding optimal agent for task {(task_requirements.task_id if task_requirements is not None else None)}"
             )
 
             # Update agent profiles and availability
@@ -303,7 +303,7 @@ class TaskAgentMatcher:
 
             if not agent_scores:
                 raise MatchingError(
-                    f"No suitable agents found for task {task_requirements.task_id}"
+                    f"No suitable agents found for task {(task_requirements.task_id if task_requirements is not None else None)}"
                 )
 
             # Generate recommendation based on strategy
@@ -317,16 +317,16 @@ class TaskAgentMatcher:
             )
 
             self.logger.info(
-                f"Generated recommendation for task {task_requirements.task_id}"
+                f"Generated recommendation for task {(task_requirements.task_id if task_requirements is not None else None)}"
             )
             return recommendation
 
         except Exception as e:
             self.logger.error(
-                f"Failed to find optimal agent for task {task_requirements.task_id}: {e}"
+                f"Failed to find optimal agent for task {(task_requirements.task_id if task_requirements is not None else None)}: {e}"
             )
             raise MatchingError(
-                f"Matching failed for task {task_requirements.task_id}: {e}"
+                f"Matching failed for task {(task_requirements.task_id if task_requirements is not None else None)}: {e}"
             )
 
     def _calculate_agent_task_score(
@@ -386,7 +386,7 @@ class TaskAgentMatcher:
 
             return MatchingScore(
                 agent_id=agent_id,
-                task_id=task_requirements.task_id,
+                task_id=(task_requirements.task_id if task_requirements is not None else None),
                 capability_match=capability_match,
                 availability_score=availability_score,
                 performance_prediction=performance_prediction,
@@ -408,7 +408,7 @@ class TaskAgentMatcher:
             self.logger.error(f"Failed to calculate agent task score: {e}")
             return MatchingScore(
                 agent_id=agent_id,
-                task_id=task_requirements.task_id,
+                task_id=(task_requirements.task_id if task_requirements is not None else None),
                 capability_match=0.0,
                 availability_score=0.0,
                 performance_prediction=0.0,
@@ -545,12 +545,12 @@ class TaskAgentMatcher:
 
             # Adjust for time constraints
             time_score = 1.0
-            if task_requirements.deadline:
+            if task_requirements is not None and task_requirements.deadline:
                 time_to_deadline = (
                     task_requirements.deadline - availability.available_from
                 )
                 if time_to_deadline.total_seconds() > 0:
-                    if task_requirements.estimated_duration:
+                    if task_requirements is not None and task_requirements.estimated_duration:
                         urgency_ratio = (
                             task_requirements.estimated_duration / time_to_deadline
                         )
@@ -687,7 +687,7 @@ class TaskAgentMatcher:
             complexity_score += task_requirements.priority.value * 0.1
 
             # Collaboration requirements
-            if task_requirements.requires_collaboration:
+            if task_requirements is not None and task_requirements.requires_collaboration:
                 complexity_score += 0.3
 
             # Normalize complexity (0-1 scale)
@@ -943,7 +943,7 @@ class TaskAgentMatcher:
             )
 
             # Determine number of agents to recommend
-            if task_requirements.requires_collaboration:
+            if task_requirements is not None and task_requirements.requires_collaboration:
                 max_agents = min(task_requirements.max_agents, len(sorted_agents))
                 recommended_count = min(
                     3, max_agents
@@ -985,7 +985,7 @@ class TaskAgentMatcher:
             )
 
             return MatchingRecommendation(
-                task_id=task_requirements.task_id,
+                task_id=(task_requirements.task_id if task_requirements is not None else None),
                 recommended_agents=recommended_agents,
                 assignment_strategy=strategy,
                 agent_scores=agent_scores,
@@ -1025,7 +1025,7 @@ class TaskAgentMatcher:
             )
 
             # Top recommendation analysis
-            if recommendation.recommended_agents:
+            if recommendation is not None and recommendation.recommended_agents:
                 top_agent = recommendation.recommended_agents[0]
                 top_score = recommendation.agent_scores[top_agent]
 
@@ -1035,19 +1035,19 @@ class TaskAgentMatcher:
                 )
 
                 # Highlight key strengths
-                if top_score.strengths:
+                if top_score is not None and top_score.strengths:
                     reasoning_parts.append(
                         f"Key strengths: {', '.join(top_score.strengths[:2])}"
                     )
 
             # Risk assessment
-            if recommendation.risk_factors:
+            if recommendation is not None and recommendation.risk_factors:
                 reasoning_parts.append(
                     f"Risk factors identified: {len(recommendation.risk_factors)}"
                 )
 
             # Alternative options
-            if recommendation.alternative_options:
+            if recommendation is not None and recommendation.alternative_options:
                 reasoning_parts.append(
                     f"{len(recommendation.alternative_options)} alternative options available"
                 )
@@ -1071,7 +1071,7 @@ class TaskAgentMatcher:
             ]
 
             # Add fallback options
-            if recommendation.alternative_options:
+            if recommendation is not None and recommendation.alternative_options:
                 fallback_agent = recommendation.alternative_options[0][0]
                 recommendation.fallback_options = [
                     f"Reassign to {fallback_agent} if primary assignment fails",
@@ -1162,7 +1162,7 @@ class TaskAgentMatcher:
                     risk_factors.append(f"Low confidence in assessment for {agent_id}")
 
             # Task-specific risks
-            if task_requirements.deadline:
+            if task_requirements is not None and task_requirements.deadline:
                 time_to_deadline = task_requirements.deadline - datetime.now()
                 if (
                     task_requirements.estimated_duration
@@ -1240,7 +1240,7 @@ class TaskAgentMatcher:
             # Get current tasks from task metrics
             current_tasks = self.task_metrics.get_agent_active_tasks(agent_id)
             scheduled_tasks = [
-                task.task_id for task in current_tasks if hasattr(task, "task_id")
+                (task.task_id if task is not None else None) for task in current_tasks if hasattr(task, "task_id")
             ]
 
             # Calculate workload based on active tasks
@@ -1303,14 +1303,14 @@ class TaskAgentMatcher:
                     recommendation = self.find_optimal_agent(
                         task_requirements, available_agents, strategy
                     )
-                    recommendations[task_requirements.task_id] = recommendation
+                    recommendations[(task_requirements.task_id if task_requirements is not None else None)] = recommendation
 
                     # Update agent availability for next task
                     self._simulate_assignment_impact(recommendation)
 
                 except Exception as e:
                     self.logger.error(
-                        f"Failed to match task {task_requirements.task_id}: {e}"
+                        f"Failed to match task {(task_requirements.task_id if task_requirements is not None else None)}: {e}"
                     )
                     # Continue with other tasks
 

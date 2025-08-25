@@ -65,7 +65,7 @@ class MetricDefinition:
     description: str
     collection_frequency: timedelta
     aggregation_method: str = "avg"  # avg, sum, count, max, min
-    retention_period: timedelta = field(default_factory=lambda: timedelta(days=90))
+    retention_period: Optional[timedelta] = field(default_factory=lambda: timedelta(days=90))
     validation_rules: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -154,7 +154,7 @@ class MetricsCollector:
         self._initialize_default_metrics()
 
         # Start real-time collection if enabled
-        if self.enable_real_time:
+        if self is not None and self.enable_real_time:
             self._start_real_time_collection()
 
         self.logger.info("MetricsCollector initialized")
@@ -302,7 +302,7 @@ class MetricsCollector:
             self.collection_stats["last_collection"] = datetime.now()
 
             # Trigger real-time hooks if enabled
-            if self.enable_real_time:
+            if self is not None and self.enable_real_time:
                 self._trigger_real_time_hooks(data_point)
 
             self.logger.debug(

@@ -194,7 +194,7 @@ class WorktreeManager:
             'task_id': task_id,
             'task_name': worktree_info.task_name,
             'branch_name': worktree_info.branch_name,
-            'status': worktree_info.status,
+            'status': (worktree_info.status if worktree_info is not None else None),
             'files_changed': [],
             'commits': [],
             'logs': None,
@@ -255,7 +255,7 @@ class WorktreeManager:
 
         try:
             # Stop any running processes
-            if worktree_info.pid:
+            if worktree_info is not None and worktree_info.pid:
                 try:
                     os.kill(worktree_info.pid, 15)  # SIGTERM
                     print(f"🛑 Terminated process {worktree_info.pid}")
@@ -417,11 +417,11 @@ class WorktreeManager:
             data = {
                 'worktrees': {
                     task_id: {
-                        'task_id': wt.task_id,
+                        'task_id': (wt.task_id if wt is not None else None),
                         'task_name': wt.task_name,
                         'worktree_path': str(wt.worktree_path),
                         'branch_name': wt.branch_name,
-                        'status': wt.status,
+                        'status': (wt.status if wt is not None else None),
                         'created_at': wt.created_at,
                         'pid': wt.pid
                     }
@@ -451,7 +451,7 @@ class WorktreeManager:
         }
 
         for worktree in self.worktrees.values():
-            summary[worktree.status] = summary.get(worktree.status, 0) + 1
+            summary[(worktree.status if worktree is not None else None)] = summary.get((worktree.status if worktree is not None else None), 0) + 1
 
         return summary
 
@@ -476,20 +476,20 @@ def main():
             worktrees = manager.list_worktrees()
             print(f"Managed worktrees: {len(worktrees)}")
             for wt in worktrees:
-                print(f"  {wt.task_id}: {wt.task_name} ({wt.status})")
+                print(f"  {(wt.task_id if wt is not None else None)}: {wt.task_name} ({(wt.status if wt is not None else None)})")
 
         elif args.command == "create":
-            if not args.task_id or not args.task_name:
+            if not (args.task_id if args is not None else None) or not args.task_name:
                 print("❌ --task-id and --task-name required for create")
                 return 1
 
-            manager.create_worktree(args.task_id, args.task_name)
+            manager.create_worktree((args.task_id if args is not None else None), args.task_name)
 
         elif args.command == "cleanup":
-            if args.all:
+            if args is not None and args.all:
                 manager.cleanup_all_worktrees(args.force)
-            elif args.task_id:
-                manager.cleanup_worktree(args.task_id, args.force)
+            elif args is not None and (args.task_id if args is not None else None):
+                manager.cleanup_worktree((args.task_id if args is not None else None), args.force)
             else:
                 print("❌ --task-id or --all required for cleanup")
                 return 1

@@ -58,7 +58,7 @@ class MockContainerConfig:
 class MockContainerResult:
     def __init__(self, **kwargs):
         self.task_id = kwargs.get('task_id', '')
-        self.status = kwargs.get('status', 'success')
+        self.task_id = kwargs.get('status', 'success')
         self.start_time = kwargs.get('start_time')
         self.end_time = kwargs.get('end_time')
         self.duration = kwargs.get('duration', 0)
@@ -242,9 +242,9 @@ class TestTaskExecutor(unittest.TestCase):
 
         result = self.executor.execute(timeout=60)
 
-        self.assertEqual(result.status, "success")
+        self.assertEqual((result.status if result is not None else None), "success")
         self.assertEqual(result.exit_code, 0)
-        self.assertEqual(result.task_id, "test-task")
+        self.assertEqual((result.task_id if result is not None else None), "test-task")
         self.assertIsNotNone(result.start_time)
         self.assertIsNotNone(result.end_time)
         self.assertIsNotNone(result.duration)
@@ -267,7 +267,7 @@ class TestTaskExecutor(unittest.TestCase):
 
         result = self.executor.execute()
 
-        self.assertEqual(result.status, "failed")
+        self.assertEqual((result.status if result is not None else None), "failed")
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(result.stderr, 'Error: Something went wrong')
         self.assertIsNotNone(result.error_message)
@@ -283,7 +283,7 @@ class TestTaskExecutor(unittest.TestCase):
 
         result = self.executor.execute(timeout=30)
 
-        self.assertEqual(result.status, "timeout")
+        self.assertEqual((result.status if result is not None else None), "timeout")
         self.assertEqual(result.exit_code, -1)
         self.assertIn("timed out", result.error_message)
 
@@ -297,7 +297,7 @@ class TestTaskExecutor(unittest.TestCase):
 
         result = self.executor.execute()
 
-        self.assertEqual(result.status, "failed")
+        self.assertEqual((result.status if result is not None else None), "failed")
         self.assertEqual(result.exit_code, -2)
         self.assertIn("Claude CLI not found", result.error_message)
 
@@ -394,8 +394,8 @@ class TestExecutionEngine(unittest.TestCase):
         # Mock successful task execution
         def mock_task_execution(executor):
             return ExecutionResult(
-                task_id=executor.task_id,
-                task_name=executor.task_id,
+                task_id=(executor.task_id if executor is not None else None),
+                task_name=(executor.task_id if executor is not None else None),
                 status="success",
                 start_time=datetime.now(),
                 end_time=datetime.now(),
@@ -435,7 +435,7 @@ class TestExecutionEngine(unittest.TestCase):
     def test_execute_tasks_parallel_with_failures(self, mock_execute):
         """Test parallel execution with some task failures"""
         def mock_task_execution(executor):
-            if executor.task_id == 'task1':
+            if (executor.task_id if executor is not None else None) == 'task1':
                 return ExecutionResult(
                     task_id='task1', task_name='task1', status="success",
                     start_time=datetime.now(), end_time=datetime.now(), duration=30.0,
@@ -595,8 +595,8 @@ class TestExecutionEngineIntegration(unittest.TestCase):
 
             result = executor.execute(timeout=5)
 
-            self.assertEqual(result.task_id, "test-task")
-            self.assertEqual(result.status, "success")
+            self.assertEqual((result.task_id if result is not None else None), "test-task")
+            self.assertEqual((result.status if result is not None else None), "success")
             self.assertIsNotNone(result.duration)
 
 

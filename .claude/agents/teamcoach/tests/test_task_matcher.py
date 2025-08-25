@@ -132,7 +132,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
 
         # Verify recommendation
         self.assertIsInstance(recommendation, MatchingRecommendation)
-        self.assertEqual(recommendation.task_id, "test_task_001")
+        self.assertEqual((recommendation.task_id if recommendation is not None else None), "test_task_001")
         self.assertGreater(len(recommendation.recommended_agents), 0)
         self.assertEqual(recommendation.assignment_strategy, MatchingStrategy.BEST_FIT)
         self.assertIsInstance(recommendation.agent_scores, dict)
@@ -324,7 +324,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
         # Verify score structure
         self.assertIsInstance(score, MatchingScore)
         self.assertEqual(score.agent_id, "agent1")
-        self.assertEqual(score.task_id, "test_task_001")
+        self.assertEqual((score.task_id if score is not None else None), "test_task_001")
         self.assertGreaterEqual(score.overall_score, 0.0)
         self.assertLessEqual(score.overall_score, 1.0)
         self.assertGreaterEqual(score.capability_match, 0.0)
@@ -371,7 +371,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
 
         for task_id, recommendation in recommendations.items():
             self.assertIsInstance(recommendation, MatchingRecommendation)
-            self.assertEqual(recommendation.task_id, task_id)
+            self.assertEqual((recommendation.task_id if recommendation is not None else None), task_id)
 
     def test_task_type_similarity(self):
         """Test task type similarity calculation"""
@@ -433,7 +433,7 @@ class TestTaskRequirements(unittest.TestCase):
             },
         )
 
-        self.assertEqual(requirements.task_id, "test_task")
+        self.assertEqual((requirements.task_id if requirements is not None else None), "test_task")
         self.assertEqual(requirements.task_type, "implementation")
         self.assertEqual(requirements.description, "Test task description")
         self.assertIsInstance(requirements.required_capabilities, dict)
@@ -459,7 +459,7 @@ class TestMatchingScore(unittest.TestCase):
         )
 
         self.assertEqual(score.agent_id, "test_agent")
-        self.assertEqual(score.task_id, "test_task")
+        self.assertEqual((score.task_id if score is not None else None), "test_task")
         self.assertEqual(score.capability_match, 0.8)
         self.assertEqual(score.overall_score, 0.75)
         self.assertIsInstance(score.strengths, list)

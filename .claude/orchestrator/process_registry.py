@@ -16,7 +16,6 @@ Key Features:
 
 import json
 import logging
-import os
 import subprocess
 import time
 from dataclasses import asdict, dataclass
@@ -114,29 +113,29 @@ class ProcessRegistry:
 
     def register_process(self, process_info: ProcessInfo) -> None:
         """Register a new process for tracking"""
-        logger.info(f"Registering process: {process_info.task_id}")
+        logger.info(f"Registering process: {(process_info.task_id if process_info is not None else None)}")
 
         # Validate process info
-        if not process_info.task_id:
+        if not (process_info.task_id if process_info is not None else None):
             raise ValueError("Process must have a task_id")
 
-        if process_info.task_id in self.processes:
-            logger.warning(f"Process {process_info.task_id} already registered, updating...")
+        if (process_info.task_id if process_info is not None else None) in self.processes:
+            logger.warning(f"Process {(process_info.task_id if process_info is not None else None)} already registered, updating...")
 
         # Set initial status if not specified
-        if process_info.status is None:
-            process_info.status = ProcessStatus.QUEUED
+        if (process_info.status if process_info is not None else None) is None:
+            (process_info.status if process_info is not None else None) = ProcessStatus.QUEUED
 
         # Initialize heartbeat
         process_info.last_heartbeat = datetime.now()
 
         # Store process
-        self.processes[process_info.task_id] = process_info
+        self.processes[(process_info.task_id if process_info is not None else None)] = process_info
 
         # Persist to disk
         self._save_registry()
 
-        logger.info(f"Process registered: {process_info.task_id} ({process_info.status.value})")
+        logger.info(f"Process registered: {(process_info.task_id if process_info is not None else None)} ({(process_info.status if process_info is not None else None).value})")
 
     def update_process_status(
         self,
@@ -151,8 +150,8 @@ class ProcessRegistry:
             return False
 
         process = self.processes[task_id]
-        old_status = process.status
-        process.status = status
+        old_status = (process.status if process is not None else None)
+        (process.status if process is not None else None) = status
         process.last_heartbeat = datetime.now()
 
         # Update timing information
@@ -186,13 +185,13 @@ class ProcessRegistry:
 
     def get_processes_by_status(self, status: ProcessStatus) -> List[ProcessInfo]:
         """Get all processes with specified status"""
-        return [p for p in self.processes.values() if p.status == status]
+        return [p for p in self.processes.values() if (p.status if p is not None else None) == status]
 
     def get_active_processes(self) -> List[ProcessInfo]:
         """Get all active (queued or running) processes"""
         return [
             p for p in self.processes.values()
-            if p.status in [ProcessStatus.QUEUED, ProcessStatus.RUNNING]
+            if (p.status if p is not None else None) in [ProcessStatus.QUEUED, ProcessStatus.RUNNING]
         ]
 
     def update_heartbeats(self) -> None:
@@ -201,11 +200,11 @@ class ProcessRegistry:
         stale_processes = []
 
         for task_id, process in self.processes.items():
-            if process.status != ProcessStatus.RUNNING:
+            if (process.status if process is not None else None) != ProcessStatus.RUNNING:
                 continue
 
             # Check if process is still alive
-            if process.pid:
+            if process is not None and process.pid:
                 try:
                     # Check if PID exists and is actually our process
                     proc = psutil.Process(process.pid)
@@ -219,7 +218,7 @@ class ProcessRegistry:
                     stale_processes.append(task_id)
             else:
                 # No PID, check heartbeat timeout
-                if process.last_heartbeat:
+                if process is not None and process.last_heartbeat:
                     time_since_heartbeat = current_time - process.last_heartbeat
                     if time_since_heartbeat.total_seconds() > self.heartbeat_timeout:
                         stale_processes.append(task_id)
@@ -253,10 +252,10 @@ class ProcessRegistry:
         # Count by status
         status_counts = {}
         for status in ProcessStatus:
-            status_counts[status] = len([p for p in processes if p.status == status])
+            status_counts[status] = len([p for p in processes if (p.status if p is not None else None) == status])
 
         # Calculate average execution time for completed processes
-        completed_processes = [p for p in processes if p.status == ProcessStatus.COMPLETED]
+        completed_processes = [p for p in processes if (p.status if p is not None else None) == ProcessStatus.COMPLETED]
         avg_execution_time = None
         if completed_processes:
             execution_times = []
@@ -269,12 +268,12 @@ class ProcessRegistry:
                 avg_execution_time = sum(execution_times) / len(execution_times)
 
         # Calculate resource usage for running processes
-        running_processes = [p for p in processes if p.status == ProcessStatus.RUNNING]
+        running_processes = [p for p in processes if (p.status if p is not None else None) == ProcessStatus.RUNNING]
         total_cpu = 0.0
         total_memory = 0.0
 
         for p in running_processes:
-            if p.resource_usage:
+            if p is not None and p.resource_usage:
                 total_cpu += p.resource_usage.get('cpu_percent', 0.0)
                 total_memory += p.resource_usage.get('memory_mb', 0.0)
 
@@ -300,7 +299,7 @@ class ProcessRegistry:
 
         processes_to_remove = []
         for task_id, process in self.processes.items():
-            if process.status in [ProcessStatus.COMPLETED, ProcessStatus.FAILED]:
+            if (process.status if process is not None else None) in [ProcessStatus.COMPLETED, ProcessStatus.FAILED]:
                 if process.completed_at and process.completed_at < cutoff_time:
                     processes_to_remove.append(task_id)
 
@@ -322,12 +321,12 @@ class ProcessRegistry:
 
         process = self.processes[task_id]
 
-        if process.status not in [ProcessStatus.QUEUED, ProcessStatus.RUNNING]:
-            logger.warning(f"Cannot cancel process {task_id} in status {process.status.value}")
+        if (process.status if process is not None else None) not in [ProcessStatus.QUEUED, ProcessStatus.RUNNING]:
+            logger.warning(f"Cannot cancel process {task_id} in status {(process.status if process is not None else None).value}")
             return False
 
         # Try to terminate the process if it's running
-        if process.status == ProcessStatus.RUNNING and process.pid:
+        if (process.status if process is not None else None) == ProcessStatus.RUNNING and process.pid:
             try:
                 proc = psutil.Process(process.pid)
                 proc.terminate()
@@ -340,7 +339,7 @@ class ProcessRegistry:
                 logger.warning(f"Could not terminate process {task_id}: {e}")
 
         # Update status
-        process.status = ProcessStatus.CANCELLED
+        (process.status if process is not None else None) = ProcessStatus.CANCELLED
         process.completed_at = datetime.now()
         process.error_message = "Process cancelled by user"
 
@@ -355,9 +354,9 @@ class ProcessRegistry:
             "registry_stats": asdict(self.get_registry_stats()),
             "processes": {
                 task_id: {
-                    "task_id": p.task_id,
+                    "task_id": (p.task_id if p is not None else None),
                     "task_name": p.task_name,
-                    "status": p.status.value,
+                    "status": (p.status if p is not None else None).value,
                     "created_at": p.created_at.isoformat() if p.created_at else None,
                     "started_at": p.started_at.isoformat() if p.started_at else None,
                     "completed_at": p.completed_at.isoformat() if p.completed_at else None,
@@ -459,7 +458,7 @@ class ProcessRegistry:
                         process_dict[field] = process_dict[field].isoformat()
 
                 # Convert enum to string
-                process_dict["status"] = process.status.value
+                process_dict["status"] = (process.status if process is not None else None).value
 
                 registry_data["processes"][task_id] = process_dict
 
@@ -479,9 +478,9 @@ class ProcessRegistry:
 
             for process in self.get_active_processes():
                 heartbeat_data["active_processes"].append({
-                    "task_id": process.task_id,
+                    "task_id": (process.task_id if process is not None else None),
                     "task_name": process.task_name,
-                    "status": process.status.value,
+                    "status": (process.status if process is not None else None).value,
                     "pid": process.pid,
                     "last_heartbeat": process.last_heartbeat.isoformat() if process.last_heartbeat else None,
                     "resource_usage": process.resource_usage
@@ -519,7 +518,7 @@ class ProcessRegistry:
                 "memory_mb": memory_info.rss / (1024 * 1024),  # Convert to MB
                 "memory_percent": proc.memory_percent(),
                 "num_threads": proc.num_threads(),
-                "status": proc.status(),
+                "status": (proc.status if proc is not None else None)(),
                 "create_time": proc.create_time()
             }
 
@@ -555,11 +554,11 @@ def main():
         print(f"  Running: {stats.running_count}")
         print(f"  Completed: {stats.completed_count}")
         print(f"  Failed: {stats.failed_count}")
-        if stats.average_execution_time:
+        if stats is not None and stats.average_execution_time:
             print(f"  Average execution time: {stats.average_execution_time:.1f} seconds")
-        if stats.total_cpu_usage:
+        if stats is not None and stats.total_cpu_usage:
             print(f"  Total CPU usage: {stats.total_cpu_usage:.1f}%")
-        if stats.total_memory_usage:
+        if stats is not None and stats.total_memory_usage:
             print(f"  Total memory usage: {stats.total_memory_usage:.1f} MB")
 
     elif args.command == "cleanup":
@@ -572,15 +571,15 @@ def main():
         print(f"Monitoring data exported to {output_file}")
 
     elif args.command == "cancel":
-        if not args.task_id:
+        if not (args.task_id if args is not None else None):
             print("Error: --task-id required for cancel command")
             return
 
-        success = registry.cancel_process(args.task_id)
+        success = registry.cancel_process((args.task_id if args is not None else None))
         if success:
-            print(f"Process {args.task_id} cancelled successfully")
+            print(f"Process {(args.task_id if args is not None else None)} cancelled successfully")
         else:
-            print(f"Failed to cancel process {args.task_id}")
+            print(f"Failed to cancel process {(args.task_id if args is not None else None)}")
 
 
 if __name__ == "__main__":

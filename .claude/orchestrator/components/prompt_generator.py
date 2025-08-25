@@ -45,7 +45,7 @@ class PromptGenerator:
         prompt_content = self._build_workflow_prompt(context)
 
         # Save prompt to worktree
-        prompt_file = worktree_path / "prompts" / f"{context.task_id}-workflow.md"
+        prompt_file = worktree_path / "prompts" / f"{(context.task_id if context is not None else None)}-workflow.md"
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
 
         with open(prompt_file, 'w') as f:
@@ -67,7 +67,7 @@ class PromptGenerator:
         prompt_content = f"""# WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: {context.task_id}
+- **Task ID**: {(context.task_id if context is not None else None)}
 - **Task Name**: {context.task_name}
 - **Original Prompt**: {context.original_prompt}
 - **Phase Focus**: {context.phase_focus or 'Full Implementation'}
@@ -303,7 +303,7 @@ def main():
     generator = PromptGenerator()
 
     context = PromptContext(
-        task_id=args.task_id,
+        task_id=(args.task_id if args is not None else None),
         task_name=args.task_name,
         original_prompt=args.original_prompt,
         phase_focus=args.phase_focus
@@ -319,7 +319,7 @@ def main():
         print(f"✅ Generated prompt: {prompt_file}")
 
         # Validate if requested
-        if args.validate:
+        if args is not None and args.validate:
             issues = generator.validate_prompt_content(prompt_file)
             if issues:
                 print("⚠️  Validation issues:")

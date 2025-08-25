@@ -325,7 +325,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
         # Verify projected metrics
         self.assertIsInstance(analysis.projected_metrics, WorkflowMetrics)
 
-        if analysis.optimizations:
+        if analysis is not None and analysis.optimizations:
             # Projected should be better than current
             self.assertLessEqual(
                 analysis.projected_metrics.total_duration,

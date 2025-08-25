@@ -60,7 +60,7 @@ class AgentMetrics:
 class PerformanceMetrics:
     """Performance metrics container"""
 
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: Optional[datetime] = field(default_factory=datetime.now)
     metrics: Dict[str, Any] = field(default_factory=dict)
 
 

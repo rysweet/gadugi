@@ -869,12 +869,12 @@ class CapabilityAssessment:
                     confidence_weight = agent_score.confidence_score
                     required_score += level_match * confidence_weight
 
-            if task_requirements.required_capabilities:
+            if task_requirements is not None and task_requirements.required_capabilities:
                 required_score /= len(task_requirements.required_capabilities)
 
             # Calculate preferred capability bonus
             preferred_score = 0.0
-            if task_requirements.preferred_capabilities:
+            if task_requirements is not None and task_requirements.preferred_capabilities:
                 for (
                     domain,
                     preferred_level,

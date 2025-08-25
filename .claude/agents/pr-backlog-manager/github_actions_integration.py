@@ -302,7 +302,7 @@ class GitHubActionsIntegration:
             "mode": "single_pr",
             "pr_number": pr_number,
             "assessment": {
-                "status": assessment.status.value,
+                "status": (assessment.status if assessment is not None else None).value,
                 "readiness_score": assessment.readiness_score,
                 "is_ready": assessment.is_ready,
                 "blocking_issues_count": len(assessment.blocking_issues),

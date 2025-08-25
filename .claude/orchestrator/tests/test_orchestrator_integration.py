@@ -6,7 +6,6 @@ These tests validate the complete orchestrator workflow from CLI input
 to parallel execution coordination.
 """
 
-import json
 import os
 import tempfile
 import unittest
@@ -150,20 +149,20 @@ Process these prompts in parallel:
         # Verify registration
         retrieved = registry.get_process("test-task-1")
         self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.task_id, "test-task-1")
-        self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
+        self.assertEqual((retrieved.task_id if retrieved is not None else None), "test-task-1")
+        self.assertEqual((retrieved.status if retrieved is not None else None), ProcessStatus.QUEUED)
 
         # Test status update
         success = registry.update_process_status("test-task-1", ProcessStatus.RUNNING)
         self.assertTrue(success)
 
         updated = registry.get_process("test-task-1")
-        self.assertEqual(updated.status, ProcessStatus.RUNNING)
+        self.assertEqual((updated.status if updated is not None else None), ProcessStatus.RUNNING)
 
         # Test completion
         registry.update_process_status("test-task-1", ProcessStatus.COMPLETED)
         completed = registry.get_process("test-task-1")
-        self.assertEqual(completed.status, ProcessStatus.COMPLETED)
+        self.assertEqual((completed.status if completed is not None else None), ProcessStatus.COMPLETED)
 
     @patch('orchestrator_main.ExecutionEngine')
     @patch('orchestrator_main.WorktreeManager')
@@ -175,9 +174,9 @@ Process these prompts in parallel:
 
         # Mock task analyzer
         mock_analysis = Mock()
-        mock_analysis.task_id = "test-task-1"
+        (mock_analysis.task_id if mock_analysis is not None else None) = "test-task-1"
         mock_analysis.name = "Test Task 1"
-        mock_analysis.prompt_file = "test-feature-1.md"
+        (mock_analysis.prompt_file if mock_analysis is not None else None) = "test-feature-1.md"
         mock_analysis.task_type = "feature_implementation"
         mock_analysis.complexity = "MEDIUM"
         mock_analysis.can_parallelize = True
@@ -188,7 +187,7 @@ Process these prompts in parallel:
 
         # Mock worktree manager
         mock_worktree_info = Mock()
-        mock_worktree_info.task_id = "test-task-1"
+        (mock_worktree_info.task_id if mock_worktree_info is not None else None) = "test-task-1"
         mock_worktree_info.worktree_path = self.test_dir / ".worktrees/test-task-1"
         mock_worktree_info.branch_name = "feature/test-task-1"
 
@@ -199,7 +198,7 @@ Process these prompts in parallel:
 
         # Mock execution engine
         mock_result = Mock()
-        mock_result.task_id = "test-task-1"
+        (mock_result.task_id if mock_result is not None else None) = "test-task-1"
         mock_result.success = True
         mock_result.execution_time = 30.0
         mock_result.error_message = None
