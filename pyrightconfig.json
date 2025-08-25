@@ -23,7 +23,7 @@
   "reportPrivateImportUsage": false,
   "pythonVersion": "3.9",
   "pythonPlatform": "All",
-  "typeCheckingMode": "basic",
+  "typeCheckingMode": "standard",
   "useLibraryCodeForTypes": true,
   "enableTypeIgnoreComments": true,
   "reportUnusedImport": false,
