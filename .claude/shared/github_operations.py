@@ -15,7 +15,7 @@ from datetime import datetime
 class GitHubError(Exception):
     """Base exception for GitHub operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict[str, Any], details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message) -> None: str, operation) -> None: str, context) -> None: Dict[str, Any], details) -> None: Optional[Dict[str, Any]] = None)) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -25,7 +25,7 @@ class GitHubError(Exception):
 class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
 
-    def __init__(self, message: str, reset_time: Optional[int] = None):
+    def __init__(self, message) -> None: str, reset_time) -> None: Optional[int] = None)) -> None:
         super().__init__(message, 'rate_limit', {})
         self.reset_time = reset_time
 
@@ -47,7 +47,7 @@ class GitHubOperations:
     Reduces 29% code duplication between OrchestratorAgent and WorkflowManager.
     """
 
-    def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None,
+    def __init__(self, repo) -> None: Optional[str] = None, retry_config) -> None: Optional[Dict[str, Any]] = None,
                  config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None):
         """
         Initialize GitHub operations.
@@ -113,7 +113,7 @@ class GitHubOperations:
         while retries < self.retry_config['max_retries']:
             try:
                 cmd = ['gh'] + args
-                if self.repo:
+                if self is not None and self.repo:
                     cmd.extend(['--repo', self.repo])
 
                 self.logger.debug(f"Executing GitHub command: {' '.join(cmd)}")
@@ -219,7 +219,7 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created issue #{result['data']['number']}: {title}")
-            if self.task_id:
+            if self is not None and self.task_id:
                 self.logger.debug(f"Issue created with task ID: {self.task_id}")
 
         return result
@@ -258,7 +258,7 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created PR #{result['data']['number']}: {title}")
-            if self.task_id:
+            if self is not None and self.task_id:
                 self.logger.debug(f"PR created with task ID: {self.task_id}")
 
         return result
@@ -372,7 +372,7 @@ class GitHubOperations:
 
         if result['success']:
             self.logger.info(f"Added comment to issue #{issue_number}")
-            if self.task_id:
+            if self is not None and self.task_id:
                 self.logger.debug(f"Comment added with task ID: {self.task_id}")
 
         return result

@@ -38,7 +38,7 @@ def test_hook_direct_execution():
 
         print(f"   Return code: {result.returncode}")
 
-        if result.stdout:
+        if result is not None and result.stdout:
             try:
                 output = json.loads(result.stdout)
                 print("   ✅ Valid JSON output")
@@ -47,7 +47,7 @@ def test_hook_direct_execution():
             except json.JSONDecodeError:
                 print(f"   ❌ Invalid JSON output: {result.stdout[:100]}")
 
-        if result.stderr:
+        if result is not None and result.stderr:
             print(f"   Stderr: {result.stderr[:100]}")
 
     except subprocess.TimeoutExpired:
@@ -81,7 +81,7 @@ def test_hook_direct_execution():
 
         print(f"   Return code: {result.returncode}")
 
-        if result.stdout:
+        if result is not None and result.stdout:
             try:
                 output = json.loads(result.stdout)
                 print("   ✅ Valid JSON output")
@@ -90,7 +90,7 @@ def test_hook_direct_execution():
             except json.JSONDecodeError:
                 print(f"   ❌ Invalid JSON output: {result.stdout[:100]}")
 
-        if result.stderr:
+        if result is not None and result.stderr:
             print(f"   Stderr: {result.stderr[:100]}")
 
     except subprocess.TimeoutExpired:
@@ -181,9 +181,9 @@ sys.exit(0)
         else:
             print("   ⚠️  No clear indication TeamCoach would be invoked")
 
-        if result.stdout:
+        if result is not None and result.stdout:
             print(f"   Stdout preview: {result.stdout[:200]}")
-        if result.stderr:
+        if result is not None and result.stderr:
             print(f"   Stderr preview: {result.stderr[:200]}")
 
     finally:

@@ -52,7 +52,7 @@ class PytestStub:
         import builtins
 
         class ApproxValue:
-            def __init__(self, value, abs_tol, rel_tol):
+            def __init__(self, value, abs_tol, rel_tol) -> None:
                 self.value = value
                 self.abs_tol = abs_tol
                 self.rel_tol = rel_tol
@@ -318,10 +318,10 @@ class GadugiError(Exception):
 class DelegationCoordinator:
     """Delegation coordinator implementation."""
 
-    def __init__(self, github_ops, auto_approve: bool = False):
+    def __init__(self, github_ops, auto_approve) -> None: bool = False)) -> None:
         self.github_ops = github_ops
         self.auto_approve = auto_approve
-        self.active_delegations: Dict[str, DelegationTask] = {}
+        self.active_delegations: Dict[Any, Any] = field(default_factory=dict)
         self.config = {
             "max_retries": 3,
             "workflow_master_timeout": 300,
@@ -644,14 +644,14 @@ Improve metadata for PR #{pr_number}.
 
     def _delegate_to_workflow_master(self, task: DelegationTask) -> None:
         """Delegate task to WorkflowMaster."""
-        if self.auto_approve:
+        if self is not None and self.auto_approve:
             self._create_workflow_master_prompt(task)
         else:
             self._invoke_workflow_master_interactive(task)
 
     def _delegate_to_code_reviewer(self, task: DelegationTask) -> None:
         """Delegate task to code-reviewer."""
-        if self.auto_approve:
+        if self is not None and self.auto_approve:
             self._create_code_review_workflow(task)
         else:
             self._invoke_code_reviewer_direct(task)
@@ -784,7 +784,7 @@ This task has been automatically delegated for resolution."""
                 )
             else:
                 comment = f"❌ **Delegation Failed**\n\nTask ID: {task_id}"
-                if task.error_message:
+                if task is not None and task.error_message:
                     comment += f"\nError: {task.error_message}"
 
             self.github_ops.add_pr_comment(task.pr_number, comment)
@@ -1053,7 +1053,7 @@ class PRBacklogManager:
 class ReadinessAssessor:
     """Readiness assessment component."""
 
-    def __init__(self, github_ops: Any = None):
+    def __init__(self, github_ops) -> None: Any = None)) -> None:
         self.github_ops = github_ops
 
     def assess_pr_readiness(self, pr_number: int) -> PRAssessment:
@@ -1492,8 +1492,8 @@ class ReadinessAssessor:
 class MetricsCollector:
     """Metrics collection component."""
 
-    def __init__(self):
-        self.metrics: Dict[str, Any] = {}
+    def __init__(self) -> None:
+        self.metrics: Dict[Any, Any] = field(default_factory=dict)
 
     def collect_pr_metrics(self, assessments: List[PRAssessment]) -> BacklogMetrics:
         """Collect PR processing metrics."""
@@ -1525,7 +1525,7 @@ class MetricsCollector:
 class NotificationHandler:
     """Notification handling component."""
 
-    def __init__(self, github_ops: Any = None):
+    def __init__(self, github_ops) -> None: Any = None)) -> None:
         self.github_ops = github_ops
 
     def send_ready_notification(self, pr_number: int, assessment: PRAssessment) -> None:
@@ -1555,7 +1555,7 @@ class NotificationHandler:
 class ConflictDetector:
     """Conflict detection component."""
 
-    def __init__(self, github_ops: Any = None):
+    def __init__(self, github_ops) -> None: Any = None)) -> None:
         self.github_ops = github_ops
 
     def detect_conflicts(self, pr_number: int) -> ConflictAssessment:
@@ -1590,7 +1590,7 @@ class ConflictDetector:
 class LabelManager:
     """Label management component."""
 
-    def __init__(self, github_ops: Any = None):
+    def __init__(self, github_ops) -> None: Any = None)) -> None:
         self.github_ops = github_ops
 
     def apply_readiness_labels(self, pr_number: int, assessment: PRAssessment) -> None:
@@ -1620,7 +1620,7 @@ class LabelManager:
 class AutoMerger:
     """Auto-merge component."""
 
-    def __init__(self, github_ops: Any = None, auto_approve: bool = False):
+    def __init__(self, github_ops) -> None: Any = None, auto_approve) -> None: bool = False)) -> None:
         self.github_ops = github_ops
         self.auto_approve = auto_approve
 
@@ -1833,7 +1833,7 @@ class SecurityConstraints:
 class GitHubActionsIntegration:
     """GitHub Actions integration component."""
 
-    def __init__(self, pr_backlog_manager=None, config: Optional[AgentConfig] = None):
+    def __init__(self, pr_backlog_manager=None, config) -> None: Optional[AgentConfig] = None)) -> None:
         # Handle both signatures
         if pr_backlog_manager is not None:
             self.pr_backlog_manager = pr_backlog_manager

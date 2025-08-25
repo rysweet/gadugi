@@ -10,7 +10,7 @@ import sys
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 # Add shared modules to path for import resolution
@@ -34,19 +34,19 @@ except ImportError as e:
 
     # Fallback definitions for development/testing
     class GitHubOperations:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class StateManager:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class TaskTracker:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class AgentConfig:
-        def __init__(self, agent_id: str, name: str, **kwargs):
+        def __init__(self, agent_id) -> None: str, name) -> None: str, **kwargs)) -> None:
             self.agent_id = agent_id
             self.name = name
 
@@ -69,7 +69,7 @@ except ImportError as e:
             self.severity = severity
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold: int, recovery_timeout: float):
+        def __init__(self, failure_threshold) -> None: int, recovery_timeout) -> None: float)) -> None:
             pass
 
     def retry_with_backoff(max_attempts: int = 3, strategy=None):
@@ -347,16 +347,22 @@ class PRBacklogManager:
             )
 
             # Update status based on results
-            if assessment.is_ready:
-                assessment.status = PRStatus.READY
+            if assessment is not None and assessment.is_ready:
+                if assessment is not None:
+
+                    assessment.status = PRStatus.READY
                 self._apply_ready_label(pr_number)
-            elif assessment.blocking_issues:
-                assessment.status = PRStatus.BLOCKED
+            elif assessment is not None and assessment.blocking_issues:
+                if assessment is not None:
+
+                    assessment.status = PRStatus.BLOCKED
                 self._delegate_issue_resolution(
                     pr_number, assessment.resolution_actions
                 )
             else:
-                assessment.status = PRStatus.FAILED
+                if assessment is not None:
+
+                    assessment.status = PRStatus.FAILED
 
             # Calculate processing time
             processing_time = (datetime.now() - start_time).total_seconds()
@@ -367,7 +373,7 @@ class PRBacklogManager:
 
             logger.info(
                 f"Completed PR #{pr_number} assessment - "
-                f"Status: {assessment.status.value}, "
+                f"Status: {(assessment.status if assessment is not None else None).value}, "
                 f"Score: {assessment.readiness_score:.1f}%, "
                 f"Time: {processing_time:.2f}s"
             )
@@ -668,7 +674,7 @@ class PRBacklogManager:
         try:
             state_data = {
                 "pr_number": assessment.pr_number,
-                "status": assessment.status.value,
+                "status": (assessment.status if assessment is not None else None).value,
                 "criteria_met": {
                     k.value: v for k, v in assessment.criteria_met.items()
                 },
@@ -718,9 +724,12 @@ class PRBacklogManager:
                     assessments.append(assessment)
 
                     # Update metrics
-                    if assessment.status == PRStatus.READY:
+                    if assessment is not None:
+
+                        assessment.status == PRStatus.READY:
                         self.metrics.ready_prs += 1
-                    elif assessment.status == PRStatus.BLOCKED:
+                    elif if assessment is not None:
+     assessment.status == PRStatus.BLOCKED:
                         self.metrics.blocked_prs += 1
 
                 except Exception as e:
@@ -783,7 +792,7 @@ class PRBacklogManager:
                 "assessments": [
                     {
                         "pr_number": a.pr_number,
-                        "status": a.status.value,
+                        "status": (a.status if a is not None else None).value,
                         "readiness_score": a.readiness_score,
                         "blocking_issues_count": len(a.blocking_issues),
                         "processing_time": a.processing_time,
@@ -819,7 +828,7 @@ def main():
             pr_number = int(sys.argv[1].split("_")[1])
             assessment = manager.process_single_pr(pr_number)
             print(
-                f"PR #{pr_number} assessment: {assessment.status.value} "
+                f"PR #{pr_number} assessment: {(assessment.status if assessment is not None else None).value} "
                 f"(Score: {assessment.readiness_score:.1f}%)"
             )
         except ValueError:

@@ -1111,8 +1111,8 @@ def create_operation_result(success: bool, data: Any = None,
 class InterfaceRegistry:
     """Registry for interface implementations."""
 
-    def __init__(self):
-        self._implementations: Dict[type, List[type]] = {}
+    def __init__(self) -> None:
+        self._implementations: Dict[Any, Any] = field(default_factory=dict)
 
     def register_implementation(self, interface_class: type, implementation_class: type) -> None:
         """

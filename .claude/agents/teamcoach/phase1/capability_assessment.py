@@ -41,7 +41,7 @@ try:
 except ImportError:
 
     class TaskMetrics:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
 
@@ -175,10 +175,10 @@ class CapabilityAssessment:
         )
 
         # Capability profiles cache
-        self.capability_profiles: Dict[str, AgentCapabilityProfile] = {}
+        self.capability_profiles: Dict[Any, Any] = field(default_factory=dict)
 
         # Task capability requirements database
-        self.task_requirements: Dict[str, TaskCapabilityRequirement] = {}
+        self.task_requirements: Dict[Any, Any] = field(default_factory=dict)
 
         # Assessment configuration
         self.assessment_config = {
@@ -869,12 +869,12 @@ class CapabilityAssessment:
                     confidence_weight = agent_score.confidence_score
                     required_score += level_match * confidence_weight
 
-            if task_requirements.required_capabilities:
+            if task_requirements is not None and task_requirements.required_capabilities:
                 required_score /= len(task_requirements.required_capabilities)
 
             # Calculate preferred capability bonus
             preferred_score = 0.0
-            if task_requirements.preferred_capabilities:
+            if task_requirements is not None and task_requirements.preferred_capabilities:
                 for (
                     domain,
                     preferred_level,

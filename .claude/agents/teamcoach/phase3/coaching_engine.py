@@ -1,6 +1,6 @@
 from datetime import timedelta
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional

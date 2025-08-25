@@ -84,7 +84,7 @@ class BankTransferProcessor(PaymentProcessor):
         """Test detection of configuration options without clear use cases."""
         _over_configured_code = """
 class DatabaseConfig:
-    def __init__(self):
+    def __init__(self)) -> None:
         self.max_connections = 10  # Never changed
         self.timeout = 30  # Never changed
         self.retry_count = 3  # Never changed
@@ -153,7 +153,7 @@ class Cat(Feline):
         """Test detection of builder pattern used for simple data structures."""
         _over_engineered_builder = """
 class PersonBuilder:
-    def __init__(self):
+    def __init__(self)) -> None:
         self._name = None
         self._age = None
         self._email = None
@@ -174,7 +174,7 @@ class PersonBuilder:
         return Person(self._name, self._age, self._email)
 
 class Person:
-    def __init__(self, name, age, email):
+    def __init__(self, name, age, email)) -> None:
         self.name = name
         self.age = age
         self.email = email
@@ -220,11 +220,11 @@ class DistributedTaskOrchestrator:
     - Result aggregation and consistency
     """
 
-    def __init__(self, worker_nodes: List[str], retry_count: int = 3):
+    def __init__(self, worker_nodes) -> None: List[str], retry_count) -> None: int = 3)) -> None:
         self.worker_nodes = worker_nodes
         self.retry_count = retry_count
-        self.active_tasks: Dict[str, TaskResult] = {}
-        self.worker_health: Dict[str, bool] = {}
+        self.active_tasks: Dict[Any, Any] = field(default_factory=dict)
+        self.worker_health: Dict[Any, Any] = field(default_factory=dict)
 
     async def execute_distributed_workflow(
         self,
@@ -245,7 +245,7 @@ class DistributedTaskOrchestrator:
         """Test detection of YAGNI (You Aren't Gonna Need It) violations."""
         _yagni_violation_code = """
 class UserManager:
-    def __init__(self):
+    def __init__(self)) -> None:
         # Currently only need basic user creation
         # But implementing enterprise features "just in case"
         self.user_cache = {}  # Not used yet
@@ -383,7 +383,7 @@ def calculate_shipping(weight, distance):
         large_team_code = """
 # Large team - structured approach for maintainability
 class ShippingCalculator:
-    def __init__(self, rate_config: ShippingRateConfig):
+    def __init__(self, rate_config) -> None: ShippingRateConfig)) -> None:
         self.rate_config = rate_config
 
     def calculate(self, shipment: Shipment) -> Decimal:

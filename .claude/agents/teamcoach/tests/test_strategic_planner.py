@@ -214,7 +214,7 @@ class TestStrategicPlanner(unittest.TestCase):
         self.assertGreater(len(capacity_plan.recommendations), 0)
 
         # Check for capacity gaps
-        if capacity_plan.gaps:
+        if capacity_plan is not None and capacity_plan.gaps:
             for timeframe, gaps in capacity_plan.gaps.items():
                 self.assertIsInstance(gaps, dict)
 

@@ -154,9 +154,9 @@ class TaskOrchestrator:
     - Distributed execution, fault tolerance, load balancing
     """
 
-    def __init__(self, worker_nodes: List[str]):
+    def __init__(self, worker_nodes) -> None: List[str])) -> None:
         self.worker_nodes = worker_nodes
-        self.active_tasks: Dict[str, Task] = {}
+        self.active_tasks: Dict[Any, Any] = field(default_factory=dict)
 
     async def execute_workflow(self, tasks: List[Task]) -> WorkflowResult:
         # Complex orchestration logic - justified by requirements
@@ -265,7 +265,7 @@ class TradingAlgorithm:
     - Market data processing
     - Regulatory compliance
     """
-    def __init__(self, risk_manager, market_feed, order_gateway):
+    def __init__(self, risk_manager, market_feed, order_gateway)) -> None:
         # Complexity justified by genuine requirements
         self.risk_manager = risk_manager
         self.market_feed = market_feed
@@ -292,7 +292,7 @@ class PDFReportGenerator(ReportGenerator):
         # Case 2: Configuration that's never varied
         _over_engineered_2 = """
 class AppConfig:
-    def __init__(self):
+    def __init__(self)) -> None:
         # These are never actually configured differently
         self.database_timeout = 30  # Always 30
         self.max_retries = 3        # Always 3

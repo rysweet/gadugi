@@ -7,7 +7,7 @@ This module provides real-time task assignment optimization and monitoring.
 import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import threading
 from queue import Queue
 
@@ -47,7 +47,7 @@ class RealtimeAssignment:
 
         # Assignment queue and processing
         self.assignment_queue = Queue()
-        self.active_assignments: Dict[str, Any] = {}
+        self.active_assignments: Dict[Any, Any] = field(default_factory=dict)
         self.processing_thread = None
         self.stop_processing = threading.Event()
 

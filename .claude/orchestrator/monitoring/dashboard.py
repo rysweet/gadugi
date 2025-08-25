@@ -50,13 +50,13 @@ logger = logging.getLogger(__name__)
 class OrchestrationMonitor:
     """Monitors and tracks orchestrator container execution"""
 
-    def __init__(self, monitoring_dir: str = "./monitoring"):
+    def __init__(self, monitoring_dir) -> None: str = "./monitoring")) -> None:
         self.monitoring_dir = Path(monitoring_dir)
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
 
         self.websocket_clients: Set[WebSocketServerProtocol] = set()
         self.docker_client = None
-        self.active_containers: Dict[str, Dict] = {}
+        self.active_containers: Dict[Any, Any] = field(default_factory=dict)
         self.monitoring = False
 
         # Initialize Docker client
@@ -115,7 +115,7 @@ class OrchestrationMonitor:
                 container_info = {
                     'id': container.id,
                     'name': container.name,
-                    'status': container.status,
+                    'status': (container.status if container is not None else None),
                     'created': container.attrs['Created'],
                     'image': container.image.tags[0] if container.image.tags else 'unknown',
                     'labels': container.labels,
@@ -127,7 +127,7 @@ class OrchestrationMonitor:
                 }
 
                 # Get resource stats for running containers
-                if container.status == 'running':
+                if (container.status if container is not None else None) == 'running':
                     try:
                         stats = container.stats(stream=False)
                         container_info['stats'] = {
@@ -248,7 +248,7 @@ class OrchestrationMonitor:
 
             try:
                 # Send initial status
-                if self.active_containers:
+                if self is not None and self.active_containers:
                     initial_message = {
                         'type': 'initial_status',
                         'timestamp': datetime.now().isoformat(),
@@ -321,7 +321,7 @@ class OrchestrationMonitor:
         try:
             container = self.docker_client.containers.get(container_name)
 
-            if container.status == 'running':
+            if (container.status if container is not None else None) == 'running':
                 stats = container.stats(stream=False)
 
                 detailed_stats = {
@@ -482,11 +482,11 @@ async def create_web_app():
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <strong>${name}</strong>
-                                    <span class="status ${container.status}">${container.status}</span>
+                                    <span class="status ${(container.status if container is not None else None)}">${(container.status if container is not None else None)}</span>
                                 </div>
-                                <div class="timestamp">Task: ${container.task_id}</div>
+                                <div class="timestamp">Task: ${(container.task_id if container is not None else None)}</div>
                             </div>
-                            ${container.status === 'running' ? `
+                            ${(container.status if container is not None else None) === 'running' ? `
                                 <div style="margin-top: 10px;">
                                     <div>CPU: ${stats.cpu_percent || 0}%</div>
                                     <div>Memory: ${memoryUsageMB}MB / ${memoryLimitMB}MB</div>

@@ -97,7 +97,7 @@ class ValidationResult:
 class ThreatPatternLibrary:
     """Library of threat detection patterns"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patterns = self._initialize_patterns()
         self.logger = logging.getLogger(f"{__name__}.ThreatPatternLibrary")
 
@@ -262,7 +262,7 @@ class ThreatPatternLibrary:
 class ContentSanitizer:
     """Sanitizes content while preserving legitimate functionality"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(f"{__name__}.ContentSanitizer")
 
     def sanitize_content(
@@ -379,7 +379,7 @@ class ContentSanitizer:
 class XPIADefenseEngine:
     """Core XPIA defense engine"""
 
-    def __init__(self, security_mode: SecurityMode = SecurityMode.BALANCED):
+    def __init__(self, security_mode) -> None: SecurityMode = SecurityMode.BALANCED)) -> None:
         self.security_mode = security_mode
         self.pattern_library = ThreatPatternLibrary()
         self.sanitizer = ContentSanitizer()
@@ -568,7 +568,7 @@ class XPIADefenseEngine:
             f"Processing Time: {result.processing_time_ms:.2f}ms, Hash: {result.content_hash}",
         )
 
-        if result.threats_detected:
+        if result is not None and result.threats_detected:
             for threat in result.threats_detected:
                 self.logger.log(
                     log_level,
@@ -602,7 +602,7 @@ class XPIADefenseEngine:
 class XPIADefenseAgent:
     """Main XPIA Defense Agent class"""
 
-    def __init__(self, security_mode: SecurityMode = SecurityMode.BALANCED):
+    def __init__(self, security_mode) -> None: SecurityMode = SecurityMode.BALANCED)) -> None:
         self.engine = XPIADefenseEngine(security_mode)
         self.logger = logging.getLogger(f"{__name__}.XPIADefenseAgent")
 

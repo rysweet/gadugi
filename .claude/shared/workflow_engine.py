@@ -20,7 +20,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from enum import Enum, auto
 
 # Import shared modules
@@ -39,7 +39,7 @@ except ImportError:
         def load_state(self, task_id): return None
 
     class GitHubOperations:
-        def __init__(self, task_id=None):
+        def __init__(self, task_id=None) -> None:
             self.task_id = task_id
         def create_issue(self, title, body): return None
         def create_pr(self, title, body, base, head): return None
@@ -143,7 +143,7 @@ class WorkflowEngine:
 
         # State tracking
         self.workflow_state: Optional[WorkflowState] = None
-        self.execution_log: List[PhaseResult] = []
+        self.execution_log: List[Any] = field(default_factory=list)
 
     def execute_workflow(self, prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
         """

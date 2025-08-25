@@ -98,10 +98,10 @@ class SystemResources:
 class ResourceMonitor:
     """Monitors system resources during execution"""
 
-    def __init__(self, monitoring_interval: float = 1.0):
+    def __init__(self, monitoring_interval) -> None: float = 1.0)) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
-        self.resource_history: List[SystemResources] = []
+        self.resource_history: List[Any] = field(default_factory=list)
         self.monitor_thread: Optional[threading.Thread] = None
 
     def start_monitoring(self):
@@ -114,7 +114,7 @@ class ResourceMonitor:
     def stop_monitoring(self):
         """Stop resource monitoring"""
         self.monitoring = False
-        if self.monitor_thread:
+        if self is not None and self.monitor_thread:
             self.monitor_thread.join(timeout=5.0)
         print("📊 Stopped resource monitoring")
 
@@ -193,10 +193,10 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
 
-    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict] = None):
+    def __init__(self, task_id) -> None: str, worktree_path) -> None: Path, prompt_file) -> None: str, task_context) -> None: Optional[Dict] = None)) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
-        self.prompt_file = prompt_file
+        self.task_id = prompt_file
         self.task_context = task_context or {}
         self.process: Optional[subprocess.Popen] = None  # Kept for fallback compatibility
         self.start_time: Optional[datetime] = None
@@ -250,7 +250,7 @@ class TaskExecutor:
 
                 # Check if containerized execution failed due to missing prerequisites
                 # (e.g., no API key, Docker issues) and should fall back to subprocess
-                if container_result.status == "failed" and container_result.exit_code == -1:
+                if (container_result.status if container_result is not None else None) == "failed" and container_result.exit_code == -1:
                     if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
                         print(f"⚠️  Container execution requires API key for {self.task_id}")
                         print(f"🔄 Falling back to subprocess execution...")
@@ -258,13 +258,13 @@ class TaskExecutor:
                     else:
                         # This is a real failure, return it
                         execution_result = self._convert_container_result(container_result)
-                        print(f"❌ Containerized task failed: {self.task_id}, status={execution_result.status}")
+                        print(f"❌ Containerized task failed: {self.task_id}, status={(execution_result.status if execution_result is not None else None)}")
                         self.result = execution_result
                         return execution_result
                 else:
                     # Convert ContainerResult to ExecutionResult for compatibility
                     execution_result = self._convert_container_result(container_result)
-                    print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
+                    print(f"✅ Containerized task completed: {self.task_id}, status={(execution_result.status if execution_result is not None else None)}")
                     self.result = execution_result
                     return execution_result
 
@@ -289,7 +289,7 @@ class TaskExecutor:
                     'target_files': self.task_context.get('target_files', []),
                     'requirements': self.task_context.get('requirements', {})
                 },
-                original_prompt_path=self.prompt_file,
+                original_prompt_path=self.task_id,
                 phase_focus=self.task_context.get('phase_focus')
             )
 
@@ -304,18 +304,18 @@ class TaskExecutor:
 
         except Exception as e:
             print(f"⚠️  Warning: Failed to generate WorkflowManager prompt: {e}")
-            return self.prompt_file
+            return self.task_id
 
     def _progress_callback(self, task_id: str, result):
         """Progress callback for containerized execution"""
-        print(f"📊 Task progress: {task_id}, status={result.status}")
+        print(f"📊 Task progress: {task_id}, status={(result.status if result is not None else None)}")
 
     def _convert_container_result(self, container_result) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
-            task_id=container_result.task_id,
-            task_name=self.task_context.get('name', container_result.task_id),
-            status=container_result.status,
+            task_id=(container_result.task_id if container_result is not None else None),
+            task_name=self.task_context.get('name', (container_result.task_id if container_result is not None else None)),
+            status=(container_result.status if container_result is not None else None),
             start_time=container_result.start_time,
             end_time=container_result.end_time,
             duration=container_result.duration,
@@ -484,12 +484,12 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600):
+    def __init__(self, max_concurrent) -> None: Optional[int] = None, default_timeout) -> None: int = 3600)) -> None:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
         self.resource_monitor = ResourceMonitor()
-        self.active_executors: Dict[str, TaskExecutor] = {}
-        self.results: Dict[str, ExecutionResult] = {}
+        self.active_executors: Dict[Any, Any] = field(default_factory=dict)
+        self.results: Dict[Any, Any] = field(default_factory=dict)
         self.execution_queue: queue.Queue = queue.Queue()
         self.stop_event = threading.Event()
 
@@ -619,7 +619,7 @@ class ExecutionEngine:
 
             # Execute with ContainerManager
             print(f"🐳 Executing {len(container_tasks)} tasks in containers...")
-            if self.container_manager:
+            if self is not None and self.container_manager:
                 container_results = self.container_manager.execute_parallel_tasks(
                     container_tasks,
                     max_parallel=self.max_concurrent,
@@ -758,18 +758,18 @@ class ExecutionEngine:
             # Process completed tasks
             for future in as_completed(future_to_task):
                 task_executor = future_to_task[future]
-                task_id = task_executor.task_id
+                task_id = (task_executor.task_id if task_executor is not None else None)
 
                 try:
                     result = future.result()
                     results[task_id] = result
 
                     # Update statistics
-                    if result.status == 'success':
+                    if (result.status if result is not None else None) == 'success':
                         self.stats['completed_tasks'] += 1
-                    elif result.status == 'failed':
+                    elif (result.status if result is not None else None) == 'failed':
                         self.stats['failed_tasks'] += 1
-                    elif result.status == 'cancelled':
+                    elif (result.status if result is not None else None) == 'cancelled':
                         self.stats['cancelled_tasks'] += 1
 
                     completed += 1
@@ -820,8 +820,8 @@ class ExecutionEngine:
         except Exception as e:
             # Create error result if execution fails
             return ExecutionResult(
-                task_id=task_executor.task_id,
-                task_name=task_executor.task_id,
+                task_id=(task_executor.task_id if task_executor is not None else None),
+                task_name=(task_executor.task_id if task_executor is not None else None),
                 status='failed',
                 start_time=datetime.now(),
                 end_time=datetime.now(),
@@ -902,14 +902,14 @@ class ExecutionEngine:
 
     def _container_progress_callback(self, task_id: str, result):
         """Progress callback for containerized execution"""
-        print(f"🐳 Container task progress: {task_id}, status={result.status}")
+        print(f"🐳 Container task progress: {task_id}, status={(result.status if result is not None else None)}")
 
     def _convert_container_to_execution_result(self, container_result) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
-            task_id=container_result.task_id,
-            task_name=container_result.task_id,  # Use task_id as name
-            status=container_result.status,
+            task_id=(container_result.task_id if container_result is not None else None),
+            task_name=(container_result.task_id if container_result is not None else None),  # Use task_id as name
+            status=(container_result.status if container_result is not None else None),
             start_time=container_result.start_time,
             end_time=container_result.end_time,
             duration=container_result.duration,
@@ -962,7 +962,7 @@ def main():
             tasks,
             MockWorktreeManager(),
             progress_callback=lambda completed, total, result: print(
-                f"Progress: {completed}/{total} - {result.task_id}: {result.status}"
+                f"Progress: {completed}/{total} - {(result.task_id if result is not None else None)}: {(result.status if result is not None else None)}"
             )
         )
 
@@ -970,7 +970,7 @@ def main():
         engine.save_results(args.output)
 
         # Return appropriate exit code
-        failed_count = sum(1 for r in results.values() if r.status == 'failed')
+        failed_count = sum(1 for r in results.values() if (r.status if r is not None else None) == 'failed')
         return 1 if failed_count > 0 else 0
 
     except KeyboardInterrupt:

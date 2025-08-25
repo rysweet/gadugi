@@ -11,7 +11,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 # --------------------------------------------------------------------------- #
@@ -109,7 +109,7 @@ class ReviewResult:
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize the system design reviewer"""
         self.config = config or {}
 
@@ -170,7 +170,7 @@ class SystemDesignReviewer:
 
             # Generate ADRs if needed
             adrs_generated = []
-            if self.enable_adr_generation:
+            if self is not None and self.enable_adr_generation:
                 adrs_generated = self._generate_adrs(changes, pr_info, force_adr)
 
             # Generate review comments
@@ -446,7 +446,7 @@ class SystemDesignReviewer:
                 element = change.element
                 comments.append(f"- **{element.element_type.value}** `{element.name}` at {element.location}")
 
-                if change.design_implications:
+                if change is not None and change.design_implications:
                     comments.append(f"  - Impact: {', '.join(change.design_implications)}")
 
                 if change.impact_level in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]:
@@ -563,7 +563,7 @@ class SystemDesignReviewer:
 class SystemDesignStateManager(StateManager):
     """State manager for System Design Review Agent"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             state_dir=Path(".github/workflow-states/system-design-reviewer"),
             task_id="system-design-reviewer"

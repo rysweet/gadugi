@@ -28,7 +28,7 @@ class XPIAMiddleware:
     threat detection and content sanitization for all agent operations.
     """
 
-    def __init__(self, security_mode: SecurityMode = SecurityMode.BALANCED):
+    def __init__(self, security_mode) -> None: SecurityMode = SecurityMode.BALANCED)) -> None:
         self.defense_agent = XPIADefenseAgent(security_mode)
         self.logger = logging.getLogger(f"{__name__}.XPIAMiddleware")
 
@@ -299,7 +299,7 @@ class XPIAMiddleware:
         }
 
         # Add detailed information if threats were detected
-        if result.threats_detected:
+        if result is not None and result.threats_detected:
             response["threat_details"] = [
                 {
                     "pattern": threat["pattern_name"],
@@ -317,7 +317,7 @@ class XPIAMiddleware:
             response["reason"] = (
                 f"Blocked due to {result.threat_level.value} threat level"
             )
-        elif result.threats_detected:
+        elif result is not None and result.threats_detected:
             response["reason"] = (
                 f"Allowed with sanitization - {len(result.threats_detected)} threats mitigated"
             )

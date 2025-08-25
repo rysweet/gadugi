@@ -111,4 +111,5 @@ line-ending = "auto"
 dev = [
     "pre-commit>=4.3.0",
     "pyright>=1.1.403",
+    "ruff>=0.12.7",
 ]

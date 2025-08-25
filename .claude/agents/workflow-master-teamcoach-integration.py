@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, workflow_master, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, workflow_master, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize TeamCoach integration."""
         self.workflow_master = workflow_master
         self.config = config or {}
@@ -87,9 +87,9 @@ class TeamCoachIntegration:
         try:
             # Calculate current metrics
             completed_tasks = [
-                t for t in workflow_state.tasks if t.status == "completed"
+                t for t in workflow_state.tasks if (t.status if t is not None else None) == "completed"
             ]
-            failed_tasks = [t for t in workflow_state.tasks if t.status == "failed"]
+            failed_tasks = [t for t in workflow_state.tasks if (t.status if t is not None else None) == "failed"]
             total_tasks = len(workflow_state.tasks)
 
             # Task completion rate
@@ -167,7 +167,7 @@ class TeamCoachIntegration:
                 {
                     "timestamp": datetime.now(),
                     "metrics": metrics,
-                    "workflow_id": workflow_state.task_id,
+                    "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
                 }
             )
 
@@ -333,7 +333,7 @@ class TeamCoachIntegration:
             optimization_record = {
                 "timestamp": datetime.now(),
                 "optimization": asdict(optimization),
-                "workflow_id": workflow_state.task_id,
+                "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
                 "applied": True,
                 "result": "pending",
             }
@@ -374,7 +374,7 @@ class TeamCoachIntegration:
         independent_tasks = []
         for task in workflow_state.tasks:
             if not task.dependencies or all(
-                dep_task.status == "completed"
+                (dep_task.status if dep_task is not None else None) == "completed"
                 for dep_task in workflow_state.tasks
                 if dep_task.id in task.dependencies
             ):
@@ -765,7 +765,7 @@ def optimize_workflow_with_teamcoach(
 
     # Apply optimizations (if auto-apply is enabled)
     applied_optimizations = []
-    if integration.auto_apply_optimizations:
+    if integration is not None and integration.auto_apply_optimizations:
         for recommendation in recommendations[:3]:  # Apply top 3
             if integration.apply_optimization(recommendation, workflow_state):
                 applied_optimizations.append(recommendation)
