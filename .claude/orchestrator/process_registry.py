@@ -329,8 +329,7 @@ class ProcessRegistry:
 
         # Try to terminate the process if it's running
         if process is not None:
-
-            process.status == ProcessStatus.RUNNING and process.pid:
+            if process.status == ProcessStatus.RUNNING and process.pid:
             try:
                 proc = psutil.Process(process.pid)
                 proc.terminate()
