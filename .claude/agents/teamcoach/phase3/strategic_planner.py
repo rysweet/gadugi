@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import List, Dict, Any, Optional
 
 from ..phase1.capability_assessment import CapabilityAssessment
 from ..phase1.performance_analytics import AgentPerformanceAnalyzer
@@ -321,7 +321,7 @@ class StrategicPlanner:
 
         # Aggregate performance metrics
         for agent_id in agent_ids:
-            performance = self.performance_analyzer.get_agent_performance(agent_id)  # type: ignore
+            performance = self.performance_analyzer.get_agent_performance(agent_id)
             for metric, value in performance.metrics.items():
                 if metric not in state["performance_metrics"]:
                     state["performance_metrics"][metric] = []
@@ -338,7 +338,7 @@ class StrategicPlanner:
         skill_counts = {}
 
         for agent_id in agent_ids:
-            capabilities = self.capability_assessment.get_agent_capabilities(agent_id)  # type: ignore
+            capabilities = self.capability_assessment.get_agent_capabilities(agent_id)
             for skill, score in capabilities.domain_scores.items():
                 all_skills.add(skill)
                 if score > 0.7:  # Competent level
@@ -629,7 +629,7 @@ class StrategicPlanner:
         values = []
 
         for agent_id in agent_ids:
-            performance = self.performance_analyzer.get_agent_performance(agent_id)  # type: ignore
+            performance = self.performance_analyzer.get_agent_performance(agent_id)
             if metric in performance.metrics:
                 values.append(performance.metrics[metric])
 
@@ -646,7 +646,7 @@ class StrategicPlanner:
 
         # Aggregate from individual agents
         for agent_id in agent_ids:
-            performance = self.performance_analyzer.get_agent_performance(agent_id)  # type: ignore
+            performance = self.performance_analyzer.get_agent_performance(agent_id)
             if performance.success_rate:
                 metrics["success_rate"] = (
                     metrics["success_rate"] + performance.success_rate
@@ -659,7 +659,7 @@ class StrategicPlanner:
         capacity = {}
 
         for agent_id in agent_ids:
-            capabilities = self.capability_assessment.get_agent_capabilities(agent_id)  # type: ignore
+            capabilities = self.capability_assessment.get_agent_capabilities(agent_id)
             for skill, score in capabilities.domain_scores.items():
                 if score > 0.6:  # Capable enough to contribute
                     if skill not in capacity:
@@ -771,7 +771,7 @@ class StrategicPlanner:
         path = []
 
         # Get agent's current capabilities
-        capabilities = self.capability_assessment.get_agent_capabilities(agent_id)  # type: ignore
+        capabilities = self.capability_assessment.get_agent_capabilities(agent_id)
 
         # Identify skills to develop
         for skill, gap in skill_gaps.items():
@@ -845,7 +845,7 @@ class StrategicPlanner:
         }
 
         # Calculate training hours
-        for _agent_id, path in development_paths.items():
+        for agent_id, path in development_paths.items():
             for skill_item in path:
                 hours = skill_item["duration_weeks"] * 10  # 10 hours per week
                 investment["training_hours"] += hours

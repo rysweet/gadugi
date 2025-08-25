@@ -17,7 +17,7 @@ Key Features:
 import logging
 import itertools
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -60,7 +60,7 @@ class ProjectRequirements:
     )
 
     # Project constraints
-    timeline: Tuple[datetime, datetime]  # type: ignore
+    timeline: Tuple[datetime, datetime]
     max_team_size: int = 10
     min_team_size: int = 1
     budget_constraints: Optional[float] = None
@@ -318,7 +318,7 @@ class TeamCompositionOptimizer:
                     ):
                         composition_id = f"{project_requirements.project_id}_comp_{combinations_generated}"
 
-                        composition = TeamComposition(  # type: ignore
+                        composition = TeamComposition(
                             composition_id=composition_id,
                             project_id=project_requirements.project_id,
                             agents=list(agent_combination),

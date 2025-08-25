@@ -4,6 +4,7 @@ Tests for TeamCoach Phase 3: Conflict Resolver
 
 import unittest
 from datetime import datetime
+
 from ..phase3.conflict_resolver import (
     ConflictResolver,
     AgentConflict,
