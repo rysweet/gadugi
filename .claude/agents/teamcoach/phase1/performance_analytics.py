@@ -38,7 +38,7 @@ try:
 except ImportError:
     # Define minimal TaskMetrics if not available
     class TaskMetrics:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
 
@@ -174,8 +174,8 @@ class AgentPerformanceAnalyzer:
         )
 
         # Performance data cache
-        self.performance_cache: Dict[str, AgentPerformanceData] = {}
-        self.team_performance_cache: Dict[str, TeamPerformanceData] = {}
+        self.performance_cache: Dict[Any, Any] = field(default_factory=dict)
+        self.team_performance_cache: Dict[Any, Any] = field(default_factory=dict)
 
         # Analysis configuration
         self.analysis_config = {

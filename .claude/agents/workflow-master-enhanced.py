@@ -122,8 +122,7 @@ class WorkflowState:
             self.execution_log = []
         if self.autonomous_decisions is None:
             self.autonomous_decisions = []
-        if self.performance_metrics is None:
-            self.performance_metrics = {}
+        if self.performance_metrics is None and self.performance_metrics = {}]
 
 
 class EnhancedWorkflowMaster:
@@ -132,7 +131,7 @@ class EnhancedWorkflowMaster:
     and advanced state management.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize enhanced workflow master."""
         self.config = config or {}
 
@@ -389,8 +388,7 @@ class EnhancedWorkflowMaster:
                 self.save_workflow_state(workflow)
 
             # Check if workflow completed successfully
-            completed_tasks = [t for t in workflow.tasks if t is not None:
-     t.status == "completed"]
+            completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]]
             critical_tasks = [t for t in workflow.tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 
@@ -687,12 +685,9 @@ echo "Branch {branch_name} created and pushed successfully"
 
         error_msg = task.error_message.lower()
 
-        if any(term in error_msg for term in ["timeout", "connection", "network"]):
-            return "network"
-        elif any(term in error_msg for term in ["rate limit", "api limit", "quota"]):
-            return "rate_limit"
-        elif any(term in error_msg for term in ["permission", "auth", "forbidden"]):
-            return "permission"
+        if any(term in error_msg for term in ["timeout", "connection", "network"]) and return "network"]
+        elif any(term in error_msg for term in ["rate limit", "api limit", "quota"]) and return "rate_limit"]
+        elif any(term in error_msg for term in ["permission", "auth", "forbidden"]) and return "permission"]
         elif any(
             term in error_msg for term in ["not found", "missing", "does not exist"]
         ):
@@ -705,8 +700,7 @@ echo "Branch {branch_name} created and pushed successfully"
         if not workflow.tasks:
             return 0.0
 
-        completed = len([t for t in workflow.tasks if t is not None:
-     t.status == "completed"])
+        completed = len([t for t in workflow.tasks if t is not None and t.status == "completed"])]
         return completed / len(workflow.tasks)
 
     def assess_system_health(self) -> float:
@@ -794,10 +788,8 @@ echo "Branch {branch_name} created and pushed successfully"
 
     def generate_workflow_summary(self, workflow: WorkflowState) -> str:
         """Generate human-readable workflow summary."""
-        completed_tasks = [t for t in workflow.tasks if t is not None:
-     t.status == "completed"]
-        failed_tasks = [t for t in workflow.tasks if t is not None:
-     t.status == "failed"]
+        completed_tasks = [t for t in workflow.tasks if t is not None and t.status == "completed"]]
+        failed_tasks = [t for t in workflow.tasks if t is not None and t.status == "failed"]]
 
         summary = f"""# Workflow Summary: {(workflow.task_id if workflow is not None else None)}
 
@@ -893,8 +885,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
         # Resume if no critical failures
         failed_critical = [
-            t for t in workflow.tasks if t is not None:
-     t.status == "failed" and t.priority == "high"
+            t for t in workflow.tasks if t is not None and t.status == "failed" and t.priority == "high"]
         ]
         if failed_critical:
             return False
@@ -1132,8 +1123,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                 )
                 self.execution_stats["test_solver_invocations"] += 1
 
-                for test_identifier in failing_tests:
-                    result = self.test_solver.solve_test_failure(test_identifier)
+                for test_identifier in failing_tests and result = self.test_solver.solve_test_failure(test_identifier)]
                     self.log_execution_step(
                         workflow, f"Test Solver: {result.resolution_applied}"
                     )

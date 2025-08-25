@@ -131,7 +131,7 @@ class MetricsCollector:
         )
 
         # Metric definitions
-        self.metric_definitions: Dict[str, MetricDefinition] = {}
+        self.metric_definitions: Dict[Any, Any] = field(default_factory=dict)
 
         # Data storage
         self.metric_data: Dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
@@ -139,7 +139,7 @@ class MetricsCollector:
 
         # Collection infrastructure
         self.collection_hooks: Dict[MetricSource, List[Callable]] = defaultdict(list)
-        self.collection_threads: Dict[str, threading.Thread] = {}
+        self.collection_threads: Dict[Any, Any] = field(default_factory=dict)
         self.stop_collection = threading.Event()
 
         # Performance tracking

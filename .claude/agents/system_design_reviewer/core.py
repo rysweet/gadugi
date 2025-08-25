@@ -11,7 +11,7 @@ import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Set, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 # --------------------------------------------------------------------------- #
@@ -109,7 +109,7 @@ class ReviewResult:
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize the system design reviewer"""
         self.config = config or {}
 
@@ -563,7 +563,7 @@ class SystemDesignReviewer:
 class SystemDesignStateManager(StateManager):
     """State manager for System Design Review Agent"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             state_dir=Path(".github/workflow-states/system-design-reviewer"),
             task_id="system-design-reviewer"

@@ -7,7 +7,7 @@ import os
 import sys
 import logging
 from typing import List, Any, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 # Add shared modules to path
@@ -18,7 +18,7 @@ try:
     from interfaces import AgentConfig, OperationResult
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass
+    from dataclasses import dataclass, field
 
     @dataclass
     class OperationResult:
@@ -80,7 +80,7 @@ class TestAnalysis:
 class SharedTestInstructions:
     """Shared instruction framework for test agents."""
 
-    def __init__(self, config: Optional[AgentConfig] = None):
+    def __init__(self, config) -> None: Optional[AgentConfig] = None)) -> None:
         self.config = config or AgentConfig(
             agent_id="shared_test_instructions", name="Shared Test Instructions"
         )

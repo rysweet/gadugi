@@ -18,7 +18,7 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -38,17 +38,17 @@ except ImportError:
 
 # Import Enhanced Separation shared modules (fallback for development)
 class GitHubOperations:
-    def __init__(self, task_id=None): pass
+    def __init__(self, task_id=None) -> None: pass
 class StateManager:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 class CheckpointManager:
-    def __init__(self, state_manager): pass
+    def __init__(self, state_manager) -> None: pass
 class ErrorHandler:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 class CircuitBreaker:
-    def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
+    def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None: pass
 class TaskMetrics:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 
 # Configure logging
 logging.basicConfig(
@@ -111,7 +111,7 @@ class OrchestratorCoordinator:
     all existing orchestrator components to enable actual parallel execution.
     """
 
-    def __init__(self, config: OrchestrationConfig = None, project_root: str = "."):
+    def __init__(self, config: OrchestrationConfig = None, project_root: str = ".") -> None:
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()

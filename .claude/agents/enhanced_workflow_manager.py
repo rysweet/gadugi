@@ -27,7 +27,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 # WorkflowStage should be properly imported or defined
 from enum import Enum
@@ -55,7 +55,7 @@ except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
     class WorkflowReliabilityManager:
-        def __init__(self, config=None): pass
+        def __init__(self, config=None) -> None: pass
         def start_workflow_monitoring(self, workflow_id, context): return True
         def update_workflow_stage(self, workflow_id, stage, context=None): return True
         def handle_workflow_error(self, workflow_id, error, stage=None, context=None): return {}
@@ -99,7 +99,7 @@ class EnhancedWorkflowManager:
     robust error handling, monitoring, recovery, and persistence.
     """
 
-    def __init__(self, config: Optional[WorkflowConfiguration] = None,
+    def __init__(self, config) -> None: Optional[WorkflowConfiguration] = None,
                  project_root: str = ".", task_id: Optional[str] = None):
         """Initialize the enhanced workflow manager"""
         self.config = config or WorkflowConfiguration()
@@ -131,8 +131,8 @@ class EnhancedWorkflowManager:
 
         # Workflow state tracking
         self.current_phase: Optional[WorkflowStage] = None
-        self.workflow_context: Dict[str, Any] = {}
-        self.phase_checkpoints: List[str] = []
+        self.workflow_context: Dict[Any, Any] = field(default_factory=dict)
+        self.phase_checkpoints: List[Any] = field(default_factory=list)
 
         logger.info("Enhanced WorkflowManager initialized")
 

@@ -84,7 +84,7 @@ class ProcessRegistry:
     capabilities for the orchestrator system.
     """
 
-    def __init__(self, registry_dir: str = ".gadugi/monitoring", clean_start: bool = False):
+    def __init__(self, registry_dir) -> None: str = ".gadugi/monitoring", clean_start) -> None: bool = False)) -> None:
         """Initialize the process registry
 
         Args:
@@ -99,7 +99,7 @@ class ProcessRegistry:
         self.stats_file = self.registry_dir / "registry_stats.json"
 
         # In-memory process tracking
-        self.processes: Dict[str, ProcessInfo] = {}
+        self.processes: Dict[Any, Any] = field(default_factory=dict)
         self.heartbeat_interval = 30  # seconds
         self.heartbeat_timeout = 120  # seconds
 
@@ -187,8 +187,7 @@ class ProcessRegistry:
 
     def get_processes_by_status(self, status: ProcessStatus) -> List[ProcessInfo]:
         """Get all processes with specified status"""
-        return [p for p in self.processes.values() if p is not None:
-     p.status == status]
+        return [p for p in self.processes.values() if p is not None and p.status == status]
 
     def get_active_processes(self) -> List[ProcessInfo]:
         """Get all active (queued or running) processes"""
@@ -255,12 +254,10 @@ class ProcessRegistry:
         # Count by status
         status_counts = {}
         for status in ProcessStatus:
-            status_counts[status] = len([p for p in processes if p is not None:
-     p.status == status])
+            status_counts[status] = len([p for p in processes if p is not None and p.status == status])
 
         # Calculate average execution time for completed processes
-        completed_processes = [p for p in processes if p is not None:
-     p.status == ProcessStatus.COMPLETED]
+        completed_processes = [p for p in processes if p is not None and p.status == ProcessStatus.COMPLETED]
         avg_execution_time = None
         if completed_processes:
             execution_times = []
@@ -273,8 +270,7 @@ class ProcessRegistry:
                 avg_execution_time = sum(execution_times) / len(execution_times)
 
         # Calculate resource usage for running processes
-        running_processes = [p for p in processes if p is not None:
-     p.status == ProcessStatus.RUNNING]
+        running_processes = [p for p in processes if p is not None and p.status == ProcessStatus.RUNNING]
         total_cpu = 0.0
         total_memory = 0.0
 

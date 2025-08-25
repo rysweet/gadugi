@@ -17,7 +17,7 @@ import pytest
 from unittest.mock import MagicMock, Mock, call, patch
 
 # For type checking only
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from claude.shared.task_tracking import (
@@ -56,7 +56,7 @@ except ImportError as e:
     )
 
     from enum import Enum
-    from typing import ClassVar
+    from typing import Optional, ClassVar
 
     class TaskStatus(Enum):
         PENDING = "pending"
@@ -154,9 +154,9 @@ except ImportError as e:
             self.update_status(TaskStatus.COMPLETED)
 
     class TaskList:
-        def __init__(self):
-            self.tasks: List[Task] = []
-            self._task_dict: Dict[str, Task] = {}
+        def __init__(self) -> None:
+            self.tasks: List[Any] = field(default_factory=list)
+            self._task_dict: Dict[Any, Any] = field(default_factory=dict)
 
         def add_task(self, task: Task) -> None:
             # Raise TaskValidationError if task is invalid
@@ -223,7 +223,7 @@ except ImportError as e:
             return task_list
 
     class TodoWriteIntegration:
-        def __init__(self):
+        def __init__(self) -> None:
             self.current_task_list: Optional[TaskList] = None
             self.call_count: int = 0
             self.mock_api = Mock()
@@ -325,11 +325,11 @@ except ImportError as e:
             return stats
 
     class WorkflowPhaseTracker:
-        def __init__(self):
+        def __init__(self) -> None:
             self.workflow_id: str = str(uuid.uuid4())
             self.current_phase: Optional[str] = None
-            self.phase_history: List[Dict[str, Any]] = []
-            self.phase_start_times: Dict[str, datetime] = {}
+            self.phase_history: List[Any] = field(default_factory=list)
+            self.phase_start_times: Dict[Any, Any] = field(default_factory=dict)
 
         def start_phase(
             self, phase_name: str, description: Optional[str] = None
@@ -467,11 +467,11 @@ except ImportError as e:
             }
 
     class TaskMetrics:
-        def __init__(self):
+        def __init__(self) -> None:
             self.start_time: datetime = datetime.now()
-            self.task_completion_times: List[Dict[str, Any]] = []
-            self.status_change_count: Dict[str, int] = {}
-            self.task_status_history: List[Dict[str, Any]] = []
+            self.task_completion_times: List[Any] = field(default_factory=list)
+            self.status_change_count: Dict[Any, Any] = field(default_factory=dict)
+            self.task_status_history: List[Any] = field(default_factory=list)
             self.average_completion_time: Optional[float] = None
             self.throughput_per_hour: float = 0.0
             self.productivity_score: float = 0.0
@@ -503,7 +503,7 @@ except ImportError as e:
             )
 
         def _update_metrics(self) -> None:
-            if self.task_completion_times:
+            if self is not None and self.task_completion_times:
                 durations = [
                     record["duration_seconds"] for record in self.task_completion_times
                 ]
@@ -522,7 +522,7 @@ except ImportError as e:
 
             base_score = len(self.task_completion_times) * 10
             avg_time_bonus = 0
-            if self.average_completion_time:
+            if self is not None and self.average_completion_time:
                 if self.average_completion_time < 300:  # Less than 5 minutes
                     avg_time_bonus = 20
                 elif self.average_completion_time < 600:  # Less than 10 minutes

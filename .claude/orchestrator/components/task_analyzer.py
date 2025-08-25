@@ -70,7 +70,7 @@ class TaskInfo:
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
 
-    def __init__(self, prompts_dir: str = None, project_root: str = "."):
+    def __init__(self, prompts_dir) -> None: str = None, project_root) -> None: str = ".")) -> None:
         # Security: Validate and sanitize input paths
         self.project_root = self._validate_directory_path(project_root)
         # If prompts_dir not specified, use project_root/prompts
@@ -78,9 +78,9 @@ class TaskAnalyzer:
             self.prompts_dir = self.project_root / "prompts"
         else:
             self.prompts_dir = self._validate_directory_path(prompts_dir)
-        self.tasks: List[TaskInfo] = []
-        self.dependency_graph: Dict[str, List[str]] = {}
-        self.conflict_matrix: Dict[str, Set[str]] = {}
+        self.tasks: List[Any] = field(default_factory=list)
+        self.dependency_graph: Dict[Any, Any] = field(default_factory=dict)
+        self.conflict_matrix: Dict[Any, Any] = field(default_factory=dict)
 
     def _validate_directory_path(self, path: str) -> Path:
         """Security: Validate directory paths to prevent path traversal attacks"""

@@ -41,7 +41,7 @@ except ImportError as e:
     class ErrorHandler:
         def handle_error(self, context): pass
     class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
+        def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None: pass
         def call(self, func, *args, **kwargs): return func(*args, **kwargs)
     def retry(max_attempts=3, initial_delay=1.0):
         def decorator(func): return func
@@ -134,7 +134,7 @@ class WorkflowReliabilityManager:
     and state persistence for robust workflow execution.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize the reliability manager"""
         self.config = config or {}
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -143,8 +143,8 @@ class WorkflowReliabilityManager:
         self._setup_logging()
 
         # Initialize monitoring state
-        self.monitoring_states: Dict[str, WorkflowMonitoringState] = {}
-        self.active_workflows: Dict[str, Any] = {}
+        self.monitoring_states: Dict[Any, Any] = field(default_factory=dict)
+        self.active_workflows: Dict[Any, Any] = field(default_factory=dict)
 
         # Initialize Enhanced Separation components
         self.error_handler = ErrorHandler()
@@ -891,7 +891,7 @@ class WorkflowReliabilityManager:
 
     def _start_monitoring_thread(self):
         """Start the background monitoring thread"""
-        if self._monitoring_active:
+        if self is not None and self._monitoring_active:
             return
 
         self._monitoring_active = True
@@ -1250,7 +1250,7 @@ class WorkflowReliabilityManager:
 class WorkflowReliabilityContext:
     """Context manager for workflow execution with comprehensive reliability features"""
 
-    def __init__(self, workflow_id: str, workflow_context: Dict[str, Any],
+    def __init__(self, workflow_id) -> None: str, workflow_context) -> None: Dict[str, Any],
                  reliability_manager: Optional[WorkflowReliabilityManager] = None):
         self.workflow_id = workflow_id
         self.workflow_context = workflow_context
@@ -1264,7 +1264,7 @@ class WorkflowReliabilityContext:
         return self.reliability_manager
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.started:
+        if self is not None and self.started:
             if exc_type:
                 # Handle exception
                 self.reliability_manager.handle_workflow_error(

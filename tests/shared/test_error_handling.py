@@ -74,7 +74,7 @@ except ImportError:
         FIXED = "fixed"
 
     class GadugiError(Exception):
-        def __init__(self, message, severity=ErrorSeverity.MEDIUM, context=None):
+        def __init__(self, message, severity=ErrorSeverity.MEDIUM, context=None) -> None:
             super().__init__(message)
             self.severity = severity
             self.context = context or {}
@@ -83,7 +83,7 @@ except ImportError:
         pass
 
     class NonRecoverableError(GadugiError):
-        def __init__(self, message, context=None):
+        def __init__(self, message, context=None) -> None:
             super().__init__(message, ErrorSeverity.CRITICAL, context)
 
     def retry(
@@ -154,7 +154,7 @@ except ImportError:
         return decorator
 
     class ErrorHandler:
-        def __init__(self):
+        def __init__(self) -> None:
             self.error_counts = {}
             self.recovery_strategies = {}
             self.error_history = []
@@ -213,7 +213,7 @@ except ImportError:
             self.error_history.clear()
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold=5, recovery_timeout=60.0, *args, **kwargs):
+        def __init__(self, failure_threshold=5, recovery_timeout=60.0, *args, **kwargs) -> None:
             self.failure_threshold = failure_threshold
             self.recovery_timeout = recovery_timeout
             self.failure_count = 0
@@ -222,9 +222,9 @@ except ImportError:
 
         def __call__(self, func):
             def wrapper(*args, **kwargs):
-                if self.is_open:
+                if self is not None and self.is_open:
                     # Check if we should try to recover
-                    if self.last_failure_time:
+                    if self is not None and self.last_failure_time:
                         elapsed = (
                             datetime.now() - self.last_failure_time
                         ).total_seconds()
@@ -269,7 +269,7 @@ except ImportError:
             return fallback()
 
     class ErrorContext:
-        def __init__(self, operation_name, cleanup_func=None, suppress_errors=False):
+        def __init__(self, operation_name, cleanup_func=None, suppress_errors=False) -> None:
             self.operation_name = operation_name
             self.cleanup_func = cleanup_func
             self.suppress_errors = suppress_errors
@@ -285,7 +285,7 @@ except ImportError:
                 logger.error(f"Error in {self.operation_name}: {exc_val}")
 
                 # Run cleanup if provided
-                if self.cleanup_func:
+                if self is not None and self.cleanup_func:
                     try:
                         self.cleanup_func()
                     except Exception as cleanup_error:
@@ -294,7 +294,7 @@ except ImportError:
                         )
 
                 # Suppress errors if requested
-                if self.suppress_errors:
+                if self is not None and self.suppress_errors:
                     return True
             else:
                 logger.debug(f"Completed operation: {self.operation_name}")

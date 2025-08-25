@@ -26,7 +26,7 @@ import os
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, AsyncGenerator, Callable
@@ -102,11 +102,11 @@ class ContainerResult:
 class ContainerOutputStreamer:
     """Streams container output in real-time"""
 
-    def __init__(self, container_id: str, task_id: str):
+    def __init__(self, container_id) -> None: str, task_id) -> None: str)) -> None:
         self.container_id = container_id
         self.task_id = task_id
         self.streaming = False
-        self.clients: List[websockets.WebSocketServerProtocol] = []
+        self.clients: List[Any] = field(default_factory=list)
 
     async def start_streaming(self, container):
         """Start streaming container output"""
@@ -164,11 +164,11 @@ class ContainerOutputStreamer:
 class ContainerManager:
     """Manages Docker container execution for orchestrator tasks"""
 
-    def __init__(self, config: ContainerConfig = None):
+    def __init__(self, config) -> None: ContainerConfig = None)) -> None:
         self.config = config or ContainerConfig()
         self.docker_client = None
-        self.active_containers: Dict[str, Any] = {}
-        self.output_streamers: Dict[str, ContainerOutputStreamer] = {}
+        self.active_containers: Dict[Any, Any] = field(default_factory=dict)
+        self.output_streamers: Dict[Any, Any] = field(default_factory=dict)
         self._initialize_docker()
 
     def _initialize_docker(self):

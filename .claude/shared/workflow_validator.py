@@ -120,7 +120,7 @@ class WorkflowValidator:
     quality, consistency, and integrity of workflow execution.
     """
 
-    def __init__(self, validation_level: ValidationLevel = ValidationLevel.STANDARD):
+    def __init__(self, validation_level) -> None: ValidationLevel = ValidationLevel.STANDARD)) -> None:
         """Initialize validator with specified validation level"""
 
         self.validation_level = validation_level
@@ -930,11 +930,11 @@ if __name__ == "__main__":
         for result in report.results:
             if not result.passed:
                 print(f"  • {result.rule_name}: {result.message}")
-                if result.suggestions:
+                if result is not None and result.suggestions:
                     for suggestion in result.suggestions:
                         print(f"    → {suggestion}")
 
-    if report.recommendations:
+    if report is not None and report.recommendations:
         print(f"\n💡 Recommendations:")
         for rec in report.recommendations:
             print(f"  • {rec}")

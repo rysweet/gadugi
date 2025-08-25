@@ -147,7 +147,7 @@ class ReportingSystem:
         )
 
         # Report cache
-        self.report_cache: Dict[str, GeneratedReport] = {}
+        self.report_cache: Dict[Any, Any] = field(default_factory=dict)
 
         # Report templates
         self.report_templates = self._initialize_report_templates()

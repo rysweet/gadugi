@@ -6,7 +6,7 @@ and enhance overall productivity.
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional, Tuple
@@ -106,10 +106,10 @@ class WorkflowOptimizer:
     - Implementation guidance
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the workflow optimizer."""
-        self.workflow_patterns: Dict[str, Dict[str, Any]] = {}
-        self.optimization_history: List[Tuple[str, WorkflowOptimization, float]] = []
+        self.workflow_patterns: Dict[Any, Any] = field(default_factory=dict)
+        self.optimization_history: List[Any] = field(default_factory=list)
 
         # Thresholds for bottleneck detection
         self.bottleneck_thresholds = {

@@ -10,13 +10,13 @@ import subprocess
 # Import the module we're testing (will be implemented after tests)
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Optional, Any, Dict, List
 
 import pytest
 from unittest.mock import Mock, call, patch
 
 # For type checking only
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_operations import GitHubError, GitHubOperations, RateLimitError
@@ -57,13 +57,13 @@ except ImportError:
     class RateLimitError(GitHubError):
         """Raised when hitting GitHub API rate limits."""
 
-        def __init__(self, message: str, reset_time: Optional[int] = None):
+        def __init__(self, message) -> None: str, reset_time) -> None: Optional[int] = None)) -> None:
             super().__init__(message)
             self.reset_time = reset_time
 
         def get_wait_time(self) -> int:
             """Get the time to wait before retrying."""
-            if self.reset_time:
+            if self is not None and self.reset_time:
                 return max(0, self.reset_time - int(time.time()))
             return 60  # Default wait time
 
@@ -89,7 +89,7 @@ except ImportError:
             """Mock GitHub CLI command execution."""
             # Add repo argument if specified
             full_command = ["gh"] + command
-            if self.repo:
+            if self is not None and self.repo:
                 full_command.extend(["--repo", self.repo])
 
             try:

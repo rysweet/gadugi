@@ -31,7 +31,7 @@ from typing import Dict, List
 class BaseService(ABC):
     """Abstract base class for services"""
 
-    def __init__(self, name: str):
+    def __init__(self, name) -> None: str)) -> None:
         self.name = name
         self._initialized = False
 
@@ -47,7 +47,7 @@ class BaseService(ABC):
 class ConcreteService(BaseService):
     """Concrete implementation of BaseService"""
 
-    def __init__(self, name: str, config: Dict):
+    def __init__(self, name) -> None: str, config) -> None: Dict)) -> None:
         super().__init__(name)
         self.config = config
 
@@ -86,7 +86,7 @@ from typing import Dict, List
 class BaseService(ABC):
     """Abstract base class for services"""
 
-    def __init__(self, name: str, version: str = "1.0"):  # Modified constructor
+    def __init__(self, name) -> None: str, version) -> None: str = "1.0")) -> None:  # Modified constructor
         self.name = name
         self.version = version  # New attribute
         self._initialized = False
@@ -108,7 +108,7 @@ class BaseService(ABC):
 class ConcreteService(BaseService):
     """Concrete implementation of BaseService"""
 
-    def __init__(self, name: str, config: Dict, version: str = "1.0"):
+    def __init__(self, name) -> None: str, config) -> None: Dict, version) -> None: str = "1.0")) -> None:
         super().__init__(name, version)  # Updated super call
         self.config = config
 

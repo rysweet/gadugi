@@ -8,7 +8,7 @@ across multiple dimensions including conflicts, CI status, reviews, and metadata
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -139,7 +139,7 @@ class ReadinessAssessor:
     with actionable insights for automated resolution.
     """
 
-    def __init__(self, github_ops):
+    def __init__(self, github_ops) -> None:
         """Initialize readiness assessor."""
         self.github_ops = github_ops
 

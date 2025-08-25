@@ -59,7 +59,7 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, id: str, content: str = None, status = TaskStatus.PENDING,
+    def __init__(self, id) -> None: str, content) -> None: str = None, status = TaskStatus.PENDING,
                  priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
         """Initialize task with compatibility for title parameter."""
         self.id = id
@@ -189,8 +189,8 @@ class Task:
 class TaskList:
     """Manages a collection of tasks."""
 
-    def __init__(self):
-        self.tasks: Dict[str, Task] = {}
+    def __init__(self) -> None:
+        self.tasks: Dict[Any, Any] = field(default_factory=dict)
         self.created_at = datetime.now()
 
     def add_task(self, task: Task) -> None:
@@ -286,11 +286,11 @@ def claude_function_call(function_name: str, parameters: Dict[str, Any]) -> Dict
 class TodoWriteIntegration:
     """Integration with Claude Code's TodoWrite function."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.current_task_list: Optional[TaskList] = None
         self.call_count = 0
         self.last_update_time: Optional[datetime] = None
-        self.call_history: List[Dict[str, Any]] = []
+        self.call_history: List[Any] = field(default_factory=list)
 
     def submit_task_list(self, task_list: TaskList) -> Dict[str, Any]:
         """Submit a complete task list via TodoWrite."""
@@ -396,15 +396,15 @@ class TodoWriteIntegration:
 class WorkflowPhaseTracker:
     """Tracks workflow phases and their associated tasks."""
 
-    def __init__(self, workflow_id: Optional[str] = None):
+    def __init__(self, workflow_id) -> None: Optional[str] = None)) -> None:
         self.workflow_id = workflow_id or str(uuid.uuid4())
         self.current_phase: Optional[str] = None
-        self.phase_history: List[Dict[str, Any]] = []
+        self.phase_history: List[Any] = field(default_factory=list)
         self.created_at = datetime.now()
 
     def start_phase(self, phase_name: str, description: str = "") -> None:
         """Start a new workflow phase."""
-        if self.current_phase:
+        if self is not None and self.current_phase:
             logger.warning(f"Starting new phase '{phase_name}' while '{self.current_phase}' is still active")
 
         self.current_phase = phase_name
@@ -533,11 +533,11 @@ class WorkflowPhaseTracker:
 class TaskMetrics:
     """Collects and analyzes task performance metrics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.start_time = datetime.now()
-        self.task_completion_times: List[Dict[str, Any]] = []
-        self.status_change_count: Dict[str, int] = {}
-        self.priority_distribution: Dict[str, int] = {}
+        self.task_completion_times: List[Any] = field(default_factory=list)
+        self.status_change_count: Dict[Any, Any] = field(default_factory=dict)
+        self.priority_distribution: Dict[Any, Any] = field(default_factory=dict)
 
     def record_task_completion(self, task: Task) -> None:
         """Record task completion time."""
@@ -650,7 +650,7 @@ class TaskMetrics:
 class TaskTracker:
     """Main task tracking coordinator that integrates all components."""
 
-    def __init__(self, workflow_id: Optional[str] = None):
+    def __init__(self, workflow_id) -> None: Optional[str] = None)) -> None:
         self.task_list = TaskList()
         self.todowrite = TodoWriteIntegration()
         self.phase_tracker = WorkflowPhaseTracker(workflow_id)

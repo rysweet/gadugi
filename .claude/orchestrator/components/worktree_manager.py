@@ -10,7 +10,7 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -30,10 +30,10 @@ class WorktreeInfo:
 class WorktreeManager:
     """Manages git worktrees for parallel task execution"""
 
-    def __init__(self, project_root: str = ".", worktrees_dir: str = ".worktrees"):
+    def __init__(self, project_root) -> None: str = ".", worktrees_dir) -> None: str = ".worktrees")) -> None:
         self.project_root = Path(project_root).resolve()
         self.worktrees_dir = self.project_root / worktrees_dir
-        self.worktrees: Dict[str, WorktreeInfo] = {}
+        self.worktrees: Dict[Any, Any] = field(default_factory=dict)
         self.state_file = self.project_root / ".claude" / "orchestrator" / "worktree_state.json"
 
         # Ensure directories exist

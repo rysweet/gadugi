@@ -104,7 +104,7 @@ class TaskPatternRecognitionSystem:
     5. Performance pattern prediction
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patterns = self._initialize_pattern_library()
         self.semantic_vectors = self._initialize_semantic_vectors()
         self.historical_data = self._initialize_historical_data()

@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, workflow_master, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, workflow_master, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """Initialize TeamCoach integration."""
         self.workflow_master = workflow_master
         self.config = config or {}

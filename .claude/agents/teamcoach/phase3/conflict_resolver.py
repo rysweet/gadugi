@@ -6,7 +6,7 @@ task overlap, coordination failures, and capability mismatches.
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional, Set, Tuple
@@ -98,11 +98,11 @@ class ConflictResolver:
     - Escalation management
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the conflict resolver."""
-        self.active_conflicts: Dict[str, AgentConflict] = {}
-        self.resolved_conflicts: List[Tuple[AgentConflict, ConflictResolution]] = []
-        self.conflict_patterns: Dict[str, int] = {}
+        self.active_conflicts: Dict[Any, Any] = field(default_factory=dict)
+        self.resolved_conflicts: List[Any] = field(default_factory=list)
+        self.conflict_patterns: Dict[Any, Any] = field(default_factory=dict)
 
         # Resolution thresholds
         self.resolution_timeouts = {
@@ -283,7 +283,7 @@ class ConflictResolver:
         conflicts = []
 
         # Track resource usage
-        resource_usage: Dict[str, List[str]] = {}
+        resource_usage: Dict[Any, Any] = field(default_factory=dict)
 
         for agent_id, state in agent_states.items():
             if "resources" in state:
@@ -327,7 +327,7 @@ class ConflictResolver:
         conflicts = []
 
         # Track task assignments
-        task_assignments: Dict[str, List[str]] = {}
+        task_assignments: Dict[Any, Any] = field(default_factory=dict)
 
         for agent_id, state in agent_states.items():
             if "assigned_tasks" in state:
@@ -442,7 +442,7 @@ class ConflictResolver:
         conflicts = []
 
         # Build dependency graph
-        dependencies: Dict[str, Set[str]] = {}
+        dependencies: Dict[Any, Any] = field(default_factory=dict)
 
         for agent_id, state in agent_states.items():
             if "waiting_for" in state:

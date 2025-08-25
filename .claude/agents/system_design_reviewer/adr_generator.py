@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .ast_parser import ArchitecturalChange, ImpactLevel, ChangeType, ElementType
 
@@ -35,7 +35,7 @@ class ADRData:
 class ADRGenerator:
     """Generates Architecture Decision Records for significant changes"""
 
-    def __init__(self, adr_dir: str = "docs/adr"):
+    def __init__(self, adr_dir) -> None: str = "docs/adr")) -> None:
         self.adr_dir = Path(adr_dir)
         self.adr_dir.mkdir(parents=True, exist_ok=True)
 

@@ -74,7 +74,7 @@ This is a simple task to test hook execution.
             print("⚠️  No TeamCoach references found in stdout")
 
         # Check stderr for any hook-related messages
-        if result.stderr:
+        if result is not None and result.stderr:
             print(f"\n⚠️  Stderr output: {result.stderr[:200]}...")
 
         # Check for hook execution indicators

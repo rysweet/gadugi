@@ -8,7 +8,7 @@ including WorkflowMaster for complex resolutions and code-reviewer for AI review
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -70,13 +70,13 @@ class DelegationCoordinator:
     and delegating to specialized agents like WorkflowMaster and code-reviewer.
     """
 
-    def __init__(self, github_ops, auto_approve: bool = False):
+    def __init__(self, github_ops, auto_approve) -> None: bool = False)) -> None:
         """Initialize delegation coordinator."""
         self.github_ops = github_ops
         self.auto_approve = auto_approve
 
         # Track active delegations
-        self.active_delegations: Dict[str, DelegationTask] = {}
+        self.active_delegations: Dict[Any, Any] = field(default_factory=dict)
 
         # Configuration
         self.config = {

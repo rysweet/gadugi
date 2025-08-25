@@ -20,7 +20,7 @@ import uuid
 class StateError(Exception):
     """Base exception for state management operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict[str, Any]):
+    def __init__(self, message) -> None: str, operation) -> None: str, context) -> None: Dict[str, Any])) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -29,7 +29,7 @@ class StateError(Exception):
 class StateValidationError(StateError):
     """Exception for state validation errors."""
 
-    def __init__(self, message: str, validation_errors: List[str]):
+    def __init__(self, message) -> None: str, validation_errors) -> None: List[str])) -> None:
         super().__init__(message, 'validation', {})
         self.validation_errors = validation_errors
 
@@ -91,7 +91,7 @@ class TaskState:
     context: Dict[str, Any] = field(default_factory=dict)
     error_info: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, task_id: str, prompt_file: str, status: str = "pending",
+    def __init__(self, task_id) -> None: str, prompt_file) -> None: str, status) -> None: str = "pending",
                  phase: Optional[WorkflowPhase] = None, **kwargs):
         """Initialize TaskState with compatibility for phase parameter."""
         self.task_id = task_id
@@ -193,7 +193,7 @@ class StateManager:
     Handles state persistence, retrieval, and lifecycle management.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config) -> None: Optional[Dict[str, Any]] = None)) -> None:
         """
         Initialize StateManager.
 
@@ -645,7 +645,7 @@ class CheckpointManager:
     Provides atomic checkpoint creation and restoration.
     """
 
-    def __init__(self, config: Optional[Union[Dict[str, Any], 'StateManager']] = None):
+    def __init__(self, config) -> None: Optional[Union[Dict[str, Any], 'StateManager']] = None)) -> None:
         """
         Initialize CheckpointManager.
 
@@ -661,7 +661,7 @@ class CheckpointManager:
             self.config = config or {}
 
         # Use default values when StateManager is passed instead of config
-        if self.state_manager:
+        if self is not None and self.state_manager:
             self.checkpoint_dir = Path('.github/workflow-checkpoints')
             self.max_checkpoints_per_task = 10
             self.compression_enabled = False
@@ -698,7 +698,7 @@ class CheckpointManager:
                 'state': state.to_dict()
             }
 
-            if self.compression_enabled:
+            if self is not None and self.compression_enabled:
                 checkpoint_file = task_checkpoint_dir / f'{checkpoint_id}.json.gz'
                 with gzip.open(checkpoint_file, 'wt') as f:
                     json.dump(checkpoint_data, f, indent=2)

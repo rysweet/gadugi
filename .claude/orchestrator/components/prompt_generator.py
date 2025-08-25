@@ -7,7 +7,7 @@ This component addresses the critical issue where WorkflowManagers were receivin
 generic prompts instead of implementation-specific instructions.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -27,7 +27,7 @@ class PromptContext:
 class PromptGenerator:
     """Generates phase-specific prompts for WorkflowManager execution"""
 
-    def __init__(self, project_root: str = "."):
+    def __init__(self, project_root) -> None: str = ".")) -> None:
         self.project_root = Path(project_root).resolve()
         self.templates_dir = self.project_root / ".claude" / "orchestrator" / "templates"
         self.templates_dir.mkdir(parents=True, exist_ok=True)

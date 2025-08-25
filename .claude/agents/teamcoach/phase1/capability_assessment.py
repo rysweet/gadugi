@@ -41,7 +41,7 @@ try:
 except ImportError:
 
     class TaskMetrics:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
 
@@ -175,10 +175,10 @@ class CapabilityAssessment:
         )
 
         # Capability profiles cache
-        self.capability_profiles: Dict[str, AgentCapabilityProfile] = {}
+        self.capability_profiles: Dict[Any, Any] = field(default_factory=dict)
 
         # Task capability requirements database
-        self.task_requirements: Dict[str, TaskCapabilityRequirement] = {}
+        self.task_requirements: Dict[Any, Any] = field(default_factory=dict)
 
         # Assessment configuration
         self.assessment_config = {

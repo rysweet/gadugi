@@ -188,7 +188,7 @@ class TeamCompositionOptimizer:
         }
 
         # Agent profiles cache
-        self.agent_profiles_cache: Dict[str, AgentCapabilityProfile] = {}
+        self.agent_profiles_cache: Dict[Any, Any] = field(default_factory=dict)
 
         self.logger.info("TeamCompositionOptimizer initialized")
 

@@ -14,7 +14,7 @@ import queue
 
 
 class SimpleOrchestrator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.active_processes = {}
         self.completed_tasks = []
 

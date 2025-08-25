@@ -40,7 +40,7 @@ try:
 except ImportError:
 
     class TaskMetrics:
-        def __init__(self, *args, **kwargs):
+        def __init__(self, *args, **kwargs) -> None:
             pass
 
 
@@ -243,8 +243,8 @@ class TaskAgentMatcher:
         )
 
         # Agent profiles cache
-        self.agent_profiles_cache: Dict[str, AgentCapabilityProfile] = {}
-        self.agent_availability_cache: Dict[str, AgentAvailability] = {}
+        self.agent_profiles_cache: Dict[Any, Any] = field(default_factory=dict)
+        self.agent_availability_cache: Dict[Any, Any] = field(default_factory=dict)
 
         # Matching configuration
         self.matching_config = {

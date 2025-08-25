@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -126,7 +126,7 @@ class GitHubActionsIntegration:
     - Workflow artifact management
     """
 
-    def __init__(self, pr_backlog_manager):
+    def __init__(self, pr_backlog_manager) -> None:
         """Initialize GitHub Actions integration."""
         self.pr_backlog_manager = pr_backlog_manager
         self.github_context = GitHubContext.from_environment()

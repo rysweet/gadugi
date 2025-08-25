@@ -95,7 +95,7 @@ class TaskPatternClassifier:
     predict complexity, and suggest optimization strategies.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.keyword_patterns = self._initialize_keyword_patterns()
         self.complexity_indicators = self._initialize_complexity_indicators()
         self.pattern_library = self._initialize_pattern_library()

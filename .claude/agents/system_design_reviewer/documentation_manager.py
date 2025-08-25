@@ -9,7 +9,7 @@ import os
 import re
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel
 
@@ -27,7 +27,7 @@ class DocumentationUpdate:
 class DocumentationManager:
     """Manages automated updates to architecture documentation"""
 
-    def __init__(self, architecture_file: str = "ARCHITECTURE.md"):
+    def __init__(self, architecture_file) -> None: str = "ARCHITECTURE.md")) -> None:
         self.architecture_file = architecture_file
         self.template_sections = {
             "system_overview": self._generate_system_overview,

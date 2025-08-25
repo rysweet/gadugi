@@ -10,7 +10,7 @@ import sys
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 # Add shared modules to path for import resolution
@@ -34,19 +34,19 @@ except ImportError as e:
 
     # Fallback definitions for development/testing
     class GitHubOperations:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class StateManager:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class TaskTracker:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs) -> None:
             pass
 
     class AgentConfig:
-        def __init__(self, agent_id: str, name: str, **kwargs):
+        def __init__(self, agent_id) -> None: str, name) -> None: str, **kwargs)) -> None:
             self.agent_id = agent_id
             self.name = name
 
@@ -69,7 +69,7 @@ except ImportError as e:
             self.severity = severity
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold: int, recovery_timeout: float):
+        def __init__(self, failure_threshold) -> None: int, recovery_timeout) -> None: float)) -> None:
             pass
 
     def retry_with_backoff(max_attempts: int = 3, strategy=None):

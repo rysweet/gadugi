@@ -6,7 +6,7 @@ capacity planning, skill development roadmaps, and team evolution strategies.
 """
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Dict, Any, Optional

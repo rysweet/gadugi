@@ -98,10 +98,10 @@ class SystemResources:
 class ResourceMonitor:
     """Monitors system resources during execution"""
 
-    def __init__(self, monitoring_interval: float = 1.0):
+    def __init__(self, monitoring_interval) -> None: float = 1.0)) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
-        self.resource_history: List[SystemResources] = []
+        self.resource_history: List[Any] = field(default_factory=list)
         self.monitor_thread: Optional[threading.Thread] = None
 
     def start_monitoring(self):
@@ -193,7 +193,7 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
 
-    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict] = None):
+    def __init__(self, task_id) -> None: str, worktree_path) -> None: Path, prompt_file) -> None: str, task_context) -> None: Optional[Dict] = None)) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
         self.task_id = prompt_file
@@ -484,12 +484,12 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600):
+    def __init__(self, max_concurrent) -> None: Optional[int] = None, default_timeout) -> None: int = 3600)) -> None:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
         self.resource_monitor = ResourceMonitor()
-        self.active_executors: Dict[str, TaskExecutor] = {}
-        self.results: Dict[str, ExecutionResult] = {}
+        self.active_executors: Dict[Any, Any] = field(default_factory=dict)
+        self.results: Dict[Any, Any] = field(default_factory=dict)
         self.execution_queue: queue.Queue = queue.Queue()
         self.stop_event = threading.Event()
 

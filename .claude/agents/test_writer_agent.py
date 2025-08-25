@@ -9,7 +9,7 @@ import ast
 import logging
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 # Add shared modules to path
@@ -20,7 +20,7 @@ try:
     from interfaces import AgentConfig, OperationResult
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass
+    from dataclasses import dataclass, field
 
     @dataclass
     class OperationResult:
@@ -34,7 +34,7 @@ except ImportError:
         name: str
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0):
+        def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None:
             pass
 
         def __call__(self, func):
@@ -128,7 +128,7 @@ class TestWriterAgent:
     Follows shared test instruction framework and supports TDD practices.
     """
 
-    def __init__(self, config: Optional[AgentConfig] = None):
+    def __init__(self, config) -> None: Optional[AgentConfig] = None)) -> None:
         self.config = config or AgentConfig(
             agent_id="test_writer_agent", name="Test Writer Agent"
         )

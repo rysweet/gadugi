@@ -20,7 +20,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum, auto
 
 # Import workflow engine components
@@ -63,7 +63,7 @@ class PhaseEnforcer:
     (especially Phase 9 and 10) are executed without manual intervention.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the phase enforcer with default rules"""
 
         # Default enforcement rules for critical phases
@@ -243,7 +243,7 @@ class PhaseEnforcer:
                 results[phase.name] = result
 
                 # If phase succeeded, mark it as completed for dependent phases
-                if result.success:
+                if result is not None and result.success:
                     workflow_state.completed_phases.append(phase)
                 else:
                     # If phase failed, don't continue with dependent phases
@@ -524,7 +524,7 @@ Thank you for the review feedback. The concerns raised have been noted and will 
             'circuit_breaker_state': self.circuit_breaker_state.copy()
         }
 
-        if self.enforcement_log:
+        if self is not None and self.enforcement_log:
             successful = sum(1 for entry in self.enforcement_log if entry['success'])
             stats['success_rate'] = successful / len(self.enforcement_log)
 

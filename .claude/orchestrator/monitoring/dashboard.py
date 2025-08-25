@@ -50,13 +50,13 @@ logger = logging.getLogger(__name__)
 class OrchestrationMonitor:
     """Monitors and tracks orchestrator container execution"""
 
-    def __init__(self, monitoring_dir: str = "./monitoring"):
+    def __init__(self, monitoring_dir) -> None: str = "./monitoring")) -> None:
         self.monitoring_dir = Path(monitoring_dir)
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
 
         self.websocket_clients: Set[WebSocketServerProtocol] = set()
         self.docker_client = None
-        self.active_containers: Dict[str, Dict] = {}
+        self.active_containers: Dict[Any, Any] = field(default_factory=dict)
         self.monitoring = False
 
         # Initialize Docker client

@@ -47,16 +47,16 @@ spec.loader.exec_module(prompt_generator_module)
 
 # Create proper mock classes instead of MagicMock to avoid InvalidSpecError
 class MockContainerManager:
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
 
 class MockContainerConfig:
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 class MockContainerResult:
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.task_id = kwargs.get('task_id', '')
         self.task_id = kwargs.get('status', 'success')
         self.start_time = kwargs.get('start_time')
