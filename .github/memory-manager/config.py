@@ -6,15 +6,15 @@ This module handles configuration for the Memory.md to GitHub Issues integration
 including sync policies, pruning rules, and operational parameters.
 """
 
-import json
 import os
 from dataclasses import asdict, dataclass, field
-from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import yaml
-from sync_engine import ConflictResolution, SyncDirection
+
+# Import enums to avoid circular imports
+from enums import SyncDirection, ConflictResolution
 
 
 @dataclass
@@ -284,7 +284,7 @@ class ConfigManager:
         ".memory-manager.yml",
     ]
 
-    def __init__(self, repo_path: str = None, config_path: str = None):
+    def __init__(self, repo_path: Optional[str] = None, config_path: Optional[str] = None):
         """Initialize configuration manager"""
         self.repo_path = Path(repo_path or os.getcwd())
         self.config_path = config_path

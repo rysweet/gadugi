@@ -8,10 +8,10 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel
+from .ast_parser import ArchitecturalChange, ElementType, ImpactLevel
 
 
 @dataclass

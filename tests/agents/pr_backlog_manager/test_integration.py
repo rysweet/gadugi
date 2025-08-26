@@ -42,9 +42,7 @@ sys.path.insert(0, shared_path)
 from .test_stubs import (
     PRBacklogManager,
     PRStatus,
-    ReadinessCriteria,
     ReadinessAssessor,
-    ConflictComplexity,
     DelegationCoordinator,
     DelegationType,
     DelegationStatus,
@@ -328,7 +326,7 @@ class TestComponentIntegration:
         mock_github_ops.add_pr_labels.return_value = None
         mock_github_ops.add_pr_comment.return_value = None
 
-        coordinator = DelegationCoordinator(mock_github_ops, auto_approve=False)
+        coordinator = DelegationCoordinator(auto_approve=False)
 
         blocking_issues = [
             "PR has merge conflicts that need resolution",
@@ -519,7 +517,7 @@ class TestErrorScenarios:
         mock_github_ops = Mock()
         mock_github_ops.add_pr_comment.side_effect = Exception("Comment API error")
 
-        coordinator = DelegationCoordinator(mock_github_ops, auto_approve=False)
+        coordinator = DelegationCoordinator(auto_approve=False)
 
         blocking_issues = ["PR has merge conflicts"]
         pr_context = {"repository": "user/repo", "title": "test"}

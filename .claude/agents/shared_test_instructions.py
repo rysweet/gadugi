@@ -14,8 +14,8 @@ from enum import Enum
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
-    from utils.error_handling import ErrorHandler
-    from interfaces import AgentConfig, OperationResult
+    from ..shared.utils.error_handling import ErrorHandler
+    from ..shared.interfaces import AgentConfig, OperationResult
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass, field

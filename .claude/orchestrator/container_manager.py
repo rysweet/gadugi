@@ -25,15 +25,15 @@ import logging
 import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Callable
 import uuid
 
 try:
-    import docker
-    from docker.errors import DockerException, ImageNotFound
+    import docker  # type: ignore[import]
+    from docker.errors import DockerException, ImageNotFound  # type: ignore[import]
     docker_available = True
 except ImportError:
     logging.warning("Docker SDK not available. Install with: pip install docker")
@@ -41,7 +41,7 @@ except ImportError:
     # Fallback classes
     class DockerException(Exception): pass
     class ImageNotFound(Exception): pass
-    docker = None
+    docker = None  # type: ignore[assignment]
 
 websocket_available = False
 try:
@@ -104,7 +104,7 @@ class ContainerOutputStreamer:
         self.container_id = container_id
         self.task_id = task_id
         self.streaming = False
-        self.clients: List[Any] = field(default_factory=list)
+        self.clients: List[Any] = []
 
     async def start_streaming(self, container):
         """Start streaming container output"""
@@ -119,7 +119,7 @@ class ContainerOutputStreamer:
                 log_text = log_line.decode('utf-8').strip()
 
                 # Broadcast to all WebSocket clients
-                if self is not None and self.clients:
+                if self.clients:
                     message = {
                         "task_id": self.task_id,
                         "container_id": self.container_id,
@@ -162,11 +162,11 @@ class ContainerOutputStreamer:
 class ContainerManager:
     """Manages Docker container execution for orchestrator tasks"""
 
-    def __init__(self, config: ContainerConfig) -> None:
+    def __init__(self, config: Optional[ContainerConfig] = None) -> None:
         self.config = config or ContainerConfig()
-        self.docker_client = None
-        self.active_containers: Dict[Any, Any] = field(default_factory=dict)
-        self.output_streamers: Dict[Any, Any] = field(default_factory=dict)
+        self.docker_client: Optional[Any] = None
+        self.active_containers: Dict[str, Any] = {}
+        self.output_streamers: Dict[str, ContainerOutputStreamer] = {}
         self._initialize_docker()
 
     def _initialize_docker(self):
@@ -175,9 +175,10 @@ class ContainerManager:
             raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
         try:
-            self.docker_client = docker.from_env()
-            # Test connection
-            self.docker_client.ping()
+            if docker is not None:
+                self.docker_client = docker.from_env()
+                # Test connection
+                self.docker_client.ping()
             logger.info("Docker client initialized successfully")
 
             # Ensure orchestrator image exists
@@ -192,7 +193,7 @@ class ContainerManager:
         try:
             if self.docker_client is not None:
                 self.docker_client.images.get(self.config.image)
-            logger.info(f"Docker image {self.config.image} found")
+                logger.info(f"Docker image {self.config.image} found")
         except ImageNotFound:
             logger.info(f"Building Docker image: {self.config.image}")
             self._build_orchestrator_image()
@@ -235,19 +236,20 @@ CMD ["bash"]
 
             try:
                 # Build the image
-                logger.info("Building Claude orchestrator Docker image...")
-                image, build_logs = self.docker_client.images.build(
-                    path=build_dir,
-                    tag=self.config.image,
-                    rm=True
-                )
+                if self.docker_client is not None:
+                    logger.info("Building Claude orchestrator Docker image...")
+                    _image, build_logs = self.docker_client.images.build(
+                        path=build_dir,
+                        tag=self.config.image,
+                        rm=True
+                    )
 
-                # Log build output
-                for log in build_logs:
-                    if isinstance(log, dict) and 'stream' in log:
-                        stream_text = log['stream']
-                        if isinstance(stream_text, str):
-                            logger.info(f"Docker build: {stream_text.strip()}")
+                    # Log build output
+                    for log in build_logs:
+                        if isinstance(log, dict) and 'stream' in log:
+                            stream_text = log['stream']
+                            if isinstance(stream_text, str):
+                                logger.info(f"Docker build: {stream_text.strip()}")
 
                 logger.info(f"Successfully built image: {self.config.image}")
 
@@ -298,12 +300,13 @@ CMD ["bash"]
                 logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
                 if mem.available < 512 * 1024 * 1024:  # Less than 512MB
                     return ContainerResult(
+                        container_id="none",
                         task_id=task_id,
                         status="failed",
                         exit_code=-1,
                         stdout="",
                         stderr="ERROR: Insufficient memory to create container",
-                        logs="",
+                        logs=[],
                         start_time=start_time,
                         end_time=datetime.now(),
                         duration=0.0,
@@ -334,23 +337,25 @@ CMD ["bash"]
 
         try:
             # Create and start container
-            container = self.docker_client.containers.run(
-                image=self.config.image,
-                command=claude_cmd,
-                volumes=volumes,
-                working_dir="/workspace",
-                cpu_count=float(self.config.cpu_limit),
-                mem_limit=self.config.memory_limit,
-                network_mode=self.config.network_mode,
-                detach=True,
-                auto_remove=self.config.auto_remove,
-                name=container_id,
-                environment={
-                    'PYTHONUNBUFFERED': '1',
-                    'CLAUDE_API_KEY': os.getenv('CLAUDE_API_KEY', ''),
-                    'TASK_ID': task_id
-                }
-            )
+            if self.docker_client is not None:
+                container = self.docker_client.containers.run(
+                    image=self.config.image,
+                    command=claude_cmd,
+                    volumes=volumes,
+                    working_dir="/workspace",
+                    mem_limit=self.config.memory_limit,
+                    network_mode=self.config.network_mode,
+                    detach=True,
+                    auto_remove=self.config.auto_remove,
+                    name=container_id,
+                    environment={
+                        'PYTHONUNBUFFERED': '1',
+                        'CLAUDE_API_KEY': os.getenv('CLAUDE_API_KEY', ''),
+                        'TASK_ID': task_id
+                    }
+                )
+            else:
+                raise RuntimeError("Docker client not initialized")
 
             self.active_containers[task_id] = container
 
@@ -386,30 +391,40 @@ CMD ["bash"]
                 'network_tx': stats.get('networks', {}).get('eth0', {}).get('tx_bytes', 0)
             }
 
-        except docker.errors.ImageNotFound as e:
-            logger.error(f"Docker image not found for {task_id}: {e}")
-            exit_code = -2
-            status = "failed"
-            stdout = ""
-            stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."
-            logs = ""
-            resource_usage = {}
-        except docker.errors.APIError as e:
-            logger.error(f"Docker API error for {task_id}: {e}")
-            exit_code = -3
-            status = "failed"
-            stdout = ""
-            stderr = f"Docker API error: {e}"
-            logs = ""
-            resource_usage = {}
-        except docker.errors.ContainerError as e:
-            logger.error(f"Container error for {task_id}: {e}")
-            exit_code = e.exit_status
-            status = "failed"
-            stdout = e.stdout.decode('utf-8') if e.stdout else ""
-            stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
-            logs = ""
-            resource_usage = {}
+        except (DockerException, ImageNotFound) as e:
+            if "ImageNotFound" in str(type(e)) or "not found" in str(e).lower():
+                logger.error(f"Docker image not found for {task_id}: {e}")
+                exit_code = -2
+                status = "failed"
+                stdout = ""
+                stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."
+                logs = ""
+                resource_usage = {}
+            elif "APIError" in str(type(e)) or "api" in str(e).lower():
+                logger.error(f"Docker API error for {task_id}: {e}")
+                exit_code = -3
+                status = "failed"
+                stdout = ""
+                stderr = f"Docker API error: {e}"
+                logs = ""
+                resource_usage = {}
+            elif "ContainerError" in str(type(e)) or "container" in str(e).lower():
+                logger.error(f"Container error for {task_id}: {e}")
+                exit_code = getattr(e, 'exit_status', -3)
+                status = "failed"
+                stdout = getattr(e, 'stdout', b'').decode('utf-8') if hasattr(e, 'stdout') and getattr(e, 'stdout') else ""
+                stderr = getattr(e, 'stderr', b'').decode('utf-8') if hasattr(e, 'stderr') and getattr(e, 'stderr') else str(e)
+                logs = ""
+                resource_usage = {}
+            else:
+                # Generic Docker error
+                logger.error(f"Docker error for {task_id}: {e}")
+                exit_code = -4
+                status = "failed"
+                stdout = ""
+                stderr = f"Docker error: {e}"
+                logs = ""
+                resource_usage = {}
         except Exception as e:
             logger.error(f"Unexpected container execution error for {task_id}: {e}")
             exit_code = -99
@@ -559,11 +574,12 @@ CMD ["bash"]
             container.reload()  # Refresh container state
 
             stats = container.stats(stream=False)
+            status = container.status if container is not None else "unknown"
 
             return {
                 'task_id': task_id,
                 'container_id': container.id,
-                'status': (container.status if container is not None else None),
+                'status': status,
                 'created': container.attrs['Created'],
                 'started': container.attrs['State']['StartedAt'],
                 'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
@@ -607,7 +623,7 @@ CMD ["bash"]
         self.output_streamers.clear()
 
         # Close Docker client
-        if self is not None and self.docker_client:
+        if self.docker_client is not None:
             try:
                 self.docker_client.close()
             except Exception as e:
@@ -635,19 +651,19 @@ def main():
     try:
         # Execute single task
         result = manager.execute_containerized_task(
-            task_id=(args.task_id if args is not None else None),
+            task_id=args.task_id,
             worktree_path=Path(args.worktree_path),
-            prompt_file=(args.prompt_file if args is not None else None)
+            prompt_file=args.prompt_file
         )
 
-        print(f"Task completed: {(result.status if result is not None else None)}")
+        print(f"Task completed: {result.status}")
         print(f"Duration: {result.duration:.1f}s")
         print(f"Exit code: {result.exit_code}")
 
-        if result is not None and result.stdout:
+        if result.stdout:
             print(f"Output: {result.stdout[:500]}...")
 
-        return 0 if (result.status if result is not None else None) == 'success' else 1
+        return 0 if result.status == 'success' else 1
 
     except Exception as e:
         logger.error(f"Container execution failed: {e}")

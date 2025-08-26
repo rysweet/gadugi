@@ -3,11 +3,10 @@ Shared interfaces, protocols, and contracts for Gadugi Enhanced Separation archi
 Provides type-safe contracts for inter-component communication and dependency injection.
 """
 
-from typing import Dict, Any, List, Optional, Protocol, Union, TypeVar, Generic
+from typing import Dict, Any, List, Optional, Protocol, TypeVar, Generic
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
 import logging
 
 logger = logging.getLogger(__name__)
@@ -457,8 +456,8 @@ class StateData:
         if not self.state_id or not self.state_id.strip():
             errors.append("State ID is required")
 
-        if self.data is None:
-            errors.append("State data cannot be None")
+        if not self.data:
+            errors.append("State data cannot be empty")
 
         return ValidationResult(is_valid=len(errors) == 0, errors=errors)
 
@@ -1112,7 +1111,7 @@ class InterfaceRegistry:
     """Registry for interface implementations."""
 
     def __init__(self) -> None:
-        self._implementations: Dict[Any, Any] = field(default_factory=dict)
+        self._implementations: Dict[type, List[type]] = {}
 
     def register_implementation(self, interface_class: type, implementation_class: type) -> None:
         """

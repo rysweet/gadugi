@@ -12,14 +12,13 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import json
 import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 # Add parent directory to path to import components
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -93,8 +92,9 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         self.assertNotIn("-p", call_args, "Should NOT use -p flag (old broken pattern)")
 
         # Verify successful execution
-        self.assertEqual((result.status if result is not None else None), "success")
-        self.assertEqual((result.task_id if result is not None else None), self.task_id)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.status, "success")
+        self.assertEqual(result.task_id, self.task_id)
 
     def test_old_command_pattern_detection(self):
         """Test that we can detect the old broken command pattern"""
@@ -169,7 +169,8 @@ The implementation requires:
             phase_focus="Implementation"
         )
 
-        self.assertEqual((context.task_id if context is not None else None), 'test-001')
+        self.assertIsNotNone(context)
+        self.assertEqual(context.task_id, 'test-001')
         self.assertEqual(context.task_name, 'Test Task')
         self.assertEqual(context.original_prompt, 'test-prompt.md')
         self.assertEqual(context.phase_focus, 'Implementation')
@@ -283,8 +284,8 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             'requirements': {'type': 'implementation'}
         }]
 
-        # Temporarily store original method
-        original_method = self.engine._execute_with_concurrency_control
+        # Temporarily store original method (for potential restoration)
+        _ = self.engine._execute_with_concurrency_control
 
         # Track executors created
         created_executors = []
@@ -418,10 +419,17 @@ class TestRegressionPrevention(unittest.TestCase):
         generator_file = Path(__file__).parent.parent / "components" / "prompt_generator.py"
         self.assertTrue(generator_file.exists(), "PromptGenerator component should exist")
 
+        # Create temp directory for test
+        temp_dir = Path(tempfile.mkdtemp())
+        
         # Test basic instantiation
         from components.prompt_generator import PromptGenerator
-        generator = PromptGenerator()
+        generator = PromptGenerator(project_root=str(temp_dir))
         self.assertIsNotNone(generator, "PromptGenerator should be instantiable")
+        
+        # Cleanup
+        import shutil
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
     def test_workflow_master_agent_availability(self):
         """Test that WorkflowManager agent is available"""

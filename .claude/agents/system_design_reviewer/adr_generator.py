@@ -5,14 +5,13 @@ Automatically generates Architecture Decision Records (ADRs) for significant
 architectural changes detected in pull requests.
 """
 
-import os
 import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ImpactLevel, ChangeType, ElementType
+from .ast_parser import ArchitecturalChange, ImpactLevel, ElementType
 
 
 @dataclass
@@ -81,7 +80,7 @@ class ADRGenerator:
             if not change.requires_adr:
                 continue
 
-            element = change.element
+            _ = change.element
             decision_type = self._classify_decision_type(change)
 
             if decision_type in groups:
@@ -131,7 +130,7 @@ class ADRGenerator:
         """Create ADR data structure for a group of changes"""
         adr_number = self._get_next_adr_number()
         pr_number = pr_info.get('number', 'Unknown')
-        pr_title = pr_info.get('title', 'Untitled Change')
+        _ = pr_info.get('title', 'Untitled Change')
 
         # Generate title
         title = self._generate_title(decision_type, changes)
@@ -374,7 +373,7 @@ class ADRGenerator:
 
     def _generate_alternatives(self, decision_type: str, changes: List[ArchitecturalChange]) -> List[str]:
         """Generate alternatives considered"""
-        alternatives = []
+        _ = []
 
         alternative_templates = {
             "new_pattern": [

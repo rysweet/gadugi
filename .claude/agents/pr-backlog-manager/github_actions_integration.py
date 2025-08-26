@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -302,7 +302,7 @@ class GitHubActionsIntegration:
             "mode": "single_pr",
             "pr_number": pr_number,
             "assessment": {
-                "status": (assessment.status if assessment is not None else None).value,
+                "status": assessment.status.value if assessment is not None else None,
                 "readiness_score": assessment.readiness_score,
                 "is_ready": assessment.is_ready,
                 "blocking_issues_count": len(assessment.blocking_issues),
@@ -410,8 +410,10 @@ class GitHubActionsIntegration:
             summary_content = self._format_github_summary(result)
 
             # Append to GitHub Actions summary
-            with open(os.getenv("GITHUB_STEP_SUMMARY"), "a") as f:
-                f.write(summary_content)
+            summary_file = os.getenv("GITHUB_STEP_SUMMARY")
+            if summary_file:
+                with open(summary_file, "a") as f:
+                    f.write(summary_content)
 
             logger.info("Generated GitHub Actions workflow summary")
 
@@ -576,9 +578,11 @@ class GitHubActionsIntegration:
                 )
 
             # Write outputs to GitHub Actions
-            with open(os.getenv("GITHUB_OUTPUT"), "a") as f:
-                for key, value in outputs.items():
-                    f.write(f"{key}={value}\n")
+            output_file = os.getenv("GITHUB_OUTPUT")
+            if output_file:
+                with open(output_file, "a") as f:
+                    for key, value in outputs.items():
+                        f.write(f"{key}={value}\n")
 
             logger.info(f"Set {len(outputs)} GitHub Actions outputs")
 

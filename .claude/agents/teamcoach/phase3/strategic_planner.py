@@ -73,9 +73,10 @@ class StrategicInitiative:
     impact_estimate: Dict[str, float]  # metric -> expected change
     resource_requirements: Dict[str, Any]
     timeline: Dict[str, datetime]  # phase -> date
-    risks: List[Dict[str, str]]
-    success_criteria: List[str]
-    owner: Optional[str]
+    implementation_steps: List[str] = field(default_factory=list)
+    risks: List[Dict[str, str]] = field(default_factory=list)
+    success_criteria: List[str] = field(default_factory=list)
+    owner: Optional[str] = None
 
 
 @dataclass

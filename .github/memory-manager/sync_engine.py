@@ -6,36 +6,20 @@ This module orchestrates the synchronization between Memory.md tasks and GitHub 
 handling conflict resolution, status updates, and maintaining data consistency.
 """
 
-import hashlib
 import json
 import shutil
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 from github_integration import GitHubIntegration, GitHubIssue
-from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
+from memory_parser import MemoryDocument, MemoryParser, Task, TaskStatus
 
 
-class SyncDirection(Enum):
-    """Synchronization direction"""
-
-    MEMORY_TO_GITHUB = "memory_to_github"
-    GITHUB_TO_MEMORY = "github_to_memory"
-    BIDIRECTIONAL = "bidirectional"
-
-
-class ConflictResolution(Enum):
-    """Conflict resolution strategies"""
-
-    MANUAL = "manual"
-    MEMORY_WINS = "memory_wins"
-    GITHUB_WINS = "github_wins"
-    LATEST_WINS = "latest_wins"
-    AUTO_MERGE = "auto_merge"
+# Import enums from separate module to avoid circular imports
+from enums import SyncDirection, ConflictResolution
 
 
 @dataclass
@@ -104,8 +88,8 @@ class SyncConfig:
     batch_size: int = 10
     backup_before_sync: bool = True
     dry_run: bool = False
-    include_sections: List[str] = None  # None means all sections
-    exclude_sections: List[str] = None
+    include_sections: Optional[List[str]] = None  # None means all sections
+    exclude_sections: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.include_sections is None:
@@ -118,7 +102,7 @@ class SyncEngine:
     """Bidirectional synchronization engine"""
 
     def __init__(
-        self, memory_path: str, repo_path: str = None, config: SyncConfig = None
+        self, memory_path: str, repo_path: Optional[str] = None, config: Optional[SyncConfig] = None
     ):
         """Initialize sync engine"""
         self.memory_path = Path(memory_path)
@@ -428,7 +412,7 @@ class SyncEngine:
             "conflict_resolution": self.config.conflict_resolution.value,
             "auto_create_issues": self.config.auto_create_issues,
             "auto_close_completed": self.config.auto_close_completed,
-            "sync_frequency_minutes": self.config.sync_frequency_minutes,
+            "sync_frequency_seconds": self.config.sync_frequency,
             "batch_size": self.config.batch_size,
             "backup_before_sync": self.config.backup_before_sync,
             "dry_run": self.config.dry_run,

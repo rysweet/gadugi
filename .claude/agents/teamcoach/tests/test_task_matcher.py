@@ -26,8 +26,8 @@ from ..phase1.capability_assessment import (
     AgentCapabilityProfile,
     CapabilityScore,
 )
-from ...shared.task_tracking import TaskMetrics
-from ...shared.state_management import StateManager
+from ....shared.task_tracking import TaskMetrics
+from ....shared.state_management import StateManager
 
 
 class TestTaskAgentMatcher(unittest.TestCase):

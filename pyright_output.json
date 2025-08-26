@@ -1,0 +1,2526 @@
+{
+    "version": "1.1.403",
+    "time": "1756182563355",
+    "generalDiagnostics": [
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/base_classes.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"float\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 125,
+                    "character": 11
+                },
+                "end": {
+                    "line": 125,
+                    "character": 38
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/interfaces.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to False since the types \"Dict[str, Any]\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 458,
+                    "character": 11
+                },
+                "end": {
+                    "line": 458,
+                    "character": 28
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"timedelta\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 19,
+                    "character": 31
+                },
+                "end": {
+                    "line": 19,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"Path\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 20
+                },
+                "end": {
+                    "line": 20,
+                    "character": 24
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"field\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 35
+                },
+                "end": {
+                    "line": 22,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"Enum\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 17
+                },
+                "end": {
+                    "line": 23,
+                    "character": 21
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"auto\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 23,
+                    "character": 23
+                },
+                "end": {
+                    "line": 23,
+                    "character": 27
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Import \"PhaseResult\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 26,
+                    "character": 57
+                },
+                "end": {
+                    "line": 26,
+                    "character": 68
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "error",
+            "message": "Object of type \"None\" cannot be called",
+            "range": {
+                "start": {
+                    "line": 171,
+                    "character": 44
+                },
+                "end": {
+                    "line": 171,
+                    "character": 92
+                }
+            },
+            "rule": "reportOptionalCall"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/phase_enforcer.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"EnforcementResult\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 245,
+                    "character": 19
+                },
+                "end": {
+                    "line": 245,
+                    "character": 37
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "error",
+            "message": "Operator \"<=\" not supported for types \"Literal[0]\" and \"int | WorkflowPhase\"\n  Operator \"<=\" not supported for types \"Literal[0]\" and \"WorkflowPhase\" when expected type is \"bool\"",
+            "range": {
+                "start": {
+                    "line": 74,
+                    "character": 15
+                },
+                "end": {
+                    "line": 74,
+                    "character": 37
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "error",
+            "message": "Operator \"<=\" not supported for types \"int | WorkflowPhase\" and \"Literal[9]\"\n  Operator \"<=\" not supported for types \"WorkflowPhase\" and \"Literal[9]\" when expected type is \"bool\"",
+            "range": {
+                "start": {
+                    "line": 74,
+                    "character": 20
+                },
+                "end": {
+                    "line": 74,
+                    "character": 37
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "warning",
+            "message": "Unnecessary isinstance call; \"WorkflowPhase\" is always an instance of \"WorkflowPhase\"",
+            "range": {
+                "start": {
+                    "line": 105,
+                    "character": 15
+                },
+                "end": {
+                    "line": 105,
+                    "character": 47
+                }
+            },
+            "rule": "reportUnnecessaryIsInstance"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "error",
+            "message": "Expected one type argument after \"Optional\"",
+            "range": {
+                "start": {
+                    "line": 195,
+                    "character": 31
+                },
+                "end": {
+                    "line": 195,
+                    "character": 39
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "error",
+            "message": "Operator \"<\" not supported for \"None\"",
+            "range": {
+                "start": {
+                    "line": 438,
+                    "character": 33
+                },
+                "end": {
+                    "line": 438,
+                    "character": 49
+                }
+            },
+            "rule": "reportOptionalOperand"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/state_management.py",
+            "severity": "error",
+            "message": "Expected one type argument after \"Optional\"",
+            "range": {
+                "start": {
+                    "line": 647,
+                    "character": 31
+                },
+                "end": {
+                    "line": 647,
+                    "character": 39
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "Import \"json\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 5,
+                    "character": 7
+                },
+                "end": {
+                    "line": 5,
+                    "character": 11
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "Import \"time\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 6,
+                    "character": 7
+                },
+                "end": {
+                    "line": 6,
+                    "character": 11
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "Import \"timedelta\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 9,
+                    "character": 31
+                },
+                "end": {
+                    "line": 9,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "Import \"Union\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 10,
+                    "character": 46
+                },
+                "end": {
+                    "line": 10,
+                    "character": 51
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "Import \"Path\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 13,
+                    "character": 20
+                },
+                "end": {
+                    "line": 13,
+                    "character": 24
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"str\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 66,
+                    "character": 11
+                },
+                "end": {
+                    "line": 66,
+                    "character": 30
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "\"result\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 745,
+                    "character": 19
+                },
+                "end": {
+                    "line": 745,
+                    "character": 25
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/task_tracking.py",
+            "severity": "error",
+            "message": "\"result\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 746,
+                    "character": 78
+                },
+                "end": {
+                    "line": 746,
+                    "character": 84
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "error",
+            "message": "Expected one type argument after \"Optional\"",
+            "range": {
+                "start": {
+                    "line": 55,
+                    "character": 46
+                },
+                "end": {
+                    "line": 55,
+                    "character": 54
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "error",
+            "message": "\"field\" is not defined",
+            "range": {
+                "start": {
+                    "line": 157,
+                    "character": 44
+                },
+                "end": {
+                    "line": 157,
+                    "character": 49
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "error",
+            "message": "\"field\" is not defined",
+            "range": {
+                "start": {
+                    "line": 158,
+                    "character": 51
+                },
+                "end": {
+                    "line": 158,
+                    "character": 56
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "error",
+            "message": "\"field\" is not defined",
+            "range": {
+                "start": {
+                    "line": 159,
+                    "character": 40
+                },
+                "end": {
+                    "line": 159,
+                    "character": 45
+                }
+            },
+            "rule": "reportUndefinedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"Self@CircuitBreaker\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 243,
+                    "character": 15
+                },
+                "end": {
+                    "line": 243,
+                    "character": 31
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"Self@CircuitBreaker\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 289,
+                    "character": 11
+                },
+                "end": {
+                    "line": 289,
+                    "character": 27
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "error",
+            "message": "Variable \"e\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 303,
+                    "character": 28
+                },
+                "end": {
+                    "line": 303,
+                    "character": 29
+                }
+            },
+            "rule": "reportUnusedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/utils/error_handling.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"Self@ErrorContext\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 358,
+                    "character": 15
+                },
+                "end": {
+                    "line": 358,
+                    "character": 31
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "Import \"Path\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 20
+                },
+                "end": {
+                    "line": 20,
+                    "character": 24
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "Import \"field\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 22,
+                    "character": 35
+                },
+                "end": {
+                    "line": 22,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"ErrorHandler\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 38
+                },
+                "end": {
+                    "line": 30,
+                    "character": 50
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"ErrorCategory\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 52
+                },
+                "end": {
+                    "line": 30,
+                    "character": 65
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"ErrorSeverity\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 30,
+                    "character": 67
+                },
+                "end": {
+                    "line": 30,
+                    "character": 80
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 287,
+                    "character": 54
+                },
+                "end": {
+                    "line": 287,
+                    "character": 65
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 288,
+                    "character": 76
+                },
+                "end": {
+                    "line": 288,
+                    "character": 87
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 292,
+                    "character": 65
+                },
+                "end": {
+                    "line": 292,
+                    "character": 72
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 295,
+                    "character": 47
+                },
+                "end": {
+                    "line": 295,
+                    "character": 54
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 296,
+                    "character": 51
+                },
+                "end": {
+                    "line": 296,
+                    "character": 62
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 305,
+                    "character": 42
+                },
+                "end": {
+                    "line": 305,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 327,
+                    "character": 67
+                },
+                "end": {
+                    "line": 327,
+                    "character": 78
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 337,
+                    "character": 46
+                },
+                "end": {
+                    "line": 337,
+                    "character": 57
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"branch_name\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 357,
+                    "character": 32
+                },
+                "end": {
+                    "line": 357,
+                    "character": 43
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 380,
+                    "character": 42
+                },
+                "end": {
+                    "line": 380,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 389,
+                    "character": 105
+                },
+                "end": {
+                    "line": 389,
+                    "character": 116
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"issue_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 396,
+                    "character": 36
+                },
+                "end": {
+                    "line": 396,
+                    "character": 48
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"branch_name\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 468,
+                    "character": 46
+                },
+                "end": {
+                    "line": 468,
+                    "character": 57
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"prompt_file\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 490,
+                    "character": 42
+                },
+                "end": {
+                    "line": 490,
+                    "character": 53
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"issue_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 515,
+                    "character": 29
+                },
+                "end": {
+                    "line": 515,
+                    "character": 41
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"issue_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 515,
+                    "character": 65
+                },
+                "end": {
+                    "line": 515,
+                    "character": 77
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"pr_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 534,
+                    "character": 36
+                },
+                "end": {
+                    "line": 534,
+                    "character": 45
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"pr_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 549,
+                    "character": 39
+                },
+                "end": {
+                    "line": 549,
+                    "character": 48
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"pr_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 554,
+                    "character": 78
+                },
+                "end": {
+                    "line": 554,
+                    "character": 87
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"pr_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 555,
+                    "character": 49
+                },
+                "end": {
+                    "line": 555,
+                    "character": 58
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 577,
+                    "character": 68
+                },
+                "end": {
+                    "line": 577,
+                    "character": 75
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"completed_phases\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 583,
+                    "character": 56
+                },
+                "end": {
+                    "line": 583,
+                    "character": 72
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "Operator \"-\" not supported for types \"datetime\" and \"datetime | None\"\n  Operator \"-\" not supported for types \"datetime\" and \"None\"",
+            "range": {
+                "start": {
+                    "line": 584,
+                    "character": 34
+                },
+                "end": {
+                    "line": 584,
+                    "character": 83
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"start_time\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 584,
+                    "character": 72
+                },
+                "end": {
+                    "line": 584,
+                    "character": 82
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 598,
+                    "character": 74
+                },
+                "end": {
+                    "line": 598,
+                    "character": 81
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 608,
+                    "character": 74
+                },
+                "end": {
+                    "line": 608,
+                    "character": 81
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "Operator \"-\" not supported for types \"datetime\" and \"datetime | None\"\n  Operator \"-\" not supported for types \"datetime\" and \"None\"",
+            "range": {
+                "start": {
+                    "line": 616,
+                    "character": 21
+                },
+                "end": {
+                    "line": 616,
+                    "character": 70
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"start_time\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 616,
+                    "character": 59
+                },
+                "end": {
+                    "line": 616,
+                    "character": 69
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 620,
+                    "character": 43
+                },
+                "end": {
+                    "line": 620,
+                    "character": 50
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"completed_phases\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 621,
+                    "character": 52
+                },
+                "end": {
+                    "line": 621,
+                    "character": 68
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"branch_name\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 623,
+                    "character": 47
+                },
+                "end": {
+                    "line": 623,
+                    "character": 58
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"issue_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 624,
+                    "character": 48
+                },
+                "end": {
+                    "line": 624,
+                    "character": 60
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"pr_number\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 625,
+                    "character": 45
+                },
+                "end": {
+                    "line": 625,
+                    "character": 54
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "Operator \"-\" not supported for types \"datetime\" and \"datetime | None\"\n  Operator \"-\" not supported for types \"datetime\" and \"None\"",
+            "range": {
+                "start": {
+                    "line": 631,
+                    "character": 21
+                },
+                "end": {
+                    "line": 631,
+                    "character": 70
+                }
+            },
+            "rule": "reportOperatorIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"start_time\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 631,
+                    "character": 59
+                },
+                "end": {
+                    "line": 631,
+                    "character": 69
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"task_id\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 636,
+                    "character": 43
+                },
+                "end": {
+                    "line": 636,
+                    "character": 50
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_engine.py",
+            "severity": "error",
+            "message": "\"completed_phases\" is not a known attribute of \"None\"",
+            "range": {
+                "start": {
+                    "line": 637,
+                    "character": 56
+                },
+                "end": {
+                    "line": 637,
+                    "character": 72
+                }
+            },
+            "rule": "reportOptionalMemberAccess"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"os\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 21,
+                    "character": 7
+                },
+                "end": {
+                    "line": 21,
+                    "character": 9
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"timedelta\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 25,
+                    "character": 31
+                },
+                "end": {
+                    "line": 25,
+                    "character": 40
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"ErrorHandler\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 33,
+                    "character": 37
+                },
+                "end": {
+                    "line": 33,
+                    "character": 49
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"CircuitBreaker\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 33,
+                    "character": 51
+                },
+                "end": {
+                    "line": 33,
+                    "character": 65
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"retry\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 33,
+                    "character": 67
+                },
+                "end": {
+                    "line": 33,
+                    "character": 72
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"retry\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 33,
+                    "character": 67
+                },
+                "end": {
+                    "line": 33,
+                    "character": 72
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"ErrorContext\" is unknown import symbol",
+            "range": {
+                "start": {
+                    "line": 33,
+                    "character": 74
+                },
+                "end": {
+                    "line": 33,
+                    "character": 86
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"WorkflowPhase\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 34,
+                    "character": 58
+                },
+                "end": {
+                    "line": 34,
+                    "character": 71
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"TaskStatus\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 35,
+                    "character": 43
+                },
+                "end": {
+                    "line": 35,
+                    "character": 53
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Import \"GitHubOperations\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 36,
+                    "character": 34
+                },
+                "end": {
+                    "line": 36,
+                    "character": 50
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Expected one type argument after \"Optional\"",
+            "range": {
+                "start": {
+                    "line": 136,
+                    "character": 31
+                },
+                "end": {
+                    "line": 136,
+                    "character": 39
+                }
+            },
+            "rule": "reportInvalidTypeForm"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"config\"",
+            "range": {
+                "start": {
+                    "line": 150,
+                    "character": 29
+                },
+                "end": {
+                    "line": 150,
+                    "character": 43
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"StateManager\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 150,
+                    "character": 29
+                },
+                "end": {
+                    "line": 150,
+                    "character": 41
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"CheckpointManager\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 151,
+                    "character": 34
+                },
+                "end": {
+                    "line": 151,
+                    "character": 51
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"workflow_id\"",
+            "range": {
+                "start": {
+                    "line": 152,
+                    "character": 28
+                },
+                "end": {
+                    "line": 152,
+                    "character": 41
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"TaskTracker\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 152,
+                    "character": 28
+                },
+                "end": {
+                    "line": 152,
+                    "character": 39
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"workflow_id\"",
+            "range": {
+                "start": {
+                    "line": 153,
+                    "character": 29
+                },
+                "end": {
+                    "line": 153,
+                    "character": 51
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"WorkflowPhaseTracker\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 153,
+                    "character": 29
+                },
+                "end": {
+                    "line": 153,
+                    "character": 49
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 344,
+                    "character": 41
+                },
+                "end": {
+                    "line": 344,
+                    "character": 54
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 348,
+                    "character": 64
+                },
+                "end": {
+                    "line": 348,
+                    "character": 80
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_history\" for class \"Dict[str, Any]\"\n  Attribute \"stage_history\" is unknown",
+            "range": {
+                "start": {
+                    "line": 349,
+                    "character": 29
+                },
+                "end": {
+                    "line": 349,
+                    "character": 42
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 350,
+                    "character": 45
+                },
+                "end": {
+                    "line": 350,
+                    "character": 61
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 354,
+                    "character": 29
+                },
+                "end": {
+                    "line": 354,
+                    "character": 42
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 355,
+                    "character": 29
+                },
+                "end": {
+                    "line": 355,
+                    "character": 45
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"last_heartbeat\" for class \"Dict[str, Any]\"\n  Attribute \"last_heartbeat\" is unknown",
+            "range": {
+                "start": {
+                    "line": 356,
+                    "character": 29
+                },
+                "end": {
+                    "line": 356,
+                    "character": 43
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"start_time\" for class \"Dict[str, Any]\"\n  Attribute \"start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 366,
+                    "character": 73
+                },
+                "end": {
+                    "line": 366,
+                    "character": 83
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 380,
+                    "character": 33
+                },
+                "end": {
+                    "line": 380,
+                    "character": 46
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 534,
+                    "character": 33
+                },
+                "end": {
+                    "line": 534,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 534,
+                    "character": 33
+                },
+                "end": {
+                    "line": 534,
+                    "character": 44
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 535,
+                    "character": 58
+                },
+                "end": {
+                    "line": 535,
+                    "character": 71
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Variable \"error_context\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 540,
+                    "character": 12
+                },
+                "end": {
+                    "line": 540,
+                    "character": 25
+                }
+            },
+            "rule": "reportUnusedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Arguments missing for parameters \"error\", \"operation\"",
+            "range": {
+                "start": {
+                    "line": 540,
+                    "character": 28
+                },
+                "end": {
+                    "line": 542,
+                    "character": 13
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "No parameter named \"operation_name\"",
+            "range": {
+                "start": {
+                    "line": 541,
+                    "character": 16
+                },
+                "end": {
+                    "line": 541,
+                    "character": 30
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"monitoring_state\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 561,
+                    "character": 35
+                },
+                "end": {
+                    "line": 561,
+                    "character": 51
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 561,
+                    "character": 52
+                },
+                "end": {
+                    "line": 561,
+                    "character": 63
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 606,
+                    "character": 62
+                },
+                "end": {
+                    "line": 606,
+                    "character": 78
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 608,
+                    "character": 45
+                },
+                "end": {
+                    "line": 608,
+                    "character": 58
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"timeout_warnings\" for class \"Dict[str, Any]\"\n  Attribute \"timeout_warnings\" is unknown",
+            "range": {
+                "start": {
+                    "line": 616,
+                    "character": 33
+                },
+                "end": {
+                    "line": 616,
+                    "character": 49
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"timeout_warnings\" for class \"Dict[str, Any]\"\n  Attribute \"timeout_warnings\" is unknown",
+            "range": {
+                "start": {
+                    "line": 616,
+                    "character": 33
+                },
+                "end": {
+                    "line": 616,
+                    "character": 49
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"TaskState\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 678,
+                    "character": 25
+                },
+                "end": {
+                    "line": 678,
+                    "character": 34
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 683,
+                    "character": 56
+                },
+                "end": {
+                    "line": 683,
+                    "character": 69
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 693,
+                    "character": 58
+                },
+                "end": {
+                    "line": 693,
+                    "character": 71
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 694,
+                    "character": 61
+                },
+                "end": {
+                    "line": 694,
+                    "character": 77
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 695,
+                    "character": 56
+                },
+                "end": {
+                    "line": 695,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 696,
+                    "character": 62
+                },
+                "end": {
+                    "line": 696,
+                    "character": 79
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_history\" for class \"Dict[str, Any]\"\n  Attribute \"stage_history\" is unknown",
+            "range": {
+                "start": {
+                    "line": 699,
+                    "character": 70
+                },
+                "end": {
+                    "line": 699,
+                    "character": 83
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 712,
+                    "character": 69
+                },
+                "end": {
+                    "line": 712,
+                    "character": 82
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"start_time\" for class \"Dict[str, Any]\"\n  Attribute \"start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 792,
+                    "character": 58
+                },
+                "end": {
+                    "line": 792,
+                    "character": 68
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_history\" for class \"Dict[str, Any]\"\n  Attribute \"stage_history\" is unknown",
+            "range": {
+                "start": {
+                    "line": 804,
+                    "character": 61
+                },
+                "end": {
+                    "line": 804,
+                    "character": 74
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 805,
+                    "character": 52
+                },
+                "end": {
+                    "line": 805,
+                    "character": 63
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 806,
+                    "character": 58
+                },
+                "end": {
+                    "line": 806,
+                    "character": 75
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_history\" for class \"Dict[str, Any]\"\n  Attribute \"stage_history\" is unknown",
+            "range": {
+                "start": {
+                    "line": 845,
+                    "character": 64
+                },
+                "end": {
+                    "line": 845,
+                    "character": 77
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 854,
+                    "character": 70
+                },
+                "end": {
+                    "line": 854,
+                    "character": 86
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 857,
+                    "character": 45
+                },
+                "end": {
+                    "line": 857,
+                    "character": 58
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 857,
+                    "character": 84
+                },
+                "end": {
+                    "line": 857,
+                    "character": 97
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"start_time\" for class \"Dict[str, Any]\"\n  Attribute \"start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 862,
+                    "character": 67
+                },
+                "end": {
+                    "line": 862,
+                    "character": 77
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"current_stage\" for class \"Dict[str, Any]\"\n  Attribute \"current_stage\" is unknown",
+            "range": {
+                "start": {
+                    "line": 864,
+                    "character": 46
+                },
+                "end": {
+                    "line": 864,
+                    "character": 59
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"stage_start_time\" for class \"Dict[str, Any]\"\n  Attribute \"stage_start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 866,
+                    "character": 51
+                },
+                "end": {
+                    "line": 866,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 869,
+                    "character": 48
+                },
+                "end": {
+                    "line": 869,
+                    "character": 59
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 870,
+                    "character": 54
+                },
+                "end": {
+                    "line": 870,
+                    "character": 71
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"timeout_warnings\" for class \"Dict[str, Any]\"\n  Attribute \"timeout_warnings\" is unknown",
+            "range": {
+                "start": {
+                    "line": 871,
+                    "character": 53
+                },
+                "end": {
+                    "line": 871,
+                    "character": 69
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"last_heartbeat\" for class \"Dict[str, Any]\"\n  Attribute \"last_heartbeat\" is unknown",
+            "range": {
+                "start": {
+                    "line": 882,
+                    "character": 51
+                },
+                "end": {
+                    "line": 882,
+                    "character": 65
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Variable \"timeout_result\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 928,
+                    "character": 20
+                },
+                "end": {
+                    "line": 928,
+                    "character": 34
+                }
+            },
+            "rule": "reportUnusedVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 933,
+                    "character": 42
+                },
+                "end": {
+                    "line": 933,
+                    "character": 55
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 933,
+                    "character": 90
+                },
+                "end": {
+                    "line": 933,
+                    "character": 103
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"start_time\" for class \"Dict[str, Any]\"\n  Attribute \"start_time\" is unknown",
+            "range": {
+                "start": {
+                    "line": 933,
+                    "character": 126
+                },
+                "end": {
+                    "line": 933,
+                    "character": 136
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"health_checks\" for class \"Dict[str, Any]\"\n  Attribute \"health_checks\" is unknown",
+            "range": {
+                "start": {
+                    "line": 938,
+                    "character": 41
+                },
+                "end": {
+                    "line": 938,
+                    "character": 54
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 992,
+                    "character": 52
+                },
+                "end": {
+                    "line": 992,
+                    "character": 69
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot assign to attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 992,
+                    "character": 52
+                },
+                "end": {
+                    "line": 992,
+                    "character": 69
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"TaskState\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 1084,
+                    "character": 35
+                },
+                "end": {
+                    "line": 1084,
+                    "character": 44
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"error_count\" for class \"Dict[str, Any]\"\n  Attribute \"error_count\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1092,
+                    "character": 56
+                },
+                "end": {
+                    "line": 1092,
+                    "character": 67
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Cannot access attribute \"recovery_attempts\" for class \"Dict[str, Any]\"\n  Attribute \"recovery_attempts\" is unknown",
+            "range": {
+                "start": {
+                    "line": 1093,
+                    "character": 62
+                },
+                "end": {
+                    "line": 1093,
+                    "character": 79
+                }
+            },
+            "rule": "reportAttributeAccessIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "\"TaskState\" is possibly unbound",
+            "range": {
+                "start": {
+                    "line": 1117,
+                    "character": 26
+                },
+                "end": {
+                    "line": 1117,
+                    "character": 35
+                }
+            },
+            "rule": "reportPossiblyUnboundVariable"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_reliability.py",
+            "severity": "error",
+            "message": "Argument missing for parameter \"config\"",
+            "range": {
+                "start": {
+                    "line": 1256,
+                    "character": 58
+                },
+                "end": {
+                    "line": 1256,
+                    "character": 86
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_validator.py",
+            "severity": "error",
+            "message": "Import \"re\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 15,
+                    "character": 7
+                },
+                "end": {
+                    "line": 15,
+                    "character": 9
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_validator.py",
+            "severity": "error",
+            "message": "Import \"Path\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 19,
+                    "character": 20
+                },
+                "end": {
+                    "line": 19,
+                    "character": 24
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_validator.py",
+            "severity": "error",
+            "message": "Import \"Tuple\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 46
+                },
+                "end": {
+                    "line": 20,
+                    "character": 51
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_validator.py",
+            "severity": "error",
+            "message": "Import \"Set\" is not accessed",
+            "range": {
+                "start": {
+                    "line": 20,
+                    "character": 53
+                },
+                "end": {
+                    "line": 20,
+                    "character": 56
+                }
+            },
+            "rule": "reportUnusedImport"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/workflow_validator.py",
+            "severity": "error",
+            "message": "No overloads for \"open\" match the provided arguments",
+            "range": {
+                "start": {
+                    "line": 359,
+                    "character": 17
+                },
+                "end": {
+                    "line": 359,
+                    "character": 57
+                }
+            },
+            "rule": "reportCallIssue"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/xpia_defense.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to False since the types \"Literal[ThreatLevel.SUSPICIOUS, ThreatLevel.MALICIOUS, ThreatLevel.CRITICAL]\" and \"Literal[ThreatLevel.SAFE]\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 534,
+                    "character": 19
+                },
+                "end": {
+                    "line": 534,
+                    "character": 51
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/xpia_defense.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"ValidationResult\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 570,
+                    "character": 11
+                },
+                "end": {
+                    "line": 570,
+                    "character": 29
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/xpia_middleware.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"ValidationResult\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 301,
+                    "character": 11
+                },
+                "end": {
+                    "line": 301,
+                    "character": 29
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        },
+        {
+            "file": "/home/rysweet/gadugi/.worktrees/issue-311/.claude/shared/xpia_middleware.py",
+            "severity": "warning",
+            "message": "Condition will always evaluate to True since the types \"ValidationResult\" and \"None\" have no overlap",
+            "range": {
+                "start": {
+                    "line": 319,
+                    "character": 13
+                },
+                "end": {
+                    "line": 319,
+                    "character": 31
+                }
+            },
+            "rule": "reportUnnecessaryComparison"
+        }
+    ],
+    "summary": {
+        "filesAnalyzed": 16,
+        "errorCount": 145,
+        "warningCount": 12,
+        "informationCount": 0,
+        "timeInSec": 4.59
+    }
+}
+

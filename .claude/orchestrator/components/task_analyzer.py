@@ -19,7 +19,7 @@ import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
@@ -80,7 +80,7 @@ class TaskAnalyzer:
             self.prompts_dir = self._validate_directory_path(prompts_dir)
         self.tasks: List[TaskInfo] = []
         self.dependency_graph: Dict[str, List[str]] = {}
-        self.conflict_matrix: Dict[str, set] = {}
+        self.conflict_matrix: Dict[str, Set[str]] = {}
 
     def _validate_directory_path(self, path: str) -> Path:
         """Security: Validate directory paths to prevent path traversal attacks"""

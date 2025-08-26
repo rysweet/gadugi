@@ -5,28 +5,20 @@ Tests the deterministic workflow execution engine to ensure
 consistent and reliable workflow phase execution.
 """
 
+import os
 import pytest
 import tempfile
-import os
 import json
-import subprocess
 from unittest.mock import Mock, patch
 
 # Import the module under test
-import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
-
-from workflow_engine import (
+from claude.shared.workflow_engine import (
     WorkflowEngine,
     WorkflowPhase,
     WorkflowState,
     PhaseResult,
-    execute_workflow,
-)
-
+    execute_workflow)
 
 class TestWorkflowEngine:
     """Test suite for WorkflowEngine class"""
@@ -75,8 +67,7 @@ Test the deterministic execution of workflow phases.
             state_manager=self.mock_state_manager,
             github_ops=self.mock_github_ops,
             task_tracker=self.mock_task_tracker,
-            error_handler=self.mock_error_handler,
-        )
+            error_handler=self.mock_error_handler)
 
         assert engine.state_manager == self.mock_state_manager
         assert engine.github_ops == self.mock_github_ops
@@ -105,8 +96,7 @@ Test the deterministic execution of workflow phases.
             task_id=task_id,
             prompt_file=prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         assert state.task_id == task_id
         assert state.prompt_file == prompt_file
@@ -142,8 +132,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-init",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_init()
 
@@ -159,8 +148,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-init-fail",
             prompt_file="/nonexistent/file.md",
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, _data = engine._phase_init()
 
@@ -174,8 +162,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-validation",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.PROMPT_VALIDATION,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_prompt_validation()
 
@@ -196,8 +183,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-short",
             prompt_file=short_file,
             current_phase=WorkflowPhase.PROMPT_VALIDATION,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, _data = engine._phase_prompt_validation()
 
@@ -215,8 +201,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-branch",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.BRANCH_CREATION,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_branch_creation()
 
@@ -238,8 +223,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-branch-fail",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.BRANCH_CREATION,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, _data = engine._phase_branch_creation()
 
@@ -259,8 +243,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-issue",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.ISSUE_MANAGEMENT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_issue_management()
 
@@ -283,8 +266,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-commit",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.COMMIT_CHANGES,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_commit_changes()
 
@@ -304,8 +286,7 @@ Test the deterministic execution of workflow phases.
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.PUSH_REMOTE,
             completed_phases=[],
-            branch_name="feature/test-branch",
-        )
+            branch_name="feature/test-branch")
 
         success, message, data = engine._phase_push_remote()
 
@@ -327,8 +308,7 @@ Test the deterministic execution of workflow phases.
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.PR_CREATION,
             completed_phases=[],
-            issue_number=123,
-        )
+            issue_number=123)
 
         success, message, data = engine._phase_pr_creation()
 
@@ -345,8 +325,7 @@ Test the deterministic execution of workflow phases.
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[],
-            pr_number=789,
-        )
+            pr_number=789)
 
         success, message, data = engine._phase_code_review()
 
@@ -363,8 +342,7 @@ Test the deterministic execution of workflow phases.
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.REVIEW_RESPONSE,
             completed_phases=[],
-            pr_number=789,
-        )
+            pr_number=789)
 
         success, message, _data = engine._phase_review_response()
 
@@ -378,8 +356,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-final",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.FINALIZATION,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         success, message, data = engine._phase_finalization()
 
@@ -395,8 +372,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-retry",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         # Mock a phase that fails twice then succeeds
         call_count = 0
@@ -425,8 +401,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-max-retry",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         # Mock a phase that always fails
         def mock_phase_init():
@@ -447,8 +422,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-checkpoint",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         # Should not raise exception
         engine._save_checkpoint()
@@ -474,8 +448,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-cleanup",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         # Create a checkpoint file
         checkpoint_file = f".workflow_checkpoint_{engine.workflow_state.task_id}.json"
@@ -499,8 +472,7 @@ Test the deterministic execution of workflow phases.
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.PROMPT_VALIDATION],
             branch_name="feature/test",
             issue_number=123,
-            pr_number=456,
-        )
+            pr_number=456)
 
         # Add some mock execution log
         engine.execution_log = [
@@ -527,8 +499,7 @@ Test the deterministic execution of workflow phases.
             task_id="test-failure",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[],
-        )
+            completed_phases=[])
 
         error_message = "Test failure message"
         result = engine._create_failure_result(error_message)
@@ -580,7 +551,6 @@ Test the deterministic execution of workflow phases.
             mock_execute.assert_called_once_with(self.prompt_file, "test-convenience")
             assert result["success"] is True
 
-
 class TestWorkflowPhases:
     """Test suite for WorkflowPhase enum"""
 
@@ -612,7 +582,6 @@ class TestWorkflowPhases:
         assert WorkflowPhase.INIT.name == "INIT"
         assert WorkflowPhase.CODE_REVIEW.name == "CODE_REVIEW"
         assert WorkflowPhase.FINALIZATION.name == "FINALIZATION"
-
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

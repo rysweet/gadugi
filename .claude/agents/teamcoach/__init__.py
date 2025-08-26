@@ -31,9 +31,9 @@ from .phase2.recommendation_engine import RecommendationEngine
 from .phase2.realtime_assignment import RealtimeAssignment
 
 from .phase3.coaching_engine import CoachingEngine
-from .phase3.conflict_resolver import AgentConflictResolver
+from .phase3.conflict_resolver import ConflictResolver
 from .phase3.workflow_optimizer import WorkflowOptimizer
-from .phase3.strategic_planner import StrategicTeamPlanner
+from .phase3.strategic_planner import StrategicPlanner
 
 # Phase 4 imports temporarily commented out until implementation is complete
 # from .phase4.performance_learner import TeamPerformanceLearner
@@ -57,9 +57,9 @@ __all__ = [
     "RealtimeAssignment",
     # Phase 3 - Coaching and Optimization
     "CoachingEngine",
-    "AgentConflictResolver",
+    "ConflictResolver",
     "WorkflowOptimizer",
-    "StrategicTeamPlanner",
+    "StrategicPlanner",
     # Phase 4 - Learning and Adaptation (temporarily disabled until implementation complete)
     # "TeamPerformanceLearner",
     # "AdaptiveTeamManager",

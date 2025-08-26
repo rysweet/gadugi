@@ -9,11 +9,9 @@ while preserving essential current information.
 
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
-import os
 
 if os.environ.get("GADUGI_TEST_ENV") == "1":
     import warnings
@@ -58,8 +56,6 @@ else:
             MemoryDocument,
             MemoryParser,
             MemorySection,
-            Task,
-            TaskStatus,
         )
     except ImportError as e:
         raise ImportError(
@@ -333,7 +329,7 @@ class MemoryCompactor:
         return plan
 
     def _analyze_section_for_compaction(
-        self, section: MemorySection, rule: CompactionRule, current_date: datetime
+        self, section: MemorySection, rule: Optional[CompactionRule], current_date: datetime
     ) -> Dict[str, Any]:
         """Analyze a section to determine what should be compacted"""
         items = self._extract_section_items(section.content)
@@ -430,7 +426,7 @@ class MemoryCompactor:
                             item_date = item_date.replace(year=item_date.year + 100)
 
                     return (current_date - item_date).days
-                except ValueError as e:
+                except ValueError:
                     # Log error but continue
                     pass
 

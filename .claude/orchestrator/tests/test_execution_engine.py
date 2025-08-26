@@ -15,7 +15,7 @@ import time
 import unittest
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 import importlib.util
 
 # Set up path for imports
@@ -43,7 +43,8 @@ spec = importlib.util.spec_from_file_location(
 )
 prompt_generator_module = importlib.util.module_from_spec(spec)
 sys.modules['prompt_generator'] = prompt_generator_module
-spec.loader.exec_module(prompt_generator_module)
+if spec is not None and spec.loader is not None:
+    spec.loader.exec_module(prompt_generator_module)
 
 # Create proper mock classes instead of MagicMock to avoid InvalidSpecError
 class MockContainerManager:
@@ -58,7 +59,7 @@ class MockContainerConfig:
 class MockContainerResult:
     def __init__(self, **kwargs) -> None:
         self.task_id = kwargs.get('task_id', '')
-        self.task_id = kwargs.get('status', 'success')
+        self.status = kwargs.get('status', 'success')
         self.start_time = kwargs.get('start_time')
         self.end_time = kwargs.get('end_time')
         self.duration = kwargs.get('duration', 0)
@@ -69,10 +70,12 @@ class MockContainerResult:
         self.resource_usage = kwargs.get('resource_usage', {})
 
 # Create container_manager module with proper classes
-container_manager_mock = type('module', (), {})()
-container_manager_mock.ContainerManager = MockContainerManager
-container_manager_mock.ContainerConfig = MockContainerConfig
-container_manager_mock.ContainerResult = MockContainerResult
+from types import ModuleType
+container_manager_mock = ModuleType('container_manager')
+# Use setattr to avoid type checker issues
+setattr(container_manager_mock, 'ContainerManager', MockContainerManager)
+setattr(container_manager_mock, 'ContainerConfig', MockContainerConfig)
+setattr(container_manager_mock, 'ContainerResult', MockContainerResult)
 sys.modules['container_manager'] = container_manager_mock
 
 # Create execution_engine module from modified source

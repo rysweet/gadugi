@@ -10,12 +10,11 @@ if str(claude_path) not in sys.path:
 Pytest configuration and shared fixtures for Gadugi tests.
 """
 
-import os
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Generator
-from unittest.mock import Mock, patch
+from typing import Any, Dict, Generator, Optional, Callable
+from unittest.mock import patch
 
 import pytest
 
@@ -31,15 +30,15 @@ def temp_dir() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def mock_gh_response():
+def mock_gh_response() -> Callable[..., Dict[str, Any]]:
     """Mock GitHub CLI response."""
 
     def _mock_response(
         success: bool = True,
-        data: Dict[str, Any] = None,
+        data: Optional[Dict[str, Any]] = None,
         raw_output: str = "",
         error: str = "",
-    ):
+    ) -> Dict[str, Any]:
         return {
             "success": success,
             "data": data,
@@ -51,7 +50,7 @@ def mock_gh_response():
 
 
 @pytest.fixture
-def mock_subprocess():
+def mock_subprocess() -> Generator[Any, None, None]:
     """Mock subprocess for GitHub operations."""
     with patch("subprocess.run") as mock_run:
         mock_run.return_value.returncode = 0
@@ -63,7 +62,7 @@ def mock_subprocess():
 
 
 @pytest.fixture
-def sample_task():
+def sample_task() -> Dict[str, Any]:
     """Sample task data for testing."""
     return {
         "task_id": "test-task-001",
@@ -78,7 +77,7 @@ def sample_task():
 
 
 @pytest.fixture
-def mock_state_file(temp_dir):
+def mock_state_file(temp_dir: Path) -> Path:
     """Create a mock state file for testing."""
     state_file = temp_dir / "state.md"
     state_content = """# WorkflowMaster State
@@ -126,7 +125,7 @@ Last Updated: 2025-08-01T22:00:00Z
 
 
 @pytest.fixture
-def mock_config():
+def mock_config() -> Dict[str, Any]:
     """Sample configuration for testing."""
     return {
         "github": {

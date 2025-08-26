@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ...shared.utils.error_handling import ErrorHandler
+from ....shared.utils.error_handling import ErrorHandler
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
 
@@ -72,7 +72,7 @@ class RecommendationEngine:
         self.logger = logging.getLogger(__name__)
         self.task_matcher = task_matcher or TaskAgentMatcher()
         self.team_optimizer = team_optimizer or TeamCompositionOptimizer()
-        self.error_handler = error_handler or ErrorHandler()
+        self.error_handler = error_handler or ErrorHandler(config={})
 
         self.logger.info("RecommendationEngine initialized")
 

@@ -1,8 +1,6 @@
 """Tests for event data models."""
 
 import json
-import time
-import pytest
 
 from gadugi.event_service.events import (
     Event,
@@ -263,6 +261,7 @@ class TestEventCreators:
         assert event.is_github_event()
 
         github_event = event.get_github_event()
+        assert github_event is not None
         assert github_event.webhook_event == "issues"
         assert github_event.repository == "owner/repo"
         assert github_event.action == "opened"
@@ -287,6 +286,7 @@ class TestEventCreators:
         assert event.metadata["custom_field"] == "custom_value"
 
         local_event = event.get_local_event()
+        assert local_event is not None
         assert local_event.event_name == "file_changed"
         assert local_event.working_directory == "/path/to/project"
         assert local_event.environment == {"VAR": "value"}
@@ -310,6 +310,7 @@ class TestEventCreators:
         assert event.metadata["custom_field"] == "custom_value"
 
         agent_event = event.get_agent_event()
+        assert agent_event is not None
         assert agent_event.agent_name == "workflow-manager"
         assert agent_event.task_id == "task-123"
         assert agent_event.phase == "implementation"

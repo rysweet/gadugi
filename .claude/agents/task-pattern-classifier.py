@@ -429,7 +429,7 @@ class TaskPatternClassifier:
         description_lower = description.lower()
         indicators = []
 
-        for indicator, score in self.complexity_indicators.items():
+        for indicator, _ in self.complexity_indicators.items():
             if indicator in description_lower:
                 indicators.append(indicator)
 
@@ -659,23 +659,23 @@ class TaskPatternClassifier:
                 subtypes.append("unit_testing")
             if "integration" in " ".join(features.complexity_indicators):
                 subtypes.append("integration_testing")
-            if features is not None and features.has_integration_requirements:
+            if features.has_integration_requirements:
                 subtypes.append("e2e_testing")
 
         elif primary_type == TaskType.FEATURE:
-            if features is not None and features.has_integration_requirements:
+            if features.has_integration_requirements:
                 subtypes.append("integration_feature")
-            if features is not None and features.database_interaction:
+            if features.database_interaction:
                 subtypes.append("data_feature")
             if features.api_interaction_count > 0:
                 subtypes.append("api_feature")
 
         elif primary_type == TaskType.BUG_FIX:
-            if features is not None and features.has_security_implications:
+            if features.has_security_implications:
                 subtypes.append("security_fix")
-            if features is not None and features.has_performance_requirements:
+            if features.has_performance_requirements:
                 subtypes.append("performance_fix")
-            if features is not None and features.database_interaction:
+            if features.database_interaction:
                 subtypes.append("data_fix")
 
         return subtypes
@@ -706,9 +706,9 @@ class TaskPatternClassifier:
 
         # Domain complexity
         domain_score = 1.0
-        if features is not None and features.has_security_implications:
+        if features.has_security_implications:
             domain_score += 1.5
-        if features is not None and features.database_interaction:
+        if features.database_interaction:
             domain_score += 1.0
         if features.api_interaction_count > 0:
             domain_score += features.api_interaction_count * 0.3
@@ -717,7 +717,7 @@ class TaskPatternClassifier:
         # Integration complexity
         integration_score = 1.0
         integration_score += features.external_dependency_count * 0.5
-        if features is not None and features.has_integration_requirements:
+        if features.has_integration_requirements:
             integration_score += 1.0
         if features.modification_scope == "global":
             integration_score += 1.5
@@ -767,7 +767,7 @@ class TaskPatternClassifier:
         if features.external_dependency_count > 2:
             optimizations.append("dependency_isolation")
 
-        if features.complexity_scores.get("overall", 0) > 4.0:
+        if features.technical_depth_score > 4.0:
             optimizations.append("task_decomposition")
 
         return list(set(optimizations))  # Remove duplicates
@@ -790,7 +790,7 @@ class TaskPatternClassifier:
         if features.external_dependency_count > 3:
             risks.append("high_external_dependencies")
 
-        if features is not None and features.has_security_implications:
+        if features.has_security_implications:
             risks.append("security_sensitive")
 
         if features.modification_scope == "global":
@@ -810,7 +810,7 @@ class TaskPatternClassifier:
         if overall_complexity < 2.0:
             return "direct_implementation"
         elif overall_complexity < 3.5:
-            if features is not None and features.has_testing_requirements:
+            if features.has_testing_requirements:
                 return "test_driven_development"
             else:
                 return "iterative_implementation"

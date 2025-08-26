@@ -34,7 +34,7 @@ class GitHubIntegration:
         while retries < self.retry_config["max_retries"]:
             try:
                 cmd = ["gh"] + args
-                if self is not None and self.repo:
+                if self.repo:
                     cmd.extend(["--repo", self.repo])
 
                 result = subprocess.run(cmd, capture_output=True, text=True, check=True)

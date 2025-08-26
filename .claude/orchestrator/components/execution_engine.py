@@ -101,24 +101,24 @@ class ResourceMonitor:
     def __init__(self, monitoring_interval: float) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
-        self.resource_history: List[Any] = []
+        self.resource_history: List[SystemResources] = []
         self.monitor_thread: Optional[threading.Thread] = None
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """Start resource monitoring"""
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
         print("📊 Started resource monitoring")
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop resource monitoring"""
         self.monitoring = False
-        if self is not None and self.monitor_thread:
+        if self.monitor_thread is not None:
             self.monitor_thread.join(timeout=5.0)
         print("📊 Stopped resource monitoring")
 
-    def _monitor_loop(self):
+    def _monitor_loop(self) -> None:
         """Resource monitoring loop"""
         while self.monitoring:
             try:
@@ -196,7 +196,7 @@ class TaskExecutor:
     def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict[str, Any]] = None) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
-        self.task_id = prompt_file
+        self.prompt_file = prompt_file
         self.task_context = task_context or {}
         self.process: Optional[subprocess.Popen] = None  # Kept for fallback compatibility
         self.start_time: Optional[datetime] = None
@@ -250,7 +250,7 @@ class TaskExecutor:
 
                 # Check if containerized execution failed due to missing prerequisites
                 # (e.g., no API key, Docker issues) and should fall back to subprocess
-                if (container_result.status if container_result is not None else None) == "failed" and container_result.exit_code == -1:
+                if container_result is not None and container_result.status == "failed" and container_result.exit_code == -1:
                     if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
                         print(f"⚠️  Container execution requires API key for {self.task_id}")
                         print(f"🔄 Falling back to subprocess execution...")
@@ -258,13 +258,13 @@ class TaskExecutor:
                     else:
                         # This is a real failure, return it
                         execution_result = self._convert_container_result(container_result)
-                        print(f"❌ Containerized task failed: {self.task_id}, status={(execution_result.status if execution_result is not None else None)}")
+                        print(f"❌ Containerized task failed: {self.task_id}, status={execution_result.status}")
                         self.result = execution_result
                         return execution_result
                 else:
                     # Convert ContainerResult to ExecutionResult for compatibility
                     execution_result = self._convert_container_result(container_result)
-                    print(f"✅ Containerized task completed: {self.task_id}, status={(execution_result.status if execution_result is not None else None)}")
+                    print(f"✅ Containerized task completed: {self.task_id}, status={execution_result.status}")
                     self.result = execution_result
                     return execution_result
 
@@ -306,11 +306,11 @@ class TaskExecutor:
             print(f"⚠️  Warning: Failed to generate WorkflowManager prompt: {e}")
             return self.task_id
 
-    def _progress_callback(self, task_id: str, result):
+    def _progress_callback(self, task_id: str, result: Any) -> None:
         """Progress callback for containerized execution"""
         print(f"📊 Task progress: {task_id}, status={(result.status if result is not None else None)}")
 
-    def _convert_container_result(self, container_result) -> ExecutionResult:
+    def _convert_container_result(self, container_result: Any) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=(container_result.task_id if container_result is not None else None),
@@ -450,7 +450,7 @@ class TaskExecutor:
         print(f"✅ Subprocess task completed: {self.task_id}, status={status} (exit code: {exit_code})")
         return self.result
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Cancel the running task"""
         if self.process and self.process.poll() is None:
             print(f"🛑 Cancelling task {self.task_id}")
@@ -488,8 +488,8 @@ class ExecutionEngine:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
         self.resource_monitor = ResourceMonitor(monitoring_interval=1.0)
-        self.active_executors: Dict[str, Any] = {}
-        self.results: Dict[str, Any] = {}
+        self.active_executors: Dict[str, TaskExecutor] = {}
+        self.results: Dict[str, ExecutionResult] = {}
         self.execution_queue: queue.Queue = queue.Queue()
         self.stop_event = threading.Event()
 
@@ -547,9 +547,9 @@ class ExecutionEngine:
 
     def execute_tasks_parallel(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute multiple tasks in parallel using containerized execution when possible"""
 
@@ -571,9 +571,9 @@ class ExecutionEngine:
 
     def _execute_tasks_containerized(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using ContainerManager for true containerized parallel execution"""
 
@@ -619,7 +619,7 @@ class ExecutionEngine:
 
             # Execute with ContainerManager
             print(f"🐳 Executing {len(container_tasks)} tasks in containers...")
-            if self is not None and self.container_manager:
+            if self.container_manager is not None:
                 container_results = self.container_manager.execute_parallel_tasks(
                     container_tasks,
                     max_parallel=self.max_concurrent,
@@ -666,9 +666,9 @@ class ExecutionEngine:
 
     def _execute_tasks_subprocess(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using subprocess (original implementation)"""
 
@@ -739,7 +739,7 @@ class ExecutionEngine:
     def _execute_with_concurrency_control(
         self,
         executors: List[TaskExecutor],
-        progress_callback: Optional[Callable]
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]]
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks with dynamic concurrency control"""
 
@@ -758,18 +758,18 @@ class ExecutionEngine:
             # Process completed tasks
             for future in as_completed(future_to_task):
                 task_executor = future_to_task[future]
-                task_id = (task_executor.task_id if task_executor is not None else None)
+                task_id = task_executor.task_id
 
                 try:
                     result = future.result()
                     results[task_id] = result
 
                     # Update statistics
-                    if (result.status if result is not None else None) == 'success':
+                    if result.status == 'success':
                         self.stats['completed_tasks'] += 1
-                    elif (result.status if result is not None else None) == 'failed':
+                    elif result.status == 'failed':
                         self.stats['failed_tasks'] += 1
-                    elif (result.status if result is not None else None) == 'cancelled':
+                    elif result.status == 'cancelled':
                         self.stats['cancelled_tasks'] += 1
 
                     completed += 1
@@ -820,8 +820,8 @@ class ExecutionEngine:
         except Exception as e:
             # Create error result if execution fails
             return ExecutionResult(
-                task_id=(task_executor.task_id if task_executor is not None else None),
-                task_name=(task_executor.task_id if task_executor is not None else None),
+                task_id=task_executor.task_id,
+                task_name=task_executor.task_id,
                 status='failed',
                 start_time=datetime.now(),
                 end_time=datetime.now(),
@@ -834,7 +834,7 @@ class ExecutionEngine:
                 resource_usage={'cpu_time': 0.0, 'memory_mb': 0.0}
             )
 
-    def cancel_all_tasks(self):
+    def cancel_all_tasks(self) -> None:
         """Cancel all running tasks"""
         print("🛑 Cancelling all running tasks...")
 
@@ -845,7 +845,7 @@ class ExecutionEngine:
 
         print("✅ All tasks cancelled")
 
-    def get_execution_status(self) -> Dict:
+    def get_execution_status(self) -> Dict[str, Any]:
         """Get current execution status"""
         resource_status = self.resource_monitor.get_current_resources()
 
@@ -858,7 +858,7 @@ class ExecutionEngine:
             'statistics': self.stats.copy()
         }
 
-    def _print_execution_summary(self):
+    def _print_execution_summary(self) -> None:
         """Print execution summary"""
         print("\n📊 Execution Summary:")
         print(f"   Total tasks: {self.stats['total_tasks']}")
@@ -881,7 +881,7 @@ class ExecutionEngine:
             print(f"   Average CPU usage: {avg_cpu:.1f}%")
             print(f"   Average memory usage: {avg_memory:.1f}%")
 
-    def save_results(self, output_file: str):
+    def save_results(self, output_file: str) -> None:
         """Save execution results to file"""
         results_data = {
             'execution_summary': {
@@ -900,16 +900,17 @@ class ExecutionEngine:
 
         print(f"💾 Execution results saved to: {output_file}")
 
-    def _container_progress_callback(self, task_id: str, result):
+    def _container_progress_callback(self, task_id: str, result: Any) -> None:
         """Progress callback for containerized execution"""
-        print(f"🐳 Container task progress: {task_id}, status={(result.status if result is not None else None)}")
+        status = result.status if result is not None else None
+        print(f"🐳 Container task progress: {task_id}, status={status}")
 
-    def _convert_container_to_execution_result(self, container_result) -> ExecutionResult:
+    def _convert_container_to_execution_result(self, container_result: Any) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
-            task_id=(container_result.task_id if container_result is not None else None),
-            task_name=(container_result.task_id if container_result is not None else None),  # Use task_id as name
-            status=(container_result.status if container_result is not None else None),
+            task_id=container_result.task_id if container_result is not None else "",
+            task_name=container_result.task_id if container_result is not None else "",  # Use task_id as name
+            status=container_result.status if container_result is not None else "failed",
             start_time=container_result.start_time,
             end_time=container_result.end_time,
             duration=container_result.duration,
@@ -962,7 +963,7 @@ def main():
             tasks,
             MockWorktreeManager(),
             progress_callback=lambda completed, total, result: print(
-                f"Progress: {completed}/{total} - {(result.task_id if result is not None else None)}: {(result.status if result is not None else None)}"
+                f"Progress: {completed}/{total} - {result.task_id}: {result.status}" if result is not None else f"Progress: {completed}/{total} - Unknown: Unknown"
             )
         )
 
@@ -970,7 +971,7 @@ def main():
         engine.save_results(args.output)
 
         # Return appropriate exit code
-        failed_count = sum(1 for r in results.values() if (r.status if r is not None else None) == 'failed')
+        failed_count = sum(1 for r in results.values() if r.status == 'failed')
         return 1 if failed_count > 0 else 0
 
     except KeyboardInterrupt:

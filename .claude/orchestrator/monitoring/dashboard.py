@@ -19,28 +19,32 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Set
+from typing import Dict, Set, Any, Optional
 
 try:
-    import websockets
-    from websockets.server import WebSocketServerProtocol
-    WEBSOCKETS_AVAILABLE = True
+    import websockets  # type: ignore[import]
+    from websockets.server import WebSocketServerProtocol  # type: ignore[import]
+    websockets_available = True
 except ImportError:
-    WEBSOCKETS_AVAILABLE = False
-    WebSocketServerProtocol = None
+    websockets_available = False
+    websockets = None  # type: ignore[assignment]
+    WebSocketServerProtocol = None  # type: ignore[assignment]
 
 try:
-    from aiohttp import web, WSMsgType
-    import aiofiles
-    AIOHTTP_AVAILABLE = True
+    from aiohttp import web  # type: ignore[import]
+    import aiofiles  # type: ignore[import]
+    aiohttp_available = True
 except ImportError:
-    AIOHTTP_AVAILABLE = False
+    aiohttp_available = False
+    web = None  # type: ignore[assignment]
+    aiofiles = None  # type: ignore[assignment]
 
 try:
-    import docker
-    DOCKER_AVAILABLE = True
+    import docker  # type: ignore[import]
+    docker_available = True
 except ImportError:
-    DOCKER_AVAILABLE = False
+    docker_available = False
+    docker = None  # type: ignore[assignment]
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -53,13 +57,13 @@ class OrchestrationMonitor:
         self.monitoring_dir = Path(monitoring_dir)
         self.monitoring_dir.mkdir(parents=True, exist_ok=True)
 
-        self.websocket_clients: Set[WebSocketServerProtocol] = set()
-        self.docker_client = None
-        self.active_containers: Dict[Any, Any] = field(default_factory=dict)
+        self.websocket_clients: Set[Any] = set()
+        self.docker_client: Optional[Any] = None
+        self.active_containers: Dict[str, Dict[str, Any]] = {}
         self.monitoring = False
 
         # Initialize Docker client
-        if DOCKER_AVAILABLE:
+        if docker_available and docker is not None:
             try:
                 self.docker_client = docker.from_env()
             except Exception as e:
@@ -74,7 +78,7 @@ class OrchestrationMonitor:
         asyncio.create_task(self.monitoring_loop())
 
         # Start WebSocket server if available
-        if WEBSOCKETS_AVAILABLE:
+        if websockets_available and websockets is not None:
             asyncio.create_task(self.start_websocket_server())
 
     async def monitoring_loop(self):
@@ -216,13 +220,13 @@ class OrchestrationMonitor:
                 'containers': self.active_containers,
                 'monitoring_metadata': {
                     'monitor_version': '1.0.0',
-                    'docker_available': DOCKER_AVAILABLE,
-                    'websockets_available': WEBSOCKETS_AVAILABLE,
+                    'docker_available': docker_available,
+                    'websockets_available': websockets_available,
                     'connected_clients': len(self.websocket_clients)
                 }
             }
 
-            if AIOHTTP_AVAILABLE:
+            if aiofiles is not None:
                 async with aiofiles.open(monitoring_file, 'w') as f:
                     await f.write(json.dumps(data, indent=2))
             else:
@@ -234,7 +238,7 @@ class OrchestrationMonitor:
 
     async def start_websocket_server(self):
         """Start WebSocket server for real-time updates"""
-        if not WEBSOCKETS_AVAILABLE:
+        if not websockets_available or websockets is None:
             logger.warning("WebSockets not available - install websockets package")
             return
 
@@ -247,7 +251,7 @@ class OrchestrationMonitor:
 
             try:
                 # Send initial status
-                if self is not None and self.active_containers:
+                if self.active_containers:
                     initial_message = {
                         'type': 'initial_status',
                         'timestamp': datetime.now().isoformat(),
@@ -271,8 +275,9 @@ class OrchestrationMonitor:
                 logger.info(f"WebSocket client disconnected: {websocket.remote_address}")
 
         try:
-            await websockets.serve(handle_websocket, "0.0.0.0", port)
-            logger.info(f"WebSocket server started on port {port}")
+            if websockets_available and websockets is not None:
+                await websockets.serve(handle_websocket, "0.0.0.0", port)
+                logger.info(f"WebSocket server started on port {port}")
         except Exception as e:
             logger.error(f"Failed to start WebSocket server: {e}")
 
@@ -347,7 +352,7 @@ class OrchestrationMonitor:
 
 async def create_web_app():
     """Create web application for monitoring dashboard"""
-    if not AIOHTTP_AVAILABLE:
+    if not aiohttp_available or web is None:
         logger.error("aiohttp not available - install with: pip install aiohttp")
         return None
 
@@ -511,10 +516,14 @@ async def create_web_app():
     '''
 
     async def dashboard_handler(request):
-        return web.Response(text=dashboard_html, content_type='text/html')
+        if web is not None:
+            return web.Response(text=dashboard_html, content_type='text/html')
+        return None
 
     async def health_handler(request):
-        return web.Response(text='OK', status=200)
+        if web is not None:
+            return web.Response(text='OK', status=200)
+        return None
 
     app.router.add_get('/', dashboard_handler)
     app.router.add_get('/health', health_handler)
@@ -527,11 +536,11 @@ async def main():
     logger.info("Starting orchestrator monitoring dashboard...")
 
     # Create monitor
-    monitor = OrchestrationMonitor()
+    monitor = OrchestrationMonitor(monitoring_dir="./monitoring")
     await monitor.start_monitoring()
 
     # Create and start web app
-    if AIOHTTP_AVAILABLE:
+    if aiohttp_available and web is not None:
         app = await create_web_app()
         if app:
             port = int(os.getenv('HTTP_PORT', 8080))

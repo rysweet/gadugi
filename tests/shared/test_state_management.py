@@ -4,33 +4,17 @@ Tests the Enhanced Separation architecture implementation for state persistence.
 """
 
 import json
-import os
 import shutil
 
 # Import the module we're testing (will be implemented after tests)
-import sys
 import tempfile
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from datetime import datetime, timezone
+from typing import Any, List, Union
 
 import pytest
-from unittest.mock import Mock, call, patch
-
 # For type checking only
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
-if TYPE_CHECKING:
-    from claude.shared.state_management import (
-        CheckpointManager,
-        StateError,
-        StateManager,
-        StateValidationError,
-        TaskState,
-        WorkflowPhase,
-    )
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     from claude.shared.state_management import (
@@ -39,15 +23,14 @@ try:
         StateManager,
         StateValidationError,
         TaskState,
-        WorkflowPhase,
-    )
+        WorkflowPhase)
 except ImportError as e:
     # These will be implemented after tests pass
     print(f"Warning: Could not import state_management module: {e}")
 
     # Define stubs for all needed classes
     from enum import Enum
-    from typing import Dict, Any, Optional, List, Union
+    from typing import Dict, List, Union
     from datetime import datetime
 
     class WorkflowPhase(Enum):
@@ -63,7 +46,7 @@ except ImportError as e:
         def get_phase_name(phase: Union["WorkflowPhase", int]) -> str:
             if isinstance(phase, int):
                 # Try to find the phase by value
-                for p in WorkflowPhase:
+                for _p in WorkflowPhase:
                     if p.value == phase:
                         return p.name.lower().replace("_", "-")
                 return "unknown"
@@ -71,7 +54,7 @@ except ImportError as e:
 
         @staticmethod
         def is_valid_phase(phase_value: int) -> bool:
-            return any(phase.value == phase_value for phase in WorkflowPhase)
+            return any(phase.value == phase_value for _phase in WorkflowPhase)
 
     class TaskStatus(Enum):
         PENDING = "pending"
@@ -156,7 +139,7 @@ except ImportError as e:
                     data["current_phase"] = WorkflowPhase(data["current_phase"])
                 except ValueError:
                     # Handle phase by name
-                    for phase in WorkflowPhase:
+                    for _phase in WorkflowPhase:
                         if phase.name.lower() == str(data["current_phase"]).lower():
                             data["current_phase"] = phase
                             break
@@ -171,8 +154,7 @@ except ImportError as e:
             self,
             error_type: str,
             error_message: str,
-            error_details: Optional[Dict] = None,
-        ) -> None:
+            error_details: Optional[Dict] = None) -> None:
             self.error_info = {
                 "type": error_type,
                 "message": error_message,
@@ -247,7 +229,7 @@ except ImportError as e:
 
         def list_task_states(self) -> List[TaskState]:
             states = []
-            for state_file in self.state_dir.glob("*.json"):
+            for _state_file in self.state_dir.glob("*.json"):
                 try:
                     with open(state_file, "r") as f:
                         data = json.load(f)
@@ -283,7 +265,7 @@ except ImportError as e:
         def cleanup_old_states(self, days: int = 7) -> int:
             count = 0
             cutoff = datetime.now(timezone.utc) - timedelta(days=days)
-            for state_file in self.state_dir.glob("*.json"):
+            for _state_file in self.state_dir.glob("*.json"):
                 try:
                     with open(state_file, "r") as f:
                         data = json.load(f)
@@ -300,7 +282,7 @@ except ImportError as e:
 
         def get_active_states(self) -> List[TaskState]:
             states = []
-            for s in self.list_task_states():
+            for _s in self.list_task_states():
                 # Handle both enum and string status
                 status_value = getattr(s.status, "value", s.status)
                 if isinstance(s.status, str):
@@ -316,7 +298,7 @@ except ImportError as e:
 
         def get_completed_states(self) -> List[TaskState]:
             states = []
-            for s in self.list_task_states():
+            for _s in self.list_task_states():
                 # Handle both enum and string status
                 status_value = getattr(s.status, "value", s.status)
                 if isinstance(s.status, str):
@@ -333,7 +315,7 @@ except ImportError as e:
         def get_failed_states(self) -> List[TaskState]:
             return [
                 s
-                for s in self.list_task_states()
+                for _s in self.list_task_states()
                 if getattr(s.status, "value", s.status) == "failed"
             ]
 
@@ -361,16 +343,15 @@ except ImportError as e:
             if not backup_path.exists():
                 raise StateError(
                     f"Backup directory {backup_dir} not found",
-                    operation="restore_state",
-                )
+                    operation="restore_state")
             # Clear in-memory cache before restore
             self._states.clear()
-            for backup_file in backup_path.glob("*.json"):
+            for _backup_file in backup_path.glob("*.json"):
                 shutil.copy2(backup_file, self.state_dir / backup_file.name)
 
         def validate_state_consistency(self) -> List[str]:
             errors = []
-            for state in self.list_task_states():
+            for _state in self.list_task_states():
                 if not state.task_id:
                     errors.append("Found state with empty task_id")
                 if state.status == "completed" and not state.result:
@@ -385,8 +366,7 @@ except ImportError as e:
         def __init__(
             self,
             checkpoint_dir: Optional[str] = None,
-            state_manager: Optional["StateManager"] = None,
-        ):
+            state_manager: Optional["StateManager"] = None):
             # Support both constructor patterns
             if checkpoint_dir:
                 self.checkpoint_dir = Path(checkpoint_dir)
@@ -410,14 +390,13 @@ except ImportError as e:
             if not checkpoint_file.exists():
                 raise StateError(
                     f"Checkpoint {checkpoint_id} not found",
-                    operation="restore_checkpoint",
-                )
+                    operation="restore_checkpoint")
             with open(checkpoint_file, "r") as f:
                 return json.load(f)
 
         def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
             pattern = f"{workflow_id}-*.json" if workflow_id else "*.json"
-            return [f.stem for f in self.checkpoint_dir.glob(pattern)]
+            return [f.stem for _f in self.checkpoint_dir.glob(pattern)]
 
         def delete_checkpoint(self, checkpoint_id: str) -> None:
             checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
@@ -434,14 +413,13 @@ except ImportError as e:
             self,
             message: str,
             operation: Optional[str] = None,
-            context: Optional[Dict] = None,
-        ):
+            context: Optional[Dict] = None):
             super().__init__(message)
             self.operation = operation
             self.context = context or {}
 
     class WorkflowState:
-        def __init__(self, workflow_id: str) -> None:
+        def __init__(self, workflow_id: str, **kwargs: Any) -> None:
             self.workflow_id = workflow_id
             self.phase = kwargs.get("phase", WorkflowPhase.PLANNING)
             self.created_at = kwargs.get("created_at", datetime.now())
@@ -453,7 +431,6 @@ except ImportError as e:
         def __init__(self, lock_dir: str) -> None:
             self.lock_dir = Path(lock_dir)
             self.lock_dir.mkdir(parents=True, exist_ok=True)
-
 
 class TestTaskState:
     """Test suite for TaskState data class."""
@@ -490,8 +467,7 @@ class TestTaskState:
             pr_number=15,
             current_phase=3,
             context=context,
-            error_info={"last_error": "Network timeout"},
-        )
+            error_info={"last_error": "Network timeout"})
 
         assert state.task_id == "test-task-002"
         assert state.branch == "feature/test-002"
@@ -515,8 +491,7 @@ class TestTaskState:
             status="completed",
             branch="feature/test-003",
             issue_number=10,
-            current_phase=9,
-        )
+            current_phase=9)
 
         data = state.to_dict()
 
@@ -617,8 +592,7 @@ class TestTaskState:
             task_id="test-task-007",
             prompt_file="test.md",
             status="error",
-            error_info={"error": "Previous error"},
-        )
+            error_info={"error": "Previous error"})
 
         state.clear_error()
 
@@ -650,7 +624,6 @@ class TestTaskState:
         )
         assert invalid_phase.is_valid  # is_valid is a property, not a method
 
-
 class TestWorkflowPhase:
     """Test suite for WorkflowPhase enum."""
 
@@ -678,7 +651,6 @@ class TestWorkflowPhase:
         assert WorkflowPhase.is_valid_phase(5) is True
         assert WorkflowPhase.is_valid_phase(15) is False
         assert WorkflowPhase.is_valid_phase(-1) is False
-
 
 class TestStateManager:
     """Test suite for StateManager class."""
@@ -749,8 +721,7 @@ class TestStateManager:
             task_id="test-load-001",
             prompt_file="load-test.md",
             status="in_progress",
-            current_phase=3,
-        )
+            current_phase=3)
         state_manager.save_state(original_state)
 
         # Load the state
@@ -817,14 +788,14 @@ class TestStateManager:
             TaskState(task_id="task-004", prompt_file="test4.md", status="error"),
         ]
 
-        for state in states:
+        for _state in states:
             state_manager.save_state(state)
 
         # List all active states (list_active_states returns ALL states, not just active)
         active_states = state_manager.list_active_states()
         assert len(active_states) == 4
 
-        task_ids = [s.task_id for s in active_states]
+        task_ids = [s.task_id for _s in active_states]
         assert "task-001" in task_ids
         assert "task-002" in task_ids
 
@@ -842,7 +813,7 @@ class TestStateManager:
             ),
         ]
 
-        for state in states:
+        for _state in states:
             state_manager.save_state(state)
 
         # Filter by completed
@@ -909,8 +880,7 @@ class TestStateManager:
             task_id="restore-test",
             prompt_file="restore.md",
             status="in_progress",
-            current_phase=3,
-        )
+            current_phase=3)
         state_manager.save_state(original_state)
         temp_backup_dir = state_manager.state_dir.parent / "restore_backup_test"
         temp_backup_dir.mkdir(parents=True, exist_ok=True)
@@ -950,7 +920,7 @@ class TestStateManager:
         state_manager.save_state(state)
 
         # Update state multiple times
-        for i in range(3):
+        for _i in range(3):
             current_phase = i + 1
             status = "in_progress" if i < 2 else "completed"
             current_state = state_manager.load_state("history-test")
@@ -1009,7 +979,6 @@ class TestStateManager:
         lock_fd_after_release = state_manager._acquire_lock("test-resource")
         assert lock_fd_after_release is not None
 
-
 class TestCheckpointManager:
     """Test suite for CheckpointManager class."""
 
@@ -1032,8 +1001,7 @@ class TestCheckpointManager:
             task_id="checkpoint-001",
             prompt_file="test.md",
             status="in_progress",
-            current_phase=3,
-        )
+            current_phase=3)
 
         checkpoint_state = {
             "task_id": state.task_id,
@@ -1058,7 +1026,7 @@ class TestCheckpointManager:
 
         # Create multiple checkpoints
         checkpoint_ids = []
-        for i in range(3):
+        for _i in range(3):
             checkpoint_state = {
                 "task_id": "list-checkpoints",
                 "current_phase": i + 1,
@@ -1074,8 +1042,8 @@ class TestCheckpointManager:
         assert len(checkpoints) >= 3
 
         # Check that our checkpoints are in the list
-        for checkpoint_id in checkpoint_ids:
-            assert any(cp["checkpoint_id"] == checkpoint_id for cp in checkpoints)
+        for _checkpoint_id in checkpoint_ids:
+            assert any(cp["checkpoint_id"] == checkpoint_id for _cp in checkpoints)
 
     def test_restore_checkpoint(self, checkpoint_manager):
         """Test checkpoint restoration."""
@@ -1084,8 +1052,7 @@ class TestCheckpointManager:
             task_id="restore-checkpoint",
             prompt_file="restore.md",
             status="in_progress",
-            current_phase=3,
-        )
+            current_phase=3)
 
         checkpoint_state = {
             "task_id": "restore-checkpoint",
@@ -1112,11 +1079,10 @@ class TestCheckpointManager:
         state = TaskState(
             task_id="cleanup-checkpoints",
             prompt_file="cleanup.md",
-            status="in_progress",
-        )
+            status="in_progress")
 
         # Create several checkpoints
-        for i in range(7):
+        for _i in range(7):
             state.current_phase = i + 1
             checkpoint_manager.create_checkpoint(
                 state, f"Checkpoint {i + 1} for cleanup"
@@ -1155,7 +1121,6 @@ class TestCheckpointManager:
         assert restored_data is not None
         assert restored_data.context["large_data"] == "x" * 10000
 
-
 class TestStateError:
     """Test suite for StateError exception class."""
 
@@ -1172,7 +1137,6 @@ class TestStateError:
         error = StateValidationError("Validation failed", errors)
         assert str(error) == "Validation failed"
         assert error.validation_errors == errors
-
 
 # Integration tests
 class TestStateManagementIntegration:
@@ -1205,8 +1169,7 @@ class TestStateManagementIntegration:
         task_state = TaskState(
             task_id="integration-workflow",
             prompt_file="integration-test.md",
-            status="pending",
-        )
+            status="pending")
 
         # Phase 1: Initial Setup
         task_state.update_phase(WorkflowPhase.INITIAL_SETUP)
@@ -1252,8 +1215,7 @@ class TestStateManagementIntegration:
         task_state = TaskState(
             task_id="error-recovery-test",
             prompt_file="error-test.md",
-            status="in_progress",
-        )
+            status="in_progress")
         # Save the initial task state
         state_manager.save_state(task_state)
 
@@ -1263,7 +1225,7 @@ class TestStateManagementIntegration:
             WorkflowPhase.ISSUE_CREATION,
             WorkflowPhase.IMPLEMENTATION,
         ]
-        for phase in phases:
+        for _phase in phases:
             task_state.update_phase(phase)
             state_manager.update_state(task_state)
             checkpoint_manager.create_checkpoint(
@@ -1296,13 +1258,12 @@ class TestStateManagementIntegration:
 
         # Create multiple tasks
         tasks = []
-        for i in range(5):
+        for _i in range(5):
             task = TaskState(
                 task_id=f"concurrent-task-{i:03d}",
                 prompt_file=f"task-{i}.md",
                 status="in_progress",
-                current_phase=i + 1,
-            )
+                current_phase=i + 1)
             tasks.append(task)
             state_manager.save_state(task)
             checkpoint_manager.create_checkpoint(task, f"concurrent-task-{i}")
@@ -1312,7 +1273,7 @@ class TestStateManagementIntegration:
         assert len(active_states) == 5
 
         # Complete some tasks
-        for i in [0, 2, 4]:
+        for _i in [0, 2, 4]:
             tasks[i].status = "completed"
             tasks[i].update_phase(WorkflowPhase.REVIEW)
             state_manager.update_state(tasks[i])

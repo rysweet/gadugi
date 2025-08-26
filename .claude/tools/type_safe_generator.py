@@ -11,7 +11,7 @@ from __future__ import annotations
 import ast
 import json
 try:
-    import black
+    import black  # type: ignore[import-untyped]
     HAS_BLACK = True
 except ImportError:
     HAS_BLACK = False

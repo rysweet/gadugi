@@ -22,6 +22,17 @@ class ErrorSeverity(Enum):
     CRITICAL = "critical"
 
 
+class ErrorCategory(Enum):
+    """Error categories for classification."""
+
+    WORKFLOW_EXECUTION = "workflow_execution"
+    SYSTEM = "system"
+    VALIDATION = "validation"
+    NETWORK = "network"
+    AUTHENTICATION = "authentication"
+    CONFIGURATION = "configuration"
+
+
 class RetryStrategy(Enum):
     """Retry strategies."""
 
@@ -53,7 +64,7 @@ class RecoverableError(GadugiError):
 class NonRecoverableError(GadugiError):
     """Error that cannot be recovered from."""
 
-    def __init__(self, message: str, context: Optional) -> None:
+    def __init__(self, message: str, context: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(message, ErrorSeverity.CRITICAL, context)
 
 
@@ -155,9 +166,9 @@ class ErrorHandler:
     """Centralized error handling with recovery strategies."""
 
     def __init__(self) -> None:
-        self.error_counts: Dict[Any, Any] = field(default_factory=dict)
-        self.recovery_strategies: Dict[Any, Any] = field(default_factory=dict)
-        self.error_history: List[Any] = field(default_factory=list)
+        self.error_counts: Dict[str, int] = {}
+        self.recovery_strategies: Dict[Type[Exception], Callable] = {}
+        self.error_history: List[Dict[str, Any]] = []
 
     def register_recovery_strategy(
         self, exception_type: Type[Exception], strategy: Callable
@@ -241,7 +252,7 @@ class CircuitBreaker:
                     self.reset()
 
             # If circuit is open, fail fast
-            if self is not None and self.is_open:
+            if self.is_open:
                 raise NonRecoverableError(
                     f"Circuit breaker open for {func.__name__}",
                     {"failure_count": self.failure_count},
@@ -287,7 +298,7 @@ class CircuitBreaker:
                 self.reset()
 
         # If circuit is open, fail fast
-        if self is not None and self.is_open:
+        if self.is_open:
             raise NonRecoverableError(
                 f"Circuit breaker open for function call",
                 {'failure_count': self.failure_count}
@@ -304,6 +315,7 @@ class CircuitBreaker:
         except Exception as e:
             self.failure_count += 1
             self.last_failure_time = time.time()
+            logger.error(f"Circuit breaker recorded failure: {e}")
 
             if self.failure_count >= self.failure_threshold:
                 self.is_open = True
@@ -356,7 +368,7 @@ class ErrorContext:
             self.error = exc_val
             logger.error(f"Error in {self.operation_name}: {exc_val}")
 
-            if self is not None and self.cleanup_func:
+            if self.cleanup_func:
                 try:
                     logger.info(f"Running cleanup for {self.operation_name}")
                     self.cleanup_func()

@@ -6,7 +6,6 @@ CodeReviewer agent identify over-engineering patterns and suggest simpler altern
 """
 
 import unittest
-from unittest.mock import patch, Mock
 import tempfile
 import os
 
@@ -14,7 +13,7 @@ import os
 class TestCodeReviewerSimplicityDetection(unittest.TestCase):
     """Test cases for design simplicity evaluation in code reviews."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_cases_dir = tempfile.mkdtemp()
 
@@ -346,7 +345,7 @@ class TestContextAwareAssessment(unittest.TestCase):
     def test_early_stage_vs_mature_project_context(self):
         """Test different standards for early-stage vs mature projects."""
         # Early stage: favor simplicity even if not perfectly architected
-        early_stage_code = """
+        _ = """
 # Quick prototype - direct approach acceptable
 def send_notification(user, message):
     # Direct email sending - no abstraction layer yet
@@ -357,7 +356,7 @@ def send_notification(user, message):
 """
 
         # Mature project: consider consistency with existing patterns
-        mature_project_code = """
+        _ = """
 # In mature codebase with established notification system
 def send_notification(user, message):
     # Should use existing NotificationService
@@ -370,7 +369,7 @@ def send_notification(user, message):
     def test_team_size_context(self):
         """Test different standards based on team size and experience."""
         # Small team: simpler patterns acceptable
-        small_team_code = """
+        _ = """
 # Small team - direct approach is fine
 def calculate_shipping(weight, distance):
     base_rate = 5.00
@@ -380,7 +379,7 @@ def calculate_shipping(weight, distance):
 """
 
         # Large team: more sophisticated patterns may be warranted
-        large_team_code = """
+        _ = """
 # Large team - structured approach for maintainability
 class ShippingCalculator:
     def __init__(self, rate_config) -> None: ShippingRateConfig)) -> None:

@@ -67,7 +67,7 @@ class PromptGenerator:
         prompt_content = f"""# WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: {(context.task_id if context is not None else None)}
+- **Task ID**: {context.task_id}
 - **Task Name**: {context.task_name}
 - **Original Prompt**: {context.original_prompt}
 - **Phase Focus**: {context.phase_focus or 'Full Implementation'}
@@ -206,7 +206,7 @@ class PromptGenerator:
 
         return formatted
 
-    def _create_default_templates(self):
+    def _create_default_templates(self) -> None:
         """Create default prompt templates if they don't exist"""
 
         # Create a basic template for reference
@@ -286,7 +286,7 @@ for WorkflowManager execution in parallel worktree environments.
         return issues
 
 
-def main():
+def main() -> int:
     """CLI entry point for PromptGenerator"""
     import argparse
 

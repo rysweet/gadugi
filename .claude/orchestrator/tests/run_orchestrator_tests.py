@@ -48,12 +48,12 @@ def run_all_tests():
     print(f"Skipped: {len(result.skipped)}")
 
     # Print failure details
-    if result is not None and result.failures:
+    if result.failures:
         print("\nFAILURES:")
         for test, traceback in result.failures:
             print(f"❌ {test}: {traceback}")
 
-    if result is not None and result.errors:
+    if result.errors:
         print("\nERRORS:")
         for test, traceback in result.errors:
             print(f"💥 {test}: {traceback}")
@@ -158,15 +158,15 @@ def main():
 
     # Set up logging
     import logging
-    if args is not None and args.quiet:
+    if args.quiet:
         logging.basicConfig(level=logging.ERROR)
     else:
         logging.basicConfig(level=logging.WARNING)
 
     # Handle commands
-    if args is not None and args.validate:
+    if args.validate:
         return validate_environment()
-    elif args is not None and args.test:
+    elif args.test:
         return run_specific_test(args.test)
     else:
         return run_all_tests()

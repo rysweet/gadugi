@@ -13,12 +13,10 @@ Key Features:
 """
 
 import os
-import re
 import json
 import subprocess
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -44,8 +42,8 @@ except ImportError:
             """Minimal WorkflowState for when workflow_engine is not available"""
             prompt_file: str = ""
             current_phase: Optional[WorkflowPhase] = None
-            phases_completed: Dict[str, bool] = None
-            context: Dict[str, Any] = None
+            phases_completed: Optional[Dict[str, bool]] = None
+            context: Optional[Dict[str, Any]] = None
 
             def __post_init__(self):
                 if self.phases_completed is None:
@@ -930,17 +928,18 @@ if __name__ == "__main__":
         for result in report.results:
             if not result.passed:
                 print(f"  • {result.rule_name}: {result.message}")
-                if result is not None and result.suggestions:
+                if result.suggestions:
                     for suggestion in result.suggestions:
                         print(f"    → {suggestion}")
 
-    if report is not None and report.recommendations:
+    if report.recommendations:
         print(f"\n💡 Recommendations:")
         for rec in report.recommendations:
             print(f"  • {rec}")
 
     # Export detailed report
-    report_file = report.export_validation_report(report)
+    validator = WorkflowValidator(validation_level)
+    report_file = validator.export_validation_report(report)
     print(f"\n📄 Detailed report saved to: {report_file}")
 
     # Exit with appropriate code

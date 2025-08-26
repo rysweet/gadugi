@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 
 @dataclass
@@ -101,7 +101,7 @@ class WorktreeManager:
             print(f"❌ {error_msg}")
             raise RuntimeError(error_msg)
 
-    def _setup_worktree_environment(self, worktree_path: Path):
+    def _setup_worktree_environment(self, worktree_path: Path) -> None:
         """Set up the worktree environment for task execution"""
         # Copy necessary configuration files
         config_files = [
@@ -140,7 +140,7 @@ class WorktreeManager:
         """Get worktree information for a specific task"""
         return self.worktrees.get(task_id)
 
-    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None):
+    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None) -> None:
         """Update worktree status"""
         if task_id in self.worktrees:
             self.worktrees[task_id].status = status
@@ -182,7 +182,7 @@ class WorktreeManager:
             print(f"❌ Failed to sync worktree {task_id}: {e}")
             return False
 
-    def collect_worktree_results(self, task_id: str) -> Optional[Dict]:
+    def collect_worktree_results(self, task_id: str) -> Optional[Dict[str, Any]]:
         """Collect results from a completed worktree"""
         if task_id not in self.worktrees:
             return None
@@ -194,7 +194,7 @@ class WorktreeManager:
             'task_id': task_id,
             'task_name': worktree_info.task_name,
             'branch_name': worktree_info.branch_name,
-            'status': (worktree_info.status if worktree_info is not None else None),
+            'status': worktree_info.status,
             'files_changed': [],
             'commits': [],
             'logs': None,
@@ -255,7 +255,7 @@ class WorktreeManager:
 
         try:
             # Stop any running processes
-            if worktree_info is not None and worktree_info.pid:
+            if worktree_info.pid is not None:
                 try:
                     os.kill(worktree_info.pid, 15)  # SIGTERM
                     print(f"🛑 Terminated process {worktree_info.pid}")
@@ -318,7 +318,7 @@ class WorktreeManager:
         print(f"✅ Cleaned up {cleaned}/{len(task_ids)} worktrees")
         return cleaned
 
-    def get_system_worktrees(self) -> List[Dict]:
+    def get_system_worktrees(self) -> List[Dict[str, Any]]:
         """Get all git worktrees (including non-managed ones)"""
         try:
             result = subprocess.run(
@@ -388,7 +388,7 @@ class WorktreeManager:
 
         return issues
 
-    def _load_state(self):
+    def _load_state(self) -> None:
         """Load worktree state from file"""
         if self.state_file.exists():
             try:
@@ -411,17 +411,17 @@ class WorktreeManager:
                 print(f"⚠️  Warning: Failed to load worktree state: {e}")
                 self.worktrees = {}
 
-    def _save_state(self):
+    def _save_state(self) -> None:
         """Save worktree state to file"""
         try:
             data = {
                 'worktrees': {
                     task_id: {
-                        'task_id': (wt.task_id if wt is not None else None),
+                        'task_id': wt.task_id,
                         'task_name': wt.task_name,
                         'worktree_path': str(wt.worktree_path),
                         'branch_name': wt.branch_name,
-                        'status': (wt.status if wt is not None else None),
+                        'status': wt.status,
                         'created_at': wt.created_at,
                         'pid': wt.pid
                     }
@@ -440,7 +440,7 @@ class WorktreeManager:
         from datetime import datetime
         return datetime.now().isoformat()
 
-    def get_status_summary(self) -> Dict:
+    def get_status_summary(self) -> Dict[str, Any]:
         """Get summary of all worktree statuses"""
         summary = {
             'total': len(self.worktrees),
@@ -451,12 +451,13 @@ class WorktreeManager:
         }
 
         for worktree in self.worktrees.values():
-            summary[(worktree.status if worktree is not None else None)] = summary.get((worktree.status if worktree is not None else None), 0) + 1
+            status = worktree.status
+            summary[status] = summary.get(status, 0) + 1
 
         return summary
 
 
-def main():
+def main() -> int:
     """CLI entry point for WorktreeManager"""
     import argparse
 
@@ -476,20 +477,20 @@ def main():
             worktrees = manager.list_worktrees()
             print(f"Managed worktrees: {len(worktrees)}")
             for wt in worktrees:
-                print(f"  {(wt.task_id if wt is not None else None)}: {wt.task_name} ({(wt.status if wt is not None else None)})")
+                print(f"  {wt.task_id}: {wt.task_name} ({wt.status})")
 
         elif args.command == "create":
-            if not (args.task_id if args is not None else None) or not args.task_name:
+            if not args.task_id or not args.task_name:
                 print("❌ --task-id and --task-name required for create")
                 return 1
 
-            manager.create_worktree((args.task_id if args is not None else None), args.task_name)
+            manager.create_worktree(args.task_id, args.task_name)
 
         elif args.command == "cleanup":
-            if args is not None and args.all:
+            if args.all:
                 manager.cleanup_all_worktrees(args.force)
-            elif args is not None and (args.task_id if args is not None else None):
-                manager.cleanup_worktree((args.task_id if args is not None else None), args.force)
+            elif args.task_id:
+                manager.cleanup_worktree(args.task_id, args.force)
             else:
                 print("❌ --task-id or --all required for cleanup")
                 return 1

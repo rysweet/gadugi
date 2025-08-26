@@ -6,7 +6,6 @@ and changes across different programming languages.
 """
 
 import ast
-import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Set, Union

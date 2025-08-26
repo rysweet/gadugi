@@ -8,8 +8,8 @@ and evolution history tracking.
 import pytest
 import tempfile
 import os
-from pathlib import Path
-from datetime import datetime
+# from pathlib import Path
+# from datetime import datetime
 from agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,
@@ -123,7 +123,7 @@ class TestDocumentationManager:
 
     def test_initialization(self):
         """Test documentation manager initialization"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         assert manager.architecture_file == "ARCHITECTURE.md"
         assert len(manager.template_sections) > 0
@@ -161,7 +161,7 @@ class TestDocumentationManager:
 
     def test_identify_sections_to_update_component_changes(self, sample_changes):
         """Test identifying sections to update for component changes"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Filter to only class/module changes
         component_changes = [
@@ -175,7 +175,7 @@ class TestDocumentationManager:
 
     def test_identify_sections_to_update_security_changes(self, sample_changes):
         """Test identifying sections to update for security changes"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Filter to security-related changes
         security_changes = [
@@ -189,7 +189,7 @@ class TestDocumentationManager:
 
     def test_identify_sections_to_update_performance_changes(self, sample_changes):
         """Test identifying sections to update for performance changes"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Create performance-related change
         perf_change = ArchitecturalChange(
@@ -210,7 +210,7 @@ class TestDocumentationManager:
 
     def test_replace_section_existing(self, sample_architecture_doc):
         """Test replacing existing section in document"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         new_section_content = """## Component Architecture
 
@@ -237,7 +237,7 @@ class TestDocumentationManager:
 
     def test_replace_section_new(self, sample_architecture_doc):
         """Test adding new section to document"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         new_section_content = """## Integration Points
 
@@ -255,7 +255,7 @@ class TestDocumentationManager:
 
     def test_generate_component_architecture_new_components(self, sample_changes):
         """Test generating component architecture section with new components"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Filter to added class changes
         new_components = [
@@ -274,7 +274,7 @@ class TestDocumentationManager:
 
     def test_generate_security_architecture_updates(self, sample_changes):
         """Test generating security architecture section updates"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Filter to security changes
         security_changes = [
@@ -289,7 +289,7 @@ class TestDocumentationManager:
 
     def test_generate_performance_architecture_updates(self):
         """Test generating performance architecture section updates"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Create async performance change
         perf_changes = [
@@ -314,7 +314,7 @@ class TestDocumentationManager:
 
     def test_create_evolution_entry_high_impact(self, sample_changes, sample_pr_info):
         """Test creating evolution entry for high impact changes"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         # Filter to high impact changes
         high_impact_changes = [
@@ -332,7 +332,7 @@ class TestDocumentationManager:
 
     def test_create_evolution_entry_low_impact_only(self, sample_pr_info):
         """Test evolution entry with only low impact changes (should return None)"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         low_impact_changes = [
             ArchitecturalChange(
@@ -352,7 +352,7 @@ class TestDocumentationManager:
 
     def test_add_evolution_entry_existing_section(self, sample_architecture_doc):
         """Test adding evolution entry to existing section"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         entry = """
 ### 2024-01-15 - PR #123: Add System Design Review Agent
@@ -373,7 +373,7 @@ class TestDocumentationManager:
 
     def test_add_evolution_entry_no_existing_section(self):
         """Test adding evolution entry when no evolution section exists"""
-        manager = DocumentationManager()
+        manager = DocumentationManager("architecture.md")
 
         simple_doc = """# Simple Architecture
 

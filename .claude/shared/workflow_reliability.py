@@ -19,11 +19,10 @@ Integration with Enhanced Separation:
 """
 
 import logging
-import os
 import psutil
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
@@ -31,27 +30,12 @@ from enum import Enum
 
 # Import Enhanced Separation shared modules
 try:
-    from utils.error_handling import ErrorHandler, CircuitBreaker, retry, ErrorContext
-    from state_management import StateManager, TaskState, WorkflowPhase, CheckpointManager
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker
-    from github_operations import GitHubOperations
+    from .utils.error_handling import ErrorHandler, CircuitBreaker, ErrorContext
+    from .state_management import StateManager, TaskState, CheckpointManager
+    from .task_tracking import TaskTracker, WorkflowPhaseTracker
 except ImportError as e:
-    logging.warning(f"Enhanced Separation modules not available: {e}")
-    # Fallback for testing/development
-    class ErrorHandler:
-        def handle_error(self, context): pass
-    class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None: pass
-        def call(self, func, *args, **kwargs): return func(*args, **kwargs)
-    def retry(max_attempts=3, initial_delay=1.0):
-        def decorator(func): return func
-        return decorator
-    @dataclass
-    class ErrorContext:
-        error: Exception
-        operation: str
-        details: Dict[str, Any] = field(default_factory=dict)
-        workflow_id: Optional[str] = None
+    # This should not happen in normal operation
+    raise ImportError(f"Required shared modules not available: {e}") from e
 
 
 class WorkflowStage(Enum):
@@ -134,7 +118,7 @@ class WorkflowReliabilityManager:
     and state persistence for robust workflow execution.
     """
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize the reliability manager"""
         self.config = config or {}
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -143,8 +127,8 @@ class WorkflowReliabilityManager:
         self._setup_logging()
 
         # Initialize monitoring state
-        self.monitoring_states: Dict[Any, Any] = field(default_factory=dict)
-        self.active_workflows: Dict[Any, Any] = field(default_factory=dict)
+        self.monitoring_states: Dict[str, WorkflowMonitoringState] = {}
+        self.active_workflows: Dict[str, Dict[str, Any]] = {}
 
         # Initialize Enhanced Separation components
         self.error_handler = ErrorHandler()
@@ -891,7 +875,7 @@ class WorkflowReliabilityManager:
 
     def _start_monitoring_thread(self):
         """Start the background monitoring thread"""
-        if self is not None and self._monitoring_active:
+        if self._monitoring_active:
             return
 
         self._monitoring_active = True
@@ -1264,7 +1248,7 @@ class WorkflowReliabilityContext:
         return self.reliability_manager
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self is not None and self.started:
+        if self.started:
             if exc_type:
                 # Handle exception
                 self.reliability_manager.handle_workflow_error(

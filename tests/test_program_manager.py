@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY, mock_open
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,7 +21,7 @@ from src.agents.program_manager import ProgramManager, Issue, IssueStage
 class TestProgramManager(unittest.TestCase):
     """Test cases for Program Manager agent"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures"""
         self.pm = ProgramManager(agent_id="test-pm")
 
@@ -29,8 +29,12 @@ class TestProgramManager(unittest.TestCase):
         self.pm.memory = Mock()
         self.pm.memory.record_agent_memory = Mock()
         self.pm.memory.record_project_memory = Mock()
+        
+        # Type hints for mocks to help with type checking
+        self.mock_record_agent_memory: Mock = self.pm.memory.record_agent_memory
+        self.mock_record_project_memory: Mock = self.pm.memory.record_project_memory
 
-    def test_issue_parsing(self):
+    def test_issue_parsing(self) -> None:
         """Test parsing issue data from gh output"""
         issue_data = """title:	Test Issue
 state:	OPEN
@@ -45,6 +49,7 @@ with multiple lines"""
         issue = self.pm.parse_issue_from_gh(issue_data)
 
         self.assertIsNotNone(issue)
+        assert issue is not None  # Type narrowing
         self.assertEqual(issue.number, 123)
         self.assertEqual(issue.title, "Test Issue")
         self.assertEqual(issue.state, "OPEN")
@@ -52,7 +57,7 @@ with multiple lines"""
         self.assertEqual(issue.labels, ["bug", "idea"])
         self.assertIn("This is the issue body", issue.body)
 
-    def test_issue_classification(self):
+    def test_issue_classification(self) -> None:
         """Test issue classification logic"""
         # Test bug detection
         bug_issue = Issue(
@@ -102,7 +107,7 @@ with multiple lines"""
         )
         self.assertEqual(self.pm.classify_issue(idea_issue), IssueStage.IDEA)
 
-    def test_lifecycle_stage_detection(self):
+    def test_lifecycle_stage_detection(self) -> None:
         """Test detection of current lifecycle stage"""
         # Test unlabeled
         issue = Issue(
@@ -216,11 +221,11 @@ with multiple lines"""
         self.assertEqual(stats["error"], 0)
 
         # Verify memory was updated
-        self.pm.memory.record_agent_memory.assert_called_with(
+        self.mock_record_agent_memory.assert_called_with(
             "issue_triage", "Triaged 2 issues: 1 ideas, 0 drafts, 1 bugs"
         )
 
-    def test_structure_idea(self):
+    def test_structure_idea(self) -> None:
         """Test structuring an unstructured idea"""
         issue = Issue(
             number=1,
@@ -386,7 +391,7 @@ with multiple lines"""
         # Mock README content without program-manager
         with patch(
             "builtins.open",
-            unittest.mock.mock_open(
+            mock_open(
                 read_data="# README\n## Agents\n- orchestrator-agent\n- workflow-manager"
             ),
         ):
@@ -417,7 +422,7 @@ with multiple lines"""
         self.assertEqual(len(prs), 1)
         self.assertEqual(prs[0]["number"], 10)
 
-    def test_extract_features_from_pr(self):
+    def test_extract_features_from_pr(self) -> None:
         """Test extracting features from PR"""
         pr = {
             "number": 10,
@@ -437,7 +442,7 @@ with multiple lines"""
         self.assertIn("Added Python 3.12 to test matrix", features)
         self.assertEqual(len(features), 3)  # Limited to 3
 
-    def test_run_full_maintenance(self):
+    def test_run_full_maintenance(self) -> None:
         """Test running full maintenance cycle"""
         with (
             patch.object(self.pm, "run_full_triage") as mock_triage,
@@ -452,16 +457,16 @@ with multiple lines"""
             mock_readme.assert_called_once()
 
             # Verify memory was updated
-            self.pm.memory.record_agent_memory.assert_called_with(
+            self.mock_record_agent_memory.assert_called_with(
                 "maintenance_complete",
-                unittest.mock.ANY,  # Don't check exact timestamp
+                ANY,  # Don't check exact timestamp
             )
 
 
 class TestIssueStage(unittest.TestCase):
     """Test IssueStage enum"""
 
-    def test_stage_values(self):
+    def test_stage_values(self) -> None:
         """Test stage enum values match expected strings"""
         self.assertEqual(IssueStage.UNLABELED.value, "unlabeled")
         self.assertEqual(IssueStage.IDEA.value, "idea")

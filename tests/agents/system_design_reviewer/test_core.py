@@ -8,8 +8,7 @@ and GitHub integration.
 import pytest
 import tempfile
 import json
-import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime
 from pathlib import Path
 from agents.system_design_reviewer.core import (
@@ -81,7 +80,7 @@ class TestSystemDesignReviewer:
 
     def test_initialization(self):
         """Test reviewer initialization"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         assert reviewer is not None
         assert reviewer.github_ops is not None
@@ -115,7 +114,7 @@ class TestSystemDesignReviewer:
         mock_subprocess.return_value.returncode = 0
         mock_subprocess.return_value.stdout = json.dumps(mock_pr_info)
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         with patch.object(
             reviewer, "_get_changed_files", return_value=mock_pr_info["changed_files"]
@@ -134,7 +133,7 @@ class TestSystemDesignReviewer:
         mock_subprocess.return_value.returncode = 1
         mock_subprocess.return_value.stderr = "PR not found"
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         result = reviewer._get_pr_info("999")
 
         # The method still returns a dict with changed_files even on failure
@@ -147,7 +146,7 @@ class TestSystemDesignReviewer:
         mock_subprocess.return_value.returncode = 0
         mock_subprocess.return_value.stdout = "file1.py\nfile2.py\nfile3.js\n"
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         files = reviewer._get_changed_files("123")
 
         assert files == ["file1.py", "file2.py", "file3.js"]
@@ -158,14 +157,14 @@ class TestSystemDesignReviewer:
         mock_subprocess.return_value.returncode = 1
         mock_subprocess.return_value.stderr = "Error"
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         files = reviewer._get_changed_files("123")
 
         assert files == []
 
     def test_analyze_pr_changes_supported_files(self, mock_pr_info):
         """Test PR changes analysis with supported file types"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         # Mock file analysis
         with patch.object(reviewer, "_analyze_file_changes") as mock_analyze:
@@ -189,7 +188,7 @@ class TestSystemDesignReviewer:
 
     def test_analyze_pr_changes_large_pr(self, mock_pr_info):
         """Test PR changes analysis with large PR"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         reviewer.max_pr_size = 2  # Set low limit for testing
 
         # Mock many changed files
@@ -206,14 +205,14 @@ class TestSystemDesignReviewer:
 
     def test_assess_overall_impact_no_changes(self):
         """Test overall impact assessment with no changes"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         impact = reviewer._assess_overall_impact([])
 
         assert impact == ImpactLevel.LOW
 
     def test_assess_overall_impact_critical_changes(self, sample_architectural_changes):
         """Test overall impact assessment with critical changes"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         # Add critical change
         critical_change = ArchitecturalChange(
@@ -233,7 +232,7 @@ class TestSystemDesignReviewer:
 
     def test_assess_overall_impact_multiple_high(self, sample_architectural_changes):
         """Test overall impact assessment with multiple high impact changes"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         # Add more high impact changes
         high_changes = [
@@ -256,7 +255,7 @@ class TestSystemDesignReviewer:
 
     def test_generate_review_comments_low_impact(self):
         """Test review comment generation for low impact changes"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         low_impact_change = ArchitecturalChange(
             change_type=ChangeType.MODIFIED,
@@ -279,7 +278,7 @@ class TestSystemDesignReviewer:
 
     def test_generate_review_comments_high_impact(self, sample_architectural_changes):
         """Test review comment generation for high impact changes"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         comments = reviewer._generate_review_comments(
             sample_architectural_changes, ImpactLevel.HIGH
@@ -293,7 +292,7 @@ class TestSystemDesignReviewer:
 
     def test_build_review_body_comprehensive(self, sample_architectural_changes):
         """Test comprehensive review body building"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         # Add affected components to the changes for testing
         sample_architectural_changes[0].affected_components = [
@@ -323,7 +322,7 @@ class TestSystemDesignReviewer:
 
     def test_update_metrics(self):
         """Test metrics updating"""
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
 
         # Create sample result
         result = ReviewResult(
@@ -354,7 +353,7 @@ class TestSystemDesignReviewer:
             Mock(returncode=0, stdout="file content here"),  # git show
         ]
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         content = reviewer._get_file_content_at_base("test.py", "123")
 
         assert content == "file content here"
@@ -368,7 +367,7 @@ class TestSystemDesignReviewer:
             Mock(returncode=1, stderr="file not found"),
         ]
 
-        reviewer = SystemDesignReviewer()
+        reviewer = SystemDesignReviewer(config={})
         content = reviewer._get_file_content_at_base("new_file.py", "123")
 
         assert content is None

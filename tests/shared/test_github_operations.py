@@ -4,34 +4,23 @@ Tests the Enhanced Separation architecture implementation.
 """
 
 import json
-import os
 import subprocess
 
 # Import the module we're testing (will be implemented after tests)
-import sys
-from pathlib import Path
-from typing import Optional, Any, Dict, List
+from typing import Any, Dict, List
 
 import pytest
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 # For type checking only
-from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
-
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+from typing import Optional
 
 try:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
+    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
-    import subprocess
     import time
-    from typing import Any, Dict, List, Optional, Union
+    from typing import Any, List
 
     class GitHubError(Exception):
         """Base exception for GitHub operations."""
@@ -44,8 +33,7 @@ except ImportError:
             command: Optional[List[str]] = None,
             stdout: str = "",
             stderr: str = "",
-            details: Optional[Dict] = None,
-        ):
+            details: Optional[Dict] = None):
             super().__init__(message)
             self.operation = operation
             self.context = context or {}
@@ -57,7 +45,7 @@ except ImportError:
     class RateLimitError(GitHubError):
         """Raised when hitting GitHub API rate limits."""
 
-        def __init__(self, message: str, reset_time: Optional) -> None:
+        def __init__(self, message: str, reset_time: Optional[int] = None) -> None:
             super().__init__(message)
             self.reset_time = reset_time
 
@@ -73,8 +61,7 @@ except ImportError:
         def __init__(
             self,
             repo: Optional[str] = None,
-            retry_config: Optional[Dict[str, Any]] = None,
-        ):
+            retry_config: Optional[Dict[str, Any]] = None):
             self.repo = repo
             self.retry_config = retry_config or {
                 "max_retries": 3,
@@ -132,8 +119,7 @@ except ImportError:
             title: str,
             body: str,
             labels: Optional[List[str]] = None,
-            assignees: Optional[List[str]] = None,
-        ) -> Dict[str, Any]:
+            assignees: Optional[List[str]] = None) -> Dict[str, Any]:
             """Create a GitHub issue."""
             command = ["issue", "create", "--title", title, "--body", body]
             if labels:
@@ -149,8 +135,7 @@ except ImportError:
             title: Optional[str] = None,
             body: Optional[str] = None,
             state: Optional[str] = None,
-            labels: Optional[List[str]] = None,
-        ) -> Dict[str, Any]:
+            labels: Optional[List[str]] = None) -> Dict[str, Any]:
             """Update a GitHub issue."""
             command = ["issue", "edit", str(issue_number)]
             if title:
@@ -171,8 +156,7 @@ except ImportError:
             base: str = "main",
             head: Optional[str] = None,
             draft: bool = False,
-            labels: Optional[List[str]] = None,
-        ) -> Dict[str, Any]:
+            labels: Optional[List[str]] = None) -> Dict[str, Any]:
             """Create a pull request."""
             command = ["pr", "create", "--title", title, "--body", body, "--base", base]
             if head:
@@ -188,8 +172,7 @@ except ImportError:
             self,
             pr_number: int,
             merge_method: str = "merge",
-            delete_branch: bool = True,
-        ) -> Dict[str, Any]:
+            delete_branch: bool = True) -> Dict[str, Any]:
             """Merge a pull request."""
             command = ["pr", "merge", str(pr_number), f"--{merge_method}"]
             if delete_branch:
@@ -202,8 +185,7 @@ except ImportError:
             state: str = "open",
             labels: Optional[List[str]] = None,
             assignee: Optional[str] = None,
-            limit: int = 30,
-        ) -> Dict[str, Any]:
+            limit: int = 30) -> Dict[str, Any]:
             """List GitHub issues."""
             command = ["issue", "list", "--state", state, "--limit", str(limit)]
             if labels:
@@ -218,8 +200,7 @@ except ImportError:
             state: str = "open",
             base: Optional[str] = None,
             head: Optional[str] = None,
-            limit: int = 30,
-        ) -> Dict[str, Any]:
+            limit: int = 30) -> Dict[str, Any]:
             """List pull requests."""
             command = ["pr", "list", "--state", state, "--limit", str(limit)]
             if base:
@@ -268,8 +249,7 @@ except ImportError:
             title: str,
             notes: str,
             draft: bool = False,
-            prerelease: bool = False,
-        ) -> Dict[str, Any]:
+            prerelease: bool = False) -> Dict[str, Any]:
             """Create a GitHub release."""
             command = ["release", "create", tag, "--title", title, "--notes", notes]
             if draft:
@@ -289,8 +269,7 @@ except ImportError:
                     title=issue["title"],
                     body=issue["body"],
                     labels=issue.get("labels"),
-                    assignees=issue.get("assignees"),
-                )
+                    assignees=issue.get("assignees"))
                 results.append(result)
             return results
 
@@ -343,8 +322,7 @@ except ImportError:
             self,
             issue_number: int,
             comment: Optional[str] = None,
-            reason: Optional[str] = None,
-        ) -> Dict[str, Any]:
+            reason: Optional[str] = None) -> Dict[str, Any]:
             """Close an issue."""
             result = self.update_issue(issue_number, state="closed")
             if comment and result.get("success"):
@@ -356,8 +334,7 @@ except ImportError:
             workflow_name: Optional[str] = None,
             workflow: Optional[str] = None,
             status: Optional[str] = None,
-            limit: int = 30,
-        ) -> Dict[str, Any]:
+            limit: int = 30) -> Dict[str, Any]:
             """Get workflow runs."""
             command = ["run", "list", "--limit", str(limit)]
             # Support both workflow_name and workflow parameters
@@ -377,7 +354,6 @@ except ImportError:
             """Context manager exit."""
             # Clean up any resources if needed
             return False
-
 
 class TestGitHubOperations:
     """Test suite for GitHubOperations class."""
@@ -485,8 +461,7 @@ class TestGitHubOperations:
             title="Test Issue",
             body="Test description",
             labels=["bug", "enhancement"],
-            assignees=["testuser"],
-        )
+            assignees=["testuser"])
 
         assert result["success"] is True
         assert result["data"]["number"] == 42
@@ -517,8 +492,7 @@ class TestGitHubOperations:
             body="Test PR description",
             base="main",
             head="feature/test",
-            draft=True,
-        )
+            draft=True)
 
         assert result["success"] is True
         assert result["data"]["number"] == 15
@@ -843,7 +817,6 @@ class TestGitHubOperations:
                 result = gh.create_issue("Test", "Body")
                 assert result["success"] is True
 
-
 class TestGitHubError:
     """Test suite for GitHubError exception class."""
 
@@ -860,10 +833,8 @@ class TestGitHubError:
             "API request failed",
             "get_issue",
             {"issue_number": 42},
-            details={"status_code": 404, "response": "Not found"},
-        )
+            details={"status_code": 404, "response": "Not found"})
         assert error.details["status_code"] == 404
-
 
 class TestRateLimitError:
     """Test suite for RateLimitError exception class."""
@@ -886,7 +857,6 @@ class TestRateLimitError:
 
         # Should be close to 3600 seconds (within 5 seconds for test execution time)
         assert 3595 <= wait_time <= 3605
-
 
 # Integration tests
 class TestGitHubOperationsIntegration:
@@ -930,8 +900,7 @@ class TestGitHubOperationsIntegration:
 
         pr_result = gh.create_pr(
             f"Implement test feature (#{issue_number})",
-            f"Fixes #{issue_number}\n\nImplements test feature functionality.",
-        )
+            f"Fixes #{issue_number}\n\nImplements test feature functionality.")
         assert pr_result["success"] is True
         pr_number = pr_result["data"]["number"]
 

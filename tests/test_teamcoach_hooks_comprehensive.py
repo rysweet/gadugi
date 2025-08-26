@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 class TestTeamCoachStopHookUnit(unittest.TestCase):
     """Unit tests for TeamCoach stop hook functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.hook_script_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
@@ -35,9 +35,10 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
             "teamcoach_stop", self.hook_script_path
         )
         self.hook_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.hook_module)
+        if spec and spec.loader is not None:
+            spec.loader.exec_module(self.hook_module)
 
-    def test_hook_script_exists_and_executable(self):
+    def test_hook_script_exists_and_executable(self) -> None:
         """Test that the hook script exists and is executable."""
         self.assertTrue(
             os.path.exists(self.hook_script_path), "Hook script should exist"
@@ -47,7 +48,7 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
             "Hook script should be executable",
         )
 
-    def test_hook_has_correct_shebang(self):
+    def test_hook_has_correct_shebang(self) -> None:
         """Test that the hook has the correct shebang."""
         with open(self.hook_script_path, "r") as f:
             first_line = f.readline().strip()
@@ -108,7 +109,7 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
         # Verify
         self.assertFalse(result)
 
-    def test_teamcoach_prompt_structure(self):
+    def test_teamcoach_prompt_structure(self) -> None:
         """Test that the TeamCoach prompt has correct structure."""
         # Get the prompt from the function
         with open(self.hook_script_path, "r") as f:
@@ -146,9 +147,10 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
                 break
 
         self.assertIsNotNone(printed_output)
-        self.assertEqual(printed_output["action"], "continue")
-        self.assertIn("completed", printed_output["message"])
-        self.assertIn("timestamp", printed_output)
+        if printed_output is not None:
+            self.assertEqual(printed_output["action"], "continue")
+            self.assertIn("completed", printed_output["message"])
+            self.assertIn("timestamp", printed_output)
 
     @patch("sys.stdin", new_callable=io.StringIO)
     @patch("subprocess.run")
@@ -175,14 +177,15 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
                 break
 
         self.assertIsNotNone(printed_output)
-        self.assertEqual(printed_output["action"], "continue")
-        self.assertIn("issues", printed_output["message"])
+        if printed_output is not None:
+            self.assertEqual(printed_output["action"], "continue")
+            self.assertIn("issues", printed_output["message"])
 
 
 class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
     """Unit tests for TeamCoach subagent stop hook functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.hook_script_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)),
@@ -196,9 +199,10 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
             "teamcoach_subagent_stop", self.hook_script_path
         )
         self.hook_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.hook_module)
+        if spec and spec.loader is not None:
+            spec.loader.exec_module(self.hook_module)
 
-    def test_hook_script_exists_and_executable(self):
+    def test_hook_script_exists_and_executable(self) -> None:
         """Test that the subagent hook script exists and is executable."""
         self.assertTrue(
             os.path.exists(self.hook_script_path), "Subagent hook script should exist"
@@ -233,7 +237,7 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
         self.assertIn("success", prompt)
         self.assertIn("120", prompt)
 
-    def test_subagent_hook_timeout_is_shorter(self):
+    def test_subagent_hook_timeout_is_shorter(self) -> None:
         """Test that subagent hook has shorter timeout than main hook."""
         with open(self.hook_script_path, "r") as f:
             content = f.read()
@@ -265,7 +269,7 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
 class TestTeamCoachHookIntegration(unittest.TestCase):
     """Integration tests for TeamCoach hooks."""
 
-    def test_settings_json_configuration(self):
+    def test_settings_json_configuration(self) -> None:
         """Test that settings.json has safe hooks only (no TeamCoach hooks)."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
@@ -298,7 +302,7 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
         # Verify permissions are still present (these should remain)
         self.assertIn("permissions", settings, "Permissions should still be configured")
 
-    def test_hook_end_to_end_execution(self):
+    def test_hook_end_to_end_execution(self) -> None:
         """Test end-to-end hook execution (without actually calling TeamCoach)."""
         # Create a temporary directory for our mock
         temp_dir = tempfile.mkdtemp()
@@ -349,15 +353,16 @@ sys.exit(0)
                         continue
 
             self.assertIsNotNone(json_output, "Should have JSON output")
-            self.assertEqual(json_output["action"], "continue")
-            self.assertIn("timestamp", json_output)
+            if json_output is not None:
+                self.assertEqual(json_output["action"], "continue")
+                self.assertIn("timestamp", json_output)
 
         finally:
             # Cleanup
             os.unlink(mock_claude)
             os.rmdir(temp_dir)
 
-    def test_both_hooks_are_non_blocking(self):
+    def test_both_hooks_are_non_blocking(self) -> None:
         """Test that both hooks are designed to be non-blocking."""
         hooks_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -377,7 +382,7 @@ sys.exit(0)
             self.assertIn("try:", content)
             self.assertIn("except", content)
 
-    def test_hooks_use_appropriate_timeouts(self):
+    def test_hooks_use_appropriate_timeouts(self) -> None:
         """Test that hooks use appropriate timeout values."""
         hooks_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -397,7 +402,7 @@ sys.exit(0)
 class TestTeamCoachHookPermissions(unittest.TestCase):
     """Test file permissions and security aspects."""
 
-    def test_hook_files_have_correct_permissions(self):
+    def test_hook_files_have_correct_permissions(self) -> None:
         """Test that hook files have secure permissions."""
         hooks_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -417,7 +422,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
             # Check file is not world-writable
             self.assertFalse(mode & 0o002, f"{hook_file} should not be world-writable")
 
-    def test_settings_json_uses_environment_variables(self):
+    def test_settings_json_uses_environment_variables(self) -> None:
         """Test that if hooks exist, they are safe and properly configured."""
         settings_path = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
@@ -464,7 +469,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
 class TestTeamCoachHookErrorHandling(unittest.TestCase):
     """Test error handling in TeamCoach hooks."""
 
-    def test_hooks_handle_all_exceptions(self):
+    def test_hooks_handle_all_exceptions(self) -> None:
         """Test that hooks have comprehensive exception handling."""
         hooks_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -484,7 +489,7 @@ class TestTeamCoachHookErrorHandling(unittest.TestCase):
             # Check that errors still result in exit(0)
             self.assertIn("sys.exit(0)", content)
 
-    def test_hooks_provide_meaningful_error_messages(self):
+    def test_hooks_provide_meaningful_error_messages(self) -> None:
         """Test that hooks provide meaningful error messages."""
         hooks_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"

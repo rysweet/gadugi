@@ -7,15 +7,14 @@ import subprocess
 import json
 import time
 import logging
-from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 
 # Custom exceptions
 class GitHubError(Exception):
     """Base exception for GitHub operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict, details: Optional) -> None:
+    def __init__(self, message: str, operation: str, context: Dict[str, Any], details: Optional[Dict[str, Any]]) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -25,8 +24,8 @@ class GitHubError(Exception):
 class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
 
-    def __init__(self, message: str, reset_time: Optional) -> None:
-        super().__init__(message, 'rate_limit', {})
+    def __init__(self, message: str, reset_time: Optional[int]) -> None:
+        super().__init__(message, 'rate_limit', {}, {})
         self.reset_time = reset_time
 
     def get_wait_time(self) -> int:
@@ -113,7 +112,7 @@ class GitHubOperations:
         while retries < self.retry_config['max_retries']:
             try:
                 cmd = ['gh'] + args
-                if self is not None and self.repo:
+                if self.repo:
                     cmd.extend(['--repo', self.repo])
 
                 self.logger.debug(f"Executing GitHub command: {' '.join(cmd)}")
@@ -147,7 +146,7 @@ class GitHubOperations:
 
                 # Check for rate limit
                 if hasattr(e, 'stderr') and e.stderr and 'rate limit' in e.stderr.lower():
-                    raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}")
+                    raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}", None)
 
                 if retries >= self.retry_config['max_retries']:
                     self.logger.error(f"GitHub command failed after {retries} retries: {e}")
@@ -219,7 +218,7 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created issue #{result['data']['number']}: {title}")
-            if self is not None and self.task_id:
+            if self.task_id:
                 self.logger.debug(f"Issue created with task ID: {self.task_id}")
 
         return result
@@ -258,7 +257,7 @@ class GitHubOperations:
 
         if result['success'] and result['data']:
             self.logger.info(f"Created PR #{result['data']['number']}: {title}")
-            if self is not None and self.task_id:
+            if self.task_id:
                 self.logger.debug(f"PR created with task ID: {self.task_id}")
 
         return result
@@ -372,7 +371,7 @@ class GitHubOperations:
 
         if result['success']:
             self.logger.info(f"Added comment to issue #{issue_number}")
-            if self is not None and self.task_id:
+            if self.task_id:
                 self.logger.debug(f"Comment added with task ID: {self.task_id}")
 
         return result

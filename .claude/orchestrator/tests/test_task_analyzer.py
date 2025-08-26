@@ -25,7 +25,7 @@ spec = importlib.util.spec_from_file_location(
 )
 task_analyzer_module = importlib.util.module_from_spec(spec)
 sys.modules['task_analyzer'] = task_analyzer_module
-if spec.loader is not None:
+if spec is not None and spec.loader is not None:
     spec.loader.exec_module(task_analyzer_module)
 
 # Import the classes we need
@@ -540,7 +540,7 @@ This is a complex feature requiring careful architecture and extensive testing.
 
     def test_execution_plan_generation(self):
         """Test execution plan generation with sample prompts"""
-        all_tasks = self.analyzer.analyze_all_prompts()
+        self.analyzer.analyze_all_prompts()
         execution_plan = self.analyzer.generate_execution_plan()
 
         # Verify plan makes sense

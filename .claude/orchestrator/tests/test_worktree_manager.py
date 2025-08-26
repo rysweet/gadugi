@@ -26,7 +26,7 @@ spec = importlib.util.spec_from_file_location(
 )
 worktree_manager_module = importlib.util.module_from_spec(spec)
 sys.modules['worktree_manager'] = worktree_manager_module
-if spec.loader is not None:
+if spec is not None and spec.loader is not None:
     spec.loader.exec_module(worktree_manager_module)
 
 # Import the classes we need

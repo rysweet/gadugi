@@ -3,38 +3,18 @@ Comprehensive tests for task_tracking.py module (TodoWrite integration).
 Tests task management, workflow tracking, and Claude Code integration.
 """
 
-import os
 import uuid
 
 # Import the module we're testing
-import sys
+from datetime import datetime
 import time
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+from dataclasses import field
 
 import pytest
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import Mock, patch
 
 # For type checking only
-from typing import Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from claude.shared.task_tracking import (
-        Task,
-        TaskError,
-        TaskList,
-        TaskMetrics,
-        TaskPriority,
-        TaskStatus,
-        TaskTracker,
-        TaskValidationError,
-        TodoWriteIntegration,
-        WorkflowPhaseTracker,
-    )
-
-# Fix imports for pyright
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     from claude.shared.task_tracking import (
@@ -47,8 +27,7 @@ try:
         TaskTracker,
         TaskValidationError,
         TodoWriteIntegration,
-        WorkflowPhaseTracker,
-    )
+        WorkflowPhaseTracker)
 except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -56,7 +35,7 @@ except ImportError as e:
     )
 
     from enum import Enum
-    from typing import Optional, ClassVar
+    from typing import Optional
 
     class TaskStatus(Enum):
         PENDING = "pending"
@@ -78,8 +57,7 @@ except ImportError as e:
             content: str,
             status: TaskStatus = TaskStatus.PENDING,
             priority: TaskPriority = TaskPriority.MEDIUM,
-            **kwargs: Any,
-        ):
+            **kwargs: Any):
             self.id = id
             self.content = content
             self.status = status
@@ -106,8 +84,7 @@ except ImportError as e:
                 data["id"],
                 data["content"],
                 TaskStatus(data["status"]),
-                TaskPriority(data["priority"]),
-            )
+                TaskPriority(data["priority"]))
 
         def update_status(self, new_status: TaskStatus) -> None:
             self.status = new_status
@@ -123,8 +100,7 @@ except ImportError as e:
             return self.status in (
                 TaskStatus.PENDING,
                 TaskStatus.IN_PROGRESS,
-                TaskStatus.BLOCKED,
-            )
+                TaskStatus.BLOCKED)
 
         def validate(self) -> None:
             if not self.id:
@@ -217,8 +193,7 @@ except ImportError as e:
                     item["id"],
                     item["content"],
                     TaskStatus(item["status"]),
-                    TaskPriority(item["priority"]),
-                )
+                    TaskPriority(item["priority"]))
                 task_list.add_task(task)
             return task_list
 
@@ -235,7 +210,7 @@ except ImportError as e:
             self.current_task_list = task_list
             self.call_count += 1
             # Simulate calling claude_function_call for the submission
-            claude_function_call(
+            self.mock_api.call(
                 "TodoWrite",
                 {
                     "todos": [
@@ -247,8 +222,7 @@ except ImportError as e:
                         }
                         for t in task_list.tasks
                     ]
-                },
-            )
+                })
             return {"success": True, "task_count": task_list.count()}
 
         def update_task_status(
@@ -363,7 +337,7 @@ except ImportError as e:
             if phase_name not in self.phase_start_times:
                 raise TaskError(f"Phase {phase_name} was not started")
 
-            for entry in self.phase_history:
+            for _entry in self.phase_history:
                 if entry["phase"] == phase_name and entry["status"] == "in_progress":
                     entry["completed_at"] = datetime.now()
                     entry["duration_seconds"] = (
@@ -385,7 +359,7 @@ except ImportError as e:
             if self.current_phase is None:
                 raise TaskError("No phase is currently active")
 
-            for entry in self.phase_history:
+            for _entry in self.phase_history:
                 if (
                     entry["phase"] == self.current_phase
                     and entry["status"] == "in_progress"
@@ -400,7 +374,7 @@ except ImportError as e:
             self.current_phase = None
 
         def get_phase_duration(self, phase_name: str) -> Optional[float]:
-            for entry in self.phase_history:
+            for _entry in self.phase_history:
                 if entry["phase"] == phase_name and "duration_seconds" in entry:
                     return entry["duration_seconds"]
             return None
@@ -427,8 +401,7 @@ except ImportError as e:
                     task_id,
                     task_data["content"],
                     TaskStatus.PENDING,
-                    priority,
-                )
+                    priority)
                 phase_task_list.add_task(task)
             return phase_task_list
 
@@ -436,13 +409,13 @@ except ImportError as e:
             """Get a summary of all phases."""
             total_phases = len(self.phase_history)
             completed_phases = len(
-                [p for p in self.phase_history if p["status"] == "completed"]
+                [p for _p in self.phase_history if p["status"] == "completed"]
             )
             failed_phases = len(
-                [p for p in self.phase_history if p["status"] == "failed"]
+                [p for _p in self.phase_history if p["status"] == "failed"]
             )
             in_progress_phases = len(
-                [p for p in self.phase_history if p["status"] == "in_progress"]
+                [p for _p in self.phase_history if p["status"] == "in_progress"]
             )
 
             # Calculate success rate
@@ -450,7 +423,7 @@ except ImportError as e:
 
             # Calculate total duration
             total_duration_seconds = 0.0
-            for phase in self.phase_history:
+            for _phase in self.phase_history:
                 if "duration_seconds" in phase:
                     total_duration_seconds += phase["duration_seconds"]
 
@@ -505,7 +478,7 @@ except ImportError as e:
         def _update_metrics(self) -> None:
             if self is not None and self.task_completion_times:
                 durations = [
-                    record["duration_seconds"] for record in self.task_completion_times
+                    record["duration_seconds"] for _record in self.task_completion_times
                 ]
                 self.average_completion_time = sum(durations) / len(durations)
                 elapsed_hours = (
@@ -541,7 +514,7 @@ except ImportError as e:
             if not self.task_completion_times:
                 return 0.0
             durations = [
-                record["duration_seconds"] for record in self.task_completion_times
+                record["duration_seconds"] for _record in self.task_completion_times
             ]
             return sum(durations) / len(durations)
 
@@ -602,8 +575,7 @@ except ImportError as e:
             self,
             content: str,
             priority: TaskPriority = TaskPriority.MEDIUM,
-            task_id: Optional[str] = None,
-        ) -> Task:
+            task_id: Optional[str] = None) -> Task:
             if task_id is None:
                 task_id = str(uuid.uuid4())
             task = Task(task_id, content, TaskStatus.PENDING, priority)
@@ -628,8 +600,7 @@ except ImportError as e:
             self,
             phase_name: str,
             description: Optional[str] = None,
-            tasks: Optional[List[Dict[str, Any]]] = None,
-        ) -> None:
+            tasks: Optional[List[Dict[str, Any]]] = None) -> None:
             # Process tasks first to catch any issues before starting the phase
             phase_tasks = []
             if tasks:
@@ -653,12 +624,11 @@ except ImportError as e:
                         task_id,
                         task_data["content"],
                         TaskStatus.PENDING,
-                        priority,
-                    )
+                        priority)
                     phase_tasks.append(task)
 
                 # Add tasks to the main task list
-                for task in phase_tasks:
+                for _task in phase_tasks:
                     self.task_list.add_task(task)
 
                 # Submit the updated task list (this can fail)
@@ -705,17 +675,14 @@ except ImportError as e:
                     task_id,
                     task_data["content"],
                     TaskStatus.PENDING,
-                    task_data.get("priority", TaskPriority.MEDIUM),
-                )
+                    task_data.get("priority", TaskPriority.MEDIUM))
                 phase_task_list.add_task(task)
             return phase_task_list
-
 
 # Add claude_function_call for stub implementation
 def claude_function_call(tool_name: str, **parameters) -> Dict[str, Any]:
     """Stub implementation of claude_function_call for testing."""
     return {"success": True, "result": parameters}
-
 
 class TestTaskStatus:
     """Test TaskStatus enum."""
@@ -738,7 +705,6 @@ class TestTaskStatus:
         assert TaskStatus.PENDING != TaskStatus.COMPLETED
         assert TaskStatus.IN_PROGRESS != TaskStatus.BLOCKED
 
-
 class TestTaskPriority:
     """Test TaskPriority enum."""
 
@@ -753,7 +719,6 @@ class TestTaskPriority:
         """Test all task priorities are defined."""
         priorities = list(TaskPriority)
         assert len(priorities) == 4
-
 
 class TestTask:
     """Test Task class."""
@@ -772,8 +737,7 @@ class TestTask:
             id="task-123",
             content="Critical task",
             status=TaskStatus.IN_PROGRESS,
-            priority=TaskPriority.CRITICAL,
-        )
+            priority=TaskPriority.CRITICAL)
         assert task.id == "task-123"
         assert task.content == "Critical task"
         assert task.status == TaskStatus.IN_PROGRESS
@@ -905,7 +869,6 @@ class TestTask:
         assert task.completed_at is not None
         assert task.status == TaskStatus.COMPLETED
 
-
 class TestTaskList:
     """Test TaskList class."""
 
@@ -1020,7 +983,7 @@ class TestTaskList:
         task3 = Task("3", "Completed", TaskStatus.COMPLETED)
         task4 = Task("4", "Blocked", TaskStatus.BLOCKED)
 
-        for task in [task1, task2, task3, task4]:
+        for _task in [task1, task2, task3, task4]:
             task_list.add_task(task)
 
         active_tasks = task_list.get_active_tasks()
@@ -1089,7 +1052,6 @@ class TestTaskList:
         assert task2.status == TaskStatus.COMPLETED
         assert task2.priority == TaskPriority.MEDIUM
 
-
 class TestTodoWriteIntegration:
     """Test TodoWrite integration functionality."""
 
@@ -1128,8 +1090,7 @@ class TestTodoWriteIntegration:
                             "priority": "high",
                         }
                     ]
-                },
-            )
+                })
 
     def test_submit_empty_task_list(self):
         """Test submitting empty task list."""
@@ -1255,7 +1216,6 @@ class TestTodoWriteIntegration:
         assert "last_update" in stats
         assert "current_task_count" in stats
 
-
 class TestWorkflowPhaseTracker:
     """Test workflow phase tracking functionality."""
 
@@ -1329,7 +1289,7 @@ class TestWorkflowPhaseTracker:
         assert len(tracker.phase_history) == 3
         assert all(
             phase["status"] in ["completed", "failed"]
-            for phase in tracker.phase_history
+            for _phase in tracker.phase_history
         )
 
     def test_get_phase_summary(self):
@@ -1391,7 +1351,6 @@ class TestWorkflowPhaseTracker:
 
             assert result["success"] is True
             assert integration.current_task_list.count() == 2
-
 
 class TestTaskMetrics:
     """Test task metrics and analytics."""
@@ -1480,7 +1439,6 @@ class TestTaskMetrics:
         assert "tasks_in_progress" in productivity_metrics
         assert productivity_metrics["total_tasks"] == 2
 
-
 class TestTaskError:
     """Test task error classes."""
 
@@ -1496,7 +1454,6 @@ class TestTaskError:
         assert str(error) == "Validation failed"
         assert isinstance(error, TaskError)
         assert isinstance(error, Exception)
-
 
 class TestTaskTracker:
     """Test the main TaskTracker class."""
@@ -1596,7 +1553,6 @@ class TestTaskTracker:
         assert dashboard["task_summary"]["total_tasks"] == 3
         assert dashboard["task_summary"]["completed_tasks"] == 1
         assert dashboard["task_summary"]["active_tasks"] == 2
-
 
 class TestTaskTrackingIntegration:
     """Integration tests for task tracking components."""

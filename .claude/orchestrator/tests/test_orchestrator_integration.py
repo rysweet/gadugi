@@ -9,14 +9,15 @@ to parallel execution coordination.
 import os
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig, OrchestrationResult
+from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig
 from orchestrator_cli import OrchestrationCLI
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 
@@ -141,7 +142,7 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,
             command="claude /agent:workflow-manager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None
+            created_at=datetime.now()
         )
 
         registry.register_process(process_info)
@@ -149,20 +150,25 @@ Process these prompts in parallel:
         # Verify registration
         retrieved = registry.get_process("test-task-1")
         self.assertIsNotNone(retrieved)
-        self.assertEqual((retrieved.task_id if retrieved is not None else None), "test-task-1")
-        self.assertEqual((retrieved.status if retrieved is not None else None), ProcessStatus.QUEUED)
+        assert retrieved is not None  # Type assertion for pyright
+        self.assertEqual(retrieved.task_id, "test-task-1")
+        self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
 
         # Test status update
         success = registry.update_process_status("test-task-1", ProcessStatus.RUNNING)
         self.assertTrue(success)
 
         updated = registry.get_process("test-task-1")
-        self.assertEqual((updated.status if updated is not None else None), ProcessStatus.RUNNING)
+        self.assertIsNotNone(updated)
+        assert updated is not None  # Type assertion for pyright
+        self.assertEqual(updated.status, ProcessStatus.RUNNING)
 
         # Test completion
         registry.update_process_status("test-task-1", ProcessStatus.COMPLETED)
         completed = registry.get_process("test-task-1")
-        self.assertEqual((completed.status if completed is not None else None), ProcessStatus.COMPLETED)
+        self.assertIsNotNone(completed)
+        assert completed is not None  # Type assertion for pyright
+        self.assertEqual(completed.status, ProcessStatus.COMPLETED)
 
     @patch('orchestrator_main.ExecutionEngine')
     @patch('orchestrator_main.WorktreeManager')
@@ -174,11 +180,9 @@ Process these prompts in parallel:
 
         # Mock task analyzer
         mock_analysis = Mock()
-        if mock_analysis is not None:
-                    mock_analysis.task_id = "test-task-1"
+        mock_analysis.task_id = "test-task-1"
         mock_analysis.name = "Test Task 1"
-        if mock_analysis is not None:
-                    mock_analysis.prompt_file = "test-feature-1.md"
+        mock_analysis.prompt_file = "test-feature-1.md"
         mock_analysis.task_type = "feature_implementation"
         mock_analysis.complexity = "MEDIUM"
         mock_analysis.can_parallelize = True
@@ -189,8 +193,7 @@ Process these prompts in parallel:
 
         # Mock worktree manager
         mock_worktree_info = Mock()
-        if mock_worktree_info is not None:
-                    mock_worktree_info.task_id = "test-task-1"
+        mock_worktree_info.task_id = "test-task-1"
         mock_worktree_info.worktree_path = self.test_dir / ".worktrees/test-task-1"
         mock_worktree_info.branch_name = "feature/test-task-1"
 
@@ -201,8 +204,7 @@ Process these prompts in parallel:
 
         # Mock execution engine
         mock_result = Mock()
-        if mock_result is not None:
-                    mock_result.task_id = "test-task-1"
+        mock_result.task_id = "test-task-1"
         mock_result.success = True
         mock_result.execution_time = 30.0
         mock_result.error_message = None

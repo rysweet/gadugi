@@ -35,12 +35,18 @@ Usage:
 # Import key agent components for programmatic access
 try:
     from .test_solver_agent import TestSolverAgent
-    from .test_writer_agent import TestWriterAgent
+    from .test_writer_agent import TestWriterAgent  
     from .shared_test_instructions import SharedTestInstructions
-    from .workflow_master_enhanced import EnhancedWorkflowMaster
+    # Import module with hyphens using importlib
+    import importlib
+    workflow_master_module = importlib.import_module('.workflow-master-enhanced', package=__name__)
+    EnhancedWorkflowMaster = getattr(workflow_master_module, 'EnhancedWorkflowMaster', None)
 except ImportError:
-    # Graceful degradation if imports fail
-    pass
+    # Graceful degradation if imports fail - set to None for type checking
+    TestSolverAgent = None  # type: ignore[misc]
+    TestWriterAgent = None  # type: ignore[misc]
+    SharedTestInstructions = None  # type: ignore[misc]
+    EnhancedWorkflowMaster = None  # type: ignore[misc]
 
 __all__ = [
     "TestSolverAgent",

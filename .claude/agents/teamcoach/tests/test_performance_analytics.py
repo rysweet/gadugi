@@ -15,9 +15,15 @@ from ..phase1.performance_analytics import (
     TeamPerformanceData,
     AnalysisError,
 )
-from ...shared.task_tracking import TaskMetrics
-from ...shared.state_management import StateManager
-from ...shared.utils.error_handling import ErrorHandler
+from ....shared.task_tracking import TaskMetrics
+from ....shared.state_management import StateManager
+try:
+    from ....shared.utils.error_handling import ErrorHandler
+except ImportError:
+    # Fallback stub for ErrorHandler
+    class ErrorHandler:
+        def __init__(self, config=None):
+            pass
 
 
 class TestAgentPerformanceAnalyzer(unittest.TestCase):

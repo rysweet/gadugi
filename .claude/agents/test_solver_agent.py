@@ -9,35 +9,36 @@ import subprocess
 import logging
 import shutil
 from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 # Add shared modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from interfaces import AgentConfig, OperationResult
+    from ..shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[attr-defined]
+    from ..shared.interfaces import AgentConfig  # type: ignore[attr-defined]
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass, field
-
-    @dataclass
-    class OperationResult:
-        success: bool
-        data: Any = None
-        error: str = ""
+    from dataclasses import dataclass
 
     @dataclass
     class AgentConfig:
         agent_id: str
         name: str
 
-    class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None:
+    class ErrorHandler:
+        def __init__(self) -> None:
             pass
 
-        def __call__(self, func):
+        def handle_error(self, error: Exception) -> None:
+            pass
+
+    class CircuitBreaker:
+        def __init__(self, failure_threshold: int = 3, recovery_timeout: float = 30.0) -> None:
+            pass
+
+        def __call__(self, func: Any) -> Any:
             return func
 
 
@@ -110,7 +111,7 @@ class TestSolverAgent:
     Follows shared test instruction framework for systematic failure resolution.
     """
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[AgentConfig]) -> None:
         self.config = config or AgentConfig(
             agent_id="test_solver_agent", name="Test Solver Agent"
         )
@@ -118,10 +119,7 @@ class TestSolverAgent:
         self.shared_instructions = SharedTestInstructions(config)
 
         # Setup error handling
-        try:
-            self.error_handler = ErrorHandler()
-        except NameError:
-            self.error_handler = None
+        self.error_handler = ErrorHandler()
 
     def solve_test_failure(
         self, test_identifier: str, context: str = ""
@@ -152,6 +150,9 @@ class TestSolverAgent:
             is_valid_structure, structure_issues = (
                 self.shared_instructions.validate_test_structure(test_code)
             )
+            # Use validation results for further analysis
+            if not is_valid_structure:
+                self.logger.warning(f"Test structure issues found: {structure_issues}")
 
             # Phase 2: Root Cause Investigation
             failure_analysis = self._investigate_root_cause(

@@ -41,7 +41,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
         False,
         "Skipping hook execution test - requires fully configured Claude CLI environment",
     )
-    def test_hook_invokes_teamcoach_successfully(self):
+    def test_hook_invokes_teamcoach_successfully(self) -> None:
         """Test that the hook successfully invokes TeamCoach."""
         # This test requires a fully configured Claude CLI environment with proper authentication
         # and can potentially trigger actual TeamCoach invocations. Skipped for safety.
@@ -49,7 +49,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
     @unittest.skipUnless(
         CLAUDE_CLI_AVAILABLE, "Claude CLI not available - cannot test failure handling"
     )
-    def test_hook_handles_teamcoach_failure_gracefully(self):
+    def test_hook_handles_teamcoach_failure_gracefully(self) -> None:
         """Test that the hook handles TeamCoach failures gracefully."""
         # This test would require a more complex setup to simulate failure scenarios
         # For now, we test that the hook script has proper error handling structure
@@ -65,7 +65,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
     @unittest.skipUnless(
         CLAUDE_CLI_AVAILABLE, "Claude CLI not available - cannot test timeout handling"
     )
-    def test_hook_handles_timeout_gracefully(self):
+    def test_hook_handles_timeout_gracefully(self) -> None:
         """Test that the hook handles timeouts gracefully."""
         # This test would require timing out actual Claude CLI calls which is impractical
         # Instead, verify the hook script has timeout handling structure
@@ -77,7 +77,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
         self.assertIn("TimeoutExpired", content)  # Handles timeout exception
         self.assertIn("timed out", content)  # Has timeout message
 
-    def test_hook_script_has_correct_structure(self):
+    def test_hook_script_has_correct_structure(self) -> None:
         """Test that the hook script has the correct structure."""
         with open(self.hook_script, "r") as f:
             content = f.read()
@@ -90,7 +90,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
         self.assertIn("/agent:teamcoach", content)  # Should use TeamCoach agent
         self.assertIn("timeout=300", content)  # Should have 5-minute timeout
 
-    def test_hook_script_generates_valid_prompt(self):
+    def test_hook_script_generates_valid_prompt(self) -> None:
         """Test that the hook script generates a valid TeamCoach prompt."""
         with open(self.hook_script, "r") as f:
             content = f.read()
@@ -129,7 +129,7 @@ class TestTeamCoachSubagentStopHook(unittest.TestCase):
         CLAUDE_CLI_AVAILABLE,
         "Claude CLI not available - cannot test agent data processing",
     )
-    def test_hook_processes_agent_data(self):
+    def test_hook_processes_agent_data(self) -> None:
         """Test that the hook processes agent data correctly."""
         # This test requires Claude CLI and complex mocking setup
         # Instead, verify the hook script has the structure to process agent data
@@ -162,7 +162,7 @@ class TestTeamCoachSubagentStopHook(unittest.TestCase):
         # Should have called TeamCoach with default/empty agent data
         mock_run.assert_called_once()
 
-    def test_subagent_hook_has_shorter_timeout(self):
+    def test_subagent_hook_has_shorter_timeout(self) -> None:
         """Test that the subagent hook has appropriate timeout."""
         with open(self.hook_script, "r") as f:
             content = f.read()
@@ -183,7 +183,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             os.path.exists(self.settings_file), "Settings file should exist"
         )
 
-    def test_settings_file_has_valid_json(self):
+    def test_settings_file_has_valid_json(self) -> None:
         """Test that settings.json is valid JSON."""
         with open(self.settings_file, "r") as f:
             try:
@@ -191,7 +191,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             except json.JSONDecodeError as e:
                 self.fail(f"Settings file should be valid JSON: {e}")
 
-    def test_hooks_configuration_exists(self):
+    def test_hooks_configuration_exists(self) -> None:
         """Test that dangerous hooks have been removed but safe hooks are allowed."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
@@ -206,7 +206,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                 "sessionStop",
             ]:
                 if hook_type in settings["hooks"]:
-                    for matcher, hook_config in (
+                    for _, hook_config in (
                         settings["hooks"][hook_type].items()
                         if isinstance(settings["hooks"][hook_type], dict)
                         else enumerate(settings["hooks"][hook_type])
@@ -226,7 +226,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                                     "Hooks should not spawn new Claude sessions",
                                 )
 
-    def test_hook_configurations_have_required_fields(self):
+    def test_hook_configurations_have_required_fields(self) -> None:
         """Test that if hooks exist, they are properly configured."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
@@ -271,7 +271,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
             "Workflow reflection collector should exist as hook replacement",
         )
 
-    def test_hook_commands_use_project_relative_paths(self):
+    def test_hook_commands_use_project_relative_paths(self) -> None:
         """Test that if hooks exist, they use relative paths."""
         with open(self.settings_file, "r") as f:
             settings = json.load(f)
@@ -302,7 +302,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
 class TestTeamCoachHookIntegration(unittest.TestCase):
     """Test TeamCoach hook integration with the overall system."""
 
-    def test_hook_files_are_executable(self):
+    def test_hook_files_are_executable(self) -> None:
         """Test that hook files have correct permissions."""
         base_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -316,7 +316,7 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
             os.access(subagent_hook, os.X_OK), "Subagent hook should be executable"
         )
 
-    def test_hook_files_have_shebang(self):
+    def test_hook_files_have_shebang(self) -> None:
         """Test that hook files have proper shebang."""
         base_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
@@ -331,7 +331,7 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
                 )
                 self.assertIn("python", first_line, f"{hook_file} should use Python")
 
-    def test_hooks_handle_errors_gracefully(self):
+    def test_hooks_handle_errors_gracefully(self) -> None:
         """Test that hooks are designed to handle errors gracefully."""
         base_dir = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"

@@ -7,9 +7,17 @@ cannot be imported during type checking.
 
 import os
 from enum import Enum
-from typing import Dict, List, Any, Optional, Callable, Union
+from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+
+
+class GitHubOperationsStub:
+    """Stub for GitHub operations."""
+    
+    def add_pr_comment(self, pr_number: int, comment: str) -> None:
+        """Add a comment to a PR - stub implementation."""
+        pass
 
 
 # Pytest stubs
@@ -319,9 +327,9 @@ class DelegationCoordinator:
     """Delegation coordinator implementation."""
 
     def __init__(self, auto_approve: bool) -> None:
-        self.github_ops = github_ops
+        self.github_ops = GitHubOperationsStub()  # Mock GitHub operations
         self.auto_approve = auto_approve
-        self.active_delegations: Dict[Any, Any] = field(default_factory=dict)
+        self.active_delegations: Dict[Any, Any] = {}
         self.config = {
             "max_retries": 3,
             "workflow_master_timeout": 300,
@@ -644,14 +652,14 @@ Improve metadata for PR #{pr_number}.
 
     def _delegate_to_workflow_master(self, task: DelegationTask) -> None:
         """Delegate task to WorkflowMaster."""
-        if self is not None and self.auto_approve:
+        if self.auto_approve:
             self._create_workflow_master_prompt(task)
         else:
             self._invoke_workflow_master_interactive(task)
 
     def _delegate_to_code_reviewer(self, task: DelegationTask) -> None:
         """Delegate task to code-reviewer."""
-        if self is not None and self.auto_approve:
+        if self.auto_approve:
             self._create_code_review_workflow(task)
         else:
             self._invoke_code_reviewer_direct(task)
@@ -854,9 +862,9 @@ class PRBacklogManager:
         # If github_ops not provided, try to create one (for test compatibility)
         if github_ops is None:
             try:
-                from core import GitHubOperations
+                # from core import GitHubOperations  # Import disabled for type checking
 
-                self.github_ops = GitHubOperations()
+                self.github_ops = None  # GitHubOperations stub
             except ImportError:
                 self.github_ops = None
         else:
@@ -1193,7 +1201,7 @@ class ReadinessAssessor:
         )
         behind_by = comparison.get("behind_by", 0)
         ahead_by = comparison.get("ahead_by", 1)
-        commits = comparison.get("commits", [])
+        _commits = comparison.get("commits", [])
 
         sync_complexity = self._assess_sync_complexity(comparison)
 
@@ -1493,7 +1501,7 @@ class MetricsCollector:
     """Metrics collection component."""
 
     def __init__(self) -> None:
-        self.metrics: Dict[Any, Any] = field(default_factory=dict)
+        self.metrics: Dict[Any, Any] = {}
 
     def collect_pr_metrics(self, assessments: List[PRAssessment]) -> BacklogMetrics:
         """Collect PR processing metrics."""
@@ -1833,14 +1841,10 @@ class SecurityConstraints:
 class GitHubActionsIntegration:
     """GitHub Actions integration component."""
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[Any] = None) -> None:
         # Handle both signatures
-        if pr_backlog_manager is not None:
-            self.pr_backlog_manager = pr_backlog_manager
-            self.config = getattr(pr_backlog_manager, "config", None)
-        else:
-            self.config = config
-            self.pr_backlog_manager = config  # For test compatibility
+        self.config = config
+        self.pr_backlog_manager = config  # For test compatibility
 
         # Check environment
         if os.environ.get("GITHUB_ACTIONS") != "true":

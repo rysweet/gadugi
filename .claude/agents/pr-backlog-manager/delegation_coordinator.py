@@ -70,7 +70,7 @@ class DelegationCoordinator:
     and delegating to specialized agents like WorkflowMaster and code-reviewer.
     """
 
-    def __init__(self, auto_approve: bool) -> None:
+    def __init__(self, github_ops: Any, auto_approve: bool) -> None:
         """Initialize delegation coordinator."""
         self.github_ops = github_ops
         self.auto_approve = auto_approve
@@ -621,41 +621,41 @@ jobs:
                 DelegationType.MERGE_CONFLICT_RESOLUTION: (
                     "🔧 **Automated Merge Conflict Resolution**\n\n"
                     f"The PR Backlog Manager has detected merge conflicts and delegated resolution to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
+                    f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
+                    f"**Status:** {task.status.value}\n\n"
                     "Resolution will be attempted automatically. Monitor this PR for updates."
                 ),
                 DelegationType.CI_FAILURE_FIX: (
                     "🚨 **Automated CI Failure Resolution**\n\n"
                     f"The PR Backlog Manager has detected CI failures and delegated fixes to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
+                    f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
+                    f"**Status:** {task.status.value}\n\n"
                     "CI issues will be analyzed and fixed automatically where possible."
                 ),
                 DelegationType.BRANCH_UPDATE: (
                     "🔄 **Automated Branch Update**\n\n"
                     f"The PR Backlog Manager has detected that this branch is behind main and delegated update to WorkflowMaster.\n\n"
-                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
+                    f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
+                    f"**Status:** {task.status.value}\n\n"
                     "The branch will be updated with latest changes from main."
                 ),
                 DelegationType.AI_CODE_REVIEW: (
                     "🤖 **AI Code Review Initiated**\n\n"
                     f"The PR Backlog Manager has initiated AI code review (Phase 9) for this PR.\n\n"
-                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
+                    f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
+                    f"**Status:** {task.status.value}\n\n"
                     "Comprehensive AI review will be performed and feedback provided."
                 ),
                 DelegationType.METADATA_IMPROVEMENT: (
                     "📝 **Metadata Improvement Request**\n\n"
                     f"The PR Backlog Manager has identified metadata improvements needed for this PR.\n\n"
-                    f"**Task ID:** `{(task.task_id if task is not None else None)}`\n"
+                    f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
-                    f"**Status:** {(task.status if task is not None else None).value}\n\n"
+                    f"**Status:** {task.status.value}\n\n"
                     "Suggestions for title, description, and labels will be provided."
                 ),
             }

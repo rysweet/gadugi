@@ -4,37 +4,14 @@ Tests error handling utilities, retry logic, circuit breakers, and recovery patt
 """
 
 import logging
-import os
 
 # Import the module we're testing
-import sys
 import time
 from datetime import datetime
-from typing import Any, Dict
 
 import pytest
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
-# For type checking only
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from claude.shared.utils.error_handling import (
-        CircuitBreaker,
-        ErrorContext,
-        ErrorHandler,
-        ErrorSeverity,
-        GadugiError,
-        NonRecoverableError,
-        RecoverableError,
-        RetryStrategy,
-        graceful_degradation,
-        handle_with_fallback,
-        retry,
-        validate_input,
-    )
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     from claude.shared.utils.error_handling import (
@@ -49,8 +26,7 @@ try:
         graceful_degradation,
         handle_with_fallback,
         retry,
-        validate_input,
-    )
+        validate_input)
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -92,14 +68,13 @@ except ImportError:
         strategy=None,
         backoff_factor=2.0,
         exceptions=None,
-        on_retry=None,
-    ):
+        on_retry=None):
         def decorator(func):
             def wrapper(*args, **kwargs):
                 last_exception = None
                 delay = initial_delay
 
-                for attempt in range(max_attempts):
+                for _attempt in range(max_attempts):
                     try:
                         return func(*args, **kwargs)
                     except Exception as e:
@@ -111,10 +86,10 @@ except ImportError:
 
                         # Call on_retry callback if provided
                         if on_retry:
-                            on_retry(attempt + 1, e)
+                            on_retry(_attempt + 1, e)
 
                         # Don't sleep on the last attempt
-                        if attempt < max_attempts - 1:
+                        if _attempt < max_attempts - 1:
                             time.sleep(delay)
 
                             # Calculate next delay based on strategy
@@ -123,7 +98,7 @@ except ImportError:
                             elif strategy == RetryStrategy.LINEAR:
                                 delay = initial_delay + initial_delay * (
                                     backoff_factor - 1
-                                ) * (attempt + 1)
+                                ) * (_attempt + 1)
                             elif strategy == RetryStrategy.FIXED:
                                 delay = initial_delay
 
@@ -138,7 +113,7 @@ except ImportError:
         return decorator
 
     def graceful_degradation(fallback_value=None, exceptions=None, log_errors=True):
-        exceptions = exceptions or (Exception,)
+        exceptions = exceptions or (Exception)
 
         def decorator(func):
             def wrapper(*args, **kwargs):
@@ -244,7 +219,7 @@ except ImportError:
                     self.failure_count = 0
                     self.last_failure_time = None
                     return result
-                except Exception as e:
+                except Exception:
                     self.failure_count += 1
                     self.last_failure_time = datetime.now()
 
@@ -261,7 +236,7 @@ except ImportError:
             self.is_open = False
 
     def handle_with_fallback(primary, fallback, exceptions=None):
-        exceptions = exceptions or (Exception,)
+        exceptions = exceptions or (Exception)
         try:
             return primary()
         except exceptions as e:
@@ -324,7 +299,6 @@ except ImportError:
 
         return decorator
 
-
 class TestErrorSeverity:
     """Test ErrorSeverity enum."""
 
@@ -346,7 +320,6 @@ class TestErrorSeverity:
         assert len(severities) == 4
         assert ErrorSeverity.CRITICAL != ErrorSeverity.LOW
 
-
 class TestRetryStrategy:
     """Test RetryStrategy enum."""
 
@@ -360,7 +333,6 @@ class TestRetryStrategy:
         """Test all retry strategies are defined."""
         strategies = list(RetryStrategy)
         assert len(strategies) == 3
-
 
 class TestGadugiError:
     """Test GadugiError base exception."""
@@ -388,7 +360,6 @@ class TestGadugiError:
         error = GadugiError("Test")
         assert isinstance(error, Exception)
 
-
 class TestRecoverableError:
     """Test RecoverableError exception."""
 
@@ -403,7 +374,6 @@ class TestRecoverableError:
         context = {"retry_count": 2}
         error = RecoverableError("Network timeout", context=context)
         assert error.context == context
-
 
 class TestNonRecoverableError:
     """Test NonRecoverableError exception."""
@@ -421,7 +391,6 @@ class TestNonRecoverableError:
         error = NonRecoverableError("System corrupted", context)
         assert error.context == context
         assert error.severity == ErrorSeverity.CRITICAL
-
 
 class TestRetryDecorator:
     """Test retry decorator functionality."""
@@ -483,8 +452,7 @@ class TestRetryDecorator:
                 max_attempts=3,
                 initial_delay=0.1,
                 strategy=RetryStrategy.EXPONENTIAL,
-                backoff_factor=2.0,
-            )
+                backoff_factor=2.0)
             def always_fails():
                 raise ValueError("Test")
 
@@ -508,8 +476,7 @@ class TestRetryDecorator:
                 max_attempts=3,
                 initial_delay=0.1,
                 strategy=RetryStrategy.LINEAR,
-                backoff_factor=2.0,
-            )
+                backoff_factor=2.0)
             def always_fails():
                 raise ValueError("Test")
 
@@ -543,7 +510,7 @@ class TestRetryDecorator:
         """Test retry only catches specified exceptions."""
         call_count = 0
 
-        @retry(max_attempts=3, initial_delay=0.01, exceptions=(ValueError,))
+        @retry(max_attempts=3, initial_delay=0.01, exceptions=(ValueError))
         def mixed_failures():
             nonlocal call_count
             call_count += 1
@@ -575,7 +542,6 @@ class TestRetryDecorator:
         assert len(retry_calls) == 2
         assert retry_calls[0] == (1, "Failure 1")
         assert retry_calls[1] == (2, "Failure 2")
-
 
 class TestGracefulDegradation:
     """Test graceful degradation decorator."""
@@ -610,7 +576,7 @@ class TestGracefulDegradation:
     def test_graceful_degradation_specific_exceptions(self):
         """Test graceful degradation only handles specified exceptions."""
 
-        @graceful_degradation(fallback_value="fallback", exceptions=(ValueError,))
+        @graceful_degradation(fallback_value="fallback", exceptions=(ValueError))
         def mixed_failures():
             raise TypeError("Not handled")
 
@@ -619,7 +585,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -630,7 +596,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -638,7 +604,6 @@ class TestGracefulDegradation:
 
             assert failing_func() == "fallback"
             mock_logger.error.assert_not_called()
-
 
 class TestErrorHandler:
     """Test ErrorHandler class."""
@@ -767,7 +732,6 @@ class TestErrorHandler:
         assert len(handler.error_counts) == 0
         assert len(handler.error_history) == 0
 
-
 class TestCircuitBreaker:
     """Test CircuitBreaker class."""
 
@@ -888,7 +852,6 @@ class TestCircuitBreaker:
         assert cb.failure_count == 0
         assert cb.last_failure_time is None
 
-
 class TestHandleWithFallback:
     """Test handle_with_fallback function."""
 
@@ -925,17 +888,17 @@ class TestHandleWithFallback:
 
         # Should not catch TypeError if only ValueError is specified
         with pytest.raises(TypeError):
-            handle_with_fallback(primary, fallback, exceptions=(ValueError,))
+            handle_with_fallback(primary, fallback, exceptions=(ValueError))
 
         # Should catch TypeError if specified
         assert (
-            handle_with_fallback(primary, fallback, exceptions=(TypeError,))
+            handle_with_fallback(primary, fallback, exceptions=(TypeError))
             == "fallback result"
         )
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -946,13 +909,12 @@ class TestHandleWithFallback:
             assert handle_with_fallback(primary, fallback) == "fallback result"
             mock_logger.warning.assert_called_once()
 
-
 class TestErrorContext:
     """Test ErrorContext context manager."""
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 pass  # Successful operation
 
@@ -966,11 +928,13 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+            ctx = None
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as ctx:
                     raise ValueError("Test error")
 
+            assert ctx is not None
             assert isinstance(ctx.error, ValueError)
             mock_logger.error.assert_called_with("Error in test operation: Test error")
 
@@ -994,7 +958,7 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch("tests.shared.test_error_handling.logger") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")
@@ -1015,7 +979,6 @@ class TestErrorContext:
         with pytest.raises(ValueError):
             with ErrorContext("test operation"):
                 raise ValueError("Test error")
-
 
 class TestValidateInput:
     """Test validate_input decorator."""
@@ -1076,7 +1039,6 @@ class TestValidateInput:
 
         # Should work fine, just ignores unknown parameter
         assert test_func(5, "hello") == "5: hello"
-
 
 class TestErrorHandlingIntegration:
     """Integration tests for error handling components."""

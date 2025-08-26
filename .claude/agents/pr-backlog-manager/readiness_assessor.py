@@ -8,7 +8,7 @@ across multiple dimensions including conflicts, CI status, reviews, and metadata
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)

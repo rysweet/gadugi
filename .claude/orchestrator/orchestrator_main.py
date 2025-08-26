@@ -18,7 +18,7 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -219,8 +219,8 @@ class OrchestratorCoordinator:
             # Phase 4: Result Integration
             logger.info("Phase 4: Integrating results and cleanup...")
             result.task_results = execution_results
-            result.successful_tasks = len([r for r in execution_results if (r.status if r is not None else None) == 'success'])
-            result.failed_tasks = len([r for r in execution_results if (r.status if r is not None else None) != 'success'])
+            result.successful_tasks = len([r for r in execution_results if r.status == 'success'])
+            result.failed_tasks = len([r for r in execution_results if r.status != 'success'])
 
             # Calculate performance metrics
             result.execution_time_seconds = time.time() - start_time
@@ -316,7 +316,7 @@ class OrchestratorCoordinator:
             prompt_context = PromptContext(
                 task_id=task_info.id,
                 task_name=task_info.name,
-                original_prompt=(task_info.prompt_file if task_info is not None else None),
+                original_prompt=task_info.prompt_file,
                 dependencies=task_info.dependencies,
                 target_files=task_info.target_files
             )
@@ -361,7 +361,7 @@ class OrchestratorCoordinator:
             for task_executor in task_executors:
                 future = executor.submit(self._execute_single_task, task_executor)
                 future_to_task[future] = task_executor
-                logger.info(f"Submitted task for execution: {(task_executor.task_id if task_executor is not None else None)}")
+                logger.info(f"Submitted task for execution: {task_executor.task_id}")
 
             # Collect results as they complete
             for future in as_completed(future_to_task):
@@ -369,12 +369,12 @@ class OrchestratorCoordinator:
                 try:
                     result = future.result()
                     results.append(result)
-                    logger.info(f"Task completed: {(task_executor.task_id if task_executor is not None else None)}, status={(result.status if result is not None else None)}")
+                    logger.info(f"Task completed: {task_executor.task_id}, status={result.status}")
                 except Exception as e:
-                    logger.error(f"Task execution failed: {(task_executor.task_id if task_executor is not None else None)}, error={e}")
+                    logger.error(f"Task execution failed: {task_executor.task_id}, error={e}")
                     # Create failed result
                     failed_result = ExecutionResult(
-                        task_id=(task_executor.task_id if task_executor is not None else None),
+                        task_id=task_executor.task_id,
                         task_name=task_executor.task_context.get('task_name', 'Unknown'),
                         status='failed',
                         start_time=datetime.now(),
@@ -396,12 +396,12 @@ class OrchestratorCoordinator:
 
     def _execute_single_task(self, task_executor: TaskExecutor) -> ExecutionResult:
         """Execute a single task using the execution engine"""
-        logger.info(f"Executing task: {(task_executor.task_id if task_executor is not None else None)}")
+        logger.info(f"Executing task: {task_executor.task_id}")
 
         # Update process status
         if self.process_registry and ProcessStatus:
             self.process_registry.update_process_status(
-                (task_executor.task_id if task_executor is not None else None),
+                task_executor.task_id,
                 ProcessStatus.RUNNING
             )
 
@@ -411,14 +411,14 @@ class OrchestratorCoordinator:
 
             # Update process status based on result
             if self.process_registry and ProcessStatus:
-                if (result.status if result is not None else None) == 'success':
+                if result.status == 'success':
                     self.process_registry.update_process_status(
-                        (task_executor.task_id if task_executor is not None else None),
+                        task_executor.task_id,
                         ProcessStatus.COMPLETED
                     )
                 else:
                     self.process_registry.update_process_status(
-                        (task_executor.task_id if task_executor is not None else None),
+                        task_executor.task_id,
                         ProcessStatus.FAILED,
                         error_message=result.error_message
                     )
@@ -426,19 +426,19 @@ class OrchestratorCoordinator:
             return result
 
         except Exception as e:
-            logger.error(f"Task execution failed: {(task_executor.task_id if task_executor is not None else None)}, error={e}")
+            logger.error(f"Task execution failed: {task_executor.task_id}, error={e}")
 
             # Update process status
             if self.process_registry and ProcessStatus:
                 self.process_registry.update_process_status(
-                    (task_executor.task_id if task_executor is not None else None),
+                    task_executor.task_id,
                     ProcessStatus.FAILED,
                     error_message=str(e)
                 )
 
             # Return failed result
             return ExecutionResult(
-                task_id=(task_executor.task_id if task_executor is not None else None),
+                task_id=task_executor.task_id,
                 task_name=task_executor.task_context.get('task_name', 'Unknown'),
                 status='failed',
                 start_time=datetime.now(),
@@ -477,7 +477,7 @@ class OrchestratorCoordinator:
         while not self._shutdown_requested:
             try:
                 # Update process heartbeats and check health
-                if self is not None and self.process_registry:
+                if self.process_registry:
                     self.process_registry.update_heartbeats()
 
                 # Save monitoring status
@@ -508,8 +508,10 @@ class OrchestratorCoordinator:
 
         status_counts = {}
         for process in all_processes.values():
-            status_name = (process.status if process is not None else None).value
-            status_counts[status_name] = status_counts.get(status_name, 0) + 1
+            if hasattr(process, 'status'):
+                status_obj = process.status
+                status_name = status_obj.value if hasattr(status_obj, 'value') else str(status_obj)
+                status_counts[status_name] = status_counts.get(status_name, 0) + 1
 
         return {
             "orchestration_id": self.orchestration_id,
@@ -518,13 +520,13 @@ class OrchestratorCoordinator:
             "status_breakdown": status_counts,
             "active_processes": [
                 {
-                    "task_id": (p.task_id if p is not None else None),
+                    "task_id": p.task_id,
                     "task_name": p.task_name,
-                    "status": (p.status if p is not None else None).value,
+                    "status": p.status.value if hasattr(p.status, 'value') else str(p.status),
                     "runtime_seconds": (datetime.now() - p.created_at).total_seconds()
                 }
                 for p in all_processes.values()
-                if (p.status if p is not None else None) in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]
+                if hasattr(p, 'status') and p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]
             ]
         }
 
@@ -552,7 +554,7 @@ class OrchestratorCoordinator:
                 logger.error(f"Failed to cleanup worktree for {task_id}: {e}")
 
         # Archive process registry
-        if self is not None and self.process_registry:
+        if self.process_registry:
             try:
                 archive_file = self.monitoring_dir / f"{self.orchestration_id}_final.json"
                 self.process_registry.save_to_file(str(archive_file))
@@ -616,12 +618,13 @@ class OrchestratorCoordinator:
                 # Execute the task with subprocess fallback
                 exec_result = executor.execute(timeout=self.config.execution_timeout_hours * 3600)
 
-                if (exec_result.status if exec_result is not None else None) == 'success':
+                if exec_result.status == 'success':
                     result.successful_tasks += 1
                 else:
                     result.failed_tasks += 1
 
-                result.task_results.append(exec_result)
+                if result.task_results is not None:
+                    result.task_results.append(exec_result)
 
             except Exception as e:
                 logger.error(f"Failed to execute task {prompt_file}: {e}")
@@ -672,7 +675,7 @@ def main():
     orchestrator = OrchestratorCoordinator(config, args.project_root)
 
     try:
-        result = orchestrator.orchestrate(args.prompt_file if args is not None else None)
+        result = orchestrator.orchestrate(args.prompt_files)
 
         # Print results
         print(f"\nOrchestration Results:")
@@ -680,10 +683,10 @@ def main():
         print(f"  Successful: {result.successful_tasks}")
         print(f"  Failed: {result.failed_tasks}")
         print(f"  Execution time: {result.execution_time_seconds:.1f} seconds")
-        if result is not None and result.parallel_speedup:
+        if result.parallel_speedup:
             print(f"  Parallel speedup: {result.parallel_speedup:.1f}x")
 
-        if result is not None and result.error_summary:
+        if result.error_summary:
             print(f"  Errors: {result.error_summary}")
 
     except KeyboardInterrupt:

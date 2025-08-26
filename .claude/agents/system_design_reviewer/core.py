@@ -10,8 +10,8 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
-from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass, asdict
 from enum import Enum
 
 # --------------------------------------------------------------------------- #
@@ -23,32 +23,32 @@ from enum import Enum
 # --------------------------------------------------------------------------- #
 try:
     # 1) Absolute imports (e.g. `python -m gadugi.system_design_reviewer`)
-    from shared.github_operations import GitHubOperations
-    from shared.state_management import StateManager
-    from shared.error_handling import (
+    from shared.github_operations import GitHubOperations  # type: ignore[attr-defined]
+    from shared.state_management import StateManager  # type: ignore[attr-defined]
+    from shared.utils.error_handling import (  # type: ignore[attr-defined]
         ErrorHandler,
         ErrorCategory,
         ErrorSeverity,
     )
-    from shared.task_tracking import TaskTracker
+    from shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
         # 2) Relative imports when executed inside repository package layout
-        from ..shared.github_operations import GitHubOperations
-        from ..shared.state_management import StateManager
-        from ..shared.error_handling import (
+        from ...shared.github_operations import GitHubOperations  # type: ignore[attr-defined]
+        from ...shared.state_management import StateManager  # type: ignore[attr-defined]
+        from ...shared.utils.error_handling import (  # type: ignore[attr-defined]
             ErrorHandler,
             ErrorCategory,
             ErrorSeverity,
         )
-        from ..shared.task_tracking import TaskTracker
+        from ...shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
     except ImportError:
         # 3) Final fallback – use lightweight stub implementations
         print(
             "Warning: Enhanced-Separation shared modules not available, "
             "using local fallback implementations"
         )
-        from .fallbacks import (  # type: ignore
+        from .fallbacks import (  # type: ignore[import-untyped]
             GitHubOperations,
             StateManager,
             ErrorHandler,
@@ -58,8 +58,8 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
         )
 
 from .ast_parser import (
-    ASTParserFactory, ArchitecturalElement, ArchitecturalChange,
-    ChangeType, ImpactLevel, ElementType
+    ASTParserFactory, ArchitecturalChange,
+    ImpactLevel
 )
 from .documentation_manager import DocumentationManager
 from .adr_generator import ADRGenerator
@@ -109,7 +109,7 @@ class ReviewResult:
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize the system design reviewer"""
         self.config = config or {}
 
@@ -121,8 +121,8 @@ class SystemDesignReviewer:
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
-        self.documentation_manager = DocumentationManager()
-        self.adr_generator = ADRGenerator()
+        self.documentation_manager = DocumentationManager(architecture_file="architecture.md")
+        self.adr_generator = ADRGenerator(adr_dir="docs/adr")
 
         # Configuration
         self.max_pr_size = self.config.get('max_pr_size', 1000)  # max files to analyze
