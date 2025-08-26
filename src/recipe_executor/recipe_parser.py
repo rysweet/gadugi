@@ -31,9 +31,10 @@ class RecipeParser:
     """Parses recipe files into structured models."""
 
     def __init__(self):
-        self.requirement_pattern = re.compile(r"^[\-\*]\s+MUST\s+(.+)$", re.MULTILINE)
-        self.should_pattern = re.compile(r"^[\-\*]\s+SHOULD\s+(.+)$", re.MULTILINE)
-        self.could_pattern = re.compile(r"^[\-\*]\s+COULD\s+(.+)$", re.MULTILINE)
+        # Match requirements anywhere in bullet points
+        self.requirement_pattern = re.compile(r"[\-\*]\s+(.*?\bMUST\b.+?)(?=\n[\-\*]|\n\n|\Z)", re.MULTILINE | re.DOTALL)
+        self.should_pattern = re.compile(r"[\-\*]\s+(.*?\bSHOULD\b.+?)(?=\n[\-\*]|\n\n|\Z)", re.MULTILINE | re.DOTALL)
+        self.could_pattern = re.compile(r"[\-\*]\s+(.*?\bCOULD\b.+?)(?=\n[\-\*]|\n\n|\Z)", re.MULTILINE | re.DOTALL)
         self.code_block_pattern = re.compile(r"```(?:python|py)?\n(.*?)\n```", re.DOTALL)
 
     def parse_recipe(self, recipe_path: Path) -> Recipe:
@@ -169,8 +170,8 @@ class RecipeParser:
         """Extract requirements from a specific section."""
         requirements: list[Requirement] = []
 
-        # Find the section
-        section_pattern = re.compile(rf"##?\s*{section_name}.*?\n(.*?)(?:\n##|\Z)", re.DOTALL)
+        # Find the section (allow for nested sections)
+        section_pattern = re.compile(rf"##\s*{section_name}.*?\n(.*?)(?:\n##\s+[^#]|\Z)", re.DOTALL | re.IGNORECASE)
         section_match = section_pattern.search(content)
 
         if not section_match:

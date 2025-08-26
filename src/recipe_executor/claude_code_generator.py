@@ -129,6 +129,23 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
                 # Read files that Claude created
                 generated_files = self._read_generated_files(temp_path, recipe)
+                
+                # Also check alternate location if files not found (handle relative path issues)
+                if not generated_files and output_dir:
+                    # Check if files were created relative to cwd instead of output_dir
+                    alt_path = Path.cwd() / f"generated_{recipe.name}"
+                    if alt_path.exists() and alt_path != temp_path:
+                        logger.warning(f"Files found in alternate location: {alt_path}")
+                        alt_files = self._read_generated_files(alt_path, recipe)
+                        if alt_files:
+                            generated_files = alt_files
+                            # Move files to correct location
+                            import shutil
+                            for filepath, content in alt_files.items():
+                                correct_path = temp_path / Path(filepath).name
+                                correct_path.parent.mkdir(parents=True, exist_ok=True)
+                                correct_path.write_text(content)
+                            logger.info(f"Moved {len(alt_files)} files to correct location")
 
                 # Check if any files were generated
                 if not generated_files:

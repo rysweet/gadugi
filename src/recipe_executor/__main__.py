@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Optional
 
 from .orchestrator import RecipeOrchestrator, BuildOptions
+from .enhanced_orchestrator import EnhancedRecipeOrchestrator
+from .self_hosting import SelfHostingManager
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -63,6 +65,48 @@ Examples:
     # Analyze command
     analyze_parser = subparsers.add_parser("analyze", help="Analyze a recipe without executing it")
     analyze_parser.add_argument("recipe", type=Path, help="Path to the recipe directory")
+    
+    # Self-host command
+    selfhost_parser = subparsers.add_parser("self-host", help="Regenerate Recipe Executor from its own recipe")
+    selfhost_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path(".recipe_build/self_host"),
+        help="Directory for generated code"
+    )
+    selfhost_parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Only validate self-hosting capability without generating"
+    )
+    selfhost_parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Run full verification including bootstrap test"
+    )
+    selfhost_parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="DANGEROUS: Overwrite existing Recipe Executor code"
+    )
+    
+    # Enhanced pipeline command
+    enhanced_parser = subparsers.add_parser("pipeline", help="Execute recipe through enhanced 10-stage pipeline")
+    enhanced_parser.add_argument("recipe", type=Path, help="Path to the recipe directory")
+    enhanced_parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="Directory to write generated files"
+    )
+    enhanced_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be generated without creating files"
+    )
+    enhanced_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    enhanced_parser.add_argument(
+        "--force", action="store_true", help="Force rebuild even if nothing changed"
+    )
 
     # Parse arguments
     args = parser.parse_args(argv)
@@ -147,6 +191,46 @@ Examples:
                     print(f"  - {issue}")
 
             return 0
+            
+        elif args.command == "self-host":
+            # Self-hosting command
+            print("Starting Recipe Executor self-hosting...")
+            manager = SelfHostingManager()
+            
+            if args.validate:
+                print("Validating self-hosting capability...")
+                result = manager.regenerate_self(validate_only=True)
+            elif args.verify:
+                print("Running full self-hosting verification...")
+                success = manager.verify_self_hosting()
+                return 0 if success else 1
+            else:
+                print(f"Regenerating Recipe Executor to {args.output_dir}")
+                result = manager.regenerate_self(
+                    output_dir=args.output_dir,
+                    allow_overwrite=args.overwrite
+                )
+            
+            print(result.summary)
+            return 0 if result.success else 1
+            
+        elif args.command == "pipeline":
+            # Enhanced pipeline command
+            print(f"Executing recipe through enhanced pipeline: {args.recipe}")
+            
+            orchestrator = EnhancedRecipeOrchestrator()
+            result = orchestrator.execute_recipe(
+                recipe_path=args.recipe,
+                output_dir=args.output_dir,
+                dry_run=args.dry_run,
+                verbose=args.verbose,
+                force_rebuild=args.force,
+                self_hosting=args.recipe.name == "recipe-executor"
+            )
+            
+            print(result.summary)
+            
+            return 0 if result.success else 1
 
         else:
             # This shouldn't happen due to argparse configuration

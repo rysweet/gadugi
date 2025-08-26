@@ -211,7 +211,12 @@ class RecipeOrchestrator:
 
             print(f"🔨 Phase 2: Generating code for {recipe.name}")
             logger.info(f"Starting code generation for {recipe.name}")
-            code = self.generator.generate(enhanced_recipe, context, output_dir=options.output_dir)
+            # Ensure output_dir is absolute to avoid path issues
+            if options.output_dir:
+                abs_output_dir = options.output_dir if options.output_dir.is_absolute() else Path.cwd() / options.output_dir
+            else:
+                abs_output_dir = None
+            code = self.generator.generate(enhanced_recipe, context, output_dir=abs_output_dir)
             logger.info(
                 f"Code generation complete for {recipe.name}: {len(code.files) if code else 0} files generated"
             )
