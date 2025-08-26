@@ -825,3 +825,21 @@ class TaskTracker:
         """Initialize workflow tracking for the given workflow ID."""
         self.phase_tracker.workflow_id = workflow_id
         logger.info(f"Initialized workflow tracking for workflow {workflow_id}")
+
+    def start_task(self, task_id: str) -> None:
+        """Start a specific task."""
+        task = self.get_task(task_id)
+        if not task:
+            raise TaskError(f"Task {task_id} not found")
+        
+        self.update_task_status(task_id, TaskStatus.IN_PROGRESS)
+        logger.info(f"Started task: {task.content}")
+
+    def complete_task(self, task_id: str) -> None:
+        """Complete a specific task."""
+        task = self.get_task(task_id)
+        if not task:
+            raise TaskError(f"Task {task_id} not found")
+        
+        self.update_task_status(task_id, TaskStatus.COMPLETED)
+        logger.info(f"Completed task: {task.content}")

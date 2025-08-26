@@ -324,7 +324,7 @@ class WorkflowValidator:
             )
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(str(prompt_file), 'r', encoding='utf-8') as f:
                 content = f.read()
 
             return ValidationResult(
@@ -355,7 +355,7 @@ class WorkflowValidator:
         start_time = datetime.now()
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(str(prompt_file), 'r', encoding='utf-8') as f:
                 content = f.read()
 
             issues = []

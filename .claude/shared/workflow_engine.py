@@ -192,7 +192,11 @@ class WorkflowEngine:
             return self._create_success_result()
 
         except Exception as e:
-            self.error_handler.handle_error(e, ErrorCategory.WORKFLOW_EXECUTION, ErrorSeverity.HIGH)
+            self.error_handler.handle_error(e, {
+                "category": ErrorCategory.WORKFLOW_EXECUTION,
+                "severity": ErrorSeverity.HIGH,
+                "phase": "workflow_execution"
+            })
             return self._create_failure_result(f"Workflow execution failed: {str(e)}")
 
     def _execute_phase(self, phase: WorkflowPhase) -> PhaseResult:
@@ -588,15 +592,24 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Finalize workflow execution"""
         try:
             # Update task tracking
-            if hasattr(self.task_tracker, 'complete_task'):
+            if hasattr(self.task_tracker, 'complete_task') and self.workflow_state:
                 self.task_tracker.complete_task(self.workflow_state.task_id)
 
             # Clean up temporary files
             self._cleanup_temp_files()
 
+            if not self.workflow_state:
+                return False, "Workflow state not initialized", {}
+
+            execution_time = (
+                (datetime.now() - self.workflow_state.start_time).total_seconds()
+                if self.workflow_state.start_time
+                else 0.0
+            )
+            
             return True, "Workflow finalization completed", {
                 "total_phases": len(self.workflow_state.completed_phases),
-                "execution_time": (datetime.now() - self.workflow_state.start_time).total_seconds()
+                "execution_time": execution_time
             }
 
         except Exception as e:
@@ -607,6 +620,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     def _save_checkpoint(self):
         """Save workflow state as checkpoint"""
         try:
+            if not self.workflow_state:
+                return
+            
             checkpoint_data = asdict(self.workflow_state)
             checkpoint_data['timestamp'] = datetime.now().isoformat()
 
@@ -682,7 +698,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
     def _create_minimal_task_tracker(self):
         """Create minimal task tracker if not provided"""
-        return TaskTracker()
+        return TaskTracker(workflow_id=self.task_id)
 
     def _create_minimal_error_handler(self):
         """Create minimal error handler if not provided"""

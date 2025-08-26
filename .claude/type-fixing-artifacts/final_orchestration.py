@@ -5,12 +5,9 @@ Uses subprocess for true parallel execution.
 """
 
 import subprocess
-import os
 import json
-import time
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
-import threading
+from concurrent.futures import ThreadPoolExecutor
 import queue
 
 class FinalOrchestrator:
@@ -263,7 +260,7 @@ print(f"Fixed {fixed} files")
         
         # Merge changes back
         print("\n📋 Merging changes...")
-        for task_id, worktree in worktrees.items():
+        for _, worktree in worktrees.items():
             # Copy fixed files back
             subprocess.run(
                 ['rsync', '-av', '--exclude=.git', f'{worktree}/', './'],

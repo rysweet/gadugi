@@ -532,7 +532,7 @@ class XPIADefenseEngine:
             return True
 
         if security_mode == SecurityMode.STRICT:
-            return threat_level == ThreatLevel.SAFE
+            return False  # Already checked SAFE above
         elif security_mode == SecurityMode.BALANCED:
             return threat_level not in [ThreatLevel.CRITICAL, ThreatLevel.MALICIOUS]
         elif security_mode == SecurityMode.PERMISSIVE:
@@ -568,7 +568,7 @@ class XPIADefenseEngine:
             f"Processing Time: {result.processing_time_ms:.2f}ms, Hash: {result.content_hash}",
         )
 
-        if result is not None and result.threats_detected:
+        if result.threats_detected:
             for threat in result.threats_detected:
                 self.logger.log(
                     log_level,

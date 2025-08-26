@@ -5,9 +5,8 @@ Fixes common type errors in the Gadugi codebase.
 """
 
 import re
-import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Tuple
 
 
 def fix_none_attribute_access(content: str) -> str:

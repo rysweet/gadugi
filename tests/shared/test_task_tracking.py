@@ -17,7 +17,7 @@ from unittest.mock import Mock, patch
 # For type checking only
 
 try:
-    from claude.shared.task_tracking import (
+    from shared.task_tracking import (
         Task,
         TaskError,
         TaskList,
@@ -338,16 +338,16 @@ except ImportError as e:
                 raise TaskError(f"Phase {phase_name} was not started")
 
             for _entry in self.phase_history:
-                if entry["phase"] == phase_name and entry["status"] == "in_progress":
-                    entry["completed_at"] = datetime.now()
-                    entry["duration_seconds"] = (
-                        entry["completed_at"] - entry["started_at"]
+                if _entry["phase"] == phase_name and _entry["status"] == "in_progress":
+                    _entry["completed_at"] = datetime.now()
+                    _entry["duration_seconds"] = (
+                        _entry["completed_at"] - _entry["started_at"]
                     ).total_seconds()
-                    entry["status"] = "completed"
+                    _entry["status"] = "completed"
                     if metadata:
-                        entry["metadata"] = metadata
+                        _entry["metadata"] = metadata
                     if completion_message:
-                        entry["completion_note"] = completion_message
+                        _entry["completion_note"] = completion_message
                     break
 
             if self.current_phase == phase_name:
@@ -359,7 +359,7 @@ except ImportError as e:
             if self.current_phase is None:
                 raise TaskError("No phase is currently active")
 
-            for _entry in self.phase_history:
+            for entry in self.phase_history:
                 if (
                     entry["phase"] == self.current_phase
                     and entry["status"] == "in_progress"
@@ -374,7 +374,7 @@ except ImportError as e:
             self.current_phase = None
 
         def get_phase_duration(self, phase_name: str) -> Optional[float]:
-            for _entry in self.phase_history:
+            for entry in self.phase_history:
                 if entry["phase"] == phase_name and "duration_seconds" in entry:
                     return entry["duration_seconds"]
             return None
@@ -409,13 +409,13 @@ except ImportError as e:
             """Get a summary of all phases."""
             total_phases = len(self.phase_history)
             completed_phases = len(
-                [p for _p in self.phase_history if p["status"] == "completed"]
+                [p for p in self.phase_history if p["status"] == "completed"]
             )
             failed_phases = len(
-                [p for _p in self.phase_history if p["status"] == "failed"]
+                [p for p in self.phase_history if p["status"] == "failed"]
             )
             in_progress_phases = len(
-                [p for _p in self.phase_history if p["status"] == "in_progress"]
+                [p for p in self.phase_history if p["status"] == "in_progress"]
             )
 
             # Calculate success rate
@@ -423,7 +423,7 @@ except ImportError as e:
 
             # Calculate total duration
             total_duration_seconds = 0.0
-            for _phase in self.phase_history:
+            for phase in self.phase_history:
                 if "duration_seconds" in phase:
                     total_duration_seconds += phase["duration_seconds"]
 
@@ -476,9 +476,9 @@ except ImportError as e:
             )
 
         def _update_metrics(self) -> None:
-            if self is not None and self.task_completion_times:
+            if self.task_completion_times:
                 durations = [
-                    record["duration_seconds"] for _record in self.task_completion_times
+                    record["duration_seconds"] for record in self.task_completion_times
                 ]
                 self.average_completion_time = sum(durations) / len(durations)
                 elapsed_hours = (
@@ -495,7 +495,7 @@ except ImportError as e:
 
             base_score = len(self.task_completion_times) * 10
             avg_time_bonus = 0
-            if self is not None and self.average_completion_time:
+            if self.average_completion_time:
                 if self.average_completion_time < 300:  # Less than 5 minutes
                     avg_time_bonus = 20
                 elif self.average_completion_time < 600:  # Less than 10 minutes
@@ -514,7 +514,7 @@ except ImportError as e:
             if not self.task_completion_times:
                 return 0.0
             durations = [
-                record["duration_seconds"] for _record in self.task_completion_times
+                record["duration_seconds"] for record in self.task_completion_times
             ]
             return sum(durations) / len(durations)
 
@@ -628,7 +628,7 @@ except ImportError as e:
                     phase_tasks.append(task)
 
                 # Add tasks to the main task list
-                for _task in phase_tasks:
+                for task in phase_tasks:
                     self.task_list.add_task(task)
 
                 # Submit the updated task list (this can fail)
@@ -935,6 +935,7 @@ class TestTaskList:
 
         task_list.update_task("1", status=TaskStatus.COMPLETED)
         updated_task = task_list.get_task("1")
+        assert updated_task is not None
         assert updated_task.status == TaskStatus.COMPLETED
 
     def test_get_tasks_by_status(self):
@@ -983,7 +984,7 @@ class TestTaskList:
         task3 = Task("3", "Completed", TaskStatus.COMPLETED)
         task4 = Task("4", "Blocked", TaskStatus.BLOCKED)
 
-        for _task in [task1, task2, task3, task4]:
+        for task in [task1, task2, task3, task4]:
             task_list.add_task(task)
 
         active_tasks = task_list.get_active_tasks()
@@ -1043,11 +1044,13 @@ class TestTaskList:
         assert task_list.count() == 2
 
         task1 = task_list.get_task("1")
+        assert task1 is not None
         assert task1.content == "First task"
         assert task1.status == TaskStatus.PENDING
         assert task1.priority == TaskPriority.HIGH
 
         task2 = task_list.get_task("2")
+        assert task2 is not None
         assert task2.content == "Second task"
         assert task2.status == TaskStatus.COMPLETED
         assert task2.priority == TaskPriority.MEDIUM
@@ -1128,6 +1131,7 @@ class TestTodoWriteIntegration:
 
             # Verify task was updated in current list
             updated_task = integration.current_task_list.get_task("1")
+            assert updated_task is not None
             assert updated_task.status == TaskStatus.COMPLETED
 
     def test_add_task(self):
@@ -1146,6 +1150,7 @@ class TestTodoWriteIntegration:
             result = integration.add_task(new_task)
 
             assert result["success"] is True
+            assert integration.current_task_list is not None
             assert integration.current_task_list.count() == 2
             assert integration.current_task_list.get_task("2") == new_task
 
@@ -1194,12 +1199,15 @@ class TestTodoWriteIntegration:
 
             # Verify updates
             task1 = integration.current_task_list.get_task("1")
+            assert task1 is not None
             assert task1.status == TaskStatus.COMPLETED
 
             task2 = integration.current_task_list.get_task("2")
+            assert task2 is not None
             assert task2.status == TaskStatus.IN_PROGRESS
 
             task3 = integration.current_task_list.get_task("3")
+            assert task3 is not None
             assert task3.priority == TaskPriority.HIGH
 
     def test_get_statistics(self):
@@ -1289,7 +1297,7 @@ class TestWorkflowPhaseTracker:
         assert len(tracker.phase_history) == 3
         assert all(
             phase["status"] in ["completed", "failed"]
-            for _phase in tracker.phase_history
+            for phase in tracker.phase_history
         )
 
     def test_get_phase_summary(self):
@@ -1350,6 +1358,7 @@ class TestWorkflowPhaseTracker:
             result = integration.submit_task_list(task_list)
 
             assert result["success"] is True
+            assert integration.current_task_list is not None
             assert integration.current_task_list.count() == 2
 
 class TestTaskMetrics:
@@ -1496,6 +1505,7 @@ class TestTaskTracker:
                 tracker.update_task_status("1", TaskStatus.COMPLETED)
 
                 updated_task = tracker.task_list.get_task("1")
+                assert updated_task is not None
                 assert updated_task.status == TaskStatus.COMPLETED
 
                 mock_update.assert_called_once_with("1", TaskStatus.COMPLETED)

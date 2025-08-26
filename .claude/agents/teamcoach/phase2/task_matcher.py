@@ -26,40 +26,34 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
-# Import available shared module components
-try:
-    from ....shared.interfaces import OperationResult
-    from ....shared.utils.error_handling import ErrorHandler, CircuitBreaker
-    from ....shared.state_management import StateManager
-except ImportError:
-    # Create basic stubs if shared modules not available
-    class OperationResult:
-        def __init__(self, success: bool = False, message: str = "", data: Any = None):
-            self.success = success
-            self.message = message
-            self.data = data
-    
-    class ErrorHandler:
-        def __init__(self, config: Optional[Dict[str, Any]] = None):
-            self.config = config or {}
-        def handle_error(self, error: Exception) -> Dict[str, Any]:
-            return {"error": str(error), "handled": False}
-    
-    class CircuitBreaker:
-        def __init__(self, failure_threshold: int = 5, timeout: int = 60, name: str = "default"):
-            self.failure_threshold = failure_threshold
-            self.timeout = timeout
-            self.name = name
-        def __call__(self, func):
-            return func
-    
-    class StateManager:
-        def __init__(self):
-            pass
-        def get_state(self, key: str) -> Any:
-            return None
-        def set_state(self, key: str, value: Any) -> None:
-            pass
+# Create stub classes for missing shared modules
+class OperationResult:
+    def __init__(self, success: bool = False, message: str = "", data: Any = None):
+        self.success = success
+        self.message = message
+        self.data = data
+
+class ErrorHandler:
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+    def handle_error(self, error: Exception) -> Dict[str, Any]:
+        return {"error": str(error), "handled": False}
+
+class CircuitBreaker:
+    def __init__(self, failure_threshold: int = 5, timeout: int = 60, name: str = "default"):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.name = name
+    def __call__(self, func):
+        return func
+
+class StateManager:
+    def __init__(self):
+        pass
+    def get_state(self, key: str) -> Any:
+        return None
+    def set_state(self, key: str, value: Any) -> None:
+        pass
 
 # Define missing classes locally
 TaskResult = OperationResult
@@ -321,7 +315,7 @@ class TaskAgentMatcher:
 
         self.logger.info("TaskAgentMatcher initialized")
 
-    @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
+    @CircuitBreaker(failure_threshold=3, timeout=30)
     def find_optimal_agent(
         self,
         task_requirements: TaskRequirements,
@@ -556,7 +550,6 @@ class TaskAgentMatcher:
         """Predict agent performance for the specific task."""
         try:
             # Get historical performance data
-            end_time = datetime.now()
             # start_time would be used for actual performance data retrieval
 
             # Get performance data - use placeholder until method exists
@@ -1272,7 +1265,7 @@ class TaskAgentMatcher:
 
         # Fallback: assess capabilities
         # Create placeholder profile until method exists
-                    profile = AgentCapabilityProfile()
+        profile = AgentCapabilityProfile()
         self.agent_profiles_cache[agent_id] = profile
         return profile
 

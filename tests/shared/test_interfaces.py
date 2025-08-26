@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional, Protocol
 import pytest
 
 try:
-    from claude.shared.interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
+    from shared.interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
         AgentConfig,
         AgentConfigSchema,
         AgentFactory,
@@ -178,7 +178,7 @@ class TestAgentInterface:
     def test_agent_interface_is_abstract(self):
         """Test that AgentInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            AgentInterface()
+            AgentInterface()  # type: ignore[abstract]
 
     def test_agent_interface_requires_execute_method(self):
         """Test that concrete implementations must implement execute method."""
@@ -187,7 +187,7 @@ class TestAgentInterface:
             pass  # Missing execute method
 
         with pytest.raises(TypeError):
-            IncompleteAgent()
+            IncompleteAgent()  # type: ignore[abstract]
 
     def test_agent_interface_implementation(self):
         """Test valid implementation of AgentInterface."""
@@ -222,7 +222,7 @@ class TestStateManagerInterface:
     def test_state_manager_interface_is_abstract(self):
         """Test that StateManagerInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            StateManagerInterface()
+            StateManagerInterface()  # type: ignore[abstract]
 
     def test_state_manager_interface_implementation(self):
         """Test valid implementation of StateManagerInterface."""

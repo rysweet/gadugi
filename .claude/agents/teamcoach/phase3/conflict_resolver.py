@@ -6,7 +6,7 @@ task overlap, coordination failures, and capability mismatches.
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional, Set, Tuple
@@ -100,9 +100,9 @@ class ConflictResolver:
 
     def __init__(self) -> None:
         """Initialize the conflict resolver."""
-        self.active_conflicts: Dict[Any, Any] = field(default_factory=dict)
-        self.resolved_conflicts: List[Any] = field(default_factory=list)
-        self.conflict_patterns: Dict[Any, Any] = field(default_factory=dict)
+        self.active_conflicts: Dict[str, AgentConflict] = {}
+        self.resolved_conflicts: List[Tuple[AgentConflict, ConflictResolution]] = []
+        self.conflict_patterns: Dict[str, int] = {}
 
         # Resolution thresholds
         self.resolution_timeouts = {
@@ -283,7 +283,7 @@ class ConflictResolver:
         conflicts = []
 
         # Track resource usage
-        resource_usage: Dict[Any, Any] = field(default_factory=dict)
+        resource_usage: Dict[str, List[str]] = {}
 
         for agent_id, state in agent_states.items():
             if "resources" in state:
@@ -327,7 +327,7 @@ class ConflictResolver:
         conflicts = []
 
         # Track task assignments
-        task_assignments: Dict[Any, Any] = field(default_factory=dict)
+        task_assignments: Dict[str, List[str]] = {}
 
         for agent_id, state in agent_states.items():
             if "assigned_tasks" in state:
@@ -442,7 +442,7 @@ class ConflictResolver:
         conflicts = []
 
         # Build dependency graph
-        dependencies: Dict[Any, Any] = field(default_factory=dict)
+        dependencies: Dict[str, Set[str]] = {}
 
         for agent_id, state in agent_states.items():
             if "waiting_for" in state:
@@ -779,9 +779,9 @@ class ConflictResolver:
             patterns["by_severity"][severity] += count
 
         # Find most common
-        if self is not None and self.conflict_patterns:
+        if self.conflict_patterns:
             most_common_key = max(
-                self.conflict_patterns, key=self.conflict_patterns.get
+                self.conflict_patterns.keys(), key=lambda k: self.conflict_patterns[k]
             )
             patterns["most_common"] = {
                 "pattern": most_common_key,

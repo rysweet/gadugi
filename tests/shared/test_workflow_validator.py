@@ -14,7 +14,7 @@ from datetime import datetime
 
 # Import the module under test
 
-from claude.shared.workflow_validator import (
+from shared.workflow_validator import (
     WorkflowValidator,
     ValidationLevel,
     ValidationCategory,
@@ -25,7 +25,7 @@ from claude.shared.workflow_validator import (
     validate_workflow)
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
+from shared.workflow_engine import WorkflowPhase, WorkflowState
 
 class TestWorkflowValidator:
     """Test suite for WorkflowValidator class"""

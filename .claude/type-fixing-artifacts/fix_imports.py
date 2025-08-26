@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Script to fix import statements in test files."""
 
-import os
 import re
 from pathlib import Path
 

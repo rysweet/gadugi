@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 # sys.path manipulation removed to ensure consistent package imports
 
-from claude.shared.phase_enforcer import (
+from shared.phase_enforcer import (
     PhaseEnforcer,
     EnforcementRule,
     EnforcementResult,
@@ -23,7 +23,7 @@ from claude.shared.phase_enforcer import (
     enforce_phase_10)
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
+from shared.workflow_engine import WorkflowPhase, WorkflowState
 
 class TestPhaseEnforcer:
     """Test suite for PhaseEnforcer class"""
@@ -56,6 +56,7 @@ class TestPhaseEnforcer:
         assert code_review_rule.phase == WorkflowPhase.CODE_REVIEW
         assert code_review_rule.max_attempts == 3
         assert code_review_rule.timeout_seconds == 900
+        assert code_review_rule.required_conditions is not None
         assert "pr_exists" in code_review_rule.required_conditions
         assert "branch_pushed" in code_review_rule.required_conditions
 
@@ -64,6 +65,7 @@ class TestPhaseEnforcer:
         assert review_rule.phase == WorkflowPhase.REVIEW_RESPONSE
         assert review_rule.max_attempts == 3
         assert code_review_rule.timeout_seconds == 900
+        assert review_rule.required_conditions is not None
         assert "code_review_completed" in review_rule.required_conditions
 
         # Check circuit breaker configuration
@@ -106,6 +108,7 @@ class TestPhaseEnforcer:
         assert result.attempts == 2
         assert result.total_time == 45.5
         assert result.error_message is None
+        assert result.details is not None
         assert result.details["method"] == "claude_agent"
         assert result.details["pr_number"] == 123
 
@@ -274,13 +277,13 @@ class TestPhaseEnforcer:
 
         # Mock script file existence
         with patch("os.path.exists", return_value=True):
-            success, message, details = self.enforcer._enforce_code_review(
+            success, message, _details = self.enforcer._enforce_code_review(
                 self.workflow_state, {}
             )
 
         assert success is True
         assert "enforced via script" in message.lower()
-        assert details["method"] == "enforcement_script"
+        assert _details["method"] == "enforcement_script"
 
     @patch("subprocess.run")
     def test_enforce_code_review_github_cli_fallback(self, mock_subprocess):
@@ -296,13 +299,13 @@ class TestPhaseEnforcer:
 
         # Mock script file not existing (skips script method)
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
+            success, message, _details = self.enforcer._enforce_code_review(
                 self.workflow_state, {}
             )
 
         assert success is True
         assert "automated code review posted" in message.lower()
-        assert details["method"] == "github_cli_review"
+        assert _details["method"] == "github_cli_review"
 
     @patch("subprocess.run")
     def test_enforce_code_review_comment_fallback(self, mock_subprocess):
@@ -318,13 +321,13 @@ class TestPhaseEnforcer:
         ]
 
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
+            success, message, _details = self.enforcer._enforce_code_review(
                 self.workflow_state, {}
             )
 
         assert success is True
         assert "enforcement comment added" in message.lower()
-        assert details["method"] == "github_comment"
+        assert _details["method"] == "github_comment"
 
     @patch("subprocess.run")
     def test_enforce_code_review_all_methods_fail(self, mock_subprocess):
@@ -335,7 +338,7 @@ class TestPhaseEnforcer:
         )
 
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
+            success, message, _details = self.enforcer._enforce_code_review(
                 self.workflow_state, {}
             )
 
@@ -352,7 +355,7 @@ class TestPhaseEnforcer:
             completed_phases=[],
             pr_number=None)
 
-        success, message, details = self.enforcer._enforce_code_review(
+        success, message, _details = self.enforcer._enforce_code_review(
             workflow_state, {}
         )
 
@@ -378,14 +381,14 @@ class TestPhaseEnforcer:
             Mock(returncode=0, stdout="Comment posted", stderr=""),  # gh pr comment
         ]
 
-        success, message, details = self.enforcer._enforce_review_response(
+        success, message, _details = self.enforcer._enforce_review_response(
             self.workflow_state, {}
         )
 
         assert success is True
         assert "review response posted" in message.lower()
-        assert details["response_method"] == "review_response_comment"
-        assert details["addressed_reviews"] == 1  # One CHANGES_REQUESTED review
+        assert _details["response_method"] == "review_response_comment"
+        assert _details["addressed_reviews"] == 1  # One CHANGES_REQUESTED review
 
     @patch("subprocess.run")
     def test_enforce_review_response_no_changes_needed(self, mock_subprocess):
@@ -397,14 +400,14 @@ class TestPhaseEnforcer:
             returncode=0, stdout=json.dumps(mock_review_data), stderr=""
         )
 
-        success, message, details = self.enforcer._enforce_review_response(
+        success, message, _details = self.enforcer._enforce_review_response(
             self.workflow_state, {}
         )
 
         assert success is True
         assert "no review response needed" in message.lower()
-        assert details["response_method"] == "none_needed"
-        assert details["total_reviews"] == 2
+        assert _details["response_method"] == "none_needed"
+        assert _details["total_reviews"] == 2
 
     def test_enforce_review_response_no_pr_number(self):
         """Test review response enforcement when PR number is missing"""
@@ -416,7 +419,7 @@ class TestPhaseEnforcer:
             completed_phases=[],
             pr_number=None)
 
-        success, message, details = self.enforcer._enforce_review_response(
+        success, message, _details = self.enforcer._enforce_review_response(
             workflow_state, {}
         )
 
@@ -431,6 +434,7 @@ class TestPhaseEnforcer:
             self.workflow_state)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "no enforcement rule defined" in result.error_message.lower()
         assert result.attempts == 0
 
@@ -445,6 +449,7 @@ class TestPhaseEnforcer:
         result = self.enforcer.enforce_phase(phase, self.workflow_state)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "circuit breaker open" in result.error_message.lower()
         assert result.attempts == 0
 
@@ -462,6 +467,7 @@ class TestPhaseEnforcer:
         result = self.enforcer.enforce_phase(WorkflowPhase.CODE_REVIEW, workflow_state)
 
         assert result.success is False
+        assert result.error_message is not None
         assert "required conditions not met" in result.error_message.lower()
         assert "pr_exists" in result.error_message
 
@@ -542,6 +548,7 @@ class TestPhaseEnforcer:
         assert added_rule.max_attempts == 10
         assert added_rule.timeout_seconds == 300
         assert added_rule.retry_delay_seconds == 15
+        assert added_rule.required_conditions is not None
         assert "custom_condition" in added_rule.required_conditions
 
     def test_log_enforcement_result(self):

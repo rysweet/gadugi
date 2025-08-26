@@ -99,8 +99,8 @@ def show_enhanced_dashboard():
                 # Find and display clickable log files
                 log_files = find_log_files(proc["task_id"])
                 if log_files:
-                    for i, log_file in enumerate(log_files[:2]):  # Show max 2 files
-                        file_name = Path(log_file).name
+                    for _, log_file in enumerate(log_files[:2]):  # Show max 2 files
+                        _ = Path(log_file).name  # type: ignore
                         abs_path = os.path.abspath(log_file)
                         print(f"   📄 file://{abs_path}")
                 else:

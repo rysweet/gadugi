@@ -14,7 +14,7 @@ from unittest.mock import call, patch
 
 
 try:
-    from claude.shared.utils.error_handling import (
+    from shared.utils.error_handling import (
         CircuitBreaker,
         ErrorContext,
         ErrorHandler,

@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch
 from typing import Optional
 
 try:
-    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError
+    from shared.github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
     import time

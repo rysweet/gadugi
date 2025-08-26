@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch
 
 # Import the module under test
 
-from claude.shared.workflow_engine import (
+from shared.workflow_engine import (
     WorkflowEngine,
     WorkflowPhase,
     WorkflowState,

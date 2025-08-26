@@ -8,8 +8,9 @@ import shutil
 
 # Import the module we're testing (will be implemented after tests)
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Any, List, Union
+from pathlib import Path
 
 import pytest
 # For type checking only
@@ -47,14 +48,14 @@ except ImportError as e:
             if isinstance(phase, int):
                 # Try to find the phase by value
                 for _p in WorkflowPhase:
-                    if p.value == phase:
-                        return p.name.lower().replace("_", "-")
+                    if _p.value == phase:
+                        return _p.name.lower().replace("_", "-")
                 return "unknown"
             return phase.name.lower().replace("_", "-")
 
         @staticmethod
         def is_valid_phase(phase_value: int) -> bool:
-            return any(phase.value == phase_value for _phase in WorkflowPhase)
+            return any(_phase.value == phase_value for _phase in WorkflowPhase)
 
     class TaskStatus(Enum):
         PENDING = "pending"
@@ -63,7 +64,7 @@ except ImportError as e:
         FAILED = "failed"
 
     class TaskState:
-        def __init__(self, task_id: str) -> None:
+        def __init__(self, task_id: str, **kwargs) -> None:
             self.task_id = task_id
             # Handle status as either string or enum
             status = kwargs.get("status", TaskStatus.PENDING)
@@ -140,8 +141,8 @@ except ImportError as e:
                 except ValueError:
                     # Handle phase by name
                     for _phase in WorkflowPhase:
-                        if phase.name.lower() == str(data["current_phase"]).lower():
-                            data["current_phase"] = phase
+                        if _phase.name.lower() == str(data["current_phase"]).lower():
+                            data["current_phase"] = _phase
                             break
             return cls(**data)
 
@@ -180,7 +181,7 @@ except ImportError as e:
             return True
 
     class StateManager:
-        def __init__(self, state_dir: Optional) -> None:
+        def __init__(self, state_dir: Optional[str] = None, **kwargs) -> None:
             # Support both string and dict initialization
             if isinstance(state_dir, dict):
                 self.state_dir = Path(state_dir.get("state_dir", ".claude/state"))

@@ -27,8 +27,6 @@ try:
     from shared.state_management import StateManager  # type: ignore[attr-defined]
     from shared.utils.error_handling import (  # type: ignore[attr-defined]
         ErrorHandler,
-        ErrorCategory,
-        ErrorSeverity,
     )
     from shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
 except ImportError:  # pragma: no cover – fall through to relative/fallback
@@ -38,8 +36,6 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
         from ...shared.state_management import StateManager  # type: ignore[attr-defined]
         from ...shared.utils.error_handling import (  # type: ignore[attr-defined]
             ErrorHandler,
-            ErrorCategory,
-            ErrorSeverity,
         )
         from ...shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
     except ImportError:
@@ -52,8 +48,6 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
             GitHubOperations,
             StateManager,
             ErrorHandler,
-            ErrorCategory,
-            ErrorSeverity,
             TaskTracker,
         )
 
@@ -116,8 +110,8 @@ class SystemDesignReviewer:
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler("system-design-reviewer")
-        self.task_tracker = TaskTracker("system-design-reviewer")
+        self.error_handler = ErrorHandler(agent_type="system-design-reviewer")  # type: ignore
+        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")  # type: ignore
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
@@ -147,8 +141,7 @@ class SystemDesignReviewer:
             # Update task status
             self.task_tracker.create_task(
                 f"review_pr_{pr_number}",
-                f"Review PR #{pr_number} for architectural changes",
-                priority="high"
+                f"Review PR #{pr_number} for architectural changes"
             )
             self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")
 
@@ -208,12 +201,7 @@ class SystemDesignReviewer:
             return result
 
         except Exception as e:
-            self.error_handler.handle_error(
-                e,
-                category=ErrorCategory.PROCESS_EXECUTION,
-                severity=ErrorSeverity.HIGH,
-                context={'pr_number': pr_number}
-            )
+            self.error_handler.handle_error(e, {'pr_number': pr_number})
 
             # Create failure result
             result = ReviewResult(
@@ -235,7 +223,7 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)
+            result = self.github_ops.get_pr_details(pr_number)  # type: ignore
 
             # Get changed files
             changed_files = self._get_changed_files(pr_number)
@@ -244,12 +232,7 @@ class SystemDesignReviewer:
             return result
 
         except Exception as e:
-            self.error_handler.handle_error(
-                e,
-                category=ErrorCategory.GITHUB_API,
-                severity=ErrorSeverity.HIGH,
-                context={'pr_number': pr_number}
-            )
+            self.error_handler.handle_error(e, context={'pr_number': pr_number})
             return {}
 
     def _get_changed_files(self, pr_number: str) -> List[str]:
@@ -475,7 +458,7 @@ class SystemDesignReviewer:
             )
 
             # Post review using GitHub operations
-            self.github_ops.post_pr_review(pr_number, review_action, review_body)
+            self.github_ops.post_pr_review(pr_number, review_action, review_body)  # type: ignore
 
         except Exception as e:
             print(f"Error posting GitHub review: {e}")
@@ -560,13 +543,13 @@ class SystemDesignReviewer:
         return self.review_pr(pr_number, **kwargs)
 
 
-class SystemDesignStateManager(StateManager):
+class SystemDesignStateManager:
     """State manager for System Design Review Agent"""
 
     def __init__(self) -> None:
-        super().__init__(
-            state_dir=Path(".github/workflow-states/system-design-reviewer"),
-            task_id="system-design-reviewer"
+        self.state_manager = StateManager(  # type: ignore[call-arg]
+            state_dir=Path(".github/workflow-states/system-design-reviewer"),  # type: ignore[call-arg]
+            task_id="system-design-reviewer"  # type: ignore[call-arg]
         )
 
     def get_default_state(self) -> Dict[str, Any]:
@@ -585,6 +568,14 @@ class SystemDesignStateManager(StateManager):
                 'max_pr_size': 1000
             }
         }
+
+    def load_state(self) -> Dict[str, Any]:
+        """Load state from file"""
+        return self.state_manager.load_state()  # type: ignore
+
+    def save_state(self, state_data: Dict[str, Any]) -> bool:
+        """Save state to file"""
+        return self.state_manager.save_state(state_data)
 
     def save_review_result(self, result: ReviewResult) -> bool:
         """Save a review result to state"""

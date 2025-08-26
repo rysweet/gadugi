@@ -113,7 +113,7 @@ def fix_other_syntax_patterns(file_path):
         lines = content.split('\n')
         fixed_lines = []
         
-        for i, line in enumerate(lines):
+        for _, line in enumerate(lines):
             # Fix lines with (expr if condition else None) = value
             if '=' in line and ' if ' in line and 'else None)' in line:
                 # Check if it's an invalid assignment
@@ -154,7 +154,7 @@ def fix_other_syntax_patterns(file_path):
         
         return False
         
-    except Exception as e:
+    except Exception:
         return False
 
 def main():

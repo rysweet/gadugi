@@ -3,7 +3,6 @@
 Fix the remaining relative import issues
 """
 from pathlib import Path
-import re
 
 def fix_teamcoach_imports():
     """Fix teamcoach relative import issues"""

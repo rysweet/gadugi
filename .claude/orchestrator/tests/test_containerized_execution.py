@@ -18,6 +18,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from unittest.mock import Mock, patch
 import shutil
 
@@ -62,25 +63,31 @@ except ImportError as e:
     class MockContainerManager:
         def __init__(self, config=None):
             self.config = config
-            self.docker_client = None
+            self.docker_client: Optional[Mock] = None
             
         def execute_containerized_task(self, *args, **kwargs):
             return MockContainerResult()
             
-        def execute_parallel_tasks(self, *args, **kwargs):
-            return [MockContainerResult()]
+        def execute_parallel_tasks(self, tasks, *args, **kwargs):
+            # Return a dict mapping task IDs to mock results
+            if isinstance(tasks, list) and len(tasks) > 0 and 'id' in tasks[0]:
+                return {task['id']: MockContainerResult(task_id=task['id']) for task in tasks}
+            return {}
     
     class MockExecutionEngine:
         def __init__(self, *args, **kwargs):
             self.execution_mode = "containerized"
             self.container_manager = None
             
-        def execute_tasks_parallel(self, *args, **kwargs):
-            return []
+        def execute_tasks_parallel(self, tasks, *args, **kwargs):
+            # Return a dict mapping task IDs to mock results 
+            if isinstance(tasks, list) and len(tasks) > 0 and 'id' in tasks[0]:
+                return {task['id']: MockContainerResult(task_id=task['id']) for task in tasks}
+            return {}
             
     class MockTaskExecutor:
         def __init__(self, *args, **kwargs):
-            self._progress_callback = None
+            self._progress_callback = Mock()
             
         def execute(self, *args, **kwargs):
             return None
@@ -89,10 +96,10 @@ except ImportError as e:
             return None
             
     class MockOrchestrationMonitor:
-        def __init__(self, *args, **kwargs):
-            self.monitoring = None
-            self.monitoring_dir = "/tmp/mock"
-            self.docker_client = None
+        def __init__(self, monitoring_dir: str = "/tmp/mock", *args, **kwargs):
+            self.monitoring: Optional[bool] = None
+            self.monitoring_dir = Path(monitoring_dir)
+            self.docker_client: Optional[Mock] = None
             self.active_containers = {}
             
         def update_container_status(self, *args, **kwargs):
@@ -104,7 +111,8 @@ except ImportError as e:
     ExecutionEngine = MockExecutionEngine
     TaskExecutor = MockTaskExecutor
     OrchestrationMonitor = MockOrchestrationMonitor
-    IMPORTS_AVAILABLE = False
+    imports_available = False
+    IMPORTS_AVAILABLE = imports_available
 
 
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
@@ -438,7 +446,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
 
         # Verify result conversion
         self.assertEqual((result.status if result is not None else None), "success")
-        self.assertEqual(result.exit_code, 0)
+        self.assertEqual((result.exit_code if result is not None else None), 0)
 
 
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Monitoring modules not available")

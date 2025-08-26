@@ -9,10 +9,9 @@ import os
 import re
 import subprocess
 import json
-import time
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict
 from dataclasses import dataclass
 import threading
 
@@ -331,7 +330,7 @@ class OrchestrationEngine:
         """Scan for all syntax errors."""
         errors = []
         
-        for root, dirs, files in os.walk('.'):
+        for root, _, files in os.walk('.'):
             # Skip virtual environments and git
             if any(skip in root for skip in ['.git', '.venv', '__pycache__', 'node_modules']):
                 continue
@@ -393,7 +392,7 @@ class OrchestrationEngine:
         """Fix type errors in parallel after syntax is fixed."""
         # Get all Python files
         py_files = []
-        for root, dirs, files in os.walk('.'):
+        for root, _, files in os.walk('.'):
             if any(skip in root for skip in ['.git', '.venv', '__pycache__']):
                 continue
             for file in files:

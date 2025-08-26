@@ -7,14 +7,13 @@ Identifies and fixes common syntax patterns that cause errors.
 import ast
 import os
 import re
-from pathlib import Path
 from typing import List, Tuple
 
 def find_syntax_errors() -> List[Tuple[str, int, str]]:
     """Find all files with syntax errors."""
     errors = []
     
-    for root, dirs, files in os.walk('.'):
+    for root, _, files in os.walk('.'):
         # Skip version control and virtual environment directories
         if any(skip in root for skip in ['.git', '.venv', '__pycache__', 'node_modules']):
             continue
@@ -122,7 +121,7 @@ def fix_file_syntax(file_path: str) -> bool:
             lines = content.split('\n')
             fixed_lines = []
             
-            for i, line in enumerate(lines):
+            for _, line in enumerate(lines):
                 # Remove trailing 's' character that was mistakenly added
                 if line.rstrip().endswith(')s'):
                     line = line.rstrip()[:-1]

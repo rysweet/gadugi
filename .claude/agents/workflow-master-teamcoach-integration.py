@@ -63,9 +63,9 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None, workflow_master: Any = None) -> None:
         """Initialize TeamCoach integration."""
-        # self.workflow_master = workflow_master  # TODO: Define workflow_master properly
+        self.workflow_master = workflow_master  # Reference to WorkflowMaster instance
         self.config = config or {}
 
         # Performance tracking
@@ -118,8 +118,20 @@ class TeamCoachIntegration:
             )
 
             # Container execution success rate
-            self.workflow_master.execution_stats.get("container_executions", 0)
-            container_success_rate = 1.0 - error_rate  # Simplified calculation
+            container_executions = (
+                self.workflow_master.execution_stats.get("container_executions", 0)
+                if self.workflow_master and hasattr(self.workflow_master, "execution_stats")
+                else 0
+            )
+            container_failures = (
+                self.workflow_master.execution_stats.get("container_failures", 0)
+                if self.workflow_master and hasattr(self.workflow_master, "execution_stats")
+                else 0
+            )
+            container_success_rate = (
+                1.0 - (container_failures / max(container_executions, 1))
+                if container_executions > 0 else 1.0
+            )
 
             # Resource utilization (simplified)
             resource_utilization = {
@@ -400,7 +412,7 @@ class TeamCoachIntegration:
                 )  # Max 15 minutes
 
         # Update circuit breaker settings
-        if hasattr(self.workflow_master, "execution_circuit_breaker"):
+        if self.workflow_master and hasattr(self.workflow_master, "execution_circuit_breaker"):
             self.workflow_master.execution_circuit_breaker.timeout = 900  # 15 minutes
 
         logger.info("Applied reliability optimizations: increased retries and timeouts")

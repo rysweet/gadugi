@@ -30,7 +30,7 @@ from enum import Enum
 
 # Import Enhanced Separation shared modules
 try:
-    from .utils.error_handling import ErrorHandler, CircuitBreaker, ErrorContext
+    from .utils.error_handling import ErrorHandler, CircuitBreaker
     from .state_management import StateManager, TaskState, CheckpointManager
     from .task_tracking import TaskTracker, WorkflowPhaseTracker
 except ImportError as e:
@@ -134,8 +134,8 @@ class WorkflowReliabilityManager:
         self.error_handler = ErrorHandler()
         self.state_manager = StateManager()
         self.checkpoint_manager = CheckpointManager(self.state_manager)
-        self.task_tracker = TaskTracker()
-        self.phase_tracker = WorkflowPhaseTracker()
+        self.task_tracker = TaskTracker(workflow_id=None)
+        self.phase_tracker = WorkflowPhaseTracker(workflow_id=None)
 
         # Configure circuit breakers for different operations
         self.github_circuit_breaker = CircuitBreaker(
@@ -519,13 +519,10 @@ class WorkflowReliabilityManager:
                 monitoring_state.error_count += 1
                 current_stage = stage or monitoring_state.current_stage
             else:
+                monitoring_state = None
                 current_stage = stage or WorkflowStage.INITIALIZATION
 
-            # Create comprehensive error context
-            error_context = ErrorContext(
-                operation_name=f"workflow_stage_{current_stage.value}"
-            )
-            # Store error information separately
+            # Store error information 
             error_details = {
                 'error': error,
                 'workflow_id': workflow_id,
@@ -543,15 +540,14 @@ class WorkflowReliabilityManager:
                     'error_type': type(error).__name__,
                     'error_message': str(error),
                     'recovery_context': recovery_context or {},
-                    'error_count': monitoring_state.error_count if workflow_id in self.monitoring_states else 1
+                    'error_count': monitoring_state.error_count if monitoring_state else 1
                 },
                 exc_info=True
             )
 
             # Handle error through Enhanced Separation error handler
-            # ErrorContext is a context manager, not for passing error info
-            # Pass the error details directly to handle_error
-            self.error_handler.handle_error(error_details)
+            # Pass the error and details as separate parameters
+            self.error_handler.handle_error(error, error_details)
 
             # Determine recovery strategy based on error type and stage
             recovery_result = self._execute_recovery_strategy(
@@ -910,7 +906,7 @@ class WorkflowReliabilityManager:
                 # Check all active workflows
                 for workflow_id in list(self.monitoring_states.keys()):
                     # Check for timeouts
-                    timeout_result = self.check_workflow_timeouts(workflow_id)
+                    self.check_workflow_timeouts(workflow_id)
 
                     # Perform periodic health checks (every 5 minutes)
                     monitoring_state = self.monitoring_states[workflow_id]

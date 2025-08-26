@@ -7,7 +7,7 @@ import os
 import sys
 import logging
 from typing import List, Any, Optional, Tuple
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 # Add shared modules to path
@@ -15,10 +15,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
     from ..shared.utils.error_handling import ErrorHandler
-    from ..shared.interfaces import AgentConfig, OperationResult
+    from ..shared.interfaces import AgentConfig
 except ImportError:
     # Fallback definitions for missing imports
-    from dataclasses import dataclass, field
+    from dataclasses import dataclass
 
     @dataclass
     class OperationResult:
@@ -80,12 +80,19 @@ class TestAnalysis:
 class SharedTestInstructions:
     """Shared instruction framework for test agents."""
 
-    def __init__(self, config: Optional) -> None:
+    def __init__(self, config: Optional[AgentConfig] = None) -> None:
         self.config = config or AgentConfig(
             agent_id="shared_test_instructions", name="Shared Test Instructions"
         )
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.error_handler = ErrorHandler() if "ErrorHandler" in globals() else None
+        self.error_handler = None
+        try:
+            # Try to create ErrorHandler if available
+            if 'ErrorHandler' in globals() and globals()['ErrorHandler'] is not None:
+                self.error_handler = ErrorHandler()  # type: ignore
+        except (NameError, TypeError):
+            # ErrorHandler not available or wrong signature
+            pass
 
     @staticmethod
     def analyze_test_purpose(test_code: str, context: str = "") -> TestAnalysis:

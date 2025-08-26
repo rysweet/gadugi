@@ -581,8 +581,7 @@ class GitHubActionsIntegration:
             output_file = os.getenv("GITHUB_OUTPUT")
             if output_file:
                 with open(output_file, "a") as f:
-                    for key, value in outputs.items():
-                        f.write(f"{key}={value}\n")
+                    f.writelines(f"{key}={value}\n" for key, value in outputs.items())
 
             logger.info(f"Set {len(outputs)} GitHub Actions outputs")
 

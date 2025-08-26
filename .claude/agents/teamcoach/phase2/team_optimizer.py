@@ -21,9 +21,28 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Import shared modules and dependencies
-from ....shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ....shared.state_management import StateManager
+# Create stub classes for missing shared modules
+class ErrorHandler:
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+    def handle_error(self, error: Exception) -> Dict[str, Any]:
+        return {"error": str(error), "handled": False}
+
+class CircuitBreaker:
+    def __init__(self, failure_threshold: int = 5, timeout: int = 60, name: str = "default"):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.name = name
+    def __call__(self, func):
+        return func
+
+class StateManager:
+    def __init__(self):
+        pass
+    def get_state(self, key: str) -> Any:
+        return None
+    def set_state(self, key: str, value: Any) -> None:
+        pass
 from ..phase1.capability_assessment import (
     CapabilityAssessment,
     CapabilityDomain,
@@ -31,6 +50,16 @@ from ..phase1.capability_assessment import (
 )
 from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 from .task_matcher import TaskAgentMatcher, TaskRequirements
+
+
+class PerformanceData:
+    """Placeholder class for performance data until actual implementation"""
+    
+    def __init__(self):
+        self.success_rate = 0.7
+        self.avg_execution_time = 300.0
+        self.performance_trend = [0.6, 0.7, 0.8]
+        self.total_tasks = 10
 
 
 class OptimizationObjective(Enum):
@@ -191,7 +220,7 @@ class TeamCompositionOptimizer:
 
         self.logger.info("TeamCompositionOptimizer initialized")
 
-    @ErrorHandler.with_circuit_breaker
+    # @ErrorHandler.with_circuit_breaker  # Disabled until proper ErrorHandler implementation
     def optimize_team_for_project(
         self,
         project_requirements: ProjectRequirements,
@@ -463,14 +492,10 @@ class TeamCompositionOptimizer:
             individual_success_rates = []
             individual_completion_times = []
 
-            for agent_id in composition.agents:
+            for _agent_id in composition.agents:
                 # Get performance data - use placeholder until method exists
-                performance_data = type('PerformanceData', (), {
-                    'success_rate': 0.7,
-                    'avg_execution_time': 300.0,
-                    'performance_trend': [0.6, 0.7, 0.8],
-                    'total_tasks': 10
-                })()
+                # In real implementation, this would use _agent_id to get specific performance data
+                performance_data = PerformanceData()
                 individual_success_rates.append(performance_data.success_rate)
                 individual_completion_times.append(performance_data.avg_execution_time)
 

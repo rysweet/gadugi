@@ -299,7 +299,7 @@ class XPIAMiddleware:
         }
 
         # Add detailed information if threats were detected
-        if result is not None and result.threats_detected:
+        if result.threats_detected:
             response["threat_details"] = [
                 {
                     "pattern": threat["pattern_name"],
@@ -317,7 +317,7 @@ class XPIAMiddleware:
             response["reason"] = (
                 f"Blocked due to {result.threat_level.value} threat level"
             )
-        elif result is not None and result.threats_detected:
+        elif result.threats_detected:
             response["reason"] = (
                 f"Allowed with sanitization - {len(result.threats_detected)} threats mitigated"
             )

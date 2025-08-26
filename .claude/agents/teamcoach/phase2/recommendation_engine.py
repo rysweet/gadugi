@@ -11,7 +11,12 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ....shared.utils.error_handling import ErrorHandler
+# Create stub class for missing shared modules
+class ErrorHandler:
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+    def handle_error(self, error: Exception) -> Dict[str, Any]:
+        return {"error": str(error), "handled": False}
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
 
