@@ -96,6 +96,15 @@ def validate_input(self, input):
 ## Design Specification
 {design}
 
+## CRITICAL TOOL USAGE RULES
+
+**⚠️ ONLY work with files in {output_path}/ ⚠️**
+
+- **USE Edit tool** ONLY for files in: `{output_path}/src/*.py` and `{output_path}/tests/*.py`
+- **USE Write tool** for any NEW files you need to create in `{output_path}/`
+- **NEVER touch files in** `src/recipe_executor/` - that's the EXISTING source code
+- **NEVER use Grep on** source files outside `{output_path}/`
+
 ## MANDATORY FIXES
 For EVERY function in EVERY file:
 1. **Remove ALL `pass` statements** - Replace with real logic
@@ -106,12 +115,37 @@ For EVERY function in EVERY file:
 6. **Add logging** - Log important operations
 7. **Ensure 3-5+ lines of logic** - No trivial implementations
 
-## Files Location
-Target directory: {output_path}
+## Files Location - CRITICAL PATH INSTRUCTIONS
+Target directory: {output_path}/
 
-IMPORTANT: 
-- If no files exist yet, use Write tool to CREATE new files with complete implementations
-- If files exist, use Edit tool to fix any stubs in the existing files
-- Start immediately by either creating files or reading and fixing existing ones
+**⚠️ CRITICAL: You MUST use EXACT paths as shown below - no shortcuts! ⚠️**
+
+IMPORTANT - You MUST create/fix files using these EXACT paths:
+- Main source files: {output_path}/src/*.py  
+- Test files: {output_path}/tests/*.py
+- CLI entry: {output_path}/cli.py
+- Configuration: {output_path}/pyproject.toml
+
+**MANDATORY FILE CREATION INSTRUCTIONS:**
+
+1. **For NEW files** - Use Write tool with EXACT paths like:
+   ```
+   Write tool with file_path: {output_path}/src/__init__.py
+   Write tool with file_path: {output_path}/src/recipe_executor.py
+   Write tool with file_path: {output_path}/src/recipe_model.py
+   Write tool with file_path: {output_path}/tests/test_recipe_executor.py
+   Write tool with file_path: {output_path}/cli.py
+   Write tool with file_path: {output_path}/pyproject.toml
+   ```
+
+2. **DO NOT CREATE FILES IN:**
+   - ❌ `src/recipe_executor/` (wrong - this is the existing source)
+   - ❌ `./` (wrong - this is root directory)
+   - ❌ Any path without `{output_path}` prefix
+
+3. **ALWAYS INCLUDE THE FULL PATH:**
+   - ✅ CORRECT: `{output_path}/src/ast_stub_detector.py`
+   - ❌ WRONG: `ast_stub_detector.py`
+   - ❌ WRONG: `src/ast_stub_detector.py`
 
 THIS IS MANDATORY - The build will FAIL if ANY stubs remain or if no files are created!

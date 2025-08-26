@@ -124,8 +124,8 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                         recipe, temp_path, generated_files, stub_errors
                     )
 
-                # Invoke Claude to write files
-                self._invoke_claude_code(impl_prompt, recipe)
+                # Invoke Claude to write files (pass output_dir for --add-dir)
+                self._invoke_claude_code(impl_prompt, recipe, temp_path)
 
                 # Read files that Claude created
                 generated_files = self._read_generated_files(temp_path, recipe)
@@ -224,28 +224,68 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
     def _create_generation_prompt_with_path(self, recipe: Recipe, output_path: Path) -> str:
         """Create a comprehensive prompt for Claude Code from recipe with output path."""
-        base_prompt = self._create_generation_prompt(recipe, output_path)
-
         # Use relative path from current directory for Claude
         # Since Claude runs in the same directory as the Recipe Executor
         rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
         
+        # START with clear immediate action instruction
+        immediate_action = f"""
+# IMMEDIATE ACTION REQUIRED
+
+**START NOW**: Use your Write tool to create files in `{rel_output_path}/`
+
+Do NOT read existing files. Do NOT search for code. Do NOT use TodoWrite.
+
+**YOUR FIRST ACTION**: Write tool with file_path: {rel_output_path}/src/__init__.py
+
+Begin implementing the Recipe Executor based on the requirements below.
+"""
+        
+        base_prompt = immediate_action + "\n\n" + self._create_generation_prompt(recipe, output_path)
+        
         # Add specific instructions about where to write files
         path_instructions = f"""
-## File Output Instructions
+## File Output Instructions - CRITICAL PATH REQUIREMENTS
+
+**⚠️ CRITICAL: You MUST create ALL files with the EXACT paths shown below! ⚠️**
 
 You MUST write all files to the following directory structure using your Write tool:
 {rel_output_path}/
 
-For example, use commands like:
+**MANDATORY: Create files using these EXACT paths (copy-paste them!):**
 - Write tool with file_path: {rel_output_path}/src/__init__.py
 - Write tool with file_path: {rel_output_path}/src/recipe_executor.py
+- Write tool with file_path: {rel_output_path}/src/recipe_model.py
+- Write tool with file_path: {rel_output_path}/src/dependency_resolver.py
+- Write tool with file_path: {rel_output_path}/src/claude_code_generator.py
+- Write tool with file_path: {rel_output_path}/src/orchestrator.py
+- Write tool with file_path: {rel_output_path}/tests/__init__.py
 - Write tool with file_path: {rel_output_path}/tests/test_recipe_executor.py
 - Write tool with file_path: {rel_output_path}/pyproject.toml
+- Write tool with file_path: {rel_output_path}/cli.py
+- Write tool with file_path: {rel_output_path}/README.md
+
+**❌ DO NOT create files in these locations (WRONG):**
+- src/recipe_executor/[filename] - This is the EXISTING source directory
+- ./[filename] - This is the root directory
+- [filename] - Missing the required path prefix
+
+**✅ ALWAYS use the full path with {rel_output_path} prefix:**
+- ✅ CORRECT: {rel_output_path}/src/ast_stub_detector.py
+- ❌ WRONG: src/recipe_executor/ast_stub_detector.py
+- ❌ WRONG: ast_stub_detector.py
 
 Create the full directory structure. Write ALL files needed for a complete implementation.
-Do NOT use Edit tool - use Write tool to CREATE new files.
-IMPORTANT: Use the exact relative path shown above, not absolute paths.
+
+**⚠️ CRITICAL TOOL USAGE RULES ⚠️**
+- **ONLY use Write tool** - You are CREATING new files, not editing existing ones
+- **NEVER use Edit tool** - There are NO existing files to edit
+- **NEVER use Grep tool on source files** - You are creating NEW files
+- **DO NOT search or read src/recipe_executor/** - That's the EXISTING source, not your output
+- **IGNORE any Recipe Executor you may have seen before** - You are creating a FRESH implementation
+- **START FRESH** - Do not reference or look at any existing implementation
+
+IMPORTANT: Use the exact relative path shown above ({rel_output_path}/...), not shortcuts.
 """
         return base_prompt + "\n" + path_instructions
 
@@ -257,13 +297,16 @@ IMPORTANT: Use the exact relative path shown above, not absolute paths.
         stub_errors: List[str],
     ) -> str:
         """Create a prompt to fix stubs and TODOs in existing code using PromptLoader."""
+        # Use relative path from current directory for Claude
+        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
+        
         # Prepare variables for prompt template
         variables = {
             "recipe_name": recipe.name,
             "stub_errors": chr(10).join(
                 f"- {error}" for error in stub_errors[:20]
             ),  # First 20 errors
-            "output_path": str(output_path),
+            "output_path": str(rel_output_path),
             "requirements": self._format_requirements(recipe.requirements),
             "design": self._format_design(recipe.design),
         }
@@ -497,20 +540,33 @@ You MUST follow this TDD workflow:
 
         return "\n".join(lines)
 
-    def _invoke_claude_code(self, prompt: str, recipe: Recipe) -> str:  # noqa: ARG002
+    def _invoke_claude_code(self, prompt: str, recipe: Recipe, output_dir: Path) -> str:  # noqa: ARG002
         """Invoke Claude Code CLI to generate implementation.
 
         Uses Claude's actual CLI interface to generate code based on the recipe.
         NO FALLBACK - must use Claude or fail.
+        
+        Args:
+            prompt: The generation prompt
+            recipe: The recipe being generated
+            output_dir: The directory where Claude should write files
         """
         logger.info(f"Invoking Claude for {recipe.name}")
         logger.debug(f"Prompt size: {len(prompt)} characters")
+        logger.debug(f"Output directory: {output_dir}")
 
-        # Write prompt to a temporary file for Claude to read
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
-            prompt_file = Path(f.name)
-            f.write(prompt)
-            logger.debug(f"Wrote prompt to {prompt_file}")
+        # Create prompt file in project-relative directory (NOT /tmp)
+        # Claude subprocesses need access to write files, so we avoid /tmp
+        prompt_dir = Path(".recipe_build/prompts")
+        prompt_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Use timestamp to ensure unique prompt filenames
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        prompt_file = prompt_dir / f"prompt_{recipe.name}_{timestamp}.md"
+        
+        # Write prompt to file in project directory
+        prompt_file.write_text(prompt)
+        logger.debug(f"Wrote prompt to {prompt_file}")
 
         try:
             # Build Claude command with all required flags for automation
@@ -526,6 +582,8 @@ You MUST follow this TDD workflow:
                 "--model",
                 model,  # Use specified model
                 # NO --allowedTools - Claude should inherit tools from parent context
+                "--add-dir",
+                str(output_dir.absolute()),  # Grant Claude access to write in output directory
             ]
 
             # Execute Claude with the prompt file
@@ -553,59 +611,117 @@ You MUST follow this TDD workflow:
                 env=env,  # Pass environment to find claude in PATH
             )
 
-            # Read streaming JSON output line by line in real-time
+            # Read streaming JSON output line by line in real-time with proper non-blocking I/O
+            import time
+            import threading
+            import queue
+            
             output_lines: List[str] = []
+            output_queue: queue.Queue[Optional[str]] = queue.Queue()
+            
+            def read_output(pipe: Any, q: queue.Queue[Optional[str]]) -> None:
+                """Read lines from pipe and put them in queue."""
+                try:
+                    for line in iter(pipe.readline, ''):
+                        if line:
+                            q.put(line)
+                        else:
+                            break
+                finally:
+                    q.put(None)  # Signal end of stream
+            
+            # Start reader thread
+            reader_thread = threading.Thread(
+                target=read_output,
+                args=(process.stdout, output_queue),
+                daemon=True
+            )
+            reader_thread.start()
+            
+            last_output_time = time.time()
+            no_output_warnings = 0
+            
             if process.stdout:
-                for line in iter(process.stdout.readline, ""):
-                    if not line:
-                        break
-                    output_lines.append(line)
-                    # Parse JSON events as they come in and emit progress
+                while True:
                     try:
-                        event: Dict[str, Any] = json.loads(line.strip())
-                        event_type: Optional[str] = event.get("type")
+                        # Try to get output with a short timeout
+                        line = output_queue.get(timeout=1.0)
+                        
+                        if line is None:
+                            # End of stream
+                            logger.info("Claude output stream ended")
+                            break
+                        
+                        last_output_time = time.time()
+                        no_output_warnings = 0
+                        output_lines.append(line)
+                        
+                        # Parse JSON events as they come in and emit progress
+                        try:
+                            event: Dict[str, Any] = json.loads(line.strip())
+                            event_type: Optional[str] = event.get("type")
 
-                        if event_type == "assistant" and "tool_use" in str(event.get("message", {})):
-                            # Extract tool use information
-                            message: Any = event.get("message", {})
-                            if isinstance(message, dict):
-                                content: Any = message.get("content", [])
-                                content_list: List[Any] = content if isinstance(content, list) else [content]
-                                for item in content_list:
-                                    if isinstance(item, dict) and item.get("type") == "tool_use":
-                                        tool_name: str = str(item.get("name", "unknown"))
-                                        tool_input: Dict[str, Any] = item.get("input", {})
-                                        if tool_name == "Write" and "file_path" in tool_input:
-                                            file_path: str = str(tool_input["file_path"])
-                                            # Extract just the relative path
-                                            if "/" in file_path:
-                                                path_parts: List[str] = file_path.split("/")
-                                                # Find and remove the generated_<recipe> directory prefix if present
-                                                rel_path: str = ""
-                                                for i, part in enumerate(path_parts):
-                                                    if part.startswith("generated_"):
-                                                        rel_path = "/".join(path_parts[i+1:]) if i+1 < len(path_parts) else path_parts[-1]
-                                                        break
+                            if event_type == "assistant" and "tool_use" in str(event.get("message", {})):
+                                # Extract tool use information
+                                message: Any = event.get("message", {})
+                                if isinstance(message, dict):
+                                    content: Any = message.get("content", [])
+                                    content_list: List[Any] = content if isinstance(content, list) else [content]
+                                    for item in content_list:
+                                        if isinstance(item, dict) and item.get("type") == "tool_use":
+                                            tool_name: str = str(item.get("name", "unknown"))
+                                            tool_input: Dict[str, Any] = item.get("input", {})
+                                            if tool_name == "Write" and "file_path" in tool_input:
+                                                file_path: str = str(tool_input["file_path"])
+                                                # Extract just the relative path
+                                                if "/" in file_path:
+                                                    path_parts: List[str] = file_path.split("/")
+                                                    # Find and remove the generated_<recipe> directory prefix if present
+                                                    rel_path: str = ""
+                                                    for i, part in enumerate(path_parts):
+                                                        if part.startswith("generated_"):
+                                                            rel_path = "/".join(path_parts[i+1:]) if i+1 < len(path_parts) else path_parts[-1]
+                                                            break
+                                                    else:
+                                                        # No generated_ prefix, just use the last part
+                                                        rel_path = path_parts[-1]
                                                 else:
-                                                    # No generated_ prefix, just use the last part
-                                                    rel_path = path_parts[-1]
+                                                    rel_path = file_path
+                                                print(f"      📝 Creating: {rel_path}")
+                                                logger.info(f"Claude creating file: {rel_path}")
                                             else:
-                                                rel_path = file_path
-                                            print(f"      📝 Creating: {rel_path}")
-                                            logger.info(f"Claude creating file: {rel_path}")
-                                        else:
-                                            print(f"      🔧 Using tool: {tool_name}")
-                                            logger.info(f"Claude using tool: {tool_name}")
-                        elif event_type == "text":
-                            # Log text output from Claude
-                            text = event.get("text", "")
-                            if text and len(text) > 1:
-                                logger.debug(f"Claude output: {text[:100]}")
-                    except json.JSONDecodeError:
-                        # Not a JSON line, just collect it
-                        pass
-                    except Exception as e:
-                        logger.debug(f"Error parsing event: {e}")
+                                                print(f"      🔧 Using tool: {tool_name}")
+                                                logger.info(f"Claude using tool: {tool_name}")
+                            elif event_type == "text":
+                                # Log text output from Claude
+                                text = event.get("text", "")
+                                if text and len(text) > 1:
+                                    logger.debug(f"Claude output: {text[:100]}")
+                        except json.JSONDecodeError:
+                            # Not a JSON line, just collect it
+                            pass
+                        except Exception as e:
+                            logger.debug(f"Error parsing event: {e}")
+                    
+                    except queue.Empty:
+                        # No output available, check if process is still alive
+                        poll_result = process.poll()
+                        if poll_result is not None:
+                            # Process has terminated
+                            logger.info(f"Claude process terminated with code {poll_result}")
+                            break
+                        
+                        # Check for extended timeout (5 minutes of no output)
+                        if time.time() - last_output_time > 300:
+                            no_output_warnings += 1
+                            if no_output_warnings == 1:
+                                logger.warning("Claude process has not produced output for 5 minutes")
+                            elif no_output_warnings >= 10:
+                                logger.error("Claude process appears stuck, terminating")
+                                process.terminate()
+                                break
+                        # Continue waiting
+                        continue
 
             # Wait for process to complete and get any remaining output
             process.wait()

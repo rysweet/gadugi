@@ -226,8 +226,8 @@ Analyze each potential stub carefully considering the context. Be precise - we w
             result = subprocess.run(
                 cmd,
                 capture_output=True,
-                text=True,
-                timeout=60  # 60 second timeout for evaluation
+                text=True
+                # No timeout - let Claude complete its evaluation
             )
             
             if result.returncode != 0:

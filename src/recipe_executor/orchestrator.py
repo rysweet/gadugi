@@ -252,7 +252,7 @@ class RecipeOrchestrator:
                         print(f"  Created test: {full_path}")
 
                 # Run quality gates on the output directory
-                quality_result = self.quality_gates.run_quality_checks(output_dir)
+                quality_result = self.quality_gates.run_all_gates(output_dir)
 
             # Determine success
             success = validation.passed and all(quality_result.values())
