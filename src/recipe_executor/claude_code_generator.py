@@ -228,15 +228,26 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         # Since Claude runs in the same directory as the Recipe Executor
         rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
         
-        # START with clear immediate action instruction
+        # START with clear immediate action instruction and component list
+        # Include component checklist if this is Recipe Executor self-hosting
+        component_section = ""
+        if recipe.name == "recipe-executor":
+            from .component_registry import ComponentRegistry
+            registry = ComponentRegistry()
+            component_section = f"\n{registry.get_component_prompt_list()}\n"
+            
         immediate_action = f"""
 # IMMEDIATE ACTION REQUIRED
 
-**START NOW**: Use your Write tool to create files in `{rel_output_path}/`
+**START NOW**: Begin implementing the Recipe Executor in `{rel_output_path}/`
 
-Do NOT read existing files. Do NOT search for code. Do NOT use TodoWrite.
-
-**YOUR FIRST ACTION**: Write tool with file_path: {rel_output_path}/src/__init__.py
+You have access to ALL tools - use them wisely:
+- **Write tool**: Create new files in the output directory
+- **Read/Grep tools**: Research patterns and conventions if needed
+- **Bash tool**: Run tests and validate your implementation
+- **TodoWrite**: Track your implementation progress
+{component_section}
+**SUGGESTED FIRST ACTION**: Write tool with file_path: {rel_output_path}/src/__init__.py
 
 Begin implementing the Recipe Executor based on the requirements below.
 """
@@ -277,13 +288,13 @@ You MUST write all files to the following directory structure using your Write t
 
 Create the full directory structure. Write ALL files needed for a complete implementation.
 
-**⚠️ CRITICAL TOOL USAGE RULES ⚠️**
-- **ONLY use Write tool** - You are CREATING new files, not editing existing ones
-- **NEVER use Edit tool** - There are NO existing files to edit
-- **NEVER use Grep tool on source files** - You are creating NEW files
-- **DO NOT search or read src/recipe_executor/** - That's the EXISTING source, not your output
-- **IGNORE any Recipe Executor you may have seen before** - You are creating a FRESH implementation
-- **START FRESH** - Do not reference or look at any existing implementation
+**⚠️ IMPORTANT TOOL USAGE GUIDELINES ⚠️**
+- **Primary task**: Create NEW files in `{rel_output_path}/` directory
+- **Use Write tool** for creating new files in the output directory
+- **Use all available tools as needed** - Read, Grep, Bash, etc. for research and validation
+- **DO NOT modify src/recipe_executor/** - That's the EXISTING source code (read-only reference)
+- **Your output goes in**: `{rel_output_path}/` only
+- **You may reference existing code** for patterns and conventions, but create your own implementation
 
 IMPORTANT: Use the exact relative path shown above ({rel_output_path}/...), not shortcuts.
 """

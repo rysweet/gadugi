@@ -96,14 +96,15 @@ def validate_input(self, input):
 ## Design Specification
 {design}
 
-## CRITICAL TOOL USAGE RULES
+## TOOL USAGE GUIDELINES
 
-**⚠️ ONLY work with files in {output_path}/ ⚠️**
+**⚠️ Your working directory is {output_path}/ ⚠️**
 
-- **USE Edit tool** ONLY for files in: `{output_path}/src/*.py` and `{output_path}/tests/*.py`
-- **USE Write tool** for any NEW files you need to create in `{output_path}/`
-- **NEVER touch files in** `src/recipe_executor/` - that's the EXISTING source code
-- **NEVER use Grep on** source files outside `{output_path}/`
+- **Edit tool**: Fix existing files in `{output_path}/src/*.py` and `{output_path}/tests/*.py`
+- **Write tool**: Create any NEW files needed in `{output_path}/`
+- **Read/Grep tools**: Research patterns and validate fixes as needed
+- **Bash tool**: Run tests and validate your fixes
+- **DO NOT modify** `src/recipe_executor/` - that's the reference implementation
 
 ## MANDATORY FIXES
 For EVERY function in EVERY file:

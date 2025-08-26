@@ -22,6 +22,7 @@ from .state_manager import StateManager
 from .python_standards import QualityGates
 from .pattern_manager import PatternManager
 from .parallel_builder import ParallelRecipeBuilder
+from .component_registry import ComponentRegistry
 
 # Configure logging
 LOG_DIR = Path(".recipe_build/logs")
@@ -214,6 +215,17 @@ class RecipeOrchestrator:
             logger.info(
                 f"Code generation complete for {recipe.name}: {len(code.files) if code else 0} files generated"
             )
+
+            # Validate component completeness
+            if code and recipe.name == "recipe-executor":  # Only validate for self-hosting
+                registry = ComponentRegistry()
+                is_complete, missing = registry.validate_completeness(code.files)
+                if not is_complete:
+                    logger.warning(f"Missing {len(missing)} required components for self-hosting")
+                    if options.verbose:
+                        print(f"⚠️  Missing components: {', '.join(missing[:5])}...")
+                else:
+                    logger.info("✅ All required components generated for self-hosting")
 
             # Generate tests
             if options.verbose:
