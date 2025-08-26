@@ -194,7 +194,7 @@ class RecipeOrchestrator:
             # Add pattern templates to context
             if patterns:
                 pattern_templates = self.pattern_manager.get_pattern_templates(patterns)
-                context.metadata["pattern_templates"] = pattern_templates
+                context.options["pattern_templates"] = pattern_templates
 
             # Generate code
             print(f"📚 Phase 1: Parsing {recipe.name}")
@@ -244,7 +244,7 @@ class RecipeOrchestrator:
                         print(f"  Created: {full_path}")
 
                 # Write test files
-                for filepath, content in tests.files.items():
+                for filepath, content in tests.test_files.items():
                     full_path = output_dir / filepath
                     full_path.parent.mkdir(parents=True, exist_ok=True)
                     full_path.write_text(content)

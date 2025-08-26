@@ -1,12 +1,12 @@
 {
   "recipe-executor": {
     "recipe_name": "recipe-executor",
-    "recipe_checksum": "93d4d830f787b38d300ea18e75e8fbf0124dc793c816ac95913601cab8499fbb",
-    "build_time": "2025-08-23T16:45:46.144831",
+    "recipe_checksum": "499a703344078664fe0b32a40fb544c07d06a6c8f8aa633ead64ebc21d1f93b1",
+    "build_time": "2025-08-25T23:59:49.485333",
     "success": false,
     "outputs": [],
     "errors": [
-      "Failed to generate stub-free code after 5 iterations:\n\nStubs detected in cli.py:\n  Line 312: - All quality gates pass\n    Pattern matched: pass\\s*$\n\nStubs detected in README.md:\n  Line 82: - All tests pass\n    Pattern matched: pass\\s*$\n  Line 83: - Quality gates pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/quality_gates.py:\n  Line 192: True if all tests pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/claude_code_generator.py:\n  Line 21: pass\n    Pattern matched: pass\\s*$\n  Line 251: 1. Write the minimal code needed to make tests pass\n    Pattern matched: pass\\s*$\n  Line 471: 'pass  # TODO',\n    Pattern matched: #\\s*TODO\\b\n  Line 472: 'raise NotImplementedError',\n    Pattern matched: raise\\s+NotImplementedError\n  Line 473: '# TODO: implement',\n    Pattern matched: #\\s*TODO\\b\n  Line 474: 'return None  # placeholder',\n    Pattern matched: '[^']*placeholder[^']*'\n  Line 475: '...  # stub'\n    Pattern matched: #\\s*STUB\\b\n  Line 482: # Check for functions with only pass\n    Pattern matched: pass\\s*$\n  Line 492: pass\n    Pattern matched: pass\\s*$\n\nStubs detected in src/test_generator.py:\n  Line 109: pass\n    Pattern matched: pass\\s*$"
+      "'RecipeTestSuite' object has no attribute 'files'"
     ]
   },
   "test-recipe": {
@@ -18,6 +18,96 @@
     "errors": [
       "Uncovered requirements: ['pattern-fr-1', 'pattern-fr-2', 'pattern-fr-3', 'pattern-fr-4', 'pattern-fr-5', 'pattern-fr-6', 'pattern-fr-7', 'pattern-fr-8', 'pattern-nfr-9', 'pattern-nfr-10', 'pattern-nfr-11', 'pattern-nfr-12', 'pattern-nfr-13']",
       "Failed quality gates: ['has_code', 'has_type_hints', 'has_imports']"
+    ]
+  },
+  "data-models": {
+    "recipe_name": "data-models",
+    "recipe_checksum": "90c76223094f2433ff90e9d185117420c820691f3f4c3372293e3333f3f21c57",
+    "build_time": "2025-08-25T04:17:33.584244",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "Claude CLI failed with exit code 1"
+    ]
+  },
+  "parser": {
+    "recipe_name": "parser",
+    "recipe_checksum": "e8879771a08c17939cbee3446724a66dad01ec93f59e187bbc13796a2613c2ce",
+    "build_time": "2025-08-25T03:28:39.855218",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "file-system": {
+    "recipe_name": "file-system",
+    "recipe_checksum": "26b3f351b69e80abe524fd68f5fca17f92c7112472844c79cc5d8cb5875c20f8",
+    "build_time": "2025-08-25T03:28:41.836646",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "quality-tools": {
+    "recipe_name": "quality-tools",
+    "recipe_checksum": "9567a18981af467977a21dfd2eea39b93fc617de0c617761677e26beb5879c01",
+    "build_time": "2025-08-25T03:28:43.801751",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "validation-service": {
+    "recipe_name": "validation-service",
+    "recipe_checksum": "4e307a975adfe49c4e688b153349d21be9cd1551af03463c99680dbc2f9db111",
+    "build_time": "2025-08-25T03:28:45.834936",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "dependency-resolution": {
+    "recipe_name": "dependency-resolution",
+    "recipe_checksum": "fd87d3a245989ea5e065f4344eeef6d298218f698dc63f49ccba5dd71228d8f7",
+    "build_time": "2025-08-25T03:28:47.813110",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "code-generation": {
+    "recipe_name": "code-generation",
+    "recipe_checksum": "7c28f0b11905529a327ac671d7b8f5d972e4e8e4332b8abb47e4e03f6d0550ca",
+    "build_time": "2025-08-25T03:28:49.829493",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "state-management": {
+    "recipe_name": "state-management",
+    "recipe_checksum": "8239cf62d38c2fcf12c46df405734faaa5d56b60ba702f62a74ba5cc3284b316",
+    "build_time": "2025-08-25T03:28:51.892957",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
+    ]
+  },
+  "main-orchestrator": {
+    "recipe_name": "main-orchestrator",
+    "recipe_checksum": "9e55bc7d0ea1c531877aa7f7650f3cd9bfdeae71d48db3e1163015b7de4fb2cf",
+    "build_time": "2025-08-25T03:28:53.843881",
+    "success": false,
+    "outputs": [],
+    "errors": [
+      "[Errno 13] Permission denied: 'claude'"
     ]
   }
 }

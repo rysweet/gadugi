@@ -1,0 +1,12 @@
+{
+  "name": "file-system",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "file_manager",
+      "path": "file_manager.py",
+      "exports": ["FileManager", "PathValidator", "FileCache"]
+    }
+  ]
+}

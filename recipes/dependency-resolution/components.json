@@ -1,0 +1,23 @@
+{
+  "name": "dependency-resolution",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "dependency_resolver",
+      "path": "dependency_resolver.py",
+      "exports": [
+        "DependencyResolver",
+        "GraphBuilder"
+      ]
+    },
+    {
+      "name": "graph_builder",
+      "path": "graph_builder.py",
+      "exports": [
+        "DependencyResolver",
+        "GraphBuilder"
+      ]
+    }
+  ]
+}

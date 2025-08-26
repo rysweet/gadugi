@@ -1,0 +1,14 @@
+{
+  "test_date": "2025-08-25T03:57:14.742455",
+  "generations_created": 1,
+  "results": [
+    {
+      "generation": 1,
+      "success": true,
+      "components": 9,
+      "files": 10,
+      "path": ".recipe_build/final_gen1"
+    }
+  ],
+  "success": false
+}

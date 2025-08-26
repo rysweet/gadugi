@@ -20,6 +20,8 @@ dependencies = [
     "neo4j>=5.0.0",
     "jinja2>=3.1.6",
     "networkx>=3.2.1",
+    "pydantic>=2.11.7",
+    "python-dateutil>=2.9.0.post0",
 ]
 dynamic = ["version"]
 
@@ -147,3 +149,9 @@ ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by format
 docstring-code-format = true
 docstring-code-line-length = 88
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.403",
+    "ruff>=0.12.7",
+]

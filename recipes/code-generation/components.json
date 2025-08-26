@@ -1,0 +1,23 @@
+{
+  "name": "code-generation",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "code_generator",
+      "path": "code_generator.py",
+      "exports": [
+        "CodeGenerator",
+        "TemplateEngine"
+      ]
+    },
+    {
+      "name": "template_engine",
+      "path": "template_engine.py",
+      "exports": [
+        "CodeGenerator",
+        "TemplateEngine"
+      ]
+    }
+  ]
+}

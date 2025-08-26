@@ -1,0 +1,34 @@
+{
+  "name": "quality-tools",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "linter",
+      "path": "linter.py",
+      "exports": [
+        "Linter",
+        "Formatter",
+        "TypeChecker"
+      ]
+    },
+    {
+      "name": "formatter",
+      "path": "formatter.py",
+      "exports": [
+        "Linter",
+        "Formatter",
+        "TypeChecker"
+      ]
+    },
+    {
+      "name": "type_checker",
+      "path": "type_checker.py",
+      "exports": [
+        "Linter",
+        "Formatter",
+        "TypeChecker"
+      ]
+    }
+  ]
+}

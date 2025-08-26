@@ -1,0 +1,23 @@
+{
+  "name": "main-orchestrator",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "orchestrator",
+      "path": "orchestrator.py",
+      "exports": [
+        "Orchestrator",
+        "WorkflowEngine"
+      ]
+    },
+    {
+      "name": "workflow_engine",
+      "path": "workflow_engine.py",
+      "exports": [
+        "Orchestrator",
+        "WorkflowEngine"
+      ]
+    }
+  ]
+}

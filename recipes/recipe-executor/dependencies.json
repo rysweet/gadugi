@@ -1,0 +1,13 @@
+{
+  "dependencies": [
+    "data-models",
+    "parser", 
+    "file-system",
+    "quality-tools",
+    "validation-service",
+    "dependency-resolution",
+    "code-generation",
+    "state-management",
+    "main-orchestrator"
+  ]
+}

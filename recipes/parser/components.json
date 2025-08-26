@@ -1,0 +1,82 @@
+{
+  "name": "parser",
+  "version": "1.0.0",
+  "description": "Recipe file parser for markdown and JSON files",
+  "type": "library",
+  "language": "python",
+  "dependencies": ["data-models"],
+  "metadata": {
+    "python_dependencies": [
+      "pydantic>=2.0.0"
+    ]
+  },
+  "components": [
+    {
+      "name": "markdown_parser",
+      "type": "module",
+      "path": "markdown_parser.py",
+      "exports": [
+        "MarkdownParser",
+        "MarkdownSection",
+        "SectionExtractor",
+        "ListParser",
+        "CodeBlockExtractor"
+      ]
+    },
+    {
+      "name": "requirements_parser",
+      "type": "module",
+      "path": "requirements_parser.py",
+      "exports": [
+        "RequirementsParser",
+        "RequirementExtractor",
+        "PriorityDetector"
+      ]
+    },
+    {
+      "name": "design_parser",
+      "type": "module",
+      "path": "design_parser.py",
+      "exports": [
+        "DesignParser",
+        "ComponentExtractor",
+        "ArchitectureParser"
+      ]
+    },
+    {
+      "name": "json_parser",
+      "type": "module",
+      "path": "json_parser.py",
+      "exports": [
+        "JsonParser",
+        "ComponentsParser",
+        "DependenciesParser"
+      ]
+    },
+    {
+      "name": "recipe_builder",
+      "type": "module",
+      "path": "recipe_builder.py",
+      "exports": [
+        "RecipeBuilder",
+        "ValidationHelper",
+        "DefaultValueProvider"
+      ]
+    }
+  ],
+  "interfaces": {
+    "primary": {
+      "type": "python-package",
+      "entry_points": [
+        "recipe_builder.RecipeBuilder",
+        "markdown_parser.MarkdownParser"
+      ]
+    }
+  },
+  "quality": {
+    "test_coverage_target": 95,
+    "type_checking": "strict",
+    "linting": "ruff",
+    "formatting": "black"
+  }
+}

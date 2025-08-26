@@ -8,6 +8,7 @@ from datetime import datetime
 import logging
 import os
 import json
+import shutil
 
 from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, ComponentDesign, Design
 from .python_standards import PythonStandards
@@ -62,7 +63,20 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         """
         self.standards = standards or PythonStandards()
         self.guidelines_path = guidelines_path or Path(".claude/Guidelines.md")
-        self.claude_command = claude_command
+        
+        # Find claude command in PATH
+        if claude_command == "claude":
+            found_claude = shutil.which("claude")
+            if found_claude:
+                self.claude_command = found_claude
+                logger.info(f"Found claude at: {found_claude}")
+            else:
+                # Fallback to assuming it's in PATH
+                self.claude_command = claude_command
+                logger.warning("Could not find claude in PATH, using 'claude' and hoping subprocess finds it")
+        else:
+            self.claude_command = claude_command
+            
         self.enforce_no_stubs = enforce_no_stubs
         self.stub_detector = StubDetector(strict_mode=True)
         self.intelligent_detector = IntelligentStubDetector(strict_mode=True)
@@ -210,21 +224,28 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
     def _create_generation_prompt_with_path(self, recipe: Recipe, output_path: Path) -> str:
         """Create a comprehensive prompt for Claude Code from recipe with output path."""
-        base_prompt = self._create_generation_prompt(recipe)
+        base_prompt = self._create_generation_prompt(recipe, output_path)
 
+        # Use relative path from current directory for Claude
+        # Since Claude runs in the same directory as the Recipe Executor
+        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
+        
         # Add specific instructions about where to write files
         path_instructions = f"""
 ## File Output Instructions
 
-You MUST write all files to the following directory using your Write tool:
-{output_path}
+You MUST write all files to the following directory structure using your Write tool:
+{rel_output_path}/
 
 For example, use commands like:
-- Write tool with file_path: {output_path}/src/module_name/__init__.py
-- Write tool with file_path: {output_path}/src/module_name/component.py
-- Write tool with file_path: {output_path}/tests/test_component.py
+- Write tool with file_path: {rel_output_path}/src/__init__.py
+- Write tool with file_path: {rel_output_path}/src/recipe_executor.py
+- Write tool with file_path: {rel_output_path}/tests/test_recipe_executor.py
+- Write tool with file_path: {rel_output_path}/pyproject.toml
 
 Create the full directory structure. Write ALL files needed for a complete implementation.
+Do NOT use Edit tool - use Write tool to CREATE new files.
+IMPORTANT: Use the exact relative path shown above, not absolute paths.
 """
         return base_prompt + "\n" + path_instructions
 
@@ -274,34 +295,45 @@ Create the full directory structure. Write ALL files needed for a complete imple
 
         return prompt
 
-    def _create_generation_prompt(self, recipe: Recipe) -> str:
+    def _create_generation_prompt(self, recipe: Recipe, output_path: Optional[Path] = None) -> str:
         """Create a comprehensive prompt for Claude Code from recipe using PromptLoader."""
         from .language_detector import LanguageDetector, Language
 
         # Detect target language
         detector = LanguageDetector()
         language = detector.detect_language(recipe.path)
+        
+        # Check if this is a decomposed/component recipe
+        is_component_recipe = self._is_component_recipe(recipe)
 
-        # Prepare variables for prompt template
-        variables = {
-            "recipe_name": recipe.name,
-            "language": language.value.capitalize() if language != Language.UNKNOWN else "Python",
-            "requirements": self._format_requirements(recipe.requirements),
-            "design": self._format_design(recipe.design),
-            "components": self._format_components(recipe.design.components),
-            "implementation_notes": recipe.design.implementation_notes or "No additional notes",
-            "dependencies": ", ".join(recipe.get_dependencies())
-            if recipe.get_dependencies()
-            else "None",
-            "success_criteria": self._format_success_criteria(recipe.requirements.success_criteria),
-        }
-
-        # Use PromptLoader to assemble the prompt with context
-        prompt = self.prompt_loader.assemble_prompt(
-            template_name="generation_prompt",
-            variables=variables,
-            include_context=True,  # This will include CRITICAL_GUIDELINES.md and Guidelines.md
-        )
+        # Use different prompt for component recipes
+        if is_component_recipe:
+            # Simple direct prompt for component recipes - let Claude read the files
+            # Use a default output path if not provided
+            if output_path is None:
+                output_path = Path(".recipe_build") / "generated"
+            prompt = self._create_simple_component_prompt(recipe, output_path)
+        else:
+            # Prepare variables for prompt template
+            variables = {
+                "recipe_name": recipe.name,
+                "language": language.value.capitalize() if language != Language.UNKNOWN else "Python",
+                "requirements": self._format_requirements(recipe.requirements),
+                "design": self._format_design(recipe.design),
+                "components": self._format_components(recipe.design.components),
+                "implementation_notes": recipe.design.implementation_notes or "No additional notes",
+                "dependencies": ", ".join(recipe.get_dependencies())
+                if recipe.get_dependencies()
+                else "None",
+                "success_criteria": self._format_success_criteria(recipe.requirements.success_criteria),
+            }
+            
+            # Use PromptLoader to assemble the prompt with context
+            prompt = self.prompt_loader.assemble_prompt(
+                template_name="generation_prompt",
+                variables=variables,
+                include_context=True,  # This will include CRITICAL_GUIDELINES.md and Guidelines.md
+            )
 
         # Add supplementary documentation if available
         if recipe.metadata.supplementary_docs:
@@ -493,12 +525,7 @@ You MUST follow this TDD workflow:
                 "--verbose",  # Required for stream-json output
                 "--model",
                 model,  # Use specified model
-                "--allowedTools",
-                "Write",
-                "Edit",
-                "MultiEdit",
-                "Bash",
-                "Read",  # Allow file operations
+                # NO --allowedTools - Claude should inherit tools from parent context
             ]
 
             # Execute Claude with the prompt file
@@ -510,6 +537,12 @@ You MUST follow this TDD workflow:
             logger.info(f"Executing Claude command: {' '.join(cmd)}")
 
             # Use Popen to handle streaming JSON output
+            # Include current environment to ensure PATH is available
+            env = os.environ.copy()
+            # Add npm-global bin to PATH if not already there
+            npm_bin = os.path.expanduser("~/.npm-global/bin")
+            if npm_bin not in env.get("PATH", ""):
+                env["PATH"] = f"{npm_bin}:{env.get('PATH', '')}"
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -517,6 +550,7 @@ You MUST follow this TDD workflow:
                 text=True,
                 bufsize=1,  # Line buffered
                 universal_newlines=True,
+                env=env,  # Pass environment to find claude in PATH
             )
 
             # Read streaming JSON output line by line in real-time
@@ -605,6 +639,158 @@ You MUST follow this TDD workflow:
         """Convert kebab-case to CamelCase."""
         parts = name.split("-")
         return "".join(part.capitalize() for part in parts)
+    
+    def _is_component_recipe(self, recipe: Recipe) -> bool:
+        """Detect if this is a decomposed/component recipe."""
+        # Component recipes have certain characteristics:
+        # 1. Focused on a single responsibility (e.g., data-models, parser, validation)
+        # 2. Fewer dependencies
+        # 3. Smaller scope (fewer components)
+        # 4. Name patterns like "data-models", "parser", "file-system"
+        
+        component_indicators = [
+            'data-model', 'parser', 'file-system', 'validation',
+            'dependency', 'code-gen', 'state', 'quality-tool',
+            'execution', 'design-model', 'requirement'
+        ]
+        
+        name_lower = recipe.name.lower()
+        
+        # Check name patterns
+        is_component_name = any(indicator in name_lower for indicator in component_indicators)
+        
+        # Check scope - component recipes typically have fewer than 10 components
+        is_focused_scope = len(recipe.design.components) <= 10
+        
+        # Check dependencies - component recipes have fewer dependencies
+        has_few_deps = len(recipe.get_dependencies()) <= 3
+        
+        return is_component_name or (is_focused_scope and has_few_deps)
+    
+    def _create_simple_component_prompt(self, recipe: Recipe, output_path: Path) -> str:
+        """Create a simple, direct prompt for component recipes that lets Claude read the files."""
+        recipe_path = recipe.path
+        output_dir = output_path / recipe.name
+        
+        # Read the actual recipe files to include specific details
+        requirements_path = recipe_path / "requirements.md"
+        design_path = recipe_path / "design.md"
+        
+        prompt = f"""# CRITICAL: COMPLETE IMPLEMENTATION CODE GENERATION - NO STUBS
+
+You are generating COMPLETE, PRODUCTION-READY Python code. NOT stubs, NOT placeholders.
+
+## ABSOLUTE REQUIREMENTS
+1. **NO STUB IMPLEMENTATIONS** - Every function must have REAL logic
+2. **NO pass STATEMENTS** - Functions must DO something meaningful
+3. **NO TODO COMMENTS** - Complete implementation ONLY
+4. **NO PLACEHOLDER RETURNS** - No returning None, {{}}, [], or input unchanged
+5. **MINIMUM 3-5 LINES OF LOGIC** per function
+
+## YOUR TASK
+Generate COMPLETE Python implementation by:
+1. Read the recipe files from {recipe_path}:
+   - requirements.md - Contains functional requirements
+   - design.md - Contains detailed specifications
+   - components.json - Lists files to generate
+
+2. Generate files in {output_dir} with FULL implementations
+
+## EXAMPLE OF REQUIRED IMPLEMENTATION QUALITY
+
+Every function MUST have substantive logic like this:
+
+```python
+# ❌ FORBIDDEN - This will FAIL:
+def validate_recipe(self, recipe: Recipe) -> bool:
+    return True  # STUB - FORBIDDEN
+
+# ✅ REQUIRED - Real implementation:
+def validate_recipe(self, recipe: Recipe) -> bool:
+    errors = []
+    
+    # Check required fields
+    if not recipe.name:
+        errors.append("Recipe name is required")
+    if not recipe.path or not recipe.path.exists():
+        errors.append(f"Recipe path does not exist: {{recipe.path}}")
+    
+    # Validate requirements
+    if not recipe.requirements:
+        errors.append("Recipe must have requirements")
+    else:
+        if not recipe.requirements.purpose:
+            errors.append("Requirements must have a purpose")
+        if not recipe.requirements.functional_requirements:
+            errors.append("At least one functional requirement is needed")
+    
+    # Validate design
+    if not recipe.design:
+        errors.append("Recipe must have a design")
+    elif not recipe.design.components:
+        errors.append("Design must have at least one component")
+    
+    # Log any errors found
+    if errors:
+        logger.error(f"Recipe validation failed: {{errors}}")
+        return False
+    
+    logger.info(f"Recipe {{recipe.name}} validated successfully")
+    return True
+```
+
+## IMPLEMENTATION PATTERNS TO USE
+
+### For Validation Functions:
+- Check all required fields exist
+- Validate data types and formats
+- Check business rules and constraints
+- Log errors with context
+- Return detailed results
+
+### For Processing Functions:
+- Parse and transform input data
+- Apply business logic and calculations
+- Handle edge cases and errors
+- Update state or generate output
+- Log processing steps
+
+### For Model Classes:
+- Include validation in __init__ or validators
+- Add computed properties with logic
+- Include serialization/deserialization
+- Add helper methods with functionality
+- Include proper __str__ and __repr__
+
+## FORBIDDEN PATTERNS
+```python
+# ALL OF THESE ARE FORBIDDEN:
+def process(self, data):
+    pass  # NO!
+
+def validate(self, item):
+    return True  # NO!
+
+def transform(self, input):
+    return input  # NO!
+
+def calculate(self, values):
+    return {{}}  # NO!
+    
+class MyClass:
+    pass  # NO!
+```
+
+## START IMMEDIATELY
+1. Read the recipe files NOW
+2. Generate COMPLETE implementations
+3. Every function must have REAL logic
+4. NO STUBS, NO PLACEHOLDERS
+
+Use Read tool to read the recipe files, then Write tool to create the Python files.
+DO NOT use any other tools. Start reading the recipe files immediately.
+"""
+        return prompt
 
     def _parse_and_write_files(
         self, claude_output: str, output_path: Path, recipe: Recipe

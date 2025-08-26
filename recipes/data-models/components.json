@@ -1,0 +1,88 @@
+{
+  "name": "data-models",
+  "version": "1.0.0",
+  "description": "Data models and structures for Recipe Executor",
+  "type": "library",
+  "language": "python",
+  "dependencies": [],
+  "metadata": {
+    "python_dependencies": [
+      "pydantic>=2.0.0",
+      "python-dateutil>=2.8.0"
+    ]
+  },
+  "components": [
+    {
+      "name": "recipe_model",
+      "type": "module",
+      "path": "recipe_model.py",
+      "exports": [
+        "Recipe",
+        "RecipeMetadata",
+        "Requirements",
+        "Design",
+        "Components"
+      ]
+    },
+    {
+      "name": "requirements_model",
+      "type": "module",
+      "path": "requirements_model.py",
+      "exports": [
+        "Requirement",
+        "RequirementPriority",
+        "RequirementStatus",
+        "RequirementCategory"
+      ]
+    },
+    {
+      "name": "design_model",
+      "type": "module",
+      "path": "design_model.py",
+      "exports": [
+        "ComponentDesign",
+        "ComponentType",
+        "Interface",
+        "Dependency"
+      ]
+    },
+    {
+      "name": "execution_model",
+      "type": "module",
+      "path": "execution_model.py",
+      "exports": [
+        "ExecutionState",
+        "ExecutionPhase",
+        "GenerationResult",
+        "TestResult"
+      ]
+    },
+    {
+      "name": "validation_model",
+      "type": "module",
+      "path": "validation_model.py",
+      "exports": [
+        "ValidationResult",
+        "ValidationError",
+        "ValidationWarning",
+        "ValidationInfo"
+      ]
+    }
+  ],
+  "interfaces": {
+    "primary": {
+      "type": "python-package",
+      "entry_points": [
+        "recipe_model.Recipe",
+        "validation_model.ValidationResult",
+        "execution_model.ExecutionState"
+      ]
+    }
+  },
+  "quality": {
+    "test_coverage_target": 95,
+    "type_checking": "strict",
+    "linting": "ruff",
+    "formatting": "black"
+  }
+}

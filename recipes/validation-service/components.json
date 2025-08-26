@@ -1,0 +1,23 @@
+{
+  "name": "validation-service",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "recipe_validator",
+      "path": "recipe_validator.py",
+      "exports": [
+        "RecipeValidator",
+        "CodeValidator"
+      ]
+    },
+    {
+      "name": "code_validator",
+      "path": "code_validator.py",
+      "exports": [
+        "RecipeValidator",
+        "CodeValidator"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "state-management",
+  "version": "1.0.0",
+  "type": "library",
+  "components": [
+    {
+      "name": "state_manager",
+      "path": "state_manager.py",
+      "exports": [
+        "StateManager",
+        "CacheManager"
+      ]
+    },
+    {
+      "name": "cache_manager",
+      "path": "cache_manager.py",
+      "exports": [
+        "StateManager",
+        "CacheManager"
+      ]
+    }
+  ]
+}

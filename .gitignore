@@ -165,3 +165,4 @@ orchestration-*/
 # Recipe Executor temporary files
 .recipe-executor/
 .gadugi/
+.recipe_build/
