@@ -89,7 +89,7 @@ class SharedTestInstructions:
         try:
             # Try to create ErrorHandler if available
             if 'ErrorHandler' in globals() and globals()['ErrorHandler'] is not None:
-                self.error_handler = ErrorHandler()  # type: ignore
+                self.error_handler = ErrorHandler()  # type: ignore[call-arg]
         except (NameError, TypeError):
             # ErrorHandler not available or wrong signature
             pass

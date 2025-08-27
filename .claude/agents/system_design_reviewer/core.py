@@ -110,8 +110,8 @@ class SystemDesignReviewer:
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler(agent_type="system-design-reviewer")  # type: ignore
-        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")  # type: ignore
+        self.error_handler = ErrorHandler(agent_type="system-design-reviewer")  # type: ignore[call-arg]
+        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")  # type: ignore[call-arg]
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
@@ -223,7 +223,7 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)  # type: ignore
+            result = self.github_ops.get_pr_details(pr_number)  # type: ignore[attr-defined]
 
             # Get changed files
             changed_files = self._get_changed_files(pr_number)
@@ -458,7 +458,7 @@ class SystemDesignReviewer:
             )
 
             # Post review using GitHub operations
-            self.github_ops.post_pr_review(pr_number, review_action, review_body)  # type: ignore
+            self.github_ops.post_pr_review(pr_number, review_action, review_body)  # type: ignore[attr-defined]
 
         except Exception as e:
             print(f"Error posting GitHub review: {e}")
@@ -571,7 +571,7 @@ class SystemDesignStateManager:
 
     def load_state(self) -> Dict[str, Any]:
         """Load state from file"""
-        return self.state_manager.load_state()  # type: ignore
+        return self.state_manager.load_state()  # type: ignore[attr-defined]
 
     def save_state(self, state_data: Dict[str, Any]) -> bool:
         """Save state to file"""

@@ -206,7 +206,7 @@ class TaskExecutor:
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if container_execution_available:
             try:
-                container_config = ContainerConfig(  # type: ignore
+                container_config = ContainerConfig(  # type: ignore[call-arg]
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -219,7 +219,7 @@ class TaskExecutor:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)  # type: ignore
+                self.container_manager = ContainerManager(container_config)  # type: ignore[call-arg]
             except (RuntimeError, ImportError) as e:
                 logger.info(f"Container manager unavailable for task {task_id}: {e}")
                 logger.info("Will use subprocess fallback")
@@ -497,7 +497,7 @@ class ExecutionEngine:
         if container_execution_available:
             print("🐳 Initializing containerized execution engine...")
             try:
-                container_config = ContainerConfig(  # type: ignore
+                container_config = ContainerConfig(  # type: ignore[call-arg]
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -509,7 +509,7 @@ class ExecutionEngine:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)  # type: ignore
+                self.container_manager = ContainerManager(container_config)  # type: ignore[call-arg]
                 self.execution_mode = "containerized"
             except (RuntimeError, ImportError) as e:
                 print(f"⚠️  Container manager unavailable: {e}")
