@@ -5,21 +5,18 @@ Tests the deterministic workflow execution engine to ensure
 consistent and reliable workflow phase execution.
 """
 
+import os
+import sys
 import pytest
 import tempfile
-import os
 import json
-import subprocess
 from unittest.mock import Mock, patch
 
+# Add .claude to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude"))
+
 # Import the module under test
-import sys
-
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
-
-from workflow_engine import (
+from shared.workflow_engine import (
     WorkflowEngine,
     WorkflowPhase,
     WorkflowState,
@@ -147,7 +144,13 @@ Test the deterministic execution of workflow phases.
 
         success, message, data = engine._phase_init()
 
-        assert success is True
+        # Debug output
+        if not success:
+            print(f"Debug - Init failed: {message}")
+            print(f"Debug - Prompt file: {self.prompt_file}")
+            print(f"Debug - File exists: {os.path.exists(self.prompt_file)}")
+
+        assert success is True, f"Init failed with message: {message}"
         assert "initialization successful" in message.lower()
         assert data["task_id"] == "test-init"
         assert data["prompt_file"] == self.prompt_file
@@ -383,7 +386,12 @@ Test the deterministic execution of workflow phases.
 
         success, message, data = engine._phase_finalization()
 
-        assert success is True
+        # Debug output
+        if not success:
+            print(f"Debug - Finalization failed: {message}")
+            print(f"Debug - Data: {data}")
+
+        assert success is True, f"Finalization failed with message: {message}"
         assert "finalization completed" in message.lower()
         assert "total_phases" in data
         assert "execution_time" in data

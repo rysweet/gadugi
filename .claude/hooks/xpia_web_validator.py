@@ -101,8 +101,7 @@ def validate_web_operation(hook_data):
             # Validate returned content
             result = xpia_agent.validate_file_content(
                 str(tool_output),
-                filename=f"{tool_name}_output",
-                file_type="web_content",
+                filename=f"{tool_name}_output"
             )
 
             if not result.is_safe:

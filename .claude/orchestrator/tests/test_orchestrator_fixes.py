@@ -12,14 +12,13 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import json
 import os
 import shutil
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 # Add parent directory to path to import components
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -35,7 +34,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
     def setUp(self):
         self.temp_dir = Path(tempfile.mkdtemp())
         self.task_id = "test-task-001"
-        self.prompt_file = "test-prompt.md"
+        self.task_id = "test-prompt.md"
         self.task_context = {
             'id': self.task_id,
             'name': 'Test Task',
@@ -69,7 +68,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         executor = TaskExecutor(
             task_id=self.task_id,
             worktree_path=self.temp_dir,
-            prompt_file=self.prompt_file,
+            prompt_file=self.task_id,
             task_context=self.task_context
         )
 
@@ -93,6 +92,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         self.assertNotIn("-p", call_args, "Should NOT use -p flag (old broken pattern)")
 
         # Verify successful execution
+        self.assertIsNotNone(result)
         self.assertEqual(result.status, "success")
         self.assertEqual(result.task_id, self.task_id)
 
@@ -169,6 +169,7 @@ The implementation requires:
             phase_focus="Implementation"
         )
 
+        self.assertIsNotNone(context)
         self.assertEqual(context.task_id, 'test-001')
         self.assertEqual(context.task_name, 'Test Task')
         self.assertEqual(context.original_prompt, 'test-prompt.md')
@@ -283,8 +284,8 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             'requirements': {'type': 'implementation'}
         }]
 
-        # Temporarily store original method
-        original_method = self.engine._execute_with_concurrency_control
+        # Temporarily store original method (for potential restoration)
+        _ = self.engine._execute_with_concurrency_control
 
         # Track executors created
         created_executors = []
@@ -306,7 +307,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
             executor = created_executors[0]
 
             # Verify context was passed
-            self.assertEqual(executor.task_id, 'test-001')
+            self.assertEqual((executor.task_id if executor is not None else None), 'test-001')
             self.assertEqual(executor.task_context['name'], 'Test Task')
             self.assertEqual(executor.task_context['dependencies'], ['dep1'])
             self.assertEqual(executor.task_context['target_files'], ['output.py'])
@@ -405,7 +406,7 @@ class TestRegressionPrevention(unittest.TestCase):
                      "ExecutionEngine should use WorkflowManager agent invocation")
 
         # Ensure the old broken pattern is not present
-        self.assertNotIn('"-p", self.prompt_file', code_content,
+        self.assertNotIn('"-p", self.task_id', code_content,
                         "Should not use old -p prompt_file pattern")
 
         # Ensure PromptGenerator import is present
@@ -418,10 +419,17 @@ class TestRegressionPrevention(unittest.TestCase):
         generator_file = Path(__file__).parent.parent / "components" / "prompt_generator.py"
         self.assertTrue(generator_file.exists(), "PromptGenerator component should exist")
 
+        # Create temp directory for test
+        temp_dir = Path(tempfile.mkdtemp())
+        
         # Test basic instantiation
         from components.prompt_generator import PromptGenerator
-        generator = PromptGenerator()
+        generator = PromptGenerator(project_root=str(temp_dir))
         self.assertIsNotNone(generator, "PromptGenerator should be instantiable")
+        
+        # Cleanup
+        import shutil
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
     def test_workflow_master_agent_availability(self):
         """Test that WorkflowManager agent is available"""

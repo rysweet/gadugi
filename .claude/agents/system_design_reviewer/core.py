@@ -10,7 +10,7 @@ import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Set, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -23,43 +23,37 @@ from enum import Enum
 # --------------------------------------------------------------------------- #
 try:
     # 1) Absolute imports (e.g. `python -m gadugi.system_design_reviewer`)
-    from shared.github_operations import GitHubOperations
-    from shared.state_management import StateManager
-    from shared.error_handling import (
+    from shared.github_operations import GitHubOperations  # type: ignore[attr-defined]
+    from shared.state_management import StateManager  # type: ignore[attr-defined]
+    from shared.utils.error_handling import (  # type: ignore[attr-defined]
         ErrorHandler,
-        ErrorCategory,
-        ErrorSeverity,
     )
-    from shared.task_tracking import TaskTracker
+    from shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
         # 2) Relative imports when executed inside repository package layout
-        from ..shared.github_operations import GitHubOperations
-        from ..shared.state_management import StateManager
-        from ..shared.error_handling import (
+        from ...shared.github_operations import GitHubOperations  # type: ignore[attr-defined]
+        from ...shared.state_management import StateManager  # type: ignore[attr-defined]
+        from ...shared.utils.error_handling import (  # type: ignore[attr-defined]
             ErrorHandler,
-            ErrorCategory,
-            ErrorSeverity,
         )
-        from ..shared.task_tracking import TaskTracker
+        from ...shared.task_tracking import TaskTracker  # type: ignore[attr-defined]
     except ImportError:
         # 3) Final fallback – use lightweight stub implementations
         print(
             "Warning: Enhanced-Separation shared modules not available, "
             "using local fallback implementations"
         )
-        from .fallbacks import (  # type: ignore
+        from .fallbacks import (  # type: ignore[import-untyped]
             GitHubOperations,
             StateManager,
             ErrorHandler,
-            ErrorCategory,
-            ErrorSeverity,
             TaskTracker,
         )
 
 from .ast_parser import (
-    ASTParserFactory, ArchitecturalElement, ArchitecturalChange,
-    ChangeType, ImpactLevel, ElementType
+    ASTParserFactory, ArchitecturalChange,
+    ImpactLevel
 )
 from .documentation_manager import DocumentationManager
 from .adr_generator import ADRGenerator
@@ -88,41 +82,42 @@ class ReviewResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""
-        return {
-            **asdict(self),
-            'timestamp': self.timestamp.isoformat(),
-            'changes_detected': [
-                {
-                    **asdict(change),
-                    'change_type': change.change_type.value,
-                    'impact_level': change.impact_level.value,
-                    'element': {
-                        **asdict(change.element),
-                        'element_type': change.element.element_type.value
-                    }
+        result = asdict(self)
+        result['status'] = self.status.value  # Convert enum to string
+        result['architectural_impact'] = self.architectural_impact.value  # Convert enum to string
+        result['timestamp'] = self.timestamp.isoformat()
+        result['changes_detected'] = [
+            {
+                **asdict(change),
+                'change_type': change.change_type.value,
+                'impact_level': change.impact_level.value,
+                'element': {
+                    **asdict(change.element),
+                    'element_type': change.element.element_type.value
                 }
-                for change in self.changes_detected
-            ]
-        }
+            }
+            for change in self.changes_detected
+        ]
+        return result
 
 
 class SystemDesignReviewer:
     """Main System Design Review Agent implementation"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initialize the system design reviewer"""
         self.config = config or {}
 
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler("system-design-reviewer")
-        self.task_tracker = TaskTracker("system-design-reviewer")
+        self.error_handler = ErrorHandler()
+        self.task_tracker = TaskTracker(workflow_id="system-design-reviewer")
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
-        self.documentation_manager = DocumentationManager()
-        self.adr_generator = ADRGenerator()
+        self.documentation_manager = DocumentationManager(architecture_file="architecture.md")
+        self.adr_generator = ADRGenerator(adr_dir="docs/adr")
 
         # Configuration
         self.max_pr_size = self.config.get('max_pr_size', 1000)  # max files to analyze
@@ -147,8 +142,7 @@ class SystemDesignReviewer:
             # Update task status
             self.task_tracker.create_task(
                 f"review_pr_{pr_number}",
-                f"Review PR #{pr_number} for architectural changes",
-                priority="high"
+                f"Review PR #{pr_number} for architectural changes"
             )
             self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")
 
@@ -208,12 +202,7 @@ class SystemDesignReviewer:
             return result
 
         except Exception as e:
-            self.error_handler.handle_error(
-                e,
-                category=ErrorCategory.PROCESS_EXECUTION,
-                severity=ErrorSeverity.HIGH,
-                context={'pr_number': pr_number}
-            )
+            self.error_handler.handle_error(e, {'pr_number': pr_number})
 
             # Create failure result
             result = ReviewResult(
@@ -235,21 +224,26 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)
-
-            # Get changed files
-            changed_files = self._get_changed_files(pr_number)
-            result['changed_files'] = changed_files
-
-            return result
+            result = self.github_ops.get_pr(int(pr_number))
+            
+            if result.get('success') and result.get('data'):
+                pr_data = result['data']
+                pr_data['number'] = str(pr_data.get('number', pr_number))
+                
+                # Get changed files
+                changed_files = self._get_changed_files(pr_number)
+                pr_data['changed_files'] = changed_files
+                
+                return pr_data
+            
+            # Fallback if the API call didn't return expected format
+            return {
+                'number': pr_number,
+                'changed_files': self._get_changed_files(pr_number)
+            }
 
         except Exception as e:
-            self.error_handler.handle_error(
-                e,
-                category=ErrorCategory.GITHUB_API,
-                severity=ErrorSeverity.HIGH,
-                context={'pr_number': pr_number}
-            )
+            self.error_handler.handle_error(e, context={'pr_number': pr_number})
             return {}
 
     def _get_changed_files(self, pr_number: str) -> List[str]:
@@ -446,7 +440,7 @@ class SystemDesignReviewer:
                 element = change.element
                 comments.append(f"- **{element.element_type.value}** `{element.name}` at {element.location}")
 
-                if change.design_implications:
+                if change is not None and change.design_implications:
                     comments.append(f"  - Impact: {', '.join(change.design_implications)}")
 
                 if change.impact_level in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]:
@@ -475,7 +469,7 @@ class SystemDesignReviewer:
             )
 
             # Post review using GitHub operations
-            self.github_ops.post_pr_review(pr_number, review_action, review_body)
+            self.github_ops.post_pr_review(pr_number, review_action, review_body)  # type: ignore[attr-defined]
 
         except Exception as e:
             print(f"Error posting GitHub review: {e}")
@@ -560,14 +554,14 @@ class SystemDesignReviewer:
         return self.review_pr(pr_number, **kwargs)
 
 
-class SystemDesignStateManager(StateManager):
+class SystemDesignStateManager:
     """State manager for System Design Review Agent"""
 
-    def __init__(self):
-        super().__init__(
-            state_dir=Path(".github/workflow-states/system-design-reviewer"),
-            task_id="system-design-reviewer"
-        )
+    def __init__(self) -> None:
+        self.state_dir = Path(".github/workflow-states/system-design-reviewer")
+        self.state_file = self.state_dir / "state.json"
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        self.task_id = "system-design-reviewer"
 
     def get_default_state(self) -> Dict[str, Any]:
         """Get default state structure"""
@@ -583,8 +577,39 @@ class SystemDesignStateManager(StateManager):
                 'enable_adr_generation': True,
                 'enable_doc_updates': True,
                 'max_pr_size': 1000
-            }
+            },
+            'task_id': self.task_id,
+            'last_updated': datetime.now().isoformat()
         }
+
+    def load_state(self) -> Dict[str, Any]:
+        """Load state from file"""
+        try:
+            if self.state_file.exists():
+                with open(self.state_file, 'r') as f:
+                    state = json.load(f)
+                    # Ensure task_id is present
+                    if 'task_id' not in state:
+                        state['task_id'] = self.task_id
+                    return state
+            return self.get_default_state()
+        except Exception as e:
+            print(f"Error loading state: {e}")
+            return self.get_default_state()
+
+    def save_state(self, state_data: Dict[str, Any]) -> bool:
+        """Save state to file"""
+        try:
+            # Add metadata
+            state_data['task_id'] = self.task_id
+            state_data['last_updated'] = datetime.now().isoformat()
+            
+            with open(self.state_file, 'w') as f:
+                json.dump(state_data, f, indent=2)
+            return True
+        except Exception as e:
+            print(f"Error saving state: {e}")
+            return False
 
     def save_review_result(self, result: ReviewResult) -> bool:
         """Save a review result to state"""

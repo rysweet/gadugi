@@ -9,7 +9,7 @@ ensuring all operations work correctly without Memory.md file dependencies.
 import unittest
 import tempfile
 import shutil
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, ANY
 from pathlib import Path
 import sys
 
@@ -208,7 +208,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
         self.assertIn("timestamp", result)
 
         # Verify comment was added to correct issue
-        self.github_mock.add_comment.assert_called_once_with(42, unittest.mock.ANY)
+        self.github_mock.add_comment.assert_called_once_with(42, ANY)
 
         # Verify comment format
         comment_body = self.github_mock.add_comment.call_args[0][1]
@@ -307,6 +307,7 @@ spanning multiple lines.
         result = manager._parse_memory_comment(comment_body)
 
         self.assertIsNotNone(result)
+        assert result is not None  # Type guard for pyright
         self.assertEqual(result["section"], "important-context")
         self.assertEqual(result["priority"], "high")
         self.assertEqual(result["timestamp"], "2025-01-01T12:00:00")

@@ -12,7 +12,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 
 @dataclass
@@ -30,7 +30,7 @@ class WorktreeInfo:
 class WorktreeManager:
     """Manages git worktrees for parallel task execution"""
 
-    def __init__(self, project_root: str = ".", worktrees_dir: str = ".worktrees"):
+    def __init__(self, project_root: str = ".", worktrees_dir: str = ".worktrees") -> None:
         self.project_root = Path(project_root).resolve()
         self.worktrees_dir = self.project_root / worktrees_dir
         self.worktrees: Dict[str, WorktreeInfo] = {}
@@ -101,7 +101,7 @@ class WorktreeManager:
             print(f"❌ {error_msg}")
             raise RuntimeError(error_msg)
 
-    def _setup_worktree_environment(self, worktree_path: Path):
+    def _setup_worktree_environment(self, worktree_path: Path) -> None:
         """Set up the worktree environment for task execution"""
         # Copy necessary configuration files
         config_files = [
@@ -140,7 +140,7 @@ class WorktreeManager:
         """Get worktree information for a specific task"""
         return self.worktrees.get(task_id)
 
-    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None):
+    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None) -> None:
         """Update worktree status"""
         if task_id in self.worktrees:
             self.worktrees[task_id].status = status
@@ -182,7 +182,7 @@ class WorktreeManager:
             print(f"❌ Failed to sync worktree {task_id}: {e}")
             return False
 
-    def collect_worktree_results(self, task_id: str) -> Optional[Dict]:
+    def collect_worktree_results(self, task_id: str) -> Optional[Dict[str, Any]]:
         """Collect results from a completed worktree"""
         if task_id not in self.worktrees:
             return None
@@ -255,7 +255,7 @@ class WorktreeManager:
 
         try:
             # Stop any running processes
-            if worktree_info.pid:
+            if worktree_info.pid is not None:
                 try:
                     os.kill(worktree_info.pid, 15)  # SIGTERM
                     print(f"🛑 Terminated process {worktree_info.pid}")
@@ -318,7 +318,7 @@ class WorktreeManager:
         print(f"✅ Cleaned up {cleaned}/{len(task_ids)} worktrees")
         return cleaned
 
-    def get_system_worktrees(self) -> List[Dict]:
+    def get_system_worktrees(self) -> List[Dict[str, Any]]:
         """Get all git worktrees (including non-managed ones)"""
         try:
             result = subprocess.run(
@@ -388,7 +388,7 @@ class WorktreeManager:
 
         return issues
 
-    def _load_state(self):
+    def _load_state(self) -> None:
         """Load worktree state from file"""
         if self.state_file.exists():
             try:
@@ -411,7 +411,7 @@ class WorktreeManager:
                 print(f"⚠️  Warning: Failed to load worktree state: {e}")
                 self.worktrees = {}
 
-    def _save_state(self):
+    def _save_state(self) -> None:
         """Save worktree state to file"""
         try:
             data = {
@@ -440,7 +440,7 @@ class WorktreeManager:
         from datetime import datetime
         return datetime.now().isoformat()
 
-    def get_status_summary(self) -> Dict:
+    def get_status_summary(self) -> Dict[str, Any]:
         """Get summary of all worktree statuses"""
         summary = {
             'total': len(self.worktrees),
@@ -451,12 +451,13 @@ class WorktreeManager:
         }
 
         for worktree in self.worktrees.values():
-            summary[worktree.status] = summary.get(worktree.status, 0) + 1
+            status = worktree.status
+            summary[status] = summary.get(status, 0) + 1
 
         return summary
 
 
-def main():
+def main() -> int:
     """CLI entry point for WorktreeManager"""
     import argparse
 

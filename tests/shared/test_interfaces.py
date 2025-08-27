@@ -3,24 +3,15 @@ Comprehensive tests for interfaces.py module.
 Tests shared interfaces, protocols, and contracts for the Enhanced Separation architecture.
 """
 
-import os
-
 # Import the module we're testing
-import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Protocol, Union
-from unittest.mock import MagicMock, Mock, patch
+from typing import Any, Dict, List, Optional, Protocol
 
 import pytest
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
-
 try:
-    from interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
+    from shared.interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
         AgentConfig,
         AgentConfigSchema,
         AgentFactory,
@@ -51,9 +42,7 @@ except ImportError:
 
     from abc import ABC, abstractmethod
     from dataclasses import dataclass
-    from datetime import datetime
-    from enum import Enum
-    from typing import Any, Dict, List, Optional, Protocol
+    from typing import Any, List, Protocol
 
     # Core interfaces
     class AgentInterface(ABC):
@@ -191,7 +180,7 @@ class TestAgentInterface:
     def test_agent_interface_is_abstract(self):
         """Test that AgentInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            AgentInterface()
+            AgentInterface()  # type: ignore[abstract]
 
     def test_agent_interface_requires_execute_method(self):
         """Test that concrete implementations must implement execute method."""
@@ -200,7 +189,7 @@ class TestAgentInterface:
             pass  # Missing execute method
 
         with pytest.raises(TypeError):
-            IncompleteAgent()
+            IncompleteAgent()  # type: ignore[abstract]
 
     def test_agent_interface_implementation(self):
         """Test valid implementation of AgentInterface."""
@@ -236,13 +225,13 @@ class TestStateManagerInterface:
     def test_state_manager_interface_is_abstract(self):
         """Test that StateManagerInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            StateManagerInterface()
+            StateManagerInterface()  # type: ignore[abstract]
 
     def test_state_manager_interface_implementation(self):
         """Test valid implementation of StateManagerInterface."""
 
         class MockStateManager(StateManagerInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.states = {}
 
             def save_state(self, state_id: str, data: Dict[str, Any]) -> bool:
@@ -281,7 +270,7 @@ class TestGitHubOperationsInterface:
         """Test valid implementation of GitHubOperationsInterface."""
 
         class MockGitHubOperations(GitHubOperationsInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.issues = {}
                 self.prs = {}
                 self.issue_counter = 1
@@ -331,7 +320,7 @@ class TestTaskTrackerInterface:
         """Test valid implementation of TaskTrackerInterface."""
 
         class MockTaskTracker(TaskTrackerInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.tasks = {}
                 self.task_counter = 1
 
@@ -372,7 +361,7 @@ class TestErrorHandlerInterface:
         """Test valid implementation of ErrorHandlerInterface."""
 
         class MockErrorHandler(ErrorHandlerInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.handled_errors = []
 
             def handle_error(self, error: Exception, context: Dict[str, Any]) -> Any:
@@ -515,7 +504,7 @@ class TestProtocols:
         """Test LoggerProvider protocol."""
 
         class MockLoggerProvider:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.messages = []
 
             def info(self, message: str) -> None:
@@ -537,7 +526,7 @@ class TestProtocols:
         """Test FileSystemProvider protocol."""
 
         class MockFileSystemProvider:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.files = {"/test/file.txt": "file contents"}
 
             def read_file(self, path: str) -> str:
@@ -661,7 +650,7 @@ class TestFactoryInterfaces:
         """Test AgentFactory interface."""
 
         class MockAgent(AgentInterface):
-            def __init__(self, config: AgentConfig):
+            def __init__(self, config: AgentConfig) -> None:
                 self.config = config
 
             def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -701,7 +690,7 @@ class TestInterfaceIntegration:
 
         # Mock implementations
         class MockStateManager(StateManagerInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.states = {}
 
             def save_state(self, state_id: str, data: Dict[str, Any]) -> bool:
@@ -718,7 +707,7 @@ class TestInterfaceIntegration:
                 return False
 
         class MockTaskTracker(TaskTrackerInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.tasks = []
 
             def create_task(
@@ -740,7 +729,7 @@ class TestInterfaceIntegration:
                 return {"success": False, "error": "Task not found"}
 
         class MockGitHubOps(GitHubOperationsInterface):
-            def __init__(self):
+            def __init__(self) -> None:
                 self.issues = []
                 self.prs = []
 
@@ -877,7 +866,7 @@ class TestInterfaceIntegration:
                 if component_type == "state_manager":
 
                     class SimpleStateManager(StateManagerInterface):
-                        def __init__(self):
+                        def __init__(self) -> None:
                             self.data = {}
 
                         def save_state(
@@ -900,7 +889,7 @@ class TestInterfaceIntegration:
                 elif component_type == "task_tracker":
 
                     class SimpleTaskTracker(TaskTrackerInterface):
-                        def __init__(self):
+                        def __init__(self) -> None:
                             self.tasks = []
 
                         def create_task(
@@ -931,7 +920,7 @@ class TestInterfaceIntegration:
                 raise ValueError(f"Unknown component: {component_type}")
 
         class TestAgentFactory(AgentFactory):
-            def __init__(self, component_factory: ComponentFactory):
+            def __init__(self, component_factory: ComponentFactory) -> None:
                 self.component_factory = component_factory
 
             def create_agent(

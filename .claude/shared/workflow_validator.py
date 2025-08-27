@@ -13,12 +13,10 @@ Key Features:
 """
 
 import os
-import re
 import json
 import subprocess
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -44,8 +42,8 @@ except ImportError:
             """Minimal WorkflowState for when workflow_engine is not available"""
             prompt_file: str = ""
             current_phase: Optional[WorkflowPhase] = None
-            phases_completed: Dict[str, bool] = None
-            context: Dict[str, Any] = None
+            phases_completed: Optional[Dict[str, bool]] = None
+            context: Optional[Dict[str, Any]] = None
 
             def __post_init__(self):
                 if self.phases_completed is None:
@@ -120,7 +118,7 @@ class WorkflowValidator:
     quality, consistency, and integrity of workflow execution.
     """
 
-    def __init__(self, validation_level: ValidationLevel = ValidationLevel.STANDARD):
+    def __init__(self, validation_level: ValidationLevel) -> None:
         """Initialize validator with specified validation level"""
 
         self.validation_level = validation_level
@@ -326,7 +324,7 @@ class WorkflowValidator:
             )
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(str(prompt_file), 'r', encoding='utf-8') as f:
                 content = f.read()
 
             return ValidationResult(
@@ -357,7 +355,7 @@ class WorkflowValidator:
         start_time = datetime.now()
 
         try:
-            with open(prompt_file, 'r') as f:
+            with open(str(prompt_file), 'r', encoding='utf-8') as f:
                 content = f.read()
 
             issues = []
@@ -940,7 +938,8 @@ if __name__ == "__main__":
             print(f"  • {rec}")
 
     # Export detailed report
-    report_file = report.export_validation_report(report)
+    validator = WorkflowValidator(validation_level)
+    report_file = validator.export_validation_report(report)
     print(f"\n📄 Detailed report saved to: {report_file}")
 
     # Exit with appropriate code

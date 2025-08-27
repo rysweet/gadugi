@@ -215,7 +215,7 @@ class TestStrategicPlanner(unittest.TestCase):
 
         # Check for capacity gaps
         if capacity_plan.gaps:
-            for timeframe, gaps in capacity_plan.gaps.items():
+            for _, gaps in capacity_plan.gaps.items():
                 self.assertIsInstance(gaps, dict)
 
     def test_create_skill_development_plan(self):

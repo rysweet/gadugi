@@ -64,5 +64,12 @@
   "strictListInference": false,
   "strictSetInference": false,
   "strictDictionaryInference": false,
-  "strictParameterNoneValue": false
+  "strictParameterNoneValue": false,
+  "extraPaths": [
+    ".",
+    ".claude",
+    ".claude/shared",
+    ".claude/agents",
+    "compat"
+  ]
 }

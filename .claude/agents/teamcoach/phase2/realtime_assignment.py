@@ -11,7 +11,12 @@ from dataclasses import dataclass
 import threading
 from queue import Queue
 
-from ...shared.utils.error_handling import ErrorHandler
+# Create stub class for missing shared modules
+class ErrorHandler:
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+    def handle_error(self, error: Exception) -> Dict[str, Any]:
+        return {"error": str(error), "handled": False}
 from .task_matcher import TaskAgentMatcher, TaskRequirements, MatchingStrategy
 
 
@@ -43,13 +48,13 @@ class RealtimeAssignment:
         """Initialize the real-time assignment system."""
         self.logger = logging.getLogger(__name__)
         self.task_matcher = task_matcher or TaskAgentMatcher()
-        self.error_handler = error_handler or ErrorHandler()
+        self.error_handler = error_handler or ErrorHandler(config={})
 
         # Assignment queue and processing
         self.assignment_queue = Queue()
-        self.active_assignments: Dict[str, Any] = {}
+        self.active_assignments: Dict[Any, Any] = {}
         self.processing_thread = None
-        self.stop_processing = threading.Event()
+        self._stop_processing = threading.Event()
 
         # Performance tracking
         self.assignment_stats = {
@@ -64,7 +69,7 @@ class RealtimeAssignment:
     def start_processing(self):
         """Start the real-time assignment processing."""
         if self.processing_thread is None or not self.processing_thread.is_alive():
-            self.stop_processing.clear()
+            self._stop_processing.clear()
             self.processing_thread = threading.Thread(
                 target=self._process_assignment_queue,
                 name="RealtimeAssignmentProcessor",
@@ -75,7 +80,7 @@ class RealtimeAssignment:
 
     def stop_processing(self):
         """Stop the real-time assignment processing."""
-        self.stop_processing.set()
+        self._stop_processing.set()
         if self.processing_thread and self.processing_thread.is_alive():
             self.processing_thread.join(timeout=5.0)
         self.logger.info("Stopped real-time assignment processing")
@@ -126,7 +131,7 @@ class RealtimeAssignment:
     def _process_assignment_queue(self):
         """Process assignment requests from the queue."""
         try:
-            while not self.stop_processing.is_set():
+            while not self._stop_processing.is_set():
                 try:
                     # Get request with timeout
                     if not self.assignment_queue.empty():
@@ -135,7 +140,7 @@ class RealtimeAssignment:
                         self.assignment_queue.task_done()
                     else:
                         # No requests, sleep briefly
-                        self.stop_processing.wait(0.1)
+                        self._stop_processing.wait(0.1)
 
                 except Exception as e:
                     self.logger.error(f"Error processing assignment request: {e}")

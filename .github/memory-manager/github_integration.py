@@ -11,10 +11,9 @@ import os
 import subprocess
 import tempfile
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from memory_parser import MemoryDocument, Task, TaskPriority, TaskStatus
 
@@ -92,7 +91,7 @@ This issue was automatically created from a Memory.md task to enable better proj
 <!-- memory-sync-metadata: {metadata} -->
 """
 
-    def __init__(self, repo_path: str = None):
+    def __init__(self, repo_path: Optional[str] = None):
         """Initialize GitHub integration"""
         self.repo_path = repo_path or os.getcwd()
         self._validate_gh_cli()
@@ -183,7 +182,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "--label",
                 "memory-sync",
                 "--json",
-                "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
+                "number,title,body,state,labels,assignees,createdAt,updatedAt,htmlUrl",
             ]
 
             result = subprocess.run(
@@ -209,7 +208,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "view",
                 str(issue_number),
                 "--json",
-                "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
+                "number,title,body,state,labels,assignees,createdAt,updatedAt,htmlUrl",
             ]
 
             result = subprocess.run(
@@ -313,7 +312,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "--label",
                 ",".join(labels),
                 "--json",
-                "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
+                "number,title,body,state,labels,assignees,createdAt,updatedAt,htmlUrl",
             ]
 
             result = subprocess.run(
@@ -347,7 +346,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "--body-file",
                 body_file,
                 "--json",
-                "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
+                "number,title,body,state,labels,assignees,createdAt,updatedAt,htmlUrl",
             ]
 
             result = subprocess.run(

@@ -13,21 +13,18 @@ Usage:
 """
 
 import json
-import sys
-import os
 import argparse
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-import tempfile
+from typing import Dict, List, Any
 import shutil
 
 
 class WorkflowReflectionCollector:
     """Safely collects and analyzes workflow session data for improvement insights."""
 
-    def __init__(self, project_root: str = None):
+    def __init__(self, project_root: str) -> None:
         self.project_root = Path(project_root) if project_root else Path.cwd()
         self.reflection_dir = self.project_root / ".claude" / "reflections"
         self.template_dir = self.project_root / ".claude" / "templates"

@@ -87,6 +87,8 @@ class AgentMemoryIntegration:
         priority: str = "high",
         related_issues: Optional[List[int]] = None,
         related_commits: Optional[List[str]] = None,
+        related_prs: Optional[List[int]] = None,
+        related_files: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Add important architectural or technical context"""
         return self.memory.update_memory(
@@ -96,6 +98,8 @@ class AgentMemoryIntegration:
             priority=priority,
             related_issues=related_issues,
             related_commits=related_commits,
+            related_prs=related_prs,
+            related_files=related_files,
         )
 
     def add_next_steps(

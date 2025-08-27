@@ -63,9 +63,9 @@ class TeamCoachIntegration:
     intelligent workflow optimization and continuous improvement.
     """
 
-    def __init__(self, workflow_master, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, workflow_master: Any = None) -> None:
         """Initialize TeamCoach integration."""
-        self.workflow_master = workflow_master
+        self.workflow_master = workflow_master  # Reference to WorkflowMaster instance
         self.config = config or {}
 
         # Performance tracking
@@ -87,9 +87,9 @@ class TeamCoachIntegration:
         try:
             # Calculate current metrics
             completed_tasks = [
-                t for t in workflow_state.tasks if t.status == "completed"
+                t for t in workflow_state.tasks if (t.status if t is not None else None) == "completed"
             ]
-            failed_tasks = [t for t in workflow_state.tasks if t.status == "failed"]
+            failed_tasks = [t for t in workflow_state.tasks if (t.status if t is not None else None) == "failed"]
             total_tasks = len(workflow_state.tasks)
 
             # Task completion rate
@@ -118,8 +118,20 @@ class TeamCoachIntegration:
             )
 
             # Container execution success rate
-            self.workflow_master.execution_stats.get("container_executions", 0)
-            container_success_rate = 1.0 - error_rate  # Simplified calculation
+            container_executions = (
+                self.workflow_master.execution_stats.get("container_executions", 0)
+                if self.workflow_master and hasattr(self.workflow_master, "execution_stats")
+                else 0
+            )
+            container_failures = (
+                self.workflow_master.execution_stats.get("container_failures", 0)
+                if self.workflow_master and hasattr(self.workflow_master, "execution_stats")
+                else 0
+            )
+            container_success_rate = (
+                1.0 - (container_failures / max(container_executions, 1))
+                if container_executions > 0 else 1.0
+            )
 
             # Resource utilization (simplified)
             resource_utilization = {
@@ -167,7 +179,7 @@ class TeamCoachIntegration:
                 {
                     "timestamp": datetime.now(),
                     "metrics": metrics,
-                    "workflow_id": workflow_state.task_id,
+                    "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
                 }
             )
 
@@ -326,17 +338,17 @@ class TeamCoachIntegration:
         self, optimization: WorkflowOptimization, workflow_state
     ) -> bool:
         """Apply optimization recommendation to workflow."""
+        # Record optimization attempt - initialize outside try block
+        optimization_record = {
+            "timestamp": datetime.now(),
+            "optimization": asdict(optimization),
+            "workflow_id": (workflow_state.task_id if workflow_state is not None else None),
+            "applied": True,
+            "result": "pending",
+        }
+        
         try:
             logger.info(f"Applying optimization: {optimization.strategy.value}")
-
-            # Record optimization attempt
-            optimization_record = {
-                "timestamp": datetime.now(),
-                "optimization": asdict(optimization),
-                "workflow_id": workflow_state.task_id,
-                "applied": True,
-                "result": "pending",
-            }
 
             # Apply strategy-specific optimizations
             if optimization.strategy == OptimizationStrategy.PERFORMANCE:
@@ -374,7 +386,7 @@ class TeamCoachIntegration:
         independent_tasks = []
         for task in workflow_state.tasks:
             if not task.dependencies or all(
-                dep_task.status == "completed"
+                (dep_task.status if dep_task is not None else None) == "completed"
                 for dep_task in workflow_state.tasks
                 if dep_task.id in task.dependencies
             ):
@@ -400,7 +412,7 @@ class TeamCoachIntegration:
                 )  # Max 15 minutes
 
         # Update circuit breaker settings
-        if hasattr(self.workflow_master, "execution_circuit_breaker"):
+        if self.workflow_master and hasattr(self.workflow_master, "execution_circuit_breaker"):
             self.workflow_master.execution_circuit_breaker.timeout = 900  # 15 minutes
 
         logger.info("Applied reliability optimizations: increased retries and timeouts")
@@ -743,17 +755,17 @@ class TeamCoachIntegration:
 
 # Integration helper functions
 def create_teamcoach_integration(
-    workflow_master, config: Optional[Dict[str, Any]] = None
+    config: Optional[Dict[str, Any]] = None
 ):
     """Create TeamCoach integration for WorkflowMaster."""
-    return TeamCoachIntegration(workflow_master, config)
+    return TeamCoachIntegration(config)
 
 
 def optimize_workflow_with_teamcoach(
-    workflow_master, workflow_state, config: Optional[Dict[str, Any]] = None
+    workflow_state, config: Optional[Dict[str, Any]] = None
 ):
     """Optimize workflow using TeamCoach integration."""
-    integration = TeamCoachIntegration(workflow_master, config)
+    integration = TeamCoachIntegration(config)
 
     # Analyze current performance
     metrics_before = integration.analyze_workflow_performance(workflow_state)

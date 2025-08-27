@@ -59,7 +59,7 @@ def mock_github_ops():
 @pytest.fixture
 def coordinator(mock_github_ops):
     """Create DelegationCoordinator instance."""
-    return DelegationCoordinator(mock_github_ops, auto_approve=False)
+    return DelegationCoordinator(auto_approve=False, github_ops=mock_github_ops)
 
 
 @pytest.fixture

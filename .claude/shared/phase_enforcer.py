@@ -17,14 +17,12 @@ import subprocess
 import time
 import json
 import os
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from typing import Dict, List, Optional, Any, Callable, Tuple
 from dataclasses import dataclass
-from enum import Enum, auto
 
 # Import workflow engine components
-from claude.shared.workflow_engine import WorkflowPhase, PhaseResult, WorkflowState
+from .workflow_engine import WorkflowPhase, WorkflowState
 
 
 @dataclass
@@ -34,7 +32,7 @@ class EnforcementRule:
     max_attempts: int = 5
     timeout_seconds: int = 600  # 10 minutes
     retry_delay_seconds: int = 30
-    required_conditions: List[str] = None
+    required_conditions: Optional[List[str]] = None
     enforcement_action: Optional[Callable] = None
 
     def __post_init__(self):
@@ -50,7 +48,7 @@ class EnforcementResult:
     attempts: int
     total_time: float
     error_message: Optional[str] = None
-    details: Dict[str, Any] = None
+    details: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         if self.details is None:
@@ -63,7 +61,7 @@ class PhaseEnforcer:
     (especially Phase 9 and 10) are executed without manual intervention.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the phase enforcer with default rules"""
 
         # Default enforcement rules for critical phases
@@ -169,7 +167,10 @@ class PhaseEnforcer:
                     )
 
                 # Execute enforcement action
-                success, message, details = rule.enforcement_action(workflow_state, context)
+                if rule.enforcement_action is None:
+                    success, message, details = False, "No enforcement action defined", {}
+                else:
+                    success, message, details = rule.enforcement_action(workflow_state, context)
 
                 if success:
                     # Reset circuit breaker on success

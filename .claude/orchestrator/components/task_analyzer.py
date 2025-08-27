@@ -70,7 +70,7 @@ class TaskInfo:
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
 
-    def __init__(self, prompts_dir: str = None, project_root: str = "."):
+    def __init__(self, prompts_dir: Optional[str] = None, project_root: str = ".") -> None:
         # Security: Validate and sanitize input paths
         self.project_root = self._validate_directory_path(project_root)
         # If prompts_dir not specified, use project_root/prompts
@@ -579,6 +579,8 @@ class TaskAnalyzer:
                     # Check for file overlaps
                     overlap = set(task1.target_files) & set(task2.target_files)
                     if overlap:
+                        if task1.id not in self.conflict_matrix:
+                            self.conflict_matrix[task1.id] = set()
                         self.conflict_matrix[task1.id].add(task2.id)
                         task1.conflicts.append(task2.id)
 

@@ -6,7 +6,6 @@ CodeReviewer agent identify over-engineering patterns and suggest simpler altern
 """
 
 import unittest
-from unittest.mock import patch, Mock
 import tempfile
 import os
 
@@ -14,7 +13,7 @@ import os
 class TestCodeReviewerSimplicityDetection(unittest.TestCase):
     """Test cases for design simplicity evaluation in code reviews."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.test_cases_dir = tempfile.mkdtemp()
 
@@ -84,7 +83,7 @@ class BankTransferProcessor(PaymentProcessor):
         """Test detection of configuration options without clear use cases."""
         _over_configured_code = """
 class DatabaseConfig:
-    def __init__(self):
+    def __init__(self)) -> None:
         self.max_connections = 10  # Never changed
         self.timeout = 30  # Never changed
         self.retry_count = 3  # Never changed
@@ -153,7 +152,7 @@ class Cat(Feline):
         """Test detection of builder pattern used for simple data structures."""
         _over_engineered_builder = """
 class PersonBuilder:
-    def __init__(self):
+    def __init__(self)) -> None:
         self._name = None
         self._age = None
         self._email = None
@@ -174,7 +173,7 @@ class PersonBuilder:
         return Person(self._name, self._age, self._email)
 
 class Person:
-    def __init__(self, name, age, email):
+    def __init__(self, name, age, email)) -> None:
         self.name = name
         self.age = age
         self.email = email
@@ -220,11 +219,11 @@ class DistributedTaskOrchestrator:
     - Result aggregation and consistency
     """
 
-    def __init__(self, worker_nodes: List[str], retry_count: int = 3):
+    def __init__(self, worker_nodes) -> None: List[str], retry_count) -> None: int = 3)) -> None:
         self.worker_nodes = worker_nodes
         self.retry_count = retry_count
-        self.active_tasks: Dict[str, TaskResult] = {}
-        self.worker_health: Dict[str, bool] = {}
+        self.active_tasks: Dict[Any, Any] = field(default_factory=dict)
+        self.worker_health: Dict[Any, Any] = field(default_factory=dict)
 
     async def execute_distributed_workflow(
         self,
@@ -245,7 +244,7 @@ class DistributedTaskOrchestrator:
         """Test detection of YAGNI (You Aren't Gonna Need It) violations."""
         _yagni_violation_code = """
 class UserManager:
-    def __init__(self):
+    def __init__(self)) -> None:
         # Currently only need basic user creation
         # But implementing enterprise features "just in case"
         self.user_cache = {}  # Not used yet
@@ -346,7 +345,7 @@ class TestContextAwareAssessment(unittest.TestCase):
     def test_early_stage_vs_mature_project_context(self):
         """Test different standards for early-stage vs mature projects."""
         # Early stage: favor simplicity even if not perfectly architected
-        early_stage_code = """
+        _ = """
 # Quick prototype - direct approach acceptable
 def send_notification(user, message):
     # Direct email sending - no abstraction layer yet
@@ -357,7 +356,7 @@ def send_notification(user, message):
 """
 
         # Mature project: consider consistency with existing patterns
-        mature_project_code = """
+        _ = """
 # In mature codebase with established notification system
 def send_notification(user, message):
     # Should use existing NotificationService
@@ -370,7 +369,7 @@ def send_notification(user, message):
     def test_team_size_context(self):
         """Test different standards based on team size and experience."""
         # Small team: simpler patterns acceptable
-        small_team_code = """
+        _ = """
 # Small team - direct approach is fine
 def calculate_shipping(weight, distance):
     base_rate = 5.00
@@ -380,10 +379,10 @@ def calculate_shipping(weight, distance):
 """
 
         # Large team: more sophisticated patterns may be warranted
-        large_team_code = """
+        _ = """
 # Large team - structured approach for maintainability
 class ShippingCalculator:
-    def __init__(self, rate_config: ShippingRateConfig):
+    def __init__(self, rate_config) -> None: ShippingRateConfig)) -> None:
         self.rate_config = rate_config
 
     def calculate(self, shipment: Shipment) -> Decimal:

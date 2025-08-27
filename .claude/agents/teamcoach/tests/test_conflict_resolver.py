@@ -340,7 +340,7 @@ class TestConflictResolver(unittest.TestCase):
     def test_prevention_recommendations(self):
         """Test generation of prevention recommendations."""
         # Simulate multiple resource conflicts
-        for i in range(10):
+        for _ in range(10):
             self.resolver.conflict_patterns["resource_contention_high"] = 10
 
         patterns = self.resolver._analyze_conflict_patterns()

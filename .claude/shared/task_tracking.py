@@ -3,15 +3,12 @@ Task tracking and TodoWrite integration for Gadugi multi-agent system.
 Provides comprehensive task management, workflow tracking, and Claude Code integration.
 """
 
-import json
-import time
 import uuid
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional, Union
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 from enum import Enum
 from dataclasses import dataclass, field
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -59,17 +56,17 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, id: str, content: str = None, status = TaskStatus.PENDING,
-                 priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
+    def __init__(self, id: str, content: str, status: TaskStatus = TaskStatus.PENDING,
+                 priority: TaskPriority = TaskPriority.MEDIUM, title: Optional[str] = None, **kwargs) -> None:
         """Initialize task with compatibility for title parameter."""
         self.id = id
         # Support both content and title parameters for API compatibility
-        if content is not None:
+        if content.strip():
             self.content = content
-        elif title is not None:
+        elif title is not None and title.strip():
             self.content = title
         else:
-            raise ValueError("Either 'content' or 'title' must be provided")
+            raise ValueError("Either 'content' or 'title' must be provided and non-empty")
 
         # Ensure status and priority are enums
         if isinstance(status, str):
@@ -189,7 +186,7 @@ class Task:
 class TaskList:
     """Manages a collection of tasks."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tasks: Dict[str, Task] = {}
         self.created_at = datetime.now()
 
@@ -286,11 +283,11 @@ def claude_function_call(function_name: str, parameters: Dict[str, Any]) -> Dict
 class TodoWriteIntegration:
     """Integration with Claude Code's TodoWrite function."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.current_task_list: Optional[TaskList] = None
         self.call_count = 0
         self.last_update_time: Optional[datetime] = None
-        self.call_history: List[Dict[str, Any]] = []
+        self.call_history: List[Any] = []
 
     def submit_task_list(self, task_list: TaskList) -> Dict[str, Any]:
         """Submit a complete task list via TodoWrite."""
@@ -396,7 +393,7 @@ class TodoWriteIntegration:
 class WorkflowPhaseTracker:
     """Tracks workflow phases and their associated tasks."""
 
-    def __init__(self, workflow_id: Optional[str] = None):
+    def __init__(self, workflow_id: Optional[str]) -> None:
         self.workflow_id = workflow_id or str(uuid.uuid4())
         self.current_phase: Optional[str] = None
         self.phase_history: List[Dict[str, Any]] = []
@@ -533,7 +530,7 @@ class WorkflowPhaseTracker:
 class TaskMetrics:
     """Collects and analyzes task performance metrics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.start_time = datetime.now()
         self.task_completion_times: List[Dict[str, Any]] = []
         self.status_change_count: Dict[str, int] = {}
@@ -650,7 +647,7 @@ class TaskMetrics:
 class TaskTracker:
     """Main task tracking coordinator that integrates all components."""
 
-    def __init__(self, workflow_id: Optional[str] = None):
+    def __init__(self, workflow_id: Optional[str]) -> None:
         self.task_list = TaskList()
         self.todowrite = TodoWriteIntegration()
         self.phase_tracker = WorkflowPhaseTracker(workflow_id)
@@ -742,11 +739,13 @@ class TaskTracker:
 
                 # Submit to TodoWrite
                 result = self.todowrite.submit_task_list(self.task_list)
+                
+                if not result.get("success"):
+                    raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")
 
-            if not result.get("success"):
-                raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")
-
-            logger.info(f"Started workflow phase '{phase_name}' with {len(phase_tasks)} tasks")
+                logger.info(f"Started workflow phase '{phase_name}' with {len(phase_tasks)} tasks")
+            else:
+                logger.info(f"Started workflow phase '{phase_name}' with no tasks")
 
         except Exception as e:
             # If anything fails, don't start the phase
@@ -826,3 +825,21 @@ class TaskTracker:
         """Initialize workflow tracking for the given workflow ID."""
         self.phase_tracker.workflow_id = workflow_id
         logger.info(f"Initialized workflow tracking for workflow {workflow_id}")
+
+    def start_task(self, task_id: str) -> None:
+        """Start a specific task."""
+        task = self.get_task(task_id)
+        if not task:
+            raise TaskError(f"Task {task_id} not found")
+        
+        self.update_task_status(task_id, TaskStatus.IN_PROGRESS)
+        logger.info(f"Started task: {task.content}")
+
+    def complete_task(self, task_id: str) -> None:
+        """Complete a specific task."""
+        task = self.get_task(task_id)
+        if not task:
+            raise TaskError(f"Task {task_id} not found")
+        
+        self.update_task_status(task_id, TaskStatus.COMPLETED)
+        logger.info(f"Completed task: {task.content}")

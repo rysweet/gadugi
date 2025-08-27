@@ -5,7 +5,6 @@ Test suite for WorktreeManager component of OrchestratorAgent
 Tests git worktree creation, management, and cleanup operations.
 """
 
-import json
 import shutil
 import subprocess
 
@@ -27,7 +26,8 @@ spec = importlib.util.spec_from_file_location(
 )
 worktree_manager_module = importlib.util.module_from_spec(spec)
 sys.modules['worktree_manager'] = worktree_manager_module
-spec.loader.exec_module(worktree_manager_module)
+if spec is not None and spec.loader is not None:
+    spec.loader.exec_module(worktree_manager_module)
 
 # Import the classes we need
 WorktreeInfo = worktree_manager_module.WorktreeInfo
@@ -75,9 +75,9 @@ class TestWorktreeManager(unittest.TestCase):
         worktree_info = self.manager.create_worktree("task1", "Test Task")
 
         # Verify worktree info
-        self.assertEqual(worktree_info.task_id, "task1")
+        self.assertEqual((worktree_info.task_id if worktree_info is not None else None), "task1")
         self.assertEqual(worktree_info.task_name, "Test Task")
-        self.assertEqual(worktree_info.status, "active")
+        self.assertEqual((worktree_info.status if worktree_info is not None else None), "active")
         self.assertEqual(worktree_info.branch_name, "feature/parallel-test-task-task1")
 
         # Verify git command was called correctly
@@ -176,7 +176,7 @@ class TestWorktreeManager(unittest.TestCase):
         # Update status
         self.manager.update_worktree_status("task1", "completed", pid=12345)
 
-        self.assertEqual(worktree_info.status, "completed")
+        self.assertEqual((worktree_info.status if worktree_info is not None else None), "completed")
         self.assertEqual(worktree_info.pid, 12345)
 
     @patch('subprocess.run')
@@ -411,9 +411,9 @@ detached
         # Verify state was loaded
         self.assertIn("task1", new_manager.worktrees)
         loaded_worktree = new_manager.worktrees["task1"]
-        self.assertEqual(loaded_worktree.task_id, "task1")
+        self.assertEqual((loaded_worktree.task_id if loaded_worktree is not None else None), "task1")
         self.assertEqual(loaded_worktree.task_name, "Task 1")
-        self.assertEqual(loaded_worktree.status, "active")
+        self.assertEqual((loaded_worktree.status if loaded_worktree is not None else None), "active")
         self.assertEqual(loaded_worktree.pid, 12345)
 
     def test_get_status_summary(self):
@@ -483,8 +483,8 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
 
         # Verify worktree was created
         self.assertTrue(worktree_info.worktree_path.exists())
-        self.assertEqual(worktree_info.task_id, "test-task")
-        self.assertEqual(worktree_info.status, "active")
+        self.assertEqual((worktree_info.task_id if worktree_info is not None else None), "test-task")
+        self.assertEqual((worktree_info.status if worktree_info is not None else None), "active")
 
         # Verify it appears in git worktree list
         result = subprocess.run(

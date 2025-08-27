@@ -98,7 +98,7 @@ class ConflictResolver:
     - Escalation management
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the conflict resolver."""
         self.active_conflicts: Dict[str, AgentConflict] = {}
         self.resolved_conflicts: List[Tuple[AgentConflict, ConflictResolution]] = []
@@ -781,7 +781,7 @@ class ConflictResolver:
         # Find most common
         if self.conflict_patterns:
             most_common_key = max(
-                self.conflict_patterns, key=self.conflict_patterns.get
+                self.conflict_patterns.keys(), key=lambda k: self.conflict_patterns[k]
             )
             patterns["most_common"] = {
                 "pattern": most_common_key,

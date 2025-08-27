@@ -70,7 +70,7 @@ class DelegationCoordinator:
     and delegating to specialized agents like WorkflowMaster and code-reviewer.
     """
 
-    def __init__(self, github_ops, auto_approve: bool = False):
+    def __init__(self, github_ops: Any, auto_approve: bool) -> None:
         """Initialize delegation coordinator."""
         self.github_ops = github_ops
         self.auto_approve = auto_approve
@@ -723,7 +723,7 @@ jobs:
         to_remove = []
         for task_id, task in self.active_delegations.items():
             if (
-                task.status in [DelegationStatus.COMPLETED, DelegationStatus.FAILED]
+                (task.status if task is not None else None) in [DelegationStatus.COMPLETED, DelegationStatus.FAILED]
                 and task.completion_time
                 and task.completion_time < cutoff_time
             ):
@@ -744,13 +744,13 @@ jobs:
         completed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.COMPLETED
+            if task is not None and task.status == DelegationStatus.COMPLETED
         )
 
         failed_tasks = sum(
             1
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.FAILED
+            if task is not None and task.status == DelegationStatus.FAILED
         )
 
         success_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
@@ -759,7 +759,7 @@ jobs:
         completed_with_time = [
             task
             for task in self.active_delegations.values()
-            if task.status == DelegationStatus.COMPLETED and task.completion_time
+            if task is not None and task.status == DelegationStatus.COMPLETED and task.completion_time
         ]
 
         avg_completion_time = 0

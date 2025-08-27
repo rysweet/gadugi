@@ -7,15 +7,14 @@ import subprocess
 import json
 import time
 import logging
-from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 
 # Custom exceptions
 class GitHubError(Exception):
     """Base exception for GitHub operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict[str, Any], details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, operation: str, context: Dict[str, Any], details: Optional[Dict[str, Any]]) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -25,8 +24,8 @@ class GitHubError(Exception):
 class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
 
-    def __init__(self, message: str, reset_time: Optional[int] = None):
-        super().__init__(message, 'rate_limit', {})
+    def __init__(self, message: str, reset_time: Optional[int]) -> None:
+        super().__init__(message, 'rate_limit', {}, {})
         self.reset_time = reset_time
 
     def get_wait_time(self) -> int:
@@ -48,7 +47,7 @@ class GitHubOperations:
     """
 
     def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None,
-                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None):
+                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None) -> None:
         """
         Initialize GitHub operations.
 
@@ -147,7 +146,7 @@ class GitHubOperations:
 
                 # Check for rate limit
                 if hasattr(e, 'stderr') and e.stderr and 'rate limit' in e.stderr.lower():
-                    raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}")
+                    raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}", None)
 
                 if retries >= self.retry_config['max_retries']:
                     self.logger.error(f"GitHub command failed after {retries} retries: {e}")

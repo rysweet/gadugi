@@ -14,12 +14,12 @@ from datetime import datetime
 class BaseAgent(ABC):
     """Base class for all Gadugi agents."""
 
-    def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, config: Optional[Dict[str, Any]]) -> None:
         self.name = name
         self.config = config or {}
         self.logger = logging.getLogger(f"gadugi.agents.{name}")
-        self.start_time = None
-        self.metrics = {}
+        self.start_time: Optional[float] = None
+        self.metrics: Dict[str, Any] = {}
 
     @abstractmethod
     def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -38,10 +38,10 @@ class BaseAgent(ABC):
 class SecurityAwareAgent(BaseAgent):
     """Base class for agents that require security awareness."""
 
-    def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, config: Optional[Dict[str, Any]]) -> None:
         super().__init__(name, config)
-        self.security_policies = self.config.get("security_policies", {})
-        self.audit_log = []
+        self.security_policies: Dict[str, Any] = self.config.get("security_policies", {})
+        self.audit_log: List[str] = []
 
     def validate_input(self, input_data: Any) -> bool:
         """Validate input against security policies."""
@@ -103,11 +103,11 @@ class SecurityAwareAgent(BaseAgent):
 class PerformanceMonitoredAgent(BaseAgent):
     """Base class for agents with performance monitoring capabilities."""
 
-    def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, config: Optional[Dict[str, Any]]) -> None:
         super().__init__(name, config)
-        self.execution_times = []
-        self.resource_metrics = []
-        self.performance_thresholds = self.config.get(
+        self.execution_times: List[float] = []
+        self.resource_metrics: List[Dict[str, Any]] = []
+        self.performance_thresholds: Dict[str, Any] = self.config.get(
             "performance_thresholds",
             {
                 "max_execution_time": 300,  # 5 minutes
@@ -123,7 +123,7 @@ class PerformanceMonitoredAgent(BaseAgent):
 
     def stop_monitoring(self):
         """Stop monitoring and record metrics."""
-        if self.start_time:
+        if self.start_time is not None:
             execution_time = time.time() - self.start_time
             self.execution_times.append(execution_time)
             self.metrics["execution_time"] = execution_time
@@ -171,12 +171,12 @@ class PerformanceMonitoredAgent(BaseAgent):
 class LearningEnabledAgent(BaseAgent):
     """Base class for agents that can learn and adapt."""
 
-    def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, config: Optional[Dict[str, Any]]) -> None:
         super().__init__(name, config)
-        self.history = []
-        self.patterns = {}
-        self.adaptations = {}
-        self.learning_enabled = self.config.get("learning_enabled", True)
+        self.history: List[Dict[str, Any]] = []
+        self.patterns: Dict[str, Any] = {}
+        self.adaptations: Dict[str, Any] = {}
+        self.learning_enabled: bool = self.config.get("learning_enabled", True)
 
     def record_execution(self, context: Dict[str, Any], result: Dict[str, Any]):
         """Record execution for learning."""
@@ -249,7 +249,7 @@ class IntegratedAgent(
 ):
     """Fully integrated agent with all capabilities."""
 
-    def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, config: Optional[Dict[str, Any]]) -> None:
         # Multiple inheritance initialization
         SecurityAwareAgent.__init__(self, name, config)
         PerformanceMonitoredAgent.__init__(self, name, config)

@@ -5,10 +5,10 @@ Handles GitHub API interactions for polling and webhook management.
 """
 
 import asyncio
-import base64
-import json
+
+# json import removed - not actually used (json= is kwarg)
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 from urllib.parse import urljoin
 
@@ -63,9 +63,12 @@ class GitHubClient:
             await self.session.close()
             self.session = None
 
-    async def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+    async def _request(self, method: str, endpoint: str, **kwargs) -> Any:
         """Make an authenticated request to GitHub API."""
         await self._ensure_session()
+        assert (
+            self.session is not None
+        )  # Type guard: session is created by _ensure_session
 
         url = urljoin(self.base_url, endpoint)
 
@@ -295,8 +298,6 @@ class GitHubClient:
     async def auto_detect_repository(self) -> Optional[tuple[str, str]]:
         """Auto-detect current repository from git remote."""
         try:
-            import subprocess
-
             import asyncio
 
             process = await asyncio.create_subprocess_exec(

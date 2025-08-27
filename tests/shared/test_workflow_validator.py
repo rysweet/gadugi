@@ -5,23 +5,16 @@ Tests the comprehensive validation and integrity checking system
 for workflow execution.
 """
 
+import os
 import pytest
 import tempfile
-import os
 import json
-import subprocess
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime
-from pathlib import Path
 
 # Import the module under test
-import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
-
-from workflow_validator import (
+from shared.workflow_validator import (
     WorkflowValidator,
     ValidationLevel,
     ValidationCategory,
@@ -33,7 +26,7 @@ from workflow_validator import (
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from workflow_engine import WorkflowPhase, WorkflowState
+from shared.workflow_engine import WorkflowPhase, WorkflowState
 
 
 class TestWorkflowValidator:
@@ -680,7 +673,7 @@ It also doesn't have enough content to be considered a valid prompt.
     def test_validation_history_limit(self):
         """Test that validation history is limited to prevent memory issues"""
         # Add many fake reports to history
-        for i in range(55):  # More than the 50 limit
+        for _ in range(55):  # More than the 50 limit
             fake_report = ValidationReport(
                 timestamp=datetime.now(),
                 validation_level=ValidationLevel.STANDARD,

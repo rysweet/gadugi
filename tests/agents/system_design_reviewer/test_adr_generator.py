@@ -68,7 +68,7 @@ class TestADRGenerator:
 
     def test_initialization_default(self):
         """Test ADR generator initialization with defaults"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         assert generator.adr_dir == Path("docs/adr")
         assert len(generator.decision_patterns) > 0
@@ -106,7 +106,7 @@ class TestADRGenerator:
 
     def test_classify_decision_type_security(self, sample_changes_requiring_adr):
         """Test classifying security-related changes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         security_change = sample_changes_requiring_adr[0]  # SecurityManager
         decision_type = generator._classify_decision_type(security_change)
@@ -115,7 +115,7 @@ class TestADRGenerator:
 
     def test_classify_decision_type_performance(self):
         """Test classifying performance-related changes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         perf_change = ArchitecturalChange(
             change_type=ChangeType.ADDED,
@@ -134,7 +134,7 @@ class TestADRGenerator:
 
     def test_classify_decision_type_integration(self):
         """Test classifying integration-related changes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         integration_change = ArchitecturalChange(
             change_type=ChangeType.ADDED,
@@ -152,7 +152,7 @@ class TestADRGenerator:
 
     def test_classify_decision_type_new_pattern(self):
         """Test classifying architectural pattern changes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         pattern_change = ArchitecturalChange(
             change_type=ChangeType.ADDED,
@@ -171,7 +171,7 @@ class TestADRGenerator:
 
     def test_group_changes_by_decision(self, sample_changes_requiring_adr):
         """Test grouping changes by decision type"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         groups = generator._group_changes_by_decision(sample_changes_requiring_adr)
 
@@ -179,12 +179,12 @@ class TestADRGenerator:
         assert len(groups["security_change"]) == 2  # Both changes are security-related
 
         # Should not have empty groups
-        for group_name, changes in groups.items():
+        for _group_name, changes in groups.items():
             assert len(changes) > 0
 
     def test_generate_title_single_change(self, sample_changes_requiring_adr):
         """Test generating title for single change"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         single_change = [sample_changes_requiring_adr[0]]
         title = generator._generate_title("security_change", single_change)
@@ -194,7 +194,7 @@ class TestADRGenerator:
 
     def test_generate_title_multiple_changes(self, sample_changes_requiring_adr):
         """Test generating title for multiple changes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         title = generator._generate_title(
             "security_change", sample_changes_requiring_adr
@@ -206,7 +206,7 @@ class TestADRGenerator:
 
     def test_generate_context(self, sample_changes_requiring_adr, sample_pr_info):
         """Test generating context section"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         context = generator._generate_context(
             "security_change", sample_changes_requiring_adr, sample_pr_info
@@ -220,7 +220,7 @@ class TestADRGenerator:
 
     def test_generate_decision(self, sample_changes_requiring_adr):
         """Test generating decision description"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         decision = generator._generate_decision(
             "security_change", sample_changes_requiring_adr
@@ -232,7 +232,7 @@ class TestADRGenerator:
 
     def test_generate_rationale(self, sample_changes_requiring_adr):
         """Test generating rationale section"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         rationale = generator._generate_rationale(
             "security_change", sample_changes_requiring_adr
@@ -245,7 +245,7 @@ class TestADRGenerator:
 
     def test_generate_consequences(self, sample_changes_requiring_adr):
         """Test generating consequences section"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         consequences = generator._generate_consequences(sample_changes_requiring_adr)
 
@@ -260,7 +260,7 @@ class TestADRGenerator:
 
     def test_generate_alternatives(self, sample_changes_requiring_adr):
         """Test generating alternatives section"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         alternatives = generator._generate_alternatives(
             "security_change", sample_changes_requiring_adr
@@ -277,7 +277,7 @@ class TestADRGenerator:
 
     def test_generate_implementation_notes(self, sample_changes_requiring_adr):
         """Test generating implementation notes"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         notes = generator._generate_implementation_notes(sample_changes_requiring_adr)
 
@@ -291,7 +291,7 @@ class TestADRGenerator:
         self, sample_changes_requiring_adr, sample_pr_info
     ):
         """Test generating related changes references"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         related = generator._generate_related_changes(
             sample_changes_requiring_adr, sample_pr_info
@@ -324,7 +324,7 @@ class TestADRGenerator:
 
     def test_slugify(self):
         """Test title slugification for filenames"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         # Test various title formats
         assert generator._slugify("Simple Title") == "simple-title"
@@ -340,7 +340,7 @@ class TestADRGenerator:
 
     def test_format_adr_content(self):
         """Test ADR content formatting"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         adr_data = ADRData(
             number=42,
@@ -411,7 +411,7 @@ class TestADRGenerator:
 
     def test_generate_adrs_no_changes_requiring_adr(self, sample_pr_info):
         """Test ADR generation with no changes requiring ADRs"""
-        generator = ADRGenerator()
+        generator = ADRGenerator("docs/adr")
 
         # Changes that don't require ADRs
         low_impact_changes = [

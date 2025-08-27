@@ -60,6 +60,7 @@ class TestProcessRegistry(unittest.TestCase):
 
         retrieved = self.registry.get_process("test-task-1")
         self.assertIsNotNone(retrieved)
+        assert retrieved is not None  # Type narrowing
         self.assertEqual(retrieved.task_id, "test-task-1")
         self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
         self.assertIsNotNone(retrieved.last_heartbeat)
@@ -82,6 +83,8 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.RUNNING)
         self.assertEqual(process.pid, 12345)
         self.assertIsNotNone(process.started_at)
@@ -91,6 +94,8 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.COMPLETED)
         self.assertIsNotNone(process.completed_at)
 
@@ -116,6 +121,8 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-3")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.FAILED)
         self.assertEqual(process.error_message, "Test error message")
         self.assertIsNotNone(process.completed_at)
@@ -205,8 +212,11 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify process is still running
         process = self.registry.get_process("test-task-running")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.RUNNING)
         self.assertIsNotNone(process.resource_usage)
+        assert process.resource_usage is not None  # Type narrowing
         self.assertEqual(process.resource_usage['cpu_percent'], 15.5)
 
     @patch('psutil.Process')
@@ -234,7 +244,11 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify process marked as failed
         process = self.registry.get_process("test-task-stale")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.FAILED)
+        self.assertIsNotNone(process.error_message)
+        assert process.error_message is not None  # Type narrowing
         self.assertIn("unresponsive", process.error_message.lower())
 
     def test_process_cancellation(self):
@@ -256,8 +270,12 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify cancellation
         process = self.registry.get_process("test-task-cancel")
+        self.assertIsNotNone(process)
+        assert process is not None  # Type narrowing
         self.assertEqual(process.status, ProcessStatus.CANCELLED)
         self.assertIsNotNone(process.completed_at)
+        self.assertIsNotNone(process.error_message)
+        assert process.error_message is not None  # Type narrowing
         self.assertIn("cancelled", process.error_message.lower())
 
     def test_process_cleanup(self):
@@ -313,7 +331,7 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(self.registry.registry_file.exists())
 
         # Create new registry instance and verify it loads data
-        new_registry = ProcessRegistry(str(self.registry_dir))
+        new_registry = ProcessRegistry(str(self.registry_dir), clean_start=False)
 
         self.assertEqual(len(new_registry.processes), 1)
         self.assertIsNotNone(new_registry.get_process("test-persistence"))

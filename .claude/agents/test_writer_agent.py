@@ -16,28 +16,30 @@ from enum import Enum
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from interfaces import AgentConfig, OperationResult
+    from ..shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[attr-defined]
+    from ..shared.interfaces import AgentConfig  # type: ignore[attr-defined]
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass
 
-    @dataclass
-    class OperationResult:
-        success: bool
-        data: Any = None
-        error: str = ""
 
     @dataclass
     class AgentConfig:
         agent_id: str
         name: str
 
-    class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0):
+    class ErrorHandler:
+        def __init__(self) -> None:
             pass
 
-        def __call__(self, func):
+        def handle_error(self, error: Exception) -> None:
+            pass
+
+    class CircuitBreaker:
+        def __init__(self, failure_threshold: int = 3, recovery_timeout: float = 30.0) -> None:
+            pass
+
+        def __call__(self, func: Any) -> Any:
             return func
 
 
@@ -128,7 +130,7 @@ class TestWriterAgent:
     Follows shared test instruction framework and supports TDD practices.
     """
 
-    def __init__(self, config: Optional[AgentConfig] = None):
+    def __init__(self, config: Optional[AgentConfig]) -> None:
         self.config = config or AgentConfig(
             agent_id="test_writer_agent", name="Test Writer Agent"
         )
@@ -136,10 +138,7 @@ class TestWriterAgent:
         self.shared_instructions = SharedTestInstructions(config)
 
         # Setup error handling
-        try:
-            self.error_handler = ErrorHandler()
-        except NameError:
-            self.error_handler = None
+        self.error_handler = ErrorHandler()
 
     def create_tests(
         self,
@@ -919,7 +918,7 @@ Maintenance notes:
         return Path(code_path).stem
 
     def _determine_fixtures_needed(
-        self, code_analysis: CodeAnalysis, test_methods: List[Dict]
+        self, code_analysis: CodeAnalysis, test_methods: List[Dict[str, Any]]
     ) -> List[str]:
         """Determine what fixtures are needed for tests."""
         fixtures = set()

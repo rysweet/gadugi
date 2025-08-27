@@ -24,7 +24,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 import psutil
 
@@ -98,27 +98,27 @@ class SystemResources:
 class ResourceMonitor:
     """Monitors system resources during execution"""
 
-    def __init__(self, monitoring_interval: float = 1.0):
+    def __init__(self, monitoring_interval: float) -> None:
         self.monitoring_interval = monitoring_interval
         self.monitoring = False
         self.resource_history: List[SystemResources] = []
         self.monitor_thread: Optional[threading.Thread] = None
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """Start resource monitoring"""
         self.monitoring = True
         self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
         print("📊 Started resource monitoring")
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop resource monitoring"""
         self.monitoring = False
-        if self.monitor_thread:
+        if self.monitor_thread is not None:
             self.monitor_thread.join(timeout=5.0)
         print("📊 Stopped resource monitoring")
 
-    def _monitor_loop(self):
+    def _monitor_loop(self) -> None:
         """Resource monitoring loop"""
         while self.monitoring:
             try:
@@ -193,7 +193,7 @@ class ResourceMonitor:
 class TaskExecutor:
     """Executes individual tasks using containerized execution"""
 
-    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict] = None):
+    def __init__(self, task_id: str, worktree_path: Path, prompt_file: str, task_context: Optional[Dict[str, Any]] = None) -> None:
         self.task_id = task_id
         self.worktree_path = worktree_path
         self.prompt_file = prompt_file
@@ -201,12 +201,12 @@ class TaskExecutor:
         self.process: Optional[subprocess.Popen] = None  # Kept for fallback compatibility
         self.start_time: Optional[datetime] = None
         self.result: Optional[ExecutionResult] = None
-        self.prompt_generator = PromptGenerator()
+        self.prompt_generator = PromptGenerator(project_root=worktree_path)
 
         # CRITICAL FIX #167: Initialize ContainerManager for Docker-based execution
         if container_execution_available:
             try:
-                container_config = ContainerConfig(  # type: ignore
+                container_config = ContainerConfig(  # type: ignore[call-arg]
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -219,7 +219,7 @@ class TaskExecutor:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)  # type: ignore
+                self.container_manager = ContainerManager(container_config)  # type: ignore[call-arg]
             except (RuntimeError, ImportError) as e:
                 logger.info(f"Container manager unavailable for task {task_id}: {e}")
                 logger.info("Will use subprocess fallback")
@@ -289,7 +289,7 @@ class TaskExecutor:
                     'target_files': self.task_context.get('target_files', []),
                     'requirements': self.task_context.get('requirements', {})
                 },
-                original_prompt_path=self.prompt_file,
+                original_prompt_path=self.task_id,
                 phase_focus=self.task_context.get('phase_focus')
             )
 
@@ -304,18 +304,18 @@ class TaskExecutor:
 
         except Exception as e:
             print(f"⚠️  Warning: Failed to generate WorkflowManager prompt: {e}")
-            return self.prompt_file
+            return self.task_id
 
-    def _progress_callback(self, task_id: str, result):
+    def _progress_callback(self, task_id: str, result: Any) -> None:
         """Progress callback for containerized execution"""
-        print(f"📊 Task progress: {task_id}, status={result.status}")
+        print(f"📊 Task progress: {task_id}, status={(result.status if result is not None else None)}")
 
-    def _convert_container_result(self, container_result) -> ExecutionResult:
+    def _convert_container_result(self, container_result: Any) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
-            task_id=container_result.task_id,
-            task_name=self.task_context.get('name', container_result.task_id),
-            status=container_result.status,
+            task_id=(container_result.task_id if container_result is not None else None),
+            task_name=self.task_context.get('name', (container_result.task_id if container_result is not None else None)),
+            status=(container_result.status if container_result is not None else None),
             start_time=container_result.start_time,
             end_time=container_result.end_time,
             duration=container_result.duration,
@@ -450,7 +450,7 @@ class TaskExecutor:
         print(f"✅ Subprocess task completed: {self.task_id}, status={status} (exit code: {exit_code})")
         return self.result
 
-    def cancel(self):
+    def cancel(self) -> None:
         """Cancel the running task"""
         if self.process and self.process.poll() is None:
             print(f"🛑 Cancelling task {self.task_id}")
@@ -484,10 +484,10 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600):
+    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600) -> None:
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
-        self.resource_monitor = ResourceMonitor()
+        self.resource_monitor = ResourceMonitor(monitoring_interval=1.0)
         self.active_executors: Dict[str, TaskExecutor] = {}
         self.results: Dict[str, ExecutionResult] = {}
         self.execution_queue: queue.Queue = queue.Queue()
@@ -497,7 +497,7 @@ class ExecutionEngine:
         if container_execution_available:
             print("🐳 Initializing containerized execution engine...")
             try:
-                container_config = ContainerConfig(  # type: ignore
+                container_config = ContainerConfig(  # type: ignore[call-arg]
                     image="claude-orchestrator:latest",
                     cpu_limit="2.0",
                     memory_limit="4g",
@@ -509,7 +509,7 @@ class ExecutionEngine:
                         "--output-format=json"
                     ]
                 )
-                self.container_manager = ContainerManager(container_config)  # type: ignore
+                self.container_manager = ContainerManager(container_config)  # type: ignore[call-arg]
                 self.execution_mode = "containerized"
             except (RuntimeError, ImportError) as e:
                 print(f"⚠️  Container manager unavailable: {e}")
@@ -547,9 +547,9 @@ class ExecutionEngine:
 
     def execute_tasks_parallel(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute multiple tasks in parallel using containerized execution when possible"""
 
@@ -571,9 +571,9 @@ class ExecutionEngine:
 
     def _execute_tasks_containerized(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using ContainerManager for true containerized parallel execution"""
 
@@ -619,7 +619,7 @@ class ExecutionEngine:
 
             # Execute with ContainerManager
             print(f"🐳 Executing {len(container_tasks)} tasks in containers...")
-            if self.container_manager:
+            if self.container_manager is not None:
                 container_results = self.container_manager.execute_parallel_tasks(
                     container_tasks,
                     max_parallel=self.max_concurrent,
@@ -666,9 +666,9 @@ class ExecutionEngine:
 
     def _execute_tasks_subprocess(
         self,
-        tasks: List[Dict],
-        worktree_manager,
-        progress_callback: Optional[Callable] = None
+        tasks: List[Dict[str, Any]],
+        worktree_manager: Any,
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]] = None
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks using subprocess (original implementation)"""
 
@@ -739,7 +739,7 @@ class ExecutionEngine:
     def _execute_with_concurrency_control(
         self,
         executors: List[TaskExecutor],
-        progress_callback: Optional[Callable]
+        progress_callback: Optional[Callable[[int, int, ExecutionResult], None]]
     ) -> Dict[str, ExecutionResult]:
         """Execute tasks with dynamic concurrency control"""
 
@@ -834,7 +834,7 @@ class ExecutionEngine:
                 resource_usage={'cpu_time': 0.0, 'memory_mb': 0.0}
             )
 
-    def cancel_all_tasks(self):
+    def cancel_all_tasks(self) -> None:
         """Cancel all running tasks"""
         print("🛑 Cancelling all running tasks...")
 
@@ -845,7 +845,7 @@ class ExecutionEngine:
 
         print("✅ All tasks cancelled")
 
-    def get_execution_status(self) -> Dict:
+    def get_execution_status(self) -> Dict[str, Any]:
         """Get current execution status"""
         resource_status = self.resource_monitor.get_current_resources()
 
@@ -858,7 +858,7 @@ class ExecutionEngine:
             'statistics': self.stats.copy()
         }
 
-    def _print_execution_summary(self):
+    def _print_execution_summary(self) -> None:
         """Print execution summary"""
         print("\n📊 Execution Summary:")
         print(f"   Total tasks: {self.stats['total_tasks']}")
@@ -881,7 +881,7 @@ class ExecutionEngine:
             print(f"   Average CPU usage: {avg_cpu:.1f}%")
             print(f"   Average memory usage: {avg_memory:.1f}%")
 
-    def save_results(self, output_file: str):
+    def save_results(self, output_file: str) -> None:
         """Save execution results to file"""
         results_data = {
             'execution_summary': {
@@ -900,16 +900,17 @@ class ExecutionEngine:
 
         print(f"💾 Execution results saved to: {output_file}")
 
-    def _container_progress_callback(self, task_id: str, result):
+    def _container_progress_callback(self, task_id: str, result: Any) -> None:
         """Progress callback for containerized execution"""
-        print(f"🐳 Container task progress: {task_id}, status={result.status}")
+        status = result.status if result is not None else None
+        print(f"🐳 Container task progress: {task_id}, status={status}")
 
-    def _convert_container_to_execution_result(self, container_result) -> ExecutionResult:
+    def _convert_container_to_execution_result(self, container_result: Any) -> ExecutionResult:
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
-            task_id=container_result.task_id,
-            task_name=container_result.task_id,  # Use task_id as name
-            status=container_result.status,
+            task_id=container_result.task_id if container_result is not None else "",
+            task_name=container_result.task_id if container_result is not None else "",  # Use task_id as name
+            status=container_result.status if container_result is not None else "failed",
             start_time=container_result.start_time,
             end_time=container_result.end_time,
             duration=container_result.duration,

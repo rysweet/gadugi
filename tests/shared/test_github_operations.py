@@ -4,34 +4,23 @@ Tests the Enhanced Separation architecture implementation.
 """
 
 import json
-import os
 import subprocess
 
 # Import the module we're testing (will be implemented after tests)
-import sys
-from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 # For type checking only
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
-
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+from typing import Optional
 
 try:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
+    from shared.github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
-    import subprocess
     import time
-    from typing import Any, Dict, List, Optional, Union
+    from typing import Any, List
 
     class GitHubError(Exception):
         """Base exception for GitHub operations."""
@@ -57,13 +46,13 @@ except ImportError:
     class RateLimitError(GitHubError):
         """Raised when hitting GitHub API rate limits."""
 
-        def __init__(self, message: str, reset_time: Optional[int] = None):
+        def __init__(self, message: str, reset_time: Optional[int] = None) -> None:
             super().__init__(message)
             self.reset_time = reset_time
 
         def get_wait_time(self) -> int:
             """Get the time to wait before retrying."""
-            if self.reset_time:
+            if self.reset_time:  # type: ignore[import-not-found]
                 return max(0, self.reset_time - int(time.time()))
             return 60  # Default wait time
 
@@ -89,7 +78,7 @@ except ImportError:
             """Mock GitHub CLI command execution."""
             # Add repo argument if specified
             full_command = ["gh"] + command
-            if self.repo:
+            if self.repo:  # type: ignore[import-not-found]
                 full_command.extend(["--repo", self.repo])
 
             try:
@@ -849,10 +838,14 @@ class TestGitHubError:
 
     def test_github_error_creation(self):
         """Test GitHubError exception creation."""
-        error = GitHubError("Test error message", "create_issue", {"title": "Test"})
+        # The actual GitHubError requires 4 arguments: message, operation, context, details
+        error = GitHubError(
+            "Test error message", "create_issue", {"title": "Test"}, None
+        )
         assert str(error) == "Test error message"
         assert error.operation == "create_issue"
         assert error.context == {"title": "Test"}
+        assert error.details == {}  # Should default to empty dict when None passed
 
     def test_github_error_with_details(self):
         """Test GitHubError with additional details."""
@@ -860,7 +853,7 @@ class TestGitHubError:
             "API request failed",
             "get_issue",
             {"issue_number": 42},
-            details={"status_code": 404, "response": "Not found"},
+            {"status_code": 404, "response": "Not found"},
         )
         assert error.details["status_code"] == 404
 

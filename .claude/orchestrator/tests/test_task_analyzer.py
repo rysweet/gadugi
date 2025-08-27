@@ -25,7 +25,8 @@ spec = importlib.util.spec_from_file_location(
 )
 task_analyzer_module = importlib.util.module_from_spec(spec)
 sys.modules['task_analyzer'] = task_analyzer_module
-spec.loader.exec_module(task_analyzer_module)
+if spec is not None and spec.loader is not None:
+    spec.loader.exec_module(task_analyzer_module)
 
 # Import the classes we need
 TaskAnalyzer = task_analyzer_module.TaskAnalyzer
@@ -535,10 +536,11 @@ This is a complex feature requiring careful architecture and extensive testing.
         # Check that feature implementation is likely not parallelizable (due to complexity)
         feature_task = next(task for task in tasks if task.task_type == TaskType.FEATURE_IMPLEMENTATION)
         # Complex feature tasks might not be parallelizable
+        self.assertIsNotNone(feature_task.complexity)
 
     def test_execution_plan_generation(self):
         """Test execution plan generation with sample prompts"""
-        tasks = self.analyzer.analyze_all_prompts()
+        self.analyzer.analyze_all_prompts()
         execution_plan = self.analyzer.generate_execution_plan()
 
         # Verify plan makes sense

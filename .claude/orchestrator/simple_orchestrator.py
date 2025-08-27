@@ -4,21 +4,20 @@ Simple Orchestrator - Real Subprocess Execution for Parallel Workflows
 
 This implements the actual subprocess spawning approach that successfully created PRs #278-282.
 """
-import os
 import subprocess
 import sys
 import time
 from pathlib import Path
 import threading
-import queue
+from typing import Dict, List, Optional, Any
 
 
 class SimpleOrchestrator:
-    def __init__(self):
-        self.active_processes = {}
-        self.completed_tasks = []
+    def __init__(self) -> None:
+        self.active_processes: Dict[str, Dict[str, Any]] = {}
+        self.completed_tasks: List[str] = []
 
-    def create_worktree(self, task_name):
+    def create_worktree(self, task_name: str) -> Optional[str]:
         """Create isolated worktree for task"""
         worktree_path = f".worktrees/{task_name}"
         branch_name = f"feature/{task_name}"
@@ -40,7 +39,7 @@ class SimpleOrchestrator:
             print(f"❌ Failed to create worktree: {result.stderr}")
             return None
 
-    def spawn_workflow_manager(self, task_name, prompt_file):
+    def spawn_workflow_manager(self, task_name: str, prompt_file: str) -> Optional[subprocess.Popen[str]]:
         """Spawn real WorkflowManager subprocess with proper delegation"""
         worktree_path = self.create_worktree(task_name)
         if not worktree_path:
@@ -106,9 +105,10 @@ Begin workflow execution now.
         # Start input thread to send prompt
         def send_input():
             try:
-                process.stdin.write(initial_prompt)
-                process.stdin.close()
-            except:
+                if process.stdin is not None:
+                    process.stdin.write(initial_prompt)
+                    process.stdin.close()
+            except Exception:
                 pass
 
         input_thread = threading.Thread(target=send_input)
@@ -123,7 +123,7 @@ Begin workflow execution now.
         print(f"✅ Spawned process PID {process.pid} for {task_name}")
         return process
 
-    def monitor_processes(self):
+    def monitor_processes(self) -> List[str]:
         """Monitor all active processes"""
         print(f"\n🔄 Monitoring {len(self.active_processes)} parallel processes...")
 
@@ -146,7 +146,7 @@ Begin workflow execution now.
 
                     # Get final output
                     try:
-                        stdout, stderr = process.communicate(timeout=5)
+                        stdout, _stderr = process.communicate(timeout=5)
                         if stdout:
                             print(f"📋 {task_name} output: {stdout[-200:]}")  # Last 200 chars
                     except subprocess.TimeoutExpired:
@@ -160,7 +160,7 @@ Begin workflow execution now.
 
         return self.completed_tasks
 
-    def execute_tasks(self, task_prompts):
+    def execute_tasks(self, task_prompts: Dict[str, str]) -> List[str]:
         """Execute multiple tasks in parallel"""
         print(f"🎯 Starting parallel execution of {len(task_prompts)} tasks")
 
@@ -179,7 +179,7 @@ Begin workflow execution now.
         return completed
 
 
-def main():
+def main() -> None:
     """Main orchestrator entry point"""
     if len(sys.argv) < 2:
         print("Usage: python simple_orchestrator.py <prompt1.md> [prompt2.md] ...")

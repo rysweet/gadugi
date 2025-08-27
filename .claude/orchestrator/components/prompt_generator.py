@@ -9,7 +9,7 @@ generic prompts instead of implementation-specific instructions.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -19,15 +19,15 @@ class PromptContext:
     task_name: str
     original_prompt: str
     phase_focus: Optional[str] = None
-    dependencies: List[str] = None
-    target_files: List[str] = None
-    implementation_requirements: Dict = None
+    dependencies: Optional[List[str]] = None
+    target_files: Optional[List[str]] = None
+    implementation_requirements: Optional[Dict[str, Any]] = None
 
 
 class PromptGenerator:
     """Generates phase-specific prompts for WorkflowManager execution"""
 
-    def __init__(self, project_root: str = "."):
+    def __init__(self, project_root: str) -> None:
         self.project_root = Path(project_root).resolve()
         self.templates_dir = self.project_root / ".claude" / "orchestrator" / "templates"
         self.templates_dir.mkdir(parents=True, exist_ok=True)
@@ -206,7 +206,7 @@ class PromptGenerator:
 
         return formatted
 
-    def _create_default_templates(self):
+    def _create_default_templates(self) -> None:
         """Create default prompt templates if they don't exist"""
 
         # Create a basic template for reference
@@ -286,7 +286,7 @@ for WorkflowManager execution in parallel worktree environments.
         return issues
 
 
-def main():
+def main() -> int:
     """CLI entry point for PromptGenerator"""
     import argparse
 
@@ -300,7 +300,7 @@ def main():
 
     args = parser.parse_args()
 
-    generator = PromptGenerator()
+    generator = PromptGenerator(project_root=".")
 
     context = PromptContext(
         task_id=args.task_id,

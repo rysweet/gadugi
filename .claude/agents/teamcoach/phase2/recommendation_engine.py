@@ -11,7 +11,12 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ...shared.utils.error_handling import ErrorHandler
+# Create stub class for missing shared modules
+class ErrorHandler:
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        self.config = config or {}
+    def handle_error(self, error: Exception) -> Dict[str, Any]:
+        return {"error": str(error), "handled": False}
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
 
@@ -49,7 +54,7 @@ class Recommendation:
     success_metrics: List[str] = field(default_factory=list)
 
     # Context
-    generated_at: datetime = field(default_factory=datetime.now)
+    generated_at: Optional[datetime] = field(default_factory=datetime.now)
     applicable_until: Optional[datetime] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
 
@@ -72,7 +77,7 @@ class RecommendationEngine:
         self.logger = logging.getLogger(__name__)
         self.task_matcher = task_matcher or TaskAgentMatcher()
         self.team_optimizer = team_optimizer or TeamCompositionOptimizer()
-        self.error_handler = error_handler or ErrorHandler()
+        self.error_handler = error_handler or ErrorHandler(config={})
 
         self.logger.info("RecommendationEngine initialized")
 

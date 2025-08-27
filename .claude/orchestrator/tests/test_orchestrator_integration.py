@@ -6,18 +6,18 @@ These tests validate the complete orchestrator workflow from CLI input
 to parallel execution coordination.
 """
 
-import json
 import os
 import tempfile
 import unittest
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig, OrchestrationResult
+from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig
 from orchestrator_cli import OrchestrationCLI
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 
@@ -142,7 +142,7 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,
             command="claude /agent:workflow-manager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None
+            created_at=datetime.now()
         )
 
         registry.register_process(process_info)
@@ -150,6 +150,7 @@ Process these prompts in parallel:
         # Verify registration
         retrieved = registry.get_process("test-task-1")
         self.assertIsNotNone(retrieved)
+        assert retrieved is not None  # Type assertion for pyright
         self.assertEqual(retrieved.task_id, "test-task-1")
         self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
 
@@ -158,11 +159,15 @@ Process these prompts in parallel:
         self.assertTrue(success)
 
         updated = registry.get_process("test-task-1")
+        self.assertIsNotNone(updated)
+        assert updated is not None  # Type assertion for pyright
         self.assertEqual(updated.status, ProcessStatus.RUNNING)
 
         # Test completion
         registry.update_process_status("test-task-1", ProcessStatus.COMPLETED)
         completed = registry.get_process("test-task-1")
+        self.assertIsNotNone(completed)
+        assert completed is not None  # Type assertion for pyright
         self.assertEqual(completed.status, ProcessStatus.COMPLETED)
 
     @patch('orchestrator_main.ExecutionEngine')

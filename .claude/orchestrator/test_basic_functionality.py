@@ -21,6 +21,7 @@ def test_imports():
 
     try:
         from orchestrator_cli import OrchestrationCLI
+        _ = OrchestrationCLI  # Mark as used for import testing
         print("✅ orchestrator_cli imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_cli import failed: {e}")
@@ -28,6 +29,7 @@ def test_imports():
 
     try:
         from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
+        _ = (ProcessRegistry, ProcessStatus, ProcessInfo)  # Mark as used for import testing
         print("✅ process_registry imported successfully")
     except Exception as e:
         print(f"❌ process_registry import failed: {e}")
@@ -35,6 +37,7 @@ def test_imports():
 
     try:
         from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig
+        _ = (OrchestratorCoordinator, OrchestrationConfig)  # Mark as used for import testing
         print("✅ orchestrator_main imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_main import failed: {e}")

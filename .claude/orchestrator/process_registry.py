@@ -16,8 +16,6 @@ Key Features:
 
 import json
 import logging
-import os
-import subprocess
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
@@ -85,7 +83,7 @@ class ProcessRegistry:
     capabilities for the orchestrator system.
     """
 
-    def __init__(self, registry_dir: str = ".gadugi/monitoring", clean_start: bool = False):
+    def __init__(self, registry_dir: str, clean_start: bool = False) -> None:
         """Initialize the process registry
 
         Args:
@@ -123,9 +121,9 @@ class ProcessRegistry:
         if process_info.task_id in self.processes:
             logger.warning(f"Process {process_info.task_id} already registered, updating...")
 
-        # Set initial status if not specified
-        if process_info.status is None:
-            process_info.status = ProcessStatus.QUEUED
+        # Set initial status if not specified (this condition should not occur with proper dataclass defaults)
+        # if process_info.status is None:
+        #     process_info.status = ProcessStatus.QUEUED
 
         # Initialize heartbeat
         process_info.last_heartbeat = datetime.now()
@@ -328,16 +326,16 @@ class ProcessRegistry:
 
         # Try to terminate the process if it's running
         if process.status == ProcessStatus.RUNNING and process.pid:
-            try:
-                proc = psutil.Process(process.pid)
-                proc.terminate()
-                # Give it a moment to terminate gracefully
-                time.sleep(2)
-                if proc.is_running():
-                    proc.kill()  # Force kill if necessary
-                logger.info(f"Terminated process {task_id} (PID: {process.pid})")
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                logger.warning(f"Could not terminate process {task_id}: {e}")
+                try:
+                    proc = psutil.Process(process.pid)
+                    proc.terminate()
+                    # Give it a moment to terminate gracefully
+                    time.sleep(2)
+                    if proc.is_running():
+                        proc.kill()  # Force kill if necessary
+                    logger.info(f"Terminated process {task_id} (PID: {process.pid})")
+                except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                    logger.warning(f"Could not terminate process {task_id}: {e}")
 
         # Update status
         process.status = ProcessStatus.CANCELLED

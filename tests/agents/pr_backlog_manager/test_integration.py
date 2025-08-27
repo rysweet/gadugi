@@ -42,9 +42,7 @@ sys.path.insert(0, shared_path)
 from .test_stubs import (
     PRBacklogManager,
     PRStatus,
-    ReadinessCriteria,
     ReadinessAssessor,
-    ConflictComplexity,
     DelegationCoordinator,
     DelegationType,
     DelegationStatus,
@@ -167,26 +165,27 @@ class TestEndToEndWorkflow:
     ):
         """Test complete workflow for a ready PR."""
         # Set up PR Backlog Manager
-        with patch("core.GitHubOperations", return_value=mock_github_ops):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Process single PR
-            assessment = manager.process_single_pr(123)
+        # Process single PR
+        assessment = manager.process_single_pr(123)
 
-            # Verify assessment
-            assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.READY
-            assert assessment.is_ready is True
-            assert assessment.readiness_score == 100.0
-            assert len(assessment.blocking_issues) == 0
+        # Verify assessment
+        assert assessment.pr_number == 123
+        assert assessment.status == PRStatus.READY
+        assert assessment.is_ready is True
+        assert assessment.readiness_score == 100.0
+        assert len(assessment.blocking_issues) == 0
 
-            # Verify GitHub operations were called
-            mock_github_ops.get_pr_details.assert_called_once_with(123)
-            mock_github_ops.add_pr_labels.assert_called_once_with(
-                123, ["ready-seeking-human"]
-            )
-            mock_github_ops.add_pr_comment.assert_called_once()
+        # Verify GitHub operations were called
+        mock_github_ops.get_pr_details.assert_called_once_with(123)
+        mock_github_ops.add_pr_labels.assert_called_once_with(
+            123, ["ready-seeking-human"]
+        )
+        mock_github_ops.add_pr_comment.assert_called_once()
 
     def test_single_pr_blocked_workflow(
         self, mock_environment, mock_github_ops, mock_shared_modules
@@ -200,25 +199,26 @@ class TestEndToEndWorkflow:
         ]
         mock_github_ops.get_pr_reviews.return_value = []  # No reviews
 
-        with patch("core.GitHubOperations", return_value=mock_github_ops):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Mock delegation methods to avoid complex setup
-            manager._delegate_issue_resolution = Mock()
+        # Mock delegation methods to avoid complex setup
+        manager._delegate_issue_resolution = Mock()
 
-            # Process single PR
-            assessment = manager.process_single_pr(123)
+        # Process single PR
+        assessment = manager.process_single_pr(123)
 
-            # Verify assessment
-            assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.BLOCKED
-            assert assessment.is_ready is False
-            assert assessment.readiness_score < 100.0
-            assert len(assessment.blocking_issues) > 0
+        # Verify assessment
+        assert assessment.pr_number == 123
+        assert assessment.status == PRStatus.BLOCKED
+        assert assessment.is_ready is False
+        assert assessment.readiness_score < 100.0
+        assert len(assessment.blocking_issues) > 0
 
-            # Verify delegation was attempted
-            manager._delegate_issue_resolution.assert_called_once()
+        # Verify delegation was attempted
+        manager._delegate_issue_resolution.assert_called_once()
 
     def test_backlog_processing_workflow(
         self, mock_environment, mock_github_ops, mock_shared_modules
@@ -244,42 +244,43 @@ class TestEndToEndWorkflow:
             },
         ]
 
-        with patch("core.GitHubOperations", return_value=mock_github_ops):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Mock individual PR processing
-            ready_assessment = Mock(
-                pr_number=123,
-                status=PRStatus.READY,
-                is_ready=True,
-                blocking_issues=[],
-                resolution_actions=[],
-            )
-            blocked_assessment = Mock(
-                pr_number=124,
-                status=PRStatus.BLOCKED,
-                is_ready=False,
-                blocking_issues=["CI failing"],
-                resolution_actions=["Fix CI"],
-            )
+        # Mock individual PR processing
+        ready_assessment = Mock(
+            pr_number=123,
+            status=PRStatus.READY,
+            is_ready=True,
+            blocking_issues=[],
+            resolution_actions=[],
+        )
+        blocked_assessment = Mock(
+            pr_number=124,
+            status=PRStatus.BLOCKED,
+            is_ready=False,
+            blocking_issues=["CI failing"],
+            resolution_actions=["Fix CI"],
+        )
 
-            manager.process_single_pr = Mock(
-                side_effect=[ready_assessment, blocked_assessment]
-            )
-            manager._generate_backlog_report = Mock()
+        manager.process_single_pr = Mock(
+            side_effect=[ready_assessment, blocked_assessment]
+        )
+        manager._generate_backlog_report = Mock()
 
-            # Process backlog
-            metrics = manager.process_backlog()
+        # Process backlog
+        metrics = manager.process_backlog()
 
-            # Verify metrics
-            assert metrics.total_prs == 2
-            assert metrics.ready_prs == 1
-            assert metrics.blocked_prs == 1
-            assert metrics.success_rate == 100.0  # All processed successfully
+        # Verify metrics
+        assert metrics.total_prs == 2
+        assert metrics.ready_prs == 1
+        assert metrics.blocked_prs == 1
+        assert metrics.success_rate == 100.0  # All processed successfully
 
-            # Verify processing was called for each PR
-            assert manager.process_single_pr.call_count == 2
+        # Verify processing was called for each PR
+        assert manager.process_single_pr.call_count == 2
 
 
 class TestComponentIntegration:
@@ -328,7 +329,9 @@ class TestComponentIntegration:
         mock_github_ops.add_pr_labels.return_value = None
         mock_github_ops.add_pr_comment.return_value = None
 
-        coordinator = DelegationCoordinator(mock_github_ops, auto_approve=False)
+        coordinator = DelegationCoordinator(
+            github_ops=mock_github_ops, auto_approve=False
+        )
 
         blocking_issues = [
             "PR has merge conflicts that need resolution",
@@ -498,28 +501,27 @@ class TestErrorScenarios:
         mock_github_ops = Mock()
         mock_github_ops.get_pr_details.side_effect = Exception("GitHub API error")
 
-        with (
-            patch("core.GitHubOperations", return_value=mock_github_ops),
-            patch("core.StateManager"),
-            patch("core.TaskTracker"),
-        ):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Process single PR with API failure
-            assessment = manager.process_single_pr(123)
+        # Process single PR with API failure
+        assessment = manager.process_single_pr(123)
 
-            # Verify graceful failure handling
-            assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.FAILED
-            assert "GitHub API error" in assessment.blocking_issues[0]
+        # Verify graceful failure handling
+        assert assessment.pr_number == 123
+        assert assessment.status == PRStatus.FAILED
+        assert "GitHub API error" in assessment.blocking_issues[0]
 
     def test_delegation_failure_handling(self):
         """Test handling of delegation failures."""
         mock_github_ops = Mock()
         mock_github_ops.add_pr_comment.side_effect = Exception("Comment API error")
 
-        coordinator = DelegationCoordinator(mock_github_ops, auto_approve=False)
+        coordinator = DelegationCoordinator(
+            github_ops=mock_github_ops, auto_approve=False
+        )
 
         blocking_issues = ["PR has merge conflicts"]
         pr_context = {"repository": "user/repo", "title": "test"}
@@ -556,22 +558,19 @@ class TestErrorScenarios:
 
         mock_github_ops.get_pr_details.side_effect = slow_operation
 
-        with (
-            patch("core.GitHubOperations", return_value=mock_github_ops),
-            patch("core.StateManager"),
-            patch("core.TaskTracker"),
-        ):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Process with simulated slow operation
-            start_time = datetime.now()
-            assessment = manager.process_single_pr(123)
-            processing_time = (datetime.now() - start_time).total_seconds()
+        # Process with simulated slow operation
+        start_time = datetime.now()
+        assessment = manager.process_single_pr(123)
+        processing_time = (datetime.now() - start_time).total_seconds()
 
-            # Verify processing completed despite delay
-            assert assessment.pr_number == 123
-            assert processing_time >= 0.1  # At least the simulated delay
+        # Verify processing completed despite delay
+        assert assessment.pr_number == 123
+        assert assessment.processing_time >= 0.1  # At least the simulated delay
 
 
 class TestRealWorldScenarios:
@@ -654,27 +653,24 @@ class TestRealWorldScenarios:
         mock_github_ops.add_pr_labels.return_value = None
         mock_github_ops.add_pr_comment.return_value = None
 
-        with (
-            patch("core.GitHubOperations", return_value=mock_github_ops),
-            patch("core.StateManager"),
-            patch("core.TaskTracker"),
-        ):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Mock delegation to avoid complex setup
-            manager._delegate_issue_resolution = Mock()
-            manager._generate_backlog_report = Mock()
+        # Mock delegation to avoid complex setup
+        manager._delegate_issue_resolution = Mock()
+        manager._generate_backlog_report = Mock()
 
-            # Process backlog
-            metrics = manager.process_backlog()
+        # Process backlog
+        metrics = manager.process_backlog()
 
-            # Should process only 2 PRs (100 and 103), filtering out 101 and 102
-            assert metrics.total_prs == 2
+        # Should process only 2 PRs (100 and 103), filtering out 101 and 102
+        assert metrics.total_prs == 2
 
-            # Verify individual PR processing calls
-            # PR 100 should be ready, PR 103 should be blocked
-            assert mock_github_ops.get_pr_details.call_count == 2
+        # Verify individual PR processing calls
+        # PR 100 should be ready, PR 103 should be blocked
+        assert mock_github_ops.get_pr_details.call_count == 2
 
     def test_high_volume_backlog_simulation(self):
         """Test processing simulation for high-volume backlog."""
@@ -696,36 +692,33 @@ class TestRealWorldScenarios:
 
         mock_github_ops.get_prs.return_value = large_pr_list
 
-        with (
-            patch("core.GitHubOperations", return_value=mock_github_ops),
-            patch("core.StateManager"),
-            patch("core.TaskTracker"),
-        ):
-            config = AgentConfig(agent_id="test-manager", name="Test Manager")
-            manager = PRBacklogManager(config=config, auto_approve=False)
+        config = AgentConfig(agent_id="test-manager", name="Test Manager")
+        manager = PRBacklogManager(
+            config=config, auto_approve=False, github_ops=mock_github_ops
+        )
 
-            # Mock the actual processing to avoid complex setup
-            manager.process_single_pr = Mock(
-                return_value=Mock(
-                    status=PRStatus.READY,
-                    is_ready=True,
-                    blocking_issues=[],
-                    resolution_actions=[],
-                )
+        # Mock the actual processing to avoid complex setup
+        manager.process_single_pr = Mock(
+            return_value=Mock(
+                status=PRStatus.READY,
+                is_ready=True,
+                blocking_issues=[],
+                resolution_actions=[],
             )
-            manager._generate_backlog_report = Mock()
+        )
+        manager._generate_backlog_report = Mock()
 
-            # Process large backlog
-            start_time = datetime.now()
-            metrics = manager.process_backlog()
-            processing_time = (datetime.now() - start_time).total_seconds()
+        # Process large backlog
+        start_time = datetime.now()
+        metrics = manager.process_backlog()
+        processing_time = (datetime.now() - start_time).total_seconds()
 
-            # Verify all PRs were processed
-            assert metrics.total_prs == 50
-            assert manager.process_single_pr.call_count == 50
+        # Verify all PRs were processed
+        assert metrics.total_prs == 50
+        assert manager.process_single_pr.call_count == 50
 
-            # Verify reasonable processing time (should be fast with mocks)
-            assert processing_time < 5.0  # Should complete quickly with mocks
+        # Verify reasonable processing time (should be fast with mocks)
+        assert processing_time < 5.0  # Should complete quickly with mocks
 
 
 if __name__ == "__main__":

@@ -12,12 +12,13 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from config import ConfigManager, MemoryManagerConfig
+from .config import ConfigManager, MemoryManagerConfig
 from github_integration import GitHubIntegration, GitHubIssue
 
 # Import our modules
 from memory_parser import MemoryDocument, MemoryParser, Task, TaskPriority, TaskStatus
-from sync_engine import SyncConfig, SyncDirection, SyncEngine
+from enums import SyncDirection
+from sync_engine import SyncConfig, SyncEngine
 
 
 class TestMemoryParser(unittest.TestCase):
@@ -148,7 +149,7 @@ class TestGitHubIntegration(unittest.TestCase):
 
         # Should not raise exception
         try:
-            github = GitHubIntegration(self.temp_dir)
+            GitHubIntegration(self.temp_dir)
         except RuntimeError:
             self.fail("GitHubIntegration raised RuntimeError unexpectedly")
 

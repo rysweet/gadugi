@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -106,10 +106,10 @@ class WorkflowOptimizer:
     - Implementation guidance
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the workflow optimizer."""
         self.workflow_patterns: Dict[str, Dict[str, Any]] = {}
-        self.optimization_history: List[Tuple[str, WorkflowOptimization, float]] = []
+        self.optimization_history: List[Dict[str, Any]] = []
 
         # Thresholds for bottleneck detection
         self.bottleneck_thresholds = {
@@ -431,7 +431,7 @@ class WorkflowOptimizer:
                 skill_delays[skill] += wait_time
 
         # Calculate supply from agent capabilities
-        for agent_id, state in agent_states.items():
+        for state in agent_states.values():
             agent_skills = state.get("skills", [])
             for skill in agent_skills:
                 if skill not in skill_supply:
@@ -986,7 +986,7 @@ class WorkflowOptimizer:
 
         # Return top 3 reasons
         sorted_reasons = sorted(reasons.items(), key=lambda x: x[1], reverse=True)
-        return [reason for reason, count in sorted_reasons[:3]]
+        return [reason for reason, _ in sorted_reasons[:3]]
 
     def _estimate_effort_days(self, effort_estimate: str) -> int:
         """Convert effort estimate string to days."""

@@ -22,6 +22,17 @@ class ErrorSeverity(Enum):
     CRITICAL = "critical"
 
 
+class ErrorCategory(Enum):
+    """Error categories for classification."""
+
+    WORKFLOW_EXECUTION = "workflow_execution"
+    SYSTEM = "system"
+    VALIDATION = "validation"
+    NETWORK = "network"
+    AUTHENTICATION = "authentication"
+    CONFIGURATION = "configuration"
+
+
 class RetryStrategy(Enum):
     """Retry strategies."""
 
@@ -53,7 +64,7 @@ class RecoverableError(GadugiError):
 class NonRecoverableError(GadugiError):
     """Error that cannot be recovered from."""
 
-    def __init__(self, message: str, context: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, context: Optional[Dict[str, Any]] = None) -> None:
         super().__init__(message, ErrorSeverity.CRITICAL, context)
 
 
@@ -154,7 +165,7 @@ def graceful_degradation(
 class ErrorHandler:
     """Centralized error handling with recovery strategies."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.error_counts: Dict[str, int] = {}
         self.recovery_strategies: Dict[Type[Exception], Callable] = {}
         self.error_history: List[Dict[str, Any]] = []
@@ -224,7 +235,7 @@ class CircuitBreaker:
     Prevents repeated calls to failing services.
     """
 
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: float = 60.0):
+    def __init__(self, failure_threshold: int, recovery_timeout: float) -> None:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.failure_count = 0
@@ -304,6 +315,7 @@ class CircuitBreaker:
         except Exception as e:
             self.failure_count += 1
             self.last_failure_time = time.time()
+            logger.error(f"Circuit breaker recorded failure: {e}")
 
             if self.failure_count >= self.failure_threshold:
                 self.is_open = True

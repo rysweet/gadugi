@@ -139,7 +139,7 @@ class ReadinessAssessor:
     with actionable insights for automated resolution.
     """
 
-    def __init__(self, github_ops):
+    def __init__(self, github_ops) -> None:
         """Initialize readiness assessor."""
         self.github_ops = github_ops
 
@@ -753,15 +753,15 @@ class ReadinessAssessor:
         recommendations = []
 
         conflict_assessment = assessments["conflicts"]
-        if conflict_assessment.has_conflicts:
-            if conflict_assessment.auto_resolvable:
+        if conflict_assessment is not None and conflict_assessment.has_conflicts:
+            if conflict_assessment is not None and conflict_assessment.auto_resolvable:
                 recommendations.append("Auto-resolve merge conflicts")
             else:
                 recommendations.append("Manual conflict resolution required")
 
         ci_assessment = assessments["ci"]
         if not ci_assessment.all_passing:
-            if ci_assessment.can_auto_retry:
+            if ci_assessment is not None and ci_assessment.can_auto_retry:
                 recommendations.append("Retry transient CI failures")
             else:
                 recommendations.append("Fix CI failures manually")
@@ -775,7 +775,7 @@ class ReadinessAssessor:
 
         sync_assessment = assessments["sync"]
         if not sync_assessment.is_up_to_date:
-            if sync_assessment.is_auto_updatable:
+            if sync_assessment is not None and sync_assessment.is_auto_updatable:
                 recommendations.append("Auto-update branch from main")
             else:
                 recommendations.append("Manual branch update required")

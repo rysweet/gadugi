@@ -38,17 +38,17 @@ except ImportError:
 
 # Import Enhanced Separation shared modules (fallback for development)
 class GitHubOperations:
-    def __init__(self, task_id=None): pass
+    def __init__(self, task_id=None) -> None: pass
 class StateManager:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 class CheckpointManager:
-    def __init__(self, state_manager): pass
+    def __init__(self, state_manager) -> None: pass
 class ErrorHandler:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 class CircuitBreaker:
-    def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
+    def __init__(self, failure_threshold=3, recovery_timeout=30.0) -> None: pass
 class TaskMetrics:
-    def __init__(self): pass
+    def __init__(self) -> None: pass
 
 # Configure logging
 logging.basicConfig(
@@ -99,7 +99,7 @@ class OrchestrationResult:
     failed_tasks: int
     execution_time_seconds: float
     parallel_speedup: Optional[float] = None
-    task_results: List[ExecutionResult] = None
+    task_results: Optional[List[ExecutionResult]] = None
     error_summary: Optional[str] = None
 
 
@@ -111,7 +111,7 @@ class OrchestratorCoordinator:
     all existing orchestrator components to enable actual parallel execution.
     """
 
-    def __init__(self, config: OrchestrationConfig = None, project_root: str = "."):
+    def __init__(self, config: Optional[OrchestrationConfig] = None, project_root: str = ".") -> None:
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()
@@ -508,8 +508,10 @@ class OrchestratorCoordinator:
 
         status_counts = {}
         for process in all_processes.values():
-            status_name = process.status.value
-            status_counts[status_name] = status_counts.get(status_name, 0) + 1
+            if hasattr(process, 'status'):
+                status_obj = process.status
+                status_name = status_obj.value if hasattr(status_obj, 'value') else str(status_obj)
+                status_counts[status_name] = status_counts.get(status_name, 0) + 1
 
         return {
             "orchestration_id": self.orchestration_id,
@@ -520,11 +522,11 @@ class OrchestratorCoordinator:
                 {
                     "task_id": p.task_id,
                     "task_name": p.task_name,
-                    "status": p.status.value,
+                    "status": p.status.value if hasattr(p.status, 'value') else str(p.status),
                     "runtime_seconds": (datetime.now() - p.created_at).total_seconds()
                 }
                 for p in all_processes.values()
-                if p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]
+                if hasattr(p, 'status') and p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]
             ]
         }
 
@@ -621,7 +623,8 @@ class OrchestratorCoordinator:
                 else:
                     result.failed_tasks += 1
 
-                result.task_results.append(exec_result)
+                if result.task_results is not None:
+                    result.task_results.append(exec_result)
 
             except Exception as e:
                 logger.error(f"Failed to execute task {prompt_file}: {e}")

@@ -14,8 +14,46 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
 from datetime import datetime
-import numpy as np
 from enum import Enum
+try:
+    import numpy as np  # type: ignore[import-untyped]
+except ImportError:
+    # Fallback stub for numpy
+    import random
+    import math
+    
+    class NumpyStub:
+        class Random:
+            def normal(self, mean: float, std: float, size: int) -> List[float]:
+                return [random.gauss(mean, std) for _ in range(size)]
+        
+        class Linalg:
+            def norm(self, vector: List[float]) -> float:
+                return math.sqrt(sum(x * x for x in vector))
+        
+        def __init__(self):
+            self.random = self.Random()
+            self.linalg = self.Linalg()
+        
+        def array(self, data: Any) -> List[Any]:
+            return list(data) if hasattr(data, '__iter__') else [data]
+        
+        def mean(self, data: List[Any]) -> float:
+            return sum(data) / len(data) if data else 0.0
+        
+        def std(self, data: List[Any]) -> float:
+            if not data:
+                return 0.0
+            mean = sum(data) / len(data)
+            return math.sqrt(sum((x - mean) ** 2 for x in data) / len(data))
+        
+        def zeros(self, size: int) -> List[float]:
+            return [0.0] * size
+        
+        def dot(self, a: List[float], b: List[float]) -> float:
+            return sum(x * y for x, y in zip(a, b))
+    
+    np = NumpyStub()
 
 
 class PatternType(Enum):
@@ -104,7 +142,7 @@ class TaskPatternRecognitionSystem:
     5. Performance pattern prediction
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patterns = self._initialize_pattern_library()
         self.semantic_vectors = self._initialize_semantic_vectors()
         self.historical_data = self._initialize_historical_data()
@@ -324,7 +362,7 @@ class TaskPatternRecognitionSystem:
 
         return patterns
 
-    def _initialize_semantic_vectors(self) -> Dict[str, np.ndarray]:
+    def _initialize_semantic_vectors(self) -> Dict[str, Any]:
         """Initialize semantic word vectors for similarity analysis"""
         # In a real implementation, this would load pre-trained word embeddings
         # For now, we'll use a simplified approach with keyword-based vectors
@@ -353,11 +391,21 @@ class TaskPatternRecognitionSystem:
         # Generate simple vectors (in reality, these would be learned embeddings)
         for i, term in enumerate(technical_terms):
             vector = np.zeros(len(technical_terms))
-            vector[i] = 1.0
-            # Add some noise to make vectors more realistic
-            noise = np.random.normal(0, 0.1, len(technical_terms))
-            vector += noise
-            vectors[term] = vector / np.linalg.norm(vector)  # Normalize
+            if isinstance(vector, list):
+                vector[i] = 1.0
+                # Add some noise to make vectors more realistic
+                noise = np.random.normal(0, 0.1, len(technical_terms))
+                # Element-wise addition for lists
+                vector = [v + n for v, n in zip(vector, noise)]
+                # Normalize
+                norm = np.linalg.norm(vector)
+                vectors[term] = [v / norm for v in vector] if norm > 0 else vector
+            else:
+                vector[i] = 1.0
+                # Add some noise to make vectors more realistic  
+                noise = np.random.normal(0, 0.1, len(technical_terms))
+                vector += noise
+                vectors[term] = vector / np.linalg.norm(vector)  # Normalize
 
         return vectors
 
@@ -393,7 +441,7 @@ class TaskPatternRecognitionSystem:
 
         pattern_matches = []
 
-        for pattern_id, pattern in self.patterns.items():
+        for _, pattern in self.patterns.items():
             match = self._evaluate_pattern_match(
                 pattern, task_description, task_context, historical_context
             )

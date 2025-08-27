@@ -6,7 +6,6 @@ and changes across different programming languages.
 """
 
 import ast
-import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Set, Union
@@ -97,9 +96,9 @@ class ArchitecturalChange:
 class ASTParser(ABC):
     """Base class for language-specific AST parsers"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.supported_extensions: Set[str] = set()
-        self.architectural_patterns: Dict[str, List[str]] = {}
+        self.architectural_patterns: Dict[Any, Any] = field(default_factory=dict)
 
     @abstractmethod
     def parse_file(self, file_path: str) -> List[ArchitecturalElement]:
@@ -139,7 +138,7 @@ class ASTParser(ABC):
 class PythonASTParser(ASTParser):
     """Python-specific AST parser using built-in ast module"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.supported_extensions = {'.py', '.pyx', '.pyi'}
         self.architectural_patterns = {
@@ -294,7 +293,7 @@ class PythonASTParser(ASTParser):
 class PythonASTVisitor(ast.NodeVisitor):
     """AST visitor for extracting architectural elements from Python code"""
 
-    def __init__(self, file_path: str, content: str, parser: PythonASTParser):
+    def __init__(self, file_path: str, content: str, parser: PythonASTParser) -> None:
         self.file_path = file_path
         self.content = content
         self.parser = parser
@@ -423,7 +422,7 @@ class PythonASTVisitor(ast.NodeVisitor):
 class TypeScriptASTParser(ASTParser):
     """TypeScript-specific AST parser (placeholder for future implementation)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.supported_extensions = {'.ts', '.tsx', '.js', '.jsx'}
         self.architectural_patterns = {
@@ -460,7 +459,7 @@ class TypeScriptASTParser(ASTParser):
 class ASTParserFactory:
     """Factory for creating appropriate AST parsers based on file type"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Register only stable, fully-implemented parsers.  The TypeScript parser
         # remains a placeholder and is therefore not exposed until completed.
         self._parsers = {

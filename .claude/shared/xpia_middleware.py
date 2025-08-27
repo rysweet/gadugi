@@ -28,7 +28,7 @@ class XPIAMiddleware:
     threat detection and content sanitization for all agent operations.
     """
 
-    def __init__(self, security_mode: SecurityMode = SecurityMode.BALANCED):
+    def __init__(self, security_mode: SecurityMode) -> None:
         self.defense_agent = XPIADefenseAgent(security_mode)
         self.logger = logging.getLogger(f"{__name__}.XPIAMiddleware")
 

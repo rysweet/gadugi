@@ -8,11 +8,10 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel
+from .ast_parser import ArchitecturalChange, ElementType, ImpactLevel
 
 
 @dataclass
@@ -28,8 +27,12 @@ class DocumentationUpdate:
 class DocumentationManager:
     """Manages automated updates to architecture documentation"""
 
-    def __init__(self, architecture_file: str = "ARCHITECTURE.md"):
-        self.architecture_file = architecture_file
+    def __init__(self, architecture_file: str) -> None:
+        # Convert to uppercase for standard ARCHITECTURE.md convention
+        if architecture_file.lower() == "architecture.md":
+            self.architecture_file = "ARCHITECTURE.md"
+        else:
+            self.architecture_file = architecture_file
         self.template_sections = {
             "system_overview": self._generate_system_overview,
             "component_architecture": self._generate_component_architecture,
@@ -294,7 +297,7 @@ Specialized Agents
             section += "#### Recently Added Components\n\n"
             for component in new_components:
                 section += f"- **{component.name}**: {component.docstring or 'New component'}\n"
-                if component.patterns:
+                if component is not None and component.patterns:
                     section += f"  - Patterns: {', '.join(component.patterns)}\n"
             section += "\n"
 

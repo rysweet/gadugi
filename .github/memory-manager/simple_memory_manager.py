@@ -118,6 +118,7 @@ class SimpleMemoryManager:
         repo_path: Optional[str] = None,
         auto_lock: bool = True,
         lock_reason: Optional[str] = None,
+        strict_security: bool = False,
     ):
         """
         Initialize Simple Memory Manager
@@ -126,10 +127,12 @@ class SimpleMemoryManager:
             repo_path: Path to repository (defaults to current directory)
             auto_lock: Whether to automatically lock memory issue for security (default: True)
             lock_reason: GitHub lock reason - one of: off-topic, too heated, resolved, spam (default: off-topic)
+            strict_security: Enable strict security mode - fails initialization if auto-lock fails (default: False)
         """
         self.repo_path = Path(repo_path or os.getcwd())
         self.logger = logging.getLogger(__name__)
         self.auto_lock = auto_lock
+        self.strict_security = strict_security
         self.lock_reason = lock_reason or self.DEFAULT_LOCK_REASON
 
         # Validate lock reason
@@ -182,14 +185,21 @@ class SimpleMemoryManager:
                             f"Successfully locked memory issue #{issue_number} for security"
                         )
                     else:
-                        self.logger.warning(
-                            f"Failed to lock memory issue #{issue_number}, continuing anyway"
-                        )
+                        error_msg = f"Failed to lock memory issue #{issue_number}"
+                        if self.strict_security:
+                            raise GitHubError(
+                                f"{error_msg} - strict security mode enabled",
+                                "lock_issue",
+                                {},
+                                None,
+                            )
+                        else:
+                            self.logger.warning(f"{error_msg}, continuing anyway")
 
                 return issue_number
             else:
                 raise GitHubError(
-                    "Failed to create memory issue", "create_issue", result
+                    "Failed to create memory issue", "create_issue", result, None
                 )
 
         except Exception as e:
@@ -270,7 +280,9 @@ enhanced integration with GitHub's collaboration features."""
             )
 
             if not result["success"]:
-                raise GitHubError("Failed to read memory issue", "read_memory", result)
+                raise GitHubError(
+                    "Failed to read memory issue", "read_memory", result, None
+                )
 
             issue_data = result["data"]
             comments = issue_data.get("comments", [])
@@ -331,7 +343,7 @@ enhanced integration with GitHub's collaboration features."""
 
             # Look for section header (### SECTION - TIMESTAMP)
             section_line = None
-            for i, line in enumerate(lines):
+            for line in lines:
                 if line.startswith("### ") and " - " in line:
                     section_line = line
                     break
@@ -458,7 +470,7 @@ enhanced integration with GitHub's collaboration features."""
                 }
             else:
                 raise GitHubError(
-                    "Failed to add memory comment", "update_memory", result
+                    "Failed to add memory comment", "update_memory", result, None
                 )
 
         except Exception as e:
@@ -499,7 +511,7 @@ enhanced integration with GitHub's collaboration features."""
             )
 
             if not result["success"]:
-                raise GitHubError("Memory search failed", "search_memory", result)
+                raise GitHubError("Memory search failed", "search_memory", result, None)
 
             # Filter results to memory issue only
             search_results = []
@@ -539,7 +551,10 @@ enhanced integration with GitHub's collaboration features."""
 
             if not issue_result["success"]:
                 raise GitHubError(
-                    "Failed to get memory issue status", "get_status", issue_result
+                    "Failed to get memory issue status",
+                    "get_status",
+                    issue_result,
+                    None,
                 )
 
             issue_data = issue_result["data"]
@@ -711,3 +726,105 @@ enhanced integration with GitHub's collaboration features."""
         except Exception as e:
             self.logger.error(f"Failed to check lock status: {e}")
             return {"success": False, "error": str(e)}
+
+    def lock_memory_issue(self) -> bool:
+        """
+        Manually lock the memory issue for security.
+        This is the public interface to _lock_memory_issue.
+
+        Returns:
+            True if successfully locked, False otherwise
+        """
+        return self._lock_memory_issue(self.memory_issue_number)
+
+    def get_security_status(self) -> Dict[str, Any]:
+        """
+        Get comprehensive security status of the memory system.
+
+        Returns:
+            Dictionary with security status information including:
+            - success: Whether the check was successful
+            - security_level: HIGH/MEDIUM/LOW
+            - locked: Whether memory issue is locked
+            - auto_lock_enabled: Whether auto-lock is configured
+            - strict_security_enabled: Whether strict security mode is enabled
+            - warnings: List of security warnings
+            - recommendations: List of security recommendations
+        """
+        try:
+            # Check if memory issue is locked
+            lock_status = self.check_lock_status()
+            is_locked = (
+                lock_status.get("locked", False)
+                if lock_status.get("success")
+                else False
+            )
+
+            # Determine security level
+            security_level = (
+                "HIGH"
+                if (is_locked and self.auto_lock and self.strict_security)
+                else "MEDIUM"
+                if (is_locked or self.auto_lock)
+                else "LOW"
+            )
+
+            # Collect warnings and recommendations
+            warnings = []
+            recommendations = []
+
+            if not is_locked:
+                warnings.append(
+                    "Memory issue is NOT locked - vulnerable to memory poisoning attacks from non-collaborators"
+                )
+                recommendations.append(
+                    "Lock the memory issue using lock_memory_issue() method"
+                )
+
+            if not self.auto_lock:
+                warnings.append(
+                    "Auto-lock is disabled - new memory issues won't be automatically protected"
+                )
+                recommendations.append(
+                    "Enable auto_lock=True in constructor for automatic protection"
+                )
+
+            if self.auto_lock and not is_locked:
+                warnings.append(
+                    "Auto-lock is enabled but memory issue is not locked - auto-lock may have failed"
+                )
+                recommendations.append(
+                    "Check GitHub permissions and manually lock the issue"
+                )
+
+            if not self.strict_security:
+                warnings.append(
+                    "Strict security mode is disabled - initialization won't fail on lock failures"
+                )
+                recommendations.append(
+                    "Enable strict_security=True for maximum security"
+                )
+
+            return {
+                "success": True,
+                "security_level": security_level,
+                "locked": is_locked,
+                "auto_lock_enabled": self.auto_lock,
+                "strict_security_enabled": self.strict_security,
+                "warnings": warnings,
+                "recommendations": recommendations,
+                "memory_issue_number": self.memory_issue_number,
+            }
+
+        except Exception as e:
+            self.logger.error(f"Failed to get security status: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "security_level": "UNKNOWN",
+                "locked": False,
+                "auto_lock_enabled": self.auto_lock,
+                "strict_security_enabled": self.strict_security,
+                "warnings": [f"Security status check failed: {e}"],
+                "recommendations": ["Fix the underlying error and try again"],
+            }

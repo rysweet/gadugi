@@ -95,7 +95,7 @@ class TaskPatternClassifier:
     predict complexity, and suggest optimization strategies.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.keyword_patterns = self._initialize_keyword_patterns()
         self.complexity_indicators = self._initialize_complexity_indicators()
         self.pattern_library = self._initialize_pattern_library()
@@ -429,7 +429,7 @@ class TaskPatternClassifier:
         description_lower = description.lower()
         indicators = []
 
-        for indicator, score in self.complexity_indicators.items():
+        for indicator, _ in self.complexity_indicators.items():
             if indicator in description_lower:
                 indicators.append(indicator)
 
@@ -767,7 +767,7 @@ class TaskPatternClassifier:
         if features.external_dependency_count > 2:
             optimizations.append("dependency_isolation")
 
-        if features.complexity_scores.get("overall", 0) > 4.0:
+        if features.technical_depth_score > 4.0:
             optimizations.append("task_decomposition")
 
         return list(set(optimizations))  # Remove duplicates

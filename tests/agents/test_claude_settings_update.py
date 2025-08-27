@@ -8,14 +8,15 @@ import json
 import os
 import tempfile
 import unittest
-from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
+
+# from pathlib import Path
+from unittest.mock import Mock, patch
 
 
 class TestClaudeSettingsUpdate(unittest.TestCase):
     """Test cases for claude-settings-update agent functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures for each test."""
         self.temp_dir = tempfile.mkdtemp()
         self.settings_path = os.path.join(self.temp_dir, ".claude", "settings.json")

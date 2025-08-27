@@ -14,15 +14,12 @@ Key test scenarios:
 """
 
 import asyncio
-import json
-import os
 import tempfile
-import threading
-import time
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch, call
+from typing import Optional
+from unittest.mock import Mock, patch
 import shutil
 
 import sys
@@ -30,14 +27,95 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
     from container_manager import ContainerManager, ContainerConfig, ContainerResult
-    from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
+    from components.execution_engine import ExecutionEngine, TaskExecutor
     from monitoring.dashboard import OrchestrationMonitor
     IMPORTS_AVAILABLE = True
 except ImportError as e:
     print(f"Warning: Could not import modules for testing: {e}")
-    IMPORTS_AVAILABLE = False
+    # Create mock classes when imports fail
+    class MockContainerConfig:
+        def __init__(self, **kwargs):
+            self.image = kwargs.get('image', "claude-orchestrator:latest")
+            self.cpu_limit = kwargs.get('cpu_limit', "2.0")
+            self.memory_limit = kwargs.get('memory_limit', "4g")
+            self.timeout_seconds = kwargs.get('timeout_seconds', 3600)
+            self.max_turns = kwargs.get('max_turns', 50)
+            self.output_format = kwargs.get('output_format', "json")
+            self.claude_flags = kwargs.get('claude_flags', [
+                "--dangerously-skip-permissions",
+                "--verbose", 
+                "--max-turns=50",
+                "--output-format=json"
+            ])
+    
+    class MockContainerResult:
+        def __init__(self, **kwargs):
+            self.task_id = kwargs.get('task_id', 'mock-task')
+            self.status = kwargs.get('status', 'success')
+            self.exit_code = kwargs.get('exit_code', 0)
+            self.stdout = kwargs.get('stdout', '')
+            self.stderr = kwargs.get('stderr', '')
+            self.start_time = kwargs.get('start_time', None)
+            self.end_time = kwargs.get('end_time', None)
+            self.duration = kwargs.get('duration', 0.0)
+            self.error_message = kwargs.get('error_message', None)
+
+    class MockContainerManager:
+        def __init__(self, config=None):
+            self.config = config
+            self.docker_client: Optional[Mock] = None
+            
+        def execute_containerized_task(self, *args, **kwargs):
+            return MockContainerResult()
+            
+        def execute_parallel_tasks(self, tasks, *args, **kwargs):
+            # Return a dict mapping task IDs to mock results
+            if isinstance(tasks, list) and len(tasks) > 0 and 'id' in tasks[0]:
+                return {task['id']: MockContainerResult(task_id=task['id']) for task in tasks}
+            return {}
+    
+    class MockExecutionEngine:
+        def __init__(self, *args, **kwargs):
+            self.execution_mode = "containerized"
+            self.container_manager = None
+            
+        def execute_tasks_parallel(self, tasks, *args, **kwargs):
+            # Return a dict mapping task IDs to mock results 
+            if isinstance(tasks, list) and len(tasks) > 0 and 'id' in tasks[0]:
+                return {task['id']: MockContainerResult(task_id=task['id']) for task in tasks}
+            return {}
+            
+    class MockTaskExecutor:
+        def __init__(self, *args, **kwargs):
+            self._progress_callback = Mock()
+            
+        def execute(self, *args, **kwargs):
+            return None
+            
+        def _generate_workflow_prompt(self, *args, **kwargs):
+            return None
+            
+    class MockOrchestrationMonitor:
+        def __init__(self, monitoring_dir: str = "/tmp/mock", *args, **kwargs):
+            self.monitoring: Optional[bool] = None
+            self.monitoring_dir = Path(monitoring_dir)
+            self.docker_client: Optional[Mock] = None
+            self.active_containers = {}
+            
+        def update_container_status(self, *args, **kwargs):
+            return None
+    
+    ContainerConfig = MockContainerConfig
+    ContainerManager = MockContainerManager
+    ContainerResult = MockContainerResult
+    ExecutionEngine = MockExecutionEngine
+    TaskExecutor = MockTaskExecutor
+    OrchestrationMonitor = MockOrchestrationMonitor
+    imports_available = False
+    IMPORTS_AVAILABLE = imports_available  # type: ignore[reportConstantRedefinition]
 
 
+@unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
 class TestContainerConfig(unittest.TestCase):
     """Test ContainerConfig dataclass and validation"""
 
@@ -367,8 +445,10 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         )
 
         # Verify result conversion
-        self.assertEqual(result.status, "success")
-        self.assertEqual(result.exit_code, 0)
+        self.assertIsNotNone(result)
+        if result is not None:
+            self.assertEqual(result.status, "success")
+        self.assertEqual((result.exit_code if result is not None else None), 0)
 
 
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Monitoring modules not available")
@@ -543,6 +623,7 @@ Test containerized execution
         # Verify results
         self.assertEqual(len(results), 1)
         result = results['test-workflow-task']
+        self.assertIsNotNone(result)  # Use the result to avoid unused variable warning
 
         # Verify containerized execution characteristics
         if engine.execution_mode == "containerized":

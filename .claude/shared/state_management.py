@@ -20,7 +20,7 @@ import uuid
 class StateError(Exception):
     """Base exception for state management operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict[str, Any]):
+    def __init__(self, message: str, operation: str, context: Dict[str, Any]) -> None:
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -29,7 +29,7 @@ class StateError(Exception):
 class StateValidationError(StateError):
     """Exception for state validation errors."""
 
-    def __init__(self, message: str, validation_errors: List[str]):
+    def __init__(self, message: str, validation_errors: List[str]) -> None:
         super().__init__(message, 'validation', {})
         self.validation_errors = validation_errors
 
@@ -72,7 +72,9 @@ class WorkflowPhase(Enum):
         """Check if phase number is valid."""
         if isinstance(phase_number, cls):
             phase_number = phase_number.value
-        return 0 <= phase_number <= 9
+        if isinstance(phase_number, int):
+            return 0 <= phase_number <= 9
+        return False
 
 
 @dataclass
@@ -91,8 +93,8 @@ class TaskState:
     context: Dict[str, Any] = field(default_factory=dict)
     error_info: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, task_id: str, prompt_file: str, status: str = "pending",
-                 phase: Optional[WorkflowPhase] = None, **kwargs):
+    def __init__(self, task_id: str, prompt_file: str, status: str,
+                 phase: Optional[WorkflowPhase] = None, **kwargs) -> None:
         """Initialize TaskState with compatibility for phase parameter."""
         self.task_id = task_id
         self.prompt_file = prompt_file
@@ -103,12 +105,8 @@ class TaskState:
 
         # Handle phase parameter for API compatibility
         if phase is not None:
-            if isinstance(phase, WorkflowPhase):
-                self.current_phase = phase.value
-                self.current_phase_name = WorkflowPhase.get_phase_name(phase.value)
-            else:
-                self.current_phase = int(phase)
-                self.current_phase_name = WorkflowPhase.get_phase_name(self.current_phase)
+            self.current_phase = phase.value
+            self.current_phase_name = WorkflowPhase.get_phase_name(phase.value)
         else:
             self.current_phase = kwargs.get('current_phase', 0)
             self.current_phase_name = kwargs.get('current_phase_name')
@@ -193,7 +191,7 @@ class StateManager:
     Handles state persistence, retrieval, and lifecycle management.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize StateManager.
 
@@ -436,7 +434,7 @@ class StateManager:
             for task_dir in self.state_dir.iterdir():
                 if task_dir.is_dir():
                     state = self.load_state(task_dir.name)
-                    if state and state.updated_at < cutoff_date:
+                    if state and state.updated_at is not None and state.updated_at < cutoff_date:
                         if state.status in ['completed', 'cancelled']:
                             self.delete_state(state.task_id)
                             cleaned_count += 1
@@ -645,7 +643,7 @@ class CheckpointManager:
     Provides atomic checkpoint creation and restoration.
     """
 
-    def __init__(self, config: Optional[Union[Dict[str, Any], 'StateManager']] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """
         Initialize CheckpointManager.
 
