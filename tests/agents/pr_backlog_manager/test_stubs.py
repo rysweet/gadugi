@@ -325,8 +325,10 @@ class GadugiError(Exception):
 class DelegationCoordinator:
     """Delegation coordinator implementation."""
 
-    def __init__(self, auto_approve: bool) -> None:
-        self.github_ops = GitHubOperationsStub()  # Mock GitHub operations
+    def __init__(self, auto_approve: bool, github_ops: Any = None) -> None:
+        self.github_ops = (
+            github_ops if github_ops else GitHubOperationsStub()
+        )  # Mock GitHub operations
         self.auto_approve = auto_approve
         self.active_delegations: Dict[Any, Any] = {}
         self.config = {

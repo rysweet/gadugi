@@ -838,10 +838,14 @@ class TestGitHubError:
 
     def test_github_error_creation(self):
         """Test GitHubError exception creation."""
-        error = GitHubError("Test error message", "create_issue", {"title": "Test"})
+        # The actual GitHubError requires 4 arguments: message, operation, context, details
+        error = GitHubError(
+            "Test error message", "create_issue", {"title": "Test"}, None
+        )
         assert str(error) == "Test error message"
         assert error.operation == "create_issue"
         assert error.context == {"title": "Test"}
+        assert error.details == {}  # Should default to empty dict when None passed
 
     def test_github_error_with_details(self):
         """Test GitHubError with additional details."""
@@ -849,7 +853,7 @@ class TestGitHubError:
             "API request failed",
             "get_issue",
             {"issue_number": 42},
-            details={"status_code": 404, "response": "Not found"},
+            {"status_code": 404, "response": "Not found"},
         )
         assert error.details["status_code"] == 404
 

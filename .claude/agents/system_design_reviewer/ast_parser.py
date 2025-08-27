@@ -297,7 +297,7 @@ class PythonASTVisitor(ast.NodeVisitor):
         self.file_path = file_path
         self.content = content
         self.parser = parser
-        self.elements: List[Any] = field(default_factory=list)
+        self.elements: List[ArchitecturalElement] = []
         self.current_class: Optional[str] = None
         self.imports: Set[str] = set()
 

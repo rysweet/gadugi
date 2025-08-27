@@ -287,7 +287,7 @@ class TodoWriteIntegration:
         self.current_task_list: Optional[TaskList] = None
         self.call_count = 0
         self.last_update_time: Optional[datetime] = None
-        self.call_history: List[Any] = field(default_factory=list)
+        self.call_history: List[Any] = []
 
     def submit_task_list(self, task_list: TaskList) -> Dict[str, Any]:
         """Submit a complete task list via TodoWrite."""

@@ -9,7 +9,7 @@ import uuid
 from datetime import datetime
 import time
 from typing import Any, Dict, List
-from dataclasses import field
+# field import removed - not needed
 
 import pytest
 from unittest.mock import Mock, patch
@@ -135,8 +135,8 @@ except ImportError as e:
 
     class TaskList:
         def __init__(self) -> None:
-            self.tasks: List[Any] = field(default_factory=list)
-            self._task_dict: Dict[Any, Any] = field(default_factory=dict)
+            self.tasks: List[Any] = []
+            self._task_dict: Dict[Any, Any] = {}
 
         def add_task(self, task: Task) -> None:
             # Raise TaskValidationError if task is invalid
@@ -208,6 +208,7 @@ except ImportError as e:
             self.call_count: int = 0
             self.mock_api = Mock()
             self.last_update_time: Optional[datetime] = None
+            self.call_history: List[Any] = []
 
         def submit_task_list(self, task_list: TaskList) -> Dict[str, Any]:
             if task_list.count() == 0:
@@ -305,11 +306,11 @@ except ImportError as e:
             return stats
 
     class WorkflowPhaseTracker:
-        def __init__(self) -> None:
-            self.workflow_id: str = str(uuid.uuid4())
+        def __init__(self, workflow_id: Optional[str] = None) -> None:
+            self.workflow_id: str = workflow_id or str(uuid.uuid4())
             self.current_phase: Optional[str] = None
-            self.phase_history: List[Any] = field(default_factory=list)
-            self.phase_start_times: Dict[Any, Any] = field(default_factory=dict)
+            self.phase_history: List[Any] = []
+            self.phase_start_times: Dict[Any, Any] = {}
 
         def start_phase(
             self, phase_name: str, description: Optional[str] = None
@@ -444,9 +445,9 @@ except ImportError as e:
     class TaskMetrics:
         def __init__(self) -> None:
             self.start_time: datetime = datetime.now()
-            self.task_completion_times: List[Any] = field(default_factory=list)
-            self.status_change_count: Dict[Any, Any] = field(default_factory=dict)
-            self.task_status_history: List[Any] = field(default_factory=list)
+            self.task_completion_times: List[Any] = []
+            self.status_change_count: Dict[Any, Any] = {}
+            self.task_status_history: List[Any] = []
             self.average_completion_time: Optional[float] = None
             self.throughput_per_hour: float = 0.0
             self.productivity_score: float = 0.0
@@ -564,13 +565,15 @@ except ImportError as e:
 
     class TaskTracker:
         def __init__(
-            self, todowrite_integration: Optional[TodoWriteIntegration] = None
+            self,
+            workflow_id: Optional[str] = None,
+            todowrite_integration: Optional[TodoWriteIntegration] = None,
         ):
             self.task_list: TaskList = TaskList()
             self.todowrite: TodoWriteIntegration = (
                 todowrite_integration or TodoWriteIntegration()
             )
-            self.phase_tracker: WorkflowPhaseTracker = WorkflowPhaseTracker()
+            self.phase_tracker: WorkflowPhaseTracker = WorkflowPhaseTracker(workflow_id)
             self.metrics: TaskMetrics = TaskMetrics()
 
         def create_task(
@@ -824,9 +827,9 @@ class TestTask:
         with pytest.raises(TaskValidationError):
             Task("", "Content").validate()
 
-        # Invalid content
-        with pytest.raises(TaskValidationError):
-            Task("id", "").validate()
+        # Invalid content - the actual implementation raises ValueError on construction
+        with pytest.raises(ValueError):
+            Task("id", "")
 
     def test_task_estimated_duration(self):
         """Test task estimated duration functionality."""
@@ -1079,7 +1082,7 @@ class TestTodoWriteIntegration:
         integration = TodoWriteIntegration()
 
         # Mock the Claude Code function call
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             task_list = TaskList()
@@ -1132,7 +1135,7 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("2", "Another task"))
         integration.current_task_list = task_list
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             result = integration.update_task_status("1", TaskStatus.COMPLETED)
@@ -1154,7 +1157,7 @@ class TestTodoWriteIntegration:
         existing_list.add_task(Task("1", "Existing task"))
         integration.current_task_list = existing_list
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             new_task = Task("2", "New task", priority=TaskPriority.HIGH)
@@ -1175,7 +1178,7 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("2", "Remove this"))
         integration.current_task_list = task_list
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             result = integration.remove_task("2")
@@ -1194,13 +1197,13 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("3", "Task 3"))
         integration.current_task_list = task_list
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             updates = [
-                {"task_id": "1", "status": TaskStatus.COMPLETED},
-                {"task_id": "2", "status": TaskStatus.IN_PROGRESS},
-                {"task_id": "3", "priority": TaskPriority.HIGH},
+                {"id": "1", "status": TaskStatus.COMPLETED},
+                {"id": "2", "status": TaskStatus.IN_PROGRESS},
+                {"id": "3", "priority": TaskPriority.HIGH},
             ]
 
             result = integration.batch_update(updates)
@@ -1241,14 +1244,14 @@ class TestWorkflowPhaseTracker:
 
     def test_workflow_phase_tracker_init(self):
         """Test workflow phase tracker initialization."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
         assert tracker.current_phase is None
         assert len(tracker.phase_history) == 0
         assert tracker.workflow_id is not None
 
     def test_start_phase(self):
         """Test starting a workflow phase."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         tracker.start_phase("setup", "Initial setup phase")
 
@@ -1263,7 +1266,7 @@ class TestWorkflowPhaseTracker:
 
     def test_complete_phase(self):
         """Test completing a workflow phase."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         tracker.start_phase("setup", "Initial setup")
         tracker.complete_phase("Setup completed successfully")
@@ -1278,7 +1281,7 @@ class TestWorkflowPhaseTracker:
 
     def test_fail_phase(self):
         """Test failing a workflow phase."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         tracker.start_phase("implementation", "Code implementation")
         tracker.fail_phase("Build failed", {"error": "syntax error"})
@@ -1292,7 +1295,7 @@ class TestWorkflowPhaseTracker:
 
     def test_phase_transitions(self):
         """Test multiple phase transitions."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         # Phase 1
         tracker.start_phase("setup", "Setup")
@@ -1314,7 +1317,7 @@ class TestWorkflowPhaseTracker:
 
     def test_get_phase_summary(self):
         """Test getting phase summary."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         tracker.start_phase("setup", "Setup")
         tracker.complete_phase("Done")
@@ -1332,7 +1335,7 @@ class TestWorkflowPhaseTracker:
 
     def test_create_phase_task_list(self):
         """Test creating task list for a phase."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
 
         tasks = [
             {"content": "Task 1", "priority": "high"},
@@ -1352,10 +1355,10 @@ class TestWorkflowPhaseTracker:
 
     def test_integration_with_todowrite(self):
         """Test integration between phase tracker and TodoWrite."""
-        tracker = WorkflowPhaseTracker()
+        tracker = WorkflowPhaseTracker(None)
         integration = TodoWriteIntegration()
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Start phase and create tasks
@@ -1484,7 +1487,7 @@ class TestTaskTracker:
 
     def test_task_tracker_init(self):
         """Test TaskTracker initialization."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         assert isinstance(tracker.task_list, TaskList)
         assert isinstance(tracker.todowrite, TodoWriteIntegration)
@@ -1493,7 +1496,7 @@ class TestTaskTracker:
 
     def test_create_task(self) -> None:
         """Test creating a task through tracker."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         with patch.object(tracker.todowrite, "add_task") as mock_add:
             mock_add.return_value = {"success": True}
@@ -1507,7 +1510,7 @@ class TestTaskTracker:
 
     def test_update_task_status(self):
         """Test updating task status through tracker."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         # Add a task first
         task = Task("1", "Test task")
@@ -1530,7 +1533,7 @@ class TestTaskTracker:
 
     def test_start_workflow_phase(self):
         """Test starting a workflow phase."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         phase_tasks = [
             {"content": "Task 1", "priority": "high"},
@@ -1550,7 +1553,7 @@ class TestTaskTracker:
 
     def test_complete_workflow_phase(self):
         """Test completing a workflow phase."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         # Start a phase first
         tracker.phase_tracker.start_phase("setup", "Setup phase")
@@ -1563,7 +1566,7 @@ class TestTaskTracker:
 
     def test_get_dashboard_data(self):
         """Test getting dashboard data."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         # Add some tasks
         tracker.task_list.add_task(Task("1", "Task 1", TaskStatus.COMPLETED))
@@ -1586,9 +1589,9 @@ class TestTaskTrackingIntegration:
     @pytest.mark.integration
     def test_complete_workflow_with_tracking(self):
         """Test complete workflow with task tracking."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Start workflow phase
@@ -1621,7 +1624,7 @@ class TestTaskTrackingIntegration:
     @pytest.mark.integration
     def test_error_recovery_in_task_tracking(self):
         """Test error recovery in task tracking."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
         # Simulate TodoWrite failure
         with patch.object(tracker.todowrite, "submit_task_list") as mock_submit:
@@ -1638,9 +1641,9 @@ class TestTaskTrackingIntegration:
     @pytest.mark.integration
     def test_metrics_collection_during_workflow(self):
         """Test metrics collection during workflow execution."""
-        tracker = TaskTracker()
+        tracker = TaskTracker(None)
 
-        with patch("claude.shared.task_tracking.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Create and start tasks

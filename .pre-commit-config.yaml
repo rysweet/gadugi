@@ -32,12 +32,12 @@ repos:
     hooks:
       - id: pyright
         name: pyright type checker
-        entry: pyright container_runtime/
+        entry: uv run pyright
         language: system
         types: [python]
         pass_filenames: false
-        stages: [pre-push]  # Run on push to avoid slowing down commits
-        # Scoped to container_runtime/ initially for phased rollout
+        stages: [pre-commit]  # Run on every commit to catch issues early
+        # Check entire codebase for type safety
 
   # Security: Check for secrets
   - repo: https://github.com/Yelp/detect-secrets
@@ -64,11 +64,11 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: uv run pytest
+        entry: uv run pytest tests/ -x --tb=short
         language: system
         pass_filenames: false
         always_run: true
-        stages: [pre-push]  # Only run tests on push, not every commit
+        stages: [pre-commit]  # Run tests on every commit to ensure quality
 
 # Global configuration
 default_language_version:

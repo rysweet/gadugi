@@ -47,6 +47,10 @@ class ErrorHandler:
         self.recovery_strategies[exc_type] = strategy
 
     def handle_error(self, error, context=None):
+        error_type = type(error)
+        if error_type in self.recovery_strategies:
+            strategy = self.recovery_strategies[error_type]
+            return strategy(error, context)
         return f"Mock error handling: {error}"
 
 
@@ -241,6 +245,9 @@ class TestEnhancedSeparationBasic:
 
         # Add task to tracker
         self.task_tracker.task_list.add_task(task)
+
+        # Submit task list to TodoWrite so it can be updated later
+        self.task_tracker.todowrite.submit_task_list(self.task_tracker.task_list)
 
         # Retrieve task
         retrieved_task = self.task_tracker.get_task("test-task-001")

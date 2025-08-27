@@ -28,7 +28,11 @@ class DocumentationManager:
     """Manages automated updates to architecture documentation"""
 
     def __init__(self, architecture_file: str) -> None:
-        self.architecture_file = architecture_file
+        # Convert to uppercase for standard ARCHITECTURE.md convention
+        if architecture_file.lower() == "architecture.md":
+            self.architecture_file = "ARCHITECTURE.md"
+        else:
+            self.architecture_file = architecture_file
         self.template_sections = {
             "system_overview": self._generate_system_overview,
             "component_architecture": self._generate_component_architecture,

@@ -500,7 +500,9 @@ class TestWorkflowManagerIntegration:
         ):  # _i unused but required by enumerate
             # Start phase
             self.phase_tracker.start_phase(phase)
-            self.task_metrics.record_phase_start(phase.name.lower())
+            # Handle both string and enum phases
+            phase_name = phase if isinstance(phase, str) else phase.name.lower()
+            self.task_metrics.record_phase_start(phase_name)
 
             # Simulate phase work (mock)
             import time
@@ -509,7 +511,7 @@ class TestWorkflowManagerIntegration:
 
             # Complete phase
             self.phase_tracker.complete_phase(phase)
-            self.task_metrics.record_phase_completion(phase.name.lower())
+            self.task_metrics.record_phase_completion(phase_name)
 
             # Verify phase completion
             phase_status = self.phase_tracker.get_phase_status(phase)

@@ -153,23 +153,23 @@ except ImportError as e:
             self.current_phase_name = phase.name.lower()
             self.updated_at = datetime.now()
 
-        def set_error(
-            self,
-            error_type: str,
-            error_message: str,
-            error_details: Optional[Dict] = None,
-        ) -> None:
-            self.error_info = {
-                "type": error_type,
-                "message": error_message,
-                "details": error_details or {},
-                "timestamp": datetime.now().isoformat(),
-            }
-            self.status = TaskStatus.FAILED
+        def set_error(self, error_info: Dict[str, Any]) -> None:
+            """Set error information and update status."""
+            self.status = (
+                TaskStatus.FAILED if hasattr(TaskStatus, "FAILED") else "error"
+            )
+            self.error_info = error_info.copy()
+            self.error_info["error_timestamp"] = (
+                datetime.now(timezone.utc).isoformat() + "Z"
+            )
             self.updated_at = datetime.now()
 
         def clear_error(self) -> None:
-            self.error_info = None
+            """Clear error information and reset status."""
+            self.status = (
+                TaskStatus.PENDING if hasattr(TaskStatus, "PENDING") else "pending"
+            )
+            self.error_info = {}
             self.updated_at = datetime.now()
 
         @property
@@ -370,43 +370,84 @@ except ImportError as e:
     class CheckpointManager:
         def __init__(
             self,
-            checkpoint_dir: Optional[str] = None,
-            state_manager: Optional["StateManager"] = None,
+            config: Optional[Any] = None,
         ):
-            # Support both constructor patterns
-            if checkpoint_dir:
-                self.checkpoint_dir = Path(checkpoint_dir)
-            elif state_manager:
-                self.checkpoint_dir = state_manager.state_dir / "checkpoints"
+            # Support both constructor patterns - config dict or StateManager
+            if isinstance(config, dict):
+                self.checkpoint_dir = Path(
+                    config.get("checkpoint_dir", ".claude/checkpoints")
+                )
+                self.state_manager = None
+            elif hasattr(config, "state_dir"):  # This is a StateManager
+                self.checkpoint_dir = config.state_dir / "checkpoints"
+                self.state_manager = config
+            elif isinstance(config, str):  # Backward compatibility for string path
+                self.checkpoint_dir = Path(config)
+                self.state_manager = None
             else:
                 self.checkpoint_dir = Path(".claude/checkpoints")
+                self.state_manager = None
             self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-        def create_checkpoint(self, workflow_id: str, state: Dict[str, Any]) -> str:
+        def create_checkpoint(self, state: "TaskState", description: str) -> str:
+            """Create checkpoint for task state."""
             # Use microseconds to avoid collision when creating multiple checkpoints quickly
             timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-            checkpoint_id = f"{workflow_id}-{timestamp}"
-            checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
+            checkpoint_id = f"{state.task_id}-{timestamp}"
+
+            task_checkpoint_dir = self.checkpoint_dir / state.task_id
+            task_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+            checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
             with open(checkpoint_file, "w") as f:
-                json.dump(state, f, indent=2)
+                json.dump(state.to_dict(), f, indent=2)
             return checkpoint_id
 
-        def restore_checkpoint(self, checkpoint_id: str) -> Dict[str, Any]:
-            checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
+        def restore_checkpoint(
+            self, task_id: str, checkpoint_id: str
+        ) -> Optional["TaskState"]:
+            """Restore task state from checkpoint."""
+            task_checkpoint_dir = self.checkpoint_dir / task_id
+            checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
+
             if not checkpoint_file.exists():
                 raise StateError(
                     f"Checkpoint {checkpoint_id} not found",
                     operation="restore_checkpoint",
                 )
+
             with open(checkpoint_file, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+            return TaskState.from_dict(data)
 
-        def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
-            pattern = f"{workflow_id}-*.json" if workflow_id else "*.json"
-            return [f.stem for f in self.checkpoint_dir.glob(pattern)]
+        def list_checkpoints(self, task_id: str) -> List[Dict[str, Any]]:
+            """List checkpoints for a task."""
+            task_checkpoint_dir = self.checkpoint_dir / task_id
+            if not task_checkpoint_dir.exists():
+                return []
 
-        def delete_checkpoint(self, checkpoint_id: str) -> None:
-            checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
+            checkpoints = []
+            checkpoint_files = list(task_checkpoint_dir.glob("*.json"))
+
+            for checkpoint_file in checkpoint_files:
+                checkpoint_id = checkpoint_file.stem
+                # Get file modification time for metadata
+                mtime = checkpoint_file.stat().st_mtime
+                checkpoints.append(
+                    {
+                        "checkpoint_id": checkpoint_id,
+                        "task_id": task_id,
+                        "created_at": datetime.fromtimestamp(mtime).isoformat(),
+                        "file": str(checkpoint_file),
+                    }
+                )
+
+            return sorted(checkpoints, key=lambda x: x["created_at"], reverse=True)
+
+        def delete_checkpoint(self, task_id: str, checkpoint_id: str) -> None:
+            """Delete a checkpoint."""
+            task_checkpoint_dir = self.checkpoint_dir / task_id
+            checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
             if checkpoint_file.exists():
                 checkpoint_file.unlink()
 
@@ -554,21 +595,24 @@ class TestTaskState:
             task_id="test-task-006", prompt_file="test.md", status="in_progress"
         )
 
-        # Set error info on state
-
-        state.set_error(
-            "network_error", "Connection failed", {"phase": 2, "retry_count": 3}
-        )
+        # Set error info on state with a dictionary
+        error_info = {
+            "type": "network_error",
+            "message": "Connection failed",
+            "phase": 2,
+            "retry_count": 3,
+        }
+        state.set_error(error_info)
 
         assert state.status == "error"  # type: ignore[import-not-found]
         # Check that error info is set properly
         assert state.error_info is not None
         assert state.error_info["type"] == "network_error"
         assert state.error_info["message"] == "Connection failed"
-        assert state.error_info["details"]["phase"] == 2
-        assert state.error_info["details"]["retry_count"] == 3
+        assert state.error_info["phase"] == 2
+        assert state.error_info["retry_count"] == 3
         # Check that timestamp was added
-        assert "timestamp" in state.error_info
+        assert "error_timestamp" in state.error_info
 
     def test_task_state_clear_error(self):
         """Test clearing error information."""
@@ -617,8 +661,8 @@ class TestWorkflowPhase:
         """Test workflow phase enumeration."""
         assert WorkflowPhase.INITIALIZATION.value == 0
         assert WorkflowPhase.ISSUE_CREATION.value == 2
-        assert WorkflowPhase.IMPLEMENTATION.value == 3
-        assert WorkflowPhase.REVIEW.value == 5
+        assert WorkflowPhase.IMPLEMENTATION.value == 5
+        assert WorkflowPhase.REVIEW.value == 9
 
     def test_workflow_phase_names(self):
         """Test workflow phase name mapping."""
@@ -626,8 +670,9 @@ class TestWorkflowPhase:
             WorkflowPhase.get_phase_name(0) == "Task Initialization & Resumption Check"
         )
         assert WorkflowPhase.get_phase_name(2) == "Issue Creation"
-        assert WorkflowPhase.get_phase_name(3) == "Implementation"
-        assert WorkflowPhase.get_phase_name(5) == "Review"
+        assert WorkflowPhase.get_phase_name(3) == "Branch Management"
+        assert WorkflowPhase.get_phase_name(5) == "Implementation"
+        assert WorkflowPhase.get_phase_name(9) == "Review"
         assert WorkflowPhase.get_phase_name(99) == "Unknown Phase"
 
     def test_workflow_phase_validation(self):
@@ -980,7 +1025,9 @@ class TestCheckpointManager:
     @pytest.fixture
     def checkpoint_manager(self, temp_checkpoint_dir):
         """Create CheckpointManager instance for testing."""
-        return CheckpointManager(checkpoint_dir=str(temp_checkpoint_dir))
+        # Use config dict with checkpoint_dir
+        config = {"checkpoint_dir": str(temp_checkpoint_dir)}
+        return CheckpointManager(config=config)
 
     def test_create_checkpoint(self, checkpoint_manager):
         """Test checkpoint creation."""
@@ -991,8 +1038,8 @@ class TestCheckpointManager:
             current_phase=3,
         )
 
-        # Create checkpoint from state data
-        checkpoint_id = checkpoint_manager.create_checkpoint(state, "checkpoint-001")
+        # Create checkpoint with description
+        checkpoint_id = checkpoint_manager.create_checkpoint(state, "Test checkpoint")
         assert checkpoint_id is not None
 
         # Verify checkpoint file exists
@@ -1011,7 +1058,7 @@ class TestCheckpointManager:
         checkpoint_ids = []
         for i in range(3):
             checkpoint_id = checkpoint_manager.create_checkpoint(
-                state, f"checkpoint-{i + 1}"
+                state, f"Checkpoint {i + 1}"
             )
             checkpoint_ids.append(checkpoint_id)
 
@@ -1033,20 +1080,24 @@ class TestCheckpointManager:
             current_phase=3,
         )
 
-        # checkpoint_state data for verification purposes
+        # Create checkpoint with description
         checkpoint_id = checkpoint_manager.create_checkpoint(
-            original_state, "restore-checkpoint-desc"
+            original_state, "Restore test checkpoint"
         )
 
         # Restore checkpoint
-        restored_data = checkpoint_manager.restore_checkpoint(
+        restored_state = checkpoint_manager.restore_checkpoint(
             "restore-checkpoint", checkpoint_id
         )
 
-        assert restored_data is not None
-        assert restored_data.task_id == "restore-checkpoint"
-        assert restored_data.current_phase == 3
-        assert restored_data.status == "in_progress"
+        assert restored_state is not None
+        assert restored_state.task_id == "restore-checkpoint"
+        assert restored_state.current_phase == 3
+        # Handle both enum and string status
+        if hasattr(restored_state.status, "value"):
+            assert restored_state.status.value == "in_progress"
+        else:
+            assert restored_state.status == "in_progress"
 
     def test_cleanup_old_checkpoints(self, checkpoint_manager):
         """Test cleanup of old checkpoints."""
@@ -1059,9 +1110,7 @@ class TestCheckpointManager:
         # Create several checkpoints
         for i in range(7):
             state.current_phase = i + 1
-            checkpoint_manager.create_checkpoint(
-                state, f"Checkpoint {i + 1} for cleanup"
-            )
+            checkpoint_manager.create_checkpoint(state, f"Checkpoint {i + 1}")
 
         # List all checkpoints (cleanup may be automatic or manual)
         checkpoints = checkpoint_manager.list_checkpoints("cleanup-checkpoints")
@@ -1077,7 +1126,7 @@ class TestCheckpointManager:
             context={"large_data": "x" * 10000},  # Large context for compression
         )
 
-        # Pass TaskState object directly
+        # Create checkpoint with description
         checkpoint_id = checkpoint_manager.create_checkpoint(
             state, "Compression test checkpoint"
         )
@@ -1090,11 +1139,11 @@ class TestCheckpointManager:
         assert len(checkpoint_files) > 0, "At least one checkpoint file should exist"
 
         # Verify we can restore the checkpoint
-        restored_data = checkpoint_manager.restore_checkpoint(
+        restored_state = checkpoint_manager.restore_checkpoint(
             "compression-test", checkpoint_id
         )
-        assert restored_data is not None
-        assert restored_data.context["large_data"] == "x" * 10000
+        assert restored_state is not None
+        assert restored_state.context["large_data"] == "x" * 10000
 
 
 class TestStateError:
@@ -1130,10 +1179,9 @@ class TestStateManagementIntegration:
             "cleanup_after_days": 7,
         }
         state_manager = StateManager(config=state_config)
-        # checkpoint_config for reference
-        checkpoint_manager = CheckpointManager(
-            checkpoint_dir=str(temp_dir / "checkpoints")
-        )
+        # Use config dict for CheckpointManager
+        checkpoint_config = {"checkpoint_dir": str(temp_dir / "checkpoints")}
+        checkpoint_manager = CheckpointManager(config=checkpoint_config)
 
         yield state_manager, checkpoint_manager, temp_dir
 
@@ -1154,7 +1202,7 @@ class TestStateManagementIntegration:
         # Phase 1: Initial Setup
         task_state.update_phase(WorkflowPhase.INITIALIZATION)
         state_manager.save_state(task_state)
-        checkpoint_manager.create_checkpoint(task_state, "Checkpoint")
+        checkpoint_manager.create_checkpoint(task_state, "Initial setup checkpoint")
 
         # Phase 2: Issue Creation
         task_state.update_phase(WorkflowPhase.ISSUE_CREATION)
@@ -1166,7 +1214,7 @@ class TestStateManagementIntegration:
         task_state.branch = "feature/integration-test-42"
         task_state.status = "in_progress"
         state_manager.update_state(task_state)
-        checkpoint_manager.create_checkpoint(task_state, "Checkpoint")
+        checkpoint_manager.create_checkpoint(task_state, "Implementation checkpoint")
 
         # Phase 5: Review Complete
         task_state.update_phase(WorkflowPhase.REVIEW)
@@ -1202,7 +1250,7 @@ class TestStateManagementIntegration:
 
         # Progress through phases with checkpoints
         phases = [
-            WorkflowPhase.PLANNING,
+            WorkflowPhase.INITIALIZATION,
             WorkflowPhase.ISSUE_CREATION,
             WorkflowPhase.IMPLEMENTATION,
         ]
@@ -1210,11 +1258,13 @@ class TestStateManagementIntegration:
             task_state.update_phase(phase)
             state_manager.update_state(task_state)
             checkpoint_manager.create_checkpoint(
-                task_state, f"error-recovery-phase-{phase.value}"
+                task_state, f"Phase {phase.value} checkpoint"
             )
 
         # Simulate error in implementation phase
-        task_state.set_error("test_failure", "Unit tests failed", {"retry_count": 1})
+        task_state.set_error(
+            {"type": "test_failure", "message": "Unit tests failed", "retry_count": 1}
+        )
         state_manager.update_state(task_state)
 
         # Recovery: clear error and continue
@@ -1242,7 +1292,9 @@ class TestStateManagementIntegration:
             )
             tasks.append(task)
             state_manager.save_state(task)
-            checkpoint_manager.create_checkpoint(task, f"concurrent-task-{i}")
+            checkpoint_manager.create_checkpoint(
+                task, f"Concurrent task {i} checkpoint"
+            )
 
         # Verify all tasks are tracked
         active_states = state_manager.list_active_states()

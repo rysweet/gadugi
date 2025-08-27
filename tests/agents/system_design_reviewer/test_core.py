@@ -380,8 +380,8 @@ class TestSystemDesignStateManager:
         """Test state manager initialization"""
         manager = SystemDesignStateManager()
 
-        assert manager.state_manager.state_dir.name == "system-design-reviewer"  # type: ignore[import-not-found]
-        assert manager.state_manager.task_id == "system-design-reviewer"  # type: ignore[import-not-found]
+        assert manager.state_dir.name == "system-design-reviewer"
+        assert manager.task_id == "system-design-reviewer"
 
     def test_get_default_state(self):
         """Test default state structure"""
@@ -403,10 +403,8 @@ class TestSystemDesignStateManager:
         """Test state saving and loading"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore[import-not-found]
-            manager.state_manager.state_file = (
-                manager.state_manager.state_dir / "test_state.json"
-            )  # type: ignore[import-not-found]
+            manager.state_dir = Path(temp_dir)
+            manager.state_file = manager.state_dir / "test_state.json"
 
             # Save state
             test_state = {"test_key": "test_value", "number": 42}
@@ -424,10 +422,8 @@ class TestSystemDesignStateManager:
         """Test saving review results"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore[import-not-found]
-            manager.state_manager.state_file = (
-                manager.state_manager.state_dir / "test_state.json"
-            )  # type: ignore[import-not-found]
+            manager.state_dir = Path(temp_dir)
+            manager.state_file = manager.state_dir / "test_state.json"
 
             # Create sample result
             result = ReviewResult(
@@ -455,10 +451,8 @@ class TestSystemDesignStateManager:
         """Test review result limit (keeps last 100)"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore[import-not-found]
-            manager.state_manager.state_file = (
-                manager.state_manager.state_dir / "test_state.json"
-            )  # type: ignore[import-not-found]
+            manager.state_dir = Path(temp_dir)
+            manager.state_file = manager.state_dir / "test_state.json"
 
             # Create initial state with many reviews
             initial_state = manager.get_default_state()
@@ -543,8 +537,8 @@ class TestReviewResult:
         result_dict = result.to_dict()
 
         assert result_dict["pr_number"] == "123"
-        assert result_dict["status"] == ReviewStatus.COMPLETED
-        assert result_dict["architectural_impact"] == ImpactLevel.MEDIUM
+        assert result_dict["status"] == ReviewStatus.COMPLETED.value
+        assert result_dict["architectural_impact"] == ImpactLevel.MEDIUM.value
         assert len(result_dict["changes_detected"]) == 1
         assert "timestamp" in result_dict
 

@@ -8,7 +8,7 @@ including WorkflowMaster for complex resolutions and code-reviewer for AI review
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger(__name__)
@@ -76,7 +76,7 @@ class DelegationCoordinator:
         self.auto_approve = auto_approve
 
         # Track active delegations
-        self.active_delegations: Dict[Any, Any] = field(default_factory=dict)
+        self.active_delegations: Dict[str, DelegationTask] = {}
 
         # Configuration
         self.config = {

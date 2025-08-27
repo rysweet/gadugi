@@ -112,7 +112,7 @@ class ImageManager:
             if result.returncode == 0:
                 logger.info("Trivy security scanner available")
                 return True
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+        except (subprocess.TimeoutExpired, FileNotFoundError, PermissionError):
             pass
 
         logger.warning(

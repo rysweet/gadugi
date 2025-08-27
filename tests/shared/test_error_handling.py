@@ -4,13 +4,14 @@ Tests error handling utilities, retry logic, circuit breakers, and recovery patt
 """
 
 import logging
-
-# Import the module we're testing
 import time
 from datetime import datetime
 
 import pytest
 from unittest.mock import call, patch
+
+# Create module-level logger
+logger = logging.getLogger(__name__)
 
 
 try:
@@ -35,9 +36,6 @@ except ImportError:
     )
 
     from enum import Enum
-
-    # Add logger for stub implementation
-    logger = logging.getLogger(__name__)
 
     class ErrorSeverity(Enum):
         LOW = "low"
@@ -602,25 +600,25 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.error") as mock_error:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
                 raise ValueError("Test error")
 
             assert failing_func() == "fallback"
-            mock_logger.error.assert_called_once()
+            mock_error.assert_called_once()
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.error") as mock_error:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
                 raise ValueError("Test error")
 
             assert failing_func() == "fallback"
-            mock_logger.error.assert_not_called()
+            mock_error.assert_not_called()
 
 
 class TestErrorHandler:
@@ -765,7 +763,7 @@ class TestCircuitBreaker:
 
     def test_circuit_breaker_success(self):
         """Test circuit breaker with successful operations."""
-        cb = CircuitBreaker()
+        cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60.0)
 
         @cb
         def success_func():
@@ -777,7 +775,7 @@ class TestCircuitBreaker:
 
     def test_circuit_breaker_failure_threshold(self):
         """Test circuit breaker opens after failure threshold."""
-        cb = CircuitBreaker(failure_threshold=2)
+        cb = CircuitBreaker(failure_threshold=2, recovery_timeout=60.0)
 
         @cb
         def failing_func():
@@ -829,7 +827,7 @@ class TestCircuitBreaker:
 
     def test_circuit_breaker_reset_on_success(self):
         """Test circuit breaker resets failure count on success."""
-        cb = CircuitBreaker(failure_threshold=3)
+        cb = CircuitBreaker(failure_threshold=3, recovery_timeout=60.0)
 
         call_count = 0
 
@@ -854,7 +852,7 @@ class TestCircuitBreaker:
 
     def test_circuit_breaker_reset_method(self):
         """Test circuit breaker manual reset."""
-        cb = CircuitBreaker(failure_threshold=1)
+        cb = CircuitBreaker(failure_threshold=1, recovery_timeout=60.0)
 
         @cb
         def failing_func():
@@ -918,7 +916,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.warning") as mock_warning:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -927,7 +925,7 @@ class TestHandleWithFallback:
                 return "fallback result"
 
             assert handle_with_fallback(primary, fallback) == "fallback result"
-            mock_logger.warning.assert_called_once()
+            mock_warning.assert_called_once()
 
 
 class TestErrorContext:
@@ -935,12 +933,12 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.debug") as mock_debug:
             with ErrorContext("test operation") as ctx:
                 pass  # Successful operation
 
             assert ctx.error is None
-            mock_logger.debug.assert_has_calls(
+            mock_debug.assert_has_calls(
                 [
                     call("Starting operation: test operation"),
                     call("Completed operation: test operation"),
@@ -949,7 +947,7 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.error") as mock_error:
             ctx = None
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as ctx:
@@ -957,7 +955,7 @@ class TestErrorContext:
 
             assert ctx is not None
             assert isinstance(ctx.error, ValueError)
-            mock_logger.error.assert_called_with("Error in test operation: Test error")
+            mock_error.assert_called_with("Error in test operation: Test error")
 
     def test_error_context_with_cleanup(self):
         """Test ErrorContext with cleanup function."""
@@ -979,13 +977,13 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("tests.shared.test_error_handling.logger") as mock_logger:
+        with patch("shared.utils.error_handling.logger.error") as mock_error:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")
 
             # Should log both the original error and cleanup failure
-            assert mock_logger.error.call_count == 2
+            assert mock_error.call_count == 2
 
     def test_error_context_suppress_errors(self):
         """Test ErrorContext with error suppression."""

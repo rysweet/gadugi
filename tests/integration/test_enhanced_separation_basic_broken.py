@@ -47,6 +47,10 @@ class ErrorHandler:
         self.recovery_strategies[exc_type] = strategy
 
     def handle_error(self, error, context=None):
+        error_type = type(error)
+        if error_type in self.recovery_strategies:
+            strategy = self.recovery_strategies[error_type]
+            return strategy(error, context)
         return f"Mock error handling: {error}"
 
 

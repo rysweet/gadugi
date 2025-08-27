@@ -413,7 +413,7 @@ class PRBacklogManager:
 
             logger.info(
                 f"Completed PR #{pr_number} assessment - "
-                f"Status: {assessment.status.name if assessment and assessment.status else 'None'}, "
+                f"Status: {assessment.status.value if assessment and assessment.status else 'None'}, "
                 f"Score: {assessment.readiness_score:.1f}%, "
                 f"Time: {processing_time:.2f}s"
             )
@@ -714,9 +714,9 @@ class PRBacklogManager:
         try:
             state_data = {
                 "pr_number": assessment.pr_number,
-                "status": assessment.status.name if assessment and assessment.status else None,
+                "status": assessment.status.value if assessment and assessment.status else None,
                 "criteria_met": {
-                    k.name: v for k, v in assessment.criteria_met.items()
+                    k.value: v for k, v in assessment.criteria_met.items()
                 },
                 "blocking_issues": assessment.blocking_issues,
                 "resolution_actions": assessment.resolution_actions,
@@ -829,7 +829,7 @@ class PRBacklogManager:
                 "assessments": [
                     {
                         "pr_number": a.pr_number,
-                        "status": a.status.name if a and a.status else None,
+                        "status": a.status.value if a and a.status else None,
                         "readiness_score": a.readiness_score,
                         "blocking_issues_count": len(a.blocking_issues),
                         "processing_time": a.processing_time,
@@ -865,7 +865,7 @@ def main():
             pr_number = int(sys.argv[1].split("_")[1])
             assessment = manager.process_single_pr(pr_number)
             print(
-                f"PR #{pr_number} assessment: {assessment.status.name if assessment and assessment.status else 'None'} "
+                f"PR #{pr_number} assessment: {assessment.status.value if assessment and assessment.status else 'None'} "
                 f"(Score: {assessment.readiness_score:.1f}%)"
             )
         except ValueError:

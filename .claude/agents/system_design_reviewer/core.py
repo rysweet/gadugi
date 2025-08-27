@@ -82,22 +82,23 @@ class ReviewResult:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""
-        return {
-            **asdict(self),
-            'timestamp': self.timestamp.isoformat(),
-            'changes_detected': [
-                {
-                    **asdict(change),
-                    'change_type': change.change_type.value,
-                    'impact_level': change.impact_level.value,
-                    'element': {
-                        **asdict(change.element),
-                        'element_type': change.element.element_type.value
-                    }
+        result = asdict(self)
+        result['status'] = self.status.value  # Convert enum to string
+        result['architectural_impact'] = self.architectural_impact.value  # Convert enum to string
+        result['timestamp'] = self.timestamp.isoformat()
+        result['changes_detected'] = [
+            {
+                **asdict(change),
+                'change_type': change.change_type.value,
+                'impact_level': change.impact_level.value,
+                'element': {
+                    **asdict(change.element),
+                    'element_type': change.element.element_type.value
                 }
-                for change in self.changes_detected
-            ]
-        }
+            }
+            for change in self.changes_detected
+        ]
+        return result
 
 
 class SystemDesignReviewer:
@@ -110,8 +111,8 @@ class SystemDesignReviewer:
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler(agent_type="system-design-reviewer")  # type: ignore[call-arg]
-        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")  # type: ignore[call-arg]
+        self.error_handler = ErrorHandler(agent_type="system-design-reviewer")
+        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
@@ -223,13 +224,23 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)  # type: ignore[attr-defined]
-
-            # Get changed files
-            changed_files = self._get_changed_files(pr_number)
-            result['changed_files'] = changed_files
-
-            return result
+            result = self.github_ops.get_pr(int(pr_number))
+            
+            if result.get('success') and result.get('data'):
+                pr_data = result['data']
+                pr_data['number'] = str(pr_data.get('number', pr_number))
+                
+                # Get changed files
+                changed_files = self._get_changed_files(pr_number)
+                pr_data['changed_files'] = changed_files
+                
+                return pr_data
+            
+            # Fallback if the API call didn't return expected format
+            return {
+                'number': pr_number,
+                'changed_files': self._get_changed_files(pr_number)
+            }
 
         except Exception as e:
             self.error_handler.handle_error(e, context={'pr_number': pr_number})
@@ -547,10 +558,10 @@ class SystemDesignStateManager:
     """State manager for System Design Review Agent"""
 
     def __init__(self) -> None:
-        self.state_manager = StateManager(  # type: ignore[call-arg]
-            state_dir=Path(".github/workflow-states/system-design-reviewer"),  # type: ignore[call-arg]
-            task_id="system-design-reviewer"  # type: ignore[call-arg]
-        )
+        self.state_dir = Path(".github/workflow-states/system-design-reviewer")
+        self.state_file = self.state_dir / "state.json"
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        self.task_id = "system-design-reviewer"
 
     def get_default_state(self) -> Dict[str, Any]:
         """Get default state structure"""
@@ -566,16 +577,39 @@ class SystemDesignStateManager:
                 'enable_adr_generation': True,
                 'enable_doc_updates': True,
                 'max_pr_size': 1000
-            }
+            },
+            'task_id': self.task_id,
+            'last_updated': datetime.now().isoformat()
         }
 
     def load_state(self) -> Dict[str, Any]:
         """Load state from file"""
-        return self.state_manager.load_state()  # type: ignore[attr-defined]
+        try:
+            if self.state_file.exists():
+                with open(self.state_file, 'r') as f:
+                    state = json.load(f)
+                    # Ensure task_id is present
+                    if 'task_id' not in state:
+                        state['task_id'] = self.task_id
+                    return state
+            return self.get_default_state()
+        except Exception as e:
+            print(f"Error loading state: {e}")
+            return self.get_default_state()
 
     def save_state(self, state_data: Dict[str, Any]) -> bool:
         """Save state to file"""
-        return self.state_manager.save_state(state_data)
+        try:
+            # Add metadata
+            state_data['task_id'] = self.task_id
+            state_data['last_updated'] = datetime.now().isoformat()
+            
+            with open(self.state_file, 'w') as f:
+                json.dump(state_data, f, indent=2)
+            return True
+        except Exception as e:
+            print(f"Error saving state: {e}")
+            return False
 
     def save_review_result(self, result: ReviewResult) -> bool:
         """Save a review result to state"""
