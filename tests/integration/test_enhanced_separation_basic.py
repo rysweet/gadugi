@@ -18,9 +18,12 @@ except ImportError:
     # Handle pytest not being available in test environment
     pytest = None
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
+)
 
 from github_operations import GitHubOperations
+
 # from interfaces import AgentConfig  # Used in test methods - commented to reduce unused import errors
 from state_management import CheckpointManager, StateManager, TaskState
 from task_tracking import (
@@ -31,27 +34,38 @@ from task_tracking import (
     TaskTracker,
     TodoWriteIntegration,
 )
+
+
 # Create mock classes first (pyright workaround)
 class ErrorHandler:
     def __init__(self):
         self.error_counts = {}
         self.recovery_strategies = {}
         self.error_history = []
+
     def register_recovery_strategy(self, exc_type, strategy):
         self.recovery_strategies[exc_type] = strategy
+
     def handle_error(self, error, context=None):
         return f"Mock error handling: {error}"
+
 
 class CircuitBreaker:
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
+
     def __call__(self, func):
         return func
 
+
 # Try to import real classes, fallback to mocks
 try:
-    from .claude.shared.utils.error_handling import ErrorHandler as RealErrorHandler, CircuitBreaker as RealCircuitBreaker
+    from .claude.shared.utils.error_handling import (
+        ErrorHandler as RealErrorHandler,
+        CircuitBreaker as RealCircuitBreaker,
+    )
+
     ErrorHandler = RealErrorHandler
     CircuitBreaker = RealCircuitBreaker
 except ImportError:
@@ -287,14 +301,13 @@ class TestEnhancedSeparationBasic:
         # Test invalid task list with raw dict (should fail validation)
         invalid_task_list = TaskList()
         try:
-            invalid_task = Task(
-                id="invalid",
-                content="Missing required fields"
-            )
+            invalid_task = Task(id="invalid", content="Missing required fields")
             # Intentionally corrupt the task to test validation
-            invalid_task.status = "invalid_status"  # type: ignore
+            invalid_task.status = "invalid_status"  # type: ignore[import-not-found]
             invalid_task_list.add_task(invalid_task)
-            is_valid_invalid = todowrite_integration.validate_task_list(invalid_task_list)
+            is_valid_invalid = todowrite_integration.validate_task_list(
+                invalid_task_list
+            )
             assert is_valid_invalid == False
         except Exception:
             # Expected to fail with invalid data
@@ -454,6 +467,7 @@ class TestEnhancedSeparationCodeReduction:
 
         # Test all shared modules can be imported
         from github_operations import GitHubOperations
+
         # from interfaces import AgentConfig  # Not needed for this test
         from state_management import StateManager
         from task_tracking import TaskTracker

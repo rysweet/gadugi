@@ -10,11 +10,14 @@ from enum import Enum
 import uuid
 import sys
 import os
+
 try:
-    from error_handling import GadugiError  # type: ignore
+    from error_handling import GadugiError  # type: ignore[import-not-found]
 except ImportError:
-    class GadugiError(Exception):  # type: ignore
+
+    class GadugiError(Exception):  # type: ignore[import-not-found]
         pass
+
 
 """
 Audit Logger for Container Execution.

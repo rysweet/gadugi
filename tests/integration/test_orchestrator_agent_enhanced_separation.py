@@ -22,6 +22,7 @@ import shutil
 import sys
 import tempfile
 from datetime import datetime  # timedelta not used
+
 # from pathlib import Path  # not used
 from typing import Dict, Any
 from unittest.mock import Mock, patch  # MagicMock not used
@@ -44,27 +45,38 @@ from task_tracking import (
     # TodoWriteIntegration,  # not used
     # WorkflowPhaseTracker,  # not used
 )
+
+
 # Create mock classes first (pyright workaround)
 class ErrorHandler:
     def __init__(self):
         self.error_counts = {}
         self.recovery_strategies = {}
         self.error_history = []
+
     def register_recovery_strategy(self, exc_type, strategy):
         self.recovery_strategies[exc_type] = strategy
+
     def handle_error(self, error, context=None):
         return f"Mock error handling: {error}"
+
 
 class CircuitBreaker:
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
+
     def __call__(self, func):
         return func
 
+
 # Try to import real classes, fallback to mocks
 try:
-    from .claude.shared.utils.error_handling import ErrorHandler as RealErrorHandler, CircuitBreaker as RealCircuitBreaker
+    from .claude.shared.utils.error_handling import (
+        ErrorHandler as RealErrorHandler,
+        CircuitBreaker as RealCircuitBreaker,
+    )
+
     ErrorHandler = RealErrorHandler
     CircuitBreaker = RealCircuitBreaker
 except ImportError:
@@ -125,7 +137,11 @@ class TestOrchestratorAgentIntegration:
         """Test parallel task analysis with enhanced error handling"""
 
         # Mock prompt files for analysis
-        _prompt_files = ["test-feature-a.md", "test-feature-b.md", "test-feature-c.md"]  # Used in test setup
+        _prompt_files = [
+            "test-feature-a.md",
+            "test-feature-b.md",
+            "test-feature-c.md",
+        ]  # Used in test setup
 
         # Mock task analysis result
         analysis_result = {
@@ -203,6 +219,7 @@ class TestOrchestratorAgentIntegration:
         successful_results = []
         for i, task in enumerate(tasks):
             try:
+
                 @execution_circuit_breaker
                 def mock_execution():
                     return {
@@ -210,7 +227,7 @@ class TestOrchestratorAgentIntegration:
                         "success": True,
                         "duration": 120 + i * 10,
                     }
-                
+
                 result = mock_execution()
                 successful_results.append(result)
                 # Mock task status update (task_tracker may not have this task yet)
@@ -229,10 +246,11 @@ class TestOrchestratorAgentIntegration:
 
         # Test circuit breaker failure handling
         try:
+
             @execution_circuit_breaker
             def mock_failing_execution():
                 raise Exception("Simulated failure")
-                
+
             mock_failing_execution()
         except Exception:
             # Should trigger error handler
@@ -258,7 +276,7 @@ class TestOrchestratorAgentIntegration:
 
             result = self.github_operations.batch_merge_pull_requests(pr_numbers)
             # Type hint for pyright - result is a Dict[str, Any]
-            result_dict: Dict[str, Any] = result  # type: ignore
+            result_dict: Dict[str, Any] = result  # type: ignore[import-not-found]
             assert result_dict["merged"] == pr_numbers
             assert len(result_dict["failed"]) == 0
             mock_batch.assert_called_once_with(pr_numbers)
@@ -293,11 +311,11 @@ class TestOrchestratorAgentIntegration:
                 "total_sequential_time": estimated_sequential_time,
             }
 
-        setattr(self.task_metrics, 'calculate_speedup', mock_calculate_speedup)
+        setattr(self.task_metrics, "calculate_speedup", mock_calculate_speedup)
 
         try:
             # Use getattr to avoid pyright issues with dynamically added method
-            calculate_speedup_method = getattr(self.task_metrics, 'calculate_speedup')
+            calculate_speedup_method = getattr(self.task_metrics, "calculate_speedup")
             performance_metrics = calculate_speedup_method(
                 execution_results, baseline_sequential_time=estimated_sequential_time
             )
@@ -434,7 +452,7 @@ class TestOrchestratorAgentIntegration:
 
             batch_result = self.github_operations.batch_merge_pull_requests(pr_numbers)
             # Type hint for pyright
-            batch_result_dict: Dict[str, Any] = batch_result  # type: ignore
+            batch_result_dict: Dict[str, Any] = batch_result  # type: ignore[import-not-found]
             assert len(batch_result_dict["merged"]) == 2
 
         # Update final state - use REVIEW phase since COMPLETED doesn't exist
@@ -455,11 +473,11 @@ class TestOrchestratorAgentIntegration:
                 "total_sequential_time": baseline_sequential_time,
             }
 
-        setattr(self.task_metrics, 'calculate_speedup', mock_calculate_speedup_e2e)
+        setattr(self.task_metrics, "calculate_speedup", mock_calculate_speedup_e2e)
 
         try:
             # Use getattr to avoid pyright issues with dynamically added method
-            calculate_speedup_method = getattr(self.task_metrics, 'calculate_speedup')
+            calculate_speedup_method = getattr(self.task_metrics, "calculate_speedup")
             performance_metrics = calculate_speedup_method(
                 execution_results,
                 baseline_sequential_time=600,  # 10 minutes sequential

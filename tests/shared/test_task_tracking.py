@@ -27,7 +27,8 @@ try:
         TaskTracker,
         TaskValidationError,
         TodoWriteIntegration,
-        WorkflowPhaseTracker)
+        WorkflowPhaseTracker,
+    )
 except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -57,7 +58,8 @@ except ImportError as e:
             content: str,
             status: TaskStatus = TaskStatus.PENDING,
             priority: TaskPriority = TaskPriority.MEDIUM,
-            **kwargs: Any):
+            **kwargs: Any,
+        ):
             self.id = id
             self.content = content
             self.status = status
@@ -84,7 +86,8 @@ except ImportError as e:
                 data["id"],
                 data["content"],
                 TaskStatus(data["status"]),
-                TaskPriority(data["priority"]))
+                TaskPriority(data["priority"]),
+            )
 
         def update_status(self, new_status: TaskStatus) -> None:
             self.status = new_status
@@ -100,7 +103,8 @@ except ImportError as e:
             return self.status in (
                 TaskStatus.PENDING,
                 TaskStatus.IN_PROGRESS,
-                TaskStatus.BLOCKED)
+                TaskStatus.BLOCKED,
+            )
 
         def validate(self) -> None:
             if not self.id:
@@ -193,7 +197,8 @@ except ImportError as e:
                     item["id"],
                     item["content"],
                     TaskStatus(item["status"]),
-                    TaskPriority(item["priority"]))
+                    TaskPriority(item["priority"]),
+                )
                 task_list.add_task(task)
             return task_list
 
@@ -222,7 +227,8 @@ except ImportError as e:
                         }
                         for t in task_list.tasks
                     ]
-                })
+                },
+            )
             return {"success": True, "task_count": task_list.count()}
 
         def update_task_status(
@@ -397,11 +403,7 @@ except ImportError as e:
                     }
                     priority = priority_map.get(priority.lower(), TaskPriority.MEDIUM)
 
-                task = Task(
-                    task_id,
-                    task_data["content"],
-                    TaskStatus.PENDING,
-                    priority)
+                task = Task(task_id, task_data["content"], TaskStatus.PENDING, priority)
                 phase_task_list.add_task(task)
             return phase_task_list
 
@@ -575,7 +577,8 @@ except ImportError as e:
             self,
             content: str,
             priority: TaskPriority = TaskPriority.MEDIUM,
-            task_id: Optional[str] = None) -> Task:
+            task_id: Optional[str] = None,
+        ) -> Task:
             if task_id is None:
                 task_id = str(uuid.uuid4())
             task = Task(task_id, content, TaskStatus.PENDING, priority)
@@ -600,7 +603,8 @@ except ImportError as e:
             self,
             phase_name: str,
             description: Optional[str] = None,
-            tasks: Optional[List[Dict[str, Any]]] = None) -> None:
+            tasks: Optional[List[Dict[str, Any]]] = None,
+        ) -> None:
             # Process tasks first to catch any issues before starting the phase
             phase_tasks = []
             if tasks:
@@ -621,10 +625,8 @@ except ImportError as e:
                         )
 
                     task = Task(
-                        task_id,
-                        task_data["content"],
-                        TaskStatus.PENDING,
-                        priority)
+                        task_id, task_data["content"], TaskStatus.PENDING, priority
+                    )
                     phase_tasks.append(task)
 
                 # Add tasks to the main task list
@@ -675,14 +677,17 @@ except ImportError as e:
                     task_id,
                     task_data["content"],
                     TaskStatus.PENDING,
-                    task_data.get("priority", TaskPriority.MEDIUM))
+                    task_data.get("priority", TaskPriority.MEDIUM),
+                )
                 phase_task_list.add_task(task)
             return phase_task_list
+
 
 # Add claude_function_call for stub implementation
 def claude_function_call(tool_name: str, **parameters) -> Dict[str, Any]:
     """Stub implementation of claude_function_call for testing."""
     return {"success": True, "result": parameters}
+
 
 class TestTaskStatus:
     """Test TaskStatus enum."""
@@ -705,6 +710,7 @@ class TestTaskStatus:
         assert TaskStatus.PENDING != TaskStatus.COMPLETED
         assert TaskStatus.IN_PROGRESS != TaskStatus.BLOCKED
 
+
 class TestTaskPriority:
     """Test TaskPriority enum."""
 
@@ -719,6 +725,7 @@ class TestTaskPriority:
         """Test all task priorities are defined."""
         priorities = list(TaskPriority)
         assert len(priorities) == 4
+
 
 class TestTask:
     """Test Task class."""
@@ -737,7 +744,8 @@ class TestTask:
             id="task-123",
             content="Critical task",
             status=TaskStatus.IN_PROGRESS,
-            priority=TaskPriority.CRITICAL)
+            priority=TaskPriority.CRITICAL,
+        )
         assert task.id == "task-123"
         assert task.content == "Critical task"
         assert task.status == TaskStatus.IN_PROGRESS
@@ -868,6 +876,7 @@ class TestTask:
         task.complete()
         assert task.completed_at is not None
         assert task.status == TaskStatus.COMPLETED
+
 
 class TestTaskList:
     """Test TaskList class."""
@@ -1055,6 +1064,7 @@ class TestTaskList:
         assert task2.status == TaskStatus.COMPLETED
         assert task2.priority == TaskPriority.MEDIUM
 
+
 class TestTodoWriteIntegration:
     """Test TodoWrite integration functionality."""
 
@@ -1093,7 +1103,8 @@ class TestTodoWriteIntegration:
                             "priority": "high",
                         }
                     ]
-                })
+                },
+            )
 
     def test_submit_empty_task_list(self):
         """Test submitting empty task list."""
@@ -1223,6 +1234,7 @@ class TestTodoWriteIntegration:
         assert stats["total_calls"] == 5
         assert "last_update" in stats
         assert "current_task_count" in stats
+
 
 class TestWorkflowPhaseTracker:
     """Test workflow phase tracking functionality."""
@@ -1361,6 +1373,7 @@ class TestWorkflowPhaseTracker:
             assert integration.current_task_list is not None
             assert integration.current_task_list.count() == 2
 
+
 class TestTaskMetrics:
     """Test task metrics and analytics."""
 
@@ -1448,6 +1461,7 @@ class TestTaskMetrics:
         assert "tasks_in_progress" in productivity_metrics
         assert productivity_metrics["total_tasks"] == 2
 
+
 class TestTaskError:
     """Test task error classes."""
 
@@ -1463,6 +1477,7 @@ class TestTaskError:
         assert str(error) == "Validation failed"
         assert isinstance(error, TaskError)
         assert isinstance(error, Exception)
+
 
 class TestTaskTracker:
     """Test the main TaskTracker class."""
@@ -1563,6 +1578,7 @@ class TestTaskTracker:
         assert dashboard["task_summary"]["total_tasks"] == 3
         assert dashboard["task_summary"]["completed_tasks"] == 1
         assert dashboard["task_summary"]["active_tasks"] == 2
+
 
 class TestTaskTrackingIntegration:
     """Integration tests for task tracking components."""

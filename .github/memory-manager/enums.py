@@ -8,6 +8,7 @@ from enum import Enum
 
 class SyncDirection(Enum):
     """Synchronization direction"""
+
     MEMORY_TO_GITHUB = "memory_to_github"
     GITHUB_TO_MEMORY = "github_to_memory"
     BIDIRECTIONAL = "bidirectional"
@@ -15,6 +16,7 @@ class SyncDirection(Enum):
 
 class ConflictResolution(Enum):
     """Conflict resolution strategies"""
+
     MANUAL = "manual"
     MEMORY_WINS = "memory_wins"
     GITHUB_WINS = "github_wins"

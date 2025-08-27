@@ -13,6 +13,7 @@ from typing import Any, List, Union
 from pathlib import Path
 
 import pytest
+
 # For type checking only
 from typing import Optional
 
@@ -24,7 +25,8 @@ try:
         StateManager,
         StateValidationError,
         TaskState,
-        WorkflowPhase)
+        WorkflowPhase,
+    )
 except ImportError as e:
     # These will be implemented after tests pass
     print(f"Warning: Could not import state_management module: {e}")
@@ -155,7 +157,8 @@ except ImportError as e:
             self,
             error_type: str,
             error_message: str,
-            error_details: Optional[Dict] = None) -> None:
+            error_details: Optional[Dict] = None,
+        ) -> None:
             self.error_info = {
                 "type": error_type,
                 "message": error_message,
@@ -344,7 +347,8 @@ except ImportError as e:
             if not backup_path.exists():
                 raise StateError(
                     f"Backup directory {backup_dir} not found",
-                    operation="restore_state")
+                    operation="restore_state",
+                )
             # Clear in-memory cache before restore
             self._states.clear()
             for backup_file in backup_path.glob("*.json"):
@@ -367,7 +371,8 @@ except ImportError as e:
         def __init__(
             self,
             checkpoint_dir: Optional[str] = None,
-            state_manager: Optional["StateManager"] = None):
+            state_manager: Optional["StateManager"] = None,
+        ):
             # Support both constructor patterns
             if checkpoint_dir:
                 self.checkpoint_dir = Path(checkpoint_dir)
@@ -391,7 +396,8 @@ except ImportError as e:
             if not checkpoint_file.exists():
                 raise StateError(
                     f"Checkpoint {checkpoint_id} not found",
-                    operation="restore_checkpoint")
+                    operation="restore_checkpoint",
+                )
             with open(checkpoint_file, "r") as f:
                 return json.load(f)
 
@@ -405,7 +411,9 @@ except ImportError as e:
                 checkpoint_file.unlink()
 
     class StateValidationError(Exception):
-        def __init__(self, message: str, validation_errors: Optional[List[str]] = None) -> None:
+        def __init__(
+            self, message: str, validation_errors: Optional[List[str]] = None
+        ) -> None:
             super().__init__(message)
             self.validation_errors = validation_errors or []
 
@@ -414,7 +422,8 @@ except ImportError as e:
             self,
             message: str,
             operation: Optional[str] = None,
-            context: Optional[Dict] = None):
+            context: Optional[Dict] = None,
+        ):
             super().__init__(message)
             self.operation = operation
             self.context = context or {}
@@ -433,6 +442,7 @@ except ImportError as e:
             self.lock_dir = Path(lock_dir)
             self.lock_dir.mkdir(parents=True, exist_ok=True)
 
+
 class TestTaskState:
     """Test suite for TaskState data class."""
 
@@ -443,10 +453,10 @@ class TestTaskState:
         )
         assert state.task_id == "test-task-001"
         assert state.prompt_file == "test-feature.md"
-        assert state.status == "pending"  # type: ignore
+        assert state.status == "pending"  # type: ignore[import-not-found]
         assert state.created_at is not None
         assert state.updated_at is not None
-        assert state.current_phase == 0  # type: ignore
+        assert state.current_phase == 0  # type: ignore[import-not-found]
         assert state.context == {}
 
     def test_task_state_creation_complete(self):
@@ -461,13 +471,14 @@ class TestTaskState:
             pr_number=15,
             current_phase=3,
             context=context,
-            error_info={"last_error": "Network timeout"})
+            error_info={"last_error": "Network timeout"},
+        )
 
         assert state.task_id == "test-task-002"
         assert state.branch == "feature/test-002"
         assert state.issue_number == 42
         assert state.pr_number == 15
-        assert state.current_phase == 3  # type: ignore
+        assert state.current_phase == 3  # type: ignore[import-not-found]
         assert state.context == context
         assert (
             state.error_info is not None
@@ -482,7 +493,8 @@ class TestTaskState:
             status="completed",
             branch="feature/test-003",
             issue_number=10,
-            current_phase=9)
+            current_phase=9,
+        )
 
         data = state.to_dict()
 
@@ -515,11 +527,11 @@ class TestTaskState:
 
         assert state.task_id == "test-task-004"
         assert state.prompt_file == "feature.md"
-        assert state.status == "error"  # type: ignore
+        assert state.status == "error"  # type: ignore[import-not-found]
         assert state.branch == "feature/test-004"
         assert state.issue_number == 20
         assert state.pr_number == 5
-        assert state.current_phase == 5  # type: ignore
+        assert state.current_phase == 5  # type: ignore[import-not-found]
         assert state.context == {"priority": "medium"}
         assert state.error_info == {"error": "Test failed"}
 
@@ -545,12 +557,10 @@ class TestTaskState:
         # Set error info on state
 
         state.set_error(
-            "network_error",
-            "Connection failed",
-            {"phase": 2, "retry_count": 3}
+            "network_error", "Connection failed", {"phase": 2, "retry_count": 3}
         )
 
-        assert state.status == "error"  # type: ignore
+        assert state.status == "error"  # type: ignore[import-not-found]
         # Check that error info is set properly
         assert state.error_info is not None
         assert state.error_info["type"] == "network_error"
@@ -566,7 +576,8 @@ class TestTaskState:
             task_id="test-task-007",
             prompt_file="test.md",
             status="error",
-            error_info={"error": "Previous error"})
+            error_info={"error": "Previous error"},
+        )
 
         state.clear_error()
 
@@ -598,6 +609,7 @@ class TestTaskState:
         )
         assert invalid_phase.is_valid  # is_valid is a property, not a method
 
+
 class TestWorkflowPhase:
     """Test suite for WorkflowPhase enum."""
 
@@ -625,6 +637,7 @@ class TestWorkflowPhase:
         assert WorkflowPhase.is_valid_phase(5) is True
         assert WorkflowPhase.is_valid_phase(15) is False
         assert WorkflowPhase.is_valid_phase(-1) is False
+
 
 class TestStateManager:
     """Test suite for StateManager class."""
@@ -695,7 +708,8 @@ class TestStateManager:
             task_id="test-load-001",
             prompt_file="load-test.md",
             status="in_progress",
-            current_phase=3)
+            current_phase=3,
+        )
         state_manager.save_state(original_state)
 
         # Load the state
@@ -854,7 +868,8 @@ class TestStateManager:
             task_id="restore-test",
             prompt_file="restore.md",
             status="in_progress",
-            current_phase=3)
+            current_phase=3,
+        )
         state_manager.save_state(original_state)
         temp_backup_dir = state_manager.state_dir.parent / "restore_backup_test"
         temp_backup_dir.mkdir(parents=True, exist_ok=True)
@@ -951,6 +966,7 @@ class TestStateManager:
         lock_fd_after_release = state_manager._acquire_lock("test-resource")
         assert lock_fd_after_release is not None
 
+
 class TestCheckpointManager:
     """Test suite for CheckpointManager class."""
 
@@ -972,7 +988,8 @@ class TestCheckpointManager:
             task_id="checkpoint-001",
             prompt_file="test.md",
             status="in_progress",
-            current_phase=3)
+            current_phase=3,
+        )
 
         # Create checkpoint from state data
         checkpoint_id = checkpoint_manager.create_checkpoint(state, "checkpoint-001")
@@ -1013,7 +1030,8 @@ class TestCheckpointManager:
             task_id="restore-checkpoint",
             prompt_file="restore.md",
             status="in_progress",
-            current_phase=3)
+            current_phase=3,
+        )
 
         # checkpoint_state data for verification purposes
         checkpoint_id = checkpoint_manager.create_checkpoint(
@@ -1035,7 +1053,8 @@ class TestCheckpointManager:
         state = TaskState(
             task_id="cleanup-checkpoints",
             prompt_file="cleanup.md",
-            status="in_progress")
+            status="in_progress",
+        )
 
         # Create several checkpoints
         for i in range(7):
@@ -1077,6 +1096,7 @@ class TestCheckpointManager:
         assert restored_data is not None
         assert restored_data.context["large_data"] == "x" * 10000
 
+
 class TestStateError:
     """Test suite for StateError exception class."""
 
@@ -1094,6 +1114,7 @@ class TestStateError:
         assert str(error) == "Validation failed"
         assert error.validation_errors == errors
 
+
 # Integration tests
 class TestStateManagementIntegration:
     """Integration tests for state management system."""
@@ -1110,7 +1131,9 @@ class TestStateManagementIntegration:
         }
         state_manager = StateManager(config=state_config)
         # checkpoint_config for reference
-        checkpoint_manager = CheckpointManager(checkpoint_dir=str(temp_dir / "checkpoints"))
+        checkpoint_manager = CheckpointManager(
+            checkpoint_dir=str(temp_dir / "checkpoints")
+        )
 
         yield state_manager, checkpoint_manager, temp_dir
 
@@ -1119,13 +1142,14 @@ class TestStateManagementIntegration:
     @pytest.mark.integration
     def test_complete_workflow_state_management(self, integration_setup):
         """Test complete workflow state management."""
-        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore
+        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore[import-not-found]
 
         # Initialize task
         task_state = TaskState(
             task_id="integration-workflow",
             prompt_file="integration-test.md",
-            status="pending")
+            status="pending",
+        )
 
         # Phase 1: Initial Setup
         task_state.update_phase(WorkflowPhase.INITIALIZATION)
@@ -1165,13 +1189,14 @@ class TestStateManagementIntegration:
     @pytest.mark.integration
     def test_error_recovery_integration(self, integration_setup):
         """Test error recovery and state restoration."""
-        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore
+        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore[import-not-found]
 
         # Create task progressing normally
         task_state = TaskState(
             task_id="error-recovery-test",
             prompt_file="error-test.md",
-            status="in_progress")
+            status="in_progress",
+        )
         # Save the initial task state
         state_manager.save_state(task_state)
 
@@ -1189,11 +1214,7 @@ class TestStateManagementIntegration:
             )
 
         # Simulate error in implementation phase
-        task_state.set_error(
-            "test_failure",
-            "Unit tests failed",
-            {"retry_count": 1}
-        )
+        task_state.set_error("test_failure", "Unit tests failed", {"retry_count": 1})
         state_manager.update_state(task_state)
 
         # Recovery: clear error and continue
@@ -1208,7 +1229,7 @@ class TestStateManagementIntegration:
     @pytest.mark.integration
     def test_concurrent_task_management(self, integration_setup):
         """Test management of multiple concurrent tasks."""
-        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore
+        state_manager, checkpoint_manager, _temp_dir = integration_setup  # type: ignore[import-not-found]
 
         # Create multiple tasks
         tasks = []
@@ -1217,7 +1238,8 @@ class TestStateManagementIntegration:
                 task_id=f"concurrent-task-{i:03d}",
                 prompt_file=f"task-{i}.md",
                 status="in_progress",
-                current_phase=i + 1)
+                current_phase=i + 1,
+            )
             tasks.append(task)
             state_manager.save_state(task)
             checkpoint_manager.create_checkpoint(task, f"concurrent-task-{i}")

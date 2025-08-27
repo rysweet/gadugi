@@ -143,9 +143,7 @@ Examples:
         handler_parser = subparsers.add_parser("handler", help="Manage event handlers")
         handler_subparsers = handler_parser.add_subparsers(dest="handler_action")
 
-        handler_subparsers.add_parser(
-            "list", help="List event handlers"
-        )
+        handler_subparsers.add_parser("list", help="List event handlers")
 
         enable_parser = handler_subparsers.add_parser("enable", help="Enable handler")
         enable_parser.add_argument("name", help="Handler name")

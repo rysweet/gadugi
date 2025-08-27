@@ -329,7 +329,10 @@ class MemoryCompactor:
         return plan
 
     def _analyze_section_for_compaction(
-        self, section: MemorySection, rule: Optional[CompactionRule], current_date: datetime
+        self,
+        section: MemorySection,
+        rule: Optional[CompactionRule],
+        current_date: datetime,
     ) -> Dict[str, Any]:
         """Analyze a section to determine what should be compacted"""
         items = self._extract_section_items(section.content)

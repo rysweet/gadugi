@@ -29,7 +29,7 @@ class TestProgramManager(unittest.TestCase):
         self.pm.memory = Mock()
         self.pm.memory.record_agent_memory = Mock()
         self.pm.memory.record_project_memory = Mock()
-        
+
         # Type hints for mocks to help with type checking
         self.mock_record_agent_memory: Mock = self.pm.memory.record_agent_memory
         self.mock_record_project_memory: Mock = self.pm.memory.record_project_memory

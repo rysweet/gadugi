@@ -14,10 +14,9 @@ from dataclasses import dataclass
 
 class GitHubOperationsStub:
     """Stub for GitHub operations."""
-    
+
     def add_pr_comment(self, pr_number: int, comment: str) -> None:
         """Add a comment to a PR - stub implementation."""
-        pass
 
 
 # Pytest stubs

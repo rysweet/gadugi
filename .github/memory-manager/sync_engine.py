@@ -102,7 +102,10 @@ class SyncEngine:
     """Bidirectional synchronization engine"""
 
     def __init__(
-        self, memory_path: str, repo_path: Optional[str] = None, config: Optional[SyncConfig] = None
+        self,
+        memory_path: str,
+        repo_path: Optional[str] = None,
+        config: Optional[SyncConfig] = None,
     ):
         """Initialize sync engine"""
         self.memory_path = Path(memory_path)

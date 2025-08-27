@@ -17,7 +17,7 @@ def test_import_file(file_path: Path) -> tuple[bool, str]:
         if spec is None:
             return False, "Could not create spec"
         
-        _ = importlib.util.module_from_spec(spec)  # type: ignore
+        _ = importlib.util.module_from_spec(spec)  # type: ignore[import-not-found]
         # Don't execute the module, just test if it can be imported
         return True, ""
     except SyntaxError as e:

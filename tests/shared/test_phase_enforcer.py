@@ -20,10 +20,12 @@ from shared.phase_enforcer import (
     EnforcementRule,
     EnforcementResult,
     enforce_phase_9,
-    enforce_phase_10)
+    enforce_phase_10,
+)
 
 # Import workflow engine for WorkflowPhase and WorkflowState
 from shared.workflow_engine import WorkflowPhase, WorkflowState
+
 
 class TestPhaseEnforcer:
     """Test suite for PhaseEnforcer class"""
@@ -84,7 +86,8 @@ class TestPhaseEnforcer:
             max_attempts=5,
             timeout_seconds=1200,
             retry_delay_seconds=60,
-            required_conditions=["pr_exists", "branch_pushed"])
+            required_conditions=["pr_exists", "branch_pushed"],
+        )
 
         assert rule.phase == WorkflowPhase.CODE_REVIEW
         assert rule.max_attempts == 5
@@ -101,7 +104,8 @@ class TestPhaseEnforcer:
             attempts=2,
             total_time=45.5,
             error_message=None,
-            details={"method": "claude_agent", "pr_number": 123})
+            details={"method": "claude_agent", "pr_number": 123},
+        )
 
         assert result.phase == WorkflowPhase.CODE_REVIEW
         assert result.success is True
@@ -123,7 +127,8 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[],
             pr_number=123,
-            branch_name="feature/test-branch")
+            branch_name="feature/test-branch",
+        )
 
         conditions_met, missing = self.enforcer._check_required_conditions(
             conditions, workflow_state, {}
@@ -143,7 +148,8 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[],
             pr_number=None,  # Missing PR
-            branch_name="feature/test-branch")
+            branch_name="feature/test-branch",
+        )
 
         conditions_met, missing = self.enforcer._check_required_conditions(
             conditions, workflow_state, {}
@@ -183,7 +189,8 @@ class TestPhaseEnforcer:
             prompt_file="test.md",
             current_phase=WorkflowPhase.REVIEW_RESPONSE,
             completed_phases=[WorkflowPhase.CODE_REVIEW],  # Code review completed
-            pr_number=123)
+            pr_number=123,
+        )
 
         conditions_met, missing = self.enforcer._check_required_conditions(
             conditions, workflow_state, {}
@@ -353,7 +360,8 @@ class TestPhaseEnforcer:
             prompt_file="test.md",
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[],
-            pr_number=None)
+            pr_number=None,
+        )
 
         success, message, _details = self.enforcer._enforce_code_review(
             workflow_state, {}
@@ -417,7 +425,8 @@ class TestPhaseEnforcer:
             prompt_file="test.md",
             current_phase=WorkflowPhase.REVIEW_RESPONSE,
             completed_phases=[],
-            pr_number=None)
+            pr_number=None,
+        )
 
         success, message, _details = self.enforcer._enforce_review_response(
             workflow_state, {}
@@ -431,7 +440,8 @@ class TestPhaseEnforcer:
         # Try to enforce a phase without a rule
         result = self.enforcer.enforce_phase(
             WorkflowPhase.INIT,  # No rule defined for INIT
-            self.workflow_state)
+            self.workflow_state,
+        )
 
         assert result.success is False
         assert result.error_message is not None
@@ -462,7 +472,8 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.CODE_REVIEW,
             completed_phases=[],
             pr_number=None,  # Missing required condition
-            branch_name="feature/test")
+            branch_name="feature/test",
+        )
 
         result = self.enforcer.enforce_phase(WorkflowPhase.CODE_REVIEW, workflow_state)
 
@@ -481,7 +492,8 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.PR_CREATION,
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
             pr_number=123,
-            branch_name="test-branch")
+            branch_name="test-branch",
+        )
 
         # Mock successful subprocess calls for both phases
         mock_subprocess.side_effect = [
@@ -512,7 +524,8 @@ class TestPhaseEnforcer:
             current_phase=WorkflowPhase.PR_CREATION,
             completed_phases=[WorkflowPhase.INIT, WorkflowPhase.BRANCH_CREATION],
             pr_number=123,
-            branch_name="test-branch")
+            branch_name="test-branch",
+        )
 
         # Mock all subprocess calls to fail
         mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Failed")
@@ -539,7 +552,8 @@ class TestPhaseEnforcer:
             max_attempts=10,
             timeout_seconds=300,
             retry_delay_seconds=15,
-            required_conditions=["custom_condition"])
+            required_conditions=["custom_condition"],
+        )
 
         self.enforcer.add_enforcement_rule(custom_rule)
 
@@ -558,7 +572,8 @@ class TestPhaseEnforcer:
             success=True,
             attempts=1,
             total_time=30.5,
-            details={"method": "test"})
+            details={"method": "test"},
+        )
 
         initial_log_length = len(self.enforcer.enforcement_log)
         self.enforcer._log_enforcement_result(result, "Test message")
@@ -662,6 +677,7 @@ class TestPhaseEnforcer:
         # Cleanup
         os.remove(filename)
 
+
 class TestConvenienceFunctions:
     """Test suite for convenience functions"""
 
@@ -716,6 +732,7 @@ class TestConvenienceFunctions:
         result = enforce_phase_10(123)
 
         assert result is False
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

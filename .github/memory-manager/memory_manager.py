@@ -26,7 +26,9 @@ from memory_compactor import MemoryCompactor
 class MemoryManager:
     """Main Memory Manager class"""
 
-    def __init__(self, repo_path: Optional[str] = None, config_path: Optional[str] = None):
+    def __init__(
+        self, repo_path: Optional[str] = None, config_path: Optional[str] = None
+    ):
         """Initialize Memory Manager"""
         self.repo_path = Path(repo_path or os.getcwd())
         self.config_manager = ConfigManager(str(self.repo_path), config_path)
@@ -337,9 +339,7 @@ def main():
     )
 
     # Conflicts command
-    subparsers.add_parser(
-        "conflicts", help="List synchronization conflicts"
-    )
+    subparsers.add_parser("conflicts", help="List synchronization conflicts")
 
     # Resolve conflict command
     resolve_parser = subparsers.add_parser(
@@ -352,9 +352,7 @@ def main():
     subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    subparsers.add_parser(
-        "init", help="Initialize Memory Manager configuration"
-    )
+    subparsers.add_parser("init", help="Initialize Memory Manager configuration")
 
     args = parser.parse_args()
 

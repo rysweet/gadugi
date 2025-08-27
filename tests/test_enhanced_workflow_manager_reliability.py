@@ -70,7 +70,7 @@ class TestWorkflowReliabilityManager:
         """Helper to safely get attributes from objects that might be dicts"""
         if hasattr(obj, attr):
             return getattr(obj, attr)
-        elif hasattr(obj, 'get'):
+        elif hasattr(obj, "get"):
             return obj.get(attr, default)
         return default
 
@@ -102,11 +102,11 @@ class TestWorkflowReliabilityManager:
         assert self.workflow_id in self.reliability_manager.active_workflows
 
         monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]
-        # Handle both dict and object access patterns  
-        workflow_id = self._get_attr(monitoring_state, 'workflow_id')
-        current_stage = self._get_attr(monitoring_state, 'current_stage')
-        health_checks = self._get_attr(monitoring_state, 'health_checks', [])
-        
+        # Handle both dict and object access patterns
+        workflow_id = self._get_attr(monitoring_state, "workflow_id")
+        current_stage = self._get_attr(monitoring_state, "current_stage")
+        health_checks = self._get_attr(monitoring_state, "health_checks", [])
+
         assert workflow_id == self.workflow_id
         assert current_stage == WorkflowStage.INITIALIZATION
         assert len(health_checks) >= 0  # Initial health check
@@ -126,9 +126,9 @@ class TestWorkflowReliabilityManager:
         assert result == True
 
         monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]
-        current_stage = self._get_attr(monitoring_state, 'current_stage')
-        stage_history = self._get_attr(monitoring_state, 'stage_history', [])
-        
+        current_stage = self._get_attr(monitoring_state, "current_stage")
+        stage_history = self._get_attr(monitoring_state, "stage_history", [])
+
         assert current_stage == WorkflowStage.ISSUE_CREATION
         assert len(stage_history) >= 0
 
@@ -231,7 +231,7 @@ class TestWorkflowReliabilityManager:
             monitoring_state = self.reliability_manager.monitoring_states[
                 self.workflow_id
             ]
-            error_count = self._get_attr(monitoring_state, 'error_count', 0)
+            error_count = self._get_attr(monitoring_state, "error_count", 0)
             assert error_count >= 0
 
     def test_check_workflow_timeouts_warning(self) -> None:
@@ -248,14 +248,16 @@ class TestWorkflowReliabilityManager:
         # Manually adjust stage start time to simulate long-running stage
         monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]
         # Set stage_start_time if the object supports it
-        if hasattr(monitoring_state, 'stage_start_time'):
+        if hasattr(monitoring_state, "stage_start_time"):
             monitoring_state.stage_start_time = datetime.now() - timedelta(
                 seconds=150
             )  # 2.5 minutes ago
-        elif hasattr(monitoring_state, '__setattr__'):
-            setattr(monitoring_state, 'stage_start_time', datetime.now() - timedelta(
-                seconds=150
-            ))
+        elif hasattr(monitoring_state, "__setattr__"):
+            setattr(
+                monitoring_state,
+                "stage_start_time",
+                datetime.now() - timedelta(seconds=150),
+            )
 
         result = self.reliability_manager.check_workflow_timeouts(self.workflow_id)
 
@@ -265,7 +267,7 @@ class TestWorkflowReliabilityManager:
 
         # Check if warning was triggered (150s > 120s warning threshold)
         if result.get("duration", 0) > 120:
-            timeout_warnings = self._get_attr(monitoring_state, 'timeout_warnings', 0)
+            timeout_warnings = self._get_attr(monitoring_state, "timeout_warnings", 0)
             assert timeout_warnings >= 0
 
     def test_create_workflow_persistence_success(self) -> None:
@@ -892,15 +894,21 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             assert "reliability_metrics" in result
 
             # Verify monitoring was properly integrated
-            start_monitoring = getattr(manager.reliability_manager, 'start_workflow_monitoring', None)
-            update_stage = getattr(manager.reliability_manager, 'update_workflow_stage', None)  
-            stop_monitoring = getattr(manager.reliability_manager, 'stop_workflow_monitoring', None)
-            
-            if start_monitoring is not None and hasattr(start_monitoring, 'called'):
+            start_monitoring = getattr(
+                manager.reliability_manager, "start_workflow_monitoring", None
+            )
+            update_stage = getattr(
+                manager.reliability_manager, "update_workflow_stage", None
+            )
+            stop_monitoring = getattr(
+                manager.reliability_manager, "stop_workflow_monitoring", None
+            )
+
+            if start_monitoring is not None and hasattr(start_monitoring, "called"):
                 assert start_monitoring.called
-            if update_stage is not None and hasattr(update_stage, 'call_count'):
+            if update_stage is not None and hasattr(update_stage, "call_count"):
                 assert update_stage.call_count >= 0
-            if stop_monitoring is not None and hasattr(stop_monitoring, 'called'):
+            if stop_monitoring is not None and hasattr(stop_monitoring, "called"):
                 assert stop_monitoring.called
 
     def test_workflow_error_handling_and_recovery_integration(self) -> None:
@@ -1021,13 +1029,17 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             ),
         ):
             # Test persistence creation
-            create_persistence = getattr(manager.reliability_manager, 'create_workflow_persistence', None)
+            create_persistence = getattr(
+                manager.reliability_manager, "create_workflow_persistence", None
+            )
             if create_persistence is not None:
                 persistence_result = create_persistence(workflow_id, test_state)
                 assert persistence_result == True
 
             # Test restoration
-            restore_persistence = getattr(manager.reliability_manager, 'restore_workflow_from_persistence', None)
+            restore_persistence = getattr(
+                manager.reliability_manager, "restore_workflow_from_persistence", None
+            )
             if restore_persistence is not None:
                 restored_state = restore_persistence(workflow_id)
                 assert restored_state == test_state
@@ -1241,9 +1253,7 @@ class TestWorkflowReliabilityContextManager:
         mock_manager.stop_workflow_monitoring.return_value = True
 
         with pytest.raises(Exception):
-            with monitor_workflow(
-                workflow_id, workflow_context, mock_manager
-            ) as _:
+            with monitor_workflow(workflow_id, workflow_context, mock_manager) as _:
                 # Simulate workflow error
                 raise test_error
 
@@ -1283,7 +1293,7 @@ def enhanced_workflow_manager():
     temp_dir = tempfile.mkdtemp()
     manager = EnhancedWorkflowManager(config, temp_dir)
     yield manager
-    shutdown_method = getattr(manager.reliability_manager, 'shutdown', None)
+    shutdown_method = getattr(manager.reliability_manager, "shutdown", None)
     if shutdown_method is not None:
         shutdown_method()
     shutil.rmtree(temp_dir, ignore_errors=True)
@@ -1342,7 +1352,9 @@ class TestWorkflowReliabilityPerformance:
             assert result == True
 
         # Verify all workflows are being monitored
-        monitoring_states = getattr(manager.reliability_manager, 'monitoring_states', {})
+        monitoring_states = getattr(
+            manager.reliability_manager, "monitoring_states", {}
+        )
         assert len(monitoring_states) == 5
 
         # Stop all workflows
@@ -1351,7 +1363,9 @@ class TestWorkflowReliabilityPerformance:
             assert result == True
 
         # Verify cleanup
-        monitoring_states_after = getattr(manager.reliability_manager, 'monitoring_states', {})
+        monitoring_states_after = getattr(
+            manager.reliability_manager, "monitoring_states", {}
+        )
         assert len(monitoring_states_after) == 0
 
 

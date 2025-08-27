@@ -284,7 +284,9 @@ class ConfigManager:
         ".memory-manager.yml",
     ]
 
-    def __init__(self, repo_path: Optional[str] = None, config_path: Optional[str] = None):
+    def __init__(
+        self, repo_path: Optional[str] = None, config_path: Optional[str] = None
+    ):
         """Initialize configuration manager"""
         self.repo_path = Path(repo_path or os.getcwd())
         self.config_path = config_path

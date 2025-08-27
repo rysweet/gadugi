@@ -7,31 +7,31 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('.claude'))
 
 try:
-    from shared.utils.error_handling import ErrorSeverity  # type: ignore
+    from shared.utils.error_handling import ErrorSeverity  # type: ignore[import-not-found]
     print("✓ Successfully imported from shared.utils.error_handling")
 except ImportError as e:
     print(f"✗ Failed to import from shared.utils.error_handling: {e}")
 
 try:
-    from shared.task_tracking import TaskStatus  # type: ignore
+    from shared.task_tracking import TaskStatus  # type: ignore[import-not-found]
     print("✓ Successfully imported from shared.task_tracking")
 except ImportError as e:
     print(f"✗ Failed to import from shared.task_tracking: {e}")
 
 try:
-    from shared.state_management import TaskState  # type: ignore
+    from shared.state_management import TaskState  # type: ignore[import-not-found]
     print("✓ Successfully imported from shared.state_management")
 except ImportError as e:
     print(f"✗ Failed to import from shared.state_management: {e}")
 
 try:
-    from shared.interfaces import AgentInterface  # type: ignore
+    from shared.interfaces import AgentInterface  # type: ignore[import-not-found]
     print("✓ Successfully imported from shared.interfaces")
 except ImportError as e:
     print(f"✗ Failed to import from shared.interfaces: {e}")
 
 try:
-    from shared.github_operations import GitHubOperations  # type: ignore
+    from shared.github_operations import GitHubOperations  # type: ignore[import-not-found]
     print("✓ Successfully imported from shared.github_operations")
 except ImportError as e:
     print(f"✗ Failed to import from shared.github_operations: {e}")

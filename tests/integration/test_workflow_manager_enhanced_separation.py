@@ -22,6 +22,7 @@ import shutil
 import sys
 import tempfile
 from datetime import datetime  # timedelta not used
+
 # from pathlib import Path  # not used
 from unittest.mock import Mock, patch  # MagicMock not used
 
@@ -44,33 +45,46 @@ from task_tracking import (
     TodoWriteIntegration,
     WorkflowPhaseTracker,
 )
+
+
 # Create mock classes first (pyright workaround)
 class ErrorHandler:
     def __init__(self):
         self.error_counts = {}
         self.recovery_strategies = {}
         self.error_history = []
+
     def register_recovery_strategy(self, exc_type, strategy):
         self.recovery_strategies[exc_type] = strategy
+
     def handle_error(self, error, context=None):
         return f"Mock error handling: {error}"
+
 
 class CircuitBreaker:
     def __init__(self, failure_threshold=5, recovery_timeout=60):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
+
     def __call__(self, func):
         return func
+
 
 # Mock retry decorator
 def retry(attempts=3, delay=1):
     def decorator(func):
         return func
+
     return decorator
+
 
 # Try to import real classes, fallback to mocks
 try:
-    from .claude.shared.utils.error_handling import ErrorHandler as RealErrorHandler, CircuitBreaker as RealCircuitBreaker
+    from .claude.shared.utils.error_handling import (
+        ErrorHandler as RealErrorHandler,
+        CircuitBreaker as RealCircuitBreaker,
+    )
+
     ErrorHandler = RealErrorHandler
     CircuitBreaker = RealCircuitBreaker
 except ImportError:
@@ -99,7 +113,7 @@ class TestWorkflowManagerIntegration:
         # Mock external dependencies
         self.mock_gh_api = Mock()
         # Set API client for mocking - use setattr to avoid pyright issues
-        setattr(self.github_ops, '_api_client', self.mock_gh_api)
+        setattr(self.github_ops, "_api_client", self.mock_gh_api)
 
     def teardown_method(self):
         """Cleanup test environment"""
@@ -208,7 +222,7 @@ class TestWorkflowManagerIntegration:
                 return self.github_ops.create_issue(
                     title=f"{prompt_data['feature_name']} - {task_id}",
                     body="Test issue body",
-                    labels=["enhancement", "ai-generated"]
+                    labels=["enhancement", "ai-generated"],
                 )
 
             issue_result = create_issue_with_retry()
@@ -403,7 +417,9 @@ class TestWorkflowManagerIntegration:
         )
 
         # Test error context creation
-        _test_error = Exception("Simulated implementation failure")  # Used in test setup
+        _test_error = Exception(
+            "Simulated implementation failure"
+        )  # Used in test setup
         error_context = ErrorContext(
             operation="implementation",
             details={
@@ -430,16 +446,18 @@ class TestWorkflowManagerIntegration:
         for i in range(3):
             try:
                 if i < 2:  # First two calls should fail
+
                     @implementation_circuit_breaker
                     def mock_failing_impl():
                         raise Exception("Test failure")
-                    
+
                     mock_failing_impl()
                 else:  # Third call should trigger circuit breaker
+
                     @implementation_circuit_breaker
                     def mock_success_impl():
                         return {"success": True}
-                    
+
                     mock_success_impl()
             except Exception:
                 failure_count += 1
@@ -477,7 +495,9 @@ class TestWorkflowManagerIntegration:
         ]
 
         # Test phase progression
-        for _i, phase in enumerate(phases_to_test):  # _i unused but required by enumerate
+        for _i, phase in enumerate(
+            phases_to_test
+        ):  # _i unused but required by enumerate
             # Start phase
             self.phase_tracker.start_phase(phase)
             self.task_metrics.record_phase_start(phase.name.lower())
@@ -575,10 +595,7 @@ class TestWorkflowManagerIntegration:
                 "issue_url": "test-url",
             }
 
-            issue_result = self.github_ops.create_issue(
-                title="E2E Test",
-                body="Test"
-            )
+            issue_result = self.github_ops.create_issue(title="E2E Test", body="Test")
             workflow_state.issue_number = issue_result["issue_number"]
 
         # Complete the issue creation phase (need to start it first)
@@ -622,7 +639,7 @@ class TestWorkflowManagerIntegration:
                     title="E2E Test PR",
                     body="Test PR",
                     base="main",
-                    head="feature-branch"
+                    head="feature-branch",
                 )
                 workflow_state.pr_number = pr_result["pr_number"]
 

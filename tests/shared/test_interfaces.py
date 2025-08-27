@@ -32,7 +32,8 @@ try:
         TodoWriteProvider,
         ValidationResult,
         WorkflowConfigSchema,
-        WorkflowPhase)
+        WorkflowPhase,
+    )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -172,6 +173,7 @@ except ImportError:
         def create_agent(self, agent_type: str, config: AgentConfig) -> AgentInterface:
             pass
 
+
 class TestAgentInterface:
     """Test AgentInterface abstract base class."""
 
@@ -216,6 +218,7 @@ class TestAgentInterface:
         assert "context_keys" in result
         assert set(result["context_keys"]) == {"key1", "key2"}
 
+
 class TestStateManagerInterface:
     """Test StateManagerInterface abstract base class."""
 
@@ -258,6 +261,7 @@ class TestStateManagerInterface:
         deleted = manager.delete_state("test-1")
         assert deleted is True
         assert manager.load_state("test-1") is None
+
 
 class TestGitHubOperationsInterface:
     """Test GitHubOperationsInterface abstract base class."""
@@ -308,6 +312,7 @@ class TestGitHubOperationsInterface:
         assert pr_result["success"] is True
         assert pr_result["pr_number"] == 1
 
+
 class TestTaskTrackerInterface:
     """Test TaskTrackerInterface abstract base class."""
 
@@ -348,6 +353,7 @@ class TestTaskTrackerInterface:
         update_result = tracker.update_task_status(task_id, "completed")
         assert update_result["success"] is True
 
+
 class TestErrorHandlerInterface:
     """Test ErrorHandlerInterface abstract base class."""
 
@@ -379,6 +385,7 @@ class TestErrorHandlerInterface:
         assert result["fallback_value"] == "default"
         assert len(handler.handled_errors) == 1
         assert handler.handled_errors[0]["error_type"] == "ValueError"
+
 
 class TestDataModels:
     """Test data model classes."""
@@ -433,7 +440,8 @@ class TestDataModels:
         """Test ErrorContext creation."""
         context = ErrorContext(
             operation="test_operation",
-            details={"error_code": 500, "message": "Server error"})
+            details={"error_code": 500, "message": "Server error"},
+        )
 
         assert context.operation == "test_operation"
         assert context.details["error_code"] == 500
@@ -469,6 +477,7 @@ class TestDataModels:
         assert result.is_valid is False
         assert len(result.errors) == 2
         assert "Missing required field" in result.errors
+
 
 class TestProtocols:
     """Test protocol definitions."""
@@ -535,6 +544,7 @@ class TestProtocols:
         content = use_filesystem(fs)
         assert content == "file contents"
 
+
 class TestConfigurationSchemas:
     """Test configuration schema classes."""
 
@@ -599,6 +609,7 @@ class TestConfigurationSchemas:
         result = schema.validate(invalid_config)
         assert result.is_valid is False
         assert len(result.errors) > 0
+
 
 class TestFactoryInterfaces:
     """Test factory interface implementations."""
@@ -668,6 +679,7 @@ class TestFactoryInterfaces:
         # Test unknown agent type
         with pytest.raises(ValueError, match="Unknown agent type: unknown"):
             factory.create_agent("unknown", config)
+
 
 class TestInterfaceIntegration:
     """Integration tests for interface interactions."""
@@ -744,7 +756,8 @@ class TestInterfaceIntegration:
                 self,
                 state_manager: StateManagerInterface,
                 task_tracker: TaskTrackerInterface,
-                github_ops: GitHubOperationsInterface):
+                github_ops: GitHubOperationsInterface,
+            ):
                 self.state_manager = state_manager
                 self.task_tracker = task_tracker
                 self.github_ops = github_ops
@@ -814,7 +827,8 @@ class TestInterfaceIntegration:
             def __init__(
                 self,
                 state_manager: StateManagerInterface,
-                error_handler: ErrorHandlerInterface):
+                error_handler: ErrorHandlerInterface,
+            ):
                 self.state_manager = state_manager
                 self.error_handler = error_handler
 

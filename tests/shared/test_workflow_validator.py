@@ -22,10 +22,12 @@ from shared.workflow_validator import (
     ValidationResult,
     ValidationReport,
     validate_prompt,
-    validate_workflow)
+    validate_workflow,
+)
 
 # Import workflow engine for WorkflowPhase and WorkflowState
 from shared.workflow_engine import WorkflowPhase, WorkflowState
+
 
 class TestWorkflowValidator:
     """Test suite for WorkflowValidator class"""
@@ -95,7 +97,8 @@ It also doesn't have enough content to be considered a valid prompt.
             completed_phases=[],
             branch_name="feature/test-validation",
             issue_number=123,
-            pr_number=456)
+            pr_number=456,
+        )
 
     def teardown_method(self):
         """Cleanup after each test"""
@@ -154,7 +157,8 @@ It also doesn't have enough content to be considered a valid prompt.
             validator_function="_test_validator",
             required_context=["prompt_file"],
             error_message="Test error",
-            warning_message="Test warning")
+            warning_message="Test warning",
+        )
 
         assert rule.name == "test_rule"
         assert rule.category == ValidationCategory.PROMPT_FORMAT
@@ -175,7 +179,8 @@ It also doesn't have enough content to be considered a valid prompt.
             message="Validation passed",
             details={"test": "data"},
             execution_time=1.5,
-            suggestions=["suggestion1", "suggestion2"])
+            suggestions=["suggestion1", "suggestion2"],
+        )
 
         assert result.rule_name == "test_rule"
         assert result.category == ValidationCategory.PROMPT_FORMAT
@@ -195,13 +200,15 @@ It also doesn't have enough content to be considered a valid prompt.
                 ValidationCategory.PROMPT_FORMAT,
                 True,
                 ValidationLevel.STANDARD,
-                "Pass"),
+                "Pass",
+            ),
             ValidationResult(
                 "rule2",
                 ValidationCategory.GIT_STATE,
                 False,
                 ValidationLevel.STANDARD,
-                "Fail"),
+                "Fail",
+            ),
         ]
 
         report = ValidationReport(
@@ -215,7 +222,8 @@ It also doesn't have enough content to be considered a valid prompt.
             overall_status="PASSED_WITH_WARNINGS",
             results=results,
             metrics={"test": "metric"},
-            recommendations=["Fix failing check"])
+            recommendations=["Fix failing check"],
+        )
 
         assert report.timestamp == timestamp
         assert report.validation_level == ValidationLevel.STANDARD
@@ -424,7 +432,8 @@ It also doesn't have enough content to be considered a valid prompt.
             prompt_file="test.md",
             current_phase=WorkflowPhase.INIT,
             completed_phases=[],
-            pr_number=None)
+            pr_number=None,
+        )
 
         context = {"workflow_state": workflow_state}
         result = self.validator._validate_pr_exists(context)
@@ -438,7 +447,8 @@ It also doesn't have enough content to be considered a valid prompt.
             task_id="test-sequence",
             prompt_file="test.md",
             current_phase=WorkflowPhase.PROMPT_VALIDATION,
-            completed_phases=[WorkflowPhase.INIT, WorkflowPhase.PROMPT_VALIDATION])
+            completed_phases=[WorkflowPhase.INIT, WorkflowPhase.PROMPT_VALIDATION],
+        )
 
         context = {"workflow_state": workflow_state}
         result = self.validator._validate_phase_sequence(context)
@@ -507,7 +517,8 @@ It also doesn't have enough content to be considered a valid prompt.
         mock_subprocess.return_value = Mock(
             returncode=0,
             stdout=json.dumps({"state": "OPEN", "title": "Test PR"}),
-            stderr="")
+            stderr="",
+        )
 
         report = self.validator.validate_end_to_end(
             self.good_prompt_file, self.workflow_state
@@ -526,7 +537,8 @@ It also doesn't have enough content to be considered a valid prompt.
             level=ValidationLevel.STANDARD,
             description="Test rule",
             validator_function="_validate_prompt_file_exists",
-            required_context=["prompt_file", "missing_context"])
+            required_context=["prompt_file", "missing_context"],
+        )
 
         context = {"prompt_file": self.good_prompt_file}
         result = self.validator._execute_validation_rule(rule, context)
@@ -543,7 +555,8 @@ It also doesn't have enough content to be considered a valid prompt.
             level=ValidationLevel.STANDARD,
             description="Test rule",
             validator_function="_nonexistent_validator",
-            required_context=[])
+            required_context=[],
+        )
 
         result = self.validator._execute_validation_rule(rule, {})
 
@@ -558,13 +571,15 @@ It also doesn't have enough content to be considered a valid prompt.
                 ValidationCategory.PROMPT_FORMAT,
                 True,
                 ValidationLevel.STANDARD,
-                "Pass 1"),
+                "Pass 1",
+            ),
             ValidationResult(
                 "rule2",
                 ValidationCategory.GIT_STATE,
                 True,
                 ValidationLevel.STANDARD,
-                "Pass 2"),
+                "Pass 2",
+            ),
         ]
 
         start_time = datetime.now()
@@ -584,19 +599,22 @@ It also doesn't have enough content to be considered a valid prompt.
                 ValidationCategory.PROMPT_FORMAT,
                 True,
                 ValidationLevel.STANDARD,
-                "Pass"),
+                "Pass",
+            ),
             ValidationResult(
                 "rule2",
                 ValidationCategory.GIT_STATE,
                 False,
                 ValidationLevel.STANDARD,
-                "Fail warning"),
+                "Fail warning",
+            ),
             ValidationResult(
                 "rule3",
                 ValidationCategory.GITHUB_INTEGRATION,
                 False,
                 ValidationLevel.STRICT,
-                "Fail error"),
+                "Fail error",
+            ),
         ]
 
         start_time = datetime.now()
@@ -617,7 +635,8 @@ It also doesn't have enough content to be considered a valid prompt.
                 False,
                 ValidationLevel.STANDARD,
                 "Fail",
-                suggestions=["Fix this", "Do that"]),
+                suggestions=["Fix this", "Do that"],
+            ),
             ValidationResult(
                 "rule2",
                 ValidationCategory.GIT_STATE,
@@ -666,7 +685,8 @@ It also doesn't have enough content to be considered a valid prompt.
                 overall_status="PASSED",
                 results=[],
                 metrics={},
-                recommendations=[])
+                recommendations=[],
+            )
             self.validator.validation_history.append(fake_report)
 
         # Run another validation
@@ -715,6 +735,7 @@ It also doesn't have enough content to be considered a valid prompt.
         # Comprehensive should have more checks
         assert comprehensive_report.total_checks >= minimal_report.total_checks
 
+
 class TestConvenienceFunctions:
     """Test suite for convenience functions"""
 
@@ -757,7 +778,8 @@ Test implementation details.
             task_id="test-convenience",
             prompt_file=self.prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[])
+            completed_phases=[],
+        )
 
         with patch("subprocess.run") as mock_subprocess:
             # Mock external calls
@@ -770,6 +792,7 @@ Test implementation details.
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD
         assert report.total_checks > 0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

@@ -188,7 +188,10 @@ class SimpleMemoryManager:
                         error_msg = f"Failed to lock memory issue #{issue_number}"
                         if self.strict_security:
                             raise GitHubError(
-                                f"{error_msg} - strict security mode enabled", "lock_issue", {}, None
+                                f"{error_msg} - strict security mode enabled",
+                                "lock_issue",
+                                {},
+                                None,
                             )
                         else:
                             self.logger.warning(f"{error_msg}, continuing anyway")
@@ -277,7 +280,9 @@ enhanced integration with GitHub's collaboration features."""
             )
 
             if not result["success"]:
-                raise GitHubError("Failed to read memory issue", "read_memory", result, None)
+                raise GitHubError(
+                    "Failed to read memory issue", "read_memory", result, None
+                )
 
             issue_data = result["data"]
             comments = issue_data.get("comments", [])
@@ -546,7 +551,10 @@ enhanced integration with GitHub's collaboration features."""
 
             if not issue_result["success"]:
                 raise GitHubError(
-                    "Failed to get memory issue status", "get_status", issue_result, None
+                    "Failed to get memory issue status",
+                    "get_status",
+                    issue_result,
+                    None,
                 )
 
             issue_data = issue_result["data"]
@@ -723,7 +731,7 @@ enhanced integration with GitHub's collaboration features."""
         """
         Manually lock the memory issue for security.
         This is the public interface to _lock_memory_issue.
-        
+
         Returns:
             True if successfully locked, False otherwise
         """
@@ -732,7 +740,7 @@ enhanced integration with GitHub's collaboration features."""
     def get_security_status(self) -> Dict[str, Any]:
         """
         Get comprehensive security status of the memory system.
-        
+
         Returns:
             Dictionary with security status information including:
             - success: Whether the check was successful
@@ -746,32 +754,57 @@ enhanced integration with GitHub's collaboration features."""
         try:
             # Check if memory issue is locked
             lock_status = self.check_lock_status()
-            is_locked = lock_status.get("locked", False) if lock_status.get("success") else False
-            
+            is_locked = (
+                lock_status.get("locked", False)
+                if lock_status.get("success")
+                else False
+            )
+
             # Determine security level
-            security_level = "HIGH" if (is_locked and self.auto_lock and self.strict_security) else \
-                           "MEDIUM" if (is_locked or self.auto_lock) else "LOW"
-            
+            security_level = (
+                "HIGH"
+                if (is_locked and self.auto_lock and self.strict_security)
+                else "MEDIUM"
+                if (is_locked or self.auto_lock)
+                else "LOW"
+            )
+
             # Collect warnings and recommendations
             warnings = []
             recommendations = []
-            
+
             if not is_locked:
-                warnings.append("Memory issue is NOT locked - vulnerable to memory poisoning attacks from non-collaborators")
-                recommendations.append("Lock the memory issue using lock_memory_issue() method")
-            
+                warnings.append(
+                    "Memory issue is NOT locked - vulnerable to memory poisoning attacks from non-collaborators"
+                )
+                recommendations.append(
+                    "Lock the memory issue using lock_memory_issue() method"
+                )
+
             if not self.auto_lock:
-                warnings.append("Auto-lock is disabled - new memory issues won't be automatically protected")
-                recommendations.append("Enable auto_lock=True in constructor for automatic protection")
-                
+                warnings.append(
+                    "Auto-lock is disabled - new memory issues won't be automatically protected"
+                )
+                recommendations.append(
+                    "Enable auto_lock=True in constructor for automatic protection"
+                )
+
             if self.auto_lock and not is_locked:
-                warnings.append("Auto-lock is enabled but memory issue is not locked - auto-lock may have failed")
-                recommendations.append("Check GitHub permissions and manually lock the issue")
-            
+                warnings.append(
+                    "Auto-lock is enabled but memory issue is not locked - auto-lock may have failed"
+                )
+                recommendations.append(
+                    "Check GitHub permissions and manually lock the issue"
+                )
+
             if not self.strict_security:
-                warnings.append("Strict security mode is disabled - initialization won't fail on lock failures")
-                recommendations.append("Enable strict_security=True for maximum security")
-                
+                warnings.append(
+                    "Strict security mode is disabled - initialization won't fail on lock failures"
+                )
+                recommendations.append(
+                    "Enable strict_security=True for maximum security"
+                )
+
             return {
                 "success": True,
                 "security_level": security_level,
@@ -782,7 +815,7 @@ enhanced integration with GitHub's collaboration features."""
                 "recommendations": recommendations,
                 "memory_issue_number": self.memory_issue_number,
             }
-            
+
         except Exception as e:
             self.logger.error(f"Failed to get security status: {e}")
             return {

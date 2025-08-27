@@ -54,11 +54,11 @@ def test_test_solver_initialization() -> None:
     """Test TestSolverAgent initialization."""
     try:
         from test_solver_agent import TestSolverAgent
-        
+
         # Create mock config
         class MockConfig:
             agent_id = "test_solver_agent"
-        
+
         solver = TestSolverAgent(config=MockConfig())
         assert solver.config is not None
         assert solver.shared_instructions is not None
@@ -70,11 +70,11 @@ def test_test_writer_initialization() -> None:
     """Test TestWriterAgent initialization."""
     try:
         from test_writer_agent import TestWriterAgent
-        
+
         # Create mock config
         class MockConfig:
             agent_id = "test_writer_agent"
-        
+
         writer = TestWriterAgent(config=MockConfig())
         assert writer.config is not None
         assert writer.shared_instructions is not None
@@ -112,10 +112,10 @@ def test_agent_config_fallback() -> None:
         # Create mock configs
         class MockSolverConfig:
             agent_id = "test_solver_agent"
-        
+
         class MockWriterConfig:
             agent_id = "test_writer_agent"
-        
+
         solver = TestSolverAgent(config=MockSolverConfig())
         writer = TestWriterAgent(config=MockWriterConfig())
 

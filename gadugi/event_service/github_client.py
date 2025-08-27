@@ -5,6 +5,7 @@ Handles GitHub API interactions for polling and webhook management.
 """
 
 import asyncio
+
 # json import removed - not actually used (json= is kwarg)
 import logging
 from datetime import datetime
@@ -65,7 +66,9 @@ class GitHubClient:
     async def _request(self, method: str, endpoint: str, **kwargs) -> Any:
         """Make an authenticated request to GitHub API."""
         await self._ensure_session()
-        assert self.session is not None  # Type guard: session is created by _ensure_session
+        assert (
+            self.session is not None
+        )  # Type guard: session is created by _ensure_session
 
         url = urljoin(self.base_url, endpoint)
 

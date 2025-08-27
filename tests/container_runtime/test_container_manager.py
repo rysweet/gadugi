@@ -96,7 +96,7 @@ def test_create_container_success(container_manager, sample_config):
 
 def test_create_container_failure(container_manager, sample_config):
     """Test container creation failure."""
-    container_manager.client.containers.create.side_effect = docker.errors.APIError(  # type: ignore
+    container_manager.client.containers.create.side_effect = docker.errors.APIError(  # type: ignore[import-not-found]
         "Creation failed"
     )
 
@@ -127,7 +127,7 @@ def test_start_container_failure(container_manager, sample_config):
     """Test container start failure."""
     # Create container first
     mock_container = Mock()
-    mock_container.start.side_effect = docker.errors.APIError("Start failed")  # type: ignore
+    mock_container.start.side_effect = docker.errors.APIError("Start failed")  # type: ignore[import-not-found]
     container_manager.client.containers.create.return_value = mock_container
     container_id = container_manager.create_container(sample_config)
 

@@ -26,7 +26,8 @@ try:
         graceful_degradation,
         handle_with_fallback,
         retry,
-        validate_input)
+        validate_input,
+    )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -50,7 +51,9 @@ except ImportError:
         FIXED = "fixed"
 
     class GadugiError(Exception):
-        def __init__(self, message, severity=ErrorSeverity.MEDIUM, context=None) -> None:
+        def __init__(
+            self, message, severity=ErrorSeverity.MEDIUM, context=None
+        ) -> None:
             super().__init__(message)
             self.severity = severity
             self.context = context or {}
@@ -68,7 +71,8 @@ except ImportError:
         strategy=None,
         backoff_factor=2.0,
         exceptions=None,
-        on_retry=None):
+        on_retry=None,
+    ):
         def decorator(func):
             def wrapper(*args, **kwargs):
                 last_exception = None
@@ -188,7 +192,9 @@ except ImportError:
             self.error_history.clear()
 
     class CircuitBreaker:
-        def __init__(self, failure_threshold=5, recovery_timeout=60.0, *args, **kwargs) -> None:
+        def __init__(
+            self, failure_threshold=5, recovery_timeout=60.0, *args, **kwargs
+        ) -> None:
             self.failure_threshold = failure_threshold
             self.recovery_timeout = recovery_timeout
             self.failure_count = 0
@@ -197,9 +203,9 @@ except ImportError:
 
         def __call__(self, func):
             def wrapper(*args, **kwargs):
-                if self.is_open:  # type: ignore
+                if self.is_open:  # type: ignore[import-not-found]
                     # Check if we should try to recover
-                    if self.last_failure_time:  # type: ignore
+                    if self.last_failure_time:  # type: ignore[import-not-found]
                         elapsed = (
                             datetime.now() - self.last_failure_time
                         ).total_seconds()
@@ -244,7 +250,9 @@ except ImportError:
             return fallback()
 
     class ErrorContext:
-        def __init__(self, operation_name, cleanup_func=None, suppress_errors=False) -> None:
+        def __init__(
+            self, operation_name, cleanup_func=None, suppress_errors=False
+        ) -> None:
             self.operation_name = operation_name
             self.cleanup_func = cleanup_func
             self.suppress_errors = suppress_errors
@@ -260,7 +268,7 @@ except ImportError:
                 logger.error(f"Error in {self.operation_name}: {exc_val}")
 
                 # Run cleanup if provided
-                if self.cleanup_func:  # type: ignore
+                if self.cleanup_func:  # type: ignore[import-not-found]
                     try:
                         self.cleanup_func()
                     except Exception as cleanup_error:
@@ -269,7 +277,7 @@ except ImportError:
                         )
 
                 # Suppress errors if requested
-                if self.suppress_errors:  # type: ignore
+                if self.suppress_errors:  # type: ignore[import-not-found]
                     return True
             else:
                 logger.debug(f"Completed operation: {self.operation_name}")
@@ -299,6 +307,7 @@ except ImportError:
 
         return decorator
 
+
 class TestErrorSeverity:
     """Test ErrorSeverity enum."""
 
@@ -320,6 +329,7 @@ class TestErrorSeverity:
         assert len(severities) == 4
         assert ErrorSeverity.CRITICAL != ErrorSeverity.LOW
 
+
 class TestRetryStrategy:
     """Test RetryStrategy enum."""
 
@@ -333,6 +343,7 @@ class TestRetryStrategy:
         """Test all retry strategies are defined."""
         strategies = list(RetryStrategy)
         assert len(strategies) == 3
+
 
 class TestGadugiError:
     """Test GadugiError base exception."""
@@ -360,6 +371,7 @@ class TestGadugiError:
         error = GadugiError("Test")
         assert isinstance(error, Exception)
 
+
 class TestRecoverableError:
     """Test RecoverableError exception."""
 
@@ -374,6 +386,7 @@ class TestRecoverableError:
         context = {"retry_count": 2}
         error = RecoverableError("Network timeout", context=context)
         assert error.context == context
+
 
 class TestNonRecoverableError:
     """Test NonRecoverableError exception."""
@@ -391,6 +404,7 @@ class TestNonRecoverableError:
         error = NonRecoverableError("System corrupted", context)
         assert error.context == context
         assert error.severity == ErrorSeverity.CRITICAL
+
 
 class TestRetryDecorator:
     """Test retry decorator functionality."""
@@ -452,7 +466,8 @@ class TestRetryDecorator:
                 max_attempts=3,
                 initial_delay=0.1,
                 strategy=RetryStrategy.EXPONENTIAL,
-                backoff_factor=2.0)
+                backoff_factor=2.0,
+            )
             def always_fails():
                 raise ValueError("Test")
 
@@ -476,7 +491,8 @@ class TestRetryDecorator:
                 max_attempts=3,
                 initial_delay=0.1,
                 strategy=RetryStrategy.LINEAR,
-                backoff_factor=2.0)
+                backoff_factor=2.0,
+            )
             def always_fails():
                 raise ValueError("Test")
 
@@ -543,6 +559,7 @@ class TestRetryDecorator:
         assert retry_calls[0] == (1, "Failure 1")
         assert retry_calls[1] == (2, "Failure 2")
 
+
 class TestGracefulDegradation:
     """Test graceful degradation decorator."""
 
@@ -604,6 +621,7 @@ class TestGracefulDegradation:
 
             assert failing_func() == "fallback"
             mock_logger.error.assert_not_called()
+
 
 class TestErrorHandler:
     """Test ErrorHandler class."""
@@ -732,6 +750,7 @@ class TestErrorHandler:
         assert len(handler.error_counts) == 0
         assert len(handler.error_history) == 0
 
+
 class TestCircuitBreaker:
     """Test CircuitBreaker class."""
 
@@ -852,6 +871,7 @@ class TestCircuitBreaker:
         assert cb.failure_count == 0
         assert cb.last_failure_time is None
 
+
 class TestHandleWithFallback:
     """Test handle_with_fallback function."""
 
@@ -908,6 +928,7 @@ class TestHandleWithFallback:
 
             assert handle_with_fallback(primary, fallback) == "fallback result"
             mock_logger.warning.assert_called_once()
+
 
 class TestErrorContext:
     """Test ErrorContext context manager."""
@@ -980,6 +1001,7 @@ class TestErrorContext:
             with ErrorContext("test operation"):
                 raise ValueError("Test error")
 
+
 class TestValidateInput:
     """Test validate_input decorator."""
 
@@ -1039,6 +1061,7 @@ class TestValidateInput:
 
         # Should work fine, just ignores unknown parameter
         assert test_func(5, "hello") == "5: hello"
+
 
 class TestErrorHandlingIntegration:
     """Integration tests for error handling components."""
