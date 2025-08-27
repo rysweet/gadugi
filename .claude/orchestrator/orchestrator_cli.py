@@ -180,13 +180,13 @@ class OrchestrationCLI:
         print("ORCHESTRATION RESULTS")
         print("="*60)
 
-        print(f"Orchestration ID: {(result.task_id if result is not None else None)}")
+        print(f"Orchestration ID: {result.task_id}")
         print(f"Total Tasks: {result.total_tasks}")
         print(f"Successful Tasks: {result.successful_tasks}")
         print(f"Failed Tasks: {result.failed_tasks}")
         print(f"Execution Time: {result.execution_time_seconds:.1f} seconds")
 
-        if result is not None and result.parallel_speedup:
+        if result.parallel_speedup:
             print(f"Parallel Speedup: {result.parallel_speedup:.1f}x")
 
         # Success rate
@@ -195,19 +195,19 @@ class OrchestrationCLI:
             print(f"Success Rate: {success_rate:.1f}%")
 
         # Task details
-        if result is not None and result.task_results:
+        if result.task_results:
             print("\nTask Details:")
             for task_result in result.task_results:
-                status = "✅ SUCCESS" if (task_result.status if task_result is not None else None) == 'success' else "❌ FAILED"
+                status = "✅ SUCCESS" if task_result.status == 'success' else "❌ FAILED"
                 exec_time = getattr(task_result, 'duration', 0) or 0
-                print(f"  {(task_result.task_id if task_result is not None else None)}: {status} ({exec_time:.1f}s)")
+                print(f"  {task_result.task_id}: {status} ({exec_time:.1f}s)")
 
-                if (task_result.status if task_result is not None else None) != 'success' and hasattr(task_result, 'error_message'):
+                if task_result.status != 'success' and hasattr(task_result, 'error_message'):
                     error_msg = getattr(task_result, 'error_message', 'Unknown error')
                     print(f"    Error: {error_msg}")
 
         # Error summary
-        if result is not None and result.error_summary:
+        if result.error_summary:
             print(f"\nError Summary: {result.error_summary}")
 
         print("="*60)
@@ -348,9 +348,9 @@ def main():
     args = parse_arguments()
 
     # Configure logging level
-    if args is not None and args.verbose:
+    if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    elif args is not None and args.quiet:
+    elif args.quiet:
         logging.getLogger().setLevel(logging.ERROR)
 
     try:
@@ -360,17 +360,17 @@ def main():
         # Determine input source
         prompt_files = []
 
-        if args is not None and args.interactive:
+        if args.interactive:
             # Interactive mode
             cli.run_interactive_mode()
             return
 
-        elif args is not None and args.stdin:
+        elif args.stdin:
             # Read from stdin (agent invocation)
             user_input = sys.stdin.read()
             prompt_files = cli.parse_user_input(user_input)
 
-        elif args is not None and args.prompt_files:
+        elif args.prompt_files:
             # Direct command line arguments
             prompt_files = args.prompt_files
 
@@ -407,7 +407,7 @@ def main():
 
     except Exception as e:
         logger.error(f"CLI execution failed: {e}")
-        if args is not None and args.verbose:
+        if args.verbose:
             import traceback
             traceback.print_exc()
         sys.exit(1)

@@ -777,7 +777,7 @@ def optimize_workflow_with_teamcoach(
 
     # Apply optimizations (if auto-apply is enabled)
     applied_optimizations = []
-    if integration is not None and integration.auto_apply_optimizations:
+    if integration.auto_apply_optimizations:
         for recommendation in recommendations[:3]:  # Apply top 3
             if integration.apply_optimization(recommendation, workflow_state):
                 applied_optimizations.append(recommendation)

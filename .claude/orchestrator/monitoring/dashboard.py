@@ -275,7 +275,7 @@ class OrchestrationMonitor:
                 logger.info(f"WebSocket client disconnected: {websocket.remote_address}")
 
         try:
-            if websockets_available and websockets is not None:
+            if websockets_available:
                 await websockets.serve(handle_websocket, "0.0.0.0", port)
                 logger.info(f"WebSocket server started on port {port}")
         except Exception as e:

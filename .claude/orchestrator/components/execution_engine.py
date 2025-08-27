@@ -250,7 +250,7 @@ class TaskExecutor:
 
                 # Check if containerized execution failed due to missing prerequisites
                 # (e.g., no API key, Docker issues) and should fall back to subprocess
-                if container_result is not None and container_result.status == "failed" and container_result.exit_code == -1:
+                if container_result.status == "failed" and container_result.exit_code == -1:
                     if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
                         print(f"⚠️  Container execution requires API key for {self.task_id}")
                         print(f"🔄 Falling back to subprocess execution...")
@@ -963,7 +963,7 @@ def main():
             tasks,
             MockWorktreeManager(),
             progress_callback=lambda completed, total, result: print(
-                f"Progress: {completed}/{total} - {result.task_id}: {result.status}" if result is not None else f"Progress: {completed}/{total} - Unknown: Unknown"
+                f"Progress: {completed}/{total} - {result.task_id}: {result.status}"
             )
         )
 

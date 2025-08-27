@@ -495,7 +495,7 @@ class ADRGenerator:
         template = f"""# ADR-{adr_data.number:03d}: {adr_data.title}
 
 **Date**: {adr_data.date.strftime('%Y-%m-%d')}
-**Status**: {(adr_data.status if adr_data is not None else None)}
+**Status**: {adr_data.status}
 **Context**: PR #{adr_data.pr_number}
 
 ## Decision

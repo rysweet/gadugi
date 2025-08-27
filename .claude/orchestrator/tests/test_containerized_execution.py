@@ -112,7 +112,7 @@ except ImportError as e:
     TaskExecutor = MockTaskExecutor
     OrchestrationMonitor = MockOrchestrationMonitor
     imports_available = False
-    IMPORTS_AVAILABLE = imports_available
+    IMPORTS_AVAILABLE = imports_available  # type: ignore[reportConstantRedefinition]
 
 
 @unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
@@ -239,8 +239,8 @@ class TestContainerManager(unittest.TestCase):
 
         # Verify result
         self.assertIsInstance(result, ContainerResult)
-        self.assertEqual((result.task_id if result is not None else None), "test-task-1")
-        self.assertEqual((result.status if result is not None else None), "success")
+        self.assertEqual(result.task_id, "test-task-1")
+        self.assertEqual(result.status, "success")
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.stdout, "Task completed successfully")
         self.assertIsNotNone(result.start_time)
@@ -353,7 +353,7 @@ class TestContainerManager(unittest.TestCase):
         )
 
         # Verify failure is handled correctly
-        self.assertEqual((result.status if result is not None else None), "failed")
+        self.assertEqual(result.status, "failed")
         self.assertEqual(result.exit_code, 1)
         self.assertEqual(result.stdout, "Error: Task failed")
         self.assertIsNone(result.error_message)  # No exception, just failed exit code
@@ -445,7 +445,9 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         )
 
         # Verify result conversion
-        self.assertEqual((result.status if result is not None else None), "success")
+        self.assertIsNotNone(result)
+        if result is not None:
+            self.assertEqual(result.status, "success")
         self.assertEqual((result.exit_code if result is not None else None), 0)
 
 
@@ -487,8 +489,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         mock_container = Mock()
         mock_container.id = "test-container"
         mock_container.name = "orchestrator-test-task"
-        if mock_container is not None:
-                    mock_container.status = "running"
+        mock_container.status = "running"
         mock_container.attrs = {
             'Created': '2023-01-01T00:00:00Z',
             'Config': {'Env': ['TEST=1']},
@@ -674,12 +675,12 @@ def run_containerized_tests():
     print(f"Errors: {len(result.errors)}")
     print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
 
-    if result is not None and result.failures:
+    if result.failures:
         print(f"\nFailures:")
         for test, traceback in result.failures:
             print(f"- {test}: {traceback.split(chr(10))[-2]}")
 
-    if result is not None and result.errors:
+    if result.errors:
         print(f"\nErrors:")
         for test, traceback in result.errors:
             print(f"- {test}: {traceback.split(chr(10))[-2]}")

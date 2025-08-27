@@ -10,7 +10,11 @@ from enum import Enum
 import uuid
 import sys
 import os
-from error_handling import GadugiError
+try:
+    from error_handling import GadugiError  # type: ignore
+except ImportError:
+    class GadugiError(Exception):  # type: ignore
+        pass
 
 """
 Audit Logger for Container Execution.

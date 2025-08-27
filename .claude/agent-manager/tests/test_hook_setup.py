@@ -10,7 +10,7 @@ import json
 import os
 import shutil
 import subprocess
-import sys
+# # import sys  # Not used  # Not currently used
 import tempfile
 import unittest
 from pathlib import Path
@@ -173,7 +173,7 @@ class TestAgentManagerHookSetup(unittest.TestCase):
         with open(self.settings_file, 'w') as f:
             f.write('{"invalid": json content}')
 
-        result = self.run_setup_script()
+        _ = self.run_setup_script()  # Result not used
 
         # Should still create valid settings
         self.assertTrue(self.settings_file.exists())

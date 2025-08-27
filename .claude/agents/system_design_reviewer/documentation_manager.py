@@ -356,7 +356,7 @@ Specialized Agents
 
         for change in security_changes:
             section += f"- **{change.get_description()}**: {change.element.location}\n"
-            if change is not None and change.design_implications:
+            if change.design_implications:
                 for implication in change.design_implications:
                     section += f"  - {implication}\n"
 

@@ -8,17 +8,14 @@ avoiding common pyright errors proactively.
 
 from __future__ import annotations
 
-import ast
-import json
 try:
     import black  # type: ignore[import-untyped]
     HAS_BLACK = True
 except ImportError:
+    black = None  # type: ignore[assignment]
     HAS_BLACK = False
 from dataclasses import dataclass, field
-from datetime import datetime
 from enum import Enum, auto
-from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -26,10 +23,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    Union,
-    Protocol,
-    TypeVar,
-    Literal,
     TypeAlias,
     Final,
 )
@@ -335,7 +328,7 @@ class TypeSafeGenerator:
         
         # Format with black if available
         code = "\n".join(lines)
-        if HAS_BLACK:
+        if HAS_BLACK and black is not None:
             try:
                 code = black.format_str(code, mode=black.Mode())
             except Exception:

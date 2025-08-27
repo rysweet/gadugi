@@ -432,13 +432,13 @@ def main():
 
     collector = WorkflowReflectionCollector(args.project_root)
 
-    if args is not None and args.session_id:
+    if args.session_id:
         # Collect metrics for specific session
         metrics = collector.collect_session_metrics(args.session_id)
         print(f"✅ Collected metrics for session {args.session_id}")
         print(json.dumps(metrics, indent=2))
 
-    elif args is not None and args.generate_reflection:
+    elif args.generate_reflection:
         # Generate reflection from recent data
         data_files = list(collector.data_dir.glob("session-*-metrics.json"))
         session_data = []
@@ -454,13 +454,13 @@ def main():
             reflection_file = collector.generate_reflection(session_data)
             print(f"✅ Generated reflection: {reflection_file}")
 
-            if args is not None and args.create_improvement_issues:
+            if args.create_improvement_issues:
                 issues = collector.create_improvement_issues(reflection_file)
                 print(f"✅ Created {len(issues)} improvement issues")
         else:
             print("⚠️ No session data available for reflection")
 
-    elif args is not None and args.create_improvement_issues:
+    elif args.create_improvement_issues:
         # Find most recent reflection and create issues
         reflection_files = list(collector.reflection_dir.glob("reflection-*.md"))
         if reflection_files:

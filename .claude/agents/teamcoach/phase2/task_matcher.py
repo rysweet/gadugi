@@ -1074,7 +1074,7 @@ class TaskAgentMatcher:
             )
 
             # Top recommendation analysis
-            if recommendation is not None and recommendation.recommended_agents:
+            if recommendation.recommended_agents:
                 top_agent = recommendation.recommended_agents[0]
                 top_score = recommendation.agent_scores[top_agent]
 
@@ -1084,19 +1084,19 @@ class TaskAgentMatcher:
                 )
 
                 # Highlight key strengths
-                if top_score is not None and top_score.strengths:
+                if top_score.strengths:
                     reasoning_parts.append(
                         f"Key strengths: {', '.join(top_score.strengths[:2])}"
                     )
 
             # Risk assessment
-            if recommendation is not None and recommendation.risk_factors:
+            if recommendation.risk_factors:
                 reasoning_parts.append(
                     f"Risk factors identified: {len(recommendation.risk_factors)}"
                 )
 
             # Alternative options
-            if recommendation is not None and recommendation.alternative_options:
+            if recommendation.alternative_options:
                 reasoning_parts.append(
                     f"{len(recommendation.alternative_options)} alternative options available"
                 )
@@ -1120,7 +1120,7 @@ class TaskAgentMatcher:
             ]
 
             # Add fallback options
-            if recommendation is not None and recommendation.alternative_options:
+            if recommendation.alternative_options:
                 fallback_agent = recommendation.alternative_options[0][0]
                 recommendation.fallback_options = [
                     f"Reassign to {fallback_agent} if primary assignment fails",

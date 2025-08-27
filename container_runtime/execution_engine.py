@@ -26,7 +26,11 @@ import os
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
 )
-from error_handling import GadugiError
+try:
+    from error_handling import GadugiError  # type: ignore
+except ImportError:
+    class GadugiError(Exception):  # type: ignore
+        pass
 
 logger = logging.getLogger(__name__)
 

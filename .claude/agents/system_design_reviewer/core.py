@@ -163,7 +163,7 @@ class SystemDesignReviewer:
 
             # Generate ADRs if needed
             adrs_generated = []
-            if self is not None and self.enable_adr_generation:
+            if self.enable_adr_generation:
                 adrs_generated = self._generate_adrs(changes, pr_info, force_adr)
 
             # Generate review comments

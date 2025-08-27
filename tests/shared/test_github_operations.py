@@ -51,7 +51,7 @@ except ImportError:
 
         def get_wait_time(self) -> int:
             """Get the time to wait before retrying."""
-            if self is not None and self.reset_time:
+            if self.reset_time:  # type: ignore
                 return max(0, self.reset_time - int(time.time()))
             return 60  # Default wait time
 
@@ -76,7 +76,7 @@ except ImportError:
             """Mock GitHub CLI command execution."""
             # Add repo argument if specified
             full_command = ["gh"] + command
-            if self is not None and self.repo:
+            if self.repo:  # type: ignore
                 full_command.extend(["--repo", self.repo])
 
             try:

@@ -49,7 +49,7 @@ class AgentConfig:
     config: Dict[str, Any] = None
     
     def __post_init__(self) -> None:
-        if self.config is None:
+        if not self.config:
             self.config = {}
 
 # Mock implementations for missing shared modules
@@ -862,7 +862,7 @@ echo "Branch {branch_name} created and pushed successfully"
         if not task.dependencies:
             return True
 
-        task_status_map = {t.id: (t.status if t is not None else None) for t in all_tasks}
+        task_status_map = {t.id: t.status for t in all_tasks}
 
         for dep_id in task.dependencies:
             if dep_id not in task_status_map or task_status_map[dep_id] != "completed":
@@ -939,7 +939,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
             summary += f"- {status_emoji} {task.name}: {task.description}\n"
 
-        if workflow is not None and workflow.autonomous_decisions:
+        if workflow.autonomous_decisions:
             summary += "\n### Autonomous Decisions\n"
             for decision in workflow.autonomous_decisions[-5:]:  # Last 5
                 summary += f"- {decision['timestamp']}: {decision['decision']} for task {decision['task_id']}\n"
@@ -1018,7 +1018,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
             # Reset in-progress tasks to pending
             for task in (workflow.tasks or []):
-                if task is not None and task.status == "in_progress":
+                if task.status == "in_progress":
                     task.status = "pending"
 
             self.current_workflow = workflow
@@ -1073,7 +1073,7 @@ echo "Branch {branch_name} created and pushed successfully"
     def cleanup(self):
         """Cleanup resources."""
         try:
-            if self is not None and self.current_workflow:
+            if self.current_workflow:
                 self.save_workflow_state(self.current_workflow)
 
             self.container_executor.cleanup()
@@ -1873,7 +1873,7 @@ print(f"Review status saved: {{review_status}}")
         step = {
             "timestamp": datetime.now().isoformat(),
             "message": message,
-            "task_id": (workflow.task_id if workflow is not None else None),
+            "task_id": workflow.task_id,
         }
         if workflow.execution_log is None:
             workflow.execution_log = []
@@ -1921,7 +1921,7 @@ def main():
         print("\nWorkflow Execution Results:")
         print(f"Success: {success}")
         print(f"Task ID: {workflow.task_id}")
-        print(f"Status: {(workflow.status if workflow is not None else None)}")
+        print(f"Status: {workflow.status}")
         print(f"Execution Stats: {stats}")
 
         return 0 if success else 1

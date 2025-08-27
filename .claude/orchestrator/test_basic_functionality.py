@@ -110,7 +110,7 @@ def test_process_registry_basic():
             # Test retrieval
             retrieved = registry.get_process("test-task")
 
-            if retrieved and (retrieved.task_id if retrieved is not None else None) == "test-task":
+            if retrieved and retrieved.task_id == "test-task":
                 print("✅ Process registry basic functionality works")
                 return True
             else:

@@ -450,10 +450,10 @@ class CapabilityAssessment:
             # Calculate performance metrics
             success_rates = [1.0 if task.success else 0.0 for task in tasks]
             quality_scores = [
-                task.quality_score for task in tasks if task.quality_score is not None
+                task.quality_score for task in tasks if task.quality_score
             ]
             execution_times = [
-                task.execution_time for task in tasks if task.execution_time is not None
+                task.execution_time for task in tasks if task.execution_time
             ]
 
             # Calculate domain performance score
@@ -626,7 +626,7 @@ class CapabilityAssessment:
         performances = []
         for task in sorted_tasks:
             performance = 1.0 if task.success else 0.0
-            if hasattr(task, "quality_score") and task.quality_score is not None:
+            if hasattr(task, "quality_score") and task.quality_score:
                 performance = (performance + task.quality_score / 100.0) / 2.0
             performances.append(performance)
 
@@ -892,7 +892,7 @@ class CapabilityAssessment:
         """Get agent configuration from state manager."""
         try:
             config_data = self.state_manager.get_agent_config(agent_id)
-            if config_data and isinstance(config_data, dict):
+            if config_data:
                 return AgentConfig(
                     name=config_data.get('name', agent_id),
                     agent_type=config_data.get('agent_type', 'generic'),

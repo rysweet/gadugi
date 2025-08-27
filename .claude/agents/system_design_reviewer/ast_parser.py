@@ -281,7 +281,7 @@ class PythonASTParser(ASTParser):
         if "singleton" in element.patterns:
             implications.append("Singleton pattern change affects global state management")
 
-        if element is not None and element.is_async:
+        if element.is_async:
             implications.append("Async function change affects concurrency patterns")
 
         if len(element.dependencies) > 5:
@@ -414,7 +414,7 @@ class PythonASTVisitor(ast.NodeVisitor):
 
     def _get_return_type(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> Optional[str]:
         """Extract return type annotation if present"""
-        if node is not None and node.returns:
+        if node.returns:
             return ast.unparse(node.returns) if hasattr(ast, 'unparse') else str(node.returns)
         return None
 

@@ -197,9 +197,9 @@ except ImportError:
 
         def __call__(self, func):
             def wrapper(*args, **kwargs):
-                if self is not None and self.is_open:
+                if self.is_open:  # type: ignore
                     # Check if we should try to recover
-                    if self is not None and self.last_failure_time:
+                    if self.last_failure_time:  # type: ignore
                         elapsed = (
                             datetime.now() - self.last_failure_time
                         ).total_seconds()
@@ -260,7 +260,7 @@ except ImportError:
                 logger.error(f"Error in {self.operation_name}: {exc_val}")
 
                 # Run cleanup if provided
-                if self is not None and self.cleanup_func:
+                if self.cleanup_func:  # type: ignore
                     try:
                         self.cleanup_func()
                     except Exception as cleanup_error:
@@ -269,7 +269,7 @@ except ImportError:
                         )
 
                 # Suppress errors if requested
-                if self is not None and self.suppress_errors:
+                if self.suppress_errors:  # type: ignore
                     return True
             else:
                 logger.debug(f"Completed operation: {self.operation_name}")

@@ -380,8 +380,8 @@ class TestSystemDesignStateManager:
         """Test state manager initialization"""
         manager = SystemDesignStateManager()
 
-        assert manager.state_dir.name == "system-design-reviewer"
-        assert manager.task_id == "system-design-reviewer"
+        assert manager.state_manager.state_dir.name == "system-design-reviewer"  # type: ignore
+        assert manager.state_manager.task_id == "system-design-reviewer"  # type: ignore
 
     def test_get_default_state(self):
         """Test default state structure"""
@@ -403,8 +403,8 @@ class TestSystemDesignStateManager:
         """Test state saving and loading"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_dir = Path(temp_dir)
-            manager.state_file = manager.state_dir / "test_state.json"
+            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore
+            manager.state_manager.state_file = manager.state_manager.state_dir / "test_state.json"  # type: ignore
 
             # Save state
             test_state = {"test_key": "test_value", "number": 42}
@@ -422,8 +422,8 @@ class TestSystemDesignStateManager:
         """Test saving review results"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_dir = Path(temp_dir)
-            manager.state_file = manager.state_dir / "test_state.json"
+            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore
+            manager.state_manager.state_file = manager.state_manager.state_dir / "test_state.json"  # type: ignore
 
             # Create sample result
             result = ReviewResult(
@@ -451,8 +451,8 @@ class TestSystemDesignStateManager:
         """Test review result limit (keeps last 100)"""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = SystemDesignStateManager()
-            manager.state_dir = Path(temp_dir)
-            manager.state_file = manager.state_dir / "test_state.json"
+            manager.state_manager.state_dir = Path(temp_dir)  # type: ignore
+            manager.state_manager.state_file = manager.state_manager.state_dir / "test_state.json"  # type: ignore
 
             # Create initial state with many reviews
             initial_state = manager.get_default_state()
