@@ -112,7 +112,7 @@ class SystemDesignReviewer:
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
         self.error_handler = ErrorHandler()
-        self.task_tracker = TaskTracker(agent_type="system-design-reviewer")
+        self.task_tracker = TaskTracker(workflow_id="system-design-reviewer")
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
