@@ -16,7 +16,7 @@ Key Features:
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -50,7 +50,9 @@ try:
         CapabilityAssessment,
         AgentCapabilityProfile,
         CapabilityDomain,
-        ProficiencyLevel)
+        ProficiencyLevel,
+        TaskCapabilityRequirement,
+    )
     from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 except ImportError:
     # Define minimal stubs if Phase 1 imports fail
@@ -216,7 +218,8 @@ class TaskAgentMatcher:
         performance_analyzer: Optional[AgentPerformanceAnalyzer] = None,
         task_metrics: Optional[TaskMetrics] = None,
         state_manager: Optional[StateManager] = None,
-        error_handler: Optional[ErrorHandler] = None):
+        error_handler: Optional[ErrorHandler] = None,
+    ):
         """
         Initialize the task-agent matcher.
 
@@ -265,7 +268,8 @@ class TaskAgentMatcher:
         self,
         task_requirements: TaskRequirements,
         available_agents: List[str],
-        strategy: MatchingStrategy = MatchingStrategy.BEST_FIT) -> MatchingRecommendation:
+        strategy: MatchingStrategy = MatchingStrategy.BEST_FIT,
+    ) -> MatchingRecommendation:
         """
         Find the optimal agent(s) for a given task.
 
@@ -329,7 +333,8 @@ class TaskAgentMatcher:
         self,
         agent_id: str,
         task_requirements: TaskRequirements,
-        strategy: MatchingStrategy) -> MatchingScore:
+        strategy: MatchingStrategy,
+    ) -> MatchingScore:
         """Calculate comprehensive matching score for an agent-task pair."""
         try:
             # Get agent data
@@ -376,7 +381,8 @@ class TaskAgentMatcher:
                 task_requirements,
                 capability_match,
                 performance_prediction,
-                availability_score)
+                availability_score,
+            )
 
             return MatchingScore(
                 agent_id=agent_id,
@@ -395,7 +401,8 @@ class TaskAgentMatcher:
                     "performance_weight": weights["performance"],
                     "availability_weight": weights["availability"],
                     "workload_weight": weights["workload"],
-                })
+                },
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to calculate agent task score: {e}")
@@ -408,15 +415,17 @@ class TaskAgentMatcher:
                 workload_balance=0.0,
                 overall_score=0.0,
                 confidence_level=0.0,
-                concerns=[f"Score calculation failed: {e}"])
+                concerns=[f"Score calculation failed: {e}"],
+            )
 
     def _calculate_capability_match(
         self,
         capability_profile: AgentCapabilityProfile,
-        task_requirements: TaskRequirements) -> float:
+        task_requirements: TaskRequirements,
+    ) -> float:
         """Calculate how well agent capabilities match task requirements."""
         try:
-            if not capability_profile.capability_scores:  # type: ignore
+            if not capability_profile.capability_scores:
                 return 0.0
 
             total_weight = 0.0
@@ -425,14 +434,15 @@ class TaskAgentMatcher:
             # Evaluate required capabilities
             for (
                 domain,
-                required_level) in task_requirements.required_capabilities.items():
-                if domain in capability_profile.capability_scores:  # type: ignore
-                    agent_capability = capability_profile.capability_scores[domain]  # type: ignore
+                required_level,
+            ) in task_requirements.required_capabilities.items():
+                if domain in capability_profile.capability_scores:
+                    agent_capability = capability_profile.capability_scores[domain]
 
                     # Calculate match score based on proficiency level
                     level_match = min(
                         1.0,
-                        agent_capability.proficiency_level.value / required_level.value,  # type: ignore
+                        agent_capability.proficiency_level.value / required_level.value,
                     )
 
                     # Weight by confidence score
@@ -452,14 +462,15 @@ class TaskAgentMatcher:
             # Evaluate preferred capabilities (bonus points)
             for (
                 domain,
-                preferred_level) in task_requirements.preferred_capabilities.items():
-                if domain in capability_profile.capability_scores:  # type: ignore
-                    agent_capability = capability_profile.capability_scores[domain]  # type: ignore
+                preferred_level,
+            ) in task_requirements.preferred_capabilities.items():
+                if domain in capability_profile.capability_scores:
+                    agent_capability = capability_profile.capability_scores[domain]
 
                     level_match = min(
                         1.0,
                         agent_capability.proficiency_level.value
-                        / preferred_level.value,  # type: ignore
+                        / preferred_level.value,
                     )
                     confidence_weight = agent_capability.confidence_score
                     requirement_weight = 1.0  # Lower weight for preferred
@@ -490,7 +501,7 @@ class TaskAgentMatcher:
             end_time = datetime.now()
             start_time = end_time - timedelta(days=30)  # Last 30 days
 
-            performance_data = self.performance_analyzer.analyze_agent_performance(  # type: ignore
+            performance_data = self.performance_analyzer.analyze_agent_performance(
                 agent_id, (start_time, end_time)
             )
 
@@ -586,7 +597,7 @@ class TaskAgentMatcher:
             end_time = datetime.now()
             start_time = end_time - timedelta(days=60)
 
-            task_results = self.task_metrics.get_agent_task_results(  # type: ignore
+            task_results = self.task_metrics.get_agent_task_results(
                 agent_id, start_time, end_time
             )
 
@@ -702,7 +713,8 @@ class TaskAgentMatcher:
         self,
         capability_profile: AgentCapabilityProfile,
         agent_id: str,
-        task_requirements: TaskRequirements) -> float:
+        task_requirements: TaskRequirements,
+    ) -> float:
         """Calculate confidence level for the matching recommendation."""
         try:
             confidence_factors = []
@@ -714,9 +726,9 @@ class TaskAgentMatcher:
 
             capability_confidences = []
             for domain in relevant_capabilities:
-                if domain in capability_profile.capability_scores:  # type: ignore
+                if domain in capability_profile.capability_scores:
                     capability_confidences.append(
-                        capability_profile.capability_scores[domain].confidence_score  # type: ignore
+                        capability_profile.capability_scores[domain].confidence_score
                     )
 
             if capability_confidences:
@@ -726,7 +738,7 @@ class TaskAgentMatcher:
                 confidence_factors.append(avg_capability_confidence)
 
             # Performance history confidence (based on data points)
-            performance_data = self.performance_analyzer.analyze_agent_performance(  # type: ignore
+            performance_data = self.performance_analyzer.analyze_agent_performance(
                 agent_id
             )
             if performance_data.total_tasks > 0:
@@ -761,7 +773,7 @@ class TaskAgentMatcher:
             end_time = datetime.now()
             start_time = end_time - timedelta(days=90)
 
-            task_results = self.task_metrics.get_agent_task_results(  # type: ignore
+            task_results = self.task_metrics.get_agent_task_results(
                 agent_id, start_time, end_time
             )
 
@@ -793,7 +805,8 @@ class TaskAgentMatcher:
         task_requirements: TaskRequirements,
         capability_match: float,
         performance_prediction: float,
-        availability_score: float) -> Tuple[List[str], List[str], List[str]]:
+        availability_score: float,
+    ) -> Tuple[List[str], List[str], List[str]]:
         """Analyze and generate explanatory factors for the match."""
         strengths = []
         concerns = []
@@ -807,7 +820,7 @@ class TaskAgentMatcher:
                 strengths.append("Good capability match with minor gaps")
 
             # Check for specific strength alignment
-            for domain in capability_profile.primary_strengths:  # type: ignore
+            for domain in capability_profile.primary_strengths:
                 if domain in task_requirements.required_capabilities:
                     strengths.append(f"Primary strength in {domain.value}")
 
@@ -828,15 +841,16 @@ class TaskAgentMatcher:
                 # Identify specific gaps
                 for (
                     domain,
-                    required_level) in task_requirements.required_capabilities.items():
-                    if domain in capability_profile.capability_scores:  # type: ignore
-                        agent_level = capability_profile.capability_scores[  # type: ignore
+                    required_level,
+                ) in task_requirements.required_capabilities.items():
+                    if domain in capability_profile.capability_scores:
+                        agent_level = capability_profile.capability_scores[
                             domain
                         ].proficiency_level
-                        if agent_level.value < required_level.value:  # type: ignore
-                            concerns.append(f"Insufficient {domain.value} capability")  # type: ignore
+                        if agent_level.value < required_level.value:
+                            concerns.append(f"Insufficient {domain.value} capability")
                     else:
-                        concerns.append(f"Missing {domain.value} capability")  # type: ignore
+                        concerns.append(f"Missing {domain.value} capability")
 
             if performance_prediction < 0.5:
                 concerns.append("Below-average predicted performance")
@@ -859,7 +873,7 @@ class TaskAgentMatcher:
                 )
 
             # Check for improvement areas that align with task
-            for domain in capability_profile.improvement_areas:  # type: ignore
+            for domain in capability_profile.improvement_areas:
                 if domain in task_requirements.required_capabilities:
                     recommendations.append(
                         f"Good opportunity to develop {domain.value} skills"
@@ -919,7 +933,8 @@ class TaskAgentMatcher:
         self,
         task_requirements: TaskRequirements,
         agent_scores: Dict[str, MatchingScore],
-        strategy: MatchingStrategy) -> MatchingRecommendation:
+        strategy: MatchingStrategy,
+    ) -> MatchingRecommendation:
         """Generate comprehensive recommendation based on scores and strategy."""
         try:
             # Sort agents by overall score
@@ -977,7 +992,8 @@ class TaskAgentMatcher:
                 alternative_options=alternative_options,
                 estimated_completion_time=estimated_completion,
                 success_probability=success_probability,
-                risk_factors=risk_factors)
+                risk_factors=risk_factors,
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to generate recommendation: {e}")
@@ -987,7 +1003,8 @@ class TaskAgentMatcher:
         self,
         recommendation: MatchingRecommendation,
         task_requirements: TaskRequirements,
-        strategy: MatchingStrategy) -> None:
+        strategy: MatchingStrategy,
+    ) -> None:
         """Enhance recommendation with detailed reasoning."""
         try:
             reasoning_parts = []
@@ -1069,7 +1086,8 @@ class TaskAgentMatcher:
         self,
         task_requirements: TaskRequirements,
         recommended_agents: List[str],
-        agent_scores: Dict[str, MatchingScore]) -> Optional[datetime]:
+        agent_scores: Dict[str, MatchingScore],
+    ) -> Optional[datetime]:
         """Estimate task completion time based on agents and requirements."""
         try:
             if not recommended_agents or not task_requirements.estimated_duration:
@@ -1077,7 +1095,7 @@ class TaskAgentMatcher:
 
             # Get primary agent's average execution time
             primary_agent = recommended_agents[0]
-            performance_data = self.performance_analyzer.analyze_agent_performance(  # type: ignore
+            performance_data = self.performance_analyzer.analyze_agent_performance(
                 primary_agent
             )
 
@@ -1114,7 +1132,8 @@ class TaskAgentMatcher:
         self,
         task_requirements: TaskRequirements,
         recommended_agents: List[str],
-        agent_scores: Dict[str, MatchingScore]) -> List[str]:
+        agent_scores: Dict[str, MatchingScore],
+    ) -> List[str]:
         """Identify potential risk factors for the assignment."""
         risk_factors = []
 
@@ -1178,9 +1197,9 @@ class TaskAgentMatcher:
                 # Update capability profile if not cached or stale
                 if agent_id not in self.agent_profiles_cache or (
                     datetime.now()
-                    - self.agent_profiles_cache[agent_id].profile_generated  # type: ignore
+                    - self.agent_profiles_cache[agent_id].profile_generated
                 ) > timedelta(hours=24):
-                    profile = self.capability_assessment.assess_agent_capabilities(  # type: ignore
+                    profile = self.capability_assessment.assess_agent_capabilities(
                         agent_id
                     )
                     self.agent_profiles_cache[agent_id] = profile
@@ -1198,7 +1217,7 @@ class TaskAgentMatcher:
             return self.agent_profiles_cache[agent_id]
 
         # Fallback: assess capabilities
-        profile = self.capability_assessment.assess_agent_capabilities(agent_id)  # type: ignore
+        profile = self.capability_assessment.assess_agent_capabilities(agent_id)
         self.agent_profiles_cache[agent_id] = profile
         return profile
 
@@ -1219,7 +1238,7 @@ class TaskAgentMatcher:
             # For now, provide a basic implementation
 
             # Get current tasks from task metrics
-            current_tasks = self.task_metrics.get_agent_active_tasks(agent_id)  # type: ignore
+            current_tasks = self.task_metrics.get_agent_active_tasks(agent_id)
             scheduled_tasks = [
                 task.task_id for task in current_tasks if hasattr(task, "task_id")
             ]
@@ -1233,7 +1252,8 @@ class TaskAgentMatcher:
                 agent_id=agent_id,
                 current_workload=workload,
                 scheduled_tasks=scheduled_tasks,
-                available_from=datetime.now())
+                available_from=datetime.now(),
+            )
 
         except Exception as e:
             self.logger.error(f"Failed to fetch agent availability for {agent_id}: {e}")
@@ -1241,7 +1261,8 @@ class TaskAgentMatcher:
                 agent_id=agent_id,
                 current_workload=0.5,  # Default moderate workload
                 scheduled_tasks=[],
-                available_from=datetime.now())
+                available_from=datetime.now(),
+            )
 
     def _initialize_prediction_models(self) -> Dict[str, Any]:
         """Initialize performance prediction models."""
@@ -1257,7 +1278,8 @@ class TaskAgentMatcher:
         self,
         task_list: List[TaskRequirements],
         available_agents: List[str],
-        strategy: MatchingStrategy = MatchingStrategy.BEST_FIT) -> Dict[str, MatchingRecommendation]:
+        strategy: MatchingStrategy = MatchingStrategy.BEST_FIT,
+    ) -> Dict[str, MatchingRecommendation]:
         """
         Perform batch matching for multiple tasks.
 
