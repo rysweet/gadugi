@@ -48,4 +48,8 @@
 - Service must log all event routing decisions
 - Service must expose Prometheus metrics
 - Service must track event latency
+<<<<<<< HEAD
 - Service must report queue depths
+=======
+- Service must report queue depths
+>>>>>>> feature/gadugi-v0.3-regeneration

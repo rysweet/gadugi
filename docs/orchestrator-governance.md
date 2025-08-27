@@ -75,7 +75,11 @@ Every task MUST go through these phases via WorkflowManager:
 ```python
 async def _execute_single_task(self, task: Any) -> Any:
     """Execute a single task.
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     GOVERNANCE REQUIREMENT: All tasks MUST be delegated to WorkflowManager
     to ensure complete 11-phase workflow execution (Issue #148).
     """
@@ -85,14 +89,22 @@ async def _execute_single_task(self, task: Any) -> Any:
 
 async def _invoke_workflow_manager(self, task: Any) -> Dict[str, Any]:
     """Invoke WorkflowManager for task execution via claude -p.
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     GOVERNANCE: This is the MANDATORY delegation point.
     """
     # Create prompt file for WorkflowManager
     prompt_content = self._create_workflow_prompt(task)
     prompt_file = Path(f"/tmp/orchestrator_task_{task_id}.md")
     prompt_file.write_text(prompt_content)
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> feature/gadugi-v0.3-regeneration
     # Execute via claude subprocess
     workflow_cmd = ["claude", "-p", str(prompt_file)]
     process = await asyncio.create_subprocess_exec(*workflow_cmd, ...)
@@ -234,4 +246,8 @@ orchestrator = Orchestrator()
 - WorkflowManager Documentation: `.claude/agents/workflow-manager.md`
 - Orchestrator Implementation: `.claude/agents/orchestrator/`
 - Governance Validator: `.claude/agents/orchestrator/governance_validator.py`
+<<<<<<< HEAD
 - Test Suite: `tests/test_orchestrator_governance.py`
+=======
+- Test Suite: `tests/test_orchestrator_governance.py`
+>>>>>>> feature/gadugi-v0.3-regeneration

@@ -590,7 +590,7 @@ class EventRouter:
         # Add to processing queue with priority
         await self.event_queue.put((event.priority.value, event))
 
-        logger.debug(f"Event published", event_id=event.id, topic=event.topic)
+        logger.debug("Event published", event_id=event.id, topic=event.topic)
 
     async def _process_events(self):
         """Main event processing loop."""
@@ -614,7 +614,7 @@ class EventRouter:
     async def _route_event(self, event: Event):
         """Route event to subscribers."""
 
-        logger.debug(f"Routing event", event_id=event.id, topic=event.topic)
+        logger.debug("Routing event", event_id=event.id, topic=event.topic)
 
         # Handle system events
         if event.type in self.event_handlers:
@@ -649,7 +649,7 @@ class EventRouter:
                             await self.dlq.add(event, str(e))
 
         if not delivered:
-            logger.warning(f"No subscribers for event", topic=event.topic)
+            logger.warning("No subscribers for event", topic=event.topic)
 
     async def _handle_agent_started(self, event: Event):
         """Handle agent started event."""

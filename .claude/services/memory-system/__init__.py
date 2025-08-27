@@ -14,4 +14,8 @@ __all__ = [
     "SyncResult",
     "ImportResult",
     "PruneResult",
+<<<<<<< HEAD
 ]
+=======
+]
+>>>>>>> feature/gadugi-v0.3-regeneration

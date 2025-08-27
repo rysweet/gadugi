@@ -61,4 +61,8 @@ uv run pytest .claude/framework/tests/
 - Fix any files with issues
 - Create missing test files
 - Update type hints
+<<<<<<< HEAD
 - Add missing docstrings
+=======
+- Add missing docstrings
+>>>>>>> feature/gadugi-v0.3-regeneration

@@ -98,8 +98,11 @@ class ImplementationValidator:
                 # Run pyright
                 errors, warnings, infos = self.run_pyright(path)
                 result["pyright_errors"] = errors
+<<<<<<< HEAD
+=======
                 result["pyright_warnings"] = warnings  # Use warnings
                 result["pyright_infos"] = infos  # Use infos
+>>>>>>> feature/gadugi-v0.3-regeneration
 
                 # Determine status
                 if errors == 0:
