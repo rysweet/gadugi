@@ -7,7 +7,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Set, Dict, Tuple
 
 
 def fix_broken_imports(file_path: Path) -> bool:

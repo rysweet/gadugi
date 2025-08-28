@@ -3,11 +3,9 @@
 Aggressive final fix for all remaining pyright errors.
 """
 
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Any
 
 
 def analyze_errors():

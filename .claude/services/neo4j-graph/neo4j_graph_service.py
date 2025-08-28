@@ -326,6 +326,13 @@ class GraphDatabaseService:
             self.driver.close()
             self.connected = False
             self.logger.info("Disconnected from Neo4j database")
+    
+    def _get_session(self):
+        """Get a database session with proper null checking."""
+        if not self.driver:
+            raise RuntimeError("Driver not connected")
+        # Neo4j 5.x uses session() without database parameter by default
+        return self.driver.session()
 
     async def _test_connection(self) -> None:
         """Test the database connection."""
@@ -334,7 +341,7 @@ class GraphDatabaseService:
             result = tx.run("RETURN 1 as test")
             return result.single()["test"]
 
-        with self.driver.session(database=self.database) as session:
+        with self._get_session() as session:
             result = session.execute_read(test_query)
             if result != 1:
                 msg = "Connection test failed"
@@ -375,7 +382,7 @@ class GraphDatabaseService:
                         raise
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 session.execute_write(create_schema)
             self.logger.info("Schema initialized successfully")
         except Exception as e:
@@ -397,8 +404,8 @@ class GraphDatabaseService:
             props.update(
                 {
                     "id": node.id,
-                    "created_at": node.created_at.isoformat(),
-                    "updated_at": node.updated_at.isoformat(),
+                    "created_at": node.created_at.isoformat() if node.created_at else datetime.now().isoformat(),
+                    "updated_at": node.updated_at.isoformat() if node.updated_at else datetime.now().isoformat(),
                 },
             )
 
@@ -412,7 +419,7 @@ class GraphDatabaseService:
             return result.single()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 record = session.execute_write(create_node_tx)
 
                 node_data = dict(record["n"])
@@ -460,7 +467,7 @@ class GraphDatabaseService:
             return result.single()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 record = session.execute_read(get_node_tx)
 
                 if record:
@@ -530,7 +537,7 @@ class GraphDatabaseService:
             return result.single()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 record = session.execute_write(update_node_tx)
 
                 if record:
@@ -594,7 +601,7 @@ class GraphDatabaseService:
             return result.consume()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 summary = session.execute_write(delete_node_tx)
 
                 nodes_deleted = summary.counters().nodes_deleted
@@ -646,7 +653,7 @@ class GraphDatabaseService:
             props.update(
                 {
                     "id": relationship.id,
-                    "created_at": relationship.created_at.isoformat(),
+                    "created_at": relationship.created_at.isoformat() if relationship.created_at else datetime.now().isoformat(),
                     "strength": relationship.strength,
                 },
             )
@@ -668,7 +675,7 @@ class GraphDatabaseService:
             return result.single()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 record = session.execute_write(create_relationship_tx)
 
                 if record:
@@ -774,7 +781,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(find_nodes_tx)
 
                 nodes = [dict(record["n"]) for record in records]
@@ -862,7 +869,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(find_relationships_tx)
 
                 relationships = []
@@ -948,7 +955,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(find_paths_tx)
 
                 paths = []
@@ -1059,7 +1066,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(get_neighbors_tx)
 
                 nodes = []
@@ -1133,7 +1140,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(get_recommendations_tx)
 
                 recommendations = []
@@ -1271,7 +1278,7 @@ class GraphDatabaseService:
             return results
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 stats_data = session.execute_read(get_stats_tx)
 
                 stats = GraphStats(
@@ -1373,7 +1380,7 @@ class GraphDatabaseService:
                 return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(search_tx)
 
                 nodes = [dict(record["node"]) for record in records]
@@ -1430,7 +1437,7 @@ class GraphDatabaseService:
             return result.data()
 
         try:
-            with self.driver.session(database=self.database) as session:
+            with self._get_session() as session:
                 records = session.execute_read(execute_cypher_tx)
 
                 # Extract nodes, relationships, and other data
@@ -1618,7 +1625,7 @@ def create_document_node(
 
     if content:
         properties["content"] = content[:1000]  # Truncate for performance
-        properties["word_count"] = len(content.split())
+        properties["word_count"] = str(len(content.split()))
 
     return GraphNode(id=doc_id, type=NodeType.DOCUMENT, properties=properties)
 

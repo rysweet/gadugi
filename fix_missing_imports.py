@@ -4,7 +4,6 @@ Fix missing import errors in the Team Coach implementation.
 """
 
 import subprocess
-import re
 from pathlib import Path
 
 

@@ -266,14 +266,14 @@ Specialized Agents
                 return content + "\n\n" + new_content
 
     def _generate_system_overview(self, changes: List[ArchitecturalChange],
-                                pr_info: Dict[str, Any]) -> str:
+                                pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated system overview section"""
         # For now, return None to keep existing content
         # Could be enhanced to detect major architectural shifts
         return None
 
     def _generate_component_architecture(self, changes: List[ArchitecturalChange],
-                                       pr_info: Dict[str, Any]) -> str:
+                                       pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated component architecture section"""
         new_components = []
         modified_components = []
@@ -322,18 +322,18 @@ Specialized Agents
         return section
 
     def _generate_agent_ecosystem(self, changes: List[ArchitecturalChange],
-                                pr_info: Dict[str, Any]) -> str:
+                                pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated agent ecosystem section"""
         # For now, return None to keep existing content
         return None
 
     def _generate_data_flow(self, changes: List[ArchitecturalChange],
-                          pr_info: Dict[str, Any]) -> str:
+                          pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated data flow section"""
         return None
 
     def _generate_security_architecture(self, changes: List[ArchitecturalChange],
-                                      pr_info: Dict[str, Any]) -> str:
+                                      pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated security architecture section"""
         security_changes = [
             change for change in changes
@@ -374,7 +374,7 @@ Specialized Agents
         ]
 
         if not perf_changes:
-            return None
+            return ""
 
         section = """## Performance Architecture
 
@@ -395,12 +395,12 @@ Specialized Agents
         return section
 
     def _generate_integration_points(self, changes: List[ArchitecturalChange],
-                                   pr_info: Dict[str, Any]) -> str:
+                                   pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated integration points section"""
         return None
 
     def _generate_evolution_history(self, changes: List[ArchitecturalChange],
-                                  pr_info: Dict[str, Any]) -> str:
+                                  pr_info: Dict[str, Any]) -> Optional[str]:
         """Generate updated evolution history section"""
         return None  # Handled by _add_evolution_entry
 

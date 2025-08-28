@@ -8,11 +8,16 @@ and evolution history tracking.
 import pytest
 import tempfile
 import os
-from agents.system_design_reviewer.documentation_manager import (
+import sys
+from pathlib import Path
+# Add .claude directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+
+from claude.agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,
 )
-from agents.system_design_reviewer.ast_parser import (
+from claude.agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,
@@ -265,7 +270,7 @@ class TestDocumentationManager:
 
         section_content = manager._generate_component_architecture(new_components, {})
 
-        assert section_content is not None
+        assert section_content is not None  # type: ignore[comparison-overlap]
         assert "SystemDesignReviewer" in section_content
         assert "Recently Added Components" in section_content
         assert "Automated architectural review agent" in section_content
@@ -281,7 +286,7 @@ class TestDocumentationManager:
 
         section_content = manager._generate_security_architecture(security_changes, {})
 
-        assert section_content is not None
+        assert section_content is not None  # type: ignore[comparison-overlap]
         assert "Recent Security Updates" in section_content
         assert "SecurityEnforcer" in section_content
 
@@ -305,7 +310,7 @@ class TestDocumentationManager:
 
         section_content = manager._generate_performance_architecture(perf_changes, {})
 
-        assert section_content is not None
+        assert section_content is not None  # type: ignore[comparison-overlap]
         assert "Recent Performance Updates" in section_content
         assert "async_handler" in section_content
         assert "Async implementation" in section_content
@@ -321,7 +326,7 @@ class TestDocumentationManager:
 
         entry = manager._create_evolution_entry(high_impact_changes, sample_pr_info)
 
-        assert entry is not None
+        assert entry is not None  # type: ignore[comparison-overlap]
         assert "PR #123" in entry
         assert "Add System Design Review Agent" in entry
         assert "**High Impact Changes**:" in entry

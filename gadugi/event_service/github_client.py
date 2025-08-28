@@ -61,7 +61,7 @@ class GitHubClient:
             await self.session.close()
             self.session = None
 
-    async def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
+    async def _request(self, method: str, endpoint: str, **kwargs) -> Any:
         """Make an authenticated request to GitHub API."""
         await self._ensure_session()
 
@@ -72,6 +72,9 @@ class GitHubClient:
             wait_time = (self.rate_limit_reset - datetime.now()).total_seconds()
             logger.warning(f"Rate limit approaching, waiting {wait_time:.1f} seconds")
             await asyncio.sleep(wait_time)
+
+        if self.session is None:
+            raise RuntimeError("Session not initialized")
 
         try:
             async with self.session.request(method, url, **kwargs) as response:
@@ -106,7 +109,7 @@ class GitHubClient:
         return await self._request("GET", f"/repos/{owner}/{repo}")
 
     async def get_events_since(
-        self, since: datetime, owner: str = None, repo: str = None
+        self, since: datetime, owner: Optional[str] = None, repo: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get events since the specified time."""
         if owner and repo:
@@ -129,9 +132,10 @@ class GitHubClient:
             filtered_events = []
 
             for event in events:
-                event_time = event.get("created_at", "")
-                if event_time and event_time >= since_str:
-                    filtered_events.append(event)
+                if isinstance(event, dict):
+                    event_time = event.get("created_at", "")
+                    if event_time and event_time >= since_str:
+                        filtered_events.append(event)
 
             logger.debug(f"Found {len(filtered_events)} events since {since}")
             return filtered_events
@@ -153,9 +157,10 @@ class GitHubClient:
             params["since"] = since.isoformat() + "Z"
 
         try:
-            return await self._request(
+            result = await self._request(
                 "GET", f"/repos/{owner}/{repo}/issues", params=params
             )
+            return result if isinstance(result, list) else []
         except Exception as e:
             logger.error(f"Error fetching issues: {e}")
             return []
@@ -167,9 +172,10 @@ class GitHubClient:
         params = {"state": state}
 
         try:
-            return await self._request(
+            result = await self._request(
                 "GET", f"/repos/{owner}/{repo}/pulls", params=params
             )
+            return result if isinstance(result, list) else []
         except Exception as e:
             logger.error(f"Error fetching pull requests: {e}")
             return []
@@ -216,7 +222,8 @@ class GitHubClient:
             raise ValueError("GitHub token required for webhook listing")
 
         try:
-            return await self._request("GET", f"/repos/{owner}/{repo}/hooks")
+            result = await self._request("GET", f"/repos/{owner}/{repo}/hooks")
+            return result if isinstance(result, list) else []
         except Exception as e:
             logger.error(f"Error listing webhooks: {e}")
             return []

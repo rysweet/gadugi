@@ -148,7 +148,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
         # Verify GPU is identified
         gpu_bottlenecks = [
             b for b in resource_bottlenecks if "gpu_1" in b.evidence.get("resource", "")
-        ]
+         if b is not None]
         self.assertGreater(len(gpu_bottlenecks), 0)
 
     def test_detect_skill_bottlenecks(self):

@@ -16,8 +16,4 @@ __all__ = [
     "ParallelExecutor",
     "TaskAnalyzer",
     "TaskDependency",
-<<<<<<< HEAD
 ]
-=======
-]
->>>>>>> feature/gadugi-v0.3-regeneration

@@ -1,5 +1,4 @@
-"""
-Version information for Gadugi v0.3.
+"""Version information for Gadugi v0.3.
 
 This module provides version information for all Gadugi components
 and agents, ensuring consistent version display across the system.
@@ -18,10 +17,10 @@ def get_full_version_info() -> dict[str, str]:
     return {
         "version": VERSION,
         "major": "0",
-        "minor": "3", 
+        "minor": "3",
         "patch": "0",
-        "display": get_version_string()
+        "display": get_version_string(),
     }
 
 # For easy import
-__all__ = ["__version__", "VERSION", "get_version_string", "get_full_version_info"]
+__all__ = ["VERSION", "__version__", "get_full_version_info", "get_version_string"]

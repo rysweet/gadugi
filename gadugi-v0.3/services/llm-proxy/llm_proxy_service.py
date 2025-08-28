@@ -16,14 +16,12 @@ import threading
 import time
 import uuid
 from abc import ABC, abstractmethod
+from collections.abc import AsyncGenerator, AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional, Tuple
-from typing import AsyncGenerator
-
-from collections.abc import AsyncIterator
 
 # Optional provider imports with fallbacks
 try:
@@ -338,7 +336,7 @@ class OpenAIProvider(LLMProviderBase):
                 if request.messages:
                     for msg in request.messages:
                         formatted_messages.append({"role": msg["role"], "content": msg["content"]})
-                
+
                 # Handle function calls - OpenAI v1+ uses tools instead of functions
                 create_params = {
                     "model": self.config.model_name,
@@ -349,13 +347,13 @@ class OpenAIProvider(LLMProviderBase):
                     "frequency_penalty": request.frequency_penalty,
                     "presence_penalty": request.presence_penalty,
                 }
-                
+
                 if request.stop_sequences:
                     create_params["stop"] = request.stop_sequences
-                    
+
                 # Skip functions and function_call for now to avoid API compatibility issues
                 # TODO: Implement tools conversion for OpenAI v1+ API
-                
+
                 response = await self.client.chat.completions.create(**create_params)
 
                 content = response.choices[0].message.content or ""
@@ -430,7 +428,7 @@ class OpenAIProvider(LLMProviderBase):
                 if request.messages:
                     for msg in request.messages:
                         formatted_messages.append({"role": msg["role"], "content": msg["content"]})
-                        
+
                 stream = await self.client.chat.completions.create(
                     model=self.config.model_name,
                     messages=formatted_messages,

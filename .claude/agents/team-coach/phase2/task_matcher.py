@@ -27,16 +27,16 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
 # Import available shared module components
-from interfaces import OperationResult
-from utils.error_handling import ErrorHandler, CircuitBreaker
-from state_management import StateManager
+from ...shared.interfaces import OperationResult  # type: ignore
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 
 # Define missing classes locally
 TaskResult = OperationResult
 
 # Import task tracking if available
 try:
-    from task_tracking import TaskMetrics
+    from ...shared.task_tracking import TaskMetrics
 except ImportError:
 
     class TaskMetrics:
@@ -51,7 +51,7 @@ try:
         AgentCapabilityProfile,
         CapabilityDomain,
         ProficiencyLevel)
-    from ..phase1.performance_analytics import AgentPerformanceAnalyzer
+    from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     # Define minimal stubs if Phase 1 imports fail
     class CapabilityAssessment:

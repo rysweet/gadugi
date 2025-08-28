@@ -4,7 +4,6 @@ Fix undefined variable errors systematically.
 """
 
 import subprocess
-import re
 from pathlib import Path
 
 

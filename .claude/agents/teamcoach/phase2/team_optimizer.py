@@ -22,8 +22,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules and dependencies
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 from ..phase1.capability_assessment import (
     CapabilityAssessment,
     AgentCapabilityProfile,

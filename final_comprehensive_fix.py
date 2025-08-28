@@ -3,11 +3,10 @@
 Comprehensive final fix for all remaining pyright errors.
 """
 
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Any, Set
+from typing import Set
 
 
 def get_error_files() -> Set[str]:

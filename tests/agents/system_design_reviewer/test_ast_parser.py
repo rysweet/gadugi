@@ -8,7 +8,12 @@ and change detection algorithms.
 import pytest
 import tempfile
 import os
-from agents.system_design_reviewer.ast_parser import (
+import sys
+from pathlib import Path
+# Add .claude directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+
+from claude.agents.system_design_reviewer.ast_parser import (
     ASTParserFactory,
     PythonASTParser,
     ArchitecturalElement,
@@ -246,7 +251,7 @@ class TestPythonASTParser:
 
             # Find base service class
             base_service = next((e for e in elements if e.name == "BaseService"), None)
-            assert base_service is not None
+            assert base_service is not None  # type: ignore[comparison-overlap]
             assert base_service.element_type == ElementType.CLASS
             assert "ABC" in base_service.interfaces
             assert base_service.is_public
@@ -254,7 +259,7 @@ class TestPythonASTParser:
 
             # Find async function
             async_func = next((e for e in elements if e.name == "process_async"), None)
-            assert async_func is not None
+            assert async_func is not None  # type: ignore[comparison-overlap]
             assert async_func.element_type == ElementType.ASYNC_FUNCTION
             assert async_func.is_async
             assert async_func.parent_element == "ConcreteService"
@@ -269,7 +274,7 @@ class TestPythonASTParser:
                 ),
                 None,
             )
-            assert start_method is not None
+            assert start_method is not None  # type: ignore[comparison-overlap]
             assert (
                 "abstractmethod" in start_method.decorators
                 or "decorator" in start_method.patterns

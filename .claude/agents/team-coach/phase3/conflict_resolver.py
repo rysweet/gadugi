@@ -72,7 +72,7 @@ class ConflictResolution:
     implementation_steps: List[str]
     timeline: str
     assigned_to: Optional[str] = None
-    created_at: datetime = None
+    created_at: Optional[datetime] = None
 
 
 @dataclass

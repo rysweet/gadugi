@@ -1233,7 +1233,7 @@ Examples:
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
                 raise subprocess.CalledProcessError(
-                    process.returncode,
+                    process.returncode or 1,
                     [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"],
                     stderr,
                 )
@@ -1279,7 +1279,7 @@ Examples:
             stdout, stderr = await process.communicate()
             result = subprocess.CompletedProcess(
                 cmd,
-                process.returncode,
+                process.returncode or 0,
                 stdout.decode(),
                 stderr.decode(),
             )
@@ -1323,7 +1323,7 @@ Examples:
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
-                raise subprocess.CalledProcessError(process.returncode, cmd, stderr)
+                raise subprocess.CalledProcessError(process.returncode or 1, cmd, stderr)
 
             if RICH_AVAILABLE:
                 self.console.print("[green]Python syntax check passed[/green]")

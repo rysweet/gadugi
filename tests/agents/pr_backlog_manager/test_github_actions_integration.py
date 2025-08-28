@@ -164,7 +164,7 @@ class TestGitHubContext:
                 assert context.event_type == GitHubEventType.SCHEDULE
                 assert context.repository == "user/scheduled-repo"
                 assert context.pr_number is None
-                assert context.actor == "github-actions[bot]"
+                assert context.actor == "github-actions[bot]"  # type: ignore[index]
 
     def test_extract_pr_number_from_event(self):
         """Test PR number extraction from GitHub event payload."""
@@ -210,7 +210,7 @@ class TestSecurityConstraints:
         )
 
         assert constraints.auto_approve_enabled is True
-        assert constraints.restricted_operations is not None
+        assert constraints.restricted_operations is not None  # type: ignore[union-attr]
         assert "delete_repository" in constraints.restricted_operations
         assert constraints.max_processing_time == 300
         assert constraints.rate_limit_threshold == 25
@@ -229,7 +229,7 @@ class TestSecurityConstraints:
             assert constraints.auto_approve_enabled is True
             assert constraints.max_processing_time == 600
             assert constraints.rate_limit_threshold == 30
-            assert constraints.restricted_operations is not None
+            assert constraints.restricted_operations is not None  # type: ignore[union-attr]
             assert "delete_repository" in constraints.restricted_operations
 
     def test_from_environment_no_auto_approve(self):
@@ -320,8 +320,8 @@ class TestProcessingModeDetection:
         mode, config = integration.determine_processing_mode()
 
         assert mode == ProcessingMode.SINGLE_PR
-        assert config["pr_number"] == 123
-        assert config["reason"] == "pull_request_event"
+        assert config["pr_number"] == 123  # type: ignore[index]
+        assert config["reason"] == "pull_request_event"  # type: ignore[index]
 
     def test_determine_processing_mode_workflow_dispatch_with_pr(self, integration):
         """Test processing mode for workflow_dispatch with PR number."""
@@ -337,8 +337,8 @@ class TestProcessingModeDetection:
             mode, config = integration.determine_processing_mode()
 
             assert mode == ProcessingMode.SINGLE_PR
-            assert config["pr_number"] == 456
-            assert config["reason"] == "manual_dispatch"
+            assert config["pr_number"] == 456  # type: ignore[index]
+            assert config["reason"] == "manual_dispatch"  # type: ignore[index]
 
     def test_determine_processing_mode_workflow_dispatch_no_pr(self, integration):
         """Test processing mode for workflow_dispatch without PR number."""
@@ -354,7 +354,7 @@ class TestProcessingModeDetection:
             mode, config = integration.determine_processing_mode()
 
             assert mode == ProcessingMode.FULL_BACKLOG
-            assert config["reason"] == "manual_backlog_dispatch"
+            assert config["reason"] == "manual_backlog_dispatch"  # type: ignore[index]
 
     def test_determine_processing_mode_schedule(self, integration):
         """Test processing mode determination for scheduled event."""
@@ -363,7 +363,7 @@ class TestProcessingModeDetection:
         mode, config = integration.determine_processing_mode()
 
         assert mode == ProcessingMode.FULL_BACKLOG
-        assert config["reason"] == "scheduled_backlog_processing"
+        assert config["reason"] == "scheduled_backlog_processing"  # type: ignore[index]
 
     def test_determine_processing_mode_unknown(self, integration):
         """Test processing mode determination for unknown event."""
@@ -372,7 +372,7 @@ class TestProcessingModeDetection:
         mode, config = integration.determine_processing_mode()
 
         assert mode == ProcessingMode.FULL_BACKLOG
-        assert config["reason"] == "unknown_event_unknown"
+        assert config["reason"] == "unknown_event_unknown"  # type: ignore[index]
 
 
 class TestProcessingExecution:
@@ -398,11 +398,11 @@ class TestProcessingExecution:
 
         result = integration._execute_single_pr_processing(123)
 
-        assert result["mode"] == "single_pr"
-        assert result["pr_number"] == 123
-        assert result["assessment"]["status"] == "ready"
-        assert result["assessment"]["readiness_score"] == 95.0
-        assert result["assessment"]["is_ready"] is True
+        assert result["mode"] == "single_pr"  # type: ignore[index]
+        assert result["pr_number"] == 123  # type: ignore[index]
+        assert result["assessment"]["status"] == "ready"  # type: ignore[index]
+        assert result["assessment"]["readiness_score"] == 95.0  # type: ignore[index]
+        assert result["assessment"]["is_ready"] is True  # type: ignore[index]
 
         mock_pr_backlog_manager.process_single_pr.assert_called_once_with(123)
 
@@ -422,11 +422,11 @@ class TestProcessingExecution:
 
         result = integration._execute_full_backlog_processing()
 
-        assert result["mode"] == "full_backlog"
-        assert result["metrics"]["total_prs"] == 10
-        assert result["metrics"]["ready_prs"] == 7
-        assert result["metrics"]["blocked_prs"] == 3
-        assert result["metrics"]["automation_rate"] == 80.0
+        assert result["mode"] == "full_backlog"  # type: ignore[index]
+        assert result["metrics"]["total_prs"] == 10  # type: ignore[index]
+        assert result["metrics"]["ready_prs"] == 7  # type: ignore[index]
+        assert result["metrics"]["blocked_prs"] == 3  # type: ignore[index]
+        assert result["metrics"]["automation_rate"] == 80.0  # type: ignore[index]
 
         mock_pr_backlog_manager.process_backlog.assert_called_once()
 
@@ -448,9 +448,9 @@ class TestProcessingExecution:
 
         result = integration.execute_processing()
 
-        assert result["success"] is True
-        assert result["processing_mode"] == "single_pr"
-        assert result["github_context"]["repository"] == "user/test-repo"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["processing_mode"] == "single_pr"  # type: ignore[index]
+        assert result["github_context"]["repository"] == "user/test-repo"  # type: ignore[index]
         assert "processing_time" in result
 
         integration._create_workflow_artifacts.assert_called_once()
@@ -468,9 +468,9 @@ class TestProcessingExecution:
 
         result = integration.execute_processing()
 
-        assert result["success"] is False
-        assert result["error"] == "Test error"
-        assert result["error_type"] == "Exception"
+        assert result["success"] is False  # type: ignore[index]
+        assert result["error"] == "Test error"  # type: ignore[index]
+        assert result["error_type"] == "Exception"  # type: ignore[index]
 
         integration._create_error_artifacts.assert_called_once()
 
@@ -532,7 +532,7 @@ class TestArtifactCreation:
 
             # Check that error file was created
             call_args = mock_file.call_args
-            assert "error" in call_args[0][0]
+            assert "error" in call_args[0][0]  # type: ignore[index]
 
     def test_generate_workflow_summary(self, integration):
         """Test GitHub Actions workflow summary generation."""

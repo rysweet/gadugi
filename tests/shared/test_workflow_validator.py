@@ -119,7 +119,7 @@ It also doesn't have enough content to be considered a valid prompt.
         assert len(validator.validation_rules) > 0
         assert validator.validation_history == []
         assert "total_validations" in validator.metrics
-        assert validator.metrics["total_validations"] == 0
+        assert validator.metrics["total_validations"] == 0  # type: ignore[index]
 
     def test_validation_level_enum(self):
         """Test ValidationLevel enum values"""
@@ -252,7 +252,7 @@ It also doesn't have enough content to be considered a valid prompt.
         assert result.category == ValidationCategory.PROMPT_FORMAT
         assert "exists and is readable" in result.message
         assert "file_size" in result.details
-        assert result.details["file_path"] == self.good_prompt_file
+        assert result.details["file_path"] == self.good_prompt_file  # type: ignore[index]
 
     def test_validate_prompt_file_exists_missing(self):
         """Test prompt file existence validation with missing file"""
@@ -282,7 +282,7 @@ It also doesn't have enough content to be considered a valid prompt.
         assert result.passed is True
         assert result.rule_name == "prompt_format"
         assert "validation passed" in result.message.lower()
-        assert result.details["content_length"] > 0
+        assert result.details["content_length"] > 0  # type: ignore[index]
 
     def test_validate_prompt_format_bad_format(self):
         """Test prompt format validation with bad format"""
@@ -291,7 +291,7 @@ It also doesn't have enough content to be considered a valid prompt.
 
         assert result.passed is False
         assert "format issues found" in result.message.lower()
-        assert len(result.details["issues_found"]) > 0
+        assert len(result.details["issues_found"]) > 0  # type: ignore[index]
         assert len(result.suggestions) > 0
 
     def test_validate_prompt_format_short_content(self):
@@ -312,7 +312,7 @@ It also doesn't have enough content to be considered a valid prompt.
 
         assert result.passed is True
         assert "repository is clean" in result.message.lower()
-        assert result.details["uncommitted_files"] == []
+        assert result.details["uncommitted_files"] == []  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_validate_git_clean_state_dirty(self, mock_subprocess):
@@ -326,7 +326,7 @@ It also doesn't have enough content to be considered a valid prompt.
 
         assert result.passed is False
         assert "uncommitted changes" in result.message.lower()
-        assert len(result.details["uncommitted_files"]) == 2
+        assert len(result.details["uncommitted_files"]) == 2  # type: ignore[index]
         assert len(result.suggestions) > 0
 
     @patch("subprocess.run")
@@ -359,7 +359,7 @@ It also doesn't have enough content to be considered a valid prompt.
         assert result.passed is True
         assert "exists=True" in result.message
         assert "current=True" in result.message
-        assert result.details["on_correct_branch"] is True
+        assert result.details["on_correct_branch"] is True  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_validate_branch_exists_wrong_branch(self, mock_subprocess):
@@ -376,7 +376,7 @@ It also doesn't have enough content to be considered a valid prompt.
         result = self.validator._validate_branch_exists(context)
 
         assert result.passed is False
-        assert result.details["on_correct_branch"] is False
+        assert result.details["on_correct_branch"] is False  # type: ignore[index]
         assert len(result.suggestions) > 0
 
     @patch("subprocess.run")
@@ -414,8 +414,8 @@ It also doesn't have enough content to be considered a valid prompt.
 
         assert result.passed is True
         assert "exists and is OPEN" in result.message
-        assert result.details["pr_state"] == "OPEN"
-        assert result.details["pr_title"] == "Test PR"
+        assert result.details["pr_state"] == "OPEN"  # type: ignore[index]
+        assert result.details["pr_title"] == "Test PR"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_validate_pr_exists_failure(self, mock_subprocess):
@@ -670,10 +670,10 @@ It also doesn't have enough content to be considered a valid prompt.
 
         # Check history was updated
         assert len(self.validator.validation_history) == initial_count + 1
-        assert self.validator.validation_history[-1] == report
+        assert self.validator.validation_history[-1] == report  # type: ignore[index]
 
         # Check metrics were updated
-        assert self.validator.metrics["total_validations"] == initial_count + 1
+        assert self.validator.metrics["total_validations"] == initial_count + 1  # type: ignore[index]
 
     def test_validation_history_limit(self):
         """Test that validation history is limited to prevent memory issues"""
@@ -718,9 +718,9 @@ It also doesn't have enough content to be considered a valid prompt.
         assert "recommendations" in report_data
         assert "results" in report_data
 
-        assert report_data["metadata"]["overall_status"] == report.overall_status
-        assert report_data["summary"]["total_checks"] == report.total_checks
-        assert len(report_data["results"]) == len(report.results)
+        assert report_data["metadata"]["overall_status"] == report.overall_status  # type: ignore[index]
+        assert report_data["summary"]["total_checks"] == report.total_checks  # type: ignore[index]
+        assert len(report_data["results"]) == len(report.results)  # type: ignore[index]
 
         # Cleanup
         os.remove(filename)

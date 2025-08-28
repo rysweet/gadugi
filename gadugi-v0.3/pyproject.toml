@@ -1,12 +1,3 @@
-[tool.pyright]
-include = ["src", "agents", "services", "tests"]
-exclude = ["**/node_modules", "**/__pycache__", "**/.venv", "**/venv"]
-reportMissingImports = "error"
-reportMissingTypeStubs = "warning"
-reportUndefinedVariable = "error"
-pythonVersion = "3.9"
-pythonPlatform = "All"
-
 [tool.ruff]
 line-length = 100
 target-version = "py39"

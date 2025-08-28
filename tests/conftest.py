@@ -13,7 +13,7 @@ Pytest configuration and shared fixtures for Gadugi tests.
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Optional
 from unittest.mock import patch
 
 import pytest
@@ -35,13 +35,13 @@ def mock_gh_response():
 
     def _mock_response(
         success: bool = True,
-        data: Dict[str, Any] = None,
+        data: Optional[Dict[str, Any]] = None,
         raw_output: str = "",
         error: str = "",
     ):
         return {
             "success": success,
-            "data": data,
+            "data": data if data is not None else {},
             "raw_output": raw_output,
             "error": error,
         }

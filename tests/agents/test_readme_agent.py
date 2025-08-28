@@ -89,14 +89,14 @@ MIT License
         analysis = analyzer.analyze_structure(content)
 
         assert "sections" in analysis
-        assert "Overview" in analysis["sections"]
-        assert "Installation" in analysis["sections"]
-        assert "Usage" in analysis["sections"]
-        assert "License" in analysis["sections"]
+        assert "Overview" in analysis["sections"]  # type: ignore[index]
+        assert "Installation" in analysis["sections"]  # type: ignore[index]
+        assert "Usage" in analysis["sections"]  # type: ignore[index]
+        assert "License" in analysis["sections"]  # type: ignore[index]
 
-        assert analysis["has_title"] is True
-        assert analysis["has_description"] is True
-        assert analysis["structure_score"] >= 0.7  # Good structure
+        assert analysis["has_title"] is True  # type: ignore[index]
+        assert analysis["has_description"] is True  # type: ignore[index]
+        assert analysis["structure_score"] >= 0.7  # Good structure  # type: ignore[index]
 
     def test_identify_missing_sections(self):
         """Test identification of missing README sections."""
@@ -145,7 +145,7 @@ Internal link to [agent](/.claude/agents/test-agent.md).
                     issue for issue in issues if issue["type"] == "broken_link"
                 ]
                 assert len(broken_links) == 1
-                assert "docs/README.md" in broken_links[0]["link"]
+                assert "docs/README.md" in broken_links[0]["link"]  # type: ignore[index]
 
     def test_validate_code_examples(self):
         """Test code example validation."""
@@ -176,7 +176,7 @@ def broken_function(
         # Should find syntax error in Python code
         syntax_errors = [issue for issue in issues if issue["type"] == "syntax_error"]
         assert len(syntax_errors) == 1
-        assert "python" in syntax_errors[0]["language"]
+        assert "python" in syntax_errors[0]["language"]  # type: ignore[index]
 
 
 class TestProjectAnalyzer:
@@ -231,9 +231,9 @@ class TestProjectAnalyzer:
 
         changes = analyzer.check_version_changes(package_data, readme_content)
 
-        assert changes["version_outdated"] is True
-        assert changes["current_version"] == "1.2.0"
-        assert changes["readme_version"] == "1.1.0"
+        assert changes["version_outdated"] is True  # type: ignore[index]
+        assert changes["current_version"] == "1.2.0"  # type: ignore[index]
+        assert changes["readme_version"] == "1.1.0"  # type: ignore[index]
 
     def test_analyze_file_structure(self):
         """Test file structure analysis."""
@@ -242,8 +242,8 @@ class TestProjectAnalyzer:
         changes = analyzer.analyze_file_structure(self.temp_dir)
 
         assert "agents_count" in changes
-        assert changes["agents_count"] == 3
-        assert changes["has_agents_dir"] is True
+        assert changes["agents_count"] == 3  # type: ignore[index]
+        assert changes["has_agents_dir"] is True  # type: ignore[index]
         assert "has_tests_dir" in changes
 
 
@@ -427,12 +427,12 @@ class TestREADMEIntegration:
 
         result = integrator.commit_readme_changes(changes)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         mock_subprocess.assert_called()
 
         # Check git commands were called correctly
         calls = mock_subprocess.call_args_list
-        assert any(call[0][0] == ["git", "add", "README.md"] for call in calls)
+        assert any(call[0][0] == ["git", "add", "README.md"] for call in calls)  # type: ignore[index]
         assert any("Added README agent" in str(call) for call in calls)
 
     def test_workflow_manager_integration(self):
@@ -448,8 +448,8 @@ class TestREADMEIntegration:
         readme_updates = integrator.generate_workflow_updates(workflow_data)
 
         assert "feature_name" in readme_updates
-        assert "New Feature" in readme_updates["feature_name"]
-        assert len(readme_updates["changes"]) == 2
+        assert "New Feature" in readme_updates["feature_name"]  # type: ignore[index]
+        assert len(readme_updates["changes"]) == 2  # type: ignore[index]
 
     def test_agent_manager_coordination(self):
         """Test coordination with Agent Manager."""
@@ -464,8 +464,8 @@ class TestREADMEIntegration:
         readme_updates = integrator.coordinate_with_agent_manager(agent_changes)
 
         assert "agent_list_updates" in readme_updates
-        assert len(readme_updates["agent_list_updates"]["added"]) == 2
-        assert len(readme_updates["agent_list_updates"]["updated"]) == 1
+        assert len(readme_updates["agent_list_updates"]["added"]) == 2  # type: ignore[index]
+        assert len(readme_updates["agent_list_updates"]["updated"]) == 1  # type: ignore[index]
 
 
 class TestREADMEValidation:
@@ -515,7 +515,7 @@ MIT License
                 assert "code_examples" in validation_results
                 assert "content_quality" in validation_results
 
-                assert validation_results["overall_score"] >= 0.8
+                assert validation_results["overall_score"] >= 0.8  # type: ignore[index]
 
     def test_quality_scoring(self):
         """Test README quality scoring."""
@@ -581,8 +581,8 @@ class TestErrorHandling:
         analysis = analyzer.analyze_structure(malformed_content)
 
         assert "warnings" in analysis
-        assert len(analysis["warnings"]) > 0
-        assert "unclosed_code_block" in str(analysis["warnings"])
+        assert len(analysis["warnings"]) > 0  # type: ignore[index]
+        assert "unclosed_code_block" in str(analysis["warnings"])  # type: ignore[index]
 
     def test_network_error_handling(self):
         """Test handling of network errors during link validation."""
@@ -599,7 +599,7 @@ See [documentation](https://unreachable-site.example.com).
                 issue for issue in issues if issue["type"] == "network_error"
             ]
             assert len(network_errors) == 1
-            assert "unreachable-site.example.com" in network_errors[0]["link"]
+            assert "unreachable-site.example.com" in network_errors[0]["link"]  # type: ignore[index]
 
 
 # Mock classes for testing (simplified implementations)

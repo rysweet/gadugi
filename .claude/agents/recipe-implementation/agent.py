@@ -208,6 +208,15 @@ class RecipeImplementationAgent:
         # Use generator to create tests
         self.generator.recipe_spec = recipe
         test_code = self.generator._generate_tests()
+        if test_code is None:
+            # Return empty GeneratedCode if generation fails
+            from pathlib import Path
+            return GeneratedCode(
+                recipe_name=recipe.name if recipe else "unknown",
+                file_path=Path("test_empty.py"),
+                content="# Test generation failed\n",
+                metadata={}
+            )
         return test_code
     
     def _generate_report(self) -> Dict[str, Any]:

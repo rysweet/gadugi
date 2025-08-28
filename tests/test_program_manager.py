@@ -165,9 +165,9 @@ with multiple lines"""
         issues = self.pm.get_issues_by_label("idea")
 
         self.assertEqual(len(issues), 2)
-        self.assertEqual(issues[0].number, 1)
-        self.assertEqual(issues[0].labels, ["idea"])
-        self.assertEqual(issues[1].labels, ["idea", "bug"])
+        self.assertEqual(issues[0].number, 1)  # type: ignore[index]
+        self.assertEqual(issues[0].labels, ["idea"])  # type: ignore[index]
+        self.assertEqual(issues[1].labels, ["idea", "bug"])  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_triage_unlabeled_issues(self, mock_run):
@@ -210,10 +210,10 @@ with multiple lines"""
 
         stats = self.pm.triage_unlabeled_issues()
 
-        self.assertEqual(stats["total"], 2)
-        self.assertEqual(stats["bug"], 1)
-        self.assertEqual(stats["idea"], 1)
-        self.assertEqual(stats["error"], 0)
+        self.assertEqual(stats["total"], 2)  # type: ignore[index]
+        self.assertEqual(stats["bug"], 1)  # type: ignore[index]
+        self.assertEqual(stats["idea"], 1)  # type: ignore[index]
+        self.assertEqual(stats["error"], 0)  # type: ignore[index]
 
         # Verify memory was updated
         self.pm.memory.record_agent_memory.assert_called_with(
@@ -415,7 +415,7 @@ with multiple lines"""
         prs = self.pm.get_recent_merged_prs(days=7)
 
         self.assertEqual(len(prs), 1)
-        self.assertEqual(prs[0]["number"], 10)
+        self.assertEqual(prs[0]["number"], 10)  # type: ignore[index]
 
     def test_extract_features_from_pr(self):
         """Test extracting features from PR"""

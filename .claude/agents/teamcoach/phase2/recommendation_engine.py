@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ...shared.utils.error_handling import ErrorHandler
+from ...shared.utils.error_handling import ErrorHandler  # type: ignore
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
 

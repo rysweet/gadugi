@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 """Test orchestrator governance compliance with Issue #148.
 
 This test ensures the orchestrator properly delegates all task execution
@@ -11,7 +13,6 @@ import pytest
 
 from ..claude.agents.orchestrator.governance_validator import (
     GovernanceValidator,
-    GovernanceViolation,
     validate_orchestrator_compliance,
 )
 from ..claude.agents.orchestrator.orchestrator import Orchestrator, TaskDefinition
@@ -72,8 +73,8 @@ class TestOrchestratorGovernance:
 
         assert not compliant
         assert len(validator.violations) == 1
-        assert validator.violations[0].violation_type == "DIRECT_EXECUTION"
-        assert validator.violations[0].severity == "CRITICAL"
+        assert validator.violations[0].violation_type == "DIRECT_EXECUTION"  # type: ignore[index]
+        assert validator.violations[0].severity == "CRITICAL"  # type: ignore[index]
 
     def test_detect_incomplete_phases_violation(self):
         """Test detection of incomplete workflow phases."""
@@ -92,8 +93,8 @@ class TestOrchestratorGovernance:
 
         assert not compliant
         assert len(validator.violations) == 1
-        assert validator.violations[0].violation_type == "INCOMPLETE_PHASES"
-        assert validator.violations[0].severity == "ERROR"
+        assert validator.violations[0].violation_type == "INCOMPLETE_PHASES"  # type: ignore[index]
+        assert validator.violations[0].severity == "ERROR"  # type: ignore[index]
 
     def test_compliant_execution(self):
         """Test that compliant execution passes validation."""
@@ -204,11 +205,11 @@ class TestOrchestratorGovernance:
         # Enforce compliance
         enforced_details = validator.enforce_compliance("task-001", original_details)
 
-        assert enforced_details["workflow_manager_invoked"] is True
-        assert enforced_details["delegation_enforced"] is True
-        assert "Issue #148" in enforced_details["enforcement_reason"]
-        assert enforced_details["require_all_phases"] is True
-        assert len(enforced_details["required_phases"]) == 11
+        assert enforced_details["workflow_manager_invoked"] is True  # type: ignore[index]
+        assert enforced_details["delegation_enforced"] is True  # type: ignore[index]
+        assert "Issue #148" in enforced_details["enforcement_reason"]  # type: ignore[index]
+        assert enforced_details["require_all_phases"] is True  # type: ignore[index]
+        assert len(enforced_details["required_phases"]) == 11  # type: ignore[index]
 
     @pytest.mark.asyncio
     async def test_parallel_executor_creates_workflow_prompt(
@@ -244,15 +245,15 @@ class TestOrchestratorGovernance:
 
             result = await parallel_executor._invoke_workflow_manager(sample_task)
 
-            assert result["success"] is True
-            assert result["workflow_manager_invoked"] is True
-            assert result["task_id"] == sample_task.id
+            assert result["success"] is True  # type: ignore[index]
+            assert result["workflow_manager_invoked"] is True  # type: ignore[index]
+            assert result["task_id"] == sample_task.id  # type: ignore[index]
 
             # Verify claude -p was called
             mock_subprocess.assert_called_once()
             call_args = mock_subprocess.call_args[0]
-            assert call_args[0] == "claude"
-            assert call_args[1] == "-p"
+            assert call_args[0] == "claude"  # type: ignore[index]
+            assert call_args[1] == "-p"  # type: ignore[index]
 
     @pytest.mark.asyncio
     async def test_orchestrator_delegates_to_workflow_manager(self, orchestrator):
@@ -288,7 +289,7 @@ class TestOrchestratorGovernance:
         report = validate_orchestrator_compliance()
 
         # Report should be generated (may or may not be compliant depending on actual files)
-        assert report is not None
+        assert report is not None  # type: ignore[comparison-overlap]
         assert hasattr(report, "compliant")
         assert hasattr(report, "violations")
         assert hasattr(report, "workflow_manager_invocations")

@@ -56,11 +56,11 @@ class TestTaskBoundsEval:
 
         result = task_bounds_eval.evaluate(sample_task_metadata)
 
-        assert result["understanding_level"] == "WELL_BOUNDED"
-        assert not result["requires_decomposition"]
-        assert not result["requires_research"]
-        assert result["complexity_assessment"]["overall"] == 3.8
-        assert result["resource_requirements"]["confidence_level"] == "HIGH"
+        assert result["understanding_level"] == "WELL_BOUNDED"  # type: ignore[index]
+        assert not result["requires_decomposition"]  # type: ignore[index]
+        assert not result["requires_research"]  # type: ignore[index]
+        assert result["complexity_assessment"]["overall"] == 3.8  # type: ignore[index]
+        assert result["resource_requirements"]["confidence_level"] == "HIGH"  # type: ignore[index]
 
     def test_complex_task_requiring_decomposition(self):
         """Test evaluation of complex tasks requiring decomposition"""
@@ -112,10 +112,10 @@ class TestTaskBoundsEval:
 
         result = task_bounds_eval.evaluate(complex_task)
 
-        assert result["understanding_level"] == "PARTIALLY_BOUNDED"
-        assert result["requires_decomposition"]
-        assert result["complexity_assessment"]["overall"] > 7.0
-        assert len(result["decomposition_recommendations"]["suggested_breakdown"]) == 8
+        assert result["understanding_level"] == "PARTIALLY_BOUNDED"  # type: ignore[index]
+        assert result["requires_decomposition"]  # type: ignore[index]
+        assert result["complexity_assessment"]["overall"] > 7.0  # type: ignore[index]
+        assert len(result["decomposition_recommendations"]["suggested_breakdown"]) == 8  # type: ignore[index]
 
     def test_research_required_task(self):
         """Test evaluation of tasks requiring research"""
@@ -144,9 +144,9 @@ class TestTaskBoundsEval:
 
         result = task_bounds_eval.evaluate(research_task)
 
-        assert result["understanding_level"] == "RESEARCH_REQUIRED"
-        assert result["requires_research"]
-        assert "Quantum algorithms" in result["research_requirements"]["research_areas"]
+        assert result["understanding_level"] == "RESEARCH_REQUIRED"  # type: ignore[index]
+        assert result["requires_research"]  # type: ignore[index]
+        assert "Quantum algorithms" in result["research_requirements"]["research_areas"]  # type: ignore[index]
 
 
 class TestTaskDecomposer:
@@ -202,10 +202,10 @@ class TestTaskDecomposer:
 
         result = task_decomposer.decompose(complex_task_for_decomposition)
 
-        assert result["strategy"] == "FUNCTIONAL_DECOMPOSITION"
-        assert len(result["subtasks"]) == 3
-        assert result["parallelization_factor"] == 0.7
-        assert any(subtask["parallelizable"] for subtask in result["subtasks"])
+        assert result["strategy"] == "FUNCTIONAL_DECOMPOSITION"  # type: ignore[index]
+        assert len(result["subtasks"]) == 3  # type: ignore[index]
+        assert result["parallelization_factor"] == 0.7  # type: ignore[index]
+        assert any(subtask["parallelizable"] for subtask in result["subtasks"])  # type: ignore[index]
 
     def test_risk_decomposition(self):
         """Test risk-based decomposition strategy"""
@@ -247,12 +247,12 @@ class TestTaskDecomposer:
 
         result = task_decomposer.decompose(high_risk_task)
 
-        assert result["strategy"] == "RISK_DECOMPOSITION"
+        assert result["strategy"] == "RISK_DECOMPOSITION"  # type: ignore[index]
         research_tasks = [
             s for s in result["subtasks"] if s["type"] == "RESEARCH_PROTOTYPE"
         ]
         assert len(research_tasks) == 1
-        assert research_tasks[0]["risk_level"] == "HIGH"
+        assert research_tasks[0]["risk_level"] == "HIGH"  # type: ignore[index]
 
     def test_subtask_quality_validation(self):
         """Test that generated subtasks meet quality criteria"""
@@ -286,9 +286,9 @@ class TestTaskDecomposer:
         is_quality, quality_checks = validate_subtask_quality(sample_subtask)
 
         assert is_quality
-        assert quality_checks["is_atomic"]
-        assert quality_checks["is_estimable"]
-        assert quality_checks["is_small"]
+        assert quality_checks["is_atomic"]  # type: ignore[index]
+        assert quality_checks["is_estimable"]  # type: ignore[index]
+        assert quality_checks["is_small"]  # type: ignore[index]
 
 
 class TestTaskResearchAgent:
@@ -325,11 +325,11 @@ class TestTaskResearchAgent:
 
         result = research_agent.research(research_task)
 
-        assert result["research_type"] == "TECHNOLOGY_RESEARCH"
+        assert result["research_type"] == "TECHNOLOGY_RESEARCH"  # type: ignore[index]
         assert (
             result["findings"]["implementation_feasibility"] == "TECHNICALLY_FEASIBLE"
         )
-        assert "primary_recommendation" in result["recommendations"]
+        assert "primary_recommendation" in result["recommendations"]  # type: ignore[index]
 
     def test_solution_research(self):
         """Test solution research for existing patterns"""
@@ -354,7 +354,7 @@ class TestTaskResearchAgent:
 
         result = research_agent.research({"research_type": "SOLUTION_RESEARCH"})
 
-        assert len(result["findings"]["existing_solutions"]) == 2
+        assert len(result["findings"]["existing_solutions"]) == 2  # type: ignore[index]
         assert (
             result["findings"]["comparative_analysis"]["recommended_solution"]
             == "Solution A"
@@ -387,7 +387,7 @@ class TestTaskResearchAgent:
         assert (
             result["findings"]["technical_feasibility"] == "FEASIBLE_WITH_CONSTRAINTS"
         )
-        assert len(result["findings"]["risk_assessment"]["high_risks"]) == 1
+        assert len(result["findings"]["risk_assessment"]["high_risks"]) == 1  # type: ignore[index]
 
 
 class TestTaskPatternClassifier:
@@ -414,10 +414,10 @@ class TestTaskPatternClassifier:
 
         features = classifier.extract_features(task_description, target_files)
 
-        assert features["description_length"] == 150
-        assert features["keyword_counts"]["api"] == 2
-        assert features["has_testing_requirements"] is True
-        assert features["file_count"] == 3
+        assert features["description_length"] == 150  # type: ignore[index]
+        assert features["keyword_counts"]["api"] == 2  # type: ignore[index]
+        assert features["has_testing_requirements"] is True  # type: ignore[index]
+        assert features["file_count"] == 3  # type: ignore[index]
 
     def test_task_classification(self):
         """Test ML-based task classification"""
@@ -440,10 +440,10 @@ class TestTaskPatternClassifier:
         mock_features = {"technical_depth_score": 4.5}
         result = classifier.classify_task(mock_features)
 
-        assert result["primary_type"] == "FEATURE"
-        assert result["confidence"] > 0.8
-        assert "api_first_design" in result["patterns"]
-        assert result["complexity_scores"]["overall"] > 4.0
+        assert result["primary_type"] == "FEATURE"  # type: ignore[index]
+        assert result["confidence"] > 0.8  # type: ignore[index]
+        assert "api_first_design" in result["patterns"]  # type: ignore[index]
+        assert result["complexity_scores"]["overall"] > 4.0  # type: ignore[index]
 
     def test_pattern_recognition(self):
         """Test pattern recognition capabilities"""
@@ -470,7 +470,7 @@ class TestTaskPatternClassifier:
         patterns = pattern_system.recognize_patterns(task_description)
 
         assert len(patterns) == 2
-        assert patterns[0]["confidence"] > 0.8
+        assert patterns[0]["confidence"] > 0.8  # type: ignore[index]
         assert (
             "parallel_client_server_development"
             in patterns[0]["optimization_strategies"]
@@ -505,9 +505,9 @@ class TestEnhancedTaskAnalyzer:
 
         conflicts = enhanced_analyzer.detect_conflicts([task1, task2])
 
-        assert len(conflicts["semantic_conflicts"]) == 1
-        assert len(conflicts["resource_conflicts"]) == 1
-        assert conflicts["resource_conflicts"][0] == "high_memory_contention"
+        assert len(conflicts["semantic_conflicts"]) == 1  # type: ignore[index]
+        assert len(conflicts["resource_conflicts"]) == 1  # type: ignore[index]
+        assert conflicts["resource_conflicts"][0] == "high_memory_contention"  # type: ignore[index]
 
     def test_ml_based_parallelization_optimization(self):
         """Test ML-based parallelization optimization"""
@@ -537,7 +537,7 @@ class TestEnhancedTaskAnalyzer:
             result["execution_plan"]["parallel_phases"][0]["parallelization_confidence"]
             > 0.9
         )
-        assert result["performance_prediction"]["speedup_factor"] > 1.5
+        assert result["performance_prediction"]["speedup_factor"] > 1.5  # type: ignore[index]
 
     def test_integration_with_orchestrator_agent(self):
         """Test integration between enhanced analyzer and orchestrator"""
@@ -559,9 +559,9 @@ class TestEnhancedTaskAnalyzer:
         prompt_files = ["task1.md", "task2.md", "task3.md"]
         result = orchestrator.analyze_tasks_enhanced(prompt_files)
 
-        assert result["enhanced_task_count"] > result["original_task_count"]
-        assert result["decomposition_applied"] == 1
-        assert result["execution_plan"]["estimated_speedup"] == "2.3x"
+        assert result["enhanced_task_count"] > result["original_task_count"]  # type: ignore[index]
+        assert result["decomposition_applied"] == 1  # type: ignore[index]
+        assert result["execution_plan"]["estimated_speedup"] == "2.3x"  # type: ignore[index]
 
 
 class TestIntegrationScenarios:
@@ -606,11 +606,11 @@ class TestIntegrationScenarios:
         }
 
         # Verify the workflow produces expected results
-        assert workflow_result["processing_steps"][0]["requires_decomposition"] is True
-        assert workflow_result["processing_steps"][1]["subtasks_created"] == 6
-        assert workflow_result["processing_steps"][2]["confidence"] > 0.9
-        assert len(workflow_result["processing_steps"][3]["patterns_found"]) == 2
-        assert workflow_result["final_execution_plan"]["speedup_achieved"] == "2.8x"
+        assert workflow_result["processing_steps"][0]["requires_decomposition"] is True  # type: ignore[index]
+        assert workflow_result["processing_steps"][1]["subtasks_created"] == 6  # type: ignore[index]
+        assert workflow_result["processing_steps"][2]["confidence"] > 0.9  # type: ignore[index]
+        assert len(workflow_result["processing_steps"][3]["patterns_found"]) == 2  # type: ignore[index]
+        assert workflow_result["final_execution_plan"]["speedup_achieved"] == "2.8x"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_orchestrator_agent_invocation(self, mock_subprocess):
@@ -641,9 +641,9 @@ class TestIntegrationScenarios:
             ["task1.md", "task2.md"], {"enable_decomposition": True}
         )
 
-        assert result["success"] is True
-        assert result["enhanced_analysis"] is True
-        assert result["task_decomposition_applied"] is True
+        assert result["success"] is True  # type: ignore[index]
+        assert result["enhanced_analysis"] is True  # type: ignore[index]
+        assert result["task_decomposition_applied"] is True  # type: ignore[index]
 
     def test_performance_metrics_tracking(self):
         """Test that performance metrics are properly tracked"""
@@ -669,9 +669,9 @@ class TestIntegrationScenarios:
 
         metrics = metrics_tracker.track_enhanced_analysis(analysis_session)
 
-        assert metrics["total_enhancement_overhead"] < 70  # Acceptable overhead
-        assert metrics["actual_vs_predicted_accuracy"] > 0.8
-        assert metrics["performance_improvement_predicted"] == "180%"
+        assert metrics["total_enhancement_overhead"] < 70  # Acceptable overhead  # type: ignore[index]
+        assert metrics["actual_vs_predicted_accuracy"] > 0.8  # type: ignore[index]
+        assert metrics["performance_improvement_predicted"] == "180%"  # type: ignore[index]
 
 
 class TestErrorHandlingAndResilience:
@@ -696,9 +696,9 @@ class TestErrorHandlingAndResilience:
 
         result = enhanced_analyzer.analyze_with_fallback()
 
-        assert result["ml_classification_failed"] is True
-        assert result["fallback_used"] == "rule_based_classification"
-        assert result["analysis_completed"] is True
+        assert result["ml_classification_failed"] is True  # type: ignore[index]
+        assert result["fallback_used"] == "rule_based_classification"  # type: ignore[index]
+        assert result["analysis_completed"] is True  # type: ignore[index]
 
     def test_task_decomposer_error_handling(self):
         """Test error handling in task decomposition"""
@@ -719,9 +719,9 @@ class TestErrorHandlingAndResilience:
 
         result = decomposer.safe_decompose()
 
-        assert result["decomposition_failed"] is True
-        assert result["original_task_preserved"] is True
-        assert result["manual_decomposition_suggested"] is True
+        assert result["decomposition_failed"] is True  # type: ignore[index]
+        assert result["original_task_preserved"] is True  # type: ignore[index]
+        assert result["manual_decomposition_suggested"] is True  # type: ignore[index]
 
     def test_research_agent_timeout_handling(self):
         """Test timeout handling in research agent"""
@@ -737,8 +737,8 @@ class TestErrorHandlingAndResilience:
 
         result = research_agent.research_with_timeout(timeout_seconds=30)
 
-        assert result["research_completed"] is False
-        assert result["timeout_occurred"] is True
+        assert result["research_completed"] is False  # type: ignore[index]
+        assert result["timeout_occurred"] is True  # type: ignore[index]
         assert "partial_results" in result
 
 
@@ -815,7 +815,7 @@ class TestPerformanceBenchmarks:
 
         # Verify performance targets
         for _task_type, metrics in performance_data.items():
-            assert metrics["analysis_time_ms"] < 3000  # Max 3 seconds
+            assert metrics["analysis_time_ms"] < 3000  # Max 3 seconds  # type: ignore[index]
             overhead_pct = int(metrics["enhancement_overhead"].rstrip("%"))
             assert overhead_pct < 40  # Max 40% overhead
 
@@ -840,8 +840,8 @@ class TestPerformanceBenchmarks:
         }
 
         for _scenario, data in speedup_data.items():
-            assert data["speedup"] > 1.5  # Minimum 50% improvement
-            assert data["parallel_time"] < data["sequential_time"]
+            assert data["speedup"] > 1.5  # Minimum 50% improvement  # type: ignore[index]
+            assert data["parallel_time"] < data["sequential_time"]  # type: ignore[index]
 
 
 if __name__ == "__main__":

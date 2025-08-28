@@ -90,10 +90,10 @@ Test the deterministic execution of workflow phases.
         engine = WorkflowEngine()
 
         # Should create minimal fallback implementations
-        assert engine.state_manager is not None
-        assert engine.github_ops is not None
-        assert engine.task_tracker is not None
-        assert engine.error_handler is not None
+        assert engine.state_manager is not None  # type: ignore[union-attr]
+        assert engine.github_ops is not None  # type: ignore[union-attr]
+        assert engine.task_tracker is not None  # type: ignore[union-attr]
+        assert engine.error_handler is not None  # type: ignore[union-attr]
 
     def test_workflow_state_creation(self):
         """Test WorkflowState creation and initialization"""
@@ -114,7 +114,7 @@ Test the deterministic execution of workflow phases.
         assert state.branch_name is None
         assert state.issue_number is None
         assert state.pr_number is None
-        assert state.start_time is not None
+        assert state.start_time is not None  # type: ignore[union-attr]
         assert state.error_count == 0
         assert state.metadata == {}
 
@@ -148,8 +148,8 @@ Test the deterministic execution of workflow phases.
 
         assert success is True
         assert "initialization successful" in message.lower()
-        assert data["task_id"] == "test-init"
-        assert data["prompt_file"] == self.prompt_file
+        assert data["task_id"] == "test-init"  # type: ignore[index]
+        assert data["prompt_file"] == self.prompt_file  # type: ignore[index]
 
     def test_phase_init_missing_file(self):
         """Test initialization phase with missing prompt file"""
@@ -180,8 +180,8 @@ Test the deterministic execution of workflow phases.
 
         assert success is True
         assert "validation successful" in message.lower()
-        assert data["content_length"] > 0
-        assert data["has_title"] is True
+        assert data["content_length"] > 0  # type: ignore[index]
+        assert data["has_title"] is True  # type: ignore[index]
 
     def test_phase_prompt_validation_short_content(self):
         """Test prompt validation with too short content"""
@@ -222,7 +222,7 @@ Test the deterministic execution of workflow phases.
         assert success is True
         assert "branch created successfully" in message.lower()
         assert engine.workflow_state.branch_name is not None
-        assert data["branch_name"] == engine.workflow_state.branch_name
+        assert data["branch_name"] == engine.workflow_state.branch_name  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_phase_branch_creation_failure(self, mock_subprocess):
@@ -266,7 +266,7 @@ Test the deterministic execution of workflow phases.
         assert success is True
         assert "issue created successfully" in message.lower()
         assert engine.workflow_state.issue_number == 123
-        assert data["issue_number"] == "123"
+        assert data["issue_number"] == "123"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_phase_commit_changes_success(self, mock_subprocess):
@@ -310,7 +310,7 @@ Test the deterministic execution of workflow phases.
 
         assert success is True
         assert "pushed to remote successfully" in message.lower()
-        assert data["branch_name"] == "feature/test-branch"
+        assert data["branch_name"] == "feature/test-branch"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_phase_pr_creation_success(self, mock_subprocess):
@@ -334,7 +334,7 @@ Test the deterministic execution of workflow phases.
         assert success is True
         assert "pr created successfully" in message.lower()
         assert engine.workflow_state.pr_number == 456
-        assert data["pr_number"] == "456"
+        assert data["pr_number"] == "456"  # type: ignore[index]
 
     def test_phase_code_review_success(self):
         """Test successful code review phase"""
@@ -351,8 +351,8 @@ Test the deterministic execution of workflow phases.
 
         assert success is True
         assert "code review initiated" in message.lower()
-        assert data["pr_number"] == 789
-        assert data["review_requested"] is True
+        assert data["pr_number"] == 789  # type: ignore[index]
+        assert data["review_requested"] is True  # type: ignore[index]
 
     def test_phase_review_response_success(self):
         """Test successful review response phase"""
@@ -460,8 +460,8 @@ Test the deterministic execution of workflow phases.
         with open(checkpoint_file, "r") as f:
             checkpoint_data = json.load(f)
 
-        assert checkpoint_data["task_id"] == "test-checkpoint"
-        assert checkpoint_data["prompt_file"] == self.prompt_file
+        assert checkpoint_data["task_id"] == "test-checkpoint"  # type: ignore[index]
+        assert checkpoint_data["prompt_file"] == self.prompt_file  # type: ignore[index]
 
         # Cleanup
         os.remove(checkpoint_file)
@@ -509,15 +509,15 @@ Test the deterministic execution of workflow phases.
 
         result = engine._create_success_result()
 
-        assert result["success"] is True
-        assert result["task_id"] == "test-success"
-        assert result["total_phases"] == 2
-        assert result["branch_name"] == "feature/test"
-        assert result["issue_number"] == 123
-        assert result["pr_number"] == 456
+        assert result["success"] is True  # type: ignore[index]
+        assert result["task_id"] == "test-success"  # type: ignore[index]
+        assert result["total_phases"] == 2  # type: ignore[index]
+        assert result["branch_name"] == "feature/test"  # type: ignore[index]
+        assert result["issue_number"] == 123  # type: ignore[index]
+        assert result["pr_number"] == 456  # type: ignore[index]
         assert "execution_time" in result
         assert "phase_results" in result
-        assert len(result["phase_results"]) == 2
+        assert len(result["phase_results"]) == 2  # type: ignore[index]
 
     def test_create_failure_result(self):
         """Test failure execution result creation"""
@@ -532,10 +532,10 @@ Test the deterministic execution of workflow phases.
         error_message = "Test failure message"
         result = engine._create_failure_result(error_message)
 
-        assert result["success"] is False
-        assert result["error"] == error_message
-        assert result["task_id"] == "test-failure"
-        assert result["completed_phases"] == 0
+        assert result["success"] is False  # type: ignore[index]
+        assert result["error"] == error_message  # type: ignore[index]
+        assert result["task_id"] == "test-failure"  # type: ignore[index]
+        assert result["completed_phases"] == 0  # type: ignore[index]
         assert "execution_time" in result
         assert "phase_results" in result
 
@@ -565,7 +565,7 @@ Test the deterministic execution of workflow phases.
         # The workflow should complete, but may fail on certain phases due to mocking limitations
         assert "success" in result
         assert "task_id" in result
-        assert result["task_id"] == "test-full-workflow"
+        assert result["task_id"] == "test-full-workflow"  # type: ignore[index]
         assert "execution_time" in result
         assert "phase_results" in result
 
@@ -577,7 +577,7 @@ Test the deterministic execution of workflow phases.
             result = execute_workflow(self.prompt_file, "test-convenience")
 
             mock_execute.assert_called_once_with(self.prompt_file, "test-convenience")
-            assert result["success"] is True
+            assert result["success"] is True  # type: ignore[index]
 
 
 class TestWorkflowPhases:

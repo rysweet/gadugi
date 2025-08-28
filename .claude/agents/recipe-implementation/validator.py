@@ -95,7 +95,7 @@ class ImplementationValidator:
             # Check for required classes
             found_classes = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
             required_classes = {
-                interface.name for interface in self.recipe_spec.interfaces
+                interface.name for interface in (self.recipe_spec.interfaces if self.recipe_spec else [])
                 if interface.type == "class"
             }
             
@@ -110,7 +110,7 @@ class ImplementationValidator:
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
             }
             required_functions = {
-                interface.name for interface in self.recipe_spec.interfaces
+                interface.name for interface in (self.recipe_spec.interfaces if self.recipe_spec else [])
                 if interface.type == "function"
             }
             
@@ -179,7 +179,7 @@ class ImplementationValidator:
     def _validate_completeness(self, code_list: List[GeneratedCode], result: ValidationResult) -> None:
         """Validate implementation completeness."""
         # Check if all high-priority requirements are addressed
-        high_priority_reqs = self.recipe_spec.get_high_priority_requirements()
+        high_priority_reqs = self.recipe_spec.get_high_priority_requirements() if self.recipe_spec and hasattr(self.recipe_spec, 'get_high_priority_requirements') else []
         
         # Simple check: look for requirement IDs in comments
         all_content = "\n".join(code.content for code in code_list)
@@ -189,9 +189,10 @@ class ImplementationValidator:
                 result.warnings.append(f"Requirement {req.id} may not be implemented")
         
         # Check if all interfaces are implemented
-        for interface in self.recipe_spec.interfaces:
-            if interface.name not in all_content:
-                result.errors.append(f"Interface {interface.name} not implemented")
+        if self.recipe_spec and self.recipe_spec.interfaces:
+            for interface in self.recipe_spec.interfaces:
+                if interface.name not in all_content:
+                    result.errors.append(f"Interface {interface.name} not implemented")
     
     def _generate_suggestions(self, result: ValidationResult) -> None:
         """Generate improvement suggestions."""
@@ -300,7 +301,9 @@ class ImplementationValidator:
         """Create test cases from recipe requirements."""
         test_cases = []
         
-        for i, req in enumerate(self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL)[:5]):
+        from .models import RequirementType
+        functional_reqs = self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL) if self.recipe_spec and hasattr(self.recipe_spec, 'get_requirements_by_type') else []
+        for i, req in enumerate(functional_reqs[:5]):
             test_case = TestCase(
                 id=f"TC-{req.id}",
                 name=f"test_{req.id.lower()}",

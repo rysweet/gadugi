@@ -8,9 +8,9 @@ from enum import Enum
 from collections import defaultdict, deque
 
 # Import shared modules
-from ...shared.task_tracking import TaskMetrics
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+from ...shared.task_tracking import TaskMetrics  # type: ignore
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 
 """
 TeamCoach Phase 1: Metrics Collection Infrastructure

@@ -196,7 +196,7 @@ class TestCIAssessment:
         assert len(assessment.retriable_failures) == 0
         assert len(assessment.blocking_failures) == 0
         assert assessment.can_auto_retry is False  # No failures to retry
-        assert assessment.last_run is not None
+        assert assessment.last_run is not None  # type: ignore[union-attr]
 
     def test_assess_ci_status_with_failures(
         self, assessor, mock_github_ops, sample_pr_details
@@ -596,11 +596,11 @@ class TestComprehensiveAssessment:
 
             result = assessor.get_comprehensive_assessment(sample_pr_details)
 
-            assert result["pr_number"] == 123
-            assert result["overall_score"] == 100.0
-            assert result["is_ready"] is True
-            assert len(result["blocking_factors"]) == 0
-            assert len(result["recommendations"]) == 0
+            assert result["pr_number"] == 123  # type: ignore[index]
+            assert result["overall_score"] == 100.0  # type: ignore[index]
+            assert result["is_ready"] is True  # type: ignore[index]
+            assert len(result["blocking_factors"]) == 0  # type: ignore[index]
+            assert len(result["recommendations"]) == 0  # type: ignore[index]
 
     def test_get_comprehensive_assessment_blocked(
         self, assessor, mock_github_ops, sample_pr_details
@@ -652,11 +652,11 @@ class TestComprehensiveAssessment:
 
             result = assessor.get_comprehensive_assessment(sample_pr_details)
 
-            assert result["pr_number"] == 123
-            assert result["overall_score"] < 95  # Should be below ready threshold
-            assert result["is_ready"] is False
-            assert len(result["blocking_factors"]) > 0
-            assert len(result["recommendations"]) > 0
+            assert result["pr_number"] == 123  # type: ignore[index]
+            assert result["overall_score"] < 95  # Should be below ready threshold  # type: ignore[index]
+            assert result["is_ready"] is False  # type: ignore[index]
+            assert len(result["blocking_factors"]) > 0  # type: ignore[index]
+            assert len(result["recommendations"]) > 0  # type: ignore[index]
 
             # Check specific blocking factors
             blocking_factors = result["blocking_factors"]

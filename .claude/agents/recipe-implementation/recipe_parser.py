@@ -121,6 +121,8 @@ class RecipeParser:
                     description=req_text,
                     priority=self._determine_priority(req_text),
                 )
+                if self.recipe_spec:
+                    if self.recipe_spec:
                 self.recipe_spec.requirements.append(requirement)
                 req_counter += 1
     
@@ -140,6 +142,8 @@ class RecipeParser:
                     description=req_text,
                     priority=self._determine_priority(req_text),
                 )
+                if self.recipe_spec:
+                    if self.recipe_spec:
                 self.recipe_spec.requirements.append(requirement)
                 req_counter += 1
     
@@ -152,7 +156,8 @@ class RecipeParser:
             # Parse Python-style interface definitions
             interfaces = self._parse_python_interfaces(block)
             for interface in interfaces:
-                self.recipe_spec.interfaces.append(interface)
+                if self.recipe_spec:
+                    self.recipe_spec.interfaces.append(interface)
             
             # Also create requirements for interfaces
             requirement = Requirement(
@@ -162,7 +167,8 @@ class RecipeParser:
                 description=f"Implement interface: {block[:100]}...",
                 priority=3,
             )
-            self.recipe_spec.requirements.append(requirement)
+            if self.recipe_spec:
+                self.recipe_spec.requirements.append(requirement)
     
     def _parse_quality_requirements(self, content: str) -> None:
         """Parse quality requirements."""
@@ -173,7 +179,8 @@ class RecipeParser:
             requirements = self._extract_bullet_points(text)
             quality_reqs[category.lower().replace(" ", "_")] = requirements
         
-        self.recipe_spec.quality_requirements = quality_reqs
+        if self.recipe_spec:
+            self.recipe_spec.quality_requirements = quality_reqs
         
         # Also create requirement objects
         req_counter = 1
@@ -186,13 +193,16 @@ class RecipeParser:
                     description=req_text,
                     priority=2,
                 )
+                if self.recipe_spec:
+                    if self.recipe_spec:
                 self.recipe_spec.requirements.append(requirement)
                 req_counter += 1
     
     def _parse_constraints(self, content: str) -> None:
         """Parse constraints."""
         constraints = self._extract_bullet_points(content)
-        self.recipe_spec.constraints = constraints
+        if self.recipe_spec:
+            self.recipe_spec.constraints = constraints
         
         # Create requirement objects
         for i, constraint in enumerate(constraints, 1):
@@ -203,12 +213,14 @@ class RecipeParser:
                 description=constraint,
                 priority=4,
             )
-            self.recipe_spec.requirements.append(requirement)
+            if self.recipe_spec:
+                self.recipe_spec.requirements.append(requirement)
     
     def _parse_assumptions(self, content: str) -> None:
         """Parse assumptions."""
         assumptions = self._extract_bullet_points(content)
-        self.recipe_spec.assumptions = assumptions
+        if self.recipe_spec:
+            self.recipe_spec.assumptions = assumptions
         
         # Create requirement objects
         for i, assumption in enumerate(assumptions, 1):
@@ -219,7 +231,8 @@ class RecipeParser:
                 description=assumption,
                 priority=1,
             )
-            self.recipe_spec.requirements.append(requirement)
+            if self.recipe_spec:
+                self.recipe_spec.requirements.append(requirement)
     
     def _parse_design(self, file_path: Path) -> None:
         """Parse design decisions from markdown file."""
@@ -242,7 +255,8 @@ class RecipeParser:
                             decision=decision_text,
                             rationale=rationale,
                         )
-                        self.recipe_spec.design_decisions.append(design_decision)
+                        if self.recipe_spec:
+                            self.recipe_spec.design_decisions.append(design_decision)
                         decision_counter += 1
     
     def _parse_dependencies(self, file_path: Path) -> None:
@@ -261,7 +275,8 @@ class RecipeParser:
                             required=info.get("required", True),
                             alternatives=info.get("alternatives", []),
                         )
-                        self.recipe_spec.dependencies.append(dependency)
+                        if self.recipe_spec:
+                            self.recipe_spec.dependencies.append(dependency)
         
         except json.JSONDecodeError as e:
             print(f"Error parsing dependencies.json: {e}")
@@ -283,7 +298,8 @@ class RecipeParser:
                         exceptions=interface_data.get("exceptions", []),
                         examples=interface_data.get("examples", []),
                     )
-                    self.recipe_spec.interfaces.append(interface)
+                    if self.recipe_spec:
+                        self.recipe_spec.interfaces.append(interface)
         
         except yaml.YAMLError as e:
             print(f"Error parsing interfaces.yaml: {e}")
@@ -293,10 +309,11 @@ class RecipeParser:
         try:
             data = json.loads(file_path.read_text())
             
-            self.recipe_spec.name = data.get("name", self.recipe_spec.name)
-            self.recipe_spec.version = data.get("version", self.recipe_spec.version)
-            self.recipe_spec.description = data.get("description", self.recipe_spec.description)
-            self.recipe_spec.metadata = data.get("metadata", {})
+            if self.recipe_spec:
+                self.recipe_spec.name = data.get("name", self.recipe_spec.name)
+                self.recipe_spec.version = data.get("version", self.recipe_spec.version)
+                self.recipe_spec.description = data.get("description", self.recipe_spec.description)
+                self.recipe_spec.metadata = data.get("metadata", {})
         
         except json.JSONDecodeError as e:
             print(f"Error parsing metadata.json: {e}")

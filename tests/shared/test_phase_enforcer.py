@@ -110,8 +110,8 @@ class TestPhaseEnforcer:
         assert result.attempts == 2
         assert result.total_time == 45.5
         assert result.error_message is None
-        assert result.details["method"] == "claude_agent"
-        assert result.details["pr_number"] == 123
+        assert result.details["method"] == "claude_agent"  # type: ignore[index]
+        assert result.details["pr_number"] == 123  # type: ignore[index]
 
     def test_check_required_conditions_success(self):
         """Test required conditions checking when all conditions are met"""
@@ -244,8 +244,8 @@ class TestPhaseEnforcer:
 
         # Check that failures are reset
         phase_name = phase.name
-        assert self.enforcer.circuit_breaker_state[phase_name]["failures"] == 0
-        assert self.enforcer.circuit_breaker_state[phase_name]["last_failure"] is None
+        assert self.enforcer.circuit_breaker_state[phase_name]["failures"] == 0  # type: ignore[index]
+        assert self.enforcer.circuit_breaker_state[phase_name]["last_failure"] is None  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_code_review_claude_agent_success(self, mock_subprocess):
@@ -261,8 +261,8 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "code review completed" in message.lower()
-        assert details["method"] == "claude_agent"
-        assert details["pr_number"] == self.test_pr_number
+        assert details["method"] == "claude_agent"  # type: ignore[index]
+        assert details["pr_number"] == self.test_pr_number  # type: ignore[index]
 
         # Verify Claude CLI was called correctly
         mock_subprocess.assert_called_once()
@@ -287,7 +287,7 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "enforced via script" in message.lower()
-        assert details["method"] == "enforcement_script"
+        assert details["method"] == "enforcement_script"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_code_review_github_cli_fallback(self, mock_subprocess):
@@ -309,7 +309,7 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "automated code review posted" in message.lower()
-        assert details["method"] == "github_cli_review"
+        assert details["method"] == "github_cli_review"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_code_review_comment_fallback(self, mock_subprocess):
@@ -331,7 +331,7 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "enforcement comment added" in message.lower()
-        assert details["method"] == "github_comment"
+        assert details["method"] == "github_comment"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_code_review_all_methods_fail(self, mock_subprocess):
@@ -392,8 +392,8 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "review response posted" in message.lower()
-        assert details["response_method"] == "review_response_comment"
-        assert details["addressed_reviews"] == 1  # One CHANGES_REQUESTED review
+        assert details["response_method"] == "review_response_comment"  # type: ignore[index]
+        assert details["addressed_reviews"] == 1  # One CHANGES_REQUESTED review  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_review_response_no_changes_needed(self, mock_subprocess):
@@ -411,8 +411,8 @@ class TestPhaseEnforcer:
 
         assert success is True
         assert "no review response needed" in message.lower()
-        assert details["response_method"] == "none_needed"
-        assert details["total_reviews"] == 2
+        assert details["response_method"] == "none_needed"  # type: ignore[index]
+        assert details["total_reviews"] == 2  # type: ignore[index]
 
     def test_enforce_review_response_no_pr_number(self):
         """Test review response enforcement when PR number is missing"""
@@ -536,7 +536,7 @@ class TestPhaseEnforcer:
         key = next(
             k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW"
         )
-        assert results[key].success is False
+        assert results[key].success is False  # type: ignore[index]
         assert "REVIEW_RESPONSE" not in result_keys
 
     def test_add_enforcement_rule(self):
@@ -574,22 +574,22 @@ class TestPhaseEnforcer:
         assert len(self.enforcer.enforcement_log) == initial_log_length + 1
 
         log_entry = self.enforcer.enforcement_log[-1]
-        assert log_entry["phase"] == "CODE_REVIEW"
-        assert log_entry["success"] is True
-        assert log_entry["attempts"] == 1
-        assert log_entry["total_time"] == 30.5
-        assert log_entry["message"] == "Test message"
-        assert log_entry["details"] == {"method": "test"}
+        assert log_entry["phase"] == "CODE_REVIEW"  # type: ignore[index]
+        assert log_entry["success"] is True  # type: ignore[index]
+        assert log_entry["attempts"] == 1  # type: ignore[index]
+        assert log_entry["total_time"] == 30.5  # type: ignore[index]
+        assert log_entry["message"] == "Test message"  # type: ignore[index]
+        assert log_entry["details"] == {"method": "test"}  # type: ignore[index]
         assert "timestamp" in log_entry
 
     def test_get_enforcement_statistics_empty(self):
         """Test getting statistics when no enforcement has occurred"""
         stats = self.enforcer.get_enforcement_statistics()
 
-        assert stats["total_enforcements"] == 0
-        assert stats["success_rate"] == 0
-        assert stats["phase_stats"] == {}
-        assert stats["circuit_breaker_state"] == {}
+        assert stats["total_enforcements"] == 0  # type: ignore[index]
+        assert stats["success_rate"] == 0  # type: ignore[index]
+        assert stats["phase_stats"] == {}  # type: ignore[index]
+        assert stats["circuit_breaker_state"] == {}  # type: ignore[index]
 
     def test_get_enforcement_statistics_with_data(self):
         """Test getting statistics with enforcement data"""
@@ -623,19 +623,19 @@ class TestPhaseEnforcer:
 
         stats = self.enforcer.get_enforcement_statistics()
 
-        assert stats["total_enforcements"] == 3
-        assert stats["success_rate"] == 2 / 3  # 2 successes out of 3
+        assert stats["total_enforcements"] == 3  # type: ignore[index]
+        assert stats["success_rate"] == 2 / 3  # 2 successes out of 3  # type: ignore[index]
 
         # Check phase-specific stats
-        assert "CODE_REVIEW" in stats["phase_stats"]
-        assert "REVIEW_RESPONSE" in stats["phase_stats"]
+        assert "CODE_REVIEW" in stats["phase_stats"]  # type: ignore[index]
+        assert "REVIEW_RESPONSE" in stats["phase_stats"]  # type: ignore[index]
 
         code_review_stats = stats["phase_stats"]["CODE_REVIEW"]
-        assert code_review_stats["total"] == 2
-        assert code_review_stats["successful"] == 1
-        assert code_review_stats["success_rate"] == 0.5
-        assert code_review_stats["avg_attempts"] == 2.0  # (1+3)/2
-        assert code_review_stats["avg_time"] == 60.0  # (30+90)/2
+        assert code_review_stats["total"] == 2  # type: ignore[index]
+        assert code_review_stats["successful"] == 1  # type: ignore[index]
+        assert code_review_stats["success_rate"] == 0.5  # type: ignore[index]
+        assert code_review_stats["avg_attempts"] == 2.0  # (1+3)/2  # type: ignore[index]
+        assert code_review_stats["avg_time"] == 60.0  # (30+90)/2  # type: ignore[index]
 
     def test_export_enforcement_log(self):
         """Test exporting enforcement log to JSON"""
@@ -664,8 +664,8 @@ class TestPhaseEnforcer:
         assert "metadata" in log_data
         assert "statistics" in log_data
         assert "log_entries" in log_data
-        assert log_data["metadata"]["total_entries"] == 1
-        assert len(log_data["log_entries"]) == 1
+        assert log_data["metadata"]["total_entries"] == 1  # type: ignore[index]
+        assert len(log_data["log_entries"]) == 1  # type: ignore[index]
 
         # Cleanup
         os.remove(filename)

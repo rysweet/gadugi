@@ -19,7 +19,7 @@ import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Tuple  # type: ignore
+from typing import Dict, List, Optional, Set, Tuple  # type: ignore
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
@@ -70,7 +70,7 @@ class TaskInfo:
 class TaskAnalyzer:
     """Analyzes prompt files and creates execution plans"""
 
-    def __init__(self, prompts_dir: str = None, project_root: str = "."):
+    def __init__(self, prompts_dir: Optional[str] = None, project_root: str = "."):
         # Security: Validate and sanitize input paths
         self.project_root = self._validate_directory_path(project_root)
         # If prompts_dir not specified, use project_root/prompts
@@ -687,7 +687,7 @@ class TaskAnalyzer:
 
 
 def main():
-    """CLI entry point for TaskAnalyzer"""))
+    """CLI entry point for TaskAnalyzer"""
     import argparse
 
     parser = argparse.ArgumentParser(description="Analyze prompt files for parallel execution")

@@ -343,10 +343,11 @@ class PythonASTVisitor(ast.NodeVisitor):
             interfaces=base_classes,
             decorators=decorators,
             docstring=ast.get_docstring(node),
-            patterns=self.parser.detect_patterns(None, self.content),
+            patterns=[],  # Will be populated after element creation
             complexity_metrics=self.parser.calculate_complexity(node),
             is_public=not node.name.startswith('_')
         )
+        element.patterns = self.parser.detect_patterns(element, self.content)
 
         self.elements.append(element)
         self.generic_visit(node)
@@ -379,9 +380,10 @@ class PythonASTVisitor(ast.NodeVisitor):
             is_public=not node.name.startswith('_'),
             parameters=parameters,
             return_type=self._get_return_type(node),
-            patterns=self.parser.detect_patterns(None, self.content),
+            patterns=[],  # Will be populated after element creation
             complexity_metrics=self.parser.calculate_complexity(node)
         )
+        element.patterns = self.parser.detect_patterns(element, self.content)
 
         self.elements.append(element)
         self.generic_visit(node)
@@ -462,7 +464,7 @@ class ASTParserFactory:
     def __init__(self):
         # Register only stable, fully-implemented parsers.  The TypeScript parser
         # remains a placeholder and is therefore not exposed until completed.
-        self._parsers = {
+        self._parsers: Dict[str, ASTParser] = {
             'python': PythonASTParser(),
             # 'typescript': TypeScriptASTParser(),  # disabled – placeholder
         }

@@ -15,7 +15,7 @@ Key Features:
 """
 
 import logging
-import numpy as np
+import numpy as np  # type: ignore[import-not-found]
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
@@ -28,16 +28,16 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
 # Import available shared module components
-from interfaces import AgentConfig, OperationResult
-from utils.error_handling import ErrorHandler, CircuitBreaker
-from state_management import StateManager
+from ...shared.interfaces import AgentConfig, OperationResult  # type: ignore
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 
 # Define missing classes locally
 TaskResult = OperationResult
 
 # Import task tracking if available
 try:
-    from task_tracking import TaskMetrics
+    from ...shared.task_tracking import TaskMetrics  # type: ignore
 except ImportError:
 
     class TaskMetrics:

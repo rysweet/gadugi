@@ -23,23 +23,23 @@ from enum import Enum
 # --------------------------------------------------------------------------- #
 try:
     # 1) Absolute imports (e.g. `python -m gadugi.system_design_reviewer`)
-    from shared.github_operations import GitHubOperations
-    from shared.state_management import StateManager
-    from shared.error_handling import (
+    from shared.github_operations import GitHubOperations  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
+    from shared.error_handling import (  # type: ignore
         ErrorHandler,
         ErrorCategory,
         ErrorSeverity)
-    from shared.task_tracking import TaskTracker
+    from shared.task_tracking import TaskTracker  # type: ignore
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
         # 2) Relative imports when executed inside repository package layout
-        from ..shared.github_operations import GitHubOperations
-        from ..shared.state_management import StateManager
-        from ..shared.error_handling import (
+        from ..shared.github_operations import GitHubOperations  # type: ignore
+        from ..shared.state_management import StateManager  # type: ignore
+        from ..shared.error_handling import (  # type: ignore
             ErrorHandler,
             ErrorCategory,
             ErrorSeverity)
-        from ..shared.task_tracking import TaskTracker
+        from ..shared.task_tracking import TaskTracker  # type: ignore
     except ImportError:
         # 3) Final fallback – use lightweight stub implementations
         print(
@@ -146,7 +146,7 @@ class SystemDesignReviewer:
                 f"Review PR #{pr_number} for architectural changes",
                 priority="high"  # type: ignore
             )
-            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")
+            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")  # type: ignore
 
             # Get PR information
             pr_info = self._get_pr_info(pr_number)
@@ -199,7 +199,7 @@ class SystemDesignReviewer:
             # Update metrics and state
             self._update_metrics(result)
             self.state_manager.save_review_result(result)
-            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "completed")
+            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "completed")  # type: ignore
 
             return result
 
@@ -224,7 +224,7 @@ class SystemDesignReviewer:
                 timestamp=datetime.now()
             )
 
-            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "failed")
+            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "failed")  # type: ignore
             return result
 
     def _get_pr_info(self, pr_number: str) -> Dict[str, Any]:

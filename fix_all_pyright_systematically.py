@@ -3,11 +3,10 @@
 Systematically fix all pyright errors in the .claude directory.
 """
 
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
+from typing import List
 
 
 def run_pyright(path: str) -> List[str]:

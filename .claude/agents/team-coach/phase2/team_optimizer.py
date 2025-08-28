@@ -22,8 +22,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules and dependencies
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 from ..phase1.capability_assessment import (
     CapabilityAssessment,
     AgentCapabilityProfile,
@@ -197,7 +197,7 @@ class TeamCompositionOptimizer:
         self,
         project_requirements: ProjectRequirements,
         available_agents: List[str],
-        objectives: List[OptimizationObjective] = None,
+        objectives: Optional[List[OptimizationObjective]] = None,
     ) -> OptimizationResult:
         """
         Optimize team composition for a specific project.
@@ -937,7 +937,7 @@ class TeamCompositionOptimizer:
             self.logger.error(f"Failed to update agent profiles: {e}")
 
     def compare_team_compositions(
-        self, compositions: List[TeamComposition], criteria: List[str] = None
+        self, compositions: List[TeamComposition], criteria: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
         Compare multiple team compositions across specified criteria.

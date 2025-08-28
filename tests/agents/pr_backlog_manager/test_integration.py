@@ -13,7 +13,6 @@ from datetime import datetime
 
 # Add the source directories to the Python path for imports
 import sys
-from typing import Set
 
 # Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
@@ -175,7 +174,7 @@ class TestEndToEndWorkflow:
 
             # Verify assessment
             assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.READY
+            assert assessment is not None  # type: ignore[comparison-overlap] and assessment.status == PRStatus.READY
             assert assessment.is_ready is True
             assert assessment.readiness_score == 100.0
             assert len(assessment.blocking_issues) == 0
@@ -211,7 +210,7 @@ class TestEndToEndWorkflow:
 
             # Verify assessment
             assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.BLOCKED
+            assert assessment is not None  # type: ignore[comparison-overlap] and assessment.status == PRStatus.BLOCKED
             assert assessment.is_ready is False
             assert assessment.readiness_score < 100.0
             assert len(assessment.blocking_issues) > 0
@@ -314,7 +313,7 @@ class TestComponentIntegration:
         # Get comprehensive assessment
         assessment = assessor.get_comprehensive_assessment(pr_details)
 
-        assert assessment["pr_number"] == 123
+        assert assessment["pr_number"] == 123  # type: ignore[index]
         assert "overall_score" in assessment
         assert "is_ready" in assessment
         assert "assessments" in assessment
@@ -345,8 +344,8 @@ class TestComponentIntegration:
         tasks = coordinator.delegate_issue_resolution(123, blocking_issues, pr_context)
 
         assert len(tasks) == 2
-        assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION
-        assert tasks[1].task_type == DelegationType.CI_FAILURE_FIX
+        assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION  # type: ignore[index]
+        assert tasks[1].task_type == DelegationType.CI_FAILURE_FIX  # type: ignore[index]
         assert all(task.pr_number == 123 for task in tasks)
         assert all(
             task.status
@@ -407,9 +406,9 @@ class TestGitHubActionsIntegration:
 
             result = integration.execute_processing()
 
-            assert result["success"] is True
-            assert result["processing_mode"] == "single_pr"
-            assert result["results"]["pr_number"] == 123
+            assert result["success"] is True  # type: ignore[index]
+            assert result["processing_mode"] == "single_pr"  # type: ignore[index]
+            assert result["results"]["pr_number"] == 123  # type: ignore[index]
             mock_manager.process_single_pr.assert_called_once_with(123)
 
     def test_scheduled_event_processing(self, github_env_vars):
@@ -444,9 +443,9 @@ class TestGitHubActionsIntegration:
 
             result = integration.execute_processing()
 
-            assert result["success"] is True
-            assert result["processing_mode"] == "full_backlog"
-            assert result["results"]["metrics"]["total_prs"] == 5
+            assert result["success"] is True  # type: ignore[index]
+            assert result["processing_mode"] == "full_backlog"  # type: ignore[index]
+            assert result["results"]["metrics"]["total_prs"] == 5  # type: ignore[index]
             mock_manager.process_backlog.assert_called_once()
 
     def test_auto_approve_workflow(self, github_env_vars):
@@ -484,8 +483,8 @@ class TestGitHubActionsIntegration:
 
             result = integration.execute_processing()
 
-            assert result["success"] is True
-            assert result["processing_mode"] == "single_pr"
+            assert result["success"] is True  # type: ignore[index]
+            assert result["processing_mode"] == "single_pr"  # type: ignore[index]
             mock_manager.process_single_pr.assert_called_once()
 
 
@@ -510,8 +509,8 @@ class TestErrorScenarios:
 
             # Verify graceful failure handling
             assert assessment.pr_number == 123
-            assert assessment.status == PRStatus.FAILED
-            assert "GitHub API error" in assessment.blocking_issues[0]
+            assert assessment is not None  # type: ignore[comparison-overlap] and assessment.status == PRStatus.FAILED
+            assert "GitHub API error" in assessment.blocking_issues[0]  # type: ignore[index]
 
     def test_delegation_failure_handling(self):
         """Test handling of delegation failures."""
@@ -528,7 +527,7 @@ class TestErrorScenarios:
 
         # Verify task creation succeeded even with comment failure
         assert len(tasks) == 1
-        assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION
+        assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION  # type: ignore[index]
         # Status might be FAILED due to comment error, but task should exist
 
     def test_invalid_environment_handling(self):

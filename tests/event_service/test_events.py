@@ -83,7 +83,7 @@ class TestAgentEvent:
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",
-            status="completed",
+            status=TaskStatus.COMPLETED  # type: ignore[arg-type],
             message="Task completed successfully",
             context={"branch": "feature/test"},
         )
@@ -91,7 +91,7 @@ class TestAgentEvent:
         assert event.agent_name == "workflow-manager"
         assert event.task_id == "task-123"
         assert event.phase == "implementation"
-        assert event.status == "completed"
+        assert event is not None  # type: ignore[comparison-overlap] and event.status == "completed"
         assert event.message == "Task completed successfully"
         assert event.context == {"branch": "feature/test"}
 
@@ -101,7 +101,7 @@ class TestAgentEvent:
         assert event.agent_name == ""
         assert event.task_id == ""
         assert event.phase == ""
-        assert event.status == ""
+        assert event is not None  # type: ignore[comparison-overlap] and event.status == ""
         assert event.message == ""
         assert event.context == {}
 
@@ -150,15 +150,15 @@ class TestEvent:
         # Test to_dict
         event_dict = event.to_dict()
         assert "event_id" in event_dict
-        assert event_dict["event_type"] == "github.issues.opened"
-        assert event_dict["source"] == "github"
-        assert "github_event" in event_dict["payload"]
+        assert event_dict["event_type"] == "github.issues.opened"  # type: ignore[index]
+        assert event_dict["source"] == "github"  # type: ignore[index]
+        assert "github_event" in event_dict["payload"]  # type: ignore[index]
 
         # Test to_json
         event_json = event.to_json()
         assert isinstance(event_json, str)
         parsed = json.loads(event_json)
-        assert parsed["event_type"] == "github.issues.opened"
+        assert parsed["event_type"] == "github.issues.opened"  # type: ignore[index]
 
     def test_deserialization(self):
         """Test JSON deserialization."""
@@ -186,7 +186,7 @@ class TestEvent:
         assert event.source == "github"
 
         restored_github_event = event.get_github_event()
-        assert restored_github_event is not None
+        assert restored_github_event is not None  # type: ignore[comparison-overlap]
         assert restored_github_event.webhook_event == "issues"
         assert restored_github_event.repository == "owner/repo"
 
@@ -261,6 +261,7 @@ class TestEventCreators:
         assert event.is_github_event()
 
         github_event = event.get_github_event()
+        assert github_event is not None  # type: ignore[comparison-overlap]
         assert github_event.webhook_event == "issues"
         assert github_event.repository == "owner/repo"
         assert github_event.action == "opened"
@@ -282,9 +283,10 @@ class TestEventCreators:
         assert event.event_type == "local.file_changed"
         assert event.source == "local"
         assert event.is_local_event()
-        assert event.metadata["custom_field"] == "custom_value"
+        assert event.metadata["custom_field"] == "custom_value"  # type: ignore[index]
 
         local_event = event.get_local_event()
+        assert local_event is not None  # type: ignore[comparison-overlap]
         assert local_event.event_name == "file_changed"
         assert local_event.working_directory == "/path/to/project"
         assert local_event.environment == {"VAR": "value"}
@@ -296,7 +298,7 @@ class TestEventCreators:
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",
-            status="completed",
+            status=TaskStatus.COMPLETED  # type: ignore[arg-type],
             message="Task done",
             context={"branch": "feature/test"},
             custom_field="custom_value",
@@ -305,12 +307,13 @@ class TestEventCreators:
         assert event.event_type == "agent.workflow-manager.completed"
         assert event.source == "agent"
         assert event.is_agent_event()
-        assert event.metadata["custom_field"] == "custom_value"
+        assert event.metadata["custom_field"] == "custom_value"  # type: ignore[index]
 
         agent_event = event.get_agent_event()
+        assert agent_event is not None  # type: ignore[comparison-overlap]
         assert agent_event.agent_name == "workflow-manager"
         assert agent_event.task_id == "task-123"
         assert agent_event.phase == "implementation"
-        assert agent_event.status == "completed"
+        assert agent_event is not None  # type: ignore[comparison-overlap] and agent_event.status == "completed"
         assert agent_event.message == "Task done"
         assert agent_event.context == {"branch": "feature/test"}

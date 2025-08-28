@@ -1,3 +1,5 @@
+from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
+
 #!/usr/bin/env python3
 """
 Integration tests for OrchestratorAgent with Enhanced Separation shared modules.
@@ -28,15 +30,17 @@ import pytest
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
+)
 
-from github_operations import GitHubOperations
-from interfaces import AgentConfig, TaskData, ErrorContext
-from state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
-from task_tracking import (
+from claude.shared.github_operations import GitHubOperations
+from claude.shared.interfaces import AgentConfig, TaskData, ErrorContext
+from claude.shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
+from claude.shared.task_tracking import (
     TaskMetrics,
     TaskTracker,
 )
-from utils.error_handling import CircuitBreaker, ErrorHandler
+from claude.shared.task_tracking import TaskPriority
+from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity
 
 
 class TestOrchestratorAgentIntegration:
@@ -67,11 +71,11 @@ class TestOrchestratorAgentIntegration:
         """Test OrchestratorAgent initialization uses shared modules correctly"""
 
         # Test shared module initialization
-        assert self.github_operations is not None
-        assert self.state_manager is not None
-        assert self.error_handler is not None
-        assert self.task_tracker is not None
-        assert self.task_metrics is not None
+        assert self.github_operations is not None  # type: ignore[union-attr]
+        assert self.state_manager is not None  # type: ignore[union-attr]
+        assert self.error_handler is not None  # type: ignore[union-attr]
+        assert self.task_tracker is not None  # type: ignore[union-attr]
+        assert self.task_metrics is not None  # type: ignore[union-attr]
 
         # Test basic functionality
         assert hasattr(self.github_operations, "create_issue")
@@ -130,7 +134,7 @@ class TestOrchestratorAgentIntegration:
         self.state_manager.save_state(orchestration_state)
         loaded_state = self.state_manager.load_state(orchestration_id)
 
-        assert loaded_state is not None
+        assert loaded_state is not None  # type: ignore[comparison-overlap]
         assert loaded_state.task_id == orchestration_id
         assert loaded_state.current_phase == 1  # ENVIRONMENT_SETUP
 
@@ -140,10 +144,10 @@ class TestOrchestratorAgentIntegration:
             orchestration_state, "Test orchestration state checkpoint"
         )
 
-        assert checkpoint_id is not None
+        assert checkpoint_id is not None  # type: ignore[comparison-overlap]
 
         # Test checkpoint system (backup functionality included)
-        assert checkpoint_id is not None
+        assert checkpoint_id is not None  # type: ignore[comparison-overlap]
 
     def test_parallel_execution_with_circuit_breakers(self):
         """Test parallel execution with circuit breaker protection"""
@@ -151,13 +155,13 @@ class TestOrchestratorAgentIntegration:
         # Mock task execution
         tasks = [
             TaskData(
-                id="task-1", content="Feature A", status="pending", priority="high"
+                id="task-1", content="Feature A", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
             ),
             TaskData(
-                id="task-2", content="Feature B", status="pending", priority="high"
+                id="task-2", content="Feature B", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
             ),
             TaskData(
-                id="task-3", content="Feature C", status="pending", priority="high"
+                id="task-3", content="Feature C", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
             ),
         ]
 
@@ -180,7 +184,7 @@ class TestOrchestratorAgentIntegration:
                 successful_results.append(result)
                 # Mock task status update (task_tracker may not have this task yet)
                 try:
-                    self.task_tracker.update_task_status(task.id, "completed")
+                    self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)
                 except Exception:
                     # Task not found - create and update status
                     pass
@@ -190,7 +194,7 @@ class TestOrchestratorAgentIntegration:
                 )
 
         assert len(successful_results) == 3
-        assert all(r["success"] for r in successful_results)
+        assert all(r["success"] for r in successful_results)  # type: ignore[index]
 
         # Test circuit breaker failure handling
         with patch.object(execution_circuit_breaker, "call") as mock_call:
@@ -222,8 +226,8 @@ class TestOrchestratorAgentIntegration:
 
             result = self.github_operations.batch_merge_pull_requests(pr_numbers)
 
-            assert result["merged"] == pr_numbers
-            assert len(result["failed"]) == 0
+            assert result["merged"] == pr_numbers  # type: ignore[index]
+            assert len(result["failed"]) == 0  # type: ignore[index]
             mock_batch.assert_called_once_with(pr_numbers)
 
     def test_performance_analytics_integration(self):
@@ -263,7 +267,7 @@ class TestOrchestratorAgentIntegration:
                 execution_results, baseline_sequential_time=estimated_sequential_time
             )
 
-            assert performance_metrics is not None
+            assert performance_metrics is not None  # type: ignore[comparison-overlap]
             assert performance_metrics.get("speedup", 0) > 1.0
             assert performance_metrics.get("parallel_efficiency", 0) > 0.5
         finally:
@@ -360,10 +364,10 @@ class TestOrchestratorAgentIntegration:
         # Phase 3: Parallel Execution (mocked)
         tasks = [
             TaskData(
-                id="task-1", content="Feature A", status="pending", priority="high"
+                id="task-1", content="Feature A", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
             ),
             TaskData(
-                id="task-2", content="Feature B", status="pending", priority="high"
+                id="task-2", content="Feature B", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
             ),
         ]
 
@@ -378,7 +382,7 @@ class TestOrchestratorAgentIntegration:
             execution_results.append(result)
             # Mock task status update (task_tracker may not have this task yet)
             try:
-                self.task_tracker.update_task_status(task.id, "completed")
+                self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)
             except Exception:
                 # Task not found - ignore for test
                 pass
@@ -394,7 +398,7 @@ class TestOrchestratorAgentIntegration:
             mock_batch.return_value = {"merged": pr_numbers, "failed": []}
 
             batch_result = self.github_operations.batch_merge_pull_requests(pr_numbers)
-            assert len(batch_result["merged"]) == 2
+            assert len(batch_result["merged"]) == 2  # type: ignore[index]
 
         # Update final state - use REVIEW phase since COMPLETED doesn't exist
         orchestration_state.current_phase = WorkflowPhase.REVIEW.value

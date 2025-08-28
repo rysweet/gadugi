@@ -13,7 +13,7 @@ authors = [
 requires-python = ">=3.9"
 dependencies = [
     "psutil>=7.0.0",
-    "PyYAML>=6.0",
+    "pyyaml>=6.0",
     "aiohttp>=3.8.0",
     "protobuf>=4.0.0",
     "grpcio-tools>=1.60.0",
@@ -151,3 +151,8 @@ ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by format
 docstring-code-format = true
 docstring-code-line-length = 88
 line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+]

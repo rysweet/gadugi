@@ -141,7 +141,7 @@ class ResourceMonitor:
             memory_percent=memory.percent,
             disk_usage_percent=disk.percent,
             available_memory_gb=memory.available / (1024**3),
-            cpu_count=psutil.cpu_count(),
+            cpu_count=psutil.cpu_count() or 1,
             load_avg=list(os.getloadavg()) if hasattr(os, 'getloadavg') else [0.0, 0.0, 0.0]
         )
 
@@ -421,7 +421,7 @@ class TaskExecutor:
             task_id=self.task_id,
             task_name=self.task_id,  # Will be updated by caller
             status=status,
-            start_time=self.start_time,
+            start_time=self.start_time or datetime.now(),
             end_time=end_time,
             duration=duration,
             exit_code=exit_code,

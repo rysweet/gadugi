@@ -13,11 +13,12 @@ from enum import Enum
 
 try:
     import websockets
-    from websockets.client import WebSocketClientProtocol
+    from websockets.exceptions import WebSocketException
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     WEBSOCKET_AVAILABLE = False
-    WebSocketClientProtocol = Any
+    websockets = None  # type: ignore
+    WebSocketException = Exception  # type: ignore
 
 import sys
 import os
@@ -71,7 +72,7 @@ class EventRouterClient:
         
         # Connection state
         self.state = ConnectionState.DISCONNECTED
-        self.websocket: Optional[WebSocketClientProtocol] = None
+        self.websocket: Optional[Any] = None  # WebSocketClientProtocol when available
         self.client_id: Optional[str] = None
         
         # Reconnection
@@ -115,14 +116,17 @@ class EventRouterClient:
                 raise RuntimeError("websockets library not installed")
             
             # Connect with timeout
-            self.websocket = await asyncio.wait_for(
-                websockets.connect(
-                    self.url,
-                    max_size=10**7,
-                    compression=None
-                ),
-                timeout=self.timeout
-            )
+            if websockets is not None:
+                self.websocket = await asyncio.wait_for(
+                    websockets.connect(
+                        self.url,
+                        max_size=10**7,
+                        compression=None
+                    ),
+                    timeout=self.timeout
+                )
+            else:
+                raise RuntimeError("websockets module not available")
             
             self.state = ConnectionState.CONNECTED
             self.connected_at = datetime.now(timezone.utc)
@@ -184,11 +188,15 @@ class EventRouterClient:
     async def _handle_messages(self):
         """Handle incoming messages."""
         try:
-            async for message in self.websocket:
-                await self._process_message(message)
+            if self.websocket:
+                async for message in self.websocket:
+                    await self._process_message(message)
                 
-        except websockets.exceptions.ConnectionClosed:
-            logger.info("Connection closed")
+        except Exception as e:
+            if websockets and isinstance(e, WebSocketException):
+                logger.info("Connection closed")
+            else:
+                raise
         except Exception as e:
             logger.error(f"Error handling messages: {e}")
         finally:
@@ -295,7 +303,8 @@ class EventRouterClient:
                 # Check for missed pong
                 if self.last_pong and time.time() - self.last_pong > self.heartbeat_interval * 2:
                     logger.warning("Heartbeat timeout, reconnecting...")
-                    await self.websocket.close()
+                    if self.websocket:
+                        await self.websocket.close()
                     break
                     
             except asyncio.CancelledError:
@@ -360,9 +369,13 @@ class EventRouterClient:
             return False
         
         try:
-            await self.websocket.send(json.dumps(data))
-            self.messages_sent += 1
-            return True
+            if self.websocket:
+                await self.websocket.send(json.dumps(data))
+                self.messages_sent += 1
+                return True
+            else:
+                self.pending_messages.append(data)
+                return False
         except Exception as e:
             logger.error(f"Send error: {e}")
             self.pending_messages.append(data)
@@ -412,10 +425,10 @@ class EventRouterClient:
     
     async def subscribe(
         self,
-        topics: List[str] = None,
-        types: List[EventType] = None,
-        priorities: List[EventPriority] = None,
-        sources: List[str] = None,
+        topics: Optional[List[str]] = None,
+        types: Optional[List[EventType]] = None,
+        priorities: Optional[List[EventPriority]] = None,
+        sources: Optional[List[str]] = None,
         callback: Optional[Callable[[Event], None]] = None
     ) -> Optional[str]:
         """Subscribe to events.

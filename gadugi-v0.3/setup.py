@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Setup script for Gadugi v0.3 - Clean implementation of multi-agent framework."""
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 # Read the README for long description
 readme_path = Path(__file__).parent / "README.md"
@@ -19,10 +20,10 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/rysweet/gadugi",
-    
+
     # Find all Python packages
     packages=find_packages(where=".", include=["src*", "services*", "tests*"]),
-    
+
     # Map packages to their directories
     package_dir={
         "": ".",
@@ -35,7 +36,7 @@ setup(
         "gadugi.services.mcp": "services/mcp",
         "gadugi.services.neo4j": "services/neo4j-graph",
     },
-    
+
     # Include all data files
     package_data={
         "gadugi": [
@@ -46,31 +47,31 @@ setup(
             "../agents/**/knowledge/*.md",
             "../agents/**/memories/*.md",
             "../agents/**/templates/*.md",
-            
+
             # Service configurations
             "../services/**/*.json",
             "../services/**/*.yaml",
             "../services/**/*.yml",
             "../services/**/*.proto",
-            
+
             # Test data
             "../tests/**/*.json",
             "../tests/**/*.yaml",
             "../tests/**/*.md",
-            
+
             # Configuration files
             "../pyproject.toml",
             "../.gadugi/**/*.json",
             "../.gadugi/**/*.yaml",
         ],
     },
-    
+
     # Include everything in MANIFEST.in
     include_package_data=True,
-    
+
     # Python version requirement
     python_requires=">=3.9",
-    
+
     # Dependencies
     install_requires=[
         # Core dependencies - add as needed
@@ -78,7 +79,7 @@ setup(
         "aiofiles>=23.0",
         "asyncio>=3.4",
     ],
-    
+
     # Optional dependencies for different features
     extras_require={
         "dev": [
@@ -98,7 +99,7 @@ setup(
             "anthropic>=0.5",
         ],
     },
-    
+
     # Console scripts
     entry_points={
         "console_scripts": [
@@ -111,7 +112,7 @@ setup(
             "gadugi-neo4j=gadugi.services.neo4j.neo4j_graph_service:main",
         ],
     },
-    
+
     # Classifiers
     classifiers=[
         "Development Status :: 3 - Alpha",

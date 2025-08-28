@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import threading
 from queue import Queue
 
-from ...shared.utils.error_handling import ErrorHandler
+from ...shared.utils.error_handling import ErrorHandler  # type: ignore
 from .task_matcher import TaskAgentMatcher, TaskRequirements, MatchingStrategy
 
 

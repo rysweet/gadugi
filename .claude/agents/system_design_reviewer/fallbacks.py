@@ -82,7 +82,7 @@ class GitHubOperations:
 class StateManager:
     """Fallback state manager implementation"""
 
-    def __init__(self, state_dir: Path = None, task_id: str = "fallback"):
+    def __init__(self, state_dir: Optional[Path] = None, task_id: str = "fallback"):
         self.state_dir = state_dir or Path(".github/workflow-states/system-design-reviewer")
         self.task_id = task_id
         self.state_file = self.state_dir / "fallback_state.json"

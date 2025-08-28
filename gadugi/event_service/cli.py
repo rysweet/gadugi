@@ -25,7 +25,6 @@ from .config import (
 )
 from .events import create_local_event
 from .github_client import GitHubClient
-from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -385,14 +384,10 @@ Examples:
             if args.data:
                 event_data = json.loads(args.data)
             elif args.file:
-                import aiofiles
-
-                async def read_json_file(path):
-                    async with aiofiles.open(path, "r") as f:
-                        content = await f.read()
-                        return json.loads(content)
-
-                event_data = await read_json_file(args.file)
+                # Read file synchronously to avoid aiofiles import issue
+                with open(args.file, "r") as f:
+                    content = f.read()
+                    event_data = json.loads(content)
 
             # Create event
             event = create_local_event(
@@ -494,8 +489,12 @@ Examples:
         print("Gadugi Event Service CLI v0.1.0")
         return 0
 
-    async def _setup_webhook_interactive(self, config: ServiceConfig):
+    async def _setup_webhook_interactive(self, config: ServiceConfig) -> None:
         """Interactive webhook setup."""
+        if not config.github_token:
+            print("GitHub token not configured")
+            return
+
         async with GitHubClient(config.github_token) as client:
             # Auto-detect repository
             repo_info = await client.auto_detect_repository()
@@ -509,11 +508,14 @@ Examples:
 
                 confirm = input("Create webhook? (y/N): ").strip().lower()
                 if confirm == "y":
-                    await client.create_webhook(
-                        owner, repo, webhook_url, config.webhook_secret
-                    )
-                    print("Webhook created successfully!")
-
+                    if config.webhook_secret:
+                        await client.create_webhook(
+                            owner, repo, webhook_url, config.webhook_secret
+                        )
+                        print("Webhook created successfully!")
+                    else:
+                        print("Error: Webhook secret not configured")
+                        return
     async def _webhook_setup(
         self, client: GitHubClient, config: ServiceConfig, args: argparse.Namespace
     ) -> int:
@@ -529,6 +531,10 @@ Examples:
             owner, repo = args.repo.split("/", 1)
 
         webhook_url = args.url or f"http://localhost:{config.bind_port}/webhook/github"
+
+        if not config.webhook_secret:
+            print("Error: Webhook secret not configured")
+            return 1
 
         result = await client.create_webhook(
             owner, repo, webhook_url, config.webhook_secret

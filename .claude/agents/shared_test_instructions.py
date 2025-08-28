@@ -61,7 +61,7 @@ class AgentConfig:
 
 
 try:
-    from utils.error_handling import ErrorHandler
+    from ..shared.utils.error_handling import ErrorHandler  # type: ignore
 except ImportError:
     # Fallback for missing ErrorHandler
     pass

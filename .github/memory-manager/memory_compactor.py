@@ -13,7 +13,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import os
 
 if os.environ.get("GADUGI_TEST_ENV") == "1":
     import warnings

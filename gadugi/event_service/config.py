@@ -265,7 +265,7 @@ def _config_to_dict(config: ServiceConfig) -> Dict[str, Any]:
     data = asdict(config)
 
     # Remove None values for cleaner YAML
-    def remove_none(obj):
+    def remove_none(obj: Any) -> Any:
         if isinstance(obj, dict):
             return {k: remove_none(v) for k, v in obj.items() if v is not None}
         elif isinstance(obj, list):
@@ -273,7 +273,10 @@ def _config_to_dict(config: ServiceConfig) -> Dict[str, Any]:
         else:
             return obj
 
-    return remove_none(data)
+    result = remove_none(data)
+    # Ensure the result is a dict
+    assert isinstance(result, dict)
+    return result
 
 
 def _validate_config(config: ServiceConfig) -> None:

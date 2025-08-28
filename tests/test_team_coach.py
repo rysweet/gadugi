@@ -12,10 +12,7 @@ These tests validate the Team Coach's core functionality including:
 """
 
 import pytest
-import json
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List
+from datetime import datetime
 
 # Import the Team Coach under test
 import sys
@@ -28,9 +25,7 @@ sys.path.insert(
 from team_coach import (
     TeamCoach,
     SessionMetrics,
-    ImprovementSuggestion,
     ImprovementType,
-    PerformanceTrend,
 )
 
 
@@ -42,9 +37,9 @@ class TestTeamCoachInitialization:
         coach = TeamCoach()
 
         assert coach.name == "TeamCoach"
-        assert coach.performance_analyzer is not None
-        assert coach.capability_assessment is not None
-        assert coach.coaching_engine is not None
+        assert coach.performance_analyzer is not None  # type: ignore[union-attr]
+        assert coach.capability_assessment is not None  # type: ignore[union-attr]
+        assert coach.coaching_engine is not None  # type: ignore[union-attr]
         assert len(coach.session_history) == 0
         assert len(coach.improvement_history) == 0
 
@@ -119,11 +114,11 @@ class TestSessionAnalysis:
 
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "metrics" in result
-        assert result["metrics"]["session_id"] == "test_session_002"
-        assert result["metrics"]["tasks_completed"] == 2
-        assert result["metrics"]["errors_encountered"] == 0
+        assert result["metrics"]["session_id"] == "test_session_002"  # type: ignore[index]
+        assert result["metrics"]["tasks_completed"] == 2  # type: ignore[index]
+        assert result["metrics"]["errors_encountered"] == 0  # type: ignore[index]
 
     def test_performance_score_calculation(self):
         """Test performance score calculation logic."""
@@ -246,9 +241,9 @@ class TestImprovementIdentification:
 
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "suggestions" in result
-        assert len(result["suggestions"]) > 0
+        assert len(result["suggestions"]) > 0  # type: ignore[index]
 
         # Check suggestion structure
         suggestion = result["suggestions"][0]
@@ -270,9 +265,9 @@ class TestPerformanceTrends:
         context = {"action": "track_performance_trends"}
         result = coach._execute_core(context)
 
-        assert result["success"] is True
-        assert result["trends"] == []
-        assert "Insufficient data" in result["message"]
+        assert result["success"] is True  # type: ignore[index]
+        assert result["trends"] == []  # type: ignore[index]
+        assert "Insufficient data" in result["message"]  # type: ignore[index]
 
     def test_trend_analysis_with_data(self):
         """Test trend analysis with sufficient session history."""
@@ -297,8 +292,8 @@ class TestPerformanceTrends:
         context = {"action": "track_performance_trends"}
         result = coach._execute_core(context)
 
-        assert result["success"] is True
-        assert len(result["trends"]) > 0
+        assert result["success"] is True  # type: ignore[index]
+        assert len(result["trends"]) > 0  # type: ignore[index]
 
         trend = result["trends"][0]
         assert "metric_name" in trend
@@ -326,9 +321,9 @@ class TestGitHubIntegration:
 
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "issue_url" in result
-        assert "github.com" in result["issue_url"]
+        assert "github.com" in result["issue_url"]  # type: ignore[index]
         assert "message" in result
 
 
@@ -342,7 +337,7 @@ class TestCoachingReports:
         context = {"action": "generate_coaching_report"}
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "report" in result
 
         report = result["report"]
@@ -350,8 +345,8 @@ class TestCoachingReports:
         assert "sessions_analyzed" in report
         assert "average_performance" in report
         assert "recommendations" in report
-        assert report["sessions_analyzed"] == 0
-        assert report["average_performance"] == 0
+        assert report["sessions_analyzed"] == 0  # type: ignore[index]
+        assert report["average_performance"] == 0  # type: ignore[index]
 
     def test_generate_coaching_report_with_data(self):
         """Test coaching report generation with session history."""
@@ -376,10 +371,10 @@ class TestCoachingReports:
         context = {"action": "generate_coaching_report"}
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         report = result["report"]
-        assert report["sessions_analyzed"] == 3
-        assert report["average_performance"] == 0.7
+        assert report["sessions_analyzed"] == 3  # type: ignore[index]
+        assert report["average_performance"] == 0.7  # type: ignore[index]
 
 
 class TestPatternLearning:
@@ -412,7 +407,7 @@ class TestPatternLearning:
 
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "patterns" in result
 
         patterns = result["patterns"]
@@ -431,8 +426,8 @@ class TestErrorHandling:
         context = {"action": "invalid_action"}
         result = coach._execute_core(context)
 
-        assert result["success"] is False
-        assert "Unknown action" in result["error"]
+        assert result["success"] is False  # type: ignore[index]
+        assert "Unknown action" in result["error"]  # type: ignore[index]
         assert "available_actions" in result
 
     def test_malformed_session_data(self):
@@ -446,7 +441,7 @@ class TestErrorHandling:
 
         result = coach._execute_core(context)
         # Should handle gracefully and create default session
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
 
     def test_empty_metrics_for_improvements(self):
         """Test improvement identification with minimal metrics."""
@@ -470,7 +465,7 @@ class TestErrorHandling:
 
         result = coach._execute_core(context)
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         # Should have minimal or no suggestions for good performance
         assert "suggestions" in result
 
@@ -495,7 +490,7 @@ class TestIntegrationWithBaseAgent:
         coach = TeamCoach()
 
         coach.start_monitoring()
-        assert coach.start_time is not None
+        assert coach.start_time is not None  # type: ignore[union-attr]
 
         coach.stop_monitoring()
         assert len(coach.execution_times) > 0
@@ -531,7 +526,7 @@ class TestIntegrationWithBaseAgent:
         result = coach.execute(context)
 
         # Should succeed with full monitoring
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert len(coach.execution_times) > 0
         assert len(coach.history) > 0
 
@@ -560,10 +555,10 @@ class TestStatusAndUtilities:
 
         summary = coach.get_status_summary()
 
-        assert summary["name"] == "TeamCoach"
-        assert summary["sessions_analyzed"] == 1
-        assert summary["improvements_identified"] == 0
-        assert summary["last_analysis"] == "test_session"
+        assert summary["name"] == "TeamCoach"  # type: ignore[index]
+        assert summary["sessions_analyzed"] == 1  # type: ignore[index]
+        assert summary["improvements_identified"] == 0  # type: ignore[index]
+        assert summary["last_analysis"] == "test_session"  # type: ignore[index]
         assert "performance_metrics" in summary
         assert "learning_summary" in summary
 

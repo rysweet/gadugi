@@ -6,7 +6,6 @@ Final comprehensive push to eliminate remaining pyright errors.
 import subprocess
 import re
 from pathlib import Path
-from typing import Dict, List
 
 
 def run_pyright_get_errors():

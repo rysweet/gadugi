@@ -30,11 +30,7 @@ from ..phase3.coaching_engine import (
     CoachingPriority,
     CoachingCategory,
 )
-<<<<<<< HEAD
 from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics
-=======
-# from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics  # Unused imports
->>>>>>> feature/gadugi-v0.3-regeneration
 
 
 class TestCoachingEngine(unittest.TestCase):

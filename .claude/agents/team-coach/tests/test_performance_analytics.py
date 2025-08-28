@@ -15,9 +15,9 @@ from ..phase1.performance_analytics import (
     TeamPerformanceData,
     AnalysisError,
 )
-from ...shared.task_tracking import TaskMetrics
-from ...shared.state_management import StateManager
-from ...shared.utils.error_handling import ErrorHandler
+from ...shared.task_tracking import TaskMetrics  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
+from ...shared.utils.error_handling import ErrorHandler  # type: ignore
 
 
 class TestAgentPerformanceAnalyzer(unittest.TestCase):

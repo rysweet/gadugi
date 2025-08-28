@@ -88,7 +88,7 @@ class CodeEvaluator:
     
     def _analyze_code_structure(self) -> None:
         """Analyze the structure of existing code."""
-        if not self.code_path.exists():
+        if not self.code_path or not self.code_path.exists():
             return
         
         if self.code_path.is_file():
@@ -286,7 +286,7 @@ class CodeEvaluator:
     
     def _check_for_tests(self) -> bool:
         """Check if tests exist."""
-        if self.code_path.is_dir():
+        if self.code_path and self.code_path.is_dir():
             test_files = list(self.code_path.glob("**/test_*.py"))
             test_files.extend(self.code_path.glob("**/*_test.py"))
             return len(test_files) > 0
@@ -294,7 +294,7 @@ class CodeEvaluator:
     
     def _check_for_documentation(self) -> bool:
         """Check if documentation exists."""
-        if self.code_path.is_dir():
+        if self.code_path and self.code_path.is_dir():
             doc_files = list(self.code_path.glob("**/*.md"))
             doc_files.extend(self.code_path.glob("**/*.rst"))
             return len(doc_files) > 0
@@ -314,10 +314,10 @@ class CodeEvaluator:
     def _check_for_error_handling(self) -> bool:
         """Check if error handling exists."""
         # Look for try/except blocks in code
-        if self.code_path.is_file():
+        if self.code_path and self.code_path.is_file():
             content = self.code_path.read_text()
             return "try:" in content and "except" in content
-        elif self.code_path.is_dir():
+        elif self.code_path and self.code_path.is_dir():
             for py_file in self.code_path.glob("**/*.py"):
                 content = py_file.read_text()
                 if "try:" in content and "except" in content:

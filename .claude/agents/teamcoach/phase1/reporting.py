@@ -11,8 +11,8 @@ from io import BytesIO
 import base64
 
 # Import shared modules and Phase 1 components
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker
-from ...shared.state_management import StateManager
+from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ...shared.state_management import StateManager  # type: ignore
 from .performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
 from .capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from .metrics_collector import MetricsCollector

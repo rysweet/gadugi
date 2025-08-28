@@ -768,7 +768,7 @@ class CoachingEngine:
         # Identify gaps
         gaps = [
             domain for domain in all_domains if len(domain_coverage.get(domain, [])) < 2
-        ]
+         if domain is not None]
 
         return {
             "total_domains": len(all_domains),

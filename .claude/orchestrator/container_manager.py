@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, asdict  # type: ignore
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable, Dict, List, Optional  # type: ignore
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union  # type: ignore
 import uuid
 
 try:
@@ -66,7 +66,7 @@ class ContainerConfig:
     detach: bool = False
 
     # Claude CLI specific settings
-    claude_flags: List[str] = None
+    claude_flags: Optional[List[str]] = None
     max_turns: int = 50
     output_format: str = "json"
 
@@ -162,7 +162,7 @@ class ContainerOutputStreamer:
 class ContainerManager:
     """Manages Docker container execution for orchestrator tasks"""
 
-    def __init__(self, config: ContainerConfig = None):
+    def __init__(self, config: Optional[ContainerConfig] = None):
         self.config = config or ContainerConfig()
         self.docker_client = None
         self.active_containers: Dict[str, Any] = {}
@@ -243,8 +243,10 @@ CMD ["bash"]
 
                 # Log build output
                 for log in build_logs:
-                    if 'stream' in log:
-                        logger.info(f"Docker build: {log['stream'].strip()}")
+                    if isinstance(log, dict) and 'stream' in log:
+                        stream_val = log.get('stream', '')
+                        if isinstance(stream_val, str):
+                            logger.info(f"Docker build: {stream_val.strip()}")
 
                 logger.info(f"Successfully built image: {self.config.image}")
 
@@ -280,7 +282,7 @@ CMD ["bash"]
             logger.warning(f"CLAUDE_API_KEY not set for task {task_id}, relying on subscription auth")
             # Don't fail here - let container try with mounted auth
 
-        _container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
+        container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
         start_time = datetime.now()
 
         # Validate host system resources
@@ -296,7 +298,7 @@ CMD ["bash"]
                         exit_code=-1,
                         stdout="",
                         stderr="ERROR: Insufficient memory to create container",
-                        logs="",
+                        logs=[],
                         start_time=start_time,
                         end_time=datetime.now(),
                         duration=0.0,
@@ -337,7 +339,7 @@ CMD ["bash"]
         claude_cmd = [
             "claude",
             "-p", escaped_prompt
-        ] + self.config.claude_flags
+        ] + (self.config.claude_flags or [])
 
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
@@ -406,7 +408,7 @@ CMD ["bash"]
             status = "failed"
             stdout = ""
             stderr = f"Docker image not found: {self.config.image}. Run 'docker build' first."  # type: ignore
-            logs = ""
+            logs = []
             resource_usage = {}
         except docker.errors.APIError as e:  # type: ignore
             logger.error(f"Docker API error for {task_id}: {e}")  # type: ignore
@@ -414,7 +416,7 @@ CMD ["bash"]
             status = "failed"
             stdout = ""
             stderr = f"Docker API error: {e}"  # type: ignore
-            logs = ""
+            logs = []
             resource_usage = {}
         except docker.errors.ContainerError as e:  # type: ignore
             logger.error(f"Container error for {task_id}: {e}")  # type: ignore
@@ -422,7 +424,7 @@ CMD ["bash"]
             status = "failed"
             stdout = e.stdout.decode('utf-8') if e.stdout else ""  # type: ignore
             stderr = e.stderr.decode('utf-8') if e.stderr else str(e)  # type: ignore
-            logs = ""
+            logs = []
             resource_usage = {}
         except Exception as e:  # type: ignore
             logger.error(f"Unexpected container execution error for {task_id}: {e}")  # type: ignore
@@ -430,7 +432,7 @@ CMD ["bash"]
             status = "failed"
             stdout = ""
             stderr = f"Unexpected error: {type(e).__name__}: {e}"  # type: ignore
-            logs = ""
+            logs = []
             resource_usage = {}
 
             # Try to get partial logs
@@ -473,7 +475,7 @@ CMD ["bash"]
             exit_code=exit_code,
             stdout=stdout,
             stderr=stderr,
-            logs=logs.split('\n') if logs else [],
+            logs=logs.split('\n') if isinstance(logs, str) and logs else logs if isinstance(logs, list) else [],
             resource_usage=resource_usage,
             error_message=stderr if status == "failed" else None
         )
@@ -637,15 +639,15 @@ CMD ["bash"]
 
         logger.info(f"Attempting subprocess execution for task {task_id}")
         start_time = datetime.now()
+        original_cwd = os.getcwd()
 
         try:
-            # Change to worktree directory
             original_cwd = os.getcwd()
             os.chdir(worktree_path)
 
             # Prepare Claude CLI command
             escaped_prompt = shlex.quote(prompt_file)
-            claude_cmd = ["claude", "-p", escaped_prompt] + self.config.claude_flags
+            claude_cmd = ["claude", "-p", escaped_prompt] + (self.config.claude_flags or [])
 
             logger.info(f"Subprocess command: {' '.join(claude_cmd)}")
 
@@ -668,7 +670,7 @@ CMD ["bash"]
                 exit_code=result.returncode,
                 stdout=result.stdout,
                 stderr=result.stderr,
-                logs=result.stdout + "\n" + result.stderr,
+                logs=[result.stdout, result.stderr] if result.stderr else [result.stdout],
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
@@ -685,7 +687,7 @@ CMD ["bash"]
                 exit_code=-1,
                 stdout="",
                 stderr="Subprocess execution timed out",
-                logs="",
+                logs=[],
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
@@ -702,7 +704,7 @@ CMD ["bash"]
                 exit_code=-2,
                 stdout="",
                 stderr=f"Subprocess error: {e}",
-                logs="",
+                logs=[],
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,

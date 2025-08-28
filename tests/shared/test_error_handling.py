@@ -18,38 +18,12 @@ from unittest.mock import call, patch
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from claude.shared.utils.error_handling import (
-        CircuitBreaker,
-        ErrorContext,
-        ErrorHandler,
-        ErrorSeverity,
-        GadugiError,
-        NonRecoverableError,
-        RecoverableError,
-        RetryStrategy,
-        graceful_degradation,
-        handle_with_fallback,
-        retry,
-        validate_input,
-    )
+    from claude.shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.utils.error_handling import (
-        CircuitBreaker,
-        ErrorContext,
-        ErrorHandler,
-        ErrorSeverity,
-        GadugiError,
-        NonRecoverableError,
-        RecoverableError,
-        RetryStrategy,
-        graceful_degradation,
-        handle_with_fallback,
-        retry,
-        validate_input,
-    )
+    from claude.shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -491,8 +465,8 @@ class TestRetryDecorator:
                 always_fails()
 
         assert len(delays) == 2  # 3 attempts = 2 delays
-        assert delays[0] == 0.1
-        assert delays[1] == 0.2  # 0.1 * 2.0
+        assert delays[0] == 0.1  # type: ignore[index]
+        assert delays[1] == 0.2  # 0.1 * 2.0  # type: ignore[index]
 
     def test_retry_linear_backoff(self):
         """Test retry with linear backoff."""
@@ -516,8 +490,8 @@ class TestRetryDecorator:
                 always_fails()
 
         assert len(delays) == 2
-        assert delays[0] == 0.1
-        assert delays[1] == 0.2  # 0.1 + 0.1 * (2.0 - 1)
+        assert delays[0] == 0.1  # type: ignore[index]
+        assert delays[1] == 0.2  # 0.1 + 0.1 * (2.0 - 1)  # type: ignore[index]
 
     def test_retry_fixed_backoff(self):
         """Test retry with fixed backoff."""
@@ -572,8 +546,8 @@ class TestRetryDecorator:
         result = fails_twice()
         assert result == "success"
         assert len(retry_calls) == 2
-        assert retry_calls[0] == (1, "Failure 1")
-        assert retry_calls[1] == (2, "Failure 2")
+        assert retry_calls[0] == (1, "Failure 1")  # type: ignore[index]
+        assert retry_calls[1] == (2, "Failure 2")  # type: ignore[index]
 
 
 class TestGracefulDegradation:
@@ -663,7 +637,7 @@ class TestErrorHandler:
 
         handler.register_recovery_strategy(ValueError, recovery_func)
         assert ValueError in handler.recovery_strategies
-        assert handler.recovery_strategies[ValueError] == recovery_func
+        assert handler.recovery_strategies[ValueError] == recovery_func  # type: ignore[index]
 
     def test_handle_error_with_recovery(self):
         """Test error handling with recovery strategy."""
@@ -706,8 +680,8 @@ class TestErrorHandler:
         handler.handle_error(error2, {})
         handler.handle_error(error3, {})
 
-        assert handler.error_counts["ValueError:error 1"] == 2
-        assert handler.error_counts["ValueError:error 2"] == 1
+        assert handler.error_counts["ValueError:error 1"] == 2  # type: ignore[index]
+        assert handler.error_counts["ValueError:error 2"] == 1  # type: ignore[index]
 
     def test_error_history(self):
         """Test error history tracking."""
@@ -725,10 +699,10 @@ class TestErrorHandler:
 
         assert len(handler.error_history) == 1
         history_entry = handler.error_history[0]
-        assert history_entry["error_type"] == "ValueError"
-        assert history_entry["error_message"] == "test error"
-        assert history_entry["context"] == context
-        assert history_entry["count"] == 1
+        assert history_entry["error_type"] == "ValueError"  # type: ignore[index]
+        assert history_entry["error_message"] == "test error"  # type: ignore[index]
+        assert history_entry["context"] == context  # type: ignore[index]
+        assert history_entry["count"] == 1  # type: ignore[index]
         assert "timestamp" in history_entry
 
     def test_get_error_statistics(self):
@@ -748,12 +722,12 @@ class TestErrorHandler:
 
         stats = handler.get_error_statistics()
 
-        assert stats["total_errors"] == 3
-        assert stats["unique_errors"] == 2
-        assert len(stats["top_errors"]) == 2
-        assert stats["top_errors"][0][0] == "ValueError:error 1"
-        assert stats["top_errors"][0][1] == 2
-        assert len(stats["recent_errors"]) == 3
+        assert stats["total_errors"] == 3  # type: ignore[index]
+        assert stats["unique_errors"] == 2  # type: ignore[index]
+        assert len(stats["top_errors"]) == 2  # type: ignore[index]
+        assert stats["top_errors"][0][0] == "ValueError:error 1"  # type: ignore[index]
+        assert stats["top_errors"][0][1] == 2  # type: ignore[index]
+        assert len(stats["recent_errors"]) == 3  # type: ignore[index]
 
     def test_reset_statistics(self):
         """Test resetting error statistics."""

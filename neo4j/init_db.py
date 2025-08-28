@@ -29,22 +29,22 @@ def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
     if not schema_file.exists():
         logger.error(f"Schema file not found: {schema_file}")
         return False
-    
+
     # Read and parse schema file
     with open(schema_file, 'r') as f:
         content = f.read()
-    
+
     # Split into individual commands (by semicolon and double newline)
     commands = []
     current_command = []
-    
+
     for line in content.split('\n'):
         # Skip comments and empty lines
         if line.strip().startswith('//') or not line.strip():
             continue
-        
+
         current_command.append(line)
-        
+
         # Check if command is complete
         if line.strip().endswith(';'):
             command = ' '.join(current_command).strip()
@@ -53,17 +53,17 @@ def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
                 command = command.rstrip(';')
                 commands.append(command)
             current_command = []
-    
+
     # Add any remaining command
     if current_command:
         command = ' '.join(current_command).strip()
         if command and not command.startswith('//'):
             commands.append(command)
-    
+
     # Execute each command
     success_count = 0
     failed_commands = []
-    
+
     for i, command in enumerate(commands, 1):
         try:
             client.execute_query(command)
@@ -78,15 +78,15 @@ def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
                 logger.error(f"Failed to execute command {i}: {e}")
                 logger.error(f"Command: {command}")
                 failed_commands.append((command, str(e)))
-    
+
     logger.info(f"Successfully executed {success_count}/{len(commands)} commands")
-    
+
     if failed_commands:
         logger.error("Failed commands:")
         for cmd, error in failed_commands:
             logger.error(f"  - {cmd[:50]}...: {error}")
         return False
-    
+
     return True
 
 
@@ -97,7 +97,7 @@ def create_sample_data(client: Neo4jClient) -> None:
         client: Neo4j client instance.
     """
     logger.info("Creating sample data...")
-    
+
     # Create Orchestrator Agent
     orchestrator_id = f"orchestrator-{uuid.uuid4().hex[:8]}"
     orchestrator = client.create_agent({
@@ -110,7 +110,7 @@ def create_sample_data(client: Neo4jClient) -> None:
         "metadata": json.dumps({"max_parallel_tasks": 10, "region": "us-west-2"})
     })
     logger.info(f"Created orchestrator agent: {orchestrator}")
-    
+
     # Create Worker Agents
     worker_ids = []
     for i in range(3):
@@ -126,7 +126,7 @@ def create_sample_data(client: Neo4jClient) -> None:
             "metadata": json.dumps({"worker_index": i})
         })
         logger.info(f"Created worker agent: {worker_id}")
-    
+
     # Create a Team
     team_id = f"team-{uuid.uuid4().hex[:8]}"
     client.create_team({
@@ -140,37 +140,37 @@ def create_sample_data(client: Neo4jClient) -> None:
         "performance_score": 0.85
     })
     logger.info(f"Created team: {team_id}")
-    
+
     # Add agents to team
     client.add_agent_to_team(orchestrator_id, team_id)
     for worker_id in worker_ids:
         client.add_agent_to_team(worker_id, team_id)
     logger.info(f"Added {len(worker_ids) + 1} agents to team")
-    
+
     # Create sample tasks
     task_ids = []
     task_types = ["code_review", "test_execution", "documentation", "deployment"]
     priorities = ["low", "normal", "high", "critical"]
-    
+
     for i in range(5):
         task_id = f"task-{uuid.uuid4().hex[:8]}"
         task_ids.append(task_id)
         client.create_task({
             "id": task_id,
             "name": f"Sample Task {i+1}",
-            "description": f"This is a sample task for testing Neo4j integration",
+            "description": "This is a sample task for testing Neo4j integration",
             "type": task_types[i % len(task_types)],
             "priority": priorities[i % len(priorities)],
             "timeout_seconds": 300 + (i * 60)
         })
         logger.info(f"Created task: {task_id}")
-    
+
     # Assign some tasks to workers
     for i, task_id in enumerate(task_ids[:3]):
         worker_id = worker_ids[i % len(worker_ids)]
         client.assign_task_to_agent(task_id, worker_id)
         logger.info(f"Assigned task {task_id} to {worker_id}")
-    
+
     # Create sample memories
     for worker_id in worker_ids[:2]:
         for i in range(3):
@@ -185,7 +185,7 @@ def create_sample_data(client: Neo4jClient) -> None:
                 "tags": ["sample", "test", f"memory_{i}"]
             })
             logger.info(f"Created memory {memory_id} for {worker_id}")
-    
+
     # Create sample knowledge
     domains = ["python", "neo4j", "agents", "orchestration"]
     for i in range(4):
@@ -200,7 +200,7 @@ def create_sample_data(client: Neo4jClient) -> None:
             "verified": i % 2 == 0
         })
         logger.info(f"Created knowledge: {knowledge_id}")
-    
+
     # Create task dependencies
     if len(task_ids) >= 2:
         # Make task 2 depend on task 1
@@ -213,7 +213,7 @@ def create_sample_data(client: Neo4jClient) -> None:
             {"task1_id": task_ids[0], "task2_id": task_ids[1]}
         )
         logger.info(f"Created dependency: {task_ids[1]} depends on {task_ids[0]}")
-    
+
     logger.info("Sample data creation complete!")
 
 
@@ -227,14 +227,14 @@ def verify_installation(client: Neo4jClient) -> bool:
         True if verification successful, False otherwise.
     """
     logger.info("Verifying database installation...")
-    
+
     try:
         # Check connectivity
         if not client.verify_connectivity():
             logger.error("Failed to connect to Neo4j database")
             return False
         logger.info("✓ Database connectivity verified")
-        
+
         # Check node counts
         result = client.execute_query("""
             MATCH (a:Agent) WITH count(a) as agents
@@ -244,26 +244,26 @@ def verify_installation(client: Neo4jClient) -> bool:
             MATCH (tm:Team) WITH agents, tasks, memories, knowledge, count(tm) as teams
             RETURN agents, tasks, memories, knowledge, teams
         """)
-        
+
         if result:
             counts = result[0]
-            logger.info(f"✓ Database contains:")
+            logger.info("✓ Database contains:")
             logger.info(f"  - Agents: {counts.get('agents', 0)}")
             logger.info(f"  - Tasks: {counts.get('tasks', 0)}")
             logger.info(f"  - Memories: {counts.get('memories', 0)}")
             logger.info(f"  - Knowledge: {counts.get('knowledge', 0)}")
             logger.info(f"  - Teams: {counts.get('teams', 0)}")
-        
+
         # Check constraints
         result = client.execute_query("SHOW CONSTRAINTS")
         logger.info(f"✓ Constraints configured: {len(result)} constraints")
-        
+
         # Check indexes
         result = client.execute_query("SHOW INDEXES")
         logger.info(f"✓ Indexes configured: {len(result)} indexes")
-        
+
         return True
-        
+
     except Exception as e:
         logger.error(f"Verification failed: {e}")
         return False
@@ -274,11 +274,11 @@ def main():
     logger.info("=" * 60)
     logger.info("Gadugi v0.3 Neo4j Database Initialization")
     logger.info("=" * 60)
-    
+
     # Create client
     config = Neo4jConfig()
     logger.info(f"Connecting to Neo4j at {config.uri}")
-    
+
     try:
         with Neo4jClient(config) as client:
             # Test connection
@@ -286,19 +286,19 @@ def main():
                 logger.error("Cannot connect to Neo4j. Is it running?")
                 logger.error("Start Neo4j with: docker-compose up -d neo4j")
                 sys.exit(1)
-            
+
             logger.info("✓ Connected to Neo4j successfully")
-            
+
             # Execute schema
             schema_file = Path(__file__).parent / "schema.cypher"
             if execute_schema_file(client, schema_file):
                 logger.info("✓ Schema created successfully")
             else:
                 logger.warning("⚠ Some schema commands failed (may already exist)")
-            
+
             # Create sample data
             create_sample_data(client)
-            
+
             # Verify installation
             if verify_installation(client):
                 logger.info("\n" + "=" * 60)
@@ -312,7 +312,7 @@ def main():
             else:
                 logger.error("❌ Verification failed")
                 sys.exit(1)
-                
+
     except Exception as e:
         logger.error(f"Initialization failed: {e}")
         logger.error("Make sure Neo4j is running: docker-compose up -d neo4j")

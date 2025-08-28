@@ -854,10 +854,10 @@ class PRBacklogManager:
         # If github_ops not provided, try to create one (for test compatibility)
         if github_ops is None:
             try:
-                from core import GitHubOperations
-
-                self.github_ops = GitHubOperations()
-            except ImportError:
+                # from claude.agents.pr_backlog_manager.core import GitHubOperations  # Module doesn't exist
+                # GitHubOperations doesn't exist, so just set to None
+                self.github_ops = None
+            except (ImportError, NameError):
                 self.github_ops = None
         else:
             self.github_ops = github_ops
@@ -969,7 +969,7 @@ class PRBacklogManager:
 
             # Delegate issue resolution if blocked
             if status == PRStatus.BLOCKED and blocking_issues:
-                self._delegate_issue_resolution(pr_number, blocking_issues, {})
+                self._delegate_issue_resolution(pr_number, blocking_issues, [])
 
             return PRAssessment(
                 pr_number=pr_number,

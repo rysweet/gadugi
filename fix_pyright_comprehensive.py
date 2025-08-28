@@ -4,12 +4,9 @@ Comprehensive Pyright Error Fixing Script
 Systematically fixes the remaining 1205 pyright errors to achieve ZERO errors.
 """
 
-import os
-import re
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Set
-import ast
+from typing import List, Dict
 
 
 class PyrightErrorFixer:

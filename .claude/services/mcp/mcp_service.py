@@ -780,11 +780,12 @@ class ContextManager:
                     elif persistence_level == PersistenceLevel.SESSION:
                         expire_seconds = 86400  # 24 hours
 
-                    self.redis_client.set(
-                        redis_key,
-                        json.dumps(redis_data),
-                        ex=expire_seconds,
-                    )
+                    if self.redis_client:
+                        self.redis_client.set(
+                            redis_key,
+                            json.dumps(redis_data),
+                            ex=expire_seconds,
+                        )
 
                 if persistence_level in [
                     PersistenceLevel.PERMANENT,
@@ -844,7 +845,7 @@ class ContextManager:
             with self.lock:
                 # Try Redis first
                 redis_key = f"context:{context_id}"
-                redis_data = self.redis_client.get(redis_key)
+                redis_data = self.redis_client.get(redis_key) if self.redis_client else None
 
                 if redis_data:
                     data = json.loads(redis_data)

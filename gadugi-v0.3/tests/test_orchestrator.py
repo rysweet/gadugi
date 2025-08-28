@@ -9,7 +9,7 @@ from pathlib import Path
 src_dir = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_dir))
 
-from orchestrator.run_agent import run_agent  # noqa: E402
+from orchestrator.run_agent import run_agent
 
 
 def test_agent_runner_basic() -> None:

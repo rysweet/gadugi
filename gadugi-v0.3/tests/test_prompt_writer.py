@@ -9,12 +9,12 @@ from pathlib import Path
 src_path = Path(__file__).parent.parent / "src" / "orchestrator"
 sys.path.insert(0, str(src_path))
 
-from prompt_writer_engine import (  # noqa: E402
+from prompt_writer_engine import (
     PromptWriterEngine,
     _generate_filename,
     generate_prompt_for_task,
 )
-from run_agent import run_agent  # noqa: E402
+from run_agent import run_agent
 
 
 class TestPromptWriterEngine(unittest.TestCase):

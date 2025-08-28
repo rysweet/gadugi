@@ -17,47 +17,48 @@ def get_gadugi_base_dir() -> Path:
     
     Raises:
         RuntimeError: If base directory cannot be determined
+
     """
     # Strategy 1: Use GADUGI_HOME environment variable if set
-    if 'GADUGI_HOME' in os.environ:
-        base_dir = Path(os.environ['GADUGI_HOME'])
+    if "GADUGI_HOME" in os.environ:
+        base_dir = Path(os.environ["GADUGI_HOME"])
         if base_dir.exists():
             return base_dir
-    
+
     # Strategy 2: Auto-detect from this file's location
     # This file is at gadugi-v0.3/src/orchestrator/run_agent.py
     # So we go up 3 levels to get to gadugi-v0.3
     current_file = Path(__file__).resolve()
     base_dir = current_file.parent.parent.parent
-    
+
     # Verify we found the right directory by checking for expected subdirs
-    if (base_dir / 'agents').exists() and (base_dir / 'src').exists():
+    if (base_dir / "agents").exists() and (base_dir / "src").exists():
         return base_dir
-    
+
     # Strategy 3: Look for gadugi-v0.3 in parent directories
     current = current_file.parent
     while current != current.parent:
-        if current.name == 'gadugi-v0.3' and (current / 'agents').exists():
+        if current.name == "gadugi-v0.3" and (current / "agents").exists():
             return current
         current = current.parent
-    
+
     raise RuntimeError(
         "Cannot determine Gadugi base directory. "
-        "Please set GADUGI_HOME environment variable or run from within gadugi-v0.3 directory."
+        "Please set GADUGI_HOME environment variable or run from within gadugi-v0.3 directory.",
     )
 
 
 # Initialize base directory and paths
 GADUGI_BASE = get_gadugi_base_dir()
-AGENTS_DIR = GADUGI_BASE / 'agents'
-SERVICES_DIR = GADUGI_BASE / 'services'
-SRC_DIR = GADUGI_BASE / 'src'
+AGENTS_DIR = GADUGI_BASE / "agents"
+SERVICES_DIR = GADUGI_BASE / "services"
+SRC_DIR = GADUGI_BASE / "src"
 
 # Add src directory to Python path for imports
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-if str(SRC_DIR / 'orchestrator') not in sys.path:
-    sys.path.insert(0, str(SRC_DIR / 'orchestrator'))
+if str(SRC_DIR / "orchestrator") not in sys.path:
+    sys.path.insert(0, str(SRC_DIR / "orchestrator"))
 
 # Import version after path setup
 try:
@@ -299,12 +300,12 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 def main():
     """Command line interface for testing the runner."""
     import argparse
-    
+
     # Get available agents
     available_agents = []
     if AGENTS_DIR.exists():
         available_agents = sorted([d.name for d in AGENTS_DIR.iterdir() if d.is_dir()])
-    
+
     parser = argparse.ArgumentParser(
         description="Run a Gadugi v0.3 agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -319,17 +320,17 @@ Examples:
   gadugi-orchestrator orchestrator --task "Build an API"
   gadugi-orchestrator TaskDecomposer --task "Create authentication"
   export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator TestAgent
-        """
+        """,
     )
-    
+
     parser.add_argument("agent", help="Name of the agent to run")
     parser.add_argument("--task", help="Task description", default="")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    
+
     args = parser.parse_args()
-    
+
     result = run_agent(args.agent, args.task)
-    
+
     if args.json:
         import json
         print(json.dumps(result, indent=2))
@@ -338,7 +339,7 @@ Examples:
             print(result["stdout"])
         if result["stderr"]:
             print(result["stderr"], file=sys.stderr)
-    
+
     return result.get("returncode", 0)
 
 

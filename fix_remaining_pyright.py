@@ -3,11 +3,9 @@
 Fix remaining specific pyright errors.
 """
 
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Any
 
 
 def fix_tempfile_import():

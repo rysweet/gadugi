@@ -283,8 +283,9 @@ class GadugiEventService:
 
             # Log webhook receipt
             if hasattr(self, "audit_logger"):
+                repository = event.payload.get("github_event", {}).get("repository", "unknown")
                 self.audit_logger.info(
-                    f"Received GitHub webhook: {event_type} from {event.payload.github_event.repository}"
+                    f"Received GitHub webhook: {event_type} from {repository}"
                 )
 
             # Process event

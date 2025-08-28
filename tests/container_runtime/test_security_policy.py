@@ -164,12 +164,12 @@ def test_apply_policy_to_container_config(policy_engine):
     # Apply standard policy
     config = policy_engine.apply_policy_to_container_config(base_config, "standard")
 
-    assert config["mem_limit"] == "512m"
-    assert config["cpu_count"] == 1.0
-    assert config["read_only"] is True
-    assert config["user"] == "1000:1000"
-    assert "no-new-privileges:true" in config["security_opt"]
-    assert config["cap_drop"] == ["ALL"]
+    assert config["mem_limit"] == "512m"  # type: ignore[index]
+    assert config["cpu_count"] == 1.0  # type: ignore[index]
+    assert config["read_only"] is True  # type: ignore[index]
+    assert config["user"] == "1000:1000"  # type: ignore[index]
+    assert "no-new-privileges:true" in config["security_opt"]  # type: ignore[index]
+    assert config["cap_drop"] == ["ALL"]  # type: ignore[index]
 
 
 def test_apply_hardened_policy_to_container_config(policy_engine):
@@ -183,19 +183,19 @@ def test_apply_hardened_policy_to_container_config(policy_engine):
     # Apply hardened policy
     config = policy_engine.apply_policy_to_container_config(base_config, "hardened")
 
-    assert config["mem_limit"] == "256m"
-    assert config["cpu_count"] == 0.5
-    assert config["user"] == "65534:65534"
-    assert config["network_mode"] == "none"
+    assert config["mem_limit"] == "256m"  # type: ignore[index]
+    assert config["cpu_count"] == 0.5  # type: ignore[index]
+    assert config["user"] == "65534:65534"  # type: ignore[index]
+    assert config["network_mode"] == "none"  # type: ignore[index]
 
     # Environment should be filtered
-    assert "PATH" in config["environment"]
-    assert "HOME" in config["environment"]
-    assert "SECRET" not in config["environment"]  # Not in whitelist
+    assert "PATH" in config["environment"]  # type: ignore[index]
+    assert "HOME" in config["environment"]  # type: ignore[index]
+    assert "SECRET" not in config["environment"]  # Not in whitelist  # type: ignore[index]
 
     # Should have tmpfs configuration
-    assert "/tmp" in config["tmpfs"]
-    assert "noexec" in config["tmpfs"]["/tmp"]
+    assert "/tmp" in config["tmpfs"]  # type: ignore[index]
+    assert "noexec" in config["tmpfs"]["/tmp"]  # type: ignore[index]
 
 
 def test_list_policies(policy_engine):
@@ -214,36 +214,36 @@ def test_get_policy_summary(policy_engine):
     """Test getting policy summary."""
     summary = policy_engine.get_policy_summary("standard")
 
-    assert summary["name"] == "standard"
-    assert summary["security_level"] == "standard"
-    assert summary["network_policy"] == "none"
-    assert summary["memory_limit"] == "512m"
-    assert summary["cpu_limit"] == "1.0"
-    assert isinstance(summary["execution_timeout"], int)
-    assert isinstance(summary["read_only_root"], bool)
-    assert isinstance(summary["allowed_images"], int)
-    assert isinstance(summary["blocked_commands"], int)
-    assert isinstance(summary["audit_required"], bool)
+    assert summary["name"] == "standard"  # type: ignore[index]
+    assert summary["security_level"] == "standard"  # type: ignore[index]
+    assert summary["network_policy"] == "none"  # type: ignore[index]
+    assert summary["memory_limit"] == "512m"  # type: ignore[index]
+    assert summary["cpu_limit"] == "1.0"  # type: ignore[index]
+    assert isinstance(summary["execution_timeout"], int)  # type: ignore[index]
+    assert isinstance(summary["read_only_root"], bool)  # type: ignore[index]
+    assert isinstance(summary["allowed_images"], int)  # type: ignore[index]
+    assert isinstance(summary["blocked_commands"], int)  # type: ignore[index]
+    assert isinstance(summary["audit_required"], bool)  # type: ignore[index]
 
 
 def test_export_policy(policy_engine):
     """Test exporting policy configuration."""
     exported = policy_engine.export_policy("standard")
 
-    assert exported["name"] == "standard"
-    assert exported["security_level"] == "standard"
+    assert exported["name"] == "standard"  # type: ignore[index]
+    assert exported["security_level"] == "standard"  # type: ignore[index]
     assert "resources" in exported
     assert "security" in exported
     assert "allowed_images" in exported
     assert "blocked_commands" in exported
 
     # Resources section
-    assert exported["resources"]["memory"] == "512m"
-    assert exported["resources"]["cpu"] == "1.0"
+    assert exported["resources"]["memory"] == "512m"  # type: ignore[index]
+    assert exported["resources"]["cpu"] == "1.0"  # type: ignore[index]
 
     # Security section
-    assert exported["security"]["read_only_root"] is True
-    assert exported["security"]["user_id"] == 1000
+    assert exported["security"]["read_only_root"] is True  # type: ignore[index]
+    assert exported["security"]["user_id"] == 1000  # type: ignore[index]
 
 
 def test_parse_policy_config_invalid():

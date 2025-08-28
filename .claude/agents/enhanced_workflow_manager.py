@@ -26,41 +26,52 @@ import sys
 import time
 from datetime import datetime, timedelta  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
+from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 # Add shared modules to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 
 try:
-    from workflow_reliability import (
-        WorkflowReliabilityManager,
-        WorkflowStage,
+    from ..shared.workflow_reliability import (  # type: ignore
+        WorkflowReliabilityManager as SharedWorkflowReliabilityManager,
+        WorkflowStage as SharedWorkflowStage,
         HealthStatus,
-        monitor_workflow,
+        monitor_workflow as shared_monitor_workflow,
         create_reliability_manager
     )
-    from utils.error_handling import ErrorHandler, retry, graceful_degradation  # type: ignore
-    from state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
-    from task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
-    from github_operations import GitHubOperations
+    from ..shared.utils.error_handling import ErrorHandler, retry, graceful_degradation  # type: ignore
+    from ..shared.state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
+    from ..shared.task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
+    from ..shared.github_operations import GitHubOperations  # type: ignore
+    
+    # Create aliases with consistent types
+    WorkflowReliabilityManager = SharedWorkflowReliabilityManager  # type: ignore[misc]
+    WorkflowStage = SharedWorkflowStage  # type: ignore[misc]
+    monitor_workflow = shared_monitor_workflow  # type: ignore[misc]
+    
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
-    class WorkflowReliabilityManager:
-        def __init__(self, config=None): pass
-        def start_workflow_monitoring(self, workflow_id, context): return True
-        def update_workflow_stage(self, workflow_id, stage, context=None): return True
-        def handle_workflow_error(self, workflow_id, error, stage=None, context=None): return {}
-        def perform_health_check(self, workflow_id): return None
-        def stop_workflow_monitoring(self, workflow_id, status='completed'): return True
+    class WorkflowReliabilityManager:  # type: ignore[no-redef]
+        def __init__(self, config: Any = None) -> None: pass
+        def start_workflow_monitoring(self, workflow_id: str, context: Any) -> bool: return True
+        def update_workflow_stage(self, workflow_id: str, stage: Any, context: Any = None) -> bool: return True
+        def handle_workflow_error(self, workflow_id: str, error: Any, stage: Any = None, context: Any = None) -> Dict[str, Any]: return {}
+        def perform_health_check(self, workflow_id: str) -> Any: return None
+        def stop_workflow_monitoring(self, workflow_id: str, status: str = 'completed') -> bool: return True
 
-    class WorkflowStage: pass
-    def monitor_workflow(workflow_id, context, manager=None):
-        class MockContext:
-            def __enter__(self): return WorkflowReliabilityManager()
-            def __exit__(self, *args): pass
-        return MockContext()
+    class WorkflowStage: pass  # type: ignore[no-redef]
+    
+    class WorkflowReliabilityContext:
+        """Mock context manager for workflow monitoring"""
+        def __enter__(self) -> WorkflowReliabilityManager:
+            return WorkflowReliabilityManager()
+        def __exit__(self, *args: Any) -> None:
+            pass
+    
+    def monitor_workflow(workflow_id: str, workflow_context: Dict[str, Any], reliability_manager: Optional[WorkflowReliabilityManager] = None) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
+        return WorkflowReliabilityContext()
 
 
 # Configure logging
@@ -291,7 +302,8 @@ class EnhancedWorkflowManager:
         self.current_phase = stage
 
         # Update reliability manager
-        reliability.update_workflow_stage(self.workflow_id, stage, {
+        if self.workflow_id:
+                reliability.update_workflow_stage(self.workflow_id, stage, {
             'phase_start': datetime.now().isoformat(),
             'previous_checkpoints': len(self.phase_checkpoints)
         })
@@ -445,7 +457,7 @@ class EnhancedWorkflowManager:
             raise FileNotFoundError(f"Prompt file not found: {prompt_file}")
 
         # Initialize task tracking if available
-        if self.task_tracker:
+        if self.task_tracker and self.workflow_id:
             self.task_tracker.initialize_workflow(self.workflow_id)
 
         # Create workflow state persistence
@@ -594,7 +606,7 @@ class EnhancedWorkflowManager:
         ]
 
         # Initialize task tracking if available
-        if self.task_tracker:
+        if self.task_tracker and self.workflow_id:
             self.task_tracker.initialize_task_list(tasks, self.workflow_id)
 
         logger.info(f"Prepared {len(tasks)} tasks for execution")

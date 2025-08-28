@@ -201,8 +201,11 @@ class GitHubActionsIntegration:
         else:
             # Default to full backlog for unknown events
             return ProcessingMode.FULL_BACKLOG, {
-                "reason": f"unknown_event_{self.github_context.event_type.value}"
+                "reason": f"unknown_event_{self.github_context.event_type.value if self.github_context and self.github_context.event_type else 'unknown'}"
             }
+        
+        # Fallback return statement (should not be reached)
+        return ProcessingMode.FULL_BACKLOG, {"reason": "fallback"}
 
     def _get_workflow_dispatch_pr_number(self) -> Optional[int]:
         """Get PR number from workflow_dispatch inputs."""

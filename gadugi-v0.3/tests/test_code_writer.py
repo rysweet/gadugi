@@ -9,8 +9,8 @@ from pathlib import Path
 src_path = Path(__file__).parent.parent / "src" / "orchestrator"
 sys.path.insert(0, str(src_path))
 
-from code_writer_engine import CodeWriterEngine, generate_code_for_task  # noqa: E402
-from run_agent import run_agent  # noqa: E402
+from code_writer_engine import CodeWriterEngine, generate_code_for_task
+from run_agent import run_agent
 
 
 class TestCodeWriterEngine(unittest.TestCase):

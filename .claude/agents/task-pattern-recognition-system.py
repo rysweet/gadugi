@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
 from datetime import datetime
-import numpy as np
+import numpy as np  # type: ignore[import-not-found]
 from enum import Enum
 
 
@@ -374,8 +374,8 @@ class TaskPatternRecognitionSystem:
     def recognize_patterns(
         self,
         task_description: str,
-        task_context: Dict[str, Any] = None,
-        historical_context: List[str] = None,
+        task_context: Optional[Dict[str, Any]] = None,
+        historical_context: Optional[List[str]] = None,
     ) -> List[PatternMatch]:
         """
         Recognize patterns in a task description using multiple recognition techniques.

@@ -44,11 +44,11 @@ class TestContainerExecutionEngine:
                 audit_log_dir=temp_dir / "audit", image_cache_dir=temp_dir / "images"
             )
 
-            assert engine.container_manager is not None
-            assert engine.security_policy is not None
-            assert engine.resource_manager is not None
-            assert engine.audit_logger is not None
-            assert engine.image_manager is not None
+            assert engine.container_manager is not None  # type: ignore[union-attr]
+            assert engine.security_policy is not None  # type: ignore[union-attr]
+            assert engine.resource_manager is not None  # type: ignore[union-attr]
+            assert engine.audit_logger is not None  # type: ignore[union-attr]
+            assert engine.image_manager is not None  # type: ignore[union-attr]
 
     def test_python_code_execution_mock(self, temp_dir):
         """Test Python code execution with mocked components."""
@@ -148,7 +148,7 @@ class TestContainerExecutionEngine:
                 details={"test": True},
             )
 
-            assert event_id is not None
+            assert event_id is not None  # type: ignore[comparison-overlap]
             assert len(event_id) > 0
 
             # Verify audit log file was created
@@ -194,7 +194,7 @@ class TestContainerExecutionEngine:
             assert "available_policies" in stats
 
             # Should have built-in policies
-            assert len(stats["available_policies"]) >= 4
+            assert len(stats["available_policies"]) >= 4  # type: ignore[index]
 
 
 class TestAgentContainerExecutor:
@@ -206,7 +206,7 @@ class TestAgentContainerExecutor:
 
         assert executor.default_policy == "testing"
         assert executor.audit_enabled is True
-        assert executor.execution_engine is not None
+        assert executor.execution_engine is not None  # type: ignore[union-attr]
 
     def test_python_code_execution(self, mock_execution_engine):
         """Test Python code execution through executor."""
@@ -230,10 +230,10 @@ class TestAgentContainerExecutor:
         executor = AgentContainerExecutor()
         result = executor.execute_python_code("print('Hello Python!')")
 
-        assert result["success"] is True
-        assert result["exit_code"] == 0
-        assert result["stdout"] == "Hello Python!\n"
-        assert result["execution_time"] == 2.0
+        assert result["success"] is True  # type: ignore[index]
+        assert result["exit_code"] == 0  # type: ignore[index]
+        assert result["stdout"] == "Hello Python!\n"  # type: ignore[index]
+        assert result["execution_time"] == 2.0  # type: ignore[index]
 
     def test_shell_script_execution(self, mock_execution_engine, temp_dir):
         """Test shell script execution through executor."""
@@ -262,8 +262,8 @@ class TestAgentContainerExecutor:
         executor = AgentContainerExecutor()
         result = executor.execute_script(str(script_file))
 
-        assert result["success"] is True
-        assert result["stdout"] == "Hello Shell!\n"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["stdout"] == "Hello Shell!\n"  # type: ignore[index]
 
     def test_command_execution(self, mock_execution_engine):
         """Test command execution through executor."""
@@ -287,8 +287,8 @@ class TestAgentContainerExecutor:
         executor = AgentContainerExecutor()
         result = executor.execute_command(["echo", "Command output"])
 
-        assert result["success"] is True
-        assert result["stdout"] == "Command output\n"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["stdout"] == "Command output\n"  # type: ignore[index]
 
     def test_runtime_detection(self, mock_execution_engine):
         """Test runtime detection from file extensions."""
@@ -315,7 +315,7 @@ class TestAgentContainerExecutor:
         status = executor.get_system_status()
 
         assert status == mock_stats
-        assert status["active_executions"] == 0
+        assert status["active_executions"] == 0  # type: ignore[index]
 
     def test_error_handling(self, mock_execution_engine):
         """Test error handling in executor."""
@@ -324,19 +324,19 @@ class TestAgentContainerExecutor:
         executor = AgentContainerExecutor()
         result = executor.execute_python_code("print('test')")
 
-        assert result["success"] is False
-        assert result["exit_code"] == 1
-        assert "Test error" in result["stderr"]
-        assert result["error"] == "Test error"
+        assert result["success"] is False  # type: ignore[index]
+        assert result["exit_code"] == 1  # type: ignore[index]
+        assert "Test error" in result["stderr"]  # type: ignore[index]
+        assert result["error"] == "Test error"  # type: ignore[index]
 
     def test_script_file_not_found(self, mock_execution_engine):
         """Test handling of non-existent script file."""
         executor = AgentContainerExecutor()
         result = executor.execute_script("/nonexistent/script.py")
 
-        assert result["success"] is False
-        assert result["exit_code"] == 1
-        assert "not found" in result["stderr"].lower()
+        assert result["success"] is False  # type: ignore[index]
+        assert result["exit_code"] == 1  # type: ignore[index]
+        assert "not found" in result["stderr"].lower()  # type: ignore[index]
 
 
 class TestSecurityPolicyIntegration:
@@ -399,8 +399,8 @@ class TestCleanupAndShutdown:
 
                         assert "images_removed" in stats
                         assert "audit_logs_removed" in stats
-                        assert stats["images_removed"] == 2
-                        assert stats["audit_logs_removed"] == 3
+                        assert stats["images_removed"] == 2  # type: ignore[index]
+                        assert stats["audit_logs_removed"] == 3  # type: ignore[index]
 
     def test_shutdown(self, temp_dir):
         """Test graceful shutdown."""

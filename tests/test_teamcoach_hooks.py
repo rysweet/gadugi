@@ -10,7 +10,6 @@ import os
 from unittest.mock import patch, MagicMock
 import sys
 import shutil
-from typing import Set
 
 # Add the project root to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

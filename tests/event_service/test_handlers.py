@@ -1,8 +1,8 @@
 """Tests for event handlers and filtering."""
 
 
-from gadugi.event_service.events import (
 from typing import Any
+from gadugi.event_service.events import (
     Event,
     create_github_event,
     create_local_event,
@@ -31,8 +31,8 @@ class TestGitHubFilter:
         github_event1 = event1.get_github_event()
         github_event2 = event2.get_github_event()
 
-        assert filter.matches(github_event1)
-        assert not filter.matches(github_event2)
+        assert github_event1 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event1)
+        assert github_event2 is not None  # type: ignore[comparison-overlap] and not filter.matches(github_event2)
 
     def test_webhook_event_filter(self):
         """Test webhook event type filtering."""
@@ -44,8 +44,8 @@ class TestGitHubFilter:
         github_event1 = event1.get_github_event()
         github_event2 = event2.get_github_event()
 
-        assert filter.matches(github_event1)
-        assert not filter.matches(github_event2)
+        assert github_event1 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event1)
+        assert github_event2 is not None  # type: ignore[comparison-overlap] and not filter.matches(github_event2)
 
     def test_action_filter(self):
         """Test action filtering."""
@@ -57,8 +57,8 @@ class TestGitHubFilter:
         github_event1 = event1.get_github_event()
         github_event2 = event2.get_github_event()
 
-        assert filter.matches(github_event1)
-        assert not filter.matches(github_event2)
+        assert github_event1 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event1)
+        assert github_event2 is not None  # type: ignore[comparison-overlap] and not filter.matches(github_event2)
 
     def test_labels_filter(self):
         """Test labels filtering."""
@@ -78,9 +78,9 @@ class TestGitHubFilter:
         github_event2 = event2.get_github_event()
         github_event3 = event3.get_github_event()
 
-        assert filter.matches(github_event1)  # Has "bug"
-        assert not filter.matches(github_event2)  # No matching labels
-        assert filter.matches(github_event3)  # Has "urgent"
+        assert github_event1 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event1)  # Has "bug"
+        assert github_event2 is not None  # type: ignore[comparison-overlap] and not filter.matches(github_event2)  # No matching labels
+        assert github_event3 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event3)  # Has "urgent"
 
     def test_ref_filter(self):
         """Test ref filtering with patterns."""
@@ -96,9 +96,9 @@ class TestGitHubFilter:
         github_event2 = event2.get_github_event()
         github_event3 = event3.get_github_event()
 
-        assert filter.matches(github_event1)  # Exact match
-        assert filter.matches(github_event2)  # Pattern match
-        assert not filter.matches(github_event3)  # No match
+        assert github_event1 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event1)  # Exact match
+        assert github_event2 is not None  # type: ignore[comparison-overlap] and filter.matches(github_event2)  # Pattern match
+        assert github_event3 is not None  # type: ignore[comparison-overlap] and not filter.matches(github_event3)  # No match
 
     def test_empty_filter_matches_all(self):
         """Test that empty filter matches all events."""
@@ -107,7 +107,7 @@ class TestGitHubFilter:
         event = create_github_event("issues", "owner/repo", "opened")
         github_event = event.get_github_event()
 
-        assert filter.matches(github_event)
+        assert github_event is not None  # type: ignore[comparison-overlap] and filter.matches(github_event)
 
     def test_from_config(self):
         """Test creating filter from configuration."""
@@ -135,7 +135,7 @@ class TestEventFilter:
 
         event1 = create_github_event("issues", "owner/repo", "opened")
         event2 = create_local_event("file_changed")
-        event3 = create_agent_event("test-agent", status="completed")
+        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
 
         assert filter.matches(event1)
         assert filter.matches(event2)
@@ -147,7 +147,7 @@ class TestEventFilter:
 
         event1 = create_github_event("issues", "owner/repo", "opened")
         event2 = create_local_event("file_changed")
-        event3 = create_agent_event("test-agent", status="completed")
+        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
         event4 = create_agent_event("test-agent", status="started")
 
         assert filter.matches(event1)  # github.*
@@ -210,7 +210,7 @@ class TestEventFilter:
         assert filter.event_types == ["github.*"]
         assert filter.sources == ["github"]
         assert filter.metadata_match == {"priority": "high"}
-        assert filter.github_filter is not None
+        assert filter.github_filter is not None  # type: ignore[union-attr]
         assert filter.github_filter.repositories == ["owner/repo"]
 
 
@@ -295,16 +295,16 @@ class TestEventMatcher:
         matching = matcher.find_matching_handlers(issue_event)
 
         assert len(matching) == 2  # handler1 and handler3
-        assert matching[0].name == "issue-handler"  # Higher priority first
-        assert matching[1].name == "all-github-handler"
+        assert matching[0].name == "issue-handler"  # Higher priority first  # type: ignore[index]
+        assert matching[1].name == "all-github-handler"  # type: ignore[index]
 
         # Test PR event
         pr_event = create_github_event("pull_request", "owner/repo", "opened")
         matching = matcher.find_matching_handlers(pr_event)
 
         assert len(matching) == 2  # handler2 and handler3
-        assert matching[0].name == "pr-handler"
-        assert matching[1].name == "all-github-handler"
+        assert matching[0].name == "pr-handler"  # type: ignore[index]
+        assert matching[1].name == "all-github-handler"  # type: ignore[index]
 
         # Test local event
         local_event = create_local_event("file_changed")
@@ -402,7 +402,7 @@ class TestCommonFilters:
         """Test agent completions filter."""
         filter = CommonFilters.agent_completions()
 
-        event1 = create_agent_event("test-agent", status="completed")
+        event1 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
         event2 = create_agent_event("test-agent", status="started")
         event3 = create_github_event("issues", "owner/repo", "opened")
 

@@ -131,7 +131,7 @@ class CodeGenerator:
         content = "\n".join(content_parts)
         
         return GeneratedCode(
-            recipe_name=self.recipe_spec.name,
+            recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
             file_path=Path(f"{self.recipe_spec.name.lower().replace(' ', '_')}.py"),
             content=content,
             classes_added=[c.split("class ")[1].split("(")[0].split(":")[0] for c in classes if "class " in c],
@@ -162,7 +162,7 @@ from typing import Any, Dict, List, Optional
 '''
         
         return GeneratedCode(
-            recipe_name=self.recipe_spec.name,
+            recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
             file_path=Path(f"{interface.name.lower()}.py"),
             content=file_content,
             is_new_file=True,
@@ -195,7 +195,7 @@ def fix_{gap.requirement_id.lower().replace("-", "_")}():
 '''
         
         return GeneratedCode(
-            recipe_name=self.recipe_spec.name,
+            recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
             file_path=Path(f"fix_{gap.requirement_id.lower()}.py"),
             content=content,
             is_new_file=True,
@@ -249,7 +249,7 @@ class Test{self._to_class_name(self.recipe_spec.name)}:
                 test_content += "\n" + test_method
         
         return GeneratedCode(
-            recipe_name=self.recipe_spec.name,
+            recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
             file_path=Path(f"test_{self.recipe_spec.name.lower().replace(' ', '_')}.py"),
             content=test_content,
             is_new_file=True,
@@ -271,12 +271,13 @@ class Test{self._to_class_name(self.recipe_spec.name)}:
         ]
         
         # Add imports based on dependencies
-        for dep in self.recipe_spec.dependencies:
-            if dep.type == "library":
-                if dep.name == "asyncio":
-                    imports.append("import asyncio")
-                elif dep.name == "fastapi":
-                    imports.append("from fastapi import FastAPI, HTTPException")
+        if self.recipe_spec and self.recipe_spec.dependencies:
+            for dep in self.recipe_spec.dependencies:
+                if dep.type == "library":
+                    if dep.name == "asyncio":
+                        imports.append("import asyncio")
+                    elif dep.name == "fastapi":
+                        imports.append("from fastapi import FastAPI, HTTPException")
                 # Add more library imports as needed
         
         return "\n".join(imports)

@@ -5,9 +5,7 @@ import logging
 import os
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
-from datetime import datetime
-from neo4j import GraphDatabase, Result, Session
-from neo4j.exceptions import Neo4jError
+from neo4j import GraphDatabase
 import json
 
 
@@ -26,7 +24,7 @@ class Neo4jConfig:
 
 class Neo4jClient:
     """Client for interacting with Neo4j database."""
-    
+
     def __init__(self, config: Optional[Neo4jConfig] = None):
         """Initialize Neo4j client.
         
@@ -43,20 +41,20 @@ class Neo4jClient:
             encrypted=self.config.encrypted
         )
         self.logger = logging.getLogger(__name__)
-    
+
     def close(self):
         """Close the database connection."""
         if self.driver:
             self.driver.close()
-    
+
     def __enter__(self):
         """Context manager entry."""
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
         self.close()
-    
+
     def verify_connectivity(self) -> bool:
         """Verify database connectivity.
         
@@ -70,11 +68,11 @@ class Neo4jClient:
         except Exception as e:
             self.logger.error(f"Connection verification failed: {e}")
             return False
-    
+
     # ============================================
     # AGENT OPERATIONS
     # ============================================
-    
+
     def create_agent(self, agent_data: Dict[str, Any]) -> str:
         """Create an agent node.
         
@@ -98,16 +96,16 @@ class Neo4jClient:
         })
         RETURN a.id as agent_id
         """
-        
+
         # Ensure required fields
         agent_data.setdefault('status', 'initializing')
         agent_data.setdefault('capabilities', [])
         agent_data.setdefault('metadata', json.dumps({}))
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **agent_data)
             return result.single()["agent_id"]
-    
+
     def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
         """Get agent by ID.
         
@@ -121,12 +119,12 @@ class Neo4jClient:
         MATCH (a:Agent {id: $agent_id})
         RETURN a
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, agent_id=agent_id)
             record = result.single()
             return dict(record["a"]) if record else None
-    
+
     def update_agent_status(self, agent_id: str, status: str) -> bool:
         """Update agent status.
         
@@ -142,15 +140,15 @@ class Neo4jClient:
         SET a.status = $status, a.updated_at = datetime()
         RETURN a.id as agent_id
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, agent_id=agent_id, status=status)
             return result.single() is not None
-    
+
     # ============================================
     # MEMORY OPERATIONS
     # ============================================
-    
+
     def create_memory(self, memory_data: Dict[str, Any]) -> str:
         """Create a memory node and link to agent.
         
@@ -176,23 +174,23 @@ class Neo4jClient:
         CREATE (a)-[:CREATES]->(m)
         RETURN m.id as memory_id
         """
-        
+
         # Set defaults
         memory_data.setdefault('priority', 'normal')
         memory_data.setdefault('importance', 0.5)
         memory_data.setdefault('tags', [])
         memory_data.setdefault('decay_rate', 0.1)
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **memory_data)
             record = result.single()
             if not record:
                 raise ValueError(f"Agent {memory_data.get('agent_id')} not found")
             return record["memory_id"]
-    
+
     def get_agent_memories(
-        self, 
-        agent_id: str, 
+        self,
+        agent_id: str,
         limit: int = 100,
         memory_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
@@ -222,11 +220,11 @@ class Neo4jClient:
             LIMIT $limit
             """
             params = {"agent_id": agent_id, "limit": limit}
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **params)
             return [dict(record["m"]) for record in result]
-    
+
     def find_similar_memories(
         self,
         memory_id: str,
@@ -251,7 +249,7 @@ class Neo4jClient:
         ORDER BY similarity DESC
         LIMIT $limit
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(
                 query,
@@ -260,11 +258,11 @@ class Neo4jClient:
                 limit=limit
             )
             return [(dict(record["m2"]), record["similarity"]) for record in result]
-    
+
     # ============================================
     # TASK OPERATIONS
     # ============================================
-    
+
     def create_task(self, task_data: Dict[str, Any]) -> str:
         """Create a task node.
         
@@ -287,17 +285,17 @@ class Neo4jClient:
         })
         RETURN t.id as task_id
         """
-        
+
         # Set defaults
         task_data.setdefault('status', 'pending')
         task_data.setdefault('priority', 'normal')
         task_data.setdefault('type', 'general')
         task_data.setdefault('timeout_seconds', 300)
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **task_data)
             return result.single()["task_id"]
-    
+
     def assign_task_to_agent(self, task_id: str, agent_id: str) -> bool:
         """Assign a task to an agent.
         
@@ -315,11 +313,11 @@ class Neo4jClient:
         SET t.assigned_to = $agent_id, t.status = 'scheduled'
         RETURN t.id as task_id
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, task_id=task_id, agent_id=agent_id)
             return result.single() is not None
-    
+
     def update_task_status(
         self,
         task_id: str,
@@ -359,11 +357,11 @@ class Neo4jClient:
             RETURN t.id as task_id
             """
             params = {"task_id": task_id, "status": status}
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **params)
             return result.single() is not None
-    
+
     def get_task_dependencies(self, task_id: str) -> Dict[str, List[str]]:
         """Get task dependencies.
         
@@ -381,7 +379,7 @@ class Neo4jClient:
             collect(DISTINCT dep.id) as depends_on,
             collect(DISTINCT blocked.id) as blocks
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, task_id=task_id)
             record = result.single()
@@ -389,11 +387,11 @@ class Neo4jClient:
                 "depends_on": record["depends_on"] if record else [],
                 "blocks": record["blocks"] if record else []
             }
-    
+
     # ============================================
     # KNOWLEDGE OPERATIONS
     # ============================================
-    
+
     def create_knowledge(self, knowledge_data: Dict[str, Any]) -> str:
         """Create a knowledge node.
         
@@ -417,16 +415,16 @@ class Neo4jClient:
         })
         RETURN k.id as knowledge_id
         """
-        
+
         # Set defaults
         knowledge_data.setdefault('confidence', 0.5)
         knowledge_data.setdefault('verified', False)
         knowledge_data.setdefault('domain', 'general')
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **knowledge_data)
             return result.single()["knowledge_id"]
-    
+
     def find_related_knowledge(
         self,
         topic: str,
@@ -448,7 +446,7 @@ class Neo4jClient:
         RETURN k, collect(related) as related
         LIMIT $limit
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, topic=topic, limit=limit)
             return [
@@ -458,11 +456,11 @@ class Neo4jClient:
                 }
                 for record in result
             ]
-    
+
     # ============================================
     # TEAM OPERATIONS
     # ============================================
-    
+
     def create_team(self, team_data: Dict[str, Any]) -> str:
         """Create a team node.
         
@@ -482,15 +480,15 @@ class Neo4jClient:
         })
         RETURN tm.id as team_id
         """
-        
+
         # Set defaults
         team_data.setdefault('objectives', json.dumps([]))
         team_data.setdefault('performance_score', 0.0)
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **team_data)
             return result.single()["team_id"]
-    
+
     def add_agent_to_team(self, agent_id: str, team_id: str) -> bool:
         """Add an agent to a team.
         
@@ -507,11 +505,11 @@ class Neo4jClient:
         CREATE (a)-[:MEMBER_OF]->(tm)
         RETURN a.id as agent_id
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, agent_id=agent_id, team_id=team_id)
             return result.single() is not None
-    
+
     def get_team_members(self, team_id: str) -> List[Dict[str, Any]]:
         """Get all members of a team.
         
@@ -526,15 +524,15 @@ class Neo4jClient:
         RETURN a
         ORDER BY a.name
         """
-        
+
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, team_id=team_id)
             return [dict(record["a"]) for record in result]
-    
+
     # ============================================
     # UTILITY OPERATIONS
     # ============================================
-    
+
     def execute_query(self, query: str, parameters: Optional[Dict] = None) -> List[Dict]:
         """Execute a custom Cypher query.
         
@@ -548,7 +546,7 @@ class Neo4jClient:
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, parameters or {})
             return [dict(record) for record in result]
-    
+
     def clear_database(self) -> bool:
         """Clear all nodes and relationships (USE WITH CAUTION).
         
@@ -556,7 +554,7 @@ class Neo4jClient:
             True if successful, False otherwise.
         """
         query = "MATCH (n) DETACH DELETE n"
-        
+
         try:
             with self.driver.session(database=self.config.database) as session:
                 session.run(query)

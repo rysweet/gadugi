@@ -13,7 +13,6 @@ import sys
 from unittest.mock import patch, MagicMock
 import io
 import importlib.util
-from typing import Set
 
 # Add the project root to the path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -67,9 +66,9 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
         self.assertTrue(result)
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        self.assertEqual(args[0], "claude")
-        self.assertEqual(args[1], "/agent:teamcoach")
-        self.assertIn("Task: Analyze completed session", args[2])
+        self.assertEqual(args[0], "claude")  # type: ignore[index]
+        self.assertEqual(args[1], "/agent:teamcoach")  # type: ignore[index]
+        self.assertIn("Task: Analyze completed session", args[2])  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_invoke_teamcoach_failure(self, mock_run):
@@ -147,8 +146,8 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
                 break
 
         self.assertIsNotNone(printed_output)
-        self.assertEqual(printed_output["action"], "continue")
-        self.assertIn("completed", printed_output["message"])
+        self.assertEqual(printed_output["action"], "continue")  # type: ignore[index]
+        self.assertIn("completed", printed_output["message"])  # type: ignore[index]
         self.assertIn("timestamp", printed_output)
 
     @patch("sys.stdin", new_callable=io.StringIO)
@@ -176,8 +175,8 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
                 break
 
         self.assertIsNotNone(printed_output)
-        self.assertEqual(printed_output["action"], "continue")
-        self.assertIn("issues", printed_output["message"])
+        self.assertEqual(printed_output["action"], "continue")  # type: ignore[index]
+        self.assertIn("issues", printed_output["message"])  # type: ignore[index]
 
 
 class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
@@ -225,8 +224,8 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
         self.assertTrue(result)
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        self.assertEqual(args[0], "claude")
-        self.assertEqual(args[1], "/agent:teamcoach")
+        self.assertEqual(args[0], "claude")  # type: ignore[index]
+        self.assertEqual(args[1], "/agent:teamcoach")  # type: ignore[index]
 
         # Check prompt contains agent data
         prompt = args[2]
@@ -350,7 +349,7 @@ sys.exit(0)
                         continue
 
             self.assertIsNotNone(json_output, "Should have JSON output")
-            self.assertEqual(json_output["action"], "continue")
+            self.assertEqual(json_output["action"], "continue")  # type: ignore[index]
             self.assertIn("timestamp", json_output)
 
         finally:

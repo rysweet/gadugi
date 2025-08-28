@@ -18,7 +18,7 @@ sys.path.insert(
 )
 
 try:
-    from interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
+    from claude.shared.interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
         AgentConfig,
         AgentConfigSchema,
         AgentFactory,
@@ -44,7 +44,7 @@ try:
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
-        "Warning: Could not import interfaces module. Tests will define what needs to be implemented."
+        "Warning: Could not import claude.shared.interfaces as interfaces module. Tests will define what needs to be implemented."
     )
 
     from abc import ABC, abstractmethod
@@ -208,8 +208,8 @@ class TestAgentInterface:
         agent = ValidAgent()
         result = agent.execute({"test": "context"})
 
-        assert result["success"] is True
-        assert result["agent"] == "ValidAgent"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["agent"] == "ValidAgent"  # type: ignore[index]
 
     def test_agent_interface_method_signature(self):
         """Test that execute method has correct signature."""
@@ -223,7 +223,7 @@ class TestAgentInterface:
         result = agent.execute(context)
 
         assert "context_keys" in result
-        assert set(result["context_keys"]) == {"key1", "key2"}
+        assert set(result["context_keys"]) == {"key1", "key2"}  # type: ignore[index]
 
 
 class TestStateManagerInterface:
@@ -311,13 +311,13 @@ class TestGitHubOperationsInterface:
 
         # Test create_issue
         issue_result = github.create_issue("Test Issue", "Issue body")
-        assert issue_result["success"] is True
-        assert issue_result["issue_number"] == 1
+        assert issue_result["success"] is True  # type: ignore[index]
+        assert issue_result["issue_number"] == 1  # type: ignore[index]
 
         # Test create_pr
         pr_result = github.create_pr("Test PR", "PR body", "main", "feature")
-        assert pr_result["success"] is True
-        assert pr_result["pr_number"] == 1
+        assert pr_result["success"] is True  # type: ignore[index]
+        assert pr_result["pr_number"] == 1  # type: ignore[index]
 
 
 class TestTaskTrackerInterface:
@@ -352,13 +352,13 @@ class TestTaskTrackerInterface:
 
         # Test create_task
         result = tracker.create_task("Test task", "high")
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert "task_id" in result
 
         # Test update_task_status
         task_id = result["task_id"]
         update_result = tracker.update_task_status(task_id, "completed")
-        assert update_result["success"] is True
+        assert update_result["success"] is True  # type: ignore[index]
 
 
 class TestErrorHandlerInterface:
@@ -388,10 +388,10 @@ class TestErrorHandlerInterface:
 
         result = handler.handle_error(error, context)
 
-        assert result["recovered"] is True
-        assert result["fallback_value"] == "default"
+        assert result["recovered"] is True  # type: ignore[index]
+        assert result["fallback_value"] == "default"  # type: ignore[index]
         assert len(handler.handled_errors) == 1
-        assert handler.handled_errors[0]["error_type"] == "ValueError"
+        assert handler.handled_errors[0]["error_type"] == "ValueError"  # type: ignore[index]
 
 
 class TestDataModels:
@@ -428,8 +428,8 @@ class TestDataModels:
         state = StateData(state_id="state-1", data={"phase": "setup", "progress": 50})
 
         assert state.state_id == "state-1"
-        assert state.data["phase"] == "setup"
-        assert state.data["progress"] == 50
+        assert state.data["phase"] == "setup"  # type: ignore[index]
+        assert state.data["progress"] == 50  # type: ignore[index]
 
     def test_github_issue_creation(self):
         """Test GitHubIssue creation."""
@@ -451,14 +451,14 @@ class TestDataModels:
         )
 
         assert context.operation == "test_operation"
-        assert context.details["error_code"] == 500
+        assert context.details["error_code"] == 500  # type: ignore[index]
 
     def test_operation_result_success(self):
         """Test OperationResult for successful operations."""
         result = OperationResult(success=True, data={"result": "completed"}, error=None)
 
         assert result.success is True
-        assert result.data["result"] == "completed"
+        assert result.data["result"] == "completed"  # type: ignore[index]
         assert result.error is None
 
     def test_operation_result_failure(self):
@@ -504,8 +504,8 @@ class TestProtocols:
             return provider.submit_task_list(tasks)
 
         result = use_todowrite_provider(provider)
-        assert result["success"] is True
-        assert result["task_count"] == 1
+        assert result["success"] is True  # type: ignore[index]
+        assert result["task_count"] == 1  # type: ignore[index]
 
     def test_logger_provider_protocol(self):
         """Test LoggerProvider protocol."""
@@ -527,7 +527,7 @@ class TestProtocols:
 
         use_logger(logger)
         assert len(logger.messages) == 1
-        assert logger.messages[0] == ("INFO", "Test message")
+        assert logger.messages[0] == ("INFO", "Test message")  # type: ignore[index]
 
     def test_filesystem_provider_protocol(self):
         """Test FileSystemProvider protocol."""
@@ -639,15 +639,15 @@ class TestFactoryInterfaces:
 
         # Test creating state manager
         state_manager = factory.create_component("state_manager", {"storage": "memory"})
-        assert state_manager["type"] == "state_manager"
-        assert state_manager["config"]["storage"] == "memory"
+        assert state_manager["type"] == "state_manager"  # type: ignore[index]
+        assert state_manager["config"]["storage"] == "memory"  # type: ignore[index]
 
         # Test creating task tracker
         task_tracker = factory.create_component(
             "task_tracker", {"backend": "todowrite"}
         )
-        assert task_tracker["type"] == "task_tracker"
-        assert task_tracker["config"]["backend"] == "todowrite"
+        assert task_tracker["type"] == "task_tracker"  # type: ignore[index]
+        assert task_tracker["config"]["backend"] == "todowrite"  # type: ignore[index]
 
         # Test unknown component type
         with pytest.raises(ValueError, match="Unknown component type: unknown"):
@@ -680,8 +680,8 @@ class TestFactoryInterfaces:
         assert isinstance(agent, AgentInterface)
 
         result = agent.execute({"test": "context"})
-        assert result["agent_id"] == "test-agent"
-        assert result["result"] == "success"
+        assert result["agent_id"] == "test-agent"  # type: ignore[index]
+        assert result["result"] == "success"  # type: ignore[index]
 
         # Test unknown agent type
         with pytest.raises(ValueError, match="Unknown agent type: unknown"):
@@ -800,21 +800,21 @@ class TestInterfaceIntegration:
         result = agent.execute({"workflow_id": "test-workflow"})
 
         # Verify results
-        assert result["success"] is True
-        assert result["workflow_completed"] is True
+        assert result["success"] is True  # type: ignore[index]
+        assert result["workflow_completed"] is True  # type: ignore[index]
 
         # Verify state was saved
         assert "workflow-1" in state_manager.states
         saved_state = state_manager.states["workflow-1"]
-        assert saved_state["phase"] == "execution"
+        assert saved_state["phase"] == "execution"  # type: ignore[index]
 
         # Verify task was created
         assert len(task_tracker.tasks) == 1
-        assert task_tracker.tasks[0]["content"] == "Complete test workflow"
+        assert task_tracker.tasks[0]["content"] == "Complete test workflow"  # type: ignore[index]
 
         # Verify issue was created
         assert len(github_ops.issues) == 1
-        assert github_ops.issues[0]["title"] == "Test Issue"
+        assert github_ops.issues[0]["title"] == "Test Issue"  # type: ignore[index]
 
     @pytest.mark.integration
     def test_error_handling_across_interfaces(self):
@@ -858,9 +858,9 @@ class TestInterfaceIntegration:
 
         result = agent.execute({"test": "context"})
 
-        assert result["success"] is False
-        assert result["recovery"]["recovered"] is True
-        assert result["recovery"]["error_type"] == "RuntimeError"
+        assert result["success"] is False  # type: ignore[index]
+        assert result["recovery"]["recovered"] is True  # type: ignore[index]
+        assert result["recovery"]["error_type"] == "RuntimeError"  # type: ignore[index]
 
     @pytest.mark.integration
     def test_factory_based_component_creation(self):
@@ -975,5 +975,5 @@ class TestInterfaceIntegration:
 
         result = agent.execute({"test": "context"})
 
-        assert result["success"] is True
-        assert result["agent_id"] == "workflow-1"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["agent_id"] == "workflow-1"  # type: ignore[index]

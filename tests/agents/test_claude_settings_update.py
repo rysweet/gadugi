@@ -131,9 +131,9 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(merged["permissions"]["allow"], expected_allow)
+        self.assertEqual(merged["permissions"]["allow"], expected_allow)  # type: ignore[index]
         # Hooks should be preserved from global
-        self.assertEqual(merged["hooks"], self.global_settings["hooks"])
+        self.assertEqual(merged["hooks"], self.global_settings["hooks"])  # type: ignore[index]
 
     def test_allow_list_sorting(self):
         """Test allow-list sorting functionality."""
@@ -292,15 +292,15 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         merged = deep_merge(complex_global, complex_local)
 
         # Check specific merge behaviors
-        self.assertEqual(merged["permissions"]["additionalDirectories"], ["/home"])
+        self.assertEqual(merged["permissions"]["additionalDirectories"], ["/home"])  # type: ignore[index]
         self.assertEqual(
             merged["permissions"]["allow"],
             ["Bash(echo:*)", "Bash(git:*)", "Bash(python:*)"],
         )
-        self.assertEqual(merged["hooks"]["Stop"], complex_local["hooks"]["Stop"])
-        self.assertEqual(merged["hooks"]["Start"], complex_global["hooks"]["Start"])
-        self.assertEqual(merged["other"]["nested"]["deep"]["value"], "local")
-        self.assertEqual(merged["other"]["nested"]["new"], "added")
+        self.assertEqual(merged["hooks"]["Stop"], complex_local["hooks"]["Stop"])  # type: ignore[index]
+        self.assertEqual(merged["hooks"]["Start"], complex_global["hooks"]["Start"])  # type: ignore[index]
+        self.assertEqual(merged["other"]["nested"]["deep"]["value"], "local")  # type: ignore[index]
+        self.assertEqual(merged["other"]["nested"]["new"], "added")  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_git_operations_success(self, mock_run):

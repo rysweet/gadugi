@@ -13,11 +13,12 @@ import traceback
 
 try:
     import websockets
-    from websockets.server import WebSocketServerProtocol
+    from websockets.exceptions import WebSocketException
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     WEBSOCKET_AVAILABLE = False
-    WebSocketServerProtocol = Any
+    websockets = None  # type: ignore
+    WebSocketException = Exception  # type: ignore
 
 from .models import (
     Event, EventType, EventPriority, EventMetadata,
@@ -64,7 +65,7 @@ class EventRouter:
         self.subscriber_subscriptions: Dict[str, Set[str]] = defaultdict(set)
         
         # WebSocket connections
-        self.clients: Dict[str, WebSocketServerProtocol] = {}
+        self.clients: Dict[str, Any] = {}  # WebSocketServerProtocol when available
         self.client_info: Dict[str, Dict] = {}
         
         # Statistics
@@ -93,19 +94,22 @@ class EventRouter:
         self.processor_task = asyncio.create_task(self._process_events())
         
         # Start WebSocket server
-        async with websockets.serve(
-            self._handle_client,
-            self.host,
-            self.port,
-            max_size=10**7,  # 10MB max message size
-            max_queue=100,
-            compression=None  # Disable compression for lower latency
-        ) as server:
-            self.server = server
-            logger.info(f"Event Router listening on ws://{self.host}:{self.port}")
-            
-            # Keep server running
-            await asyncio.Future()  # Run forever
+        if websockets is not None:
+            async with websockets.serve(
+                self._handle_client,
+                self.host,
+                self.port,
+                max_size=10**7,  # 10MB max message size
+                max_queue=100,
+                compression=None  # Disable compression for lower latency
+            ) as server:
+                self.server = server
+                logger.info(f"Event Router listening on ws://{self.host}:{self.port}")
+                
+                # Keep server running
+                await asyncio.Future()  # Run forever
+        else:
+            raise RuntimeError("websockets module not available")
     
     async def stop(self):
         """Stop the event router service."""
@@ -131,7 +135,7 @@ class EventRouter:
         
         logger.info("Event Router stopped")
     
-    async def _handle_client(self, websocket: WebSocketServerProtocol):
+    async def _handle_client(self, websocket: Any):  # WebSocketServerProtocol when available
         """Handle WebSocket client connection."""
         client_id = str(uuid.uuid4())
         client_address = websocket.remote_address
@@ -169,10 +173,11 @@ class EventRouter:
             async for message in websocket:
                 await self._handle_message(client_id, message)
                 
-        except websockets.exceptions.ConnectionClosed:
-            logger.info(f"Client {client_id} disconnected")
         except Exception as e:
-            logger.error(f"Error handling client {client_id}: {e}")
+            if websockets and isinstance(e, WebSocketException):
+                logger.info(f"Client {client_id} disconnected")
+            else:
+                logger.error(f"Error handling client {client_id}: {e}")
         finally:
             # Clean up client
             await self._cleanup_client(client_id)
@@ -434,9 +439,9 @@ class EventRouter:
     def subscribe(
         self,
         subscriber_id: str,
-        topics: List[str] = None,
-        types: List[EventType] = None,
-        callback: Callable[[Event], None] = None
+        topics: Optional[List[str]] = None,
+        types: Optional[List[EventType]] = None,
+        callback: Optional[Callable[[Event], None]] = None
     ) -> str:
         """Create local subscription.
         
@@ -481,10 +486,10 @@ class EventRouter:
         uptime = time.time() - self.start_time
         
         if self.use_multi_queue:
-            queue_stats = await self.queue.get_stats()
+            queue_stats = await self.queue.get_stats()  # type: ignore
             queue_size = sum(s.get("size", 0) for s in queue_stats.values())
         else:
-            stats = await self.queue.get_stats()
+            stats = await self.queue.get_stats()  # type: ignore
             queue_size = stats.get("size", 0)
         
         # Determine health status

@@ -18,14 +18,14 @@ from unittest.mock import Mock, patch
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
+    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError
 
 sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
 try:
-    from github_operations import GitHubError, GitHubOperations, RateLimitError
+    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError
 except ImportError:
     # These will be implemented after tests pass
     import subprocess
@@ -385,19 +385,19 @@ class TestGitHubOperations:
         """Test GitHubOperations initialization with default config."""
         gh = GitHubOperations()
         assert gh.repo is None
-        assert gh.retry_config["max_retries"] == 3
-        assert gh.retry_config["initial_delay"] == 1
-        assert gh.retry_config["backoff_factor"] == 2
-        assert gh.rate_limit_handler is not None
+        assert gh.retry_config["max_retries"] == 3  # type: ignore[index]
+        assert gh.retry_config["initial_delay"] == 1  # type: ignore[index]
+        assert gh.retry_config["backoff_factor"] == 2  # type: ignore[index]
+        assert gh.rate_limit_handler is not None  # type: ignore[union-attr]
 
     def test_init_custom_config(self):
         """Test GitHubOperations initialization with custom config."""
         custom_config = {"max_retries": 5, "initial_delay": 2, "backoff_factor": 3}
         gh = GitHubOperations(repo="test/repo", retry_config=custom_config)
         assert gh.repo == "test/repo"
-        assert gh.retry_config["max_retries"] == 5
-        assert gh.retry_config["initial_delay"] == 2
-        assert gh.retry_config["backoff_factor"] == 3
+        assert gh.retry_config["max_retries"] == 5  # type: ignore[index]
+        assert gh.retry_config["initial_delay"] == 2  # type: ignore[index]
+        assert gh.retry_config["backoff_factor"] == 3  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_execute_gh_command_success(self, mock_run):
@@ -411,9 +411,9 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh._execute_gh_command(["issue", "list"])
 
-        assert result["success"] is True
-        assert result["data"]["number"] == 1
-        assert result["raw_output"] is not None
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["number"] == 1  # type: ignore[index]
+        assert result["raw_output"] is not None  # type: ignore[index]
         mock_run.assert_called_once()
 
     @patch("subprocess.run")
@@ -450,7 +450,7 @@ class TestGitHubOperations:
         )
         result = gh._execute_gh_command(["issue", "list"])
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
         assert mock_run.call_count == 3
         assert mock_sleep.call_count == 2  # Two retries
 
@@ -467,7 +467,7 @@ class TestGitHubOperations:
         )
         result = gh._execute_gh_command(["issue", "list"])
 
-        assert result["success"] is False
+        assert result["success"] is False  # type: ignore[index]
         assert "error" in result
         assert mock_run.call_count == 2  # max_retries
 
@@ -487,8 +487,8 @@ class TestGitHubOperations:
             assignees=["testuser"],
         )
 
-        assert result["success"] is True
-        assert result["data"]["number"] == 42
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["number"] == 42  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -519,8 +519,8 @@ class TestGitHubOperations:
             draft=True,
         )
 
-        assert result["success"] is True
-        assert result["data"]["number"] == 15
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["number"] == 15  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -551,10 +551,10 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.get_issue(42)
 
-        assert result["success"] is True
-        assert result["data"]["number"] == 42
-        assert result["data"]["title"] == "Test Issue"
-        assert result["data"]["state"] == "open"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["number"] == 42  # type: ignore[index]
+        assert result["data"]["title"] == "Test Issue"  # type: ignore[index]
+        assert result["data"]["state"] == "open"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_get_pr_success(self, mock_run):
@@ -572,9 +572,9 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.get_pr(15)
 
-        assert result["success"] is True
-        assert result["data"]["number"] == 15
-        assert result["data"]["state"] == "open"
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["number"] == 15  # type: ignore[index]
+        assert result["data"]["state"] == "open"  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_update_issue_success(self, mock_run):
@@ -587,7 +587,7 @@ class TestGitHubOperations:
             42, title="Updated Title", body="Updated body", state="closed"
         )
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -610,7 +610,7 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.add_comment(42, "Test comment")
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -633,9 +633,9 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.list_issues(state="all", labels=["bug"], limit=50)
 
-        assert result["success"] is True
-        assert len(result["data"]) == 2
-        assert result["data"][0]["number"] == 1
+        assert result["success"] is True  # type: ignore[index]
+        assert len(result["data"]) == 2  # type: ignore[index]
+        assert result["data"][0]["number"] == 1  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -661,9 +661,9 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.list_prs(state="all", base="main", limit=25)
 
-        assert result["success"] is True
-        assert len(result["data"]) == 2
-        assert result["data"][0]["number"] == 10
+        assert result["success"] is True  # type: ignore[index]
+        assert len(result["data"]) == 2  # type: ignore[index]
+        assert result["data"][0]["number"] == 10  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_create_branch_success(self, mock_run):
@@ -717,8 +717,8 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.merge_pr(15, merge_method="rebase")
 
-        assert result["success"] is True
-        assert result["data"]["merged"] is True
+        assert result["success"] is True  # type: ignore[index]
+        assert result["data"]["merged"] is True  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -736,7 +736,7 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.close_issue(42, reason="not_planned")
 
-        assert result["success"] is True
+        assert result["success"] is True  # type: ignore[index]
 
         # Verify command construction
         called_args = mock_run.call_args[0][0]
@@ -759,9 +759,9 @@ class TestGitHubOperations:
         gh = GitHubOperations()
         result = gh.get_workflow_runs(workflow="CI", limit=5)
 
-        assert result["success"] is True
-        assert len(result["data"]) == 2
-        assert result["data"][0]["status"] == "completed"
+        assert result["success"] is True  # type: ignore[index]
+        assert len(result["data"]) == 2  # type: ignore[index]
+        assert result["data"][0]["status"] == "completed"  # type: ignore[index]
 
     def test_rate_limit_handling(self):
         """Test rate limit detection and handling."""
@@ -776,8 +776,8 @@ class TestGitHubOperations:
             }
 
             result = gh.create_issue("Test", "Body")
-            assert result["success"] is False
-            assert "rate limit" in result["error"].lower()
+            assert result["success"] is False  # type: ignore[index]
+            assert "rate limit" in result["error"].lower()  # type: ignore[index]
 
     def test_error_handling(self):
         """Test comprehensive error handling."""
@@ -793,8 +793,8 @@ class TestGitHubOperations:
             }
 
             result = gh.get_issue(42)
-            assert result["success"] is False
-            assert "Network unreachable" in result["error"]
+            assert result["success"] is False  # type: ignore[index]
+            assert "Network unreachable" in result["error"]  # type: ignore[index]
 
     def test_batch_operations(self):
         """Test batch operations for efficiency."""
@@ -813,7 +813,7 @@ class TestGitHubOperations:
             results = gh.batch_create_issues(issues)
 
             assert len(results) == 3
-            assert all(r["success"] for r in results)
+            assert all(r["success"] for r in results)  # type: ignore[index]
             assert mock_create.call_count == 3
 
     def test_validation(self):
@@ -840,7 +840,7 @@ class TestGitHubOperations:
             with patch.object(gh, "_execute_gh_command") as mock_execute:
                 mock_execute.return_value = {"success": True, "data": {"number": 1}}
                 result = gh.create_issue("Test", "Body")
-                assert result["success"] is True
+                assert result["success"] is True  # type: ignore[index]
 
 
 class TestGitHubError:
@@ -861,7 +861,7 @@ class TestGitHubError:
             {"issue_number": 42},
             details={"status_code": 404, "response": "Not found"},
         )
-        assert error.details["status_code"] == 404
+        assert error.details["status_code"] == 404  # type: ignore[index]
 
 
 class TestRateLimitError:
@@ -921,7 +921,7 @@ class TestGitHubOperationsIntegration:
 
         # Execute complete workflow
         issue_result = gh.create_issue("Test Feature", "Implement test feature")
-        assert issue_result["success"] is True
+        assert issue_result["success"] is True  # type: ignore[index]
         issue_number = issue_result["data"]["number"]
 
         branch_result = gh.create_branch(f"feature/test-{issue_number}")
@@ -931,17 +931,17 @@ class TestGitHubOperationsIntegration:
             f"Implement test feature (#{issue_number})",
             f"Fixes #{issue_number}\n\nImplements test feature functionality.",
         )
-        assert pr_result["success"] is True
+        assert pr_result["success"] is True  # type: ignore[index]
         pr_number = pr_result["data"]["number"]
 
         comment_result = gh.add_comment(pr_number, "Ready for review")
-        assert comment_result["success"] is True
+        assert comment_result["success"] is True  # type: ignore[index]
 
         merge_result = gh.merge_pr(pr_number)
-        assert merge_result["success"] is True
+        assert merge_result["success"] is True  # type: ignore[index]
 
         close_result = gh.close_issue(issue_number, reason="completed")
-        assert close_result["success"] is True
+        assert close_result["success"] is True  # type: ignore[index]
 
         # Verify all operations were called
         assert mock_run.call_count == 7
@@ -956,5 +956,5 @@ class TestGitHubOperationsIntegration:
             mock_execute.return_value = {"success": True, "data": {"number": 42}}
 
             result = gh.create_issue("Test", "Body")
-            assert result["success"] is True
+            assert result["success"] is True  # type: ignore[index]
             assert mock_execute.call_count == 1
