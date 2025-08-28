@@ -38,7 +38,6 @@ TaskResult = OperationResult
 try:
     from ...shared.task_tracking import TaskMetrics
 except ImportError:
-
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
@@ -47,30 +46,29 @@ except ImportError:
 # Import Phase 1 components (will be available when all imports are fixed)
 try:
     from ..phase1.capability_assessment import (
-        CapabilityAssessment,
-        AgentCapabilityProfile,
-        CapabilityDomain,
-        ProficiencyLevel)
+        CapabilityAssessment as Phase1CapabilityAssessment,
+        AgentCapabilityProfile as Phase1AgentCapabilityProfile,
+        CapabilityDomain as Phase1CapabilityDomain,
+        ProficiencyLevel as Phase1ProficiencyLevel)
     from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     # Define minimal stubs if Phase 1 imports fail
-    class CapabilityAssessment:
+    class Phase1CapabilityAssessment:
         pass
-
-    class AgentCapabilityProfile:
+    class Phase1AgentCapabilityProfile:
         pass
-
-    class CapabilityDomain:
+    class Phase1CapabilityDomain:
         pass
-
-    class ProficiencyLevel:
+    class Phase1ProficiencyLevel:
         pass
-
-    class TaskCapabilityRequirement:
-        pass
-
     class AgentPerformanceAnalyzer:
         pass
+
+# Define local aliases to avoid import conflicts
+CapabilityAssessment = Phase1CapabilityAssessment
+AgentCapabilityProfile = Phase1AgentCapabilityProfile
+CapabilityDomain = Phase1CapabilityDomain
+ProficiencyLevel = Phase1ProficiencyLevel
 
 
 class MatchingStrategy(Enum):

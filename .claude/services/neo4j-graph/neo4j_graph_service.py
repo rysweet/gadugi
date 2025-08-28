@@ -14,7 +14,7 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 try:
     from neo4j import GraphDatabase  # type: ignore[misc]
@@ -36,53 +36,53 @@ except ImportError:
         def close(self) -> None:
             pass
 
-        def session(self):
+        def session(self) -> 'MockSession':
             return MockSession()
 
     class MockSession:
         def close(self) -> None:
             pass
             
-        def __enter__(self):
+        def __enter__(self) -> 'MockSession':
             return self
             
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def __exit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> None:
             pass
 
-        def run(self, *args, **kwargs):
+        def run(self, *args: Any, **kwargs: Any) -> 'MockResult':
             return MockResult()
 
-        def execute_read(self, func):
+        def execute_read(self, func: Any) -> Any:
             result = func(MockTransaction())
             return result or []
 
-        def execute_write(self, func):
+        def execute_write(self, func: Any) -> Any:
             result = func(MockTransaction())
             return result or MockSummary()
 
     class MockTransaction:
-        def run(self, *args, **kwargs):
+        def run(self, *args: Any, **kwargs: Any) -> 'MockResult':
             return MockResult()
 
     class MockResult:
-        def single(self):
+        def single(self) -> 'MockRecord':
             return MockRecord()
 
-        def data(self):
+        def data(self) -> list[dict[str, Any]]:
             return []
 
-        def consume(self):
+        def consume(self) -> 'MockSummary':
             return MockSummary()
 
     class MockRecord:
-        def __getitem__(self, key):
+        def __getitem__(self, key: str) -> Any:
             return None
 
-        def get(self, key, default=None):
+        def get(self, key: str, default: Any = None) -> Any:
             return default
 
     class MockSummary:
-        def counters(self):
+        def counters(self) -> 'MockCounters':
             return MockCounters()
 
     class MockCounters:
@@ -341,7 +341,7 @@ class GraphDatabaseService:
     async def _test_connection(self) -> None:
         """Test the database connection."""
 
-        def test_query(tx):
+        def test_query(tx: Any) -> Any:
             result = tx.run("RETURN 1 as test")
             return result.single()["test"]
 
@@ -376,7 +376,7 @@ class GraphDatabaseService:
             "CREATE FULLTEXT INDEX document_content_idx IF NOT EXISTS FOR (d:Document) ON EACH [d.title, d.content, d.summary]",
         ]
 
-        def create_schema(tx) -> None:
+        def create_schema(tx: Any) -> None:
             for query in schema_queries:
                 try:
                     tx.run(query)
@@ -399,7 +399,7 @@ class GraphDatabaseService:
         """Create a new node in the graph."""
         start_time = time.time()
 
-        def create_node_tx(tx):
+        def create_node_tx(tx: Any) -> Any:
             # Build labels string
             labels = ":".join(node.labels)
 
@@ -462,7 +462,7 @@ class GraphDatabaseService:
         """Retrieve a node by ID."""
         start_time = time.time()
 
-        def get_node_tx(tx):
+        def get_node_tx(tx: Any) -> Any:
             query = """
             MATCH (n {id: $node_id})
             RETURN n
@@ -527,7 +527,7 @@ class GraphDatabaseService:
         """Update node properties."""
         start_time = time.time()
 
-        def update_node_tx(tx):
+        def update_node_tx(tx: Any) -> Any:
             # Add updated timestamp
             props = dict(properties)
             props["updated_at"] = datetime.now().isoformat()
@@ -596,7 +596,7 @@ class GraphDatabaseService:
         """Delete a node and all its relationships."""
         start_time = time.time()
 
-        def delete_node_tx(tx):
+        def delete_node_tx(tx: Any) -> Any:
             query = """
             MATCH (n {id: $node_id})
             DETACH DELETE n
@@ -652,7 +652,7 @@ class GraphDatabaseService:
         """Create a relationship between two nodes."""
         start_time = time.time()
 
-        def create_relationship_tx(tx):
+        def create_relationship_tx(tx: Any) -> Any:
             # Prepare properties
             props = dict(relationship.properties)
             props.update(
@@ -746,7 +746,7 @@ class GraphDatabaseService:
         """Find nodes matching criteria."""
         start_time = time.time()
 
-        def find_nodes_tx(tx):
+        def find_nodes_tx(tx: Any) -> Any:
             # Build query
             where_clauses = []
             params = {}
@@ -836,7 +836,7 @@ class GraphDatabaseService:
         """Find relationships matching criteria."""
         start_time = time.time()
 
-        def find_relationships_tx(tx):
+        def find_relationships_tx(tx: Any) -> Any:
             # Build query components
             match_parts = []
             params = {}
@@ -942,7 +942,7 @@ class GraphDatabaseService:
         """Find paths between two nodes."""
         start_time = time.time()
 
-        def find_paths_tx(tx):
+        def find_paths_tx(tx: Any) -> Any:
             # Build relationship filter
             if relationship_types:
                 rel_types = "|".join([rt.value for rt in relationship_types])
@@ -1045,7 +1045,7 @@ class GraphDatabaseService:
         """Get neighboring nodes with specified criteria."""
         start_time = time.time()
 
-        def get_neighbors_tx(tx):
+        def get_neighbors_tx(tx: Any) -> Any:
             # Build relationship filter
             if relationship_types:
                 rel_types = "|".join([rt.value for rt in relationship_types])
@@ -1130,7 +1130,7 @@ class GraphDatabaseService:
         """Get recommendations based on graph analysis."""
         start_time = time.time()
 
-        def get_recommendations_tx(tx):
+        def get_recommendations_tx(tx: Any) -> Any:
             # Build base query based on recommendation type
             if request.recommendation_type == "similar_nodes":
                 query = self._build_similar_nodes_query(request)
@@ -1264,7 +1264,7 @@ class GraphDatabaseService:
         """Get comprehensive graph statistics."""
         start_time = time.time()
 
-        def get_stats_tx(tx):
+        def get_stats_tx(tx: Any) -> Any:
             queries = {
                 "node_count": "MATCH (n) RETURN COUNT(n) as count",
                 "relationship_count": "MATCH ()-[r]->() RETURN COUNT(r) as count",
@@ -1334,7 +1334,7 @@ class GraphDatabaseService:
         """Perform full-text search across node content."""
         start_time = time.time()
 
-        def search_tx(tx):
+        def search_tx(tx: Any) -> Any:
             if node_types:
                 # Search specific node types
                 type_queries = []
@@ -1437,7 +1437,7 @@ class GraphDatabaseService:
 
         start_time = time.time()
 
-        def execute_cypher_tx(tx):
+        def execute_cypher_tx(tx: Any) -> Any:
             result = tx.run(query, **parameters)
             return result.data()
 

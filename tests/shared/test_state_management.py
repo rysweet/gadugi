@@ -18,30 +18,26 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 
-# For type checking only
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from claude.shared.state_management import (
-        CheckpointManager,
-        StateError,
-        StateManager,
-        StateValidationError,
-        TaskState,
-        WorkflowPhase,
-    )
+# TYPE_CHECKING imports removed due to conflicts with stub implementations
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     from claude.shared.state_management import (
-        CheckpointManager,
-        StateError,
-        StateManager,
-        StateValidationError,
-        TaskState,
-        WorkflowPhase,
+        CheckpointManager as _ImportedCheckpointManager,
+        StateError as _ImportedStateError,
+        StateManager as _ImportedStateManager,
+        StateValidationError as _ImportedStateValidationError,
+        TaskState as _ImportedTaskState,
+        WorkflowPhase as _ImportedWorkflowPhase,
     )
+    # Use imported classes
+    CheckpointManager = _ImportedCheckpointManager
+    StateError = _ImportedStateError
+    StateManager = _ImportedStateManager
+    StateValidationError = _ImportedStateValidationError
+    TaskState = _ImportedTaskState
+    WorkflowPhase = _ImportedWorkflowPhase
 except ImportError as e:
     # These will be implemented after tests pass
     print(f"Warning: Could not import claude.shared.state_management as state_management module: {e}")
@@ -369,7 +365,11 @@ except ImportError as e:
             for backup_file in backup_path.glob("*.json"):
                 shutil.copy2(backup_file, self.state_dir / backup_file.name)
 
-        def validate_state_consistency(self) -> List[str]:
+        def validate_state_consistency(self, state: Optional[TaskState] = None) -> Union[List[str], bool]:
+            if state:
+                # Validate single state
+                return state.is_valid
+            # Validate all states
             errors = []
             for state in self.list_task_states():
                 if not state.task_id:
@@ -387,9 +387,12 @@ except ImportError as e:
             self,
             checkpoint_dir: Optional[str] = None,
             state_manager: Optional["StateManager"] = None,
+            config: Optional[Dict[str, str]] = None,
         ):
             # Support both constructor patterns
-            if checkpoint_dir:
+            if config and "checkpoint_dir" in config:
+                self.checkpoint_dir = Path(config["checkpoint_dir"])
+            elif checkpoint_dir:
                 self.checkpoint_dir = Path(checkpoint_dir)
             elif state_manager:
                 self.checkpoint_dir = state_manager.state_dir / "checkpoints"
@@ -397,28 +400,54 @@ except ImportError as e:
                 self.checkpoint_dir = Path(".claude/checkpoints")
             self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-        def create_checkpoint(self, workflow_id: str, state: Dict[str, Any]) -> str:
+        def create_checkpoint(self, state: TaskState, description: str) -> str:
             # Use microseconds to avoid collision when creating multiple checkpoints quickly
             timestamp = datetime.now().strftime("%Y%m%d-%H%M%S-%f")
-            checkpoint_id = f"{workflow_id}-{timestamp}"
-            checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
+            checkpoint_id = f"{state.task_id}-{timestamp}"
+            
+            # Create task-specific checkpoint directory
+            task_checkpoint_dir = self.checkpoint_dir / state.task_id
+            task_checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            
+            checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
+            checkpoint_data = state.to_dict()
+            checkpoint_data["description"] = description
+            
             with open(checkpoint_file, "w") as f:
-                json.dump(state, f, indent=2)
+                json.dump(checkpoint_data, f, indent=2)
             return checkpoint_id
 
-        def restore_checkpoint(self, checkpoint_id: str) -> Dict[str, Any]:
-            checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
+        def restore_checkpoint(self, task_id: str, checkpoint_id: str) -> TaskState:
+            task_checkpoint_dir = self.checkpoint_dir / task_id
+            checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
             if not checkpoint_file.exists():
                 raise StateError(
                     f"Checkpoint {checkpoint_id} not found",
                     operation="restore_checkpoint",
                 )
             with open(checkpoint_file, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+            return TaskState.from_dict(data)
 
-        def list_checkpoints(self, workflow_id: Optional[str] = None) -> List[str]:
-            pattern = f"{workflow_id}-*.json" if workflow_id else "*.json"
-            return [f.stem for f in self.checkpoint_dir.glob(pattern)]
+        def list_checkpoints(self, task_id: str) -> List[Dict[str, Any]]:
+            task_checkpoint_dir = self.checkpoint_dir / task_id
+            if not task_checkpoint_dir.exists():
+                return []
+            
+            checkpoints = []
+            for checkpoint_file in task_checkpoint_dir.glob("*.json"):
+                try:
+                    with open(checkpoint_file, "r") as f:
+                        data = json.load(f)
+                    checkpoints.append({
+                        "checkpoint_id": checkpoint_file.stem,
+                        "description": data.get("description", ""),
+                        "created_at": data.get("created_at"),
+                        "task_id": data.get("task_id")
+                    })
+                except Exception:
+                    continue
+            return checkpoints
 
         def delete_checkpoint(self, checkpoint_id: str) -> None:
             checkpoint_file = self.checkpoint_dir / f"{checkpoint_id}.json"
@@ -706,10 +735,10 @@ class TestStateManager:
     def test_state_manager_init_default(self):
         """Test StateManager initialization with default config."""
         sm = StateManager()
-        assert sm.state_dir == Path(".github/workflow-states")
+        assert sm.state_dir == Path(".claude/state")
         assert sm.backup_enabled is True
-        assert sm.cleanup_after_days == 30
-        assert sm.max_states_per_task == 20
+        assert sm.cleanup_after_days == 7
+        assert sm.max_states_per_task == 100
 
     def test_state_manager_init_custom(self, temp_state_dir):
         """Test StateManager initialization with custom config."""
@@ -734,7 +763,7 @@ class TestStateManager:
         state_manager.save_state(state)
 
         # Verify file exists
-        state_file = state_manager.state_dir / "test-save-001" / "state.json"
+        state_file = state_manager.state_dir / "test-save-001.json"
         assert state_file.exists()
 
         # Verify content
@@ -780,10 +809,7 @@ class TestStateManager:
         state_manager.save_state(state)
 
         # Update the state
-        state.status = "in_progress"
-        state.current_phase = 2
-        state.issue_number = 42
-        updated_state = state_manager.update_state(state)
+        updated_state = state_manager.update_state("test-update-001", status="in_progress", current_phase=2, issue_number=42)
 
         # Verify update
         loaded_state = state_manager.load_state("test-update-001")

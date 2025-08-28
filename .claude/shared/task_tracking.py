@@ -57,8 +57,8 @@ class Task:
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, id: str, content: str = None, status = TaskStatus.PENDING,
-                 priority = TaskPriority.MEDIUM, title: str = None, **kwargs):
+    def __init__(self, id: str, content: Optional[str] = None, status = TaskStatus.PENDING,
+                 priority = TaskPriority.MEDIUM, title: Optional[str] = None, **kwargs):
         """Initialize task with compatibility for title parameter."""
         self.id = id
         # Support both content and title parameters for API compatibility
@@ -587,7 +587,7 @@ class TaskMetrics:
             "task_completion_count": len(self.task_completion_times)
         }
 
-    def start_workflow_phase(self, phase_name: str, description: str = None) -> None:
+    def start_workflow_phase(self, phase_name: str, description: Optional[str] = None) -> None:
         """Start tracking a workflow phase."""
         self.current_phase = phase_name
         self.phase_start_time = datetime.now()
@@ -744,7 +744,7 @@ class TaskTracker:
             if not result.get("success"):  # type: ignore
                 raise TaskError(f"Failed to submit phase tasks to TodoWrite: {result}")  # type: ignore
 
-            logger.info(f"Started workflow phase '{phase_name}' with {len(phase_tasks)} tasks")
+            logger.info(f"Started workflow phase '{phase_name}' with {len(phase_tasks or [])} tasks")
 
         except Exception as e:
             # If anything fails, don't start the phase

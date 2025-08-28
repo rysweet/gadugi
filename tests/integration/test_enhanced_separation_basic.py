@@ -1,5 +1,3 @@
-from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
-
 #!/usr/bin/env python3
 """
 Basic integration tests for Enhanced Separation architecture.
@@ -273,7 +271,7 @@ class TestEnhancedSeparationBasic:
             }
         ]
 
-        is_valid_invalid = todowrite_integration.validate_task_list(invalid_tasks)
+        is_valid_invalid = todowrite_integration.validate_task_list(invalid_tasks)  # type: ignore
         assert is_valid_invalid == False
 
     def test_integration_workflow_simulation(self):
@@ -353,7 +351,7 @@ class TestEnhancedSeparationBasic:
         task_state = TaskState(
             task_id=workflow_id,
             prompt_file="workflow.md",
-            status=TaskStatus.COMPLETED  # type: ignore[arg-type],
+            status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
             context=workflow_state,
         )
         self.state_manager.save_state(task_state)
@@ -439,7 +437,7 @@ class TestEnhancedSeparationCodeReduction:
             from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity
 
             # Test instantiation
-            github_ops = GitHubOperations(, TaskPriority)
+            github_ops = GitHubOperations()
             state_manager = StateManager()
             error_handler = ErrorHandler()
             task_tracker = TaskTracker()

@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 
 class WorktreeStatus(Enum):
@@ -37,8 +37,8 @@ class WorktreeRequirements:
 
     uv_project: bool = False
     container_ready: bool = False
-    development_tools: list[str] = None
-    python_version: str | None = None
+    development_tools: Optional[List[str]] = None
+    python_version: Optional[str] = None
     container_policy: str = "standard"
 
     def __post_init__(self):
@@ -60,7 +60,7 @@ class WorktreeMetadata:
     status: WorktreeStatus
     disk_usage_mb: int = 0
     requirements: WorktreeRequirements = None
-    error_message: str | None = None
+    error_message: Optional[str] = None
 
     def __post_init__(self):
         if self.requirements is None:
@@ -75,9 +75,9 @@ class WorktreeResult:
     worktree_path: str
     branch_name: str
     status: str
-    environment: dict[str, Any]
-    metadata: dict[str, Any]
-    error_message: str | None = None
+    environment: Dict[str, Any]
+    metadata: Dict[str, Any]
+    error_message: Optional[str] = None
 
 
 @dataclass
@@ -87,18 +87,18 @@ class CleanupResult:
     removed_count: int
     preserved_count: int
     disk_freed_mb: int
-    errors: list[str]
-    summary: dict[str, Any]
+    errors: List[str]
+    summary: Dict[str, Any]
 
 
 class WorktreeEnvironmentSetup:
     """Handles development environment setup in worktrees."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         self.config = config or self._default_config()
         self.logger = logging.getLogger(__name__)
 
-    def _default_config(self) -> dict[str, Any]:
+    def _default_config(self) -> Dict[str, Any]:
         """Default environment configuration."""
         return {
             "default_uv_extras": ["dev", "test"],
@@ -111,7 +111,7 @@ class WorktreeEnvironmentSetup:
         self,
         worktree_path: str,
         requirements: WorktreeRequirements,
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """Set up complete development environment in worktree."""
         self.logger.info(f"Setting up environment in {worktree_path}")
 
@@ -201,7 +201,7 @@ class WorktreeEnvironmentSetup:
             )
             return False
 
-    async def _install_development_tools(self, tools: list[str]) -> bool:
+    async def _install_development_tools(self, tools: List[str]) -> bool:
         """Install development tools in environment."""
         if not tools:
             return True
@@ -274,11 +274,11 @@ class WorktreeEnvironmentSetup:
 class WorktreeHealthMonitor:
     """Monitors worktree health and resource usage."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         self.config = config or self._default_config()
         self.logger = logging.getLogger(__name__)
 
-    def _default_config(self) -> dict[str, Any]:
+    def _default_config(self) -> Dict[str, Any]:
         """Default monitoring configuration."""
         return {
             "health_check_interval": 300,
@@ -287,7 +287,7 @@ class WorktreeHealthMonitor:
             "max_disk_usage_gb": 10,
         }
 
-    async def check_worktree_health(self, metadata: WorktreeMetadata) -> dict[str, Any]:
+    async def check_worktree_health(self, metadata: WorktreeMetadata) -> Dict[str, Any]:
         """Check health of a specific worktree."""
         health = {
             "status": "healthy",
@@ -339,7 +339,7 @@ class WorktreeHealthMonitor:
 
         return health
 
-    async def _check_git_health(self, worktree_path: str) -> dict[str, Any]:
+    async def _check_git_health(self, worktree_path: str) -> Dict[str, Any]:
         """Check git repository health."""
         health = {"healthy": True, "issues": []}
 
@@ -390,7 +390,7 @@ class WorktreeHealthMonitor:
 
         return health
 
-    async def _check_disk_usage(self, path: str) -> dict[str, Any]:
+    async def _check_disk_usage(self, path: str) -> Dict[str, Any]:
         """Check disk usage for worktree."""
         try:
             # Get directory size
@@ -415,7 +415,7 @@ class WorktreeHealthMonitor:
             self.logger.exception(f"Disk usage check failed: {e!s}")
             return {"usage_mb": 0, "usage_bytes": 0, "within_limits": True}
 
-    async def _check_uv_health(self, worktree_path: str) -> dict[str, Any]:
+    async def _check_uv_health(self, worktree_path: str) -> Dict[str, Any]:
         """Check UV environment health."""
         health = {"healthy": True, "issues": []}
 
@@ -464,11 +464,11 @@ class WorktreeHealthMonitor:
 class WorktreeCleanupManager:
     """Manages worktree cleanup and resource recovery."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         self.config = config or self._default_config()
         self.logger = logging.getLogger(__name__)
 
-    def _default_config(self) -> dict[str, Any]:
+    def _default_config(self) -> Dict[str, Any]:
         """Default cleanup configuration."""
         return {
             "preserve_uncommitted": True,
@@ -479,7 +479,7 @@ class WorktreeCleanupManager:
 
     async def cleanup_worktrees(
         self,
-        worktrees: list[WorktreeMetadata],
+        worktrees: List[WorktreeMetadata],
         policy: str = "completed_tasks",
         retention_days: int = 7,
         dry_run: bool = False,
@@ -548,10 +548,10 @@ class WorktreeCleanupManager:
 
     async def _select_worktrees_for_cleanup(
         self,
-        worktrees: list[WorktreeMetadata],
+        worktrees: List[WorktreeMetadata],
         policy: str,
         retention_days: int,
-    ) -> list[WorktreeMetadata]:
+    ) -> List[WorktreeMetadata]:
         """Select worktrees for cleanup based on policy."""
         to_cleanup = []
         cutoff_date = datetime.now() - timedelta(days=retention_days)
@@ -741,7 +741,7 @@ class WorktreeCleanupManager:
 class WorktreeManagerEngine:
     """Main worktree manager engine."""
 
-    def __init__(self, config: dict[str, Any] | None = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         self.config = config or self._load_default_config()
         self.logger = logging.getLogger(__name__)
 
@@ -759,7 +759,7 @@ class WorktreeManagerEngine:
 
     async def _run_command_async(
         self,
-        cmd: list[str],
+        cmd: List[str],
         timeout: int = 30,
     ) -> subprocess.CompletedProcess:
         """Run command asynchronously and return result."""
@@ -782,7 +782,7 @@ class WorktreeManagerEngine:
         except asyncio.TimeoutError:
             raise subprocess.TimeoutExpired(cmd, timeout)
 
-    def _load_default_config(self) -> dict[str, Any]:
+    def _load_default_config(self) -> Dict[str, Any]:
         """Load default configuration."""
         return {
             "worktree": {
@@ -997,7 +997,7 @@ class WorktreeManagerEngine:
     def _create_result(
         self,
         metadata: WorktreeMetadata,
-        error_message: str | None = None,
+        error_message: Optional[str] = None,
     ) -> WorktreeResult:
         """Create WorktreeResult from metadata."""
         return WorktreeResult(
@@ -1014,7 +1014,7 @@ class WorktreeManagerEngine:
             error_message=error_message or metadata.error_message,
         )
 
-    async def list_worktrees(self) -> list[WorktreeMetadata]:
+    async def list_worktrees(self) -> List[WorktreeMetadata]:
         """List all registered worktrees."""
         # Update last_accessed for health monitoring
         for metadata in self.worktrees.values():
@@ -1033,7 +1033,7 @@ class WorktreeManagerEngine:
     async def cleanup_worktrees(
         self,
         policy: str = "completed_tasks",
-        retention_days: int | None = None,
+        retention_days: Optional[int] = None,
         dry_run: bool = False,
     ) -> CleanupResult:
         """Clean up worktrees based on policy."""
@@ -1060,7 +1060,7 @@ class WorktreeManagerEngine:
 
         return result
 
-    async def health_check(self, task_id: str | None = None) -> dict[str, Any]:
+    async def health_check(self, task_id: Optional[str] = None) -> Dict[str, Any]:
         """Check health of worktrees."""
         if task_id:
             # Check specific worktree

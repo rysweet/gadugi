@@ -344,7 +344,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
         """Test critical path calculation."""
         # Create tasks with clear dependencies
         deps = {"A": [], "B": ["A"], "C": ["A"], "D": ["B", "C"], "E": ["D"]}
-        durations = {"A": 100, "B": 200, "C": 50, "D": 150, "E": 100}
+        durations = {"A": 100.0, "B": 200.0, "C": 50.0, "D": 150.0, "E": 100.0}
 
         critical_path = self.optimizer._find_critical_path(deps, durations)
 

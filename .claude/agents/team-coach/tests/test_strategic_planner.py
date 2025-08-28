@@ -274,7 +274,7 @@ class TestStrategicPlanner(unittest.TestCase):
             self.assertIsInstance(initiative, StrategicInitiative)
             self.assertIsNotNone(initiative.initiative_id)
             self.assertIsInstance(initiative.type, StrategyType)
-            self.assertGreater(len(initiative.steps), 0)
+            self.assertGreater(len(initiative.goals_addressed), 0)
             self.assertIsInstance(initiative.timeline, dict)
             self.assertGreater(len(initiative.success_criteria), 0)
 

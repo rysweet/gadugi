@@ -838,10 +838,10 @@ class StrategicPlanner:
     ) -> Dict[str, float]:
         """Calculate investment required for training."""
         investment = {
-            "training_hours": 0,
-            "external_training": 0,
-            "lost_productivity": 0,
-            "materials": 0,
+            "training_hours": 0.0,
+            "external_training": 0.0,
+            "lost_productivity": 0.0,
+            "materials": 0.0,
         }
 
         # Calculate training hours

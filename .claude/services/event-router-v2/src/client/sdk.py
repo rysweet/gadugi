@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import functools
 import logging
+import uuid
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from ..core.models import Event, EventBatch, Subscription
@@ -79,12 +80,12 @@ class EventRouterClient:
     
     # === Context Manager Support ===
     
-    async def __aenter__(self):
+    async def __aenter__(self) -> 'EventRouterClient':
         """Async context manager entry."""
         await self.connect()
         return self
     
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> None:
         """Async context manager exit."""
         await self.disconnect()
     
@@ -271,7 +272,7 @@ class EventRouterClient:
             pattern: Regex pattern for event types
         
         Examples:
-            @client.on_pattern(r"user\.(created|updated|deleted)")
+            @client.on_pattern(r"user\\.(created|updated|deleted)")
             async def handle_user_lifecycle(event):
                 await update_user_cache(event)
         """
@@ -288,7 +289,7 @@ class EventRouterClient:
         self,
         topics: Union[str, List[str]],
         handler: Optional[Callable[[Event], Awaitable[None]]] = None,
-        filter: Optional[Dict[str, Any]] = None
+        event_filter: Optional[Dict[str, Any]] = None
     ) -> Subscription:
         """
         Subscribe to events programmatically.
@@ -296,7 +297,7 @@ class EventRouterClient:
         Args:
             topics: Topic or list of topics to subscribe to
             handler: Event handler function
-            filter: Optional event filter
+            event_filter: Optional event filter
         
         Returns:
             Subscription object
@@ -308,7 +309,7 @@ class EventRouterClient:
             # With filter
             sub = await client.subscribe(
                 "payment.*",
-                filter={"payload.amount": {"$gt": 100}},
+                event_filter={"payload.amount": {"$gt": 100}},
                 handler=audit_large_payment
             )
         """
@@ -323,7 +324,7 @@ class EventRouterClient:
         subscription = Subscription(
             subscriber_id=self.config.get("client_id", "unknown"),
             topics=topics,
-            filter=filter,
+            filter=event_filter,
             handler=handler
         )
         
@@ -364,7 +365,7 @@ class EventRouterClient:
         self,
         topics: Union[str, List[str]],
         batch_size: int = 1,
-        timeout: float = None
+        timeout: Optional[float] = None
     ):
         """
         Stream events as async generator.
@@ -536,7 +537,7 @@ class EventRouterClient:
     
     # === Background Tasks ===
     
-    def _start_background_tasks(self):
+    def _start_background_tasks(self) -> None:
         """Start background tasks."""
         # Start batch flush task
         if self.config["batch"]["size"] > 1:
@@ -545,7 +546,7 @@ class EventRouterClient:
         # Start event receive task
         asyncio.create_task(self._receive_loop())
     
-    async def _stop_background_tasks(self):
+    async def _stop_background_tasks(self) -> None:
         """Stop background tasks."""
         # Cancel batch task
         if self.batch_task:
@@ -555,7 +556,7 @@ class EventRouterClient:
             except asyncio.CancelledError:
                 pass
     
-    async def _batch_flush_loop(self):
+    async def _batch_flush_loop(self) -> None:
         """Periodically flush event batch."""
         timeout = self.config["batch"]["timeout"]
         
@@ -566,7 +567,7 @@ class EventRouterClient:
                 if self.batch.size() > 0:
                     await self._flush_batch()
     
-    async def _flush_batch(self):
+    async def _flush_batch(self) -> None:
         """Flush current batch."""
         if self.batch.size() == 0:
             return
@@ -580,7 +581,7 @@ class EventRouterClient:
         # Clear batch
         self.batch = EventBatch()
     
-    async def _receive_loop(self):
+    async def _receive_loop(self) -> None:
         """Receive events from transport."""
         while self.running:
             try:
@@ -594,7 +595,7 @@ class EventRouterClient:
                 logger.error(f"Error in receive loop: {e}")
                 await asyncio.sleep(1)
     
-    async def _handle_message(self, message: Dict[str, Any]):
+    async def _handle_message(self, message: Dict[str, Any]) -> None:
         """Handle received message."""
         msg_type = message.get("type")
         
@@ -611,7 +612,7 @@ class EventRouterClient:
             # Handle acknowledgment
             logger.debug(f"Received ack for {message.get('event_id')}")
     
-    async def _dispatch_event(self, event: Event):
+    async def _dispatch_event(self, event: Event) -> None:
         """Dispatch event to handlers."""
         # Check subscriptions
         for subscription in self.subscriptions.values():
@@ -638,7 +639,7 @@ class EventRouterClient:
         self,
         event_types: tuple,
         handler: Callable
-    ):
+    ) -> None:
         """Create subscription for decorator."""
         if not self.connected:
             await self.connect()
@@ -649,7 +650,7 @@ class EventRouterClient:
         self,
         pattern: str,
         handler: Callable
-    ):
+    ) -> None:
         """Create pattern subscription for decorator."""
         if not self.connected:
             await self.connect()
@@ -658,7 +659,7 @@ class EventRouterClient:
         await self.subscribe(
             "*",  # Subscribe to all
             handler=handler,
-            filter={"type": {"$regex": pattern}}
+            event_filter={"type": {"$regex": pattern}}
         )
 
 

@@ -18,7 +18,7 @@ sys.path.insert(
 )
 
 try:
-    from claude.shared.interfaces import (  # Core interfaces; Data models; Protocols; Configuration schemas; Result types; Factory interfaces
+    from claude.shared.interfaces import (
         AgentConfig,
         AgentConfigSchema,
         AgentFactory,
@@ -91,6 +91,14 @@ except ImportError:
         agent_id: str
         name: str
         version: str = "1.0.0"
+        
+        @property
+        def config_data(self) -> Dict[str, Any]:
+            return {
+                "agent_id": self.agent_id,
+                "name": self.name,
+                "version": self.version
+            }
 
     @dataclass
     class WorkflowPhase:
@@ -121,6 +129,8 @@ except ImportError:
     class ErrorContext:
         operation: str
         details: Dict[str, Any]
+        workflow_id: Optional[str] = None
+        error: Optional[Exception] = None
 
     # Protocols
     class TodoWriteProvider(Protocol):

@@ -22,17 +22,17 @@ from enum import Enum, auto
 
 # Import workflow engine components
 try:
-    from .workflow_engine import WorkflowPhase, WorkflowState
+    from .workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState
+    WorkflowPhase = EngineWorkflowPhase
+    WorkflowState = EngineWorkflowState
 except ImportError:
     try:
         # Try absolute import if relative import fails
-        from workflow_engine import WorkflowPhase, WorkflowState
+        from workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState
+        WorkflowPhase = EngineWorkflowPhase
+        WorkflowState = EngineWorkflowState
     except ImportError:
         # Minimal definitions if workflow_engine not available
-        from enum import Enum, auto
-        from dataclasses import dataclass
-from typing import Dict, Any, Optional
-
         class WorkflowPhase(Enum):
             INIT = auto()
             PROMPT_VALIDATION = auto()
@@ -42,12 +42,8 @@ from typing import Dict, Any, Optional
             """Minimal WorkflowState for when workflow_engine is not available"""
             prompt_file: str = ""
             current_phase: Optional[WorkflowPhase] = None
-            phases_completed: Dict[str, bool] = None
-            context: Dict[str, Any] = None
-
-            def __post_init__(self):
-                if self.phases_completed is None:
-                    self.phases_completed = {}
+            phases_completed: Dict[str, bool] = field(default_factory=dict)
+            context: Dict[str, Any] = field(default_factory=dict)
                 if self.context is None:
                     self.context = {}
 

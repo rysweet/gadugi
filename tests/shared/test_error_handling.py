@@ -18,12 +18,15 @@ from unittest.mock import call, patch
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from claude.shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
+    pass
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
+    from claude.shared.utils.error_handling import (
+        ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, 
+        NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
+    )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -136,7 +139,7 @@ except ImportError:
             self.recovery_strategies[error_type] = strategy
 
         def handle_error(self, error, context=None):
-            # Updated signature to match test usage
+            """Handle both Exception objects and ErrorContext objects"""
             if isinstance(error, Exception):
                 error_type = type(error)
                 error_key = f"{error_type.__name__}:{str(error)}"
@@ -161,10 +164,16 @@ except ImportError:
                     raise error
             else:
                 # Handle ErrorContext objects
-                error_type = type(error.error).__name__
+                if hasattr(error, 'error') and error.error:
+                    error_type = type(error.error).__name__
+                else:
+                    error_type = type(error).__name__
                 self.error_history.append(error)
                 if error_type in self.recovery_strategies:
                     return self.recovery_strategies[error_type](error)
+                else:
+                    # For ErrorContext without recovery, just record it
+                    return None
 
         def get_error_statistics(self):
             total_errors = sum(self.error_counts.values())
@@ -595,7 +604,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'error') as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -603,11 +612,11 @@ class TestGracefulDegradation:
 
             result = failing_func()
             assert result == "fallback"
-            mock_logger.error.assert_called_once()
+            mock_logger.assert_called_once()
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'error') as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -615,7 +624,7 @@ class TestGracefulDegradation:
 
             result = failing_func()
             assert result == "fallback"
-            mock_logger.error.assert_not_called()
+            mock_logger.assert_not_called()
 
 
 class TestErrorHandler:
@@ -917,7 +926,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'warning') as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -927,7 +936,7 @@ class TestHandleWithFallback:
 
             result = handle_with_fallback(primary, fallback)
             assert result == "fallback result"
-            mock_logger.warning.assert_called_once()
+            mock_logger.assert_called_once()
 
 
 class TestErrorContext:
@@ -935,12 +944,12 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'debug') as mock_logger:
             with ErrorContext("test operation") as ctx:
                 pass
 
             assert ctx.error is None
-            mock_logger.debug.assert_has_calls(
+            mock_logger.assert_has_calls(
                 [
                     call("Starting operation: test operation"),
                     call("Completed operation: test operation"),
@@ -949,13 +958,15 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'error') as mock_logger:
+            ctx = None
             with pytest.raises(ValueError):
-                with ErrorContext("test operation") as ctx:
+                with ErrorContext("test operation") as context_obj:
+                    ctx = context_obj
                     raise ValueError("Test error")
 
-            assert isinstance(ctx.error, ValueError)
-            mock_logger.error.assert_called_with("Error in test operation: Test error")
+            assert ctx is not None and isinstance(ctx.error, ValueError)
+            mock_logger.assert_called_with("Error in test operation: Test error")
 
     def test_error_context_with_cleanup(self):
         """Test ErrorContext with cleanup function."""
@@ -977,13 +988,13 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch("claude.shared.utils.error_handling.logger") as mock_logger:
+        with patch.object(logger, 'error') as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")
 
             # Should log both the original error and cleanup failure
-            assert mock_logger.error.call_count == 2
+            assert mock_logger.call_count == 2
 
     def test_error_context_suppress_errors(self):
         """Test ErrorContext with error suppression."""

@@ -1,7 +1,3 @@
-from datetime import datetime, timedelta
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-from unittest import TestCase
 #!/usr/bin/env python3
 """
 Comprehensive tests for containerized orchestrator execution.
@@ -18,23 +14,27 @@ Key test scenarios:
 """
 
 import asyncio
+from datetime import datetime, timedelta
 import shutil
 import sys
 import tempfile
+import unittest
 from pathlib import Path
 from typing import Any, Dict, Optional
+from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest import TestCase
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Define imports conditionally to avoid type conflicts
 IMPORTS_AVAILABLE = False
-ExecutionEngine = None
-TaskExecutor = None
-ExecutionResult = None  
-ContainerManager = None
-ContainerConfig = None
-ContainerResult = None
-OrchestrationMonitor = None
+ExecutionEngine: Optional[type] = None
+TaskExecutor: Optional[type] = None
+ExecutionResult: Optional[type] = None  
+ContainerManager: Optional[type] = None
+ContainerConfig: Optional[type] = None
+ContainerResult: Optional[type] = None
+OrchestrationMonitor: Optional[type] = None
 
 try:
     from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
@@ -50,7 +50,7 @@ except ImportError as e:
 class TestContainerConfig(unittest.TestCase):
     """Test ContainerConfig dataclass and validation"""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """Test default configuration values"""
         config = ContainerConfig()
 
@@ -67,7 +67,7 @@ class TestContainerConfig(unittest.TestCase):
         self.assertIn("--max-turns=50", config.claude_flags)
         self.assertIn("--output-format=json", config.claude_flags)
 
-    def test_custom_config(self):
+    def test_custom_config(self) -> None:
         """Test custom configuration values"""
         custom_flags = ["--custom-flag", "--another-flag"]
         config = ContainerConfig(
@@ -91,7 +91,7 @@ class TestContainerConfig(unittest.TestCase):
 class TestContainerManager(unittest.TestCase):
     """Test ContainerManager Docker operations"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.test_dir = Path(tempfile.mkdtemp())
         self.test_worktree = self.test_dir / "test-worktree"
@@ -106,13 +106,13 @@ class TestContainerManager(unittest.TestCase):
         self.container_mock = Mock()
         self.docker_mock.containers.run.return_value = self.container_mock
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir)
 
     @patch('container_manager.docker')
-    def test_container_manager_initialization(self, mock_docker):
+    def test_container_manager_initialization(self, mock_docker: Mock) -> None:
         """Test ContainerManager initialization"""
         mock_docker.from_env.return_value = self.docker_mock
         self.docker_mock.ping.return_value = True
@@ -127,7 +127,7 @@ class TestContainerManager(unittest.TestCase):
         self.docker_mock.ping.assert_called_once()
 
     @patch('container_manager.docker')
-    def test_docker_not_available_error(self, mock_docker):
+    def test_docker_not_available_error(self, mock_docker: Mock) -> None:
         """Test ContainerManager handles Docker unavailability"""
         mock_docker.from_env.side_effect = Exception("Docker daemon not running")
 
@@ -139,7 +139,7 @@ class TestContainerManager(unittest.TestCase):
         self.assertIn("Docker initialization failed", str(context.exception))
 
     @patch('container_manager.docker')
-    def test_containerized_task_execution(self, mock_docker):
+    def test_containerized_task_execution(self, mock_docker: Mock) -> None:
         """Test single containerized task execution"""
         # Setup mocks
         mock_docker.from_env.return_value = self.docker_mock
@@ -197,7 +197,7 @@ class TestContainerManager(unittest.TestCase):
         self.assertIn('/workspace', call_args[1]['volumes'])
 
     @patch('container_manager.docker')
-    def test_parallel_task_execution(self, mock_docker):
+    def test_parallel_task_execution(self, mock_docker: Mock) -> None:
         """Test parallel execution of multiple containerized tasks"""
         # Setup mocks
         mock_docker.from_env.return_value = self.docker_mock
@@ -255,7 +255,7 @@ class TestContainerManager(unittest.TestCase):
         self.assertEqual(self.docker_mock.containers.run.call_count, 3)
 
     @patch('container_manager.docker')
-    def test_container_failure_handling(self, mock_docker):
+    def test_container_failure_handling(self, mock_docker: Mock) -> None:
         """Test handling of container execution failures"""
         # Setup mocks
         mock_docker.from_env.return_value = self.docker_mock
@@ -289,7 +289,7 @@ class TestContainerManager(unittest.TestCase):
         self.assertEqual(result.stdout, "Error: Task failed")
         self.assertIsNone(result.error_message)  # No exception, just failed exit code
 
-    def test_container_timeout_handling(self):
+    def test_container_timeout_handling(self) -> None:
         """Test container timeout handling"""
         # This would require more complex mocking of asyncio/threading
         # For now, test the timeout configuration
@@ -301,18 +301,18 @@ class TestContainerManager(unittest.TestCase):
 class TestExecutionEngineContainerization(unittest.TestCase):
     """Test ExecutionEngine integration with ContainerManager"""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test environment"""
         self.test_dir = Path(tempfile.mkdtemp())
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up test environment"""
         if self.test_dir.exists():
             shutil.rmtree(self.test_dir)
 
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('components.execution_engine.ContainerManager')
-    def test_execution_engine_uses_containers(self, mock_container_manager):
+    def test_execution_engine_uses_containers(self, mock_container_manager: Mock) -> None:
         """Test that ExecutionEngine uses ContainerManager when available"""
         mock_manager = Mock()
         mock_container_manager.return_value = mock_manager
@@ -325,7 +325,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
         self.assertIsNotNone(engine.container_manager)
 
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', False)
-    def test_execution_engine_fallback_subprocess(self):
+    def test_execution_engine_fallback_subprocess(self) -> None:
         """Test that ExecutionEngine falls back to subprocess when containers unavailable"""
         engine = ExecutionEngine()
 
@@ -397,7 +397,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
             shutil.rmtree(self.test_dir)
 
     @patch('monitoring.dashboard.docker')
-    def test_monitor_initialization(self, mock_docker):
+    def test_monitor_initialization(self, mock_docker: Mock) -> None:
         """Test OrchestrationMonitor initialization"""
         mock_docker_client = Mock()
         mock_docker.from_env.return_value = mock_docker_client
@@ -409,7 +409,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         self.assertIsNotNone(monitor.docker_client)
 
     @patch('monitoring.dashboard.docker')
-    def test_container_status_update(self, mock_docker):
+    def test_container_status_update(self, mock_docker: Mock) -> None:
         """Test container status monitoring"""
         mock_docker_client = Mock()
         mock_docker.from_env.return_value = mock_docker_client
@@ -460,7 +460,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
 class TestPerformanceComparisons(unittest.TestCase):
     """Test performance improvements of containerized vs subprocess execution"""
 
-    def test_execution_statistics_tracking(self):
+    def test_execution_statistics_tracking(self) -> None:
         """Test that execution statistics properly track performance metrics"""
         # This would be an integration test measuring actual execution times
         # For unit testing, we verify the statistics structure
@@ -499,7 +499,7 @@ class TestIntegrationWorkflow(unittest.TestCase):
 
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('container_manager.docker')
-    def test_end_to_end_containerized_workflow(self, mock_docker):
+    def test_end_to_end_containerized_workflow(self, mock_docker: Mock) -> None:
         """Test complete end-to-end containerized workflow"""
         # Setup Docker mocks
         mock_docker_client = Mock()
@@ -566,13 +566,13 @@ Test containerized execution
             self.assertIn('--output-format=json', command)
 
 
-def run_containerized_tests() -> bool:
+def run_containerized_tests() -> Optional[bool]:
     """Run all containerized orchestrator tests"""
 
     if not IMPORTS_AVAILABLE:
         print("⚠️  Cannot run tests - required modules not available")
         print("This is expected if Docker SDK or other dependencies are not installed")
-        return
+        return None
 
     # Create test suite
     suite = unittest.TestSuite()

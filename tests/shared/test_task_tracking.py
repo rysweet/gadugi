@@ -17,39 +17,35 @@ from typing import Any, Dict, List, Optional
 import pytest
 from unittest.mock import Mock, patch
 
-# For type checking only
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from claude.shared.task_tracking import (
-        Task,
-        TaskError,
-        TaskList,
-        TaskMetrics,
-        TaskPriority,
-        TaskStatus,
-        TaskTracker,
-        TaskValidationError,
-        TodoWriteIntegration,
-        WorkflowPhaseTracker,
-    )
+# TYPE_CHECKING imports removed due to conflicts with stub implementations
 
 # Fix imports for pyright
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
     from claude.shared.task_tracking import (
-        Task,
-        TaskError,
-        TaskList,
-        TaskMetrics,
-        TaskPriority,
-        TaskStatus,
-        TaskTracker,
-        TaskValidationError,
-        TodoWriteIntegration,
-        WorkflowPhaseTracker,
+        Task as _ImportedTask,
+        TaskError as _ImportedTaskError,
+        TaskList as _ImportedTaskList,
+        TaskMetrics as _ImportedTaskMetrics,
+        TaskPriority as _ImportedTaskPriority,
+        TaskStatus as _ImportedTaskStatus,
+        TaskTracker as _ImportedTaskTracker,
+        TaskValidationError as _ImportedTaskValidationError,
+        TodoWriteIntegration as _ImportedTodoWriteIntegration,
+        WorkflowPhaseTracker as _ImportedWorkflowPhaseTracker,
     )
+    # Use imported classes
+    Task = _ImportedTask
+    TaskError = _ImportedTaskError
+    TaskList = _ImportedTaskList
+    TaskMetrics = _ImportedTaskMetrics
+    TaskPriority = _ImportedTaskPriority
+    TaskStatus = _ImportedTaskStatus
+    TaskTracker = _ImportedTaskTracker
+    TaskValidationError = _ImportedTaskValidationError
+    TodoWriteIntegration = _ImportedTodoWriteIntegration
+    WorkflowPhaseTracker = _ImportedWorkflowPhaseTracker
 except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(

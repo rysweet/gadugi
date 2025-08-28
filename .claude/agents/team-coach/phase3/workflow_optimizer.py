@@ -106,7 +106,7 @@ class WorkflowOptimizer:
     - Implementation guidance
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the workflow optimizer."""
         self.workflow_patterns: Dict[str, Dict[str, Any]] = {}
         self.optimization_history: List[Tuple[str, WorkflowOptimization, float]] = []
@@ -377,13 +377,13 @@ class WorkflowOptimizer:
                     affected_agents=[
                         t.get("agent_id")
                         for t in task_history
-                        if resource in t.get("resources_used", [])
-                     if t.get("agent_id") is not None],
+                        if resource in t.get("resources_used", []) and t.get("agent_id") is not None
+                    ],  # type: ignore
                     affected_tasks=[
                         t.get("task_id")
                         for t in task_history
-                        if resource in t.get("resources_used", [])
-                     if t.get("task_id") is not None],
+                        if resource in t.get("resources_used", []) and t.get("task_id") is not None
+                    ],  # type: ignore
                     description=f"Resource '{resource}' is overutilized ({utilization:.1%})",
                     evidence={
                         "resource": resource,
@@ -563,8 +563,8 @@ class WorkflowOptimizer:
                     affected_tasks=[
                         t.get("task_id")
                         for t in task_history
-                        if t.get("communication_delay", 0)
-                        > self.bottleneck_thresholds["communication_delay" if t.get("task_id") is not None]
+                        if (t.get("communication_delay", 0) > self.bottleneck_thresholds["communication_delay"] 
+                            and t.get("task_id") is not None)
                     ],
                     description=f"Communication delays averaging {avg_delay / 60:.1f} minutes",
                     evidence={
@@ -598,7 +598,7 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Quality control process",
                 impact=rework_rate * 100,
-                affected_agents=list(set(t.get("agent_id") for t in rework_tasks)),
+                affected_agents=[t.get("agent_id") for t in rework_tasks if t.get("agent_id") is not None],  # type: ignore
                 affected_tasks=[t.get("task_id") for t in rework_tasks if t.get("task_id") is not None],
                 description=f"High rework rate ({rework_rate:.1%}) indicating process issues",
                 evidence={
@@ -619,7 +619,7 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Overall workflow",
                 impact=(0.7 - metrics.efficiency_ratio) * 100,
-                affected_agents=list(set(t.get("agent_id") for t in task_history)),
+                affected_agents=[t.get("agent_id") for t in task_history if t.get("agent_id") is not None],  # type: ignore
                 affected_tasks=[t.get("task_id") for t in task_history if t.get("task_id") is not None],
                 description=f"Low workflow efficiency ({metrics.efficiency_ratio:.1%})",
                 evidence={
@@ -657,7 +657,7 @@ class WorkflowOptimizer:
                 "4. Add capacity planning for peak usage times",
                 "5. Consider adding additional capacity if needed",
             ],
-            affected_components=[resource] + bottleneck.affected_agents,
+            affected_components=[resource] + (bottleneck.affected_agents or []),  # type: ignore
             effort_estimate="3-5 days",
             prerequisites=[
                 "Resource usage audit",
@@ -1020,7 +1020,7 @@ class WorkflowOptimizer:
 
         return 7  # Default to 1 week
 
-    def _update_workflow_patterns(self, workflow_id: str, analysis: WorkflowAnalysis):
+    def _update_workflow_patterns(self, workflow_id: str, analysis: WorkflowAnalysis) -> None:
         """Update workflow patterns for future learning."""
         if workflow_id not in self.workflow_patterns:
             self.workflow_patterns[workflow_id] = {
