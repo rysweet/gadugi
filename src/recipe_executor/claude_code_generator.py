@@ -97,7 +97,8 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         if not context.dry_run:
             # Use the provided output directory or create a subdirectory in current directory
             if output_dir:
-                temp_path = output_dir / f"generated_{recipe.name}"
+                # Use output_dir directly, don't create nested generated_* subdirectory
+                temp_path = output_dir
             else:
                 temp_path = Path.cwd() / f"generated_{recipe.name}"
 
@@ -278,18 +279,62 @@ This is a FRESH implementation. Let the recipe guide your implementation.
         
         base_prompt = context_header + "\n\n" + self._create_generation_prompt(recipe, output_path)
         
-        # Add simple file creation examples
+        # Add explicit list of required files
         path_instructions = """
-## File Creation Examples
+## REQUIRED FILES - YOU MUST CREATE ALL OF THESE
 
-Use the Write tool with RELATIVE paths:
-```
-Write tool with file_path: src/__init__.py
-Write tool with file_path: src/recipe_model.py  
-Write tool with file_path: tests/test_recipe_model.py
-```
+You MUST create ALL the following files with EXACT names and paths:
 
-**Remember**: You're in an isolated directory. All paths are relative to your current working directory.
+### Core Model and Parsing (REQUIRED)
+- `src/recipe_executor/__init__.py`
+- `src/recipe_executor/recipe_model.py` - Data models for recipes
+- `src/recipe_executor/recipe_parser.py` - Parse recipe files
+- `src/recipe_executor/recipe_validator.py` - Validate recipe structure
+- `src/recipe_executor/recipe_decomposer.py` - Break down complex recipes
+- `src/recipe_executor/dependency_resolver.py` - Resolve recipe dependencies
+
+### Generation Components (REQUIRED)
+- `src/recipe_executor/claude_code_generator.py` - Claude Code integration
+- `src/recipe_executor/test_generator.py` - Generate tests from recipes
+- `src/recipe_executor/test_solver.py` - Fix failing tests
+- `src/recipe_executor/base_generator.py` - Base code generation logic
+
+### Quality and Review (REQUIRED)
+- `src/recipe_executor/code_reviewer.py` - Automated code review
+- `src/recipe_executor/code_review_response.py` - Handle review feedback
+- `src/recipe_executor/requirements_validator.py` - Validate requirements
+- `src/recipe_executor/validator.py` - General validation
+- `src/recipe_executor/quality_gates.py` - Quality enforcement
+
+### Stub Detection (REQUIRED)
+- `src/recipe_executor/stub_detector.py` - Detect incomplete code
+- `src/recipe_executor/intelligent_stub_detector.py` - Smart stub detection
+
+### Orchestration (REQUIRED)
+- `src/recipe_executor/orchestrator.py` - Main orchestration logic
+- `src/recipe_executor/state_manager.py` - Manage build state
+- `src/recipe_executor/parallel_builder.py` - Parallel execution
+
+### Standards and Utilities (REQUIRED)
+- `src/recipe_executor/python_standards.py` - Python quality standards
+- `src/recipe_executor/pattern_manager.py` - Design patterns
+- `src/recipe_executor/prompt_loader.py` - Load prompt templates
+- `src/recipe_executor/language_detector.py` - Detect code languages
+- `src/recipe_executor/uv_environment.py` - UV environment setup
+
+### Entry Points (REQUIRED)
+- `src/recipe_executor/__main__.py` - Main entry point
+- `src/recipe_executor/cli.py` - CLI interface
+
+### Tests (REQUIRED)
+- `tests/__init__.py`
+- `tests/test_recipe_executor.py` - Main test suite
+
+### Additional Files
+- `pyproject.toml` - Project configuration
+- `README.md` - Documentation
+
+**CRITICAL**: Create files with EXACT names above. DO NOT create files with different names like 'code_generator.py' or 'executor.py' - use the EXACT names listed.
 """
         return base_prompt + "\n" + path_instructions
 

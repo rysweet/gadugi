@@ -143,9 +143,10 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 
 #### 5.2 AI-Powered Code Generation
 - MUST use AI-powered code generation, not template-based generation
-- **CRITICAL: NO TIMEOUT on AI generation process - complex recipes require patience**
-- MUST wait indefinitely for AI to complete code generation
-- MUST NOT terminate AI process due to inactivity or time elapsed
+- **CRITICAL: ABSOLUTELY NO TIMEOUT on AI generation process - complex recipes require patience**
+- **MUST wait INDEFINITELY for AI to complete code generation - DO NOT USE timeout parameters**
+- **MUST NOT terminate AI process due to inactivity or time elapsed - EVER**
+- **NO subprocess timeout, NO process.wait(timeout), NO signal alarms - PATIENCE IS MANDATORY**
 - MUST create detailed generation prompts that include:
   - Complete requirements with validation criteria
   - Design specifications with architectural decisions
