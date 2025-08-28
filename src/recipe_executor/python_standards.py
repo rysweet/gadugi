@@ -137,8 +137,13 @@ if TYPE_CHECKING:
 __all__ = {exports}
 '''
 
-    def format_code_with_ruff(self, code: str) -> str:
-        """Format Python code using ruff."""
+    def format_code_with_ruff(self, code: str, use_project_context: bool = False) -> str:
+        """Format Python code using ruff.
+        
+        Args:
+            code: Python code to format
+            use_project_context: If True, uses uv run within project. If False, runs ruff directly.
+        """
         if not self.use_ruff:
             return code
 
@@ -148,9 +153,16 @@ __all__ = {exports}
             temp_path = f.name
 
         try:
-            # Run ruff format
+            # Decide whether to use uv run or direct ruff
+            if use_project_context and self.use_uv:
+                # Use UV within project context
+                cmd = ["uv", "run", "ruff", "format", temp_path]
+            else:
+                # Run ruff directly (for temp files outside project)
+                cmd = ["ruff", "format", temp_path]
+                
             subprocess.run(
-                ["uv", "run", "ruff", "format", temp_path],
+                cmd,
                 check=True,
                 capture_output=True,
                 text=True,
@@ -170,9 +182,15 @@ __all__ = {exports}
             Path(temp_path).unlink(missing_ok=True)
 
     def check_code_with_pyright(
-        self, code: str, module_name: str = "temp"
+        self, code: str, module_name: str = "temp", use_project_context: bool = False
     ) -> tuple[bool, list[str]]:
-        """Check Python code with pyright for type errors."""
+        """Check Python code with pyright for type errors.
+        
+        Args:
+            code: Python code to check
+            module_name: Name for the temporary module
+            use_project_context: If True, uses uv run within project. If False, runs pyright directly.
+        """
         if not self.use_pyright:
             return True, []
 
@@ -192,8 +210,14 @@ __all__ = {exports}
 
             # Run pyright
             try:
+                # Decide whether to use uv run or direct pyright
+                if use_project_context and self.use_uv:
+                    cmd = ["uv", "run", "pyright", str(src_dir)]
+                else:
+                    cmd = ["pyright", str(src_dir)]
+                    
                 result = subprocess.run(
-                    ["uv", "run", "pyright", str(src_dir)],
+                    cmd,
                     cwd=temp_path,
                     capture_output=True,
                     text=True,
@@ -427,4 +451,46 @@ class QualityGates:
             )
             return result.returncode == 0
         except Exception:
+            return False
+
+    def check_ruff_format(self, directory_path: Path) -> bool:
+        """Check if all Python files in directory are properly formatted.
+        
+        This method handles both project directories and external directories.
+        For external directories (like temp dirs), it runs ruff directly without UV.
+        """
+        try:
+            # Check if this is a UV project (has pyproject.toml and uv.lock)
+            is_uv_project = (directory_path / "pyproject.toml").exists() and (directory_path / "uv.lock").exists()
+            
+            # Find all Python files
+            python_files = list(directory_path.rglob("*.py"))
+            if not python_files:
+                return True  # No Python files to check
+            
+            # Run ruff format check
+            if is_uv_project:
+                # Use UV for project directories
+                cmd = ["uv", "run", "ruff", "format", "--check"] + [str(f) for f in python_files]
+                cwd = directory_path
+            else:
+                # Run ruff directly for non-project directories (like temp dirs)
+                cmd = ["ruff", "format", "--check"] + [str(f) for f in python_files]
+                cwd = directory_path
+            
+            result = subprocess.run(
+                cmd,
+                cwd=cwd,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            
+            return result.returncode == 0
+        except FileNotFoundError:
+            # Ruff not installed
+            print("Warning: ruff not found, skipping format check")
+            return True
+        except Exception as e:
+            print(f"Error checking ruff format: {e}")
             return False

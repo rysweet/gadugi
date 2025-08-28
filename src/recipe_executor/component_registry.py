@@ -12,55 +12,55 @@ class ComponentRegistry:
     
     # Core components required for bootstrap
     BOOTSTRAP_COMPONENTS = {
-        'stub_detector': 'src/stub_detector.py',
-        'intelligent_stub_detector': 'src/intelligent_stub_detector.py', 
-        'base_generator': 'src/base_generator.py',
+        'stub_detector': 'src/recipe_executor/stub_detector.py',
+        'intelligent_stub_detector': 'src/recipe_executor/intelligent_stub_detector.py', 
+        'base_generator': 'src/recipe_executor/base_generator.py',
     }
     
     # All required components for complete system
     REQUIRED_COMPONENTS = {
         # Data Models
-        'recipe_model': 'src/recipe_model.py',
+        'recipe_model': 'src/recipe_executor/recipe_model.py',
         
         # Parsing & Validation
-        'recipe_parser': 'src/recipe_parser.py',
-        'recipe_validator': 'src/recipe_validator.py',
-        'recipe_decomposer': 'src/recipe_decomposer.py',
-        'dependency_resolver': 'src/dependency_resolver.py',
+        'recipe_parser': 'src/recipe_executor/recipe_parser.py',
+        'recipe_validator': 'src/recipe_executor/recipe_validator.py',
+        'recipe_decomposer': 'src/recipe_executor/recipe_decomposer.py',
+        'dependency_resolver': 'src/recipe_executor/dependency_resolver.py',
         
         # Generation
-        'claude_code_generator': 'src/claude_code_generator.py',
-        'test_generator': 'src/test_generator.py',
-        'test_solver': 'src/test_solver.py',
-        'base_generator': 'src/base_generator.py',
+        'claude_code_generator': 'src/recipe_executor/claude_code_generator.py',
+        'test_generator': 'src/recipe_executor/test_generator.py',
+        'test_solver': 'src/recipe_executor/test_solver.py',
+        'base_generator': 'src/recipe_executor/base_generator.py',
         
         # Quality & Review
-        'code_reviewer': 'src/code_reviewer.py',
-        'code_review_response': 'src/code_review_response.py',
-        'requirements_validator': 'src/requirements_validator.py',
-        'validator': 'src/validator.py',
-        'quality_gates': 'src/quality_gates.py',
+        'code_reviewer': 'src/recipe_executor/code_reviewer.py',
+        'code_review_response': 'src/recipe_executor/code_review_response.py',
+        'requirements_validator': 'src/recipe_executor/requirements_validator.py',
+        'validator': 'src/recipe_executor/validator.py',
+        'quality_gates': 'src/recipe_executor/quality_gates.py',
         
         # Stub Detection
-        'stub_detector': 'src/stub_detector.py',
-        'intelligent_stub_detector': 'src/intelligent_stub_detector.py',
+        'stub_detector': 'src/recipe_executor/stub_detector.py',
+        'intelligent_stub_detector': 'src/recipe_executor/intelligent_stub_detector.py',
         
         # Orchestration
-        'orchestrator': 'src/orchestrator.py',
-        'state_manager': 'src/state_manager.py',
-        'parallel_builder': 'src/parallel_builder.py',
+        'orchestrator': 'src/recipe_executor/orchestrator.py',
+        'state_manager': 'src/recipe_executor/state_manager.py',
+        'parallel_builder': 'src/recipe_executor/parallel_builder.py',
         
         # Standards & Utilities
-        'python_standards': 'src/python_standards.py',
-        'pattern_manager': 'src/pattern_manager.py',
-        'prompt_loader': 'src/prompt_loader.py',
-        'language_detector': 'src/language_detector.py',
-        'uv_environment': 'src/uv_environment.py',
+        'python_standards': 'src/recipe_executor/python_standards.py',
+        'pattern_manager': 'src/recipe_executor/pattern_manager.py',
+        'prompt_loader': 'src/recipe_executor/prompt_loader.py',
+        'language_detector': 'src/recipe_executor/language_detector.py',
+        'uv_environment': 'src/recipe_executor/uv_environment.py',
         
         # Entry Points
-        '__init__': 'src/__init__.py',
-        '__main__': 'src/__main__.py',
-        'cli': 'cli.py',
+        '__init__': 'src/recipe_executor/__init__.py',
+        '__main__': 'src/recipe_executor/__main__.py',
+        'cli': 'src/recipe_executor/cli.py',
         
         # Configuration
         'pyproject.toml': 'pyproject.toml',

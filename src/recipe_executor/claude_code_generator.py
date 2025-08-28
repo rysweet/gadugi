@@ -186,9 +186,10 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                 raise ClaudeCodeGenerationError(error_msg)
 
             # Apply Python standards (format with ruff, check with pyright)
+            # Don't use UV context since these are temp files not in a project yet
             for file_path in list(generated_files.keys()):
                 content = generated_files[file_path]
-                formatted = self.standards.format_code_with_ruff(content)
+                formatted = self.standards.format_code_with_ruff(content, use_project_context=False)
                 generated_files[file_path] = formatted
 
             # Step 3: Detect and remediate any stub implementations
