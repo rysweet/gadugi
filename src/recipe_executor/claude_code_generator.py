@@ -892,11 +892,22 @@ Output Directory: {abs_output_path}/
 ## Design
 {self._format_design(recipe.design)}
 
+## CRITICAL QUALITY REQUIREMENTS
+
+**ALL GENERATED PYTHON CODE MUST:**
+1. ✅ Pass pyright type checking with ZERO errors in strict mode
+2. ✅ Be properly formatted according to ruff standards
+3. ✅ Include comprehensive type hints for ALL functions, methods, and variables
+4. ✅ Use proper Python typing (Optional, List, Dict, Union, etc.)
+5. ✅ Handle None values explicitly with Optional types
+6. ✅ Have NO stubs, placeholders, or NotImplementedError
+
 ## Instructions
 1. Analyze the requirements and design above
 2. Create all necessary files to satisfy the requirements
 3. All files should be created in: {abs_output_path}/
-4. Ensure implementations are complete (no stubs or placeholders)
+4. Write pyright-compliant code with proper type annotations
+5. Follow ruff formatting standards (line length, imports, etc.)
 
 ## EXAMPLE OF REQUIRED IMPLEMENTATION QUALITY
 

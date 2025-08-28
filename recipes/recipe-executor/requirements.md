@@ -151,6 +151,9 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
   - Design specifications with architectural decisions
   - Existing test files that need to pass
   - Quality standards and coding conventions
+  - **Explicit instructions to generate pyright-compliant code with zero type errors**
+  - **Explicit instructions to follow ruff formatting standards**
+  - **Examples of properly typed and formatted Python code**
 - MUST parse generated output to extract files and their content
 - MUST validate that generated code satisfies requirements before proceeding
 
@@ -292,9 +295,17 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST enforce quality gates at each stage of the build process
 - MUST ensure all generated Python code passes strict pyright type checking with zero errors
   - Example: "error: Argument of type 'str | None' cannot be assigned to parameter of type 'str'"
+  - MUST run pyright check immediately after generation
+  - MUST fail generation if any pyright errors exist
 - MUST format all generated code with ruff, automatically fixing style issues
+  - MUST run `ruff format` on all generated Python files
+  - MUST run `ruff check --fix` to fix auto-fixable linting issues
+  - MUST report any unfixable linting issues as errors
 - MUST use UV for package management in all Python projects, ensuring consistent dependency resolution
-- MUST automatically create UV virtual environments when generating Python projects using `uv sync`
+- MUST automatically create UV virtual environments when generating Python projects:
+  - MUST run `uv sync --all-extras` after generating pyproject.toml
+  - MUST ensure virtual environment is created before running quality checks
+  - MUST use `uv run` prefix for all Python commands in generated projects
 - MUST detect UV availability and provide clear instructions if UV is not installed
 - MUST execute all generated tests with pytest and fail if any test fails
 - MUST check code coverage and warn if below 80% threshold

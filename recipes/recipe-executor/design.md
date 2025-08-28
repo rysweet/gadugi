@@ -6,6 +6,7 @@
 - **Technology**: Claude Code CLI (`claude -p`) for all code generation
 - **Rationale**: Built-in retry logic, consistent quality, no need for templates
 - **Note**: Claude CLI handles its own exponential backoff and retry logic
+- **Quality Enforcement**: All prompts explicitly instruct Claude to generate pyright-compliant and ruff-formatted code
 
 ### TDD-First Approach
 - Tests generated before implementation
@@ -127,10 +128,15 @@ graph TD
 The Recipe Executor is designed to be language-agnostic while providing language-specific enhancements:
 
 1. **Language Detection**: Target language is specified in design.md as "Language: Python" or similar
-2. **Prompt Templates**: Language-agnostic templates in `prompts/` directory
+2. **Prompt Templates**: Language-agnostic templates in `prompts/` directory with quality enforcement
 3. **Context Loading**: Always includes `context/CRITICAL_GUIDELINES.md` and `.claude/Guidelines.md`
 4. **Language Context**: Loads language-specific guidelines from `context/languages/{language}.md`
 5. **Quality Standards**: Applies language-appropriate linting, formatting, and testing tools
+6. **Quality Instructions**: All prompts include explicit instructions for:
+   - Zero pyright errors in strict mode for Python
+   - Proper ruff formatting compliance
+   - Comprehensive type hints on all functions and variables
+   - Examples of properly typed and formatted code
 
 ## Core Components
 
@@ -1353,30 +1359,58 @@ build-backend = "hatchling.build"
 ### 13. Quality Gates (`quality_gates.py`)
 ```python
 class QualityGates:
-    """Runs quality checks on generated code."""
+    """Runs quality checks on generated code with UV environment setup."""
     
-    def run_all_gates(self, implementation: Implementation) -> dict[str, bool]:
-        """Run all quality gates and return results."""
+    def run_all_gates(self, project_dir: Path) -> dict[str, bool]:
+        """Run all quality gates and return results.
+        
+        MUST set up UV environment before running checks.
+        """
         results = {}
         
-        # Create temporary project directory
-        with tempfile.TemporaryDirectory() as temp_dir:
-            project_dir = Path(temp_dir)
+        # First, ensure UV environment is set up
+        if (project_dir / "pyproject.toml").exists():
+            setup_result = subprocess.run(
+                ["uv", "sync", "--all-extras"],
+                cwd=project_dir,
+                capture_output=True,
+                text=True
+            )
+            results["uv_setup"] = setup_result.returncode == 0
             
-            # Write implementation files
-            for filepath, content in implementation.code.files.items():
-                file_path = project_dir / filepath
-                file_path.parent.mkdir(parents=True, exist_ok=True)
-                file_path.write_text(content)
-            
-            # Run quality gates
-            results["pyright"] = self._run_pyright(project_dir)
-            results["ruff_format"] = self._run_ruff_format(project_dir)
-            results["ruff_lint"] = self._run_ruff_lint(project_dir)
-            results["pytest"] = self._run_pytest(project_dir)
-            results["coverage"] = self._check_coverage(project_dir)
+            if not results["uv_setup"]:
+                return results  # Can't proceed without environment
+        
+        # Format code first (fixes issues)
+        results["ruff_format"] = self._run_ruff_format(project_dir)
+        results["ruff_lint"] = self._run_ruff_lint_fix(project_dir)
+        
+        # Then check quality
+        results["pyright"] = self._run_pyright(project_dir)
+        results["pytest"] = self._run_pytest(project_dir)
+        results["coverage"] = self._check_coverage(project_dir)
         
         return results
+    
+    def _run_ruff_format(self, project_dir: Path) -> bool:
+        """Format all Python files with ruff."""
+        result = subprocess.run(
+            ["uv", "run", "ruff", "format", "."],
+            cwd=project_dir,
+            capture_output=True,
+            text=True
+        )
+        return result.returncode == 0
+    
+    def _run_ruff_lint_fix(self, project_dir: Path) -> bool:
+        """Fix auto-fixable linting issues with ruff."""
+        result = subprocess.run(
+            ["uv", "run", "ruff", "check", ".", "--fix"],
+            cwd=project_dir,
+            capture_output=True,
+            text=True
+        )
+        return result.returncode == 0
     
     def _run_pyright(self, project_dir: Path) -> bool:
         """Run pyright type checking - must have zero errors."""
@@ -1386,6 +1420,9 @@ class QualityGates:
             capture_output=True,
             text=True
         )
+        # Log errors if any
+        if result.returncode != 0:
+            print(f"Pyright errors:\n{result.stdout}")
         return result.returncode == 0
 ```
 

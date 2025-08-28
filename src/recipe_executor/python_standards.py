@@ -380,19 +380,60 @@ class QualityGates:
     standards: PythonStandards = field(default_factory=PythonStandards)
 
     def run_all_gates(self, project_path: Path) -> Dict[str, bool]:
-        """Run all quality gates on a project."""
+        """Run all quality gates on a project.
+        
+        MUST set up UV environment before running checks if pyproject.toml exists.
+        """
         results: Dict[str, bool] = {}
 
-        # Run pyright
+        # First, ensure UV environment is set up if this is a UV project
+        if (project_path / "pyproject.toml").exists():
+            try:
+                setup_result = subprocess.run(
+                    ["uv", "sync", "--all-extras"],
+                    cwd=project_path,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                results["uv_setup"] = setup_result.returncode == 0
+                
+                if not results["uv_setup"]:
+                    print(f"Warning: UV setup failed, quality gates may not work properly")
+                    # Try to continue anyway
+            except FileNotFoundError:
+                print("Warning: UV not found, skipping environment setup")
+                results["uv_setup"] = False
+
+        # Format code first (fixes issues automatically)
+        try:
+            format_result = subprocess.run(
+                ["uv", "run", "ruff", "format", "."],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            results["ruff_format"] = format_result.returncode == 0
+        except:
+            results["ruff_format"] = False
+
+        # Fix auto-fixable linting issues
+        try:
+            lint_fix_result = subprocess.run(
+                ["uv", "run", "ruff", "check", ".", "--fix"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            results["ruff_lint_fix"] = lint_fix_result.returncode == 0
+        except:
+            results["ruff_lint_fix"] = False
+
+        # Now check quality after fixes
         results["pyright"] = self._run_pyright(project_path)
-
-        # Run ruff format check
-        results["ruff_format"] = self._run_ruff_format_check(project_path)
-
-        # Run ruff lint
-        results["ruff_lint"] = self._run_ruff_lint(project_path)
-
-        # Run pytest
+        results["ruff_check"] = self._run_ruff_lint(project_path)
         results["pytest"] = self._run_pytest(project_path)
 
         return results

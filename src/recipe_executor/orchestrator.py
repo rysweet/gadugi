@@ -3,6 +3,7 @@
 from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass
 from pathlib import Path
+import subprocess
 import time
 import logging
 from datetime import datetime
@@ -273,6 +274,19 @@ class RecipeOrchestrator:
                     full_path.write_text(content)
                     if options.verbose:
                         print(f"  Created test: {full_path}")
+
+                # Set up UV environment if pyproject.toml exists
+                if (output_dir / "pyproject.toml").exists():
+                    if options.verbose:
+                        print(f"Setting up UV environment for {recipe.name}...")
+                    setup_result = subprocess.run(
+                        ["uv", "sync", "--all-extras"],
+                        cwd=output_dir,
+                        capture_output=True,
+                        text=True,
+                    )
+                    if setup_result.returncode != 0:
+                        logger.warning(f"UV setup failed: {setup_result.stderr}")
 
                 # Run quality gates on the output directory
                 quality_result = self.quality_gates.run_all_gates(output_dir)
