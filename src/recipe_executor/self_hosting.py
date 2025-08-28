@@ -116,6 +116,7 @@ class SelfHostingManager:
             output_dir = Path(tempfile.mkdtemp(prefix="recipe_executor_self_host_"))
             logger.info(f"Using temporary output directory: {output_dir}")
         else:
+            output_dir = Path(output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
         
         if validate_only:
