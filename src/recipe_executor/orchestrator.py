@@ -125,7 +125,7 @@ class RecipeOrchestrator:
         if options.parallel:
             # Use parallel builder for better performance
             if self.parallel_builder is None:
-                self.parallel_builder = ParallelRecipeBuilder(self, max_workers=4)
+                self.parallel_builder = ParallelRecipeBuilder(max_workers=4)
 
             # Filter recipes that need rebuilding
             recipes_to_build = [
@@ -135,7 +135,13 @@ class RecipeOrchestrator:
             ]
 
             if recipes_to_build:
-                parallel_result = self.parallel_builder.build_parallel(recipes_to_build, options)
+                # Build in parallel - need to group them first
+                recipe_groups = [[r] for r in recipes_to_build]  # Each in its own group for now
+                parallel_result = self.parallel_builder.build_parallel(
+                    recipe_groups, 
+                    lambda r, opts: self._execute_single(r, opts),
+                    options
+                )
                 results = list(parallel_result.results.values())
 
                 # Record builds in state manager
@@ -144,7 +150,7 @@ class RecipeOrchestrator:
 
                 if options.verbose:
                     print(
-                        f"\nParallel build complete: {parallel_result.parallel_speedup:.1f}x speedup"
+                        f"\nParallel build complete in {parallel_result.total_time:.2f}s"
                     )
         else:
             # Sequential execution (original logic)
@@ -285,7 +291,7 @@ class RecipeOrchestrator:
             code = None
             tests = None
             validation = None
-            quality_result = {}
+            quality_result = {}  # type: ignore[assignment]
             success = False
             errors.append(str(e))
 

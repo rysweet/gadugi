@@ -239,7 +239,7 @@ class TestSolver:
         failed = 0
         skipped = 0
         errors = 0
-        failures = []
+        failures: List[TestFailure] = []
         
         # Parse summary line (e.g., "3 passed, 2 failed, 1 skipped")
         summary_pattern = r"(\d+)\s+passed|(\d+)\s+failed|(\d+)\s+skipped|(\d+)\s+error"
@@ -360,7 +360,7 @@ class TestSolver:
         current_code: CodeArtifact
     ) -> Dict[str, Any]:
         """Prepare context information for fix generation."""
-        context = {
+        context: Dict[str, Any] = {
             "failures": [],
             "current_files": {}
         }
@@ -447,6 +447,7 @@ class TestSolver:
         updated_files.update(changes)
         
         return CodeArtifact(
+            recipe_name=artifact.recipe_name,
             files=updated_files,
             language=artifact.language,
             framework=artifact.framework

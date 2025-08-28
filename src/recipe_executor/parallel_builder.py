@@ -1,7 +1,7 @@
 """Parallel builder for executing independent recipes concurrently."""
 
-from typing import List, Dict, Any
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Dict, Any, Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from dataclasses import dataclass
 import time
 
@@ -29,7 +29,7 @@ class ParallelRecipeBuilder:
         self.max_workers = max_workers
 
     def build_parallel(
-        self, recipe_groups: List[List[Recipe]], build_func, options: Any
+        self, recipe_groups: List[List[Recipe]], build_func: Callable[[Recipe, Any], SingleBuildResult], options: Any
     ) -> ParallelBuildResult:
         """Build recipes in parallel groups.
 
@@ -42,8 +42,8 @@ class ParallelRecipeBuilder:
             ParallelBuildResult with all build results
         """
         start_time = time.time()
-        all_results = {}
-        parallel_groups = []
+        all_results: Dict[str, SingleBuildResult] = {}
+        parallel_groups: List[List[str]] = []
 
         for group_idx, group in enumerate(recipe_groups):
             if options.verbose:
@@ -66,7 +66,7 @@ class ParallelRecipeBuilder:
         )
 
     def _build_group_parallel(
-        self, recipes: List[Recipe], build_func, options: Any
+        self, recipes: List[Recipe], build_func: Callable[[Recipe, Any], SingleBuildResult], options: Any
     ) -> Dict[str, SingleBuildResult]:
         """Build a group of recipes in parallel.
 
@@ -78,11 +78,11 @@ class ParallelRecipeBuilder:
         Returns:
             Dictionary mapping recipe names to build results
         """
-        results = {}
+        results: Dict[str, SingleBuildResult] = {}
 
         with ThreadPoolExecutor(max_workers=min(self.max_workers, len(recipes))) as executor:
             # Submit all builds
-            future_to_recipe = {
+            future_to_recipe: Dict[Future[SingleBuildResult], Recipe] = {
                 executor.submit(build_func, recipe, options): recipe for recipe in recipes
             }
 
@@ -90,7 +90,7 @@ class ParallelRecipeBuilder:
             for future in as_completed(future_to_recipe):
                 recipe = future_to_recipe[future]
                 try:
-                    result = future.result()
+                    result: SingleBuildResult = future.result()
                     results[recipe.name] = result
 
                     if options.verbose:
@@ -98,9 +98,16 @@ class ParallelRecipeBuilder:
                         print(f"  {status} {recipe.name} completed in {result.build_time:.2f}s")
 
                 except Exception as e:
-                    # Build failed with exception
+                    # Build failed with exception - create a proper SingleBuildResult
                     results[recipe.name] = SingleBuildResult(
-                        recipe_name=recipe.name, success=False, errors=[str(e)], build_time=0.0
+                        recipe=recipe,
+                        code=None,
+                        tests=None,
+                        validation=None,
+                        quality_result={},
+                        success=False,
+                        errors=[str(e)],
+                        build_time=0.0
                     )
 
                     if options.verbose:
@@ -120,17 +127,17 @@ class ParallelRecipeBuilder:
         Returns:
             List of groups, where each group can be built in parallel
         """
-        # Build a map of recipe names to recipes
-        recipe_map = {r.name: r for r in recipes}
+        # Build a map of recipe names to recipes (not used but kept for potential future use)
+        # recipe_map = {r.name: r for r in recipes}
 
         # Track which recipes have been assigned to groups
-        assigned = set()
-        groups = []
+        assigned: set[str] = set()
+        groups: List[List[Recipe]] = []
 
         # Keep grouping until all recipes are assigned
         while len(assigned) < len(recipes):
             # Find recipes that have no unassigned dependencies
-            current_group = []
+            current_group: List[Recipe] = []
 
             for recipe in recipes:
                 if recipe.name in assigned:

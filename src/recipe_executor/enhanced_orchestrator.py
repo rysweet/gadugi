@@ -1,23 +1,26 @@
 """Enhanced orchestrator with complete 10-stage recipe processing pipeline."""
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 import time
 from enum import Enum
-from datetime import datetime
 
 from .recipe_model import (
     Recipe,
     BuildContext,
-    BuildResult,
     SingleBuildResult,
+    Requirements,
+    Design,
+    Components,
+    RecipeMetadata,
+    ComponentType,
 )
 from .recipe_parser import RecipeParser
 from .dependency_resolver import DependencyResolver
-from .recipe_decomposer import RecipeDecomposer, SubRecipe
-from .tdd_pipeline import TDDPipeline, TDDCycleResult
+from .recipe_decomposer import RecipeDecomposer
+from .tdd_pipeline import TDDPipeline
 from .test_generator import TestGenerator
 from .test_solver import TestSolver
 from .claude_code_generator import ClaudeCodeGenerator
@@ -51,9 +54,9 @@ class StageResult:
     stage: PipelineStage
     success: bool
     duration: float
-    data: Dict[str, Any] = field(default_factory=dict)
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    data: Dict[str, Any] = field(default_factory=lambda: {})
+    errors: List[str] = field(default_factory=lambda: [])
+    warnings: List[str] = field(default_factory=lambda: [])
     
     @property
     def summary(self) -> str:
@@ -183,8 +186,18 @@ class EnhancedRecipeOrchestrator:
             self.current_recipe = recipe
         except Exception as e:
             logger.error(f"Failed to parse recipe: {e}")
+            # Create minimal recipe for error case
+            from datetime import datetime
+            empty_req = Requirements(purpose='error', functional_requirements=[], 
+                                    non_functional_requirements=[], success_criteria=[])
+            empty_design = Design(architecture='error', components=[], 
+                                interfaces=[], implementation_notes='')
+            empty_comp = Components(name='error', version='0.0.0', type=ComponentType.LIBRARY)
+            empty_meta = RecipeMetadata(created_at=datetime.now(), updated_at=datetime.now())
+            empty_recipe = Recipe(name='error', path=recipe_path, requirements=empty_req,
+                                design=empty_design, components=empty_comp, metadata=empty_meta)
             return PipelineResult(
-                recipe=None,
+                recipe=empty_recipe,
                 stages_completed=[],
                 final_artifact=None,
                 total_duration=time.time() - start_time,
@@ -220,8 +233,7 @@ class EnhancedRecipeOrchestrator:
             stage_result = self._execute_stage_2_complexity(recipe, context)
             self.stage_results.append(stage_result)
             
-            # Get potentially decomposed recipes
-            recipes_to_process = [recipe]
+            # Check for decomposed recipes
             if stage_result.data.get("sub_recipes"):
                 if verbose:
                     print(f"Recipe decomposed into {len(stage_result.data['sub_recipes'])} sub-recipes")
@@ -303,8 +315,8 @@ class EnhancedRecipeOrchestrator:
         start_time = time.time()
         logger.info("Stage 1: Recipe Validation")
         
-        errors = []
-        warnings = []
+        errors: List[str] = []
+        warnings: List[str] = []
         
         try:
             # Validate recipe structure
@@ -338,8 +350,8 @@ class EnhancedRecipeOrchestrator:
             
             # Log errors for debugging
             if errors:
-                for error in errors:
-                    logger.error(f"Validation error: {error}")
+                for error_msg in errors:
+                    logger.error(f"Validation error: {error_msg}")
             
             return StageResult(
                 stage=PipelineStage.VALIDATION,
@@ -370,7 +382,7 @@ class EnhancedRecipeOrchestrator:
             # Evaluate complexity
             should_decompose, metrics = self.decomposer.should_decompose(recipe)
             
-            data = {
+            data: Dict[str, Any] = {
                 "complexity_score": metrics.complexity_score,
                 "is_complex": metrics.is_complex,
                 "metrics": {
@@ -384,7 +396,8 @@ class EnhancedRecipeOrchestrator:
             sub_recipes = []
             if should_decompose:
                 sub_recipes = self.decomposer.decompose_recipe(recipe)
-                data["sub_recipes"] = [sr.name for sr in sub_recipes]
+                sub_recipe_names: List[str] = [str(sr.name) for sr in sub_recipes]
+                data["sub_recipes"] = sub_recipe_names
                 
                 # Save sub-recipes if not dry run
                 if not context.dry_run and sub_recipes:
@@ -417,7 +430,7 @@ class EnhancedRecipeOrchestrator:
         """Execute Stages 3-5: TDD cycle (Test Generation, Implementation, Test Fixing)."""
         logger.info("Stages 3-5: TDD Cycle")
         
-        stage_results = []
+        stage_results: List[StageResult] = []
         
         # Execute complete TDD cycle
         tdd_result = self.tdd_pipeline.execute_tdd_cycle(recipe, context, output_dir)
@@ -426,7 +439,7 @@ class EnhancedRecipeOrchestrator:
         # Stage 3: Test Generation (RED)
         stage_results.append(StageResult(
             stage=PipelineStage.TEST_GENERATION,
-            success=tdd_result.red_phase_result is not None,
+            success=bool(tdd_result.red_phase_result),
             duration=tdd_result.cycle_time * 0.2,  # Approximate
             data={"tests_created": tdd_result.red_phase_result.failed if tdd_result.red_phase_result else 0}
         ))
@@ -442,7 +455,7 @@ class EnhancedRecipeOrchestrator:
         # Stage 5: Test Fixing (GREEN complete)
         stage_results.append(StageResult(
             stage=PipelineStage.TEST_FIXING,
-            success=tdd_result.success and tdd_result.green_phase_result and tdd_result.green_phase_result.all_passed,
+            success=tdd_result.success and tdd_result.green_phase_result is not None and tdd_result.green_phase_result.all_passed,
             duration=tdd_result.cycle_time * 0.4,  # Approximate
             data={"all_tests_pass": tdd_result.green_phase_result.all_passed if tdd_result.green_phase_result else False}
         ))
@@ -467,7 +480,7 @@ class EnhancedRecipeOrchestrator:
         # Placeholder for code review implementation
         # Would integrate CodeReviewer and CodeReviewResponse agents
         
-        warnings = []
+        warnings: List[str] = []
         
         # Basic checks for Zero BS compliance
         if artifact and hasattr(artifact, 'files'):
@@ -495,7 +508,7 @@ class EnhancedRecipeOrchestrator:
         try:
             results = self.quality_gates.run_all_gates(output_dir)
             
-            errors = []
+            errors: List[str] = []
             for gate, passed in results.items():
                 if not passed:
                     errors.append(f"Quality gate failed: {gate}")
@@ -527,8 +540,8 @@ class EnhancedRecipeOrchestrator:
         start_time = time.time()
         logger.info("Stage 8: Post-Generation Validation")
         
-        errors = []
-        warnings = []
+        errors: List[str] = []
+        warnings: List[str] = []
         
         # Validate generated artifacts exist
         if not artifact:
@@ -588,8 +601,8 @@ class EnhancedRecipeOrchestrator:
         start_time = time.time()
         logger.info("Stage 10: Artifact Completeness")
         
-        errors = []
-        data = {}
+        errors: List[str] = []
+        data: Dict[str, Any] = {}
         
         if self_hosting and recipe.name == "recipe-executor":
             # Special validation for self-hosting

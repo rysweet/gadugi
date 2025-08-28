@@ -1,12 +1,12 @@
 """Recipe Decomposer Agent - Evaluates recipe complexity and splits complex recipes into sub-recipes."""
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
+from typing import List, Optional, Tuple, cast
+from dataclasses import dataclass, field
 from pathlib import Path
 import json
 
-from .recipe_model import Recipe, Requirements, Design
+from .recipe_model import Recipe, Requirements, Design, Requirement
 from .recipe_parser import RecipeParser
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class ComplexityMetrics:
     @property
     def decomposition_reason(self) -> str:
         """Get human-readable reason for decomposition."""
-        reasons = []
+        reasons: List[str] = []
         if self.complexity_score > 7.0:
             reasons.append(f"High complexity score: {self.complexity_score:.1f}")
         if self.functional_requirements_count > 10:
@@ -56,9 +56,9 @@ class SubRecipe:
     name: str
     parent_recipe: str
     requirements: Requirements
-    design: Optional[Design]
-    dependencies: List[str]
     complexity_metrics: ComplexityMetrics
+    design: Optional[Design] = None
+    dependencies: List[str] = field(default_factory=lambda: cast(List[str], []))
 
 
 class RecipeDecomposer:
@@ -102,9 +102,7 @@ class RecipeDecomposer:
             component_count = len(recipe.design.components)
             for comp in recipe.design.components:
                 # Handle different component types
-                if hasattr(comp, 'public_interfaces'):
-                    interface_count += len(comp.public_interfaces)
-                elif hasattr(comp, 'methods'):
+                if hasattr(comp, 'methods'):
                     interface_count += len(comp.methods)
         
         # Dependency analysis
@@ -174,7 +172,7 @@ class RecipeDecomposer:
         Returns:
             List of sub-recipes that together implement the parent recipe
         """
-        sub_recipes = []
+        sub_recipes: List[SubRecipe] = []
         
         # Check if decomposition is needed
         should_decompose, metrics = self.should_decompose(recipe)
@@ -210,39 +208,50 @@ class RecipeDecomposer:
     
     def _decompose_by_components(self, recipe: Recipe) -> List[SubRecipe]:
         """Decompose recipe based on design components."""
-        sub_recipes = []
+        sub_recipes: List[SubRecipe] = []
         
         if not recipe.design:
             return sub_recipes
         
         for component in recipe.design.components:
             # Group requirements related to this component
+            # Convert Requirement objects to strings for matching
+            req_strings = [req.description for req in recipe.requirements.functional_requirements]
             related_reqs = self._find_related_requirements(
                 component.name, 
-                recipe.requirements.functional_requirements
+                req_strings
             )
             
-            if related_reqs:
+            # Convert back to Requirement objects
+            related_req_objects = [
+                req for req in recipe.requirements.functional_requirements 
+                if req.description in related_reqs
+            ]
+            
+            if related_req_objects:
                 sub_recipe = SubRecipe(
                     name=f"{recipe.name}-{component.name.lower().replace(' ', '-')}",
                     parent_recipe=recipe.name,
                     requirements=Requirements(
-                        functional_requirements=related_reqs,
-                        non_functional_requirements=[]  # Inherit from parent
+                        purpose=f"Component {component.name} of {recipe.requirements.purpose}",
+                        functional_requirements=related_req_objects,
+                        non_functional_requirements=[],  # Inherit from parent
+                        success_criteria=[]
                     ),
                     design=Design(
                         architecture="Component-based",
                         components=[component],
-                        patterns=recipe.design.patterns if recipe.design else []
+                        interfaces=[],
+                        implementation_notes=""
                     ),
-                    dependencies=component.dependencies,
+                    dependencies=[],
                     complexity_metrics=ComplexityMetrics(
                         functional_requirements_count=len(related_reqs),
                         non_functional_requirements_count=0,
                         component_count=1,
-                        dependency_count=len(component.dependencies),
+                        dependency_count=0,
                         interface_count=len(component.methods) if hasattr(component, 'methods') else 0,
-                        estimated_loc=self._estimate_lines_of_code(len(related_reqs), 1, 
+                        estimated_loc=self._estimate_lines_of_code(len(related_req_objects), 1, 
                                                                    len(component.methods) if hasattr(component, 'methods') else 0),
                         complexity_score=3.0  # Simplified score for sub-recipe
                     )
@@ -253,7 +262,7 @@ class RecipeDecomposer:
     
     def _decompose_by_features(self, recipe: Recipe) -> List[SubRecipe]:
         """Decompose recipe by grouping related functional requirements."""
-        sub_recipes = []
+        sub_recipes: List[SubRecipe] = []
         requirements = recipe.requirements.functional_requirements
         
         # Simple clustering: group every N requirements
@@ -265,8 +274,10 @@ class RecipeDecomposer:
                     name=f"{recipe.name}-feature-{i//chunk_size + 1}",
                     parent_recipe=recipe.name,
                     requirements=Requirements(
+                        purpose=f"Feature group {i//chunk_size + 1} of {recipe.requirements.purpose}",
                         functional_requirements=chunk,
-                        non_functional_requirements=[]
+                        non_functional_requirements=[],
+                        success_criteria=[]
                     ),
                     design=None,  # Will be generated during implementation
                     dependencies=[],
@@ -287,12 +298,12 @@ class RecipeDecomposer:
     def _decompose_by_layers(self, recipe: Recipe) -> List[SubRecipe]:
         """Decompose recipe into architectural layers (data, logic, presentation)."""
         # Categorize requirements by layer
-        data_reqs = []
-        logic_reqs = []
-        presentation_reqs = []
+        data_reqs: List[Requirement] = []
+        logic_reqs: List[Requirement] = []
+        presentation_reqs: List[Requirement] = []
         
         for req in recipe.requirements.functional_requirements:
-            req_lower = req.lower()
+            req_lower = req.description.lower()
             if any(keyword in req_lower for keyword in ['data', 'storage', 'database', 'persist']):
                 data_reqs.append(req)
             elif any(keyword in req_lower for keyword in ['ui', 'interface', 'display', 'view']):
@@ -300,10 +311,10 @@ class RecipeDecomposer:
             else:
                 logic_reqs.append(req)
         
-        sub_recipes = []
+        sub_recipes: List[SubRecipe] = []
         
         # Create sub-recipe for each layer with requirements
-        layers = [
+        layers: List[Tuple[str, List[Requirement]]] = [
             ("data-layer", data_reqs),
             ("logic-layer", logic_reqs),
             ("presentation-layer", presentation_reqs)
@@ -315,8 +326,10 @@ class RecipeDecomposer:
                     name=f"{recipe.name}-{layer_name}",
                     parent_recipe=recipe.name,
                     requirements=Requirements(
+                        purpose=f"{layer_name.replace('-', ' ').title()} of {recipe.requirements.purpose}",
                         functional_requirements=layer_reqs,
-                        non_functional_requirements=[]
+                        non_functional_requirements=[],
+                        success_criteria=[]
                     ),
                     design=None,
                     dependencies=[],
@@ -336,7 +349,7 @@ class RecipeDecomposer:
     
     def _find_related_requirements(self, component_name: str, requirements: List[str]) -> List[str]:
         """Find requirements related to a specific component."""
-        related = []
+        related: List[str] = []
         component_keywords = component_name.lower().split()
         
         for req in requirements:
@@ -410,7 +423,7 @@ class RecipeDecomposer:
             req_content += f"Parent Recipe: {sub_recipe.parent_recipe}\n\n"
             req_content += "## Functional Requirements\n\n"
             for req in sub_recipe.requirements.functional_requirements:
-                req_content += f"- {req}\n"
+                req_content += f"- {req.description}\n"
             req_file.write_text(req_content)
             
             # Write design.md if available

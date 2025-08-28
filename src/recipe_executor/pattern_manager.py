@@ -197,16 +197,15 @@ class PatternManager:
                 enhanced.components.metadata["applied_patterns"] = []
 
             # Type assertion for pyright
-            applied_patterns = enhanced.components.metadata.get("applied_patterns", [])
-            if isinstance(applied_patterns, list):
-                applied_patterns.append(
-                    {  # type: ignore[reportUnknownMemberType]
-                        "name": pattern.name,
-                        "version": pattern.version,
-                        "applied_at": datetime.now().isoformat(),
-                    }
-                )
-                enhanced.components.metadata["applied_patterns"] = applied_patterns
+            applied_patterns: List[Any] = enhanced.components.metadata.get("applied_patterns", [])
+            applied_patterns.append(
+                {
+                    "name": pattern.name,
+                    "version": pattern.version,
+                    "applied_at": datetime.now().isoformat(),
+                }
+            )
+            enhanced.components.metadata["applied_patterns"] = applied_patterns
 
         return enhanced
 

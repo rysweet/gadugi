@@ -3,14 +3,13 @@
 import logging
 import shutil
 import tempfile
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
 import json
 
-from .enhanced_orchestrator import EnhancedRecipeOrchestrator, PipelineResult
-from .recipe_model import Recipe
+from .enhanced_orchestrator import EnhancedRecipeOrchestrator
 from .component_registry import ComponentRegistry
 
 logger = logging.getLogger(__name__)
@@ -58,13 +57,6 @@ class SelfHostingManager:
     4. Bootstrap test the generated version
     """
     
-    # Try to find the recipe path relative to the working directory or parent directories
-    RECIPE_EXECUTOR_RECIPE_PATH = Path("recipes/recipe-executor")
-    if not RECIPE_EXECUTOR_RECIPE_PATH.exists():
-        # Try parent directory (when running from src/)
-        alt_path = Path("../recipes/recipe-executor")
-        if alt_path.exists():
-            RECIPE_EXECUTOR_RECIPE_PATH = alt_path
     CRITICAL_COMPONENTS = [
         "orchestrator.py",
         "recipe_parser.py",
@@ -79,6 +71,14 @@ class SelfHostingManager:
         """Initialize the self-hosting manager."""
         self.orchestrator = EnhancedRecipeOrchestrator()
         self.component_registry = ComponentRegistry()
+        
+        # Try to find the recipe path relative to the working directory or parent directories
+        self.recipe_executor_recipe_path = Path("recipes/recipe-executor")
+        if not self.recipe_executor_recipe_path.exists():
+            # Try parent directory (when running from src/)
+            alt_path = Path("../recipes/recipe-executor")
+            if alt_path.exists():
+                self.recipe_executor_recipe_path = alt_path
         
     def regenerate_self(
         self,
@@ -100,13 +100,13 @@ class SelfHostingManager:
         logger.info("Starting Recipe Executor self-hosting regeneration")
         
         # Check recipe exists
-        if not self.RECIPE_EXECUTOR_RECIPE_PATH.exists():
-            logger.error(f"Recipe not found at {self.RECIPE_EXECUTOR_RECIPE_PATH}")
+        if not self.recipe_executor_recipe_path.exists():
+            logger.error(f"Recipe not found at {self.recipe_executor_recipe_path}")
             return SelfHostingResult(
                 success=False,
                 generated_files={},
                 missing_components=["recipe"],
-                validation_errors=[f"Recipe not found at {self.RECIPE_EXECUTOR_RECIPE_PATH}"],
+                validation_errors=[f"Recipe not found at {self.recipe_executor_recipe_path}"],
                 bootstrap_test_passed=False,
                 comparison_report={}
             )
@@ -125,7 +125,7 @@ class SelfHostingManager:
         # Execute recipe through enhanced pipeline
         logger.info("Executing Recipe Executor recipe through enhanced pipeline")
         result = self.orchestrator.execute_recipe(
-            recipe_path=self.RECIPE_EXECUTOR_RECIPE_PATH,
+            recipe_path=self.recipe_executor_recipe_path,
             output_dir=output_dir,
             dry_run=False,
             verbose=True,
@@ -145,15 +145,20 @@ class SelfHostingManager:
             )
         
         # Extract generated files
-        generated_files = {}
+        generated_files: Dict[str, str] = {}
         if result.final_artifact and hasattr(result.final_artifact, 'files'):
-            generated_files = result.final_artifact.files
+            files_attr = getattr(result.final_artifact, 'files', {})
+            if isinstance(files_attr, dict):
+                # Type assertion to ensure proper typing
+                for k, v in files_attr.items():  # type: ignore[assignment]
+                    if k is not None and v is not None:
+                        generated_files[str(k)] = str(v)  # type: ignore[arg-type]
         
         # Validate completeness
         is_complete, missing = self.component_registry.validate_completeness(generated_files)
         
         # Validate critical components
-        validation_errors = []
+        validation_errors: List[str] = []
         for component in self.CRITICAL_COMPONENTS:
             component_found = any(component in filepath for filepath in generated_files)
             if not component_found:
@@ -184,14 +189,14 @@ class SelfHostingManager:
         """Validate that self-hosting is possible without generating code."""
         logger.info("Validating self-hosting capability")
         
-        validation_errors = []
+        validation_errors: List[str] = []
         
         # Check recipe exists and is valid
-        if not self.RECIPE_EXECUTOR_RECIPE_PATH.exists():
+        if not self.recipe_executor_recipe_path.exists():
             validation_errors.append("Recipe not found")
         else:
             try:
-                recipe = self.orchestrator.parser.parse_recipe(self.RECIPE_EXECUTOR_RECIPE_PATH)
+                recipe = self.orchestrator.parser.parse_recipe(self.recipe_executor_recipe_path)
                 
                 # Validate recipe has required sections
                 if not recipe.requirements:
@@ -241,11 +246,16 @@ class SelfHostingManager:
         """Compare generated code with existing implementation."""
         logger.info("Comparing generated code with existing implementation")
         
-        report = {
-            "files_matched": [],
-            "files_different": [],
-            "files_new": [],
-            "files_missing": [],
+        files_matched: List[str] = []
+        files_different: List[str] = []
+        files_new: List[str] = []
+        files_missing: List[str] = []
+        
+        report: Dict[str, Any] = {
+            "files_matched": files_matched,
+            "files_different": files_different,
+            "files_new": files_new,
+            "files_missing": files_missing,
             "similarity_score": 0.0
         }
         
@@ -261,23 +271,23 @@ class SelfHostingManager:
                 if existing_file.exists():
                     existing_content = existing_file.read_text()
                     if content.strip() == existing_content.strip():
-                        report["files_matched"].append(rel_path)
+                        files_matched.append(rel_path)
                     else:
-                        report["files_different"].append(rel_path)
+                        files_different.append(rel_path)
                         # Could add more sophisticated diff here
                 else:
-                    report["files_new"].append(rel_path)
+                    files_new.append(rel_path)
         
         # Check for missing files
         for existing_file in current_src.glob("*.py"):
             rel_path = existing_file.name
             if not any(rel_path in fp for fp in generated_files):
-                report["files_missing"].append(rel_path)
+                files_missing.append(rel_path)
         
         # Calculate similarity score
-        total_files = len(report["files_matched"]) + len(report["files_different"]) + len(report["files_new"]) + len(report["files_missing"])
+        total_files = len(files_matched) + len(files_different) + len(files_new) + len(files_missing)
         if total_files > 0:
-            report["similarity_score"] = len(report["files_matched"]) / total_files
+            report["similarity_score"] = len(files_matched) / total_files
         
         return report
     

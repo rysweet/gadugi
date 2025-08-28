@@ -28,7 +28,7 @@ class TestGenerationError(Exception):
 
         # Build detailed message
         if component_name or test_type:
-            details = []
+            details: List[str] = []
             if component_name:
                 details.append(f"Component: {component_name}")
             if test_type:
@@ -126,7 +126,7 @@ class TestGenerator:
         """Generate REAL unit test file content - NO STUBS."""
 
         # Build real test methods based on component methods
-        test_methods = []
+        test_methods: List[str] = []
 
         # Always include initialization test
         test_methods.append(f'''
@@ -175,7 +175,7 @@ class TestGenerator:
         assert large_result is not None''')
 
         # Add helper methods for validation
-        helper_methods = []
+        helper_methods: List[str] = []
         if component.methods:
             for method in component.methods:
                 helper_methods.append(f'''
@@ -393,7 +393,7 @@ class TestIntegration:
             if r.priority == RequirementPriority.SHOULD
         ]
 
-        test_methods = []
+        test_methods: List[str] = []
 
         for req in must_requirements:
             test_methods.append(f'''
@@ -437,7 +437,7 @@ class TestIntegration:
             pytest.skip("SHOULD requirement not yet implemented")''')
 
         # Generate validation methods separately
-        validation_methods = []
+        validation_methods: List[str] = []
         for req in must_requirements + should_requirements:
             validation_methods.append(f'''
     def _validate_requirement_{req.id}(self, result: Dict[str, Any]) -> bool:

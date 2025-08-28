@@ -48,7 +48,7 @@ class PromptLoader:
         Returns:
             Dictionary mapping filename to content
         """
-        context = {}
+        context: Dict[str, str] = {}
 
         # Load all .md files from context directory
         for context_file in self.context_dir.glob("*.md"):
@@ -88,7 +88,7 @@ class PromptLoader:
             context_files = self.load_context_files()
             if context_files:
                 # Prepend critical context to the prompt
-                context_sections = []
+                context_sections: List[str] = []
 
                 # Always include CRITICAL_GUIDELINES first if it exists
                 if "CRITICAL_GUIDELINES.md" in context_files:
@@ -122,7 +122,7 @@ class PromptLoader:
         Returns:
             List of template names (without .md extension)
         """
-        templates = []
+        templates: List[str] = []
         for template_file in self.prompts_dir.glob("*.md"):
             templates.append(template_file.stem)
         return sorted(templates)
@@ -133,7 +133,7 @@ class PromptLoader:
         Returns:
             List of context file names
         """
-        files = []
+        files: List[str] = []
         for context_file in self.context_dir.glob("*.md"):
             files.append(context_file.name)
         return sorted(files)

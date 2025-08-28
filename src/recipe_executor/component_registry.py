@@ -140,10 +140,10 @@ class ComponentRegistry:
         Returns:
             Tuple of (is_complete, list_of_missing_components)
         """
-        missing = []
+        missing: List[str] = []
         
         # Normalize paths for comparison
-        normalized_generated = set()
+        normalized_generated: Set[str] = set()
         for filepath in generated_files.keys():
             # Remove any leading directory parts before src/ or tests/
             path = Path(filepath)

@@ -5,7 +5,10 @@ import re
 from pathlib import Path
 from datetime import datetime
 import hashlib
-from typing import Optional
+from typing import Optional, Dict, List, Tuple, Set, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .recipe_model import DependencyGraph
 
 from .recipe_model import (
     Recipe,
@@ -30,7 +33,11 @@ class RecipeParseError(Exception):
 class RecipeParser:
     """Parses recipe files into structured models."""
 
-    def __init__(self):
+    def __init__(self, analyze_complexity: bool = False, load_patterns: bool = False):
+        # Store options
+        self.analyze_complexity = analyze_complexity
+        self.load_patterns = load_patterns
+        
         # Match requirements anywhere in bullet points
         self.requirement_pattern = re.compile(r"[\-\*]\s+(.*?\bMUST\b.+?)(?=\n[\-\*]|\n\n|\Z)", re.MULTILINE | re.DOTALL)
         self.should_pattern = re.compile(r"[\-\*]\s+(.*?\bSHOULD\b.+?)(?=\n[\-\*]|\n\n|\Z)", re.MULTILINE | re.DOTALL)
@@ -67,7 +74,7 @@ class RecipeParser:
         # Extract recipe name from path or components
         recipe_name = components.name or recipe_path.name
 
-        return Recipe(
+        recipe = Recipe(
             name=recipe_name,
             path=recipe_path,
             requirements=requirements,
@@ -75,6 +82,12 @@ class RecipeParser:
             components=components,
             metadata=metadata,
         )
+        
+        # Calculate complexity if requested
+        if self.analyze_complexity:
+            recipe.calculate_complexity()
+        
+        return recipe
 
     def _parse_requirements(self, path: Path) -> Requirements:
         """Parse requirements.md using markdown parser."""
@@ -386,4 +399,144 @@ class RecipeParser:
                 except Exception as e:
                     print(f"Warning: Could not read {md_file}: {e}")
 
-        return supplementary_docs
+        supplementary_docs_typed: Dict[str, str] = supplementary_docs
+        return supplementary_docs_typed
+    
+    def parse_recipes_batch(self, recipe_paths: List[Path], analyze_dependencies: bool = True) -> Tuple[List[Recipe], Optional['DependencyGraph']]:  # type: ignore[name-defined]
+        """Parse multiple recipes and optionally analyze dependencies.
+        
+        Args:
+            recipe_paths: List of paths to recipe directories
+            analyze_dependencies: Whether to build dependency graph
+            
+        Returns:
+            Tuple of (list of parsed recipes, optional dependency graph)
+        """
+        from .recipe_model import DependencyGraph
+        
+        recipes: List[Recipe] = []
+        recipe_dict: Dict[str, Recipe] = {}
+        
+        # Parse all recipes
+        for path in recipe_paths:
+            try:
+                recipe = self.parse_recipe(path)
+                recipes.append(recipe)
+                recipe_dict[recipe.name] = recipe
+            except Exception as e:
+                print(f"Warning: Failed to parse recipe at {path}: {e}")
+                continue
+        
+        # Build dependency graph if requested
+        dep_graph = None
+        if analyze_dependencies and recipes:
+            dep_graph = DependencyGraph()
+            
+            # Add all recipes to graph
+            for recipe in recipes:
+                dep_graph.add_recipe(recipe)
+            
+            # Detect cycles
+            dep_graph.detect_cycles()
+        
+        return recipes, dep_graph  # type: ignore[return-value]
+    
+    def get_build_order(self, recipes: list[Recipe]) -> list[list[str]]:
+        """Get build order for recipes based on dependencies.
+        
+        Args:
+            recipes: List of recipes to order
+            
+        Returns:
+            List of recipe name layers, where each layer can be built in parallel
+        """
+        from .recipe_model import DependencyGraph
+        
+        # Build dependency graph
+        dep_graph = DependencyGraph()
+        for recipe in recipes:
+            dep_graph.add_recipe(recipe)
+        
+        # Get build order
+        try:
+            return dep_graph.get_build_order()
+        except ValueError as e:
+            print(f"Warning: Could not determine build order: {e}")
+            # Return recipes as single layer if can't determine order
+            return [[r.name for r in recipes]]
+    
+    def detect_changed_recipes(self, recipes: list[Recipe], cache_dir: Path) -> list[str]:
+        """Detect which recipes have changed since last build.
+        
+        Args:
+            recipes: List of recipes to check
+            cache_dir: Directory containing cached checksums
+            
+        Returns:
+            List of recipe names that have changed
+        """
+        changed: List[str] = []
+        cache_dir.mkdir(exist_ok=True)
+        
+        for recipe in recipes:
+            checksum_file = cache_dir / f"{recipe.name}.checksum"
+            current_checksum = recipe.calculate_checksum()
+            
+            # Check if checksum file exists and compare
+            if checksum_file.exists():
+                cached_checksum = checksum_file.read_text().strip()
+                if current_checksum != cached_checksum:
+                    changed.append(recipe.name)
+            else:
+                # No cached checksum, consider changed
+                changed.append(recipe.name)
+            
+            # Update cached checksum
+            checksum_file.write_text(current_checksum)
+        
+        return changed
+    
+    def analyze_recipe_impact(self, recipe_name: str, all_recipes: List[Recipe]) -> Dict[str, List[str]]:
+        """Analyze which recipes are impacted by changes to a given recipe.
+        
+        Args:
+            recipe_name: Name of the changed recipe
+            all_recipes: List of all recipes in the system
+            
+        Returns:
+            Dictionary with 'direct' and 'transitive' lists of impacted recipe names
+        """
+        from .recipe_model import DependencyGraph
+        
+        # Build dependency graph
+        dep_graph = DependencyGraph()
+        for recipe in all_recipes:
+            dep_graph.add_recipe(recipe)
+        
+        direct_impact: List[str] = []
+        transitive_impact: List[str] = []
+        
+        if recipe_name in dep_graph.nodes:
+            node = dep_graph.nodes[recipe_name]
+            # Get direct dependents
+            direct_impact = list(node.dependents)
+            
+            # Get transitive dependents (BFS)
+            visited: Set[str] = set()
+            to_visit = list(direct_impact)
+            
+            while to_visit:
+                current = to_visit.pop(0)
+                if current not in visited and current != recipe_name:
+                    visited.add(current)
+                    if current in dep_graph.nodes:
+                        current_node = dep_graph.nodes[current]
+                        for dep in current_node.dependents:
+                            if dep not in visited and dep not in direct_impact:
+                                transitive_impact.append(dep)
+                                to_visit.append(dep)
+        
+        return {
+            'direct': direct_impact,
+            'transitive': transitive_impact
+        }

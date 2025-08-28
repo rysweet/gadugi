@@ -3,10 +3,10 @@
 
 import shutil
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
-def install_recipe_agents(target_dir: Path = Path(".claude/agents")) -> Tuple[bool, List[str]]:
+def install_recipe_agents(target_dir: Optional[Path] = None) -> Tuple[bool, List[str]]:
     """Install Recipe Executor agents to the Claude Code agents directory.
 
     Args:
@@ -16,6 +16,10 @@ def install_recipe_agents(target_dir: Path = Path(".claude/agents")) -> Tuple[bo
         Tuple of (success, list of messages)
     """
     messages: List[str] = []
+    
+    # Use default directory if none provided
+    if target_dir is None:
+        target_dir = Path(".claude/agents")
 
     # Find agent files
     agents_source_dir = Path(__file__).parent / "agents"
@@ -31,7 +35,7 @@ def install_recipe_agents(target_dir: Path = Path(".claude/agents")) -> Tuple[bo
     messages.append(f"Created/verified target directory: {target_dir}")
 
     # Install each agent
-    installed = []
+    installed: List[str] = []
     for agent_file in agent_files:
         target_file = target_dir / agent_file.name
 

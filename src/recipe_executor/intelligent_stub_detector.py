@@ -4,7 +4,7 @@ import re
 import subprocess
 import json
 import tempfile
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Any
 from pathlib import Path
 
 
@@ -61,7 +61,7 @@ class IntelligentStubDetector:
             return False, []
         
         # Format the real stub issues
-        issues = []
+        issues: List[str] = []
         for filename, stubs in real_stubs.items():
             issues.append(f"\nReal stubs detected in {filename}:")
             for line_num, context, verdict in stubs:
@@ -76,11 +76,11 @@ class IntelligentStubDetector:
         Returns:
             Dict of filename -> [(line_num, line_content, surrounding_context)]
         """
-        potential = {}
+        potential: Dict[str, List[Tuple[int, str, str]]] = {}
         
         for filename, code in files.items():
             lines = code.split('\n')
-            file_stubs = []
+            file_stubs: List[Tuple[int, str, str]] = []
             
             for i, line in enumerate(lines, 1):
                 for pattern in self.potential_stub_patterns:
@@ -103,7 +103,7 @@ class IntelligentStubDetector:
     def _is_obviously_legitimate(self, context: str, line: str) -> bool:
         """Quick check for obviously legitimate uses."""
         # Check for legitimate contexts
-        for pattern, reason in self.legitimate_contexts:
+        for pattern, _ in self.legitimate_contexts:
             if re.search(pattern, context, re.IGNORECASE | re.MULTILINE):
                 return True
         
@@ -251,31 +251,40 @@ Analyze each potential stub carefully considering the context. Be precise - we w
             evaluations = json.loads(json_match.group())
             
             # Build a flat list of all stubs with their IDs
-            all_stubs = []
+            all_stubs: List[Tuple[str, Tuple[int, str, str]]] = []
             for filename, stubs in potential_stubs.items():
                 for stub in stubs:
                     all_stubs.append((filename, stub))
             
             # Filter to only real stubs based on Claude's evaluation
-            real_stubs = {}
-            for eval_item in evaluations:
-                stub_id = eval_item.get('id', 0) - 1  # Convert to 0-based index
-                if stub_id < len(all_stubs) and eval_item.get('is_real_stub', False):
-                    filename, (line_num, line_content, context) = all_stubs[stub_id]
-                    if filename not in real_stubs:
-                        real_stubs[filename] = []
-                    real_stubs[filename].append((
-                        line_num, 
-                        line_content, 
-                        eval_item.get('reason', 'Identified as real stub')
-                    ))
+            real_stubs: Dict[str, List[Tuple[int, str, str]]] = {}
+            if isinstance(evaluations, list):
+                for eval_item in evaluations:  # type: ignore[misc]
+                    if isinstance(eval_item, dict):
+                        eval_dict: Dict[str, Any] = eval_item  # type: ignore[assignment]
+                        stub_id: int = int(eval_dict.get('id', 0)) - 1  # Convert to 0-based index
+                        is_real: bool = bool(eval_dict.get('is_real_stub', False))
+                        if 0 <= stub_id < len(all_stubs) and is_real:
+                            stub_entry: Tuple[str, Tuple[int, str, str]] = all_stubs[stub_id]
+                            filename: str = stub_entry[0]
+                            stub_info: Tuple[int, str, str] = stub_entry[1]
+                            line_num: int = stub_info[0]
+                            line_content: str = stub_info[1]
+                            reason: str = str(eval_dict.get('reason', 'Identified as real stub'))
+                            if filename not in real_stubs:
+                                real_stubs[filename] = []
+                            real_stubs[filename].append((
+                                line_num, 
+                                line_content, 
+                                reason
+                            ))
             
             return real_stubs
             
         except (json.JSONDecodeError, KeyError, ValueError) as e:
             print(f"Warning: Failed to parse Claude evaluation: {e}")
             # On parse failure, be conservative and flag all as potential issues
-            result = {}
+            result: Dict[str, List[Tuple[int, str, str]]] = {}
             for filename, stubs in potential_stubs.items():
                 result[filename] = [(s[0], s[1], "Could not verify - flagged for review") for s in stubs]
             return result

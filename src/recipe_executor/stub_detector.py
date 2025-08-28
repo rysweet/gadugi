@@ -1,6 +1,6 @@
 """Stub detection and remediation for generated code."""
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 import re
 
 
@@ -161,7 +161,7 @@ The following stub implementations violate the Zero BS principle and MUST be fix
 
         for filename, stubs in stub_results.items():
             prompt += f"\n### {filename}\n"
-            for line_num, pattern, content in stubs:
+            for line_num, _, content in stubs:
                 prompt += f"- Line {line_num}: `{content}`\n"
 
         prompt += """
@@ -241,7 +241,7 @@ Follow the Zero BS Principle: if you can't implement it properly, say so rather 
 class StubRemediator:
     """Handles automatic remediation of stub implementations."""
 
-    def __init__(self, claude_generator):
+    def __init__(self, claude_generator: Any):
         """Initialize with a Claude code generator.
 
         Args:
@@ -252,7 +252,7 @@ class StubRemediator:
         self.max_remediation_attempts = 3
 
     def remediate_stubs(
-        self, files: Dict[str, str], recipe
+        self, files: Dict[str, str], recipe: Any
     ) -> Tuple[Dict[str, str], bool, List[str]]:
         """Attempt to automatically fix stub implementations.
 
@@ -282,8 +282,8 @@ class StubRemediator:
 
             try:
                 # Use Claude to fix the stubs
-                fixed_output = self.generator._invoke_claude_code(prompt, recipe)
-                fixed_files = self.generator._parse_generated_files(fixed_output, recipe)
+                fixed_output: str = self.generator._invoke_claude_code(prompt, recipe)  # type: ignore[attr-defined]
+                fixed_files: Dict[str, str] = self.generator._parse_generated_files(fixed_output, recipe)  # type: ignore[attr-defined]
 
                 if fixed_files:
                     # Update with fixed versions

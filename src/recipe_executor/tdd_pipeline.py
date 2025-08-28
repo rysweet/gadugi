@@ -1,7 +1,7 @@
 """Complete TDD Red-Green-Refactor cycle implementation for Recipe Executor."""
 
 import logging
-from typing import Dict, Any, Optional, Tuple, List
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from pathlib import Path
 import subprocess
@@ -114,7 +114,7 @@ class TDDPipeline:
         logger.info(f"Starting TDD cycle for recipe '{recipe.name}'")
         start_time = time.time()
         
-        errors = []
+        errors: List[str] = []
         phase_reached = TDDPhase.RED
         test_suite = None
         code_artifact = None
@@ -493,6 +493,7 @@ class TDDPipeline:
                     refactored_files[file_path] = full_path.read_text()
         
         return CodeArtifact(
+            recipe_name=code_artifact.recipe_name,
             files=refactored_files,
             language=code_artifact.language,
             framework=code_artifact.framework
@@ -514,9 +515,9 @@ class TDDPipeline:
         """Create a TDD cycle result."""
         return TDDCycleResult(
             phase_reached=phase_reached,
-            test_suite=test_suite,
+            test_suite=test_suite,  # type: ignore[arg-type]
             code_artifact=code_artifact,
-            red_phase_result=red_result,
+            red_phase_result=red_result,  # type: ignore[arg-type]
             green_phase_result=green_result,
             refactor_phase_result=refactor_result,
             quality_gates_passed=quality_passed,

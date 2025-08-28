@@ -3,7 +3,6 @@
 from typing import Optional, Dict, List, Any
 from pathlib import Path
 import subprocess
-import tempfile
 from datetime import datetime
 import logging
 import os
@@ -66,7 +65,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         
         # Find claude command in PATH
         if claude_command == "claude":
-            found_claude = shutil.which("claude")
+            found_claude: Optional[str] = shutil.which("claude")
             if found_claude:
                 self.claude_command = found_claude
                 logger.info(f"Found claude at: {found_claude}")
@@ -140,7 +139,6 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                         if alt_files:
                             generated_files = alt_files
                             # Move files to correct location
-                            import shutil
                             for filepath, content in alt_files.items():
                                 correct_path = temp_path / Path(filepath).name
                                 correct_path.parent.mkdir(parents=True, exist_ok=True)
@@ -211,8 +209,8 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
                         self.stub_remediator = StubRemediator(self)
 
-                    fixed_files, success, errors = self.stub_remediator.remediate_stubs(
-                        generated_files, recipe
+                    fixed_files, success, errors = self.stub_remediator.remediate_stubs(  # type: ignore[attr-defined]
+                        generated_files, recipe  # type: ignore[arg-type]
                     )
 
                     if success:
@@ -241,79 +239,56 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
     def _create_generation_prompt_with_path(self, recipe: Recipe, output_path: Path) -> str:
         """Create a comprehensive prompt for Claude Code from recipe with output path."""
-        # Use relative path from current directory for Claude
-        # Since Claude runs in the same directory as the Recipe Executor
-        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
-        
-        # START with clear immediate action instruction and component list
-        # Include component checklist if this is Recipe Executor self-hosting
-        component_section = ""
-        if recipe.name == "recipe-executor":
-            from .component_registry import ComponentRegistry
-            registry = ComponentRegistry()
-            component_section = f"\n{registry.get_component_prompt_list()}\n"
-            
-        immediate_action = f"""
-# IMMEDIATE ACTION REQUIRED
+        # START with clear context about the self-hosting task
+        context_header = f"""
+# Recipe-Based Code Generation: Self-Hosting Exercise
 
-**START NOW**: Begin implementing the Recipe Executor in `{rel_output_path}/`
+## CRITICAL CONTEXT: Recipe Executor Self-Hosting
 
-You have access to ALL tools - use them wisely:
-- **Write tool**: Create new files in the output directory
-- **Read/Grep tools**: Research patterns and conventions if needed
-- **Bash tool**: Run tests and validate your implementation
-- **TodoWrite**: Track your implementation progress
-{component_section}
-**SUGGESTED FIRST ACTION**: Write tool with file_path: {rel_output_path}/src/__init__.py
+You are participating in a **self-hosting exercise** where the Recipe Executor system is using its own recipe specification to regenerate itself from scratch. This is a test of the Recipe Executor's capability to build software from recipes.
 
-Begin implementing the Recipe Executor based on the requirements below.
+**KEY UNDERSTANDING**:
+1. The Recipe Executor (which invoked you) is testing its ability to recreate itself from its recipe
+2. You are working in an ISOLATED BUILD DIRECTORY that is separate from the main codebase
+3. You must create a NEW, FRESH implementation based solely on the recipe specification
+4. DO NOT modify any files outside your working directory
+5. This is similar to how a compiler can compile itself - we're using Recipe Executor to build Recipe Executor
+
+## YOUR WORKING DIRECTORY
+You are in an isolated build directory. All file operations are relative to this directory.
+- Create files using RELATIVE paths (e.g., `src/recipe_model.py`, not absolute paths)
+- Your working directory is already set up - just create files relative to it
+- DO NOT try to access or modify files outside this directory
+
+## YOUR TASK
+Generate a complete, functional implementation of Recipe Executor based on the recipe below.
+
+**Requirements**:
+1. Use the **Write tool** exclusively (no Edit/MultiEdit)
+2. Create proper Python package structure (src/, tests/, etc.)
+3. Implement ALL components described in the recipe
+4. Ensure the implementation is complete and functional
+5. Focus on the recipe requirements, not on existing code
+
+## Recipe Name: {recipe.name}
+
+This is a FRESH implementation. Let the recipe guide your implementation.
 """
         
-        base_prompt = immediate_action + "\n\n" + self._create_generation_prompt(recipe, output_path)
+        base_prompt = context_header + "\n\n" + self._create_generation_prompt(recipe, output_path)
         
-        # Add specific instructions about where to write files
-        path_instructions = f"""
-## File Output Instructions - CRITICAL PATH REQUIREMENTS
+        # Add simple file creation examples
+        path_instructions = """
+## File Creation Examples
 
-**⚠️ CRITICAL: You MUST create ALL files with the EXACT paths shown below! ⚠️**
+Use the Write tool with RELATIVE paths:
+```
+Write tool with file_path: src/__init__.py
+Write tool with file_path: src/recipe_model.py  
+Write tool with file_path: tests/test_recipe_model.py
+```
 
-You MUST write all files to the following directory structure using your Write tool:
-{rel_output_path}/
-
-**MANDATORY: Create files using these EXACT paths (copy-paste them!):**
-- Write tool with file_path: {rel_output_path}/src/__init__.py
-- Write tool with file_path: {rel_output_path}/src/recipe_executor.py
-- Write tool with file_path: {rel_output_path}/src/recipe_model.py
-- Write tool with file_path: {rel_output_path}/src/dependency_resolver.py
-- Write tool with file_path: {rel_output_path}/src/claude_code_generator.py
-- Write tool with file_path: {rel_output_path}/src/orchestrator.py
-- Write tool with file_path: {rel_output_path}/tests/__init__.py
-- Write tool with file_path: {rel_output_path}/tests/test_recipe_executor.py
-- Write tool with file_path: {rel_output_path}/pyproject.toml
-- Write tool with file_path: {rel_output_path}/cli.py
-- Write tool with file_path: {rel_output_path}/README.md
-
-**❌ DO NOT create files in these locations (WRONG):**
-- src/recipe_executor/[filename] - This is the EXISTING source directory
-- ./[filename] - This is the root directory
-- [filename] - Missing the required path prefix
-
-**✅ ALWAYS use the full path with {rel_output_path} prefix:**
-- ✅ CORRECT: {rel_output_path}/src/ast_stub_detector.py
-- ❌ WRONG: src/recipe_executor/ast_stub_detector.py
-- ❌ WRONG: ast_stub_detector.py
-
-Create the full directory structure. Write ALL files needed for a complete implementation.
-
-**⚠️ IMPORTANT TOOL USAGE GUIDELINES ⚠️**
-- **Primary task**: Create NEW files in `{rel_output_path}/` directory
-- **Use Write tool** for creating new files in the output directory
-- **Use all available tools as needed** - Read, Grep, Bash, etc. for research and validation
-- **DO NOT modify src/recipe_executor/** - That's the EXISTING source code (read-only reference)
-- **Your output goes in**: `{rel_output_path}/` only
-- **You may reference existing code** for patterns and conventions, but create your own implementation
-
-IMPORTANT: Use the exact relative path shown above ({rel_output_path}/...), not shortcuts.
+**Remember**: You're in an isolated directory. All paths are relative to your current working directory.
 """
         return base_prompt + "\n" + path_instructions
 
@@ -568,6 +543,68 @@ You MUST follow this TDD workflow:
 
         return "\n".join(lines)
 
+    def _prepare_isolated_environment(self, output_dir: Path, recipe: Recipe, prompt_file: Path) -> None:
+        """Prepare an isolated environment for Claude to work in.
+        
+        This copies necessary context files to the output directory so Claude
+        can work in isolation without seeing the existing Recipe Executor code.
+        
+        Args:
+            output_dir: The isolated directory where Claude will work
+            recipe: The recipe being built
+            prompt_file: The prompt file to copy
+        """
+        logger.info(f"Preparing isolated environment in {output_dir}")
+        
+        # Create .claude subdirectory for context
+        claude_dir = output_dir / ".claude"
+        claude_dir.mkdir(exist_ok=True)
+        
+        # Copy the Guidelines file if it exists
+        if self.guidelines_path.exists():
+            target_guidelines = claude_dir / "Guidelines.md"
+            shutil.copy2(self.guidelines_path, target_guidelines)
+            logger.debug(f"Copied guidelines to {target_guidelines}")
+        
+        # Copy the prompt file to the isolated directory
+        target_prompt = output_dir / "generation_prompt.md"
+        shutil.copy2(prompt_file, target_prompt)
+        logger.debug(f"Copied prompt to {target_prompt}")
+        
+        # Create a README explaining the context
+        readme_content = f"""# Isolated Build Environment for {recipe.name}
+
+This is an isolated build directory for generating a fresh implementation
+of {recipe.name} from its recipe specification.
+
+## Important Notes
+
+1. This directory is completely isolated from the main codebase
+2. All files should be created relative to this directory
+3. Use the Write tool to create new files
+4. Do not attempt to access files outside this directory
+5. The recipe specification is your sole guide for implementation
+
+## Your Task
+
+Generate a complete implementation based on the recipe specification
+provided in generation_prompt.md.
+
+## Directory Structure
+
+Create your implementation with proper Python package structure:
+- src/ - Source code
+- tests/ - Test files
+- Any other directories as needed by the recipe
+
+Remember: This is a self-hosting exercise where Recipe Executor is
+rebuilding itself from its own recipe. Focus on the recipe requirements,
+not on any existing implementation.
+"""
+        readme_file = output_dir / "README.md"
+        readme_file.write_text(readme_content)
+        logger.debug("Created README in isolated directory")
+        
     def _invoke_claude_code(self, prompt: str, recipe: Recipe, output_dir: Path) -> str:  # noqa: ARG002
         """Invoke Claude Code CLI to generate implementation.
 
@@ -599,10 +636,12 @@ You MUST follow this TDD workflow:
         try:
             # Build Claude command with all required flags for automation
             model = os.environ.get("CLAUDE_MODEL", "opus")  # Default to opus
-            cmd = [
+            # Use the prompt file from the isolated directory
+            isolated_prompt = output_dir / "generation_prompt.md"
+            cmd: List[str] = [
                 self.claude_command,
                 "-p",  # Print mode for non-interactive
-                str(prompt_file),
+                str(isolated_prompt),  # Use prompt from isolated dir
                 "--dangerously-skip-permissions",  # Skip ALL permission prompts
                 "--output-format",
                 "stream-json",  # Stream JSON output for parsing
@@ -610,8 +649,7 @@ You MUST follow this TDD workflow:
                 "--model",
                 model,  # Use specified model
                 # NO --allowedTools - Claude should inherit tools from parent context
-                "--add-dir",
-                str(output_dir.absolute()),  # Grant Claude access to write in output directory
+                # NO --add-dir needed since we're running IN the directory
             ]
 
             # Execute Claude with the prompt file
@@ -622,6 +660,10 @@ You MUST follow this TDD workflow:
 
             logger.info(f"Executing Claude command: {' '.join(cmd)}")
 
+            # Prepare isolated environment for Claude
+            # Copy necessary context files to the output directory
+            self._prepare_isolated_environment(output_dir, recipe, prompt_file)
+            
             # Use Popen to handle streaming JSON output
             # Include current environment to ensure PATH is available
             env = os.environ.copy()
@@ -629,6 +671,8 @@ You MUST follow this TDD workflow:
             npm_bin = os.path.expanduser("~/.npm-global/bin")
             if npm_bin not in env.get("PATH", ""):
                 env["PATH"] = f"{npm_bin}:{env.get('PATH', '')}"
+            
+            # CRITICAL: Run Claude in the isolated output directory
             process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.PIPE,
@@ -637,15 +681,21 @@ You MUST follow this TDD workflow:
                 bufsize=1,  # Line buffered
                 universal_newlines=True,
                 env=env,  # Pass environment to find claude in PATH
+                cwd=str(output_dir.absolute()),  # Run Claude IN the output directory
             )
 
             # Read streaming JSON output line by line in real-time with proper non-blocking I/O
-            import time
             import threading
             import queue
             
             output_lines: List[str] = []
             output_queue: queue.Queue[Optional[str]] = queue.Queue()
+            
+            # Create Claude-specific log file for better visibility
+            claude_log_file = prompt_dir / f"claude_{recipe.name}_{timestamp}.log"
+            claude_log = open(claude_log_file, 'w', buffering=1)  # Line buffered
+            logger.info(f"Claude output will be logged to: {claude_log_file}")
+            print(f"      📋 Claude output log: {claude_log_file}")
             
             def read_output(pipe: Any, q: queue.Queue[Optional[str]]) -> None:
                 """Read lines from pipe and put them in queue."""
@@ -666,8 +716,9 @@ You MUST follow this TDD workflow:
             )
             reader_thread.start()
             
-            last_output_time = time.time()
-            no_output_warnings = 0
+            # Variables for timeout handling (not used but kept for future)
+            # last_output_time = time.time()
+            # no_output_warnings = 0
             
             if process.stdout:
                 while True:
@@ -680,25 +731,31 @@ You MUST follow this TDD workflow:
                             logger.info("Claude output stream ended")
                             break
                         
-                        last_output_time = time.time()
-                        no_output_warnings = 0
+                        # Update timeout tracking (not used but kept for future)
+                        # last_output_time = time.time()
+                        # no_output_warnings = 0
                         output_lines.append(line)
+                        
+                        # Write to Claude log file
+                        claude_log.write(line)
+                        claude_log.flush()
                         
                         # Parse JSON events as they come in and emit progress
                         try:
                             event: Dict[str, Any] = json.loads(line.strip())
-                            event_type: Optional[str] = event.get("type")
+                            event_type: Optional[str] = event.get("type")  # type: ignore[assignment]
 
                             if event_type == "assistant" and "tool_use" in str(event.get("message", {})):
                                 # Extract tool use information
                                 message: Any = event.get("message", {})
                                 if isinstance(message, dict):
-                                    content: Any = message.get("content", [])
-                                    content_list: List[Any] = content if isinstance(content, list) else [content]
+                                    content_raw = message.get("content", [])  # type: ignore[assignment]
+                                    content_list: List[Any] = content_raw if isinstance(content_raw, list) else [content_raw]  # type: ignore[misc]
                                     for item in content_list:
-                                        if isinstance(item, dict) and item.get("type") == "tool_use":
-                                            tool_name: str = str(item.get("name", "unknown"))
-                                            tool_input: Dict[str, Any] = item.get("input", {})
+                                        if isinstance(item, dict) and item.get("type") == "tool_use":  # type: ignore[arg-type]
+                                            tool_name: str = str(item.get("name", "unknown"))  # type: ignore[arg-type]
+                                            tool_input_raw = item.get("input", {})  # type: ignore[assignment]
+                                            tool_input: Dict[str, Any] = tool_input_raw if isinstance(tool_input_raw, dict) else {}  # type: ignore[arg-type]
                                             if tool_name == "Write" and "file_path" in tool_input:
                                                 file_path: str = str(tool_input["file_path"])
                                                 # Extract just the relative path
@@ -724,6 +781,11 @@ You MUST follow this TDD workflow:
                                 # Log text output from Claude
                                 text = event.get("text", "")
                                 if text and len(text) > 1:
+                                    # Print first 200 chars to console for visibility
+                                    if len(text) > 200:
+                                        print(f"      💭 Claude: {text[:200]}...")
+                                    else:
+                                        print(f"      💭 Claude: {text}")
                                     logger.debug(f"Claude output: {text[:100]}")
                         except json.JSONDecodeError:
                             # Not a JSON line, just collect it
@@ -739,15 +801,8 @@ You MUST follow this TDD workflow:
                             logger.info(f"Claude process terminated with code {poll_result}")
                             break
                         
-                        # Check for extended timeout (5 minutes of no output)
-                        if time.time() - last_output_time > 300:
-                            no_output_warnings += 1
-                            if no_output_warnings == 1:
-                                logger.warning("Claude process has not produced output for 5 minutes")
-                            elif no_output_warnings >= 10:
-                                logger.error("Claude process appears stuck, terminating")
-                                process.terminate()
-                                break
+                        # NO TIMEOUT - Be patient with Claude
+                        # Complex recipes may take a long time to process
                         # Continue waiting
                         continue
 
@@ -774,6 +829,13 @@ You MUST follow this TDD workflow:
                     error_msg, command=" ".join(cmd[:2] + ["<prompt_file>"]), stderr=stderr
                 )
         finally:
+            # Close Claude log file
+            if 'claude_log' in locals():
+                try:
+                    claude_log.close()  # type: ignore[possibly-unbound]
+                except:
+                    pass
+            
             # Clean up temp file
             if prompt_file.exists():
                 prompt_file.unlink()
@@ -812,33 +874,28 @@ You MUST follow this TDD workflow:
         return is_component_name or (is_focused_scope and has_few_deps)
     
     def _create_simple_component_prompt(self, recipe: Recipe, output_path: Path) -> str:
-        """Create a simple, direct prompt for component recipes that lets Claude read the files."""
-        recipe_path = recipe.path
-        output_dir = output_path / recipe.name
+        """Create a simple prompt for component recipes based on requirements and design."""
+        abs_output_path = output_path.absolute()
         
-        # Read the actual recipe files to include specific details
-        requirements_path = recipe_path / "requirements.md"
-        design_path = recipe_path / "design.md"
-        
-        prompt = f"""# CRITICAL: COMPLETE IMPLEMENTATION CODE GENERATION - NO STUBS
+        prompt = f"""# Component Implementation Task
 
-You are generating COMPLETE, PRODUCTION-READY Python code. NOT stubs, NOT placeholders.
+## Context
+You are implementing a component based on its recipe specification.
 
-## ABSOLUTE REQUIREMENTS
-1. **NO STUB IMPLEMENTATIONS** - Every function must have REAL logic
-2. **NO pass STATEMENTS** - Functions must DO something meaningful
-3. **NO TODO COMMENTS** - Complete implementation ONLY
-4. **NO PLACEHOLDER RETURNS** - No returning None, {{}}, [], or input unchanged
-5. **MINIMUM 3-5 LINES OF LOGIC** per function
+Recipe: {recipe.name}
+Output Directory: {abs_output_path}/
 
-## YOUR TASK
-Generate COMPLETE Python implementation by:
-1. Read the recipe files from {recipe_path}:
-   - requirements.md - Contains functional requirements
-   - design.md - Contains detailed specifications
-   - components.json - Lists files to generate
+## Requirements
+{self._format_requirements(recipe.requirements)}
 
-2. Generate files in {output_dir} with FULL implementations
+## Design
+{self._format_design(recipe.design)}
+
+## Instructions
+1. Analyze the requirements and design above
+2. Create all necessary files to satisfy the requirements
+3. All files should be created in: {abs_output_path}/
+4. Ensure implementations are complete (no stubs or placeholders)
 
 ## EXAMPLE OF REQUIRED IMPLEMENTATION QUALITY
 
@@ -947,7 +1004,7 @@ DO NOT use any other tools. Start reading the recipe files immediately.
         # Parse output looking for file markers
         lines = claude_output.split("\n")
         current_file = None
-        current_content = []
+        current_content: List[str] = []
         in_code_block = False
 
         for line in lines:
@@ -959,7 +1016,7 @@ DO NOT use any other tools. Start reading the recipe files immediately.
             ):
                 # Save previous file if exists
                 if current_file and current_content:
-                    file_content = "\n".join(current_content)
+                    file_content: str = "\n".join(current_content)
                     generated_files[current_file] = file_content
 
                     # Write to disk
@@ -970,7 +1027,7 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
                 # Start new file
                 current_file = line.split(":", 1)[1].strip()
-                current_content = []
+                current_content: List[str] = []
                 in_code_block = False
 
             # Check for code block start
@@ -987,7 +1044,7 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
         # Save last file if exists
         if current_file and current_content:
-            file_content = "\n".join(current_content)
+            file_content: str = "\n".join(current_content)
             generated_files[current_file] = file_content
 
             # Write to disk
@@ -1057,7 +1114,7 @@ DO NOT use any other tools. Start reading the recipe files immediately.
                         # Simple filename, put in recipe src dir
                         file_path = f"src/{recipe.name.replace('-', '_')}/{file_path}"
                 current_file = file_path
-                current_content = []
+                current_content: List[str] = []
                 in_code_block = False
             elif line.strip() == "```python" or line.strip() == "```":
                 in_code_block = not in_code_block
