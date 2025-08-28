@@ -58,6 +58,7 @@ cat .claude/instructions/orchestration.md
 ```bash
 # Load when: Running tests, fixing type errors, quality gates
 cat .claude/instructions/testing-qa.md
+# Type-fixing tools location: .claude/type-fixing-tools/
 ```
 
 ### For Worktree & Git Management
