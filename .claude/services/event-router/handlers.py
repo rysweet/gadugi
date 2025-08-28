@@ -3,25 +3,19 @@ Request handlers for event-router.
 """
 
 import logging
-<<<<<<< HEAD
-from typing import Any, Dict, Optional
-=======
-from typing import Any, Dict, Optional  # type: ignore
-
-from .models import RequestModel, ValidationResult
->>>>>>> feature/gadugi-v0.3-regeneration
+from datetime import datetime
+from typing import Any, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
 
-async def health_check() -> Dict[str, str]:
+def health_check() -> Dict[str, str]:
     """Perform health check."""
     # Add actual health checks here
     return {"status": "healthy", "service": "event-router"}
 
 
-<<<<<<< HEAD
-def validate_input(data: Optional[Dict[str, Any]]) -> tuple[bool, Optional[str]]:
+def validate_input(data: Optional[Dict[str, Any]]) -> Tuple[bool, Optional[str]]:
     """Validate incoming request data.
 
     Args:
@@ -37,6 +31,10 @@ def validate_input(data: Optional[Dict[str, Any]]) -> tuple[bool, Optional[str]]
         # Basic validation
         if not data:
             return False, "Request data is required"
+        
+        # Check if data key exists for proper request structure
+        if "data" not in data and not isinstance(data, dict):
+            return False, "Invalid request format"
 
         # Add more validation logic as needed
         return True, None
@@ -57,55 +55,37 @@ def process_request(data: Dict[str, Any]) -> Dict[str, Any]:
     Raises:
         Exception: Re-raises any processing errors for proper error handling
     """
-=======
-async def validate_input(request: RequestModel) -> ValidationResult:
-    """Validate incoming request."""
-    try:
-        # Add actual validation logic here
-        if not request.data:
-            return ValidationResult(
-                is_valid=False,
-                error="Request data is required"
-            )
-
-        # Check for required fields
-        required_fields = []  # Add required fields based on recipe
-        for field in required_fields:
-            if field not in request.data:
-                return ValidationResult(
-                    is_valid=False,
-                    error=f"Required field missing: {field}"
-                )
-
-        return ValidationResult(is_valid=True)  # type: ignore
-    except Exception as e:
-        logger.error(f"Validation error: {e}")
-        return ValidationResult(
-            is_valid=False,
-            error=str(e)
-        )
-
-
-async def process_request(request: RequestModel) -> Dict[str, Any]:
-    """Process the incoming request."""
->>>>>>> feature/gadugi-v0.3-regeneration
     try:
         # Add actual processing logic here
-        result = {
+        result: Dict[str, Any] = {
             "processed": True,
-<<<<<<< HEAD
             "data": data,
-            "timestamp": "2023-01-01T00:00:00Z"  # Would use actual timestamp
-=======
-            "request_id": request.id,
-            "data": request.data,
-            "timestamp": request.timestamp.isoformat()
->>>>>>> feature/gadugi-v0.3-regeneration
+            "timestamp": datetime.utcnow().isoformat()
         }
 
-        # Implement actual business logic based on recipe
+        # If data has an id field, include it
+        if "id" in data:
+            result["request_id"] = data["id"]
 
+        # Implement actual business logic based on recipe
+        
         return result
     except Exception as e:
         logger.error(f"Processing error: {e}")
         raise
+
+
+# Async versions for potential FastAPI compatibility
+async def async_health_check() -> Dict[str, str]:
+    """Async version of health check."""
+    return health_check()
+
+
+async def async_validate_input(data: Optional[Dict[str, Any]]) -> Tuple[bool, Optional[str]]:
+    """Async version of validation."""
+    return validate_input(data)
+
+
+async def async_process_request(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Async version of process request."""
+    return process_request(data)

@@ -48,7 +48,7 @@ except ImportError as e:
 
     # Define stubs for all needed classes
     from enum import Enum
-from typing import Dict, Any, Optional, List, Union
+    from typing import Dict, Any, Optional, List, Union
     from datetime import datetime
 
     class WorkflowPhase(Enum):
@@ -172,7 +172,7 @@ from typing import Dict, Any, Optional, List, Union
             self,
             error_type: str,
             error_message: str,
-            error_details: Optional[Dict] = None,
+            error_details: Optional[Dict[str, Any]] = None,
         ) -> None:
             self.error_info = {
                 "type": error_type,
@@ -270,12 +270,12 @@ from typing import Dict, Any, Optional, List, Union
             self.save_state(state)
             return state
 
-        def _acquire_lock(self, resource_id: str, timeout: int = 30) -> bool:
+        def _acquire_lock(self, resource_id: str, timeout: int = 30) -> Optional[bool]:
             # Simplified lock implementation
             if resource_id not in self._locks:
                 self._locks[resource_id] = True
                 return True
-            return False
+            return None
 
         def release_lock(self, resource_id: str) -> None:
             if resource_id in self._locks:
@@ -701,7 +701,7 @@ class TestStateManager:
             "cleanup_after_days": 7,
             "max_states_per_task": 10,
         }
-        return StateManager(config=config)
+        return StateManager(config)
 
     def test_state_manager_init_default(self):
         """Test StateManager initialization with default config."""
@@ -719,7 +719,7 @@ class TestStateManager:
             "cleanup_after_days": 14,
             "max_states_per_task": 5,
         }
-        sm = StateManager(config=config)
+        sm = StateManager(config)
         assert sm.state_dir == Path(temp_state_dir)
         assert sm.backup_enabled is False
         assert sm.cleanup_after_days == 14
@@ -821,9 +821,9 @@ class TestStateManager:
         for state in states:
             state_manager.save_state(state)
 
-        # List all active states (list_active_states returns ALL states, not just active)
-        active_states = state_manager.list_active_states()
-        assert len(active_states) == 4
+        # List all active states
+        active_states = state_manager.get_active_states()
+        assert len(active_states) == 2  # Only pending and in_progress are active
 
         task_ids = [s.task_id for s in active_states]
         assert "task-001" in task_ids
@@ -851,9 +851,9 @@ class TestStateManager:
         assert len(completed_states) == 1
         assert completed_states[0].task_id == "complete-001"  # type: ignore[index]
 
-        # Filter by active (use list_active_states which returns all states)
-        active_states = state_manager.list_active_states()
-        assert len(active_states) == 4  # list_active_states returns all states
+        # Filter by active
+        active_states = state_manager.get_active_states()
+        assert len(active_states) == 2  # Only pending and in_progress are active
 
     def test_cleanup_old_states(self, state_manager):
         """Test cleanup of old states."""

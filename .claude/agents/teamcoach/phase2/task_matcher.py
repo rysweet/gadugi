@@ -27,9 +27,32 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
 
 # Import available shared module components
-from interfaces import OperationResult
-from utils.error_handling import ErrorHandler, CircuitBreaker
-from state_management import StateManager
+try:
+    from interfaces import OperationResult
+    from utils.error_handling import ErrorHandler, CircuitBreaker
+    from state_management import StateManager
+except ImportError:
+    # Define minimal stubs if shared modules are not available
+    class OperationResult:
+        def __init__(self, success=True, data=None, error=None):
+            self.success = success
+            self.data = data
+            self.error = error
+    
+    class ErrorHandler:
+        def __init__(self, *args, **kwargs):
+            pass
+    
+    class CircuitBreaker:
+        def __init__(self, *args, **kwargs):
+            pass
+        
+        def __call__(self, func):
+            return func
+    
+    class StateManager:
+        def __init__(self, *args, **kwargs):
+            pass
 
 # Define missing classes locally
 TaskResult = OperationResult
@@ -38,41 +61,26 @@ TaskResult = OperationResult
 try:
     from task_tracking import TaskMetrics
 except ImportError:
-
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
+        
+        def get_agent_task_results(self, agent_id: str, start_time, end_time):
+            return []
+        
+        def get_agent_active_tasks(self, agent_id: str):
+            return []
 
 
-# Import Phase 1 components (will be available when all imports are fixed)
-try:
-    from ..phase1.capability_assessment import (
-        CapabilityAssessment,
-        AgentCapabilityProfile,
-        CapabilityDomain,
-        ProficiencyLevel,
-        TaskCapabilityRequirement,
-    )
-    from ..phase1.performance_analytics import AgentPerformanceAnalyzer
-except ImportError:
-    # Define minimal stubs if Phase 1 imports fail
-    class CapabilityAssessment:
-        pass
-
-    class AgentCapabilityProfile:
-        pass
-
-    class CapabilityDomain:
-        pass
-
-    class ProficiencyLevel:
-        pass
-
-    class TaskCapabilityRequirement:
-        pass
-
-    class AgentPerformanceAnalyzer:
-        pass
+# Import Phase 1 components
+from ..phase1.capability_assessment import (
+    CapabilityAssessment,
+    AgentCapabilityProfile,
+    CapabilityDomain,
+    ProficiencyLevel,
+    TaskCapabilityRequirement,
+)
+from ..phase1.performance_analytics import AgentPerformanceAnalyzer
 
 
 class MatchingStrategy(Enum):
@@ -263,7 +271,7 @@ class TaskAgentMatcher:
 
         self.logger.info("TaskAgentMatcher initialized")
 
-    @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)
+    # @CircuitBreaker(failure_threshold=3, recovery_timeout=30.0)  # Disabled for now
     def find_optimal_agent(
         self,
         task_requirements: TaskRequirements,

@@ -42,15 +42,23 @@ except ImportError:
     class MockSession:
         def close(self) -> None:
             pass
+            
+        def __enter__(self):
+            return self
+            
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            pass
 
         def run(self, *args, **kwargs):
             return MockResult()
 
         def execute_read(self, func):
-            return func(MockTransaction())
+            result = func(MockTransaction())
+            return result or []
 
         def execute_write(self, func):
-            return func(MockTransaction())
+            result = func(MockTransaction())
+            return result or MockSummary()
 
     class MockTransaction:
         def run(self, *args, **kwargs):
@@ -80,6 +88,8 @@ except ImportError:
     class MockCounters:
         nodes_created = 0
         relationships_created = 0
+        nodes_deleted = 0
+        relationships_deleted = 0
 
 
 class NodeType(Enum):
@@ -187,12 +197,6 @@ class QueryResult:
     execution_time: float
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
-
-    def __post_init__(self):
-        if self.warnings is None:
-            self.warnings = []
-        if self.errors is None:
-            self.errors = []
 
 
 @dataclass
@@ -604,8 +608,9 @@ class GraphDatabaseService:
             with self._get_session() as session:
                 summary = session.execute_write(delete_node_tx)
 
-                nodes_deleted = summary.counters().nodes_deleted
-                relationships_deleted = summary.counters().relationships_deleted
+                counters = summary.counters()
+                nodes_deleted = counters.nodes_deleted
+                relationships_deleted = counters.relationships_deleted
 
                 execution_time = time.time() - start_time
                 self._update_query_stats(execution_time)

@@ -77,7 +77,7 @@ except ImportError:
 
     class TaskTrackerInterface(ABC):
         @abstractmethod
-        def create_task(self, content: str, priority: str) -> Dict[str, Any]:
+        def create_task(self, content: str, priority: str = "medium", **kwargs: Any) -> Dict[str, Any]:
             pass
 
     class ErrorHandlerInterface(ABC):
@@ -331,7 +331,7 @@ class TestTaskTrackerInterface:
                 self.tasks = {}
                 self.task_counter = 1
 
-            def create_task(self, content: str, priority: str) -> Dict[str, Any]:
+            def create_task(self, content: str, priority: str = "medium", **kwargs: Any) -> Dict[str, Any]:
                 task_id = f"task-{self.task_counter}"
                 self.tasks[task_id] = {
                     "id": task_id,
@@ -718,7 +718,7 @@ class TestInterfaceIntegration:
                 self.tasks = []
 
             def create_task(
-                self, content: str, priority: str = "medium", **kwargs
+                self, content: str, priority: str = "medium", **kwargs: Any
             ) -> Dict[str, Any]:
                 task = {
                     "id": f"task-{len(self.tasks) + 1}",
@@ -740,13 +740,13 @@ class TestInterfaceIntegration:
                 self.issues = []
                 self.prs = []
 
-            def create_issue(self, title: str, body: str, **kwargs) -> Dict[str, Any]:
+            def create_issue(self, title: str, body: str, **kwargs: Any) -> Dict[str, Any]:
                 issue = {"number": len(self.issues) + 1, "title": title, "body": body}
                 self.issues.append(issue)
                 return {"success": True, "issue": issue}
 
             def create_pr(
-                self, title: str, body: str, base: str, head: str, **kwargs
+                self, title: str, body: str, base: str, head: str, **kwargs: Any
             ) -> Dict[str, Any]:
                 pr = {
                     "number": len(self.prs) + 1,
@@ -900,7 +900,7 @@ class TestInterfaceIntegration:
                             self.tasks = []
 
                         def create_task(
-                            self, content: str, priority: str = "medium", **kwargs
+                            self, content: str, priority: str = "medium", **kwargs: Any
                         ) -> Dict[str, Any]:
                             task_id = f"task-{len(self.tasks) + 1}"
                             self.tasks.append(

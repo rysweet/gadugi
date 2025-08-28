@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional
-from ..phase1.performance_analytics import AgentPerformanceAnalyzer, PerformanceMetrics
-from ..phase1.capability_assessment import CapabilityAssessment, AgentCapability
+from ..phase1.performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
+from ..phase1.capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from ..phase2.task_matcher import TaskAgentMatcher
 
 """
@@ -127,12 +127,14 @@ class CoachingEngine:
         recommendations = []
 
         # Get agent performance data
-        performance = self.performance_analyzer.get_agent_performance(
-            agent_id, days=performance_window
+        end_time = datetime.utcnow()
+        start_time = end_time - timedelta(days=performance_window or 30)
+        performance = self.performance_analyzer.analyze_agent_performance(
+            agent_id, (start_time, end_time)
         )
 
         # Get agent capabilities
-        capabilities = self.capability_assessment.get_agent_capabilities(agent_id)
+        capabilities = self.capability_assessment.assess_agent_capabilities(agent_id)
 
         # Analyze performance issues
         perf_recommendations = self._analyze_performance_issues(
@@ -215,8 +217,8 @@ class CoachingEngine:
     def _analyze_performance_issues(
         self,
         agent_id: str,
-        performance: PerformanceMetrics,
-        capabilities: AgentCapability,
+        performance: AgentPerformanceData,
+        capabilities: AgentCapabilityProfile,
     ) -> List[CoachingRecommendation]:
         """Analyze performance issues and generate recommendations."""
         recommendations = []
@@ -246,8 +248,8 @@ class CoachingEngine:
                 created_at=datetime.utcnow(),
                 evidence={
                     "current_success_rate": performance.success_rate,
-                    "recent_failures": performance.error_count,
-                    "failure_types": performance.error_types,
+                    "recent_failures": performance.failed_tasks,
+                    "failure_types": [],  # Placeholder
                 },
             )
             recommendations.append(recommendation)
@@ -280,7 +282,7 @@ class CoachingEngine:
             recommendations.append(recommendation)
 
         # Check efficiency
-        avg_time = performance.average_execution_time
+        avg_time = performance.avg_execution_time
         if (
             avg_time and avg_time > self.efficiency_thresholds["slow"] * 60
         ):  # Convert to seconds
@@ -317,17 +319,17 @@ class CoachingEngine:
     def _analyze_capability_gaps(
         self,
         agent_id: str,
-        capabilities: AgentCapability,
-        performance: PerformanceMetrics,
+        capabilities: AgentCapabilityProfile,
+        performance: AgentPerformanceData,
     ) -> List[CoachingRecommendation]:
         """Analyze capability gaps and generate development recommendations."""
         recommendations = []
 
-        # Find weak capabilities
+        # Find weak capabilities  
         weak_capabilities = [
-            (domain, score)
-            for domain, score in capabilities.domain_scores.items()
-            if score < 0.6  # Below 60% is considered weak
+            (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
+            for domain, score in capabilities.capability_scores.items()
+            if score.proficiency_level.value < 3  # Below intermediate is considered weak
         ]
 
         if weak_capabilities:
@@ -336,20 +338,20 @@ class CoachingEngine:
                     agent_id=agent_id,
                     category=CoachingCategory.SKILL_DEVELOPMENT,
                     priority=CoachingPriority.MEDIUM,
-                    title=f"Develop {domain.replace('_', ' ').title()} Capabilities",
-                    description=f"Current {domain} capability score ({score:.1%}) indicates development opportunity",
+                    title=f"Develop {domain.value.replace('_', ' ').title()} Capabilities",
+                    description=f"Current {domain.value} capability score ({score:.1%}) indicates development opportunity",
                     specific_actions=[
-                        f"Complete {domain} training modules",
-                        f"Practice with {domain}-focused tasks",
-                        f"Shadow experts in {domain} tasks",
+                        f"Complete {domain.value} training modules",
+                        f"Practice with {domain.value}-focused tasks",
+                        f"Shadow experts in {domain.value} tasks",
                         "Request gradual increase in task complexity",
                         "Document learnings and create knowledge base",
                     ],
-                    expected_impact=f"Improve {domain} capability to 80% within 6 weeks",
-                    metrics_to_track=[f"{domain}_score", f"{domain}_task_success_rate"],
+                    expected_impact=f"Improve {domain.value} capability to 80% within 6 weeks",
+                    metrics_to_track=[f"{domain.value}_score", f"{domain.value}_task_success_rate"],
                     resources=[
-                        {"type": "training", "name": f"{domain.title()} Fundamentals"},
-                        {"type": "mentor", "name": f"{domain.title()} Expert Agent"},
+                        {"type": "training", "name": f"{domain.value.title()} Fundamentals"},
+                        {"type": "mentor", "name": f"{domain.value.title()} Expert Agent"},
                     ],
                     timeframe="6 weeks",
                     created_at=datetime.utcnow(),
@@ -357,7 +359,7 @@ class CoachingEngine:
                         "current_score": score,
                         "domain": domain,
                         "related_failures": self._get_domain_failures(
-                            performance, domain
+                            performance, domain.value
                         ),
                     },
                 )
@@ -365,21 +367,21 @@ class CoachingEngine:
 
         # Check for unutilized strengths
         strong_capabilities = [
-            (domain, score)
-            for domain, score in capabilities.domain_scores.items()
-            if score > 0.85  # Above 85% is considered strong
+            (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
+            for domain, score in capabilities.capability_scores.items()
+            if score.proficiency_level.value >= 4  # Advanced or expert is considered strong
         ]
 
         for domain, score in strong_capabilities:
             utilization = self._calculate_capability_utilization(
-                agent_id, domain, performance
+                agent_id, domain.value, performance
             )
             if utilization < 0.3:  # Less than 30% utilization
                 recommendation = CoachingRecommendation(
                     agent_id=agent_id,
                     category=CoachingCategory.CAPABILITY,
                     priority=CoachingPriority.LOW,
-                    title=f"Underutilized {domain.replace('_', ' ').title()} Strength",
+                    title=f"Underutilized {domain.value.replace('_', ' ').title()} Strength",
                     description=f"Strong {domain} capability ({score:.1%}) is underutilized ({utilization:.1%})",
                     specific_actions=[
                         f"Increase assignment of {domain} tasks",
@@ -404,13 +406,13 @@ class CoachingEngine:
         return recommendations
 
     def _analyze_collaboration_patterns(
-        self, agent_id: str, performance: PerformanceMetrics
+        self, agent_id: str, performance: AgentPerformanceData
     ) -> List[CoachingRecommendation]:
         """Analyze collaboration patterns and generate recommendations."""
         recommendations = []
 
         # Check collaboration metrics
-        collab_score = performance.metrics.get("collaboration_score", 0)
+        collab_score = performance.collaboration_success_rate
 
         if collab_score < 0.6:
             recommendation = CoachingRecommendation(
@@ -440,9 +442,7 @@ class CoachingEngine:
                 created_at=datetime.utcnow(),
                 evidence={
                     "current_score": collab_score,
-                    "interaction_frequency": performance.metrics.get(
-                        "interaction_count", 0
-                    ),
+                    "interaction_frequency": performance.collaboration_frequency,
                 },
             )
             recommendations.append(recommendation)
@@ -450,14 +450,14 @@ class CoachingEngine:
         return recommendations
 
     def _analyze_workload_balance(
-        self, agent_id: str, performance: PerformanceMetrics
+        self, agent_id: str, performance: AgentPerformanceData
     ) -> List[CoachingRecommendation]:
         """Analyze workload balance and generate recommendations."""
         recommendations = []
 
         # Check workload metrics
-        workload = performance.metrics.get("workload_score", 0.5)
-        task_variety = performance.metrics.get("task_variety_score", 0.5)
+        workload = min(1.0, performance.total_tasks / 10.0)  # Normalize workload based on task count
+        task_variety = 0.5  # Placeholder - would need task type diversity calculation
 
         if workload > 0.85:  # Overloaded
             recommendation = CoachingRecommendation(
@@ -487,8 +487,8 @@ class CoachingEngine:
                 created_at=datetime.utcnow(),
                 evidence={
                     "current_workload": workload,
-                    "task_count": performance.metrics.get("active_tasks", 0),
-                    "overtime_hours": performance.metrics.get("overtime", 0),
+                    "task_count": performance.total_tasks,
+                    "overtime_hours": 0,  # Placeholder
                 },
             )
             recommendations.append(recommendation)
@@ -551,7 +551,7 @@ class CoachingEngine:
                 created_at=datetime.utcnow(),
                 evidence={
                     "current_variety": task_variety,
-                    "task_types": performance.metrics.get("unique_task_types", 0),
+                    "task_types": 1,  # Placeholder
                 },
             )
             recommendations.append(recommendation)
@@ -734,17 +734,17 @@ class CoachingEngine:
         }
         return ranks.get(priority, 0)
 
-    def _get_domain_failures(self, performance: PerformanceMetrics, domain: str) -> int:
+    def _get_domain_failures(self, performance: AgentPerformanceData, domain: str) -> int:
         """Get failure count related to a specific domain."""
         # This would analyze error patterns related to the domain
-        return performance.metrics.get(f"{domain}_failures", 0)
+        return performance.failed_tasks  # Simplified - return total failures
 
     def _calculate_capability_utilization(
-        self, agent_id: str, domain: str, performance: PerformanceMetrics
+        self, agent_id: str, domain: str, performance: AgentPerformanceData
     ) -> float:
         """Calculate how much a capability is being utilized."""
         total_tasks = performance.total_tasks
-        domain_tasks = performance.metrics.get(f"{domain}_task_count", 0)
+        domain_tasks = total_tasks // 5  # Simplified estimation
 
         if total_tasks == 0:
             return 0.0
@@ -757,12 +757,12 @@ class CoachingEngine:
         domain_coverage = {}
 
         for agent_id in agent_ids:
-            capabilities = self.capability_assessment.get_agent_capabilities(agent_id)
-            for domain, score in capabilities.domain_scores.items():
+            capabilities = self.capability_assessment.assess_agent_capabilities(agent_id)
+            for domain, score in capabilities.capability_scores.items():
                 all_domains.add(domain)
                 if domain not in domain_coverage:
                     domain_coverage[domain] = []
-                if score > 0.7:  # Competent level
+                if score.proficiency_level.value >= 4:  # Advanced or expert level
                     domain_coverage[domain].append(agent_id)
 
         # Identify gaps
@@ -783,10 +783,12 @@ class CoachingEngine:
         """Calculate overall team collaboration score."""
         scores = []
         for agent_id in agent_ids:
-            performance = self.performance_analyzer.get_agent_performance(
-                agent_id, days=30
+            end_time = datetime.utcnow()
+            start_time = end_time - timedelta(days=30)
+            performance = self.performance_analyzer.analyze_agent_performance(
+                agent_id, (start_time, end_time)
             )
-            collab_score = performance.metrics.get("collaboration_score", 0.5)
+            collab_score = performance.collaboration_success_rate
             scores.append(collab_score)
 
         return sum(scores) / len(scores) if scores else 0.0

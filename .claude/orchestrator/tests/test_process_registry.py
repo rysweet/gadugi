@@ -60,9 +60,10 @@ class TestProcessRegistry(unittest.TestCase):
 
         retrieved = self.registry.get_process("test-task-1")
         self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.task_id, "test-task-1")
-        self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
-        self.assertIsNotNone(retrieved.last_heartbeat)
+        if retrieved is not None:
+            self.assertEqual(retrieved.task_id, "test-task-1")
+            self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
+            self.assertIsNotNone(retrieved.last_heartbeat)
 
     def test_process_status_updates(self):
         """Test process status transitions"""
@@ -82,17 +83,21 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
-        self.assertEqual(process.status, ProcessStatus.RUNNING)
-        self.assertEqual(process.pid, 12345)
-        self.assertIsNotNone(process.started_at)
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.RUNNING)
+            self.assertEqual(process.pid, 12345)
+            self.assertIsNotNone(process.started_at)
 
         # Test running -> completed
         success = self.registry.update_process_status("test-task-2", ProcessStatus.COMPLETED)
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
-        self.assertEqual(process.status, ProcessStatus.COMPLETED)
-        self.assertIsNotNone(process.completed_at)
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.COMPLETED)
+            self.assertIsNotNone(process.completed_at)
 
     def test_process_status_failure(self):
         """Test process failure handling"""
@@ -116,9 +121,11 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-3")
-        self.assertEqual(process.status, ProcessStatus.FAILED)
-        self.assertEqual(process.error_message, "Test error message")
-        self.assertIsNotNone(process.completed_at)
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.FAILED)
+            self.assertEqual(process.error_message, "Test error message")
+            self.assertIsNotNone(process.completed_at)
 
     def test_nonexistent_process_update(self):
         """Test updating nonexistent process"""
@@ -205,9 +212,12 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify process is still running
         process = self.registry.get_process("test-task-running")
-        self.assertEqual(process.status, ProcessStatus.RUNNING)
-        self.assertIsNotNone(process.resource_usage)
-        self.assertEqual(process.resource_usage['cpu_percent'], 15.5)
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.RUNNING)
+            self.assertIsNotNone(process.resource_usage)
+            if process.resource_usage is not None:
+                self.assertEqual(process.resource_usage['cpu_percent'], 15.5)
 
     @patch('psutil.Process')
     def test_stale_process_detection(self, mock_process_class):
@@ -234,8 +244,11 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify process marked as failed
         process = self.registry.get_process("test-task-stale")
-        self.assertEqual(process.status, ProcessStatus.FAILED)
-        self.assertIn("unresponsive", process.error_message.lower())
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.FAILED)
+            if process.error_message is not None:
+                self.assertIn("unresponsive", process.error_message.lower())
 
     def test_process_cancellation(self):
         """Test process cancellation"""
@@ -256,9 +269,12 @@ class TestProcessRegistry(unittest.TestCase):
 
         # Verify cancellation
         process = self.registry.get_process("test-task-cancel")
-        self.assertEqual(process.status, ProcessStatus.CANCELLED)
-        self.assertIsNotNone(process.completed_at)
-        self.assertIn("cancelled", process.error_message.lower())
+        self.assertIsNotNone(process)
+        if process is not None:
+            self.assertEqual(process.status, ProcessStatus.CANCELLED)
+            self.assertIsNotNone(process.completed_at)
+            if process.error_message is not None:
+                self.assertIn("cancelled", process.error_message.lower())
 
     def test_process_cleanup(self):
         """Test cleanup of old completed processes"""

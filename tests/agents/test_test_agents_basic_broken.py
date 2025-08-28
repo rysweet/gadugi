@@ -15,7 +15,7 @@ sys.path.insert(
 def test_shared_test_instructions_import():
     """Test that shared test instructions can be imported."""
     try:
-        from shared_test_instructions import  # type: ignore[import-not-found]  # type: ignore[import] (
+        from shared_test_instructions import (  # type: ignore[import-not-found]
             SharedTestInstructions,
             TestStatus,
             SkipReason,
@@ -41,7 +41,7 @@ def test_shared_test_instructions_import():
 def test_test_solver_agent_import():
     """Test that TestSolverAgent can be imported."""
     try:
-        from test_solver_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestSolverAgent, FailureCategory
+        from test_solver_agent import TestSolverAgent, FailureCategory  # type: ignore[import-not-found]
 
         assert TestSolverAgent is not None
         assert FailureCategory.ASSERTION_ERROR is not None
@@ -58,7 +58,7 @@ def test_test_solver_agent_import():
 def test_test_writer_agent_import():
     """Test that TestWriterAgent can be imported."""
     try:
-        from test_writer_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestWriterAgent, TestType
+        from test_writer_agent import TestWriterAgent, TestType  # type: ignore[import-not-found]
 
         assert TestWriterAgent is not None
         assert TestType.UNIT is not None
@@ -75,7 +75,7 @@ def test_test_writer_agent_import():
 def test_test_solver_initialization():
     """Test TestSolverAgent initialization."""
     try:
-        from test_solver_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestSolverAgent
+        from test_solver_agent import TestSolverAgent  # type: ignore[import-not-found]
 
         solver = TestSolverAgent()
         assert solver.config is not None
@@ -91,7 +91,7 @@ def test_test_solver_initialization():
 def test_test_writer_initialization():
     """Test TestWriterAgent initialization."""
     try:
-        from test_writer_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestWriterAgent
+        from test_writer_agent import TestWriterAgent  # type: ignore[import-not-found]
 
         writer = TestWriterAgent()
         assert writer.config is not None
@@ -107,7 +107,7 @@ def test_test_writer_initialization():
 def test_shared_instructions_basic_functionality():
     """Test basic functionality of SharedTestInstructions."""
     try:
-        from shared_test_instructions import  # type: ignore[import-not-found]  # type: ignore[import] SharedTestInstructions
+        from shared_test_instructions import SharedTestInstructions  # type: ignore[import-not-found]
 
         # Test basic method existence
         assert hasattr(SharedTestInstructions, "analyze_test_purpose")
@@ -131,8 +131,8 @@ def test_shared_instructions_basic_functionality():
 def test_agent_config_fallback():
     """Test that agents work with fallback config when enhanced separation is not available."""
     try:
-        from test_solver_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestSolverAgent
-        from test_writer_agent import  # type: ignore[import-not-found]  # type: ignore[import] TestWriterAgent
+        from test_solver_agent import TestSolverAgent  # type: ignore[import-not-found]
+        from test_writer_agent import TestWriterAgent  # type: ignore[import-not-found]
 
         # Should work even if enhanced separation modules are not available
         solver = TestSolverAgent()

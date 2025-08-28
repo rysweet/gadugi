@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from neo4j import AsyncGraphDatabase, AsyncSession
+from neo4j import AsyncGraphDatabase, AsyncSession, AsyncDriver, Record, Query
 from neo4j.exceptions import ServiceUnavailable
 
 from .models import Context, ContextState, Memory, MemoryType
@@ -37,7 +37,7 @@ class Neo4jMemoryClient:
         self.database = database
         
         self.logger = logging.getLogger(__name__)
-        self._driver = None
+        self._driver: Optional[AsyncDriver] = None
     
     async def connect(self) -> None:
         """Connect to Neo4j database."""
@@ -66,6 +66,8 @@ class Neo4jMemoryClient:
     
     async def _create_indexes(self) -> None:
         """Create database indexes for performance."""
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Memory indexes
             await session.run(
@@ -106,6 +108,8 @@ class Neo4jMemoryClient:
         Returns:
             Memory ID
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             query = """
                 MERGE (m:Memory {id: $id})
@@ -141,7 +145,9 @@ class Neo4jMemoryClient:
             if memory.parent_id:
                 await self._create_version_relationship(session, memory.id, memory.parent_id)
             
-            return record["id"]
+            if record is not None:
+                return record["id"]
+            raise RuntimeError("Failed to create memory")
     
     async def retrieve_memory(self, memory_id: str) -> Optional[Memory]:
         """Retrieve a memory from Neo4j.
@@ -152,6 +158,8 @@ class Neo4jMemoryClient:
         Returns:
             Memory object or None if not found
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             query = """
                 MATCH (m:Memory {id: $id})
@@ -165,7 +173,7 @@ class Neo4jMemoryClient:
             if not record:
                 return None
             
-            return self._record_to_memory(record)
+            return self._record_to_memory(dict(record)) if record else None
     
     async def update_memory(self, memory: Memory) -> bool:
         """Update an existing memory.
@@ -176,6 +184,8 @@ class Neo4jMemoryClient:
         Returns:
             True if updated, False if not found
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Create new version
             memory.version += 1
@@ -213,6 +223,8 @@ class Neo4jMemoryClient:
         Returns:
             True if deleted, False if not found
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             query = """
                 MATCH (m:Memory {id: $id})
@@ -223,7 +235,7 @@ class Neo4jMemoryClient:
             result = await session.run(query, id=memory_id)
             record = await result.single()
             
-            return record["deleted"] > 0
+            return record["deleted"] > 0 if record else False
     
     async def search_memories(
         self,
@@ -245,6 +257,8 @@ class Neo4jMemoryClient:
         Returns:
             List of matching memories
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Build WHERE clause
             where_clauses = []
@@ -280,7 +294,7 @@ class Neo4jMemoryClient:
             memories = []
             
             async for record in result:
-                memory = self._record_to_memory(record)
+                memory = self._record_to_memory(dict(record))
                 if memory:
                     memories.append(memory)
             
@@ -302,6 +316,8 @@ class Neo4jMemoryClient:
         Returns:
             List of similar memories
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Find memories connected through associations or shared tags
             query = """
@@ -334,7 +350,7 @@ class Neo4jMemoryClient:
             
             memories = []
             async for record in result:
-                memory = self._record_to_memory(record)
+                memory = self._record_to_memory(dict(record))
                 if memory:
                     memories.append(memory)
             
@@ -351,6 +367,8 @@ class Neo4jMemoryClient:
         Returns:
             Context ID
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             query = """
                 MERGE (c:Context {id: $id})
@@ -385,7 +403,9 @@ class Neo4jMemoryClient:
                     context.parent_context_id
                 )
             
-            return record["id"]
+            if record is not None:
+                return record["id"]
+            raise RuntimeError("Failed to save context")
     
     async def load_context(self, agent_id: str) -> Optional[Context]:
         """Load the active context for an agent.
@@ -396,6 +416,8 @@ class Neo4jMemoryClient:
         Returns:
             Active context or None
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             query = """
                 MATCH (c:Context {agent_id: $agent_id, state: 'active'})
@@ -416,7 +438,7 @@ class Neo4jMemoryClient:
             if not record:
                 return None
             
-            return self._record_to_context(record)
+            return self._record_to_context(dict(record)) if record else None
     
     async def switch_context(
         self,
@@ -432,6 +454,8 @@ class Neo4jMemoryClient:
         Returns:
             True if successful
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Suspend current context
             await session.run(
@@ -459,6 +483,8 @@ class Neo4jMemoryClient:
         if len(context_ids) < 2:
             return None
         
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Get all contexts
             query = """
@@ -476,19 +502,20 @@ class Neo4jMemoryClient:
             merged_working_memory = {}
             
             async for record in result:
-                context = self._record_to_context(record)
+                context = self._record_to_context(dict(record))
                 if not merged_context:
                     merged_context = context
-                else:
+                elif context is not None:
                     merged_context.merge_with(context)
                 
                 all_memories.update(record["memories"] or [])
                 
                 # Archive merged contexts
-                await session.run(
-                    "MATCH (c:Context {id: $id}) SET c.state = 'merged'",
-                    id=context.id
-                )
+                if context is not None:
+                    await session.run(
+                        "MATCH (c:Context {id: $id}) SET c.state = 'merged'",
+                        id=context.id
+                    )
             
             if merged_context:
                 merged_context.memories = list(all_memories)
@@ -517,6 +544,8 @@ class Neo4jMemoryClient:
         Returns:
             Number of memories pruned
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             cutoff_date = (datetime.now() - timedelta(days=older_than_days)).isoformat()
             
@@ -532,18 +561,19 @@ class Neo4jMemoryClient:
             
             where_clause = " AND ".join(where_clauses)
             
-            query = f"""
+            # Build the query as a literal string to avoid typing issues
+            base_query = """
                 MATCH (m:Memory)
                 WHERE {where_clause}
                 WITH m
                 DETACH DELETE m
                 RETURN count(m) as pruned
-            """
+            """.format(where_clause=where_clause)
             
-            result = await session.run(query, **params)
+            result = await session.run(base_query, **params)  # type: ignore[arg-type]
             record = await result.single()
             
-            pruned_count = record["pruned"]
+            pruned_count = record["pruned"] if record else 0
             self.logger.info(f"Pruned {pruned_count} memories")
             
             return pruned_count
@@ -562,6 +592,8 @@ class Neo4jMemoryClient:
         Returns:
             Number of memories consolidated
         """
+        if self._driver is None:
+            raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Find similar memories within time window
             query = """
@@ -585,14 +617,15 @@ class Neo4jMemoryClient:
                 m1 = self._record_to_memory({"m": record["m1"], "associations": []})
                 m2 = self._record_to_memory({"m": record["m2"], "associations": []})
                 
-                # Merge m2 into m1
-                m1.content = f"{m1.content}\n\n[Consolidated]: {m2.content}"
-                m1.importance_score = max(m1.importance_score, m2.importance_score)
-                m1.access_count += m2.access_count
-                m1.tags = list(set(m1.tags + m2.tags))
-                
-                await self.update_memory(m1)
-                await self.delete_memory(m2.id)
+                if m1 is not None and m2 is not None:
+                    # Merge m2 into m1
+                    m1.content = f"{m1.content}\n\n[Consolidated]: {m2.content}"
+                    m1.importance_score = max(m1.importance_score, m2.importance_score)
+                    m1.access_count += m2.access_count
+                    m1.tags = list(set(m1.tags + m2.tags))
+                    
+                    await self.update_memory(m1)
+                    await self.delete_memory(m2.id)
                 
                 consolidated += 1
             

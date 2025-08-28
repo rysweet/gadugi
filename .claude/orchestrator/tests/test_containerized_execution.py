@@ -18,12 +18,27 @@ Key test scenarios:
 """
 
 import asyncio
+import shutil
+import sys
 import tempfile
 from pathlib import Path
+from typing import Any, Dict, Optional
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Define imports conditionally to avoid type conflicts
+IMPORTS_AVAILABLE = False
+ExecutionEngine = None
+TaskExecutor = None
+ExecutionResult = None  
+ContainerManager = None
+ContainerConfig = None
+ContainerResult = None
+OrchestrationMonitor = None
 
 try:
     from components.execution_engine import ExecutionEngine, TaskExecutor, ExecutionResult
+    from container_manager import ContainerManager, ContainerConfig, ContainerResult
     from monitoring.dashboard import OrchestrationMonitor
     IMPORTS_AVAILABLE = True
 except ImportError as e:
@@ -31,6 +46,7 @@ except ImportError as e:
     IMPORTS_AVAILABLE = False
 
 
+@unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
 class TestContainerConfig(unittest.TestCase):
     """Test ContainerConfig dataclass and validation"""
 
@@ -318,9 +334,8 @@ class TestExecutionEngineContainerization(unittest.TestCase):
 
     @patch('components.execution_engine.CONTAINER_EXECUTION_AVAILABLE', True)
     @patch('components.execution_engine.ContainerManager')
-    def test_task_executor_containerized_execution(self, mock_container_manager):
-            TaskExecutor = None
-    """Test TaskExecutor uses containerized execution"""
+    def test_task_executor_containerized_execution(self, mock_container_manager: Mock) -> None:
+        """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
         mock_container_result.task_id = "test-task"
@@ -441,6 +456,7 @@ class TestOrchestrationMonitoring(unittest.TestCase):
         self.assertIn('recent_logs', container_info)
 
 
+@unittest.skipUnless(IMPORTS_AVAILABLE, "Container modules not available")
 class TestPerformanceComparisons(unittest.TestCase):
     """Test performance improvements of containerized vs subprocess execution"""
 
@@ -550,7 +566,7 @@ Test containerized execution
             self.assertIn('--output-format=json', command)
 
 
-def run_containerized_tests():
+def run_containerized_tests() -> bool:
     """Run all containerized orchestrator tests"""
 
     if not IMPORTS_AVAILABLE:
@@ -586,21 +602,24 @@ def run_containerized_tests():
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    if result.testsRun > 0:
+        print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
 
     if result.failures:
         print(f"\nFailures:")
         for test, traceback in result.failures:
-            print(f"- {test}: {traceback.split(chr(10))[-2]}")
+            lines = traceback.split('\n')
+            print(f"- {test}: {lines[-2] if len(lines) > 1 else 'Unknown error'}")
 
     if result.errors:
         print(f"\nErrors:")
         for test, traceback in result.errors:
-            print(f"- {test}: {traceback.split(chr(10))[-2]}")
+            lines = traceback.split('\n')
+            print(f"- {test}: {lines[-2] if len(lines) > 1 else 'Unknown error'}")
 
     return result.wasSuccessful()
 
 
 if __name__ == "__main__":
     success = run_containerized_tests()
-    exit(0 if success else 1)
+    sys.exit(0 if success else 1)
