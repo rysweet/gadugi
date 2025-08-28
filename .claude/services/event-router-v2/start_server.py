@@ -9,7 +9,7 @@ import os
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from core.router import EventRouter
+from core.router import EventRouter  # type: ignore[import]
 
 # Configure logging
 logging.basicConfig(

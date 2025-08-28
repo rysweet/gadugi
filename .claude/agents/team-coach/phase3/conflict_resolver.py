@@ -558,7 +558,7 @@ class ConflictResolver:
         elif conflict.conflict_type == ConflictType.TASK_OVERLAP:
             # Reassign task to single agent
             best_agent = self._select_best_agent_for_task(
-                conflict.agents_involved, conflict.evidence.get("task_id")
+                conflict.agents_involved, conflict.evidence.get("task_id")  # type: ignore[assignment]
             )
             for agent_id in conflict.agents_involved:
                 if agent_id != best_agent:
@@ -781,7 +781,7 @@ class ConflictResolver:
         # Find most common
         if self.conflict_patterns:
             most_common_key = max(  # type: ignore
-                self.conflict_patterns, key=self.conflict_patterns.get
+                self.conflict_patterns, key=self.conflict_patterns.get  # type: ignore[operator]
             )
             patterns["most_common"] = {
                 "pattern": most_common_key,
@@ -860,4 +860,4 @@ class ConflictResolver:
         """Select the best agent for a specific task."""
         # In real implementation, would analyze capabilities, availability, etc.
         # For now, return first agent
-        return agent_ids[0] if agent_ids else None
+        return agent_ids[0] if agent_ids else None  # type: ignore[return-value]

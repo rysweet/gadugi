@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Tuple  # type: ignore
 
 import psutil  # type: ignore
-import structlog
+import structlog  # type: ignore[import]
 from pydantic import BaseModel, Field  # type: ignore
 
 try:
@@ -487,7 +487,7 @@ class DeadLetterQueue:
         file_path.unlink()
 
         # Return event for retry
-        return Event.from_dict(dlq_entry["event"])
+        return Event.from_dict(dlq_entry["event"])  # type: ignore[assignment]
 
     async def clear(self):
         """Clear all events from DLQ."""

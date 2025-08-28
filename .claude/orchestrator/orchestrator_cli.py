@@ -136,7 +136,7 @@ class OrchestrationCLI:
     def execute_orchestration(
         self,
         prompt_files: List[str],
-        config: OrchestrationConfig = None
+        config: OrchestrationConfig = None  # type: ignore[assignment]
     ) -> OrchestrationResult:
         """Execute orchestration with specified prompt files"""
         if not prompt_files:

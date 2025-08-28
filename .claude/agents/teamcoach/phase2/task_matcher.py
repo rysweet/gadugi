@@ -28,9 +28,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "sh
 
 # Import available shared module components
 try:
-    from interfaces import OperationResult
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from state_management import StateManager
+    from interfaces import OperationResult  # type: ignore[import]
+    from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
+    from state_management import StateManager  # type: ignore[import]
 except ImportError:
     # Define minimal stubs if shared modules are not available
     class OperationResult:
@@ -59,7 +59,7 @@ TaskResult = OperationResult
 
 # Import task tracking if available
 try:
-    from task_tracking import TaskMetrics
+    from task_tracking import TaskMetrics  # type: ignore[import]
 except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):

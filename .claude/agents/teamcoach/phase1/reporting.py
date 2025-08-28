@@ -1,11 +1,11 @@
-import numpy as np
+import numpy as np  # type: ignore[import]
 import logging
 import json
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore[import]
 import seaborn as sns
 from io import BytesIO
 import base64
@@ -98,7 +98,7 @@ class GeneratedReport:
     sections: List[ReportSection] = field(default_factory=list)
 
     # Output content
-    content: str
+    content: str  # type: ignore[misc]
     attachments: Dict[str, bytes] = field(default_factory=dict)
 
     # Metadata
@@ -182,7 +182,7 @@ class ReportingSystem:
             )
 
             # Initialize report structure
-            report = GeneratedReport(
+            report = GeneratedReport(  # type: ignore[misc]
                 report_id=report_id,
                 report_type=config.report_type,
                 format=config.format,

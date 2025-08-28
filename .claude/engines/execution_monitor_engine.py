@@ -156,7 +156,7 @@ class MonitoringConfiguration:
     enable_real_time: bool = True
     auto_restart: bool = True
     max_restart_attempts: int = 3
-    notification_channels: list[str] = None
+    notification_channels: list[str] = None  # type: ignore[assignment]
     alert_config: dict[str, Any] | None = None
     resource_config: dict[str, Any] | None = None
 

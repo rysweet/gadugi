@@ -164,7 +164,7 @@ class EnhancedWorkflowManager:
         })
 
         # Execute workflow with reliability monitoring
-        with monitor_workflow(self.workflow_id, self.workflow_context, self.reliability_manager) as reliability:
+        with monitor_workflow(self.workflow_id, self.workflow_context, self.reliability_manager) as reliability:  # type: ignore[assignment]
             try:
                 logger.info(f"Starting enhanced workflow execution: {self.workflow_id}")
                 logger.info(f"Prompt file: {prompt_file}")
@@ -321,7 +321,7 @@ class EnhancedWorkflowManager:
             ]
 
             if stage in critical_phases:
-                health_check = reliability.perform_health_check(self.workflow_id)
+                health_check = reliability.perform_health_check(self.workflow_id)  # type: ignore[assignment]
                 if health_check and health_check.status in [HealthStatus.CRITICAL, HealthStatus.FAILED]:  # type: ignore
                     logger.warning(f"Health check failed before {stage.value}: {health_check.status.value}")  # type: ignore
                     # Continue with warnings but monitor closely
@@ -358,7 +358,7 @@ class EnhancedWorkflowManager:
 
             # Handle error through reliability manager
             error_result = reliability.handle_workflow_error(
-                self.workflow_id, e, stage, {
+                self.workflow_id, e, stage, {  # type: ignore[assignment]
                     'phase_duration': phase_duration,
                     'phase_start_time': phase_start_time,
                     'checkpoints_so_far': len(self.phase_checkpoints)

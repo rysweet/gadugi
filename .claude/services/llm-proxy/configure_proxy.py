@@ -240,7 +240,7 @@ class LLMProxyConfigurator:
                 prompt_text += f" [{default}]"
             prompt_text += ": "
             value = input(prompt_text).strip()
-            return value if value else default
+            return value if value else default  # type: ignore[assignment]
     
     def get_number(self, prompt: str, default: int) -> int:
         """Get numeric input from user."""

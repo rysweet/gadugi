@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 neo4j_path = Path(__file__).parent.parent / 'neo4j'
 sys.path.insert(0, str(neo4j_path))
 
-from neo4j_client import Neo4jConfig
+from neo4j_client import Neo4jConfig  # type: ignore[import]
 
 
 class TestEnvironmentVariableConfiguration(unittest.TestCase):

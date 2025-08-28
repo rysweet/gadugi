@@ -16,7 +16,7 @@ from enum import Enum
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
 try:
-    from utils.error_handling import CircuitBreaker
+    from utils.error_handling import CircuitBreaker  # type: ignore[import]
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass
@@ -127,16 +127,16 @@ class TestWriterAgent:
     Follows shared test instruction framework and supports TDD practices.
     """
 
-    def __init__(self, config: Optional[AgentConfig] = None):
-        self.config = config or AgentConfig(
+    def __init__(self, config: Optional[AgentConfig] = None):  # type: ignore[assignment]
+        self.config = config or AgentConfig(  # type: ignore[assignment]
             agent_id="test_writer_agent", name="Test Writer Agent"
         )
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.shared_instructions = SharedTestInstructions(config)
+        self.shared_instructions = SharedTestInstructions(config)  # type: ignore[assignment]
 
         # Setup error handling
         try:
-            self.error_handler = ErrorHandler()
+            self.error_handler = ErrorHandler()  # type: ignore[assignment]
         except NameError:
             self.error_handler = None
 

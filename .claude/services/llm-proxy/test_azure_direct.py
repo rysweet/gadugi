@@ -81,7 +81,7 @@ print("\nTesting deployment list endpoint...")
 # Try to list deployments
 list_url = f"{base_url}/openai/deployments?api-version=2024-02-01"
 try:
-    response = httpx.get(list_url, headers={"api-key": api_key}, timeout=10)
+    response = httpx.get(list_url, headers={"api-key": api_key}, timeout=10)  # type: ignore[assignment]
     if response.status_code == 200:
         data = response.json()
         print("✅ Available deployments:")

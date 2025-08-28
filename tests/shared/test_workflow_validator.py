@@ -19,7 +19,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
-from workflow_validator import (
+from workflow_validator import (  # type: ignore[import]
     WorkflowValidator,
     ValidationLevel,
     ValidationCategory,
@@ -31,7 +31,7 @@ from workflow_validator import (
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from workflow_engine import WorkflowPhase, WorkflowState
+from workflow_engine import WorkflowPhase, WorkflowState  # type: ignore[import]
 
 
 class TestWorkflowValidator:

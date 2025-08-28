@@ -39,10 +39,10 @@ except ImportError:
 # Import Enhanced Separation shared modules
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 try:
-    from github_operations import GitHubOperations
-    from state_management import StateManager, CheckpointManager
-    from utils.error_handling import ErrorHandler, CircuitBreaker
-    from task_tracking import TaskMetrics
+    from github_operations import GitHubOperations  # type: ignore[import]
+    from state_management import StateManager, CheckpointManager  # type: ignore[import]
+    from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
+    from task_tracking import TaskMetrics  # type: ignore[import]
     from interfaces import AgentConfig, OperationResult  # type: ignore
 except ImportError as e:
     logging.warning(f"Could not import shared modules: {e}")
@@ -111,7 +111,7 @@ class OrchestrationResult:
     failed_tasks: int
     execution_time_seconds: float
     parallel_speedup: Optional[float] = None
-    task_results: List[ExecutionResult] = None
+    task_results: List[ExecutionResult] = None  # type: ignore[assignment]
     error_summary: Optional[str] = None
 
 
@@ -123,7 +123,7 @@ class OrchestratorCoordinator:
     all existing orchestrator components to enable actual parallel execution.
     """
 
-    def __init__(self, config: OrchestrationConfig = None, project_root: str = "."):
+    def __init__(self, config: OrchestrationConfig = None, project_root: str = "."):  # type: ignore[assignment]
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()

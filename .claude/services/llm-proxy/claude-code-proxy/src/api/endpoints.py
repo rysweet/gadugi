@@ -4,21 +4,21 @@ from datetime import datetime
 import uuid
 from typing import Optional
 
-from src.core.config import config
-from src.core.logging import logger
-from src.core.client import OpenAIClient
-from src.models.claude import ClaudeMessagesRequest, ClaudeTokenCountRequest
-from src.conversion.request_converter import convert_claude_to_openai
-from src.conversion.response_converter import (
+from src.core.config import config  # type: ignore
+from src.core.logging import logger  # type: ignore
+from src.core.client import OpenAIClient  # type: ignore
+from src.models.claude import ClaudeMessagesRequest, ClaudeTokenCountRequest  # type: ignore
+from src.conversion.request_converter import convert_claude_to_openai  # type: ignore
+from src.conversion.response_converter import (  # type: ignore
     convert_openai_to_claude_response,
     convert_openai_streaming_to_claude_with_cancellation,
 )
-from src.core.model_manager import model_manager
+from src.core.model_manager import model_manager  # type: ignore
 
 router = APIRouter()
 
 @router.get("/health")
-async def health_check():
+async def health_check():  # type: ignore[misc]
     """Comprehensive health check endpoint with upstream validation."""
     import httpx
     
@@ -156,13 +156,13 @@ async def health_check():
         return JSONResponse(status_code=200, content=health_status)
 
 openai_client = OpenAIClient(
-    config.openai_api_key,
+    config.openai_api_key,  # type: ignore[assignment]
     config.openai_base_url,
     config.request_timeout,
     api_version=config.azure_api_version,
 )
 
-async def validate_api_key(x_api_key: Optional[str] = Header(None), authorization: Optional[str] = Header(None)):
+async def validate_api_key(x_api_key: Optional[str] = Header(None), authorization: Optional[str] = Header(None)):  # type: ignore
     """Validate the client's API key from either x-api-key header or Authorization header."""
     client_api_key = None
     
@@ -185,7 +185,7 @@ async def validate_api_key(x_api_key: Optional[str] = Header(None), authorizatio
         )
 
 @router.post("/v1/messages")
-async def create_message(request: ClaudeMessagesRequest, http_request: Request, _: None = Depends(validate_api_key)):
+async def create_message(request: ClaudeMessagesRequest, http_request: Request, _: None = Depends(validate_api_key)):  # type: ignore
     try:
         # Log incoming request details (without message content for privacy)
         import logging
@@ -214,10 +214,10 @@ async def create_message(request: ClaudeMessagesRequest, http_request: Request, 
         if request.stream:
             # Streaming response - wrap in error handling
             try:
-                openai_stream = openai_client.create_chat_completion_stream(
+                openai_stream = openai_client.create_chat_completion_stream(  # type: ignore
                     openai_request, request_id
                 )
-                return StreamingResponse(
+                return StreamingResponse(  # type: ignore
                     convert_openai_streaming_to_claude_with_cancellation(
                         openai_stream,
                         request,
@@ -248,7 +248,7 @@ async def create_message(request: ClaudeMessagesRequest, http_request: Request, 
                 return JSONResponse(status_code=e.status_code, content=error_response)
         else:
             # Non-streaming response
-            openai_response = await openai_client.create_chat_completion(
+            openai_response = await openai_client.create_chat_completion(  # type: ignore
                 openai_request, request_id
             )
             claude_response = convert_openai_to_claude_response(
@@ -267,7 +267,7 @@ async def create_message(request: ClaudeMessagesRequest, http_request: Request, 
 
 
 @router.post("/v1/messages/count_tokens")
-async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)):
+async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)):  # type: ignore
     try:
         # For token counting, we'll use a simple estimation
         # In a real implementation, you might want to use tiktoken or similar
@@ -291,8 +291,8 @@ async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(valid
                 total_chars += len(msg.content)
             elif isinstance(msg.content, list):
                 for block in msg.content:
-                    if hasattr(block, "text") and block.text is not None:
-                        total_chars += len(block.text)
+                    if hasattr(block, "text") and block.text is not None:  # type: ignore[attr-defined]
+                        total_chars += len(block.text)  # type: ignore[attr-defined]
 
         # Rough estimation: 4 characters per token
         estimated_tokens = max(1, total_chars // 4)

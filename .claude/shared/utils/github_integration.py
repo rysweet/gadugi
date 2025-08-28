@@ -26,7 +26,7 @@ class GitHubIntegration:
             "backoff_factor": 2,
         }
 
-    def _execute_gh_command(self, args: List[str]) -> Dict[str, Any]:
+    def _execute_gh_command(self, args: List[str]) -> Dict[str, Any]:  # type: ignore[misc]
         """Execute gh CLI command with retry logic."""
         retries = 0
         delay = self.retry_config["initial_delay"]

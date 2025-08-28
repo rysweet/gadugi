@@ -45,12 +45,12 @@ with multiple lines"""
         issue = self.pm.parse_issue_from_gh(issue_data)
 
         self.assertIsNotNone(issue)
-        self.assertEqual(issue.number, 123)
-        self.assertEqual(issue.title, "Test Issue")
-        self.assertEqual(issue.state, "OPEN")
-        self.assertEqual(issue.author, "testuser")
-        self.assertEqual(issue.labels, ["bug", "idea"])
-        self.assertIn("This is the issue body", issue.body)
+        self.assertEqual(issue.number, 123)  # type: ignore[union-attr]
+        self.assertEqual(issue.title, "Test Issue")  # type: ignore[union-attr]
+        self.assertEqual(issue.state, "OPEN")  # type: ignore[union-attr]
+        self.assertEqual(issue.author, "testuser")  # type: ignore[union-attr]
+        self.assertEqual(issue.labels, ["bug", "idea"])  # type: ignore[union-attr]
+        self.assertIn("This is the issue body", issue.body)  # type: ignore[union-attr]
 
     def test_issue_classification(self):
         """Test issue classification logic"""
@@ -216,7 +216,7 @@ with multiple lines"""
         self.assertEqual(stats["error"], 0)  # type: ignore[index]
 
         # Verify memory was updated
-        self.pm.memory.record_agent_memory.assert_called_with(
+        self.pm.memory.record_agent_memory.assert_called_with(  # type: ignore[attr-defined]
             "issue_triage", "Triaged 2 issues: 1 ideas, 0 drafts, 1 bugs"
         )
 
@@ -386,7 +386,7 @@ with multiple lines"""
         # Mock README content without program-manager
         with patch(
             "builtins.open",
-            unittest.mock.mock_open(
+            unittest.mock.mock_open(  # type: ignore[attr-defined]
                 read_data="# README\n## Agents\n- orchestrator-agent\n- workflow-manager"
             ),
         ):
@@ -452,9 +452,9 @@ with multiple lines"""
             mock_readme.assert_called_once()
 
             # Verify memory was updated
-            self.pm.memory.record_agent_memory.assert_called_with(
+            self.pm.memory.record_agent_memory.assert_called_with(  # type: ignore[attr-defined]
                 "maintenance_complete",
-                unittest.mock.ANY,  # Don't check exact timestamp
+                unittest.mock.ANY,  # Don't check exact timestamp  # type: ignore[attr-defined]
             )
 
 

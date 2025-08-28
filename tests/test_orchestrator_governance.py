@@ -233,9 +233,9 @@ class TestOrchestratorGovernance:
         """Test that parallel executor properly invokes WorkflowManager."""
         # Mock subprocess execution
         with patch("asyncio.create_subprocess_exec") as mock_subprocess:
-            mock_process = AsyncMock()
+            mock_process = AsyncMock()  # type: ignore[assignment]
             mock_process.returncode = 0
-            mock_process.communicate = AsyncMock(
+            mock_process.communicate = AsyncMock(  # type: ignore[assignment]
                 return_value=(
                     b"Phase 1 completed\nPhase 2 completed\n...Phase 11 completed\nPR #123 created",
                     b"",
@@ -262,7 +262,7 @@ class TestOrchestratorGovernance:
         with patch.object(
             orchestrator.parallel_executor,
             "_invoke_workflow_manager",
-            new_callable=AsyncMock,
+            new_callable=AsyncMock,  # type: ignore[assignment]
         ) as mock_invoke:
             mock_invoke.return_value = {
                 "success": True,

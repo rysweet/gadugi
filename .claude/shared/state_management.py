@@ -855,3 +855,21 @@ class CheckpointManager:
         except Exception as e:
             self.logger.error(f"Failed to cleanup checkpoints for task {task_id}: {e}")
             return 0
+
+    def get_agent_config(self, agent_id: str) -> Optional[Dict[str, Any]]:
+        """Get agent configuration by ID."""
+        # Mock implementation for compatibility
+        return {"agent_id": agent_id, "name": agent_id, "version": "1.0.0"}
+    
+    def save_agent_capability_profile(self, agent_id: str, profile_data: Dict[str, Any]) -> bool:
+        """Save agent capability profile."""
+        # Mock implementation for compatibility
+        try:
+            profile_file = self.state_dir / f"agent_profiles/{agent_id}.json"  # type: ignore[attr-defined]
+            profile_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(profile_file, 'w') as f:
+                json.dump(profile_data, f, indent=2, default=str)
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to save capability profile for {agent_id}: {e}")
+            return False

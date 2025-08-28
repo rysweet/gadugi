@@ -53,9 +53,9 @@ class MemoryManagerRequest:
 
     action: str  # update, prune, sync, archive, status
     memory_content: str | None = None
-    updates: list[dict[str, Any]] = None
-    sync_options: dict[str, bool] = None
-    prune_options: dict[str, Any] = None
+    updates: list[dict[str, Any]] = None  # type: ignore[assignment]
+    sync_options: dict[str, bool] = None  # type: ignore[assignment]
+    prune_options: dict[str, Any] = None  # type: ignore[assignment]
 
 
 @dataclass

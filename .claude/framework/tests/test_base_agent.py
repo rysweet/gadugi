@@ -16,7 +16,7 @@ class TestAgentImpl(BaseAgent):
         """Initialize test agent."""
         self.state["initialized"] = True
 
-    async def process(self, event: Any) -> AgentResponse:
+    async def process(self, event: Any) -> AgentResponse:  # type: ignore[assignment]
         """Process test event."""
         return AgentResponse(
             success=True,
@@ -47,8 +47,8 @@ class TestBaseAgent:
         """Create test agent instance."""
         agent = TestAgentImpl(
             metadata=agent_metadata,
-            event_router=AsyncMock(),
-            memory_system=AsyncMock(),
+            event_router=AsyncMock(),  # type: ignore[assignment]
+            memory_system=AsyncMock(),  # type: ignore[assignment]
         )
         await agent.init()
         return agent
@@ -79,7 +79,7 @@ class TestBaseAgent:
         assert test_agent.running is True
 
         # Simulate event
-        mock_event = MagicMock()
+        mock_event = MagicMock()  # type: ignore[assignment]
         mock_event.type = "test.event"
         mock_event.data = {"test": "data"}
 
@@ -160,7 +160,7 @@ class TestBaseAgent:
         test_agent.memory_system.store_memory.assert_called()
 
         # Simulate load
-        mock_memory = MagicMock()
+        mock_memory = MagicMock()  # type: ignore[assignment]
         mock_memory.metadata = {"state": {"test_key": "loaded_value"}}
         test_agent.memory_system.retrieve_context.return_value = [mock_memory]
 

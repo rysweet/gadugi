@@ -47,7 +47,7 @@ class TaskManagerAgent:
         # Subscribe to task events
         await self.client.subscribe(
             topics=["task.completed", "task.failed"],
-            callback=self.handle_task_update
+            callback=self.handle_task_update  # type: ignore[assignment]
         )
         
         # Publish agent started event
@@ -125,7 +125,7 @@ class WorkerAgent:
         # Subscribe to task created events
         await self.client.subscribe(
             topics=["task.created", "task.assigned"],
-            callback=self.handle_task_event
+            callback=self.handle_task_event  # type: ignore[assignment]
         )
         
         # Publish agent started event
@@ -245,7 +245,7 @@ class MonitorAgent:
         # Subscribe to all events
         await self.client.subscribe(
             topics=["*"],
-            callback=self.handle_event
+            callback=self.handle_event  # type: ignore[assignment]
         )
         
         # Publish agent started event

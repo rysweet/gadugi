@@ -79,7 +79,7 @@ class TestAgentEvent:
 
     def test_creation(self):
         """Test AgentEvent creation."""
-        event = AgentEvent(
+        event = AgentEvent(  # type: ignore[misc]
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",
@@ -294,7 +294,7 @@ class TestEventCreators:
 
     def test_create_agent_event(self):
         """Test create_agent_event function."""
-        event = create_agent_event(
+        event = create_agent_event(  # type: ignore[misc]
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",

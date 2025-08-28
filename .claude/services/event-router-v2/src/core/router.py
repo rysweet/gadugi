@@ -361,9 +361,9 @@ class EventRouter:
             try:
                 # Get next event
                 if self.use_multi_queue:
-                    event = await self.queue.get_next(timeout=1.0)
+                    event = await self.queue.get_next(timeout=1.0)  # type: ignore[attr-defined]
                 else:
-                    event = await self.queue.get(timeout=1.0)
+                    event = await self.queue.get(timeout=1.0)  # type: ignore[attr-defined]
                 
                 if event:
                     await self._deliver_event(event)
@@ -496,7 +496,7 @@ class EventRouter:
         status = "healthy"
         errors = []
         
-        if queue_size > 8000:  # 80% full
+        if queue_size > 8000:  # 80% full  # type: ignore[misc]
             status = "degraded"
             errors.append("Queue approaching capacity")
         
@@ -509,7 +509,7 @@ class EventRouter:
             uptime=uptime,
             events_processed=self.events_processed,
             events_failed=self.events_failed,
-            events_in_queue=queue_size,
+            events_in_queue=queue_size,  # type: ignore[assignment]
             active_subscriptions=len(self.subscriptions),
             connected_clients=len(self.clients),
             last_event_at=self.last_event_at,

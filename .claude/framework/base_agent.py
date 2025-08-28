@@ -15,7 +15,7 @@ from .tool_registry import ToolRegistry
 # Import service dependencies
 try:
     from ..services.event_router import EventRouter, Event, EventType, Subscription  # type: ignore
-    from ..services.memory_system import MemorySystem, Memory, MemoryType
+    from ..services.memory_system import MemorySystem, Memory, MemoryType  # type: ignore[import]
 except ImportError:
     # Mock imports for development
     class EventRouter:
@@ -183,7 +183,7 @@ class BaseAgent(ABC):
                     handler=self._handle_event,
                     agent_id=self.agent_id,
                 )
-                self.subscriptions.append(subscription)
+                self.subscriptions.append(subscription)  # type: ignore[assignment]
                 logger.debug(f"Subscribed to event: {event_type}")
 
         # Store registration in memory

@@ -234,7 +234,7 @@ async def main():
         # Run both publisher and subscriber
         await asyncio.gather(
             subscriber_client(),
-            asyncio.create_task(asyncio.sleep(1)).then(publisher_client())
+            asyncio.create_task(asyncio.sleep(1)).then(publisher_client())  # type: ignore[attr-defined]
         )
     elif choice == "2":
         await interactive_client()

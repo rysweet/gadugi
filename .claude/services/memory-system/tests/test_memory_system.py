@@ -2,7 +2,7 @@
 
 import asyncio
 from datetime import datetime, timedelta
-from pathlib import
+from pathlib import  # type: ignore[import]
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

@@ -18,7 +18,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
 
-from workflow_engine import (
+from workflow_engine import (  # type: ignore[import]
     WorkflowEngine,
     WorkflowPhase,
     WorkflowState,

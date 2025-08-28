@@ -26,7 +26,7 @@ import os
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
 )
-from error_handling import GadugiError
+from error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
 
@@ -286,7 +286,7 @@ class ContainerExecutionEngine:
             container_id=request_id,
             image=config.image,
             command=config.command,
-            security_policy=config.security_opt,
+            security_policy=config.security_opt,  # type: ignore[assignment]
             resource_limits={
                 "memory": config.memory_limit,
                 "cpu": config.cpu_limit,

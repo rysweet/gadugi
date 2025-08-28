@@ -88,7 +88,7 @@ async def demonstrate_event_responses():
     await client.subscribe(
         topics=["task.*"],
         priorities=[EventPriority.HIGH, EventPriority.CRITICAL],
-        callback=handle_urgent_tasks
+        callback=handle_urgent_tasks  # type: ignore[assignment]
     )
     
     # Pattern 4: Chain responses

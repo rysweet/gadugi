@@ -34,8 +34,8 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
         spec = importlib.util.spec_from_file_location(
             "teamcoach_stop", self.hook_script_path
         )
-        self.hook_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.hook_module)
+        self.hook_module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(self.hook_module)  # type: ignore[attr-defined]
 
     def test_hook_script_exists_and_executable(self):
         """Test that the hook script exists and is executable."""
@@ -147,8 +147,8 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
 
         self.assertIsNotNone(printed_output)
         self.assertEqual(printed_output["action"], "continue")  # type: ignore[index]
-        self.assertIn("completed", printed_output["message"])  # type: ignore[index]
-        self.assertIn("timestamp", printed_output)
+        self.assertIn("completed", printed_output["message"])  # type: ignore[arg-type]
+        self.assertIn("timestamp", printed_output)  # type: ignore[arg-type]
 
     @patch("sys.stdin", new_callable=io.StringIO)
     @patch("subprocess.run")
@@ -176,7 +176,7 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
 
         self.assertIsNotNone(printed_output)
         self.assertEqual(printed_output["action"], "continue")  # type: ignore[index]
-        self.assertIn("issues", printed_output["message"])  # type: ignore[index]
+        self.assertIn("issues", printed_output["message"])  # type: ignore[arg-type]
 
 
 class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
@@ -195,8 +195,8 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
         spec = importlib.util.spec_from_file_location(
             "teamcoach_subagent_stop", self.hook_script_path
         )
-        self.hook_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.hook_module)
+        self.hook_module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(self.hook_module)  # type: ignore[attr-defined]
 
     def test_hook_script_exists_and_executable(self):
         """Test that the subagent hook script exists and is executable."""
@@ -349,8 +349,8 @@ sys.exit(0)
                         continue
 
             self.assertIsNotNone(json_output, "Should have JSON output")
-            self.assertEqual(json_output["action"], "continue")  # type: ignore[index]
-            self.assertIn("timestamp", json_output)
+            self.assertEqual(json_output["action"], "continue")  # type: ignore[arg-type]
+            self.assertIn("timestamp", json_output)  # type: ignore[arg-type]
 
         finally:
             # Cleanup

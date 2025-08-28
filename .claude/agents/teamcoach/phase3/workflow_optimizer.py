@@ -375,14 +375,14 @@ class WorkflowOptimizer:
                     location=f"Resource: {resource}",
                     impact=wait_ratio * 100,  # Percentage of time waiting
                     affected_agents=[
-                        t.get("agent_id")
+                        str(t.get("agent_id", ""))
                         for t in task_history
-                        if resource in t.get("resources_used", [])
+                        if resource in t.get("resources_used", []) and t.get("agent_id") is not None
                     ],
                     affected_tasks=[
-                        t.get("task_id")
+                        str(t.get("task_id", ""))
                         for t in task_history
-                        if resource in t.get("resources_used", [])
+                        if resource in t.get("resources_used", []) and t.get("task_id") is not None
                     ],
                     description=f"Resource '{resource}' is overutilized ({utilization:.1%})",
                     evidence={
@@ -452,9 +452,9 @@ class WorkflowOptimizer:
                     impact=(avg_delay / 3600) * 10,  # Impact based on hours of delay
                     affected_agents=list(agent_states.keys()),
                     affected_tasks=[
-                        t.get("task_id")
+                        str(t.get("task_id", ""))
                         for t in task_history
-                        if skill in t.get("required_skills", [])
+                        if skill in t.get("required_skills", []) and t.get("task_id") is not None
                     ],
                     description=f"Insufficient agents with '{skill}' skill (demand: {demand}, supply: {supply})",
                     evidence={
@@ -505,9 +505,9 @@ class WorkflowOptimizer:
                     impact=(total_duration / workflow_duration - 0.5) * 100,
                     affected_agents=list(
                         set(
-                            t.get("agent_id")
+                            str(t.get("agent_id", ""))
                             for t in task_history
-                            if t.get("task_id") in critical_path
+                            if t.get("task_id") in critical_path and t.get("agent_id") is not None
                         )
                     ),
                     affected_tasks=critical_path,
@@ -560,7 +560,7 @@ class WorkflowOptimizer:
                     affected_agents=list(pair)
                     if pair[0] != "general"
                     else list(agent_states.keys()),
-                    affected_tasks=[
+                    affected_tasks=[  # type: ignore[assignment]
                         t.get("task_id")
                         for t in task_history
                         if t.get("communication_delay", 0)
@@ -598,8 +598,8 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Quality control process",
                 impact=rework_rate * 100,
-                affected_agents=list(set(t.get("agent_id") for t in rework_tasks)),
-                affected_tasks=[t.get("task_id") for t in rework_tasks],
+                affected_agents=[str(t.get("agent_id", "")) for t in rework_tasks if t.get("agent_id") is not None],
+                affected_tasks=[str(t.get("task_id", "")) for t in rework_tasks if t.get("task_id") is not None],
                 description=f"High rework rate ({rework_rate:.1%}) indicating process issues",
                 evidence={
                     "rework_rate": rework_rate,
@@ -619,8 +619,8 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Overall workflow",
                 impact=(0.7 - metrics.efficiency_ratio) * 100,
-                affected_agents=list(set(t.get("agent_id") for t in task_history)),
-                affected_tasks=[t.get("task_id") for t in task_history],
+                affected_agents=[str(t.get("agent_id", "")) for t in task_history if t.get("agent_id") is not None],
+                affected_tasks=[str(t.get("task_id", "")) for t in task_history if t.get("task_id") is not None],
                 description=f"Low workflow efficiency ({metrics.efficiency_ratio:.1%})",
                 evidence={
                     "efficiency_ratio": metrics.efficiency_ratio,
@@ -657,7 +657,7 @@ class WorkflowOptimizer:
                 "4. Add capacity planning for peak usage times",
                 "5. Consider adding additional capacity if needed",
             ],
-            affected_components=[resource] + bottleneck.affected_agents,
+            affected_components=[resource] + list(bottleneck.affected_agents),  # type: ignore[assignment]
             effort_estimate="3-5 days",
             prerequisites=[
                 "Resource usage audit",

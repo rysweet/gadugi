@@ -25,7 +25,7 @@ import shutil
 class WorkflowReflectionCollector:
     """Safely collects and analyzes workflow session data for improvement insights."""
 
-    def __init__(self, project_root: str = None):
+    def __init__(self, project_root: str = None):  # type: ignore[assignment]
         self.project_root = Path(project_root) if project_root else Path.cwd()
         self.reflection_dir = self.project_root / ".claude" / "reflections"
         self.template_dir = self.project_root / ".claude" / "templates"

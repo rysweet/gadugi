@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
-from .models import Event, Subscription
+from .models import Event, Subscription  # type: ignore[import]
 
 
 @dataclass
@@ -145,7 +145,7 @@ class DeadLetterQueue:
                 await self._persist_entry(entry)
             
             self.logger.warning(
-                f"Added event {event.id} to dead letter queue: {error_message}",
+                f"Added event {event.id} to dead letter queue: {error_message}",  # type: ignore[assignment]
                 extra={"event_id": event.id, "error_type": type(error).__name__}
             )
     

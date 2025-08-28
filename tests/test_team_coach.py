@@ -22,7 +22,7 @@ sys.path.insert(
     0, os.path.join(os.path.dirname(__file__), "..", ".claude", "agents", "teamcoach")
 )
 
-from team_coach import (
+from team_coach import (  # type: ignore[import]
     TeamCoach,
     SessionMetrics,
     ImprovementType,

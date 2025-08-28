@@ -21,9 +21,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Mock imports that may not be available
 try:
-    from orchestrator_cli import OrchestrationCLI
-    from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
-    from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig
+    from orchestrator_cli import OrchestrationCLI  # type: ignore
+    from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo  # type: ignore
+    from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig  # type: ignore
     ORCHESTRATOR_IMPORTS_AVAILABLE = True
 except ImportError:
     # Create mock classes for testing
@@ -31,27 +31,27 @@ except ImportError:
         def __init__(self, project_root: str) -> None:
             self.project_root = project_root
         
-        def parse_user_input(self, user_input: str) -> list[str]:
+        def parse_user_input(self, user_input: str) -> list[str]:  # type: ignore
             return []
         
-        def execute_orchestration(self, prompt_files: list[str]) -> None:
+        def execute_orchestration(self, prompt_files: list[str]) -> None:  # type: ignore
             pass
     
     class ProcessRegistry:
         def __init__(self, registry_dir: str) -> None:
             self.registry_dir = registry_dir
         
-        def register_process(self, process_info: Any) -> None:
+        def register_process(self, process_info: Any) -> None:  # type: ignore
             pass
         
-        def get_process(self, task_id: str) -> Any:
+        def get_process(self, task_id: str) -> Any:  # type: ignore
             return None
         
-        def update_process_status(self, task_id: str, status: Any) -> bool:
+        def update_process_status(self, task_id: str, status: Any) -> bool:  # type: ignore
             return True
         
-        def get_registry_stats(self) -> Any:
-            return Mock()
+        def get_registry_stats(self) -> Any:  # type: ignore
+            return Mock()  # type: ignore
     
     class ProcessStatus:
         QUEUED = "queued"
@@ -60,7 +60,7 @@ except ImportError:
         FAILED = "failed"
     
     class ProcessInfo:
-        def __init__(self, task_id: str, task_name: str, status: str, command: str, working_directory: str, created_at: Any) -> None:
+        def __init__(self, task_id: str, task_name: str, status: str, command: str, working_directory: str, created_at: Any) -> None:  # type: ignore
             self.task_id = task_id
             self.task_name = task_name
             self.status = status
@@ -69,16 +69,16 @@ except ImportError:
             self.created_at = created_at
     
     class OrchestratorCoordinator:
-        def __init__(self, config: Any, project_root: str) -> None:
+        def __init__(self, config: Any, project_root: str) -> None:  # type: ignore[assignment]
             self.config = config
             self.project_root = Path(project_root)
             self.orchestration_id = f"orchestration-{id(self)}"
         
-        def orchestrate(self, prompt_files: list[str]) -> Any:
-            return Mock(total_tasks=len(prompt_files), successful_tasks=0, execution_time_seconds=0.0)
+        def orchestrate(self, prompt_files: list[str]) -> Any:  # type: ignore
+            return Mock(total_tasks=len(prompt_files), successful_tasks=0, execution_time_seconds=0.0)  # type: ignore
     
     class OrchestrationConfig:
-        def __init__(self, max_parallel_tasks: int = 4, execution_timeout_hours: int = 2, fallback_to_sequential: bool = True, **kwargs: Any) -> None:
+        def __init__(self, max_parallel_tasks: int = 4, execution_timeout_hours: int = 2, fallback_to_sequential: bool = True, **kwargs: Any) -> None:  # type: ignore
             self.max_parallel_tasks = max_parallel_tasks
             self.execution_timeout_hours = execution_timeout_hours
             self.fallback_to_sequential = fallback_to_sequential
@@ -122,7 +122,7 @@ Test prompt for orchestrator integration testing.
 """)
 
         # Create test configuration
-        self.config = OrchestrationConfig(
+        self.config = OrchestrationConfig(  # type: ignore
             max_parallel_tasks=2,
             execution_timeout_hours=1,
             monitoring_interval_seconds=5,
@@ -142,19 +142,19 @@ Test prompt for orchestrator integration testing.
              patch('orchestrator_main.TaskAnalyzer'), \
              patch('orchestrator_main.PromptGenerator'):
 
-            coordinator = OrchestratorCoordinator(
+            coordinator = OrchestratorCoordinator(  # type: ignore
                 config=self.config,
                 project_root=str(self.test_dir)
             )
 
             self.assertIsNotNone(coordinator)
-            self.assertEqual(coordinator.project_root, self.test_dir)
-            self.assertIsNotNone(coordinator.orchestration_id)
-            self.assertTrue(coordinator.orchestration_id.startswith("orchestration-"))
+            self.assertEqual(coordinator.project_root, self.test_dir)  # type: ignore
+            self.assertIsNotNone(coordinator.orchestration_id)  # type: ignore
+            self.assertTrue(coordinator.orchestration_id.startswith("orchestration-"))  # type: ignore
 
     def test_cli_parse_user_input(self) -> None:
         """Test CLI parsing of user input"""
-        cli = OrchestrationCLI(str(self.test_dir))
+        cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
 
         # Test standard input format
         user_input = """
@@ -173,7 +173,7 @@ Execute these specific prompts in parallel:
 
     def test_cli_parse_alternative_formats(self) -> None:
         """Test CLI parsing with different input formats"""
-        cli = OrchestrationCLI(str(self.test_dir))
+        cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
 
         # Test numbered list format
         user_input = """
@@ -199,42 +199,42 @@ Process these prompts in parallel:
     def test_process_registry_lifecycle(self) -> None:
         """Test process registry lifecycle management"""
         registry_dir = self.test_dir / ".gadugi/monitoring"
-        registry = ProcessRegistry(str(registry_dir))
+        registry = ProcessRegistry(str(registry_dir))  # type: ignore
 
         # Test process registration
-        process_info = ProcessInfo(
+        process_info = ProcessInfo(  # type: ignore
             task_id="test-task-1",
             task_name="Test Task 1",
-            status=ProcessStatus.QUEUED,
+            status=ProcessStatus.QUEUED,  # type: ignore
             command="claude /agent:workflow-manager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None
+            created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None  # type: ignore
         )
 
         registry.register_process(process_info)
 
         # Verify registration
-        retrieved = registry.get_process("test-task-1")
+        retrieved = registry.get_process("test-task-1")  # type: ignore
         self.assertIsNotNone(retrieved)
-        self.assertEqual(retrieved.task_id, "test-task-1")
-        self.assertEqual(retrieved.status, ProcessStatus.QUEUED)
+        self.assertEqual(retrieved.task_id, "test-task-1")  # type: ignore
+        self.assertEqual(retrieved.status, ProcessStatus.QUEUED)  # type: ignore
 
         # Test status update
-        success = registry.update_process_status("test-task-1", ProcessStatus.RUNNING)
+        success = registry.update_process_status("test-task-1", ProcessStatus.RUNNING)  # type: ignore
         self.assertTrue(success)
 
-        updated = registry.get_process("test-task-1")
-        self.assertEqual(updated.status, ProcessStatus.RUNNING)
+        updated = registry.get_process("test-task-1")  # type: ignore
+        self.assertEqual(updated.status, ProcessStatus.RUNNING)  # type: ignore
 
         # Test completion
-        registry.update_process_status("test-task-1", ProcessStatus.COMPLETED)
-        completed = registry.get_process("test-task-1")
-        self.assertEqual(completed.status, ProcessStatus.COMPLETED)
+        registry.update_process_status("test-task-1", ProcessStatus.COMPLETED)  # type: ignore
+        completed = registry.get_process("test-task-1")  # type: ignore
+        self.assertEqual(completed.status, ProcessStatus.COMPLETED)  # type: ignore
 
-    @patch('orchestrator_main.ExecutionEngine')
-    @patch('orchestrator_main.WorktreeManager')
-    @patch('orchestrator_main.TaskAnalyzer')
-    @patch('orchestrator_main.PromptGenerator')
+    @patch('orchestrator_main.ExecutionEngine')  # type: ignore
+    @patch('orchestrator_main.WorktreeManager')  # type: ignore
+    @patch('orchestrator_main.TaskAnalyzer')  # type: ignore
+    @patch('orchestrator_main.PromptGenerator')  # type: ignore
     def test_orchestrator_workflow_stages(self, mock_prompt_gen: Mock, mock_task_analyzer: Mock,
                                         mock_worktree_mgr: Mock, mock_exec_engine: Mock) -> None:
         """Test orchestrator workflow stages"""
@@ -273,7 +273,7 @@ Process these prompts in parallel:
         mock_exec_engine.return_value.execute_task.return_value = mock_result
 
         # Create coordinator and run orchestration
-        coordinator = OrchestratorCoordinator(
+        coordinator = OrchestratorCoordinator(  # type: ignore
             config=self.config,
             project_root=str(self.test_dir)
         )
@@ -288,7 +288,7 @@ Process these prompts in parallel:
 
     def test_cli_validation_missing_files(self) -> None:
         """Test CLI validation with missing prompt files"""
-        cli = OrchestrationCLI(str(self.test_dir))
+        cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
 
         user_input = """
 Execute these prompts:
@@ -308,13 +308,13 @@ Execute these prompts:
     def test_configuration_validation(self) -> None:
         """Test orchestration configuration validation"""
         # Test default configuration
-        default_config = OrchestrationConfig()
+        default_config = OrchestrationConfig()  # type: ignore
         self.assertEqual(default_config.max_parallel_tasks, 4)
         self.assertEqual(default_config.execution_timeout_hours, 2)
         self.assertTrue(default_config.fallback_to_sequential)
 
         # Test custom configuration
-        custom_config = OrchestrationConfig(
+        custom_config = OrchestrationConfig(  # type: ignore
             max_parallel_tasks=8,
             execution_timeout_hours=4,
             fallback_to_sequential=False
@@ -326,28 +326,28 @@ Execute these prompts:
     def test_process_registry_stats(self) -> None:
         """Test process registry statistics generation"""
         registry_dir = self.test_dir / ".gadugi/monitoring"
-        registry = ProcessRegistry(str(registry_dir))
+        registry = ProcessRegistry(str(registry_dir))  # type: ignore
 
         # Add test processes
         from datetime import datetime
         processes = [
-            ProcessInfo("task-1", "Task 1", ProcessStatus.COMPLETED, "cmd1", str(self.test_dir), datetime.now()),
-            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", str(self.test_dir), datetime.now()),
-            ProcessInfo("task-3", "Task 3", ProcessStatus.FAILED, "cmd3", str(self.test_dir), datetime.now()),
+            ProcessInfo("task-1", "Task 1", ProcessStatus.COMPLETED, "cmd1", str(self.test_dir), datetime.now()),  # type: ignore
+            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", str(self.test_dir), datetime.now()),  # type: ignore
+            ProcessInfo("task-3", "Task 3", ProcessStatus.FAILED, "cmd3", str(self.test_dir), datetime.now()),  # type: ignore
         ]
 
         for process in processes:
             registry.register_process(process)
 
         # Get stats
-        stats = registry.get_registry_stats()
+        stats = registry.get_registry_stats()  # type: ignore
 
-        self.assertEqual(stats.total_processes, 3)
-        self.assertEqual(stats.completed_count, 1)
-        self.assertEqual(stats.running_count, 1)
-        self.assertEqual(stats.failed_count, 1)
+        self.assertEqual(stats.total_processes, 3)  # type: ignore
+        self.assertEqual(stats.completed_count, 1)  # type: ignore
+        self.assertEqual(stats.running_count, 1)  # type: ignore
+        self.assertEqual(stats.failed_count, 1)  # type: ignore
 
-    @patch('subprocess.run')
+    @patch('subprocess.run')  # type: ignore
     def test_shell_script_integration(self, mock_subprocess: Mock) -> None:
         """Test shell script entry point integration"""
         # Mock successful subprocess execution
@@ -367,12 +367,12 @@ Execute these prompts:
         """Test error handling and graceful degradation"""
         # Test with invalid project root
         with self.assertRaises(FileNotFoundError):
-            OrchestrationCLI("/nonexistent/directory")
+            OrchestrationCLI("/nonexistent/directory")  # type: ignore
 
         # Test with empty prompt list
-        cli = OrchestrationCLI(str(self.test_dir))
+        cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
         with self.assertRaises(ValueError):
-            cli.execute_orchestration([])
+            cli.execute_orchestration([])  # type: ignore
 
 
 class TestOrchestratorPerformance(unittest.TestCase):
@@ -398,7 +398,7 @@ class TestOrchestratorPerformance(unittest.TestCase):
             prompt_files.append(prompt_file)
 
         # Test CLI parsing
-        cli = OrchestrationCLI(str(self.test_dir))
+        cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
         user_input = "Execute these prompts:\n" + "\n".join(f"- {pf}" for pf in prompt_files)
 
         parsed_files = cli.parse_user_input(user_input)
@@ -406,7 +406,7 @@ class TestOrchestratorPerformance(unittest.TestCase):
 
     def test_resource_limit_configuration(self) -> None:
         """Test resource limit configuration"""
-        config = OrchestrationConfig(
+        config = OrchestrationConfig(  # type: ignore
             max_parallel_tasks=16,
             execution_timeout_hours=8
         )

@@ -197,11 +197,11 @@ def convert_claude_assistant_message(msg: ClaudeMessage) -> Dict[str, Any]:
     if text_parts:
         openai_message["content"] = "".join(text_parts)
     else:
-        openai_message["content"] = None
+        openai_message["content"] = None  # type: ignore[assignment]
 
     # Set tool calls
     if tool_calls:
-        openai_message["tool_calls"] = tool_calls
+        openai_message["tool_calls"] = tool_calls  # type: ignore[assignment]
 
     return openai_message
 

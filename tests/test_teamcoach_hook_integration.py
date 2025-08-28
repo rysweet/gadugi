@@ -251,10 +251,10 @@ def main():
     print("\n\n" + "=" * 80)
     print("🏁 FINAL TEST RESULTS:")
     print(f"   • Configuration: {'✅' if config_ok else '❌'}")
-    print(f"   • Basic hook test: {'✅' if basic_result['success'] else '❌'}")
+    print(f"   • Basic hook test: {'✅' if basic_result['success'] else '❌'}")  # type: ignore[misc]
     print(f"   • Subagent hook test: {'✅' if subagent_result['success'] else '❌'}")
 
-    all_passed = config_ok and basic_result["success"] and subagent_result["success"]
+    all_passed = config_ok and basic_result["success"] and subagent_result["success"]  # type: ignore[misc]
 
     if all_passed:
         print("\n✅ All integration tests passed!")

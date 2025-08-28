@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
-from execution_engine import (
+from execution_engine import (  # type: ignore[import]
     ExecutionEngine,
     ExecutionResult,
     ResourceMonitor,

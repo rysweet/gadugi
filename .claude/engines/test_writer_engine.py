@@ -115,7 +115,7 @@ class FunctionInfo:
     complexity: int
     line_number: int
     is_async: bool = False
-    decorators: list[str] = None
+    decorators: list[str] = None  # type: ignore[assignment]
 
     def __post_init__(self):
         if self.decorators is None:

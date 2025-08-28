@@ -29,7 +29,7 @@ try:
     )
     from claude.shared.github_operations import GitHubOperations
     from claude.shared.state_management import CheckpointManager, StateManager, TaskState
-    from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity
+    from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 except ImportError as e:
     # If imports fail, we'll skip tests that require these modules
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
@@ -433,7 +433,7 @@ class TestEnhancedSeparationCodeReduction:
         from claude.shared.interfaces import AgentConfig
         from claude.shared.state_management import StateManager
         from claude.shared.task_tracking import TaskTracker
-        from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity
+        from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 
         # Test instantiation
         github_ops = GitHubOperations()

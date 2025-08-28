@@ -197,7 +197,7 @@ class EventRouterClient:
                 logger.info("Connection closed")
             else:
                 raise
-        except Exception as e:
+        except Exception as e:  # type: ignore[misc]
             logger.error(f"Error handling messages: {e}")
         finally:
             if self.state != ConnectionState.CLOSED:

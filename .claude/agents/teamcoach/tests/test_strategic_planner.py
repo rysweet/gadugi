@@ -56,15 +56,19 @@ class TestStrategicPlanner(unittest.TestCase):
 
         # Mock performance data
         self.mock_performance = PerformanceMetrics(
-            agent_id="agent_1",
-            success_rate=0.75,
-            average_execution_time=120,
-            total_tasks=100,
-            successful_tasks=75,
-            failed_tasks=25,
-            error_count=25,
-            error_types={},
-            metrics={"efficiency_ratio": 0.65, "capacity_multiplier": 1.0},
+            timestamp=datetime.now(),
+            metrics={
+                "agent_id": "agent_1",
+                "success_rate": 0.75,
+                "average_execution_time": 120,
+                "total_tasks": 100,
+                "successful_tasks": 75,
+                "failed_tasks": 25,
+                "error_count": 25,
+                "error_types": {},
+                "efficiency_ratio": 0.65,
+                "capacity_multiplier": 1.0,
+            },
         )
 
         # Mock capability data
@@ -215,7 +219,7 @@ class TestStrategicPlanner(unittest.TestCase):
 
         # Check for capacity gaps
         if capacity_plan.gaps:
-            for timeframe, gaps in capacity_plan.gaps.items():
+            for _timeframe, gaps in capacity_plan.gaps.items():
                 self.assertIsInstance(gaps, dict)
 
     def test_create_skill_development_plan(self):
@@ -284,7 +288,8 @@ class TestStrategicPlanner(unittest.TestCase):
             self.assertIsInstance(initiative, StrategicInitiative)
             self.assertIsNotNone(initiative.initiative_id)
             self.assertIsInstance(initiative.type, StrategyType)
-            self.assertGreater(len(initiative.implementation_steps), 0)
+            # Check for success criteria (implementation_steps doesn't exist in this class)
+            self.assertGreater(len(initiative.success_criteria), 0)
             self.assertIsInstance(initiative.timeline, dict)
             self.assertGreater(len(initiative.success_criteria), 0)
 

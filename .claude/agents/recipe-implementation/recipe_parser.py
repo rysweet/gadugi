@@ -123,7 +123,7 @@ class RecipeParser:
                 )
                 if self.recipe_spec:
                     if self.recipe_spec:
-                self.recipe_spec.requirements.append(requirement)
+                        self.recipe_spec.requirements.append(requirement)  # type: ignore[attr-defined]
                 req_counter += 1
     
     def _parse_non_functional_requirements(self, content: str) -> None:
@@ -144,7 +144,7 @@ class RecipeParser:
                 )
                 if self.recipe_spec:
                     if self.recipe_spec:
-                self.recipe_spec.requirements.append(requirement)
+                        self.recipe_spec.requirements.append(requirement)  # type: ignore[attr-defined]
                 req_counter += 1
     
     def _parse_interface_requirements(self, content: str) -> None:
@@ -195,7 +195,7 @@ class RecipeParser:
                 )
                 if self.recipe_spec:
                     if self.recipe_spec:
-                self.recipe_spec.requirements.append(requirement)
+                        self.recipe_spec.requirements.append(requirement)  # type: ignore[attr-defined]
                 req_counter += 1
     
     def _parse_constraints(self, content: str) -> None:

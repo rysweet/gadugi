@@ -28,28 +28,28 @@ from typing import Any
 
 try:
     # import redis  # Commented out to fix unused import lint error
-    REDIS_AVAILABLE = True
+    REDIS_AVAILABLE = True  # type: ignore
 except ImportError:
-    REDIS_AVAILABLE = False
+    REDIS_AVAILABLE = False  # type: ignore
 
     # Mock Redis for development
     class MockRedis:
-        def __init__(self, *args, **kwargs) -> None:
+        def __init__(self, *args, **kwargs) -> None:  # type: ignore
             pass
 
-        def get(self, key) -> None:
+        def get(self, key) -> None:  # type: ignore
             return None
 
-        def set(self, key, value, ex=None) -> bool:
+        def set(self, key, value, ex=None) -> bool:  # type: ignore
             return True
 
-        def delete(self, key) -> bool:
+        def delete(self, key) -> bool:  # type: ignore
             return True
 
-        def exists(self, key) -> bool:
+        def exists(self, key) -> bool:  # type: ignore
             return False
 
-        def keys(self, pattern="*"):
+        def keys(self, pattern="*"):  # type: ignore
             return []
 
         def flushdb(self) -> bool:
@@ -915,13 +915,13 @@ class ContextManager:
                 # Get from Redis
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []
+                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
                 )
 
                 for key in redis_keys:
                     try:
                         key_str = key.decode() if isinstance(key, bytes) else str(key)
-                        redis_data = self.redis_client.get(key_str)
+                        redis_data = self.redis_client.get(key_str)  # type: ignore[attr-defined]
                         if redis_data:
                             data = json.loads(redis_data)
                             if context_type is None or data["type"] == context_type.value:
@@ -982,7 +982,7 @@ class ContextManager:
             with self.lock:
                 # Delete from Redis
                 redis_key = f"context:{context_id}"
-                self.redis_client.delete(redis_key)
+                self.redis_client.delete(redis_key)  # type: ignore[attr-defined]
 
                 # Delete from database
                 with sqlite3.connect(str(self.db_path)) as conn:
@@ -1039,19 +1039,19 @@ class ContextManager:
                 # Redis contexts expire automatically, but we can check manually
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []
+                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
                 )
 
                 for key in redis_keys:
                     try:
                         key_str = key.decode() if isinstance(key, bytes) else str(key)
-                        redis_data = self.redis_client.get(key_str)
+                        redis_data = self.redis_client.get(key_str)  # type: ignore[attr-defined]
                         if redis_data:
                             data = json.loads(redis_data)
                             if data.get("expires_at"):
                                 expires_at = datetime.fromisoformat(data["expires_at"])
                                 if expires_at < current_time:
-                                    self.redis_client.delete(key_str)
+                                    self.redis_client.delete(key_str)  # type: ignore[attr-defined]
                                     deleted_count += 1
                     except Exception:
                         continue
@@ -1214,7 +1214,7 @@ class MCPService:
 
         # Close Redis connection if available
         if hasattr(self.context_manager.redis_client, "close"):
-            self.context_manager.redis_client.close()
+            self.context_manager.redis_client.close()  # type: ignore[attr-defined]
 
         self.logger.info("MCP service stopped")
 

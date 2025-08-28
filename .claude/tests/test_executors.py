@@ -37,7 +37,7 @@ class TestBaseExecutor(unittest.TestCase):
     def test_base_executor_is_abstract(self):
         """Verify BaseExecutor cannot be instantiated directly."""
         with self.assertRaises(TypeError):
-            BaseExecutor()
+            BaseExecutor()  # type: ignore[misc]
     
     def test_executor_registry(self):
         """Test the executor registry functionality."""

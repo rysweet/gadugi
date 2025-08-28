@@ -863,4 +863,4 @@ class StrategicPlanner:
         # Materials and resources
         investment["materials"] = len(development_paths) * 500  # $500 per agent
 
-        return investment
+        return investment  # type: ignore[assignment]

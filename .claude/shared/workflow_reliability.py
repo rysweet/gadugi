@@ -685,7 +685,7 @@ class WorkflowReliabilityManager:
                 task_id=workflow_id,
                 prompt_file=workflow_state.get('prompt_file', 'unknown'),
                 status='in_progress',
-                phase=self._convert_stage_to_phase(
+                phase=self._convert_stage_to_phase(  # type: ignore[assignment]
                     self.monitoring_states[workflow_id].current_stage
                 ) if workflow_id in self.monitoring_states else 0,
                 context=workflow_state
@@ -748,7 +748,7 @@ class WorkflowReliabilityManager:
             if monitoring_data:
                 restored_monitoring = WorkflowMonitoringState(
                     workflow_id=workflow_id,
-                    start_time=task_state.created_at,
+                    start_time=task_state.created_at,  # type: ignore[assignment]
                     current_stage=WorkflowStage(monitoring_data['current_stage']),
                     stage_start_time=datetime.fromisoformat(monitoring_data['stage_start_time']),
                     last_heartbeat=datetime.now(),
@@ -1091,7 +1091,7 @@ class WorkflowReliabilityManager:
                     task_id=workflow_id,
                     prompt_file=self.active_workflows.get(workflow_id, {}).get('prompt_file', 'unknown'),
                     status='in_progress',
-                    phase=self._convert_stage_to_phase(stage),
+                    phase=self._convert_stage_to_phase(stage),  # type: ignore[assignment]
                     context={
                         'checkpoint_stage': stage.value,
                         'checkpoint_time': datetime.now().isoformat(),
@@ -1124,7 +1124,7 @@ class WorkflowReliabilityManager:
                 task_id=f"{workflow_id}_error_{int(time.time())}",
                 prompt_file=self.active_workflows.get(workflow_id, {}).get('prompt_file', 'unknown'),
                 status='error',
-                phase=self._convert_stage_to_phase(stage),
+                phase=self._convert_stage_to_phase(stage),  # type: ignore[assignment]
                 context={
                     'error_stage': stage.value,
                     'error_time': datetime.now().isoformat(),

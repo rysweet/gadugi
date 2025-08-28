@@ -10,11 +10,14 @@ import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-import structlog
-
-logger = structlog.get_logger()
+try:
+    import structlog  # type: ignore[import]
+    logger = structlog.get_logger()
+except ImportError:
+    import logging
+    logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -23,7 +26,7 @@ class AuthConfig:
 
     github_token: Optional[str] = None
     claude_session_path: Optional[Path] = None
-    additional_env: Dict[str, str] = None
+    additional_env: Optional[Dict[str, str]] = None
     mount_home_claude: bool = True  # Mount ~/.claude directory
 
     def to_env_dict(self) -> Dict[str, str]:
@@ -102,7 +105,7 @@ class AuthManager:
         self,
         agent_id: str,
         container_work_dir: Path = Path("/app")
-    ) -> Dict[str, any]:  # type: ignore
+    ) -> Dict[str, Any]:
         """Prepare authentication for container execution."""
 
         config = {
@@ -156,7 +159,7 @@ class AuthManager:
 
         return config
 
-    def create_docker_compose_auth(self, services: List[str]) -> Dict[str, any]:  # type: ignore
+    def create_docker_compose_auth(self, services: List[str]) -> Dict[str, Any]:
         """Create docker-compose configuration with authentication."""
 
         compose_config = {
@@ -192,7 +195,7 @@ class AuthManager:
 
         return compose_config
 
-    def create_kubernetes_secret(self, namespace: str = "gadugi") -> Dict[str, any]:  # type: ignore
+    def create_kubernetes_secret(self, namespace: str = "gadugi") -> Dict[str, Any]:
         """Create Kubernetes secret configuration for auth."""
 
         secret_data = {}
@@ -358,11 +361,7 @@ class ContainerAuthBuilder:
     def build_entrypoint_script(self) -> str:
         """Build entrypoint script for containers."""
 
-<<<<<<< HEAD
-        return """#!/bin/bash
-=======
         return '''#!/bin/bash
->>>>>>> feature/gadugi-v0.3-regeneration
 set -e
 
 # Copy Claude auth if mounted
@@ -382,18 +381,14 @@ fi
 
 # Execute the actual command
 exec "$@"
-<<<<<<< HEAD
-"""
-=======
 '''
->>>>>>> feature/gadugi-v0.3-regeneration
 
     def build_compose_service(
         self,
         service_name: str,
         image: str,
         command: List[str]
-    ) -> Dict[str, any]:  # type: ignore
+    ) -> Dict[str, Any]:
         """Build docker-compose service with auth."""
 
         auth_config = self.auth_manager.prepare_container_auth(service_name)

@@ -64,7 +64,7 @@ async def test_proxy_connection():
                     print(f"\n❌ Proxy returned error {response.status}: {error_text}")
                     return False
                     
-    except aiohttp.ClientError as e:
+    except aiohttp.ClientError as e:  # type: ignore[assignment]
         print(f"\n❌ Connection error: {e}")
         print("\nPossible issues:")
         print("1. The proxy service might not be exposing an HTTP endpoint")

@@ -1,5 +1,3 @@
-from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
-
 #!/usr/bin/env python3
 """
 Integration tests for OrchestratorAgent with Enhanced Separation shared modules.
@@ -30,17 +28,17 @@ import pytest
 sys.path.append(
     os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
 )
-)
 
-from claude.shared.github_operations import GitHubOperations
-from claude.shared.interfaces import AgentConfig, TaskData, ErrorContext
-from claude.shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase
-from claude.shared.task_tracking import (
+from claude.shared.github_operations import GitHubOperations  # type: ignore[import]
+from claude.shared.interfaces import AgentConfig, TaskData, ErrorContext  # type: ignore[import]
+from claude.shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase  # type: ignore[import]
+from claude.shared.task_tracking import (  # type: ignore[import]
     TaskMetrics,
+    TaskPriority,
+    TaskStatus,
     TaskTracker,
 )
-from claude.shared.task_tracking import TaskPriority
-from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity
+from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 
 
 class TestOrchestratorAgentIntegration:
@@ -49,16 +47,16 @@ class TestOrchestratorAgentIntegration:
     def setup_method(self):
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.config = AgentConfig(
+        self.config = AgentConfig(  # type: ignore[misc]
             agent_id="test-orchestrator", name="Test Orchestrator"
         )
 
         # Initialize shared modules
-        self.github_operations = GitHubOperations()
-        self.state_manager = StateManager()
-        self.error_handler = ErrorHandler()
-        self.task_tracker = TaskTracker()
-        self.task_metrics = TaskMetrics()
+        self.github_operations = GitHubOperations()  # type: ignore[misc]
+        self.state_manager = StateManager()  # type: ignore[misc]
+        self.error_handler = ErrorHandler()  # type: ignore[misc]
+        self.task_tracker = TaskTracker()  # type: ignore[misc]
+        self.task_metrics = TaskMetrics()  # type: ignore[misc]
 
         # Mock external dependencies
         self.mock_gh_api = Mock()
@@ -82,10 +80,10 @@ class TestOrchestratorAgentIntegration:
         assert hasattr(self.state_manager, "save_state")
 
         # Test circuit breaker initialization
-        github_circuit_breaker = CircuitBreaker(
+        github_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
             failure_threshold=3, recovery_timeout=300
         )
-        execution_circuit_breaker = CircuitBreaker(
+        execution_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
             failure_threshold=5, recovery_timeout=600
         )
 
@@ -122,7 +120,7 @@ class TestOrchestratorAgentIntegration:
         # Create orchestration state
         orchestration_id = f"orchestration-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
-        orchestration_state = TaskState(
+        orchestration_state = TaskState(  # type: ignore[misc]
             task_id=orchestration_id,
             prompt_file="orchestration.md",
             status="in_progress",
@@ -139,7 +137,7 @@ class TestOrchestratorAgentIntegration:
         assert loaded_state.current_phase == 1  # ENVIRONMENT_SETUP
 
         # Test checkpoint creation
-        checkpoint_manager = CheckpointManager(self.state_manager)
+        checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore[misc]
         checkpoint_id = checkpoint_manager.create_checkpoint(
             orchestration_state, "Test orchestration state checkpoint"
         )
@@ -154,19 +152,19 @@ class TestOrchestratorAgentIntegration:
 
         # Mock task execution
         tasks = [
-            TaskData(
-                id="task-1", content="Feature A", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
+            TaskData(  # type: ignore[misc]
+                id="task-1", content="Feature A", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
             ),
-            TaskData(
-                id="task-2", content="Feature B", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
+            TaskData(  # type: ignore[misc]
+                id="task-2", content="Feature B", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
             ),
-            TaskData(
-                id="task-3", content="Feature C", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
+            TaskData(  # type: ignore[misc]
+                id="task-3", content="Feature C", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
             ),
         ]
 
         # Test circuit breaker protection
-        execution_circuit_breaker = CircuitBreaker(
+        execution_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
             failure_threshold=2, recovery_timeout=300
         )
 
@@ -174,7 +172,7 @@ class TestOrchestratorAgentIntegration:
         successful_results = []
         for i, task in enumerate(tasks):
             try:
-                result = execution_circuit_breaker.call(
+                result = execution_circuit_breaker.call(  # type: ignore[attr-defined]
                     lambda: {
                         "task_id": task.id,
                         "success": True,
@@ -184,7 +182,7 @@ class TestOrchestratorAgentIntegration:
                 successful_results.append(result)
                 # Mock task status update (task_tracker may not have this task yet)
                 try:
-                    self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)
+                    self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)  # type: ignore[attr-defined]
                 except Exception:
                     # Task not found - create and update status
                     pass
@@ -201,7 +199,7 @@ class TestOrchestratorAgentIntegration:
             mock_call.side_effect = Exception("Simulated failure")
 
             try:
-                execution_circuit_breaker.call(lambda: {"success": False})
+                execution_circuit_breaker.call(lambda: {"success": False})  # type: ignore[attr-defined]
             except Exception:
                 # Should trigger error handler
                 pass
@@ -260,10 +258,10 @@ class TestOrchestratorAgentIntegration:
                 "total_sequential_time": estimated_sequential_time,
             }
 
-        self.task_metrics.calculate_speedup = mock_calculate_speedup
+        self.task_metrics.calculate_speedup = mock_calculate_speedup  # type: ignore[misc]
 
         try:
-            performance_metrics = self.task_metrics.calculate_speedup(
+            performance_metrics = self.task_metrics.calculate_speedup(  # type: ignore[attr-defined]
                 execution_results, baseline_sequential_time=estimated_sequential_time
             )
 
@@ -283,7 +281,7 @@ class TestOrchestratorAgentIntegration:
         orchestration_id = "test-orchestration-123"
 
         # Test error context creation
-        error_context = ErrorContext(
+        error_context = ErrorContext(  # type: ignore[misc]
             operation="parallel_execution",
             details={
                 "active_tasks": 2,
@@ -347,7 +345,7 @@ class TestOrchestratorAgentIntegration:
         self.task_metrics.record_phase_start("task_analysis")
 
         # Phase 2: Environment Setup
-        orchestration_state = TaskState(
+        orchestration_state = TaskState(  # type: ignore[misc]
             task_id=orchestration_id,
             prompt_file="orchestration.md",
             status="in_progress",
@@ -356,18 +354,18 @@ class TestOrchestratorAgentIntegration:
         )
 
         self.state_manager.save_state(orchestration_state)
-        checkpoint_manager = CheckpointManager(self.state_manager)
+        checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore[misc]
         checkpoint_manager.create_checkpoint(
             orchestration_state, "Test parallel execution checkpoint"
         )
 
         # Phase 3: Parallel Execution (mocked)
         tasks = [
-            TaskData(
-                id="task-1", content="Feature A", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
+            TaskData(  # type: ignore[misc]
+                id="task-1", content="Feature A", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
             ),
-            TaskData(
-                id="task-2", content="Feature B", status=TaskStatus.PENDING  # type: ignore[arg-type], priority=TaskPriority.HIGH
+            TaskData(  # type: ignore[misc]
+                id="task-2", content="Feature B", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
             ),
         ]
 
@@ -382,7 +380,7 @@ class TestOrchestratorAgentIntegration:
             execution_results.append(result)
             # Mock task status update (task_tracker may not have this task yet)
             try:
-                self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)
+                self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)  # type: ignore[attr-defined]
             except Exception:
                 # Task not found - ignore for test
                 pass
@@ -406,7 +404,7 @@ class TestOrchestratorAgentIntegration:
 
         # Verify end-to-end completion
         final_state = self.state_manager.load_state(orchestration_id)
-        assert final_state.current_phase == WorkflowPhase.REVIEW.value
+        assert final_state.current_phase == WorkflowPhase.REVIEW.value  # type: ignore[attr-defined]
 
         # Verify performance improvements - mock calculate_speedup
         def mock_calculate_speedup_e2e(execution_results, baseline_sequential_time):
@@ -417,10 +415,10 @@ class TestOrchestratorAgentIntegration:
                 "total_sequential_time": baseline_sequential_time,
             }
 
-        self.task_metrics.calculate_speedup = mock_calculate_speedup_e2e
+        self.task_metrics.calculate_speedup = mock_calculate_speedup_e2e  # type: ignore[misc]
 
         try:
-            performance_metrics = self.task_metrics.calculate_speedup(
+            performance_metrics = self.task_metrics.calculate_speedup(  # type: ignore[attr-defined]
                 execution_results,
                 baseline_sequential_time=600,  # 10 minutes sequential
             )

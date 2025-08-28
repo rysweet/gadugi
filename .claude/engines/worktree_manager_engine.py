@@ -59,7 +59,7 @@ class WorktreeMetadata:
     last_accessed: datetime
     status: WorktreeStatus
     disk_usage_mb: int = 0
-    requirements: WorktreeRequirements = None
+    requirements: Optional[WorktreeRequirements] = None
     error_message: Optional[str] = None
 
     def __post_init__(self):
@@ -124,7 +124,7 @@ class WorktreeEnvironmentSetup:
 
         try:
             # Change to worktree directory
-            original_cwd = os.getcwd()
+            original_cwd = os.getcwd()  # type: ignore
             os.chdir(worktree_path)
 
             # Check git status
@@ -146,14 +146,14 @@ class WorktreeEnvironmentSetup:
             self.logger.exception(f"Environment setup failed: {e!s}")
             result["error"] = str(e)
         finally:
-            os.chdir(original_cwd)
+            os.chdir(original_cwd)  # type: ignore
 
         return result
 
     async def _check_git_status(self) -> str:
         """Check git repository status."""
         try:
-            result = await self._run_command_async(["git", "status", "--porcelain"])
+            result = await self._run_command_async(["git", "status", "--porcelain"])  # type: ignore
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(result.returncode, result.args)
             return "clean" if not result.stdout.strip() else "dirty"
@@ -179,7 +179,7 @@ class WorktreeEnvironmentSetup:
             for extra in extras:
                 extra_args.extend(["--extra", extra])
 
-            result = await self._run_command_async(["uv", "sync", *extra_args])
+            result = await self._run_command_async(["uv", "sync", *extra_args])  # type: ignore
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(result.returncode, result.args)
 
@@ -201,7 +201,7 @@ class WorktreeEnvironmentSetup:
             )
             return False
 
-    async def _install_development_tools(self, tools: List[str]) -> bool:
+    async def _install_development_tools(self, tools: Optional[List[str]]) -> bool:
         """Install development tools in environment."""
         if not tools:
             return True
@@ -324,7 +324,7 @@ class WorktreeHealthMonitor:
                 health["recommendations"].append("Consider cleanup - worktree inactive")
 
             # Check environment health
-            if metadata.requirements.uv_project:
+            if metadata.requirements and metadata.requirements.uv_project:  # type: ignore
                 uv_health = await self._check_uv_health(metadata.worktree_path)
                 health["metrics"]["uv"] = uv_health
 
@@ -386,7 +386,7 @@ class WorktreeHealthMonitor:
             health["healthy"] = False
             health["issues"].append(f"Git check failed: {e!s}")
         finally:
-            os.chdir(original_cwd)
+            os.chdir(original_cwd)  # type: ignore
 
         return health
 
@@ -456,7 +456,7 @@ class WorktreeHealthMonitor:
             health["healthy"] = False
             health["issues"].append(f"UV health check failed: {e!s}")
         finally:
-            os.chdir(original_cwd)
+            os.chdir(original_cwd)  # type: ignore
 
         return health
 
@@ -649,7 +649,7 @@ class WorktreeCleanupManager:
             self.logger.warning(f"Could not determine task completion status: {e!s}")
             return False
         finally:
-            os.chdir(original_cwd)
+            os.chdir(original_cwd)  # type: ignore
 
     async def _has_uncommitted_changes(self, worktree: WorktreeMetadata) -> bool:
         """Check if worktree has uncommitted changes."""
@@ -670,7 +670,7 @@ class WorktreeCleanupManager:
         except Exception:
             return True  # Err on side of caution
         finally:
-            os.chdir(original_cwd)
+            os.chdir(original_cwd)  # type: ignore
 
     async def _remove_worktree(self, worktree: WorktreeMetadata) -> bool:
         """Remove a worktree safely."""
@@ -736,6 +736,7 @@ class WorktreeCleanupManager:
     async def _cleanup_metadata(self, worktree: WorktreeMetadata) -> None:
         """Clean up tracking metadata."""
         # Remove from registry (implementation depends on storage)
+        pass
 
 
 class WorktreeManagerEngine:
@@ -774,7 +775,7 @@ class WorktreeManagerEngine:
             # Create a CompletedProcess-like result for compatibility
             result = subprocess.CompletedProcess(
                 args=cmd,
-                returncode=process.returncode,
+                returncode=process.returncode or 0,  # type: ignore
                 stdout=stdout.decode() if stdout else "",
                 stderr=stderr.decode() if stderr else "",
             )
@@ -863,7 +864,7 @@ class WorktreeManagerEngine:
         task_id: str,
         branch_name: str,
         base_branch: str = "main",
-        requirements: WorktreeRequirements = None,
+        requirements: Optional[WorktreeRequirements] = None,
     ) -> WorktreeResult:
         """Create new worktree for task."""
         self.logger.info(f"Creating worktree for task {task_id}")
@@ -1044,7 +1045,7 @@ class WorktreeManagerEngine:
         result = await self.cleanup_manager.cleanup_worktrees(
             worktree_list,
             policy,
-            retention_days,
+            retention_days or self.config["worktree"]["default_cleanup_days"],  # type: ignore
             dry_run,
         )
 
@@ -1069,12 +1070,13 @@ class WorktreeManagerEngine:
 
             metadata = self.worktrees[task_id]
             return await self.health_monitor.check_worktree_health(metadata)
-        # Check all worktrees
-        results = {}
-        for task_id, metadata in self.worktrees.items():
-            results[task_id] = await self.health_monitor.check_worktree_health(
-                metadata,
-            )
+        else:
+            # Check all worktrees
+            results = {}
+            for task_id, metadata in self.worktrees.items():
+                results[task_id] = await self.health_monitor.check_worktree_health(
+                    metadata,
+                )
 
         # Generate summary
         healthy_count = sum(1 for r in results.values() if r["status"] == "healthy")

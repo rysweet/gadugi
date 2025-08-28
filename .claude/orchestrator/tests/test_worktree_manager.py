@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, call, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
-from worktree_manager import WorktreeInfo, WorktreeManager
+from worktree_manager import WorktreeInfo, WorktreeManager  # type: ignore[import]
 
 
 class TestWorktreeManager(unittest.TestCase):

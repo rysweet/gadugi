@@ -20,9 +20,9 @@ class PromptContext:
     task_name: str
     original_prompt: str
     phase_focus: Optional[str] = None
-    dependencies: List[str] = None
-    target_files: List[str] = None
-    implementation_requirements: Dict = None
+    dependencies: List[str] = None  # type: ignore[assignment]
+    target_files: List[str] = None  # type: ignore[assignment]
+    implementation_requirements: Dict = None  # type: ignore[assignment]
 
 
 class PromptGenerator:

@@ -226,7 +226,7 @@ class RuffAnalyzer(AnalysisTool):
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
                 result = subprocess.CompletedProcess(
                     cmd,
-                    process.returncode,
+                    process.returncode,  # type: ignore[assignment]
                     stdout.decode(),
                     stderr.decode(),
                 )
@@ -706,7 +706,7 @@ class CodeReviewerEngine:
             # Check if file is text-based
             try:
                 if AIOFILES_AVAILABLE:
-                    async with aiofiles.open(path, encoding="utf-8") as f:
+                    async with aiofiles.open(path, encoding="utf-8") as f:  # type: ignore[assignment]
                         await f.read(1024)  # Read first 1KB to test
                 else:
                     # Fallback to sync operations if aiofiles not available
@@ -1136,7 +1136,7 @@ Recommendations:
 
         if args.output_file:
             if AIOFILES_AVAILABLE:
-                async with aiofiles.open(args.output_file, "w") as f:
+                async with aiofiles.open(args.output_file, "w") as f:  # type: ignore[assignment]
                     await f.write(output)
             else:
                 # Fallback to sync operations if aiofiles not available

@@ -32,7 +32,7 @@ class EnforcementRule:
     max_attempts: int = 5
     timeout_seconds: int = 600  # 10 minutes
     retry_delay_seconds: int = 30
-    required_conditions: List[str] = None
+    required_conditions: List[str] = None  # type: ignore[assignment]
     enforcement_action: Optional[Callable] = None
 
     def __post_init__(self):
@@ -48,7 +48,7 @@ class EnforcementResult:
     attempts: int
     total_time: float
     error_message: Optional[str] = None
-    details: Dict[str, Any] = None
+    details: Dict[str, Any] = None  # type: ignore[assignment]
 
     def __post_init__(self):
         if self.details is None:
@@ -97,7 +97,7 @@ class PhaseEnforcer:
     def enforce_phase(self,
                      phase: WorkflowPhase,
                      workflow_state: WorkflowState,
-                     context: Dict[str, Any] = None) -> EnforcementResult:
+                     context: Dict[str, Any] = None) -> EnforcementResult:  # type: ignore[assignment]
         """
         Enforce execution of a specific phase with retry logic and monitoring
 
@@ -556,7 +556,7 @@ Thank you for the review feedback. The concerns raised have been noted and will 
 
         return stats
 
-    def export_enforcement_log(self, filename: str = None) -> str:
+    def export_enforcement_log(self, filename: str = None) -> str:  # type: ignore[assignment]
         """Export enforcement log to JSON file"""
 
         if filename is None:

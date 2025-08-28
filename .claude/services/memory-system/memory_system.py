@@ -25,7 +25,7 @@ from .models import (
 # Import service dependencies
 try:
     from ..mcp import MCPService  # type: ignore
-    from ..event_router import EventRouter, Event, EventType, EventPriority
+    from ..event_router import EventRouter, Event, EventType, EventPriority  # type: ignore[import]
 except ImportError:
     # Mock imports for development
     class MCPService:

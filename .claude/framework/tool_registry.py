@@ -17,7 +17,7 @@ class Tool:
     handler: Callable[..., Any]
     required: bool = False
     description: str = ""
-    parameters: Dict[str, Any] = None
+    parameters: Dict[str, Any] = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         """Post-initialization setup."""

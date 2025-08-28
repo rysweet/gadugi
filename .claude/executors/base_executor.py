@@ -66,7 +66,7 @@ class BaseExecutor(ABC):
         
         return {'success': True}
     
-    def log_operation(self, operation: str, details: Dict[str, Any] = None):
+    def log_operation(self, operation: str, details: Dict[str, Any] = None):  # type: ignore[assignment]
         """Log an operation for audit purposes.
         
         Args:

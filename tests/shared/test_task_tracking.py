@@ -1,4 +1,4 @@
-from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
+# from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
 
 """
 Comprehensive tests for task_tracking.py module (TodoWrite integration).
@@ -23,7 +23,7 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.task_tracking import (
+    from claude.shared.task_tracking import (  # type: ignore[import]
         Task as _ImportedTask,
         TaskError as _ImportedTaskError,
         TaskList as _ImportedTaskList,
@@ -36,16 +36,16 @@ try:
         WorkflowPhaseTracker as _ImportedWorkflowPhaseTracker,
     )
     # Use imported classes
-    Task = _ImportedTask
-    TaskError = _ImportedTaskError
-    TaskList = _ImportedTaskList
-    TaskMetrics = _ImportedTaskMetrics
-    TaskPriority = _ImportedTaskPriority
-    TaskStatus = _ImportedTaskStatus
-    TaskTracker = _ImportedTaskTracker
-    TaskValidationError = _ImportedTaskValidationError
-    TodoWriteIntegration = _ImportedTodoWriteIntegration
-    WorkflowPhaseTracker = _ImportedWorkflowPhaseTracker
+    Task = _ImportedTask  # type: ignore[assignment]
+    TaskError = _ImportedTaskError  # type: ignore[assignment]
+    TaskList = _ImportedTaskList  # type: ignore[assignment]
+    TaskMetrics = _ImportedTaskMetrics  # type: ignore[assignment]
+    TaskPriority = _ImportedTaskPriority  # type: ignore[assignment]
+    TaskStatus = _ImportedTaskStatus  # type: ignore[assignment]
+    TaskTracker = _ImportedTaskTracker  # type: ignore[assignment]
+    TaskValidationError = _ImportedTaskValidationError  # type: ignore[assignment]
+    TodoWriteIntegration = _ImportedTodoWriteIntegration  # type: ignore[assignment]
+    WorkflowPhaseTracker = _ImportedWorkflowPhaseTracker  # type: ignore[assignment]
 except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(
@@ -756,7 +756,7 @@ class TestTask:
 
     def test_task_creation_minimal(self) -> None:
         """Test creating a task with minimal parameters."""
-        task: Task = Task("1", "Test task")
+        task = Task("1", "Test task")
         assert task.id == "1"
         assert task.content == "Test task"
         assert task is not None  # type: ignore[comparison-overlap] and task.status == TaskStatus.PENDING
@@ -764,7 +764,7 @@ class TestTask:
 
     def test_task_creation_full(self) -> None:
         """Test creating a task with all parameters."""
-        task: Task = Task(
+        task = Task(
             id="task-123",
             content="Critical task",
             status=TaskStatus.IN_PROGRESS,
@@ -777,8 +777,8 @@ class TestTask:
 
     def test_task_to_dict(self) -> None:
         """Test converting task to dictionary."""
-        task: Task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
-        task_dict: Dict[str, Any] = task.to_dict()
+        task = Task("1", "Test task", TaskStatus.COMPLETED, TaskPriority.HIGH)
+        task_dict = task.to_dict()
 
         expected = {
             "id": "1",
@@ -790,13 +790,13 @@ class TestTask:
 
     def test_task_from_dict(self) -> None:
         """Test creating task from dictionary."""
-        task_dict: Dict[str, Any] = {
+        task_dict = {
             "id": "2",
             "content": "From dict task",
             "status": "in_progress",
             "priority": "low",
         }
-        task: Task = Task.from_dict(task_dict)
+        task = Task.from_dict(task_dict)
 
         assert task.id == "2"
         assert task.content == "From dict task"
@@ -841,17 +841,17 @@ class TestTask:
     def test_task_validation(self) -> None:
         """Test task validation."""
         # Valid task
-        task: Task = Task("valid-id", "Valid content")
+        task = Task("valid-id", "Valid content")
         task.validate()  # Should not raise
 
         # Invalid ID
         with pytest.raises(TaskValidationError):
-            invalid_task: Task = Task("", "Content")
+            invalid_task = Task("", "Content")
             invalid_task.validate()
 
         # Invalid content
         with pytest.raises(TaskValidationError):
-            invalid_task: Task = Task("id", "")
+            invalid_task = Task("id", "")
             invalid_task.validate()
 
     def test_task_estimated_duration(self):
@@ -1512,12 +1512,12 @@ class TestTaskTracker:
 
     def test_create_task(self) -> None:
         """Test creating a task through tracker."""
-        tracker: TaskTracker = TaskTracker()
+        tracker = TaskTracker()
 
         with patch.object(tracker.todowrite, "add_task") as mock_add:
             mock_add.return_value = {"success": True}
 
-            task: Task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
+            task = tracker.create_task("Test task", priority=TaskPriority.HIGH)
 
             assert task.content == "Test task"
             assert task.priority == TaskPriority.HIGH

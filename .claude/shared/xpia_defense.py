@@ -289,14 +289,14 @@ class ContentSanitizer:
             if threat_level in ["critical", "malicious"]:
                 # Remove or neutralize critical/malicious content
                 sanitized, action = self._neutralize_threat(
-                    sanitized, match_text, pattern_name
+                    sanitized, match_text, pattern_name  # type: ignore[assignment]
                 )
                 if action:
                     actions.append(action)
             elif threat_level == "suspicious":
                 # Comment out or mark suspicious content
                 sanitized, action = self._mark_suspicious(
-                    sanitized, match_text, pattern_name
+                    sanitized, match_text, pattern_name  # type: ignore[assignment]
                 )
                 if action:
                     actions.append(action)

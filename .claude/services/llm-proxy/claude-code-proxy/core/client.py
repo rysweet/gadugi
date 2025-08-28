@@ -45,7 +45,7 @@ class OpenAIClient:
             
             if request_id:
                 # Wait for either completion or cancellation
-                cancel_task = asyncio.create_task(cancel_event.wait())
+                cancel_task = asyncio.create_task(cancel_event.wait())  # type: ignore[assignment]
                 done, pending = await asyncio.wait(
                     [completion_task, cancel_task],
                     return_when=asyncio.FIRST_COMPLETED

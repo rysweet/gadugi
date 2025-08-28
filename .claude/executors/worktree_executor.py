@@ -251,7 +251,7 @@ class WorktreeExecutor(BaseExecutor):
             elif line.startswith('branch '):
                 current_worktree['branch'] = line.replace('branch ', '')
             elif line == 'bare':
-                current_worktree['bare'] = True
+                current_worktree['bare'] = True  # type: ignore[assignment]
         
         if current_worktree:
             worktrees.append(current_worktree)

@@ -90,7 +90,7 @@ async def test_direct_api():
     subscription = Subscription(
         id="sub-001",
         subscriber_id="test_subscriber",
-        subscription_type="filtered",
+        subscription_type="filtered",  # type: ignore[assignment]
         filter=EventFilter(
             event_types=[EventType.TASK_CREATED, EventType.AGENT_STARTED],
             priorities=[EventPriority.HIGH, EventPriority.NORMAL]

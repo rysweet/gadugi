@@ -9,7 +9,7 @@ import pytest
 from typing import Dict, List, Optional
 
 try:
-    from decomposer.task_decomposer import (
+    from decomposer.task_decomposer import (  # type: ignore[import]
         DecompositionResult,
         PatternDatabase,
         SubTask,

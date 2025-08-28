@@ -421,3 +421,4 @@ class TestCommonFilters:
         assert filter.matches(event1)
         assert not filter.matches(event2)
         assert not filter.matches(event3)
+  # type: ignore[misc]

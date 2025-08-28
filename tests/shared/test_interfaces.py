@@ -18,28 +18,28 @@ sys.path.insert(
 )
 
 try:
-    from claude.shared.interfaces import (
-        AgentConfig,
-        AgentConfigSchema,
-        AgentFactory,
-        AgentInterface,
-        ComponentFactory,
-        ErrorContext,
-        ErrorHandlerInterface,
-        FileSystemProvider,
-        GitHubIssue,
-        GitHubOperationsInterface,
-        GitHubPR,
-        LoggerProvider,
-        OperationResult,
-        StateData,
-        StateManagerInterface,
-        TaskData,
-        TaskTrackerInterface,
-        TodoWriteProvider,
-        ValidationResult,
-        WorkflowConfigSchema,
-        WorkflowPhase,
+    from claude.shared.interfaces import (  # type: ignore[import]
+        AgentConfig,  # type: ignore[assignment]
+        AgentConfigSchema,  # type: ignore[assignment]
+        AgentFactory,  # type: ignore[assignment]
+        AgentInterface,  # type: ignore[assignment]
+        ComponentFactory,  # type: ignore[assignment]
+        ErrorContext,  # type: ignore[assignment]
+        ErrorHandlerInterface,  # type: ignore[assignment]
+        FileSystemProvider,  # type: ignore[assignment]
+        GitHubIssue,  # type: ignore[assignment]
+        GitHubOperationsInterface,  # type: ignore[assignment]
+        GitHubPR,  # type: ignore[assignment]
+        LoggerProvider,  # type: ignore[assignment]
+        OperationResult,  # type: ignore[assignment]
+        StateData,  # type: ignore[assignment]
+        StateManagerInterface,  # type: ignore[assignment]
+        TaskData,  # type: ignore[assignment]
+        TaskTrackerInterface,  # type: ignore[assignment]
+        TodoWriteProvider,  # type: ignore[assignment]
+        ValidationResult,  # type: ignore[assignment]
+        WorkflowConfigSchema,  # type: ignore[assignment]
+        WorkflowPhase,  # type: ignore[assignment]
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
@@ -197,7 +197,7 @@ class TestAgentInterface:
     def test_agent_interface_is_abstract(self):
         """Test that AgentInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            AgentInterface()
+            AgentInterface()  # type: ignore[abstract]
 
     def test_agent_interface_requires_execute_method(self):
         """Test that concrete implementations must implement execute method."""
@@ -206,7 +206,7 @@ class TestAgentInterface:
             pass  # Missing execute method
 
         with pytest.raises(TypeError):
-            IncompleteAgent()
+            IncompleteAgent()  # type: ignore[abstract]
 
     def test_agent_interface_implementation(self):
         """Test valid implementation of AgentInterface."""
@@ -242,7 +242,7 @@ class TestStateManagerInterface:
     def test_state_manager_interface_is_abstract(self):
         """Test that StateManagerInterface cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            StateManagerInterface()
+            StateManagerInterface()  # type: ignore[abstract]
 
     def test_state_manager_interface_implementation(self):
         """Test valid implementation of StateManagerInterface."""

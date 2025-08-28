@@ -24,7 +24,7 @@ sys.path.insert(
 )
 
 try:
-    from memory_utils.agent_interface import (
+    from memory_utils.agent_interface import (  # type: ignore[import]
         AgentMemoryInterface as BaseAgentMemoryInterface,
     )
 

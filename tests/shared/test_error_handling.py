@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.utils.error_handling import (
-        ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, 
-        NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext
+    from claude.shared.utils.error_handling import (  # type: ignore[import]
+        ErrorHandler, ErrorSeverity, GadugiError, RecoverableError,  # type: ignore[attr-defined]
+        NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext  # type: ignore[attr-defined]
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented

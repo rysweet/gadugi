@@ -30,15 +30,15 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 try:
-    from .claude.shared.github_operations import GitHubOperations
-    from .claude.shared.state_management import StateManager
-    from .claude.shared.task_tracking import TaskTracker, TaskMetrics
-    from .claude.shared.utils.error_handling import (
+    from .claude.shared.github_operations import GitHubOperations  # type: ignore[import]
+    from .claude.shared.state_management import StateManager  # type: ignore[import]
+    from .claude.shared.task_tracking import TaskTracker, TaskMetrics  # type: ignore[import]
+    from .claude.shared.utils.error_handling import (  # type: ignore[import]
         ErrorHandler,
         RetryManager,
         CircuitBreaker,
     )
-    from .claude.shared.interfaces import AgentConfig, WorkflowPhase
+    from .claude.shared.interfaces import AgentConfig, WorkflowPhase  # type: ignore[import]
 except ImportError:
     # Mock classes for type checking when imports are not available
     class GitHubOperations:
@@ -79,7 +79,7 @@ except ImportError:
 
 # Container execution imports
 try:
-    from container_runtime.agent_integration import AgentContainerExecutor
+    from container_runtime.agent_integration import AgentContainerExecutor  # type: ignore[import]
 except ImportError:
     class AgentContainerExecutor:
         def __init__(self, **kwargs): pass
@@ -92,8 +92,8 @@ except ImportError:
 
 # Test agent imports
 try:
-    from test_solver_agent import TestSolverAgent
-    from test_writer_agent import TestWriterAgent
+    from test_solver_agent import TestSolverAgent  # type: ignore[import]
+    from test_writer_agent import TestWriterAgent  # type: ignore[import]
 except ImportError:
     class TestSolverResult:
         def __init__(self):
@@ -390,12 +390,14 @@ class EnhancedWorkflowMaster:
         logger.info(f"Starting workflow execution for {workflow.task_id}")
 
         try:
+            if workflow.tasks is None:
+                return False
             for task in workflow.tasks:
                 if task.status == "completed":
                     continue
 
                 # Check dependencies
-                if not self.are_dependencies_met(task, workflow.tasks):
+                if not self.are_dependencies_met(task, workflow.tasks or []):
                     logger.warning(
                         f"Dependencies not met for task {task.id}, skipping for now"
                     )
@@ -447,8 +449,9 @@ class EnhancedWorkflowMaster:
                 self.save_workflow_state(workflow)
 
             # Check if workflow completed successfully
-            completed_tasks = [t for t in workflow.tasks if t.status == "completed"]
-            critical_tasks = [t for t in workflow.tasks if t.priority == "high"]
+            tasks = workflow.tasks or []
+            completed_tasks = [t for t in tasks if t.status == "completed"]
+            critical_tasks = [t for t in tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 
             if (
@@ -792,7 +795,10 @@ echo "Branch {branch_name} created and pushed successfully"
             "workflow_progress": self.calculate_workflow_progress(workflow),
         }
 
-        workflow.autonomous_decisions.append(decision_record)
+        if workflow.autonomous_decisions is not None:
+            workflow.autonomous_decisions.append(decision_record)
+        else:
+            workflow.autonomous_decisions = [decision_record]
         self.execution_stats["autonomous_decisions"] += 1
 
         logger.info(f"Autonomous decision for task {task_id}: {decision.value}")
@@ -842,23 +848,24 @@ echo "Branch {branch_name} created and pushed successfully"
 
     def generate_workflow_summary(self, workflow: WorkflowState) -> str:
         """Generate human-readable workflow summary."""
-        completed_tasks = [t for t in workflow.tasks if t.status == "completed"]
-        failed_tasks = [t for t in workflow.tasks if t.status == "failed"]
+        tasks = workflow.tasks or []
+        completed_tasks = [t for t in tasks if t.status == "completed"]
+        failed_tasks = [t for t in tasks if t.status == "failed"]
 
         summary = f"""# Workflow Summary: {workflow.task_id}
 
 ## Status: {workflow.status.upper()}
 
 ### Progress
-- Total Tasks: {len(workflow.tasks)}
+- Total Tasks: {len(tasks)}
 - Completed: {len(completed_tasks)}
 - Failed: {len(failed_tasks)}
-- Progress: {len(completed_tasks) / len(workflow.tasks) * 100:.1f}%
+- Progress: {len(completed_tasks) / len(tasks) * 100:.1f}% if tasks else 0%"
 
 ### Timeline
 - Created: {workflow.created_at}
 - Updated: {workflow.updated_at}
-- Duration: {workflow.updated_at - workflow.created_at}
+- Duration: {workflow.updated_at - workflow.created_at if workflow.updated_at and workflow.created_at else 'Unknown'}
 
 ### GitHub Integration
 - Issue: #{workflow.issue_number} ({workflow.issue_url})
@@ -868,7 +875,7 @@ echo "Branch {branch_name} created and pushed successfully"
 ### Tasks Status
 """
 
-        for task in workflow.tasks:
+        for task in tasks:
             status_emoji = {
                 "completed": "✅",
                 "failed": "❌",
@@ -928,6 +935,8 @@ echo "Branch {branch_name} created and pushed successfully"
             return False
 
         # Resume if workflow is recent (within 24 hours)
+        if workflow.updated_at is None:
+            return False
         time_since_update = datetime.now() - workflow.updated_at
         if time_since_update > timedelta(hours=24):
             return False
@@ -938,8 +947,9 @@ echo "Branch {branch_name} created and pushed successfully"
             return True
 
         # Resume if no critical failures
+        tasks = workflow.tasks or []
         failed_critical = [
-            t for t in workflow.tasks if t.status == "failed" and t.priority == "high"
+            t for t in tasks if t.status == "failed" and t.priority == "high"
         ]
         if failed_critical:
             return False
@@ -957,9 +967,10 @@ echo "Branch {branch_name} created and pushed successfully"
             workflow.updated_at = datetime.now()
 
             # Reset in-progress tasks to pending
-            for task in workflow.tasks:
-                if task.status == "in_progress":
-                    task.status = "pending"
+            if workflow.tasks:
+                for task in workflow.tasks:
+                    if task.status == "in_progress":
+                        task.status = "pending"
 
             self.current_workflow = workflow
             logger.info(f"Resumed workflow {task_id}")
@@ -1024,6 +1035,10 @@ echo "Branch {branch_name} created and pushed successfully"
 
         except Exception as e:
             logger.error(f"Cleanup failed: {e}")
+
+    def _get_state_file(self, task_id: str) -> Path:
+        """Get the path to a state file for a task."""
+        return Path(f".github/workflow-states/{task_id}/state.json")
 
     def shutdown(self):
         """Shutdown workflow master."""
@@ -1179,11 +1194,12 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                         workflow, f"Test Solver: {result.resolution_applied}"
                     )
 
-                    if result.final_status.value == "pass":
+                    if hasattr(result.final_status, 'value') and result.final_status.value == "pass":  # type: ignore[attr-defined]
                         logger.info(f"✅ Test {test_identifier} resolved successfully")
-                    elif result.final_status.value == "skip":
+                    elif hasattr(result.final_status, 'value') and result.final_status.value == "skip":  # type: ignore[attr-defined]
+                        skip_reason = getattr(result, 'skip_justification', 'No reason provided')
                         logger.info(
-                            f"⚠️ Test {test_identifier} skipped: {result.skip_justification}"
+                            f"⚠️ Test {test_identifier} skipped: {skip_reason}"
                         )
                     else:
                         logger.warning(
@@ -1817,7 +1833,10 @@ print(f"Review status saved: {{review_status}}")
             "message": message,
             "task_id": workflow.task_id,
         }
-        workflow.execution_log.append(step)
+        if workflow.execution_log is not None:
+            workflow.execution_log.append(step)
+        else:
+            workflow.execution_log = [step]
         logger.info(f"[{workflow.task_id}] {message}")
 
 

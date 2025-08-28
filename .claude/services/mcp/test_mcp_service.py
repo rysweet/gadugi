@@ -6,7 +6,7 @@ Test suite for MCP Service
 import asyncio
 import httpx
 import pytest
-from  import
+from  import  # type: ignore[import]
 
 
 BASE_URL = "http://localhost:8000"

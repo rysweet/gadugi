@@ -451,7 +451,7 @@ class WorkflowOptimizer:
                     location=f"Skill: {skill}",
                     impact=(avg_delay / 3600) * 10,  # Impact based on hours of delay
                     affected_agents=list(agent_states.keys()),
-                    affected_tasks=[
+                    affected_tasks=[  # type: ignore[assignment]
                         t.get("task_id")
                         for t in task_history
                         if skill in t.get("required_skills", [])
@@ -503,7 +503,7 @@ class WorkflowOptimizer:
                     type=BottleneckType.DEPENDENCY_CHAIN,
                     location="Critical path",
                     impact=(total_duration / workflow_duration - 0.5) * 100,
-                    affected_agents=list(
+                    affected_agents=list(  # type: ignore[assignment]
                         set(
                             t.get("agent_id")
                             for t in task_history
@@ -560,7 +560,7 @@ class WorkflowOptimizer:
                     affected_agents=list(pair)
                     if pair[0] != "general"
                     else list(agent_states.keys()),
-                    affected_tasks=[
+                    affected_tasks=[  # type: ignore[assignment]
                         t.get("task_id")
                         for t in task_history
                         if (t.get("communication_delay", 0) > self.bottleneck_thresholds["communication_delay"] 
@@ -599,7 +599,7 @@ class WorkflowOptimizer:
                 location="Quality control process",
                 impact=rework_rate * 100,
                 affected_agents=[t.get("agent_id") for t in rework_tasks if t.get("agent_id") is not None],  # type: ignore
-                affected_tasks=[t.get("task_id") for t in rework_tasks if t.get("task_id") is not None],
+                affected_tasks=[t.get("task_id") for t in rework_tasks if t.get("task_id") is not None],  # type: ignore[assignment]
                 description=f"High rework rate ({rework_rate:.1%}) indicating process issues",
                 evidence={
                     "rework_rate": rework_rate,
@@ -620,7 +620,7 @@ class WorkflowOptimizer:
                 location="Overall workflow",
                 impact=(0.7 - metrics.efficiency_ratio) * 100,
                 affected_agents=[t.get("agent_id") for t in task_history if t.get("agent_id") is not None],  # type: ignore
-                affected_tasks=[t.get("task_id") for t in task_history if t.get("task_id") is not None],
+                affected_tasks=[t.get("task_id") for t in task_history if t.get("task_id") is not None],  # type: ignore[assignment]
                 description=f"Low workflow efficiency ({metrics.efficiency_ratio:.1%})",
                 evidence={
                     "efficiency_ratio": metrics.efficiency_ratio,

@@ -18,7 +18,7 @@ from typing import List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
 
 try:
-    from task_analyzer import TaskAnalyzer, TaskComplexity, TaskInfo, TaskType
+    from task_analyzer import TaskAnalyzer, TaskComplexity, TaskInfo, TaskType  # type: ignore[import]
 except ImportError:
     # Define stub classes for type checking
     from enum import Enum

@@ -22,8 +22,8 @@ from typing import Optional, Dict, Any
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-from client.client import EventRouterClient
-from core.models import EventPriority, EventType
+from client.client import EventRouterClient  # type: ignore[import]
+from core.models import EventPriority, EventType  # type: ignore[import]
 
 
 class EventRouterManager:

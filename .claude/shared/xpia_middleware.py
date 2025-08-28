@@ -68,7 +68,7 @@ class XPIAMiddleware:
             security_logger.addHandler(handler)
 
     def validate_user_input(
-        self, content: str, context: Dict[str, Any] = None
+        self, content: str, context: Dict[str, Any] = None  # type: ignore[assignment]
     ) -> Dict[str, Any]:
         """
         Validate user input through XPIA defense.
@@ -443,7 +443,7 @@ def get_xpia_middleware(
 
 
 def xpia_validate_user_input(
-    content: str, context: Dict[str, Any] = None
+    content: str, context: Dict[str, Any] = None  # type: ignore[assignment]
 ) -> Dict[str, Any]:
     """Hook function for validating user input"""
     middleware = get_xpia_middleware()

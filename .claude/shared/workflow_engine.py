@@ -18,16 +18,16 @@ import subprocess
 import json
 import time
 from datetime import datetime
-from pathlib import   # type: ignore
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum, auto
 
 # Import shared modules
 try:
-    from .github_operations import GitHubOperations
-    from .state_management import StateManager
-    from .task_tracking import TaskTracker
+    from .github_operations import GitHubOperations  # type: ignore
+    from .state_management import StateManager  # type: ignore
+    from .task_tracking import TaskTracker  # type: ignore
     from .utils.error_handling import ErrorHandler, ErrorCategory, ErrorSeverity  # type: ignore
 except ImportError:
     # Fallback for testing or standalone usage
@@ -35,21 +35,21 @@ except ImportError:
 
     # Define minimal fallback types
     class StateManager:
-        def save_state(self, state): pass
-        def load_state(self, task_id): return None
+        def save_state(self, state: Any) -> None: pass
+        def load_state(self, task_id: str) -> Any: return None
 
     class GitHubOperations:
-        def __init__(self, task_id=None):
+        def __init__(self, task_id: Optional[str] = None):
             self.task_id = task_id
-        def create_issue(self, title, body): return None
-        def create_pr(self, title, body, base, head): return None
+        def create_issue(self, title: str, body: str) -> Any: return None
+        def create_pr(self, title: str, body: str, base: str, head: str) -> Any: return None
 
     class TaskTracker:
-        def start_task(self, task_id): pass
-        def complete_task(self, task_id): pass
+        def start_task(self, task_id: str) -> None: pass
+        def complete_task(self, task_id: str) -> None: pass
 
     class ErrorHandler:
-        def handle_error(self, error, category=None, severity=None):
+        def handle_error(self, error: Any, category: Optional[str] = None, severity: Optional[str] = None) -> None:
             print(f"Error: {error}")
 
     class ErrorCategory:
@@ -89,7 +89,7 @@ class WorkflowState:
     start_time: Optional[datetime] = None
     last_checkpoint: Optional[datetime] = None
     error_count: int = 0
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -104,7 +104,7 @@ class PhaseResult:
     phase: WorkflowPhase
     success: bool
     message: str
-    data: Dict[str, Any] = None
+    data: Optional[Dict[str, Any]] = None
     execution_time: float = 0.0
     retry_count: int = 0
 
@@ -278,6 +278,15 @@ class WorkflowEngine:
 
                 # Wait before retry (exponential backoff)
                 time.sleep(2 ** retry_count)
+
+        # This should never be reached, but satisfy type checker
+        return PhaseResult(
+            phase=phase,
+            success=False,
+            message="Unexpected error: max retries exceeded",
+            execution_time=time.time() - start_time,
+            retry_count=retry_count
+        )
 
     # Phase Implementation Methods
 
@@ -513,7 +522,7 @@ Implementation of deterministic WorkflowEngine to fix WorkflowManager repeatabil
 - Improved maintainability and debugging
 - Better integration with existing shared modules
 
-Closes #{self.workflow_state.issue_number if self.workflow_state.issue_number else 'issue'}  # type: ignore
+Closes #{self.workflow_state.issue_number if self.workflow_state and self.workflow_state.issue_number else 'issue'}  # type: ignore  # type: ignore
 
 *Note: This PR was created by an AI agent on behalf of the repository owner.*
 
@@ -593,7 +602,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
     def _save_checkpoint(self):
         """Save workflow state as checkpoint"""
         try:
-            checkpoint_data = asdict(self.workflow_state)
+            checkpoint_data = asdict(self.workflow_state)  # type: ignore
             checkpoint_data['timestamp'] = datetime.now().isoformat()
 
             checkpoint_file = f".workflow_checkpoint_{self.workflow_state.task_id}.json"  # type: ignore

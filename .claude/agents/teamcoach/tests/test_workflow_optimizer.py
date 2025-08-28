@@ -346,7 +346,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
         deps = {"A": [], "B": ["A"], "C": ["A"], "D": ["B", "C"], "E": ["D"]}
         durations = {"A": 100, "B": 200, "C": 50, "D": 150, "E": 100}
 
-        critical_path = self.optimizer._find_critical_path(deps, durations)
+        critical_path = self.optimizer._find_critical_path(deps, durations)  # type: ignore[assignment]
 
         # Should find A->B->D->E (total: 550) as critical path
         self.assertIn("A", critical_path)

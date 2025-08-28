@@ -15,14 +15,14 @@ class Neo4jConnectionTest:
         self.uri = uri
         self.user = user
         self.password = password
-        self.driver: Optional[GraphDatabase.driver] = None
+        self.driver: Optional[GraphDatabase.driver] = None  # type: ignore[misc]
 
     def connect(self) -> bool:
         """Establish connection to Neo4j"""
         try:
             self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
             # Test the connection
-            with self.driver.session() as session:
+            with self.driver.session() as session:  # type: ignore[attr-defined]
                 result = session.run("RETURN 1 as test")
                 test_value = result.single()["test"]
                 print(f"✅ Connected to Neo4j at {self.uri}")

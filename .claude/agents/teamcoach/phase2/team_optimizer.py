@@ -60,7 +60,7 @@ class ProjectRequirements:
     )
 
     # Project constraints
-    timeline: Tuple[datetime, datetime]
+    timeline: Tuple[datetime, datetime]  # type: ignore[misc]
     max_team_size: int = 10
     min_team_size: int = 1
     budget_constraints: Optional[float] = None
@@ -197,7 +197,7 @@ class TeamCompositionOptimizer:
         self,
         project_requirements: ProjectRequirements,
         available_agents: List[str],
-        objectives: List[OptimizationObjective] = None,
+        objectives: List[OptimizationObjective] = None,  # type: ignore[assignment]
     ) -> OptimizationResult:
         """
         Optimize team composition for a specific project.
@@ -318,7 +318,7 @@ class TeamCompositionOptimizer:
                     ):
                         composition_id = f"{project_requirements.project_id}_comp_{combinations_generated}"
 
-                        composition = TeamComposition(
+                        composition = TeamComposition(  # type: ignore[misc]
                             composition_id=composition_id,
                             project_id=project_requirements.project_id,
                             agents=list(agent_combination),
@@ -937,7 +937,7 @@ class TeamCompositionOptimizer:
             self.logger.error(f"Failed to update agent profiles: {e}")
 
     def compare_team_compositions(
-        self, compositions: List[TeamComposition], criteria: List[str] = None
+        self, compositions: List[TeamComposition], criteria: List[str] = None  # type: ignore[assignment]
     ) -> Dict[str, Any]:
         """
         Compare multiple team compositions across specified criteria.

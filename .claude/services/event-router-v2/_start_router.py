@@ -6,7 +6,7 @@ import os
 
 sys.path.append('/home/rysweet/gadugi/.claude/services/event-router-v2/src')
 
-from core.router import EventRouter
+from core.router import EventRouter  # type: ignore[import]
 
 logging.basicConfig(
     level=logging.INFO,

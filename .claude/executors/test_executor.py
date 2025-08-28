@@ -172,7 +172,7 @@ class TestExecutor(BaseExecutor):
                 if match:
                     tests_run = int(match.group(1))
             if 'FAILED' in line:
-                match = re.search(r'failures=(\d+)', line)
+                match = re.search(r'failures=(\d+)', line)  # type: ignore[assignment]
                 if match:
                     tests_failed = int(match.group(1))
         
@@ -280,7 +280,7 @@ class TestExecutor(BaseExecutor):
                 if match:
                     tests_passed = int(match.group(1))
             if 'failing' in line:
-                match = re.search(r'(\d+) failing', line)
+                match = re.search(r'(\d+) failing', line)  # type: ignore[assignment]
                 if match:
                     tests_failed = int(match.group(1))
         

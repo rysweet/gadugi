@@ -11,9 +11,9 @@ sys.path.append(str(Path(__file__).parent.parent / "generated" / "python"))
 
 try:
     # Import generated protobuf modules
-    import agent_events_pb2
-    import task_events_pb2
-    import common_pb2
+    import agent_events_pb2  # type: ignore[import]
+    import task_events_pb2  # type: ignore[import]
+    import common_pb2  # type: ignore[import]
 except ImportError:
     print("ERROR: Protobuf bindings not generated yet.")
     print("Run: python .claude/protos/generate_protos.py")

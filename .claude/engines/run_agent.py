@@ -61,7 +61,7 @@ if str(SRC_DIR / 'orchestrator') not in sys.path:
 
 # Import version after path setup
 try:
-    from version import get_version_string
+    from version import get_version_string  # type: ignore[import]
     print(f"{get_version_string()} initialized with base: {GADUGI_BASE}", file=sys.stderr)
 except ImportError:
     print(f"Gadugi v0.3 initialized with base: {GADUGI_BASE}", file=sys.stderr)

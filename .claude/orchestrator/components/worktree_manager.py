@@ -342,9 +342,9 @@ class WorktreeManager:
                 elif line.startswith('branch '):
                     current_worktree['branch'] = line[7:]
                 elif line == 'bare':
-                    current_worktree['bare'] = True
+                    current_worktree['bare'] = True  # type: ignore[assignment]
                 elif line == 'detached':
-                    current_worktree['detached'] = True
+                    current_worktree['detached'] = True  # type: ignore[assignment]
 
             if current_worktree:
                 worktrees.append(current_worktree)

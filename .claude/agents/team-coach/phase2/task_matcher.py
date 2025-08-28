@@ -36,7 +36,7 @@ TaskResult = OperationResult
 
 # Import task tracking if available
 try:
-    from ...shared.task_tracking import TaskMetrics
+    from ...shared.task_tracking import TaskMetrics  # type: ignore[import]
 except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
@@ -46,10 +46,10 @@ except ImportError:
 # Import Phase 1 components (will be available when all imports are fixed)
 try:
     from ..phase1.capability_assessment import (
-        CapabilityAssessment as Phase1CapabilityAssessment,
-        AgentCapabilityProfile as Phase1AgentCapabilityProfile,
-        CapabilityDomain as Phase1CapabilityDomain,
-        ProficiencyLevel as Phase1ProficiencyLevel)
+        CapabilityAssessment as Phase1CapabilityAssessment,  # type: ignore[assignment]
+        AgentCapabilityProfile as Phase1AgentCapabilityProfile,  # type: ignore[assignment]
+        CapabilityDomain as Phase1CapabilityDomain,  # type: ignore[assignment]
+        ProficiencyLevel as Phase1ProficiencyLevel)  # type: ignore[assignment]
     from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     # Define minimal stubs if Phase 1 imports fail
@@ -65,10 +65,10 @@ except ImportError:
         pass
 
 # Define local aliases to avoid import conflicts
-CapabilityAssessment = Phase1CapabilityAssessment
-AgentCapabilityProfile = Phase1AgentCapabilityProfile
-CapabilityDomain = Phase1CapabilityDomain
-ProficiencyLevel = Phase1ProficiencyLevel
+CapabilityAssessment = Phase1CapabilityAssessment  # type: ignore[assignment]
+AgentCapabilityProfile = Phase1AgentCapabilityProfile  # type: ignore[assignment]
+CapabilityDomain = Phase1CapabilityDomain  # type: ignore[assignment]
+ProficiencyLevel = Phase1ProficiencyLevel  # type: ignore[assignment]
 
 
 class MatchingStrategy(Enum):

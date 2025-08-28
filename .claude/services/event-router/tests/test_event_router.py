@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-=======
-import asyncio
-import unittest
-from unittest import TestCase
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-
-
->>>>>>> feature/gadugi-v0.3-regeneration
 """
 Comprehensive tests for Event Router.
 """
@@ -17,15 +5,12 @@ Comprehensive tests for Event Router.
 import asyncio
 import json
 from datetime import datetime, timedelta
-<<<<<<< HEAD
 from unittest.mock import AsyncMock, MagicMock, patch
-=======
-from pathlib import
->>>>>>> feature/gadugi-v0.3-regeneration
+from pathlib import Path  # type: ignore
 
 import pytest
 
-from ..event_router import (
+from ..event_router import (  # type: ignore
     Event,
     EventPriority,
     EventRouter,
@@ -155,7 +140,7 @@ class TestProcessManager:
     @pytest.mark.asyncio
     async def test_spawn_agent(self, process_manager):
         """Test spawning an agent process."""
-        with patch("asyncio.create_subprocess_exec") as mock_subprocess:
+        with patch("asyncio.create_subprocess_exec") as mock_subprocess:  # type: ignore
             mock_process = MagicMock()
             mock_process.pid = 12345
             mock_process.returncode = None
@@ -173,7 +158,7 @@ class TestProcessManager:
     @pytest.mark.asyncio
     async def test_stop_agent(self, process_manager):
         """Test stopping an agent."""
-        with patch("asyncio.create_subprocess_exec") as mock_subprocess:
+        with patch("asyncio.create_subprocess_exec") as mock_subprocess:  # type: ignore
             mock_process = AsyncMock()
             mock_process.pid = 12345
             mock_process.returncode = None
@@ -191,7 +176,7 @@ class TestProcessManager:
     @pytest.mark.asyncio
     async def test_restart_agent(self, process_manager):
         """Test restarting an agent."""
-        with patch("asyncio.create_subprocess_exec") as mock_subprocess:
+        with patch("asyncio.create_subprocess_exec") as mock_subprocess:  # type: ignore
             mock_process = AsyncMock()
             mock_process.pid = 12345
             mock_process.returncode = None
@@ -461,7 +446,7 @@ class TestEventRouter:
     @pytest.mark.asyncio
     async def test_agent_started_handler(self, event_router):
         """Test agent started event handling."""
-        with patch.object(event_router.process_manager, 'spawn_agent') as mock_spawn:
+        with patch.object(event_router.process_manager, 'spawn_agent') as mock_spawn:  # type: ignore
             mock_spawn.return_value = AsyncMock()
 
             await event_router.start()
@@ -555,7 +540,7 @@ class TestEventRouter:
         await event_router.start()
 
         # Subscribe with failing callback
-        async def failing_callback(event):
+        async def failing_callback(event):  # type: ignore
             raise Exception("Delivery failed")
 
         event_router.subscribe(

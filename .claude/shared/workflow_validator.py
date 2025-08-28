@@ -22,15 +22,15 @@ from enum import Enum, auto
 
 # Import workflow engine components
 try:
-    from .workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState
-    WorkflowPhase = EngineWorkflowPhase
-    WorkflowState = EngineWorkflowState
+    from .workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState  # type: ignore
+    WorkflowPhase = EngineWorkflowPhase  # type: ignore
+    WorkflowState = EngineWorkflowState  # type: ignore
 except ImportError:
     try:
         # Try absolute import if relative import fails
-        from workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState
-        WorkflowPhase = EngineWorkflowPhase
-        WorkflowState = EngineWorkflowState
+        from workflow_engine import WorkflowPhase as EngineWorkflowPhase, WorkflowState as EngineWorkflowState  # type: ignore
+        WorkflowPhase = EngineWorkflowPhase  # type: ignore
+        WorkflowState = EngineWorkflowState  # type: ignore
     except ImportError:
         # Minimal definitions if workflow_engine not available
         class WorkflowPhase(Enum):
@@ -44,6 +44,8 @@ except ImportError:
             current_phase: Optional[WorkflowPhase] = None
             phases_completed: Dict[str, bool] = field(default_factory=dict)
             context: Dict[str, Any] = field(default_factory=dict)
+            
+            def __post_init__(self):  # type: ignore
                 if self.context is None:
                     self.context = {}
 
@@ -834,7 +836,7 @@ class WorkflowValidator:
 
         return report
 
-    def export_validation_report(self, report: ValidationReport, filename: str = None) -> str:
+    def export_validation_report(self, report: ValidationReport, filename: str = None) -> str:  # type: ignore
         """Export validation report to JSON file"""
 
         if filename is None:
@@ -873,7 +875,7 @@ class WorkflowValidator:
         }
 
         with open(filename, 'w') as f:
-            json.dump(report_dict, f, indent=2, default=str)
+            json.dump(report_dict, f, indent=2, default=str)  # type: ignore
 
         return filename
 
@@ -934,7 +936,8 @@ if __name__ == "__main__":
             print(f"  • {rec}")
 
     # Export detailed report
-    report_file = report.export_validation_report(report)  # type: ignore
+    validator = WorkflowValidator(validation_level)
+    report_file = validator.export_validation_report(report)  # type: ignore
     print(f"\n📄 Detailed report saved to: {report_file}")
 
     # Exit with appropriate code

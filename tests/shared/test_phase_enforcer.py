@@ -441,7 +441,7 @@ class TestPhaseEnforcer:
         )
 
         assert result.success is False
-        assert "no enforcement rule defined" in result.error_message.lower()
+        assert "no enforcement rule defined" in result.error_message.lower()  # type: ignore[attr-defined]
         assert result.attempts == 0
 
     def test_enforce_phase_circuit_breaker_open(self):
@@ -455,7 +455,7 @@ class TestPhaseEnforcer:
         result = self.enforcer.enforce_phase(phase, self.workflow_state)
 
         assert result.success is False
-        assert "circuit breaker open" in result.error_message.lower()
+        assert "circuit breaker open" in result.error_message.lower()  # type: ignore[attr-defined]
         assert result.attempts == 0
 
     def test_enforce_phase_missing_conditions(self):
@@ -473,8 +473,8 @@ class TestPhaseEnforcer:
         result = self.enforcer.enforce_phase(WorkflowPhase.CODE_REVIEW, workflow_state)
 
         assert result.success is False
-        assert "required conditions not met" in result.error_message.lower()
-        assert "pr_exists" in result.error_message
+        assert "required conditions not met" in result.error_message.lower()  # type: ignore[attr-defined]
+        assert "pr_exists" in result.error_message  # type: ignore[misc]
 
     @patch("subprocess.run")
     def test_enforce_critical_phases_success(self, mock_subprocess):

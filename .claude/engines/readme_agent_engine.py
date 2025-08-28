@@ -1608,10 +1608,10 @@ class ContentDiscoverer:
     def _parse_pyproject_toml(self, pyproject_toml: Path, metadata: ProjectMetadata) -> None:
         """Parse pyproject.toml for project information."""
         try:
-            import tomllib
+            import tomllib  # type: ignore[import]
         except ImportError:
             try:
-                import tomli as tomllib
+                import tomli as tomllib  # type: ignore[import]
             except ImportError:
                 logging.warning(
                     "Cannot parse pyproject.toml: tomllib/tomli not available",

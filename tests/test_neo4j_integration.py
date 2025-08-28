@@ -24,12 +24,12 @@ class Neo4jConnection:
         self.user = user
         # Use environment variable or default password
         self.password = password or os.getenv("NEO4J_PASSWORD", "password")
-        self.driver: Optional[Driver] = None
+        self.driver: Optional[Driver] = None  # type: ignore[assignment]
 
-    def connect(self) -> Driver:
+    def connect(self) -> Driver:  # type: ignore[assignment]
         """Establish connection to Neo4j."""
         if not self.driver:
-            self.driver = GraphDatabase.driver(
+            self.driver = GraphDatabase.driver(  # type: ignore[assignment]
                 self.uri, auth=(self.user, self.password)
             )
         return self.driver

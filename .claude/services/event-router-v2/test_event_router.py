@@ -9,9 +9,9 @@ from datetime import datetime
 # Setup path
 sys.path.append('src')
 
-from core.router import EventRouter
-from core.models import Event, EventType, EventPriority
-from client.client import EventRouterClient
+from core.router import EventRouter  # type: ignore[import]
+from core.models import Event, EventType, EventPriority  # type: ignore[import]
+from client.client import EventRouterClient  # type: ignore[import]
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)

@@ -19,11 +19,11 @@ sys.path.insert(0, str(shared_path))
 
 try:
     from claude.shared.xpia_defense import (
-        XPIADefenseEngine,
-        XPIADefenseAgent,
-        ThreatPattern,
-        ThreatLevel,
-        SecurityMode,
+        XPIADefenseEngine,  # type: ignore[assignment]
+        XPIADefenseAgent,  # type: ignore[assignment]
+        ThreatPattern,  # type: ignore[assignment]
+        ThreatLevel,  # type: ignore[assignment]
+        SecurityMode,  # type: ignore[assignment]
     )
 except ImportError:
     # If module not found, create mock versions for testing

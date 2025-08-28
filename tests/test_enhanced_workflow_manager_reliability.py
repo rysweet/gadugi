@@ -38,7 +38,7 @@ sys.path.insert(0, str(project_root / ".claude" / "agents"))
 
 # Import modules under test
 try:
-    from workflow_reliability import (
+    from workflow_reliability import (  # type: ignore[import]
         WorkflowReliabilityManager,
         WorkflowStage,
         HealthStatus,
@@ -47,7 +47,7 @@ try:
         monitor_workflow,
         create_reliability_manager,
     )
-    from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration
+    from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration  # type: ignore[import]
 except ImportError as e:
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
 

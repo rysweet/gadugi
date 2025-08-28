@@ -550,10 +550,10 @@ class GadugiEngine:
             results = self._configure_system(parameters, options)
         elif target == TargetType.SERVICE:
             service_name = parameters.get("component")
-            results = self._configure_service(service_name, parameters, options)
+            results = self._configure_service(service_name, parameters, options)  # type: ignore[assignment]
         elif target == TargetType.AGENT:
             agent_name = parameters.get("component")
-            results = self._configure_agent(agent_name, parameters, options)
+            results = self._configure_agent(agent_name, parameters, options)  # type: ignore[assignment]
 
         return OperationResult(
             success=len(errors) == 0,
@@ -1912,7 +1912,7 @@ class GadugiEngine:
         for unit in ["B", "KB", "MB", "GB", "TB"]:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.1f} {unit}"
-            size_bytes /= 1024.0
+            size_bytes /= 1024.0  # type: ignore[assignment]
         return f"{size_bytes:.1f} PB"
 
     def shutdown(self) -> None:
