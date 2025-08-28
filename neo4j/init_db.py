@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
     """Execute schema commands from a Cypher file.
-    
+
     Args:
         client: Neo4j client instance.
         schema_file: Path to schema.cypher file.
-        
+
     Returns:
         True if successful, False otherwise.
     """
@@ -92,7 +92,7 @@ def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
 
 def create_sample_data(client: Neo4jClient) -> None:
     """Create sample data for testing.
-    
+
     Args:
         client: Neo4j client instance.
     """
@@ -219,10 +219,10 @@ def create_sample_data(client: Neo4jClient) -> None:
 
 def verify_installation(client: Neo4jClient) -> bool:
     """Verify that the database is properly set up.
-    
+
     Args:
         client: Neo4j client instance.
-        
+
     Returns:
         True if verification successful, False otherwise.
     """

@@ -1142,7 +1142,7 @@ class TestTodoWriteIntegration:
 
     def test_submit_invalid_task_list(self):
         """Test submitting invalid task list."""
-        integration = TodoWriteIntegration()
+        TodoWriteIntegration()
 
         task_list = TaskList()
         invalid_task = Task("", "Invalid task")  # Empty ID

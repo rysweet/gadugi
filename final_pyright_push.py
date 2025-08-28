@@ -88,7 +88,7 @@ def fix_unused_imports(errors):
         if not match:
             continue
 
-        import_name = match.group(1)
+        match.group(1)
 
         try:
             with open(file_path, "r") as f:

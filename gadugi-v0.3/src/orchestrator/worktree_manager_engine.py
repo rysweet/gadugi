@@ -772,13 +772,12 @@ class WorktreeManagerEngine:
             stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
 
             # Create a CompletedProcess-like result for compatibility
-            result = subprocess.CompletedProcess(
+            return subprocess.CompletedProcess(
                 args=cmd,
                 returncode=process.returncode,
                 stdout=stdout.decode() if stdout else "",
                 stderr=stderr.decode() if stderr else "",
             )
-            return result
         except asyncio.TimeoutError:
             raise subprocess.TimeoutExpired(cmd, timeout)
 

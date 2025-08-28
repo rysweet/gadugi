@@ -47,7 +47,6 @@ else:
 
         def print(self, *args: Any, **kwargs: Any) -> None:
             """Mock print method."""
-            print(*args)  # Use builtin print
 
         def input(self, prompt: str) -> str:
             """Mock input method."""

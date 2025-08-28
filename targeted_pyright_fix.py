@@ -28,7 +28,6 @@ def fix_missing_type_imports(file_path: Path) -> bool:
         lines = content.splitlines()
 
         # Check if typing imports are needed
-        needs_typing = False
         missing_types = set()
 
         # Check for undefined type variables

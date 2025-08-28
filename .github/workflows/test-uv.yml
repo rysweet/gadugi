@@ -44,7 +44,7 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
       with:
         file: ./coverage.xml
 
@@ -59,13 +59,13 @@ jobs:
         version: "latest"
 
     - name: Set up Python
-      run: uv python install 3.13
+      run: uv python install 3.12
 
     - name: Install dependencies
-      run: uv sync --extra dev
+      run: uv sync --all-extras
 
     - name: Run ruff check (lint and format)
-      run: uv run ruff check gadugi-v0.3/ --select E,F,W --ignore E501
+      run: uv run ruff check . --select E,F,W --ignore E501
 
     - name: Run ruff format check
-      run: uv run ruff format --check gadugi-v0.3/
+      run: uv run ruff format --check .

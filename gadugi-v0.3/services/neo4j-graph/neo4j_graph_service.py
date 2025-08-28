@@ -847,10 +847,7 @@ class GraphDatabaseService:
                 match_parts.append("(b)")
 
             # Build relationship pattern
-            if relationship_type:
-                rel_pattern = f"[r:{relationship_type.value}]"
-            else:
-                rel_pattern = "[r]"
+            rel_pattern = f"[r:{relationship_type.value}]" if relationship_type else "[r]"
 
             query = f"""
             MATCH {match_parts[0]}-{rel_pattern}->{match_parts[1]}

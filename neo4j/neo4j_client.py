@@ -27,7 +27,7 @@ class Neo4jClient:
 
     def __init__(self, config: Optional[Neo4jConfig] = None):
         """Initialize Neo4j client.
-        
+
         Args:
             config: Neo4j configuration. Uses defaults if not provided.
         """
@@ -57,7 +57,7 @@ class Neo4jClient:
 
     def verify_connectivity(self) -> bool:
         """Verify database connectivity.
-        
+
         Returns:
             True if connection is successful, False otherwise.
         """
@@ -75,10 +75,10 @@ class Neo4jClient:
 
     def create_agent(self, agent_data: Dict[str, Any]) -> str:
         """Create an agent node.
-        
+
         Args:
             agent_data: Agent properties including id, name, type, etc.
-            
+
         Returns:
             Agent ID of created agent.
         """
@@ -108,10 +108,10 @@ class Neo4jClient:
 
     def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
         """Get agent by ID.
-        
+
         Args:
             agent_id: Agent identifier.
-            
+
         Returns:
             Agent properties or None if not found.
         """
@@ -127,11 +127,11 @@ class Neo4jClient:
 
     def update_agent_status(self, agent_id: str, status: str) -> bool:
         """Update agent status.
-        
+
         Args:
             agent_id: Agent identifier.
             status: New status.
-            
+
         Returns:
             True if updated, False otherwise.
         """
@@ -151,10 +151,10 @@ class Neo4jClient:
 
     def create_memory(self, memory_data: Dict[str, Any]) -> str:
         """Create a memory node and link to agent.
-        
+
         Args:
             memory_data: Memory properties including agent_id.
-            
+
         Returns:
             Memory ID of created memory.
         """
@@ -195,12 +195,12 @@ class Neo4jClient:
         memory_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get memories created by an agent.
-        
+
         Args:
             agent_id: Agent identifier.
             limit: Maximum number of memories to return.
             memory_type: Optional filter by memory type.
-            
+
         Returns:
             List of memory nodes.
         """
@@ -232,12 +232,12 @@ class Neo4jClient:
         limit: int = 10
     ) -> List[Tuple[Dict[str, Any], float]]:
         """Find memories similar to a given memory.
-        
+
         Args:
             memory_id: Reference memory ID.
             threshold: Minimum similarity threshold.
             limit: Maximum number of results.
-            
+
         Returns:
             List of (memory, similarity_score) tuples.
         """
@@ -265,10 +265,10 @@ class Neo4jClient:
 
     def create_task(self, task_data: Dict[str, Any]) -> str:
         """Create a task node.
-        
+
         Args:
             task_data: Task properties.
-            
+
         Returns:
             Task ID of created task.
         """
@@ -298,11 +298,11 @@ class Neo4jClient:
 
     def assign_task_to_agent(self, task_id: str, agent_id: str) -> bool:
         """Assign a task to an agent.
-        
+
         Args:
             task_id: Task identifier.
             agent_id: Agent identifier.
-            
+
         Returns:
             True if assignment successful, False otherwise.
         """
@@ -325,19 +325,19 @@ class Neo4jClient:
         result: Optional[str] = None
     ) -> bool:
         """Update task status.
-        
+
         Args:
             task_id: Task identifier.
             status: New status.
             result: Optional task result (JSON string).
-            
+
         Returns:
             True if updated, False otherwise.
         """
         if status == 'completed' and result:
             query = """
             MATCH (t:Task {id: $task_id})
-            SET t.status = $status, 
+            SET t.status = $status,
                 t.completed_at = datetime(),
                 t.result = $result
             RETURN t.id as task_id
@@ -364,10 +364,10 @@ class Neo4jClient:
 
     def get_task_dependencies(self, task_id: str) -> Dict[str, List[str]]:
         """Get task dependencies.
-        
+
         Args:
             task_id: Task identifier.
-            
+
         Returns:
             Dictionary with 'depends_on' and 'blocks' lists.
         """
@@ -375,7 +375,7 @@ class Neo4jClient:
         MATCH (t:Task {id: $task_id})
         OPTIONAL MATCH (t)-[:DEPENDS_ON]->(dep:Task)
         OPTIONAL MATCH (blocked:Task)-[:DEPENDS_ON]->(t)
-        RETURN 
+        RETURN
             collect(DISTINCT dep.id) as depends_on,
             collect(DISTINCT blocked.id) as blocks
         """
@@ -394,10 +394,10 @@ class Neo4jClient:
 
     def create_knowledge(self, knowledge_data: Dict[str, Any]) -> str:
         """Create a knowledge node.
-        
+
         Args:
             knowledge_data: Knowledge properties.
-            
+
         Returns:
             Knowledge ID of created node.
         """
@@ -431,11 +431,11 @@ class Neo4jClient:
         limit: int = 10
     ) -> List[Dict[str, Any]]:
         """Find knowledge nodes related to a topic.
-        
+
         Args:
             topic: Topic to search for.
             limit: Maximum number of results.
-            
+
         Returns:
             List of knowledge nodes with their related nodes.
         """
@@ -463,10 +463,10 @@ class Neo4jClient:
 
     def create_team(self, team_data: Dict[str, Any]) -> str:
         """Create a team node.
-        
+
         Args:
             team_data: Team properties.
-            
+
         Returns:
             Team ID of created team.
         """
@@ -491,11 +491,11 @@ class Neo4jClient:
 
     def add_agent_to_team(self, agent_id: str, team_id: str) -> bool:
         """Add an agent to a team.
-        
+
         Args:
             agent_id: Agent identifier.
             team_id: Team identifier.
-            
+
         Returns:
             True if successful, False otherwise.
         """
@@ -512,10 +512,10 @@ class Neo4jClient:
 
     def get_team_members(self, team_id: str) -> List[Dict[str, Any]]:
         """Get all members of a team.
-        
+
         Args:
             team_id: Team identifier.
-            
+
         Returns:
             List of agent nodes.
         """
@@ -535,11 +535,11 @@ class Neo4jClient:
 
     def execute_query(self, query: str, parameters: Optional[Dict] = None) -> List[Dict]:
         """Execute a custom Cypher query.
-        
+
         Args:
             query: Cypher query string.
             parameters: Query parameters.
-            
+
         Returns:
             List of result records as dictionaries.
         """
@@ -549,7 +549,7 @@ class Neo4jClient:
 
     def clear_database(self) -> bool:
         """Clear all nodes and relationships (USE WITH CAUTION).
-        
+
         Returns:
             True if successful, False otherwise.
         """

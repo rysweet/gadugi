@@ -31,9 +31,7 @@ class ImplementationValidator:
         py_files = list(dir_path.glob("*.py"))
         # Exclude __init__.py and test files
         impl_files = [
-            f
-            for f in py_files
-            if f.name != "__init__.py" and not f.name.startswith("test_")
+            f for f in py_files if f.name != "__init__.py" and not f.name.startswith("test_")
         ]
         return len(impl_files) > 0, len(impl_files)
 
@@ -98,11 +96,8 @@ class ImplementationValidator:
                 # Run pyright
                 errors, warnings, infos = self.run_pyright(path)
                 result["pyright_errors"] = errors
-<<<<<<< HEAD
-=======
                 result["pyright_warnings"] = warnings  # Use warnings
                 result["pyright_infos"] = infos  # Use infos
->>>>>>> feature/gadugi-v0.3-regeneration
 
                 # Determine status
                 if errors == 0:
@@ -184,29 +179,17 @@ class ImplementationValidator:
 
         total = len(self.results["components"])
         exists = sum(1 for c in self.results["components"].values() if c["exists"])
-        has_impl = sum(
-            1 for c in self.results["components"].values() if c["has_implementation"]
-        )
-        working = sum(
-            1 for c in self.results["components"].values() if c["status"] == "WORKING"
-        )
+        has_impl = sum(1 for c in self.results["components"].values() if c["has_implementation"])
+        working = sum(1 for c in self.results["components"].values() if c["status"] == "WORKING")
         has_errors = sum(
-            1
-            for c in self.results["components"].values()
-            if c["status"] == "HAS_ERRORS"
+            1 for c in self.results["components"].values() if c["status"] == "HAS_ERRORS"
         )
-        empty = sum(
-            1 for c in self.results["components"].values() if c["status"] == "EMPTY_DIR"
-        )
+        empty = sum(1 for c in self.results["components"].values() if c["status"] == "EMPTY_DIR")
 
         print(f"\nTotal Components: {total}")
         print(f"  Directories Exist: {exists}/{total} ({exists / total * 100:.0f}%)")
-        print(
-            f"  Have Implementation: {has_impl}/{total} ({has_impl / total * 100:.0f}%)"
-        )
-        print(
-            f"  Working (no pyright errors): {working}/{total} ({working / total * 100:.0f}%)"
-        )
+        print(f"  Have Implementation: {has_impl}/{total} ({has_impl / total * 100:.0f}%)")
+        print(f"  Working (no pyright errors): {working}/{total} ({working / total * 100:.0f}%)")
         print(f"  Have Errors: {has_errors}/{total}")
         print(f"  Empty Directories: {empty}/{total}")
 

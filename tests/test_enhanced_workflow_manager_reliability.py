@@ -90,7 +90,7 @@ class TestWorkflowReliabilityManager:
             self.workflow_id, self.workflow_context
         )
 
-        assert result == True
+        assert result
         assert self.workflow_id in self.reliability_manager.monitoring_states
         assert self.workflow_id in self.reliability_manager.active_workflows
 
@@ -111,7 +111,7 @@ class TestWorkflowReliabilityManager:
             self.workflow_id, WorkflowStage.ISSUE_CREATION, {"test": "context"}
         )
 
-        assert result == True
+        assert result
 
         monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]
         assert monitoring_state.current_stage == WorkflowStage.ISSUE_CREATION
@@ -261,7 +261,7 @@ class TestWorkflowReliabilityManager:
             self.workflow_id, workflow_state
         )
 
-        assert result == True
+        assert result
 
     def test_restore_workflow_from_persistence_success(self):
         """Test successful workflow state restoration"""
@@ -308,7 +308,7 @@ class TestWorkflowReliabilityManager:
             self.workflow_id, "completed"
         )
 
-        assert result == True
+        assert result
         assert self.workflow_id not in self.reliability_manager.monitoring_states
         assert self.workflow_id not in self.reliability_manager.active_workflows
 
@@ -481,7 +481,7 @@ class TestEnhancedWorkflowManager:
                 result = manager.execute_workflow(str(self.test_prompt_file))
 
                 assert isinstance(result, dict)
-                assert result["success"] == False  # type: ignore[index]
+                assert not result["success"]  # type: ignore[index]
                 assert "error" in result
                 assert "workflow_id" in result
                 assert "recovery_recommendations" in result
@@ -510,7 +510,7 @@ class TestEnhancedWorkflowManager:
 
         assert result is not None  # type: ignore[comparison-overlap]
         assert result["test_result"] == "success"  # type: ignore[index]
-        assert result["phase_completed"] == True  # type: ignore[index]
+        assert result["phase_completed"]  # type: ignore[index]
 
         # Verify monitoring methods were called
         mock_reliability.update_workflow_stage.assert_called_once_with(
@@ -698,7 +698,7 @@ class TestEnhancedWorkflowManager:
             result = manager.resume_workflow(test_workflow_id)
 
             assert isinstance(result, dict)
-            assert result["success"] == True  # type: ignore[index]
+            assert result["success"]  # type: ignore[index]
             assert result["workflow_id"] == test_workflow_id  # type: ignore[index]
             assert "resumed_from" in result
             assert "resumption_time" in result
@@ -720,7 +720,7 @@ class TestEnhancedWorkflowManager:
             result = manager.resume_workflow(test_workflow_id)
 
             assert isinstance(result, dict)
-            assert result["success"] == False  # type: ignore[index]
+            assert not result["success"]  # type: ignore[index]
             assert "error" in result
             assert result["workflow_id"] == test_workflow_id  # type: ignore[index]
 
@@ -995,7 +995,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                     workflow_id, test_state
                 )
             )
-            assert persistence_result == True
+            assert persistence_result
 
             # Test restoration
             restored_state = (
@@ -1007,7 +1007,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
 
             # Test workflow resumption
             resume_result = manager.resume_workflow(workflow_id)
-            assert resume_result["success"] == True  # type: ignore[index]
+            assert resume_result["success"]  # type: ignore[index]
             assert resume_result["workflow_id"] == workflow_id  # type: ignore[index]
 
     def test_health_check_integration_with_workflow_phases(self):
@@ -1078,7 +1078,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 },
             ),
         ):
-            result = manager.execute_workflow(str(self.test_prompt_file))
+            manager.execute_workflow(str(self.test_prompt_file))
 
             # Verify health checks were performed
             assert len(health_check_calls) > 0
@@ -1216,7 +1216,7 @@ class TestWorkflowReliabilityContextManager:
         with pytest.raises(Exception):
             with monitor_workflow(
                 workflow_id, workflow_context, mock_manager
-            ) as manager:
+            ):
                 # Simulate workflow error
                 raise test_error
 
@@ -1303,14 +1303,14 @@ class TestWorkflowReliabilityPerformance:
             result = manager.reliability_manager.start_workflow_monitoring(
                 workflow_id, {"test": "concurrent"}
             )
-            assert result == True
+            assert result
 
         # Update stages concurrently
         for workflow_id in workflow_ids:
             result = manager.reliability_manager.update_workflow_stage(
                 workflow_id, WorkflowStage.IMPLEMENTATION_PROGRESS
             )
-            assert result == True
+            assert result
 
         # Verify all workflows are being monitored
         assert len(manager.reliability_manager.monitoring_states) == 5
@@ -1318,7 +1318,7 @@ class TestWorkflowReliabilityPerformance:
         # Stop all workflows
         for workflow_id in workflow_ids:
             result = manager.reliability_manager.stop_workflow_monitoring(workflow_id)
-            assert result == True
+            assert result
 
         # Verify cleanup
         assert len(manager.reliability_manager.monitoring_states) == 0

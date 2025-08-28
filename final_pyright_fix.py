@@ -116,7 +116,6 @@ def add_missing_imports(file_path: Path) -> bool:
     try:
         content = file_path.read_text()
         lines = content.splitlines()
-        added_imports = []
 
         # Check what's used but not imported
         imports_needed = set()

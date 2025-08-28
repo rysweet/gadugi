@@ -71,7 +71,7 @@ class TaskOrchestrator:
                 )
 
             # Create new worktree
-            result = subprocess.run(
+            subprocess.run(
                 [
                     "git",
                     "worktree",

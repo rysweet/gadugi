@@ -937,7 +937,7 @@ class TestErrorContext:
         """Test ErrorContext with successful operation."""
         with patch("claude.shared.utils.error_handling.logger") as mock_logger:
             with ErrorContext("test operation") as ctx:
-                result = "success"
+                pass
 
             assert ctx.error is None
             mock_logger.debug.assert_has_calls(

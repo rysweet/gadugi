@@ -281,60 +281,15 @@ class TestSimplicityRecommendations(unittest.TestCase):
         # provides appropriate guidance on abstraction decisions
 
         # Case 1: Code used in only 2 places - suggest inline
-        duplicate_code = """
-def validate_email_format(email):
-    return "@" in email and "." in email
-
-def process_user_registration(email):
-    if not validate_email_format(email):
-        raise ValueError("Invalid email")
-    # ... rest of registration
-
-def process_user_update(email):
-    if not validate_email_format(email):
-        raise ValueError("Invalid email")
-    # ... rest of update
-"""
         # Should suggest inlining since it's only used in 2 places
 
         # Case 2: Code used in 5+ places - abstraction is justified
-        justified_abstraction = """
-def validate_email_format(email):
-    return "@" in email and "." in email
-
-# Used in: registration, update, password_reset, newsletter_signup,
-# contact_form, admin_user_creation, bulk_import
-"""
         # Should accept abstraction as justified
 
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_cognitive_load_reduction_suggestions(self):
         """Test suggestions for reducing cognitive load."""
-        high_cognitive_load = """
-def process_order(order_data):
-    if order_data and order_data.get('items') and len(order_data['items']) > 0 and \
-       order_data.get('customer') and order_data['customer'].get('id') and \
-       order_data['customer']['id'] != '' and order_data.get('payment') and \
-       order_data['payment'].get('method') in ['credit', 'debit', 'paypal'] and \
-       order_data['payment'].get('amount') and order_data['payment']['amount'] > 0:
-        # Nested processing logic
-        for item in order_data['items']:
-            if item.get('quantity') and item['quantity'] > 0:
-                if item.get('price') and item['price'] > 0:
-                    if item['quantity'] * item['price'] > 1000:
-                        # Apply bulk discount
-                        item['discount'] = 0.1
-                    else:
-                        item['discount'] = 0
-                else:
-                    raise ValueError("Invalid price")
-            else:
-                raise ValueError("Invalid quantity")
-        return True
-    else:
-        return False
-"""
         # Should suggest extracting complex conditions and reducing nesting
         self.assertTrue(True)  # Placeholder for actual implementation
 
@@ -345,50 +300,16 @@ class TestContextAwareAssessment(unittest.TestCase):
     def test_early_stage_vs_mature_project_context(self):
         """Test different standards for early-stage vs mature projects."""
         # Early stage: favor simplicity even if not perfectly architected
-        early_stage_code = """
-# Quick prototype - direct approach acceptable
-def send_notification(user, message):
-    # Direct email sending - no abstraction layer yet
-    import smtplib
-    server = smtplib.SMTP('localhost')
-    server.send(user.email, message)
-    server.quit()
-"""
 
         # Mature project: consider consistency with existing patterns
-        mature_project_code = """
-# In mature codebase with established notification system
-def send_notification(user, message):
-    # Should use existing NotificationService
-    notification_service = NotificationService()
-    notification_service.send_email(user.email, message)
-"""
 
         self.assertTrue(True)  # Placeholder for actual implementation
 
     def test_team_size_context(self):
         """Test different standards based on team size and experience."""
         # Small team: simpler patterns acceptable
-        small_team_code = """
-# Small team - direct approach is fine
-def calculate_shipping(weight, distance):
-    base_rate = 5.00
-    weight_factor = weight * 0.50
-    distance_factor = distance * 0.10
-    return base_rate + weight_factor + distance_factor
-"""
 
         # Large team: more sophisticated patterns may be warranted
-        large_team_code = """
-# Large team - structured approach for maintainability
-class ShippingCalculator:
-    def __init__(self, rate_config: ShippingRateConfig):
-        self.rate_config = rate_config
-
-    def calculate(self, shipment: Shipment) -> Decimal:
-        calculator = self._get_calculator_for_region(shipment.destination)
-        return calculator.calculate_rate(shipment)
-"""
 
         self.assertTrue(True)  # Placeholder for actual implementation
 

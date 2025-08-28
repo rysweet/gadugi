@@ -283,7 +283,7 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Status command
-    status_parser = subparsers.add_parser("status", help="Show current status")
+    subparsers.add_parser("status", help="Show current status")
 
     # Sync command
     sync_parser = subparsers.add_parser(
@@ -319,7 +319,7 @@ def main():
     )
 
     # Auto-compact command
-    auto_compact_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "auto-compact",
         help="Check and automatically compact if thresholds are exceeded",
     )
@@ -336,7 +336,7 @@ def main():
     )
 
     # Conflicts command
-    conflicts_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "conflicts", help="List synchronization conflicts"
     )
 
@@ -348,10 +348,10 @@ def main():
     resolve_parser.add_argument("resolution", help="Resolution strategy")
 
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate configuration")
+    subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    init_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "init", help="Initialize Memory Manager configuration"
     )
 

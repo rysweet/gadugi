@@ -95,19 +95,9 @@ def fix_unused_imports(file_path: Path) -> bool:
 def fix_optional_access(file_path: Path) -> bool:
     """Add None checks for optional member access."""
     try:
-        content = file_path.read_text()
-        original_content = content
+        file_path.read_text()
 
         # Common _patterns that need None checks
-        patterns = [
-            # Pattern: if obj.attr -> if obj and obj.attr
-            (r"if (\w+)\.(\w+)(?!\s*is\s+None)(?!\s*==)", r"if \1 and \1.\2"),
-            # Pattern: obj.method() without None check -> obj.method() if obj else None
-            (
-                r"^(\s*)(\w+)\.(\w+)\((.*?)\)(\s*#.*)?$",
-                r"\1\2.\3(\4) if \2 else None\5",
-            ),
-        ]
 
         # Apply patterns conservatively
         # This is a simplified approach - a proper fix would need AST analysis

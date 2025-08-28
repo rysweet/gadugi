@@ -142,7 +142,7 @@ Examples:
         handler_parser = subparsers.add_parser("handler", help="Manage event handlers")
         handler_subparsers = handler_parser.add_subparsers(dest="handler_action")
 
-        list_handlers_parser = handler_subparsers.add_parser(
+        handler_subparsers.add_parser(
             "list", help="List event handlers"
         )
 

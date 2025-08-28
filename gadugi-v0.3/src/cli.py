@@ -48,7 +48,7 @@ Examples:
     run_parser.add_argument("--input", help="Input file for task")
 
     # Status command
-    status_parser = subparsers.add_parser("status", help="Show system status")
+    subparsers.add_parser("status", help="Show system status")
 
     # Serve command
     serve_parser = subparsers.add_parser("serve", help="Start services")
@@ -56,7 +56,7 @@ Examples:
     serve_parser.add_argument("--port", type=int, help="Port override")
 
     # List command
-    list_parser = subparsers.add_parser("list", help="List available agents")
+    subparsers.add_parser("list", help="List available agents")
 
     args = parser.parse_args()
 
@@ -77,37 +77,29 @@ Examples:
 
         # Print output
         if result.get("stdout"):
-            print(result["stdout"])
+            pass
         if result.get("stderr"):
-            print(result["stderr"], file=sys.stderr)
+            pass
 
         return result.get("returncode", 0)
 
     if args.command == "status":
         from orchestrator.run_agent import AGENTS_DIR, GADUGI_BASE, SERVICES_DIR
 
-        print(f"{get_version_string()} Status")
-        print("==================")
-        print(f"Base Directory: {GADUGI_BASE}")
-        print(f"Agents Directory: {AGENTS_DIR}")
-        print(f"Services Directory: {SERVICES_DIR}")
 
         # List available agents
         if AGENTS_DIR.exists():
             agents = [d.name for d in AGENTS_DIR.iterdir() if d.is_dir()]
-            print(f"\nAvailable Agents ({len(agents)}):")
             for agent in sorted(agents):
-                print(f"  - {agent}")
+                pass
 
         # List available services
         if SERVICES_DIR.exists():
             services = [d.name for d in SERVICES_DIR.iterdir() if d.is_dir()]
-            print(f"\nAvailable Services ({len(services)}):")
             for service in sorted(services):
-                print(f"  - {service}")
+                pass
 
     elif args.command == "serve":
-        print(f"Starting services: {args.service}")
         if args.service == "cli":
             from services.cli.gadugi_cli_service import main as cli_main
             return cli_main()
@@ -115,10 +107,9 @@ Examples:
             from services.event_router.event_router_service import main as event_main
             return event_main()
         if args.service == "all":
-            print("Starting all services...")
+            pass
             # Could use subprocess to start each service
         else:
-            print(f"Unknown service: {args.service}")
             return 1
 
     elif args.command == "list":
@@ -126,7 +117,6 @@ Examples:
 
         if AGENTS_DIR.exists():
             agents = [d.name for d in AGENTS_DIR.iterdir() if d.is_dir()]
-            print("Available Agents:")
             for agent in sorted(agents):
                 agent_file = AGENTS_DIR / agent / "agent.md"
                 if agent_file.exists():
@@ -135,17 +125,17 @@ Examples:
                         lines = f.readlines()
                         for line in lines[:10]:  # Check first 10 lines
                             if line.startswith("description:"):
-                                desc = line.replace("description:", "").strip()
-                                print(f"  {agent:<25} - {desc}")
+                                line.replace("description:", "").strip()
                                 break
                         else:
-                            print(f"  {agent}")
+                            pass
                 else:
-                    print(f"  {agent}")
+                    pass
 
     else:
         parser.print_help()
         return 0
+    return None
 
 if __name__ == "__main__":
     sys.exit(main())

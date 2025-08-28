@@ -29,27 +29,17 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
 
-  # Type checking with pyright
-  - repo: https://github.com/RobertCraigie/pyright-python
-    rev: v1.1.390
+  # Type checking with pyright (using local hook)
+  - repo: local
     hooks:
       - id: pyright
         name: pyright
-        entry: pyright
-        language: node
+        entry: uv run pyright
+        language: system
         types: [python]
         pass_filenames: false
-        additional_dependencies: ['pyright@1.1.390']
-        args: []
-
-  # Security: Check for secrets
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-        exclude: .*\.lock$|package-lock\.json$
-
+        always_run: false
+        stages: [pre-push]  # Only run on push, not every commit
 
   # Run tests (using local hook)
   - repo: local

@@ -3,6 +3,7 @@
 Runs agents in subprocess and captures output with proper path resolution.
 """
 
+import contextlib
 import os
 import subprocess
 import sys
@@ -11,10 +12,10 @@ from pathlib import Path
 
 def get_gadugi_base_dir() -> Path:
     """Get the Gadugi base directory using multiple strategies.
-    
+
     Returns:
         Path to the Gadugi v0.3 base directory
-    
+
     Raises:
         RuntimeError: If base directory cannot be determined
 
@@ -42,9 +43,12 @@ def get_gadugi_base_dir() -> Path:
             return current
         current = current.parent
 
-    raise RuntimeError(
+    msg = (
         "Cannot determine Gadugi base directory. "
-        "Please set GADUGI_HOME environment variable or run from within gadugi-v0.3 directory.",
+        "Please set GADUGI_HOME environment variable or run from within gadugi-v0.3 directory."
+    )
+    raise RuntimeError(
+        msg,
     )
 
 
@@ -61,11 +65,8 @@ if str(SRC_DIR / "orchestrator") not in sys.path:
     sys.path.insert(0, str(SRC_DIR / "orchestrator"))
 
 # Import version after path setup
-try:
+with contextlib.suppress(ImportError):
     from version import get_version_string
-    print(f"{get_version_string()} initialized with base: {GADUGI_BASE}", file=sys.stderr)
-except ImportError:
-    print(f"Gadugi v0.3 initialized with base: {GADUGI_BASE}", file=sys.stderr)
 
 
 def run_agent(agent_name: str, task_description: str = "") -> dict:
@@ -312,10 +313,10 @@ def main():
         epilog=f"""
 Environment:
   GADUGI_HOME={GADUGI_BASE}
-  
+
 Available agents:
   {', '.join(available_agents) if available_agents else 'No agents found'}
-  
+
 Examples:
   gadugi-orchestrator orchestrator --task "Build an API"
   gadugi-orchestrator TaskDecomposer --task "Create authentication"
@@ -333,12 +334,11 @@ Examples:
 
     if args.json:
         import json
-        print(json.dumps(result, indent=2))
     else:
         if result["stdout"]:
-            print(result["stdout"])
+            pass
         if result["stderr"]:
-            print(result["stderr"], file=sys.stderr)
+            pass
 
     return result.get("returncode", 0)
 

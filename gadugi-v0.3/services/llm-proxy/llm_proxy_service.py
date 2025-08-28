@@ -16,12 +16,15 @@ import threading
 import time
 import uuid
 from abc import ABC, abstractmethod
-from collections.abc import AsyncGenerator, AsyncIterator
+from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional, Tuple
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncGenerator
 
 # Optional provider imports with fallbacks
 try:
@@ -215,7 +218,7 @@ class RateLimiter:
         self.requests_per_minute = requests_per_minute
         self.tokens_per_minute = tokens_per_minute
         self.request_times: list[datetime] = []
-        self.token_usage: list[Tuple[datetime, int]] = []
+        self.token_usage: list[tuple[datetime, int]] = []
         self.lock = threading.Lock()
 
     def can_make_request(self, estimated_tokens: int = 0) -> bool:
