@@ -1,1 +1,0 @@
-WorktreeManager.md

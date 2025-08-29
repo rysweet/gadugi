@@ -7,6 +7,106 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+import re
+
+
+def camel_to_kebab(name: str) -> str:
+    """Convert CamelCase to kebab-case.
+    
+    Args:
+        name: CamelCase string like "CodeReviewer"
+        
+    Returns:
+        kebab-case string like "code-reviewer"
+    """
+    # Insert hyphens before uppercase letters that follow lowercase letters
+    s1 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', name)
+    return s1.lower()
+
+
+def kebab_to_camel(name: str) -> str:
+    """Convert kebab-case to CamelCase.
+    
+    Args:
+        name: kebab-case string like "code-reviewer" 
+        
+    Returns:
+        CamelCase string like "CodeReviewer"
+    """
+    components = name.split('-')
+    return ''.join(word.capitalize() for word in components)
+
+
+# Agent name mapping - kebab-case to CamelCase
+AGENT_NAME_MAPPING = {
+    # Explicitly map known agents for backward compatibility
+    "agent-updater": "AgentUpdater",
+    "claude-settings-update": "ClaudeSettingsUpdate", 
+    "code-executor": "CodeExecutor",
+    "code-review-response": "CodeReviewResponse",
+    "code-reviewer": "CodeReviewer",
+    "event-router-manager": "EventRouterManager",
+    "event-router-service-manager": "EventRouterServiceManager",
+    "execution-monitor": "ExecutionMonitor", 
+    "gadugi-coordinator": "GadugiCoordinator",
+    "github-executor": "GitHubExecutor",
+    "llm-proxy-agent": "LlmProxyAgent",
+    "memory-manager": "MemoryManager",
+    "memory-service-manager": "MemoryServiceManager",
+    "neo4j-service-manager": "Neo4jServiceManager",
+    "orchestrator-agent": "OrchestratorAgent",
+    "pr-backlog-manager": "PrBacklogManager", 
+    "program-manager": "ProgramManager",
+    "prompt-writer": "PromptWriter",
+    "readme-agent": "ReadmeAgent",
+    "recipe-executor": "RecipeExecutor", 
+    "system-design-reviewer": "SystemDesignReviewer",
+    "task-analyzer": "TaskAnalyzer",
+    "task-bounds-eval": "TaskBoundsEval",
+    "task-decomposer": "TaskDecomposer",
+    "task-research-agent": "TaskResearchAgent",
+    "team-coach": "TeamCoach",
+    "teamcoach-agent": "TeamcoachAgent",
+    "test-executor": "TestExecutor",
+    "test-solver": "TestSolver", 
+    "test-writer": "TestWriter",
+    "type-fix-agent": "TypeFixAgent",
+    "workflow-manager": "WorkflowManager",
+    "workflow-manager-phase9-enforcement": "WorkflowManagerPhase9Enforcement", 
+    "workflow-manager-simplified": "WorkflowManagerSimplified",
+    "workflow-phase-reflection": "WorkflowPhaseReflection",
+    "worktree-executor": "WorktreeExecutor",
+    "worktree-manager": "WorktreeManager",
+    "xpia-defense-agent": "XpiaDefenseAgent",
+}
+
+# Reverse mapping - CamelCase to kebab-case
+CAMEL_TO_KEBAB_MAPPING = {v: k for k, v in AGENT_NAME_MAPPING.items()}
+
+
+def normalize_agent_name(agent_name: str) -> str:
+    """Normalize agent name to CamelCase format.
+    
+    Args:
+        agent_name: Agent name in any format
+        
+    Returns:
+        CamelCase agent name
+    """
+    # If already in mapping, use it
+    if agent_name in AGENT_NAME_MAPPING:
+        return AGENT_NAME_MAPPING[agent_name]
+    
+    # If already CamelCase and exists, use as-is
+    if agent_name[0].isupper() and '-' not in agent_name:
+        return agent_name
+        
+    # Convert kebab-case to CamelCase
+    if '-' in agent_name:
+        return kebab_to_camel(agent_name)
+        
+    # Default: assume it's already correct
+    return agent_name
 
 
 def get_gadugi_base_dir() -> Path:
@@ -25,13 +125,13 @@ def get_gadugi_base_dir() -> Path:
             return base_dir
     
     # Strategy 2: Auto-detect from this file's location
-    # This file is at gadugi-v0.3/src/orchestrator/run_agent.py
-    # So we go up 3 levels to get to gadugi-v0.3
+    # This file is at gadugi/.claude/engines/run_agent.py
+    # So we go up 2 levels to get to gadugi root
     current_file = Path(__file__).resolve()
     base_dir = current_file.parent.parent.parent
     
     # Verify we found the right directory by checking for expected subdirs
-    if (base_dir / 'agents').exists() and (base_dir / 'src').exists():
+    if (base_dir / '.claude' / 'agents').exists():
         return base_dir
     
     # Strategy 3: Look for gadugi-v0.3 in parent directories
@@ -49,9 +149,9 @@ def get_gadugi_base_dir() -> Path:
 
 # Initialize base directory and paths
 GADUGI_BASE = get_gadugi_base_dir()
-AGENTS_DIR = GADUGI_BASE / 'agents'
-SERVICES_DIR = GADUGI_BASE / 'services'
-SRC_DIR = GADUGI_BASE / 'src'
+AGENTS_DIR = GADUGI_BASE / '.claude' / 'agents'
+SERVICES_DIR = GADUGI_BASE / '.claude' / 'services'
+SRC_DIR = GADUGI_BASE
 
 # Add src directory to Python path for imports
 if str(SRC_DIR) not in sys.path:
@@ -71,15 +171,18 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
     """Run an agent in subprocess and capture output.
 
     Args:
-        agent_name: Name of the agent to run
+        agent_name: Name of the agent to run (supports both CamelCase and kebab-case)
         task_description: Optional task description to pass to agent
 
     Returns:
         Dict with stdout, stderr, returncode, and success status
 
     """
+    # Normalize agent name to CamelCase for consistency
+    normalized_name = normalize_agent_name(agent_name)
+    original_name = agent_name  # Keep original for error messages
     # Special cases: agents with Python implementations for reliability
-    if agent_name == "TaskDecomposer":
+    if normalized_name == "TaskDecomposer":
         try:
             import json
             import sys
@@ -93,7 +196,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
             result = decompose_task(task_description or "Generic task")
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": json.dumps(result, indent=2),
                 "stderr": "",
@@ -102,7 +205,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
         except Exception as e:
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": "",
                 "stderr": f"Task decomposer error: {e!s}",
@@ -111,7 +214,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
 
     # Special case: PromptWriter uses Python implementation
-    if agent_name == "PromptWriter":
+    if normalized_name == "PromptWriter":
         try:
             import json
             import sys
@@ -127,7 +230,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 task_description or "Generic development task",
             )
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": result["markdown"],
                 "stderr": "",
@@ -140,7 +243,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
         except Exception as e:
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": "",
                 "stderr": f"Prompt writer error: {e!s}",
@@ -149,7 +252,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
 
     # Special case: code-writer uses Python implementation
-    if agent_name == "CodeWriter":
+    if normalized_name == "CodeWriter":
         try:
             import json
             import sys
@@ -188,7 +291,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 output = f"Code generation failed: {result.get('error', 'Unknown error')}"
 
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": output,
                 "stderr": "" if result["success"] else result.get("error", ""),
@@ -202,7 +305,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             }
         except Exception as e:
             return {
-                "agent": agent_name,
+                "agent": normalized_name,
                 "task": task_description,
                 "stdout": "",
                 "stderr": f"Code writer error: {e!s}",
@@ -210,20 +313,34 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "success": False,
             }
 
-    # Find the agent file
-    # Look relative to this script's directory
-    script_dir = Path(__file__).parent
-    agent_file = script_dir / ".." / ".." / "agents" / agent_name / "agent.md"
-
+    # Find the agent file - try multiple resolution strategies
+    agents_base_dir = AGENTS_DIR
+    
+    # Strategy 1: Try CamelCase .md file directly
+    agent_file = agents_base_dir / f"{normalized_name}.md"
+    
     if not agent_file.exists():
-        return {
-            "agent": agent_name,
-            "task": task_description,
-            "stdout": "",
-            "stderr": f"Agent file not found: {agent_file}",
-            "returncode": -1,
-            "success": False,
-        }
+        # Strategy 2: Try kebab-case directory structure
+        kebab_name = camel_to_kebab(normalized_name)
+        agent_file = agents_base_dir / kebab_name / "agent.md"
+        
+        if not agent_file.exists():
+            # Strategy 3: Try original name as directory
+            agent_file = agents_base_dir / original_name / "agent.md"
+            
+            if not agent_file.exists():
+                # Strategy 4: Try normalized name as directory 
+                agent_file = agents_base_dir / normalized_name / "agent.md"
+                
+                if not agent_file.exists():
+                    return {
+                        "agent": normalized_name,
+                        "task": task_description,
+                        "stdout": "",
+                        "stderr": f"Agent file not found. Tried: {normalized_name}.md, {kebab_name}/agent.md, {original_name}/agent.md, {normalized_name}/agent.md",
+                        "returncode": -1,
+                        "success": False,
+                    }
 
     # Read the agent file content
     try:
@@ -231,7 +348,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
             f.read()
     except Exception as e:
         return {
-            "agent": agent_name,
+            "agent": normalized_name,
             "task": task_description,
             "stdout": "",
             "stderr": f"Could not read agent file: {e}",
@@ -242,9 +359,9 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
     # For minimal implementation, let's simplify and just use a basic prompt
     # Skip the agent file for now and just simulate the response
     if task_description:
-        simple_prompt = f"Act as a {agent_name}. {task_description}. Respond briefly."
+        simple_prompt = f"Act as a {normalized_name}. {task_description}. Respond briefly."
     else:
-        simple_prompt = f"Act as a {agent_name}. Respond with a simple confirmation."
+        simple_prompt = f"Act as a {normalized_name}. Respond with a simple confirmation."
 
     try:
         # Run claude with a simple non-interactive command
@@ -257,7 +374,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
         )
 
         return {
-            "agent": agent_name,
+            "agent": normalized_name,
             "task": task_description,
             "stdout": result.stdout,
             "stderr": result.stderr,
@@ -267,17 +384,17 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     except subprocess.TimeoutExpired:
         return {
-            "agent": agent_name,
+            "agent": normalized_name,
             "task": task_description,
             "stdout": "",
-            "stderr": f"Agent {agent_name} timed out after 60 seconds",
+            "stderr": f"Agent {normalized_name} timed out after 30 seconds",
             "returncode": -1,
             "success": False,
         }
 
     except FileNotFoundError:
         return {
-            "agent": agent_name,
+            "agent": normalized_name,
             "task": task_description,
             "stdout": "",
             "stderr": "Claude command not found. Is Claude Code CLI installed?",
@@ -287,7 +404,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     except Exception as e:
         return {
-            "agent": agent_name,
+            "agent": normalized_name,
             "task": task_description,
             "stdout": "",
             "stderr": f"Error running agent: {e!s}",

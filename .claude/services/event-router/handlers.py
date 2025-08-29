@@ -96,7 +96,7 @@ except ImportError:
             async def get_stats(self) -> Dict[str, Any]:
                 return {"total_memories": 0, "memory_types": {}}
 
-from .models import (
+from models import (
     AgentEvent, EventType, EventPriority, EventFilter,
     EventReplayRequest, EventStorageInfo, MemoryIntegrationStatus
 )

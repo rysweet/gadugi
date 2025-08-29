@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-29T10:42:05.253963",
+  "timestamp": "2025-08-29T12:23:03.268252",
   "processes": {
     "fix-all-pyright-errors": {
       "task_id": "fix-all-pyright-errors",
@@ -127,6 +127,22 @@
       "last_heartbeat": "2025-08-29T10:42:05.253951",
       "exit_code": null,
       "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "commit-claude-md-improvements": {
+      "task_id": "commit-claude-md-improvements",
+      "task_name": "Task: Commit Infrastructure Improvements to CLAUDE.md",
+      "status": "running",
+      "command": "claude /agent:WorkflowManager",
+      "working_directory": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-commit-claude-md-improvements",
+      "created_at": "2025-08-29T12:23:03.261603",
+      "prompt_file": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-commit-claude-md-improvements/prompts/commit-claude-md-improvements-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-29T12:23:03.268251",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-29T12:23:03.268248",
+      "exit_code": null,
+      "error_message": null,
       "resource_usage": null
     }
   }

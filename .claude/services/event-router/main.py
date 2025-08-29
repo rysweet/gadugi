@@ -20,13 +20,13 @@ except ImportError:
     Response = None  # type: ignore[misc]
     WerkzeugResponse = None  # type: ignore[misc]
 
-from .config import Config, get_settings
-from .handlers import (
+from config import Config, get_settings
+from handlers import (
     process_request, validate_input,
     EventHandler, MemoryEventStorage,
     EventFilterEngine, EventReplayEngine
 )
-from .models import (
+from models import (
     AgentEvent, EventFilter, EventReplayRequest,
     EventStorageInfo, MemoryIntegrationStatus,
     EventType, EventPriority
