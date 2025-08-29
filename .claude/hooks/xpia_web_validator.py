@@ -12,7 +12,7 @@ from pathlib import Path
 shared_path = Path(__file__).parent.parent / "shared"
 sys.path.insert(0, str(shared_path))
 
-from xpia_defense import XPIADefenseAgent, SecurityMode
+from xpia_defense import XPIADefenseAgent, SecurityMode  # type: ignore[import]
 
 
 def validate_web_operation(hook_data):
@@ -101,7 +101,8 @@ def validate_web_operation(hook_data):
             # Validate returned content
             result = xpia_agent.validate_file_content(
                 str(tool_output),
-                filename=f"{tool_name}_output"
+                filename=f"{tool_name}_output",
+                file_type="web_content",
             )
 
             if not result.is_safe:
