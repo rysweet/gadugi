@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/service-check.sh"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "WebFetch",
@@ -48,6 +58,8 @@
     "allow": [
       "Bash(./.claude/agent-manager/hooks/check-agent-updates.sh:*)",
       "Bash(.claude/hooks/check-agent-updates.sh:*)",
+      "Bash(.claude/hooks/service-check.sh:*)",
+      "Bash(bash .claude/hooks/service-check.sh:*)",
       "Bash(STATE_DIR=\".github/workflow-states/$TASK_ID\")",
       "Bash(awk:*)",
       "Bash(bash:*)",
