@@ -112,6 +112,9 @@ class CodeReviewerV03(V03Agent):
         # Initialize code review engine
         self.review_engine = CodeReviewerEngine()
 
+        # Migrate legacy data if needed
+        await self._migrate_legacy_data()
+
         # Load historical patterns from memory
         await self._load_historical_patterns()
 
@@ -173,6 +176,153 @@ class CodeReviewerV03(V03Agent):
                 self.module_patterns[module] = ModulePattern(module_path=module)
         except Exception as e:
             self.logger.warning(f"Failed to parse module pattern: {e}")
+
+    async def _migrate_legacy_data(self) -> None:
+        """Migrate legacy CodeReviewerProjectMemory.md data on first run."""
+        try:
+            if not self.memory:
+                return
+            
+            # Check if migration has already been done
+            existing_migration = await self.memory.search_memories(
+                tags=["migration", "legacy_import"],
+                limit=1
+            )
+            
+            if existing_migration:
+                self.logger.info("Legacy data migration already completed")
+                return
+            
+            # Look for legacy file
+            legacy_file = Path(".github/CodeReviewerProjectMemory.md")
+            backup_file = Path(".github/CodeReviewerProjectMemory.md.bak")
+            
+            content = ""
+            legacy_source = None
+            
+            # Try to read from backup first (since main file might be empty)
+            if backup_file.exists():
+                try:
+                    content = backup_file.read_text(encoding='utf-8')
+                    legacy_source = str(backup_file)
+                except Exception as e:
+                    self.logger.warning(f"Could not read legacy backup file: {e}")
+            
+            # Fall back to main file if backup not available
+            if not content and legacy_file.exists():
+                try:
+                    content = legacy_file.read_text(encoding='utf-8')
+                    legacy_source = str(legacy_file)
+                except Exception as e:
+                    self.logger.warning(f"Could not read legacy file: {e}")
+            
+            if not content:
+                self.logger.info("No legacy CodeReviewerProjectMemory.md found to migrate")
+                await self._mark_migration_complete("no_legacy_data")
+                return
+            
+            self.logger.info(f"Migrating legacy data from {legacy_source}")
+            await self._process_legacy_content(content)
+            await self._mark_migration_complete(legacy_source)
+            
+        except Exception as e:
+            self.logger.error(f"Legacy data migration failed: {e}")
+
+    async def _process_legacy_content(self, content: str) -> None:
+        """Process legacy content and import into v0.3 memory system."""
+        lines = content.split('\n')
+        current_pr = None
+        current_section = None
+        current_content = []
+        
+        for line in lines:
+            # Detect PR sections
+            if line.startswith('### PR #'):
+                # Save previous section if exists
+                if current_pr and current_section and current_content:
+                    await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
+                
+                # Start new PR
+                current_pr = line.strip()
+                current_section = None
+                current_content = []
+                
+            # Detect subsections
+            elif line.startswith('#### ') and current_pr:
+                # Save previous section if exists
+                if current_section and current_content:
+                    await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
+                
+                # Start new section
+                current_section = line[5:].strip()  # Remove "#### "
+                current_content = []
+                
+            # Collect content
+            elif current_pr and current_section:
+                current_content.append(line)
+        
+        # Don't forget the last section
+        if current_pr and current_section and current_content:
+            await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
+
+    async def _import_legacy_section(self, pr: str, section: str, content: str) -> None:
+        """Import a legacy section into v0.3 memory system."""
+        if not self.memory or not content.strip():
+            return
+        
+        # Categorize based on section type
+        memory_type = "semantic"  # Default
+        importance = 0.7
+        tags = ["legacy_import", "code_review"]
+        
+        # Extract PR number for tagging
+        pr_match = pr.split('#')
+        if len(pr_match) > 1:
+            pr_number = pr_match[1].split(':')[0]
+            tags.append(f"pr_{pr_number}")
+        
+        # Categorize by section type
+        section_lower = section.lower()
+        if any(keyword in section_lower for keyword in ['what i learned', 'insights', 'architectural']):
+            memory_type = "semantic"
+            importance = 0.8
+            tags.append("insights")
+        elif any(keyword in section_lower for keyword in ['patterns discovered', 'design patterns']):
+            memory_type = "procedural"
+            importance = 0.9
+            tags.extend(["patterns", "design"])
+        elif any(keyword in section_lower for keyword in ['security', 'vulnerabilities']):
+            memory_type = "semantic"
+            importance = 0.95
+            tags.append("security")
+        elif any(keyword in section_lower for keyword in ['patterns to watch', 'recommendations']):
+            memory_type = "procedural"
+            importance = 0.85
+            tags.extend(["recommendations", "watch_patterns"])
+        elif any(keyword in section_lower for keyword in ['test', 'coverage']):
+            memory_type = "semantic"
+            importance = 0.75
+            tags.append("testing")
+        
+        # Store in memory
+        formatted_content = f"Legacy Import - {pr}\n\n## {section}\n\n{content.strip()}"
+        
+        await self.memory.remember_long_term(
+            content=formatted_content,
+            memory_type=memory_type,
+            tags=tags,
+            importance=importance
+        )
+
+    async def _mark_migration_complete(self, source: str) -> None:
+        """Mark the migration as completed."""
+        if self.memory:
+            await self.memory.remember_long_term(
+                content=f"Legacy CodeReviewerProjectMemory.md migration completed. Source: {source}",
+                memory_type="episodic",
+                tags=["migration", "legacy_import", "completed"],
+                importance=0.6
+            )
 
     async def execute_task(self, task: Dict[str, Any]) -> TaskOutcome:
         """Execute a code review task."""

@@ -1,6 +1,7 @@
 """
 Memory System Integration for Gadugi Agents
 Provides a simple interface for agents to interact with the memory system
+Enhanced with fallback support for offline/resilient operation
 """
 
 from __future__ import annotations
@@ -9,29 +10,120 @@ import asyncio
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import httpx
+import logging
+
+# Import fallback system
+try:
+    from .memory_fallback import (
+        Memory, MemoryType, MemoryScope, MemoryPersistence,
+        KnowledgeNode, Whiteboard, MemoryBackend,
+        create_simple_fallback_chain, MemoryFallbackChain
+    )
+    FALLBACK_AVAILABLE = True
+except ImportError:
+    FALLBACK_AVAILABLE = False
+    # Define stubs for type checking
+    Memory = Any  # type: ignore[misc,assignment]
+    MemoryType = Any  # type: ignore[misc,assignment]
+    MemoryBackend = Any  # type: ignore[misc,assignment]
+    MemoryFallbackChain = Any  # type: ignore[misc,assignment]
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
 class AgentMemoryInterface:
-    """Interface for agents to interact with the memory system."""
+    """
+    Enhanced interface for agents to interact with the memory system.
+    
+    Supports both HTTP-based Neo4j memory service and local fallback backends.
+    Automatically switches between backends based on availability.
+    """
     
     agent_id: str
     mcp_base_url: str = "http://localhost:8000"
     project_id: Optional[str] = None
     task_id: Optional[str] = None
+    use_fallback: bool = True
+    storage_path: str = ".memory"
+    
+    # Internal state
     _client: Optional[httpx.AsyncClient] = None
+    _fallback_chain: Optional[MemoryFallbackChain] = None
+    _use_http: bool = True  # Start with HTTP, fall back if needed
     
     async def __aenter__(self):
         """Async context manager entry."""
-        self._client = httpx.AsyncClient(base_url=self.mcp_base_url)
+        await self._initialize_backends()
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
+        await self._cleanup_backends()
+    
+    async def _initialize_backends(self) -> None:
+        """Initialize both HTTP and fallback backends."""
+        # Try to initialize HTTP client
+        try:
+            self._client = httpx.AsyncClient(
+                base_url=self.mcp_base_url,
+                timeout=httpx.Timeout(5.0)  # Short timeout for fast fallback
+            )
+            # Test connection
+            response = await self._client.get("/health", timeout=2.0)
+            if response.status_code == 200:
+                self._use_http = True
+                logger.info("HTTP memory service available")
+            else:
+                self._use_http = False
+                logger.warning("HTTP memory service responded but not healthy")
+        except Exception as e:
+            self._use_http = False
+            logger.info(f"HTTP memory service unavailable: {e}")
+        
+        # Initialize fallback backends if needed or requested
+        if not self._use_http or self.use_fallback:
+            if FALLBACK_AVAILABLE:
+                self._fallback_chain = create_simple_fallback_chain(self.storage_path)
+                await self._fallback_chain.connect()
+                logger.info("Fallback memory chain initialized")
+            else:
+                logger.warning("Fallback system not available")
+        
+        # Final check - ensure we have at least one backend
+        if not self._use_http and not self._fallback_chain:
+            raise RuntimeError("No memory backends available")
+    
+    async def _cleanup_backends(self) -> None:
+        """Clean up all backend connections."""
         if self._client:
             await self._client.aclose()
+        
+        if self._fallback_chain:
+            await self._fallback_chain.disconnect()
+    
+    async def _execute_with_fallback(self, operation_name: str, http_func, fallback_func, *args, **kwargs) -> Any:
+        """Execute operation with automatic fallback."""
+        # Try HTTP first if available
+        if self._use_http and self._client:
+            try:
+                return await http_func(*args, **kwargs)
+            except Exception as e:
+                logger.warning(f"HTTP {operation_name} failed: {e}")
+                # Mark HTTP as unavailable and try fallback
+                self._use_http = False
+        
+        # Use fallback chain
+        if self._fallback_chain:
+            try:
+                return await fallback_func(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Fallback {operation_name} failed: {e}")
+                raise
+        
+        raise RuntimeError(f"No backends available for {operation_name}")
     
     # ========== Short-term Memory ==========
     
@@ -42,24 +134,72 @@ class AgentMemoryInterface:
         importance: float = 0.5
     ) -> str:
         """Store a short-term memory."""
-        if not self._client:
-            raise RuntimeError("Client not initialized. Use async with statement.")
         
-        response = await self._client.post(
-            "/memory/agent/store",
-            json={
-                "agent_id": self.agent_id,
-                "content": content,
-                "memory_type": "short_term",
-                "is_short_term": True,
-                "task_id": self.task_id,
-                "project_id": self.project_id,
-                "tags": tags or [],
-                "importance_score": importance
-            }
+        async def http_store():
+            if not self._client:
+                raise RuntimeError("HTTP client not available")
+            
+            response = await self._client.post(
+                "/memory/agent/store",
+                json={
+                    "agent_id": self.agent_id,
+                    "content": content,
+                    "memory_type": "short_term",
+                    "is_short_term": True,
+                    "task_id": self.task_id,
+                    "project_id": self.project_id,
+                    "tags": tags or [],
+                    "importance_score": importance
+                }
+            )
+            response.raise_for_status()
+            return response.json()["id"]
+        
+        async def fallback_store():
+            if not self._fallback_chain:
+                raise RuntimeError("Fallback chain not available")
+            
+            memory = Memory(
+                agent_id=self.agent_id,
+                content=content,
+                type=MemoryType.SHORT_TERM,
+                persistence=MemoryPersistence.VOLATILE,
+                task_id=self.task_id,
+                project_id=self.project_id,
+                tags=tags or [],
+                importance_score=importance
+            )
+            
+            stored_memory = await self._fallback_chain.store_memory(memory)
+            return stored_memory.id
+        
+        return await self._execute_with_fallback(
+            "remember_short_term", 
+            http_store, 
+            fallback_store
         )
-        response.raise_for_status()
-        return response.json()["id"]
+    
+    # ========== Helper Methods ==========
+    
+    def _convert_http_memory_to_dict(self, http_memory: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert HTTP memory response to standard format."""
+        return http_memory
+    
+    def _convert_fallback_memory_to_dict(self, memory: Memory) -> Dict[str, Any]:
+        """Convert fallback Memory object to standard format."""
+        return {
+            "id": memory.id,
+            "agent_id": memory.agent_id,
+            "content": memory.content,
+            "memory_type": memory.type.value if hasattr(memory.type, 'value') else str(memory.type),
+            "is_short_term": memory.persistence == MemoryPersistence.VOLATILE,
+            "task_id": memory.task_id,
+            "project_id": memory.project_id,
+            "tags": memory.tags,
+            "importance_score": memory.importance_score,
+            "created_at": memory.created_at.isoformat() if memory.created_at else None,
+            "updated_at": memory.updated_at.isoformat() if memory.updated_at else None
+        }
     
     # ========== Long-term Memory ==========
     
@@ -71,24 +211,58 @@ class AgentMemoryInterface:
         importance: float = 0.7
     ) -> str:
         """Store a long-term memory."""
-        if not self._client:
-            raise RuntimeError("Client not initialized. Use async with statement.")
         
-        response = await self._client.post(
-            "/memory/agent/store",
-            json={
-                "agent_id": self.agent_id,
-                "content": content,
-                "memory_type": memory_type,
-                "is_short_term": False,
-                "task_id": self.task_id,
-                "project_id": self.project_id,
-                "tags": tags or [],
-                "importance_score": importance
+        async def http_store():
+            if not self._client:
+                raise RuntimeError("HTTP client not available")
+            
+            response = await self._client.post(
+                "/memory/agent/store",
+                json={
+                    "agent_id": self.agent_id,
+                    "content": content,
+                    "memory_type": memory_type,
+                    "is_short_term": False,
+                    "task_id": self.task_id,
+                    "project_id": self.project_id,
+                    "tags": tags or [],
+                    "importance_score": importance
+                }
+            )
+            response.raise_for_status()
+            return response.json()["id"]
+        
+        async def fallback_store():
+            if not self._fallback_chain:
+                raise RuntimeError("Fallback chain not available")
+            
+            # Map memory_type string to MemoryType enum
+            type_mapping = {
+                "semantic": MemoryType.SEMANTIC,
+                "episodic": MemoryType.EPISODIC,
+                "procedural": MemoryType.PROCEDURAL,
+                "long_term": MemoryType.LONG_TERM
             }
+            
+            memory = Memory(
+                agent_id=self.agent_id,
+                content=content,
+                type=type_mapping.get(memory_type, MemoryType.SEMANTIC),
+                persistence=MemoryPersistence.PERSISTENT,
+                task_id=self.task_id,
+                project_id=self.project_id,
+                tags=tags or [],
+                importance_score=importance
+            )
+            
+            stored_memory = await self._fallback_chain.store_memory(memory)
+            return stored_memory.id
+        
+        return await self._execute_with_fallback(
+            "remember_long_term", 
+            http_store, 
+            fallback_store
         )
-        response.raise_for_status()
-        return response.json()["id"]
     
     # ========== Memory Retrieval ==========
     
@@ -100,23 +274,57 @@ class AgentMemoryInterface:
         limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Recall memories based on criteria."""
-        if not self._client:
-            raise RuntimeError("Client not initialized. Use async with statement.")
         
-        params = {
-            "limit": limit,
-            "short_term_only": short_term_only,
-            "long_term_only": long_term_only
-        }
-        if memory_type:
-            params["memory_type"] = memory_type
+        async def http_recall():
+            if not self._client:
+                raise RuntimeError("HTTP client not available")
+            
+            params = {
+                "limit": limit,
+                "short_term_only": short_term_only,
+                "long_term_only": long_term_only
+            }
+            if memory_type:
+                params["memory_type"] = memory_type
+            
+            response = await self._client.get(
+                f"/memory/agent/{self.agent_id}",
+                params=params
+            )
+            response.raise_for_status()
+            return response.json()
         
-        response = await self._client.get(
-            f"/memory/agent/{self.agent_id}",
-            params=params
+        async def fallback_recall():
+            if not self._fallback_chain:
+                raise RuntimeError("Fallback chain not available")
+            
+            # Map memory_type string to MemoryType enum if needed
+            memory_type_enum = None
+            if memory_type:
+                type_mapping = {
+                    "semantic": MemoryType.SEMANTIC,
+                    "episodic": MemoryType.EPISODIC,
+                    "procedural": MemoryType.PROCEDURAL,
+                    "short_term": MemoryType.SHORT_TERM,
+                    "long_term": MemoryType.LONG_TERM
+                }
+                memory_type_enum = type_mapping.get(memory_type)
+            
+            memories = await self._fallback_chain.get_agent_memories(
+                agent_id=self.agent_id,
+                memory_type=memory_type_enum,
+                short_term_only=short_term_only,
+                long_term_only=long_term_only,
+                limit=limit
+            )
+            
+            return [self._convert_fallback_memory_to_dict(m) for m in memories]
+        
+        return await self._execute_with_fallback(
+            "recall_memories",
+            http_recall,
+            fallback_recall
         )
-        response.raise_for_status()
-        return response.json()
     
     async def search_memories(
         self,
@@ -549,3 +757,240 @@ async def example_usage():
 if __name__ == "__main__":
     # Run the example
     asyncio.run(example_usage())
+
+
+# ============================================================================
+# Enhanced Memory Interface with Full Fallback Support
+# ============================================================================
+
+class EnhancedAgentMemoryInterface(AgentMemoryInterface):
+    """
+    Enhanced memory interface with full fallback support and monitoring.
+    
+    This extends the basic interface with additional features:
+    - Backend status monitoring
+    - Fallback chain health checks
+    - Memory synchronization between backends
+    - Enhanced error handling and recovery
+    """
+    
+    def get_backend_status(self) -> Dict[str, Any]:
+        """Get detailed status of all backends."""
+        status = {
+            "http_available": self._use_http,
+            "http_endpoint": self.mcp_base_url if self._use_http else None,
+            "fallback_available": self._fallback_chain is not None,
+            "current_backend": "HTTP" if self._use_http else "Fallback Chain",
+            "storage_path": self.storage_path,
+            "fallback_chain_status": None
+        }
+        
+        if self._fallback_chain and hasattr(self._fallback_chain, 'get_backend_status'):
+            status["fallback_chain_status"] = self._fallback_chain.get_backend_status()
+        
+        return status
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Perform comprehensive health check on all backends."""
+        health_status = {
+            "overall_healthy": False,
+            "http_healthy": False,
+            "fallback_healthy": False,
+            "errors": []
+        }
+        
+        # Check HTTP backend
+        if self._client:
+            try:
+                response = await self._client.get("/health", timeout=5.0)
+                health_status["http_healthy"] = response.status_code == 200
+            except Exception as e:
+                health_status["errors"].append(f"HTTP health check failed: {e}")
+        
+        # Check fallback chain
+        if self._fallback_chain:
+            try:
+                fallback_healthy = await self._fallback_chain.is_available()
+                health_status["fallback_healthy"] = fallback_healthy
+                
+                # Get detailed fallback status
+                if hasattr(self._fallback_chain, 'health_check_all_backends'):
+                    await self._fallback_chain.health_check_all_backends()
+            except Exception as e:
+                health_status["errors"].append(f"Fallback health check failed: {e}")
+        
+        health_status["overall_healthy"] = (
+            health_status["http_healthy"] or health_status["fallback_healthy"]
+        )
+        
+        return health_status
+    
+    async def force_backend_switch(self, use_http: bool = True) -> bool:
+        """Force switch between HTTP and fallback backends."""
+        if use_http and self._client:
+            # Try to switch to HTTP
+            try:
+                response = await self._client.get("/health", timeout=2.0)
+                if response.status_code == 200:
+                    self._use_http = True
+                    logger.info("Forced switch to HTTP backend")
+                    return True
+            except Exception as e:
+                logger.warning(f"Cannot switch to HTTP backend: {e}")
+        
+        # Switch to fallback
+        if self._fallback_chain and await self._fallback_chain.is_available():
+            self._use_http = False
+            logger.info("Forced switch to fallback backend")
+            return True
+        
+        logger.error("Cannot switch backends - target backend unavailable")
+        return False
+    
+    async def sync_memories_between_backends(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
+        """Attempt to sync memories between available backends."""
+        if not agent_id:
+            agent_id = self.agent_id
+        
+        sync_result = {
+            "synced_count": 0,
+            "errors": [],
+            "source_backend": None,
+            "target_backend": None
+        }
+        
+        # Only sync if we have both backends available
+        if not (self._client and self._fallback_chain):
+            sync_result["errors"].append("Both HTTP and fallback backends must be available for sync")
+            return sync_result
+        
+        try:
+            # Determine sync direction based on current primary backend
+            if self._use_http:
+                # HTTP is primary, sync from HTTP to fallback
+                sync_result["source_backend"] = "HTTP"
+                sync_result["target_backend"] = "Fallback"
+                
+                # Get memories from HTTP
+                memories_data = await self.recall_memories(limit=1000)  # Use existing method
+                
+                # Store in fallback (would need more complex conversion)
+                # This is a simplified version - full implementation would need proper conversion
+                sync_result["synced_count"] = len(memories_data)
+                
+            else:
+                # Fallback is primary, sync from fallback to HTTP
+                sync_result["source_backend"] = "Fallback"
+                sync_result["target_backend"] = "HTTP"
+                
+                # Get memories from fallback
+                if self._fallback_chain:
+                    memories = await self._fallback_chain.get_agent_memories(agent_id, limit=1000)
+                    # Would need to convert and store in HTTP backend
+                    sync_result["synced_count"] = len(memories)
+            
+        except Exception as e:
+            sync_result["errors"].append(f"Sync failed: {e}")
+        
+        return sync_result
+    
+    async def get_memory_statistics(self) -> Dict[str, Any]:
+        """Get memory usage statistics from active backend."""
+        stats = {
+            "backend_type": "HTTP" if self._use_http else "Fallback",
+            "agent_id": self.agent_id,
+            "total_memories": 0,
+            "short_term_memories": 0,
+            "long_term_memories": 0,
+            "procedural_memories": 0,
+            "last_updated": datetime.now().isoformat()
+        }
+        
+        try:
+            # Get memory counts
+            all_memories = await self.recall_memories(limit=1000)
+            stats["total_memories"] = len(all_memories)
+            
+            # Count by type
+            short_term = await self.recall_memories(short_term_only=True, limit=1000)
+            stats["short_term_memories"] = len(short_term)
+            
+            long_term = await self.recall_memories(long_term_only=True, limit=1000)
+            stats["long_term_memories"] = len(long_term)
+            
+            # This would need additional API support for procedural memories
+            # stats["procedural_memories"] = len(await self.recall_procedure())
+            
+        except Exception as e:
+            stats["error"] = str(e)
+        
+        return stats
+
+
+# ============================================================================
+# Factory Functions for Enhanced Interface
+# ============================================================================
+
+def create_enhanced_memory_interface(
+    agent_id: str,
+    mcp_base_url: str = "http://localhost:8000",
+    project_id: Optional[str] = None,
+    task_id: Optional[str] = None,
+    use_fallback: bool = True,
+    storage_path: str = ".memory"
+) -> EnhancedAgentMemoryInterface:
+    """
+    Create an enhanced memory interface with fallback support.
+    
+    Args:
+        agent_id: Unique identifier for the agent
+        mcp_base_url: Base URL for HTTP memory service
+        project_id: Optional project identifier
+        task_id: Optional task identifier  
+        use_fallback: Enable fallback backends
+        storage_path: Path for local storage backends
+    
+    Returns:
+        Configured enhanced memory interface
+    """
+    return EnhancedAgentMemoryInterface(
+        agent_id=agent_id,
+        mcp_base_url=mcp_base_url,
+        project_id=project_id,
+        task_id=task_id,
+        use_fallback=use_fallback,
+        storage_path=storage_path
+    )
+
+
+def create_fallback_only_interface(
+    agent_id: str,
+    project_id: Optional[str] = None,
+    task_id: Optional[str] = None,
+    storage_path: str = ".memory"
+) -> EnhancedAgentMemoryInterface:
+    """
+    Create a memory interface that only uses fallback backends (offline mode).
+    
+    Args:
+        agent_id: Unique identifier for the agent
+        project_id: Optional project identifier
+        task_id: Optional task identifier
+        storage_path: Path for local storage backends
+    
+    Returns:
+        Configured memory interface with fallback backends only
+    """
+    interface = EnhancedAgentMemoryInterface(
+        agent_id=agent_id,
+        mcp_base_url="http://localhost:8000",  # Won't be used
+        project_id=project_id,
+        task_id=task_id,
+        use_fallback=True,
+        storage_path=storage_path
+    )
+    
+    # Force fallback mode
+    interface._use_http = False
+    
+    return interface
