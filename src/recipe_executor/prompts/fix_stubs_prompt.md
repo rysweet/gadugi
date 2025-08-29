@@ -2,8 +2,6 @@
 
 ## CRITICAL: REPLACE ALL STUBS WITH REAL IMPLEMENTATIONS
 
-**TOOL RESTRICTION: You MUST use the Write tool EXCLUSIVELY. Do NOT use Edit, MultiEdit, or Bash tools.**
-
 The code contains stubs/placeholders that MUST be replaced with COMPLETE implementations.
 
 ## Stub/TODO Issues Found
@@ -12,9 +10,9 @@ The code contains stubs/placeholders that MUST be replaced with COMPLETE impleme
 ## YOUR MANDATORY TASK
 1. Read ALL existing files in {output_path}
 2. Find EVERY stub, TODO, and placeholder implementation
-3. REWRITE the ENTIRE FILE using the Write tool with complete implementations
+3. Replace them with COMPLETE, WORKING implementations
 4. Every function must have MINIMUM 3-5 lines of real logic
-5. Use Write tool to overwrite files completely (not Edit)
+5. Use any tools necessary to fix the issues and test your fixes
 
 ## HOW TO FIX EACH TYPE OF STUB
 

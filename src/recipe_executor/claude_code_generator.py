@@ -283,20 +283,22 @@ You are participating in a **self-hosting exercise** where the Recipe Executor s
 
 ## YOUR WORKING DIRECTORY
 You are in an isolated build directory. All file operations are relative to this directory.
-- Create files using RELATIVE paths (e.g., `src/recipe_model.py`, not absolute paths)
-- Your working directory is already set up - just create files relative to it
+- Your current working directory is the output directory where you should create all files
+- Create the directory structure: src/recipe_executor/ for Python modules, tests/ for test files
+- When creating files, use paths like: src/recipe_executor/recipe_model.py
+- The recipe files are available in the recipes/ subdirectory if you need to reference them
 - DO NOT try to access or modify files outside this directory
 
 ## YOUR TASK
 Generate a complete, functional implementation of Recipe Executor based on the recipe below.
 
 **Requirements**:
-1. Use the **Write tool** exclusively (no Edit/MultiEdit, no Bash commands)
-2. DO NOT use Bash to create virtual environments or install packages
-3. Create proper Python package structure (src/, tests/, etc.)
-4. Implement ALL components described in the recipe
-5. Ensure the implementation is complete and functional
-6. Focus on the recipe requirements, not on existing code
+1. Create proper Python package structure (src/, tests/, etc.)
+2. Implement ALL components described in the recipe
+3. Ensure the implementation is complete and functional
+4. Focus on the recipe requirements, not on existing code
+5. Test your implementation as needed
+6. Use any tools necessary to complete the task
 
 ## Recipe Name: {recipe.name}
 
@@ -311,19 +313,18 @@ This is a FRESH implementation. Let the recipe guide your implementation.
 
 **MANDATORY: You MUST create files using the Write tool with THESE EXACT file_path parameters. Do NOT interpret these as examples - use these EXACT paths:**
 
-**STEP 1: First, create the src/recipe_executor directory structure:**
-```
-Write(file_path="src/recipe_executor/__init__.py", content="...")
-```
+**IMPORTANT**: Your current working directory is the isolated build directory. Create all files relative to this directory.
 
-**STEP 2: Then create each file with its EXACT path as shown:**
+**STEP 1: Create the directory structure and files:**
 
-For the recipe model, you MUST write:
-```
-Write(file_path="src/recipe_executor/recipe_model.py", content="...")
-```
+When creating Python module files, use these exact paths relative to your current directory:
+- src/recipe_executor/recipe_model.py
+- src/recipe_executor/recipe_parser.py
+- src/recipe_executor/__init__.py
+- tests/test_recipe_executor.py
+- etc.
 
-DO NOT write to "recipe_model.py" or any other path!
+The files will be created in the correct structure automatically when you use these paths.
 
 ## REQUIRED FILES - CREATE WITH EXACT PATHS
 
@@ -406,7 +407,6 @@ Write tool with file_path="tests/conftest.py"
 **VALIDATION CHECK**: You MUST create EXACTLY 31 Python files in src/recipe_executor/ directory.
 
 **DO NOT CREATE**:
-- Virtual environments (.venv directory) - NEVER run `python -m venv` or `uv venv`
 - Files with different names (e.g., "models.py" instead of "recipe_model.py")
 - Files in wrong locations (e.g., root directory instead of src/recipe_executor/)
 - Stub files that just import from other files
@@ -733,6 +733,15 @@ You MUST follow this TDD workflow:
         target_prompt = output_dir / "generation_prompt.md"
         shutil.copy2(prompt_file, target_prompt)
         logger.debug(f"Copied prompt to {target_prompt}")
+        
+        # Copy the recipe files to the isolated environment
+        recipes_dir = Path("recipes")
+        if recipes_dir.exists():
+            target_recipes = output_dir / "recipes"
+            if target_recipes.exists():
+                shutil.rmtree(target_recipes)
+            shutil.copytree(recipes_dir, target_recipes)
+            logger.debug(f"Copied recipes directory to {target_recipes}")
         
         # Create a README explaining the context
         readme_content = f"""# Isolated Build Environment for {recipe.name}
