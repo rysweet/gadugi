@@ -283,6 +283,74 @@ class EventHandlerMixin:
             }
         })
 
+    # ========== Core System Events (per v0.3 spec) ==========
+    
+    async def emit_started(self, input_data: Any, task_id: str) -> bool:
+        """Emit agent started event (core system event)."""
+        return await self._emit_event({
+            "event_type": f"{self.agent_type.lower()}.started",
+            "priority": "normal",
+            "data": {
+                "input": input_data,
+                "task_id": task_id,
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+    
+    async def emit_stopped(self, output_data: Any, task_id: str, success: bool, duration_seconds: float) -> bool:
+        """Emit agent stopped event (core system event)."""
+        return await self._emit_event({
+            "event_type": f"{self.agent_type.lower()}.stopped",
+            "priority": "normal",
+            "data": {
+                "output": output_data,
+                "task_id": task_id,
+                "success": success,
+                "duration_seconds": duration_seconds,
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+    
+    async def emit_has_question(self, question: str, context: Optional[Dict[str, Any]] = None, options: Optional[List[str]] = None) -> bool:
+        """Emit hasQuestion event when agent needs interactive answer."""
+        return await self._emit_event({
+            "event_type": f"{self.agent_type.lower()}.hasQuestion",
+            "priority": "high",
+            "data": {
+                "question": question,
+                "context": context or {},
+                "options": options or [],
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+    
+    async def emit_needs_approval(self, command: str, description: str, risk_level: str = "medium") -> bool:
+        """Emit needsApproval event when agent needs user approval."""
+        return await self._emit_event({
+            "event_type": f"{self.agent_type.lower()}.needsApproval",
+            "priority": "high",
+            "data": {
+                "command": command,
+                "description": description,
+                "risk_level": risk_level,
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+    
+    async def emit_cancel(self, target_agent_id: str, reason: str) -> bool:
+        """Emit cancel event to stop another agent."""
+        return await self._emit_event({
+            "event_type": f"{self.agent_type.lower()}.cancel",
+            "priority": "critical",
+            "data": {
+                "target_agent_id": target_agent_id,
+                "reason": reason,
+                "timestamp": datetime.now().isoformat()
+            }
+        })
+    
+    # ========== Domain-Specific Events ==========
+    
     async def emit_knowledge_learned(self,
                                    knowledge_type: str,
                                    content: str,

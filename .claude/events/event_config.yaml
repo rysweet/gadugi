@@ -1,0 +1,285 @@
+# Gadugi v0.3 Event Configuration
+# Defines all event types and agent subscriptions
+
+version: "0.3"
+description: "Core event configuration for Gadugi multi-agent framework"
+
+# Core system events that all agents emit
+core_events:
+  - name: "started"
+    description: "Agent begins task execution"
+    payload:
+      input: "any"
+      task_id: "string"
+      timestamp: "datetime"
+  
+  - name: "stopped"
+    description: "Agent completes task execution"
+    payload:
+      output: "any"
+      task_id: "string"
+      success: "boolean"
+      duration_seconds: "float"
+      timestamp: "datetime"
+  
+  - name: "hasQuestion"
+    description: "Agent needs interactive answer"
+    payload:
+      question: "string"
+      context: "object"
+      options: "array"
+      timestamp: "datetime"
+  
+  - name: "needsApproval"
+    description: "Agent needs user approval"
+    payload:
+      command: "string"
+      description: "string"
+      risk_level: "string"
+      timestamp: "datetime"
+  
+  - name: "cancel"
+    description: "Cancel another agent's execution"
+    payload:
+      target_agent_id: "string"
+      reason: "string"
+      timestamp: "datetime"
+
+# Agent-specific event configurations
+agents:
+  gadugi:
+    description: "Bootstrap and management agent"
+    emits:
+      - event: "gadugi.service_started"
+        description: "Core services initialized"
+      - event: "gadugi.agent_installed"
+        description: "Agent installed or updated"
+      - event: "gadugi.agent_activity"
+        description: "Periodic activity report"
+      - event: "gadugi.event_stream"
+        description: "Filtered event stream"
+    subscribes:
+      - pattern: "*.started"
+        handler: "track_agent_start"
+      - pattern: "*.stopped"
+        handler: "track_agent_completion"
+      - pattern: "system.shutdown"
+        handler: "graceful_shutdown"
+
+  orchestration:
+    description: "Problem solving and coordination agent"
+    emits:
+      - event: "orchestration.problem_identified"
+        description: "Problem identification phase complete"
+      - event: "orchestration.information_gathered"
+        description: "Information gathering complete"
+      - event: "orchestration.analysis_complete"
+        description: "Analysis phase complete"
+      - event: "orchestration.solution_designed"
+        description: "Solution design ready"
+      - event: "orchestration.refinement_needed"
+        description: "Solution needs refinement"
+      - event: "orchestration.implementation_started"
+        description: "Implementation begun"
+      - event: "orchestration.agent_generated"
+        description: "New agent created dynamically"
+    subscribes:
+      - pattern: "*.hasQuestion"
+        handler: "route_question_to_user"
+      - pattern: "*.needsApproval"
+        handler: "route_approval_to_user"
+      - pattern: "*.stopped"
+        handler: "aggregate_results"
+      - pattern: "teamcoach.reflection_complete"
+        handler: "learn_from_session"
+
+  teamcoach:
+    description: "Reflection and learning agent"
+    emits:
+      - event: "teamcoach.reflection_started"
+        description: "Session reflection begun"
+      - event: "teamcoach.lessons_learned"
+        description: "Identified improvements"
+      - event: "teamcoach.agent_improvements"
+        description: "Suggested prompt updates"
+      - event: "teamcoach.tool_improvements"
+        description: "Tool enhancement ideas"
+      - event: "teamcoach.memory_updates"
+        description: "Memory additions"
+      - event: "teamcoach.new_agent_suggested"
+        description: "New agent recommendations"
+    subscribes:
+      - pattern: "orchestration.stopped"
+        handler: "trigger_reflection"
+      - pattern: "*.stopped"
+        handler: "collect_metrics"
+
+  workflow:
+    description: "Workflow execution agent"
+    emits:
+      - event: "workflow.started"
+        description: "Workflow execution begun"
+      - event: "workflow.phase_started"
+        description: "Workflow phase started"
+      - event: "workflow.phase_completed"
+        description: "Workflow phase completed"
+      - event: "workflow.step_completed"
+        description: "Workflow step completed"
+      - event: "workflow.decision_needed"
+        description: "Workflow branch point"
+      - event: "workflow.tool_invoked"
+        description: "Tool call made"
+      - event: "workflow.pr_created"
+        description: "Pull request created"
+      - event: "workflow.tests_passed"
+        description: "Tests succeeded"
+      - event: "workflow.blocked"
+        description: "Workflow blocked"
+    subscribes:
+      - pattern: "orchestration.implementation_started"
+        handler: "begin_workflow"
+      - pattern: "*.hasQuestion.response"
+        handler: "continue_after_answer"
+      - pattern: "*.needsApproval.response"
+        handler: "continue_after_approval"
+      - pattern: "codereview.completed"
+        handler: "proceed_to_phase_10"
+
+  codereview:
+    description: "Code review agent"
+    emits:
+      - event: "codereview.started"
+        description: "Review begun"
+      - event: "codereview.issue_found"
+        description: "Problem detected"
+      - event: "codereview.approval_given"
+        description: "Code approved"
+      - event: "codereview.changes_requested"
+        description: "Changes needed"
+      - event: "codereview.completed"
+        description: "Review complete"
+    subscribes:
+      - pattern: "workflow.pr_created"
+        handler: "trigger_review"
+      - pattern: "workflow.code_changed"
+        handler: "re_review"
+
+  memory:
+    description: "Memory management agent"
+    emits:
+      - event: "memory.stored"
+        description: "Memory persisted to graph DB"
+      - event: "memory.recalled"
+        description: "Memory retrieved"
+      - event: "memory.pattern_detected"
+        description: "Pattern found in memories"
+      - event: "memory.pruned"
+        description: "Old memories cleaned"
+      - event: "memory.synced"
+        description: "GitHub sync complete"
+    subscribes:
+      - pattern: "*.lessons_learned"
+        handler: "store_learnings"
+      - pattern: "*.memory_updates"
+        handler: "update_memories"
+      - pattern: "agent.started"
+        handler: "load_agent_memories"
+      - pattern: "orchestration.pattern_learned"
+        handler: "store_pattern"
+
+  taskdecomposer:
+    description: "Task decomposition agent"
+    emits:
+      - event: "decomposition.started"
+        description: "Task analysis begun"
+      - event: "decomposition.subtask_created"
+        description: "Subtask identified"
+      - event: "decomposition.dependencies_mapped"
+        description: "Dependencies analyzed"
+      - event: "decomposition.completed"
+        description: "Decomposition finished"
+      - event: "decomposition.pattern_matched"
+        description: "Known pattern applied"
+    subscribes:
+      - pattern: "orchestration.problem_identified"
+        handler: "begin_decomposition"
+      - pattern: "workflow.blocked"
+        handler: "analyze_blockage"
+
+  testsolver:
+    description: "Test failure resolution agent"
+    emits:
+      - event: "testsolver.analysis_started"
+        description: "Test analysis begun"
+      - event: "testsolver.root_cause_found"
+        description: "Failure cause identified"
+      - event: "testsolver.fix_applied"
+        description: "Fix implemented"
+      - event: "testsolver.tests_fixed"
+        description: "Tests now passing"
+    subscribes:
+      - pattern: "workflow.tests_failed"
+        handler: "analyze_failures"
+      - pattern: "workflow.phase_started"
+        handler: "monitor_test_phase"
+        filter: "phase == 'testing'"
+
+  prbacklog:
+    description: "PR backlog management agent"
+    emits:
+      - event: "prbacklog.pr_added"
+        description: "PR added to tracking"
+      - event: "prbacklog.readiness_updated"
+        description: "PR readiness changed"
+      - event: "prbacklog.conflict_detected"
+        description: "Merge conflict found"
+      - event: "prbacklog.ready_for_merge"
+        description: "PR ready to merge"
+    subscribes:
+      - pattern: "workflow.pr_created"
+        handler: "add_to_backlog"
+      - pattern: "codereview.completed"
+        handler: "update_readiness"
+      - pattern: "*.pr_conflict"
+        handler: "flag_for_resolution"
+
+# Event routing rules
+routing:
+  # Questions and approvals always go through orchestrator
+  interactive:
+    - pattern: "*.hasQuestion"
+      route_to: "orchestration"
+      priority: "high"
+    - pattern: "*.needsApproval"
+      route_to: "orchestration"
+      priority: "high"
+  
+  # Cancellations are immediate
+  cancellation:
+    - pattern: "*.cancel"
+      route_to: "event_router"
+      priority: "critical"
+      action: "terminate_agent"
+  
+  # Learning events go to memory
+  learning:
+    - pattern: "*.lessons_learned"
+      route_to: "memory"
+      priority: "normal"
+    - pattern: "*.pattern_*"
+      route_to: "memory"
+      priority: "normal"
+
+# Event persistence settings
+persistence:
+  store: "append_only"
+  location: "/var/gadugi/events"
+  retention_days: 30
+  compress_after_days: 7
+  
+# Performance settings
+performance:
+  batch_size: 100
+  flush_interval_ms: 1000
+  max_queue_size: 10000
+  worker_threads: 4

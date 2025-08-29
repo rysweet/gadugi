@@ -100,6 +100,7 @@ from models import (
     AgentEvent, EventType, EventPriority, EventFilter,
     EventReplayRequest, EventStorageInfo, MemoryIntegrationStatus
 )
+from subscriptions import get_subscription_manager
 
 logger = logging.getLogger(__name__)
 
@@ -234,9 +235,15 @@ class MemoryEventStorage:
 
             # Always store in SQLite
             if self.sqlite_backend:
+                # Convert event to dict with ISO format datetime
+                event_dict = event.dict()
+                # Convert datetime to ISO format string
+                if isinstance(event_dict.get('timestamp'), datetime):
+                    event_dict['timestamp'] = event_dict['timestamp'].isoformat()
+                
                 memory_id = await self.sqlite_backend.store_memory(
                     agent_id=event.agent_id,
-                    content=json.dumps(event.dict()),
+                    content=json.dumps(event_dict),
                     memory_type=f"event_{event.event_type}",
                     task_id=event.task_id,
                     importance_score=self._get_importance_score(event.priority),
@@ -501,6 +508,7 @@ class EventHandler:
         self.storage = storage
         self.filter_engine = filter_engine
         self._routing_rules: Dict[str, List[str]] = {}
+        self.subscription_manager = get_subscription_manager()
 
     async def initialize(self) -> None:
         """Initialize the event handler."""
@@ -546,12 +554,66 @@ class EventHandler:
                 "processed_at": datetime.utcnow().isoformat()
             }
 
+            # Route to subscribers
+            await self._route_to_subscribers(event)
+            
             logger.info(f"✅ Event {event.id} processed successfully")
             return result
 
         except Exception as e:
             logger.error(f"❌ Error handling event {event.id}: {e}")
             raise
+    
+    async def _route_to_subscribers(self, event: AgentEvent) -> None:
+        """Route event to all subscribed agents."""
+        try:
+            # Get subscribers for this event type
+            subscribers = self.subscription_manager.get_subscribers(event.event_type)
+            
+            if not subscribers:
+                logger.debug(f"No subscribers for event type: {event.event_type}")
+                return
+            
+            logger.info(f"📨 Routing {event.event_type} to {len(subscribers)} subscribers")
+            
+            # Process subscriptions by priority
+            for subscription in subscribers:
+                try:
+                    # Apply subscription filter if present
+                    if subscription.filter:
+                        if not self._matches_filter(event, subscription.filter):
+                            continue
+                    
+                    # In production, this would invoke the agent
+                    # For now, we'll log the routing
+                    logger.info(
+                        f"  → Routing to {subscription.agent_id}.{subscription.handler} "
+                        f"(priority: {subscription.priority.value})"
+                    )
+                    
+                    # TODO: Implement actual agent invocation
+                    # This would typically:
+                    # 1. Start agent container if not running
+                    # 2. Send event to agent's handler function
+                    # 3. Track agent response
+                    
+                except Exception as e:
+                    logger.error(
+                        f"Failed to route to {subscription.agent_id}.{subscription.handler}: {e}"
+                    )
+                    # Continue routing to other subscribers
+                    
+        except Exception as e:
+            logger.error(f"Error in event routing: {e}")
+            # Don't fail the entire event processing if routing fails
+    
+    def _matches_filter(self, event: AgentEvent, filter_dict: Dict[str, Any]) -> bool:
+        """Check if event matches subscription filter."""
+        for key, value in filter_dict.items():
+            event_value = event.data.get(key) if hasattr(event, 'data') else None
+            if event_value != value:
+                return False
+        return True
 
 
 # ========== Event Filter Engine ==========

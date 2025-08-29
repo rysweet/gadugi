@@ -67,18 +67,38 @@ class StateModel(BaseModel):
 # ========== Event System Models ==========
 
 class EventType(str, Enum):
-    """Event types for agent lifecycle tracking."""
+    """Event types for agent lifecycle tracking - includes v0.3 core events."""
+    # Core system events (v0.3 spec)
+    STARTED = "*.started"  # Any agent started
+    STOPPED = "*.stopped"  # Any agent stopped
+    HAS_QUESTION = "*.hasQuestion"  # Any agent has question
+    NEEDS_APPROVAL = "*.needsApproval"  # Any agent needs approval
+    CANCEL = "*.cancel"  # Cancel event
+    
+    # Agent lifecycle events
     AGENT_INITIALIZED = "agent.initialized"
     AGENT_SHUTDOWN = "agent.shutdown"
+    AGENT_HEARTBEAT = "agent.heartbeat"
+    
+    # Task events
     TASK_STARTED = "task.started"
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
+    
+    # Knowledge and memory events
     KNOWLEDGE_LEARNED = "knowledge.learned"
-    COLLABORATION_MESSAGE = "collaboration.message"
     MEMORY_STORED = "memory.stored"
     MEMORY_RECALLED = "memory.recalled"
+    
+    # Collaboration events
+    COLLABORATION_MESSAGE = "collaboration.message"
+    
+    # Error events
     ERROR_OCCURRED = "error.occurred"
+    
+    # System events
     SYSTEM_HEALTH_CHECK = "system.health_check"
+    SYSTEM_SHUTDOWN = "system.shutdown"
 
 
 class EventPriority(str, Enum):
@@ -93,8 +113,9 @@ class AgentEvent(BaseModel):
     """Base model for agent lifecycle events."""
 
     id: str = Field(default_factory=lambda: str(uuid4()), description="Event ID")
-    event_type: EventType = Field(..., description="Type of event")
+    event_type: str = Field(..., description="Type of event (supports v0.3 dynamic event types)")
     agent_id: str = Field(..., description="ID of the agent that generated the event")
+    agent_type: Optional[str] = Field(None, description="Type of agent")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="Event timestamp")
     priority: EventPriority = Field(default=EventPriority.NORMAL, description="Event priority")
 

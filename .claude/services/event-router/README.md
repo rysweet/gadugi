@@ -13,16 +13,36 @@ Enhanced event routing service for Gadugi v0.3 with complete memory system integ
 - **Production Ready**: Comprehensive error handling, logging, and monitoring
 
 ### Event Types
+
+#### Core System Events (v0.3 Spec)
+- `*.started` - Any agent begins task execution (e.g., `orchestration.started`, `workflow.started`)
+- `*.stopped` - Any agent completes task execution (e.g., `orchestration.stopped`, `workflow.stopped`)
+- `*.hasQuestion` - Agent needs interactive answer from user (high priority)
+- `*.needsApproval` - Agent needs user approval for action (high priority)
+- `*.cancel` - Cancel another agent's execution (critical priority)
+
+#### Agent Lifecycle Events
 - `agent.initialized` - Agent startup and configuration
+- `agent.shutdown` - Agent shutdown
+- `agent.heartbeat` - Periodic health check
+
+#### Task Events
 - `task.started` - Task initiation with dependencies and estimates
 - `task.completed` - Task completion with results and metrics
 - `task.failed` - Task failures with error details
+
+#### Knowledge & Memory Events
 - `knowledge.learned` - Knowledge acquisition and pattern recognition
-- `collaboration.message` - Inter-agent communication and coordination
 - `memory.stored` - Memory system storage events
 - `memory.recalled` - Memory retrieval events
+
+#### Collaboration Events
+- `collaboration.message` - Inter-agent communication and coordination
+
+#### System Events
 - `error.occurred` - System errors and exceptions
 - `system.health_check` - Health monitoring events
+- `system.shutdown` - System shutdown
 
 ## 🏗️ Architecture
 
@@ -51,6 +71,54 @@ Enhanced event routing service for Gadugi v0.3 with complete memory system integ
                        │ • Time Filtering │
                        └─────────────────┘
 ```
+
+## 📨 Event Subscriptions
+
+The Event Router implements a pattern-based subscription system that routes events to appropriate agents based on the v0.3 specification.
+
+### Subscription Patterns
+
+Subscriptions support wildcard patterns for flexible event matching:
+
+- `*.started` - Matches any agent's started event
+- `*.stopped` - Matches any agent's stopped event  
+- `workflow.*` - Matches all workflow events
+- `orchestration.problem_identified` - Exact event match
+
+### Default Subscriptions (v0.3 Spec)
+
+#### Orchestration Agent
+- `*.hasQuestion` → `route_question_to_user` (HIGH priority)
+- `*.needsApproval` → `route_approval_to_user` (HIGH priority)
+- `*.stopped` → `aggregate_results`
+- `decomposition.completed` → `begin_execution_planning`
+
+#### Gadugi Agent  
+- `*.started` → `track_agent_start`
+- `*.stopped` → `track_agent_completion`
+- `system.shutdown` → `graceful_shutdown`
+
+#### Team Coach
+- `orchestration.stopped` → `trigger_reflection`
+- `*.stopped` → `collect_metrics`
+
+#### WorkflowManager
+- `orchestration.implementation_started` → `begin_workflow`
+- `orchestration.tasks_distributed` → `begin_assigned_workflow`
+- `codereview.completed` → `proceed_to_phase_10`
+
+#### Memory Manager
+- `*.lessons_learned` → `store_learnings`
+- `*.memory_updates` → `update_memories`
+- `agent.initialized` → `load_agent_memories`
+
+### Priority Levels
+
+Events are processed based on priority:
+1. **CRITICAL** - System failures, cancellations
+2. **HIGH** - User interactions (hasQuestion, needsApproval)
+3. **NORMAL** - Standard lifecycle events
+4. **LOW** - Informational events
 
 ## 🛠️ Installation & Setup
 
