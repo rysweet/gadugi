@@ -8,6 +8,7 @@ import logging
 import os
 import json
 import shutil
+import ast
 
 from .recipe_model import Recipe, GeneratedCode, BuildContext, Requirements, ComponentDesign, Design
 from .python_standards import PythonStandards
@@ -81,6 +82,30 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         self.intelligent_detector = IntelligentStubDetector(strict_mode=True)
         self.stub_remediator = None  # Will be set to StubRemediator(self) if needed
         self.prompt_loader = PromptLoader()  # Initialize prompt loader for template management
+
+    def _validate_python_syntax(self, filepath: str, content: str) -> tuple[bool, str]:
+        """Validate Python file syntax using ast.parse().
+        
+        Args:
+            filepath: Path to the file (for error reporting)
+            content: Python code content to validate
+            
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        if not filepath.endswith('.py'):
+            return True, ""  # Skip non-Python files
+            
+        try:
+            ast.parse(content)
+            return True, ""
+        except SyntaxError as e:
+            error_msg = f"Syntax error in {filepath} at line {e.lineno}: {e.msg}"
+            if e.text:
+                error_msg += f"\n  Problem code: {e.text.strip()}"
+            return False, error_msg
+        except Exception as e:
+            return False, f"Failed to parse {filepath}: {str(e)}"
 
     def generate(
         self,
@@ -392,6 +417,41 @@ Write tool with file_path="tests/conftest.py"
 - Include proper type hints for all functions
 - Have docstrings for all classes and functions
 - Pass pyright type checking
+
+**FORBIDDEN PATTERNS - NEVER USE THESE**:
+```python
+# ❌ NEVER write stubs like this:
+def some_method(self):
+    pass  # FORBIDDEN!
+
+def another_method(self):
+    raise NotImplementedError  # FORBIDDEN!
+
+def third_method(self):
+    ...  # FORBIDDEN!
+
+def fourth_method(self):
+    return  # FORBIDDEN - empty return!
+
+def fifth_method(self):
+    return None  # FORBIDDEN if that's the only line!
+```
+
+**REQUIRED PATTERNS - ALWAYS USE THESE**:
+```python
+# ✅ ALWAYS write complete implementations:
+def some_method(self):
+    logger.debug("Processing started")
+    result = self._process_internal()
+    self._validate_result(result)
+    return result
+
+def another_method(self):
+    if not self.data:
+        raise ValueError("No data available")
+    processed = [self._transform(item) for item in self.data]
+    return ProcessedData(items=processed)
+```
 """
         return base_prompt + "\n" + path_instructions
 
@@ -1190,6 +1250,15 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
                 try:
                     content = file_path.read_text()
+                    
+                    # Validate Python syntax before accepting the file
+                    if file_path.suffix == '.py':
+                        is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
+                        if not is_valid:
+                            logger.error(f"Syntax validation failed: {error_msg}")
+                            # Skip files with syntax errors to prevent ruff formatting failures
+                            continue
+                    
                     generated_files[str(rel_path)] = content
                     logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
                 except Exception as e:

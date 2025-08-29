@@ -2,6 +2,8 @@
 
 ## CRITICAL: REPLACE ALL STUBS WITH REAL IMPLEMENTATIONS
 
+**TOOL RESTRICTION: You MUST use the Write tool EXCLUSIVELY. Do NOT use Edit, MultiEdit, or Bash tools.**
+
 The code contains stubs/placeholders that MUST be replaced with COMPLETE implementations.
 
 ## Stub/TODO Issues Found
@@ -10,8 +12,9 @@ The code contains stubs/placeholders that MUST be replaced with COMPLETE impleme
 ## YOUR MANDATORY TASK
 1. Read ALL existing files in {output_path}
 2. Find EVERY stub, TODO, and placeholder implementation
-3. Replace them with COMPLETE, WORKING implementations
+3. REWRITE the ENTIRE FILE using the Write tool with complete implementations
 4. Every function must have MINIMUM 3-5 lines of real logic
+5. Use Write tool to overwrite files completely (not Edit)
 
 ## HOW TO FIX EACH TYPE OF STUB
 
@@ -32,7 +35,7 @@ def process_data(self, data):
         transformed = self._transform_item(validated)
         processed.append(transformed)
     
-    logger.info(f"Processed {{len(processed)}} items")
+    logger.info(f"Processed {len(processed)} items")
     return ProcessedResult(items=processed, count=len(processed))
 ```
 
@@ -40,21 +43,21 @@ def process_data(self, data):
 ```python
 # ❌ CURRENT (FORBIDDEN):
 def calculate_metrics(self, values):
-    return {{}}
+    return {}
 
 # ✅ REPLACE WITH:
 def calculate_metrics(self, values):
     if not values:
-        return {{
+        return {
             'count': 0,
             'sum': 0.0,
             'average': 0.0,
             'min': None,
             'max': None
-        }}
+        }
     
     numeric_values = [float(v) for v in values if v is not None]
-    return {{
+    return {
         'count': len(numeric_values),
         'sum': sum(numeric_values),
         'average': sum(numeric_values) / len(numeric_values) if numeric_values else 0.0,
@@ -76,17 +79,17 @@ def validate_input(self, input):
         raise ValueError("Input cannot be None")
     
     if not isinstance(input, dict):
-        raise TypeError(f"Expected dict, got {{type(input).__name__}}")
+        raise TypeError(f"Expected dict, got {type(input).__name__}")
     
     required_fields = ['id', 'name', 'type']
     missing = [f for f in required_fields if f not in input]
     if missing:
-        raise ValueError(f"Missing required fields: {{missing}}")
+        raise ValueError(f"Missing required fields: {missing}")
     
     if not input.get('id'):
         raise ValueError("ID cannot be empty")
     
-    logger.debug(f"Validated input with ID: {{input['id']}}")
+    logger.debug(f"Validated input with ID: {input['id']}")
     return True
 ```
 
