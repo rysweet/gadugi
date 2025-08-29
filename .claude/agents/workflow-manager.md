@@ -674,7 +674,7 @@ TaskData(
    complete_phase 9 "Review" "verify_phase_9"
    complete_phase 10 "Review Response" "verify_phase_10"
 
-   git add .github/Memory.md .github/CodeReviewerProjectMemory.md
+   git add .github/Memory.md
    git commit -m "docs: update project memory files after Phase 9+10 completion
 
 🤖 Generated with [Claude Code](https://claude.ai/code)

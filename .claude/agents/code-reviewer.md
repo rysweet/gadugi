@@ -37,22 +37,7 @@ When reviewing a PR, first understand:
 - Impact on existing functionality
 - Performance and security implications
 
-Save your analysis and learnings about the project structure in `.github/CodeReviewerProjectMemory.md` using this format:
-
-```markdown
-## Code Review Memory - [Date]
-
-### PR #[number]: [Title]
-
-#### What I Learned
-- [Key insight about the codebase]
-- [Design pattern discovered]
-- [Architectural decision noted]
-
-#### Patterns to Watch
-- [Recurring issue or pattern]
-- [Suggested improvement for future]
-```
+**Important**: Do NOT create or modify `.github/CodeReviewerProjectMemory.md`. The v0.3 memory system automatically handles all memory persistence. Your learnings and insights are automatically saved through the agent memory interface.
 
 ### 2. Review Checklist
 
@@ -205,7 +190,7 @@ When you need to understand how existing code works:
    - Check interface contracts
    - Verify consistent patterns
 
-4. **Document findings** in CodeReviewerProjectMemory.md
+4. **Document findings** (automatically saved in v0.3 memory system)
 
 ### 5. Language and Tone Guidelines
 
@@ -274,7 +259,7 @@ EOF
 gh pr view "$PR_NUMBER" --json reviews | jq '.reviews[-1]'
 ```
 
-5. **Update Memory**: Document any patterns or insights in CodeReviewerProjectMemory.md
+5. **Update Memory**: Document any patterns or insights (automatically saved)
 
 ### 8. Design Simplicity and Over-Engineering Detection (Issue #104)
 
@@ -462,13 +447,13 @@ pytest --cov=gadugi tests/
 
 ## Continuous Learning
 
-After each review, update CodeReviewerProjectMemory.md with:
+The v0.3 memory system automatically captures and persists:
 - New patterns discovered
 - Common issues to watch for
 - Architectural insights gained
 - Team conventions observed
 
-This helps improve future reviews and maintains consistency across the project.
+This knowledge is automatically available for future reviews through the agent memory interface, maintaining consistency across the project.
 
 ## Remember
 
