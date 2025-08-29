@@ -133,7 +133,10 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
 
             max_iterations = 5  # Prevent infinite loops
             iteration = 0
-            stub_errors: List[str] = []  # Initialize for first iteration
+            all_errors: List[str] = []  # Track ALL errors: syntax, stubs, quality
+            syntax_errors: List[str] = []  # Track syntax errors separately
+            stub_errors: List[str] = []  # Track stub errors separately
+            quality_errors: List[str] = []  # Track pyright/ruff errors
             is_valid = False  # Initialize validation status
 
             while iteration < max_iterations:
@@ -144,16 +147,16 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                     # First iteration: generate from recipe
                     impl_prompt = self._create_generation_prompt_with_path(recipe, temp_path)
                 else:
-                    # Subsequent iterations: fix stubs and TODOs
-                    impl_prompt = self._create_fix_stubs_prompt(
-                        recipe, temp_path, generated_files, stub_errors
+                    # Subsequent iterations: fix ALL issues (syntax, stubs, quality)
+                    impl_prompt = self._create_fix_all_issues_prompt(
+                        recipe, temp_path, generated_files, all_errors
                     )
 
                 # Invoke Claude to write files (pass output_dir for --add-dir)
                 self._invoke_claude_code(impl_prompt, recipe, temp_path)
 
-                # Read files that Claude created
-                generated_files = self._read_generated_files(temp_path, recipe)
+                # Read files that Claude created (and check for syntax errors)
+                generated_files, syntax_errors = self._read_generated_files_with_validation(temp_path, recipe)
                 
                 # Also check alternate location if files not found (handle relative path issues)
                 if not generated_files and output_dir:
@@ -171,13 +174,23 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                                 correct_path.write_text(content)
                             logger.info(f"Moved {len(alt_files)} files to correct location")
 
+                # Combine all errors for comprehensive validation
+                all_errors = []
+                
                 # Check if any files were generated
                 if not generated_files:
                     logger.error(f"No files generated in iteration {iteration}")
-                    stub_errors = ["No files were generated"]
+                    all_errors = ["No files were generated"]
                     is_valid = False
-                # Check for stubs and TODOs
-                elif self.enforce_no_stubs:
+                else:
+                    # Check for syntax errors first
+                    if syntax_errors:
+                        logger.warning(f"Iteration {iteration} has {len(syntax_errors)} syntax errors")
+                        all_errors.extend(syntax_errors)
+                        is_valid = False
+                    
+                    # Check for stubs and TODOs
+                    if self.enforce_no_stubs:
                     # Try intelligent detection first (if iteration > 2, use Claude)
                     if iteration > 2:
                         try:
@@ -191,23 +204,28 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                         # Use basic detection for early iterations (faster)
                         is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
 
-                    if is_valid:
+                        if not is_valid:
+                            all_errors.extend(stub_errors)
+                    
+                    # Check if all validations passed
+                    if not all_errors:
                         logger.info(f"Code generation successful after {iteration} iteration(s)")
                         break
                     else:
+                        total_issues = len(all_errors)
                         logger.warning(
-                            f"Iteration {iteration} still has stubs/TODOs: {len(stub_errors)} issues found"
+                            f"Iteration {iteration} has {total_issues} total issues: {len(syntax_errors)} syntax, {len(stub_errors)} stubs"
                         )
                         print(
-                            f"      ⚠️  Iteration {iteration} has {len(stub_errors)} stub/TODO issues, requesting fixes..."
+                            f"      ⚠️  Iteration {iteration} has {total_issues} issues, requesting fixes..."
                         )
-                else:
-                    break  # No stub checking requested
 
-            if iteration >= max_iterations and not is_valid:
+            if iteration >= max_iterations and all_errors:
                 error_msg = (
-                    f"Failed to generate stub-free code after {max_iterations} iterations:\n"
-                    + "\n".join(stub_errors)
+                    f"Failed to generate clean code after {max_iterations} iterations:\n"
+                    + f"Syntax errors: {len(syntax_errors)}\n"
+                    + f"Stub errors: {len(stub_errors)}\n"
+                    + "\n".join(all_errors[:50])  # Limit error output
                 )
                 raise ClaudeCodeGenerationError(error_msg)
 
@@ -1275,6 +1293,43 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
         logger.info(f"Read {len(generated_files)} files from {output_path}")
         return generated_files
+    
+    def _read_generated_files_with_validation(self, output_path: Path, recipe: Recipe) -> tuple[Dict[str, str], List[str]]:
+        """Read all files and track syntax errors instead of skipping them."""
+        generated_files: Dict[str, str] = {}
+        syntax_errors: List[str] = []
+
+        logger.info(f"Reading generated files from {output_path}")
+
+        # Walk through the directory and read all files
+        for file_path in output_path.rglob("*"):
+            if file_path.is_file():
+                # Get relative path from output directory
+                rel_path = file_path.relative_to(output_path)
+
+                # Skip common non-source files
+                if file_path.suffix in [".pyc", ".pyo", ".pyd", ".so", ".dll"]:
+                    continue
+                if "__pycache__" in str(rel_path):
+                    continue
+
+                try:
+                    content = file_path.read_text()
+                    
+                    # Validate Python syntax and track errors
+                    if file_path.suffix == '.py':
+                        is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
+                        if not is_valid:
+                            syntax_errors.append(f"SYNTAX ERROR: {error_msg}")
+                            # Still include the file so Claude can fix it
+                    
+                    generated_files[str(rel_path)] = content
+                    logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
+                except Exception as e:
+                    logger.warning(f"Could not read file {rel_path}: {e}")
+
+        logger.info(f"Read {len(generated_files)} files with {len(syntax_errors)} syntax errors")
+        return generated_files, syntax_errors
 
     def _parse_generated_files(self, claude_output: str, recipe: Recipe) -> Dict[str, str]:
         """Parse files from Claude output."""
