@@ -266,11 +266,12 @@ You are in an isolated build directory. All file operations are relative to this
 Generate a complete, functional implementation of Recipe Executor based on the recipe below.
 
 **Requirements**:
-1. Use the **Write tool** exclusively (no Edit/MultiEdit)
-2. Create proper Python package structure (src/, tests/, etc.)
-3. Implement ALL components described in the recipe
-4. Ensure the implementation is complete and functional
-5. Focus on the recipe requirements, not on existing code
+1. Use the **Write tool** exclusively (no Edit/MultiEdit, no Bash commands)
+2. DO NOT use Bash to create virtual environments or install packages
+3. Create proper Python package structure (src/, tests/, etc.)
+4. Implement ALL components described in the recipe
+5. Ensure the implementation is complete and functional
+6. Focus on the recipe requirements, not on existing code
 
 ## Recipe Name: {recipe.name}
 
@@ -283,19 +284,21 @@ This is a FRESH implementation. Let the recipe guide your implementation.
         path_instructions = """
 ## CRITICAL FILE CREATION INSTRUCTIONS
 
-**YOU MUST USE THE WRITE TOOL WITH THESE EXACT file_path VALUES:**
+**MANDATORY: You MUST create files using the Write tool with THESE EXACT file_path parameters. Do NOT interpret these as examples - use these EXACT paths:**
 
-### Example of CORRECT Write tool usage:
-```python
-Write tool with file_path="src/recipe_executor/recipe_model.py"
-Write tool with file_path="src/recipe_executor/recipe_parser.py"
+**STEP 1: First, create the src/recipe_executor directory structure:**
+```
+Write(file_path="src/recipe_executor/__init__.py", content="...")
 ```
 
-### Example of WRONG usage (DO NOT DO THIS):
-```python
-Write tool with file_path="recipe_model.py"  # WRONG - missing src/recipe_executor/
-Write tool with file_path="models.py"  # WRONG - wrong filename
+**STEP 2: Then create each file with its EXACT path as shown:**
+
+For the recipe model, you MUST write:
 ```
+Write(file_path="src/recipe_executor/recipe_model.py", content="...")
+```
+
+DO NOT write to "recipe_model.py" or any other path!
 
 ## REQUIRED FILES - CREATE WITH EXACT PATHS
 
@@ -378,9 +381,11 @@ Write tool with file_path="tests/conftest.py"
 **VALIDATION CHECK**: You MUST create EXACTLY 31 Python files in src/recipe_executor/ directory.
 
 **DO NOT CREATE**:
+- Virtual environments (.venv directory) - NEVER run `python -m venv` or `uv venv`
 - Files with different names (e.g., "models.py" instead of "recipe_model.py")
 - Files in wrong locations (e.g., root directory instead of src/recipe_executor/)
 - Stub files that just import from other files
+- Any files not explicitly listed above
 
 **EVERY FILE MUST**:
 - Have complete implementation (no pass statements, no NotImplementedError)
