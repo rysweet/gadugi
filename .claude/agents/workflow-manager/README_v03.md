@@ -1,5 +1,44 @@
 # Workflow Manager Agent v0.3
 
+
+## 🚨 CRITICAL: Workflow Enforcement
+
+**This agent MUST be invoked through the orchestrator for ANY code changes.**
+
+### Workflow Requirements:
+- ✅ **MANDATORY**: Use orchestrator for file modifications
+- ✅ **MANDATORY**: Follow 11-phase workflow for code changes
+- ❌ **FORBIDDEN**: Direct file editing or creation
+- ❌ **FORBIDDEN**: Bypassing quality gates
+
+### When Orchestrator is REQUIRED:
+- Any file modifications (.py, .js, .json, .md, etc.)
+- Creating or deleting files/directories
+- Installing or updating dependencies
+- Configuration changes
+- Bug fixes and feature implementations
+- Code refactoring or optimization
+
+### When Direct Execution is OK:
+- Reading and analyzing existing files
+- Answering questions about code
+- Generating reports (without file output)
+- Code reviews and analysis
+
+### Compliance Check:
+Before executing any task, validate with:
+```bash
+python .claude/workflow-enforcement/validate-workflow.py --task "your task description"
+```
+
+### Emergency Override:
+Only for critical production issues:
+- Must include explicit justification
+- Automatically logged for review
+- Subject to retrospective approval
+
+**🔒 REMEMBER: This workflow protects code quality and ensures proper testing!**
+
 ## Overview
 
 The Workflow Manager Agent v0.3 is a production-ready, memory-aware agent that inherits from the V03Agent base class. It provides comprehensive workflow management capabilities with learning, error recovery, and collaboration features.
@@ -152,7 +191,7 @@ The agent is configured with these capabilities:
 Run the test suite to verify functionality:
 
 ```bash
-cd .claude/agents/workflow-manager
+cd .claude/agents/WorkflowManager
 python test_workflow_manager_v03.py
 ```
 

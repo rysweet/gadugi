@@ -49,7 +49,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
     @patch('components.execution_engine.subprocess.Popen')
     @patch('components.execution_engine.psutil.Process')
     def test_claude_cli_uses_workflow_master_agent(self, mock_psutil_process, mock_popen):
-        """Test that Claude CLI command uses /agent:workflow-manager instead of -p"""
+        """Test that Claude CLI command uses /agent:WorkflowManager instead of -p"""
 
         # Create mock process
         mock_process = MagicMock()
@@ -83,7 +83,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
 
         # Critical assertions
         self.assertEqual(call_args[0], "claude", "Should use claude CLI")
-        self.assertEqual(call_args[1], "/agent:workflow-manager", "Should use WorkflowManager agent")
+        self.assertEqual(call_args[1], "/agent:WorkflowManager", "Should use WorkflowManager agent")
         self.assertIn("Execute the complete workflow", call_args[2], "Should include workflow instruction")
         self.assertIn("--output-format", call_args, "Should include output format")
         self.assertIn("json", call_args, "Should use JSON output format")
@@ -102,7 +102,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         old_cmd = ["claude", "-p", "prompt.md", "--output-format", "json"]
 
         # New fixed pattern
-        new_cmd = ["claude", "/agent:workflow-manager", "Execute the complete workflow for prompt.md", "--output-format", "json"]
+        new_cmd = ["claude", "/agent:WorkflowManager", "Execute the complete workflow for prompt.md", "--output-format", "json"]
 
         # Verify old pattern is detected as broken
         self.assertIn("-p", old_cmd, "Old pattern should contain -p flag")
@@ -110,7 +110,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
 
         # Verify new pattern is correct
         self.assertNotIn("-p", new_cmd, "New pattern should not contain -p flag")
-        self.assertIn("/agent:workflow-manager", new_cmd, "New pattern should contain agent invocation")
+        self.assertIn("/agent:WorkflowManager", new_cmd, "New pattern should contain agent invocation")
 
 
 class TestPromptGenerator(unittest.TestCase):
@@ -400,7 +400,7 @@ class TestRegressionPrevention(unittest.TestCase):
             code_content = f.read()
 
         # Ensure the fix is still in place
-        self.assertIn("/agent:workflow-manager", code_content,
+        self.assertIn("/agent:WorkflowManager", code_content,
                      "ExecutionEngine should use WorkflowManager agent invocation")
 
         # Ensure the old broken pattern is not present

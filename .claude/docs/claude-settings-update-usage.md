@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `claude-settings-update` agent automatically manages Claude settings by merging local changes into global configuration and maintaining consistent formatting. This agent is designed to run automatically as part of the WorkflowManager process, but can also be invoked manually when needed.
+The `ClaudeSettingsUpdate` agent automatically manages Claude settings by merging local changes into global configuration and maintaining consistent formatting. This agent is designed to run automatically as part of the WorkflowManager process, but can also be invoked manually when needed.
 
 ## Table of Contents
 
@@ -25,21 +25,21 @@ The agent runs automatically in **Phase 11** of the WorkflowManager process:
 # Phase 8: PR Creation
 # Phase 9: Code Review
 # Phase 10: Review Response
-# Phase 11: Settings Update (AUTOMATIC) ← claude-settings-update runs here
+# Phase 11: Settings Update (AUTOMATIC) ← ClaudeSettingsUpdate runs here
 ```
 
 When you complete a workflow using WorkflowManager, the settings update happens automatically:
 
 ```bash
 # Example WorkflowManager execution
-/agent:workflow-manager "Execute workflow for /prompts/my-feature.md"
+/agent:WorkflowManager "Execute workflow for /prompts/my-feature.md"
 
 # Output will include:
 # ... other phases ...
 # ✅ Phase 10: Review Response completed
 # 📋 Phase 11: Claude Settings Update
 # ✅ Local settings detected - invoking settings update agent
-# 🚀 AUTOMATIC: Invoking claude-settings-update agent
+# 🚀 AUTOMATIC: Invoking ClaudeSettingsUpdate agent
 # Settings update PR created: chore/update-claude-settings-20250805-143022
 # ✅ Settings update completed successfully
 ```
@@ -62,7 +62,7 @@ You can invoke the agent manually when needed:
 
 ```bash
 # Manual invocation
-/agent:claude-settings-update
+/agent:ClaudeSettingsUpdate
 
 # Expected output when changes detected:
 # Merging Claude settings...
@@ -233,7 +233,7 @@ echo '{
 }' > .claude/settings.local.json
 
 # 2. Run workflow or manual update
-/agent:claude-settings-update
+/agent:ClaudeSettingsUpdate
 
 # 3. Review and merge the settings PR
 gh pr view $(gh pr list --author "@me" --json number --jq '.[0].number')
@@ -277,7 +277,7 @@ Existing settings are messy and need cleanup:
 echo '{"permissions": {"allow": []}}' > .claude/settings.local.json
 
 # 3. Run agent to clean up
-/agent:claude-settings-update
+/agent:ClaudeSettingsUpdate
 
 # 4. Remove local settings after cleanup
 rm .claude/settings.local.json
@@ -288,7 +288,7 @@ rm .claude/settings.local.json
 Agent detects no changes and skips PR creation:
 
 ```bash
-/agent:claude-settings-update
+/agent:ClaudeSettingsUpdate
 
 # Output:
 # Checking for Claude settings changes...
@@ -480,8 +480,8 @@ if [ -f ".claude/settings.local.json" ]; then
 fi
 
 # Run settings update agent
-echo "🚀 Running claude-settings-update agent..."
-/agent:claude-settings-update
+echo "🚀 Running ClaudeSettingsUpdate agent..."
+/agent:ClaudeSettingsUpdate
 
 echo "✅ Settings update completed!"
 ```
@@ -533,7 +533,7 @@ if __name__ == '__main__':
     merged = custom_merge(global_settings, local_settings)
 
     # Proceed with agent invocation
-    os.system('/agent:claude-settings-update')
+    os.system('/agent:ClaudeSettingsUpdate')
 ```
 
 ### Batch Processing Multiple Projects
@@ -553,11 +553,11 @@ for project in "${PROJECTS[@]}"; do
     cd "$project"
 
     if [ -f ".claude/settings.local.json" ]; then
-        /agent:claude-settings-update
+        /agent:ClaudeSettingsUpdate
     else
         echo "No local settings found in $project"
     fi
 done
 ```
 
-This comprehensive usage guide covers all aspects of using the claude-settings-update agent effectively in various scenarios and environments.
+This comprehensive usage guide covers all aspects of using the ClaudeSettingsUpdate agent effectively in various scenarios and environments.

@@ -1,4 +1,4 @@
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts for Gadugi v0.3 implementation:
 - setup-neo4j-gadugi.md

@@ -79,7 +79,7 @@ class ProgramManager:
 
     def __init__(self, agent_id: str = "pm-001"):
         self.agent_id = agent_id
-        self.memory = AgentMemoryInterface(agent_id, "program-manager")
+        self.memory = AgentMemoryInterface(agent_id, "ProgramManager")
         self.lifecycle_labels = [
             stage.value for stage in IssueStage if stage != IssueStage.UNLABELED
         ]

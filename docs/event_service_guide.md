@@ -101,7 +101,7 @@ handlers:
         actions:
           - opened
     invocation:
-      agent_name: workflow-manager
+      agent_name: WorkflowManager
       method: claude_cli
       prompt_template: |
         New issue #{number}: {title}
@@ -130,7 +130,7 @@ handlers:
           - opened
           - synchronize
     invocation:
-      agent_name: code-reviewer
+      agent_name: CodeReviewer
       method: claude_cli
       prompt_template: |
         Review PR #{number}: {title}
@@ -155,7 +155,7 @@ handlers:
         refs:
           - refs/heads/main
     invocation:
-      agent_name: memory-manager
+      agent_name: MemoryManager
       method: claude_cli
       prompt_template: |
         Update Memory.md after merge to main: {ref}
@@ -254,7 +254,7 @@ filter:
 
 ```yaml
 invocation:
-  agent_name: workflow-manager
+  agent_name: WorkflowManager
   method: claude_cli
   prompt_template: |
     Handle event: {event_type}
@@ -428,7 +428,7 @@ handlers:
       metadata_match:
         file_type: python
     invocation:
-      agent_name: test-writer
+      agent_name: TestWriter
       method: claude_cli
       prompt_template: |
         Files changed: {files_changed}
@@ -540,7 +540,7 @@ from gadugi.event_service.events import create_agent_event
 
 # Create follow-up event
 follow_up = create_agent_event(
-    agent_name="workflow-manager",
+    agent_name="WorkflowManager",
     task_id="task-123",
     phase="testing",
     status="completed",
@@ -637,7 +637,7 @@ gadugi webhook test --repo owner/repo --hook-id 12345
 3. Review agent execution logs
 4. Test agent manually:
    ```bash
-   claude /agent:workflow-manager
+   claude /agent:WorkflowManager
    ```
 
 ### Debug Mode

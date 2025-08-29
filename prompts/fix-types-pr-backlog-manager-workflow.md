@@ -1,9 +1,9 @@
 # WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: fix-types-pr-backlog-manager
-- **Task Name**: fix-types-pr-backlog-manager
-- **Original Prompt**: /Users/ryan/src/gadugi/.worktrees/task-fix-types-pr-backlog-manager/prompts/fix-types-pr-backlog-manager-workflow.md
+- **Task ID**: fix-types-PrBacklogManager
+- **Task Name**: fix-types-PrBacklogManager
+- **Original Prompt**: /Users/ryan/src/gadugi/.worktrees/task-fix-types-PrBacklogManager/prompts/fix-types-PrBacklogManager-workflow.md
 - **Phase Focus**: Full Implementation
 
 ## Implementation Requirements
@@ -63,9 +63,9 @@ No specific dependencies identified.
 # WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: fix-types-pr-backlog-manager
+- **Task ID**: fix-types-PrBacklogManager
 - **Task Name**: Fix Type Errors in PR Backlog Manager Tests
-- **Original Prompt**: /Users/ryan/src/gadugi/prompts/fix-types-pr-backlog-manager.md
+- **Original Prompt**: /Users/ryan/src/gadugi/prompts/fix-types-PrBacklogManager.md
 - **Phase Focus**: Full Implementation
 
 ## Implementation Requirements

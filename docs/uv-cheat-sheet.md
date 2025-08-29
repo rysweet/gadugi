@@ -171,7 +171,7 @@ uv config set key value           # Set configuration value
 ### Memory Manager Development
 ```bash
 # Work with memory manager
-cd .github/memory-manager
+cd .github/MemoryManager
 uv run python memory_manager.py
 uv run python -c "import yaml; print(yaml.__version__)"
 ```

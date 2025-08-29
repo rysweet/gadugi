@@ -223,7 +223,7 @@ class TestEventHandler:
     def test_creation(self):
         """Test handler creation."""
         filter = EventFilter(event_types=["github.issues.opened"])
-        invocation = AgentInvocation(agent_name="workflow-manager")
+        invocation = AgentInvocation(agent_name="WorkflowManager")
 
         handler = EventHandler(
             name="issue-handler",
@@ -243,7 +243,7 @@ class TestEventHandler:
     def test_matches(self):
         """Test event matching."""
         filter = EventFilter(event_types=["github.issues.opened"])
-        invocation = AgentInvocation(agent_name="workflow-manager")
+        invocation = AgentInvocation(agent_name="WorkflowManager")
         handler = EventHandler(name="test", filter=filter, invocation=invocation)
 
         event1 = create_github_event("issues", "owner/repo", "opened")
@@ -255,7 +255,7 @@ class TestEventHandler:
     def test_disabled_handler(self):
         """Test disabled handler doesn't match."""
         filter = EventFilter(event_types=["github.issues.opened"])
-        invocation = AgentInvocation(agent_name="workflow-manager")
+        invocation = AgentInvocation(agent_name="WorkflowManager")
         handler = EventHandler(
             name="test", filter=filter, invocation=invocation, enabled=False
         )
@@ -273,14 +273,14 @@ class TestEventMatcher:
         handler1 = EventHandler(
             name="issue-handler",
             filter=EventFilter(event_types=["github.issues.*"]),
-            invocation=AgentInvocation(agent_name="workflow-manager"),
+            invocation=AgentInvocation(agent_name="WorkflowManager"),
             priority=100,
         )
 
         handler2 = EventHandler(
             name="pr-handler",
             filter=EventFilter(event_types=["github.pull_request.*"]),
-            invocation=AgentInvocation(agent_name="code-reviewer"),
+            invocation=AgentInvocation(agent_name="CodeReviewer"),
             priority=90,
         )
 

@@ -356,7 +356,7 @@ class OrchestratorCoordinator:
                     task_id=task_info.id,
                     task_name=task_info.name,
                     status=ProcessStatus.QUEUED,
-                    command=f"claude /agent:workflow-manager",
+                    command=f"claude /agent:WorkflowManager",
                     working_directory=str(worktree_info.worktree_path),
                     created_at=datetime.now(),
                     prompt_file=workflow_prompt

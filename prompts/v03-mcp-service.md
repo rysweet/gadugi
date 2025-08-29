@@ -27,6 +27,6 @@ Fix and complete the MCP (Memory Context Protocol) Service implementation.
 - Run `uv run pytest .claude/services/mcp/test_mcp_service.py`
 - Ensure service can start with `uv run python .claude/services/mcp/mcp_service.py`
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for MCP Service implementation

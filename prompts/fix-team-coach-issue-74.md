@@ -10,7 +10,7 @@ The team coach feature is starting processes that run indefinitely without produ
 - Issue #74 already created
 
 ## Phase 2: Branch Creation
-- Create branch: `fix/issue-74-team-coach`
+- Create branch: `fix/issue-74-TeamCoach`
 
 ## Phase 3: Investigation
 - Locate the team coach hook implementation

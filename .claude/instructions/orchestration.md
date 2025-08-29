@@ -4,7 +4,7 @@
 Load when you need to:
 - Manage complex multi-task workflows
 - Coordinate parallel execution
-- Use orchestrator or workflow-manager agents
+- Use orchestrator or WorkflowManager agents
 - Handle task dependencies
 
 ## Core Orchestration Pattern
@@ -28,7 +28,7 @@ Requirements: Clear specifications
 
 #### Invoke Orchestrator
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these prompts in parallel:
 - fix-bug-issue-256.md

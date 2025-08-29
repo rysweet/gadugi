@@ -110,7 +110,7 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 "success": False,
             }
 
-    # Special case: prompt-writer uses Python implementation
+    # Special case: PromptWriter uses Python implementation
     if agent_name == "PromptWriter":
         try:
             import json

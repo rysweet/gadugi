@@ -103,14 +103,14 @@ is_workflow_pr() {
     return 1
 }
 
-# Function to invoke code-reviewer for a PR
+# Function to invoke CodeReviewer for a PR
 invoke_code_reviewer() {
     local pr_number="$1"
 
-    log "INFO" "Invoking code-reviewer for PR #$pr_number"
+    log "INFO" "Invoking CodeReviewer for PR #$pr_number"
 
     if [ "$DRY_RUN" = true ]; then
-        log "INFO" "[DRY RUN] Would invoke: /agent:code-reviewer for PR #$pr_number"
+        log "INFO" "[DRY RUN] Would invoke: /agent:CodeReviewer for PR #$pr_number"
         log "INFO" "[DRY RUN] Would set context: Orphaned PR recovery - mandatory Phase 9 enforcement"
         return 0
     fi
@@ -118,11 +118,11 @@ invoke_code_reviewer() {
     # Create a comment on the PR to document the automatic review invocation
     local comment_body="🚨 **Automatic Phase 9 Enforcement**
 
-This PR was detected as missing the mandatory code review (Phase 9). The code-reviewer agent is being invoked automatically to ensure compliance with workflow requirements.
+This PR was detected as missing the mandatory code review (Phase 9). The CodeReviewer agent is being invoked automatically to ensure compliance with workflow requirements.
 
 **Context**: Orphaned PR recovery - PR #$pr_number is older than $MAX_AGE_MINUTES minutes without a review.
 
-**Action**: Invoking code-reviewer agent now.
+**Action**: Invoking CodeReviewer agent now.
 
 *Note: This action was performed automatically by the WorkflowManager consistency enforcement system.*"
 
@@ -133,15 +133,15 @@ This PR was detected as missing the mandatory code review (Phase 9). The code-re
         log "WARN" "Failed to post comment to PR #$pr_number, but continuing with review invocation"
     fi
 
-    # Set environment variable for code-reviewer
+    # Set environment variable for CodeReviewer
     export PR_NUMBER="$pr_number"
     export ORPHANED_PR_RECOVERY=true
 
-    # Invoke code-reviewer agent using Claude CLI
-    log "INFO" "Executing: claude -p '/agent:code-reviewer' for PR #$pr_number"
+    # Invoke CodeReviewer agent using Claude CLI
+    log "INFO" "Executing: claude -p '/agent:CodeReviewer' for PR #$pr_number"
 
     # Build the agent invocation prompt
-    local agent_prompt="/agent:code-reviewer
+    local agent_prompt="/agent:CodeReviewer
 
 Review PR #$pr_number which appears to be missing the mandatory Phase 9 code review.
 
@@ -156,7 +156,7 @@ Please conduct a thorough code review focusing on:
 
 This review is being automatically invoked by the WorkflowManager consistency enforcement system."
 
-    # Execute Claude CLI to invoke the code-reviewer agent
+    # Execute Claude CLI to invoke the CodeReviewer agent
     if claude -p "$agent_prompt"; then
         log "INFO" "Code-reviewer invocation completed successfully for PR #$pr_number"
     else
@@ -227,12 +227,12 @@ detect_and_fix_orphaned_prs() {
 
         log "WARN" "ORPHANED PR DETECTED: #$pr_number ($pr_title)"
 
-        # Attempt to fix by invoking code-reviewer
+        # Attempt to fix by invoking CodeReviewer
         if invoke_code_reviewer "$pr_number"; then
-            log "INFO" "Successfully invoked code-reviewer for PR #$pr_number"
+            log "INFO" "Successfully invoked CodeReviewer for PR #$pr_number"
             fixed_count=$((fixed_count + 1))
         else
-            log "ERROR" "Failed to invoke code-reviewer for PR #$pr_number"
+            log "ERROR" "Failed to invoke CodeReviewer for PR #$pr_number"
         fi
 
     done <<< "$orphaned_prs"
@@ -240,7 +240,7 @@ detect_and_fix_orphaned_prs() {
     log "INFO" "Orphaned PR recovery completed: $fixed_count fixed, $skipped_count skipped"
 
     if [ $fixed_count -gt 0 ]; then
-        log "INFO" "Fixed $fixed_count orphaned PRs by invoking code-reviewer"
+        log "INFO" "Fixed $fixed_count orphaned PRs by invoking CodeReviewer"
         return 0
     else
         log "INFO" "No orphaned PRs required fixing"

@@ -38,7 +38,7 @@ User Request → CLAUDE.md Instructions → Direct Execution with Optional Execu
 
 **Old way:**
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks:
 - task1.md
@@ -61,25 +61,25 @@ Instead of complex agent chains, use single-purpose executors:
 
 **Worktree Operations:**
 ```
-/agent:worktree-executor
+/agent:WorktreeExecutor
 Create worktree for issue 305
 ```
 
 **GitHub Operations:**
 ```
-/agent:github-executor
+/agent:GitHubExecutor
 Create PR for branch feature/issue-305
 ```
 
 **Test Execution:**
 ```
-/agent:test-executor
+/agent:TestExecutor
 Run full test suite
 ```
 
 **Code Writing:**
 ```
-/agent:code-executor
+/agent:CodeExecutor
 Create module src/parser.py with Parser class
 ```
 
@@ -99,7 +99,7 @@ Create module src/parser.py with Parser class
 
 **Old:**
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 Implement feature X
 ```
 
@@ -112,7 +112,7 @@ Implement feature X
 
 **Old:**
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 Fix bugs A, B, and C in parallel
 ```
 
@@ -126,7 +126,7 @@ Fix bugs A, B, and C in parallel
 
 **Old:**
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 Review PR #123
 ```
 
@@ -151,8 +151,8 @@ Review PR #123
 | Task | Old Method | New Method |
 |------|------------|------------|
 | Create issue | WorkflowManager Phase 2 | `gh issue create` per CLAUDE.md |
-| Create worktree | WorktreeManager agent | `git worktree add` or worktree-executor |
-| Run tests | WorkflowManager Phase 6 | Direct commands or test-executor |
+| Create worktree | WorktreeManager agent | `git worktree add` or WorktreeExecutor |
+| Run tests | WorkflowManager Phase 6 | Direct commands or TestExecutor |
 | Create PR | WorkflowManager Phase 8 | `gh pr create` per CLAUDE.md |
 | Parallel tasks | OrchestratorAgent | Follow CLAUDE.md parallel guidelines |
 

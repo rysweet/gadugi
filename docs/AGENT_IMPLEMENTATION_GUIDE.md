@@ -24,24 +24,24 @@ Gadugi agents consist of two parts:
 Many agents only need a definition file:
 
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Task: Review PR #123
 ```
 
-Claude reads `.claude/agents/code-reviewer.md` and uses built-in tools (Read, Write, Bash, etc.) to complete the task.
+Claude reads `.claude/agents/CodeReviewer.md` and uses built-in tools (Read, Write, Bash, etc.) to complete the task.
 
 ### 2. Complex Agents (Definition + Implementation)
 Some agents have Python backends for complex operations:
 
 ```
-/agent:program-manager
+/agent:ProgramManager
 
 Task: Triage all unlabeled issues
 ```
 
 Claude:
-1. Reads `.claude/agents/program-manager.md` for instructions
+1. Reads `.claude/agents/ProgramManager.md` for instructions
 2. Imports `src/agents/program_manager.py`
 3. Calls appropriate functions (e.g., `triage_unlabeled_issues()`)
 4. Reports results back to the user
@@ -49,17 +49,17 @@ Claude:
 ## Agent Types in Gadugi
 
 ### Definition-Only Agents
-- **code-reviewer**: Reviews code using Read/Grep tools
-- **workflow-manager**: Orchestrates development phases
-- **orchestrator-agent**: Coordinates parallel execution
-- **memory-manager**: Manages memory files (deprecated)
+- **CodeReviewer**: Reviews code using Read/Grep tools
+- **WorkflowManager**: Orchestrates development phases
+- **OrchestratorAgent**: Coordinates parallel execution
+- **MemoryManager**: Manages memory files (deprecated)
 
 ### Agents with Python Backends
-- **program-manager**: Complex GitHub operations and analysis
+- **ProgramManager**: Complex GitHub operations and analysis
   - Backend: `src/agents/program_manager.py`
   - Handles issue triage, priority management, README updates
 
-- **pr-backlog-manager**: PR delegation and coordination
+- **PrBacklogManager**: PR delegation and coordination
   - Backend: `src/agents/pr_backlog_manager/`
   - Complex state management and delegation logic
 
@@ -135,7 +135,7 @@ Use only a definition when:
 
 The Program Manager demonstrates the full pattern:
 
-**Definition** (`.claude/agents/program-manager.md`):
+**Definition** (`.claude/agents/ProgramManager.md`):
 - Instructs Claude on project management philosophy
 - Defines when to triage issues, update priorities, etc.
 - Specifies how to invoke the agent
@@ -147,7 +147,7 @@ The Program Manager demonstrates the full pattern:
 
 **Invocation**:
 ```
-/agent:program-manager
+/agent:ProgramManager
 
 Task: Run full project maintenance
 ```

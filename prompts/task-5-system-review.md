@@ -1,7 +1,7 @@
 # Task 5: System Design Review
 
 ## Objective
-Conduct comprehensive system design review of Gadugi v0.3 implementation using the system-design-reviewer agent.
+Conduct comprehensive system design review of Gadugi v0.3 implementation using the SystemDesignReviewer agent.
 
 ## Requirements
 1. Validate all components against requirements checklist

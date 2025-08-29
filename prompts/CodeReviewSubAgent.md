@@ -78,7 +78,7 @@ The sub-agent should:
 
 ### Phase 1: Create Sub-Agent Structure
 
-1. Create `.claude/agents/code-reviewer.md` with:
+1. Create `.claude/agents/CodeReviewer.md` with:
    - Proper YAML frontmatter
    - Clear role definition
    - Review process steps

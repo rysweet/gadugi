@@ -191,7 +191,7 @@ class MemoryManagerConfig:
 
     # Paths
     memory_file_path: str = ".github/Memory.md"
-    config_file_path: str = ".github/memory-manager/config.yaml"
+    config_file_path: str = ".github/MemoryManager/config.yaml"
     state_directory: str = ".github/memory-sync-state"
     backup_directory: str = ".github/memory-sync-state/backups"
 
@@ -276,10 +276,10 @@ class ConfigManager:
     """Manages Memory Manager configuration"""
 
     DEFAULT_CONFIG_LOCATIONS = [
-        ".github/memory-manager/config.yaml",
-        ".github/memory-manager/config.yml",
-        ".memory-manager.yaml",
-        ".memory-manager.yml",
+        ".github/MemoryManager/config.yaml",
+        ".github/MemoryManager/config.yml",
+        ".MemoryManager.yaml",
+        ".MemoryManager.yml",
     ]
 
     def __init__(self, repo_path: str = None, config_path: str = None):

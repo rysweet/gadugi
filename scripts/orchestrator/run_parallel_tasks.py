@@ -17,7 +17,7 @@ def main():
     # Verify the prompt files exist
     prompt_files = [
         "fix-all-pyright-errors.md",
-        "complete-team-coach-implementation.md",
+        "complete-TeamCoach-implementation.md",
         "cleanup-all-worktrees.md",
     ]
 
@@ -42,7 +42,7 @@ def main():
     print("\nCleaning up any blocking branches...")
     # Clean up branches that might block worktree creation
     branches_to_clean = [
-        "feature/parallel-complete-team-coach-agent-implementation-complete-team-coach-implementation",
+        "feature/parallel-complete-TeamCoach-agent-implementation-complete-TeamCoach-implementation",
         "feature/parallel-clean-up-all-worktrees-cleanup-all-worktrees",
         "feature/parallel-fix-all-pyright-errors-in-v0.3-components-fix-all-pyright-errors",
     ]
@@ -62,7 +62,7 @@ def main():
         "python3",
         ".claude/orchestrator/orchestrator_main.py",
         "fix-all-pyright-errors.md",
-        "complete-team-coach-implementation.md",
+        "complete-TeamCoach-implementation.md",
         "cleanup-all-worktrees.md",
         "--max-parallel",
         "3",

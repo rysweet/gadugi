@@ -11,12 +11,12 @@ Implement the missing Team Coach component for Gadugi v0.3's performance analyti
    - Team coordination insights
 
 2. **Location**
-   - `.claude/agents/team-coach/`
+   - `.claude/agents/TeamCoach/`
    - Must integrate with WorkflowManager Phase 13
 
 3. **Components**
    ```
-   .claude/agents/team-coach/
+   .claude/agents/TeamCoach/
    ├── __init__.py
    ├── coach.py           # Main Team Coach implementation
    ├── metrics.py         # Performance metrics collection
@@ -72,7 +72,7 @@ class TeamCoach:
 ## Testing
 ```bash
 # Run Team Coach tests
-uv run pytest .claude/agents/team-coach/tests/ -v
+uv run pytest .claude/agents/TeamCoach/tests/ -v
 
 # Integration test with WorkflowManager
 uv run python -m pytest tests/integration/test_team_coach_integration.py

@@ -2,17 +2,17 @@
 
 ## Title and Overview
 
-Fix the orchestrator-agent implementation to enable actual parallel execution of WorkflowManager agents. The current orchestrator-agent.md contains only pseudo-code documentation, while Python components exist but aren't properly coordinated. This implementation will create a minimal working orchestrator that can spawn and monitor parallel WorkflowManager processes, following the staged approach recommended in Issue #27.
+Fix the OrchestratorAgent implementation to enable actual parallel execution of WorkflowManager agents. The current OrchestratorAgent.md contains only pseudo-code documentation, while Python components exist but aren't properly coordinated. This implementation will create a minimal working orchestrator that can spawn and monitor parallel WorkflowManager processes, following the staged approach recommended in Issue #27.
 
 ## Problem Statement
 
 ### Current Limitations
-The orchestrator-agent currently fails to deliver its core value proposition of 3-5x faster development through parallel execution due to critical implementation gaps:
+The OrchestratorAgent currently fails to deliver its core value proposition of 3-5x faster development through parallel execution due to critical implementation gaps:
 
-1. **Pseudo-Code Only**: The orchestrator-agent.md file contains comprehensive documentation but no actual implementation
+1. **Pseudo-Code Only**: The OrchestratorAgent.md file contains comprehensive documentation but no actual implementation
 2. **Component Isolation**: Python components (ExecutionEngine, WorktreeManager, TaskAnalyzer, PromptGenerator) exist but aren't coordinated
 3. **No Process Management**: Cannot spawn or monitor parallel WorkflowManager agents
-4. **Missing Integration**: No bridge between Claude agent invocation (`/agent:orchestrator-agent`) and Python implementation
+4. **Missing Integration**: No bridge between Claude agent invocation (`/agent:OrchestratorAgent`) and Python implementation
 
 ### Impact on Users
 - Users cannot leverage parallel execution capabilities despite comprehensive documentation
@@ -26,9 +26,9 @@ Issue #27 identified that the current architecture treats agents as isolated bat
 ## Feature Requirements
 
 ### Functional Requirements
-1. **Agent Invocation Bridge**: Create entry point that responds to `/agent:orchestrator-agent` calls
+1. **Agent Invocation Bridge**: Create entry point that responds to `/agent:OrchestratorAgent` calls
 2. **Component Coordination**: Wire together existing ExecutionEngine, WorktreeManager, TaskAnalyzer, and PromptGenerator
-3. **Parallel Process Spawning**: Launch multiple WorkflowManager agents using `claude /agent:workflow-manager` commands
+3. **Parallel Process Spawning**: Launch multiple WorkflowManager agents using `claude /agent:WorkflowManager` commands
 4. **Real-time Monitoring**: Track execution progress and agent health through file-based coordination
 5. **Error Handling**: Graceful failure recovery with automatic fallback to sequential execution
 6. **Resource Management**: Monitor system resources and adjust parallelism dynamically
@@ -61,7 +61,7 @@ Issue #27 identified that the current architecture treats agents as isolated bat
 **Gap Analysis**:
 1. **Missing Coordinator**: No main orchestrator class that coordinates all components
 2. **No Process Registry**: Cannot track running agents or their status
-3. **Missing Entry Point**: No script or module that responds to `/agent:orchestrator-agent` invocation
+3. **Missing Entry Point**: No script or module that responds to `/agent:OrchestratorAgent` invocation
 4. **Limited Monitoring**: No real-time visibility into parallel execution progress
 5. **No Recovery Mechanism**: Cannot resume interrupted orchestration or handle partial failures
 
@@ -95,7 +95,7 @@ Issue #27 identified that the current architecture treats agents as isolated bat
 
 **Process Management Strategy**:
 - Each task gets isolated git worktree using WorktreeManager
-- WorkflowManager agents spawned using `claude /agent:workflow-manager` commands
+- WorkflowManager agents spawned using `claude /agent:WorkflowManager` commands
 - Process registry tracks PIDs, status, and metadata in JSON format
 - File-based coordination enables VS Code integration and external monitoring
 
@@ -216,7 +216,7 @@ class OrchestratorCoordinator:
 ## Implementation Steps
 
 ### Step 1: Issue Creation and Branch Management
-1. **Create GitHub Issue**: "Fix orchestrator-agent implementation for parallel execution"
+1. **Create GitHub Issue**: "Fix OrchestratorAgent implementation for parallel execution"
    - Link to Issues #27 and current limitations
    - Include detailed requirements and success criteria
    - Add labels: `enhancement`, `orchestration`, `parallel-execution`
@@ -283,13 +283,13 @@ class OrchestratorCoordinator:
 1. **API Documentation**:
    - Document all public classes and methods
    - Create usage examples and integration guides
-   - Update orchestrator-agent.md with actual implementation details
+   - Update OrchestratorAgent.md with actual implementation details
    - Create troubleshooting guide for common issues
 
 2. **Usage Examples**:
    ```bash
    # Example 1: Basic parallel execution
-   /agent:orchestrator-agent
+   /agent:OrchestratorAgent
 
    Execute these specific prompts in parallel:
    - test-definition-node.md
@@ -297,7 +297,7 @@ class OrchestratorCoordinator:
    - test-documentation-linker.md
 
    # Example 2: Advanced configuration
-   /agent:orchestrator-agent
+   /agent:OrchestratorAgent
 
    Execute with custom configuration:
    - prompt-files: [bug-fix-1.md, bug-fix-2.md, feature-update.md]
@@ -344,7 +344,7 @@ class OrchestratorCoordinator:
    - Plan future enhancements based on real-world usage
 
 ### Success Validation Checklist
-- [ ] `/agent:orchestrator-agent` command successfully invokes implementation
+- [ ] `/agent:OrchestratorAgent` command successfully invokes implementation
 - [ ] Multiple WorkflowManager agents spawn and execute in parallel
 - [ ] Process registry tracks all running tasks with real-time status
 - [ ] Performance improvement of 3-5x demonstrated for independent tasks
@@ -359,10 +359,10 @@ class OrchestratorCoordinator:
 
 Upon successful completion of this implementation:
 
-1. **Functional Orchestrator**: Users can invoke `/agent:orchestrator-agent` and receive actual parallel execution of WorkflowManager agents
+1. **Functional Orchestrator**: Users can invoke `/agent:OrchestratorAgent` and receive actual parallel execution of WorkflowManager agents
 2. **Performance Gains**: Achieve 3-5x speedup for independent tasks compared to sequential execution
 3. **Monitoring Capabilities**: Real-time visibility into parallel execution progress and agent health
 4. **Robust Error Handling**: Automatic recovery from failures with fallback to sequential execution
 5. **Production Ready**: Enterprise-grade orchestration system ready for complex multi-task workflows
 
-This implementation will transform the orchestrator-agent from comprehensive documentation into a working, production-ready parallel execution system that delivers the promised performance improvements while maintaining the high quality standards of the Gadugi project.
+This implementation will transform the OrchestratorAgent from comprehensive documentation into a working, production-ready parallel execution system that delivers the promised performance improvements while maintaining the high quality standards of the Gadugi project.

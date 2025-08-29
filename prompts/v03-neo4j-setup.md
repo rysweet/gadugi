@@ -20,6 +20,6 @@ Initialize and verify Neo4j database for Gadugi v0.3 implementation.
 - Run pyright checks on any Python code
 - Ensure all tests pass before completing
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for Neo4j setup task

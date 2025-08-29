@@ -71,7 +71,7 @@ This test simulates a code review with various types of feedback to validate the
 
 To test the agent:
 1. Create a mock PR with above feedback
-2. Invoke: `/agent:code-review-response`
+2. Invoke: `/agent:CodeReviewResponse`
 3. Verify all expected behaviors
 4. Check response quality and tone
 5. Ensure changes are correct

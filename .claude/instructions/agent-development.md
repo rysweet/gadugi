@@ -57,7 +57,7 @@ subagent_type: general-purpose
 
 ### Workflow Manager
 ```
-subagent_type: workflow-manager
+subagent_type: WorkflowManager
 - Executes 13-phase workflow
 - Creates issues, PRs
 - Manages development lifecycle
@@ -65,7 +65,7 @@ subagent_type: workflow-manager
 
 ### Code Reviewer
 ```
-subagent_type: code-reviewer
+subagent_type: CodeReviewer
 - Reviews pull requests
 - Provides feedback
 - Checks best practices
@@ -130,7 +130,7 @@ Task(
 ### Agent Delegation
 ```
 # From one agent to another
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Delegated from orchestrator
 Task: Execute workflow for prompt.md

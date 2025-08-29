@@ -80,7 +80,7 @@ This document explains the agent hierarchy for executing development workflows i
 
 ### Multiple Tasks (Use OrchestratorAgent)
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - test-definition-node.md
@@ -90,7 +90,7 @@ Execute these specific prompts in parallel:
 
 ### Single Task (Use WorkflowManager)
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Execute workflow for /prompts/implement-new-feature.md
 ```

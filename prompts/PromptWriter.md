@@ -70,7 +70,7 @@ Every prompt should include these sections:
 
 ### Phase 1: Create PromptWriter Sub-Agent
 
-1. Create `.claude/agents/prompt-writer.md` with:
+1. Create `.claude/agents/PromptWriter.md` with:
    - Proper YAML frontmatter for tools and description
    - Clear instructions on prompt structure
    - Template sections to include
@@ -162,7 +162,7 @@ When invoked at the start of a session:
 
 1. Create GitHub issue for PromptWriter implementation
 2. Create feature branch
-3. Implement the sub-agent in `.claude/agents/prompt-writer.md`
+3. Implement the sub-agent in `.claude/agents/PromptWriter.md`
 4. Create example prompts demonstrating the pattern
 5. Test with various feature types
 6. Document usage guidelines

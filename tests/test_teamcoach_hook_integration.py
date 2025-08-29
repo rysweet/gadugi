@@ -124,7 +124,7 @@ def test_subagent_hook_integration():
 
     # Create a task that will use a subagent
     test_task = """
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Please review this simple Python code and provide feedback:
 

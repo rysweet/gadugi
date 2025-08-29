@@ -24,38 +24,38 @@ Mandatory testing and review phases ensure code quality before merging.
 
 **Purpose**: Coordinate and manage parallel execution of tasks
 
-- **orchestrator-agent**: Main coordinator for parallel task execution
-- **task-analyzer**: Analyzes task dependencies and parallelization opportunities
-- **worktree-manager**: Creates and manages isolated git environments
-- **execution-monitor**: Tracks progress of parallel executions
+- **OrchestratorAgent**: Main coordinator for parallel task execution
+- **TaskAnalyzer**: Analyzes task dependencies and parallelization opportunities
+- **WorktreeManager**: Creates and manages isolated git environments
+- **ExecutionMonitor**: Tracks progress of parallel executions
 
 ### Layer 2: Implementation Layer
 
 **Purpose**: Execute actual development work
 
-- **workflow-manager**: Executes complete 11-phase development workflows
-- **prompt-writer**: Creates structured prompts for complex tasks
-- **test-writer**: Generates comprehensive test suites
-- **test-solver**: Diagnoses and fixes failing tests
-- **type-fix-agent**: Resolves type checking errors
+- **WorkflowManager**: Executes complete 11-phase development workflows
+- **PromptWriter**: Creates structured prompts for complex tasks
+- **TestWriter**: Generates comprehensive test suites
+- **TestSolver**: Diagnoses and fixes failing tests
+- **TypeFixAgent**: Resolves type checking errors
 
 ### Layer 3: Review Layer
 
 **Purpose**: Ensure code quality and architectural compliance
 
-- **code-reviewer**: Performs automated code reviews on PRs
-- **code-review-response**: Processes and implements review feedback
-- **system-design-reviewer**: Reviews architectural changes
+- **CodeReviewer**: Performs automated code reviews on PRs
+- **CodeReviewResponse**: Processes and implements review feedback
+- **SystemDesignReviewer**: Reviews architectural changes
 
 ### Layer 4: Maintenance Layer
 
 **Purpose**: Maintain project health and documentation
 
-- **pr-backlog-manager**: Manages PR queue and readiness
-- **agent-updater**: Keeps agents updated to latest versions
-- **memory-manager**: Maintains context and syncs with GitHub Issues
-- **readme-agent**: Keeps README documentation current
-- **claude-settings-update**: Manages configuration synchronization
+- **PrBacklogManager**: Manages PR queue and readiness
+- **AgentUpdater**: Keeps agents updated to latest versions
+- **MemoryManager**: Maintains context and syncs with GitHub Issues
+- **ReadmeAgent**: Keeps README documentation current
+- **ClaudeSettingsUpdate**: Manages configuration synchronization
 
 ## 11-Phase Workflow Process
 

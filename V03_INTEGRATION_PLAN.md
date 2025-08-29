@@ -12,7 +12,7 @@ Not just tools that execute tasks, but a system that:
 - **Evolves** to become better at building software
 
 ### The Key Insight
-Each time an agent completes a task, it should become better at similar tasks. When workflow-manager creates a PR, it should remember what reviewers typically ask for. When orchestrator decomposes tasks, it should learn optimal parallelization patterns.
+Each time an agent completes a task, it should become better at similar tasks. When WorkflowManager creates a PR, it should remember what reviewers typically ask for. When orchestrator decomposes tasks, it should learn optimal parallelization patterns.
 
 ## Step-by-Step Integration Plan
 
@@ -49,7 +49,7 @@ class V03Agent:
 #### Step 1.2: Knowledge Directory Structure
 ```
 .claude/agents/
-├── workflow-manager/
+├── WorkflowManager/
 │   ├── agent.md
 │   ├── workflow_manager.py
 │   └── knowledge/
@@ -73,7 +73,7 @@ class V03Agent:
 - Confirm knowledge base loads
 
 ### Phase 2: First Memory-Enabled Agent (Week 1-2)
-**Goal**: workflow-manager becomes fully memory-enabled
+**Goal**: WorkflowManager becomes fully memory-enabled
 
 #### Step 2.1: Update WorkflowManager
 ```python
@@ -209,10 +209,10 @@ class OrchestratorV03(V03Agent):
 #### Step 6.1: Agent Registry with Capabilities
 ```python
 AGENT_REGISTRY = {
-    "workflow-manager": {
+    "WorkflowManager": {
         "class": WorkflowManagerV03,
         "expertise": ["git", "pr", "workflow"],
-        "knowledge_dir": ".claude/agents/workflow-manager/knowledge"
+        "knowledge_dir": ".claude/agents/WorkflowManager/knowledge"
     },
     "orchestrator": {
         "class": OrchestratorV03,
@@ -227,7 +227,7 @@ AGENT_REGISTRY = {
 ### Immediate (This Week)
 1. Create `V03Agent` base class
 2. Set up knowledge directory structure
-3. Update `workflow-manager` to use memory
+3. Update `WorkflowManager` to use memory
 4. Create knowledge priming system
 5. Test memory persistence
 
@@ -265,7 +265,7 @@ AGENT_REGISTRY = {
 ```bash
 # Step 1: Create base structure
 mkdir -p .claude/agents/base
-mkdir -p .claude/agents/workflow-manager/knowledge
+mkdir -p .claude/agents/WorkflowManager/knowledge
 mkdir -p .claude/agents/orchestrator/knowledge
 
 # Step 2: Create V03Agent base class
@@ -274,7 +274,7 @@ cat > .claude/agents/base/v03_agent.py << 'EOF'
 EOF
 
 # Step 3: Add knowledge files
-echo "# Git Best Practices" > .claude/agents/workflow-manager/knowledge/git_best_practices.md
+echo "# Git Best Practices" > .claude/agents/WorkflowManager/knowledge/git_best_practices.md
 echo "# Task Decomposition Patterns" > .claude/agents/orchestrator/knowledge/decomposition.md
 
 # Step 4: Test with first agent

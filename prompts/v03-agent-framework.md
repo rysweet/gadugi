@@ -29,6 +29,6 @@ Fix and complete the Agent Framework implementation with BaseAgent and tool regi
 - Create and run tests with `uv run pytest`
 - Ensure all imports work correctly
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for Agent Framework implementation

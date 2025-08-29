@@ -17,7 +17,7 @@ A specialized WorkflowManager sub-agent can:
 1. Execute complete workflows systematically
 2. Ensure no steps are missed or shortcuts taken
 3. Maintain consistent git practices and PR quality
-4. Coordinate with other sub-agents (like code-reviewer)
+4. Coordinate with other sub-agents (like CodeReviewer)
 5. Track progress and handle interruptions gracefully
 
 ## Requirements
@@ -28,7 +28,7 @@ A specialized WorkflowManager sub-agent can:
 2. **Tool Access**: Needs Read, Write, Edit, Bash, Grep, LS, TodoWrite, Task tools for full workflow execution
 3. **Git Integration**: Must handle all git operations properly
 4. **GitHub CLI**: Must use `gh` commands for issues and PRs
-5. **Sub-Agent Coordination**: Must invoke other agents like code-reviewer
+5. **Sub-Agent Coordination**: Must invoke other agents like CodeReviewer
 
 ### Functional Requirements
 
@@ -93,7 +93,7 @@ The standard workflow that WorkflowManager follows:
    - Request reviews
 
 8. **Review Phase**
-   - Invoke code-reviewer sub-agent
+   - Invoke CodeReviewer sub-agent
    - Address feedback
    - Ensure CI passes
    - Final verification
@@ -154,7 +154,7 @@ The standard workflow that WorkflowManager follows:
    - PR checks passing
 
 2. Sub-agent coordination:
-   - Invoke code-reviewer at appropriate time
+   - Invoke CodeReviewer at appropriate time
    - Handle reviewer feedback
    - Coordinate fixes and updates
    - Verify final approval

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Add pr-backlog-manager directory
+# Add PrBacklogManager directory
 pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -22,7 +22,7 @@ pr_backlog_path = os.path.join(
     "..",
     ".claude",
     "agents",
-    "pr-backlog-manager",
+    "PrBacklogManager",
 )
 sys.path.insert(0, pr_backlog_path)
 
@@ -327,7 +327,7 @@ class TestReviewAssessment:
         # AI review present
         mock_github_ops.get_pr_comments.return_value = [
             {"body": "Human comment about the changes"},
-            {"body": "Automated review by code-reviewer: This PR looks good"},
+            {"body": "Automated review by CodeReviewer: This PR looks good"},
             {"body": "Another human comment"},
         ]
         assert assessor._check_ai_review_completion(123) is True

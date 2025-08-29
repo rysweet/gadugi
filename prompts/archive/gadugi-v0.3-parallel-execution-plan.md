@@ -73,7 +73,7 @@ graph TD
 **Parallel Execution Commands**:
 ```bash
 # All can run simultaneously in separate worktrees
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Setup QA framework with UV, ruff, pyright, pytest (#242)
@@ -95,7 +95,7 @@ Execute these tasks in parallel:
 
 **Parallel Execution Commands**:
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Implement event system with protobuf (#236)
@@ -115,7 +115,7 @@ Execute these tasks in parallel:
 
 **Parallel Execution Commands**:
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Complete memory system with Neo4j+MCP integration (#237)
@@ -134,7 +134,7 @@ Execute these tasks in parallel:
 
 **Parallel Execution Commands**:
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Implement task decomposer agent (#240)
@@ -152,7 +152,7 @@ Execute these tasks in parallel:
 
 **Execution Command**:
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute this task:
 - Implement orchestrator with 3-5x parallel speedup (#239)
@@ -279,7 +279,7 @@ uv run python benchmarks/orchestrator_speedup.py
 uv sync --all-extras
 
 # Create parallel worktrees for Batch 1
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 1. Setup QA framework (#242):
@@ -305,7 +305,7 @@ Execute these tasks in parallel:
 
 ### Day 2-3: Batch 2
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 1. Implement Event System (#236) with existing code from gadugi-v0.3/services/event-router/
@@ -315,7 +315,7 @@ Execute these tasks in parallel:
 
 ### Day 3-4: Batch 3
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 1. Complete Memory System (#237) integrating Neo4j + MCP + Events
@@ -324,7 +324,7 @@ Execute these tasks in parallel:
 
 ### Day 4-5: Batch 4
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 1. Implement Task Decomposer (#240) using simple_decomposer.py as base
@@ -333,7 +333,7 @@ Execute these tasks in parallel:
 
 ### Day 5-6: Batch 5 (Critical)
 ```bash
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Implement Orchestrator with 3-5x speedup (#239)
 Priority: CRITICAL
@@ -425,7 +425,7 @@ If critical issues arise:
 uv sync --all-extras
 
 # Start implementation
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Begin Gadugi v0.3 implementation following the parallel execution plan.
 Start with Batch 1: QA Framework (#242), Recipe Definitions (#234), 

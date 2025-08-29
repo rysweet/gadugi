@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fix remaining import issues in team-coach and other agent modules."""
+"""Fix remaining import issues in TeamCoach and other agent modules."""
 
 import os
 import re

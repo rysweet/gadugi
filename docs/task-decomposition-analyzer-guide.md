@@ -23,7 +23,7 @@ graph TD
     A --> J[OrchestratorAgent Integration]
 ```
 
-#### 1. TaskBoundsEval Agent (`/agent:task-bounds-eval`)
+#### 1. TaskBoundsEval Agent (`/agent:TaskBoundsEval`)
 
 **Purpose**: Evaluates whether tasks are well-defined and executable or require decomposition/research.
 
@@ -35,7 +35,7 @@ graph TD
 
 **Usage Example**:
 ```bash
-/agent:task-bounds-eval
+/agent:TaskBoundsEval
 
 Evaluate task understanding for:
 Task: "Implement machine learning model for code pattern recognition"
@@ -43,7 +43,7 @@ Context: "Part of enhanced task decomposition system"
 Priority: HIGH
 ```
 
-#### 2. TaskDecomposer Agent (`/agent:task-decomposer`)
+#### 2. TaskDecomposer Agent (`/agent:TaskDecomposer`)
 
 **Purpose**: Breaks complex tasks into manageable, parallelizable subtasks with proper dependency management.
 
@@ -59,7 +59,7 @@ Priority: HIGH
 - **WORKFLOW_DECOMPOSITION**: Break by process steps
 - **RISK_DECOMPOSITION**: Isolate high-risk components
 
-#### 3. TaskResearchAgent (`/agent:task-research-agent`)
+#### 3. TaskResearchAgent (`/agent:TaskResearchAgent`)
 
 **Purpose**: Researches solutions, technologies, and approaches for unknown or novel tasks.
 
@@ -151,7 +151,7 @@ def analyze_tasks_enhanced(prompt_files):
 For most use cases, the system works automatically:
 
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - complex-feature-implementation.md
@@ -172,15 +172,15 @@ For detailed analysis or debugging:
 
 ```bash
 # Step 1: Evaluate task bounds
-/agent:task-bounds-eval
+/agent:TaskBoundsEval
 Task: "Build microservices architecture with real-time analytics"
 
 # Step 2: If decomposition is recommended
-/agent:task-decomposer
+/agent:TaskDecomposer
 Decompose the evaluated task using FUNCTIONAL_DECOMPOSITION strategy
 
 # Step 3: If research is needed
-/agent:task-research-agent
+/agent:TaskResearchAgent
 Research: "Real-time analytics patterns for microservices"
 ```
 
@@ -190,7 +190,7 @@ For novel or research-intensive tasks:
 
 ```bash
 # The system automatically handles research-required tasks
-/agent:task-analyzer
+/agent:TaskAnalyzer
 
 Analyze prompt: implement-quantum-optimization.md
 
@@ -357,7 +357,7 @@ export TASK_DECOMPOSITION_ANALYZER_DEBUG=true
 export ENHANCED_TASK_ANALYZER_VERBOSE=true
 
 # Run with debug output
-/agent:task-analyzer --debug
+/agent:TaskAnalyzer --debug
 
 # Check logs
 tail -f .github/logs/task-decomposition-analyzer.log
@@ -372,23 +372,23 @@ If upgrading from basic task analysis:
 1. **Update Agent Invocations**:
    ```bash
    # Old
-   /agent:task-analyzer
+   /agent:TaskAnalyzer
 
    # New (automatic enhancement)
-   /agent:task-analyzer  # Enhanced capabilities are automatic
+   /agent:TaskAnalyzer  # Enhanced capabilities are automatic
    ```
 
 2. **Update Configuration**:
    ```bash
    # Create enhanced configuration
-   cp .claude/config/task-analyzer.yaml .claude/config/task-decomposition-analyzer.yaml
+   cp .claude/config/TaskAnalyzer.yaml .claude/config/task-decomposition-analyzer.yaml
    # Edit new configuration with enhanced settings
    ```
 
 3. **Test Integration**:
    ```bash
    # Test with simple task first
-   /agent:task-bounds-eval
+   /agent:TaskBoundsEval
    Task: "Add unit test for user service"
 
    # Verify output includes enhanced analysis

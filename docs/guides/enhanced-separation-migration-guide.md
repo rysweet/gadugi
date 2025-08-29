@@ -102,11 +102,11 @@ The OrchestratorAgent has been updated with Enhanced Separation integration:
 **Verification:**
 ```bash
 # Check updated agent file
-cat .claude/agents/orchestrator-agent.md | head -20
+cat .claude/agents/OrchestratorAgent.md | head -20
 # Should show imports section with shared modules
 
 # Verify agent can be invoked (test with simple prompt)
-claude /agent:orchestrator-agent "Test basic functionality"
+claude /agent:OrchestratorAgent "Test basic functionality"
 ```
 
 #### Step 2.2: Update WorkflowManager
@@ -127,7 +127,7 @@ cat .claude/agents/workflow-master.md | head -20
 # Should show imports section with shared modules
 
 # Verify agent can be invoked (test with simple prompt)
-claude /agent:workflow-manager "Test basic functionality"
+claude /agent:WorkflowManager "Test basic functionality"
 ```
 
 #### Step 2.3: Update Agent Documentation
@@ -168,7 +168,7 @@ Test key workflows to ensure functionality is preserved:
 **OrchestratorAgent Testing:**
 ```bash
 # Test parallel execution
-claude /agent:orchestrator-agent "
+claude /agent:OrchestratorAgent "
 Execute these prompts in parallel:
 - test-feature-a.md
 - test-feature-b.md
@@ -185,7 +185,7 @@ Execute these prompts in parallel:
 **WorkflowManager Testing:**
 ```bash
 # Test complete workflow execution
-claude /agent:workflow-manager "
+claude /agent:WorkflowManager "
 Task: Execute workflow for test-implementation.md
 "
 
@@ -251,7 +251,7 @@ python -c "from github_operations import GitHubOperations; print('OK')"
 ```bash
 # Symptoms: Agent fails to start or responds with errors
 # Solution: Check agent file syntax and imports
-claude --validate-agent orchestrator-agent
+claude --validate-agent OrchestratorAgent
 claude --validate-agent workflow-master
 ```
 
@@ -275,7 +275,7 @@ ls -la .github/workflow-states/
 #### Agent Rollback
 ```bash
 # Revert to previous agent version
-git checkout HEAD~1 -- .claude/agents/orchestrator-agent.md
+git checkout HEAD~1 -- .claude/agents/OrchestratorAgent.md
 git checkout HEAD~1 -- .claude/agents/workflow-master.md
 git commit -m "Rollback agents to previous version"
 ```

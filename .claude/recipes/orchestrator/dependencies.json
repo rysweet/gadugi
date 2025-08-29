@@ -16,7 +16,7 @@
         "purpose": "Task and workflow event publishing"
       },
       {
-        "component": "task-decomposer",
+        "component": "TaskDecomposer",
         "version": ">=0.3.0",
         "required": false,
         "purpose": "Breaking down complex tasks into subtasks (optional)"

@@ -14,7 +14,7 @@ This analysis provides detailed quantitative metrics on code similarity between 
 
 ### Analysis Scope
 - **OrchestratorAgent Files Analyzed**:
-  - `.claude/agents/orchestrator-agent.md` (303 lines)
+  - `.claude/agents/OrchestratorAgent.md` (303 lines)
   - `.claude/orchestrator/components/execution_engine.py` (692 lines)
   - `.claude/orchestrator/components/prompt_generator.py` (342 lines)
   - **Total**: 1,337 lines

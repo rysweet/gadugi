@@ -3,10 +3,10 @@
 ## ✅ COMPLETED STEPS
 
 ### Step 1: Core Agents Updated [COMPLETED]
-- ✅ **workflow-manager** - Full v0.3 with memory, 13-phase workflow, learning
+- ✅ **WorkflowManager** - Full v0.3 with memory, 13-phase workflow, learning
 - ✅ **orchestrator** - Intelligent task decomposition with pattern learning
-- ✅ **code-reviewer** - Pattern recognition, feedback learning, developer tracking
-- ✅ **task-decomposer** - Optimal decomposition with success tracking
+- ✅ **CodeReviewer** - Pattern recognition, feedback learning, developer tracking
+- ✅ **TaskDecomposer** - Optimal decomposition with success tracking
 
 ### Step 2: Agent Registry [COMPLETED]
 - ✅ Central registry for all v0.3 agents

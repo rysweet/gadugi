@@ -14,7 +14,7 @@ from datetime import datetime
 # Add the source directories to the Python path for imports
 import sys
 
-# Add pr-backlog-manager directory
+# Add PrBacklogManager directory
 pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -22,7 +22,7 @@ pr_backlog_path = os.path.join(
     "..",
     ".claude",
     "agents",
-    "pr-backlog-manager",
+    "PrBacklogManager",
 )
 sys.path.insert(0, pr_backlog_path)
 

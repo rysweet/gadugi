@@ -14,7 +14,7 @@ from datetime import datetime
 # Add the source directories to the Python path for imports
 import sys
 
-# Add pr-backlog-manager directory
+# Add PrBacklogManager directory
 pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -22,7 +22,7 @@ pr_backlog_path = os.path.join(
     "..",
     ".claude",
     "agents",
-    "pr-backlog-manager",
+    "PrBacklogManager",
 )
 sys.path.insert(0, pr_backlog_path)
 
@@ -427,7 +427,7 @@ class TestPRBacklogManager:
         assert any("WorkflowMaster" in action for action in actions)
         assert any("merge conflict" in action.lower() for action in actions)
         assert any("CI" in action for action in actions)
-        assert any("code-reviewer" in action for action in actions)
+        assert any("CodeReviewer" in action for action in actions)
 
     def test_process_single_pr_success(
         self, pr_backlog_manager, sample_pr_data, mock_github_ops
@@ -636,7 +636,7 @@ class TestPRAssessment:
             status=PRStatus.PROCESSING,
             criteria_met=criteria_met,
             blocking_issues=["Branch behind main", "AI review missing"],
-            resolution_actions=["Update branch", "Invoke code-reviewer"],
+            resolution_actions=["Update branch", "Invoke CodeReviewer"],
             last_updated=datetime.now(),
             processing_time=2.5,
         )

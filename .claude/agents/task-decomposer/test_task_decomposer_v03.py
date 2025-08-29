@@ -251,7 +251,7 @@ async def test_learning_from_execution(decomposer):
         improvements=["parallel_testing"],
         agent_performance={
             "code-writer": 0.85,
-            "test-writer": 0.90
+            "TestWriter": 0.90
         }
     )
 
@@ -349,7 +349,7 @@ async def test_agent_suggestions(decomposer):
 
     # Should suggest appropriate agents
     suggested_agents = set(agent_hints)
-    expected_agents = {"code-writer", "test-writer", "code-reviewer", "readme-agent"}
+    expected_agents = {"code-writer", "TestWriter", "CodeReviewer", "ReadmeAgent"}
     assert len(suggested_agents & expected_agents) > 0
 
 

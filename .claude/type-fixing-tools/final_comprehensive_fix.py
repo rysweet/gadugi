@@ -31,8 +31,8 @@ def fix_agent_performance_dataclass():
 
     # Files that use AgentPerformance
     files = [
-        ".claude/agents/team-coach/tests/test_coaching_engine.py",
-        ".claude/agents/team-coach/tests/test_strategic_planner.py",
+        ".claude/agents/TeamCoach/tests/test_coaching_engine.py",
+        ".claude/agents/TeamCoach/tests/test_strategic_planner.py",
         ".claude/agents/teamcoach/tests/test_coaching_engine.py",
         ".claude/agents/teamcoach/tests/test_strategic_planner.py",
     ]
@@ -90,7 +90,7 @@ def fix_unused_imports():
             "ChangeType",
             "ElementType",
         ],
-        ".claude/agents/team-coach/phase2/task_matcher.py": [
+        ".claude/agents/TeamCoach/phase2/task_matcher.py": [
             "TaskCapabilityRequirement"
         ],
         ".claude/agents/teamcoach/phase2/task_matcher.py": [
@@ -132,8 +132,8 @@ def fix_unused_variables():
     """Fix unused variable warnings."""
 
     files_with_unused = {
-        ".claude/agents/team-coach/tests/test_conflict_resolver.py": ["i"],
-        ".claude/agents/team-coach/tests/test_strategic_planner.py": ["timeframe"],
+        ".claude/agents/TeamCoach/tests/test_conflict_resolver.py": ["i"],
+        ".claude/agents/TeamCoach/tests/test_strategic_planner.py": ["timeframe"],
     }
 
     for filepath, unused_vars in files_with_unused.items():
@@ -156,7 +156,7 @@ def fix_unused_variables():
 def fix_attribute_access():
     """Fix attribute access errors."""
 
-    path = Path(".claude/agents/team-coach/tests/test_strategic_planner.py")
+    path = Path(".claude/agents/TeamCoach/tests/test_strategic_planner.py")
     if path.exists():
         content = path.read_text()
 

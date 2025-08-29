@@ -1,6 +1,6 @@
 # Execute Gadugi v0.3 Foundation Tasks
 
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these foundation tasks for Gadugi v0.3 implementation in parallel:
 
@@ -15,7 +15,7 @@ Set up comprehensive quality assurance framework:
 
 ## Task 2: Create Recipe Definitions (Issue #234)
 Create recipe structure in `.claude/recipes/` directory:
-- Create directories for: event-system, memory-system, agent-framework, orchestrator, task-decomposer, team-coach
+- Create directories for: event-system, memory-system, agent-framework, orchestrator, TaskDecomposer, TeamCoach
 - Each component needs: requirements.md, design.md, dependencies.json
 - Focus on NEW v0.3 requirements, not current implementation
 - Define clear interfaces and dependencies between components

@@ -456,18 +456,18 @@ class TestGitHubIntegration:
 ```bash
 gh issue create \
   --title "Simplify Memory Manager: GitHub Issues as Single Source of Truth" \
-  --body-file prompts/simplify-memory-manager-github-only.md \
-  --label "enhancement,memory-manager,architecture"
+  --body-file prompts/simplify-MemoryManager-github-only.md \
+  --label "enhancement,MemoryManager,architecture"
 ```
 
 ### Step 2: Create Feature Branch
 **Action**: Create feature branch for implementation
-**Branch**: `feature/simplify-memory-manager-github-only`
+**Branch**: `feature/simplify-MemoryManager-github-only`
 **Timeline**: Day 1
 
 ```bash
-git checkout -b feature/simplify-memory-manager-github-only
-git push -u origin feature/simplify-memory-manager-github-only
+git checkout -b feature/simplify-MemoryManager-github-only
+git push -u origin feature/simplify-MemoryManager-github-only
 ```
 
 ### Step 3: Phase 1 - Core Infrastructure Implementation
@@ -571,14 +571,14 @@ git push -u origin feature/simplify-memory-manager-github-only
 ```bash
 gh pr create \
   --base main \
-  --head feature/simplify-memory-manager-github-only \
+  --head feature/simplify-MemoryManager-github-only \
   --title "Simplify Memory Manager: GitHub Issues as Single Source of Truth" \
   --body "Complete implementation of simplified memory management using GitHub Issues exclusively"
 ```
 
 ### Step 8: Code Review and Testing
 **Action**: Comprehensive code review and final testing
-**Reviewer**: Invoke code-reviewer sub-agent for thorough review
+**Reviewer**: Invoke CodeReviewer sub-agent for thorough review
 **Timeline**: Week 5
 
 ### Step 9: Deployment and Monitoring

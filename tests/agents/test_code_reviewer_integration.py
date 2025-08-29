@@ -1,5 +1,5 @@
 """
-Integration tests for code-reviewer agent with design simplicity features.
+Integration tests for CodeReviewer agent with design simplicity features.
 
 These tests validate that the enhanced CodeReviewer agent (Issue #104) correctly
 integrates simplicity detection with existing review functionality.

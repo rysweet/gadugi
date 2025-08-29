@@ -217,7 +217,7 @@ async def process_task(event):
 - **Management**:
   - `manage_router.py` - CLI for managing the service
   - `start_server.py` - Standalone server starter
-  - `.claude/agents/event-router-manager.md` - Agent documentation
+  - `.claude/agents/EventRouterManager.md` - Agent documentation
 
 - **Tests & Examples**:
   - `test_event_router.py` - End-to-end test

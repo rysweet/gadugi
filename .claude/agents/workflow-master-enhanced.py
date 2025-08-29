@@ -1465,8 +1465,8 @@ if result.returncode == 0:
     print(f"Existing reviews: {{existing_reviews}}")
 
     if existing_reviews == 0:
-        print("No reviews found - will invoke code-reviewer agent")
-        # This would trigger code-reviewer agent invocation
+        print("No reviews found - will invoke CodeReviewer agent")
+        # This would trigger CodeReviewer agent invocation
         invoke_code_reviewer = True
     else:
         print("Reviews exist - checking status")
@@ -1500,7 +1500,7 @@ print(f"Review status saved: {{review_status}}")
 
             if result["success"]:
                 logger.info("Code review process initiated successfully")
-                # In a real implementation, this would invoke the code-reviewer agent
+                # In a real implementation, this would invoke the CodeReviewer agent
                 # For now, we'll mark as successful since the review process is initiated
                 return True
             else:

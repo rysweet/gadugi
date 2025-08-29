@@ -16,7 +16,7 @@ This prompt guides the complete migration of the Gadugi multi-agent system from 
 ### Current State Analysis
 The Gadugi project currently has:
 - Python test infrastructure with pytest
-- Memory manager component with PyYAML dependency (`/.github/memory-manager/requirements.txt`)
+- Memory manager component with PyYAML dependency (`/.github/MemoryManager/requirements.txt`)
 - Orchestrator components with complex Python modules
 - Integration testing framework
 - No centralized dependency management or lock files
@@ -103,7 +103,7 @@ UV provides significant advantages:
 #### Existing Python Structure
 ```
 gadugi/
-├── .github/memory-manager/
+├── .github/MemoryManager/
 │   ├── requirements.txt          # PyYAML>=6.0
 │   ├── memory_manager.py
 │   ├── github_integration.py
@@ -534,7 +534,7 @@ Migrate the Gadugi project from traditional pip-based dependency management to U
 - Complete developer migration within 2 weeks
 
 ## Related Files
-- .github/memory-manager/requirements.txt
+- .github/MemoryManager/requirements.txt
 - tests/ (pytest infrastructure)
 - .claude/orchestrator/ (Python components)
 
@@ -703,7 +703,7 @@ ensure_newline_before_comments = true
 #### Step 3.1: Audit Existing Dependencies
 **Action**: Catalog all current Python dependencies
 **Tasks**:
-- Read `.github/memory-manager/requirements.txt`
+- Read `.github/MemoryManager/requirements.txt`
 - Identify test dependencies from pytest usage
 - Check for any hidden or implicit dependencies
 - Document current Python version requirements
@@ -839,7 +839,7 @@ jobs:
 #### Step 5.1: Migrate Memory Manager Dependencies
 **Action**: Update memory manager to use UV-managed dependencies
 **Tasks**:
-- Remove `.github/memory-manager/requirements.txt`
+- Remove `.github/MemoryManager/requirements.txt`
 - Ensure PyYAML is available via UV environment
 - Update any installation documentation
 - Test memory manager functionality
@@ -861,7 +861,7 @@ uv run python test_orchestrator_fix_integration.py
 #### Step 5.3: Remove Legacy Files
 **Action**: Clean up old dependency management files
 **Files to Remove**:
-- `.github/memory-manager/requirements.txt`
+- `.github/MemoryManager/requirements.txt`
 - Any other requirements.txt files found
 - Old pip-based installation scripts
 
@@ -1059,7 +1059,7 @@ EOF
 **Command**: Executed by WorkflowMaster
 ```bash
 # This will be handled by WorkflowMaster's Phase 9
-/agent:code-reviewer
+/agent:CodeReviewer
 
 PR: [PR number from previous step]
 Focus Areas:
@@ -1074,7 +1074,7 @@ Focus Areas:
 #### Step 9.2: Address Review Feedback
 **Action**: Respond to code review comments and suggestions
 **Process**:
-- Review automated feedback from code-reviewer agent
+- Review automated feedback from CodeReviewer agent
 - Make necessary adjustments to configuration
 - Update documentation based on feedback
 - Ensure all review concerns are addressed

@@ -12,11 +12,11 @@ Load when encountering:
 ### Agent Not Found
 ```bash
 # Check files exist
-ls -la .claude/agents/orchestrator-agent.md
+ls -la .claude/agents/OrchestratorAgent.md
 ls -la src/orchestrator/
 
 # Restore from main if missing
-git checkout main -- .claude/agents/orchestrator-agent.md
+git checkout main -- .claude/agents/OrchestratorAgent.md
 git checkout main -- src/orchestrator/
 ```
 
@@ -31,13 +31,13 @@ df -h   # Disk space
 free -h # Memory
 
 # Restart with logging
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 ```
 
 ### Task Analysis Fails
 **Fallback to WorkflowManager:**
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Execute workflow for /prompts/single-task.md
 Emergency fallback: orchestrator failure
@@ -116,7 +116,7 @@ git status            # Repository
 git worktree list     # Worktrees
 
 # Test basic functionality
-/agent:task-analyzer
+/agent:TaskAnalyzer
 Simple test task
 ```
 
@@ -125,7 +125,7 @@ Simple test task
 ### Level 1: Use WorkflowManager
 When orchestrator fails completely:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 Task: [specific task]
 Fallback from orchestrator failure
 ```

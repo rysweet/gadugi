@@ -11,7 +11,7 @@ from claude.agents.base.v03_agent import V03Agent, AgentCapabilities, TaskOutcom
 
 
 class TestWorkflowAgent(V03Agent):
-    """Test implementation of workflow-manager with v0.3 memory."""
+    """Test implementation of WorkflowManager with v0.3 memory."""
 
     def __init__(self):
         capabilities = AgentCapabilities(
@@ -21,7 +21,7 @@ class TestWorkflowAgent(V03Agent):
             max_parallel_tasks=5,
         )
         super().__init__(
-            agent_id="workflow_test_001", agent_type="workflow-manager", capabilities=capabilities
+            agent_id="workflow_test_001", agent_type="WorkflowManager", capabilities=capabilities
         )
 
     async def execute_task(self, task: dict) -> TaskOutcome:

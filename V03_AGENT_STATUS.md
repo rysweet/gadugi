@@ -7,11 +7,11 @@ The agents in `.claude/agents/` are **NOT fully integrated** with v0.3 services.
 ### What Exists
 
 1. **Agent Markdown Files** (in `.claude/agents/`):
-   - workflow-manager.md
-   - orchestrator-agent.md
-   - task-research-agent.md
-   - memory-manager.md
-   - event-router-manager.md
+   - WorkflowManager.md
+   - OrchestratorAgent.md
+   - TaskResearchAgent.md
+   - MemoryManager.md
+   - EventRouterManager.md
    - etc.
 
 2. **Some Python Implementations** (in `.claude/agents/`):

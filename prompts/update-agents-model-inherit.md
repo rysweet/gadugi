@@ -15,34 +15,34 @@ Currently, agent files have inconsistent model specifications in their frontmatt
 
 ### 2. Files to Update
 All 28 agent files in `.claude/agents/`:
-- agent-updater.md
-- claude-settings-update.md
-- code-review-response.md
-- code-reviewer.md
-- execution-monitor.md
+- AgentUpdater.md
+- ClaudeSettingsUpdate.md
+- CodeReviewResponse.md
+- CodeReviewer.md
+- ExecutionMonitor.md
 - gadugi.md
-- memory-manager.md
-- orchestrator-agent.md
-- pr-backlog-manager.md
-- program-manager.md
-- prompt-writer.md
-- readme-agent.md
-- system-design-reviewer.md
-- task-analyzer.md
-- task-bounds-eval.md
-- task-decomposer.md
-- task-research-agent.md
-- team-coach.md
-- teamcoach-agent.md
-- test-solver.md
-- test-writer.md
-- type-fix-agent.md
-- workflow-manager-phase9-enforcement.md
-- workflow-manager-simplified.md
-- workflow-manager.md
-- workflow-phase-reflection.md
-- worktree-manager.md
-- xpia-defense-agent.md
+- MemoryManager.md
+- OrchestratorAgent.md
+- PrBacklogManager.md
+- ProgramManager.md
+- PromptWriter.md
+- ReadmeAgent.md
+- SystemDesignReviewer.md
+- TaskAnalyzer.md
+- TaskBoundsEval.md
+- TaskDecomposer.md
+- TaskResearchAgent.md
+- TeamCoach.md
+- TeamcoachAgent.md
+- TestSolver.md
+- TestWriter.md
+- TypeFixAgent.md
+- WorkflowManagerPhase9Enforcement.md
+- WorkflowManagerSimplified.md
+- WorkflowManager.md
+- WorkflowPhaseReflection.md
+- WorktreeManager.md
+- XpiaDefenseAgent.md
 
 ### 3. Frontmatter Format
 Ensure all agent files follow this structure:

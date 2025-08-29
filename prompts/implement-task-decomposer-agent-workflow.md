@@ -1,16 +1,16 @@
 # WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: implement-task-decomposer-agent
-- **Task Name**: implement-task-decomposer-agent
-- **Original Prompt**: /Users/ryan/src/gadugi2/gadugi/.worktrees/task-implement-task-decomposer-agent/prompts/implement-task-decomposer-agent-workflow.md
+- **Task ID**: implement-TaskDecomposer-agent
+- **Task Name**: implement-TaskDecomposer-agent
+- **Original Prompt**: /Users/ryan/src/gadugi2/gadugi/.worktrees/task-implement-TaskDecomposer-agent/prompts/implement-TaskDecomposer-agent-workflow.md
 - **Phase Focus**: Full Implementation
 
 ## Implementation Requirements
 
 ### Location
-- Agent directory: `.claude/agents/task-decomposer/`
-- Recipe directory: `.claude/recipes/task-decomposer/`
+- Agent directory: `.claude/agents/TaskDecomposer/`
+- Recipe directory: `.claude/recipes/TaskDecomposer/`
 
 ### Core Functionality
 1. **Task Analysis**
@@ -35,7 +35,7 @@
 
 #### Agent Structure
 ```python
-# .claude/agents/task-decomposer/task_decomposer.py
+# .claude/agents/TaskDecomposer/task_decomposer.py
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -95,8 +95,8 @@ class TaskDecomposer(BaseAgent):
 
 #### Recipe Structure
 ```yaml
-# .claude/recipes/task-decomposer/recipe.yaml
-name: task-decomposer
+# .claude/recipes/TaskDecomposer/recipe.yaml
+name: TaskDecomposer
 version: 1.0.0
 description: Intelligent task decomposition and parallelization analysis
 
@@ -249,16 +249,16 @@ No specific dependencies identified.
 # WorkflowManager Task Execution
 
 ## Task Information
-- **Task ID**: implement-task-decomposer-agent
+- **Task ID**: implement-TaskDecomposer-agent
 - **Task Name**: Implement Task Decomposer Agent (#240)
-- **Original Prompt**: /Users/ryan/src/gadugi2/gadugi/prompts/implement-task-decomposer-agent.md
+- **Original Prompt**: /Users/ryan/src/gadugi2/gadugi/prompts/implement-TaskDecomposer-agent.md
 - **Phase Focus**: Full Implementation
 
 ## Implementation Requirements
 
 ### Location
-- Agent directory: `.claude/agents/task-decomposer/`
-- Recipe directory: `.claude/recipes/task-decomposer/`
+- Agent directory: `.claude/agents/TaskDecomposer/`
+- Recipe directory: `.claude/recipes/TaskDecomposer/`
 
 ### Core Functionality
 1. **Task Analysis**
@@ -283,7 +283,7 @@ No specific dependencies identified.
 
 #### Agent Structure
 ```python
-# .claude/agents/task-decomposer/task_decomposer.py
+# .claude/agents/TaskDecomposer/task_decomposer.py
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -343,8 +343,8 @@ class TaskDecomposer(BaseAgent):
 
 #### Recipe Structure
 ```yaml
-# .claude/recipes/task-decomposer/recipe.yaml
-name: task-decomposer
+# .claude/recipes/TaskDecomposer/recipe.yaml
+name: TaskDecomposer
 version: 1.0.0
 description: Intelligent task decomposition and parallelization analysis
 
@@ -500,8 +500,8 @@ Create the Task Decomposer agent that intelligently breaks down complex tasks in
 ## Requirements
 
 ### Location
-- Agent directory: `.claude/agents/task-decomposer/`
-- Recipe directory: `.claude/recipes/task-decomposer/`
+- Agent directory: `.claude/agents/TaskDecomposer/`
+- Recipe directory: `.claude/recipes/TaskDecomposer/`
 
 ### Core Functionality
 1. **Task Analysis**
@@ -526,7 +526,7 @@ Create the Task Decomposer agent that intelligently breaks down complex tasks in
 
 #### Agent Structure
 ```python
-# .claude/agents/task-decomposer/task_decomposer.py
+# .claude/agents/TaskDecomposer/task_decomposer.py
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -586,8 +586,8 @@ class TaskDecomposer(BaseAgent):
 
 #### Recipe Structure
 ```yaml
-# .claude/recipes/task-decomposer/recipe.yaml
-name: task-decomposer
+# .claude/recipes/TaskDecomposer/recipe.yaml
+name: TaskDecomposer
 version: 1.0.0
 description: Intelligent task decomposition and parallelization analysis
 

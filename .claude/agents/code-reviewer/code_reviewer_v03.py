@@ -82,7 +82,7 @@ class CodeReviewerV03(V03Agent):
 
         super().__init__(
             agent_id="code_reviewer_v03",
-            agent_type="code-reviewer",
+            agent_type="CodeReviewer",
             capabilities=capabilities
         )
 

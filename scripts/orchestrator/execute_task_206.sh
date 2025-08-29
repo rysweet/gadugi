@@ -9,7 +9,7 @@ echo "Starting WorkflowManager for Issue #206 in $(pwd)"
 
 # Execute WorkflowManager for Issue #206
 claude -p - <<'EOF'
-/agent:workflow-manager
+/agent:WorkflowManager
 
 ## Task Context
 Task ID: task-20250807-132118-a66f199e
@@ -43,7 +43,7 @@ Execute the complete 11-phase workflow to reorganize project structure by:
    - Verify all moved file references are updated
 7. **Documentation Phase**: Update any affected documentation
 8. **PR Creation Phase**: Create PR for Issue #206
-9. **Review Phase**: Invoke code-reviewer agent
+9. **Review Phase**: Invoke CodeReviewer agent
 10. **Review Response Phase**: Address any review feedback
 11. **Settings Update Phase**: Update Memory.md
 

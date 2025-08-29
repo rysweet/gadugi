@@ -1,7 +1,7 @@
 # Claude Settings Update Agent Implementation
 
 ## Overview
-Create a new specialized agent called `claude-settings-update` that merges `.claude/settings.local.json` into `.claude/settings.json` and maintains an alphabetically sorted allow-list. This agent will be integrated into the WorkflowManager's Phase 10 (after code-review-response) to ensure Claude settings are consistently updated after each workflow session.
+Create a new specialized agent called `ClaudeSettingsUpdate` that merges `.claude/settings.local.json` into `.claude/settings.json` and maintains an alphabetically sorted allow-list. This agent will be integrated into the WorkflowManager's Phase 10 (after CodeReviewResponse) to ensure Claude settings are consistently updated after each workflow session.
 
 ## Problem Statement
 Currently, there's no automated way to merge local Claude settings changes into the main settings file. This leads to:
@@ -21,10 +21,10 @@ The new agent should handle this maintenance automatically as part of the standa
 4. **Separate PR Creation**: Settings updates should be in a separate PR from the main workflow
 5. **Branch Management**: Switch back to main workflow branch after settings PR creation
 6. **Graceful Handling**: Handle cases where settings.local.json doesn't exist
-7. **WorkflowManager Integration**: Be invoked automatically in Phase 10 after code-review-response
+7. **WorkflowManager Integration**: Be invoked automatically in Phase 10 after CodeReviewResponse
 
 ### Integration Points
-- **WorkflowManager Phase 10**: Add invocation after code-review-response agent
+- **WorkflowManager Phase 10**: Add invocation after CodeReviewResponse agent
 - **Branch Naming**: Use pattern `chore/update-claude-settings-TIMESTAMP`
 - **PR Creation**: Use GitHub CLI for automated PR creation
 - **State Management**: Update workflow state to track settings update PR
@@ -39,10 +39,10 @@ The new agent should handle this maintenance automatically as part of the standa
 
 ### File Structure
 The agent will be created at:
-- `.claude/agents/claude-settings-update.md`
+- `.claude/agents/ClaudeSettingsUpdate.md`
 
 And will modify:
-- `.claude/agents/workflow-manager.md` (add Phase 10 integration)
+- `.claude/agents/WorkflowManager.md` (add Phase 10 integration)
 
 ## Testing Requirements
 
@@ -99,7 +99,7 @@ And will modify:
 ✅ **Performance**: Efficient processing without unnecessary operations
 
 ### Integration Requirements
-✅ **Phase 10 Integration**: WorkflowManager automatically invokes after code-review-response
+✅ **Phase 10 Integration**: WorkflowManager automatically invokes after CodeReviewResponse
 ✅ **State Consistency**: Workflow state properly updated with settings PR information
 ✅ **Branch Isolation**: Settings changes don't interfere with main workflow PR
 ✅ **Recovery Support**: Workflow can resume if settings update fails
@@ -109,11 +109,11 @@ And will modify:
 ### Phase 1: Agent Creation
 1. Create GitHub issue for tracking
 2. Create feature branch for implementation
-3. Implement claude-settings-update.md agent
+3. Implement ClaudeSettingsUpdate.md agent
 4. Create comprehensive test suite
 
 ### Phase 2: WorkflowManager Integration
-1. Update workflow-manager.md to include Phase 10 settings update
+1. Update WorkflowManager.md to include Phase 10 settings update
 2. Add proper error handling and state management
 3. Test integration thoroughly
 

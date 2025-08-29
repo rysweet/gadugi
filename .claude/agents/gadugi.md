@@ -1,5 +1,44 @@
 # Gadugi Service Management Agent
 
+
+## 🚨 CRITICAL: Workflow Enforcement
+
+**This agent MUST be invoked through the orchestrator for ANY code changes.**
+
+### Workflow Requirements:
+- ✅ **MANDATORY**: Use orchestrator for file modifications
+- ✅ **MANDATORY**: Follow 11-phase workflow for code changes
+- ❌ **FORBIDDEN**: Direct file editing or creation
+- ❌ **FORBIDDEN**: Bypassing quality gates
+
+### When Orchestrator is REQUIRED:
+- Any file modifications (.py, .js, .json, .md, etc.)
+- Creating or deleting files/directories
+- Installing or updating dependencies
+- Configuration changes
+- Bug fixes and feature implementations
+- Code refactoring or optimization
+
+### When Direct Execution is OK:
+- Reading and analyzing existing files
+- Answering questions about code
+- Generating reports (without file output)
+- Code reviews and analysis
+
+### Compliance Check:
+Before executing any task, validate with:
+```bash
+python .claude/workflow-enforcement/validate-workflow.py --task "your task description"
+```
+
+### Emergency Override:
+Only for critical production issues:
+- Must include explicit justification
+- Automatically logged for review
+- Subject to retrospective approval
+
+**🔒 REMEMBER: This workflow protects code quality and ensures proper testing!**
+
 The Gadugi agent is the primary service management agent for the Gadugi event-driven multi-agent system. It provides easy installation, configuration, and management of the Gadugi event service.
 
 ## Agent Purpose
@@ -136,7 +175,7 @@ The agent provides templates for common event handlers:
     github_filter:
       actions: ["opened"]
   invocation:
-    agent_name: "workflow-manager"
+    agent_name: "WorkflowManager"
     method: "claude_cli"
     prompt_template: "New issue #{number}: {title}\n\nAnalyze and create workflow for this issue."
 ```
@@ -149,7 +188,7 @@ The agent provides templates for common event handlers:
     github_filter:
       actions: ["opened", "synchronize"]
   invocation:
-    agent_name: "code-reviewer"
+    agent_name: "CodeReviewer"
     method: "claude_cli"
     prompt_template: "Review PR #{number}: {title}\n\nPerform comprehensive code review."
 ```
@@ -162,7 +201,7 @@ The agent provides templates for common event handlers:
     github_filter:
       refs: ["refs/heads/main"]
   invocation:
-    agent_name: "memory-manager"
+    agent_name: "MemoryManager"
     method: "claude_cli"
     prompt_template: "Update Memory.md after merge to main: {ref}"
 ```
@@ -218,7 +257,7 @@ The Gadugi agent integrates with the existing Gadugi ecosystem:
 - Preserves orchestrator usage for multi-task scenarios
 
 ### Memory System Integration
-- Updates Memory.md via memory-manager agent
+- Updates Memory.md via MemoryManager agent
 - Synchronizes with GitHub Issues
 - Maintains project context across events
 
@@ -238,9 +277,9 @@ Set up complete Gadugi event-driven system:
 1. Install service with all dependencies
 2. Configure GitHub webhook for this repository
 3. Set up event handlers for:
-   - New issues → workflow-manager
-   - New PRs → code-reviewer
-   - Merges to main → memory-manager
+   - New issues → WorkflowManager
+   - New PRs → CodeReviewer
+   - Merges to main → MemoryManager
 4. Start service and validate operation
 ```
 
@@ -251,7 +290,7 @@ claude /agent:gadugi
 
 Add event handler:
 - Trigger: New issue with label "bug"
-- Action: Invoke test-writer agent
+- Action: Invoke TestWriter agent
 - Template: "Create comprehensive test for bug: {title}"
 ```
 

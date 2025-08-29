@@ -58,14 +58,14 @@ While Team Coach normally runs automatically, you can invoke it manually for spe
 
 ### Manual Invocation Command
 ```
-/agent:team-coach
+/agent:TeamCoach
 
 Analyze the current session and provide improvement recommendations.
 ```
 
 ## Configuration
 
-The Team Coach agent is configured in `.claude/agents/team-coach.md` with:
+The Team Coach agent is configured in `.claude/agents/TeamCoach.md` with:
 - Proper YAML frontmatter for agent registration
 - Tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
 - Model: inherit (uses the same model as the main Claude session)
@@ -80,8 +80,8 @@ The Team Coach agent is configured in `.claude/agents/team-coach.md` with:
 ## Troubleshooting
 
 ### Team Coach Doesn't Run
-- Check that Phase 13 is enabled in workflow-manager.md
-- Verify team-coach.md has proper YAML frontmatter
+- Check that Phase 13 is enabled in WorkflowManager.md
+- Verify TeamCoach.md has proper YAML frontmatter
 - Ensure no error suppression (`2>/dev/null`) in Phase 13 execution
 
 ### Issues Not Created

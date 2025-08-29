@@ -83,7 +83,7 @@ class StateManager:
     """Fallback state manager implementation"""
 
     def __init__(self, state_dir: Optional[Path] = None, task_id: str = "fallback"):
-        self.state_dir = state_dir or Path(".github/workflow-states/system-design-reviewer")
+        self.state_dir = state_dir or Path(".github/workflow-states/SystemDesignReviewer")
         self.task_id = task_id
         self.state_file = self.state_dir / "fallback_state.json"
         self.state_dir.mkdir(parents=True, exist_ok=True)

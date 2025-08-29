@@ -12,9 +12,9 @@ This plan details the migration of Gadugi v0.3 Python implementations to comply 
 - **16 agent specifications** in `agents/` directory (markdown format)
 
 ### 2. .claude/ Directory Structure
-- **New executor agents** created: code-executor, github-executor, test-executor, worktree-executor
+- **New executor agents** created: CodeExecutor, GitHubExecutor, TestExecutor, WorktreeExecutor
 - **Python orchestrator code** in `.claude/agents/orchestrator/`
-- **Legacy agents** still present (orchestrator-agent.md, workflow-manager.md, etc.)
+- **Legacy agents** still present (OrchestratorAgent.md, WorkflowManager.md, etc.)
 
 ### 3. Key Architecture Changes Required
 - **Remove all agent-to-agent delegation** - agents cannot call other agents
@@ -81,21 +81,21 @@ class CodeExecutor:
 #### 2.3 Agent Categories and Responsibilities
 
 **Pure Executors (NEW):**
-- `code-executor`: File writing and editing only
-- `test-executor`: Test execution only  
-- `github-executor`: GitHub operations only
-- `worktree-executor`: Git worktree operations only
+- `CodeExecutor`: File writing and editing only
+- `TestExecutor`: Test execution only  
+- `GitHubExecutor`: GitHub operations only
+- `WorktreeExecutor`: Git worktree operations only
 
 **Analysis Agents (keep single-purpose):**
-- `task-analyzer`: Analyze task dependencies only
+- `TaskAnalyzer`: Analyze task dependencies only
 - `architect`: Design architecture only
-- `code-reviewer`: Review code only
+- `CodeReviewer`: Review code only
 
 **Generator Agents (keep single-purpose):**
 - `agent-generator`: Generate agent templates only
-- `prompt-writer`: Write prompts only
-- `test-writer`: Write tests only
-- `readme-agent`: Generate documentation only
+- `PromptWriter`: Write prompts only
+- `TestWriter`: Write tests only
+- `ReadmeAgent`: Generate documentation only
 
 ### Phase 3: Service Integration
 
@@ -162,21 +162,21 @@ This agent MUST NOT call or delegate to other agents. All operations must be dir
 3. Set up test framework
 
 ### Week 2: Core Executors
-1. Implement code-executor from code_writer_engine.py
-2. Implement test-executor from test_agent_engine.py
-3. Implement github-executor (new)
-4. Implement worktree-executor from worktree_manager_engine.py
+1. Implement CodeExecutor from code_writer_engine.py
+2. Implement TestExecutor from test_agent_engine.py
+3. Implement GitHubExecutor (new)
+4. Implement WorktreeExecutor from worktree_manager_engine.py
 
 ### Week 3: Analysis Agents
-1. Refactor task-analyzer (remove delegation)
+1. Refactor TaskAnalyzer (remove delegation)
 2. Refactor architect (single-purpose)
-3. Refactor code-reviewer (single-purpose)
+3. Refactor CodeReviewer (single-purpose)
 
 ### Week 4: Generator Agents
 1. Refactor agent-generator
-2. Refactor prompt-writer
-3. Refactor test-writer
-4. Refactor readme-agent
+2. Refactor PromptWriter
+3. Refactor TestWriter
+4. Refactor ReadmeAgent
 
 ### Week 5: Integration and Testing
 1. Update all tests

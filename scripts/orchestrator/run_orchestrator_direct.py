@@ -91,7 +91,7 @@ Execute complete 11-phase workflow:
 
 CRITICAL: This is a UV project - use 'uv run' for all Python commands
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow to achieve ZERO pyright errors.
 """

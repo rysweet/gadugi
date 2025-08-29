@@ -59,8 +59,8 @@ Successfully created simplified single-purpose executors in `.claude/executors/`
 4. **Move services** from gadugi-v0.3/services/ to .claude/services/
 
 ### Architecture Validation
-- [ ] Run system-design-reviewer on new architecture
-- [ ] Code review with code-reviewer agent
+- [ ] Run SystemDesignReviewer on new architecture
+- [ ] Code review with CodeReviewer agent
 - [ ] Performance benchmarking
 - [ ] Documentation updates
 

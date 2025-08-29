@@ -139,8 +139,8 @@ The existing system consists of:
 │   └── guidelines.md    # Coding standards and conventions
 ├── agents/              # Individual agent memories (checked in)
 │   ├── orchestrator.md  # OrchestratorAgent specific knowledge
-│   ├── workflow-manager.md # WorkflowManager specific knowledge
-│   ├── code-reviewer.md # CodeReviewer specific knowledge
+│   ├── WorkflowManager.md # WorkflowManager specific knowledge
+│   ├── CodeReviewer.md # CodeReviewer specific knowledge
 │   └── [agent-name].md  # Other agent-specific memories
 ├── organization/        # Cross-project knowledge (checked in)
 │   ├── practices.md     # Organizational best practices
@@ -598,7 +598,7 @@ mkdir -p .memory/tasks/temp
    - Verify performance and functionality
 
 3. **Old System Removal**
-   - Remove .github/memory-manager/ directory
+   - Remove .github/MemoryManager/ directory
    - Clean up old Memory.md integration code
    - Update documentation references
    - Archive old system components

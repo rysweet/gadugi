@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Fix type errors in team-coach modules.
-This script will systematically fix common type errors across all team-coach files.
+Fix type errors in TeamCoach modules.
+This script will systematically fix common type errors across all TeamCoach files.
 """
 
 import os
@@ -83,7 +83,7 @@ def ensure_optional_import(content: str) -> str:
     return content
 
 def fix_type_aliases(content: str) -> str:
-    """Fix type alias conflicts in team-coach modules."""
+    """Fix type alias conflicts in TeamCoach modules."""
     # Fix duplicate class imports
     if 'from ..phase1.capability_assessment import' in content:
         lines = content.split('\n')
@@ -176,17 +176,17 @@ def process_file(file_path: Path) -> bool:
         return False
 
 def main():
-    """Main function to process all team-coach files."""
-    team_coach_dir = Path('/home/rysweet/gadugi/.claude/agents/team-coach')
+    """Main function to process all TeamCoach files."""
+    team_coach_dir = Path('/home/rysweet/gadugi/.claude/agents/TeamCoach')
     
     if not team_coach_dir.exists():
         print(f"Directory not found: {team_coach_dir}")
         return
     
-    # Find all Python files in team-coach directory
+    # Find all Python files in TeamCoach directory
     python_files = list(team_coach_dir.glob('**/*.py'))
     
-    print(f"Found {len(python_files)} Python files in team-coach directory")
+    print(f"Found {len(python_files)} Python files in TeamCoach directory")
     
     fixed_count = 0
     for file_path in python_files:

@@ -30,14 +30,14 @@ claude -p prompt.md \
 - Progress tracking and status updates
 
 ### 5. Proper Task Decomposition
-- Use task-analyzer agent for intelligent decomposition
+- Use TaskAnalyzer agent for intelligent decomposition
 - Identify parallelizable vs sequential tasks
 - Handle dependencies correctly
 
 ## Current Issues to Fix
 
 1. **Subprocess Instead of Containers**: Uses `subprocess.Popen` directly without container isolation
-2. **Wrong CLI Invocation**: Uses `/agent:workflow-manager` instead of `claude -p` with prompt files
+2. **Wrong CLI Invocation**: Uses `/agent:WorkflowManager` instead of `claude -p` with prompt files
 3. **Missing Automation Flags**: No `--dangerously-skip-permissions` for automation
 4. **ThreadPool Instead of Containers**: Uses ThreadPoolExecutor instead of true parallel containers
 5. **No Real-time Monitoring**: Missing output streaming and observability
@@ -77,7 +77,7 @@ claude -p prompt.md \
 ### Files to Modify
 - `.claude/orchestrator/orchestrator_main.py` - Integrate container execution
 - `.claude/orchestrator/components/execution_engine.py` - Replace subprocess with containers
-- `.claude/agents/orchestrator-agent.md` - Update documentation
+- `.claude/agents/OrchestratorAgent.md` - Update documentation
 
 ## Success Criteria
 - 3-5x speedup for parallel tasks

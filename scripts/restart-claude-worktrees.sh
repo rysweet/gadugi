@@ -5,7 +5,7 @@
 WORKTREES=(
     "/Users/ryan/src/gadugi"
     "/Users/ryan/src/gadugi/.worktrees/memory-github-pr14-20250801-142454"
-    "/Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation"
+    "/Users/ryan/src/gadugi/.worktrees/PrBacklogManager-implementation"
     "/Users/ryan/src/gadugi/.worktrees/pr25-review-20250801-164649-4741"
     "/Users/ryan/src/gadugi/.worktrees/teamcoach-implementation"
     "/Users/ryan/src/gadugi/.worktrees/uv-migration-20250802"

@@ -108,7 +108,7 @@ Missing from plan:
 
 ### Immediate Actions (Day 1)
 - [ ] Create `.claude/executors/` directory
-- [ ] Migrate code-executor with NO delegation
+- [ ] Migrate CodeExecutor with NO delegation
 - [ ] Update CLAUDE.md with basic orchestration
 - [ ] Test single file write operation end-to-end
 
@@ -134,9 +134,9 @@ The plan is APPROVED subject to:
 
 ## Next Steps
 
-1. **Immediate**: Begin with code-executor migration as proof of concept
-2. **Day 2**: Update CLAUDE.md with orchestration for code-executor
-3. **Day 3**: Add test-executor and validate pattern
+1. **Immediate**: Begin with CodeExecutor migration as proof of concept
+2. **Day 2**: Update CLAUDE.md with orchestration for CodeExecutor
+3. **Day 3**: Add TestExecutor and validate pattern
 4. **Day 4**: Review progress and adjust plan
 5. **Day 5**: MVP demonstration
 

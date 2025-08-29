@@ -265,11 +265,11 @@ class PhaseEnforcer:
             if not pr_number:
                 return False, "No PR number available for code review", {}
 
-            # Method 1: Invoke code-reviewer agent using Claude CLI
+            # Method 1: Invoke CodeReviewer agent using Claude CLI
             try:
                 cmd = [
                     'claude', '-p',
-                    f'/agent:code-reviewer\n\nReview PR #{pr_number} with comprehensive analysis'
+                    f'/agent:CodeReviewer\n\nReview PR #{pr_number} with comprehensive analysis'
                 ]
 
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)

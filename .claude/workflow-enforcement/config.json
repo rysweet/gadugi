@@ -1,0 +1,44 @@
+{
+  "enforcement_level": "warning",
+  "auto_redirect": true,
+  "log_violations": true,
+  "log_compliant": true,
+  "monitoring": {
+    "enabled": true,
+    "interval": 30,
+    "check_git_status": true,
+    "check_file_changes": true,
+    "check_orchestrator_status": true
+  },
+  "notifications": {
+    "violation_warnings": true,
+    "compliance_reminders": true,
+    "weekly_reports": false
+  },
+  "emergency_override": {
+    "enabled": true,
+    "require_justification": true,
+    "log_overrides": true
+  },
+  "excluded_paths": [
+    ".git/",
+    "node_modules/",
+    "__pycache__/",
+    "*.pyc",
+    "*.log",
+    ".DS_Store"
+  ],
+  "required_workflow_phases": [
+    "task_validation",
+    "environment_setup",
+    "dependency_analysis",
+    "worktree_creation",
+    "implementation",
+    "testing",
+    "quality_gates",
+    "documentation",
+    "review",
+    "integration",
+    "cleanup"
+  ]
+}

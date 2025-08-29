@@ -39,9 +39,9 @@ class TaskOrchestrator:
                 "description": "Fix all remaining pyright errors across v0.3 components",
             },
             {
-                "id": "complete-team-coach",
+                "id": "complete-TeamCoach",
                 "name": "Complete Team Coach Implementation",
-                "prompt_file": "complete-team-coach-implementation.md",
+                "prompt_file": "complete-TeamCoach-implementation.md",
                 "description": "Implement the Team Coach agent for session analysis",
             },
             {
@@ -151,7 +151,7 @@ Execute the complete 11-phase workflow:
 6. Phase 6: Testing (MUST pass all tests)
 7. Phase 7: Documentation
 8. Phase 8: Pull Request Creation
-9. Phase 9: Code Review (invoke code-reviewer)
+9. Phase 9: Code Review (invoke CodeReviewer)
 10. Phase 10: Review Response
 11. Phase 11: Settings Update
 
@@ -161,7 +161,7 @@ Execute the complete 11-phase workflow:
 - All tests MUST pass before PR creation
 - Execute all work in the specified worktree
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for {task_id} using prompt file {prompt_file}
 """

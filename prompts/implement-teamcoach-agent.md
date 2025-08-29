@@ -202,7 +202,7 @@ class TeamCompositionOptimizer:
 ## Implementation Steps
 
 1. **Create GitHub Issue**: Document TeamCoach agent requirements and capabilities
-2. **Create Feature Branch**: `feature-teamcoach-agent-implementation`
+2. **Create Feature Branch**: `feature-TeamcoachAgent-implementation`
 3. **Research Phase**: Analyze team coordination patterns and optimization strategies
 4. **Performance Analytics Engine**: Build comprehensive agent performance monitoring
 5. **Capability Assessment System**: Implement agent capability evaluation framework

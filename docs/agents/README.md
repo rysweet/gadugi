@@ -6,39 +6,39 @@ Complete catalog of all Gadugi agents with descriptions, usage examples, and pat
 
 ```
 Orchestration Layer (Coordination)
-├── orchestrator-agent (Main coordinator)
-├── task-analyzer (Dependency analysis)
-├── worktree-manager (Environment isolation)
-└── execution-monitor (Progress tracking)
+├── OrchestratorAgent (Main coordinator)
+├── TaskAnalyzer (Dependency analysis)
+├── WorktreeManager (Environment isolation)
+└── ExecutionMonitor (Progress tracking)
 
 Implementation Layer (Development)
-├── workflow-manager (11-phase executor)
-├── prompt-writer (Structured prompts)
-├── test-writer (Test generation)
-├── test-solver (Test diagnosis)
-└── type-fix-agent (Type resolution)
+├── WorkflowManager (11-phase executor)
+├── PromptWriter (Structured prompts)
+├── TestWriter (Test generation)
+├── TestSolver (Test diagnosis)
+└── TypeFixAgent (Type resolution)
 
 Review Layer (Quality)
-├── code-reviewer (PR reviews)
-├── code-review-response (Feedback processing)
-└── system-design-reviewer (Architecture review)
+├── CodeReviewer (PR reviews)
+├── CodeReviewResponse (Feedback processing)
+└── SystemDesignReviewer (Architecture review)
 
 Maintenance Layer (Health)
-├── pr-backlog-manager (PR queue)
-├── agent-updater (Version management)
-├── memory-manager (Context curation)
-├── readme-agent (Documentation)
-└── claude-settings-update (Configuration)
+├── PrBacklogManager (PR queue)
+├── AgentUpdater (Version management)
+├── MemoryManager (Context curation)
+├── ReadmeAgent (Documentation)
+└── ClaudeSettingsUpdate (Configuration)
 ```
 
 ## Orchestration Layer Agents
 
-### orchestrator-agent
+### OrchestratorAgent
 **Purpose**: Coordinate parallel execution of multiple tasks
 
 **Usage**:
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - implement-feature-a.md
@@ -51,12 +51,12 @@ Execute these specific prompts in parallel:
 - Need for parallel execution
 - Complex multi-step workflows
 
-### task-analyzer
+### TaskAnalyzer
 **Purpose**: Analyze task dependencies and parallelization opportunities
 
 **Usage**:
 ```
-/agent:task-analyzer
+/agent:TaskAnalyzer
 
 Analyze these tasks for dependencies:
 - Update database schema
@@ -69,12 +69,12 @@ Analyze these tasks for dependencies:
 - Understanding task relationships
 - Optimizing execution order
 
-### worktree-manager
+### WorktreeManager
 **Purpose**: Create and manage isolated git worktree environments
 
 **Usage**:
 ```
-/agent:worktree-manager
+/agent:WorktreeManager
 
 Create a new git worktree for issue #123.
 Branch name: feature/issue-123-description
@@ -85,12 +85,12 @@ Branch name: feature/issue-123-description
 - Need isolated development environment
 - Parallel development tasks
 
-### execution-monitor
+### ExecutionMonitor
 **Purpose**: Monitor and track parallel execution progress
 
 **Usage**:
 ```
-/agent:execution-monitor
+/agent:ExecutionMonitor
 
 Monitor these executing tasks:
 - task-id-123 in worktree-a
@@ -104,12 +104,12 @@ Monitor these executing tasks:
 
 ## Implementation Layer Agents
 
-### workflow-manager
+### WorkflowManager
 **Purpose**: Execute complete 11-phase development workflows
 
 **Usage**:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Implement the user authentication feature described in issue #123.
 This requires adding login/logout endpoints, session management, and tests.
@@ -120,12 +120,12 @@ This requires adding login/logout endpoints, session management, and tests.
 - Single feature implementation
 - Bug fixes with full workflow
 
-### prompt-writer
+### PromptWriter
 **Purpose**: Create structured prompts for complex tasks
 
 **Usage**:
 ```
-/agent:prompt-writer
+/agent:PromptWriter
 
 Create a detailed prompt for implementing a caching system with Redis.
 Include requirements, acceptance criteria, and test scenarios.
@@ -136,12 +136,12 @@ Include requirements, acceptance criteria, and test scenarios.
 - Creating reusable task templates
 - Documenting requirements
 
-### test-writer
+### TestWriter
 **Purpose**: Generate comprehensive test suites
 
 **Usage**:
 ```
-/agent:test-writer
+/agent:TestWriter
 
 Write unit tests for the authentication module.
 Cover login, logout, session management, and error cases.
@@ -152,12 +152,12 @@ Cover login, logout, session management, and error cases.
 - TDD approach
 - Regression test creation
 
-### test-solver
+### TestSolver
 **Purpose**: Diagnose and fix failing tests
 
 **Usage**:
 ```
-/agent:test-solver
+/agent:TestSolver
 
 Fix the failing tests in test_auth.py.
 Tests are failing with "connection refused" errors.
@@ -168,12 +168,12 @@ Tests are failing with "connection refused" errors.
 - Debugging test issues
 - Test environment problems
 
-### type-fix-agent
+### TypeFixAgent
 **Purpose**: Resolve type checking errors
 
 **Usage**:
 ```
-/agent:type-fix-agent
+/agent:TypeFixAgent
 
 Fix all pyright type errors in the auth module.
 Focus on proper type annotations and generics.
@@ -186,12 +186,12 @@ Focus on proper type annotations and generics.
 
 ## Review Layer Agents
 
-### code-reviewer
+### CodeReviewer
 **Purpose**: Perform automated code reviews on pull requests
 
 **Usage**:
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Review PR #123 - Authentication feature implementation
 Focus on security, code quality, and test coverage.
@@ -202,12 +202,12 @@ Focus on security, code quality, and test coverage.
 - Manual review requests
 - Security audits
 
-### code-review-response
+### CodeReviewResponse
 **Purpose**: Process and implement code review feedback
 
 **Usage**:
 ```
-/agent:code-review-response
+/agent:CodeReviewResponse
 
 Address the code review feedback for PR #123.
 Implement requested changes and respond to comments.
@@ -218,12 +218,12 @@ Implement requested changes and respond to comments.
 - Implementing requested changes
 - Resolving review discussions
 
-### system-design-reviewer
+### SystemDesignReviewer
 **Purpose**: Review architectural changes and system design
 
 **Usage**:
 ```
-/agent:system-design-reviewer
+/agent:SystemDesignReviewer
 
 Review the proposed microservices architecture in PR #123.
 Evaluate scalability, maintainability, and design patterns.
@@ -236,12 +236,12 @@ Evaluate scalability, maintainability, and design patterns.
 
 ## Maintenance Layer Agents
 
-### pr-backlog-manager
+### PrBacklogManager
 **Purpose**: Manage PR queue and assess readiness
 
 **Usage**:
 ```
-/agent:pr-backlog-manager
+/agent:PrBacklogManager
 
 Analyze all open PRs and prioritize for review.
 Check for conflicts, CI status, and review readiness.
@@ -252,12 +252,12 @@ Check for conflicts, CI status, and review readiness.
 - Prioritizing review queue
 - Identifying blocked PRs
 
-### agent-updater
+### AgentUpdater
 **Purpose**: Check for and apply agent updates
 
 **Usage**:
 ```
-/agent:agent-updater
+/agent:AgentUpdater
 
 Check for updates to all agents and apply if available.
 Verify compatibility and run tests after updates.
@@ -268,12 +268,12 @@ Verify compatibility and run tests after updates.
 - Before major releases
 - Agent behavior issues
 
-### memory-manager
+### MemoryManager
 **Purpose**: Maintain Memory.md and sync with GitHub Issues
 
 **Usage**:
 ```
-/agent:memory-manager
+/agent:MemoryManager
 
 Prune old entries from Memory.md and sync with GitHub Issues.
 Keep only relevant context and active tasks.
@@ -284,12 +284,12 @@ Keep only relevant context and active tasks.
 - Syncing tasks with issues
 - Context cleanup
 
-### readme-agent
+### ReadmeAgent
 **Purpose**: Maintain and update README documentation
 
 **Usage**:
 ```
-/agent:readme-agent
+/agent:ReadmeAgent
 
 Update README.md with new feature documentation.
 Add installation instructions for the new authentication module.
@@ -300,12 +300,12 @@ Add installation instructions for the new authentication module.
 - Documentation updates
 - README maintenance
 
-### claude-settings-update
+### ClaudeSettingsUpdate
 **Purpose**: Merge and maintain Claude settings configuration
 
 **Usage**:
 ```
-/agent:claude-settings-update
+/agent:ClaudeSettingsUpdate
 
 Merge settings.local.json into settings.json.
 Maintain alphabetical sorting of allow-lists.
@@ -320,14 +320,14 @@ Maintain alphabetical sorting of allow-lists.
 
 ### Sequential Execution
 ```
-1. /agent:workflow-manager - Implement feature
-2. /agent:test-writer - Add tests
-3. /agent:code-reviewer - Review changes
+1. /agent:WorkflowManager - Implement feature
+2. /agent:TestWriter - Add tests
+3. /agent:CodeReviewer - Review changes
 ```
 
 ### Parallel Execution
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute in parallel:
 - Feature A implementation
@@ -337,40 +337,40 @@ Execute in parallel:
 
 ### Review Workflow
 ```
-1. Create PR (automatic from workflow-manager)
-2. /agent:code-reviewer - Automated review
-3. /agent:code-review-response - Address feedback
+1. Create PR (automatic from WorkflowManager)
+2. /agent:CodeReviewer - Automated review
+3. /agent:CodeReviewResponse - Address feedback
 4. Merge when approved
 ```
 
 ### Maintenance Routine
 ```
-/agent:memory-manager - Clean context
-/agent:agent-updater - Update agents
-/agent:pr-backlog-manager - Review PR queue
+/agent:MemoryManager - Clean context
+/agent:AgentUpdater - Update agents
+/agent:PrBacklogManager - Review PR queue
 ```
 
 ## Agent Selection Guide
 
 | If you need to... | Use this agent |
 |------------------|----------------|
-| Execute multiple tasks | orchestrator-agent |
-| Implement a single feature | workflow-manager |
-| Fix failing tests | test-solver |
-| Review code | code-reviewer |
-| Update documentation | readme-agent |
-| Analyze task dependencies | task-analyzer |
-| Create test suite | test-writer |
-| Fix type errors | type-fix-agent |
-| Manage PRs | pr-backlog-manager |
-| Clean up context | memory-manager |
+| Execute multiple tasks | OrchestratorAgent |
+| Implement a single feature | WorkflowManager |
+| Fix failing tests | TestSolver |
+| Review code | CodeReviewer |
+| Update documentation | ReadmeAgent |
+| Analyze task dependencies | TaskAnalyzer |
+| Create test suite | TestWriter |
+| Fix type errors | TypeFixAgent |
+| Manage PRs | PrBacklogManager |
+| Clean up context | MemoryManager |
 
 ## Best Practices
 
 1. **Always use orchestrator** for multiple tasks
 2. **Follow the workflow** - Don't skip phases
 3. **Document changes** - Keep README current
-4. **Test thoroughly** - Use test-writer for coverage
-5. **Review regularly** - Invoke code-reviewer
+4. **Test thoroughly** - Use TestWriter for coverage
+5. **Review regularly** - Invoke CodeReviewer
 6. **Maintain context** - Update Memory.md
 7. **Clean up** - Remove worktrees after merge

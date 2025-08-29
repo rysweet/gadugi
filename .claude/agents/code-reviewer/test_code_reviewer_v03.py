@@ -30,7 +30,7 @@ class TestCodeReviewerV03(unittest.TestCase):
         """Test that the agent initializes with correct capabilities."""
         # Check agent properties
         self.assertEqual(self.reviewer.agent_id, "code_reviewer_v03")
-        self.assertEqual(self.reviewer.agent_type, "code-reviewer")
+        self.assertEqual(self.reviewer.agent_type, "CodeReviewer")
 
         # Check capabilities
         capabilities = self.reviewer.capabilities

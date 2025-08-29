@@ -14,7 +14,7 @@
 2. **Knowledge Directory Structure**
    ```
    .claude/agents/
-   ├── workflow-manager/knowledge/
+   ├── WorkflowManager/knowledge/
    │   ├── pr_best_practices.md     ✅
    │   └── workflow_phases.md       ✅
    └── orchestrator/knowledge/
@@ -29,7 +29,7 @@
 ## Test Results
 
 ### Successful Test Run:
-- ✅ **workflow-manager** loaded 2 knowledge files (PR Best Practices, Workflow Phases)
+- ✅ **WorkflowManager** loaded 2 knowledge files (PR Best Practices, Workflow Phases)
 - ✅ **orchestrator** loaded 1 knowledge file (Parallelization Patterns)
 - ✅ Tasks executed with memory persistence
 - ✅ Similar past tasks detected ("Found 1 similar past experiences")
@@ -71,7 +71,7 @@ await agent.learn_from_outcome(outcome)
 - [x] V03Agent base class
 - [x] Knowledge priming from MD files
 - [x] Memory persistence
-- [ ] Update actual workflow-manager to inherit from V03Agent
+- [ ] Update actual WorkflowManager to inherit from V03Agent
 - [ ] Update orchestrator to use memory for task decomposition
 
 ### Next Week
@@ -133,4 +133,4 @@ Agents can now:
 - Learn from experience ✅
 - Collaborate via shared memory ✅
 
-The infrastructure is ready. The next step is updating the actual agents (workflow-manager, orchestrator, etc.) to inherit from V03Agent and start using these capabilities in production.
+The infrastructure is ready. The next step is updating the actual agents (WorkflowManager, orchestrator, etc.) to inherit from V03Agent and start using these capabilities in production.

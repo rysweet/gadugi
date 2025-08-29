@@ -3,7 +3,7 @@
 Implement the Team Coach agent for session analysis and performance tracking.
 
 ## Requirements
-- Create full implementation in .claude/agents/team-coach/
+- Create full implementation in .claude/agents/TeamCoach/
 - Main file: team_coach.py
 - Implement session analysis capabilities
 - Add GitHub integration for tracking

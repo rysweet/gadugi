@@ -1,68 +1,83 @@
 # Rename All Agents from kebab-case to CamelCase
 
 ## Objective
-Rename all agent files from kebab-case to CamelCase format and update all references throughout the codebase.
+Rename all agent files in `.claude/agents/` from kebab-case to CamelCase format to maintain consistency and professionalism.
 
-## Requirements
+## Priority
+HIGH
 
-1. **Research Phase**:
-   - Find all agent files with kebab-case names
-   - Identify all references to these agents in the codebase
-   - Map out the renaming strategy
-   - Check for backward compatibility requirements
+## Tasks
 
-2. **Implementation Phase**:
-   - Rename agent files to CamelCase (e.g., `code-reviewer.md` → `CodeReviewer.md`)
-   - Update all agent invocation references
-   - Update documentation references
-   - Maintain backward compatibility where needed
-   - Update agent registry/manifests
+### 1. Rename Agent Files
+Convert all kebab-case agent filenames to CamelCase:
 
-3. **Testing Phase**:
-   - Verify all agents are accessible with new names
-   - Test agent invocations work correctly
-   - Validate no broken references remain
-   - Test backward compatibility if implemented
-   - Run full test suite
+**Files to rename:**
+- AgentUpdater.md → AgentUpdater.md
+- ClaudeSettingsUpdate.md → ClaudeSettingsUpdate.md
+- CodeExecutor.md → CodeExecutor.md
+- CodeReviewResponse.md → CodeReviewResponse.md
+- CodeReviewer.md → CodeReviewer.md
+- EventRouterManager.md → EventRouterManager.md
+- EventRouterServiceManager.md → EventRouterServiceManager.md
+- ExecutionMonitor.md → ExecutionMonitor.md
+- GadugiCoordinator.md → GadugiCoordinator.md
+- GitHubExecutor.md → GitHubExecutor.md
+- LlmProxyAgent.md → LlmProxyAgent.md
+- MemoryManager.md → MemoryManager.md
+- MemoryServiceManager.md → MemoryServiceManager.md
+- Neo4jServiceManager.md → Neo4jServiceManager.md
+- OrchestratorAgent.md → OrchestratorAgent.md
+- PrBacklogManager.md → PrBacklogManager.md
+- ProgramManager.md → ProgramManager.md
+- PromptWriter.md → PromptWriter.md
+- ReadmeAgent.md → ReadmeAgent.md
+- RecipeExecutor.md → RecipeExecutor.md
+- SystemDesignReviewer.md → SystemDesignReviewer.md
+- TaskAnalyzer.md → TaskAnalyzer.md
+- TaskBoundsEval.md → TaskBoundsEval.md
+- TaskDecomposer.md → TaskDecomposer.md
+- TaskResearchAgent.md → TaskResearchAgent.md
+- TeamCoach.md → TeamCoach.md
+- TeamcoachAgent.md → TeamcoachAgent.md
+- TestExecutor.md → TestExecutor.md
+- TestSolver.md → TestSolver.md
+- TestWriter.md → TestWriter.md
+- TypeFixAgent.md → TypeFixAgent.md
+- WorkflowManagerPhase9Enforcement.md → WorkflowManagerPhase9Enforcement.md
+- WorkflowManagerSimplified.md → WorkflowManagerSimplified.md
+- WorkflowManager.md → WorkflowManager.md
+- WorkflowPhaseReflection.md → WorkflowPhaseReflection.md
+- WorktreeExecutor.md → WorktreeExecutor.md
+- WorktreeManager.md → WorktreeManager.md
+- XpiaDefenseAgent.md → XpiaDefenseAgent.md
 
-## Technical Details
+### 2. Update All References
+After renaming files, update all references throughout the codebase:
 
-### Agent Locations
-- Main agents: `.claude/agents/`
-- Prompt files: `prompts/`
-- Documentation: `docs/agents/`
+**Locations to check and update:**
+- Task tool invocations in all Python files
+- Agent invocations in prompts/ directory
+- Documentation files (*.md) 
+- Scripts in scripts/ directory
+- Test files referencing agents
+- The orchestrator implementation
+- Any configuration files
+- CLAUDE.md and other instruction files
 
-### Renaming Mapping Examples
-- `code-reviewer.md` → `CodeReviewer.md`
-- `workflow-manager.md` → `WorkflowManager.md`
-- `task-analyzer.md` → `TaskAnalyzer.md`
-- `prompt-writer.md` → `PromptWriter.md`
-- `orchestrator-agent.md` → `OrchestratorAgent.md`
+### 3. Create Compatibility Layer (Optional)
+Consider creating symlinks or aliases for backward compatibility during transition:
+- Create symlinks from old names to new names
+- Add deprecation notices
+- Plan removal of symlinks in future version
 
-### Reference Update Locations
-1. Agent invocation strings (`/agent:code-reviewer` → `/agent:CodeReviewer`)
-2. Documentation files
-3. Test files
-4. Configuration files
-5. Scripts and automation
+### 4. Validation
+- Verify all agent files are renamed correctly
+- Ensure no broken references remain
+- Test agent invocations still work
+- Run integration tests to verify functionality
 
 ## Success Criteria
-- [ ] All agent files renamed to CamelCase
-- [ ] All references updated throughout codebase
-- [ ] No broken agent invocations
-- [ ] Backward compatibility maintained (if needed)
-- [ ] Documentation updated
-- [ ] Tests passing
-
-## Testing Requirements
-- Agent invocation tests
-- Reference integrity tests
-- Backward compatibility tests
-- Integration tests
-- Documentation validation
-
-## Documentation Updates
-- Agent naming conventions guide
-- Migration guide for users
-- Updated agent documentation
-- Reference guide updates
+- All agent files follow CamelCase naming convention
+- No broken references in the codebase
+- All tests pass
+- Agent invocations work correctly with new names

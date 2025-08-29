@@ -123,10 +123,10 @@ result = reviewer.review_pr('123', force_adr=True)
 
 ```bash
 # Using Claude Code agent system
-/agent:system-design-reviewer analyze-pr 123
+/agent:SystemDesignReviewer analyze-pr 123
 
 # With additional options
-/agent:system-design-reviewer analyze-pr 123 --force-adr --update-architecture
+/agent:SystemDesignReviewer analyze-pr 123 --force-adr --update-architecture
 ```
 
 ### Programmatic Usage
@@ -339,7 +339,7 @@ The System Design Review Agent integrates with WorkflowManager in Phase 9:
 # after PR creation (Phase 8)
 
 # .claude/scripts/enforce_phase_9.sh includes:
-/agent:system-design-reviewer analyze-pr $PR_NUMBER
+/agent:SystemDesignReviewer analyze-pr $PR_NUMBER
 ```
 
 ### OrchestratorAgent Coordination
@@ -350,12 +350,12 @@ For parallel execution scenarios:
 # OrchestratorAgent can invoke design review in parallel
 # with other agents for comprehensive PR analysis
 
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these agents in parallel:
-- /agent:code-reviewer
-- /agent:system-design-reviewer
-- /agent:test-writer
+- /agent:CodeReviewer
+- /agent:SystemDesignReviewer
+- /agent:TestWriter
 ```
 
 ### CodeReviewer Collaboration

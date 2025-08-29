@@ -37,7 +37,7 @@ def decompose_task(task_description: str) -> dict:
                 },
                 {
                     "id": "4",
-                    "agent": "test-writer",
+                    "agent": "TestWriter",
                     "task": "Write API tests",
                     "dependencies": ["3"],
                 },
@@ -63,7 +63,7 @@ def decompose_task(task_description: str) -> dict:
                 },
                 {
                     "id": "3",
-                    "agent": "test-writer",
+                    "agent": "TestWriter",
                     "task": "Write UI tests",
                     "dependencies": ["2"],
                 },
@@ -89,7 +89,7 @@ def decompose_task(task_description: str) -> dict:
             },
             {
                 "id": "3",
-                "agent": "test-writer",
+                "agent": "TestWriter",
                 "task": f"Test solution for: {task_description}",
                 "dependencies": ["2"],
             },

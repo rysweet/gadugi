@@ -20,10 +20,10 @@ resolve_conflicts() {
             echo "✓ Resolved $file (kept v0.3-regeneration version)"
             ;;
         "ours")
-            # Keep our team-coach version
+            # Keep our TeamCoach version
             git checkout --ours "$file"
             git add "$file"
-            echo "✓ Resolved $file (kept team-coach version)"
+            echo "✓ Resolved $file (kept TeamCoach version)"
             ;;
         "merge")
             # Manual merge needed - we'll handle these specially
@@ -34,13 +34,13 @@ resolve_conflicts() {
 
 # Memory files - keep v0.3-regeneration version as it's more complete
 resolve_conflicts ".github/Memory.md" "theirs"
-resolve_conflicts ".github/memory-manager/config.py" "theirs"
-resolve_conflicts ".github/memory-manager/github_integration.py" "theirs"
-resolve_conflicts ".github/memory-manager/memory_compactor.py" "theirs"
-resolve_conflicts ".github/memory-manager/memory_manager.py" "theirs"
-resolve_conflicts ".github/memory-manager/sync_engine.py" "theirs"
+resolve_conflicts ".github/MemoryManager/config.py" "theirs"
+resolve_conflicts ".github/MemoryManager/github_integration.py" "theirs"
+resolve_conflicts ".github/MemoryManager/memory_compactor.py" "theirs"
+resolve_conflicts ".github/MemoryManager/memory_manager.py" "theirs"
+resolve_conflicts ".github/MemoryManager/sync_engine.py" "theirs"
 
-# Service files - keep our team-coach implementations as they're newer
+# Service files - keep our TeamCoach implementations as they're newer
 resolve_conflicts ".claude/services/event-router/event_router.py" "ours"
 resolve_conflicts ".claude/services/event-router/models.py" "ours"
 resolve_conflicts ".claude/services/mcp/mcp_service.py" "ours"

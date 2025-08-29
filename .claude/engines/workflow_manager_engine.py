@@ -422,7 +422,7 @@ class PhaseExecutor:
 
     def _get_issue_labels(self) -> list[str]:
         """Get appropriate labels for issue."""
-        labels = ["gadugi-v0.3", "workflow-manager"]
+        labels = ["gadugi-v0.3", "WorkflowManager"]
 
         if self.state.task.task_type == "feature":
             labels.append("enhancement")

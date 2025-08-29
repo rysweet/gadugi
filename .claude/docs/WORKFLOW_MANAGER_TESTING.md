@@ -165,7 +165,7 @@ def _verify_files_created(self):
 1. Create test prompt file
 2. Invoke WorkflowManager:
    ```
-   /agent:workflow-manager
+   /agent:WorkflowManager
    Execute workflow from: /prompts/test_feature.md
    ```
 3. Monitor execution and verify each phase

@@ -9,7 +9,7 @@ echo "Starting WorkflowManager for README Humility Update in $(pwd)"
 
 # Execute WorkflowManager for README Humility Update
 claude -p - <<'EOF'
-/agent:workflow-manager
+/agent:WorkflowManager
 
 ## Task Context
 Task ID: task-20250807-132118-a8532ccb
@@ -45,7 +45,7 @@ Execute the complete 11-phase workflow to update README.md by:
    - Verify README.md is well-formatted
 7. **Documentation Phase**: Document changes made
 8. **PR Creation Phase**: Create PR for README humility update
-9. **Review Phase**: Invoke code-reviewer agent
+9. **Review Phase**: Invoke CodeReviewer agent
 10. **Review Response Phase**: Address any review feedback
 11. **Settings Update Phase**: Update Memory.md
 

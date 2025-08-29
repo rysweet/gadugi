@@ -6,8 +6,8 @@ Create the Task Decomposer agent that intelligently breaks down complex tasks in
 ## Requirements
 
 ### Location
-- Agent directory: `.claude/agents/task-decomposer/`
-- Recipe directory: `.claude/recipes/task-decomposer/`
+- Agent directory: `.claude/agents/TaskDecomposer/`
+- Recipe directory: `.claude/recipes/TaskDecomposer/`
 
 ### Core Functionality
 1. **Task Analysis**
@@ -32,7 +32,7 @@ Create the Task Decomposer agent that intelligently breaks down complex tasks in
 
 #### Agent Structure
 ```python
-# .claude/agents/task-decomposer/task_decomposer.py
+# .claude/agents/TaskDecomposer/task_decomposer.py
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -116,8 +116,8 @@ class TaskDecomposer(BaseAgent):
 
 #### Recipe Structure
 ```yaml
-# .claude/recipes/task-decomposer/recipe.yaml
-name: task-decomposer
+# .claude/recipes/TaskDecomposer/recipe.yaml
+name: TaskDecomposer
 version: 1.0.0
 description: Intelligent task decomposition and parallelization analysis
 

@@ -633,7 +633,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 **Code Review Agent Invocation**:
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Please conduct a comprehensive review of this Bloom command implementation for the Gadugi VS Code extension. Focus on:
 

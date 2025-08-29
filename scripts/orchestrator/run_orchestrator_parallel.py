@@ -42,7 +42,7 @@ def main():
         {
             "id": f"task-{datetime.now().strftime('%Y%m%d-%H%M%S')}-002",
             "name": "Complete Team Coach Implementation",
-            "prompt_file": "prompts/complete-team-coach-implementation.md",
+            "prompt_file": "prompts/complete-TeamCoach-implementation.md",
             "priority": "high",
             "estimated_duration": 45,
         },

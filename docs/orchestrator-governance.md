@@ -27,7 +27,7 @@ Every task MUST go through these phases via WorkflowManager:
 6. **Phase 6: Testing** - Test execution and validation
 7. **Phase 7: Documentation** - Documentation updates
 8. **Phase 8: Pull Request** - PR creation
-9. **Phase 9: Code Review** - Invoke code-reviewer agent
+9. **Phase 9: Code Review** - Invoke CodeReviewer agent
 10. **Phase 10: Review Response** - Handle review feedback
 11. **Phase 11: Settings Update** - Final configurations
 
@@ -243,7 +243,7 @@ orchestrator = Orchestrator()
 ## References
 
 - Issue #148: Enforce orchestrator governance requirements
-- WorkflowManager Documentation: `.claude/agents/workflow-manager.md`
+- WorkflowManager Documentation: `.claude/agents/WorkflowManager.md`
 - Orchestrator Implementation: `.claude/agents/orchestrator/`
 - Governance Validator: `.claude/agents/orchestrator/governance_validator.py`
 <<<<<<< HEAD

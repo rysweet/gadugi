@@ -137,7 +137,7 @@ User Input/File Content → XPIA Defense Agent → Sanitized Content → Target 
 ## Implementation Steps
 
 1. **Create GitHub Issue**: Document XPIA defense requirements and implementation plan
-2. **Create Feature Branch**: `feature-xpia-defense-agent`
+2. **Create Feature Branch**: `feature-XpiaDefenseAgent`
 3. **Research Phase**: Analyze common prompt injection techniques and countermeasures
 4. **Core Engine Implementation**: Build pattern detection and sanitization engine
 5. **Middleware Integration**: Integrate with agent-manager hook system

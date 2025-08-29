@@ -2,7 +2,7 @@
 Delegation Coordinator for PR Backlog Manager.
 
 Coordinates delegation of issue resolution tasks to appropriate agents
-including WorkflowMaster for complex resolutions and code-reviewer for AI reviews.
+including WorkflowMaster for complex resolutions and CodeReviewer for AI reviews.
 """
 
 import logging
@@ -67,7 +67,7 @@ class DelegationCoordinator:
     Coordinates delegation of PR issue resolution tasks to appropriate agents.
 
     Manages the workflow of identifying issues, generating appropriate prompts,
-    and delegating to specialized agents like WorkflowMaster and code-reviewer.
+    and delegating to specialized agents like WorkflowMaster and CodeReviewer.
     """
 
     def __init__(self, github_ops, auto_approve: bool = False):
@@ -95,7 +95,7 @@ class DelegationCoordinator:
                 DelegationType.BRANCH_UPDATE,
                 DelegationType.METADATA_IMPROVEMENT,
             ],
-            "code-reviewer": [DelegationType.AI_CODE_REVIEW],
+            "CodeReviewer": [DelegationType.AI_CODE_REVIEW],
         }
 
     def delegate_issue_resolution(
@@ -432,7 +432,7 @@ Resolve the identified blocking issue for PR #{pr_number}.
 
             if task.agent_target == "workflow-master":
                 self._delegate_to_workflow_master(task)
-            elif task.agent_target == "code-reviewer":
+            elif task.agent_target == "CodeReviewer":
                 self._delegate_to_code_reviewer(task)
             else:
                 raise ValueError(f"Unknown agent target: {task.agent_target}")
@@ -528,7 +528,7 @@ jobs:
             raise Exception(f"Failed to invoke WorkflowMaster: {e}")
 
     def _delegate_to_code_reviewer(self, task: DelegationTask) -> None:
-        """Delegate task to code-reviewer agent."""
+        """Delegate task to CodeReviewer agent."""
         try:
             if self.auto_approve:
                 # In GitHub Actions, create a follow-up workflow
@@ -538,7 +538,7 @@ jobs:
                 self._invoke_code_reviewer_direct(task)
 
         except Exception as e:
-            raise Exception(f"Failed to delegate to code-reviewer: {e}")
+            raise Exception(f"Failed to delegate to CodeReviewer: {e}")
 
     def _create_code_review_workflow(self, task: DelegationTask) -> None:
         """Create a follow-up GitHub Actions workflow for code review."""
@@ -560,7 +560,7 @@ jobs:
       - name: Run AI Code Review
         uses: anthropics/claude-code-base-action@v1
         with:
-          agent: 'code-reviewer'
+          agent: 'CodeReviewer'
           prompt: |
             Perform comprehensive code review for PR #{task.pr_number}.
 
@@ -590,13 +590,13 @@ jobs:
             raise Exception(f"Failed to create code review workflow: {e}")
 
     def _invoke_code_reviewer_direct(self, task: DelegationTask) -> None:
-        """Invoke code-reviewer directly."""
+        """Invoke CodeReviewer directly."""
         try:
-            logger.info(f"Would invoke code-reviewer for PR #{task.pr_number}")
+            logger.info(f"Would invoke CodeReviewer for PR #{task.pr_number}")
             task.status = DelegationStatus.IN_PROGRESS
 
         except Exception as e:
-            raise Exception(f"Failed to invoke code-reviewer: {e}")
+            raise Exception(f"Failed to invoke CodeReviewer: {e}")
 
     def _add_delegation_comment(self, task: DelegationTask) -> None:
         """Add comment to PR about delegation action."""

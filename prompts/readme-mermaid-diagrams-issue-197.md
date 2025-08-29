@@ -20,29 +20,29 @@ Create a comprehensive agent hierarchy diagram showing:
 
 **Agents to Include:**
 - **Orchestration Layer** (Primary - Blue theme):
-  - orchestrator-agent (top-level coordinator)
-  - task-analyzer (dependency analysis)
-  - worktree-manager (environment isolation)
-  - execution-monitor (parallel tracking)
+  - OrchestratorAgent (top-level coordinator)
+  - TaskAnalyzer (dependency analysis)
+  - WorktreeManager (environment isolation)
+  - ExecutionMonitor (parallel tracking)
 
 - **Implementation Layer** (Green theme):
-  - workflow-manager (11-phase executor)
-  - prompt-writer (structured prompts)
-  - test-writer (test authoring)
-  - type-fix-agent (type error resolution)
-  - test-solver (failing test fixes)
+  - WorkflowManager (11-phase executor)
+  - PromptWriter (structured prompts)
+  - TestWriter (test authoring)
+  - TypeFixAgent (type error resolution)
+  - TestSolver (failing test fixes)
 
 - **Review Layer** (Purple theme):
-  - code-reviewer (PR review)
-  - code-review-response (feedback processor)
-  - system-design-reviewer (architecture review)
+  - CodeReviewer (PR review)
+  - CodeReviewResponse (feedback processor)
+  - SystemDesignReviewer (architecture review)
 
 - **Maintenance Layer** (Orange theme):
-  - pr-backlog-manager (PR queue management)
-  - agent-updater (agent version management)
-  - memory-manager (memory curation)
-  - readme-agent (README maintenance)
-  - claude-settings-update (settings merger)
+  - PrBacklogManager (PR queue management)
+  - AgentUpdater (agent version management)
+  - MemoryManager (memory curation)
+  - ReadmeAgent (README maintenance)
+  - ClaudeSettingsUpdate (settings merger)
 
 **Visual Requirements:**
 - Use boxes with rounded corners for agents
@@ -63,7 +63,7 @@ Create a flowchart showing the 11-phase workflow:
 6. Testing (quality gates)
 7. Documentation (updates)
 8. Pull Request (PR creation)
-9. Review (code-reviewer invocation)
+9. Review (CodeReviewer invocation)
 10. Review Response (feedback handling)
 11. Settings Update (configuration sync)
 
@@ -129,13 +129,13 @@ Use GitHub-supported Mermaid features:
 ```mermaid
 graph TD
     subgraph "Orchestration Layer"
-        O[orchestrator-agent<br/>Main Coordinator]
-        O --> TA[task-analyzer]
-        O --> WM[worktree-manager]
+        O[OrchestratorAgent<br/>Main Coordinator]
+        O --> TA[TaskAnalyzer]
+        O --> WM[WorktreeManager]
     end
 
     subgraph "Implementation Layer"
-        WF[workflow-manager<br/>11-phase executor]
+        WF[WorkflowManager<br/>11-phase executor]
     end
 
     O --> WF

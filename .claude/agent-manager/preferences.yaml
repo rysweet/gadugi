@@ -5,7 +5,7 @@ installation:
   # Preferred versions for specific agents
   preferred_versions:
     # workflow-master: "2.1.0"  # Pin to specific version
-    # code-reviewer: "latest"   # Always use latest
+    # CodeReviewer: "latest"   # Always use latest
 
   # Agent categories to auto-install
   auto_install_categories:

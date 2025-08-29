@@ -1123,7 +1123,7 @@ if __name__ == "__main__":
     # Example usage
     sample_workflow_data = {
         "workflow_id": "test_workflow_001",
-        "agents_used": ["orchestrator", "task-decomposer", "code-writer"],
+        "agents_used": ["orchestrator", "TaskDecomposer", "code-writer"],
         "task_sequence": [
             {
                 "agent": "orchestrator",
@@ -1133,7 +1133,7 @@ if __name__ == "__main__":
                 "metadata": {"tasks_created": 3},
             },
             {
-                "agent": "task-decomposer",
+                "agent": "TaskDecomposer",
                 "action": "decompose_task",
                 "duration_seconds": 25,
                 "success": True,

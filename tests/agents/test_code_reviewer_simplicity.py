@@ -1,5 +1,5 @@
 """
-Test cases for code-reviewer agent's design simplicity and over-engineering detection.
+Test cases for CodeReviewer agent's design simplicity and over-engineering detection.
 
 These tests validate the enhanced functionality added in Issue #104 to help the
 CodeReviewer agent identify over-engineering patterns and suggest simpler alternatives.

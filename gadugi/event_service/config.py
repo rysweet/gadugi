@@ -139,7 +139,7 @@ def create_default_config() -> ServiceConfig:
                     },
                 },
                 invocation={
-                    "agent_name": "workflow-manager",
+                    "agent_name": "WorkflowManager",
                     "method": "claude_cli",
                     "prompt_template": "New issue #{number}: {title}\n\nAnalyze and create workflow for this issue.",
                 },
@@ -157,7 +157,7 @@ def create_default_config() -> ServiceConfig:
                     },
                 },
                 invocation={
-                    "agent_name": "code-reviewer",
+                    "agent_name": "CodeReviewer",
                     "method": "claude_cli",
                     "prompt_template": "Review PR #{number}: {title}\n\nPerform comprehensive code review.",
                 },
@@ -175,7 +175,7 @@ def create_default_config() -> ServiceConfig:
                     },
                 },
                 invocation={
-                    "agent_name": "memory-manager",
+                    "agent_name": "MemoryManager",
                     "method": "claude_cli",
                     "prompt_template": "Update Memory.md after merge to main: {ref}\n\nSynchronize project memory with latest changes.",
                 },

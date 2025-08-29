@@ -127,7 +127,7 @@ def execute_task(task_id, description):
 Instead of using agent delegation:
 ```python
 # OLD WAY - Don't use this
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 Execute workflow for task-123.md
 ```
 
@@ -255,8 +255,8 @@ Test coverage:
 ## Deprecated Components
 
 The following components are deprecated in V0.3:
-- `orchestrator-agent.md` - Use CLAUDE.md orchestration
-- `workflow-manager.md` - Use direct phase execution
+- `OrchestratorAgent.md` - Use CLAUDE.md orchestration
+- `WorkflowManager.md` - Use direct phase execution
 - Agent delegation patterns - Use executor calls
 
 See `.claude/agents/DEPRECATED_AGENTS.md` for migration details.

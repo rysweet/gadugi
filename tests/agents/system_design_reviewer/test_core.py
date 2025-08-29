@@ -384,8 +384,8 @@ class TestSystemDesignStateManager:
         """Test state manager initialization"""
         manager = SystemDesignStateManager()
 
-        assert manager.state_dir.name == "system-design-reviewer"
-        assert manager.task_id == "system-design-reviewer"
+        assert manager.state_dir.name == "SystemDesignReviewer"
+        assert manager.task_id == "SystemDesignReviewer"
 
     def test_get_default_state(self):
         """Test default state structure"""

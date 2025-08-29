@@ -153,23 +153,23 @@ Keep the memory file concise and synced with GitHub Issues:
 - Bidirectional synchronization keeps both systems updated
 - Issues labeled with "memory-sync", "ai-assistant"
 - Completed tasks automatically close corresponding issues
-- Use `/agent:memory-manager` for manual sync and maintenance
+- Use `/agent:MemoryManager` for manual sync and maintenance
 
 **Memory Manager CLI**:
 ```bash
 # Initialize Memory Manager configuration
-python3 .github/memory-manager/memory_manager.py init
+python3 .github/MemoryManager/memory_manager.py init
 
 # Check current sync status
-python3 .github/memory-manager/memory_manager.py status
+python3 .github/MemoryManager/memory_manager.py status
 
 # Manual synchronization (dry-run first)
-python3 .github/memory-manager/memory_manager.py sync --dry-run
-python3 .github/memory-manager/memory_manager.py sync
+python3 .github/MemoryManager/memory_manager.py sync --dry-run
+python3 .github/MemoryManager/memory_manager.py sync
 
 # Prune old entries
-python3 .github/memory-manager/memory_manager.py prune --dry-run
-python3 .github/memory-manager/memory_manager.py prune
+python3 .github/MemoryManager/memory_manager.py prune --dry-run
+python3 .github/MemoryManager/memory_manager.py prune
 ```
 
 ## Task Completion Reflection
@@ -258,14 +258,14 @@ Requirements: [What needs to be achieved]
 ```
 
 ### Common Workflow Agents (in hierarchical order)
-- **orchestrator-agent**: Top-level coordinator for parallel task execution (use FIRST for multiple tasks)
-- **workflow-manager**: Orchestrates individual development workflows from issue to PR
-- **memory-manager**: Manages Memory.md pruning, curation, and GitHub Issues sync (NEW!)
-- **code-reviewer**: Reviews pull requests (invoked by WorkflowManager in Phase 9)
-- **prompt-writer**: Creates structured prompts
-- **task-analyzer**: Analyzes dependencies (invoked by OrchestratorAgent)
-- **worktree-manager**: Manages git worktrees (invoked by OrchestratorAgent)
-- **execution-monitor**: Monitors parallel execution (invoked by OrchestratorAgent)
+- **OrchestratorAgent**: Top-level coordinator for parallel task execution (use FIRST for multiple tasks)
+- **WorkflowManager**: Orchestrates individual development workflows from issue to PR
+- **MemoryManager**: Manages Memory.md pruning, curation, and GitHub Issues sync (NEW!)
+- **CodeReviewer**: Reviews pull requests (invoked by WorkflowManager in Phase 9)
+- **PromptWriter**: Creates structured prompts
+- **TaskAnalyzer**: Analyzes dependencies (invoked by OrchestratorAgent)
+- **WorktreeManager**: Manages git worktrees (invoked by OrchestratorAgent)
+- **ExecutionMonitor**: Monitors parallel execution (invoked by OrchestratorAgent)
 
 ### Creating New Agents
 New specialized agents can be added to `.github/agents/` or `.claude/agents/` following the existing template structure. Each agent should have:

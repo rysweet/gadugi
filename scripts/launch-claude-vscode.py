@@ -16,7 +16,7 @@ WORKTREES = [
     ),
     (
         "PR-Backlog",
-        "/Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation",
+        "/Users/ryan/src/gadugi/.worktrees/PrBacklogManager-implementation",
     ),
     (
         "PR25-Review",

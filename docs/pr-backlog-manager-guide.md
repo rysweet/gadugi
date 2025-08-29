@@ -15,7 +15,7 @@ The PR Backlog Manager is an intelligent automation agent for managing pull requ
 
 ### 🔧 Intelligent Issue Resolution
 - **WorkflowMaster Delegation**: Automatically delegates complex issues for resolution
-- **AI Code Review Integration**: Invokes code-reviewer agent for Phase 9 reviews
+- **AI Code Review Integration**: Invokes CodeReviewer agent for Phase 9 reviews
 - **Priority-Based Processing**: Handles critical issues first
 - **Retry Logic**: Automatically retries transient failures
 
@@ -149,10 +149,10 @@ jobs:
       - name: Run PR Backlog Manager
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            claude --auto-approve /agent:pr-backlog-manager \
+            claude --auto-approve /agent:PrBacklogManager \
               "Evaluate PR #${{ github.event.number }} for readiness"
           else
-            claude --auto-approve /agent:pr-backlog-manager \
+            claude --auto-approve /agent:PrBacklogManager \
               "Process entire PR backlog for ready-seeking-human candidates"
           fi
         env:
@@ -173,7 +173,7 @@ Configure the following secrets in your repository:
 
 #### Single PR Evaluation
 ```
-/agent:pr-backlog-manager
+/agent:PrBacklogManager
 
 Evaluate PR #42 for readiness and apply appropriate labels based on:
 - Merge conflict status
@@ -186,7 +186,7 @@ If issues are found, delegate resolution to WorkflowMaster with specific fix pro
 
 #### Full Backlog Processing
 ```
-/agent:pr-backlog-manager
+/agent:PrBacklogManager
 
 Process the entire PR backlog for ready-seeking-human candidates:
 - Scan all ready_for_review PRs without ready-seeking-human label
@@ -250,8 +250,8 @@ Fix CI/CD failures in PR #456 to restore passing status.
 - No regression in functionality
 ```
 
-#### AI Code Review → code-reviewer
-Automatically invokes the code-reviewer agent to perform Phase 9 review when missing.
+#### AI Code Review → CodeReviewer
+Automatically invokes the CodeReviewer agent to perform Phase 9 review when missing.
 
 ## Configuration
 
@@ -367,7 +367,7 @@ Enable detailed logging:
 - name: Run PR Backlog Manager
   run: |
     export CLAUDE_LOG_LEVEL=debug
-    claude --auto-approve /agent:pr-backlog-manager "..."
+    claude --auto-approve /agent:PrBacklogManager "..."
 ```
 
 ### State Recovery
@@ -439,7 +439,7 @@ For parallel processing of multiple PRs:
 
 ```python
 # Parallel PR processing through OrchestratorAgent
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these PR evaluations in parallel:
 - evaluate-pr-123.md

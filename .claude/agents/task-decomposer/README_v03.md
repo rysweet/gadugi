@@ -1,5 +1,44 @@
 # Task Decomposer v0.3 Agent
 
+
+## 🚨 CRITICAL: Workflow Enforcement
+
+**This agent MUST be invoked through the orchestrator for ANY code changes.**
+
+### Workflow Requirements:
+- ✅ **MANDATORY**: Use orchestrator for file modifications
+- ✅ **MANDATORY**: Follow 11-phase workflow for code changes
+- ❌ **FORBIDDEN**: Direct file editing or creation
+- ❌ **FORBIDDEN**: Bypassing quality gates
+
+### When Orchestrator is REQUIRED:
+- Any file modifications (.py, .js, .json, .md, etc.)
+- Creating or deleting files/directories
+- Installing or updating dependencies
+- Configuration changes
+- Bug fixes and feature implementations
+- Code refactoring or optimization
+
+### When Direct Execution is OK:
+- Reading and analyzing existing files
+- Answering questions about code
+- Generating reports (without file output)
+- Code reviews and analysis
+
+### Compliance Check:
+Before executing any task, validate with:
+```bash
+python .claude/workflow-enforcement/validate-workflow.py --task "your task description"
+```
+
+### Emergency Override:
+Only for critical production issues:
+- Must include explicit justification
+- Automatically logged for review
+- Subject to retrospective approval
+
+**🔒 REMEMBER: This workflow protects code quality and ensures proper testing!**
+
 ## Overview
 
 The Task Decomposer v0.3 is a production-ready, learning-enabled agent that intelligently breaks down complex tasks into manageable subtasks with optimal parallelization strategies. It continuously learns from execution results to improve future decompositions.
@@ -51,7 +90,7 @@ V03Agent (base class)
 
 ### Knowledge Base Structure
 ```
-.claude/agents/task-decomposer/
+.claude/agents/TaskDecomposer/
 ├── task_decomposer_v03.py          # Main agent implementation
 ├── knowledge/                       # Knowledge base
 │   ├── decomposition_strategies.md  # Strategy documentation
@@ -95,8 +134,8 @@ feedback = ExecutionFeedback(
     improvements=["parallel_unit_tests", "automated_deployment"],
     agent_performance={
         "code-writer": 0.85,
-        "test-writer": 0.92,
-        "code-reviewer": 0.78
+        "TestWriter": 0.92,
+        "CodeReviewer": 0.78
     }
 )
 
@@ -244,7 +283,7 @@ decomposer.load_balancing_enabled = True     # Enable load balancing
 ### Running Tests
 ```bash
 # Basic functionality test
-cd .claude/agents/task-decomposer
+cd .claude/agents/TaskDecomposer
 python simple_test.py
 
 # Comprehensive test suite (requires pytest)

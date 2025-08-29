@@ -17,12 +17,12 @@ def run_pyright_get_errors():
     errors = []
     for line in result.stderr.split("\n"):
         if (
-            "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line
+            "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line
             and " - error:" in line
         ):
             try:
                 file_part = line.split(
-                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                 )[1]
                 file_path = file_part.split(":")[0]
                 line_num = int(file_part.split(":")[1])

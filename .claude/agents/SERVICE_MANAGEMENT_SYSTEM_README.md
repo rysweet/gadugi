@@ -1,5 +1,44 @@
 # Gadugi v0.3 Service Management System
 
+
+## 🚨 CRITICAL: Workflow Enforcement
+
+**This agent MUST be invoked through the orchestrator for ANY code changes.**
+
+### Workflow Requirements:
+- ✅ **MANDATORY**: Use orchestrator for file modifications
+- ✅ **MANDATORY**: Follow 11-phase workflow for code changes
+- ❌ **FORBIDDEN**: Direct file editing or creation
+- ❌ **FORBIDDEN**: Bypassing quality gates
+
+### When Orchestrator is REQUIRED:
+- Any file modifications (.py, .js, .json, .md, etc.)
+- Creating or deleting files/directories
+- Installing or updating dependencies
+- Configuration changes
+- Bug fixes and feature implementations
+- Code refactoring or optimization
+
+### When Direct Execution is OK:
+- Reading and analyzing existing files
+- Answering questions about code
+- Generating reports (without file output)
+- Code reviews and analysis
+
+### Compliance Check:
+Before executing any task, validate with:
+```bash
+python .claude/workflow-enforcement/validate-workflow.py --task "your task description"
+```
+
+### Emergency Override:
+Only for critical production issues:
+- Must include explicit justification
+- Automatically logged for review
+- Subject to retrospective approval
+
+**🔒 REMEMBER: This workflow protects code quality and ensures proper testing!**
+
 ## Overview
 Comprehensive service management system for Gadugi v0.3 with individual service managers, centralized coordination, and automated startup hooks.
 
@@ -8,18 +47,18 @@ Comprehensive service management system for Gadugi v0.3 with individual service 
 ```
 Service Management System
 ├── Individual Service Managers
-│   ├── neo4j-service-manager.md
-│   ├── memory-service-manager.md
-│   └── event-router-service-manager.md
+│   ├── Neo4jServiceManager.md
+│   ├── MemoryServiceManager.md
+│   └── EventRouterServiceManager.md
 ├── Central Coordinator
-│   └── gadugi-coordinator.md
+│   └── GadugiCoordinator.md
 └── Startup Hook
     └── service-check.sh
 ```
 
 ## Components
 
-### 1. Neo4j Service Manager (`neo4j-service-manager.md`)
+### 1. Neo4j Service Manager (`Neo4jServiceManager.md`)
 - **Purpose**: Manages Neo4j Docker container lifecycle
 - **Features**:
   - Container status monitoring
@@ -29,7 +68,7 @@ Service Management System
   - Resource usage monitoring
   - Automated recovery strategies
 
-### 2. Memory Service Manager (`memory-service-manager.md`)
+### 2. Memory Service Manager (`MemoryServiceManager.md`)
 - **Purpose**: Manages hierarchical memory system with fallback chain
 - **Features**:
   - Neo4j primary backend monitoring
@@ -39,7 +78,7 @@ Service Management System
   - Performance statistics
   - Automatic backend switching
 
-### 3. Event Router Service Manager (`event-router-service-manager.md`)
+### 3. Event Router Service Manager (`EventRouterServiceManager.md`)
 - **Purpose**: Manages Event Router service lifecycle
 - **Features**:
   - HTTP server monitoring (webhooks)
@@ -49,7 +88,7 @@ Service Management System
   - Endpoint health checks
   - Event submission testing
 
-### 4. Gadugi Coordinator (`gadugi-coordinator.md`)
+### 4. Gadugi Coordinator (`GadugiCoordinator.md`)
 - **Purpose**: Central coordination of all service managers
 - **Features**:
   - Unified status aggregation
@@ -75,37 +114,37 @@ Service Management System
 #### Neo4j Service
 ```bash
 # Check Neo4j status
-./.claude/agents/neo4j-service-manager.md status
+./.claude/agents/Neo4jServiceManager.md status
 
 # Start Neo4j
-./.claude/agents/neo4j-service-manager.md start
+./.claude/agents/Neo4jServiceManager.md start
 
 # Restart Neo4j
-./.claude/agents/neo4j-service-manager.md restart
+./.claude/agents/Neo4jServiceManager.md restart
 ```
 
 #### Memory Service
 ```bash
 # Check memory system status
-./.claude/agents/memory-service-manager.md status
+./.claude/agents/MemoryServiceManager.md status
 
 # Test memory operations
-./.claude/agents/memory-service-manager.md test
+./.claude/agents/MemoryServiceManager.md test
 
 # Force restart
-./.claude/agents/memory-service-manager.md restart
+./.claude/agents/MemoryServiceManager.md restart
 ```
 
 #### Event Router Service
 ```bash
 # Check Event Router status
-./.claude/agents/event-router-service-manager.md status
+./.claude/agents/EventRouterServiceManager.md status
 
 # Test all endpoints
-./.claude/agents/event-router-service-manager.md test
+./.claude/agents/EventRouterServiceManager.md test
 
 # Start service
-./.claude/agents/event-router-service-manager.md start
+./.claude/agents/EventRouterServiceManager.md start
 ```
 
 ### Centralized Management
@@ -113,13 +152,13 @@ Service Management System
 #### Gadugi Coordinator
 ```bash
 # Comprehensive status check
-./.claude/agents/gadugi-coordinator.md status
+./.claude/agents/GadugiCoordinator.md status
 
 # Start all services
-./.claude/agents/gadugi-coordinator.md start
+./.claude/agents/GadugiCoordinator.md start
 
 # JSON output for automation
-./.claude/agents/gadugi-coordinator.md json
+./.claude/agents/GadugiCoordinator.md json
 ```
 
 ### Automated Hook Integration
@@ -314,7 +353,7 @@ sqlite3 .claude/memory/fallback.db "SELECT 1;"
 
 # Reset memory system
 rm -rf .claude/memory/
-./.claude/agents/memory-service-manager.md start
+./.claude/agents/MemoryServiceManager.md start
 ```
 
 #### Event Router Problems
@@ -327,7 +366,7 @@ ps aux | grep event_service
 
 # Clean restart
 pkill -f event_service
-./.claude/agents/event-router-service-manager.md start
+./.claude/agents/EventRouterServiceManager.md start
 ```
 
 ### Service Recovery
@@ -336,12 +375,12 @@ pkill -f event_service
 GADUGI_SERVICE_CHECK_AUTO_START=true ./.claude/hooks/service-check.sh
 
 # Individual service recovery
-./.claude/agents/neo4j-service-manager.md restart
-./.claude/agents/memory-service-manager.md restart
-./.claude/agents/event-router-service-manager.md restart
+./.claude/agents/Neo4jServiceManager.md restart
+./.claude/agents/MemoryServiceManager.md restart
+./.claude/agents/EventRouterServiceManager.md restart
 
 # Coordinator-managed recovery
-./.claude/agents/gadugi-coordinator.md start
+./.claude/agents/GadugiCoordinator.md start
 ```
 
 ## Development

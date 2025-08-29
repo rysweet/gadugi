@@ -17,7 +17,7 @@ Create a System Design Review Agent that:
 ## Implementation Requirements
 
 ### 1. Agent Specification
-Create `.claude/agents/system-design-reviewer.md` with:
+Create `.claude/agents/SystemDesignReviewer.md` with:
 - Clear role definition for architectural review
 - Integration points with orchestrator/workflow manager
 - AST parsing capabilities for code analysis

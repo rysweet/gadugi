@@ -112,8 +112,8 @@ class SystemDesignReviewer:
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, 'task_id', None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler("system-design-reviewer")
-        self.task_tracker = TaskTracker("system-design-reviewer")
+        self.error_handler = ErrorHandler("SystemDesignReviewer")
+        self.task_tracker = TaskTracker("SystemDesignReviewer")
 
         # Initialize specialized components
         self.ast_parser_factory = ASTParserFactory()
@@ -561,8 +561,8 @@ class SystemDesignStateManager(StateManager):  # type: ignore
 
     def __init__(self):
         super().__init__(
-            state_dir=Path(".github/workflow-states/system-design-reviewer"),
-            task_id="system-design-reviewer"
+            state_dir=Path(".github/workflow-states/SystemDesignReviewer"),
+            task_id="SystemDesignReviewer"
         )
 
     def get_default_state(self) -> Dict[str, Any]:

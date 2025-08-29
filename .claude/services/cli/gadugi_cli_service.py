@@ -132,7 +132,7 @@ class ServiceType(Enum):
     MCP = "mcp"
     LLM_PROXY = "llm-proxy"
     ORCHESTRATOR = "orchestrator"
-    WORKFLOW_MANAGER = "workflow-manager"
+    WORKFLOW_MANAGER = "WorkflowManager"
     ALL = "all"
 
 
@@ -868,13 +868,13 @@ Examples:
             if args.parallel:
                 prompt = f"Execute workflow from {args.prompt_file} in parallel"
                 result = await self.agent_manager.invoke_agent(
-                    "orchestrator-agent",
+                    "OrchestratorAgent",
                     prompt,
                 )
             else:
                 prompt = f"Execute workflow from {args.prompt_file}"
                 result = await self.agent_manager.invoke_agent(
-                    "workflow-manager",
+                    "WorkflowManager",
                     prompt,
                 )
 

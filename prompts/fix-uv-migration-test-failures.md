@@ -76,7 +76,7 @@ Comprehensively analyze and fix all 39 failing tests to achieve 100% test pass r
 - Clear documentation of changes
 
 ## Notes
-- Use test-solver agent for complex failures
+- Use TestSolver agent for complex failures
 - Some tests may be obsolete and can be removed
 - Prioritize fixing over skipping when possible
 - Ensure backwards compatibility maintained

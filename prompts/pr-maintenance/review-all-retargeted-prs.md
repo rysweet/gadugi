@@ -67,7 +67,7 @@ Execute comprehensive code reviews for all 14 PRs that have been retargeted to f
 
 ## Review Instructions for Each PR
 
-For each PR, the code-reviewer agent should:
+For each PR, the CodeReviewer agent should:
 
 1. **Analyze Changes**:
    - Review all modified files

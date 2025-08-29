@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Add pr-backlog-manager directory
+# Add PrBacklogManager directory
 pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -22,7 +22,7 @@ pr_backlog_path = os.path.join(
     "..",
     ".claude",
     "agents",
-    "pr-backlog-manager",
+    "PrBacklogManager",
 )
 sys.path.insert(0, pr_backlog_path)
 
@@ -207,10 +207,10 @@ class TestDelegationCreation:
             == "workflow-master"
         )
 
-        # Test code-reviewer capabilities
+        # Test CodeReviewer capabilities
         assert (
             coordinator._select_target_agent(DelegationType.AI_CODE_REVIEW)
-            == "code-reviewer"
+            == "CodeReviewer"
         )
 
     def test_create_delegation_task(self, coordinator, sample_pr_context):
@@ -357,13 +357,13 @@ class TestDelegationExecution:
             assert task.last_attempt is not None  # type: ignore[union-attr]
 
     def test_execute_delegation_code_reviewer(self, coordinator):
-        """Test delegation execution to code-reviewer."""
+        """Test delegation execution to CodeReviewer."""
         task = DelegationTask(
             task_id="test-456",
             pr_number=789,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.MEDIUM,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Test prompt",
             context={"repository": "user/repo"},
             created_at=datetime.now(),
@@ -456,7 +456,7 @@ class TestWorkflowMasterDelegation:
 
 
 class TestCodeReviewerDelegation:
-    """Test code-reviewer delegation functionality."""
+    """Test CodeReviewer delegation functionality."""
 
     def test_create_code_review_workflow_auto_approve(self, coordinator):
         """Test code review workflow creation in auto-approve mode."""
@@ -466,7 +466,7 @@ class TestCodeReviewerDelegation:
             pr_number=123,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.HIGH,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Review PR #123",
             context={"repository": "user/repo"},
             created_at=datetime.now(),
@@ -484,18 +484,18 @@ class TestCodeReviewerDelegation:
                 call.args[0] for call in mock_file().write.call_args_list
             )
             assert "AI Code Review for PR #123" in written_content
-            assert "code-reviewer" in written_content
+            assert "CodeReviewer" in written_content
             assert task is not None  # type: ignore[comparison-overlap] and task.status == DelegationStatus.IN_PROGRESS
 
     def test_invoke_code_reviewer_direct(self, coordinator):
-        """Test direct code-reviewer invocation."""
+        """Test direct CodeReviewer invocation."""
         coordinator.auto_approve = False
         task = DelegationTask(
             task_id="test-abc",
             pr_number=456,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.MEDIUM,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Review PR #456",
             context={"repository": "user/repo"},
             created_at=datetime.now(),
@@ -567,7 +567,7 @@ class TestDelegationComments:
             pr_number=123,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.HIGH,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Test prompt",
             context={"repository": "user/repo"},
             created_at=datetime.now(),
@@ -637,7 +637,7 @@ class TestDelegationManagement:
             pr_number=456,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.LOW,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Test",
             context={},
             created_at=datetime.now(),
@@ -745,7 +745,7 @@ class TestDelegationManagement:
             pr_number=123,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.LOW,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Test",
             context={},
             created_at=datetime.now(),
@@ -802,7 +802,7 @@ class TestDelegationManagement:
             pr_number=789,
             task_type=DelegationType.AI_CODE_REVIEW,
             priority=DelegationPriority.LOW,
-            agent_target="code-reviewer",
+            agent_target="CodeReviewer",
             prompt_template="Test",
             context={},
             created_at=datetime.now() - timedelta(minutes=5),

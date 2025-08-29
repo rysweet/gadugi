@@ -24,9 +24,9 @@ def add_type_ignores_for_optional_access():
         if 'Object of type "None"' in line or "reportOptional" in line:
             try:
                 # Extract file path and line number
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     parts = file_path_full.split(":")
                     file_path = parts[0]
@@ -63,9 +63,9 @@ def comment_out_unused_variables():
         if "is not accessed" in line and 'Variable "' in line:
             try:
                 # Extract file path, line number, and variable name
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     parts = file_path_full.split(":")
                     file_path = parts[0]
@@ -108,9 +108,9 @@ def add_missing_attributes():
     for line in errors.split("\n"):
         if "Cannot access attribute" in line and "for class" in line:
             try:
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     parts = file_path_full.split(":")
                     file_path = parts[0]
@@ -161,9 +161,9 @@ def fix_call_issues():
     for line in errors.split("\n"):
         if "Arguments missing for parameters" in line or "No parameter named" in line:
             try:
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     parts = file_path_full.split(":")
                     file_path = parts[0]
@@ -201,9 +201,9 @@ def comment_out_more_unused_imports():
     for line in errors.split("\n"):
         if "is not accessed" in line and 'Import "' in line:
             try:
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     file_path = file_path_full.split(":")[0]
 

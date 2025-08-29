@@ -16,7 +16,7 @@ cd /Users/ryan/src/gadugi2/gadugi
 # Execute the orchestrator directly with the three prompt files
 python3 .claude/orchestrator/orchestrator_main.py \
     prompts/fix-all-pyright-errors.md \
-    prompts/complete-team-coach-implementation.md \
+    prompts/complete-TeamCoach-implementation.md \
     prompts/cleanup-all-worktrees.md \
     --parallel \
     --max-workers 3 \

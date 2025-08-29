@@ -809,7 +809,7 @@ if __name__ == "__main__":
 - 🔄 Implement remaining agents for v0.3
 
 ## Current Context
-- Branch: feature/v0.3-memory-manager
+- Branch: feature/v0.3-MemoryManager
 - Working on memory management capabilities
 
 ## Recent Accomplishments
@@ -826,7 +826,7 @@ if __name__ == "__main__":
                 "type": "accomplishment",
                 "content": "✅ Successfully implemented memory manager engine",
                 "priority": "high",
-                "metadata": {"component": "memory-manager"},
+                "metadata": {"component": "MemoryManager"},
             },
         ],
     }

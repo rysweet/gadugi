@@ -19,7 +19,7 @@ Previously, the WorkflowManager had several consistency issues:
 
 - **Phase 9 Skipping**: Despite being marked as "MANDATORY - NEVER SKIP", the code review phase was often not executed
 - **Incomplete Execution**: WorkflowManager sometimes created a plan but stopped before implementation
-- **Missing Code Review Response**: Even when reviews happened, the code-review-response agent was not consistently invoked
+- **Missing Code Review Response**: Even when reviews happened, the CodeReviewResponse agent was not consistently invoked
 - **State Management Gaps**: Phase transitions weren't properly tracked, leading to orphaned PRs
 
 ## Enhanced Enforcement Mechanisms
@@ -29,7 +29,7 @@ Previously, the WorkflowManager had several consistency issues:
 #### Enforcement Mechanism 1: Automatic Invocation After PR Creation
 - **Trigger**: Immediately after Phase 8 (PR creation) completes
 - **Timing**: 30-second automatic timer
-- **Action**: Automatic invocation of code-reviewer agent
+- **Action**: Automatic invocation of CodeReviewer agent
 - **No Manual Intervention**: Fully automated process
 
 ```bash
@@ -41,7 +41,7 @@ echo "Setting 30-second timer for MANDATORY code review invocation..."
 sleep 30
 
 # FORCE code review invocation
-echo "⚡ ENFORCING Phase 9: Invoking code-reviewer agent NOW"
+echo "⚡ ENFORCING Phase 9: Invoking CodeReviewer agent NOW"
 PHASE_9_ENFORCEMENT=true
 ```
 
@@ -57,7 +57,7 @@ verify_phase_9_completion() {
 
     if ! gh pr view "$PR_NUMBER" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
         echo "🚨 CRITICAL ERROR: Workflow marked complete but NO REVIEW FOUND!"
-        echo "📋 ENFORCING Phase 9: Invoking code-reviewer agent immediately"
+        echo "📋 ENFORCING Phase 9: Invoking CodeReviewer agent immediately"
 
         # FORCE code review invocation
         MUST_INVOKE_CODE_REVIEWER=true
@@ -79,7 +79,7 @@ verify_phase_9_completion() {
 # MANDATORY tasks that MUST be in every workflow
 TaskData(
     id="9",
-    content="🚨 MANDATORY: Invoke code-reviewer agent (Phase 9 - CANNOT SKIP)",
+    content="🚨 MANDATORY: Invoke CodeReviewer agent (Phase 9 - CANNOT SKIP)",
     status="pending",
     priority="high",  # Maximum priority
     phase=WorkflowPhase.REVIEW,
@@ -88,7 +88,7 @@ TaskData(
 ),
 TaskData(
     id="10",
-    content="🚨 MANDATORY: Process review with code-review-response agent",
+    content="🚨 MANDATORY: Process review with CodeReviewResponse agent",
     status="pending",
     priority="high",  # Maximum priority
     phase=WorkflowPhase.REVIEW_RESPONSE,
@@ -135,7 +135,7 @@ After each phase, the system verifies:
 - **Trigger**: Before starting any new workflow
 - **Criteria**: PRs older than 5 minutes without reviews
 - **Scope**: Only WorkflowManager-created PRs
-- **Action**: Automatic code-reviewer invocation
+- **Action**: Automatic CodeReviewer invocation
 
 #### Recovery Script
 Location: `.claude/utils/orphaned_pr_recovery.sh`
@@ -177,7 +177,7 @@ Features:
 
 ### File Changes
 
-1. **`.claude/agents/workflow-manager.md`**
+1. **`.claude/agents/WorkflowManager.md`**
    - Enhanced Phase 9 section with multiple enforcement mechanisms
    - Added execution completion requirements
    - Added anti-termination safeguards
@@ -249,7 +249,7 @@ The enhanced enforcement mechanisms ensure:
 
 1. ✅ **100% Phase 9 Execution**: Every PR gets a code review automatically
 2. ✅ **0% Planning-Only Runs**: WorkflowManager always executes implementation
-3. ✅ **100% Review Response**: Every review gets processed with code-review-response
+3. ✅ **100% Review Response**: Every review gets processed with CodeReviewResponse
 4. ✅ **Automatic Recovery**: Orphaned PRs detected and fixed within 5 minutes
 5. ✅ **State Consistency**: 100% reliable state management and recovery
 

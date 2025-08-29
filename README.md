@@ -32,10 +32,10 @@ Gadugi implements a sophisticated multi-agent architecture with four distinct la
 graph TD
     subgraph "🔵 Orchestration Layer"
         direction TB
-        OA[orchestrator-agent<br/>🎯 Main Coordinator<br/>Parallel execution planning]
-        TA[task-analyzer<br/>🧠 Dependency Analysis<br/>Task decomposition]
-        WM[worktree-manager<br/>🌿 Environment Isolation<br/>Git worktree lifecycle]
-        EM[execution-monitor<br/>📊 Progress Tracking<br/>Parallel monitoring]
+        OA[OrchestratorAgent<br/>🎯 Main Coordinator<br/>Parallel execution planning]
+        TA[TaskAnalyzer<br/>🧠 Dependency Analysis<br/>Task decomposition]
+        WM[WorktreeManager<br/>🌿 Environment Isolation<br/>Git worktree lifecycle]
+        EM[ExecutionMonitor<br/>📊 Progress Tracking<br/>Parallel monitoring]
 
         OA --> TA
         OA --> WM
@@ -44,27 +44,27 @@ graph TD
 
     subgraph "🟢 Implementation Layer"
         direction TB
-        WF[workflow-manager<br/>⚡ 11-Phase Executor<br/>Complete workflows]
-        PW[prompt-writer<br/>📝 Structured Prompts<br/>Template creation]
-        TW[test-writer<br/>🧪 Test Generation<br/>Comprehensive suites]
-        TS[test-solver<br/>🔧 Test Diagnosis<br/>Failure resolution]
-        TFA[type-fix-agent<br/>🔍 Type Resolution<br/>Error correction]
+        WF[WorkflowManager<br/>⚡ 11-Phase Executor<br/>Complete workflows]
+        PW[PromptWriter<br/>📝 Structured Prompts<br/>Template creation]
+        TW[TestWriter<br/>🧪 Test Generation<br/>Comprehensive suites]
+        TS[TestSolver<br/>🔧 Test Diagnosis<br/>Failure resolution]
+        TFA[TypeFixAgent<br/>🔍 Type Resolution<br/>Error correction]
     end
 
     subgraph "🟣 Review Layer"
         direction TB
-        CR[code-reviewer<br/>👥 PR Reviews<br/>Quality assurance]
-        CRR[code-review-response<br/>💬 Feedback Processing<br/>Change implementation]
-        SDR[system-design-reviewer<br/>🏗️ Architecture Review<br/>Design validation]
+        CR[CodeReviewer<br/>👥 PR Reviews<br/>Quality assurance]
+        CRR[CodeReviewResponse<br/>💬 Feedback Processing<br/>Change implementation]
+        SDR[SystemDesignReviewer<br/>🏗️ Architecture Review<br/>Design validation]
     end
 
     subgraph "🟠 Maintenance Layer"
         direction TB
-        PBM[pr-backlog-manager<br/>📋 PR Queue Management<br/>Readiness assessment]
-        AU[agent-updater<br/>🔄 Version Management<br/>Agent updates]
-        MM[memory-manager<br/>🧠 Memory Curation<br/>State synchronization]
-        RA[readme-agent<br/>📄 Documentation<br/>README maintenance]
-        CSU[claude-settings-update<br/>⚙️ Configuration<br/>Settings merger]
+        PBM[PrBacklogManager<br/>📋 PR Queue Management<br/>Readiness assessment]
+        AU[AgentUpdater<br/>🔄 Version Management<br/>Agent updates]
+        MM[MemoryManager<br/>🧠 Memory Curation<br/>State synchronization]
+        RA[ReadmeAgent<br/>📄 Documentation<br/>README maintenance]
+        CSU[ClaudeSettingsUpdate<br/>⚙️ Configuration<br/>Settings merger]
     end
 
     %% Inter-layer connections
@@ -151,27 +151,27 @@ flowchart TD
 gadugi/
 ├── .claude/
 │   ├── agents/                     # All agents stored here
-│   │   ├── workflow-manager.md         # Main workflow orchestrator
-│   │   ├── orchestrator-agent.md       # Parallel execution coordinator
-│   │   ├── code-reviewer.md            # Code review automation
-│   │   ├── code-review-response.md     # Review feedback processing
-│   │   ├── prompt-writer.md            # Structured prompt creation
+│   │   ├── WorkflowManager.md         # Main workflow orchestrator
+│   │   ├── OrchestratorAgent.md       # Parallel execution coordinator
+│   │   ├── CodeReviewer.md            # Code review automation
+│   │   ├── CodeReviewResponse.md     # Review feedback processing
+│   │   ├── PromptWriter.md            # Structured prompt creation
 │   │   ├── agent-manager.md            # Agent repository management
-│   │   ├── task-analyzer.md            # Task dependency analysis
-│   │   ├── task-bounds-eval.md         # Task complexity evaluation
-│   │   ├── task-decomposer.md          # Task breakdown specialist
-│   │   ├── task-research-agent.md      # Research and planning
-│   │   ├── worktree-manager.md         # Git worktree lifecycle
-│   │   ├── execution-monitor.md        # Parallel execution tracking
-│   │   ├── team-coach.md               # Team coordination & analytics
-│   │   ├── teamcoach-agent.md          # Alternative team coaching
-│   │   ├── pr-backlog-manager.md       # PR readiness management
-│   │   ├── program-manager.md          # Project health & strategy
-│   │   ├── memory-manager.md           # Memory.md synchronization
-│   │   ├── test-solver.md              # Test failure diagnosis
-│   │   ├── test-writer.md              # Test suite creation
-│   │   ├── xpia-defense-agent.md       # Security protection
-│   │   └── workflow-manager-phase9-enforcement.md  # Review enforcement
+│   │   ├── TaskAnalyzer.md            # Task dependency analysis
+│   │   ├── TaskBoundsEval.md         # Task complexity evaluation
+│   │   ├── TaskDecomposer.md          # Task breakdown specialist
+│   │   ├── TaskResearchAgent.md      # Research and planning
+│   │   ├── WorktreeManager.md         # Git worktree lifecycle
+│   │   ├── ExecutionMonitor.md        # Parallel execution tracking
+│   │   ├── TeamCoach.md               # Team coordination & analytics
+│   │   ├── TeamcoachAgent.md          # Alternative team coaching
+│   │   ├── PrBacklogManager.md       # PR readiness management
+│   │   ├── ProgramManager.md          # Project health & strategy
+│   │   ├── MemoryManager.md           # Memory.md synchronization
+│   │   ├── TestSolver.md              # Test failure diagnosis
+│   │   ├── TestWriter.md              # Test suite creation
+│   │   ├── XpiaDefenseAgent.md       # Security protection
+│   │   └── WorkflowManagerPhase9Enforcement.md  # Review enforcement
 │   ├── shared/                     # Shared utilities and modules
 │   ├── docs/                       # Additional documentation
 │   └── templates/                  # Workflow templates
@@ -187,7 +187,7 @@ gadugi/
 │       └── CLAUDE_TEMPLATE.md      # Claude instruction template
 ├── scripts/                        # Utility scripts
 │   ├── claude                      # Claude CLI executable
-│   ├── claude-worktree-manager.sh  # Worktree management
+│   ├── claude-WorktreeManager.sh  # Worktree management
 │   └── launch-claude-*.sh          # Launch helpers
 ├── config/                         # Configuration files
 │   ├── manifest.yaml               # Agent registry and versions
@@ -291,12 +291,12 @@ The agent-manager will handle all necessary configuration updates.
 Once installed, invoke agents as needed:
 
 #### Primary Orchestrators
-- `/agent:orchestrator-agent` - For coordinating multiple parallel workflows
-- `/agent:workflow-manager` - For complete development workflows (issue → code → PR)
+- `/agent:OrchestratorAgent` - For coordinating multiple parallel workflows
+- `/agent:WorkflowManager` - For complete development workflows (issue → code → PR)
 
 #### Specialized Agents
-- `/agent:code-reviewer` - For comprehensive code reviews
-- `/agent:prompt-writer` - For creating structured prompts
+- `/agent:CodeReviewer` - For comprehensive code reviews
+- `/agent:PromptWriter` - For creating structured prompts
 
 ## Parallel Execution Capabilities
 
@@ -336,8 +336,8 @@ A recent orchestrator execution successfully completed three tasks in parallel:
    - Result: Zero pyright errors
 
 2. **Complete Team Coach Implementation**
-   - Worktree: `.worktrees/task-complete-team-coach`
-   - Branch: `task/complete-team-coach-[timestamp]`
+   - Worktree: `.worktrees/task-complete-TeamCoach`
+   - Branch: `task/complete-TeamCoach-[timestamp]`
    - Result: Full agent with test coverage
 
 3. **Clean Up Legacy Worktrees**
@@ -355,17 +355,17 @@ To execute multiple tasks in parallel:
    ```bash
    # Create prompts for each task
    echo "Fix all pyright errors in the codebase" > prompts/fix-pyright.md
-   echo "Implement team coach agent" > prompts/team-coach.md
+   echo "Implement team coach agent" > prompts/TeamCoach.md
    echo "Clean up old worktrees" > prompts/cleanup.md
    ```
 
 2. **Invoke the orchestrator**:
    ```
-   /agent:orchestrator-agent
+   /agent:OrchestratorAgent
    
    Execute the following tasks in parallel:
    - prompts/fix-pyright.md
-   - prompts/team-coach.md
+   - prompts/TeamCoach.md
    - prompts/cleanup.md
    ```
 
@@ -389,15 +389,15 @@ All parallel executions maintain strict quality standards:
 - **Quality gates enforced** (pyright, ruff, pytest must pass)
 - **Code review invocation** (Phase 9) for every PR
 - **Isolated environments** prevent cross-task contamination
-- `/agent:memory-manager` - For maintaining Memory.md and GitHub sync
-- `/agent:program-manager` - For project health and issue lifecycle management
-- `/agent:team-coach` - For team coordination and analytics
-- `/agent:readme-agent` - For README management and maintenance
+- `/agent:MemoryManager` - For maintaining Memory.md and GitHub sync
+- `/agent:ProgramManager` - For project health and issue lifecycle management
+- `/agent:TeamCoach` - For team coordination and analytics
+- `/agent:ReadmeAgent` - For README management and maintenance
 
 #### Development Tools
-- `/agent:test-solver` - For diagnosing and fixing failing tests
-- `/agent:test-writer` - For creating comprehensive test suites
-- `/agent:pr-backlog-manager` - For managing PR readiness and backlogs
+- `/agent:TestSolver` - For diagnosing and fixing failing tests
+- `/agent:TestWriter` - For creating comprehensive test suites
+- `/agent:PrBacklogManager` - For managing PR readiness and backlogs
 
 ## VS Code Extension
 
@@ -595,14 +595,14 @@ Run `Gadugi: Validate Setup` to verify:
 The VS Code extension seamlessly integrates with the broader Gadugi ecosystem:
 
 #### Orchestrator Integration
-- **Parallel Execution**: Bloom command aligns with orchestrator-agent parallel workflows
-- **Worktree Coordination**: Integrates with worktree-manager agent functionality
+- **Parallel Execution**: Bloom command aligns with OrchestratorAgent parallel workflows
+- **Worktree Coordination**: Integrates with WorktreeManager agent functionality
 - **Process Monitoring**: Provides UI for orchestrator-managed Claude instances
 
 #### Memory and State Management
 - **Memory.md Integration**: Monitor panel can show memory file status
 - **State Persistence**: Tracks extension state across VS Code sessions
-- **GitHub Sync**: Coordinates with memory-manager agent for issue synchronization
+- **GitHub Sync**: Coordinates with MemoryManager agent for issue synchronization
 
 #### Workflow Enhancement
 - **Issue to PR Workflow**: Supports complete development lifecycle in IDE
@@ -611,10 +611,10 @@ The VS Code extension seamlessly integrates with the broader Gadugi ecosystem:
 
 #### Agent Invocation
 The extension serves as a visual frontend for:
-- **workflow-manager**: Start workflows directly from worktree context menu
-- **code-reviewer**: Trigger reviews from PR branches
-- **orchestrator-agent**: Visualize and manage parallel execution
-- **team-coach**: Display team metrics and coaching insights
+- **WorkflowManager**: Start workflows directly from worktree context menu
+- **CodeReviewer**: Trigger reviews from PR branches
+- **OrchestratorAgent**: Visualize and manage parallel execution
+- **TeamCoach**: Display team metrics and coaching insights
 
 This integration makes the VS Code extension a central hub for AI-assisted development, bringing the power of Gadugi's multi-agent system directly into the developer's primary workspace.
 
@@ -639,13 +639,13 @@ Gadugi provides comprehensive documentation to help you understand and use the m
 ### Workflow and Testing
 - **[Workflows Guide](docs/workflows.md)** - Understanding workflow patterns and execution
 - **[Testing Workflow](docs/testing-workflow.md)** - Testing strategy and practices
-- **[Test Agents Guide](docs/test-agents-guide.md)** - Using test-writer and test-solver agents
+- **[Test Agents Guide](docs/test-agents-guide.md)** - Using TestWriter and TestSolver agents
 - **[Enhanced WorkflowMaster Guide](docs/enhanced-workflowmaster-guide.md)** - Advanced workflow management
 
 ### Agent Guides
 - **[Agents Overview](docs/agents/README.md)** - Introduction to available agents
-- **[PR Backlog Manager Guide](docs/pr-backlog-manager-guide.md)** - Managing pull request backlogs
-- **[System Design Reviewer Integration](docs/system-design-reviewer-integration-guide.md)** - Architecture review automation
+- **[PR Backlog Manager Guide](docs/PrBacklogManager-guide.md)** - Managing pull request backlogs
+- **[System Design Reviewer Integration](docs/SystemDesignReviewer-integration-guide.md)** - Architecture review automation
 - **[Task Decomposition Analyzer Guide](docs/task-decomposition-analyzer-guide.md)** - Breaking down complex tasks
 - **[Event Service Guide](docs/event_service_guide.md)** - Understanding the event-driven architecture
 
@@ -675,22 +675,22 @@ Gadugi provides comprehensive documentation to help you understand and use the m
 flowchart TD
     Task[📋 New Task or Request] --> TaskType{Task Type?}
 
-    TaskType -->|Multiple Independent Tasks| Orchestrator[🎯 Use orchestrator-agent<br/>Parallel execution<br/>Optimal efficiency]
+    TaskType -->|Multiple Independent Tasks| Orchestrator[🎯 Use OrchestratorAgent<br/>Parallel execution<br/>Optimal efficiency]
 
-    TaskType -->|Single Complex Workflow| WorkflowMgr[⚡ Use workflow-manager<br/>11-phase execution<br/>Complete lifecycle]
+    TaskType -->|Single Complex Workflow| WorkflowMgr[⚡ Use WorkflowManager<br/>11-phase execution<br/>Complete lifecycle]
 
-    TaskType -->|Code Review Needed| CodeReview[👥 Use code-reviewer<br/>PR quality assurance<br/>Automated feedback]
+    TaskType -->|Code Review Needed| CodeReview[👥 Use CodeReviewer<br/>PR quality assurance<br/>Automated feedback]
 
-    TaskType -->|Failed Tests| TestSolver[🔧 Use test-solver<br/>Diagnostic analysis<br/>Fix implementation]
+    TaskType -->|Failed Tests| TestSolver[🔧 Use TestSolver<br/>Diagnostic analysis<br/>Fix implementation]
 
-    TaskType -->|Documentation Update| ReadmeAgent[📄 Use readme-agent<br/>Content management<br/>Structure enhancement]
+    TaskType -->|Documentation Update| ReadmeAgent[📄 Use ReadmeAgent<br/>Content management<br/>Structure enhancement]
 
-    TaskType -->|Project Planning| ProgramMgr[🏗️ Use program-manager<br/>Issue lifecycle<br/>Strategic direction]
+    TaskType -->|Project Planning| ProgramMgr[🏗️ Use ProgramManager<br/>Issue lifecycle<br/>Strategic direction]
 
     %% Detailed workflows
     Orchestrator --> |Delegates to| WorkflowMgr
     WorkflowMgr --> |Invokes| CodeReview
-    CodeReview --> |Response via| ReviewResponse[💬 code-review-response<br/>Feedback processing]
+    CodeReview --> |Response via| ReviewResponse[💬 CodeReviewResponse<br/>Feedback processing]
 
     %% Styling
     classDef start fill:#3498db,stroke:#2980b9,color:#fff
@@ -712,56 +712,56 @@ flowchart TD
 
 | Use Case | Command | Purpose |
 |----------|---------|---------|
-| **Multiple Tasks** | `/agent:orchestrator-agent` | Parallel execution of independent workflows |
-| **Single Workflow** | `/agent:workflow-manager` | Complete issue-to-PR workflow |
-| **Code Review** | `/agent:code-reviewer` | Automated PR review and feedback |
-| **Fix Tests** | `/agent:test-solver` | Diagnose and fix failing tests |
-| **Create Tests** | `/agent:test-writer` | Generate comprehensive test suites |
-| **Update README** | `/agent:readme-agent` | Documentation management |
-| **Project Planning** | `/agent:program-manager` | Issue lifecycle and strategy |
-| **Team Coordination** | `/agent:team-coach` | Team analytics and coordination |
+| **Multiple Tasks** | `/agent:OrchestratorAgent` | Parallel execution of independent workflows |
+| **Single Workflow** | `/agent:WorkflowManager` | Complete issue-to-PR workflow |
+| **Code Review** | `/agent:CodeReviewer` | Automated PR review and feedback |
+| **Fix Tests** | `/agent:TestSolver` | Diagnose and fix failing tests |
+| **Create Tests** | `/agent:TestWriter` | Generate comprehensive test suites |
+| **Update README** | `/agent:ReadmeAgent` | Documentation management |
+| **Project Planning** | `/agent:ProgramManager` | Issue lifecycle and strategy |
+| **Team Coordination** | `/agent:TeamCoach` | Team analytics and coordination |
 
 ## Available Agents
 
 ### Workflow Management
-- **workflow-manager** - Orchestrates complete development workflows from issue creation to PR review
-- **orchestrator-agent** - Coordinates parallel execution of multiple WorkflowManagers
-- **task-analyzer** - Analyzes prompt files to identify dependencies and parallelization opportunities
-- **worktree-manager** - Manages git worktree lifecycle for isolated parallel execution
-- **execution-monitor** - Monitors parallel Claude Code CLI executions and tracks progress
+- **WorkflowManager** - Orchestrates complete development workflows from issue creation to PR review
+- **OrchestratorAgent** - Coordinates parallel execution of multiple WorkflowManagers
+- **TaskAnalyzer** - Analyzes prompt files to identify dependencies and parallelization opportunities
+- **WorktreeManager** - Manages git worktree lifecycle for isolated parallel execution
+- **ExecutionMonitor** - Monitors parallel Claude Code CLI executions and tracks progress
 
 ### Task Analysis & Decomposition
-- **task-bounds-eval** - Evaluates task complexity and scope boundaries
-- **task-decomposer** - Breaks down complex tasks into manageable subtasks
-- **task-research-agent** - Conducts research for task planning and implementation
+- **TaskBoundsEval** - Evaluates task complexity and scope boundaries
+- **TaskDecomposer** - Breaks down complex tasks into manageable subtasks
+- **TaskResearchAgent** - Conducts research for task planning and implementation
 
 ### Code Quality & Review
-- **code-reviewer** - Performs comprehensive code reviews on pull requests
-- **code-review-response** - Processes code review feedback and implements changes
-- **test-solver** - Diagnoses and fixes failing tests
-- **test-writer** - Creates comprehensive test suites
+- **CodeReviewer** - Performs comprehensive code reviews on pull requests
+- **CodeReviewResponse** - Processes code review feedback and implements changes
+- **TestSolver** - Diagnoses and fixes failing tests
+- **TestWriter** - Creates comprehensive test suites
 
 ### Team Coordination & Analytics
-- **team-coach** - Provides intelligent multi-agent team coordination with team analytics
-- **teamcoach-agent** - Alternative implementation of team coaching functionality
-- **pr-backlog-manager** - Manages PR backlogs by ensuring readiness for review and merge
+- **TeamCoach** - Provides intelligent multi-agent team coordination with team analytics
+- **TeamcoachAgent** - Alternative implementation of team coaching functionality
+- **PrBacklogManager** - Manages PR backlogs by ensuring readiness for review and merge
 
 ### Project Management
-- **program-manager** - Manages project health, issue lifecycle, and strategic direction
-- **memory-manager** - Maintains and synchronizes Memory.md with GitHub Issues
+- **ProgramManager** - Manages project health, issue lifecycle, and strategic direction
+- **MemoryManager** - Maintains and synchronizes Memory.md with GitHub Issues
 
 ### Productivity & Content Creation
-- **prompt-writer** - Creates high-quality structured prompts for development workflows
+- **PromptWriter** - Creates high-quality structured prompts for development workflows
 
 ### Service Configuration & Management
-- **llm-proxy-agent** - Interactive configuration wizard for LLM Proxy Service with background execution and logging
-- **readme-agent** - Manages and maintains README.md files on behalf of the Product Manager
+- **LlmProxyAgent** - Interactive configuration wizard for LLM Proxy Service with background execution and logging
+- **ReadmeAgent** - Manages and maintains README.md files on behalf of the Product Manager
 ### Security & Infrastructure
 - **agent-manager** - Manages external agent repositories with version control
-- **xpia-defense-agent** - Protects against Cross-Prompt Injection Attacks
+- **XpiaDefenseAgent** - Protects against Cross-Prompt Injection Attacks
 
 ### Specialized Enforcement
-- **workflow-manager-phase9-enforcement** - Ensures Phase 9 code review enforcement in workflows
+- **WorkflowManagerPhase9Enforcement** - Ensures Phase 9 code review enforcement in workflows
 
 ## Core Services
 
@@ -778,9 +778,9 @@ The LLM Proxy Service provides a unified interface to multiple LLM providers wit
 - **Time-based scheduling** - Run until specific time or for duration (e.g., "until 7pm" when rate limits reset)
 
 **Configuration:**
-Use the `llm-proxy-agent` for interactive setup:
+Use the `LlmProxyAgent` for interactive setup:
 ```
-/agent:llm-proxy-agent
+/agent:LlmProxyAgent
 Help me set up Azure OpenAI with the LLM Proxy
 ```
 
@@ -794,27 +794,27 @@ See [LLM Proxy Documentation](.claude/services/llm-proxy/README.md) for detailed
 ## Agent Hierarchy and Coordination
 
 ### Primary Orchestrators
-- **orchestrator-agent** → Coordinates multiple **workflow-manager** instances for parallel execution
-- **workflow-manager** → Main workflow orchestrator that invokes specialized agents as needed
+- **OrchestratorAgent** → Coordinates multiple **WorkflowManager** instances for parallel execution
+- **WorkflowManager** → Main workflow orchestrator that invokes specialized agents as needed
 
 ### Agent Dependencies
-- **orchestrator-agent** uses:
-  - **task-analyzer** - To analyze dependencies and plan parallel execution
-  - **worktree-manager** - To create isolated development environments
-  - **execution-monitor** - To track progress of parallel executions
-- **workflow-manager** integrates with:
-  - **code-reviewer** - For automated code review (Phase 9)
-  - **memory-manager** - For state persistence and GitHub sync
-  - **pr-backlog-manager** - For PR lifecycle management
-- **team-coach** provides optimization for:
-  - **orchestrator-agent** - Performance analytics and team coordination
-  - **workflow-manager** - Intelligent task assignment and coaching
+- **OrchestratorAgent** uses:
+  - **TaskAnalyzer** - To analyze dependencies and plan parallel execution
+  - **WorktreeManager** - To create isolated development environments
+  - **ExecutionMonitor** - To track progress of parallel executions
+- **WorkflowManager** integrates with:
+  - **CodeReviewer** - For automated code review (Phase 9)
+  - **MemoryManager** - For state persistence and GitHub sync
+  - **PrBacklogManager** - For PR lifecycle management
+- **TeamCoach** provides optimization for:
+  - **OrchestratorAgent** - Performance analytics and team coordination
+  - **WorkflowManager** - Intelligent task assignment and coaching
 
 ### Usage Patterns
-- **For multiple related tasks**: Use **orchestrator-agent** to coordinate parallel **workflow-manager** instances
-- **For single complex workflows**: Use **workflow-manager** directly
-- **For specialized tasks**: Invoke specific agents (code-reviewer, test-solver, etc.) directly
-- **For project management**: Use **program-manager** for issue lifecycle and strategic direction
+- **For multiple related tasks**: Use **OrchestratorAgent** to coordinate parallel **WorkflowManager** instances
+- **For single complex workflows**: Use **WorkflowManager** directly
+- **For specialized tasks**: Invoke specific agents (CodeReviewer, TestSolver, etc.) directly
+- **For project management**: Use **ProgramManager** for issue lifecycle and strategic direction
 
 ## Development Setup
 

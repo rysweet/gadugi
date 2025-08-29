@@ -74,7 +74,7 @@ def test_prompt_files():
     prompts_dir = Path("/Users/ryan/src/gadugi2/gadugi/prompts")
     required_prompts = [
         "fix-all-pyright-errors.md",
-        "complete-team-coach-implementation.md",
+        "complete-TeamCoach-implementation.md",
         "cleanup-all-worktrees.md",
     ]
 

@@ -5,10 +5,10 @@ Update the orchestrator agent to handle any type of input (not just existing pro
 
 ## Requirements
 
-1. **Update `.claude/agents/orchestrator-agent.md`**:
+1. **Update `.claude/agents/OrchestratorAgent.md`**:
    - Add input processing logic to handle both prompt files and task descriptions
    - Check if input refers to existing prompt files or is a task description
-   - For task descriptions, invoke prompt-writer to create structured prompt files
+   - For task descriptions, invoke PromptWriter to create structured prompt files
    - Process all inputs into a list of executable prompt files
 
 2. **Input Processing Pattern**:
@@ -20,7 +20,7 @@ Update the orchestrator agent to handle any type of input (not just existing pro
 
    1. Check if input is an existing prompt file
    2. If not, treat it as a task description:
-      - Invoke prompt-writer agent to create prompt file
+      - Invoke PromptWriter agent to create prompt file
       - Save to prompts/ directory
       - Add to execution list
    3. Continue with normal orchestration workflow

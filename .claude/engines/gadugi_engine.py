@@ -238,14 +238,14 @@ class GadugiEngine:
                 "executable": "python",
                 "args": ["src/orchestrator/architect_engine.py"],
             },
-            "task-decomposer": {
+            "TaskDecomposer": {
                 "version": "0.3.0",
                 "capabilities": ["task_analysis", "decomposition"],
                 "memory_limit": "128MB",
                 "executable": "python",
                 "args": ["src/orchestrator/simple_decomposer.py"],
             },
-            "workflow-manager": {
+            "WorkflowManager": {
                 "version": "0.3.0",
                 "capabilities": ["workflow_management", "phase_coordination"],
                 "memory_limit": "256MB",
@@ -259,35 +259,35 @@ class GadugiEngine:
                 "executable": "python",
                 "args": ["src/orchestrator/code_writer_engine.py"],
             },
-            "code-reviewer": {
+            "CodeReviewer": {
                 "version": "0.3.0",
                 "capabilities": ["code_review", "quality_analysis"],
                 "memory_limit": "128MB",
                 "executable": "python",
                 "args": ["src/orchestrator/code_reviewer_engine.py"],
             },
-            "memory-manager": {
+            "MemoryManager": {
                 "version": "0.3.0",
                 "capabilities": ["memory_management", "state_tracking"],
                 "memory_limit": "128MB",
                 "executable": "python",
                 "args": ["src/orchestrator/memory_manager_engine.py"],
             },
-            "team-coach": {
+            "TeamCoach": {
                 "version": "0.3.0",
                 "capabilities": ["team_coordination", "performance_optimization"],
                 "memory_limit": "256MB",
                 "executable": "python",
                 "args": ["src/orchestrator/team_coach_engine.py"],
             },
-            "prompt-writer": {
+            "PromptWriter": {
                 "version": "0.3.0",
                 "capabilities": ["prompt_generation", "template_management"],
                 "memory_limit": "128MB",
                 "executable": "python",
                 "args": ["src/orchestrator/prompt_writer_engine.py"],
             },
-            "worktree-manager": {
+            "WorktreeManager": {
                 "version": "0.3.0",
                 "capabilities": ["git_management", "worktree_isolation"],
                 "memory_limit": "128MB",
@@ -340,7 +340,7 @@ class GadugiEngine:
             "agents": {
                 "orchestrator": {"enabled": True, "max_instances": 3},
                 "architect": {"enabled": True, "max_instances": 2},
-                "workflow-manager": {"enabled": True, "max_instances": 5},
+                "WorkflowManager": {"enabled": True, "max_instances": 5},
             },
             "monitoring": {
                 "enabled": True,

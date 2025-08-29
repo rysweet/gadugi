@@ -138,7 +138,7 @@ We welcome several types of contributions:
 #### For Single Features or Fixes
 ```bash
 # Use WorkflowManager for complete development workflow
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Implement [description of feature/fix]
 Requirements:
@@ -150,7 +150,7 @@ Requirements:
 #### For Multiple Related Tasks
 ```bash
 # Use OrchestratorAgent for parallel execution
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - [Task 1 description]

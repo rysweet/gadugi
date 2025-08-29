@@ -1,4 +1,4 @@
-name: team-coach
+name: TeamCoach
 version: 1.0.0
 description: Auto-analyzes sessions and provides continuous improvement coaching
 
@@ -83,7 +83,7 @@ github_integration:
 
       labels:
         - enhancement
-        - team-coach
+        - TeamCoach
         - continuous-improvement
 
 configuration:

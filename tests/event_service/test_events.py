@@ -84,7 +84,7 @@ class TestAgentEvent:
     def test_creation(self):
         """Test AgentEvent creation."""
         event = AgentEvent(  # type: ignore[misc]
-            agent_name="workflow-manager",
+            agent_name="WorkflowManager",
             task_id="task-123",
             phase="implementation",
             status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
@@ -92,7 +92,7 @@ class TestAgentEvent:
             context={"branch": "feature/test"},
         )
 
-        assert event.agent_name == "workflow-manager"
+        assert event.agent_name == "WorkflowManager"
         assert event.task_id == "task-123"
         assert event.phase == "implementation"
         assert event is not None  # type: ignore[comparison-overlap] and event.status == "completed"
@@ -299,7 +299,7 @@ class TestEventCreators:
     def test_create_agent_event(self):
         """Test create_agent_event function."""
         event = create_agent_event(  # type: ignore[misc]
-            agent_name="workflow-manager",
+            agent_name="WorkflowManager",
             task_id="task-123",
             phase="implementation",
             status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
@@ -308,14 +308,14 @@ class TestEventCreators:
             custom_field="custom_value",
         )
 
-        assert event.event_type == "agent.workflow-manager.completed"
+        assert event.event_type == "agent.WorkflowManager.completed"
         assert event.source == "agent"
         assert event.is_agent_event()
         assert event.metadata["custom_field"] == "custom_value"  # type: ignore[index]
 
         agent_event = event.get_agent_event()
         assert agent_event is not None  # type: ignore[comparison-overlap]
-        assert agent_event.agent_name == "workflow-manager"
+        assert agent_event.agent_name == "WorkflowManager"
         assert agent_event.task_id == "task-123"
         assert agent_event.phase == "implementation"
         assert agent_event is not None  # type: ignore[comparison-overlap] and agent_event.status == "completed"

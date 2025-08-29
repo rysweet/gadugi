@@ -11,7 +11,7 @@ Run comprehensive quality checks on all Gadugi v0.3 components and fix any issue
 5. Fix ALL issues found - no skipping
 
 ## Components to Check
-1. **Recipe Executor** (`.claude/agents/recipe-executor/`)
+1. **Recipe Executor** (`.claude/agents/RecipeExecutor/`)
 2. **Event Router** (`.claude/services/event-router/`)
 3. **Orchestrator** (`.claude/orchestrator/`)
 4. **Neo4j Service** (`.claude/services/neo4j/`)
@@ -21,7 +21,7 @@ Run comprehensive quality checks on all Gadugi v0.3 components and fix any issue
 ## Quality Check Commands
 ```bash
 # Type checking
-uv run pyright .claude/agents/recipe-executor/
+uv run pyright .claude/agents/RecipeExecutor/
 uv run pyright .claude/services/event-router/
 uv run pyright .claude/orchestrator/
 uv run pyright .claude/services/mcp/
@@ -34,7 +34,7 @@ uv run ruff format .claude/
 uv run ruff check .claude/ --fix
 
 # Testing
-uv run pytest .claude/agents/recipe-executor/tests/
+uv run pytest .claude/agents/RecipeExecutor/tests/
 uv run pytest .claude/services/event-router/tests/
 uv run pytest .claude/orchestrator/tests/
 uv run pytest .claude/services/mcp/tests/

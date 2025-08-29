@@ -190,9 +190,9 @@ async def main():
     print("No server required - using SQLite directly")
     print("=" * 70)
 
-    # Test workflow-manager agent
-    print("\n📤 Testing workflow-manager agent...")
-    workflow_agent = SimpleV03Agent("workflow_001", "workflow-manager")
+    # Test WorkflowManager agent
+    print("\n📤 Testing WorkflowManager agent...")
+    workflow_agent = SimpleV03Agent("workflow_001", "WorkflowManager")
     await workflow_agent.initialize()
 
     # Execute tasks

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test suite for claude-settings-update agent functionality.
+Test suite for ClaudeSettingsUpdate agent functionality.
 Tests JSON merging, sorting, change detection, and PR creation logic.
 """
 
@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 
 
 class TestClaudeSettingsUpdate(unittest.TestCase):
-    """Test cases for claude-settings-update agent functionality."""
+    """Test cases for ClaudeSettingsUpdate agent functionality."""
 
     def setUp(self):
         """Set up test fixtures for each test."""
@@ -439,12 +439,12 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
 
 class TestClaudeSettingsUpdateIntegration(unittest.TestCase):
-    """Integration tests for claude-settings-update agent."""
+    """Integration tests for ClaudeSettingsUpdate agent."""
 
     def test_workflow_manager_integration(self):
         """Test integration with WorkflowManager Phase 11."""
         # Test that Phase 11 is properly defined
-        phase_11_defined = True  # Would check actual workflow-manager.md
+        phase_11_defined = True  # Would check actual WorkflowManager.md
         self.assertTrue(phase_11_defined)
 
         # Test automatic invocation after Phase 10

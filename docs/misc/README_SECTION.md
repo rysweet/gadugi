@@ -15,10 +15,10 @@ Gadugi now uses a simplified orchestration model with all workflow logic integra
 1. **Read CLAUDE.md** for complete workflow instructions
 2. **Follow the 11 phases** for any code change
 3. **Use executor agents** when you need specific operations:
-   - `worktree-executor`: Git worktree operations
-   - `github-executor`: GitHub issue/PR operations
-   - `test-executor`: Test execution
-   - `code-executor`: Code writing/editing
+   - `WorktreeExecutor`: Git worktree operations
+   - `GitHubExecutor`: GitHub issue/PR operations
+   - `TestExecutor`: Test execution
+   - `CodeExecutor`: Code writing/editing
 
 ### Example Workflow
 

@@ -427,9 +427,9 @@ class ReadinessAssessor:
         try:
             comments = self.github_ops.get_pr_comments(pr_number)
 
-            # Look for code-reviewer agent comments
+            # Look for CodeReviewer agent comments
             ai_review_indicators = [
-                "code-reviewer",
+                "CodeReviewer",
                 "ai code review",
                 "automated review",
                 "phase 9",

@@ -33,7 +33,7 @@ handlers:
         actions:
           - opened
     invocation:
-      agent_name: workflow-manager
+      agent_name: WorkflowManager
       method: claude_cli
       prompt_template: |
         New issue #{number}: {title}
@@ -72,7 +72,7 @@ handlers:
           - opened
           - synchronize
     invocation:
-      agent_name: code-reviewer
+      agent_name: CodeReviewer
       method: claude_cli
       prompt_template: |
         Review PR #{number}: {title}
@@ -107,7 +107,7 @@ handlers:
         refs:
           - refs/heads/main
     invocation:
-      agent_name: memory-manager
+      agent_name: MemoryManager
       method: claude_cli
       prompt_template: |
         Update Memory.md after merge to main branch
@@ -312,7 +312,7 @@ handlers:
       metadata_match:
         file_type: python
     invocation:
-      agent_name: test-writer
+      agent_name: TestWriter
       method: claude_cli
       prompt_template: |
         Python files changed: {files_changed}
@@ -334,7 +334,7 @@ handlers:
     async_execution: true
     filter:
       event_types:
-        - agent.workflow-manager.completed
+        - agent.WorkflowManager.completed
         - agent.*.failed
     invocation:
       agent_name: workflow-coordinator

@@ -47,7 +47,7 @@ Execute the complete 11-phase workflow:
 6. Phase 6: Testing (MUST pass all tests)
 7. Phase 7: Documentation
 8. Phase 8: Pull Request Creation
-9. Phase 9: Code Review (invoke code-reviewer)
+9. Phase 9: Code Review (invoke CodeReviewer)
 10. Phase 10: Review Response
 11. Phase 11: Settings Update
 
@@ -56,7 +56,7 @@ Execute the complete 11-phase workflow:
 - All tests MUST pass before PR creation
 - Execute all work in the specified worktree
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for task $task_id using prompt file $prompt_file in worktree $worktree_path
 EOF
@@ -83,9 +83,9 @@ execute_task "fix-pyright-errors" \
     "Fix All Pyright Errors"
 
 # Task 2: Complete Team Coach
-execute_task "complete-team-coach" \
-    "complete-team-coach-implementation.md" \
-    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-team-coach" \
+execute_task "complete-TeamCoach" \
+    "complete-TeamCoach-implementation.md" \
+    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-complete-TeamCoach" \
     "Complete Team Coach Implementation"
 
 # Task 3: Cleanup Worktrees
@@ -108,7 +108,7 @@ echo "📊 Results Summary:"
 echo "==================="
 
 # Check results
-for task_id in "fix-pyright-errors" "complete-team-coach" "cleanup-worktrees"; do
+for task_id in "fix-pyright-errors" "complete-TeamCoach" "cleanup-worktrees"; do
     if [ -f "/tmp/${task_id}_output.log" ]; then
         echo ""
         echo "Task: $task_id"
@@ -139,5 +139,5 @@ echo "3. Clean up worktrees with: git worktree prune"
 echo ""
 echo "Log files available at:"
 echo "  - /tmp/fix-pyright-errors_output.log"
-echo "  - /tmp/complete-team-coach_output.log"
+echo "  - /tmp/complete-TeamCoach_output.log"
 echo "  - /tmp/cleanup-worktrees_output.log"

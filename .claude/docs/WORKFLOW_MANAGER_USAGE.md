@@ -11,7 +11,7 @@ WorkflowManager now includes multiple enforcement mechanisms to ensure 100% reli
 ## Invocation
 
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute the workflow from: /prompts/FeatureName.md
 ```
@@ -37,7 +37,7 @@ Execute the workflow from: /prompts/FeatureName.md
 ## Example Session
 
 ```
-User: /agent:workflow-manager
+User: /agent:WorkflowManager
       Execute the workflow from: /prompts/AddCacheFeature.md
 
 WorkflowManager: I'll execute the workflow described in `/prompts/AddCacheFeature.md`.
@@ -56,7 +56,7 @@ Starting Phase 3: Research and Planning
 [... continues through all phases ...]
 
 Starting Phase 9: Review
-[Invokes code-reviewer sub-agent]
+[Invokes CodeReviewer sub-agent]
 
 Workflow complete! Feature delivered from issue #42 to PR #99.
 ```
@@ -67,7 +67,7 @@ Workflow complete! Feature delivered from issue #42 to PR #99.
 - Creates the structured prompts that WorkflowManager executes
 - Ensures prompts include all necessary workflow information
 
-### code-reviewer
+### CodeReviewer
 - Invoked by WorkflowManager during the review phase
 - Provides comprehensive PR feedback
 

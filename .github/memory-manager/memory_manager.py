@@ -365,7 +365,7 @@ def main():
         if args.command == "init":
             # Create default configuration
             repo_path = Path(args.repo_path or os.getcwd())
-            config_path = repo_path / ".github/memory-manager/config.yaml"
+            config_path = repo_path / ".github/MemoryManager/config.yaml"
             config_path.parent.mkdir(parents=True, exist_ok=True)
 
             config = create_default_config()

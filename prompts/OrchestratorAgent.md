@@ -174,7 +174,7 @@ def analyze_file_dependencies(prompts):
 1. **Create OrchestratorAgent Structure**:
    ```bash
    mkdir -p .claude/agents/orchestrator
-   touch .claude/agents/orchestrator-agent.md
+   touch .claude/agents/OrchestratorAgent.md
    ```
 
 2. **Implement PromptParser**:
@@ -450,7 +450,7 @@ def retry_failed_task(task, attempt=1):
 4. Link to related issues and dependencies
 
 ### Step 2: Branch Creation and Environment Setup
-1. Create feature branch: `feature/orchestrator-agent-parallel-execution`
+1. Create feature branch: `feature/OrchestratorAgent-parallel-execution`
 2. Set up development environment with required dependencies
 3. Create initial directory structure for OrchestratorAgent
 4. Initialize testing framework and benchmarking tools
@@ -477,7 +477,7 @@ def retry_failed_task(task, attempt=1):
 1. Create comprehensive PR with detailed description
 2. Include performance benchmarks and test results
 3. Add AI agent attribution: "🤖 Generated with [Claude Code](https://claude.ai/code)"
-4. Request code review using existing code-reviewer sub-agent
+4. Request code review using existing CodeReviewer sub-agent
 
 ### Step 7: Deployment and Monitoring
 1. Deploy to staging environment for validation

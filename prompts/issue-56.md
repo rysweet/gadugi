@@ -227,7 +227,7 @@ Without automated, principled handling for test failures and test authoring, dev
      "Note: This PR was created by an AI agent on behalf of the repository owner."
 
 9. **Code Review:**
-   - Invoke code-reviewer sub-agent for comprehensive review and validation.
+   - Invoke CodeReviewer sub-agent for comprehensive review and validation.
 
 ---
 

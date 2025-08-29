@@ -13,7 +13,7 @@ This PR reduces pyright errors in the `.claude/` directory from 442 to 178 error
 
 ### Test File Improvements
 - Created `MockPerformanceData` class for testing
-- Fixed `PerformanceMetrics` usage in team-coach tests
+- Fixed `PerformanceMetrics` usage in TeamCoach tests
 - Fixed `AgentPerformance` parameter mismatches
 - Corrected attribute access errors in test files
 

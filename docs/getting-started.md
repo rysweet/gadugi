@@ -91,7 +91,7 @@ gh issue create --title "Fix import error in module X" --body "Description of th
 
 2. **Invoke the workflow manager**:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Fix the import error in module X as described in issue #[number].
 This requires debugging the import statements and ensuring all dependencies are correct.
@@ -111,7 +111,7 @@ This requires debugging the import statements and ensuring all dependencies are 
 For multiple independent tasks, use the orchestrator:
 
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Fix import error in module X
@@ -158,5 +158,5 @@ Run the setup verification script:
 
 - **Documentation**: Browse the `/docs` directory
 - **Issues**: Check [GitHub Issues](https://github.com/rysweet/gadugi/issues)
-- **Agent Help**: Use `/agent:task-analyzer` for task guidance
+- **Agent Help**: Use `/agent:TaskAnalyzer` for task guidance
 - **Memory**: Check `.github/Memory.md` for context

@@ -4,31 +4,31 @@
 Gadugi Agent Registry
 
 Available Agents:
-- orchestrator-agent: Top-level coordinator for parallel task execution
-- workflow-manager: Orchestrates individual development workflows
-- test-solver: Analyzes and resolves failing tests through systematic analysis
-- test-writer: Authors comprehensive tests for new functionality with TDD alignment
-- code-reviewer: Reviews pull requests with comprehensive analysis
-- code-review-response: Responds to code review feedback
-- memory-manager: Manages Memory.md pruning and GitHub Issues sync
-- prompt-writer: Creates structured prompts for workflows
-- task-analyzer: Analyzes task dependencies and complexity
-- worktree-manager: Manages git worktrees for parallel development
-- execution-monitor: Monitors parallel execution progress
-- team-coach: Intelligent multi-agent coordination and optimization
-- program-manager: Project health maintenance and oversight
-- xpia-defense-agent: Cross-Prompt Injection Attack defense
+- OrchestratorAgent: Top-level coordinator for parallel task execution
+- WorkflowManager: Orchestrates individual development workflows
+- TestSolver: Analyzes and resolves failing tests through systematic analysis
+- TestWriter: Authors comprehensive tests for new functionality with TDD alignment
+- CodeReviewer: Reviews pull requests with comprehensive analysis
+- CodeReviewResponse: Responds to code review feedback
+- MemoryManager: Manages Memory.md pruning and GitHub Issues sync
+- PromptWriter: Creates structured prompts for workflows
+- TaskAnalyzer: Analyzes task dependencies and complexity
+- WorktreeManager: Manages git worktrees for parallel development
+- ExecutionMonitor: Monitors parallel execution progress
+- TeamCoach: Intelligent multi-agent coordination and optimization
+- ProgramManager: Project health maintenance and oversight
+- XpiaDefenseAgent: Cross-Prompt Injection Attack defense
 
 Test Agents (New):
-- test-solver: Systematic test failure analysis and resolution
-- test-writer: Automated test creation with quality validation
+- TestSolver: Systematic test failure analysis and resolution
+- TestWriter: Automated test creation with quality validation
 - shared_test_instructions: Shared framework for test quality and consistency
 
 Usage:
-    /agent:test-solver
+    /agent:TestSolver
     Context: Analyze and resolve failing test: tests/test_module.py::test_function
 
-    /agent:test-writer
+    /agent:TestWriter
     Context: Create tests for src/module.py with TDD alignment
 """
 

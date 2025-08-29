@@ -194,9 +194,9 @@ def add_missing_imports(file_path: Path) -> bool:
 def fix_teamcoach_files():
     """Fix all TeamCoach test files with syntax errors."""
     teamcoach_patterns = [
-        ".claude/agents/team-coach/tests/*.py",
+        ".claude/agents/TeamCoach/tests/*.py",
         ".claude/agents/teamcoach/tests/*.py",
-        "claude/agents/team-coach/tests/*.py",
+        "claude/agents/TeamCoach/tests/*.py",
         "claude/agents/teamcoach/tests/*.py",
     ]
 

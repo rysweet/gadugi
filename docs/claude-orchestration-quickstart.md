@@ -114,19 +114,19 @@ When you need specific operations, use simplified executors:
 
 ```bash
 # Worktree operations
-/agent:worktree-executor
+/agent:WorktreeExecutor
 Create worktree for issue 310, feature branch
 
 # GitHub operations
-/agent:github-executor
+/agent:GitHubExecutor
 Create issue titled "Add user authentication"
 
 # Test operations
-/agent:test-executor
+/agent:TestExecutor
 Run full test suite with coverage
 
 # Code operations
-/agent:code-executor
+/agent:CodeExecutor
 Create new module src/auth.py with Auth class
 ```
 

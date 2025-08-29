@@ -12,7 +12,7 @@
 **DO NOT STOP** until `uv run pyright .claude/` shows **0 errors**!
 
 ## System State at Checkpoint
-- **Branch**: feature/parallel-implement-task-decomposer-agent-(#240)-implement-task-decomposer-agent
+- **Branch**: feature/parallel-implement-TaskDecomposer-agent-(#240)-implement-TaskDecomposer-agent
 - **Latest Commit**: 8bd0a85 (fix: apply pyright error fixes and type annotations)
 - **Previous Commit**: ae954e6 (docs: add comprehensive resume prompt)
 - **All Changes Pushed**: Yes, to origin
@@ -26,7 +26,7 @@
 3. **Event Router**: Implemented (26 pyright errors remain)
 4. **MCP Service**: Implemented (11 pyright errors remain)
 5. **Agent Framework**: Implemented (8 pyright errors remain)
-6. **Team Coach**: Implementation exists in .claude/agents/team-coach/ with phase1/2/3 (108 pyright errors)
+6. **Team Coach**: Implementation exists in .claude/agents/TeamCoach/ with phase1/2/3 (108 pyright errors)
 7. **Neo4j**: Container running on port 7475, schema initialized
 
 ### ⚠️ Critical Fix Applied to Orchestrator
@@ -60,7 +60,7 @@ This fix is committed but needs to be used for proper parallel execution.
 - Various type annotation issues
 
 **Files with most errors**:
-- .claude/agents/team-coach/: 108 errors
+- .claude/agents/TeamCoach/: 108 errors
 - .claude/agents/orchestrator/: 16 errors
 - .claude/services/event-router/: 26 errors
 - .claude/services/mcp/: 11 errors
@@ -91,7 +91,7 @@ This fix is committed but needs to be used for proper parallel execution.
 # Clone and checkout
 git clone https://github.com/rysweet/gadugi
 cd gadugi
-git checkout feature/parallel-implement-task-decomposer-agent-\(#240\)-implement-task-decomposer-agent
+git checkout feature/parallel-implement-TaskDecomposer-agent-\(#240\)-implement-TaskDecomposer-agent
 
 # Setup UV environment
 uv sync --all-extras
@@ -123,12 +123,12 @@ Create these prompt files in prompts/ directory:
 Fix all 388 remaining pyright errors to achieve ZERO errors.
 
 Focus areas:
-1. Team Coach (108 errors) - .claude/agents/team-coach/
+1. Team Coach (108 errors) - .claude/agents/TeamCoach/
 2. Event Router (26 errors) - .claude/services/event-router/
 3. Orchestrator (16 errors) - .claude/agents/orchestrator/
 4. MCP Service (11 errors) - .claude/services/mcp/
 5. Agent Framework (8 errors) - .claude/framework/
-6. Recipe Executor (4 errors) - .claude/agents/recipe-executor/
+6. Recipe Executor (4 errors) - .claude/agents/RecipeExecutor/
 
 Requirements:
 - Fix actual issues, not just suppress
@@ -171,7 +171,7 @@ Checklist:
 **ORCHESTRATOR INSTRUCTIONS**: You MUST complete these TODOs:
 
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 MANDATORY: Complete ALL of the following TODOs from the interrupted session:
 

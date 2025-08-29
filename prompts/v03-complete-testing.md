@@ -46,6 +46,6 @@ Run comprehensive testing and quality checks on all v0.3 components.
 - Fix any failing tests
 - Clean up worktree after completion
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow for testing and quality assurance

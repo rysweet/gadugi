@@ -453,7 +453,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
         # Verify that new workflow reflection system components exist as replacement
         base_dir = os.path.dirname(os.path.dirname(__file__))
         reflection_agent = os.path.join(
-            base_dir, ".claude", "agents", "workflow-phase-reflection.md"
+            base_dir, ".claude", "agents", "WorkflowPhaseReflection.md"
         )
         self.assertTrue(
             os.path.exists(reflection_agent),

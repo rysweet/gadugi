@@ -75,7 +75,7 @@ class TestWorkflowManagerIntegration:
         """Setup test environment"""
         self.temp_dir = tempfile.mkdtemp()
         self.config = AgentConfig(  # type: ignore[misc]
-            agent_id="test-workflow-manager", name="Test WorkflowManager"
+            agent_id="test-WorkflowManager", name="Test WorkflowManager"
         )
 
         # Initialize shared modules with proper configuration

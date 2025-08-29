@@ -67,7 +67,7 @@ This revised orchestration plan incorporates findings from the ephemeral conflic
 **These CANNOT run in parallel - all modify agent-manager**
 
 1. **XPIA Defense Implementation**
-   - Prompt: `implement-xpia-defense-agent.md`
+   - Prompt: `implement-XpiaDefenseAgent.md`
    - Duration: ~3 hours
    - Uses container environment from Phase 2
 
@@ -84,7 +84,7 @@ This revised orchestration plan incorporates findings from the ephemeral conflic
 - Uses shared base classes and interfaces
 
 **Stream B: Team Intelligence**
-- Prompt: `implement-teamcoach-agent.md`
+- Prompt: `implement-TeamcoachAgent.md`
 - Uses agent creation framework from Phase 2
 
 **Stream C: WorkflowManager Robustness**
@@ -103,20 +103,20 @@ mkdir -p .claude/shared/{base_classes,interfaces,utils}
 ### Phase 1: Sequential Foundation
 ```bash
 # Execute Memory.md migration first
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Execute workflow for /prompts/integrate-memory-github-issues.md
 Priority: CRITICAL - All other tasks depend on this
 
 # Wait for completion, then:
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Execute workflow for /prompts/analyze-orchestrator-workflowmaster-architecture.md
 ```
 
 ### Phase 2: Limited Parallel
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these prompts in parallel with worktree isolation:
 - /prompts/setup-container-execution-environment.md
@@ -128,23 +128,23 @@ Use --max-parallel=2 to limit resource usage
 ### Phase 3: Sequential Security
 ```bash
 # XPIA Defense first
-/agent:workflow-manager
+/agent:WorkflowManager
 
-Task: Execute workflow for /prompts/implement-xpia-defense-agent.md
+Task: Execute workflow for /prompts/implement-XpiaDefenseAgent.md
 
 # Then hooks integration
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: Execute workflow for /prompts/enhance-claude-code-hooks-integration.md
 ```
 
 ### Phase 4: Full Parallel
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these prompts in parallel:
 - /prompts/enhance-task-decomposition-analyzer.md
-- /prompts/implement-teamcoach-agent.md
+- /prompts/implement-TeamcoachAgent.md
 - /prompts/fix-workflowmaster-brittleness-issues.md
 
 Use worktree isolation for clean parallel execution

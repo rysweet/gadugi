@@ -3,7 +3,7 @@
 Orchestrator Agent Entry Point Script
 
 This script serves as the entry point for Claude agent invocations of the format:
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 It bridges the gap between Claude's agent invocation system and the Python
 orchestrator implementation, enabling actual parallel execution.

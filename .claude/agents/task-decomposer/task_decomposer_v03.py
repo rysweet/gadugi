@@ -108,7 +108,7 @@ class TaskDecomposerV03(V03Agent):
 
         super().__init__(
             agent_id="task_decomposer_v03",
-            agent_type="task-decomposer",
+            agent_type="TaskDecomposer",
             capabilities=capabilities
         )
 
@@ -748,13 +748,13 @@ class TaskDecomposerV03(V03Agent):
         """Suggest best agent type for subtask."""
         agent_mapping = {
             "implementation": "code-writer",
-            "code_review": "code-reviewer",
-            "testing": "test-writer",
-            "unit_testing": "test-writer",
-            "integration_testing": "test-writer",
-            "performance_testing": "test-writer",
-            "documentation": "readme-agent",
-            "security_review": "code-reviewer",
+            "code_review": "CodeReviewer",
+            "testing": "TestWriter",
+            "unit_testing": "TestWriter",
+            "integration_testing": "TestWriter",
+            "performance_testing": "TestWriter",
+            "documentation": "ReadmeAgent",
+            "security_review": "CodeReviewer",
             "architecture_design": "architect",
             "design": "architect"
         }
@@ -1317,8 +1317,8 @@ async def test_task_decomposer_v03():
             improvements=["parallel_testing", "automated_deployment"],
             agent_performance={
                 "code-writer": 0.85,
-                "test-writer": 0.90,
-                "code-reviewer": 0.88
+                "TestWriter": 0.90,
+                "CodeReviewer": 0.88
             }
         )
 

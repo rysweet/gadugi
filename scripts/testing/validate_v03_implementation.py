@@ -128,7 +128,7 @@ class ImplementationValidator:
 
         components = {
             "Recipe Executor": (
-                ".claude/agents/recipe-executor",
+                ".claude/agents/RecipeExecutor",
                 ["Parse recipe files", "Generate implementation", "Create tests"],
             ),
             "Event Router": (
@@ -156,11 +156,11 @@ class ImplementationValidator:
                 ],
             ),
             "Task Decomposer": (
-                ".claude/agents/task-decomposer",
+                ".claude/agents/TaskDecomposer",
                 ["Task analysis", "Dependency detection", "Parallel opportunities"],
             ),
             "Team Coach": (
-                ".claude/agents/team-coach",
+                ".claude/agents/TeamCoach",
                 ["Session analysis", "GitHub integration", "Performance tracking"],
             ),
         }

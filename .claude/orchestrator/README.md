@@ -6,11 +6,11 @@ The OrchestratorAgent is a sophisticated coordination system that enables parall
 
 ## 🚀 NEW: Working Implementation (Issue #106)
 
-The orchestrator-agent now responds to actual `/agent:orchestrator-agent` invocations with real parallel execution:
+The OrchestratorAgent now responds to actual `/agent:OrchestratorAgent` invocations with real parallel execution:
 
 ```bash
 # This now works and spawns real parallel WorkflowManager processes!
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - implement-feature-a.md
@@ -367,10 +367,10 @@ The OrchestratorAgent is designed to work seamlessly with existing WorkflowManag
 
 ```bash
 # Traditional WorkflowManager usage
-/agent:workflow-manager prompts/single-task.md
+/agent:WorkflowManager prompts/single-task.md
 
 # OrchestratorAgent usage for multiple tasks
-/agent:orchestrator-agent prompts/  # Analyzes all prompts
+/agent:OrchestratorAgent prompts/  # Analyzes all prompts
 ```
 
 ### GitHub Integration

@@ -1,78 +1,128 @@
 # Reinforce Workflow for Code Changes
 
 ## Objective
-Create a workflow enforcement mechanism to ensure all code changes follow the proper orchestrator → workflow-manager → 11 phases pattern.
+Create and enforce a strict workflow mechanism that ensures all code changes go through the proper orchestrator and WorkflowManager agents with full 11-phase workflow.
 
-## Requirements
+## Priority
+CRITICAL
 
-1. **Research Phase**:
-   - Review current workflow enforcement mechanisms
-   - Identify gaps in workflow compliance
-   - Study existing orchestrator and workflow-manager patterns
-   - Analyze common workflow violations
+## Context
+Code changes MUST follow the proper workflow to maintain code quality, ensure proper testing, and preserve git history. This task will create enforcement mechanisms to prevent bypassing the orchestrator.
 
-2. **Implementation Phase**:
-   - Create workflow enforcement mechanism
-   - Add pre-execution checks for orchestrator usage
-   - Implement automated reminders/warnings
-   - Create workflow validation hooks
-   - Add compliance monitoring
+## Tasks
 
-3. **Testing Phase**:
-   - Test enforcement mechanisms
-   - Validate workflow compliance checks
-   - Test automated reminders
-   - Verify no legitimate workflows are blocked
-   - Test edge cases and exceptions
+### 1. Create Workflow Enforcement Documentation
+Create `.claude/workflow-enforcement.md` with:
+- Clear explanation of mandatory workflow for code changes
+- Decision tree for when to use orchestrator vs direct execution
+- Examples of violations and correct approaches
+- Consequences of bypassing workflow
 
-## Technical Details
+### 2. Update CLAUDE.md with Strict Requirements
+Enhance CLAUDE.md to include:
+- **CRITICAL** section on workflow enforcement
+- Clear distinction between code changes and informational queries
+- Mandatory use of orchestrator for ANY file modifications
+- Examples of what constitutes a "code change"
 
-### Workflow Phases (11 Required)
-1. Initial Setup (task analysis)
-2. Issue Creation
-3. Branch Management (worktree)
-4. Research and Planning
-5. Implementation (with parallel pyright/formatting)
-6. Testing
-7. Documentation
-8. Pull Request
-9. Review (code-reviewer agent)
-10. Review Response
-11. Settings Update
+### 3. Create Pre-Execution Validation Script
+Develop `.claude/scripts/validate-workflow.py`:
+```python
+def validate_execution_method(task_type, files_to_modify):
+    """
+    Validates that the correct execution method is being used.
+    Returns: (is_valid, error_message, suggested_method)
+    """
+    if task_type == "code_change" and files_to_modify:
+        if not using_orchestrator():
+            return False, "Code changes must use orchestrator", "OrchestratorAgent"
+    return True, None, None
+```
 
-### Enforcement Mechanisms
-1. **Pre-execution Validation**:
-   - Check for orchestrator invocation
-   - Validate workflow-manager usage
-   - Ensure worktree creation
+### 4. Implement Workflow Hooks
+Create hooks that intercept execution attempts:
+- `.claude/hooks/pre-execution-hook.py`
+- Detects when files will be modified
+- Warns if orchestrator is not being used
+- Optionally blocks direct execution
 
-2. **Runtime Monitoring**:
-   - Track phase completion
-   - Monitor compliance metrics
-   - Log workflow violations
+### 5. Create Workflow Validation Checklist
+Develop `.claude/workflow-validation.md`:
+- [ ] Is this a code change? → Use orchestrator
+- [ ] Will files be modified? → Use orchestrator  
+- [ ] Is this adding functionality? → Use orchestrator
+- [ ] Is this fixing bugs? → Use orchestrator
+- [ ] Is this only reading/analyzing? → Direct execution OK
+- [ ] Is this only answering questions? → Direct execution OK
 
-3. **Automated Reminders**:
-   - Hook-based reminders
-   - CLI warnings for direct execution
-   - Documentation references
+### 6. Add Enforcement to Agent Instructions
+Update all agent markdown files to include:
+```markdown
+## CRITICAL: Workflow Enforcement
+This agent MUST be invoked through the orchestrator for any code changes.
+Direct invocation is ONLY permitted for read-only operations.
+```
+
+### 7. Create Workflow Compliance Report
+Implement `.claude/scripts/workflow-compliance.py`:
+- Tracks all executions and their methods
+- Identifies potential workflow violations
+- Generates compliance reports
+- Suggests corrections for violations
+
+### 8. Implement Graceful Enforcement
+Rather than hard blocking, implement:
+- Warning messages for first violation
+- Escalating warnings for repeated violations
+- Automatic redirection to orchestrator when appropriate
+- Educational messages explaining why workflow matters
+
+### 9. Create Emergency Override Mechanism
+For rare cases where direct execution is justified:
+- Require explicit override flag
+- Log the override with justification
+- Send notification about override usage
+- Review overrides periodically
+
+### 10. Add Workflow Status Indicators
+Create visual/text indicators showing:
+- Current execution method (orchestrator/direct)
+- Workflow phase if using orchestrator
+- Compliance status
+- Warnings if in violation
+
+## Implementation Requirements
+
+### Files to Create
+- `.claude/workflow-enforcement.md`
+- `.claude/scripts/validate-workflow.py`
+- `.claude/hooks/pre-execution-hook.py`
+- `.claude/workflow-validation.md`
+- `.claude/scripts/workflow-compliance.py`
+
+### Files to Update
+- `CLAUDE.md` - Add strict workflow requirements
+- All agent files in `.claude/agents/` - Add enforcement notices
+- `.claude/Guidelines.md` - Include workflow guidelines
+- `.claude/instructions/orchestration.md` - Enhance with enforcement
 
 ## Success Criteria
-- [ ] Workflow enforcement mechanism implemented
-- [ ] Pre-execution checks operational
-- [ ] Automated reminders functional
-- [ ] Compliance monitoring active
-- [ ] Documentation comprehensive
-- [ ] No false positives in enforcement
+- Workflow enforcement mechanism is active
+- All code changes go through orchestrator
+- Clear documentation exists for workflow requirements
+- Validation scripts prevent accidental violations
+- Compliance can be monitored and reported
+- Emergency overrides are logged and justified
 
-## Testing Requirements
-- Enforcement mechanism tests
-- Compliance validation tests
-- Reminder system tests
-- Integration tests with orchestrator
-- Edge case handling
+## Testing Plan
+1. Attempt direct file modification → Should trigger warning
+2. Use orchestrator for code change → Should proceed normally
+3. Direct execution for analysis → Should be allowed
+4. Test emergency override → Should work with logging
+5. Run compliance report → Should show all executions
 
-## Documentation Updates
-- Workflow enforcement guide
-- Best practices documentation
-- Troubleshooting guide
-- Compliance metrics documentation
+## Notes
+- Balance enforcement with usability
+- Focus on education over punishment
+- Make the right path the easy path
+- Provide clear guidance when violations detected

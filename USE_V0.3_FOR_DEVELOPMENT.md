@@ -50,7 +50,7 @@ Using Gadugi v0.3 to build v0.4
 ## Use v0.3 Features
 - Use orchestrator for parallel execution
 - Store progress in memory system
-- Use workflow-manager for proper git flow
+- Use WorkflowManager for proper git flow
 EOF
 
 # Execute using v0.3 orchestrator
@@ -81,7 +81,7 @@ When working with Claude (like now), you can request v0.3 features:
 ### Workflow Management
 ```python
 # Use proper workflow
-"Use v0.3 workflow-manager to implement feature X"
+"Use v0.3 WorkflowManager to implement feature X"
 # This will:
 # - Create worktree
 # - Run 13-phase workflow
@@ -142,11 +142,11 @@ uv run python tasks/add_v04_feature.py
 The v0.3 agents can be invoked to help build v0.4:
 
 ```bash
-# Use workflow-manager agent
-claude --agent workflow-manager "Create v0.4 agent communication system"
+# Use WorkflowManager agent
+claude --agent WorkflowManager "Create v0.4 agent communication system"
 
-# Use task-decomposer agent
-claude --agent task-decomposer "Break down v0.4 roadmap into parallel tasks"
+# Use TaskDecomposer agent
+claude --agent TaskDecomposer "Break down v0.4 roadmap into parallel tasks"
 
 # Use code-writer agent with memory
 claude --agent code-writer --memory "Implement v0.4 feature X based on v0.3 patterns"
@@ -189,7 +189,7 @@ Tell Claude (me) to use v0.3 features:
 "Use v0.3 orchestrator to create a new agent for v0.4"
 "Store our v0.4 design decisions in the memory system"
 "Use parallel execution to refactor the codebase"
-"Use workflow-manager to properly implement feature X"
+"Use WorkflowManager to properly implement feature X"
 ```
 
 ## Running v0.3 Services

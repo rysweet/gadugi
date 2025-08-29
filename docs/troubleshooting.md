@@ -6,15 +6,15 @@ Common issues and solutions when using Gadugi.
 
 ### Agent Not Found
 
-**Symptoms**: `/agent:orchestrator-agent` returns "agent not found" error
+**Symptoms**: `/agent:OrchestratorAgent` returns "agent not found" error
 
 **Solutions**:
 ```bash
 # Check if agent files exist
-ls -la .claude/agents/orchestrator-agent.md
+ls -la .claude/agents/OrchestratorAgent.md
 
 # If missing, restore from main branch
-git checkout main -- .claude/agents/orchestrator-agent.md
+git checkout main -- .claude/agents/OrchestratorAgent.md
 ```
 
 ### Agent Timeout
@@ -32,7 +32,7 @@ df -h   # Disk space
 top     # CPU/Memory usage
 
 # Retry with increased timeout
-/agent:workflow-manager
+/agent:WorkflowManager
 
 [Your task with simpler scope]
 ```
@@ -49,7 +49,7 @@ top     # CPU/Memory usage
 **Solutions**:
 ```bash
 # Use correct syntax
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts:
 - prompt-file-1.md
@@ -282,7 +282,7 @@ gh auth refresh
 **Solutions**:
 ```bash
 # Reduce parallel tasks
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks sequentially:
 - task-1
@@ -308,7 +308,7 @@ find . -type d -name __pycache__ -exec rm -rf {} +
 uv cache clean
 
 # Reduce parallel execution
-# Use sequential workflow-manager instead of orchestrator
+# Use sequential WorkflowManager instead of orchestrator
 ```
 
 ## Recovery Procedures
@@ -325,7 +325,7 @@ git status
 git log --oneline -5
 
 # Resume or restart
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Resume task in .worktrees/failed-task from Phase 5
 ```
@@ -385,7 +385,7 @@ watch -n 1 'ps aux | grep claude'
 1. **Check documentation**: `/docs` directory
 2. **Search issues**: `gh issue list --search "error message"`
 3. **Review Memory.md**: Context and recent actions
-4. **Agent help**: `/agent:task-analyzer` for guidance
+4. **Agent help**: `/agent:TaskAnalyzer` for guidance
 
 ### Reporting Issues
 

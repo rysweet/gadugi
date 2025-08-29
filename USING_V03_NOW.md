@@ -62,7 +62,7 @@ Claude: [Retrieves: "Event-driven architecture"]
 
 ### 2. Workflow Management
 ```
-"Use v0.3 workflow-manager pattern to:
+"Use v0.3 WorkflowManager pattern to:
 - Create a new feature branch
 - Implement feature X
 - Create PR with proper testing"
@@ -78,7 +78,7 @@ Claude: [Retrieves: "Event-driven architecture"]
 
 ### 4. Agent Invocation
 ```
-"Use the task-decomposer agent pattern to break down:
+"Use the TaskDecomposer agent pattern to break down:
 'Build v0.4 agent communication system' into parallel tasks"
 ```
 

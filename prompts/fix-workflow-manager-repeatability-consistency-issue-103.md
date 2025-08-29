@@ -33,7 +33,7 @@ The WorkflowManager currently exhibits these consistency issues:
 
 ### Current Architecture Issues
 
-1. **Prompt-Heavy Design**: The workflow-manager.md file contains extensive instructions but lacks code enforcement
+1. **Prompt-Heavy Design**: The WorkflowManager.md file contains extensive instructions but lacks code enforcement
 2. **State Management Complexity**: Multiple state files, checkpoints, and validation mechanisms spread across markdown
 3. **Phase Transition Logic**: Manual verification and transition code embedded in bash snippets within markdown
 4. **Error Handling**: Scattered throughout prompt instructions rather than centralized code
@@ -63,7 +63,7 @@ The solution requires migrating from a prompt-heavy design to a code-heavy desig
 
 ### Phase 3: Simplify Workflow Manager Agent
 
-**Refactor `.claude/agents/workflow-manager.md`**:
+**Refactor `.claude/agents/WorkflowManager.md`**:
 - Reduce from 1,283 lines to <200 lines
 - Focus on agent coordination rather than execution details
 - Delegate deterministic behavior to code modules

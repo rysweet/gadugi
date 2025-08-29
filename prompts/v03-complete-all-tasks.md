@@ -18,7 +18,7 @@ ALL tasks MUST be delegated to WorkflowManager instances via 'claude -p' subproc
 - Must achieve: 0 pyright errors across ALL components
 
 ### Task 2: Implement Team Coach
-- Prompt file: /Users/ryan/src/gadugi2/gadugi/prompts/v03-implement-team-coach.md
+- Prompt file: /Users/ryan/src/gadugi2/gadugi/prompts/v03-implement-TeamCoach.md
 - Priority: HIGH
 - Must achieve: Full implementation with 0 errors
 
@@ -53,6 +53,6 @@ ALL tasks MUST be delegated to WorkflowManager instances via 'claude -p' subproc
 - All Python commands must use `uv run` prefix
 - DO NOT STOP until everything is 100% complete
 
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute ALL tasks to 100% completion. Do not stop until everything is done.

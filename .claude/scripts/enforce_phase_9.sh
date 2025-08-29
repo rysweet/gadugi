@@ -84,21 +84,21 @@ check_review_exists() {
 invoke_code_reviewer() {
     local pr_num="$1"
 
-    log "INFO" "🚨 ENFORCING MANDATORY Phase 9: Invoking code-reviewer for PR #$pr_num"
+    log "INFO" "🚨 ENFORCING MANDATORY Phase 9: Invoking CodeReviewer for PR #$pr_num"
 
     # Post a comment to document the enforcement
     local comment="🚨 **Phase 9 Enforcement Triggered**
 
 This PR has completed Phase 8 (PR creation) and is now automatically proceeding to Phase 9 (mandatory code review).
 
-**Status**: Invoking code-reviewer agent...
+**Status**: Invoking CodeReviewer agent...
 
 *This is an automated WorkflowManager Phase 9 enforcement action.*"
 
     gh pr comment "$pr_num" --body "$comment" || log "WARN" "Failed to post enforcement comment"
 
     # Build the code review prompt as a single line with proper escaping
-    local review_prompt="/agent:code-reviewer\\n\\nReview PR #$pr_num - MANDATORY Phase 9 Execution\\n\\nThis is an automated Phase 9 enforcement action triggered by WorkflowManager after PR creation.\\n\\nContext:\\n- PR was just created and requires mandatory code review\\n- This review is part of the automated workflow execution\\n- Phase 9 CANNOT be skipped per WorkflowManager requirements\\n\\nPlease conduct a comprehensive review of all changes in PR #$pr_num."
+    local review_prompt="/agent:CodeReviewer\\n\\nReview PR #$pr_num - MANDATORY Phase 9 Execution\\n\\nThis is an automated Phase 9 enforcement action triggered by WorkflowManager after PR creation.\\n\\nContext:\\n- PR was just created and requires mandatory code review\\n- This review is part of the automated workflow execution\\n- Phase 9 CANNOT be skipped per WorkflowManager requirements\\n\\nPlease conduct a comprehensive review of all changes in PR #$pr_num."
 
     log "INFO" "Executing: claude -p with single-line prompt for code review"
 

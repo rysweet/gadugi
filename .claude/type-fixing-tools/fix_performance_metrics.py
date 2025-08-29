@@ -11,8 +11,8 @@ def fix_performance_metrics_usage():
     """Fix PerformanceMetrics instantiation in test files."""
 
     test_files = [
-        ".claude/agents/team-coach/tests/test_coaching_engine.py",
-        ".claude/agents/team-coach/tests/test_strategic_planner.py",
+        ".claude/agents/TeamCoach/tests/test_coaching_engine.py",
+        ".claude/agents/TeamCoach/tests/test_strategic_planner.py",
         ".claude/agents/teamcoach/tests/test_coaching_engine.py",
         ".claude/agents/teamcoach/tests/test_strategic_planner.py",
     ]

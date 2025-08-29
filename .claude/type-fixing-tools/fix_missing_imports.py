@@ -30,7 +30,7 @@ def fix_missing_imports():
         "github_operations": {
             "files": [
                 ".claude/agents/enhanced_workflow_manager.py",
-                ".claude/agents/pr-backlog-manager/core.py",
+                ".claude/agents/PrBacklogManager/core.py",
             ],
             "import": "from ..shared.github_operations import GitHubOperations as github_operations",
         },
@@ -40,17 +40,17 @@ def fix_missing_imports():
         },
         "utils.error_handling": {
             "files": [
-                ".claude/agents/pr-backlog-manager/core.py",
+                ".claude/agents/PrBacklogManager/core.py",
                 ".claude/agents/shared_test_instructions.py",
             ],
             "import": "from ..shared.error_handling import ErrorHandler",
         },
         "state_management": {
-            "files": [".claude/agents/pr-backlog-manager/core.py"],
+            "files": [".claude/agents/PrBacklogManager/core.py"],
             "import": "from ..shared.state_management import WorkflowStateManager as state_management",
         },
         "task_tracking": {
-            "files": [".claude/agents/pr-backlog-manager/core.py"],
+            "files": [".claude/agents/PrBacklogManager/core.py"],
             "import": "from ..shared.task_tracking import TaskTracker as task_tracking",
         },
         "shared.error_handling": {
@@ -87,11 +87,11 @@ def fix_missing_imports():
             if f'Import "{import_name}"' in error and "could not be resolved" in error:
                 # Extract file path from error
                 if (
-                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     in error
                 ):
                     file_path = error.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1].split(":")[0]
                     full_path = Path(file_path)
 

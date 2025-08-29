@@ -106,7 +106,7 @@ class WorkflowManagerV03(V03Agent):
 
         super().__init__(
             agent_id=agent_id,
-            agent_type="workflow-manager",
+            agent_type="WorkflowManager",
             capabilities=capabilities
         )
 

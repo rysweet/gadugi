@@ -272,7 +272,7 @@ Execute in parallel:
 - **Deliverable**: Reviewed, approved pull requests
 
 ### Step 9: Code Review and Quality Assurance
-- Invoke code-reviewer sub-agent for each PR
+- Invoke CodeReviewer sub-agent for each PR
 - Address review feedback systematically
 - Ensure all success criteria are met
 - **Deliverable**: High-quality, reviewed code ready for merge
@@ -280,7 +280,7 @@ Execute in parallel:
 ## Task Breakdown for Parallel Execution
 
 ### Group 1: Foundation Security and Infrastructure (Parallel)
-1. **XPIA Defense Agent** (`/prompts/implement-xpia-defense-agent.md`)
+1. **XPIA Defense Agent** (`/prompts/implement-XpiaDefenseAgent.md`)
 2. **Container Execution Environment** (`/prompts/setup-container-execution-environment.md`)
 3. **Memory.md GitHub Integration** (`/prompts/integrate-memory-github-issues.md`)
 4. **Enhanced TaskAnalyzer** (`/prompts/enhance-task-decomposition-analyzer.md`)
@@ -290,7 +290,7 @@ Execute in parallel:
 
 ### Group 3: Robustness and Team Capabilities (Parallel)
 6. **WorkflowManager Brittleness Fixes** (`/prompts/fix-workflowmaster-brittleness-issues.md`)
-7. **TeamCoach Agent** (`/prompts/implement-teamcoach-agent.md`)
+7. **TeamCoach Agent** (`/prompts/implement-TeamcoachAgent.md`)
 8. **Agent Creation System** (`/prompts/create-systematic-agent-creation-system.md`)
 9. **Claude-Code Hooks Enhancement** (`/prompts/enhance-claude-code-hooks-integration.md`)
 
@@ -353,7 +353,7 @@ The estimated **3-5x speedup** from parallelization makes this approach signific
 
 **Note**: This prompt should be executed using the OrchestratorAgent with the command:
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute this master orchestration prompt with parallel task analysis and execution planning for maximum efficiency.
 ```

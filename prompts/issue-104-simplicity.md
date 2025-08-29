@@ -29,7 +29,7 @@
    - Evaluate high-change areas vs. stable domains
 
 ### Files to Modify:
-- **Primary**: `.claude/agents/code-reviewer.md` - Add new sections for design simplicity assessment
+- **Primary**: `.claude/agents/CodeReviewer.md` - Add new sections for design simplicity assessment
 - **Test**: Create test cases to validate the new functionality
 
 ### Success Criteria:

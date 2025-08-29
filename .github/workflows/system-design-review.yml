@@ -60,7 +60,7 @@ jobs:
           echo "The System Design Review Agent should be invoked by the Workflow Manager instead."
           echo ""
           echo "To manually run a system design review, use:"
-          echo "  /agent:system-design-reviewer analyze-pr <PR_NUMBER>"
+          echo "  /agent:SystemDesignReviewer analyze-pr <PR_NUMBER>"
           echo ""
           echo "To re-enable CI-based reviews:"
           echo "  1. Uncomment the pull_request trigger in this workflow"

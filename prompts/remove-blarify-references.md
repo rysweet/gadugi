@@ -14,12 +14,12 @@ The codebase contains references to "Blarify" that need to be completely removed
 
 ## Files to Update
 The following files contain Blarify references:
-- `.claude/agents/workflow-manager.md`
-- `.claude/agents/code-review-response.md`
-- `.claude/agents/code-reviewer.md`
-- `.claude/agents/task-analyzer.md`
-- `.claude/agents/prompt-writer.md`
-- `.claude/agents/orchestrator-agent.md`
+- `.claude/agents/WorkflowManager.md`
+- `.claude/agents/CodeReviewResponse.md`
+- `.claude/agents/CodeReviewer.md`
+- `.claude/agents/TaskAnalyzer.md`
+- `.claude/agents/PromptWriter.md`
+- `.claude/agents/OrchestratorAgent.md`
 - `.claude/orchestrator/components/task_analyzer.py`
 - `.claude/orchestrator/tests/test_task_analyzer.py`
 - `.claude/orchestrator/README.md`

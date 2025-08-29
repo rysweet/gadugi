@@ -336,7 +336,7 @@ class DelegationCoordinator:
                 DelegationType.BRANCH_UPDATE,
                 DelegationType.METADATA_IMPROVEMENT,
             ],
-            "code-reviewer": [DelegationType.AI_CODE_REVIEW],
+            "CodeReviewer": [DelegationType.AI_CODE_REVIEW],
         }
 
     def _classify_issue_type(self, issue: str) -> DelegationType:
@@ -631,7 +631,7 @@ Improve metadata for PR #{pr_number}.
         try:
             if task.agent_target == "workflow-master":
                 self._delegate_to_workflow_master(task)
-            elif task.agent_target == "code-reviewer":
+            elif task.agent_target == "CodeReviewer":
                 self._delegate_to_code_reviewer(task)
             else:
                 raise ValueError(f"Unknown agent target: {task.agent_target}")
@@ -650,7 +650,7 @@ Improve metadata for PR #{pr_number}.
             self._invoke_workflow_master_interactive(task)
 
     def _delegate_to_code_reviewer(self, task: DelegationTask) -> None:
-        """Delegate task to code-reviewer."""
+        """Delegate task to CodeReviewer."""
         if self.auto_approve:
             self._create_code_review_workflow(task)
         else:
@@ -702,10 +702,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Run code-reviewer
+      - name: Run CodeReviewer
         run: |
-          echo "Running code-reviewer for PR #{task.pr_number}"
-          # Invoke code-reviewer agent
+          echo "Running CodeReviewer for PR #{task.pr_number}"
+          # Invoke CodeReviewer agent
 """
 
         with open(file_path, "w") as f:
@@ -714,7 +714,7 @@ jobs:
         task.status = DelegationStatus.IN_PROGRESS
 
     def _invoke_code_reviewer_direct(self, task: DelegationTask) -> None:
-        """Invoke code-reviewer directly."""
+        """Invoke CodeReviewer directly."""
         task.status = DelegationStatus.IN_PROGRESS
 
     def _add_delegation_comment(self, task: DelegationTask) -> None:
@@ -1167,7 +1167,7 @@ class ReadinessAssessor:
         ]
 
         ai_review_complete = any(
-            "code-reviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
+            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
             for c in comments
         )
 
@@ -1351,7 +1351,7 @@ class ReadinessAssessor:
 
         comments = self.github_ops.get_pr_comments(pr_number)
         return any(
-            "code-reviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
+            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
             for c in comments
         )
 

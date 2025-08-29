@@ -6,8 +6,8 @@ Create the Team Coach agent that auto-analyzes completed sessions, identifies im
 ## Requirements
 
 ### Location
-- Agent directory: `.claude/agents/team-coach/`
-- Recipe directory: `.claude/recipes/team-coach/`
+- Agent directory: `.claude/agents/TeamCoach/`
+- Recipe directory: `.claude/recipes/TeamCoach/`
 
 ### Core Functionality
 1. **Session Analysis**
@@ -38,7 +38,7 @@ Create the Team Coach agent that auto-analyzes completed sessions, identifies im
 
 #### Agent Structure
 ```python
-# .claude/agents/team-coach/team_coach.py
+# .claude/agents/TeamCoach/team_coach.py
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
@@ -151,8 +151,8 @@ class TeamCoach(BaseAgent):
 
 #### Recipe Structure
 ```yaml
-# .claude/recipes/team-coach/recipe.yaml
-name: team-coach
+# .claude/recipes/TeamCoach/recipe.yaml
+name: TeamCoach
 version: 1.0.0
 description: Auto-analyzes sessions and provides continuous improvement coaching
 
@@ -283,7 +283,7 @@ github_integration:
 >>>>>>> feature/gadugi-v0.3-regeneration
       labels:
         - enhancement
-        - team-coach
+        - TeamCoach
         - continuous-improvement
 ```
 

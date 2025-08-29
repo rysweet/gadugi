@@ -1,26 +1,65 @@
 # Deprecated Agents - V0.3 Migration
 
+
+## 🚨 CRITICAL: Workflow Enforcement
+
+**This agent MUST be invoked through the orchestrator for ANY code changes.**
+
+### Workflow Requirements:
+- ✅ **MANDATORY**: Use orchestrator for file modifications
+- ✅ **MANDATORY**: Follow 11-phase workflow for code changes
+- ❌ **FORBIDDEN**: Direct file editing or creation
+- ❌ **FORBIDDEN**: Bypassing quality gates
+
+### When Orchestrator is REQUIRED:
+- Any file modifications (.py, .js, .json, .md, etc.)
+- Creating or deleting files/directories
+- Installing or updating dependencies
+- Configuration changes
+- Bug fixes and feature implementations
+- Code refactoring or optimization
+
+### When Direct Execution is OK:
+- Reading and analyzing existing files
+- Answering questions about code
+- Generating reports (without file output)
+- Code reviews and analysis
+
+### Compliance Check:
+Before executing any task, validate with:
+```bash
+python .claude/workflow-enforcement/validate-workflow.py --task "your task description"
+```
+
+### Emergency Override:
+Only for critical production issues:
+- Must include explicit justification
+- Automatically logged for review
+- Subject to retrospective approval
+
+**🔒 REMEMBER: This workflow protects code quality and ensures proper testing!**
+
 ## Overview
 These agents are DEPRECATED as of V0.3 migration. They used complex delegation patterns that have been replaced by the simplified executor architecture.
 
 ## Deprecated Agents
 
-### 1. orchestrator-agent.md
+### 1. OrchestratorAgent.md
 - **Reason**: Complex delegation to WorkflowManager
 - **Replacement**: Direct orchestration in CLAUDE.md using executors
 - **Migration**: Use execute() calls to coordinate executors
 
-### 2. workflow-manager.md
+### 2. WorkflowManager.md
 - **Reason**: Multi-phase workflow with agent delegation
 - **Replacement**: Direct phase execution in CLAUDE.md
 - **Migration**: Implement phases using executor calls
 
-### 3. workflow-manager-phase9-enforcement.md
+### 3. WorkflowManagerPhase9Enforcement.md
 - **Reason**: Enforcement via delegation
 - **Replacement**: Direct enforcement in CLAUDE.md
 - **Migration**: Use GitHub executor for PR checks
 
-### 4. agent-updater.md
+### 4. AgentUpdater.md
 - **Reason**: Updates via agent delegation
 - **Replacement**: Direct file operations via code executor
 - **Migration**: Use code executor for updates
@@ -51,7 +90,7 @@ CLAUDE.md orchestration:
 Instead of invoking these deprecated agents, use the executor pattern:
 
 ```python
-# Instead of: /agent:orchestrator-agent
+# Instead of: /agent:OrchestratorAgent
 # Use direct executor orchestration:
 
 from .claude.executors import execute
@@ -90,10 +129,10 @@ if result['success']:
 ## Files to Remove After Full Migration
 
 Once migration is complete and validated, these files can be removed:
-- .claude/agents/orchestrator-agent.md
-- .claude/agents/workflow-manager.md
-- .claude/agents/workflow-manager-phase9-enforcement.md
-- .claude/agents/workflow-manager-simplified.md
-- .claude/agents/agent-updater.md
+- .claude/agents/OrchestratorAgent.md
+- .claude/agents/WorkflowManager.md
+- .claude/agents/WorkflowManagerPhase9Enforcement.md
+- .claude/agents/WorkflowManagerSimplified.md
+- .claude/agents/AgentUpdater.md
 
 Keep this file as documentation of the migration.

@@ -227,7 +227,7 @@ class TestOrchestratorGovernance:
         assert "GOVERNANCE NOTICE" in prompt_content
         assert "Issue #148" in prompt_content
         assert "11-phase workflow" in prompt_content
-        assert "/agent:workflow-manager" in prompt_content
+        assert "/agent:WorkflowManager" in prompt_content
         assert sample_task.id in prompt_content
         assert sample_task.name in prompt_content
 

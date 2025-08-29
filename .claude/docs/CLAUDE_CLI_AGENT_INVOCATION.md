@@ -19,13 +19,13 @@ Based on https://docs.anthropic.com/en/docs/claude-code/cli-reference:
 
 ```bash
 # Non-interactive agent invocation
-claude -p "/agent:code-reviewer
+claude -p "/agent:CodeReviewer
 
 Review PR #123 for implementation quality and completeness."
 
 # With environment context
 export PR_NUMBER=123
-claude -p "/agent:code-reviewer
+claude -p "/agent:CodeReviewer
 
 Review PR $PR_NUMBER which was automatically created by WorkflowManager."
 ```
@@ -37,10 +37,10 @@ Review PR $PR_NUMBER which was automatically created by WorkflowManager."
 invoke_code_reviewer() {
     local pr_number="$1"
 
-    echo "Invoking code-reviewer agent for PR #$pr_number"
+    echo "Invoking CodeReviewer agent for PR #$pr_number"
 
     # Build the prompt
-    local prompt="/agent:code-reviewer
+    local prompt="/agent:CodeReviewer
 
 Review PR #$pr_number as part of mandatory Phase 9 workflow execution.
 
@@ -70,7 +70,7 @@ Focus on:
 recover_orphaned_pr() {
     local pr_number="$1"
 
-    claude -p "/agent:code-reviewer
+    claude -p "/agent:CodeReviewer
 
 Review PR #$pr_number which appears to be missing mandatory code review.
 
@@ -104,10 +104,10 @@ execute_phase_9() {
         return 0
     fi
 
-    # Invoke code-reviewer agent
-    echo "🚨 ENFORCING Phase 9: Invoking code-reviewer for PR #$pr_number"
+    # Invoke CodeReviewer agent
+    echo "🚨 ENFORCING Phase 9: Invoking CodeReviewer for PR #$pr_number"
 
-    local prompt="/agent:code-reviewer
+    local prompt="/agent:CodeReviewer
 
 MANDATORY Phase 9 Review for PR #$pr_number
 
@@ -149,7 +149,7 @@ To test if Claude CLI is properly configured:
 claude -p "Hello, can you confirm you received this message?"
 
 # Agent test
-claude -p "/agent:code-reviewer
+claude -p "/agent:CodeReviewer
 
 This is a test invocation. Please confirm you can receive agent commands."
 ```

@@ -66,7 +66,7 @@ This creates challenges for:
 - Preserve existing agent functionality and interfaces
 - Maintain compatibility with current orchestration patterns
 - Document integration points with shared modules
-- Ensure agent hierarchy (orchestrator → workflow-manager → specialized agents) is clear
+- Ensure agent hierarchy (orchestrator → WorkflowManager → specialized agents) is clear
 
 ## Technical Analysis
 
@@ -76,7 +76,7 @@ The existing `.claude/agents/` directory contains:
 - **25+ agent files** with varying documentation quality
 - **Mixed formats**: Some with embedded Python, others pure markdown
 - **Complex agents**: TeamCoach, SystemDesignReviewer, PRBacklogManager with substantial codebases
-- **Hierarchical structure**: Clear orchestration patterns with orchestrator-agent at the top
+- **Hierarchical structure**: Clear orchestration patterns with OrchestratorAgent at the top
 
 ### Proposed Technical Approach
 
@@ -109,8 +109,8 @@ The existing `.claude/agents/` directory contains:
 ### Architecture and Design Decisions
 
 1. **Hierarchical Organization**
-   - **Top-level orchestrator**: orchestrator-agent coordinates everything
-   - **Workflow managers**: workflow-manager handles individual workflows
+   - **Top-level orchestrator**: OrchestratorAgent coordinates everything
+   - **Workflow managers**: WorkflowManager handles individual workflows
    - **Specialized agents**: domain-specific agents for particular tasks
    - **Utility agents**: support agents for common operations
 
@@ -139,7 +139,7 @@ The existing `.claude/agents/` directory contains:
 ### Phase 2: Core Agent Documentation (Foundation)
 **Deliverables**: Documentation templates and core agent docs
 - Create standardized documentation templates following Claude Code format
-- Document top-level agents first (orchestrator-agent, workflow-manager)
+- Document top-level agents first (OrchestratorAgent, WorkflowManager)
 - Establish consistent patterns for Role, Requirements, Function, Job Description, Tools
 - Create example agent documentation to serve as template
 - Validate documentation format against Claude Code specifications
@@ -248,14 +248,14 @@ The existing `.claude/agents/` directory contains:
 ### Step 3: Core Agent Documentation
 1. **Template creation**:
    - Design standard agent documentation template with all required fields
-   - Create example documentation for orchestrator-agent as reference
+   - Create example documentation for OrchestratorAgent as reference
    - Establish patterns for contract definition and tool referencing
    - Validate template against Claude Code sub-agent specifications
 
 2. **High-priority agent documentation**:
-   - Document orchestrator-agent with clear hierarchy and coordination role
-   - Document workflow-manager with workflow orchestration capabilities
-   - Document key utility agents (worktree-manager, memory-manager, etc.)
+   - Document OrchestratorAgent with clear hierarchy and coordination role
+   - Document WorkflowManager with workflow orchestration capabilities
+   - Document key utility agents (WorktreeManager, MemoryManager, etc.)
    - Ensure foundational agents follow established patterns perfectly
 
 ### Step 4: Code Extraction Implementation

@@ -15,8 +15,8 @@ Execute three independent tasks in parallel using isolated worktrees and Workflo
   - Test each component after fixing
 
 ### Task 2: Complete Team Coach Implementation
-- **ID**: complete-team-coach
-- **Prompt**: prompts/complete-team-coach-implementation.md
+- **ID**: complete-TeamCoach
+- **Prompt**: prompts/complete-TeamCoach-implementation.md
 - **Priority**: HIGH
 - **Requirements**:
   - Implement full Team Coach agent
@@ -38,7 +38,7 @@ Execute three independent tasks in parallel using isolated worktrees and Workflo
 Create isolated worktrees for each task:
 ```bash
 git worktree add -b task/fix-pyright-errors .worktrees/task-fix-pyright-errors
-git worktree add -b task/complete-team-coach .worktrees/task-complete-team-coach
+git worktree add -b task/complete-TeamCoach .worktrees/task-complete-TeamCoach
 git worktree add -b task/cleanup-worktrees .worktrees/task-cleanup-worktrees
 ```
 
@@ -54,7 +54,7 @@ Execute all three tasks simultaneously via WorkflowManager:
 
 #### Task 1 WorkflowManager Command:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute workflow for: prompts/fix-all-pyright-errors.md
 Worktree: .worktrees/task-fix-pyright-errors
@@ -63,16 +63,16 @@ Requirements: Fix ALL pyright errors to achieve zero errors
 
 #### Task 2 WorkflowManager Command:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
-Execute workflow for: prompts/complete-team-coach-implementation.md
-Worktree: .worktrees/task-complete-team-coach
+Execute workflow for: prompts/complete-TeamCoach-implementation.md
+Worktree: .worktrees/task-complete-TeamCoach
 Requirements: Complete Team Coach implementation with tests
 ```
 
 #### Task 3 WorkflowManager Command:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute workflow for: prompts/cleanup-all-worktrees.md
 Worktree: .worktrees/task-cleanup-worktrees

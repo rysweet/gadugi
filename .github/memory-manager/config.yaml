@@ -1,6 +1,6 @@
 # Memory Manager Configuration
 backup_directory: .github/memory-sync-state/backups
-config_file_path: .github/memory-manager/config.yaml
+config_file_path: .github/MemoryManager/config.yaml
 enabled: true
 version: "1.0.0"
 

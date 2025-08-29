@@ -51,14 +51,14 @@ This ensures:
 2. **ALWAYS use the orchestrator agent as the entry point**:
 
    ```
-   /agent:orchestrator-agent
+   /agent:OrchestratorAgent
 
    Execute the following task:
    - [description of changes needed]
    ```
 
 3. **The Orchestrator will automatically**:
-   - Invoke the worktree-manager to create isolated environments
+   - Invoke the WorktreeManager to create isolated environments
    - Delegate to appropriate sub-agents (WorkflowManager, etc.)
    - Coordinate parallel execution when multiple tasks exist
    - Ensure proper branch creation and PR workflow
@@ -88,7 +88,7 @@ This ensures:
    - Phase 6: Testing
    - Phase 7: Documentation
    - Phase 8: Pull Request
-   - Phase 9: Review (code-reviewer invocation)
+   - Phase 9: Review (CodeReviewer invocation)
    - Phase 10: Review Response
    - Phase 11: Settings Update
 
@@ -112,7 +112,7 @@ This ensures:
 - Quality gates MUST be validated at each phase transition
 
 **Enforcement Examples**:
-- ✅ **Compliant**: `/agent:orchestrator-agent` → delegates to `/agent:workflow-manager` for each task
+- ✅ **Compliant**: `/agent:OrchestratorAgent` → delegates to `/agent:WorkflowManager` for each task
 - ❌ **Violation**: Using `claude -p prompt.md` directly bypasses workflow phases
 - ❌ **Violation**: Direct shell script execution without issue creation and PR workflow
 - ✅ **Validation**: Pre-execution checks verify WorkflowManager delegation for all tasks
@@ -168,7 +168,7 @@ Note: Project-specific instructions are integrated directly into this file above
 
 ## Worktree Lifecycle Management
 
-**IMPORTANT**: Use the worktree-manager agent for creating isolated development environments for issues.
+**IMPORTANT**: Use the WorktreeManager agent for creating isolated development environments for issues.
 
 ### When to Use Worktrees
 
@@ -182,7 +182,7 @@ Use worktrees for:
 
 1. **Creation Phase**:
    ```
-   /agent:worktree-manager
+   /agent:WorktreeManager
 
    Create a new git worktree for issue [number].
    Branch name: [type]/issue-[number]-[description]
@@ -221,7 +221,7 @@ Use worktrees for:
 
 ```bash
 # 1. Create worktree for issue 44
-/agent:worktree-manager
+/agent:WorktreeManager
 Create worktree for issue 44 about documenting lifecycle
 
 # 2. Navigate to worktree
@@ -253,7 +253,7 @@ git worktree remove .worktrees/issue-44/
 
 ### Worktree Agent Integration
 
-The worktree-manager agent handles:
+The WorktreeManager agent handles:
 - Automatic branch naming based on issue type
 - Task metadata initialization
 - Proper isolation from main repository
@@ -709,15 +709,15 @@ When the mandatory orchestrator workflow encounters issues, use these troublesho
 ### Common Orchestrator Failures
 
 #### 1. Orchestrator Agent Not Found
-**Symptoms**: `/agent:orchestrator-agent` returns "agent not found" error
+**Symptoms**: `/agent:OrchestratorAgent` returns "agent not found" error
 **Solution**:
 ```bash
 # Check if orchestrator files exist
-ls -la .claude/agents/orchestrator-agent.md
+ls -la .claude/agents/OrchestratorAgent.md
 ls -la src/orchestrator/
 
 # If missing, restore from main branch
-git checkout main -- .claude/agents/orchestrator-agent.md
+git checkout main -- .claude/agents/OrchestratorAgent.md
 git checkout main -- src/orchestrator/
 ```
 
@@ -734,7 +734,7 @@ df -h  # Disk space
 free -h  # Memory (Linux) or vm_stat (macOS)
 
 # Restart with verbose logging
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 # Add troubleshooting flag if available
 ```
 
@@ -744,7 +744,7 @@ free -h  # Memory (Linux) or vm_stat (macOS)
 1. Try simpler task breakdown manually
 2. Use WorkflowManager directly for single tasks:
    ```
-   /agent:workflow-manager
+   /agent:WorkflowManager
 
    Task: Execute workflow for /prompts/[single-prompt].md
    ```
@@ -808,7 +808,7 @@ git worktree prune
 #### 1. Orchestrator Unavailable - Use WorkflowManager
 When orchestrator completely fails, use WorkflowManager for individual tasks:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Task: [describe specific task]
 Emergency fallback from orchestrator failure: [brief reason]
@@ -876,7 +876,7 @@ git status              # Repository state
 git worktree list       # Active worktrees
 
 # Test basic agent functionality
-/agent:task-analyzer
+/agent:TaskAnalyzer
 Simple test task analysis
 ```
 

@@ -119,7 +119,7 @@ Problem: WorkflowManagers were not executing properly
 ├── Symptom: Only Memory.md updates, no actual implementation
 ├── Root Cause: Incorrect command construction
 │   ├── Used: claude -p prompt.md
-│   └── Should use: claude /agent:workflow-manager "Execute workflow..."
+│   └── Should use: claude /agent:WorkflowManager "Execute workflow..."
 ├── Impact: 0% implementation success rate
 └── Solution: ExecutionEngine fix + PromptGenerator component
 ```

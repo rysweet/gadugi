@@ -10,7 +10,7 @@
 - **Dependencies**: None (can run independently)
 
 ### Task 2: Complete Team Coach Implementation
-- **Prompt File**: prompts/complete-team-coach-implementation.md
+- **Prompt File**: prompts/complete-TeamCoach-implementation.md
 - **Description**: Implement the Team Coach agent for session analysis
 - **Components**: Team Coach agent creation and integration
 - **Priority**: High

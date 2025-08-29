@@ -32,7 +32,7 @@ MemoryManager ← ConfigManager ← ConflictResolver ← API Client
 4. **MemoryCompactor** (`memory_compactor.py`): Automatic Memory.md compaction with archiving
 5. **ConfigManager** (`config.py`): Manages configuration and policies
 6. **MemoryManager** (`memory_manager.py`): Main CLI interface
-7. **MemoryManagerAgent** (`.claude/agents/memory-manager.md`): Agent interface
+7. **MemoryManagerAgent** (`.claude/agents/MemoryManager.md`): Agent interface
 
 ## Installation and Setup
 
@@ -47,30 +47,30 @@ MemoryManager ← ConfigManager ← ConflictResolver ← API Client
 1. **Initialize the system**:
    ```bash
    cd /path/to/your/repo
-   python3 .github/memory-manager/memory_manager.py init
+   python3 .github/MemoryManager/memory_manager.py init
    ```
 
 2. **Check status**:
    ```bash
-   python3 .github/memory-manager/memory_manager.py status
+   python3 .github/MemoryManager/memory_manager.py status
    ```
 
 3. **Perform initial sync** (dry-run first):
    ```bash
-   python3 .github/memory-manager/memory_manager.py sync --dry-run
-   python3 .github/memory-manager/memory_manager.py sync
+   python3 .github/MemoryManager/memory_manager.py sync --dry-run
+   python3 .github/MemoryManager/memory_manager.py sync
    ```
 
 ### Dependencies
 
 Install required Python packages:
 ```bash
-pip install -r .github/memory-manager/requirements.txt
+pip install -r .github/MemoryManager/requirements.txt
 ```
 
 ## Configuration
 
-The system uses a YAML configuration file (`.github/memory-manager/config.yaml`) with the following sections:
+The system uses a YAML configuration file (`.github/MemoryManager/config.yaml`) with the following sections:
 
 ### Synchronization Settings
 
@@ -150,57 +150,57 @@ The Memory Manager provides a comprehensive CLI for all operations:
 #### Status and Information
 ```bash
 # Show current system status
-python3 .github/memory-manager/memory_manager.py status
+python3 .github/MemoryManager/memory_manager.py status
 
 # Validate configuration
-python3 .github/memory-manager/memory_manager.py validate
+python3 .github/MemoryManager/memory_manager.py validate
 
 # List synchronization conflicts
-python3 .github/memory-manager/memory_manager.py conflicts
+python3 .github/MemoryManager/memory_manager.py conflicts
 ```
 
 #### Synchronization
 ```bash
 # Bidirectional sync (default)
-python3 .github/memory-manager/memory_manager.py sync
+python3 .github/MemoryManager/memory_manager.py sync
 
 # Memory.md to GitHub only
-python3 .github/memory-manager/memory_manager.py sync --direction memory_to_github
+python3 .github/MemoryManager/memory_manager.py sync --direction memory_to_github
 
 # GitHub to Memory.md only
-python3 .github/memory-manager/memory_manager.py sync --direction github_to_memory
+python3 .github/MemoryManager/memory_manager.py sync --direction github_to_memory
 
 # Dry run (preview changes)
-python3 .github/memory-manager/memory_manager.py sync --dry-run
+python3 .github/MemoryManager/memory_manager.py sync --dry-run
 ```
 
 #### Content Management
 ```bash
 # Create GitHub issues for Memory.md tasks
-python3 .github/memory-manager/memory_manager.py create-issues
+python3 .github/MemoryManager/memory_manager.py create-issues
 
 # Create issues for specific section only
-python3 .github/memory-manager/memory_manager.py create-issues --section "Current Goals"
+python3 .github/MemoryManager/memory_manager.py create-issues --section "Current Goals"
 
 # Automatic memory compaction
-python3 .github/memory-manager/memory_manager.py auto-compact
+python3 .github/MemoryManager/memory_manager.py auto-compact
 
 # Manual compaction (dry run first)
-python3 .github/memory-manager/memory_manager.py compact --dry-run
-python3 .github/memory-manager/memory_manager.py compact
+python3 .github/MemoryManager/memory_manager.py compact --dry-run
+python3 .github/MemoryManager/memory_manager.py compact
 
 # Force compaction even if not needed
-python3 .github/memory-manager/memory_manager.py compact --force
+python3 .github/MemoryManager/memory_manager.py compact --force
 
 # Prune old entries from Memory.md (alias for compact)
-python3 .github/memory-manager/memory_manager.py prune --dry-run
-python3 .github/memory-manager/memory_manager.py prune
+python3 .github/MemoryManager/memory_manager.py prune --dry-run
+python3 .github/MemoryManager/memory_manager.py prune
 ```
 
 #### Conflict Resolution
 ```bash
 # Resolve specific conflict
-python3 .github/memory-manager/memory_manager.py resolve <conflict_id> <resolution>
+python3 .github/MemoryManager/memory_manager.py resolve <conflict_id> <resolution>
 ```
 
 ### Agent Interface
@@ -208,7 +208,7 @@ python3 .github/memory-manager/memory_manager.py resolve <conflict_id> <resoluti
 Use the MemoryManagerAgent for integrated workflow operations:
 
 ```
-/agent:memory-manager
+/agent:MemoryManager
 
 Task: Sync Memory.md with GitHub Issues
 Options:
@@ -385,7 +385,7 @@ The following items were archived during automatic compaction:
 
 ### Compaction Configuration
 
-Customize compaction behavior through `.github/memory-manager/config.yaml`:
+Customize compaction behavior through `.github/MemoryManager/config.yaml`:
 
 ```yaml
 compaction:
@@ -415,16 +415,16 @@ compaction:
 
 ```bash
 # Check if compaction is needed
-python3 .github/memory-manager/memory_manager.py auto-compact
+python3 .github/MemoryManager/memory_manager.py auto-compact
 
 # Preview compaction changes
-python3 .github/memory-manager/memory_manager.py compact --dry-run
+python3 .github/MemoryManager/memory_manager.py compact --dry-run
 
 # Execute compaction
-python3 .github/memory-manager/memory_manager.py compact
+python3 .github/MemoryManager/memory_manager.py compact
 
 # Force compaction even if under thresholds
-python3 .github/memory-manager/memory_manager.py compact --force
+python3 .github/MemoryManager/memory_manager.py compact --force
 ```
 
 ### Compaction Results
@@ -518,10 +518,10 @@ The system detects and handles various conflict scenarios:
 
 ```bash
 # List all conflicts
-python3 .github/memory-manager/memory_manager.py conflicts
+python3 .github/MemoryManager/memory_manager.py conflicts
 
 # Resolve specific conflict
-python3 .github/memory-manager/memory_manager.py resolve conflict-001 memory_wins
+python3 .github/MemoryManager/memory_manager.py resolve conflict-001 memory_wins
 ```
 
 ## Performance and Reliability
@@ -581,10 +581,10 @@ gh auth login
 #### Sync Failures
 ```bash
 # Check system status
-python3 .github/memory-manager/memory_manager.py status
+python3 .github/MemoryManager/memory_manager.py status
 
 # Validate configuration
-python3 .github/memory-manager/memory_manager.py validate
+python3 .github/MemoryManager/memory_manager.py validate
 
 # Check logs
 tail -f .github/memory-sync-state/memory-sync.log
@@ -593,10 +593,10 @@ tail -f .github/memory-sync-state/memory-sync.log
 #### Configuration Issues
 ```bash
 # Regenerate default configuration
-python3 .github/memory-manager/memory_manager.py init --force
+python3 .github/MemoryManager/memory_manager.py init --force
 
 # Validate current configuration
-python3 .github/memory-manager/memory_manager.py validate
+python3 .github/MemoryManager/memory_manager.py validate
 ```
 
 ### Debug Mode
@@ -628,7 +628,7 @@ cp .github/memory-sync-state/backups/Memory_backup_20250801_130000.md .github/Me
 rm -rf .github/memory-sync-state/sync_state.json
 
 # Perform full sync
-python3 .github/memory-manager/memory_manager.py sync
+python3 .github/MemoryManager/memory_manager.py sync
 ```
 
 ## Testing
@@ -637,7 +637,7 @@ python3 .github/memory-manager/memory_manager.py sync
 
 ```bash
 # Run comprehensive test suite
-python3 .github/memory-manager/test_memory_integration.py
+python3 .github/MemoryManager/test_memory_integration.py
 
 # Run compaction tests
 python3 tests/memory_manager/test_memory_compactor.py
@@ -698,13 +698,13 @@ git clone <repository-url>
 cd <repository>
 
 # Install dependencies
-pip install -r .github/memory-manager/requirements.txt
+pip install -r .github/MemoryManager/requirements.txt
 
 # Run tests
-python3 .github/memory-manager/test_memory_integration.py
+python3 .github/MemoryManager/test_memory_integration.py
 
 # Initialize development configuration
-python3 .github/memory-manager/memory_manager.py init
+python3 .github/MemoryManager/memory_manager.py init
 ```
 
 ## Migration and Adoption
@@ -765,23 +765,23 @@ version: "1.0.0"
 
 ```bash
 # Setup
-python3 .github/memory-manager/memory_manager.py init
+python3 .github/MemoryManager/memory_manager.py init
 
 # Daily operations
-python3 .github/memory-manager/memory_manager.py status
-python3 .github/memory-manager/memory_manager.py sync
-python3 .github/memory-manager/memory_manager.py auto-compact
+python3 .github/MemoryManager/memory_manager.py status
+python3 .github/MemoryManager/memory_manager.py sync
+python3 .github/MemoryManager/memory_manager.py auto-compact
 
 # Maintenance
-python3 .github/memory-manager/memory_manager.py compact
-python3 .github/memory-manager/memory_manager.py prune
-python3 .github/memory-manager/memory_manager.py validate
+python3 .github/MemoryManager/memory_manager.py compact
+python3 .github/MemoryManager/memory_manager.py prune
+python3 .github/MemoryManager/memory_manager.py validate
 ```
 
 ### Agent Usage
 
 ```
-/agent:memory-manager
+/agent:MemoryManager
 
 Task: Daily Memory.md maintenance
 - Sync with GitHub Issues
@@ -792,7 +792,7 @@ Task: Daily Memory.md maintenance
 
 ### Configuration Files
 
-- **Main Config**: `.github/memory-manager/config.yaml`
+- **Main Config**: `.github/MemoryManager/config.yaml`
 - **Memory File**: `.github/Memory.md`
 - **State Directory**: `.github/memory-sync-state/`
 - **Logs**: `.github/memory-sync-state/memory-sync.log`

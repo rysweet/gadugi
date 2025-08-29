@@ -7,7 +7,7 @@ The CodeReviewResponseAgent is a specialized sub-agent that systematically proce
 ## Invocation
 
 ```
-/agent:code-review-response
+/agent:CodeReviewResponse
 
 Process review feedback from: [PR number or review comment]
 ```
@@ -64,7 +64,7 @@ Process review feedback from: [PR number or review comment]
 ## Example Session
 
 ```
-User: /agent:code-review-response
+User: /agent:CodeReviewResponse
       Process review feedback from PR #22
 
 Agent: I'll process the review feedback from PR #22.
@@ -125,7 +125,7 @@ Could you clarify:
 ## Integration with Other Agents
 
 ### Code-Reviewer
-- Receives structured feedback from code-reviewer
+- Receives structured feedback from CodeReviewer
 - Processes categorized issues systematically
 
 ### WorkflowManager

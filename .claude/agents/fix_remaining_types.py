@@ -7,7 +7,7 @@ from pathlib import Path
 
 # Files and their specific fixes
 SPECIFIC_FIXES = {
-    "team-coach/phase3/conflict_resolver.py": [
+    "TeamCoach/phase3/conflict_resolver.py": [
         # Fix None check for task_id
         ('task_id = conflict.get("task")',
          'task_id = conflict.get("task")\n            if task_id is None:\n                continue'),
@@ -15,19 +15,19 @@ SPECIFIC_FIXES = {
         ('return selected_agent',
          'return selected_agent if selected_agent else ""'),
     ],
-    "team-coach/phase3/strategic_planner.py": [
+    "TeamCoach/phase3/strategic_planner.py": [
         # Fix dict type variance
         ('return {agent: 0 for agent in available_agents}',
          'return {agent: 0.0 for agent in available_agents}'),
     ],
-    "team-coach/phase3/workflow_optimizer.py": [
+    "TeamCoach/phase3/workflow_optimizer.py": [
         # Fix list comprehension with None filtering
         ('affected_agents=[task.get("agent") for task in',
          'affected_agents=[task.get("agent") for task in'),
         ('if "agent" in task]',
          'if task.get("agent") is not None]'),
     ],
-    "team-coach/phase2/task_matcher.py": [
+    "TeamCoach/phase2/task_matcher.py": [
         # Add type ignore comments for imported classes used as aliases
         ('CapabilityAssessment = CapabilityAssessment',
          'CapabilityAssessment = CapabilityAssessment  # type: ignore[misc]'),
@@ -54,7 +54,7 @@ SPECIFIC_FIXES = {
         ('health_issue = reliability.perform_health_check(self.workflow_id)',
          'health_issue = reliability.perform_health_check(self.workflow_id) if self.workflow_id else None'),
     ],
-    "pr-backlog-manager/core.py": [
+    "PrBacklogManager/core.py": [
         # Fix GadugiError aliasing
         ('GadugiError = SharedGadugiError',
          'GadugiError = SharedGadugiError  # type: ignore[misc]'),
@@ -75,7 +75,7 @@ SPECIFIC_FIXES = {
         ('return None\n\n        section = """## Performance Architecture',
          'return ""\n\n        section = """## Performance Architecture'),
     ],
-    "team-coach/phase1/performance_analytics.py": [
+    "TeamCoach/phase1/performance_analytics.py": [
         # Add type ignore for task_tracking import
         ('from ...shared.task_tracking import TaskMetrics',
          'from ...shared.task_tracking import TaskMetrics  # type: ignore'),

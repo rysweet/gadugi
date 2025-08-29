@@ -90,7 +90,7 @@ case "\$1 \$2 \$3" in
         if [[ "\$2" == "123" ]]; then
             echo '{"reviews": []}'
         elif [[ "\$2" == "124" ]]; then
-            echo '{"reviews": [{"author": {"login": "code-reviewer"}}]}'
+            echo '{"reviews": [{"author": {"login": "CodeReviewer"}}]}'
         else
             echo '{"reviews": []}'
         fi

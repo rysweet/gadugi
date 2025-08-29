@@ -69,7 +69,7 @@ gh pr create --title "feat: add structured logging" \
 
 #### Review
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 ```
 
 ### 4. Track Progress

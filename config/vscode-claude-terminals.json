@@ -12,7 +12,7 @@
     },
     "Claude - PR Backlog": {
       "path": "bash",
-      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation && claude"],
+      "args": ["-c", "cd /Users/ryan/src/gadugi/.worktrees/PrBacklogManager-implementation && claude"],
       "icon": "terminal"
     },
     "Claude - PR25 Review": {

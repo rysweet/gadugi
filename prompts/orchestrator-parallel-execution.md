@@ -4,19 +4,19 @@ Execute the following two tasks in parallel to complete the Gadugi v0.3 implemen
 
 ## Tasks to Execute
 
-### Task 1: implement-task-decomposer-agent.md
+### Task 1: implement-TaskDecomposer-agent.md
 - Implement the Task Decomposer agent (#240)
-- Location: `.claude/agents/task-decomposer/`
+- Location: `.claude/agents/TaskDecomposer/`
 - Requirements: Break complex tasks into subtasks, identify dependencies, estimate parallelization potential
 - Must inherit from BaseAgent framework and be pyright clean
 
 <<<<<<< HEAD
-### Task 2: implement-team-coach-agent.md
+### Task 2: implement-TeamCoach-agent.md
 =======
-### Task 2: implement-team-coach-agent.md  
+### Task 2: implement-TeamCoach-agent.md  
 >>>>>>> feature/gadugi-v0.3-regeneration
 - Implement the Team Coach agent (#241)
-- Location: `.claude/agents/team-coach/`
+- Location: `.claude/agents/TeamCoach/`
 - Requirements: Auto-analyze sessions, identify improvements, create GitHub issues, track performance
 - Must inherit from BaseAgent framework and be pyright clean
 

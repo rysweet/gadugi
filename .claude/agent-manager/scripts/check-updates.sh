@@ -127,12 +127,12 @@ fetch_registry() {
       "description": "Master workflow orchestration agent",
       "release_date": "2024-03-15"
     },
-    "code-reviewer": {
+    "CodeReviewer": {
       "latest_version": "1.5.0",
       "description": "Automated code review agent",
       "release_date": "2024-03-10"
     },
-    "task-analyzer": {
+    "TaskAnalyzer": {
       "latest_version": "1.2.0",
       "description": "Task analysis and decomposition agent",
       "release_date": "2024-03-05"

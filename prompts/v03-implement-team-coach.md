@@ -4,7 +4,7 @@
 Implement the Team Coach agent for session analysis and performance tracking.
 
 ## Requirements
-1. Create full implementation in .claude/agents/team-coach/
+1. Create full implementation in .claude/agents/TeamCoach/
 2. Implement session analysis capabilities
 3. Add GitHub integration for tracking
 4. Performance metrics collection
@@ -25,10 +25,10 @@ Implement the Team Coach agent for session analysis and performance tracking.
 
 ## Execution Requirements
 - Use `uv run` for all Python commands
-- Run `uv run pyright .claude/agents/team-coach/`
+- Run `uv run pyright .claude/agents/TeamCoach/`
 - Create and run tests
 - Clean up worktree after completion
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow to implement Team Coach agent

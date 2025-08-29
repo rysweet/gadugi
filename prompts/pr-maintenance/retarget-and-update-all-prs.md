@@ -37,7 +37,7 @@ Systematically update all 15 open PRs that should target the v0.3 regeneration b
 1. **Change base branch** from `main` to `feature/gadugi-v0.3-regeneration`
 2. **Fetch and merge** latest regeneration branch to resolve conflicts
 3. **Push updates** to remote
-4. **Trigger code review** via code-reviewer agent
+4. **Trigger code review** via CodeReviewer agent
 
 ## Execution Strategy
 
@@ -64,7 +64,7 @@ git push
 ```
 
 ### Phase 3: Code Reviews
-Invoke code-reviewer agent for each updated PR
+Invoke CodeReviewer agent for each updated PR
 
 ## Priority Order
 1. Infrastructure fixes first (287, 280, 278)

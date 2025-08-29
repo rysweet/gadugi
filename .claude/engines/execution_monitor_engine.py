@@ -1091,7 +1091,7 @@ def main() -> None:
             "operation": "monitor",
             "target": {
                 "process_id": "test_process_001",
-                "agent_type": "workflow-manager",
+                "agent_type": "WorkflowManager",
                 "task_id": "task_001",
             },
             "parameters": {

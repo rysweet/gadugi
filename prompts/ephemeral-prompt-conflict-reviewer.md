@@ -16,7 +16,7 @@ Review all prompts created for issue #9 implementation to ensure:
 ### Prompts to Review
 
 #### Phase 1 Prompts (Parallel Execution)
-1. `implement-xpia-defense-agent.md` - XPIA defense system
+1. `implement-XpiaDefenseAgent.md` - XPIA defense system
 2. `setup-container-execution-environment.md` - Container execution
 3. `integrate-memory-github-issues.md` - Memory management refactoring
 4. `enhance-task-decomposition-analyzer.md` - Task analysis enhancement
@@ -26,7 +26,7 @@ Review all prompts created for issue #9 implementation to ensure:
 
 #### Phase 3 Prompts (Parallel Execution)
 6. `fix-workflowmaster-brittleness-issues.md` - WorkflowManager robustness
-7. `implement-teamcoach-agent.md` - Team intelligence
+7. `implement-TeamcoachAgent.md` - Team intelligence
 8. `create-systematic-agent-creation-system.md` - Agent creation
 9. `enhance-claude-code-hooks-integration.md` - Hooks integration
 
@@ -118,7 +118,7 @@ Generate a comprehensive report with:
 ⚠️ [Any dependency issues found]
 
 ## Specific Recommendations
-### For implement-xpia-defense-agent.md
+### For implement-XpiaDefenseAgent.md
 - [Specific recommendations]
 
 [Continue for each prompt]
@@ -140,4 +140,4 @@ Generate a comprehensive report with:
 This ephemeral agent should complete its review within 15-20 minutes and self-terminate after delivering the report.
 
 ## Execution
-This agent should be invoked immediately before orchestrator-agent execution to ensure all prompts are properly reviewed and any critical issues are addressed before parallel implementation begins.
+This agent should be invoked immediately before OrchestratorAgent execution to ensure all prompts are properly reviewed and any critical issues are addressed before parallel implementation begins.

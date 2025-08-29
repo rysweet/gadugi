@@ -192,8 +192,8 @@ async def test_task_decomposer():
             improvements=["parallel_testing", "automated_deployment"],
             agent_performance={
                 "code-writer": 0.85,
-                "test-writer": 0.92,
-                "code-reviewer": 0.88
+                "TestWriter": 0.92,
+                "CodeReviewer": 0.88
             }
         )
 

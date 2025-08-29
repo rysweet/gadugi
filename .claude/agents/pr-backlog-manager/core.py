@@ -180,7 +180,7 @@ class PRBacklogManager:
     ):
         """Initialize PR Backlog Manager."""
         self.config = config or AgentConfig(
-            agent_id="pr-backlog-manager", name="PR Backlog Manager"
+            agent_id="PrBacklogManager", name="PR Backlog Manager"
         )
         self.auto_approve = auto_approve or self._detect_auto_approve_context()
 
@@ -516,11 +516,11 @@ class PRBacklogManager:
         try:
             comments = self.github_ops.get_pr_comments(pr_details["number"])  # type: ignore
 
-            # Look for code-reviewer comments
+            # Look for CodeReviewer comments
             ai_review_comments = [
                 comment
                 for comment in comments
-                if "code-reviewer" in comment.get("body", "").lower()
+                if "CodeReviewer" in comment.get("body", "").lower()
             ]
 
             return len(ai_review_comments) > 0
@@ -607,7 +607,7 @@ class PRBacklogManager:
                     f"Add comment requesting human review for PR #{pr_number}"
                 )
             elif "ai code review" in issue.lower():
-                actions.append(f"Invoke code-reviewer agent for PR #{pr_number}")
+                actions.append(f"Invoke CodeReviewer agent for PR #{pr_number}")
             elif "metadata" in issue.lower():
                 actions.append(
                     f"Add comment requesting metadata improvements for PR #{pr_number}"
@@ -641,7 +641,7 @@ class PRBacklogManager:
             try:
                 if "WorkflowMaster" in action:
                     self._delegate_to_workflow_master(pr_number, action)
-                elif "code-reviewer" in action:
+                elif "CodeReviewer" in action:
                     self._invoke_code_reviewer(pr_number)
                 else:
                     self._add_informational_comment(pr_number, action)
@@ -663,11 +663,11 @@ class PRBacklogManager:
         logger.info(f"Delegated issue resolution to WorkflowMaster for PR #{pr_number}")
 
     def _invoke_code_reviewer(self, pr_number: int) -> None:
-        """Invoke code-reviewer agent for AI review."""
+        """Invoke CodeReviewer agent for AI review."""
         comment = (
             "🤖 **AI Code Review Required**\n\n"
             "This PR needs AI code review (Phase 9) to be completed.\n"
-            "The code-reviewer agent will be invoked to perform this review.\n\n"
+            "The CodeReviewer agent will be invoked to perform this review.\n\n"
             "*This comment was generated automatically by the PR Backlog Manager.*"
         )
         self.github_ops.add_pr_comment(pr_number, comment)  # type: ignore

@@ -20,7 +20,7 @@ GADUGI_SERVICE_CHECK_SKIP_SERVICES="${GADUGI_SERVICE_CHECK_SKIP_SERVICES:-}"
 GADUGI_SERVICE_CHECK_REQUIRED_ONLY="${GADUGI_SERVICE_CHECK_REQUIRED_ONLY:-false}"
 
 # Paths
-COORDINATOR_AGENT="$GADUGI_ROOT/.claude/agents/gadugi-coordinator.md"
+COORDINATOR_AGENT="$GADUGI_ROOT/.claude/agents/GadugiCoordinator.md"
 LOG_FILE="$GADUGI_ROOT/.claude/hooks/service-check.log"
 
 # Color codes for output

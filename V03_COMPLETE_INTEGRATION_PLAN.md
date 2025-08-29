@@ -13,7 +13,7 @@
 ### Step 1: Update Core Agents [PARALLEL]
 Execute these in parallel:
 
-#### Task 1A: Update workflow-manager
+#### Task 1A: Update WorkflowManager
 - Create workflow_manager_v03.py inheriting from V03Agent
 - Implement execute_task with memory awareness
 - Add workflow-specific knowledge files
@@ -25,13 +25,13 @@ Execute these in parallel:
 - Add parallelization knowledge files
 - Test orchestration with learned patterns
 
-#### Task 1C: Update code-reviewer
+#### Task 1C: Update CodeReviewer
 - Create code_reviewer_v03.py inheriting from V03Agent
 - Implement review with memory of past issues
 - Add code review knowledge files
 - Test review with pattern recognition
 
-#### Task 1D: Update task-decomposer
+#### Task 1D: Update TaskDecomposer
 - Create task_decomposer_v03.py inheriting from V03Agent
 - Implement decomposition with past patterns
 - Add decomposition knowledge files
@@ -182,10 +182,10 @@ Execute these in parallel:
 
 ```
 PARALLEL BATCH 1:
-├── Step 1A: Update workflow-manager
+├── Step 1A: Update WorkflowManager
 ├── Step 1B: Update orchestrator
-├── Step 1C: Update code-reviewer
-└── Step 1D: Update task-decomposer
+├── Step 1C: Update CodeReviewer
+└── Step 1D: Update TaskDecomposer
 
 SEQUENTIAL:
 └── Step 2: Create Agent Registry

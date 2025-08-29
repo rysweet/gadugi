@@ -190,9 +190,9 @@ class TestProjectAnalyzer:
 
         # Create test agent files
         self.agent_files = [
-            "workflow-manager.md",
-            "code-reviewer.md",
-            "readme-agent.md",
+            "WorkflowManager.md",
+            "CodeReviewer.md",
+            "ReadmeAgent.md",
         ]
 
         for agent_file in self.agent_files:
@@ -213,13 +213,13 @@ class TestProjectAnalyzer:
         analyzer = ProjectAnalyzer()
 
         # Mock existing README with only some agents
-        existing_agents = ["workflow-manager", "code-reviewer"]
+        existing_agents = ["WorkflowManager", "CodeReviewer"]
 
         new_agents = analyzer.detect_new_agents(self.agents_dir, existing_agents)
 
-        assert "readme-agent" in new_agents
-        assert "workflow-manager" not in new_agents
-        assert "code-reviewer" not in new_agents
+        assert "ReadmeAgent" in new_agents
+        assert "WorkflowManager" not in new_agents
+        assert "CodeReviewer" not in new_agents
 
     def test_check_version_changes(self):
         """Test version change detection."""
@@ -257,12 +257,12 @@ class TestContentGenerator:
         manifest_data = {
             "agents": [
                 {
-                    "name": "workflow-manager",
+                    "name": "WorkflowManager",
                     "description": "Orchestrates development workflows",
                     "category": "workflow",
                 },
                 {
-                    "name": "code-reviewer",
+                    "name": "CodeReviewer",
                     "description": "Performs code reviews",
                     "category": "quality",
                 },
@@ -271,8 +271,8 @@ class TestContentGenerator:
 
         agent_list = generator.generate_agent_list(manifest_data)
 
-        assert "workflow-manager" in agent_list
-        assert "code-reviewer" in agent_list
+        assert "WorkflowManager" in agent_list
+        assert "CodeReviewer" in agent_list
         assert "Orchestrates development workflows" in agent_list
         assert "Performs code reviews" in agent_list
 
@@ -335,8 +335,8 @@ class TestREADMEUpdater:
 Description
 
 ## Available Agents
-- workflow-manager - Orchestrates workflows
-- code-reviewer - Reviews code
+- WorkflowManager - Orchestrates workflows
+- CodeReviewer - Reviews code
 
 ## Installation
 npm install test-project
@@ -359,8 +359,8 @@ Current version: 1.0.0
         updater = READMEUpdater()
 
         new_agents = [
-            {"name": "readme-agent", "description": "Manages README files"},
-            {"name": "memory-manager", "description": "Manages memory files"},
+            {"name": "ReadmeAgent", "description": "Manages README files"},
+            {"name": "MemoryManager", "description": "Manages memory files"},
         ]
 
         with open(self.readme_path, "r") as f:
@@ -368,14 +368,14 @@ Current version: 1.0.0
 
         updated_content = updater.update_agent_list(content, new_agents)
 
-        assert "readme-agent" in updated_content
-        assert "memory-manager" in updated_content
+        assert "ReadmeAgent" in updated_content
+        assert "MemoryManager" in updated_content
         assert "Manages README files" in updated_content
         assert "Manages memory files" in updated_content
 
         # Original agents should still be there
-        assert "workflow-manager" in updated_content
-        assert "code-reviewer" in updated_content
+        assert "WorkflowManager" in updated_content
+        assert "CodeReviewer" in updated_content
 
     def test_update_version_references(self):
         """Test updating version references."""
@@ -421,7 +421,7 @@ class TestREADMEIntegration:
 
         changes = {
             "type": "agent_addition",
-            "agent_name": "readme-agent",
+            "agent_name": "ReadmeAgent",
             "description": "Added README agent",
         }
 
@@ -456,8 +456,8 @@ class TestREADMEIntegration:
         integrator = READMEIntegrator()
 
         agent_changes = {
-            "added": ["readme-agent", "memory-manager"],
-            "updated": ["workflow-manager"],
+            "added": ["ReadmeAgent", "MemoryManager"],
+            "updated": ["WorkflowManager"],
             "removed": [],
         }
 
@@ -492,8 +492,8 @@ const project = require('test-project');
 ```
 
 ## Available Agents
-- workflow-manager - Orchestrates workflows
-- [code-reviewer](/.claude/agents/code-reviewer.md) - Reviews code
+- WorkflowManager - Orchestrates workflows
+- [CodeReviewer](/.claude/agents/CodeReviewer.md) - Reviews code
 
 ## License
 MIT License

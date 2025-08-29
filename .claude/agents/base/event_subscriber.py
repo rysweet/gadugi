@@ -614,7 +614,7 @@ class EventSubscriberExamples:
         """Example: Filter for collaboration events from specific agents."""
         return EventFilter(
             event_types=['collaboration.message'],
-            agent_sources=['workflow-manager', 'orchestrator'],
+            agent_sources=['WorkflowManager', 'orchestrator'],
             priorities=[EventPriority.HIGH, EventPriority.CRITICAL],
             custom_filter=lambda e: 'urgent' in e.get('tags', [])
         )

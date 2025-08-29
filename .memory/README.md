@@ -90,7 +90,7 @@ The memory system is accessed through the Python utilities in `.memory_utils/`:
 from memory_utils.agent_interface import AgentMemoryInterface
 
 # Create interface for an agent
-agent = AgentMemoryInterface("agent-id", "orchestrator-agent")
+agent = AgentMemoryInterface("agent-id", "OrchestratorAgent")
 
 # Read project context
 context = agent.get_project_context()
@@ -131,7 +131,7 @@ To migrate from the old Memory.md system:
 
 1. Run the migration tool (Phase 2): `python .memory_utils/migration_tool.py`
 2. Verify content was migrated correctly
-3. Remove old `.github/Memory.md` and memory-manager directory
+3. Remove old `.github/Memory.md` and MemoryManager directory
 4. Update agent configurations to use new system
 
 ## Best Practices

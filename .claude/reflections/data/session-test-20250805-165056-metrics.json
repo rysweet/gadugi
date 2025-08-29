@@ -3,8 +3,8 @@
   "timestamp": "2025-08-05T16:50:56.666610",
   "git_metrics": {
     "recent_commits": 0,
-    "current_branch": "feature/issue-89-team-coach-reflection-fix",
-    "diff_stats": "prompts/fix-types-pr-backlog-manager-workflow.md   |  165 +++\n tests/agents/pr_backlog_manager/test_core.py       |   18 +-\n .../test_delegation_coordinator.py                 |   16 +-\n .../test_github_actions_integration.py             |   16 +-\n .../agents/pr_backlog_manager/test_integration.py  |   22 +-\n .../pr_backlog_manager/test_readiness_assessor.py  |   19 +-\n tests/agents/pr_backlog_manager/test_stubs.py      | 1163 ++++++++++++++++++++\n 7 files changed, 1400 insertions(+), 19 deletions(-)",
+    "current_branch": "feature/issue-89-TeamCoach-reflection-fix",
+    "diff_stats": "prompts/fix-types-PrBacklogManager-workflow.md   |  165 +++\n tests/agents/pr_backlog_manager/test_core.py       |   18 +-\n .../test_delegation_coordinator.py                 |   16 +-\n .../test_github_actions_integration.py             |   16 +-\n .../agents/pr_backlog_manager/test_integration.py  |   22 +-\n .../pr_backlog_manager/test_readiness_assessor.py  |   19 +-\n tests/agents/pr_backlog_manager/test_stubs.py      | 1163 ++++++++++++++++++++\n 7 files changed, 1400 insertions(+), 19 deletions(-)",
     "repository_status": "dirty"
   },
   "file_metrics": {

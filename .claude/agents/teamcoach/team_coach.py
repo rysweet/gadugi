@@ -3,7 +3,7 @@ Team Coach Agent - Main Integration Class
 
 This module provides the main Team Coach agent that integrates with the BaseAgent framework
 and coordinates all the Phase 1-3 capabilities. It implements the requirements from the
-implement-team-coach-agent.md prompt.
+implement-TeamCoach-agent.md prompt.
 
 Key Features:
 - Session analysis and improvement identification

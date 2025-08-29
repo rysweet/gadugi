@@ -10,7 +10,7 @@ echo "========================================"
 declare -A WORKTREES=(
     ["Main"]="/Users/ryan/src/gadugi"
     ["Memory-GitHub"]="/Users/ryan/src/gadugi/.worktrees/memory-github-pr14-20250801-142454"
-    ["PR-Backlog"]="/Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation"
+    ["PR-Backlog"]="/Users/ryan/src/gadugi/.worktrees/PrBacklogManager-implementation"
     ["PR25-Review"]="/Users/ryan/src/gadugi/.worktrees/pr25-review-20250801-164649-4741"
     ["TeamCoach"]="/Users/ryan/src/gadugi/.worktrees/teamcoach-implementation"
     ["UV-Migration"]="/Users/ryan/src/gadugi/.worktrees/uv-migration-20250802"
@@ -26,7 +26,7 @@ function activate(context) {
     const terminals = [
         { name: 'Claude: Main', cwd: '/Users/ryan/src/gadugi' },
         { name: 'Claude: Memory-GitHub', cwd: '/Users/ryan/src/gadugi/.worktrees/memory-github-pr14-20250801-142454' },
-        { name: 'Claude: PR-Backlog', cwd: '/Users/ryan/src/gadugi/.worktrees/pr-backlog-manager-implementation' },
+        { name: 'Claude: PR-Backlog', cwd: '/Users/ryan/src/gadugi/.worktrees/PrBacklogManager-implementation' },
         { name: 'Claude: PR25-Review', cwd: '/Users/ryan/src/gadugi/.worktrees/pr25-review-20250801-164649-4741' },
         { name: 'Claude: TeamCoach', cwd: '/Users/ryan/src/gadugi/.worktrees/teamcoach-implementation' },
         { name: 'Claude: UV-Migration', cwd: '/Users/ryan/src/gadugi/.worktrees/uv-migration-20250802' }
@@ -50,7 +50,7 @@ EOF
 # Option 1: Using VS Code Tasks (Recommended)
 echo "Option 1: Using VS Code Tasks (Recommended)"
 echo "-------------------------------------------"
-echo "Run: ./scripts/claude-worktree-manager.sh launch"
+echo "Run: ./scripts/claude-WorktreeManager.sh launch"
 echo "Then use Cmd+Shift+P → 'Tasks: Run Task' to launch terminals"
 echo ""
 

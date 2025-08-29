@@ -21,16 +21,16 @@ from base.v03_agent import V03Agent, AgentCapabilities
 
 class AgentType(Enum):
     """Enumeration of available agent types."""
-    WORKFLOW_MANAGER = "workflow-manager"
+    WORKFLOW_MANAGER = "WorkflowManager"
     ORCHESTRATOR = "orchestrator"
-    CODE_REVIEWER = "code-reviewer"
-    TASK_DECOMPOSER = "task-decomposer"
-    TEST_WRITER = "test-writer"
-    EXECUTION_MONITOR = "execution-monitor"
-    WORKTREE_MANAGER = "worktree-manager"
-    PR_BACKLOG_MANAGER = "pr-backlog-manager"
-    MEMORY_MANAGER = "memory-manager"
-    EVENT_ROUTER_MANAGER = "event-router-manager"
+    CODE_REVIEWER = "CodeReviewer"
+    TASK_DECOMPOSER = "TaskDecomposer"
+    TEST_WRITER = "TestWriter"
+    EXECUTION_MONITOR = "ExecutionMonitor"
+    WORKTREE_MANAGER = "WorktreeManager"
+    PR_BACKLOG_MANAGER = "PrBacklogManager"
+    MEMORY_MANAGER = "MemoryManager"
+    EVENT_ROUTER_MANAGER = "EventRouterManager"
 
 
 @dataclass
@@ -68,8 +68,8 @@ class AgentRegistry:
         # Workflow Manager
         self._registry[AgentType.WORKFLOW_MANAGER] = AgentRegistration(
             agent_type=AgentType.WORKFLOW_MANAGER,
-            agent_class=self._lazy_load_class("workflow-manager", "workflow_manager_v03", "WorkflowManagerV03"),
-            module_path=".claude/agents/workflow-manager/workflow_manager_v03.py",
+            agent_class=self._lazy_load_class("WorkflowManager", "workflow_manager_v03", "WorkflowManagerV03"),
+            module_path=".claude/agents/WorkflowManager/workflow_manager_v03.py",
             capabilities=AgentCapabilities(
                 can_create_prs=True,
                 can_parallelize=True,
@@ -81,7 +81,7 @@ class AgentRegistry:
                 max_parallel_tasks=5
             ),
             expertise_areas=["git", "pull_requests", "workflows", "ci_cd", "project_management"],
-            knowledge_dir=Path(".claude/agents/workflow-manager/knowledge"),
+            knowledge_dir=Path(".claude/agents/WorkflowManager/knowledge"),
             description="Manages complete development workflows from requirements to PR merge",
             enabled=True
         )
@@ -110,8 +110,8 @@ class AgentRegistry:
         # Code Reviewer
         self._registry[AgentType.CODE_REVIEWER] = AgentRegistration(
             agent_type=AgentType.CODE_REVIEWER,
-            agent_class=self._lazy_load_class("code-reviewer", "code_reviewer_v03", "CodeReviewerV03"),
-            module_path=".claude/agents/code-reviewer/code_reviewer_v03.py",
+            agent_class=self._lazy_load_class("CodeReviewer", "code_reviewer_v03", "CodeReviewerV03"),
+            module_path=".claude/agents/CodeReviewer/code_reviewer_v03.py",
             capabilities=AgentCapabilities(
                 can_parallelize=True,
                 can_create_prs=False,
@@ -123,7 +123,7 @@ class AgentRegistry:
                 max_parallel_tasks=5
             ),
             expertise_areas=["code_quality", "security_analysis", "performance_review", "patterns"],
-            knowledge_dir=Path(".claude/agents/code-reviewer/knowledge"),
+            knowledge_dir=Path(".claude/agents/CodeReviewer/knowledge"),
             description="Reviews code with pattern recognition and learning from feedback",
             enabled=True
         )
@@ -131,8 +131,8 @@ class AgentRegistry:
         # Task Decomposer
         self._registry[AgentType.TASK_DECOMPOSER] = AgentRegistration(
             agent_type=AgentType.TASK_DECOMPOSER,
-            agent_class=self._lazy_load_class("task-decomposer", "task_decomposer_v03", "TaskDecomposerV03"),
-            module_path=".claude/agents/task-decomposer/task_decomposer_v03.py",
+            agent_class=self._lazy_load_class("TaskDecomposer", "task_decomposer_v03", "TaskDecomposerV03"),
+            module_path=".claude/agents/TaskDecomposer/task_decomposer_v03.py",
             capabilities=AgentCapabilities(
                 can_parallelize=True,
                 can_create_prs=False,
@@ -144,7 +144,7 @@ class AgentRegistry:
                 max_parallel_tasks=1
             ),
             expertise_areas=["task_breakdown", "complexity_analysis", "dependency_detection", "optimization"],
-            knowledge_dir=Path(".claude/agents/task-decomposer/knowledge"),
+            knowledge_dir=Path(".claude/agents/TaskDecomposer/knowledge"),
             description="Decomposes complex tasks into optimal parallel subtasks",
             enabled=True
         )

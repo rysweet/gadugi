@@ -112,7 +112,7 @@ EOF
 ## Phase 8: Review
 
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 ```
 
 Then address any feedback and ensure CI passes.

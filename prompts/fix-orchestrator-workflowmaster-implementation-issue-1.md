@@ -253,7 +253,7 @@ Based on issue #1 description, the problem occurs in the handoff between Orchest
 - Include prevention measures for future development
 
 ### Step 7: Code Review
-- Invoke code-reviewer sub-agent for thorough review
+- Invoke CodeReviewer sub-agent for thorough review
 - Address any feedback systematically
 - Ensure fix meets all quality standards
 

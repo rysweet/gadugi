@@ -625,7 +625,7 @@ class EnhancedWorkflowManager:
             issue_data = {
                 'title': f"{prompt_data.get('feature_name', 'Feature')} - {self.workflow_id}",
                 'body': self._format_issue_body(prompt_data),
-                'labels': ['enhancement', 'ai-generated', 'workflow-manager']
+                'labels': ['enhancement', 'ai-generated', 'WorkflowManager']
             }
 
             # Create issue with retry logic through Enhanced Separation
@@ -654,7 +654,7 @@ class EnhancedWorkflowManager:
         logger.info("Setting up feature branch")
 
         issue_number = issue_result.get('issue_number', 999)
-        branch_name = f"feature/workflow-manager-reliability-{issue_number}"
+        branch_name = f"feature/WorkflowManager-reliability-{issue_number}"
 
         try:
             # Git operations would go here
@@ -705,7 +705,7 @@ class EnhancedWorkflowManager:
                 '.claude/agents/enhanced_workflow_manager.py'
             ],
             'files_to_modify': [
-                '.claude/agents/workflow-manager.md'
+                '.claude/agents/WorkflowManager.md'
             ],
             'start_time': datetime.now().isoformat()
         }
@@ -811,7 +811,7 @@ class EnhancedWorkflowManager:
         """Process code review"""
         logger.info("Processing code review")
 
-        # This would invoke the code-reviewer agent
+        # This would invoke the CodeReviewer agent
         return {
             'review_requested': True,
             'review_status': 'pending',

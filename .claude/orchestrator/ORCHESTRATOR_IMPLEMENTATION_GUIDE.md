@@ -15,7 +15,7 @@ The orchestrator implementation consists of three main components that work toge
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Claude Agent Invocation                     │
-│                  /agent:orchestrator-agent                     │
+│                  /agent:OrchestratorAgent                     │
 └─────────────────────────┬───────────────────────────────────────┘
                           │
 ┌─────────────────────────▼───────────────────────────────────────┐
@@ -124,7 +124,7 @@ Execute these prompt files:
 The primary way to use the orchestrator:
 
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - implement-feature-a.md

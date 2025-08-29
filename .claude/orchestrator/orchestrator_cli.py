@@ -2,7 +2,7 @@
 """
 OrchestratorCLI - Command Line Interface for Orchestrator Agent
 
-This module provides the CLI entry point that responds to `/agent:orchestrator-agent`
+This module provides the CLI entry point that responds to `/agent:OrchestratorAgent`
 invocations, parsing user input and coordinating with the main orchestrator.
 
 Key Features:

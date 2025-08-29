@@ -18,14 +18,14 @@ Use the PromptWriter sub-agent when:
 
 ### Basic Invocation
 ```
-/agent:prompt-writer
+/agent:PromptWriter
 
 I need to implement [feature name] that will [brief description].
 ```
 
 ### Detailed Invocation with Context
 ```
-/agent:prompt-writer
+/agent:PromptWriter
 
 Context: I'm working on improving the orchestration performance in Gadugi
 Requirements: Need to implement caching and query optimization
@@ -181,7 +181,7 @@ Prompts created by PromptWriter are designed for WorkflowManager execution:
 
 ### Automatic Workflow Execution
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute the complete workflow described in /prompts/[your-prompt-file].md
 ```
@@ -217,7 +217,7 @@ Prompts are committed to git for:
 
 ### Example 1: New Feature Development
 ```
-User: /agent:prompt-writer
+User: /agent:PromptWriter
 
 I need to add real-time collaboration features to Gadugi so multiple developers can work on the same workflow orchestration simultaneously.
 
@@ -243,7 +243,7 @@ The prompt is ready for WorkflowManager execution.
 
 ### Example 2: Performance Optimization
 ```
-User: /agent:prompt-writer
+User: /agent:PromptWriter
 
 Context: Graph queries are slow on large codebases
 Requirements: Need caching and query optimization

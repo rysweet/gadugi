@@ -9,7 +9,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 ### Current Issues:
 1. **Phase 9 Skipping**: Despite being marked as "MANDATORY - NEVER SKIP", the code review phase is often not executed
 2. **Incomplete Execution**: WorkflowManager sometimes creates a plan but stops before implementation
-3. **Missing Code Review Response**: Even when reviews happen, the code-review-response agent is not consistently invoked
+3. **Missing Code Review Response**: Even when reviews happen, the CodeReviewResponse agent is not consistently invoked
 4. **State Management Gaps**: Phase transitions aren't properly tracked, leading to orphaned PRs
 
 ### Evidence:
@@ -44,17 +44,17 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 
    1. **Automatic Invocation After PR Creation**:
       - IMMEDIATELY after PR creation success, add code review task
-      - Set a 30-second timer to invoke code-reviewer
+      - Set a 30-second timer to invoke CodeReviewer
       - Log CRITICAL error if review not invoked
 
    2. **Task List Requirements**:
-      - ALWAYS include "Invoke code-reviewer agent" as task #8
-      - ALWAYS include "Process review with code-review-response" as task #9
+      - ALWAYS include "Invoke CodeReviewer agent" as task #8
+      - ALWAYS include "Process review with CodeReviewResponse" as task #9
       - Mark both as HIGH priority
 
    3. **State Validation**:
       - Before marking workflow complete, VERIFY review exists
-      - If no review found, FORCE code-reviewer invocation
+      - If no review found, FORCE CodeReviewer invocation
       - Update state only after review confirmation
    ```
 
@@ -73,7 +73,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
            ),
            TaskData(
                id="9",
-               content="MANDATORY: Invoke code-reviewer agent",
+               content="MANDATORY: Invoke CodeReviewer agent",
                status="pending",
                priority="critical",  # New priority level
                phase=WorkflowPhase.REVIEW,
@@ -81,7 +81,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
            ),
            TaskData(
                id="10",
-               content="MANDATORY: Process review with code-review-response agent",
+               content="MANDATORY: Process review with CodeReviewResponse agent",
                status="pending",
                priority="critical",
                phase=WorkflowPhase.REVIEW_RESPONSE,
@@ -103,7 +103,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 
    2. **Phase 9 → Phase 10**:
       - After review posted confirmation
-      - Immediate invocation of code-review-response
+      - Immediate invocation of CodeReviewResponse
       - Even for approvals (acknowledge and confirm)
    ```
 
@@ -147,7 +147,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
        jq -r '.[] | select((now - (.createdAt | fromdateiso8601)) > 300) | .number' | \
        while read -r pr_num; do
            if ! gh pr view "$pr_num" --json reviews | jq -e '.reviews | length > 0' >/dev/null; then
-               echo "CRITICAL: PR #$pr_num missing review! Invoking code-reviewer..."
+               echo "CRITICAL: PR #$pr_num missing review! Invoking CodeReviewer..."
                invoke_code_reviewer "$pr_num"
            fi
        done
@@ -200,8 +200,8 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 
    Your task list MUST ALWAYS include:
    - Task for each of the 10 workflow phases
-   - "Invoke code-reviewer agent" as a CRITICAL priority task
-   - "Process review with code-review-response" as a CRITICAL priority task
+   - "Invoke CodeReviewer agent" as a CRITICAL priority task
+   - "Process review with CodeReviewResponse" as a CRITICAL priority task
    - Clear dependencies between tasks
    - No gaps in task numbering
    ```
@@ -209,7 +209,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 ## Testing Requirements
 
 1. **Phase 9 Enforcement Tests**:
-   - Verify code-reviewer is invoked after every PR
+   - Verify CodeReviewer is invoked after every PR
    - Confirm review tasks are always in TodoWrite
    - Test automatic phase transition
 
@@ -227,7 +227,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 
 1. **100% Phase 9 Execution**: Every PR gets a code review automatically
 2. **0% Planning-Only Runs**: WorkflowManager always executes implementation
-3. **100% Review Response**: Every review gets processed with code-review-response
+3. **100% Review Response**: Every review gets processed with CodeReviewResponse
 4. **Automatic Recovery**: Orphaned PRs are detected and fixed within 5 minutes
 
 ## Migration Steps
@@ -244,7 +244,7 @@ The WorkflowManager agent is experiencing consistency issues where it doesn't re
 
 If issues arise:
 1. Revert to previous WorkflowManager prompt
-2. Manually invoke code-reviewer for any missed PRs
+2. Manually invoke CodeReviewer for any missed PRs
 3. Document specific failure scenarios
 4. Iterate on fixes based on failure analysis
 

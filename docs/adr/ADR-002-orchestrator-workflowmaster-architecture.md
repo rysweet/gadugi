@@ -86,7 +86,7 @@ User Request → OrchestratorAgent → Multiple WorkflowManagers → Results
 - Resource usage: ~2GB RAM per parallel task
 ```
 
-**Critical Insight**: The PR #10 fix resolved the core execution issue. Performance bottleneck was **not** the dual-agent architecture, but incorrect command construction (`claude -p` vs `/agent:workflow-manager`).
+**Critical Insight**: The PR #10 fix resolved the core execution issue. Performance bottleneck was **not** the dual-agent architecture, but incorrect command construction (`claude -p` vs `/agent:WorkflowManager`).
 
 ### 4. Architectural Alternatives Evaluation
 

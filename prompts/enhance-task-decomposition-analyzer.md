@@ -156,7 +156,7 @@ class EnhancedTaskAnalyzer:
 ## Implementation Steps
 
 1. **Create GitHub Issue**: Document TaskAnalyzer enhancement requirements and capabilities
-2. **Create Feature Branch**: `feature-enhanced-task-analyzer`
+2. **Create Feature Branch**: `feature-enhanced-TaskAnalyzer`
 3. **Research Phase**: Analyze task decomposition algorithms and optimization strategies
 4. **Core Algorithm Implementation**: Build sophisticated decomposition and analysis engines
 5. **Dependency Analysis Enhancement**: Implement multi-level dependency mapping

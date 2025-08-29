@@ -26,11 +26,11 @@ Create the following structure:
     │   ├── requirements.md
     │   ├── design.md
     │   └── dependencies.json
-    ├── task-decomposer/
+    ├── TaskDecomposer/
     │   ├── requirements.md
     │   ├── design.md
     │   └── dependencies.json
-    └── team-coach/
+    └── TeamCoach/
         ├── requirements.md
         ├── design.md
         └── dependencies.json

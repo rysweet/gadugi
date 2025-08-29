@@ -341,7 +341,7 @@ class WorkflowEngine:
             issue_match = re.search(r'issue-(\d+)', prompt_filename)
             if issue_match:
                 issue_number = issue_match.group(1)
-                branch_name = f"feature/fix-workflow-manager-repeatability-{issue_number}"
+                branch_name = f"feature/fix-WorkflowManager-repeatability-{issue_number}"
             else:
                 # Generate branch name from prompt title
                 with open(self.workflow_state.prompt_file, 'r') as f:  # type: ignore
@@ -377,7 +377,7 @@ class WorkflowEngine:
         """Invoke prompt writer for prompt validation and enhancement"""
         try:
             # For now, skip prompt writer invocation as it's optional
-            # In the future, this could invoke the prompt-writer agent
+            # In the future, this could invoke the PromptWriter agent
             return True, "Prompt writer phase completed (skipped)", {}
 
         except Exception as e:
@@ -559,7 +559,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             if not self.workflow_state.pr_number:  # type: ignore
                 return False, "No PR number available for code review", {}
 
-            # This would invoke the code-reviewer agent
+            # This would invoke the CodeReviewer agent
             # For now, we'll simulate successful review invocation
             return True, f"Code review initiated for PR #{self.workflow_state.pr_number}", {  # type: ignore
                 "pr_number": self.workflow_state.pr_number,  # type: ignore

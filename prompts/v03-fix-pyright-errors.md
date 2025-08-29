@@ -6,7 +6,7 @@ Fix all remaining pyright errors across v0.3 components to achieve 100% clean co
 ## Components to Fix
 
 ### Recipe Executor (1 error)
-- Location: .claude/agents/recipe-executor/recipe_executor.py
+- Location: .claude/agents/RecipeExecutor/recipe_executor.py
 - Errors: 1 pyright error
 
 ### Event Router (14 errors)
@@ -35,6 +35,6 @@ Fix all remaining pyright errors across v0.3 components to achieve 100% clean co
 - Ensure no regressions
 - Clean up worktree after completion
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow to fix all pyright errors

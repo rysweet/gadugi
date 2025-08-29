@@ -59,7 +59,7 @@ The following agents have been updated to include task ID support:
 5. **SystemDesignReviewer** (`.claude/agents/system_design_reviewer/core.py`)
    - Supports task_id if available
 
-6. **SimpleMemoryManager** (`.github/memory-manager/simple_memory_manager.py`)
+6. **SimpleMemoryManager** (`.github/MemoryManager/simple_memory_manager.py`)
    - Supports task_id if available
 
 ## Usage Examples

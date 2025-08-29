@@ -33,8 +33,8 @@ This orchestration request MUST delegate ALL tasks to WorkflowManager instances 
 - NO direct execution - everything through WorkflowManager
 - All Python commands must use `uv run` prefix
 - Each task creates its own issue, branch, and PR
-- Phase 9 must invoke code-reviewer agent
+- Phase 9 must invoke CodeReviewer agent
 
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute the three tasks with proper dependencies and parallel execution where possible.

@@ -11,13 +11,13 @@ This guide covers typical development workflows using Gadugi agents.
 gh issue create --title "Add user profile page" --body "Create a profile page with user details"
 
 # 2. Execute the workflow
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Implement the user profile page feature for issue #123.
 Create the page component, add routing, include user details display, and write tests.
 ```
 
-The workflow-manager will:
+The WorkflowManager will:
 1. Create a feature branch
 2. Set up isolated worktree
 3. Research existing code
@@ -30,7 +30,7 @@ The workflow-manager will:
 
 ```bash
 # Quick bug fix
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Fix the null pointer exception in the user service (issue #456).
 The error occurs when user.email is undefined. Add proper null checking.
@@ -41,7 +41,7 @@ The error occurs when user.email is undefined. Add proper null checking.
 ### Multiple Independent Features
 
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these tasks in parallel:
 - Implement user profile page (issue #123)
@@ -59,7 +59,7 @@ The orchestrator will:
 ### Batch Testing Updates
 
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Add comprehensive tests for these modules:
 - Authentication module
@@ -74,13 +74,13 @@ Add comprehensive tests for these modules:
 After any PR is created, the system automatically:
 
 1. **Waits 30 seconds** for PR to propagate
-2. **Invokes code-reviewer** (Phase 9)
+2. **Invokes CodeReviewer** (Phase 9)
 3. **Posts review comments**
 
 ### Manual Review Request
 
 ```bash
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Review PR #789 for security vulnerabilities and code quality.
 Pay special attention to SQL injection risks and input validation.
@@ -89,7 +89,7 @@ Pay special attention to SQL injection risks and input validation.
 ### Responding to Review Feedback
 
 ```bash
-/agent:code-review-response
+/agent:CodeReviewResponse
 
 Address the review feedback for PR #789:
 - Add input validation as requested
@@ -143,7 +143,7 @@ git status
 git log --oneline -5
 
 # 3. Resume or restart
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Resume the failed task in worktree .worktrees/[failed-task].
 Continue from implementation phase, tests are still needed.
@@ -154,7 +154,7 @@ Continue from implementation phase, tests are still needed.
 ### Adding Test Coverage
 
 ```bash
-/agent:test-writer
+/agent:TestWriter
 
 Write comprehensive tests for the authentication module.
 Include:
@@ -167,7 +167,7 @@ Include:
 ### Fixing Failing Tests
 
 ```bash
-/agent:test-solver
+/agent:TestSolver
 
 Fix the failing tests in test_user_service.py.
 Error: "Cannot read property 'id' of undefined"
@@ -179,7 +179,7 @@ This started after the recent refactoring.
 ### Updating README
 
 ```bash
-/agent:readme-agent
+/agent:ReadmeAgent
 
 Update README.md with:
 - New authentication feature documentation
@@ -191,7 +191,7 @@ Update README.md with:
 ### Creating Technical Docs
 
 ```bash
-/agent:prompt-writer
+/agent:PromptWriter
 
 Create comprehensive documentation for the new caching system.
 Include architecture decisions, configuration options, and usage examples.
@@ -203,13 +203,13 @@ Include architecture decisions, configuration options, and usage examples.
 
 ```bash
 # Weekly maintenance
-/agent:memory-manager
+/agent:MemoryManager
 Clean up Memory.md and sync with GitHub issues
 
-/agent:agent-updater
+/agent:AgentUpdater
 Check for and apply agent updates
 
-/agent:pr-backlog-manager
+/agent:PrBacklogManager
 Review and prioritize open PRs
 ```
 
@@ -229,7 +229,7 @@ git worktree prune
 ### Feature with Dependencies
 
 ```bash
-/agent:task-analyzer
+/agent:TaskAnalyzer
 
 Analyze dependencies for:
 1. Update database schema
@@ -243,7 +243,7 @@ Then execute in correct order.
 ### Refactoring Workflow
 
 ```bash
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Refactor the user service to use dependency injection.
 - Extract interfaces
@@ -256,7 +256,7 @@ Refactor the user service to use dependency injection.
 ### Performance Optimization
 
 ```bash
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Optimize application performance:
 - Profile and identify bottlenecks
@@ -269,21 +269,21 @@ Optimize application performance:
 ## Workflow Patterns
 
 ### TDD Pattern
-1. Write tests first (`test-writer`)
-2. Implement feature (`workflow-manager`)
+1. Write tests first (`TestWriter`)
+2. Implement feature (`WorkflowManager`)
 3. Refactor if needed
-4. Review (`code-reviewer`)
+4. Review (`CodeReviewer`)
 
 ### Documentation-First Pattern
-1. Write documentation (`prompt-writer`)
+1. Write documentation (`PromptWriter`)
 2. Get approval on design
-3. Implement (`workflow-manager`)
-4. Update docs (`readme-agent`)
+3. Implement (`WorkflowManager`)
+4. Update docs (`ReadmeAgent`)
 
 ### Parallel Development Pattern
-1. Analyze dependencies (`task-analyzer`)
-2. Orchestrate parallel work (`orchestrator-agent`)
-3. Monitor progress (`execution-monitor`)
+1. Analyze dependencies (`TaskAnalyzer`)
+2. Orchestrate parallel work (`OrchestratorAgent`)
+3. Monitor progress (`ExecutionMonitor`)
 4. Integrate results
 
 ## Best Practices

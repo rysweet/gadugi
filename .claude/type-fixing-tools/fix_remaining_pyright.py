@@ -126,7 +126,7 @@ def fix_unused_imports_in_core():
 
 def fix_task_matcher():
     """Fix unused import in task_matcher.py."""
-    file_path = Path(".claude/agents/team-coach/phase2/task_matcher.py")
+    file_path = Path(".claude/agents/TeamCoach/phase2/task_matcher.py")
     if file_path.exists():
         content = file_path.read_text()
         # Remove TaskCapabilityRequirement if unused
@@ -159,7 +159,7 @@ def fix_task_matcher():
 def fix_workflow_optimizer_syntax():
     """Fix syntax errors in workflow_optimizer test files."""
     for path in [
-        ".claude/agents/team-coach/tests/test_workflow_optimizer.py",
+        ".claude/agents/TeamCoach/tests/test_workflow_optimizer.py",
         ".claude/agents/teamcoach/tests/test_workflow_optimizer.py",
     ]:
         file_path = Path(path)
@@ -202,8 +202,8 @@ from ..phase2.workflow_optimizer import (
 def fix_performance_data_calls():
     """Fix AgentPerformance parameter issues."""
     test_files = [
-        ".claude/agents/team-coach/tests/test_coaching_engine.py",
-        ".claude/agents/team-coach/tests/test_strategic_planner.py",
+        ".claude/agents/TeamCoach/tests/test_coaching_engine.py",
+        ".claude/agents/TeamCoach/tests/test_strategic_planner.py",
         ".claude/agents/teamcoach/tests/test_coaching_engine.py",
         ".claude/agents/teamcoach/tests/test_strategic_planner.py",
     ]

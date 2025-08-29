@@ -374,25 +374,25 @@ with multiple lines"""
         """Test detection of new agents"""
         # Mock agent directory listing
         mock_listdir.return_value = [
-            "orchestrator-agent.md",
-            "workflow-manager.md",
-            "program-manager.md",  # New agent
+            "OrchestratorAgent.md",
+            "WorkflowManager.md",
+            "ProgramManager.md",  # New agent
             "template.md",  # Should be ignored
         ]
 
         # Mock file existence checks
         mock_exists.side_effect = lambda path: True
 
-        # Mock README content without program-manager
+        # Mock README content without ProgramManager
         with patch(
             "builtins.open",
             unittest.mock.mock_open(  # type: ignore[attr-defined]
-                read_data="# README\n## Agents\n- orchestrator-agent\n- workflow-manager"
+                read_data="# README\n## Agents\n- OrchestratorAgent\n- WorkflowManager"
             ),
         ):
             new_agents = self.pm.detect_new_agents()
 
-        self.assertEqual(new_agents, ["program-manager"])
+        self.assertEqual(new_agents, ["ProgramManager"])
 
     @patch("subprocess.run")
     def test_get_recent_merged_prs(self, mock_run):

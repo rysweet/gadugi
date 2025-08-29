@@ -17,7 +17,7 @@ This guide helps team members transition from pip-based workflows to UV (Ultravi
 # Old workflow
 python -m venv venv
 source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-pip install -r .github/memory-manager/requirements.txt
+pip install -r .github/MemoryManager/requirements.txt
 pip install pytest pytest-cov black isort flake8
 python -m pytest tests/
 ```

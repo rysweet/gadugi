@@ -206,7 +206,7 @@ Process these prompts in parallel:
             task_id="test-task-1",
             task_name="Test Task 1",
             status=ProcessStatus.QUEUED,  # type: ignore
-            command="claude /agent:workflow-manager",
+            command="claude /agent:WorkflowManager",
             working_directory=str(self.test_dir),
             created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None  # type: ignore
         )

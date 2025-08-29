@@ -117,7 +117,7 @@ git push
 ### 2. Code Reviews (Priority 2)
 After conflict resolution, invoke code reviews:
 ```bash
-/agent:code-reviewer
+/agent:CodeReviewer
 Review PR #<NUMBER> targeting feature/gadugi-v0.3-regeneration
 ```
 

@@ -23,13 +23,13 @@ Success Criteria: [How to measure success]
 
 ## Core Agents API
 
-### orchestrator-agent
+### OrchestratorAgent
 
 **Purpose**: Coordinate parallel task execution
 
 **Syntax**:
 ```
-/agent:orchestrator-agent
+/agent:OrchestratorAgent
 
 Execute these specific prompts in parallel:
 - prompt-1.md
@@ -42,13 +42,13 @@ Execute these specific prompts in parallel:
 - `parallel`: Boolean (default: true)
 - `priority`: Task priority ordering
 
-### workflow-manager
+### WorkflowManager
 
 **Purpose**: Execute 11-phase development workflow
 
 **Syntax**:
 ```
-/agent:workflow-manager
+/agent:WorkflowManager
 
 [Detailed task description]
 ```
@@ -59,13 +59,13 @@ Execute these specific prompts in parallel:
 - `branch`: Branch name (optional)
 - `skip_phases`: Phases to skip (not recommended)
 
-### code-reviewer
+### CodeReviewer
 
 **Purpose**: Review pull requests
 
 **Syntax**:
 ```
-/agent:code-reviewer
+/agent:CodeReviewer
 
 Review PR #[number] - [title]
 Focus on: [specific areas]

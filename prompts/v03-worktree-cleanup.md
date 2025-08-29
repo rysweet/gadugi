@@ -47,6 +47,6 @@ git worktree prune
 - Test cleanup process
 - Document in workflow documentation
 
-/agent:workflow-manager
+/agent:WorkflowManager
 
 Execute complete workflow to add worktree cleanup and clean existing worktrees

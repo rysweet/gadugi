@@ -9,7 +9,7 @@ The LLM Proxy Service provides a unified interface to multiple LLM providers wit
 The easiest way to configure the LLM Proxy is through the dedicated agent:
 
 ```
-/agent:llm-proxy-agent
+/agent:LlmProxyAgent
 
 Help me set up Azure OpenAI with the LLM Proxy
 ```
@@ -167,7 +167,7 @@ python3 configure_proxy.py
 python3 launch_proxy.py &
 
 # Using the agent
-/agent:llm-proxy-agent
+/agent:LlmProxyAgent
 Start the LLM Proxy service
 ```
 
@@ -327,4 +327,4 @@ response = await llm.generate_completion(
 For issues or questions:
 1. Check the logs first: `tail -f logs/llm_proxy_*.log`
 2. Run configuration test: `python3 configure_proxy.py` (select test option)
-3. Use the agent for guided troubleshooting: `/agent:llm-proxy-agent`
+3. Use the agent for guided troubleshooting: `/agent:LlmProxyAgent`

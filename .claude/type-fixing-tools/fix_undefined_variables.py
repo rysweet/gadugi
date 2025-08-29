@@ -56,10 +56,10 @@ def add_missing_imports_for_undefined_vars():
 
     for error in errors:
         # Extract file path and variable name
-        if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in error:
+        if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in error:
             try:
                 file_path_full = error.split(
-                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                 )[1]
                 file_path = file_path_full.split(":")[0]
 
@@ -128,9 +128,9 @@ def fix_unused_imports():
         if "is not accessed" in line and 'Import "' in line:
             try:
                 # Extract file path and import name
-                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/" in line:
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in line:
                     file_path_full = line.split(
-                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-team-coach/"
+                        "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1]
                     file_path = file_path_full.split(":")[0]
 
