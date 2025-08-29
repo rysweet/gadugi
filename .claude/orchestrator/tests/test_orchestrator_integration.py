@@ -30,35 +30,35 @@ except ImportError:
     class OrchestrationCLI:
         def __init__(self, project_root: str) -> None:
             self.project_root = project_root
-        
+
         def parse_user_input(self, user_input: str) -> list[str]:  # type: ignore
             return []
-        
+
         def execute_orchestration(self, prompt_files: list[str]) -> None:  # type: ignore
             pass
-    
+
     class ProcessRegistry:
         def __init__(self, registry_dir: str) -> None:
             self.registry_dir = registry_dir
-        
+
         def register_process(self, process_info: Any) -> None:  # type: ignore
             pass
-        
+
         def get_process(self, task_id: str) -> Any:  # type: ignore
             return None
-        
+
         def update_process_status(self, task_id: str, status: Any) -> bool:  # type: ignore
             return True
-        
+
         def get_registry_stats(self) -> Any:  # type: ignore
             return Mock()  # type: ignore
-    
+
     class ProcessStatus:
         QUEUED = "queued"
         RUNNING = "running"
         COMPLETED = "completed"
         FAILED = "failed"
-    
+
     class ProcessInfo:
         def __init__(self, task_id: str, task_name: str, status: str, command: str, working_directory: str, created_at: Any) -> None:  # type: ignore
             self.task_id = task_id
@@ -67,16 +67,16 @@ except ImportError:
             self.command = command
             self.working_directory = working_directory
             self.created_at = created_at
-    
+
     class OrchestratorCoordinator:
         def __init__(self, config: Any, project_root: str) -> None:  # type: ignore[assignment]
             self.config = config
             self.project_root = Path(project_root)
             self.orchestration_id = f"orchestration-{id(self)}"
-        
+
         def orchestrate(self, prompt_files: list[str]) -> Any:  # type: ignore
             return Mock(total_tasks=len(prompt_files), successful_tasks=0, execution_time_seconds=0.0)  # type: ignore
-    
+
     class OrchestrationConfig:
         def __init__(self, max_parallel_tasks: int = 4, execution_timeout_hours: int = 2, fallback_to_sequential: bool = True, **kwargs: Any) -> None:  # type: ignore
             self.max_parallel_tasks = max_parallel_tasks
@@ -84,7 +84,7 @@ except ImportError:
             self.fallback_to_sequential = fallback_to_sequential
             for key, value in kwargs.items():
                 setattr(self, key, value)
-    
+
     ORCHESTRATOR_IMPORTS_AVAILABLE = False
 
 

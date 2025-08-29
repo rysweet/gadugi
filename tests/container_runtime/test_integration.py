@@ -21,9 +21,7 @@ def temp_dir():
 @pytest.fixture
 def mock_execution_engine():
     """Mock execution engine for testing."""
-    with patch(
-        "container_runtime.agent_integration.ContainerExecutionEngine"
-    ) as mock_engine:
+    with patch("container_runtime.agent_integration.ContainerExecutionEngine") as mock_engine:
         engine_instance = Mock()
         mock_engine.return_value = engine_instance
         yield engine_instance
@@ -98,9 +96,7 @@ class TestContainerExecutionEngine:
                             image_cache_dir=temp_dir / "images",
                         )
 
-                        response = engine.execute_python_code(
-                            "print('Hello from Python!')"
-                        )
+                        response = engine.execute_python_code("print('Hello from Python!')")
 
                         assert response.success is True
                         assert response.exit_code == 0
@@ -389,12 +385,8 @@ class TestCleanupAndShutdown:
 
             # Mock cleanup methods
             with patch.object(engine.container_manager, "cleanup_all"):
-                with patch.object(
-                    engine.image_manager, "cleanup_old_images", return_value=2
-                ):
-                    with patch.object(
-                        engine.audit_logger, "cleanup_old_logs", return_value=3
-                    ):
+                with patch.object(engine.image_manager, "cleanup_old_images", return_value=2):
+                    with patch.object(engine.audit_logger, "cleanup_old_logs", return_value=3):
                         stats = engine.cleanup_resources()
 
                         assert "images_removed" in stats

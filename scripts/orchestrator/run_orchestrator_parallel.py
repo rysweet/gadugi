@@ -15,9 +15,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -128,9 +126,7 @@ def main():
             speedup = sequential_estimate / total_time if total_time > 0 else 1
             logger.info(f"\n⚡ Speedup achieved: {speedup:.1f}x")
             logger.info(f"   Parallel time: {total_time / 60:.1f} minutes")
-            logger.info(
-                f"   Sequential estimate: {sequential_estimate / 60:.1f} minutes"
-            )
+            logger.info(f"   Sequential estimate: {sequential_estimate / 60:.1f} minutes")
 
         return 0 if len(failed) == 0 else 1
 

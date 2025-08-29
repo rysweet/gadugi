@@ -110,10 +110,10 @@ def check_event_router_status() -> Dict[str, Any]:
         "performance": {},
         "message": ""
     }
-    
+
     # Determine overall status
     component_statuses = [comp["status"] for comp in status["components"].values()]
-    
+
     if all(s == "HEALTHY" for s in component_statuses):
         status["overall_status"] = "HEALTHY"
         status["message"] = "Event Router fully operational"
@@ -123,7 +123,7 @@ def check_event_router_status() -> Dict[str, Any]:
     else:
         status["overall_status"] = "DOWN"
         status["message"] = "Event Router not responding"
-    
+
     return status
 
 def check_process_status() -> Dict[str, Any]:
@@ -142,12 +142,12 @@ def check_process_status() -> Dict[str, Any]:
                     "cpu_percent": proc.cpu_percent(),
                     "message": f"Process running (PID: {proc.info['pid']})"
                 }
-        
+
         return {
             "status": "DOWN",
             "message": "Event Router process not found"
         }
-        
+
     except Exception as e:
         return {
             "status": "ERROR",
@@ -161,7 +161,7 @@ def check_http_server(port: int = 8000) -> Dict[str, Any]:
         # Test health endpoint
         health_url = f"http://localhost:{port}/health"
         response = requests.get(health_url, timeout=5)
-        
+
         if response.status_code == 200:
             health_data = response.json()
             return {
@@ -179,7 +179,7 @@ def check_http_server(port: int = 8000) -> Dict[str, Any]:
                 "http_status": response.status_code,
                 "message": f"HTTP server returned status {response.status_code}"
             }
-            
+
     except requests.exceptions.ConnectionError:
         return {
             "status": "DOWN",
@@ -204,21 +204,21 @@ def check_unix_socket(socket_path: str = "/tmp/gadugi-events.sock") -> Dict[str,
     """Check Unix socket server status."""
     try:
         socket_file = Path(socket_path)
-        
+
         if not socket_file.exists():
             return {
                 "status": "DOWN",
                 "path": socket_path,
                 "message": "Unix socket file does not exist"
             }
-        
+
         # Test socket connection
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.settimeout(5)
-        
+
         try:
             sock.connect(socket_path)
-            
+
             # Send test event
             test_event = {
                 "event_id": "test-connection",
@@ -227,11 +227,11 @@ def check_unix_socket(socket_path: str = "/tmp/gadugi-events.sock") -> Dict[str,
                 "source": "service-manager",
                 "payload": {"test": True}
             }
-            
+
             sock.send(json.dumps(test_event).encode('utf-8'))
             response = sock.recv(1024)
             sock.close()
-            
+
             if response:
                 response_data = json.loads(response.decode('utf-8'))
                 return {
@@ -246,7 +246,7 @@ def check_unix_socket(socket_path: str = "/tmp/gadugi-events.sock") -> Dict[str,
                     "path": socket_path,
                     "message": "Unix socket connected but no response"
                 }
-                
+
         except socket.timeout:
             return {
                 "status": "TIMEOUT",
@@ -265,7 +265,7 @@ def check_unix_socket(socket_path: str = "/tmp/gadugi-events.sock") -> Dict[str,
                 sock.close()
             except:
                 pass
-            
+
     except Exception as e:
         return {
             "status": "ERROR",
@@ -279,7 +279,7 @@ def check_github_api_access() -> Dict[str, Any]:
     try:
         # Test GitHub API access
         response = requests.get("https://api.github.com/rate_limit", timeout=10)
-        
+
         if response.status_code == 200:
             rate_limit_data = response.json()
             return {
@@ -295,7 +295,7 @@ def check_github_api_access() -> Dict[str, Any]:
                 "http_status": response.status_code,
                 "message": f"GitHub API returned status {response.status_code}"
             }
-            
+
     except Exception as e:
         return {
             "status": "ERROR",
@@ -312,7 +312,7 @@ def get_event_router_metrics() -> Dict[str, Any]:
         "active_handlers": "unknown",
         "recent_errors": []
     }
-    
+
     try:
         # Try to get metrics from health endpoint
         response = requests.get("http://localhost:8000/health", timeout=5)
@@ -325,7 +325,7 @@ def get_event_router_metrics() -> Dict[str, Any]:
             })
     except:
         pass
-    
+
     return metrics
 ```
 
@@ -334,19 +334,19 @@ def get_event_router_metrics() -> Dict[str, Any]:
 def start_event_router_service(config_path: Optional[str] = None):
     """Start the Event Router service."""
     print("Starting Event Router Service...")
-    
+
     # Check if already running
     status = check_process_status()
     if status["status"] == "HEALTHY":
         print(f"Service already running (PID: {status.get('pid')})")
         return True
-    
+
     try:
         # Build command
         cmd = ["python", "-m", "gadugi.event_service.service"]
         if config_path:
             cmd.extend(["--config", config_path])
-        
+
         # Start process in background
         process = subprocess.Popen(
             cmd,
@@ -354,9 +354,9 @@ def start_event_router_service(config_path: Optional[str] = None):
             stderr=subprocess.PIPE,
             cwd=Path.cwd()
         )
-        
+
         print(f"Started Event Router service (PID: {process.pid})")
-        
+
         # Wait for service to be ready
         print("Waiting for service to be ready...")
         for i in range(30):  # Wait up to 30 seconds
@@ -368,7 +368,7 @@ def start_event_router_service(config_path: Optional[str] = None):
             print(f"HTTP server status: {http_status['status']} (attempt {i+1}/30)")
         else:
             print("⚠️ HTTP server not ready within timeout")
-        
+
         # Check Unix socket
         for i in range(10):  # Wait up to 10 seconds for socket
             time.sleep(1)
@@ -379,10 +379,10 @@ def start_event_router_service(config_path: Optional[str] = None):
             print(f"Unix socket status: {socket_status['status']} (attempt {i+1}/10)")
         else:
             print("⚠️ Unix socket not ready within timeout")
-        
+
         print("Event Router Service started successfully")
         return True
-        
+
     except Exception as e:
         print(f"ERROR: Failed to start Event Router service: {e}")
         return False
@@ -390,7 +390,7 @@ def start_event_router_service(config_path: Optional[str] = None):
 def stop_event_router_service():
     """Stop the Event Router service."""
     print("Stopping Event Router Service...")
-    
+
     try:
         # Find and terminate the process
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
@@ -398,7 +398,7 @@ def stop_event_router_service():
             if 'gadugi.event_service' in cmdline or 'event_service.service' in cmdline:
                 print(f"Terminating process {proc.info['pid']}")
                 proc.terminate()
-                
+
                 # Wait for graceful shutdown
                 try:
                     proc.wait(timeout=10)
@@ -407,19 +407,19 @@ def stop_event_router_service():
                     print("Process did not terminate gracefully, killing...")
                     proc.kill()
                     proc.wait()
-                
+
                 # Clean up Unix socket
                 socket_path = Path("/tmp/gadugi-events.sock")
                 if socket_path.exists():
                     socket_path.unlink()
                     print("Unix socket cleaned up")
-                
+
                 print("Event Router Service stopped successfully")
                 return True
-        
+
         print("No Event Router process found to stop")
         return True
-        
+
     except Exception as e:
         print(f"ERROR: Failed to stop Event Router service: {e}")
         return False
@@ -427,7 +427,7 @@ def stop_event_router_service():
 def restart_event_router_service(config_path: Optional[str] = None):
     """Restart the Event Router service."""
     print("Restarting Event Router Service...")
-    
+
     if stop_event_router_service():
         time.sleep(2)  # Brief pause
         return start_event_router_service(config_path)
@@ -440,19 +440,19 @@ def restart_event_router_service(config_path: Optional[str] = None):
 def test_event_submission():
     """Test event submission through various channels."""
     print("=== Event Router Test Suite ===")
-    
+
     results = {
         "webhook_endpoint": test_webhook_endpoint(),
         "unix_socket": test_unix_socket_submission(),
         "health_endpoint": test_health_endpoint()
     }
-    
+
     # Summary
     print("\nTest Results:")
     for test_name, result in results.items():
         status_icon = "✅" if result["success"] else "❌"
         print(f"{status_icon} {test_name}: {result['message']}")
-    
+
     return results
 
 def test_webhook_endpoint():
@@ -472,7 +472,7 @@ def test_webhook_endpoint():
                 "login": "test-user"
             }
         }
-        
+
         response = requests.post(
             "http://localhost:8000/webhook/github",
             json=test_payload,
@@ -482,7 +482,7 @@ def test_webhook_endpoint():
             },
             timeout=10
         )
-        
+
         if response.status_code == 200:
             return {
                 "success": True,
@@ -495,7 +495,7 @@ def test_webhook_endpoint():
                 "message": f"Webhook returned status {response.status_code}",
                 "status_code": response.status_code
             }
-    
+
     except Exception as e:
         return {
             "success": False,
@@ -507,19 +507,19 @@ def test_unix_socket_submission():
     """Test Unix socket event submission."""
     try:
         socket_path = "/tmp/gadugi-events.sock"
-        
+
         if not Path(socket_path).exists():
             return {
                 "success": False,
                 "message": "Unix socket does not exist"
             }
-        
+
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         sock.settimeout(10)
-        
+
         try:
             sock.connect(socket_path)
-            
+
             test_event = {
                 "event_id": "test-" + str(int(time.time())),
                 "event_type": "system.test",
@@ -530,10 +530,10 @@ def test_unix_socket_submission():
                     "timestamp": time.time()
                 }
             }
-            
+
             sock.send(json.dumps(test_event).encode('utf-8'))
             response = sock.recv(1024)
-            
+
             if response:
                 response_data = json.loads(response.decode('utf-8'))
                 return {
@@ -546,10 +546,10 @@ def test_unix_socket_submission():
                     "success": False,
                     "message": "Unix socket connected but no response"
                 }
-        
+
         finally:
             sock.close()
-    
+
     except Exception as e:
         return {
             "success": False,
@@ -561,7 +561,7 @@ def test_health_endpoint():
     """Test health check endpoint."""
     try:
         response = requests.get("http://localhost:8000/health", timeout=5)
-        
+
         if response.status_code == 200:
             health_data = response.json()
             return {
@@ -575,7 +575,7 @@ def test_health_endpoint():
                 "message": f"Health endpoint returned status {response.status_code}",
                 "status_code": response.status_code
             }
-    
+
     except Exception as e:
         return {
             "success": False,

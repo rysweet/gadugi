@@ -19,7 +19,7 @@ from urllib.parse import urljoin
 if TYPE_CHECKING:
     from dataclasses import dataclass
     from ...shared.memory_integration import AgentMemoryInterface
-    
+
     @dataclass
     class EventConfiguration:
         """Configuration for event publishing."""
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         heartbeat_interval: int
         store_in_memory: bool
         graceful_degradation: bool
-    
+
     @dataclass
     class AgentCapabilities:
         """Agent capabilities configuration."""
@@ -68,11 +68,11 @@ class EventHandlerProtocol(Protocol):
 class EventHandlerMixin:
     """
     Mixin providing event handling capabilities for V03Agent.
-    
+
     This mixin requires the base class to implement EventHandlerProtocol.
     All required attributes are defined in the protocol above.
     """
-    
+
     # Type hints for mixin attributes (these will be provided by the base class)
     agent_id: str
     agent_type: str
@@ -284,7 +284,7 @@ class EventHandlerMixin:
         })
 
     # ========== Core System Events (per v0.3 spec) ==========
-    
+
     async def emit_started(self, input_data: Any, task_id: str) -> bool:
         """Emit agent started event (core system event)."""
         return await self._emit_event({
@@ -296,7 +296,7 @@ class EventHandlerMixin:
                 "timestamp": datetime.now().isoformat()
             }
         })
-    
+
     async def emit_stopped(self, output_data: Any, task_id: str, success: bool, duration_seconds: float) -> bool:
         """Emit agent stopped event (core system event)."""
         return await self._emit_event({
@@ -310,7 +310,7 @@ class EventHandlerMixin:
                 "timestamp": datetime.now().isoformat()
             }
         })
-    
+
     async def emit_has_question(self, question: str, context: Optional[Dict[str, Any]] = None, options: Optional[List[str]] = None) -> bool:
         """Emit hasQuestion event when agent needs interactive answer."""
         return await self._emit_event({
@@ -323,7 +323,7 @@ class EventHandlerMixin:
                 "timestamp": datetime.now().isoformat()
             }
         })
-    
+
     async def emit_needs_approval(self, command: str, description: str, risk_level: str = "medium") -> bool:
         """Emit needsApproval event when agent needs user approval."""
         return await self._emit_event({
@@ -336,7 +336,7 @@ class EventHandlerMixin:
                 "timestamp": datetime.now().isoformat()
             }
         })
-    
+
     async def emit_cancel(self, target_agent_id: str, reason: str) -> bool:
         """Emit cancel event to stop another agent."""
         return await self._emit_event({
@@ -348,9 +348,9 @@ class EventHandlerMixin:
                 "timestamp": datetime.now().isoformat()
             }
         })
-    
+
     # ========== Domain-Specific Events ==========
-    
+
     async def emit_knowledge_learned(self,
                                    knowledge_type: str,
                                    content: str,

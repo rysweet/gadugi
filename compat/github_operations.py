@@ -16,19 +16,12 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
-_IMPL_PATH = (
-    Path(__file__).resolve().parent.parent
-    / ".claude"
-    / "shared"
-    / "github_operations.py"
-)
+_IMPL_PATH = Path(__file__).resolve().parent.parent / ".claude" / "shared" / "github_operations.py"
 
 if not _IMPL_PATH.is_file():
     raise ImportError(f"Canonical implementation not found at {_IMPL_PATH}")
 
-_spec = importlib.util.spec_from_file_location(
-    "_gadugi_github_operations_impl", _IMPL_PATH
-)
+_spec = importlib.util.spec_from_file_location("_gadugi_github_operations_impl", _IMPL_PATH)
 if _spec is None or _spec.loader is None:  # pragma: no cover
     raise ImportError(f"Unable to load spec for {_IMPL_PATH}")
 

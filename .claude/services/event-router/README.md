@@ -81,7 +81,7 @@ The Event Router implements a pattern-based subscription system that routes even
 Subscriptions support wildcard patterns for flexible event matching:
 
 - `*.started` - Matches any agent's started event
-- `*.stopped` - Matches any agent's stopped event  
+- `*.stopped` - Matches any agent's stopped event
 - `workflow.*` - Matches all workflow events
 - `orchestration.problem_identified` - Exact event match
 
@@ -93,7 +93,7 @@ Subscriptions support wildcard patterns for flexible event matching:
 - `*.stopped` → `aggregate_results`
 - `decomposition.completed` → `begin_execution_planning`
 
-#### Gadugi Agent  
+#### Gadugi Agent
 - `*.started` → `track_agent_start`
 - `*.stopped` → `track_agent_completion`
 - `system.shutdown` → `graceful_shutdown`

@@ -191,7 +191,7 @@ uv run python manage_router.py configure
 subprocess.run(["python", "manage_router.py", "start", "--daemon"])
 
 # Check health
-result = subprocess.run(["python", "manage_router.py", "status"], 
+result = subprocess.run(["python", "manage_router.py", "status"],
                        capture_output=True, text=True)
 print(result.stdout)
 
@@ -217,11 +217,11 @@ from client.client import EventRouterClient
 async def monitor():
     client = EventRouterClient()
     await client.connect()
-    
+
     @client.on("*")
     async def log_event(event):
         print(f"[{event.topic}] {event.payload}")
-    
+
     await client.subscribe(topics=["*"])
     await asyncio.sleep(60)  # Monitor for 1 minute
 

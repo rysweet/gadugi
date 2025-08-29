@@ -98,8 +98,7 @@ class CompactionRule:
 
         # Check for priority markers
         if self.priority_preserve and any(
-            marker in content.upper()
-            for marker in ["CRITICAL", "HIGH", "URGENT", "IMPORTANT"]
+            marker in content.upper() for marker in ["CRITICAL", "HIGH", "URGENT", "IMPORTANT"]
         ):
             return True
 
@@ -114,9 +113,7 @@ class MemoryCompactor:
         "Current Goals": CompactionRule(
             "Current Goals", preserve_patterns=["🔄", "⏳"], priority_preserve=True
         ),
-        "Completed Tasks": CompactionRule(
-            "Completed Tasks", max_age_days=7, max_items=15
-        ),
+        "Completed Tasks": CompactionRule("Completed Tasks", max_age_days=7, max_items=15),
         "Recent Accomplishments": CompactionRule(
             "Recent Accomplishments", max_age_days=14, max_items=20
         ),
@@ -156,14 +153,11 @@ class MemoryCompactor:
         # Validate and sanitize paths
         self.memory_path = self._validate_path(memory_file_path)
         self.details_path = self._validate_path(
-            details_file_path
-            or str(self.memory_path.parent / "LongTermMemoryDetails.md")
+            details_file_path or str(self.memory_path.parent / "LongTermMemoryDetails.md")
         )
         # Path security: details file must be in same directory as memory file
         if self.details_path.parent != self.memory_path.parent:
-            raise ValueError(
-                "details_file_path must be in the same directory as memory_file_path"
-            )
+            raise ValueError("details_file_path must be in the same directory as memory_file_path")
 
         self.rules = rules or self.DEFAULT_RULES.copy()
         self.size_thresholds = {
@@ -171,10 +165,7 @@ class MemoryCompactor:
             **(size_thresholds or {}),
         }
         # Config validation
-        if (
-            self.size_thresholds["max_lines"] < 10
-            or self.size_thresholds["max_chars"] < 1000
-        ):
+        if self.size_thresholds["max_lines"] < 10 or self.size_thresholds["max_chars"] < 1000:
             raise ValueError("Compaction thresholds are too low")
         if self.size_thresholds["target_lines"] > self.size_thresholds["max_lines"]:
             raise ValueError("target_lines must be less than or equal to max_lines")
@@ -210,10 +201,8 @@ class MemoryCompactor:
                 "current_chars": char_count,
                 "threshold_lines": self.size_thresholds["max_lines"],
                 "threshold_chars": self.size_thresholds["max_chars"],
-                "exceeds_line_threshold": line_count
-                > self.size_thresholds["max_lines"],
-                "exceeds_char_threshold": char_count
-                > self.size_thresholds["max_chars"],
+                "exceeds_line_threshold": line_count > self.size_thresholds["max_lines"],
+                "exceeds_char_threshold": char_count > self.size_thresholds["max_chars"],
                 "last_modified": datetime.fromtimestamp(
                     self.memory_path.stat().st_mtime
                 ).isoformat(),
@@ -385,8 +374,7 @@ class MemoryCompactor:
 
             # Only treat as new item if no leading indentation (top-level)
             if (
-                bullet_pattern.match(stripped_line)
-                or number_pattern.match(stripped_line)
+                bullet_pattern.match(stripped_line) or number_pattern.match(stripped_line)
             ) and not line.startswith(" "):
                 if current_item:
                     items.append("\n".join(current_item))
@@ -510,9 +498,7 @@ class MemoryCompactor:
         # Prepare archive content
         timestamp = datetime.now().isoformat()
         archive_section = f"\n\n## Memory Compaction Archive - {timestamp}\n\n"
-        archive_section += (
-            "The following items were archived during automatic compaction:\n\n"
-        )
+        archive_section += "The following items were archived during automatic compaction:\n\n"
 
         for item in items_to_archive:
             archive_section += f"{item}\n\n"
@@ -558,8 +544,7 @@ Last Updated: {timestamp}
 
         # Build section mapping for easier lookup
         sections_to_compact = {
-            section["section_name"]: section
-            for section in compaction_plan["sections_to_compact"]
+            section["section_name"]: section for section in compaction_plan["sections_to_compact"]
         }
 
         # Use the preserved items directly from the compaction plan
@@ -579,9 +564,7 @@ Last Updated: {timestamp}
                 section_analysis = self._analyze_section_for_compaction(
                     section, self.rules.get(section.name), datetime.now()
                 )
-                section_preserved_items[section.name] = section_analysis[
-                    "items_to_preserve"
-                ]
+                section_preserved_items[section.name] = section_analysis["items_to_preserve"]
 
         # Rebuild each section
         for section in memory_doc.sections:
@@ -597,7 +580,9 @@ Last Updated: {timestamp}
                 # Add reference to archived content
                 archived_count = sections_to_compact[section.name]["items_to_archive"]
                 if archived_count > 0:
-                    compacted += f"\n*{archived_count} items archived to LongTermMemoryDetails.md*\n"
+                    compacted += (
+                        f"\n*{archived_count} items archived to LongTermMemoryDetails.md*\n"
+                    )
             else:
                 # Preserve section as-is if not being compacted
                 compacted += f"{section.content}"
@@ -667,9 +652,7 @@ def main():
                 print(f"Compaction plan: {result['compaction_plan']}")
             else:
                 print("Compaction completed successfully")
-                print(
-                    f"Size reduction: {result['result']['reduction_percentage']:.1f}%"
-                )
+                print(f"Size reduction: {result['result']['reduction_percentage']:.1f}%")
                 print(f"Archived items: {result['result']['archived_items']}")
         else:
             print(f"Compaction failed: {result['error']}")

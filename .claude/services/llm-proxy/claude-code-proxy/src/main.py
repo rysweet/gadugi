@@ -19,11 +19,11 @@ async def log_requests(request: Request, call_next):
         # Log basic request info
         request_logger.info(f"[INCOMING] /v1/messages POST request")
         request_logger.info(f"[HEADERS] {dict(request.headers)}")
-        
+
         # Note: We can't safely read the body here without breaking things
         # The body will be logged by injecting logging into the endpoint handler
         request_logger.info(f"[INFO] Request body will be logged by endpoint handler")
-    
+
     response = await call_next(request)
     return response
 
@@ -75,7 +75,7 @@ def main():
 
     # Parse log level - extract just the first word to handle comments
     log_level = config.log_level.split()[0].lower()
-    
+
     # Validate and set default if invalid
     valid_levels = ['debug', 'info', 'warning', 'error', 'critical']
     if log_level not in valid_levels:

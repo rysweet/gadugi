@@ -12,10 +12,13 @@ import json
 @dataclass
 class Neo4jConfig:
     """Neo4j connection configuration."""
-    uri: str = field(default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST', 'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7687')}")
-    username: str = field(default_factory=lambda: os.getenv('NEO4J_USERNAME', 'neo4j'))
-    password: str = field(default_factory=lambda: os.getenv('NEO4J_PASSWORD', 'changeme'))
-    database: str = field(default_factory=lambda: os.getenv('NEO4J_DATABASE', 'gadugi'))
+
+    uri: str = field(
+        default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST', 'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7687')}"
+    )
+    username: str = field(default_factory=lambda: os.getenv("NEO4J_USERNAME", "neo4j"))
+    password: str = field(default_factory=lambda: os.getenv("NEO4J_PASSWORD", "changeme"))
+    database: str = field(default_factory=lambda: os.getenv("NEO4J_DATABASE", "gadugi"))
     max_connection_lifetime: int = 3600
     max_connection_pool_size: int = 50
     connection_timeout: float = 30.0
@@ -38,7 +41,7 @@ class Neo4jClient:
             max_connection_lifetime=self.config.max_connection_lifetime,
             max_connection_pool_size=self.config.max_connection_pool_size,
             connection_timeout=self.config.connection_timeout,
-            encrypted=self.config.encrypted
+            encrypted=self.config.encrypted,
         )
         self.logger = logging.getLogger(__name__)
 
@@ -98,9 +101,9 @@ class Neo4jClient:
         """
 
         # Ensure required fields
-        agent_data.setdefault('status', 'initializing')
-        agent_data.setdefault('capabilities', [])
-        agent_data.setdefault('metadata', json.dumps({}))
+        agent_data.setdefault("status", "initializing")
+        agent_data.setdefault("capabilities", [])
+        agent_data.setdefault("metadata", json.dumps({}))
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **agent_data)
@@ -176,10 +179,10 @@ class Neo4jClient:
         """
 
         # Set defaults
-        memory_data.setdefault('priority', 'normal')
-        memory_data.setdefault('importance', 0.5)
-        memory_data.setdefault('tags', [])
-        memory_data.setdefault('decay_rate', 0.1)
+        memory_data.setdefault("priority", "normal")
+        memory_data.setdefault("importance", 0.5)
+        memory_data.setdefault("tags", [])
+        memory_data.setdefault("decay_rate", 0.1)
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **memory_data)
@@ -189,10 +192,7 @@ class Neo4jClient:
             return record["memory_id"]
 
     def get_agent_memories(
-        self,
-        agent_id: str,
-        limit: int = 100,
-        memory_type: Optional[str] = None
+        self, agent_id: str, limit: int = 100, memory_type: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Get memories created by an agent.
 
@@ -226,10 +226,7 @@ class Neo4jClient:
             return [dict(record["m"]) for record in result]
 
     def find_similar_memories(
-        self,
-        memory_id: str,
-        threshold: float = 0.7,
-        limit: int = 10
+        self, memory_id: str, threshold: float = 0.7, limit: int = 10
     ) -> List[Tuple[Dict[str, Any], float]]:
         """Find memories similar to a given memory.
 
@@ -251,12 +248,7 @@ class Neo4jClient:
         """
 
         with self.driver.session(database=self.config.database) as session:
-            result = session.run(
-                query,
-                memory_id=memory_id,
-                threshold=threshold,
-                limit=limit
-            )
+            result = session.run(query, memory_id=memory_id, threshold=threshold, limit=limit)
             return [(dict(record["m2"]), record["similarity"]) for record in result]
 
     # ============================================
@@ -287,10 +279,10 @@ class Neo4jClient:
         """
 
         # Set defaults
-        task_data.setdefault('status', 'pending')
-        task_data.setdefault('priority', 'normal')
-        task_data.setdefault('type', 'general')
-        task_data.setdefault('timeout_seconds', 300)
+        task_data.setdefault("status", "pending")
+        task_data.setdefault("priority", "normal")
+        task_data.setdefault("type", "general")
+        task_data.setdefault("timeout_seconds", 300)
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **task_data)
@@ -318,12 +310,7 @@ class Neo4jClient:
             result = session.run(query, task_id=task_id, agent_id=agent_id)
             return result.single() is not None
 
-    def update_task_status(
-        self,
-        task_id: str,
-        status: str,
-        result: Optional[str] = None
-    ) -> bool:
+    def update_task_status(self, task_id: str, status: str, result: Optional[str] = None) -> bool:
         """Update task status.
 
         Args:
@@ -334,7 +321,7 @@ class Neo4jClient:
         Returns:
             True if updated, False otherwise.
         """
-        if status == 'completed' and result:
+        if status == "completed" and result:
             query = """
             MATCH (t:Task {id: $task_id})
             SET t.status = $status,
@@ -343,7 +330,7 @@ class Neo4jClient:
             RETURN t.id as task_id
             """
             params = {"task_id": task_id, "status": status, "result": result}
-        elif status == 'running':
+        elif status == "running":
             query = """
             MATCH (t:Task {id: $task_id})
             SET t.status = $status, t.started_at = datetime()
@@ -385,7 +372,7 @@ class Neo4jClient:
             record = result.single()
             return {
                 "depends_on": record["depends_on"] if record else [],
-                "blocks": record["blocks"] if record else []
+                "blocks": record["blocks"] if record else [],
             }
 
     # ============================================
@@ -417,19 +404,15 @@ class Neo4jClient:
         """
 
         # Set defaults
-        knowledge_data.setdefault('confidence', 0.5)
-        knowledge_data.setdefault('verified', False)
-        knowledge_data.setdefault('domain', 'general')
+        knowledge_data.setdefault("confidence", 0.5)
+        knowledge_data.setdefault("verified", False)
+        knowledge_data.setdefault("domain", "general")
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **knowledge_data)
             return result.single()["knowledge_id"]
 
-    def find_related_knowledge(
-        self,
-        topic: str,
-        limit: int = 10
-    ) -> List[Dict[str, Any]]:
+    def find_related_knowledge(self, topic: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Find knowledge nodes related to a topic.
 
         Args:
@@ -452,7 +435,7 @@ class Neo4jClient:
             return [
                 {
                     "knowledge": dict(record["k"]),
-                    "related": [dict(r) for r in record["related"] if r]
+                    "related": [dict(r) for r in record["related"] if r],
                 }
                 for record in result
             ]
@@ -482,8 +465,8 @@ class Neo4jClient:
         """
 
         # Set defaults
-        team_data.setdefault('objectives', json.dumps([]))
-        team_data.setdefault('performance_score', 0.0)
+        team_data.setdefault("objectives", json.dumps([]))
+        team_data.setdefault("performance_score", 0.0)
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **team_data)

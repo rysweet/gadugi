@@ -7,7 +7,7 @@ The Memory Health Check System provides comprehensive monitoring and automatic f
 The system monitors four types of memory backends:
 - **Neo4j**: Graph database for complex memory relationships
 - **SQLite**: Lightweight relational database for structured storage
-- **Markdown**: File-based storage for human-readable persistence  
+- **Markdown**: File-based storage for human-readable persistence
 - **In-Memory**: Fast volatile storage (always available fallback)
 
 ## Features
@@ -50,11 +50,11 @@ async with memory_with_health_monitoring(
     enable_health_monitoring=True,
     health_check_interval=30  # Check every 30 seconds
 ) as memory:
-    
+
     # Memory operations automatically handle failover
     await memory.remember_short_term("Important information")
     memories = await memory.recall_memories(limit=10)
-    
+
     # Check backend health status
     health_status = memory.get_memory_health_status()
     print(f"Current backend: {memory.get_current_backend()}")
@@ -90,7 +90,7 @@ backends = [
         enabled=True,
         config={
             "uri": "bolt://localhost:7687",
-            "user": "neo4j", 
+            "user": "neo4j",
             "password": "secure_password",
             "database": "gadugi"
         }
@@ -143,7 +143,7 @@ async with monitor.health_monitoring_context():
 neo4j_config = {
     "uri": "bolt://localhost:7687",      # Connection URI
     "user": "neo4j",                     # Username
-    "password": "gadugi123!",            # Password  
+    "password": "gadugi123!",            # Password
     "database": "neo4j"                  # Database name
 }
 ```
@@ -195,7 +195,7 @@ config = HealthMonitorConfig(
 - May be aggressive for temporary issues
 
 ### Retry Then Switch
-```python 
+```python
 config = HealthMonitorConfig(
     failover_strategy=FailoverStrategy.RETRY_THEN_SWITCH
 )
@@ -207,7 +207,7 @@ config = HealthMonitorConfig(
 ### Graceful Failover
 ```python
 config = HealthMonitorConfig(
-    failover_strategy=FailoverStrategy.GRACEFUL  
+    failover_strategy=FailoverStrategy.GRACEFUL
 )
 ```
 - Waits for ongoing operations to complete
@@ -241,7 +241,7 @@ status = monitor.get_status()
             }
         },
         "sqlite": {
-            "status": "healthy", 
+            "status": "healthy",
             "response_time_ms": 2.1,
             "last_checked": "2024-01-15T10:30:00Z",
             "error": null,
@@ -312,7 +312,7 @@ else:
 async with memory_with_health_monitoring("diagnostic_agent") as memory:
     # Run comprehensive diagnostics
     diagnostics = await memory.run_memory_diagnostics()
-    
+
     print(f"Health monitoring: {diagnostics['health_monitoring_enabled']}")
     print(f"Backend health: {diagnostics['backend_health']}")
     print(f"Connection test: {diagnostics['connection_test']}")
@@ -330,7 +330,7 @@ export NEO4J_USER="neo4j"
 export NEO4J_PASSWORD="gadugi123!"
 export NEO4J_DATABASE="neo4j"
 
-# SQLite Configuration  
+# SQLite Configuration
 export SQLITE_DB_PATH=".claude/data/memory.db"
 
 # Markdown Configuration
@@ -359,7 +359,7 @@ class MyAgent:
             health_check_interval=30,
             auto_failover=True
         )
-    
+
     async def work(self):
         async with self.memory:
             # All memory operations now have health monitoring
@@ -374,7 +374,7 @@ def memory_event_handler(event_type: str, event_data: dict):
     if event_type == "backend_failover":
         # Notify monitoring system
         send_alert(f"Memory failover: {event_data}")
-    elif event_type == "backend_recovery": 
+    elif event_type == "backend_recovery":
         # Log recovery
         log_info(f"Backend recovered: {event_data}")
 
@@ -397,7 +397,7 @@ monitor = create_memory_health_monitor(logger=logger)
 # Log levels:
 # INFO: Normal operations, failovers
 # WARNING: Backend health issues
-# ERROR: Complete system failures  
+# ERROR: Complete system failures
 # DEBUG: Detailed health check results
 ```
 

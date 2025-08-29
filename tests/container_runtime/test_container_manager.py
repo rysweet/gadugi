@@ -97,9 +97,8 @@ def test_create_container_failure(container_manager, sample_config):
     """Test container creation failure."""
     # Create a mock APIError exception
     from docker.errors import APIError
-    container_manager.client.containers.create.side_effect = APIError(
-        "Creation failed"
-    )
+
+    container_manager.client.containers.create.side_effect = APIError("Creation failed")
 
     with pytest.raises(Exception, match="Docker API error creating container"):
         container_manager.create_container(sample_config)
@@ -128,6 +127,7 @@ def test_start_container_failure(container_manager, sample_config):
     """Test container start failure."""
     # Create container first
     from docker.errors import APIError
+
     mock_container = Mock()
     mock_container.start.side_effect = APIError("Start failed")
     container_manager.client.containers.create.return_value = mock_container

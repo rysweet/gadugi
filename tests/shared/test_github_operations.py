@@ -20,9 +20,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 try:
     from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
@@ -99,9 +97,7 @@ except ImportError:
 
                 if result.returncode == 0:
                     try:
-                        data = (
-                            json.loads(result.stdout) if result.stdout.strip() else {}
-                        )
+                        data = json.loads(result.stdout) if result.stdout.strip() else {}
                     except json.JSONDecodeError:
                         data = {"raw": result.stdout}
 
@@ -278,9 +274,7 @@ except ImportError:
 
             return self._execute_gh_command(command)
 
-        def batch_create_issues(
-            self, issues: List[Dict[str, Any]]
-        ) -> List[Dict[str, Any]]:
+        def batch_create_issues(self, issues: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             """Create multiple issues in batch."""
             results = []
             for issue in issues:
@@ -308,19 +302,14 @@ except ImportError:
             rate_limit_info = self.check_rate_limit()
             if rate_limit_info.get("success") and rate_limit_info.get("data"):
                 reset_time = (
-                    rate_limit_info["data"]
-                    .get("resources", {})
-                    .get("core", {})
-                    .get("reset", 0)
+                    rate_limit_info["data"].get("resources", {}).get("core", {}).get("reset", 0)
                 )
                 current_time = int(time.time())
                 if reset_time > current_time:
                     wait_time = reset_time - current_time + 10  # Add 10 second buffer
                     time.sleep(wait_time)
 
-        def create_branch(
-            self, branch_name: str, base_branch: str = "main"
-        ) -> Dict[str, Any]:
+        def create_branch(self, branch_name: str, base_branch: str = "main") -> Dict[str, Any]:
             """Create a new branch."""
             # This would normally create a branch via git commands or GitHub API
             return {
@@ -435,9 +424,7 @@ class TestGitHubOperations:
     def test_execute_gh_command_retry_logic(self, mock_sleep, mock_run):
         """Test retry logic on command failure."""
         # First two calls fail, third succeeds (avoid rate limit trigger)
-        error1 = subprocess.CalledProcessError(
-            1, ["gh", "issue", "list"], stderr="Network timeout"
-        )
+        error1 = subprocess.CalledProcessError(1, ["gh", "issue", "list"], stderr="Network timeout")
         error2 = subprocess.CalledProcessError(
             1, ["gh", "issue", "list"], stderr="Connection error"
         )
@@ -583,9 +570,7 @@ class TestGitHubOperations:
         mock_run.return_value.stdout = "Issue updated successfully"
 
         gh = GitHubOperations()
-        result = gh.update_issue(
-            42, title="Updated Title", body="Updated body", state="closed"
-        )
+        result = gh.update_issue(42, title="Updated Title", body="Updated body", state="closed")
 
         assert result["success"] is True  # type: ignore[index]
 

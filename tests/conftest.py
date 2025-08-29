@@ -133,9 +133,7 @@ Last Updated: 2025-08-01T22:00:00Z
 def mock_config():
     """Sample configuration for testing."""
     return {
-        "github": {
-            "retry_config": {"max_retries": 3, "initial_delay": 1, "backoff_factor": 2}
-        },
+        "github": {"retry_config": {"max_retries": 3, "initial_delay": 1, "backoff_factor": 2}},
         "state_management": {
             "state_dir": ".github/workflow-states",
             "cleanup_after_days": 30,

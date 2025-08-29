@@ -235,7 +235,7 @@ pip install uv
    ```bash
    # Copy the example environment file
    cp .env.example .env
-   
+
    # Edit .env and set your secure passwords
    # IMPORTANT: Never commit the .env file to version control
    nano .env  # or use your preferred editor
@@ -252,7 +252,7 @@ pip install uv
    ```bash
    # Start Neo4j using Docker Compose
    docker-compose up -d neo4j
-   
+
    # Verify Neo4j is running
    docker-compose logs neo4j
    ```
@@ -362,7 +362,7 @@ To execute multiple tasks in parallel:
 2. **Invoke the orchestrator**:
    ```
    /agent:OrchestratorAgent
-   
+
    Execute the following tasks in parallel:
    - prompts/fix-pyright.md
    - prompts/TeamCoach.md
@@ -373,10 +373,10 @@ To execute multiple tasks in parallel:
    ```bash
    # Watch worktree creation
    git worktree list
-   
+
    # Monitor branches
    git branch -a | grep task/
-   
+
    # Check PR creation
    gh pr list
    ```

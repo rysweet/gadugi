@@ -10,8 +10,9 @@ import tempfile
 import os
 import sys
 from pathlib import Path
+
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
 
 from claude.agents.system_design_reviewer.ast_parser import (
     ASTParserFactory,
@@ -267,11 +268,7 @@ class TestPythonASTParser:
 
             # Find abstract method
             start_method = next(
-                (
-                    e
-                    for e in elements
-                    if e.name == "start" and e.parent_element == "BaseService"
-                ),
+                (e for e in elements if e.name == "start" and e.parent_element == "BaseService"),
                 None,
             )
             assert start_method is not None  # type: ignore[comparison-overlap]
@@ -284,9 +281,7 @@ class TestPythonASTParser:
         finally:
             os.unlink(temp_path)
 
-    def test_analyze_changes_added_elements(
-        self, sample_python_code, modified_python_code
-    ):
+    def test_analyze_changes_added_elements(self, sample_python_code, modified_python_code):
         """Test change detection for added elements"""
         parser = PythonASTParser()
 
@@ -320,9 +315,7 @@ class TestPythonASTParser:
             os.unlink(old_path)
             os.unlink(new_path)
 
-    def test_analyze_changes_removed_elements(
-        self, sample_python_code, modified_python_code
-    ):
+    def test_analyze_changes_removed_elements(self, sample_python_code, modified_python_code):
         """Test change detection for removed elements"""
         parser = PythonASTParser()
 
@@ -341,9 +334,7 @@ class TestPythonASTParser:
             changes = parser.analyze_changes(old_elements, new_elements)
 
             # Find removed elements
-            removed_changes = [
-                c for c in changes if c.change_type == ChangeType.REMOVED
-            ]
+            removed_changes = [c for c in changes if c.change_type == ChangeType.REMOVED]
             removed_names = [c.element.name for c in removed_changes]
 
             # Should detect removed function
@@ -353,9 +344,7 @@ class TestPythonASTParser:
             os.unlink(old_path)
             os.unlink(new_path)
 
-    def test_analyze_changes_modified_elements(
-        self, sample_python_code, modified_python_code
-    ):
+    def test_analyze_changes_modified_elements(self, sample_python_code, modified_python_code):
         """Test change detection for modified elements"""
         parser = PythonASTParser()
 
@@ -374,9 +363,7 @@ class TestPythonASTParser:
             changes = parser.analyze_changes(old_elements, new_elements)
 
             # Find modified elements
-            modified_changes = [
-                c for c in changes if c.change_type == ChangeType.MODIFIED
-            ]
+            modified_changes = [c for c in changes if c.change_type == ChangeType.MODIFIED]
 
             # Should detect modified elements
             # Note: Exact detection depends on implementation sensitivity
@@ -447,10 +434,7 @@ class TestPythonASTParser:
         implication_text = " ".join(implications).lower()
 
         # Check for expected implication types
-        assert any(
-            keyword in implication_text
-            for keyword in ["singleton", "async", "coupling"]
-        )
+        assert any(keyword in implication_text for keyword in ["singleton", "async", "coupling"])
 
 
 class TestArchitecturalElements:
@@ -512,9 +496,7 @@ class TestArchitecturalElements:
         )
 
         rename_description = rename_change.get_description()
-        assert (
-            "Renamed function 'old_function' to 'test_function'" in rename_description
-        )
+        assert "Renamed function 'old_function' to 'test_function'" in rename_description
 
 
 class TestPatternDetection:

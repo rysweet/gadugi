@@ -22,9 +22,7 @@ including security events, resource usage, and operational activities.
 
 # Import Enhanced Separation shared modules
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 logger = logging.getLogger(__name__)
 
 
@@ -131,9 +129,7 @@ class AuditLogger:
     def _rotate_log_file(self) -> None:
         """Rotate to new log file when current file is too large."""
         if self.current_log_size >= self.max_log_size:
-            logger.info(
-                f"Rotating audit log file (size: {self.current_log_size} bytes)"
-            )
+            logger.info(f"Rotating audit log file (size: {self.current_log_size} bytes)")
             self._initialize_log_file()
 
     def _calculate_event_checksum(self, event: AuditEvent) -> str:
@@ -275,9 +271,7 @@ class AuditLogger:
             },
         )
 
-    def log_container_started(
-        self, container_id: str, user_id: Optional[str] = None
-    ) -> str:
+    def log_container_started(self, container_id: str, user_id: Optional[str] = None) -> str:
         """Log container start event."""
         return self.log_event(
             event_type=AuditEventType.CONTAINER_STARTED,
@@ -438,25 +432,17 @@ class AuditLogger:
                                 continue
 
                             # Apply filters
-                            if (
-                                event_type
-                                and event.get("event_type") != event_type.value
-                            ):
+                            if event_type and event.get("event_type") != event_type.value:
                                 continue
 
                             if severity and event.get("severity") != severity.value:
                                 continue
 
-                            if (
-                                container_id
-                                and event.get("container_id") != container_id
-                            ):
+                            if container_id and event.get("container_id") != container_id:
                                 continue
 
                             # Time filters
-                            event_time = datetime.fromisoformat(
-                                event.get("timestamp", "")
-                            )
+                            event_time = datetime.fromisoformat(event.get("timestamp", ""))
 
                             if start_time and event_time < start_time:
                                 continue
@@ -504,15 +490,11 @@ class AuditLogger:
         for event in events:
             # Count by type
             event_type = event.get("event_type", "unknown")
-            stats["events_by_type"][event_type] = (
-                stats["events_by_type"].get(event_type, 0) + 1
-            )
+            stats["events_by_type"][event_type] = stats["events_by_type"].get(event_type, 0) + 1
 
             # Count by severity
             severity = event.get("severity", "unknown")
-            stats["events_by_severity"][severity] = (
-                stats["events_by_severity"].get(severity, 0) + 1
-            )
+            stats["events_by_severity"][severity] = stats["events_by_severity"].get(severity, 0) + 1
 
             # Track affected containers
             if event.get("container_id"):
@@ -579,18 +561,14 @@ class AuditLogger:
                             # Calculate expected checksum
                             old_previous_hash = self.previous_event_hash
                             self.previous_event_hash = previous_hash
-                            expected_checksum = self._calculate_event_checksum(
-                                temp_event
-                            )
+                            expected_checksum = self._calculate_event_checksum(temp_event)
                             self.previous_event_hash = old_previous_hash
 
                             if expected_checksum == event["checksum"]:
                                 events_verified += 1
                             else:
                                 events_failed += 1
-                                logger.warning(
-                                    f"Integrity violation at line {line_num}"
-                                )
+                                logger.warning(f"Integrity violation at line {line_num}")
 
                             previous_hash = event["checksum"]
 

@@ -134,12 +134,8 @@ class TestNeo4jIntegration:
 
             # Verify tool categories
             tool_categories = {t["id"]: t["category"] for t in tools}
-            assert tool_categories.get("read") == "file_ops", (
-                "Read tool has wrong category"
-            )
-            assert tool_categories.get("bash") == "execution", (
-                "Bash tool has wrong category"
-            )
+            assert tool_categories.get("read") == "file_ops", "Read tool has wrong category"
+            assert tool_categories.get("bash") == "execution", "Bash tool has wrong category"
 
     def test_relationships_created(self, neo4j_conn):
         """Test that relationships between nodes are created."""

@@ -77,40 +77,40 @@ class BaseAgent(ABC):
         self.event_router = EventRouterService()
         self.memory_system = MemorySystem()
         self.state = {}
-    
+
     @abstractmethod
     async def init(self) -> None:
         """Initialize agent resources"""
         pass
-    
+
     @abstractmethod
     async def register(self) -> None:
         """Register with orchestrator"""
         pass
-    
+
     @abstractmethod
     async def listen(self) -> None:
         """Start listening for events"""
         pass
-    
+
     @abstractmethod
     async def process(self, event: Event) -> Response:
         """Process incoming events"""
         pass
-    
+
     @abstractmethod
     async def cleanup(self) -> None:
         """Clean up resources"""
         pass
-    
+
     async def invoke_tool(self, tool_name: str, params: Dict) -> Any:
         """Invoke a registered tool"""
         pass
-    
+
     async def ask_question(self, question: str) -> str:
         """Interactive Q&A support"""
         pass
-    
+
     async def request_approval(self, action: str) -> bool:
         """Request user approval"""
         pass

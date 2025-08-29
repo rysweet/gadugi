@@ -563,7 +563,7 @@ class WorkflowOptimizer:
                     affected_tasks=[  # type: ignore[assignment]
                         t.get("task_id")
                         for t in task_history
-                        if (t.get("communication_delay", 0) > self.bottleneck_thresholds["communication_delay"] 
+                        if (t.get("communication_delay", 0) > self.bottleneck_thresholds["communication_delay"]
                             and t.get("task_id") is not None)
                     ],
                     description=f"Communication delays averaging {avg_delay / 60:.1f} minutes",

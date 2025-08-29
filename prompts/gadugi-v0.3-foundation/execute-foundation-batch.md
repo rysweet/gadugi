@@ -28,7 +28,7 @@ Create protobuf definitions in `.claude/protos/`:
 - Generate Python bindings in generated/python/
 - Create usage examples
 
-## Task 4: Neo4j Database Setup  
+## Task 4: Neo4j Database Setup
 Set up Neo4j graph database:
 - Create docker-compose.yml with Neo4j 5 Community Edition
 - Define schema for Agent, Memory, Knowledge, Task nodes

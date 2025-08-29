@@ -38,18 +38,18 @@ except ImportError:
             self.success = success
             self.data = data
             self.error = error
-    
+
     class ErrorHandler:
         def __init__(self, *args, **kwargs):
             pass
-    
+
     class CircuitBreaker:
         def __init__(self, *args, **kwargs):
             pass
-        
+
         def __call__(self, func):
             return func
-    
+
     class StateManager:
         def __init__(self, *args, **kwargs):
             pass
@@ -64,10 +64,10 @@ except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
-        
+
         def get_agent_task_results(self, agent_id: str, start_time, end_time):
             return []
-        
+
         def get_agent_active_tasks(self, agent_id: str):
             return []
 

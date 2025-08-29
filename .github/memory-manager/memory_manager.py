@@ -35,13 +35,9 @@ class MemoryManager:
         memory_path = self.repo_path / self.config.memory_file_path
         self.parser = MemoryParser()
         self.github = GitHubIntegration(str(self.repo_path))
-        self.sync_engine = SyncEngine(
-            str(memory_path), str(self.repo_path), self.config.sync
-        )
+        self.sync_engine = SyncEngine(str(memory_path), str(self.repo_path), self.config.sync)
         # Initialize memory compactor with config-based thresholds
-        details_path = (
-            self.repo_path / ".github" / self.config.compaction.details_file_name
-        )
+        details_path = self.repo_path / ".github" / self.config.compaction.details_file_name
         self.compactor = MemoryCompactor(
             str(memory_path),
             str(details_path),
@@ -71,25 +67,17 @@ class MemoryManager:
                     "path": str(memory_path),
                     "exists": memory_path.exists(),
                     "last_updated": (
-                        memory_doc.last_updated.isoformat()
-                        if memory_doc.last_updated
-                        else None
+                        memory_doc.last_updated.isoformat() if memory_doc.last_updated else None
                     ),
                     "total_tasks": len(memory_doc.tasks),
-                    "completed_tasks": len(
-                        memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)
-                    ),
-                    "pending_tasks": len(
-                        memory_doc.get_tasks_by_status(TaskStatus.PENDING)
-                    ),
+                    "completed_tasks": len(memory_doc.get_tasks_by_status(TaskStatus.COMPLETED)),
+                    "pending_tasks": len(memory_doc.get_tasks_by_status(TaskStatus.PENDING)),
                     "sections": len(memory_doc.sections),
                 },
                 "github_issues": {
                     "total_memory_issues": len(github_issues),
                     "open_issues": len([i for i in github_issues if i.state == "open"]),
-                    "closed_issues": len(
-                        [i for i in github_issues if i.state == "closed"]
-                    ),
+                    "closed_issues": len([i for i in github_issues if i.state == "closed"]),
                 },
                 "sync_status": sync_status,
                 "config": {
@@ -110,9 +98,7 @@ class MemoryManager:
         except Exception as e:
             return {"error": str(e)}
 
-    def sync(
-        self, direction: Optional[str] = None, dry_run: bool = False
-    ) -> Dict[str, Any]:
+    def sync(self, direction: Optional[str] = None, dry_run: bool = False) -> Dict[str, Any]:
         """Perform synchronization between Memory.md and GitHub Issues"""
         try:
             # Set sync options
@@ -216,9 +202,7 @@ class MemoryManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def create_issues(
-        self, section: Optional[str] = None, dry_run: bool = False
-    ) -> Dict[str, Any]:
+    def create_issues(self, section: Optional[str] = None, dry_run: bool = False) -> Dict[str, Any]:
         """Create GitHub issues for Memory.md tasks"""
         try:
             memory_path = self.repo_path / self.config.memory_file_path
@@ -244,9 +228,7 @@ class MemoryManager:
                         self.github.create_issue_from_task(task)
                         created_count += 1
                     except Exception as e:
-                        errors.append(
-                            f"Failed to create issue for task {task.id}: {str(e)}"
-                        )
+                        errors.append(f"Failed to create issue for task {task.id}: {str(e)}")
 
             return {
                 "success": len(errors) == 0,
@@ -275,9 +257,7 @@ def main():
         description="Memory Manager - Sync Memory.md with GitHub Issues"
     )
 
-    parser.add_argument(
-        "--repo-path", help="Path to repository (default: current directory)"
-    )
+    parser.add_argument("--repo-path", help="Path to repository (default: current directory)")
     parser.add_argument("--config", help="Path to configuration file")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -286,9 +266,7 @@ def main():
     subparsers.add_parser("status", help="Show current status")
 
     # Sync command
-    sync_parser = subparsers.add_parser(
-        "sync", help="Synchronize Memory.md with GitHub Issues"
-    )
+    sync_parser = subparsers.add_parser("sync", help="Synchronize Memory.md with GitHub Issues")
     sync_parser.add_argument(
         "--direction",
         choices=["memory_to_github", "github_to_memory", "bidirectional"],
@@ -328,22 +306,16 @@ def main():
     create_parser = subparsers.add_parser(
         "create-issues", help="Create GitHub issues for Memory.md tasks"
     )
-    create_parser.add_argument(
-        "--section", help="Only process tasks from specific section"
-    )
+    create_parser.add_argument("--section", help="Only process tasks from specific section")
     create_parser.add_argument(
         "--dry-run", action="store_true", help="Preview changes without applying"
     )
 
     # Conflicts command
-    subparsers.add_parser(
-        "conflicts", help="List synchronization conflicts"
-    )
+    subparsers.add_parser("conflicts", help="List synchronization conflicts")
 
     # Resolve conflict command
-    resolve_parser = subparsers.add_parser(
-        "resolve", help="Resolve synchronization conflict"
-    )
+    resolve_parser = subparsers.add_parser("resolve", help="Resolve synchronization conflict")
     resolve_parser.add_argument("conflict_id", help="Conflict ID to resolve")
     resolve_parser.add_argument("resolution", help="Resolution strategy")
 
@@ -351,9 +323,7 @@ def main():
     subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    subparsers.add_parser(
-        "init", help="Initialize Memory Manager configuration"
-    )
+    subparsers.add_parser("init", help="Initialize Memory Manager configuration")
 
     args = parser.parse_args()
 
@@ -415,13 +385,9 @@ def main():
                 if result.get("compaction_executed"):
                     print("✅ Memory compaction completed successfully")
                     if not args.dry_run:
-                        reduction = result.get("result", {}).get(
-                            "reduction_percentage", 0
-                        )
+                        reduction = result.get("result", {}).get("reduction_percentage", 0)
                         archived = result.get("result", {}).get("archived_items", 0)
-                        print(
-                            f"📊 Size reduced by {reduction:.1f}%, {archived} items archived"
-                        )
+                        print(f"📊 Size reduced by {reduction:.1f}%, {archived} items archived")
                 elif result.get("compaction_needed") is False:
                     print("ℹ️  No compaction needed - Memory.md is within size limits")
             else:

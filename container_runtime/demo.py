@@ -247,9 +247,7 @@ try {
 """
 
         print("Executing Node.js code...")
-        response = engine.execute_node_code(
-            code=node_code, security_policy="standard", timeout=60
-        )
+        response = engine.execute_node_code(code=node_code, security_policy="standard", timeout=60)
 
         print(f"Exit code: {response.exit_code}")
         print(f"Execution time: {response.execution_time:.2f} seconds")

@@ -7,9 +7,7 @@ import sys
 import os
 
 # Add agents to path for testing
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "agents")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "agents"))
 
 
 def test_shared_test_instructions_import():
@@ -29,10 +27,13 @@ def test_shared_test_instructions_import():
         class TestStatus:
             PASS = "pass"
             FAIL = "fail"
+
         class SkipReason:
             API_KEY_MISSING = "api_key_missing"
+
         class SharedTestInstructions:
             pass
+
         assert SharedTestInstructions is not None
         assert TestStatus.PASS is not None
         assert SkipReason.API_KEY_MISSING is not None
@@ -49,8 +50,10 @@ def test_test_solver_agent_import():
         # Create mock versions for testing when not available
         class FailureCategory:
             ASSERTION_ERROR = "assertion_error"
+
         class TestSolverAgent:
             pass
+
         assert TestSolverAgent is not None
         assert FailureCategory.ASSERTION_ERROR is not None
 
@@ -66,8 +69,10 @@ def test_test_writer_agent_import():
         # Create mock versions for testing when not available
         class TestType:
             UNIT = "unit"
+
         class TestWriterAgent:
             pass
+
         assert TestWriterAgent is not None
         assert TestType.UNIT is not None
 

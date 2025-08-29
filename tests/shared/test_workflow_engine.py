@@ -14,9 +14,7 @@ from unittest.mock import Mock, patch
 # Import the module under test
 import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 from workflow_engine import (  # type: ignore[import]
     WorkflowEngine,
@@ -228,9 +226,7 @@ Test the deterministic execution of workflow phases.
     def test_phase_branch_creation_failure(self, mock_subprocess):
         """Test branch creation failure"""
         # Mock failed git command
-        mock_subprocess.return_value = Mock(
-            returncode=1, stdout="", stderr="Branch already exists"
-        )
+        mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Branch already exists")
 
         engine = WorkflowEngine()
         engine.workflow_state = WorkflowState(
@@ -550,15 +546,9 @@ Test the deterministic execution of workflow phases.
         engine = WorkflowEngine()
 
         # Mock some phases to avoid actual system operations
-        engine._phase_implementation = Mock(
-            return_value=(True, "Implementation successful", {})
-        )
-        engine._phase_development_planning = Mock(
-            return_value=(True, "Planning successful", {})
-        )
-        engine._phase_prompt_writer = Mock(
-            return_value=(True, "Prompt writer successful", {})
-        )
+        engine._phase_implementation = Mock(return_value=(True, "Implementation successful", {}))
+        engine._phase_development_planning = Mock(return_value=(True, "Planning successful", {}))
+        engine._phase_prompt_writer = Mock(return_value=(True, "Prompt writer successful", {}))
 
         result = engine.execute_workflow(self.prompt_file, "test-full-workflow")
 

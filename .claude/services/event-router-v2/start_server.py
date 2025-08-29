@@ -23,7 +23,7 @@ async def main():
     router = EventRouter(host="0.0.0.0", port=9090)
     print("Starting Event Router on ws://0.0.0.0:9090")
     print("Press Ctrl+C to stop")
-    
+
     try:
         await router.start()
     except KeyboardInterrupt:

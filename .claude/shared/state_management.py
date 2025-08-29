@@ -860,7 +860,7 @@ class CheckpointManager:
         """Get agent configuration by ID."""
         # Mock implementation for compatibility
         return {"agent_id": agent_id, "name": agent_id, "version": "1.0.0"}
-    
+
     def save_agent_capability_profile(self, agent_id: str, profile_data: Dict[str, Any]) -> bool:
         """Save agent capability profile."""
         # Mock implementation for compatibility

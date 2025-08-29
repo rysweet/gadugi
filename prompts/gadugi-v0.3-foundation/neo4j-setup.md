@@ -46,7 +46,7 @@ FOR (a:Agent) REQUIRE a.id IS UNIQUE;
 
 // Properties: id, name, type, version, status, created_at, updated_at, capabilities[]
 
-// Memory Node  
+// Memory Node
 CREATE CONSTRAINT memory_id IF NOT EXISTS
 FOR (m:Memory) REQUIRE m.id IS UNIQUE;
 
@@ -119,7 +119,7 @@ class Neo4jConfig:
 
 class Neo4jClient:
     """Client for interacting with Neo4j database."""
-    
+
     def __init__(self, config: Neo4jConfig):
         self.config = config
         self.driver = GraphDatabase.driver(
@@ -129,11 +129,11 @@ class Neo4jClient:
             max_connection_pool_size=config.max_connection_pool_size
         )
         self.logger = logging.getLogger(__name__)
-    
+
     def close(self):
         """Close the database connection."""
         self.driver.close()
-    
+
     def create_agent(self, agent_data: Dict[str, Any]) -> str:
         """Create an agent node."""
         query = """
@@ -151,7 +151,7 @@ class Neo4jClient:
         with self.driver.session() as session:
             result = session.run(query, **agent_data)
             return result.single()["agent_id"]
-    
+
     def create_memory(self, memory_data: Dict[str, Any]) -> str:
         """Create a memory node and link to agent."""
         query = """
@@ -170,7 +170,7 @@ class Neo4jClient:
         with self.driver.session() as session:
             result = session.run(query, **memory_data)
             return result.single()["memory_id"]
-    
+
     def create_task(self, task_data: Dict[str, Any]) -> str:
         """Create a task node."""
         query = """
@@ -186,7 +186,7 @@ class Neo4jClient:
         with self.driver.session() as session:
             result = session.run(query, **task_data)
             return result.single()["task_id"]
-    
+
     def link_task_to_agent(self, task_id: str, agent_id: str):
         """Assign a task to an agent."""
         query = """
@@ -196,7 +196,7 @@ class Neo4jClient:
         """
         with self.driver.session() as session:
             session.run(query, task_id=task_id, agent_id=agent_id)
-    
+
     def get_agent_memories(self, agent_id: str) -> List[Dict]:
         """Get all memories created by an agent."""
         query = """
@@ -207,7 +207,7 @@ class Neo4jClient:
         with self.driver.session() as session:
             result = session.run(query, agent_id=agent_id)
             return [dict(record["m"]) for record in result]
-    
+
     def find_related_knowledge(self, topic: str) -> List[Dict]:
         """Find knowledge nodes related to a topic."""
         query = """
@@ -242,18 +242,18 @@ logger = logging.getLogger(__name__)
 def initialize_database():
     """Initialize the Neo4j database."""
     client = Neo4jClient(Neo4jConfig())
-    
+
     try:
         # Create constraints
         with open("neo4j/schema.cypher", "r") as f:
             schema_commands = f.read().split(";")
-            
+
         with client.driver.session() as session:
             for command in schema_commands:
                 if command.strip():
                     session.run(command)
                     logger.info(f"Executed: {command[:50]}...")
-        
+
         # Create sample data
         orchestrator = client.create_agent({
             "id": "orchestrator-001",
@@ -263,7 +263,7 @@ def initialize_database():
             "status": "active",
             "capabilities": ["parallel_execution", "task_coordination"]
         })
-        
+
         memory = client.create_memory({
             "id": "mem-001",
             "agent_id": orchestrator,
@@ -272,9 +272,9 @@ def initialize_database():
             "priority": "high",
             "tags": ["initialization", "system"]
         })
-        
+
         logger.info("Database initialized successfully")
-        
+
     finally:
         client.close()
 
@@ -294,14 +294,14 @@ import uuid
 def test_neo4j():
     """Test Neo4j connection and operations."""
     client = Neo4jClient(Neo4jConfig())
-    
+
     try:
         # Test connection
         with client.driver.session() as session:
             result = session.run("RETURN 1 as test")
             assert result.single()["test"] == 1
             print("✓ Connection successful")
-        
+
         # Test agent creation
         agent_id = client.create_agent({
             "id": f"test-agent-{uuid.uuid4()}",
@@ -312,7 +312,7 @@ def test_neo4j():
             "capabilities": ["testing"]
         })
         print(f"✓ Created agent: {agent_id}")
-        
+
         # Test memory creation
         memory_id = client.create_memory({
             "id": f"test-memory-{uuid.uuid4()}",
@@ -323,14 +323,14 @@ def test_neo4j():
             "tags": ["test"]
         })
         print(f"✓ Created memory: {memory_id}")
-        
+
         # Test retrieval
         memories = client.get_agent_memories(agent_id)
         assert len(memories) == 1
         print(f"✓ Retrieved {len(memories)} memories")
-        
+
         print("\n✅ All tests passed!")
-        
+
     finally:
         client.close()
 

@@ -2,9 +2,9 @@
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from typing import Any
 from gadugi.event_service.events import (
     Event,
     create_github_event,
@@ -67,15 +67,9 @@ class TestGitHubFilter:
         """Test labels filtering."""
         filter = GitHubFilter(labels=["bug", "urgent"])
 
-        event1 = create_github_event(
-            "issues", "owner/repo", "opened", labels=["bug", "feature"]
-        )
-        event2 = create_github_event(
-            "issues", "owner/repo", "opened", labels=["feature"]
-        )
-        event3 = create_github_event(
-            "issues", "owner/repo", "opened", labels=["urgent"]
-        )
+        event1 = create_github_event("issues", "owner/repo", "opened", labels=["bug", "feature"])
+        event2 = create_github_event("issues", "owner/repo", "opened", labels=["feature"])
+        event3 = create_github_event("issues", "owner/repo", "opened", labels=["urgent"])
 
         github_event1 = event1.get_github_event()
         github_event2 = event2.get_github_event()
@@ -90,9 +84,7 @@ class TestGitHubFilter:
         filter = GitHubFilter(refs=["refs/heads/main", "refs/heads/feature/*"])
 
         event1 = create_github_event("push", "owner/repo", "", ref="refs/heads/main")
-        event2 = create_github_event(
-            "push", "owner/repo", "", ref="refs/heads/feature/test"
-        )
+        event2 = create_github_event("push", "owner/repo", "", ref="refs/heads/feature/test")
         event3 = create_github_event("push", "owner/repo", "", ref="refs/heads/develop")
 
         github_event1 = event1.get_github_event()
@@ -174,9 +166,7 @@ class TestEventFilter:
         """Test metadata filtering."""
         filter = EventFilter(metadata_match={"priority": "high", "team": "backend"})
 
-        event1 = Event(
-            metadata={"priority": "high", "team": "backend", "other": "value"}
-        )
+        event1 = Event(metadata={"priority": "high", "team": "backend", "other": "value"})
         event2 = Event(metadata={"priority": "high", "team": "frontend"})
         event3 = Event(metadata={"priority": "low", "team": "backend"})
 
@@ -256,9 +246,7 @@ class TestEventHandler:
         """Test disabled handler doesn't match."""
         filter = EventFilter(event_types=["github.issues.opened"])
         invocation = AgentInvocation(agent_name="WorkflowManager")
-        handler = EventHandler(
-            name="test", filter=filter, invocation=invocation, enabled=False
-        )
+        handler = EventHandler(name="test", filter=filter, invocation=invocation, enabled=False)
 
         event = create_github_event("issues", "owner/repo", "opened")
         assert not handler.matches(event)
@@ -392,9 +380,7 @@ class TestCommonFilters:
         filter = CommonFilters.bug_issues()
 
         event1 = create_github_event("issues", "owner/repo", "opened", labels=["bug"])
-        event2 = create_github_event(
-            "issues", "owner/repo", "opened", labels=["feature"]
-        )
+        event2 = create_github_event("issues", "owner/repo", "opened", labels=["feature"])
         event3 = create_github_event("issues", "owner/repo", "closed", labels=["bug"])
 
         assert filter.matches(event1)
@@ -424,4 +410,6 @@ class TestCommonFilters:
         assert filter.matches(event1)
         assert not filter.matches(event2)
         assert not filter.matches(event3)
-  # type: ignore[misc]
+
+
+# type: ignore[misc]

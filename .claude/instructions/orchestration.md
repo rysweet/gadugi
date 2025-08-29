@@ -99,10 +99,10 @@ import asyncio
 async def execute_task(task_id, description):
     worktree = f".worktrees/task-{task_id}"
     # Create worktree and execute
-    
+
 async def execute_parallel(tasks):
     results = await asyncio.gather(*[
-        execute_task(t['id'], t['desc']) 
+        execute_task(t['id'], t['desc'])
         for t in tasks
     ])
     return results

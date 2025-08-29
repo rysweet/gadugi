@@ -112,8 +112,7 @@ def main() -> None:
             print("✅ Review completed successfully")
         else:
             fail_body = (
-                "## System Design Review Failed\n\n"
-                "*Automated review could not be completed.*"
+                "## System Design Review Failed\n\n" "*Automated review could not be completed.*"
             )
             _post_pr_comment(pr_number, fail_body)
             print("❌ Review failed.")

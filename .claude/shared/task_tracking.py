@@ -610,22 +610,22 @@ class TaskMetrics:
         """Get task results for a specific agent in a time period."""
         # Mock implementation for compatibility
         return []
-    
+
     def get_agent_execution_times(self, agent_id: str, start_time: datetime, end_time: datetime) -> List[float]:
         """Get execution times for a specific agent in a time period."""
         # Mock implementation for compatibility
         return []
-    
+
     def get_agent_resource_usage(self, agent_id: str, start_time: datetime, end_time: datetime) -> List[Dict[str, Any]]:
         """Get resource usage data for a specific agent in a time period."""
         # Mock implementation for compatibility
         return []
-    
+
     def get_agent_quality_metrics(self, agent_id: str, start_time: datetime, end_time: datetime) -> List[Dict[str, Any]]:
         """Get quality metrics for a specific agent in a time period."""
         # Mock implementation for compatibility
         return []
-    
+
     def get_agent_collaboration_metrics(self, agent_id: str, start_time: datetime, end_time: datetime) -> List[Dict[str, Any]]:
         """Get collaboration metrics for a specific agent in a time period."""
         # Mock implementation for compatibility

@@ -42,15 +42,9 @@ class GitHubIssue:
             body=issue_data.get("body", ""),
             state=issue_data["state"],
             labels=[label["name"] for label in issue_data.get("labels", [])],
-            assignees=[
-                assignee["login"] for assignee in issue_data.get("assignees", [])
-            ],
-            created_at=datetime.fromisoformat(
-                issue_data["createdAt"].replace("Z", "+00:00")
-            ),
-            updated_at=datetime.fromisoformat(
-                issue_data["updatedAt"].replace("Z", "+00:00")
-            ),
+            assignees=[assignee["login"] for assignee in issue_data.get("assignees", [])],
+            created_at=datetime.fromisoformat(issue_data["createdAt"].replace("Z", "+00:00")),
+            updated_at=datetime.fromisoformat(issue_data["updatedAt"].replace("Z", "+00:00")),
             html_url=issue_data["htmlUrl"],
             memory_task_id=cls._extract_memory_task_id(issue_data.get("body", "")),
         )
@@ -108,13 +102,9 @@ This issue was automatically created from a Memory.md task to enable better proj
             if result.returncode != 0:
                 raise RuntimeError("GitHub CLI not authenticated. Run 'gh auth login'")
         except FileNotFoundError:
-            raise RuntimeError(
-                "GitHub CLI not found. Install with 'brew install gh' or equivalent"
-            )
+            raise RuntimeError("GitHub CLI not found. Install with 'brew install gh' or equivalent")
 
-    def create_issue_from_task(
-        self, task: Task, additional_context: str = ""
-    ) -> GitHubIssue:
+    def create_issue_from_task(self, task: Task, additional_context: str = "") -> GitHubIssue:
         """Create GitHub issue from Memory.md task"""
         # Generate issue title (truncate if too long)
         title = self._generate_issue_title(task)
@@ -185,9 +175,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.repo_path
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
             if result.returncode != 0:
                 raise RuntimeError(f"Failed to list issues: {result.stderr}")
@@ -211,9 +199,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.repo_path
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
             if result.returncode != 0:
                 return None
@@ -291,9 +277,7 @@ This issue was automatically created from a Memory.md task to enable better proj
 
         return title
 
-    def _create_gh_issue(
-        self, title: str, body: str, labels: List[str]
-    ) -> Dict[str, Any]:
+    def _create_gh_issue(self, title: str, body: str, labels: List[str]) -> Dict[str, Any]:
         """Create GitHub issue using CLI"""
         # Write body to temporary file to handle special characters
         with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
@@ -315,9 +299,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.repo_path
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
             if result.returncode != 0:
                 raise RuntimeError(f"Failed to create issue: {result.stderr}")
@@ -327,9 +309,7 @@ This issue was automatically created from a Memory.md task to enable better proj
         finally:
             os.unlink(body_file)
 
-    def _update_gh_issue(
-        self, issue_number: int, title: str, body: str
-    ) -> Dict[str, Any]:
+    def _update_gh_issue(self, issue_number: int, title: str, body: str) -> Dict[str, Any]:
         """Update GitHub issue using CLI"""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".md", delete=False) as f:
             f.write(body)
@@ -349,9 +329,7 @@ This issue was automatically created from a Memory.md task to enable better proj
                 "number,title,body,state,labels,assignees,createdAt,updatedAt,url",
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=self.repo_path
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
             if result.returncode != 0:
                 raise RuntimeError(f"Failed to update issue: {result.stderr}")
@@ -367,9 +345,7 @@ This issue was automatically created from a Memory.md task to enable better proj
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
         if result.returncode != 0:
-            raise RuntimeError(
-                f"Failed to close issue #{issue_number}: {result.stderr}"
-            )
+            raise RuntimeError(f"Failed to close issue #{issue_number}: {result.stderr}")
 
     def _reopen_issue(self, issue_number: int):
         """Reopen GitHub issue"""
@@ -377,9 +353,7 @@ This issue was automatically created from a Memory.md task to enable better proj
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
 
         if result.returncode != 0:
-            raise RuntimeError(
-                f"Failed to reopen issue #{issue_number}: {result.stderr}"
-            )
+            raise RuntimeError(f"Failed to reopen issue #{issue_number}: {result.stderr}")
 
 
 def main():

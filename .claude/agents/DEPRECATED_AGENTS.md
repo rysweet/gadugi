@@ -68,7 +68,7 @@ These agents are DEPRECATED as of V0.3 migration. They used complex delegation p
 
 ### Old Pattern (Delegation)
 ```
-OrchestratorAgent 
+OrchestratorAgent
   → delegates to WorkflowManager
     → delegates to TaskAnalyzer
     → delegates to WorktreeManager

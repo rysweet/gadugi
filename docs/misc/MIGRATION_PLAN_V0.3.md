@@ -60,10 +60,10 @@ class WorkflowManagerEngine:
     def execute_workflow(self, prompt):
         # Delegate to task decomposer
         tasks = self.task_decomposer.decompose(prompt)
-        
+
         # Delegate to worktree manager
         worktree = self.worktree_manager.create()
-        
+
         # Delegate to code writer
         code = self.code_writer.write(tasks)
 ```
@@ -82,7 +82,7 @@ class CodeExecutor:
 
 **Pure Executors (NEW):**
 - `CodeExecutor`: File writing and editing only
-- `TestExecutor`: Test execution only  
+- `TestExecutor`: Test execution only
 - `GitHubExecutor`: GitHub operations only
 - `WorktreeExecutor`: Git worktree operations only
 

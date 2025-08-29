@@ -141,9 +141,7 @@ class Cat(Feline):
     def purr(self):
         return "purr"
 """
-        filepath = self.create_test_file(
-            "complex_inheritance.py", complex_inheritance_code
-        )
+        filepath = self.create_test_file("complex_inheritance.py", complex_inheritance_code)
 
         # Should detect unnecessarily deep inheritance hierarchy
         self.assertTrue(os.path.exists(filepath))
@@ -178,9 +176,7 @@ class Person:
         self.age = age
         self.email = email
 """
-        filepath = self.create_test_file(
-            "over_engineered_builder.py", over_engineered_builder
-        )
+        filepath = self.create_test_file("over_engineered_builder.py", over_engineered_builder)
 
         # Builder pattern is overkill for a simple 3-field data class
         self.assertTrue(os.path.exists(filepath))
@@ -233,9 +229,7 @@ class DistributedTaskOrchestrator:
         # Complex orchestration logic justified by genuine complexity
         pass
 '''
-        filepath = self.create_test_file(
-            "justified_complexity.py", complex_but_justified_code
-        )
+        filepath = self.create_test_file("justified_complexity.py", complex_but_justified_code)
 
         # This complex code is justified by genuinely complex requirements
         self.assertTrue(os.path.exists(filepath))

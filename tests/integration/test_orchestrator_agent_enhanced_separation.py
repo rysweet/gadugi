@@ -25,9 +25,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 from claude.shared.github_operations import GitHubOperations  # type: ignore[import]
 from claude.shared.interfaces import AgentConfig, TaskData, ErrorContext  # type: ignore[import]
@@ -38,7 +36,7 @@ from claude.shared.task_tracking import (  # type: ignore[import]
     TaskStatus,
     TaskTracker,
 )
-from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
+from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
 
 
 class TestOrchestratorAgentIntegration:
@@ -153,13 +151,22 @@ class TestOrchestratorAgentIntegration:
         # Mock task execution
         tasks = [
             TaskData(  # type: ignore[misc]
-                id="task-1", content="Feature A", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
+                id="task-1",
+                content="Feature A",
+                status=TaskStatus.PENDING,
+                priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
-                id="task-2", content="Feature B", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
+                id="task-2",
+                content="Feature B",
+                status=TaskStatus.PENDING,
+                priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
-                id="task-3", content="Feature C", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
+                id="task-3",
+                content="Feature C",
+                status=TaskStatus.PENDING,
+                priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
         ]
 
@@ -217,9 +224,7 @@ class TestOrchestratorAgentIntegration:
         # Test batch PR operations
         pr_numbers = [t["pr_number"] for t in successful_tasks]
 
-        with patch.object(
-            self.github_operations, "batch_merge_pull_requests"
-        ) as mock_batch:
+        with patch.object(self.github_operations, "batch_merge_pull_requests") as mock_batch:
             mock_batch.return_value = {"merged": pr_numbers, "failed": []}
 
             result = self.github_operations.batch_merge_pull_requests(pr_numbers)
@@ -319,9 +324,7 @@ class TestOrchestratorAgentIntegration:
         """Test resource monitoring and graceful degradation"""
 
         # Mock resource exhaustion scenario
-        with patch.object(
-            self.task_metrics, "detect_resource_exhaustion"
-        ) as mock_detect:
+        with patch.object(self.task_metrics, "detect_resource_exhaustion") as mock_detect:
             mock_detect.return_value = True
 
             # Test graceful degradation trigger
@@ -362,10 +365,16 @@ class TestOrchestratorAgentIntegration:
         # Phase 3: Parallel Execution (mocked)
         tasks = [
             TaskData(  # type: ignore[misc]
-                id="task-1", content="Feature A", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
+                id="task-1",
+                content="Feature A",
+                status=TaskStatus.PENDING,
+                priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
-                id="task-2", content="Feature B", status=TaskStatus.PENDING, priority=TaskPriority.HIGH  # type: ignore[arg-type]
+                id="task-2",
+                content="Feature B",
+                status=TaskStatus.PENDING,
+                priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
         ]
 
@@ -390,9 +399,7 @@ class TestOrchestratorAgentIntegration:
         pr_numbers = [t["pr_number"] for t in successful_tasks]
 
         # Mock GitHub integration
-        with patch.object(
-            self.github_operations, "batch_merge_pull_requests"
-        ) as mock_batch:
+        with patch.object(self.github_operations, "batch_merge_pull_requests") as mock_batch:
             mock_batch.return_value = {"merged": pr_numbers, "failed": []}
 
             batch_result = self.github_operations.batch_merge_pull_requests(pr_numbers)
@@ -454,9 +461,7 @@ class TestOrchestratorAgentPerformance:
         speedup = sequential_time / parallel_time
 
         # Validate speedup is in expected range
-        assert 3.0 <= speedup <= 5.5, (
-            f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
-        )
+        assert 3.0 <= speedup <= 5.5, f"Speedup {speedup:.2f} not in expected range [3.0, 5.5]"
 
         # Test with different parallelization scenarios
         test_scenarios = [
@@ -471,9 +476,9 @@ class TestOrchestratorAgentPerformance:
             par_time = max(durations)
             actual_speedup = seq_time / par_time
 
-            assert actual_speedup >= expected_min, (
-                f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
-            )
+            assert (
+                actual_speedup >= expected_min
+            ), f"Scenario {durations}: speedup {actual_speedup:.2f} < {expected_min}"
 
     def test_shared_module_performance_overhead(self):
         """Test that shared modules don't add significant performance overhead"""
@@ -510,9 +515,7 @@ class TestOrchestratorAgentPerformance:
         state_ops_time = time.time() - start_time
 
         # Performance should be reasonable (< 1 second for 10 operations each)
-        assert github_ops_time < 1.0, (
-            f"GitHub operations too slow: {github_ops_time:.3f}s"
-        )
+        assert github_ops_time < 1.0, f"GitHub operations too slow: {github_ops_time:.3f}s"
         assert state_ops_time < 1.0, f"State operations too slow: {state_ops_time:.3f}s"
 
 

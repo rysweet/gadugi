@@ -74,28 +74,28 @@ class EventType(str, Enum):
     HAS_QUESTION = "*.hasQuestion"  # Any agent has question
     NEEDS_APPROVAL = "*.needsApproval"  # Any agent needs approval
     CANCEL = "*.cancel"  # Cancel event
-    
+
     # Agent lifecycle events
     AGENT_INITIALIZED = "agent.initialized"
     AGENT_SHUTDOWN = "agent.shutdown"
     AGENT_HEARTBEAT = "agent.heartbeat"
-    
+
     # Task events
     TASK_STARTED = "task.started"
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
-    
+
     # Knowledge and memory events
     KNOWLEDGE_LEARNED = "knowledge.learned"
     MEMORY_STORED = "memory.stored"
     MEMORY_RECALLED = "memory.recalled"
-    
+
     # Collaboration events
     COLLABORATION_MESSAGE = "collaboration.message"
-    
+
     # Error events
     ERROR_OCCURRED = "error.occurred"
-    
+
     # System events
     SYSTEM_HEALTH_CHECK = "system.health_check"
     SYSTEM_SHUTDOWN = "system.shutdown"

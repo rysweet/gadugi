@@ -48,22 +48,22 @@ def fix_missing_shared_imports(content: str) -> str:
         ('import state_management', 'from ...shared import state_management'),
         ('import task_tracking', 'from ...shared import task_tracking'),
     ]
-    
+
     for old, new in replacements:
         content = content.replace(old, new)
-    
+
     return content
 
 def fix_optional_parameters(content: str) -> str:
     """Fix optional parameter type hints."""
     # Pattern to find function definitions with = None but without Optional
     pattern = r'(\w+):\s*(List\[[^\]]+\]|Dict\[[^\]]+\]|str|int|float|bool|Any)\s*=\s*None'
-    
+
     def replace_with_optional(match):
         param_name = match.group(1)
         type_hint = match.group(2)
         return f'{param_name}: Optional[{type_hint}] = None'
-    
+
     return re.sub(pattern, replace_with_optional, content)
 
 def ensure_optional_import(content: str) -> str:
@@ -89,7 +89,7 @@ def fix_type_aliases(content: str) -> str:
         lines = content.split('\n')
         new_lines = []
         seen_imports = set()
-        
+
         for line in lines:
             # Check for duplicate import assignments
             if '=' in line and 'import' in line:
@@ -101,20 +101,20 @@ def fix_type_aliases(content: str) -> str:
                         continue
                     seen_imports.add(alias)
             new_lines.append(line)
-        
+
         content = '\n'.join(new_lines)
-    
+
     return content
 
 def fix_datetime_optional(content: str) -> str:
     """Fix datetime optional type issues."""
     # Fix patterns like: resolved_at: datetime = None
     pattern = r'(\w+):\s*datetime\s*=\s*None'
-    
+
     def replace_datetime(match):
         param_name = match.group(1)
         return f'{param_name}: Optional[datetime] = None'
-    
+
     return re.sub(pattern, replace_datetime, content)
 
 def fix_dict_type_variance(content: str) -> str:
@@ -130,7 +130,7 @@ def fix_list_none_assignments(content: str) -> str:
     """Fix list assignments with None values."""
     # Pattern to find list comprehensions with potential None values
     pattern = r'\[([^]]*\.get\([^)]+\)[^]]*)\]'
-    
+
     def fix_list_comp(match):
         inner = match.group(1)
         # Check if it's getting values that could be None
@@ -141,7 +141,7 @@ def fix_list_none_assignments(content: str) -> str:
                 expr, iterator = parts
                 return f'[{expr} for {iterator} if {expr.split()[0]} is not None]'
         return match.group(0)
-    
+
     return re.sub(pattern, fix_list_comp, content)
 
 def process_file(file_path: Path) -> bool:
@@ -149,9 +149,9 @@ def process_file(file_path: Path) -> bool:
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         original_content = content
-        
+
         # Apply all fixes
         content = ensure_optional_import(content)
         content = fix_numpy_imports(content)
@@ -163,13 +163,13 @@ def process_file(file_path: Path) -> bool:
         content = fix_datetime_optional(content)
         content = fix_dict_type_variance(content)
         content = fix_list_none_assignments(content)
-        
+
         if content != original_content:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             print(f"Fixed: {file_path}")
             return True
-        
+
         return False
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
@@ -178,21 +178,21 @@ def process_file(file_path: Path) -> bool:
 def main():
     """Main function to process all TeamCoach files."""
     team_coach_dir = Path('/home/rysweet/gadugi/.claude/agents/TeamCoach')
-    
+
     if not team_coach_dir.exists():
         print(f"Directory not found: {team_coach_dir}")
         return
-    
+
     # Find all Python files in TeamCoach directory
     python_files = list(team_coach_dir.glob('**/*.py'))
-    
+
     print(f"Found {len(python_files)} Python files in TeamCoach directory")
-    
+
     fixed_count = 0
     for file_path in python_files:
         if process_file(file_path):
             fixed_count += 1
-    
+
     print(f"\nFixed {fixed_count} files")
 
 if __name__ == '__main__':

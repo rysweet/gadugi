@@ -13,7 +13,7 @@ Execute the following two tasks in parallel to complete the Gadugi v0.3 implemen
 <<<<<<< HEAD
 ### Task 2: implement-TeamCoach-agent.md
 =======
-### Task 2: implement-TeamCoach-agent.md  
+### Task 2: implement-TeamCoach-agent.md
 >>>>>>> feature/gadugi-v0.3-regeneration
 - Implement the Team Coach agent (#241)
 - Location: `.claude/agents/TeamCoach/`

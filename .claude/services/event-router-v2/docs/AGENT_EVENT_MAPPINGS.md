@@ -258,7 +258,7 @@ sequenceDiagram
     participant ER as EventRouter
     participant W as Worker
     participant M as Monitor
-    
+
     O->>ER: task.created
     ER->>W: task.created (delivered)
     ER->>M: task.created (delivered)
@@ -277,7 +277,7 @@ sequenceDiagram
     participant ER as EventRouter
     participant O as Orchestrator
     participant W2 as Worker2
-    
+
     W1->>ER: task.failed
     ER->>O: task.failed
     O->>ER: task.created (retry)
@@ -412,11 +412,11 @@ finally:
 class MockEventRouter:
     def __init__(self):
         self.events = []
-    
+
     async def publish(self, event):
         self.events.append(event)
         return event.id
-    
+
     def assert_event_published(self, topic):
         assert any(e.topic == topic for e in self.events)
 ```
@@ -427,15 +427,15 @@ class MockEventRouter:
 async def test_agent_communication():
     router = EventRouter()
     await router.start()
-    
+
     # Create test agents
     agent1 = TestAgent(router)
     agent2 = TestAgent(router)
-    
+
     # Test communication
     await agent1.send_message(agent2.id, "test")
     await asyncio.sleep(0.1)
-    
+
     assert agent2.received_messages == ["test"]
 ```
 

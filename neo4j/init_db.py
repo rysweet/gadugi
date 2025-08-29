@@ -10,8 +10,7 @@ from neo4j_client import Neo4jClient, Neo4jConfig
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -31,33 +30,33 @@ def execute_schema_file(client: Neo4jClient, schema_file: Path) -> bool:
         return False
 
     # Read and parse schema file
-    with open(schema_file, 'r') as f:
+    with open(schema_file, "r") as f:
         content = f.read()
 
     # Split into individual commands (by semicolon and double newline)
     commands = []
     current_command = []
 
-    for line in content.split('\n'):
+    for line in content.split("\n"):
         # Skip comments and empty lines
-        if line.strip().startswith('//') or not line.strip():
+        if line.strip().startswith("//") or not line.strip():
             continue
 
         current_command.append(line)
 
         # Check if command is complete
-        if line.strip().endswith(';'):
-            command = ' '.join(current_command).strip()
-            if command and not command.startswith('//'):
+        if line.strip().endswith(";"):
+            command = " ".join(current_command).strip()
+            if command and not command.startswith("//"):
                 # Remove trailing semicolon
-                command = command.rstrip(';')
+                command = command.rstrip(";")
                 commands.append(command)
             current_command = []
 
     # Add any remaining command
     if current_command:
-        command = ' '.join(current_command).strip()
-        if command and not command.startswith('//'):
+        command = " ".join(current_command).strip()
+        if command and not command.startswith("//"):
             commands.append(command)
 
     # Execute each command
@@ -100,15 +99,17 @@ def create_sample_data(client: Neo4jClient) -> None:
 
     # Create Orchestrator Agent
     orchestrator_id = f"orchestrator-{uuid.uuid4().hex[:8]}"
-    orchestrator = client.create_agent({
-        "id": orchestrator_id,
-        "name": "Primary Orchestrator",
-        "type": "coordinator",
-        "version": "0.3.0",
-        "status": "running",
-        "capabilities": ["parallel_execution", "task_coordination", "resource_management"],
-        "metadata": json.dumps({"max_parallel_tasks": 10, "region": "us-west-2"})
-    })
+    orchestrator = client.create_agent(
+        {
+            "id": orchestrator_id,
+            "name": "Primary Orchestrator",
+            "type": "coordinator",
+            "version": "0.3.0",
+            "status": "running",
+            "capabilities": ["parallel_execution", "task_coordination", "resource_management"],
+            "metadata": json.dumps({"max_parallel_tasks": 10, "region": "us-west-2"}),
+        }
+    )
     logger.info(f"Created orchestrator agent: {orchestrator}")
 
     # Create Worker Agents
@@ -116,29 +117,35 @@ def create_sample_data(client: Neo4jClient) -> None:
     for i in range(3):
         worker_id = f"worker-{uuid.uuid4().hex[:8]}"
         worker_ids.append(worker_id)
-        client.create_agent({
-            "id": worker_id,
-            "name": f"Worker Agent {i+1}",
-            "type": "worker",
-            "version": "0.3.0",
-            "status": "running",
-            "capabilities": ["task_execution", "state_management"],
-            "metadata": json.dumps({"worker_index": i})
-        })
+        client.create_agent(
+            {
+                "id": worker_id,
+                "name": f"Worker Agent {i+1}",
+                "type": "worker",
+                "version": "0.3.0",
+                "status": "running",
+                "capabilities": ["task_execution", "state_management"],
+                "metadata": json.dumps({"worker_index": i}),
+            }
+        )
         logger.info(f"Created worker agent: {worker_id}")
 
     # Create a Team
     team_id = f"team-{uuid.uuid4().hex[:8]}"
-    client.create_team({
-        "id": team_id,
-        "name": "Development Team Alpha",
-        "objectives": json.dumps([
-            "Complete v0.3 implementation",
-            "Improve system performance",
-            "Enhance test coverage"
-        ]),
-        "performance_score": 0.85
-    })
+    client.create_team(
+        {
+            "id": team_id,
+            "name": "Development Team Alpha",
+            "objectives": json.dumps(
+                [
+                    "Complete v0.3 implementation",
+                    "Improve system performance",
+                    "Enhance test coverage",
+                ]
+            ),
+            "performance_score": 0.85,
+        }
+    )
     logger.info(f"Created team: {team_id}")
 
     # Add agents to team
@@ -155,14 +162,16 @@ def create_sample_data(client: Neo4jClient) -> None:
     for i in range(5):
         task_id = f"task-{uuid.uuid4().hex[:8]}"
         task_ids.append(task_id)
-        client.create_task({
-            "id": task_id,
-            "name": f"Sample Task {i+1}",
-            "description": "This is a sample task for testing Neo4j integration",
-            "type": task_types[i % len(task_types)],
-            "priority": priorities[i % len(priorities)],
-            "timeout_seconds": 300 + (i * 60)
-        })
+        client.create_task(
+            {
+                "id": task_id,
+                "name": f"Sample Task {i+1}",
+                "description": "This is a sample task for testing Neo4j integration",
+                "type": task_types[i % len(task_types)],
+                "priority": priorities[i % len(priorities)],
+                "timeout_seconds": 300 + (i * 60),
+            }
+        )
         logger.info(f"Created task: {task_id}")
 
     # Assign some tasks to workers
@@ -175,30 +184,34 @@ def create_sample_data(client: Neo4jClient) -> None:
     for worker_id in worker_ids[:2]:
         for i in range(3):
             memory_id = f"memory-{uuid.uuid4().hex[:8]}"
-            client.create_memory({
-                "id": memory_id,
-                "agent_id": worker_id,
-                "content": f"Sample memory content {i+1} for worker {worker_id}",
-                "type": ["episodic", "semantic", "procedural"][i % 3],
-                "priority": "normal",
-                "importance": 0.5 + (i * 0.1),
-                "tags": ["sample", "test", f"memory_{i}"]
-            })
+            client.create_memory(
+                {
+                    "id": memory_id,
+                    "agent_id": worker_id,
+                    "content": f"Sample memory content {i+1} for worker {worker_id}",
+                    "type": ["episodic", "semantic", "procedural"][i % 3],
+                    "priority": "normal",
+                    "importance": 0.5 + (i * 0.1),
+                    "tags": ["sample", "test", f"memory_{i}"],
+                }
+            )
             logger.info(f"Created memory {memory_id} for {worker_id}")
 
     # Create sample knowledge
     domains = ["python", "neo4j", "agents", "orchestration"]
     for i in range(4):
         knowledge_id = f"knowledge-{uuid.uuid4().hex[:8]}"
-        client.create_knowledge({
-            "id": knowledge_id,
-            "title": f"Knowledge Item {i+1}",
-            "content": f"This is sample knowledge about {domains[i]}",
-            "domain": domains[i],
-            "confidence": 0.7 + (i * 0.05),
-            "source": "sample_data_generator",
-            "verified": i % 2 == 0
-        })
+        client.create_knowledge(
+            {
+                "id": knowledge_id,
+                "title": f"Knowledge Item {i+1}",
+                "content": f"This is sample knowledge about {domains[i]}",
+                "domain": domains[i],
+                "confidence": 0.7 + (i * 0.05),
+                "source": "sample_data_generator",
+                "verified": i % 2 == 0,
+            }
+        )
         logger.info(f"Created knowledge: {knowledge_id}")
 
     # Create task dependencies
@@ -210,7 +223,7 @@ def create_sample_data(client: Neo4jClient) -> None:
             MATCH (t2:Task {id: $task2_id})
             CREATE (t2)-[:DEPENDS_ON]->(t1)
             """,
-            {"task1_id": task_ids[0], "task2_id": task_ids[1]}
+            {"task1_id": task_ids[0], "task2_id": task_ids[1]},
         )
         logger.info(f"Created dependency: {task_ids[1]} depends on {task_ids[0]}")
 

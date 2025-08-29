@@ -11,7 +11,7 @@ Execute the following foundation tasks in parallel for Gadugi v0.3 implementatio
    - Ensure all Python commands use `uv run` prefix
    - Focus on correctness and quality
 
-2. **create-recipe-definitions.md** - Issue #234  
+2. **create-recipe-definitions.md** - Issue #234
    - Create recipe structure in `.claude/recipes/`
    - Define requirements, design, and dependencies for all components
    - Follow new v0.3 requirements, not current implementation

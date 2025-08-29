@@ -137,9 +137,7 @@ class TestConflictAssessment:
 
         # Few non-critical files - low complexity
         simple_files = ["src/utils.py", "src/helper.js"]
-        assert (
-            assessor._assess_conflict_complexity(simple_files) == ConflictComplexity.LOW
-        )
+        assert assessor._assess_conflict_complexity(simple_files) == ConflictComplexity.LOW
 
         # Critical configuration files - higher complexity
         critical_files = ["package.json", "requirements.txt", "Dockerfile"]
@@ -148,33 +146,23 @@ class TestConflictAssessment:
 
         # Many files - high complexity
         many_files = [f"file{i}.py" for i in range(10)]
-        assert (
-            assessor._assess_conflict_complexity(many_files) == ConflictComplexity.HIGH
-        )
+        assert assessor._assess_conflict_complexity(many_files) == ConflictComplexity.HIGH
 
     def test_estimate_resolution_time(self, assessor):
         """Test conflict resolution time estimation."""
         # Test all complexity levels
-        assert assessor._estimate_resolution_time(ConflictComplexity.NONE) == timedelta(
-            0
+        assert assessor._estimate_resolution_time(ConflictComplexity.NONE) == timedelta(0)
+        assert assessor._estimate_resolution_time(ConflictComplexity.LOW) == timedelta(minutes=15)
+        assert assessor._estimate_resolution_time(ConflictComplexity.MEDIUM) == timedelta(
+            minutes=45
         )
-        assert assessor._estimate_resolution_time(ConflictComplexity.LOW) == timedelta(
-            minutes=15
-        )
-        assert assessor._estimate_resolution_time(
-            ConflictComplexity.MEDIUM
-        ) == timedelta(minutes=45)
-        assert assessor._estimate_resolution_time(ConflictComplexity.HIGH) == timedelta(
-            hours=2
-        )
+        assert assessor._estimate_resolution_time(ConflictComplexity.HIGH) == timedelta(hours=2)
 
 
 class TestCIAssessment:
     """Test CI/CD assessment functionality."""
 
-    def test_assess_ci_status_all_passing(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_ci_status_all_passing(self, assessor, mock_github_ops, sample_pr_details):
         """Test CI assessment with all checks passing."""
         mock_github_ops.get_pr_status_checks.return_value = [
             {
@@ -198,9 +186,7 @@ class TestCIAssessment:
         assert assessment.can_auto_retry is False  # No failures to retry
         assert assessment.last_run is not None  # type: ignore[union-attr]
 
-    def test_assess_ci_status_with_failures(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_ci_status_with_failures(self, assessor, mock_github_ops, sample_pr_details):
         """Test CI assessment with some failures."""
         mock_github_ops.get_pr_status_checks.return_value = [
             {
@@ -256,10 +242,7 @@ class TestCIAssessment:
             "description": "Vulnerability detected",
             "context": "security/scan",
         }
-        assert (
-            assessor._classify_ci_failure(security_check)
-            == CIFailureType.SECURITY_FAILURE
-        )
+        assert assessor._classify_ci_failure(security_check) == CIFailureType.SECURITY_FAILURE
 
         # Unknown failure
         unknown_check = {
@@ -272,9 +255,7 @@ class TestCIAssessment:
 class TestReviewAssessment:
     """Test code review assessment functionality."""
 
-    def test_assess_review_status_complete(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_review_status_complete(self, assessor, mock_github_ops, sample_pr_details):
         """Test review assessment with complete reviews."""
         mock_github_ops.get_pr_reviews.return_value = [
             {"user": {"login": "human-reviewer"}, "state": "APPROVED"},
@@ -298,17 +279,13 @@ class TestReviewAssessment:
         assert assessment.is_review_complete is True
         assert assessment.review_coverage_score > 0
 
-    def test_assess_review_status_incomplete(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_review_status_incomplete(self, assessor, mock_github_ops, sample_pr_details):
         """Test review assessment with incomplete reviews."""
         mock_github_ops.get_pr_reviews.return_value = [
             {"user": {"login": "human-reviewer"}, "state": "CHANGES_REQUESTED"}
         ]
 
-        mock_github_ops.get_pr_comments.return_value = [
-            {"body": "Just a regular comment"}
-        ]
+        mock_github_ops.get_pr_comments.return_value = [{"body": "Just a regular comment"}]
 
         # Add pending review requests
         sample_pr_details["requested_reviewers"] = [{"login": "pending-reviewer"}]
@@ -361,9 +338,7 @@ class TestReviewAssessment:
             {"user": {"login": "reviewer3"}},
             {"user": {"login": "reviewer4"}},
         ]
-        coverage_multiple = assessor._calculate_review_coverage(
-            pr_details, multiple_reviews
-        )
+        coverage_multiple = assessor._calculate_review_coverage(pr_details, multiple_reviews)
         assert coverage_multiple > coverage
         assert coverage_multiple <= 100
 
@@ -376,9 +351,7 @@ class TestReviewAssessment:
 class TestSyncAssessment:
     """Test branch synchronization assessment functionality."""
 
-    def test_assess_branch_sync_up_to_date(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_branch_sync_up_to_date(self, assessor, mock_github_ops, sample_pr_details):
         """Test branch sync assessment for up-to-date branch."""
         mock_github_ops.compare_commits.return_value = {
             "behind_by": 0,
@@ -395,9 +368,7 @@ class TestSyncAssessment:
         assert assessment.is_auto_updatable is True  # No commits behind
         assert assessment.sync_complexity == "simple"
 
-    def test_assess_branch_sync_behind(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_branch_sync_behind(self, assessor, mock_github_ops, sample_pr_details):
         """Test branch sync assessment for branch behind main."""
         mock_github_ops.compare_commits.return_value = {
             "behind_by": 5,
@@ -415,21 +386,15 @@ class TestSyncAssessment:
         assert assessment.commits_behind == 5
         assert assessment.commits_ahead == 2
         assert assessment.requires_update is True
-        assert (
-            assessment.is_auto_updatable is False
-        )  # complexity is moderate, not simple
+        assert assessment.is_auto_updatable is False  # complexity is moderate, not simple
         assert assessment.sync_complexity == "moderate"  # Has merge commit
 
-    def test_assess_branch_sync_far_behind(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_assess_branch_sync_far_behind(self, assessor, mock_github_ops, sample_pr_details):
         """Test branch sync assessment for branch far behind main."""
         mock_github_ops.compare_commits.return_value = {
             "behind_by": 25,
             "ahead_by": 1,
-            "commits": [
-                {"parents": ["p1", "p2"]} for _ in range(10)
-            ],  # Many merge commits
+            "commits": [{"parents": ["p1", "p2"]} for _ in range(10)],  # Many merge commits
         }
 
         assessment = assessor.assess_branch_sync(sample_pr_details)
@@ -532,10 +497,7 @@ class TestMetadataAssessment:
         assert assessor._check_linked_issues("Closes #456") is True
         assert assessor._check_linked_issues("Resolves #789") is True
         assert assessor._check_linked_issues("See issue #321") is True
-        assert (
-            assessor._check_linked_issues("https://github.com/user/repo/issues/123")
-            is True
-        )
+        assert assessor._check_linked_issues("https://github.com/user/repo/issues/123") is True
 
         # No issue references
         assert assessor._check_linked_issues("Just a regular description") is False
@@ -546,9 +508,7 @@ class TestMetadataAssessment:
 class TestComprehensiveAssessment:
     """Test comprehensive assessment functionality."""
 
-    def test_get_comprehensive_assessment_ready(
-        self, assessor, mock_github_ops, sample_pr_details
-    ):
+    def test_get_comprehensive_assessment_ready(self, assessor, mock_github_ops, sample_pr_details):
         """Test comprehensive assessment for ready PR."""
         # Mock all individual assessments to return positive results
         with (
@@ -653,7 +613,9 @@ class TestComprehensiveAssessment:
             result = assessor.get_comprehensive_assessment(sample_pr_details)
 
             assert result["pr_number"] == 123  # type: ignore[index]
-            assert result["overall_score"] < 95  # Should be below ready threshold  # type: ignore[index]
+            assert (
+                result["overall_score"] < 95
+            )  # Should be below ready threshold  # type: ignore[index]
             assert result["is_ready"] is False  # type: ignore[index]
             assert len(result["blocking_factors"]) > 0  # type: ignore[index]
             assert len(result["recommendations"]) > 0  # type: ignore[index]
@@ -662,9 +624,7 @@ class TestComprehensiveAssessment:
             blocking_factors = result["blocking_factors"]
             assert any("conflict" in factor.lower() for factor in blocking_factors)
             assert any("ci failure" in factor.lower() for factor in blocking_factors)
-            assert any(
-                "review incomplete" in factor.lower() for factor in blocking_factors
-            )
+            assert any("review incomplete" in factor.lower() for factor in blocking_factors)
 
     def test_identify_blocking_factors(self, assessor):
         """Test blocking factor identification."""
@@ -713,9 +673,7 @@ class TestComprehensiveAssessment:
         assert any("ci failure" in factor.lower() for factor in blocking_factors)
         assert any("review incomplete" in factor.lower() for factor in blocking_factors)
         assert any("behind by 15" in factor for factor in blocking_factors)
-        assert any(
-            "metadata incomplete" in factor.lower() for factor in blocking_factors
-        )
+        assert any("metadata incomplete" in factor.lower() for factor in blocking_factors)
 
     def test_generate_recommendations(self, assessor):
         """Test recommendation generation."""
@@ -763,21 +721,13 @@ class TestComprehensiveAssessment:
         assert any(
             "auto-resolve" in rec.lower() for rec in recommendations
         )  # Auto-resolvable conflicts
-        assert any(
-            "retry" in rec.lower() for rec in recommendations
-        )  # Retriable CI failures
+        assert any("retry" in rec.lower() for rec in recommendations)  # Retriable CI failures
         assert any(
             "human code review" in rec.lower() for rec in recommendations
         )  # Missing human review
-        assert any(
-            "ai code review" in rec.lower() for rec in recommendations
-        )  # Missing AI review
-        assert any(
-            "auto-update" in rec.lower() for rec in recommendations
-        )  # Auto-updatable branch
-        assert any(
-            "metadata" in rec.lower() for rec in recommendations
-        )  # Incomplete metadata
+        assert any("ai code review" in rec.lower() for rec in recommendations)  # Missing AI review
+        assert any("auto-update" in rec.lower() for rec in recommendations)  # Auto-updatable branch
+        assert any("metadata" in rec.lower() for rec in recommendations)  # Incomplete metadata
 
 
 if __name__ == "__main__":

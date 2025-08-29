@@ -12,7 +12,7 @@ core_events:
       input: "any"
       task_id: "string"
       timestamp: "datetime"
-  
+
   - name: "stopped"
     description: "Agent completes task execution"
     payload:
@@ -21,7 +21,7 @@ core_events:
       success: "boolean"
       duration_seconds: "float"
       timestamp: "datetime"
-  
+
   - name: "hasQuestion"
     description: "Agent needs interactive answer"
     payload:
@@ -29,7 +29,7 @@ core_events:
       context: "object"
       options: "array"
       timestamp: "datetime"
-  
+
   - name: "needsApproval"
     description: "Agent needs user approval"
     payload:
@@ -37,7 +37,7 @@ core_events:
       description: "string"
       risk_level: "string"
       timestamp: "datetime"
-  
+
   - name: "cancel"
     description: "Cancel another agent's execution"
     payload:
@@ -253,14 +253,14 @@ routing:
     - pattern: "*.needsApproval"
       route_to: "orchestration"
       priority: "high"
-  
+
   # Cancellations are immediate
   cancellation:
     - pattern: "*.cancel"
       route_to: "event_router"
       priority: "critical"
       action: "terminate_agent"
-  
+
   # Learning events go to memory
   learning:
     - pattern: "*.lessons_learned"
@@ -276,7 +276,7 @@ persistence:
   location: "/var/gadugi/events"
   retention_days: 30
   compress_after_days: 7
-  
+
 # Performance settings
 performance:
   batch_size: 100

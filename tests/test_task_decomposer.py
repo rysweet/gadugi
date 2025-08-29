@@ -69,7 +69,7 @@ except ImportError:
         def __getitem__(self, key: str) -> Any:
             # Support dictionary-like access
             return getattr(self, key, None)
-                
+
         def to_dict(self) -> Dict[str, Any]:
             return {
                 "subtasks": [subtask.to_dict() for subtask in self.subtasks],
@@ -79,7 +79,7 @@ except ImportError:
                 "dependency_graph": self.dependency_graph,
                 "parallelization_score": self.parallelization_score,
                 "estimated_total_time": self.estimated_total_time,
-                "decomposition_pattern": self.decomposition_pattern
+                "decomposition_pattern": self.decomposition_pattern,
             }
 
     class PatternDatabase:
@@ -89,20 +89,20 @@ except ImportError:
                     "success_rate": 0.85,
                     "avg_parallelization": 0.7,
                     "triggers": ["implement", "create", "add"],
-                    "subtasks": ["design", "implement", "test"]
+                    "subtasks": ["design", "implement", "test"],
                 },
                 "bug_fix": {
                     "success_rate": 0.9,
                     "avg_parallelization": 0.5,
                     "triggers": ["fix", "resolve", "bug"],
-                    "subtasks": ["reproduce", "fix", "test"]
+                    "subtasks": ["reproduce", "fix", "test"],
                 },
                 "refactoring": {
                     "success_rate": 0.75,
                     "avg_parallelization": 0.6,
                     "triggers": ["refactor", "optimize"],
-                    "subtasks": ["analyze", "refactor", "test"]
-                }
+                    "subtasks": ["analyze", "refactor", "test"],
+                },
             }
             self.storage_path = storage_path
 
@@ -118,35 +118,44 @@ except ImportError:
         def __getitem__(self, key: str) -> Any:
             # Support dictionary-like access
             return self.patterns.get(key)
-        
+
         def __setitem__(self, key: str, value: Any) -> None:
             self.patterns[key] = value
-            
-        def update_pattern_metrics(self, pattern_name: str, success: bool, parallelization_score: float) -> None:
+
+        def update_pattern_metrics(
+            self, pattern_name: str, success: bool, parallelization_score: float
+        ) -> None:
             if pattern_name in self.patterns:
                 pattern = self.patterns[pattern_name]
                 # Simple update logic
                 if success:
                     pattern["success_rate"] = min(0.95, pattern["success_rate"] + 0.05)
-                pattern["avg_parallelization"] = (pattern["avg_parallelization"] + parallelization_score) / 2
-                
+                pattern["avg_parallelization"] = (
+                    pattern["avg_parallelization"] + parallelization_score
+                ) / 2
+
         def save_patterns(self) -> None:
             if self.storage_path:
                 import json
                 from pathlib import Path
+
                 with open(Path(self.storage_path), "w") as f:
                     json.dump(self.patterns, f, indent=2)
 
     class TaskDecomposer:
-        def __init__(self, storage_path: Optional[str] = None, patterns_db: Optional[PatternDatabase] = None):
+        def __init__(
+            self, storage_path: Optional[str] = None, patterns_db: Optional[PatternDatabase] = None
+        ):
             self.storage_path = storage_path
             self.pattern_db = patterns_db or PatternDatabase(storage_path)
             self.patterns_db = self.pattern_db  # Alias for compatibility
 
-        async def decompose_task(self, task_description: str, context: Optional[Dict[str, Any]] = None, **kwargs: Any) -> DecompositionResult:
+        async def decompose_task(
+            self, task_description: str, context: Optional[Dict[str, Any]] = None, **kwargs: Any
+        ) -> DecompositionResult:
             # Find matching pattern
             pattern = self.pattern_db.find_matching_pattern(task_description)
-            
+
             # Generate subtasks based on pattern
             if pattern and pattern in self.pattern_db.patterns:
                 pattern_data = self.pattern_db.patterns[pattern]
@@ -157,16 +166,16 @@ except ImportError:
                         id=subtask_id,
                         name=subtask_name.title(),
                         description=f"{subtask_name} for {task_description}",
-                        estimated_time=30 + i * 15  # Simple time estimation
+                        estimated_time=30 + i * 15,  # Simple time estimation
                     )
                     subtasks.append(subtask)
-                
+
                 return DecompositionResult(
                     subtasks=subtasks,
                     original_task=task_description,
                     decomposition_pattern=pattern,
                     parallelization_score=pattern_data["avg_parallelization"],
-                    **kwargs
+                    **kwargs,
                 )
             else:
                 # Default decomposition
@@ -174,26 +183,27 @@ except ImportError:
                     SubTask(
                         id=self._generate_subtask_id("analysis"),
                         name="Analysis",
-                        description=f"Analyze requirements for {task_description}"
+                        description=f"Analyze requirements for {task_description}",
                     ),
                     SubTask(
                         id=self._generate_subtask_id("implementation"),
-                        name="Implementation", 
-                        description=f"Implement solution for {task_description}"
-                    )
+                        name="Implementation",
+                        description=f"Implement solution for {task_description}",
+                    ),
                 ]
-                
+
                 return DecompositionResult(
                     subtasks=subtasks,
                     original_task=task_description,
                     decomposition_pattern=None,
-                    **kwargs
+                    **kwargs,
                 )
-        
+
         def _generate_subtask_id(self, base: str) -> str:
             import time
+
             return f"subtask_{base}_{int(time.time() * 1000) % 1000:03d}"
-            
+
         async def analyze_dependencies(self, subtasks: List[SubTask]) -> Dict[str, List[str]]:
             # Simple dependency analysis
             deps = {}
@@ -202,35 +212,47 @@ except ImportError:
                     deps[subtask.id] = []
                 else:
                     # Each task depends on the previous one
-                    deps[subtask.id] = [subtasks[i-1].id]
+                    deps[subtask.id] = [subtasks[i - 1].id]
             return deps
-            
-        async def estimate_parallelization(self, subtasks: List[SubTask], dependencies: Dict[str, List[str]]) -> float:
+
+        async def estimate_parallelization(
+            self, subtasks: List[SubTask], dependencies: Dict[str, List[str]]
+        ) -> float:
             if not subtasks:
                 return 0.0
-            
+
             # Count tasks with no dependencies (can run in parallel)
             parallel_tasks = sum(1 for task_id in dependencies if not dependencies[task_id])
             return parallel_tasks / len(subtasks)
-            
-        async def _find_critical_path_length(self, subtasks: List[SubTask], dependencies: Dict[str, List[str]]) -> int:
+
+        async def _find_critical_path_length(
+            self, subtasks: List[SubTask], dependencies: Dict[str, List[str]]
+        ) -> int:
             # Simple critical path calculation
             return sum(task.estimated_time for task in subtasks)
-            
-        def _calculate_total_time(self, subtasks: List[SubTask], dependencies: Dict[str, List[str]], parallelization_score: float) -> int:
+
+        def _calculate_total_time(
+            self,
+            subtasks: List[SubTask],
+            dependencies: Dict[str, List[str]],
+            parallelization_score: float,
+        ) -> int:
             total_time = sum(task.estimated_time for task in subtasks)
             # Reduce time based on parallelization potential
             return int(total_time * (1 - parallelization_score * 0.5))
-            
+
         async def learn_pattern(self, result: DecompositionResult, metrics: Dict[str, Any]) -> None:
             # Mock implementation for learning
             pass
-            
+
         async def find_similar_patterns(self, task_description: str) -> List[str]:
             # Return patterns that might match
             matches = []
             for pattern_name in self.pattern_db.patterns.keys():
-                if any(trigger in task_description.lower() for trigger in self.pattern_db.patterns[pattern_name]["triggers"]):
+                if any(
+                    trigger in task_description.lower()
+                    for trigger in self.pattern_db.patterns[pattern_name]["triggers"]
+                ):
                     matches.append(pattern_name)
             return matches[:3]  # Return top 3
 
@@ -292,7 +314,7 @@ class TestDecompositionResult:
             dependency_graph={"sub_002": ["sub_001"]},
             parallelization_score=0.7,
             estimated_total_time=120,
-            decomposition_pattern="feature_implementation"
+            decomposition_pattern="feature_implementation",
         )
 
         assert result.original_task == "Complex task"
@@ -313,13 +335,13 @@ class TestDecompositionResult:
         )
 
         # Mock the to_dict method since it's not implemented in the stub
-        if hasattr(result, 'to_dict'):
+        if hasattr(result, "to_dict"):
             dict_result = result.to_dict()
         else:
             dict_result = {
                 "original_task": result.original_task,
                 "subtasks": [st.to_dict() for st in result.subtasks],
-                "parallelization_score": result.parallelization_score
+                "parallelization_score": result.parallelization_score,
             }
         assert isinstance(dict_result, dict)
         assert dict_result["original_task"] == "Simple task"  # type: ignore[index]
@@ -345,14 +367,8 @@ class TestPatternDatabase:
         db = PatternDatabase()
 
         # Test feature implementation pattern
-        assert (
-            db.find_matching_pattern("implement new authentication")
-            == "feature_implementation"
-        )
-        assert (
-            db.find_matching_pattern("create user dashboard")
-            == "feature_implementation"
-        )
+        assert db.find_matching_pattern("implement new authentication") == "feature_implementation"
+        assert db.find_matching_pattern("create user dashboard") == "feature_implementation"
 
         # Test bug fix pattern
         assert db.find_matching_pattern("fix login issue") == "bug_fix"
@@ -372,9 +388,7 @@ class TestPatternDatabase:
             db = PatternDatabase(storage_path=str(db_path))
 
             initial_rate = db.patterns["feature_implementation"]["success_rate"]
-            initial_parallel = db.patterns["feature_implementation"][
-                "avg_parallelization"
-            ]
+            initial_parallel = db.patterns["feature_implementation"]["avg_parallelization"]
 
             # Update with success
             db.update_pattern_metrics(
@@ -444,7 +458,10 @@ class TestTaskDecomposer:
         assert isinstance(result, DecompositionResult)
         assert result.original_task == task
         assert len(result.subtasks) > 0
-        assert hasattr(result, 'decomposition_pattern') and result.decomposition_pattern == "feature_implementation"
+        assert (
+            hasattr(result, "decomposition_pattern")
+            and result.decomposition_pattern == "feature_implementation"
+        )
 
         # Check subtasks match pattern
         subtask_names = [st.name.lower() for st in result.subtasks]
@@ -461,7 +478,7 @@ class TestTaskDecomposer:
         assert isinstance(result, DecompositionResult)
         assert result.original_task == task
         assert len(result.subtasks) > 0
-        assert hasattr(result, 'decomposition_pattern') and result.decomposition_pattern is None
+        assert hasattr(result, "decomposition_pattern") and result.decomposition_pattern is None
 
         # Should use default decomposition
         subtask_names = [st.name.lower() for st in result.subtasks]
@@ -473,18 +490,21 @@ class TestTaskDecomposer:
         """Test dependency analysis between subtasks."""
         subtasks = [
             SubTask(id="sub_001", name="Design API", description="Design the API"),
-            SubTask(
-                id="sub_002", name="Implement API", description="Implement the API"
-            ),
+            SubTask(id="sub_002", name="Implement API", description="Implement the API"),
             SubTask(id="sub_003", name="Test API", description="Test the API"),
             SubTask(id="sub_004", name="Document API", description="Document the API"),
         ]
 
-        if hasattr(decomposer, 'analyze_dependencies'):
+        if hasattr(decomposer, "analyze_dependencies"):
             dependencies = await decomposer.analyze_dependencies(subtasks)
         else:
             # Mock implementation
-            dependencies = {"sub_001": [], "sub_002": ["sub_001"], "sub_003": ["sub_002"], "sub_004": []}
+            dependencies = {
+                "sub_001": [],
+                "sub_002": ["sub_001"],
+                "sub_003": ["sub_002"],
+                "sub_004": [],
+            }
 
         assert isinstance(dependencies, dict)
         # Test tasks should depend on implementation
@@ -521,7 +541,7 @@ class TestTaskDecomposer:
         ]
         parallel_deps: Dict[str, List[str]] = {"p1": [], "p2": [], "p3": []}
 
-        if hasattr(decomposer, 'estimate_parallelization'):
+        if hasattr(decomposer, "estimate_parallelization"):
             parallel_score = await decomposer.estimate_parallelization(
                 parallel_tasks, parallel_deps
             )
@@ -556,7 +576,7 @@ class TestTaskDecomposer:
         ]
         sequential_deps = {"s1": [], "s2": ["s1"], "s3": ["s2"]}
 
-        if hasattr(decomposer, 'estimate_parallelization'):
+        if hasattr(decomposer, "estimate_parallelization"):
             sequential_score = await decomposer.estimate_parallelization(
                 sequential_tasks, sequential_deps
             )
@@ -574,7 +594,7 @@ class TestTaskDecomposer:
         ]
         mixed_deps = {"m1": [], "m2": [], "m3": ["m1", "m2"], "m4": ["m3"]}
 
-        if hasattr(decomposer, 'estimate_parallelization'):
+        if hasattr(decomposer, "estimate_parallelization"):
             mixed_score = await decomposer.estimate_parallelization(mixed_tasks, mixed_deps)
         else:
             # Mock implementation for mixed tasks
@@ -596,7 +616,7 @@ class TestTaskDecomposer:
         # Critical path should be t1 -> t3 -> t4 = 105
         deps = {"t1": [], "t2": [], "t3": ["t1"], "t4": ["t2", "t3"]}
 
-        if hasattr(decomposer, '_find_critical_path_length'):
+        if hasattr(decomposer, "_find_critical_path_length"):
             critical_length = await decomposer._find_critical_path_length(tasks, deps)
         else:
             # Mock implementation
@@ -622,26 +642,22 @@ class TestTaskDecomposer:
         success_metrics = {"success": True, "execution_time": 150}
 
         # Learn from this successful decomposition
-        if hasattr(decomposer, 'learn_pattern'):
+        if hasattr(decomposer, "learn_pattern"):
             await decomposer.learn_pattern(result, success_metrics)
 
         # Check if a new pattern was learned
         # Note: The pattern name will be dynamic based on hash
-        if hasattr(decomposer, 'patterns_db'):
+        if hasattr(decomposer, "patterns_db"):
             pattern_count = len(decomposer.patterns_db.patterns)
         else:
             pattern_count = 5
-        assert (
-            pattern_count >= 5
-        )  # Should have default patterns plus potentially new ones
+        assert pattern_count >= 5  # Should have default patterns plus potentially new ones
 
     @pytest.mark.asyncio
     async def test_find_similar_patterns(self, decomposer):
         """Test finding similar patterns for a task."""
-        if hasattr(decomposer, 'find_similar_patterns'):
-            similar = await decomposer.find_similar_patterns(
-                "implement new feature with tests"
-            )
+        if hasattr(decomposer, "find_similar_patterns"):
+            similar = await decomposer.find_similar_patterns("implement new feature with tests")
         else:
             similar = ["feature_implementation"]
 
@@ -699,7 +715,7 @@ class TestTaskDecomposer:
 
         # Fully parallel (score = 1.0)
         parallel_deps: Dict[str, List[str]] = {"t1": [], "t2": []}
-        if hasattr(decomposer, '_calculate_total_time'):
+        if hasattr(decomposer, "_calculate_total_time"):
             time_parallel = decomposer._calculate_total_time(tasks, parallel_deps, 1.0)
         else:
             # Mock implementation
@@ -708,7 +724,7 @@ class TestTaskDecomposer:
 
         # Fully sequential (score = 0.0)
         sequential_deps = {"t1": [], "t2": ["t1"]}
-        if hasattr(decomposer, '_calculate_total_time'):
+        if hasattr(decomposer, "_calculate_total_time"):
             time_sequential = decomposer._calculate_total_time(tasks, sequential_deps, 0.0)
         else:
             # Mock implementation
@@ -716,7 +732,7 @@ class TestTaskDecomposer:
         assert time_sequential == 120  # Should be sum of all tasks
 
         # Partial parallelization (score = 0.5)
-        if hasattr(decomposer, '_calculate_total_time'):
+        if hasattr(decomposer, "_calculate_total_time"):
             time_partial = decomposer._calculate_total_time(tasks, sequential_deps, 0.5)
         else:
             # Mock implementation

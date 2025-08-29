@@ -103,9 +103,7 @@ def test_git_worktrees():
     print_section("Testing Git Worktree Operations")
 
     # List current worktrees
-    returncode, stdout, stderr = run_command(
-        ["git", "worktree", "list"], "Listing worktrees"
-    )
+    returncode, stdout, stderr = run_command(["git", "worktree", "list"], "Listing worktrees")
 
     if returncode == 0:
         print("  Current worktrees:")
@@ -128,17 +126,13 @@ def test_process_registry():
     """Test the process registry functionality."""
     print_section("Testing Process Registry")
 
-    registry_path = Path(
-        "/Users/ryan/src/gadugi2/gadugi/.gadugi/monitoring/process_registry.json"
-    )
+    registry_path = Path("/Users/ryan/src/gadugi2/gadugi/.gadugi/monitoring/process_registry.json")
 
     if registry_path.exists():
         try:
             with open(registry_path) as f:
                 registry = json.load(f)
-            print(
-                f"  ✅ Registry found with {len(registry.get('processes', {}))} processes"
-            )
+            print(f"  ✅ Registry found with {len(registry.get('processes', {}))} processes")
 
             # Show process status
             for pid, process in registry.get("processes", {}).items():
@@ -182,9 +176,7 @@ def test_docker_setup():
     print_section("Testing Docker Setup")
 
     # Check if Docker is running
-    returncode, stdout, stderr = run_command(
-        ["docker", "info"], "Checking Docker daemon"
-    )
+    returncode, stdout, stderr = run_command(["docker", "info"], "Checking Docker daemon")
 
     if returncode == 0:
         print("  ✅ Docker daemon is running")
@@ -204,9 +196,7 @@ def test_docker_setup():
         if stdout.strip():
             print(f"  ✅ Found image: {stdout.strip()}")
         else:
-            print(
-                "  ℹ️  No claude-orchestrator image found (will use subprocess fallback)"
-            )
+            print("  ℹ️  No claude-orchestrator image found (will use subprocess fallback)")
     else:
         print("  ℹ️  Docker not available (will use subprocess fallback)")
 
@@ -218,9 +208,7 @@ def cleanup_branches():
     print_section("Cleaning Up Parallel Branches")
 
     # List branches
-    returncode, stdout, stderr = run_command(
-        ["git", "branch", "-a"], "Listing branches"
-    )
+    returncode, stdout, stderr = run_command(["git", "branch", "-a"], "Listing branches")
 
     if returncode == 0:
         parallel_branches = [
@@ -248,9 +236,7 @@ def run_integration_test():
     print_section("Running Integration Test")
 
     # Create a simple test prompt
-    test_prompt_path = Path(
-        "/Users/ryan/src/gadugi2/gadugi/prompts/test-orchestrator.md"
-    )
+    test_prompt_path = Path("/Users/ryan/src/gadugi2/gadugi/prompts/test-orchestrator.md")
     test_prompt_content = """# Test Orchestrator Task
 
 This is a test task for the orchestrator.

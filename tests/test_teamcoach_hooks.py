@@ -16,9 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Check if Claude CLI is available
 CLAUDE_CLI_AVAILABLE = shutil.which("claude") is not None
-skip_if_no_claude = unittest.skipUnless(
-    CLAUDE_CLI_AVAILABLE, "Claude CLI not available"
-)
+skip_if_no_claude = unittest.skipUnless(CLAUDE_CLI_AVAILABLE, "Claude CLI not available")
 
 
 class TestTeamCoachStopHook(unittest.TestCase):
@@ -33,9 +31,7 @@ class TestTeamCoachStopHook(unittest.TestCase):
             "teamcoach-stop.py",
         )
         self.assertTrue(os.path.exists(self.hook_script), "Hook script should exist")
-        self.assertTrue(
-            os.access(self.hook_script, os.X_OK), "Hook script should be executable"
-        )
+        self.assertTrue(os.access(self.hook_script, os.X_OK), "Hook script should be executable")
 
     @unittest.skipUnless(
         False,
@@ -117,9 +113,7 @@ class TestTeamCoachSubagentStopHook(unittest.TestCase):
             "hooks",
             "teamcoach-subagent-stop.py",
         )
-        self.assertTrue(
-            os.path.exists(self.hook_script), "Subagent hook script should exist"
-        )
+        self.assertTrue(os.path.exists(self.hook_script), "Subagent hook script should exist")
         self.assertTrue(
             os.access(self.hook_script, os.X_OK),
             "Subagent hook script should be executable",
@@ -179,9 +173,7 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
         self.settings_file = os.path.join(
             os.path.dirname(os.path.dirname(__file__)), ".claude", "settings.json"
         )
-        self.assertTrue(
-            os.path.exists(self.settings_file), "Settings file should exist"
-        )
+        self.assertTrue(os.path.exists(self.settings_file), "Settings file should exist")
 
     def test_settings_file_has_valid_json(self):
         """Test that settings.json is valid JSON."""
@@ -239,12 +231,8 @@ class TestTeamCoachHookConfiguration(unittest.TestCase):
                         if "hooks" in hook_config:
                             for hook in hook_config["hooks"]:
                                 # Verify hook has required fields
-                                self.assertIn(
-                                    "type", hook, "Hook should have type field"
-                                )
-                                self.assertIn(
-                                    "command", hook, "Hook should have command field"
-                                )
+                                self.assertIn("type", hook, "Hook should have type field")
+                                self.assertIn("command", hook, "Hook should have command field")
                                 # Ensure no dangerous hooks
                                 self.assertNotIn(
                                     "teamcoach",
@@ -304,38 +292,28 @@ class TestTeamCoachHookIntegration(unittest.TestCase):
 
     def test_hook_files_are_executable(self):
         """Test that hook files have correct permissions."""
-        base_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         stop_hook = os.path.join(base_dir, "teamcoach-stop.py")
         subagent_hook = os.path.join(base_dir, "teamcoach-subagent-stop.py")
 
         self.assertTrue(os.access(stop_hook, os.X_OK), "Stop hook should be executable")
-        self.assertTrue(
-            os.access(subagent_hook, os.X_OK), "Subagent hook should be executable"
-        )
+        self.assertTrue(os.access(subagent_hook, os.X_OK), "Subagent hook should be executable")
 
     def test_hook_files_have_shebang(self):
         """Test that hook files have proper shebang."""
-        base_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         for hook_file in ["teamcoach-stop.py", "teamcoach-subagent-stop.py"]:
             hook_path = os.path.join(base_dir, hook_file)
             with open(hook_path, "r") as f:
                 first_line = f.readline().strip()
-                self.assertTrue(
-                    first_line.startswith("#!"), f"{hook_file} should have shebang"
-                )
+                self.assertTrue(first_line.startswith("#!"), f"{hook_file} should have shebang")
                 self.assertIn("python", first_line, f"{hook_file} should use Python")
 
     def test_hooks_handle_errors_gracefully(self):
         """Test that hooks are designed to handle errors gracefully."""
-        base_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        base_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         for hook_file in ["teamcoach-stop.py", "teamcoach-subagent-stop.py"]:
             hook_path = os.path.join(base_dir, hook_file)

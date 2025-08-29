@@ -55,29 +55,29 @@ else:
 
     class Table:
         """Mock Table class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize table."""
             pass
-        
+
         def add_column(self, *args: Any, **kwargs: Any) -> None:
             """Mock add_column method."""
             pass
-        
+
         def add_row(self, *args: Any, **kwargs: Any) -> None:
             """Mock add_row method."""
             pass
 
     class Panel:
         """Mock Panel class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize panel."""
             pass
 
     class Progress:
         """Mock Progress class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize progress."""
             pass
@@ -87,7 +87,7 @@ else:
 
     class TextColumn:
         """Mock TextColumn class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize text column."""
             pass
@@ -111,14 +111,14 @@ else:
 
     class Syntax:
         """Mock Syntax class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize syntax."""
             pass
 
     class Tree:
         """Mock Tree class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize tree."""
             pass

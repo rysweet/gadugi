@@ -15,10 +15,10 @@ from .validator import ImplementationValidator
 
 class RecipeImplementationAgent:
     """Agent that implements components from recipe specifications."""
-    
+
     def __init__(self, verbose: bool = False):
         """Initialize the Recipe Implementation Agent.
-        
+
         Args:
             verbose: Enable verbose logging
         """
@@ -27,19 +27,19 @@ class RecipeImplementationAgent:
         self.evaluator = CodeEvaluator()
         self.generator = CodeGenerator()
         self.validator = ImplementationValidator()
-        
+
         # Agent state
         self.current_recipe: Optional[RecipeSpec] = None
         self.current_evaluation: Optional[EvaluationReport] = None
         self.generated_code: List[GeneratedCode] = []
         self.validation_result: Optional[ValidationResult] = None
-    
+
     def _setup_logging(self, verbose: bool) -> logging.Logger:
         """Set up logging for the agent."""
         logger = logging.getLogger("RecipeImplementationAgent")
         level = logging.DEBUG if verbose else logging.INFO
         logger.setLevel(level)
-        
+
         if not logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
@@ -47,9 +47,9 @@ class RecipeImplementationAgent:
             )
             handler.setFormatter(formatter)
             logger.addHandler(handler)
-        
+
         return logger
-    
+
     def implement_from_recipe(
         self,
         recipe_path: Path,
@@ -59,19 +59,19 @@ class RecipeImplementationAgent:
         validate: bool = True,
     ) -> Dict[str, Any]:
         """Implement a component from recipe specification.
-        
+
         Args:
             recipe_path: Path to recipe directory
             code_path: Path to existing code (for evaluation)
             output_path: Path for generated code output
             auto_fix: Automatically fix gaps
             validate: Validate generated implementation
-            
+
         Returns:
             Dictionary with implementation results
         """
         self.logger.info(f"Starting implementation from recipe: {recipe_path}")
-        
+
         # Step 1: Parse recipe
         self.logger.info("Parsing recipe specification...")
         self.current_recipe = self.parser.parse_recipe(recipe_path)
@@ -79,7 +79,7 @@ class RecipeImplementationAgent:
             f"Parsed recipe: {self.current_recipe.name} with "
             f"{len(self.current_recipe.requirements)} requirements"
         )
-        
+
         # Step 2: Evaluate existing code (if provided)
         if code_path and code_path.exists():
             self.logger.info("Evaluating existing code...")
@@ -109,7 +109,7 @@ class RecipeImplementationAgent:
                     expected_state=req.description,
                     suggested_fix=f"Implement {req.description}",
                 ))
-        
+
         # Step 3: Generate implementation
         if auto_fix and self.current_evaluation.gaps:
             self.logger.info("Generating implementation...")
@@ -119,7 +119,7 @@ class RecipeImplementationAgent:
                 output_path
             )
             self.logger.info(f"Generated {len(self.generated_code)} code files")
-        
+
         # Step 4: Validate implementation
         if validate and self.generated_code:
             self.logger.info("Validating implementation...")
@@ -131,37 +131,37 @@ class RecipeImplementationAgent:
             self.logger.info(
                 f"Validation complete: {'PASSED' if self.validation_result.is_valid else 'FAILED'}"
             )
-        
+
         # Step 5: Generate report
         report = self._generate_report()
-        
+
         self.logger.info("Implementation process complete")
-        
+
         return report
-    
+
     def parse_recipe(self, recipe_path: Path) -> RecipeSpec:
         """Parse a recipe specification.
-        
+
         Args:
             recipe_path: Path to recipe directory
-            
+
         Returns:
             Parsed recipe specification
         """
         return self.parser.parse_recipe(recipe_path)
-    
+
     def evaluate_code(self, code_path: Path, recipe: RecipeSpec) -> EvaluationReport:
         """Evaluate existing code against recipe.
-        
+
         Args:
             code_path: Path to code
             recipe: Recipe specification
-            
+
         Returns:
             Evaluation report
         """
         return self.evaluator.evaluate_existing_code(code_path, recipe)
-    
+
     def generate_code(
         self,
         recipe: RecipeSpec,
@@ -169,39 +169,39 @@ class RecipeImplementationAgent:
         output_path: Optional[Path] = None,
     ) -> List[GeneratedCode]:
         """Generate code from recipe and evaluation.
-        
+
         Args:
             recipe: Recipe specification
             evaluation: Evaluation report
             output_path: Output directory
-            
+
         Returns:
             List of generated code files
         """
         return self.generator.generate_implementation(recipe, evaluation, output_path)
-    
+
     def validate_code(
         self,
         code: GeneratedCode | List[GeneratedCode],
         recipe: RecipeSpec,
     ) -> ValidationResult:
         """Validate generated code.
-        
+
         Args:
             code: Generated code
             recipe: Recipe specification
-            
+
         Returns:
             Validation result
         """
         return self.validator.validate_implementation(code, recipe)
-    
+
     def create_tests(self, recipe: RecipeSpec) -> GeneratedCode:
         """Create tests for recipe implementation.
-        
+
         Args:
             recipe: Recipe specification
-            
+
         Returns:
             Generated test file
         """
@@ -218,7 +218,7 @@ class RecipeImplementationAgent:
                 metadata={}
             )
         return test_code
-    
+
     def _generate_report(self) -> Dict[str, Any]:
         """Generate implementation report."""
         report = {
@@ -237,7 +237,7 @@ class RecipeImplementationAgent:
                 "recommendations": [],
             },
         }
-        
+
         if self.current_evaluation:
             report["evaluation"] = {
                 "coverage_percentage": self.current_evaluation.coverage_percentage,
@@ -246,7 +246,7 @@ class RecipeImplementationAgent:
                 "critical_gaps": len(self.current_evaluation.get_critical_gaps()),
                 "recommendations": self.current_evaluation.recommendations,
             }
-        
+
         if self.generated_code:
             report["generation"] = {
                 "files_generated": len(self.generated_code),
@@ -254,7 +254,7 @@ class RecipeImplementationAgent:
                 "functions_added": sum(len(code.functions_added) for code in self.generated_code),
                 "tests_generated": sum(len(code.tests_generated) for code in self.generated_code),
             }
-        
+
         if self.validation_result:
             report["validation"] = {
                 "is_valid": self.validation_result.is_valid,
@@ -264,16 +264,16 @@ class RecipeImplementationAgent:
                 "warnings": self.validation_result.warnings,
                 "suggestions": self.validation_result.suggestions,
             }
-            
+
             report["summary"]["success"] = self.validation_result.is_valid
             report["summary"]["issues"] = (
                 self.validation_result.errors +
                 self.validation_result.warnings[:3]
             )
             report["summary"]["recommendations"] = self.validation_result.suggestions[:5]
-        
+
         return report
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get current agent status."""
         return {
@@ -284,7 +284,7 @@ class RecipeImplementationAgent:
             "current_recipe": self.current_recipe.name if self.current_recipe else None,
             "gaps_remaining": len(self.current_evaluation.gaps) if self.current_evaluation else None,
         }
-    
+
     def reset(self) -> None:
         """Reset agent state."""
         self.current_recipe = None
@@ -298,11 +298,11 @@ def main():
     """Example usage of the Recipe Implementation Agent."""
     # Create agent
     agent = RecipeImplementationAgent(verbose=True)
-    
+
     # Example: Implement from recipe
     recipe_path = Path(".claude/recipes/event-system")
     output_path = Path(".claude/generated/event-system")
-    
+
     if recipe_path.exists():
         result = agent.implement_from_recipe(
             recipe_path=recipe_path,
@@ -311,21 +311,21 @@ def main():
             auto_fix=True,
             validate=True,
         )
-        
+
         print("\n=== Implementation Report ===")
         print(f"Recipe: {result['recipe']['name']}")
         print(f"Requirements: {result['recipe']['requirements_count']}")
-        
+
         if result['generation']:
             print(f"Files Generated: {result['generation']['files_generated']}")
             print(f"Classes Added: {result['generation']['classes_added']}")
             print(f"Functions Added: {result['generation']['functions_added']}")
-        
+
         if result['validation']:
             print(f"Validation: {'PASSED' if result['validation']['is_valid'] else 'FAILED'}")
             print(f"Test Pass Rate: {result['validation']['test_pass_rate']:.1%}")
             print(f"Quality Score: {result['validation']['quality_score']:.1%}")
-        
+
         print("\nRecommendations:")
         for rec in result['summary']['recommendations']:
             print(f"  - {rec}")

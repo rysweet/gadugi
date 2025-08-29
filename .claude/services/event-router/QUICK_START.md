@@ -6,7 +6,7 @@ The Event Router service is now fully functional and ready to use.
 
 ### Key Fixes Made:
 1. ✅ Fixed import issues (changed relative to absolute imports)
-2. ✅ Resolved requirements.txt merge conflicts  
+2. ✅ Resolved requirements.txt merge conflicts
 3. ✅ Added Flask and pydantic-settings dependencies
 4. ✅ Created proper startup scripts
 5. ✅ Service now runs correctly on port 8000
@@ -58,7 +58,7 @@ uv run python3 .claude/hooks/check-services.py
 ## 📍 Available Endpoints
 
 - **Health Check**: `GET /health`
-- **Service Info**: `GET /`  
+- **Service Info**: `GET /`
 - **Create Event**: `POST /events`
 - **List Events**: `GET /events`
 - **Filter Events**: `POST /events/filter`

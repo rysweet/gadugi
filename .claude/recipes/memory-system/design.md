@@ -130,14 +130,14 @@ class MemoryManager:
         importance: float = 0.5
     ) -> Memory:
         """Create a new memory"""
-        
+
     async def retrieve_memory(
         self,
         memory_id: str,
         update_access: bool = True
     ) -> Optional[Memory]:
         """Retrieve a specific memory"""
-        
+
     async def search_memories(
         self,
         agent_id: str,
@@ -146,14 +146,14 @@ class MemoryManager:
         type_filter: Optional[MemoryType] = None
     ) -> List[Memory]:
         """Search memories by content similarity"""
-        
+
     async def update_memory(
         self,
         memory_id: str,
         updates: Dict[str, Any]
     ) -> bool:
         """Update memory properties"""
-        
+
     async def forget_memory(
         self,
         memory_id: str,
@@ -172,26 +172,26 @@ class ContextManager:
         parent_context: Optional[str] = None
     ) -> Context:
         """Create a new context"""
-        
+
     async def load_context(
         self,
         context_id: str
     ) -> Context:
         """Load a saved context"""
-        
+
     async def save_context(
         self,
         context: Context
     ) -> bool:
         """Save current context state"""
-        
+
     async def switch_context(
         self,
         agent_id: str,
         to_context_id: str
     ) -> Context:
         """Switch to a different context"""
-        
+
     async def merge_contexts(
         self,
         primary: Context,
@@ -210,14 +210,14 @@ class MemoryQuery:
         limit: int = 10
     ) -> List[Tuple[Memory, float]]:
         """Find similar memories using embeddings"""
-        
+
     async def find_associated_memories(
         self,
         memory_id: str,
         max_depth: int = 2
     ) -> List[Memory]:
         """Find associated memories via graph traversal"""
-        
+
     async def find_memories_by_time(
         self,
         agent_id: str,
@@ -225,7 +225,7 @@ class MemoryQuery:
         end: datetime
     ) -> List[Memory]:
         """Find memories in time range"""
-        
+
     async def get_memory_timeline(
         self,
         agent_id: str,

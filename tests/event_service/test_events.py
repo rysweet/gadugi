@@ -4,6 +4,7 @@ import json
 
 import sys
 import os
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from gadugi.event_service.events import (
@@ -141,9 +142,7 @@ class TestEvent:
 
     def test_serialization(self):
         """Test JSON serialization."""
-        github_event = GitHubEvent(
-            webhook_event="issues", repository="owner/repo", action="opened"
-        )
+        github_event = GitHubEvent(webhook_event="issues", repository="owner/repo", action="opened")
 
         event = Event(
             event_type="github.issues.opened",
@@ -167,9 +166,7 @@ class TestEvent:
     def test_deserialization(self):
         """Test JSON deserialization."""
         # First create an event and get its dict representation
-        github_event = GitHubEvent(
-            webhook_event="issues", repository="owner/repo", action="opened"
-        )
+        github_event = GitHubEvent(webhook_event="issues", repository="owner/repo", action="opened")
 
         original_event = Event(
             event_id="test-123",

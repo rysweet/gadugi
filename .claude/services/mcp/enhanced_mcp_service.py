@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent / "neo4j-memory"))
 from memory_manager import (  # type: ignore[import]
-    MemoryManager, Memory, MemoryType, MemoryScope, 
+    MemoryManager, Memory, MemoryType, MemoryScope,
     MemoryPersistence, KnowledgeNode, Whiteboard
 )
 
@@ -29,7 +29,7 @@ from memory_manager import (  # type: ignore[import]
 
 class MemoryCreateRequest(BaseModel):
     """Request model for creating a memory."""
-    
+
     agent_id: str
     content: str
     memory_type: str = "semantic"
@@ -43,7 +43,7 @@ class MemoryCreateRequest(BaseModel):
 
 class MemoryResponse(BaseModel):
     """Response model for memory operations."""
-    
+
     id: str
     agent_id: str
     content: str
@@ -57,14 +57,14 @@ class MemoryResponse(BaseModel):
 
 class WhiteboardCreateRequest(BaseModel):
     """Request model for creating a whiteboard."""
-    
+
     task_id: str
     agent_id: str
 
 
 class WhiteboardUpdateRequest(BaseModel):
     """Request model for updating a whiteboard."""
-    
+
     task_id: str
     agent_id: str
     section: str
@@ -73,7 +73,7 @@ class WhiteboardUpdateRequest(BaseModel):
 
 class KnowledgeNodeCreateRequest(BaseModel):
     """Request model for creating a knowledge node."""
-    
+
     agent_id: str
     concept: str
     description: str
@@ -83,7 +83,7 @@ class KnowledgeNodeCreateRequest(BaseModel):
 
 class KnowledgeLinkRequest(BaseModel):
     """Request model for linking knowledge nodes."""
-    
+
     node1_id: str
     node2_id: str
     relationship: str
@@ -92,7 +92,7 @@ class KnowledgeLinkRequest(BaseModel):
 
 class ProceduralMemoryRequest(BaseModel):
     """Request model for storing procedural memory."""
-    
+
     agent_id: str
     procedure_name: str
     steps: List[str]
@@ -102,7 +102,7 @@ class ProceduralMemoryRequest(BaseModel):
 
 class ProjectMemoryRequest(BaseModel):
     """Request model for project shared memory."""
-    
+
     project_id: str
     content: str
     created_by: str
@@ -112,7 +112,7 @@ class ProjectMemoryRequest(BaseModel):
 
 class MemorySearchRequest(BaseModel):
     """Request model for searching memories."""
-    
+
     agent_id: Optional[str] = None
     memory_type: Optional[str] = None
     task_id: Optional[str] = None
@@ -157,7 +157,7 @@ async def startup_event():
     memory_manager = MemoryManager()
     if memory_manager:
         await memory_manager.connect()
-    
+
     # Start background task for memory cleanup
     asyncio.create_task(periodic_memory_cleanup())
 
@@ -193,7 +193,7 @@ async def health_check(mm: MemoryManager = Depends(get_memory_manager)):
             async with mm._driver.session() as session:
                 result = await session.run("RETURN 1 as test")
                 await result.single()
-        
+
         return {
             "status": "healthy",
             "service": "MCP Service",
@@ -215,21 +215,21 @@ async def get_metrics(mm: MemoryManager = Depends(get_memory_manager)):
                 RETURN m.type as type, count(m) as count
             """)
             memory_counts = await result.data()
-            
+
             # Count knowledge nodes
             result = await session.run("""
                 MATCH (k:KnowledgeNode)
                 RETURN count(k) as count
             """)
             knowledge_count = (await result.single())["count"]
-            
+
             # Count whiteboards
             result = await session.run("""
                 MATCH (w:Whiteboard)
                 RETURN count(w) as count
             """)
             whiteboard_count = (await result.single())["count"]
-        
+
         return {
             "memories_by_type": {item["type"]: item["count"] for item in memory_counts},
             "total_memories": sum(item["count"] for item in memory_counts),
@@ -262,7 +262,7 @@ async def store_agent_memory(
             importance_score=request.importance_score,
             metadata=request.metadata
         )
-        
+
         return MemoryResponse(
             id=memory.id,
             agent_id=memory.agent_id,
@@ -297,7 +297,7 @@ async def get_agent_memories(
             long_term_only=long_term_only,
             limit=limit
         )
-        
+
         return [
             MemoryResponse(
                 id=m.id,
@@ -328,7 +328,7 @@ async def consolidate_memories(
             agent_id=agent_id,
             threshold_hours=threshold_hours
         )
-        
+
         return {
             "consolidated_count": len(consolidated),
             "memories": [m.id for m in consolidated]
@@ -353,7 +353,7 @@ async def store_project_memory(
             tags=request.tags,
             importance_score=request.importance_score
         )
-        
+
         return MemoryResponse(
             id=memory.id,
             agent_id=memory.agent_id,
@@ -381,7 +381,7 @@ async def get_project_memories(
             project_id=project_id,
             limit=limit
         )
-        
+
         return [
             MemoryResponse(
                 id=m.id,
@@ -413,7 +413,7 @@ async def create_whiteboard(
             task_id=request.task_id,
             agent_id=request.agent_id
         )
-        
+
         return {
             "id": whiteboard.id,
             "task_id": whiteboard.task_id,
@@ -437,7 +437,7 @@ async def update_whiteboard(
             section=request.section,
             content=request.content
         )
-        
+
         return {"status": "success", "task_id": request.task_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update whiteboard: {str(e)}")
@@ -451,10 +451,10 @@ async def get_whiteboard(
     """Retrieve a task whiteboard."""
     try:
         whiteboard = await mm.get_whiteboard(task_id)
-        
+
         if not whiteboard:
             raise HTTPException(status_code=404, detail="Whiteboard not found")
-        
+
         return {
             "id": whiteboard.id,
             "task_id": whiteboard.task_id,
@@ -489,7 +489,7 @@ async def store_procedural_memory(
             context=request.context,
             tags=request.tags
         )
-        
+
         return MemoryResponse(
             id=memory.id,
             agent_id=memory.agent_id,
@@ -517,7 +517,7 @@ async def get_procedural_memories(
             agent_id=agent_id,
             procedure_name=procedure_name
         )
-        
+
         return [
             {
                 "id": m.id,
@@ -549,7 +549,7 @@ async def create_knowledge_node(
             attributes=request.attributes,
             confidence=request.confidence
         )
-        
+
         return {
             "id": node.id,
             "agent_id": node.agent_id,
@@ -575,7 +575,7 @@ async def link_knowledge_nodes(
             relationship=request.relationship,
             strength=request.strength
         )
-        
+
         return {"status": "success", "linked": [request.node1_id, request.node2_id]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to link knowledge nodes: {str(e)}")
@@ -593,7 +593,7 @@ async def get_knowledge_graph(
             agent_id=agent_id,
             max_depth=max_depth
         )
-        
+
         return graph
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve knowledge graph: {str(e)}")
@@ -611,29 +611,29 @@ async def search_memories(
         # Build search query based on parameters
         conditions = []
         params = {}
-        
+
         if request.agent_id:
             conditions.append("m.agent_id = $agent_id")
             params["agent_id"] = request.agent_id
-        
+
         if request.memory_type:
             conditions.append("m.type = $memory_type")
             params["memory_type"] = request.memory_type
-        
+
         if request.task_id:
             conditions.append("m.task_id = $task_id")
             params["task_id"] = request.task_id
-        
+
         if request.project_id:
             conditions.append("m.project_id = $project_id")
             params["project_id"] = request.project_id
-        
+
         if request.tags:
             conditions.append("ANY(tag IN $tags WHERE tag IN m.tags)")
             params["tags"] = request.tags
-        
+
         where_clause = " AND ".join(conditions) if conditions else "1=1"
-        
+
         query = f"""
         MATCH (m:Memory)
         WHERE {where_clause}
@@ -642,11 +642,11 @@ async def search_memories(
         LIMIT $limit
         """
         params["limit"] = request.limit
-        
+
         async with mm._driver.session() as session:
             result = await session.run(query, params)
             records = await result.data()
-        
+
         return [
             {
                 "id": r["m"]["id"],
@@ -679,7 +679,7 @@ async def store_context(
             is_short_term=True,
             metadata={"legacy_context": True}
         )
-        
+
         return {"context_id": memory.id, "status": "stored"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to store context: {str(e)}")
@@ -697,17 +697,17 @@ async def retrieve_context(
         MATCH (m:Memory {id: $context_id})
         RETURN m
         """
-        
+
         async with mm._driver.session() as session:
             result = await session.run(query, {"context_id": context_id})
             record = await result.single()
-        
+
         if not record:
             raise HTTPException(status_code=404, detail="Context not found")
-        
+
         memory = record["m"]
         context = json.loads(memory["content"]) if memory["content"].startswith("{") else {"content": memory["content"]}
-        
+
         return {
             "context_id": memory["id"],
             "agent_id": memory["agent_id"],

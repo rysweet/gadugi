@@ -12,10 +12,10 @@ import re
 
 def camel_to_kebab(name: str) -> str:
     """Convert CamelCase to kebab-case.
-    
+
     Args:
         name: CamelCase string like "CodeReviewer"
-        
+
     Returns:
         kebab-case string like "code-reviewer"
     """
@@ -26,10 +26,10 @@ def camel_to_kebab(name: str) -> str:
 
 def kebab_to_camel(name: str) -> str:
     """Convert kebab-case to CamelCase.
-    
+
     Args:
-        name: kebab-case string like "code-reviewer" 
-        
+        name: kebab-case string like "code-reviewer"
+
     Returns:
         CamelCase string like "CodeReviewer"
     """
@@ -41,13 +41,13 @@ def kebab_to_camel(name: str) -> str:
 AGENT_NAME_MAPPING = {
     # Explicitly map known agents for backward compatibility
     "agent-updater": "AgentUpdater",
-    "claude-settings-update": "ClaudeSettingsUpdate", 
+    "claude-settings-update": "ClaudeSettingsUpdate",
     "code-executor": "CodeExecutor",
     "code-review-response": "CodeReviewResponse",
     "code-reviewer": "CodeReviewer",
     "event-router-manager": "EventRouterManager",
     "event-router-service-manager": "EventRouterServiceManager",
-    "execution-monitor": "ExecutionMonitor", 
+    "execution-monitor": "ExecutionMonitor",
     "gadugi-coordinator": "GadugiCoordinator",
     "github-executor": "GitHubExecutor",
     "llm-proxy-agent": "LlmProxyAgent",
@@ -55,11 +55,11 @@ AGENT_NAME_MAPPING = {
     "memory-service-manager": "MemoryServiceManager",
     "neo4j-service-manager": "Neo4jServiceManager",
     "orchestrator-agent": "OrchestratorAgent",
-    "pr-backlog-manager": "PrBacklogManager", 
+    "pr-backlog-manager": "PrBacklogManager",
     "program-manager": "ProgramManager",
     "prompt-writer": "PromptWriter",
     "readme-agent": "ReadmeAgent",
-    "recipe-executor": "RecipeExecutor", 
+    "recipe-executor": "RecipeExecutor",
     "system-design-reviewer": "SystemDesignReviewer",
     "task-analyzer": "TaskAnalyzer",
     "task-bounds-eval": "TaskBoundsEval",
@@ -68,11 +68,11 @@ AGENT_NAME_MAPPING = {
     "team-coach": "TeamCoach",
     "teamcoach-agent": "TeamcoachAgent",
     "test-executor": "TestExecutor",
-    "test-solver": "TestSolver", 
+    "test-solver": "TestSolver",
     "test-writer": "TestWriter",
     "type-fix-agent": "TypeFixAgent",
     "workflow-manager": "WorkflowManager",
-    "workflow-manager-phase9-enforcement": "WorkflowManagerPhase9Enforcement", 
+    "workflow-manager-phase9-enforcement": "WorkflowManagerPhase9Enforcement",
     "workflow-manager-simplified": "WorkflowManagerSimplified",
     "workflow-phase-reflection": "WorkflowPhaseReflection",
     "worktree-executor": "WorktreeExecutor",
@@ -86,35 +86,35 @@ CAMEL_TO_KEBAB_MAPPING = {v: k for k, v in AGENT_NAME_MAPPING.items()}
 
 def normalize_agent_name(agent_name: str) -> str:
     """Normalize agent name to CamelCase format.
-    
+
     Args:
         agent_name: Agent name in any format
-        
+
     Returns:
         CamelCase agent name
     """
     # If already in mapping, use it
     if agent_name in AGENT_NAME_MAPPING:
         return AGENT_NAME_MAPPING[agent_name]
-    
+
     # If already CamelCase and exists, use as-is
     if agent_name[0].isupper() and '-' not in agent_name:
         return agent_name
-        
+
     # Convert kebab-case to CamelCase
     if '-' in agent_name:
         return kebab_to_camel(agent_name)
-        
+
     # Default: assume it's already correct
     return agent_name
 
 
 def get_gadugi_base_dir() -> Path:
     """Get the Gadugi base directory using multiple strategies.
-    
+
     Returns:
         Path to the Gadugi v0.3 base directory
-    
+
     Raises:
         RuntimeError: If base directory cannot be determined
     """
@@ -123,24 +123,24 @@ def get_gadugi_base_dir() -> Path:
         base_dir = Path(os.environ['GADUGI_HOME'])
         if base_dir.exists():
             return base_dir
-    
+
     # Strategy 2: Auto-detect from this file's location
     # This file is at gadugi/.claude/engines/run_agent.py
     # So we go up 2 levels to get to gadugi root
     current_file = Path(__file__).resolve()
     base_dir = current_file.parent.parent.parent
-    
+
     # Verify we found the right directory by checking for expected subdirs
     if (base_dir / '.claude' / 'agents').exists():
         return base_dir
-    
+
     # Strategy 3: Look for gadugi-v0.3 in parent directories
     current = current_file.parent
     while current != current.parent:
         if current.name == 'gadugi-v0.3' and (current / 'agents').exists():
             return current
         current = current.parent
-    
+
     raise RuntimeError(
         "Cannot determine Gadugi base directory. "
         "Please set GADUGI_HOME environment variable or run from within gadugi-v0.3 directory."
@@ -315,23 +315,23 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 
     # Find the agent file - try multiple resolution strategies
     agents_base_dir = AGENTS_DIR
-    
+
     # Strategy 1: Try CamelCase .md file directly
     agent_file = agents_base_dir / f"{normalized_name}.md"
-    
+
     if not agent_file.exists():
         # Strategy 2: Try kebab-case directory structure
         kebab_name = camel_to_kebab(normalized_name)
         agent_file = agents_base_dir / kebab_name / "agent.md"
-        
+
         if not agent_file.exists():
             # Strategy 3: Try original name as directory
             agent_file = agents_base_dir / original_name / "agent.md"
-            
+
             if not agent_file.exists():
-                # Strategy 4: Try normalized name as directory 
+                # Strategy 4: Try normalized name as directory
                 agent_file = agents_base_dir / normalized_name / "agent.md"
-                
+
                 if not agent_file.exists():
                     return {
                         "agent": normalized_name,
@@ -416,37 +416,37 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
 def main():
     """Command line interface for testing the runner."""
     import argparse
-    
+
     # Get available agents
     available_agents = []
     if AGENTS_DIR.exists():
         available_agents = sorted([d.name for d in AGENTS_DIR.iterdir() if d.is_dir()])
-    
+
     parser = argparse.ArgumentParser(
         description="Run a Gadugi v0.3 agent",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
 Environment:
   GADUGI_HOME={GADUGI_BASE}
-  
+
 Available agents:
   {', '.join(available_agents) if available_agents else 'No agents found'}
-  
+
 Examples:
   gadugi-orchestrator orchestrator --task "Build an API"
   gadugi-orchestrator TaskDecomposer --task "Create authentication"
   export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator TestAgent
         """
     )
-    
+
     parser.add_argument("agent", help="Name of the agent to run")
     parser.add_argument("--task", help="Task description", default="")
     parser.add_argument("--json", action="store_true", help="Output as JSON")
-    
+
     args = parser.parse_args()
-    
+
     result = run_agent(args.agent, args.task)
-    
+
     if args.json:
         import json
         print(json.dumps(result, indent=2))
@@ -455,7 +455,7 @@ Examples:
             print(result["stdout"])
         if result["stderr"]:
             print(result["stderr"], file=sys.stderr)
-    
+
     return result.get("returncode", 0)
 
 

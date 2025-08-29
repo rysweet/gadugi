@@ -93,9 +93,7 @@ class MemoryDocument:
 
     def get_tasks_by_section(self, section_name: str) -> List[Task]:
         """Get tasks from specific section"""
-        return [
-            task for task in self.tasks if task.section.lower() == section_name.lower()
-        ]
+        return [task for task in self.tasks if task.section.lower() == section_name.lower()]
 
 
 class MemoryParser:
@@ -130,8 +128,7 @@ class MemoryParser:
 
     def __init__(self):
         self.compiled_patterns = [
-            (re.compile(pattern, re.IGNORECASE), status)
-            for pattern, status in self.TASK_PATTERNS
+            (re.compile(pattern, re.IGNORECASE), status) for pattern, status in self.TASK_PATTERNS
         ]
         self.section_pattern = re.compile(self.SECTION_PATTERN)
         self.priority_patterns = [
@@ -181,9 +178,7 @@ class MemoryParser:
         for line in lines[:10]:  # Check first 10 lines
             if "Last Updated:" in line:
                 # Extract ISO timestamp
-                match = re.search(
-                    r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})", line
-                )
+                match = re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})", line)
                 if match:
                     try:
                         return datetime.fromisoformat(match.group(1))
@@ -223,9 +218,7 @@ class MemoryParser:
 
         return sections
 
-    def _extract_tasks(
-        self, lines: List[str], sections: List[MemorySection]
-    ) -> List[Task]:
+    def _extract_tasks(self, lines: List[str], sections: List[MemorySection]) -> List[Task]:
         """Extract tasks from all sections"""
         tasks = []
         task_id_counter = 1
@@ -311,9 +304,7 @@ class MemoryParser:
             "total_lines": len(content.split("\n")),
             "total_sections": len(sections),
             "total_tasks": len(tasks),
-            "completed_tasks": len(
-                [t for t in tasks if t.status == TaskStatus.COMPLETED]
-            ),
+            "completed_tasks": len([t for t in tasks if t.status == TaskStatus.COMPLETED]),
             "pending_tasks": len([t for t in tasks if t.status == TaskStatus.PENDING]),
             "sections_with_tasks": len(
                 [s for s in sections if any(t.section == s.name for t in tasks)]
@@ -322,17 +313,13 @@ class MemoryParser:
             "issue_references": len([t for t in tasks if t.issue_number is not None]),
         }
 
-    def update_task_status(
-        self, content: str, task_id: str, new_status: TaskStatus
-    ) -> str:
+    def update_task_status(self, content: str, task_id: str, new_status: TaskStatus) -> str:
         """Update task status in Memory.md content"""
         # This would be implemented to modify the content
         # For now, return unchanged content
         return content
 
-    def add_task_metadata(
-        self, content: str, task_id: str, metadata: Dict[str, Any]
-    ) -> str:
+    def add_task_metadata(self, content: str, task_id: str, metadata: Dict[str, Any]) -> str:
         """Add metadata to task in Memory.md content"""
         # This would be implemented to add HTML comments with metadata
         # For now, return unchanged content

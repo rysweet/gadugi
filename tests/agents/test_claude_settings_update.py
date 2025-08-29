@@ -18,9 +18,7 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
         """Set up test fixtures for each test."""
         self.temp_dir = tempfile.mkdtemp()
         self.settings_path = os.path.join(self.temp_dir, ".claude", "settings.json")
-        self.local_settings_path = os.path.join(
-            self.temp_dir, ".claude", "settings.local.json"
-        )
+        self.local_settings_path = os.path.join(self.temp_dir, ".claude", "settings.local.json")
 
         # Create .claude directory
         os.makedirs(os.path.dirname(self.settings_path), exist_ok=True)
@@ -37,9 +35,7 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
                 ],
                 "deny": [],
             },
-            "hooks": {
-                "Stop": [{"hooks": [{"type": "command", "command": "echo stop"}]}]
-            },
+            "hooks": {"Stop": [{"hooks": [{"type": "command", "command": "echo stop"}]}]},
         }
 
         # Sample local settings
@@ -100,11 +96,7 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
             result = global_dict.copy()
 
             for key, value in local_dict.items():
-                if (
-                    key in result
-                    and isinstance(result[key], dict)
-                    and isinstance(value, dict)
-                ):
+                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                     result[key] = deep_merge(result[key], value)
                 elif key == "allow" and isinstance(value, list):
                     # Special handling for allow-list: merge and deduplicate
@@ -255,9 +247,7 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
                 "allow": ["Bash(python:*)", "Bash(echo:*)"],  # should merge
             },
             "hooks": {
-                "Stop": [
-                    {"hooks": [{"type": "command", "command": "stop2"}]}
-                ]  # should replace
+                "Stop": [{"hooks": [{"type": "command", "command": "stop2"}]}]  # should replace
             },
             "other": {
                 "nested": {
@@ -274,11 +264,7 @@ class TestClaudeSettingsUpdate(unittest.TestCase):
             result = global_dict.copy()
 
             for key, value in local_dict.items():
-                if (
-                    key in result
-                    and isinstance(result[key], dict)
-                    and isinstance(value, dict)
-                ):
+                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                     result[key] = deep_merge(result[key], value)
                 elif key == "allow" and isinstance(value, list):
                     existing = result.get(key, [])
@@ -400,9 +386,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Test workflow when no changes are detected."""
         # Create identical settings
         self.write_settings_file(self.global_settings, self.settings_path)
-        self.write_settings_file(
-            {"permissions": {"allow": []}}, self.local_settings_path
-        )
+        self.write_settings_file({"permissions": {"allow": []}}, self.local_settings_path)
 
         # Simulate no changes detected scenario
         no_changes_detected = True  # Would be determined by actual merge logic

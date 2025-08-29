@@ -64,10 +64,10 @@ async def main():
         max_workers=10,
         queue_size=10000
     )
-    
+
     # Start service
     await service.start()
-    
+
     # Keep running
     try:
         await asyncio.Future()  # Run forever
@@ -89,7 +89,7 @@ from datetime import datetime
 
 async def publish_event():
     uri = "ws://localhost:9090"
-    
+
     async with websockets.connect(uri) as websocket:
         # Publish an event
         event_message = {
@@ -110,9 +110,9 @@ async def publish_event():
                 }
             }
         }
-        
+
         await websocket.send(json.dumps(event_message))
-        
+
         # Wait for acknowledgment
         response = await websocket.recv()
         print(f"Response: {response}")
@@ -128,7 +128,7 @@ import websockets
 
 async def subscribe_to_events():
     uri = "ws://localhost:9090"
-    
+
     async with websockets.connect(uri) as websocket:
         # Subscribe to specific event types
         subscription_message = {
@@ -142,9 +142,9 @@ async def subscribe_to_events():
                 }
             }
         }
-        
+
         await websocket.send(json.dumps(subscription_message))
-        
+
         # Receive events
         while True:
             message = await websocket.recv()
@@ -204,11 +204,11 @@ async def execute(self, task):
             payload={"task_id": task.id}
         )
     )
-    
+
     try:
         # Do work
         result = await self.process_task(task)
-        
+
         # Publish completion
         await self.event_router.publish_event(
             Event(
@@ -265,18 +265,18 @@ import websockets
 async def test_event_router():
     # Start the service first
     # Then run this test
-    
+
     uri = "ws://localhost:9090"
-    
+
     try:
         async with websockets.connect(uri) as ws:
             print("Connected to Event Router")
-            
+
             # Test ping
             await ws.send(json.dumps({"type": "ping"}))
             pong = await ws.recv()
             print(f"Ping response: {pong}")
-            
+
             # Test event publish
             event = {
                 "type": "publish_event",
@@ -290,9 +290,9 @@ async def test_event_router():
             await ws.send(json.dumps(event))
             ack = await ws.recv()
             print(f"Publish response: {ack}")
-            
+
             print("✅ Event Router is working!")
-            
+
     except Exception as e:
         print(f"❌ Event Router test failed: {e}")
 

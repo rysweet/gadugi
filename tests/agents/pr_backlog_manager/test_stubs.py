@@ -141,16 +141,12 @@ class PRAssessment:
         """Calculate is_ready and readiness_score if not explicitly set."""
         # If is_ready wasn't explicitly set, calculate from criteria
         if not hasattr(self, "_is_ready_set"):
-            self.is_ready = (
-                all(self.criteria_met.values()) if self.criteria_met else True
-            )
+            self.is_ready = all(self.criteria_met.values()) if self.criteria_met else True
         # Calculate readiness score if not set
         if self.readiness_score == 100.0 and self.criteria_met:
             met_count = sum(1 for met in self.criteria_met.values() if met)
             total_count = len(self.criteria_met)
-            self.readiness_score = (
-                (met_count / total_count * 100) if total_count > 0 else 0.0
-            )
+            self.readiness_score = (met_count / total_count * 100) if total_count > 0 else 0.0
 
 
 @dataclass
@@ -229,9 +225,7 @@ class ReviewAssessment:
             self.requested_changes = []
         # Calculate is_review_complete if not explicitly set
         if not hasattr(self, "_is_review_complete_set"):
-            self.is_review_complete = (
-                self.has_approved_review and self.ai_review_complete
-            )
+            self.is_review_complete = self.has_approved_review and self.ai_review_complete
 
 
 @dataclass
@@ -347,11 +341,7 @@ class DelegationCoordinator:
             return DelegationType.MERGE_CONFLICT_RESOLUTION
         elif "ci" in issue_lower or "failing" in issue_lower or "fail" in issue_lower:
             return DelegationType.CI_FAILURE_FIX
-        elif (
-            "behind main" in issue_lower
-            or "behind" in issue_lower
-            or "branch" in issue_lower
-        ):
+        elif "behind main" in issue_lower or "behind" in issue_lower or "branch" in issue_lower:
             return DelegationType.BRANCH_UPDATE
         elif (
             "ai code review" in issue_lower
@@ -359,19 +349,13 @@ class DelegationCoordinator:
             or "phase 9" in issue_lower
         ):
             return DelegationType.AI_CODE_REVIEW
-        elif (
-            "metadata" in issue_lower
-            or "description" in issue_lower
-            or "label" in issue_lower
-        ):
+        elif "metadata" in issue_lower or "description" in issue_lower or "label" in issue_lower:
             return DelegationType.METADATA_IMPROVEMENT
         else:
             # Default to CI failure fix for unknown issues
             return DelegationType.CI_FAILURE_FIX
 
-    def _assess_issue_priority(
-        self, issue: str, pr_context: Dict[str, Any]
-    ) -> DelegationPriority:
+    def _assess_issue_priority(self, issue: str, pr_context: Dict[str, Any]) -> DelegationPriority:
         """Assess issue priority based on issue and context."""
         issue_lower = issue.lower()
         labels = pr_context.get("labels", [])
@@ -662,9 +646,7 @@ Improve metadata for PR #{pr_number}.
 
         # Create the expected file path
         task_type_name = task.task_type.value.lower()
-        file_path = (
-            f".github/workflow-states/resolve-pr-{task.pr_number}-{task_type_name}.md"
-        )
+        file_path = f".github/workflow-states/resolve-pr-{task.pr_number}-{task_type_name}.md"
 
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -756,15 +738,11 @@ This task has been automatically delegated for resolution."""
         """Check delegation status."""
         return self.active_delegations.get(task_id)
 
-    def get_active_delegations(
-        self, pr_number: Optional[int] = None
-    ) -> List[DelegationTask]:
+    def get_active_delegations(self, pr_number: Optional[int] = None) -> List[DelegationTask]:
         """Get active delegations."""
         if pr_number is not None:
             return [
-                task
-                for task in self.active_delegations.values()
-                if task.pr_number == pr_number
+                task for task in self.active_delegations.values() if task.pr_number == pr_number
             ]
         return list(self.active_delegations.values())
 
@@ -772,16 +750,12 @@ This task has been automatically delegated for resolution."""
         """Mark delegation as completed."""
         task = self.active_delegations.get(task_id)
         if task:
-            task.status = (
-                DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
-            )
+            task.status = DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
             task.completion_time = datetime.now()
 
             # Add completion comment
             if success:
-                comment = (
-                    f"✅ **Delegation Completed Successfully**\n\nTask ID: {task_id}"
-                )
+                comment = f"✅ **Delegation Completed Successfully**\n\nTask ID: {task_id}"
             else:
                 comment = f"❌ **Delegation Failed**\n\nTask ID: {task_id}"
                 if task.error_message:
@@ -793,19 +767,13 @@ This task has been automatically delegated for resolution."""
         """Get delegation metrics."""
         total_tasks = len(self.active_delegations)
         completed_tasks = sum(
-            1
-            for t in self.active_delegations.values()
-            if t.status == DelegationStatus.COMPLETED
+            1 for t in self.active_delegations.values() if t.status == DelegationStatus.COMPLETED
         )
         failed_tasks = sum(
-            1
-            for t in self.active_delegations.values()
-            if t.status == DelegationStatus.FAILED
+            1 for t in self.active_delegations.values() if t.status == DelegationStatus.FAILED
         )
         in_progress_tasks = sum(
-            1
-            for t in self.active_delegations.values()
-            if t.status == DelegationStatus.IN_PROGRESS
+            1 for t in self.active_delegations.values() if t.status == DelegationStatus.IN_PROGRESS
         )
 
         # Calculate average completion time
@@ -830,9 +798,7 @@ This task has been automatically delegated for resolution."""
             "completed_tasks": completed_tasks,
             "failed_tasks": failed_tasks,
             "in_progress_tasks": in_progress_tasks,
-            "success_rate": (completed_tasks / total_tasks * 100)
-            if total_tasks > 0
-            else 0,
+            "success_rate": (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0,
             "average_completion_time_seconds": avg_completion_time,
             "task_types": task_types,
         }
@@ -847,9 +813,7 @@ class PRBacklogManager:
         auto_approve: bool = False,
         github_ops: Any = None,
     ):
-        self.config = config or AgentConfig(
-            agent_id="pr-backlog", name="PR Backlog Manager"
-        )
+        self.config = config or AgentConfig(agent_id="pr-backlog", name="PR Backlog Manager")
         self.auto_approve = auto_approve
         # If github_ops not provided, try to create one (for test compatibility)
         if github_ops is None:
@@ -905,15 +869,11 @@ class PRBacklogManager:
         """Check metadata completeness."""
         return True
 
-    def _identify_blocking_issues(
-        self, criteria_met: Dict[ReadinessCriteria, bool]
-    ) -> List[str]:
+    def _identify_blocking_issues(self, criteria_met: Dict[ReadinessCriteria, bool]) -> List[str]:
         """Identify blocking issues."""
         return []
 
-    def _generate_resolution_actions(
-        self, pr_number: int, blocking_issues: List[str]
-    ) -> List[str]:
+    def _generate_resolution_actions(self, pr_number: int, blocking_issues: List[str]) -> List[str]:
         """Generate resolution actions."""
         return []
 
@@ -1011,8 +971,7 @@ class PRBacklogManager:
                     for pr in prs
                     if not pr.get("draft", False)
                     and not any(
-                        label.get("name") == "ready-seeking-human"
-                        for label in pr.get("labels", [])
+                        label.get("name") == "ready-seeking-human" for label in pr.get("labels", [])
                     )
                 ]
 
@@ -1135,9 +1094,7 @@ class ReadinessAssessor:
             all_passing=len(failing_checks) == 0,
             failing_checks=failing_checks,
             retriable_failures=[
-                c
-                for c in failing_checks
-                if "timeout" in c.get("description", "").lower()
+                c for c in failing_checks if "timeout" in c.get("description", "").lower()
             ],
             blocking_failures=[
                 c["context"]
@@ -1162,13 +1119,10 @@ class ReadinessAssessor:
 
         human_reviews = [r for r in reviews if not r["user"]["login"].endswith("[bot]")]
         approved_reviews = [r for r in human_reviews if r["state"] == "APPROVED"]
-        changes_requested = [
-            r for r in human_reviews if r["state"] == "CHANGES_REQUESTED"
-        ]
+        changes_requested = [r for r in human_reviews if r["state"] == "CHANGES_REQUESTED"]
 
         ai_review_complete = any(
-            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
-            for c in comments
+            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower() for c in comments
         )
 
         return ReviewAssessment(
@@ -1178,9 +1132,7 @@ class ReadinessAssessor:
             pending_requests=pr_details.get("requested_reviewers", [])
             + pr_details.get("requested_teams", []),
             is_review_complete=len(approved_reviews) > 0 and ai_review_complete,
-            review_coverage_score=self._calculate_review_coverage(
-                pr_details, human_reviews
-            ),
+            review_coverage_score=self._calculate_review_coverage(pr_details, human_reviews),
         )
 
     def assess_branch_sync(self, pr_details: Dict[str, Any]) -> SyncAssessment:
@@ -1207,9 +1159,7 @@ class ReadinessAssessor:
             last_sync=datetime.now(),
         )
 
-    def assess_metadata_completeness(
-        self, pr_details: Dict[str, Any]
-    ) -> MetadataAssessment:
+    def assess_metadata_completeness(self, pr_details: Dict[str, Any]) -> MetadataAssessment:
         """Assess metadata completeness."""
         title = pr_details.get("title", "")
         body = pr_details.get("body", "")
@@ -1249,9 +1199,7 @@ class ReadinessAssessor:
             completeness_score=completeness_score,
         )
 
-    def get_comprehensive_assessment(
-        self, pr_details: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def get_comprehensive_assessment(self, pr_details: Dict[str, Any]) -> Dict[str, Any]:
         """Get comprehensive assessment."""
         assessments = {
             "conflicts": self.assess_merge_conflicts(pr_details),
@@ -1303,9 +1251,7 @@ class ReadinessAssessor:
         """Get conflicted files (mock)."""
         return ["file1.py", "file2.js"]
 
-    def _assess_conflict_complexity(
-        self, affected_files: List[str]
-    ) -> ConflictComplexity:
+    def _assess_conflict_complexity(self, affected_files: List[str]) -> ConflictComplexity:
         """Assess conflict complexity."""
         if not affected_files:
             return ConflictComplexity.NONE
@@ -1351,8 +1297,7 @@ class ReadinessAssessor:
 
         comments = self.github_ops.get_pr_comments(pr_number)
         return any(
-            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower()
-            for c in comments
+            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower() for c in comments
         )
 
     def _calculate_review_coverage(
@@ -1421,15 +1366,11 @@ class ReadinessAssessor:
 
         if assessments["conflicts"].has_conflicts:
             complexity = assessments["conflicts"].complexity.value
-            blocking_factors.append(
-                f"Merge conflicts detected (complexity: {complexity})"
-            )
+            blocking_factors.append(f"Merge conflicts detected (complexity: {complexity})")
 
         if not assessments["ci"].all_passing:
             failing_count = len(assessments["ci"].failing_checks)
-            blocking_factors.append(
-                f"CI failures detected ({failing_count} failing checks)"
-            )
+            blocking_factors.append(f"CI failures detected ({failing_count} failing checks)")
 
         if not assessments["reviews"].is_review_complete:
             if not assessments["reviews"].has_approved_review:
@@ -1531,9 +1472,7 @@ class NotificationHandler:
     def send_ready_notification(self, pr_number: int, assessment: PRAssessment) -> None:
         """Send ready notification."""
 
-    def send_blocked_notification(
-        self, pr_number: int, blocking_issues: List[str]
-    ) -> None:
+    def send_blocked_notification(self, pr_number: int, blocking_issues: List[str]) -> None:
         """Send blocked notification."""
 
     def send_summary_notification(self, metrics: BacklogMetrics) -> None:
@@ -1572,9 +1511,7 @@ class ConflictDetector:
         """Analyze conflict complexity."""
         return ConflictComplexity.NONE
 
-    def suggest_resolution_strategy(
-        self, conflict_assessment: ConflictAssessment
-    ) -> List[str]:
+    def suggest_resolution_strategy(self, conflict_assessment: ConflictAssessment) -> List[str]:
         """Suggest resolution strategy."""
         return []
 
@@ -1599,9 +1536,7 @@ class LabelManager:
     def remove_stale_labels(self, pr_number: int) -> None:
         """Remove stale labels."""
 
-    def ensure_required_labels(
-        self, pr_number: int, required_labels: List[str]
-    ) -> None:
+    def ensure_required_labels(self, pr_number: int, required_labels: List[str]) -> None:
         """Ensure required labels are present."""
 
     def _get_readiness_labels(self, assessment: PRAssessment) -> List[str]:
@@ -1709,9 +1644,7 @@ class GitHubContext:
                 "workflow_dispatch": GitHubEventType.WORKFLOW_DISPATCH,
                 "push": GitHubEventType.PUSH,
             }
-            self.event_type = event_type or event_map.get(
-                event_name, GitHubEventType.UNKNOWN
-            )
+            self.event_type = event_type or event_map.get(event_name, GitHubEventType.UNKNOWN)
             self.pr_number = pr_number
             self.workflow_run_id = workflow_run_id or run_id or "123456789"
             self.run_attempt = run_attempt or 1
@@ -1728,9 +1661,7 @@ class GitHubContext:
 
             # Set defaults for other fields
             self.event_name = (
-                "pull_request"
-                if self.event_type == GitHubEventType.PULL_REQUEST
-                else "unknown"
+                "pull_request" if self.event_type == GitHubEventType.PULL_REQUEST else "unknown"
             )
             self.event_path = "/github/workflow/event.json"
             self.workspace = "/github/workspace"
@@ -1762,9 +1693,7 @@ class GitHubContext:
 
         return cls(
             event_name=event_name,
-            event_path=os.environ.get(
-                "GITHUB_EVENT_PATH", "/github/workflow/event.json"
-            ),
+            event_path=os.environ.get("GITHUB_EVENT_PATH", "/github/workflow/event.json"),
             workspace=os.environ.get("GITHUB_WORKSPACE", "/github/workspace"),
             run_id=os.environ.get("GITHUB_RUN_ID", "123456789"),
             run_number=int(os.environ.get("GITHUB_RUN_NUMBER", "1")),
@@ -1823,9 +1752,7 @@ class SecurityConstraints:
             rate_limit_threshold=int(
                 os.environ.get("RATE_LIMIT_THRESHOLD", "30" if auto_approve else "50")
             ),
-            restricted_operations=["delete_repository", "force_push"]
-            if auto_approve
-            else [],
+            restricted_operations=["delete_repository", "force_push"] if auto_approve else [],
         )
 
 
@@ -1844,9 +1771,7 @@ class GitHubActionsIntegration:
 
         # Check environment
         if os.environ.get("GITHUB_ACTIONS") != "true":
-            raise RuntimeError(
-                "GitHub Actions integration requires GITHUB_ACTIONS=true"
-            )
+            raise RuntimeError("GitHub Actions integration requires GITHUB_ACTIONS=true")
         if not os.environ.get("GITHUB_TOKEN"):
             raise RuntimeError("GitHub Actions integration requires GITHUB_TOKEN")
 
@@ -1858,17 +1783,13 @@ class GitHubActionsIntegration:
         if self.security_constraints.auto_approve_enabled:
             event_name = os.environ.get("GITHUB_EVENT_NAME", "")
             if event_name not in ["pull_request", "workflow_dispatch", "schedule"]:
-                raise RuntimeError(
-                    f"Auto-approve not allowed for event type: {event_name}"
-                )
+                raise RuntimeError(f"Auto-approve not allowed for event type: {event_name}")
 
     def _get_github_context(self) -> GitHubContext:
         """Get GitHub Actions context."""
         return GitHubContext(
             event_name=os.environ.get("GITHUB_EVENT_NAME", "pull_request"),
-            event_path=os.environ.get(
-                "GITHUB_EVENT_PATH", "/github/workflow/event.json"
-            ),
+            event_path=os.environ.get("GITHUB_EVENT_PATH", "/github/workflow/event.json"),
             workspace=os.environ.get("GITHUB_WORKSPACE", "/github/workspace"),
             run_id=os.environ.get("GITHUB_RUN_ID", "123456789"),
             run_number=int(os.environ.get("GITHUB_RUN_NUMBER", "1")),
@@ -1930,10 +1851,7 @@ class GitHubActionsIntegration:
                 if os.path.exists(self.github_context.event_path):
                     with open(self.github_context.event_path) as f:
                         event_data = json.load(f)
-                        if (
-                            "inputs" in event_data
-                            and "pr_number" in event_data["inputs"]
-                        ):
+                        if "inputs" in event_data and "pr_number" in event_data["inputs"]:
                             pr_num = int(event_data["inputs"]["pr_number"])
                             return (
                                 ProcessingMode.SINGLE_PR,
@@ -2014,9 +1932,7 @@ class GitHubActionsIntegration:
 
     def _execute_single_pr_processing(self, pr_number: int) -> Dict[str, Any]:
         """Execute single PR processing."""
-        if self.pr_backlog_manager and hasattr(
-            self.pr_backlog_manager, "process_single_pr"
-        ):
+        if self.pr_backlog_manager and hasattr(self.pr_backlog_manager, "process_single_pr"):
             assessment = self.pr_backlog_manager.process_single_pr(pr_number)  # type: ignore[attr-defined]
             return {
                 "mode": "single_pr",
@@ -2027,9 +1943,7 @@ class GitHubActionsIntegration:
                     else str(assessment.status),
                     "readiness_score": getattr(assessment, "readiness_score", 95.0),
                     "is_ready": getattr(assessment, "is_ready", True),
-                    "blocking_issues_count": len(
-                        getattr(assessment, "blocking_issues", [])
-                    ),
+                    "blocking_issues_count": len(getattr(assessment, "blocking_issues", [])),
                 },
                 "blocking_issues": getattr(assessment, "blocking_issues", []),
                 "resolution_actions": getattr(assessment, "resolution_actions", []),
@@ -2042,9 +1956,7 @@ class GitHubActionsIntegration:
 
     def _execute_full_backlog_processing(self) -> Dict[str, Any]:
         """Execute full backlog processing."""
-        if self.pr_backlog_manager and hasattr(
-            self.pr_backlog_manager, "process_backlog"
-        ):
+        if self.pr_backlog_manager and hasattr(self.pr_backlog_manager, "process_backlog"):
             metrics = self.pr_backlog_manager.process_backlog()  # type: ignore[attr-defined]
             return {
                 "mode": "full_backlog",
@@ -2118,9 +2030,7 @@ class GitHubActionsIntegration:
             summary += "### Single PR Processing\n\n"
             summary += f"**PR Number:** #{pr_number}\n"
             summary += f"**Ready for Review:** {'✅ Yes' if assessment.get('is_ready', False) else '❌ No'}\n"
-            summary += (
-                f"**Readiness Score:** {assessment.get('readiness_score', 0):.1f}%\n\n"
-            )
+            summary += f"**Readiness Score:** {assessment.get('readiness_score', 0):.1f}%\n\n"
 
             blocking_issues = results.get("blocking_issues", [])
             if blocking_issues:
@@ -2144,17 +2054,13 @@ class GitHubActionsIntegration:
             summary += f"**Total PRs Processed:** {metrics.get('total_prs', 0)}\n"
             summary += f"**Ready PRs:** {metrics.get('ready_prs', 0)}\n"
             summary += f"**Blocked PRs:** {metrics.get('blocked_prs', 0)}\n"
-            summary += (
-                f"**Automation Rate:** {metrics.get('automation_rate', 0):.1f}%\n"
-            )
+            summary += f"**Automation Rate:** {metrics.get('automation_rate', 0):.1f}%\n"
             summary += f"**Success Rate:** {metrics.get('success_rate', 0):.1f}%\n\n"
 
         if not success:
             summary += "### Error Details\n\n"
             summary += f"**Error Type:** {result.get('error_type', 'Unknown')}\n"
-            summary += (
-                f"**Error Message:** {result.get('error', 'No error message')}\n\n"
-            )
+            summary += f"**Error Message:** {result.get('error', 'No error message')}\n\n"
 
         return summary
 
@@ -2171,9 +2077,7 @@ class GitHubActionsIntegration:
         if context:
             summary += f"Event Type: {context.get('event_type', 'unknown')}\n"
             summary += f"Repository: {context.get('repository', 'unknown')}\n"
-            summary += (
-                f"Workflow Run ID: {context.get('workflow_run_id', 'unknown')}\n\n"
-            )
+            summary += f"Workflow Run ID: {context.get('workflow_run_id', 'unknown')}\n\n"
 
         summary += f"Processing Mode: {mode}\n"
         summary += f"Processing Time: {processing_time:.2f}s\n"
@@ -2216,9 +2120,7 @@ class GitHubActionsIntegration:
                 f.write(f"pr_number={pr_number}\n")
                 f.write(f"pr_ready={str(assessment.get('is_ready', False)).lower()}\n")
                 f.write(f"readiness_score={assessment.get('readiness_score', 0)}\n")
-                f.write(
-                    f"blocking_issues_count={assessment.get('blocking_issues_count', 0)}\n"
-                )
+                f.write(f"blocking_issues_count={assessment.get('blocking_issues_count', 0)}\n")
 
             elif result.get("processing_mode") == "full_backlog":
                 results = result.get("results", {})

@@ -245,9 +245,7 @@ class TestSecurityConstraints:
 class TestGitHubActionsIntegration:
     """Test GitHubActionsIntegration functionality."""
 
-    def test_initialization_valid_environment(
-        self, mock_pr_backlog_manager, github_env_vars
-    ):
+    def test_initialization_valid_environment(self, mock_pr_backlog_manager, github_env_vars):
         """Test GitHubActionsIntegration initialization in valid environment."""
         with patch.dict(os.environ, github_env_vars):
             integration = GitHubActionsIntegration(mock_pr_backlog_manager)
@@ -275,9 +273,7 @@ class TestGitHubActionsIntegration:
             ):
                 GitHubActionsIntegration(mock_pr_backlog_manager)
 
-    def test_initialization_auto_approve_validation(
-        self, mock_pr_backlog_manager, github_env_vars
-    ):
+    def test_initialization_auto_approve_validation(self, mock_pr_backlog_manager, github_env_vars):
         """Test auto-approve validation during initialization."""
         github_env_vars["CLAUDE_AUTO_APPROVE"] = "true"
 
@@ -289,14 +285,10 @@ class TestGitHubActionsIntegration:
         self, mock_pr_backlog_manager, github_env_vars
     ):
         """Test auto-approve validation with invalid event type."""
-        github_env_vars.update(
-            {"CLAUDE_AUTO_APPROVE": "true", "GITHUB_EVENT_NAME": "push"}
-        )
+        github_env_vars.update({"CLAUDE_AUTO_APPROVE": "true", "GITHUB_EVENT_NAME": "push"})
 
         with patch.dict(os.environ, github_env_vars):
-            with pytest.raises(
-                RuntimeError, match="Auto-approve not allowed for event type: push"
-            ):
+            with pytest.raises(RuntimeError, match="Auto-approve not allowed for event type: push"):
                 GitHubActionsIntegration(mock_pr_backlog_manager)
 
 
@@ -406,9 +398,7 @@ class TestProcessingExecution:
 
         mock_pr_backlog_manager.process_single_pr.assert_called_once_with(123)
 
-    def test_execute_full_backlog_processing(
-        self, integration, mock_pr_backlog_manager
-    ):
+    def test_execute_full_backlog_processing(self, integration, mock_pr_backlog_manager):
         """Test full backlog processing execution."""
         mock_metrics = Mock(
             total_prs=10,
@@ -430,9 +420,7 @@ class TestProcessingExecution:
 
         mock_pr_backlog_manager.process_backlog.assert_called_once()
 
-    def test_execute_processing_single_pr_success(
-        self, integration, mock_pr_backlog_manager
-    ):
+    def test_execute_processing_single_pr_success(self, integration, mock_pr_backlog_manager):
         """Test full processing execution for single PR."""
         # Mock processing mode detection
         integration.determine_processing_mode = Mock(
@@ -459,9 +447,7 @@ class TestProcessingExecution:
     def test_execute_processing_failure(self, integration, mock_pr_backlog_manager):
         """Test processing execution with failure."""
         # Mock processing mode detection to raise exception
-        integration.determine_processing_mode = Mock(
-            side_effect=Exception("Test error")
-        )
+        integration.determine_processing_mode = Mock(side_effect=Exception("Test error"))
 
         # Mock artifact creation
         integration._create_error_artifacts = Mock()
@@ -502,15 +488,11 @@ class TestArtifactCreation:
             assert mock_file.call_count == 2  # JSON and text files
 
             # Check JSON artifact
-            json_calls = [
-                call for call in mock_file.call_args_list if "json" in str(call)
-            ]
+            json_calls = [call for call in mock_file.call_args_list if "json" in str(call)]
             assert len(json_calls) == 1
 
             # Check text artifact
-            txt_calls = [
-                call for call in mock_file.call_args_list if "txt" in str(call)
-            ]
+            txt_calls = [call for call in mock_file.call_args_list if "txt" in str(call)]
             assert len(txt_calls) == 1
 
     def test_create_error_artifacts(self, integration):
@@ -561,9 +543,7 @@ class TestArtifactCreation:
             mock_file.assert_called_once_with("/tmp/summary.md", "a")
 
             # Check summary content
-            written_content = "".join(
-                call.args[0] for call in mock_file().write.call_args_list
-            )
+            written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
             assert "🤖 PR Backlog Manager Results" in written_content
             assert "✅ Success" in written_content
             assert "single_pr" in written_content
@@ -594,9 +574,7 @@ class TestArtifactCreation:
             mock_file.assert_called_once_with("/tmp/outputs.txt", "a")
 
             # Check output content
-            written_content = "".join(
-                call.args[0] for call in mock_file().write.call_args_list
-            )
+            written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
             assert "success=true" in written_content
             assert "processing_mode=single_pr" in written_content
             assert "pr_number=456" in written_content
@@ -609,9 +587,7 @@ class TestArtifactCreation:
             "success": True,
             "processing_mode": "full_backlog",
             "processing_time": 45.8,
-            "results": {
-                "metrics": {"total_prs": 8, "ready_prs": 5, "automation_rate": 75.0}
-            },
+            "results": {"metrics": {"total_prs": 8, "ready_prs": 5, "automation_rate": 75.0}},
         }
 
         with (
@@ -623,9 +599,7 @@ class TestArtifactCreation:
             mock_file.assert_called_once_with("/tmp/outputs.txt", "a")
 
             # Check output content
-            written_content = "".join(
-                call.args[0] for call in mock_file().write.call_args_list
-            )
+            written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
             assert "success=true" in written_content
             assert "processing_mode=full_backlog" in written_content
             assert "total_prs=8" in written_content

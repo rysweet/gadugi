@@ -26,9 +26,7 @@ except ImportError:
 import sys
 import os
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 from error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
@@ -210,9 +208,7 @@ class ContainerManager:
 
             # Get logs
             try:
-                logs = container.logs(stdout=True, stderr=True).decode(
-                    "utf-8", errors="replace"
-                )
+                logs = container.logs(stdout=True, stderr=True).decode("utf-8", errors="replace")
                 stdout = logs  # Docker combines stdout/stderr
                 stderr = ""
             except Exception as e:
@@ -234,9 +230,7 @@ class ContainerManager:
                 stderr=stderr,
                 execution_time=execution_time,
                 resource_usage=resource_usage,
-                status=ContainerStatus.STOPPED
-                if exit_code == 0
-                else ContainerStatus.FAILED,
+                status=ContainerStatus.STOPPED if exit_code == 0 else ContainerStatus.FAILED,
             )
 
             # Store in history
@@ -254,9 +248,7 @@ class ContainerManager:
             if container_id:
                 self.cleanup_container(container_id)
 
-    def stop_container(
-        self, container_id: str, force: bool = False, timeout: int = 10
-    ) -> None:
+    def stop_container(self, container_id: str, force: bool = False, timeout: int = 10) -> None:
         """
         Stop a running container.
 
@@ -326,9 +318,9 @@ class ContainerManager:
 
             cpu_percent = 0.0
             if cpu_stats and precpu_stats:
-                cpu_delta = cpu_stats.get("cpu_usage", {}).get(
-                    "total_usage", 0
-                ) - precpu_stats.get("cpu_usage", {}).get("total_usage", 0)
+                cpu_delta = cpu_stats.get("cpu_usage", {}).get("total_usage", 0) - precpu_stats.get(
+                    "cpu_usage", {}
+                ).get("total_usage", 0)
                 system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
                     "system_cpu_usage", 0
                 )
@@ -345,9 +337,7 @@ class ContainerManager:
                 "cpu_percent": cpu_percent,
                 "memory_usage_bytes": memory_usage,
                 "memory_limit_bytes": memory_limit,
-                "memory_percent": (memory_usage / memory_limit * 100)
-                if memory_limit > 0
-                else 0,
+                "memory_percent": (memory_usage / memory_limit * 100) if memory_limit > 0 else 0,
                 "network_stats": stats.get("networks", {}),
                 "block_io_stats": stats.get("blkio_stats", {}),
             }
@@ -367,9 +357,7 @@ class ContainerManager:
                         "container_id": container_id,
                         "name": container.name,
                         "status": container.status,
-                        "image": container.image.tags[0]
-                        if container.image.tags
-                        else "unknown",
+                        "image": container.image.tags[0] if container.image.tags else "unknown",
                     }
                 )
             except Exception as e:
@@ -385,9 +373,7 @@ class ContainerManager:
 
         logger.info(f"Cleaned up {len(container_ids)} containers")
 
-    def get_execution_history(
-        self, limit: Optional[int] = None
-    ) -> List[ContainerResult]:
+    def get_execution_history(self, limit: Optional[int] = None) -> List[ContainerResult]:
         """Get container execution history."""
         if limit:
             return self.execution_history[-limit:]

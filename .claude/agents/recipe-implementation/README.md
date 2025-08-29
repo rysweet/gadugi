@@ -201,7 +201,7 @@ interfaces:
         type: method
       - name: subscribe
         type: method
-    
+
   - name: process_event
     type: function
     description: Process incoming event

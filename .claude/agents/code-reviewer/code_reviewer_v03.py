@@ -127,7 +127,7 @@ class CodeReviewerV03(V03Agent):
             if not self.memory:
                 self.logger.warning("Memory not initialized, skipping pattern loading")
                 return
-            
+
             pattern_memories = await self.memory.search_memories(
                 tags=["pattern", "developer", "module"],
                 limit=100
@@ -182,24 +182,24 @@ class CodeReviewerV03(V03Agent):
         try:
             if not self.memory:
                 return
-            
+
             # Check if migration has already been done
             existing_migration = await self.memory.search_memories(
                 tags=["migration", "legacy_import"],
                 limit=1
             )
-            
+
             if existing_migration:
                 self.logger.info("Legacy data migration already completed")
                 return
-            
+
             # Look for legacy file
             legacy_file = Path(".github/CodeReviewerProjectMemory.md")
             backup_file = Path(".github/CodeReviewerProjectMemory.md.bak")
-            
+
             content = ""
             legacy_source = None
-            
+
             # Try to read from backup first (since main file might be empty)
             if backup_file.exists():
                 try:
@@ -207,7 +207,7 @@ class CodeReviewerV03(V03Agent):
                     legacy_source = str(backup_file)
                 except Exception as e:
                     self.logger.warning(f"Could not read legacy backup file: {e}")
-            
+
             # Fall back to main file if backup not available
             if not content and legacy_file.exists():
                 try:
@@ -215,16 +215,16 @@ class CodeReviewerV03(V03Agent):
                     legacy_source = str(legacy_file)
                 except Exception as e:
                     self.logger.warning(f"Could not read legacy file: {e}")
-            
+
             if not content:
                 self.logger.info("No legacy CodeReviewerProjectMemory.md found to migrate")
                 await self._mark_migration_complete("no_legacy_data")
                 return
-            
+
             self.logger.info(f"Migrating legacy data from {legacy_source}")
             await self._process_legacy_content(content)
             await self._mark_migration_complete(legacy_source)
-            
+
         except Exception as e:
             self.logger.error(f"Legacy data migration failed: {e}")
 
@@ -234,33 +234,33 @@ class CodeReviewerV03(V03Agent):
         current_pr = None
         current_section = None
         current_content = []
-        
+
         for line in lines:
             # Detect PR sections
             if line.startswith('### PR #'):
                 # Save previous section if exists
                 if current_pr and current_section and current_content:
                     await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
-                
+
                 # Start new PR
                 current_pr = line.strip()
                 current_section = None
                 current_content = []
-                
+
             # Detect subsections
             elif line.startswith('#### ') and current_pr:
                 # Save previous section if exists
                 if current_section and current_content:
                     await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
-                
+
                 # Start new section
                 current_section = line[5:].strip()  # Remove "#### "
                 current_content = []
-                
+
             # Collect content
             elif current_pr and current_section:
                 current_content.append(line)
-        
+
         # Don't forget the last section
         if current_pr and current_section and current_content:
             await self._import_legacy_section(current_pr, current_section, '\n'.join(current_content))
@@ -269,18 +269,18 @@ class CodeReviewerV03(V03Agent):
         """Import a legacy section into v0.3 memory system."""
         if not self.memory or not content.strip():
             return
-        
+
         # Categorize based on section type
         memory_type = "semantic"  # Default
         importance = 0.7
         tags = ["legacy_import", "code_review"]
-        
+
         # Extract PR number for tagging
         pr_match = pr.split('#')
         if len(pr_match) > 1:
             pr_number = pr_match[1].split(':')[0]
             tags.append(f"pr_{pr_number}")
-        
+
         # Categorize by section type
         section_lower = section.lower()
         if any(keyword in section_lower for keyword in ['what i learned', 'insights', 'architectural']):
@@ -303,10 +303,10 @@ class CodeReviewerV03(V03Agent):
             memory_type = "semantic"
             importance = 0.75
             tags.append("testing")
-        
+
         # Store in memory
         formatted_content = f"Legacy Import - {pr}\n\n## {section}\n\n{content.strip()}"
-        
+
         await self.memory.remember_long_term(
             content=formatted_content,
             memory_type=memory_type,

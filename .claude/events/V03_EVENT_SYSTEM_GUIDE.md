@@ -184,18 +184,18 @@ class MyAgent(V03Agent):
                 event_router_url="http://localhost:8001"
             )
         )
-    
+
     async def execute_task(self, task):
         # Emit started event
         await self.emit_started(
             input_data=task,
             task_id=task["id"]
         )
-        
+
         try:
             # Do work...
             result = await self.process_task(task)
-            
+
             # Emit stopped event
             await self.emit_stopped(
                 output_data=result,
@@ -324,7 +324,7 @@ GET /events/storage
 async def execute_task(self, task):
     # ALWAYS emit started
     await self.emit_started(input_data=task, task_id=task["id"])
-    
+
     try:
         result = await self.do_work(task)
     finally:

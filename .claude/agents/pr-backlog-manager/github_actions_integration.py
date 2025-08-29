@@ -203,7 +203,7 @@ class GitHubActionsIntegration:
             return ProcessingMode.FULL_BACKLOG, {
                 "reason": f"unknown_event_{self.github_context.event_type.value if self.github_context and self.github_context.event_type else 'unknown'}"
             }
-        
+
         # Fallback return statement (should not be reached)
         return ProcessingMode.FULL_BACKLOG, {"reason": "fallback"}
 

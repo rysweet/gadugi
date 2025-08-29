@@ -15,9 +15,7 @@ from datetime import datetime
 # Import the module under test
 import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 from workflow_validator import (  # type: ignore[import]
     WorkflowValidator,
@@ -333,9 +331,7 @@ It also doesn't have enough content to be considered a valid prompt.
     def test_validate_git_clean_state_failure(self, mock_subprocess):
         """Test git clean state validation with git command failure"""
         # Mock git command failure
-        mock_subprocess.return_value = Mock(
-            returncode=1, stdout="", stderr="Not a git repo"
-        )
+        mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="Not a git repo")
 
         result = self.validator._validate_git_clean_state({})
 
@@ -525,9 +521,7 @@ It also doesn't have enough content to be considered a valid prompt.
             stderr="",
         )
 
-        report = self.validator.validate_end_to_end(
-            self.good_prompt_file, self.workflow_state
-        )
+        report = self.validator.validate_end_to_end(self.good_prompt_file, self.workflow_state)
 
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD
@@ -733,9 +727,7 @@ It also doesn't have enough content to be considered a valid prompt.
 
         # Run same validation with different levels
         minimal_report = minimal_validator.validate_prompt_file(self.good_prompt_file)
-        comprehensive_report = comprehensive_validator.validate_prompt_file(
-            self.good_prompt_file
-        )
+        comprehensive_report = comprehensive_validator.validate_prompt_file(self.good_prompt_file)
 
         # Comprehensive should have more checks
         assert comprehensive_report.total_checks >= minimal_report.total_checks
@@ -790,9 +782,7 @@ Test implementation details.
             # Mock external calls
             mock_subprocess.return_value = Mock(returncode=0, stdout="", stderr="")
 
-            report = validate_workflow(
-                self.prompt_file, workflow_state, ValidationLevel.STANDARD
-            )
+            report = validate_workflow(self.prompt_file, workflow_state, ValidationLevel.STANDARD)
 
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD

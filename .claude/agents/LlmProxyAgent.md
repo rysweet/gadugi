@@ -196,20 +196,20 @@ logger = logging.getLogger(__name__)
 
 async def main():
     """Launch the LLM Proxy Service with configured providers."""
-    
+
     logger.info("Starting LLM Proxy Service...")
     logger.info(f"Log file: {log_file}")
-    
+
     # Load configuration from environment
     api_key = os.getenv("AZURE_OPENAI_API_KEY")
     endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
     api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-02-15-preview")
     deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
-    
+
     if not all([api_key, endpoint, deployment]):
         logger.error("Missing required Azure OpenAI configuration")
         sys.exit(1)
-    
+
     # Create service
     service = LLMProxyService(
         cache_size=int(os.getenv("LLM_PROXY_CACHE_SIZE", "1000")),
@@ -217,7 +217,7 @@ async def main():
         load_balance_strategy=LoadBalanceStrategy.ROUND_ROBIN,
         enable_failover=True
     )
-    
+
     # Configure Azure OpenAI provider
     azure_config = ModelConfig(
         provider=LLMProvider.AZURE,
@@ -230,19 +230,19 @@ async def main():
         cost_per_1k_tokens=0.03,
         rate_limit=60
     )
-    
+
     # Register provider
     azure_provider = AzureOpenAIProvider(azure_config)
     service.register_provider("azure_openai", azure_provider)
-    
+
     logger.info("Azure OpenAI provider registered successfully")
-    
+
     try:
         # Start service
         await service.start()
         logger.info("LLM Proxy Service started successfully")
         logger.info(f"Service running on port {os.getenv('LLM_PROXY_PORT', '8080')}")
-        
+
         # Keep running
         while True:
             await asyncio.sleep(60)
@@ -251,7 +251,7 @@ async def main():
             logger.info(f"Stats - Requests: {stats['total_requests']}, "
                        f"Cache hits: {stats['cache_hits']}, "
                        f"Cost: ${stats['total_cost']:.2f}")
-            
+
     except KeyboardInterrupt:
         logger.info("Shutting down LLM Proxy Service...")
     except Exception as e:
@@ -308,7 +308,7 @@ from typing import Dict, Any
 
 class LLMProxyConfigurator:
     """Interactive configuration wizard for LLM Proxy Service."""
-    
+
     PROVIDERS = {
         "azure_openai": {
             "name": "Azure OpenAI",
@@ -345,39 +345,39 @@ class LLMProxyConfigurator:
             ]
         }
     }
-    
+
     def __init__(self):
         self.config_dir = Path(".claude/services/llm-proxy/config")
         self.config_dir.mkdir(parents=True, exist_ok=True)
         self.env_file = Path(".claude/services/llm-proxy/.env")
-        
+
     def run(self):
         """Run the configuration wizard."""
         print("\n🤖 LLM Proxy Configuration Wizard\n")
         print("This wizard will help you configure LLM providers for the proxy service.\n")
-        
+
         # Select provider
         provider = self.select_provider()
         if not provider:
             return
-        
+
         # Collect configuration
         config = self.collect_configuration(provider)
-        
+
         # Save configuration
         self.save_configuration(provider, config)
-        
+
         # Offer to start service
         if self.ask_yes_no("\nWould you like to start the LLM Proxy service now?"):
             self.start_service()
-    
+
     def select_provider(self) -> str:
         """Let user select a provider."""
         print("Available providers:")
         providers = list(self.PROVIDERS.keys())
         for i, key in enumerate(providers, 1):
             print(f"  {i}. {self.PROVIDERS[key]['name']}")
-        
+
         while True:
             try:
                 choice = input("\nSelect provider (number or 'q' to quit): ").strip()
@@ -389,19 +389,19 @@ class LLMProxyConfigurator:
             except (ValueError, IndexError):
                 pass
             print("Invalid choice. Please try again.")
-    
+
     def collect_configuration(self, provider: str) -> Dict[str, Any]:
         """Collect configuration for the selected provider."""
         print(f"\nConfiguring {self.PROVIDERS[provider]['name']}")
         print("-" * 50)
-        
+
         config = {"provider": provider}
         env_vars = {}
-        
+
         for field_info in self.PROVIDERS[provider]["required_fields"]:
             field, prompt, is_secret = field_info[:3]
             default = field_info[3] if len(field_info) > 3 else None
-            
+
             if is_secret:
                 import getpass
                 value = getpass.getpass(f"{prompt}: ").strip()
@@ -411,36 +411,36 @@ class LLMProxyConfigurator:
                     prompt_text += f" [{default}]"
                 prompt_text += ": "
                 value = input(prompt_text).strip() or default
-            
+
             if value:
                 config[field] = value
                 # Create environment variable name
                 env_var_name = f"{provider.upper()}_{field.upper()}"
                 env_vars[env_var_name] = value
-        
+
         # Additional settings
         print("\nAdditional Settings (press Enter for defaults):")
         config["cache_enabled"] = self.ask_yes_no("Enable response caching?", True)
         config["rate_limit"] = int(input("Rate limit (requests/minute) [60]: ").strip() or "60")
         config["max_retries"] = int(input("Max retries on failure [3]: ").strip() or "3")
-        
+
         config["env_vars"] = env_vars
         return config
-    
+
     def save_configuration(self, provider: str, config: Dict[str, Any]):
         """Save configuration to files."""
         # Save JSON config
         config_file = self.config_dir / f"{provider}.json"
         env_vars = config.pop("env_vars", {})
-        
+
         with open(config_file, 'w') as f:
             json.dump(config, f, indent=2)
         print(f"\n✅ Configuration saved to: {config_file}")
-        
+
         # Update .env file
         self.update_env_file(env_vars)
         print(f"✅ Environment variables saved to: {self.env_file}")
-    
+
     def update_env_file(self, env_vars: Dict[str, str]):
         """Update .env file with new variables."""
         existing = {}
@@ -451,10 +451,10 @@ class LLMProxyConfigurator:
                     if line and not line.startswith('#') and '=' in line:
                         key, value = line.split('=', 1)
                         existing[key] = value
-        
+
         # Update with new values
         existing.update(env_vars)
-        
+
         # Add service defaults if not present
         defaults = {
             "LLM_PROXY_PORT": "8080",
@@ -462,54 +462,54 @@ class LLMProxyConfigurator:
             "LLM_PROXY_CACHE_SIZE": "1000",
             "LLM_PROXY_CACHE_TTL": "3600"
         }
-        
+
         for key, value in defaults.items():
             if key not in existing:
                 existing[key] = value
-        
+
         # Write back
         with open(self.env_file, 'w') as f:
             f.write("# LLM Proxy Service Configuration\n")
             f.write("# Generated by LLM Proxy Configuration Wizard\n\n")
-            
+
             # Provider settings
             f.write("# Provider API Keys and Settings\n")
             for key, value in sorted(existing.items()):
                 if "API_KEY" in key or "ENDPOINT" in key or "DEPLOYMENT" in key:
                     f.write(f"{key}={value}\n")
-            
+
             f.write("\n# Service Configuration\n")
             for key, value in sorted(existing.items()):
                 if "LLM_PROXY" in key:
                     f.write(f"{key}={value}\n")
-    
+
     def start_service(self):
         """Start the LLM Proxy service in the background."""
         print("\n🚀 Starting LLM Proxy Service...")
-        
+
         launch_script = Path(".claude/services/llm-proxy/launch_proxy.py")
         if not launch_script.exists():
             print("❌ Launch script not found. Please ensure the service is properly installed.")
             return
-        
+
         import subprocess
-        
+
         # Start service in background
         log_dir = Path(".claude/services/llm-proxy/logs")
         log_dir.mkdir(exist_ok=True)
         log_file = log_dir / f"llm_proxy_{os.getpid()}.log"
-        
+
         process = subprocess.Popen(
             [sys.executable, str(launch_script)],
             stdout=open(log_file, 'w'),
             stderr=subprocess.STDOUT,
             start_new_session=True
         )
-        
+
         # Save PID
         pid_file = Path(".claude/services/llm-proxy/llm_proxy.pid")
         pid_file.write_text(str(process.pid))
-        
+
         print(f"\n✅ LLM Proxy Service started successfully!")
         print(f"   PID: {process.pid}")
         print(f"\n📁 Log file location:")
@@ -520,7 +520,7 @@ class LLMProxyConfigurator:
         print(f"   ps -p {process.pid}")
         print(f"\n🛑 To stop the service:")
         print(f"   kill {process.pid}")
-    
+
     def ask_yes_no(self, prompt: str, default: bool = True) -> bool:
         """Ask a yes/no question."""
         default_str = "Y/n" if default else "y/N"
@@ -731,7 +731,7 @@ When users encounter issues, help them with:
 
 Always remind users:
 - Never share API keys in plain text
-- Use environment variables for sensitive data  
+- Use environment variables for sensitive data
 - Regularly rotate API keys
 - Monitor usage and costs through the logs
 - Set up rate limiting to prevent abuse

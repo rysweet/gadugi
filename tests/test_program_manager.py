@@ -115,9 +115,7 @@ with multiple lines"""
             created_at="2024-01-01",
             updated_at="2024-01-01",
         )
-        self.assertEqual(
-            self.pm.get_current_lifecycle_stage(issue), IssueStage.UNLABELED
-        )
+        self.assertEqual(self.pm.get_current_lifecycle_stage(issue), IssueStage.UNLABELED)
 
         # Test with lifecycle label
         issue.labels = ["idea", "enhancement"]

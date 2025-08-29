@@ -71,7 +71,7 @@ def get_project_root() -> Path:
 def create_rename_mapping() -> Dict[str, str]:
     """Create a complete mapping including variations."""
     mapping = {}
-    
+
     # Add basic mappings
     for old, new in AGENT_RENAME_MAP.items():
         mapping[old] = new
@@ -79,18 +79,18 @@ def create_rename_mapping() -> Dict[str, str]:
         old_base = old.replace('.md', '')
         new_base = new.replace('.md', '')
         mapping[old_base] = new_base
-        
+
         # With agent: prefix for invocations
         mapping[f"agent:{old_base}"] = f"agent:{new_base}"
         mapping[f"/agent:{old_base}"] = f"/agent:{new_base}"
-    
+
     return mapping
 
 def find_files_to_update() -> List[Path]:
     """Find all files that might contain references to agents."""
     root = get_project_root()
     files_to_check = []
-    
+
     # File patterns to check
     patterns = [
         "**/*.py",
@@ -104,10 +104,10 @@ def find_files_to_update() -> List[Path]:
         ".claude/**/*",
         "prompts/**/*",
     ]
-    
+
     for pattern in patterns:
         files_to_check.extend(root.glob(pattern))
-    
+
     # Filter out directories and binary files
     return [f for f in files_to_check if f.is_file() and not f.name.endswith(('.pyc', '.pyo', '.so', '.dylib'))]
 
@@ -117,10 +117,10 @@ def update_file_references(file_path: Path, mapping: Dict[str, str]) -> Tuple[bo
         content = file_path.read_text(encoding='utf-8')
     except (UnicodeDecodeError, PermissionError):
         return False, []
-    
+
     original_content = content
     changes = []
-    
+
     # Apply mappings
     for old, new in mapping.items():
         if old in content:
@@ -129,45 +129,45 @@ def update_file_references(file_path: Path, mapping: Dict[str, str]) -> Tuple[bo
             if count > 0:
                 content = content.replace(old, new)
                 changes.append(f"  - Replaced {count} occurrences of '{old}' with '{new}'")
-    
+
     # Save if changed
     if content != original_content:
         file_path.write_text(content, encoding='utf-8')
         return True, changes
-    
+
     return False, []
 
 def rename_agent_files() -> List[str]:
     """Rename the actual agent files."""
     agents_dir = get_project_root() / ".claude" / "agents"
     renamed = []
-    
+
     for old_name, new_name in AGENT_RENAME_MAP.items():
         old_path = agents_dir / old_name
         new_path = agents_dir / new_name
-        
+
         if old_path.exists():
             # Check if target already exists
             if new_path.exists():
                 print(f"Warning: {new_name} already exists, skipping {old_name}")
                 continue
-            
+
             # Rename the file
             old_path.rename(new_path)
             renamed.append(f"{old_name} -> {new_name}")
             print(f"Renamed: {old_name} -> {new_name}")
-    
+
     return renamed
 
 def create_compatibility_symlinks() -> List[str]:
     """Create symlinks for backward compatibility."""
     agents_dir = get_project_root() / ".claude" / "agents"
     symlinks = []
-    
+
     for old_name, new_name in AGENT_RENAME_MAP.items():
         old_path = agents_dir / old_name
         new_path = agents_dir / new_name
-        
+
         if new_path.exists() and not old_path.exists():
             # Create symlink from old name to new name
             try:
@@ -176,31 +176,31 @@ def create_compatibility_symlinks() -> List[str]:
                 print(f"Created symlink: {old_name} -> {new_name}")
             except OSError as e:
                 print(f"Could not create symlink for {old_name}: {e}")
-    
+
     return symlinks
 
 def update_agent_registry():
     """Update the agent_registry.py file if it exists."""
     registry_path = get_project_root() / ".claude" / "agents" / "agent_registry.py"
-    
+
     if not registry_path.exists():
         print("Agent registry not found, skipping")
         return
-    
+
     content = registry_path.read_text()
     original = content
-    
+
     # Update any agent name references
     for old, new in AGENT_RENAME_MAP.items():
         old_base = old.replace('.md', '')
         new_base = new.replace('.md', '')
-        
+
         # Update in various contexts
         content = content.replace(f'"{old}"', f'"{new}"')
         content = content.replace(f"'{old}'", f"'{new}'")
         content = content.replace(f'"{old_base}"', f'"{new_base}"')
         content = content.replace(f"'{old_base}'", f"'{new_base}'")
-    
+
     if content != original:
         registry_path.write_text(content)
         print("Updated agent_registry.py")
@@ -210,20 +210,20 @@ def main():
     print("=" * 60)
     print("Agent Renaming: kebab-case to CamelCase")
     print("=" * 60)
-    
+
     # Step 1: Rename agent files
     print("\n1. Renaming agent files...")
     renamed_files = rename_agent_files()
     print(f"Renamed {len(renamed_files)} files")
-    
+
     # Step 2: Update references throughout codebase
     print("\n2. Updating references throughout codebase...")
     mapping = create_rename_mapping()
     files_to_update = find_files_to_update()
-    
+
     updated_count = 0
     all_changes = []
-    
+
     for file_path in files_to_update:
         was_updated, changes = update_file_references(file_path, mapping)
         if was_updated:
@@ -233,18 +233,18 @@ def main():
             for change in changes:
                 print(f"  {change}")
             all_changes.append((str(relative_path), changes))
-    
+
     print(f"\nUpdated {updated_count} files with references")
-    
+
     # Step 3: Update agent registry
     print("\n3. Updating agent registry...")
     update_agent_registry()
-    
+
     # Step 4: Create compatibility symlinks
     print("\n4. Creating backward compatibility symlinks...")
     symlinks = create_compatibility_symlinks()
     print(f"Created {len(symlinks)} symlinks")
-    
+
     # Step 5: Generate summary report
     print("\n" + "=" * 60)
     print("SUMMARY REPORT")
@@ -252,7 +252,7 @@ def main():
     print(f"Files renamed: {len(renamed_files)}")
     print(f"Files updated: {updated_count}")
     print(f"Symlinks created: {len(symlinks)}")
-    
+
     # Save detailed report
     report_path = get_project_root() / ".claude" / "agents" / "rename_report.json"
     report = {
@@ -261,10 +261,10 @@ def main():
         "symlinks": symlinks,
         "mapping": AGENT_RENAME_MAP
     }
-    
+
     with open(report_path, 'w') as f:
         json.dump(report, f, indent=2)
-    
+
     print(f"\nDetailed report saved to: {report_path}")
     print("\nRenaming complete!")
 

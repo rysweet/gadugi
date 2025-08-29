@@ -73,7 +73,7 @@ Creates a new git worktree for isolated development.
    ```bash
    worktree_dir=".worktrees/issue-${issue_number}"
    ```
-3. Check if worktree exists: 
+3. Check if worktree exists:
    ```bash
    git worktree list | grep "${worktree_dir}"
    ```
@@ -251,17 +251,17 @@ worktree_dir=".worktrees/issue-${issue_number}"
 
 if [[ -d "${worktree_dir}" ]]; then
     cd "${worktree_dir}"
-    
+
     # Check for uncommitted changes
     if git diff --quiet && git diff --cached --quiet; then
         has_changes=false
     else
         has_changes=true
     fi
-    
+
     # Check ahead/behind status
     ahead_behind=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0")
-    
+
     # Return status
     echo "{
         \"exists\": true,

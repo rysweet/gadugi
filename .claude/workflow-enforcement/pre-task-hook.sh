@@ -37,17 +37,17 @@ is_orchestrator_context() {
     if [[ -n "${GADUGI_ORCHESTRATOR_ACTIVE:-}" ]] || [[ -n "${ORCHESTRATOR_TASK_ID:-}" ]]; then
         return 0
     fi
-    
+
     # Check for orchestrator process
     if pgrep -f "orchestrator.*main.py" > /dev/null; then
         return 0
     fi
-    
+
     # Check for workflow manager indicators
     if [[ -n "${WORKFLOW_PHASE:-}" ]] || [[ -n "${GADUGI_WORKFLOW_ID:-}" ]]; then
         return 0
     fi
-    
+
     return 1
 }
 
@@ -55,7 +55,7 @@ is_orchestrator_context() {
 detect_file_modifications() {
     local task_description="$1"
     local files=()
-    
+
     # Extract potential file patterns from task description
     # This is a heuristic approach - may not catch all cases
     while IFS= read -r line; do
@@ -63,7 +63,7 @@ detect_file_modifications() {
             files+=("$line")
         fi
     done < <(echo "$task_description" | grep -oE '\S+\.(py|js|ts|json|yaml|yml|md|txt|sh|bash|go|java|cpp|c|h)' || true)
-    
+
     printf '%s\n' "${files[@]}"
 }
 
@@ -81,7 +81,7 @@ show_workflow_reminder() {
 # Function to show correct usage
 show_correct_usage() {
     local task_description="$1"
-    
+
     print_colored "$GREEN" "✅ CORRECT APPROACH:"
     echo "   Use orchestrator for this task:"
     echo
@@ -99,22 +99,22 @@ handle_violation() {
     local task_description="$1"
     local files="$2"
     local severity="${3:-medium}"
-    
+
     show_workflow_reminder
-    
+
     print_colored "$RED" "❌ WORKFLOW VIOLATION DETECTED"
     print_colored "$RED" "Task: $task_description"
-    
+
     if [[ -n "$files" ]]; then
         print_colored "$RED" "Files to modify: $files"
     fi
-    
+
     echo
     show_correct_usage "$task_description"
-    
+
     # Log the violation
     log_message "VIOLATION" "Task: $task_description | Files: $files | Severity: $severity"
-    
+
     # Ask user for confirmation
     print_colored "$YELLOW" "Do you want to:"
     print_colored "$YELLOW" "  [o] Use orchestrator (recommended)"
@@ -123,7 +123,7 @@ handle_violation() {
     echo
     read -p "Choose [o/c/a]: " -n 1 -r choice
     echo
-    
+
     case "$choice" in
         [Oo]*)
             print_colored "$GREEN" "✅ Excellent choice! Please use the orchestrator command above."
@@ -149,46 +149,46 @@ handle_violation() {
 main() {
     local task_description="${1:-}"
     local execution_method="${2:-direct}"
-    
+
     # Initialize log if it doesn't exist
     if [[ ! -f "$HOOK_LOG" ]]; then
         touch "$HOOK_LOG"
         log_message "INIT" "Hook log initialized"
     fi
-    
+
     log_message "INFO" "Pre-task hook executed | Task: $task_description | Method: $execution_method"
-    
+
     # If no task description provided, show general reminder
     if [[ -z "$task_description" ]]; then
         show_workflow_reminder
         print_colored "$BLUE" "💡 Remember to use orchestrator for code changes!"
         exit 0
     fi
-    
+
     # Check if we're already in orchestrator context
     if is_orchestrator_context; then
         log_message "INFO" "Orchestrator context detected - allowing execution"
         print_colored "$GREEN" "✅ Orchestrator context detected - workflow compliant"
         exit 0
     fi
-    
+
     # Detect potential file modifications
     local files
     files=$(detect_file_modifications "$task_description")
-    
+
     # Use workflow checker if available
     if [[ -f "$WORKFLOW_CHECKER" ]]; then
         local files_array=()
         if [[ -n "$files" ]]; then
             mapfile -t files_array <<< "$files"
         fi
-        
+
         # Run workflow validation
         if python3 "$WORKFLOW_CHECKER" \
             --task "$task_description" \
             --files "${files_array[@]}" \
             --method "$execution_method" 2>/dev/null; then
-            
+
             print_colored "$GREEN" "✅ Workflow compliance validated"
             log_message "COMPLIANT" "Task: $task_description | Method: $execution_method"
             exit 0
@@ -200,14 +200,14 @@ main() {
     else
         # Fallback heuristic validation if workflow checker not available
         log_message "WARNING" "Workflow checker not found - using heuristic validation"
-        
+
         # Simple heuristic: if files detected and not using orchestrator, it's likely a violation
         if [[ -n "$files" ]] && [[ "$execution_method" != "orchestrator" ]]; then
             handle_violation "$task_description" "$files" "medium"
             exit $?
         fi
     fi
-    
+
     # If we reach here, execution is likely OK
     print_colored "$GREEN" "✅ Pre-task validation passed"
     log_message "INFO" "Pre-task validation passed for: $task_description"

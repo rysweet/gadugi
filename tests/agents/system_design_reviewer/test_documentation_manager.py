@@ -10,8 +10,9 @@ import tempfile
 import os
 import sys
 from pathlib import Path
+
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
 
 from claude.agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
@@ -181,9 +182,7 @@ class TestDocumentationManager:
         manager = DocumentationManager()
 
         # Filter to security-related changes
-        security_changes = [
-            c for c in sample_changes if "security" in c.element.name.lower()
-        ]
+        security_changes = [c for c in sample_changes if "security" in c.element.name.lower()]
 
         sections = manager._identify_sections_to_update(security_changes)
 
@@ -264,8 +263,7 @@ class TestDocumentationManager:
         new_components = [
             c
             for c in sample_changes
-            if c.change_type == ChangeType.ADDED
-            and c.element.element_type == ElementType.CLASS
+            if c.change_type == ChangeType.ADDED and c.element.element_type == ElementType.CLASS
         ]
 
         section_content = manager._generate_component_architecture(new_components, {})
@@ -280,9 +278,7 @@ class TestDocumentationManager:
         manager = DocumentationManager()
 
         # Filter to security changes
-        security_changes = [
-            c for c in sample_changes if "security" in c.element.name.lower()
-        ]
+        security_changes = [c for c in sample_changes if "security" in c.element.name.lower()]
 
         section_content = manager._generate_security_architecture(security_changes, {})
 
@@ -320,9 +316,7 @@ class TestDocumentationManager:
         manager = DocumentationManager()
 
         # Filter to high impact changes
-        high_impact_changes = [
-            c for c in sample_changes if c.impact_level == ImpactLevel.HIGH
-        ]
+        high_impact_changes = [c for c in sample_changes if c.impact_level == ImpactLevel.HIGH]
 
         entry = manager._create_evolution_entry(high_impact_changes, sample_pr_info)
 
@@ -396,9 +390,7 @@ Basic overview."""
         assert "## Evolution History" in updated_content
         assert "### 2024-01-15 - PR #123" in updated_content
 
-    def test_update_architecture_doc_full_workflow(
-        self, sample_changes, sample_pr_info
-    ):
+    def test_update_architecture_doc_full_workflow(self, sample_changes, sample_pr_info):
         """Test complete architecture document update workflow"""
         with tempfile.TemporaryDirectory() as temp_dir:
             arch_file = os.path.join(temp_dir, "ARCHITECTURE.md")
@@ -434,9 +426,7 @@ Basic overview."""
             updates = manager.update_architecture_doc(sample_changes, sample_pr_info)
 
             assert len(updates) > 0
-            assert not any(
-                "Created" in update for update in updates
-            )  # Should not create new
+            assert not any("Created" in update for update in updates)  # Should not create new
             assert any("Updated" in update for update in updates)
 
             # Check updated content
@@ -465,9 +455,7 @@ Basic overview."""
                 )
             ]
 
-            updates = manager.update_architecture_doc(
-                low_impact_changes, sample_pr_info
-            )
+            updates = manager.update_architecture_doc(low_impact_changes, sample_pr_info)
 
             # Should still create file but minimal updates
             assert len(updates) >= 1  # At least file creation

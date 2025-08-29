@@ -28,7 +28,7 @@ from core.models import EventPriority, EventType  # type: ignore[import]
 
 class EventRouterManager:
     """Event Router management utility."""
-    
+
     def __init__(self):
         """Initialize manager."""
         self.config_file = Path("router_config.json")
@@ -42,28 +42,28 @@ class EventRouterManager:
             "use_multi_queue": False,
             "log_level": "INFO"
         }
-    
+
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from file."""
         if self.config_file.exists():
             with open(self.config_file) as f:
                 return json.load(f)
         return self.default_config.copy()
-    
+
     def save_config(self, config: Dict[str, Any]):
         """Save configuration to file."""
         with open(self.config_file, 'w') as f:
             json.dump(config, f, indent=2)
         print(f"Configuration saved to {self.config_file}")
-    
+
     def start(self, daemon: bool = False):
         """Start the Event Router server."""
         if self.is_running():
             print("Event Router is already running")
             return False
-        
+
         config = self.load_config()
-        
+
         # Create start script
         start_script = f"""#!/usr/bin/env python3
 import asyncio
@@ -101,12 +101,12 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\\nEvent Router stopped")
 """
-        
+
         # Write start script
         script_file = Path("_start_router.py")
         with open(script_file, 'w') as f:
             f.write(start_script)
-        
+
         # Start process
         if daemon:
             # Start as daemon
@@ -116,11 +116,11 @@ if __name__ == "__main__":
                 stderr=subprocess.STDOUT,
                 start_new_session=True
             )
-            
+
             # Save PID
             with open(self.pid_file, 'w') as f:
                 f.write(str(process.pid))
-            
+
             print(f"Event Router started as daemon (PID: {process.pid})")
             print(f"Logs: {self.log_file}")
             print(f"WebSocket URL: ws://{config['host']}:{config['port']}")
@@ -129,23 +129,23 @@ if __name__ == "__main__":
             print(f"Starting Event Router on ws://{config['host']}:{config['port']}")
             print("Press Ctrl+C to stop")
             subprocess.run([sys.executable, str(script_file)])
-        
+
         return True
-    
+
     def stop(self):
         """Stop the Event Router server."""
         if not self.is_running():
             print("Event Router is not running")
             return False
-        
+
         if self.pid_file.exists():
             with open(self.pid_file) as f:
                 pid = int(f.read().strip())
-            
+
             try:
                 # Send SIGTERM
                 os.kill(pid, signal.SIGTERM)
-                
+
                 # Wait for graceful shutdown
                 for _ in range(10):
                     time.sleep(0.5)
@@ -156,11 +156,11 @@ if __name__ == "__main__":
                 else:
                     # Force kill if still running
                     os.kill(pid, signal.SIGKILL)
-                
+
                 print(f"Event Router stopped (PID: {pid})")
                 self.pid_file.unlink()
                 return True
-                
+
             except ProcessLookupError:
                 print("Event Router process not found")
                 self.pid_file.unlink()
@@ -168,25 +168,25 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"Error stopping Event Router: {e}")
                 return False
-        
+
         return False
-    
+
     def restart(self):
         """Restart the Event Router server."""
         print("Restarting Event Router...")
         self.stop()
         time.sleep(2)
         self.start(daemon=True)
-    
+
     def is_running(self) -> bool:
         """Check if Event Router is running."""
         if not self.pid_file.exists():
             return False
-        
+
         try:
             with open(self.pid_file) as f:
                 pid = int(f.read().strip())
-            
+
             # Check if process exists
             os.kill(pid, 0)
             return True
@@ -194,23 +194,23 @@ if __name__ == "__main__":
             # Clean up stale PID file
             self.pid_file.unlink()
             return False
-    
+
     async def status(self):
         """Get Event Router status."""
         if not self.is_running():
             print("Event Router Status: STOPPED")
             return
-        
+
         config = self.load_config()
         print(f"Event Router Status: RUNNING")
-        
+
         if self.pid_file.exists():
             with open(self.pid_file) as f:
                 pid = f.read().strip()
             print(f"PID: {pid}")
-        
+
         print(f"WebSocket URL: ws://{config['host']}:{config['port']}")
-        
+
         # Try to connect and get health
         try:
             client = EventRouterClient(url=f"ws://{config['host']}:{config['port']}")
@@ -225,26 +225,26 @@ if __name__ == "__main__":
                     print(f"  Events in Queue: {health.get('events_in_queue', 0)}")
                     print(f"  Active Subscriptions: {health.get('active_subscriptions', 0)}")
                     print(f"  Connected Clients: {health.get('connected_clients', 0)}")
-                    
+
                     if health.get('errors'):
                         print(f"  Errors: {', '.join(health['errors'])}")
-                
+
                 await client.disconnect()
         except Exception as e:
             print(f"Could not connect to Event Router: {e}")
-    
+
     def configure(self):
         """Interactive configuration."""
         config = self.load_config()
-        
+
         print("\nEvent Router Configuration")
         print("-" * 40)
-        
+
         # Host
         host = input(f"Host [{config['host']}]: ").strip()
         if host:
             config['host'] = host
-        
+
         # Port
         port = input(f"Port [{config['port']}]: ").strip()
         if port:
@@ -253,7 +253,7 @@ if __name__ == "__main__":
             except ValueError:
                 print("Invalid port number")
                 return
-        
+
         # Max queue size
         max_queue = input(f"Max Queue Size [{config['max_queue_size']}]: ").strip()
         if max_queue:
@@ -262,7 +262,7 @@ if __name__ == "__main__":
             except ValueError:
                 print("Invalid queue size")
                 return
-        
+
         # Max clients
         max_clients = input(f"Max Clients [{config['max_clients']}]: ").strip()
         if max_clients:
@@ -271,64 +271,64 @@ if __name__ == "__main__":
             except ValueError:
                 print("Invalid client limit")
                 return
-        
+
         # Multi-queue
         use_multi = input(f"Use Multi-Queue (y/n) [{'y' if config['use_multi_queue'] else 'n'}]: ").strip().lower()
         if use_multi:
             config['use_multi_queue'] = use_multi == 'y'
-        
+
         # Log level
         log_level = input(f"Log Level (DEBUG/INFO/WARNING/ERROR) [{config.get('log_level', 'INFO')}]: ").strip().upper()
         if log_level and log_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR']:
             config['log_level'] = log_level
-        
+
         self.save_config(config)
-        
+
         # Offer to restart if running
         if self.is_running():
             restart = input("\nEvent Router is running. Restart now? (y/n): ").strip().lower()
             if restart == 'y':
                 self.restart()
-    
+
     async def monitor(self):
         """Monitor events in real-time."""
         config = self.load_config()
-        
+
         print(f"Connecting to Event Router at ws://{config['host']}:{config['port']}")
         print("Monitoring all events (Press Ctrl+C to stop)")
         print("-" * 60)
-        
+
         client = EventRouterClient(url=f"ws://{config['host']}:{config['port']}")
-        
+
         try:
             if not await client.connect():
                 print("Failed to connect to Event Router")
                 return
-            
+
             # Subscribe to all events
             @client.on("*")
             async def log_event(event):
                 timestamp = event.metadata.created_at.strftime("%H:%M:%S") if event.metadata and event.metadata.created_at else "??:??:??"
                 priority = event.priority.name if hasattr(event.priority, 'name') else str(event.priority)
                 print(f"[{timestamp}] [{priority:8}] {event.topic:30} | {event.source:20} | {json.dumps(event.payload)[:100]}")
-            
+
             await client.subscribe(topics=["*"], callback=log_event)
-            
+
             # Keep monitoring
             while True:
                 await asyncio.sleep(1)
-                
+
         except KeyboardInterrupt:
             print("\nMonitoring stopped")
         finally:
             await client.disconnect()
-    
+
     def logs(self, lines: int = 50, follow: bool = False):
         """View Event Router logs."""
         if not self.log_file.exists():
             print("No log file found")
             return
-        
+
         if follow:
             # Follow logs
             print(f"Following {self.log_file} (Press Ctrl+C to stop)")
@@ -345,19 +345,19 @@ async def async_main():
     """Async main for commands that need it."""
     parser = argparse.ArgumentParser(description="Event Router Management CLI")
     parser.add_argument("command", choices=[
-        "start", "stop", "restart", "status", "configure", 
+        "start", "stop", "restart", "status", "configure",
         "monitor", "logs", "help"
     ], help="Command to execute")
-    parser.add_argument("--daemon", "-d", action="store_true", 
+    parser.add_argument("--daemon", "-d", action="store_true",
                        help="Start as daemon (background process)")
     parser.add_argument("--lines", "-n", type=int, default=50,
                        help="Number of log lines to show")
     parser.add_argument("--follow", "-f", action="store_true",
                        help="Follow log output")
-    
+
     args = parser.parse_args()
     manager = EventRouterManager()
-    
+
     if args.command == "start":
         manager.start(daemon=args.daemon)
     elif args.command == "stop":
@@ -386,26 +386,26 @@ def main():
     """Main entry point."""
     # Commands that need async
     async_commands = ["status", "monitor"]
-    
+
     if len(sys.argv) > 1 and sys.argv[1] in async_commands:
         asyncio.run(async_main())
     else:
         # Parse args for sync commands
         parser = argparse.ArgumentParser(description="Event Router Management CLI")
         parser.add_argument("command", choices=[
-            "start", "stop", "restart", "status", "configure", 
+            "start", "stop", "restart", "status", "configure",
             "monitor", "logs", "help"
         ], help="Command to execute")
-        parser.add_argument("--daemon", "-d", action="store_true", 
+        parser.add_argument("--daemon", "-d", action="store_true",
                            help="Start as daemon (background process)")
         parser.add_argument("--lines", "-n", type=int, default=50,
                            help="Number of log lines to show")
         parser.add_argument("--follow", "-f", action="store_true",
                            help="Follow log output")
-        
+
         args = parser.parse_args()
         manager = EventRouterManager()
-        
+
         if args.command == "start":
             manager.start(daemon=args.daemon)
         elif args.command == "stop":

@@ -39,7 +39,7 @@ class MemoryMixinProtocol(Protocol):
 class MemoryMixin:
     """
     Mixin providing memory management capabilities for V03Agent.
-    
+
     This mixin requires the following attributes to be present on the class:
     - memory: Optional[AgentMemoryInterface]
     - agent_id: str
@@ -51,7 +51,7 @@ class MemoryMixin:
     - tasks_completed: int
     - success_rate: float
     """
-    
+
     # Type hints for attributes expected from the base class
     memory: Optional[AgentMemoryInterface]
     agent_id: str

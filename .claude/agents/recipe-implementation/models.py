@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 
 class RequirementType(Enum):
     """Types of requirements."""
-    
+
     FUNCTIONAL = "functional"
     NON_FUNCTIONAL = "non_functional"
     INTERFACE = "interface"
@@ -22,7 +22,7 @@ class RequirementType(Enum):
 
 class ImplementationStatus(Enum):
     """Status of implementation."""
-    
+
     NOT_STARTED = "not_started"
     PARTIAL = "partial"
     COMPLETE = "complete"
@@ -31,7 +31,7 @@ class ImplementationStatus(Enum):
 
 class GapSeverity(Enum):
     """Severity of implementation gap."""
-    
+
     CRITICAL = "critical"  # Must be fixed
     HIGH = "high"         # Should be fixed
     MEDIUM = "medium"     # Nice to have
@@ -41,7 +41,7 @@ class GapSeverity(Enum):
 @dataclass
 class Requirement:
     """A single requirement from recipe."""
-    
+
     id: str
     type: RequirementType
     category: str
@@ -55,7 +55,7 @@ class Requirement:
 @dataclass
 class DesignDecision:
     """A design decision from recipe."""
-    
+
     id: str
     category: str
     decision: str
@@ -68,7 +68,7 @@ class DesignDecision:
 @dataclass
 class InterfaceSpec:
     """Interface specification from recipe."""
-    
+
     name: str
     type: str  # class, function, api_endpoint, etc.
     description: str
@@ -82,7 +82,7 @@ class InterfaceSpec:
 @dataclass
 class Dependency:
     """Component dependency."""
-    
+
     name: str
     version: Optional[str] = None
     type: str = "library"  # library, service, component
@@ -93,7 +93,7 @@ class Dependency:
 @dataclass
 class RecipeSpec:
     """Complete recipe specification."""
-    
+
     name: str
     version: str
     description: str
@@ -105,11 +105,11 @@ class RecipeSpec:
     constraints: List[str] = field(default_factory=list)
     assumptions: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def get_requirements_by_type(self, req_type: RequirementType) -> List[Requirement]:
         """Get requirements by type."""
         return [r for r in self.requirements if r.type == req_type]
-    
+
     def get_high_priority_requirements(self, threshold: int = 3) -> List[Requirement]:
         """Get high priority requirements."""
         return [r for r in self.requirements if r.priority >= threshold]
@@ -118,7 +118,7 @@ class RecipeSpec:
 @dataclass
 class ImplementationGap:
     """Gap between recipe and implementation."""
-    
+
     requirement_id: str
     description: str
     severity: GapSeverity
@@ -132,7 +132,7 @@ class ImplementationGap:
 @dataclass
 class EvaluationReport:
     """Code evaluation report."""
-    
+
     recipe_name: str
     code_path: Path
     evaluated_at: datetime = field(default_factory=datetime.now)
@@ -143,11 +143,11 @@ class EvaluationReport:
     compliance_score: float = 0.0
     recommendations: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
-    
+
     def get_critical_gaps(self) -> List[ImplementationGap]:
         """Get critical gaps that must be fixed."""
         return [g for g in self.gaps if g.severity == GapSeverity.CRITICAL]
-    
+
     def is_compliant(self, threshold: float = 0.8) -> bool:
         """Check if implementation is compliant."""
         return self.compliance_score >= threshold
@@ -156,7 +156,7 @@ class EvaluationReport:
 @dataclass
 class GeneratedCode:
     """Generated code from recipe."""
-    
+
     recipe_name: str
     file_path: Path
     content: str
@@ -173,7 +173,7 @@ class GeneratedCode:
 @dataclass
 class TestCase:
     """Test case for validating implementation."""
-    
+
     id: str
     name: str
     description: str
@@ -189,7 +189,7 @@ class TestCase:
 @dataclass
 class ValidationResult:
     """Implementation validation result."""
-    
+
     recipe_name: str
     code_path: Path
     validated_at: datetime = field(default_factory=datetime.now)
@@ -200,14 +200,14 @@ class ValidationResult:
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
     suggestions: List[str] = field(default_factory=list)
-    
+
     def get_test_pass_rate(self) -> float:
         """Get test pass rate."""
         if not self.test_results:
             return 0.0
         passed = sum(1 for result in self.test_results.values() if result)
         return passed / len(self.test_results)
-    
+
     def get_quality_score(self) -> float:
         """Get quality score."""
         if not self.quality_checks:

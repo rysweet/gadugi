@@ -100,7 +100,7 @@ class ServiceStatus:
 
 class GadugiCoordinator:
     """Central coordinator for all Gadugi v0.3 services."""
-    
+
     def __init__(self):
         self.services = {
             "neo4j": {
@@ -111,7 +111,7 @@ class GadugiCoordinator:
                 "ports": {"http": 7475, "bolt": 7689}
             },
             "memory": {
-                "name": "Memory System", 
+                "name": "Memory System",
                 "manager": ".claude/agents/MemoryServiceManager.md",
                 "priority": 2,  # After Neo4j
                 "dependencies": ["neo4j"],
@@ -119,23 +119,23 @@ class GadugiCoordinator:
             },
             "event-router": {
                 "name": "Event Router",
-                "manager": ".claude/agents/EventRouterServiceManager.md", 
+                "manager": ".claude/agents/EventRouterServiceManager.md",
                 "priority": 3,  # After memory system
                 "dependencies": ["memory"],
                 "ports": {"http": 8000, "socket": "/tmp/gadugi-events.sock"}
             }
         }
-        
+
         self.last_status_check = None
         self.status_cache = {}
-    
+
     async def get_comprehensive_status(self, force_refresh: bool = False) -> Dict[str, Any]:
         """Get comprehensive status of all Gadugi services."""
         if not force_refresh and self._status_cache_valid():
             return self.status_cache
-        
+
         print("🔍 Checking Gadugi v0.3 Service Status...")
-        
+
         status_report = {
             "timestamp": datetime.now().isoformat(),
             "overall_status": "UNKNOWN",
@@ -151,13 +151,13 @@ class GadugiCoordinator:
             "recommendations": [],
             "agent_updates": await self._check_agent_updates()
         }
-        
+
         # Check each service
         for service_id, service_config in self.services.items():
             print(f"   Checking {service_config['name']}...")
             service_status = await self._check_service_status(service_id, service_config)
             status_report["services"][service_id] = service_status
-            
+
             # Update summary counts
             status_key = service_status["status"].lower()
             if status_key in ["healthy", "optimal"]:
@@ -168,24 +168,24 @@ class GadugiCoordinator:
                 status_report["summary"]["down"] += 1
             else:
                 status_report["summary"]["unknown"] += 1
-        
+
         # Determine overall status
         status_report["overall_status"] = self._calculate_overall_status(status_report)
-        
+
         # Generate recommendations
         status_report["recommendations"] = self._generate_recommendations(status_report)
-        
+
         # Cache results
         self.status_cache = status_report
         self.last_status_check = datetime.now()
-        
+
         return status_report
-    
+
     async def _check_service_status(self, service_id: str, config: Dict[str, Any]) -> Dict[str, Any]:
         """Check status of individual service via its manager."""
         try:
             manager_path = Path(config["manager"])
-            
+
             if not manager_path.exists():
                 return {
                     "name": config["name"],
@@ -194,7 +194,7 @@ class GadugiCoordinator:
                     "details": {},
                     "last_check": datetime.now().isoformat()
                 }
-            
+
             # For now, we'll simulate calling the service managers
             # In practice, these would be actual executable scripts or Python modules
             if service_id == "neo4j":
@@ -211,7 +211,7 @@ class GadugiCoordinator:
                     "details": {},
                     "last_check": datetime.now().isoformat()
                 }
-        
+
         except Exception as e:
             return {
                 "name": config["name"],
@@ -220,7 +220,7 @@ class GadugiCoordinator:
                 "details": {"error": str(e)},
                 "last_check": datetime.now().isoformat()
             }
-    
+
     async def _check_neo4j_service(self) -> Dict[str, Any]:
         """Check Neo4j service status."""
         try:
@@ -228,7 +228,7 @@ class GadugiCoordinator:
             result = subprocess.run([
                 "docker", "ps", "-f", "name=gadugi-neo4j", "--format", "{{.Status}}"
             ], capture_output=True, text=True, timeout=10)
-            
+
             if result.returncode == 0 and result.stdout.strip():
                 # Container is running, test connection
                 try:
@@ -261,7 +261,7 @@ class GadugiCoordinator:
                 except Exception as e:
                     return {
                         "name": "Neo4j Database",
-                        "status": "UNHEALTHY", 
+                        "status": "UNHEALTHY",
                         "message": f"Neo4j container running but connection failed: {str(e)}",
                         "details": {
                             "container_status": result.stdout.strip(),
@@ -280,7 +280,7 @@ class GadugiCoordinator:
                     },
                     "last_check": datetime.now().isoformat()
                 }
-        
+
         except Exception as e:
             return {
                 "name": "Neo4j Database",
@@ -289,7 +289,7 @@ class GadugiCoordinator:
                 "details": {"error": str(e)},
                 "last_check": datetime.now().isoformat()
             }
-    
+
     async def _check_memory_service(self) -> Dict[str, Any]:
         """Check Memory Service status."""
         try:
@@ -301,7 +301,7 @@ class GadugiCoordinator:
                 neo4j_available = (response.status_code == 200)
             except:
                 pass
-            
+
             # Check SQLite fallback
             sqlite_path = Path(".claude/memory/fallback.db")
             sqlite_available = False
@@ -314,7 +314,7 @@ class GadugiCoordinator:
                 sqlite_available = True
             except:
                 pass
-            
+
             # Determine status
             if neo4j_available:
                 return {
@@ -331,7 +331,7 @@ class GadugiCoordinator:
                 }
             elif sqlite_available:
                 return {
-                    "name": "Memory System", 
+                    "name": "Memory System",
                     "status": "DEGRADED",
                     "message": "Memory system using SQLite fallback",
                     "details": {
@@ -355,16 +355,16 @@ class GadugiCoordinator:
                     },
                     "last_check": datetime.now().isoformat()
                 }
-        
+
         except Exception as e:
             return {
                 "name": "Memory System",
-                "status": "ERROR", 
+                "status": "ERROR",
                 "message": f"Memory service check failed: {str(e)}",
                 "details": {"error": str(e)},
                 "last_check": datetime.now().isoformat()
             }
-    
+
     async def _check_event_router_service(self) -> Dict[str, Any]:
         """Check Event Router service status."""
         try:
@@ -372,7 +372,7 @@ class GadugiCoordinator:
             import psutil
             process_running = False
             process_info = {}
-            
+
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 cmdline = ' '.join(proc.info['cmdline'] or [])
                 if 'gadugi.event_service' in cmdline or 'event_service.service' in cmdline:
@@ -382,7 +382,7 @@ class GadugiCoordinator:
                         "memory_mb": round(proc.memory_info().rss / 1024 / 1024, 2)
                     }
                     break
-            
+
             if process_running:
                 # Test HTTP endpoint
                 http_healthy = False
@@ -392,7 +392,7 @@ class GadugiCoordinator:
                     http_healthy = (response.status_code == 200)
                 except:
                     pass
-                
+
                 # Test Unix socket
                 socket_healthy = False
                 socket_path = Path("/tmp/gadugi-events.sock")
@@ -406,7 +406,7 @@ class GadugiCoordinator:
                         socket_healthy = True
                     except:
                         pass
-                
+
                 if http_healthy and socket_healthy:
                     return {
                         "name": "Event Router",
@@ -445,7 +445,7 @@ class GadugiCoordinator:
                     },
                     "last_check": datetime.now().isoformat()
                 }
-        
+
         except Exception as e:
             return {
                 "name": "Event Router",
@@ -454,7 +454,7 @@ class GadugiCoordinator:
                 "details": {"error": str(e)},
                 "last_check": datetime.now().isoformat()
             }
-    
+
     def _check_dependencies(self) -> Dict[str, Any]:
         """Check service dependencies."""
         deps = {
@@ -463,11 +463,11 @@ class GadugiCoordinator:
             "network": self._check_network_ports()
         }
         return deps
-    
+
     def _check_docker_available(self) -> Dict[str, Any]:
         """Check if Docker is available."""
         try:
-            result = subprocess.run(["docker", "--version"], 
+            result = subprocess.run(["docker", "--version"],
                                   capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
                 return {
@@ -485,7 +485,7 @@ class GadugiCoordinator:
                 "available": False,
                 "message": f"Docker not available: {str(e)}"
             }
-    
+
     def _check_python_available(self) -> Dict[str, Any]:
         """Check Python environment."""
         try:
@@ -501,32 +501,32 @@ class GadugiCoordinator:
                 "available": False,
                 "message": f"Python check failed: {str(e)}"
             }
-    
+
     def _check_network_ports(self) -> Dict[str, Any]:
         """Check network port availability."""
         import socket
         ports_to_check = [7475, 7689, 8000]
         port_status = {}
-        
+
         for port in ports_to_check:
             try:
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.settimeout(1)
                 result = sock.connect_ex(('localhost', port))
                 sock.close()
-                
+
                 if result == 0:
                     port_status[port] = {"in_use": True, "status": "occupied"}
                 else:
                     port_status[port] = {"in_use": False, "status": "available"}
             except Exception as e:
                 port_status[port] = {"in_use": False, "status": f"error: {str(e)}"}
-        
+
         return {
             "ports": port_status,
             "message": f"Checked {len(ports_to_check)} ports"
         }
-    
+
     async def _check_agent_updates(self) -> Dict[str, Any]:
         """Check if agents need updates."""
         try:
@@ -544,11 +544,11 @@ class GadugiCoordinator:
                 "error": str(e),
                 "message": f"Agent update check failed: {str(e)}"
             }
-    
+
     def _calculate_overall_status(self, status_report: Dict[str, Any]) -> str:
         """Calculate overall system status."""
         summary = status_report["summary"]
-        
+
         if summary["down"] > 0:
             return "CRITICAL"
         elif summary["degraded"] > 0:
@@ -557,60 +557,60 @@ class GadugiCoordinator:
             return "FULLY_OPERATIONAL"
         else:
             return "UNKNOWN"
-    
+
     def _generate_recommendations(self, status_report: Dict[str, Any]) -> List[str]:
         """Generate actionable recommendations."""
         recommendations = []
-        
+
         # Check Neo4j
         neo4j_status = status_report["services"].get("neo4j", {})
         if neo4j_status.get("status") in ["DOWN", "UNHEALTHY"]:
             recommendations.append("Start Neo4j service: docker-compose -f docker-compose.gadugi.yml up -d neo4j")
-        
+
         # Check Memory System
         memory_status = status_report["services"].get("memory", {})
         if memory_status.get("status") == "CRITICAL":
             recommendations.append("Initialize SQLite fallback: mkdir -p .claude/memory")
         elif memory_status.get("status") == "DEGRADED":
             recommendations.append("Restore Neo4j connection for optimal memory performance")
-        
+
         # Check Event Router
         event_status = status_report["services"].get("event-router", {})
         if event_status.get("status") in ["DOWN", "ERROR"]:
             recommendations.append("Start Event Router: python -m gadugi.event_service.service")
-        
+
         # Dependencies
         deps = status_report["dependencies"]
         if not deps.get("docker", {}).get("available", False):
             recommendations.append("Install Docker for Neo4j container support")
-        
+
         if not recommendations:
             recommendations.append("All services operational - no actions needed")
-        
+
         return recommendations
-    
+
     def _status_cache_valid(self) -> bool:
         """Check if status cache is still valid."""
         if not self.last_status_check:
             return False
-        
+
         cache_age = (datetime.now() - self.last_status_check).total_seconds()
         return cache_age < 30  # 30 second cache
-    
+
     async def ensure_services_running(self) -> bool:
         """Ensure all services are running, start if needed."""
         print("🚀 Ensuring all Gadugi services are running...")
-        
+
         # Get current status
         status = await self.get_comprehensive_status(force_refresh=True)
-        
+
         success = True
-        
+
         # Start services in dependency order
-        for service_id in sorted(self.services.keys(), 
+        for service_id in sorted(self.services.keys(),
                                key=lambda x: self.services[x]["priority"]):
             service_status = status["services"][service_id]
-            
+
             if service_status["status"] in ["DOWN", "ERROR", "CRITICAL"]:
                 print(f"   Starting {service_status['name']}...")
                 if await self._start_service(service_id):
@@ -620,23 +620,23 @@ class GadugiCoordinator:
                     success = False
             else:
                 print(f"   ✅ {service_status['name']} already running")
-        
+
         return success
-    
+
     async def _start_service(self, service_id: str) -> bool:
         """Start individual service."""
         try:
             if service_id == "neo4j":
                 result = subprocess.run([
-                    "docker-compose", "-f", "docker-compose.gadugi.yml", 
+                    "docker-compose", "-f", "docker-compose.gadugi.yml",
                     "up", "-d", "neo4j"
                 ], capture_output=True, text=True, timeout=60)
                 return result.returncode == 0
-            
+
             elif service_id == "memory":
                 # Memory service is primarily client-side, ensure dependencies
                 return True
-            
+
             elif service_id == "event-router":
                 # Start Event Router service
                 subprocess.Popen([
@@ -644,9 +644,9 @@ class GadugiCoordinator:
                 ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 await asyncio.sleep(5)  # Give it time to start
                 return True
-            
+
             return False
-            
+
         except Exception as e:
             print(f"Error starting {service_id}: {e}")
             return False
@@ -658,13 +658,13 @@ class GadugiCoordinator:
             "",
             "### Core Services:"
         ]
-        
+
         # Service status
         for service_id, service_status in status_report["services"].items():
             status = service_status["status"]
             name = service_status["name"]
             message = service_status.get("message", "")
-            
+
             if status in ["HEALTHY", "OPTIMAL"]:
                 icon = "✅"
             elif status in ["DEGRADED", "UNHEALTHY", "PARTIALLY_OPERATIONAL"]:
@@ -673,7 +673,7 @@ class GadugiCoordinator:
                 icon = "❌"
             else:
                 icon = "❓"
-            
+
             # Add port info if available
             port_info = ""
             details = service_status.get("details", {})
@@ -681,31 +681,31 @@ class GadugiCoordinator:
                 port_info = f" (Ports {details['http_port']}/{details['bolt_port']})"
             elif "http_endpoint" in details:
                 port_info = f" (Port 8000)"
-            
+
             summary_lines.append(f"{icon} {name} - {status.title()}{port_info}")
             if message and message != name:
                 summary_lines.append(f"   {message}")
-        
+
         # Agent updates
         summary_lines.extend([
             "",
             "### Agent Updates:"
         ])
-        
+
         agent_info = status_report["agent_updates"]
         if agent_info.get("up_to_date", False):
             summary_lines.append("✅ All agents up to date")
         else:
             pending = agent_info.get("pending_updates", 0)
             summary_lines.append(f"⚠️ {pending} agent updates pending")
-        
+
         # Overall status
         overall = status_report["overall_status"]
         summary_lines.extend([
             "",
             f"### Overall Status: {overall.replace('_', ' ').title()}"
         ])
-        
+
         # Recommendations
         recommendations = status_report.get("recommendations", [])
         if recommendations and len(recommendations) > 1:  # More than just "no actions needed"
@@ -715,7 +715,7 @@ class GadugiCoordinator:
             ])
             for rec in recommendations[:3]:  # Top 3 recommendations
                 summary_lines.append(f"- {rec}")
-        
+
         return "\\n".join(summary_lines)
 
 # Global coordinator instance
@@ -725,11 +725,11 @@ coordinator = GadugiCoordinator()
 async def status_command():
     """CLI command for status check."""
     status_report = await coordinator.get_comprehensive_status(force_refresh=True)
-    
+
     # Print formatted summary
     summary = coordinator.generate_status_summary(status_report)
     print(summary.replace("\\n", "\n"))
-    
+
     # Return JSON for programmatic use
     return status_report
 
@@ -740,12 +740,12 @@ async def start_command():
 async def main():
     """Main CLI entry point."""
     import sys
-    
+
     if len(sys.argv) < 2:
         command = "status"
     else:
         command = sys.argv[1]
-    
+
     if command == "status":
         await status_command()
     elif command == "start":
@@ -820,7 +820,7 @@ case "${1:-status}" in
         echo ""
         echo "Commands:"
         echo "  status - Show comprehensive service status"
-        echo "  start  - Ensure all services are running"  
+        echo "  start  - Ensure all services are running"
         echo "  json   - Output detailed status as JSON"
         exit 1
         ;;
@@ -879,7 +879,7 @@ success = await coordinator.ensure_services_running()
     },
     "memory": {
       "name": "Memory System",
-      "status": "OPTIMAL", 
+      "status": "OPTIMAL",
       "message": "Memory system using Neo4j primary backend",
       "details": {
         "active_backend": "neo4j",
@@ -900,7 +900,7 @@ success = await coordinator.ensure_services_running()
   "summary": {
     "total_services": 3,
     "healthy": 3,
-    "degraded": 0, 
+    "degraded": 0,
     "down": 0,
     "unknown": 0
   },

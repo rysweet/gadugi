@@ -137,7 +137,7 @@ await client.disconnect()
 async def publisher():
     client = EventRouterClient()
     await client.connect()
-    
+
     for i in range(10):
         await client.publish(
             topic=f"data.update",
@@ -149,11 +149,11 @@ async def publisher():
 async def subscriber():
     client = EventRouterClient()
     await client.connect()
-    
+
     @client.on("data.*")
     async def handle_data(event):
         print(f"Received: {event.payload}")
-    
+
     await asyncio.sleep(60)  # Keep running
 ```
 
@@ -163,7 +163,7 @@ async def subscriber():
 class TaskAgent:
     def __init__(self, client):
         self.client = client
-    
+
     async def create_task(self, description):
         await self.client.publish(
             topic="task.created",
@@ -178,7 +178,7 @@ class TaskAgent:
 class WorkerAgent:
     def __init__(self, client):
         self.client = client
-        
+
     async def start(self):
         @self.client.on("task.created")
         async def process_task(event):
@@ -196,23 +196,23 @@ class WorkerAgent:
 async def request_response_example():
     client = EventRouterClient()
     await client.connect()
-    
+
     response_received = asyncio.Event()
     response_data = {}
-    
+
     # Set up response handler
     @client.on("response.data")
     async def handle_response(event):
         if event.payload.get("request_id") == "req-123":
             response_data.update(event.payload)
             response_received.set()
-    
+
     # Send request
     await client.publish(
         topic="request.data",
         payload={"request_id": "req-123", "query": "get_status"}
     )
-    
+
     # Wait for response
     await asyncio.wait_for(response_received.wait(), timeout=5.0)
     print(f"Response: {response_data}")
@@ -371,7 +371,7 @@ async def load_test():
         client = EventRouterClient()
         await client.connect()
         clients.append(client)
-    
+
     # Publish many events
     for _ in range(1000):
         client = random.choice(clients)
@@ -379,7 +379,7 @@ async def load_test():
             topic="load.test",
             payload={"data": "test"}
         )
-    
+
     # Check health
     health = await clients[0].get_health()
     print(f"Processed: {health['events_processed']}")

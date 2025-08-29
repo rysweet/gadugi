@@ -63,7 +63,7 @@ class MemorySystem:
         self.neo4j_service = Neo4jGraphService()
         self.event_router = EventRouterService()
         self.github_client = GitHubClient()
-    
+
     async def store_memory(self, memory: Memory) -> str
     async def retrieve_context(self, query: str, limit: int = 10) -> List[Memory]
     async def sync_with_github(self) -> SyncResult

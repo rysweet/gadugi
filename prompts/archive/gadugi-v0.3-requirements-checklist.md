@@ -104,7 +104,7 @@
 <<<<<<< HEAD
 **CURRENT REALITY**:
 =======
-**CURRENT REALITY**: 
+**CURRENT REALITY**:
 >>>>>>> feature/gadugi-v0.3-regeneration
 - 0% of requirements actually implemented
 - 0% of services running

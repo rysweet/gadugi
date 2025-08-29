@@ -143,9 +143,7 @@ def verify_setup():
             checks_passed += 1
 
             # Get version
-            version_result = subprocess.run(
-                ["claude", "--version"], capture_output=True, text=True
-            )
+            version_result = subprocess.run(["claude", "--version"], capture_output=True, text=True)
             if version_result.returncode == 0:
                 print(f"      Version: {version_result.stdout.strip()}")
         else:

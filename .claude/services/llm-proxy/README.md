@@ -103,7 +103,7 @@ $ python3 configure_proxy.py
 ⚙️ Configuring Azure OpenAI
 🔐 API Key: ****
 ➤ Endpoint: https://my-resource.openai.azure.com/
-➤ API Version [2024-02-15-preview]: 
+➤ API Version [2024-02-15-preview]:
 ➤ Deployment Name: gpt-4-deployment
 
 ✅ Configuration saved!
@@ -119,7 +119,7 @@ $ python3 configure_proxy.py
 ```
 User: Use the LLMProxy to help me setup Azure OpenAI
 
-Agent: I'll help you configure Azure OpenAI for the LLM Proxy Service. 
+Agent: I'll help you configure Azure OpenAI for the LLM Proxy Service.
        Let me start the interactive configuration wizard for you...
 
 [Configuration wizard runs]
@@ -236,7 +236,7 @@ Contains sensitive credentials and service settings:
 AZURE_OPENAI_API_KEY=sk-...
 AZURE_OPENAI_ENDPOINT=https://...
 
-# Service Configuration  
+# Service Configuration
 LLM_PROXY_PORT=8080
 LLM_PROXY_LOG_LEVEL=INFO
 LLM_PROXY_CACHE_SIZE=1000

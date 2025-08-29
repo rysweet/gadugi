@@ -8,7 +8,7 @@ Set up and verify Neo4j database for the Gadugi v0.3 implementation.
 <<<<<<< HEAD
 2. Initialize the database schema
 =======
-2. Initialize the database schema 
+2. Initialize the database schema
 >>>>>>> feature/gadugi-v0.3-regeneration
 3. Verify the connection is working
 4. Create test data to confirm operation

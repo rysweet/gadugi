@@ -31,17 +31,13 @@ class TestTeamCoachStopHookUnit(unittest.TestCase):
         )
 
         # Load the hook module directly for unit testing
-        spec = importlib.util.spec_from_file_location(
-            "teamcoach_stop", self.hook_script_path
-        )
+        spec = importlib.util.spec_from_file_location("teamcoach_stop", self.hook_script_path)
         self.hook_module = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
         spec.loader.exec_module(self.hook_module)  # type: ignore[attr-defined]
 
     def test_hook_script_exists_and_executable(self):
         """Test that the hook script exists and is executable."""
-        self.assertTrue(
-            os.path.exists(self.hook_script_path), "Hook script should exist"
-        )
+        self.assertTrue(os.path.exists(self.hook_script_path), "Hook script should exist")
         self.assertTrue(
             os.access(self.hook_script_path, os.X_OK),
             "Hook script should be executable",
@@ -200,9 +196,7 @@ class TestTeamCoachSubagentStopHookUnit(unittest.TestCase):
 
     def test_hook_script_exists_and_executable(self):
         """Test that the subagent hook script exists and is executable."""
-        self.assertTrue(
-            os.path.exists(self.hook_script_path), "Subagent hook script should exist"
-        )
+        self.assertTrue(os.path.exists(self.hook_script_path), "Subagent hook script should exist")
         self.assertTrue(
             os.access(self.hook_script_path, os.X_OK),
             "Subagent hook script should be executable",
@@ -359,9 +353,7 @@ sys.exit(0)
 
     def test_both_hooks_are_non_blocking(self):
         """Test that both hooks are designed to be non-blocking."""
-        hooks_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        hooks_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         for hook_file in ["teamcoach-stop.py", "teamcoach-subagent-stop.py"]:
             hook_path = os.path.join(hooks_dir, hook_file)
@@ -379,9 +371,7 @@ sys.exit(0)
 
     def test_hooks_use_appropriate_timeouts(self):
         """Test that hooks use appropriate timeout values."""
-        hooks_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        hooks_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         # Check stop hook (should be 5 minutes)
         with open(os.path.join(hooks_dir, "teamcoach-stop.py"), "r") as f:
@@ -399,9 +389,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
 
     def test_hook_files_have_correct_permissions(self):
         """Test that hook files have secure permissions."""
-        hooks_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        hooks_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         for hook_file in ["teamcoach-stop.py", "teamcoach-subagent-stop.py"]:
             hook_path = os.path.join(hooks_dir, hook_file)
@@ -452,9 +440,7 @@ class TestTeamCoachHookPermissions(unittest.TestCase):
 
         # Verify that new workflow reflection system components exist as replacement
         base_dir = os.path.dirname(os.path.dirname(__file__))
-        reflection_agent = os.path.join(
-            base_dir, ".claude", "agents", "WorkflowPhaseReflection.md"
-        )
+        reflection_agent = os.path.join(base_dir, ".claude", "agents", "WorkflowPhaseReflection.md")
         self.assertTrue(
             os.path.exists(reflection_agent),
             "Workflow reflection agent should exist as hook replacement",
@@ -466,9 +452,7 @@ class TestTeamCoachHookErrorHandling(unittest.TestCase):
 
     def test_hooks_handle_all_exceptions(self):
         """Test that hooks have comprehensive exception handling."""
-        hooks_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        hooks_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         for hook_file in ["teamcoach-stop.py", "teamcoach-subagent-stop.py"]:
             hook_path = os.path.join(hooks_dir, hook_file)
@@ -486,9 +470,7 @@ class TestTeamCoachHookErrorHandling(unittest.TestCase):
 
     def test_hooks_provide_meaningful_error_messages(self):
         """Test that hooks provide meaningful error messages."""
-        hooks_dir = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks"
-        )
+        hooks_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude", "hooks")
 
         # Test stop hook error messages
         with open(os.path.join(hooks_dir, "teamcoach-stop.py"), "r") as f:

@@ -352,52 +352,52 @@ from llm_proxy_service import (
 
 async def chat_assistant():
     """Simple chat assistant using LLM Proxy."""
-    
+
     # Initialize service
     service = LLMProxyService(
         cache_size=500,
         load_balance_strategy=LoadBalanceStrategy.COST_OPTIMIZED,
         enable_failover=True
     )
-    
+
     await service.start()
-    
+
     try:
         conversation = []
         print("Chat Assistant Ready! (type 'quit' to exit)")
-        
+
         while True:
             # Get user input
             user_input = input("\nYou: ")
             if user_input.lower() == 'quit':
                 break
-            
+
             # Add to conversation
             conversation.append({"role": "user", "content": user_input})
-            
+
             # Create request
             request = create_chat_request(
                 messages=conversation,
                 model="gpt-3.5-turbo",
                 temperature=0.7
             )
-            
+
             # Get response
             response = await service.generate_completion(request)
             print(f"\nAssistant: {response.content}")
-            
+
             # Add to conversation history
             conversation.append({
-                "role": "assistant", 
+                "role": "assistant",
                 "content": response.content
             })
-            
+
             # Show stats periodically
             if len(conversation) % 10 == 0:
                 stats = service.get_service_stats()
                 print(f"\n[Stats] Requests: {stats['total_requests']}, "
                       f"Cost: ${stats['total_cost']:.2f}")
-    
+
     finally:
         await service.stop()
         print("\nGoodbye!")

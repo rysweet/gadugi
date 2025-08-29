@@ -162,32 +162,32 @@ A complete redesign of the Gadugi Event Router to create a production-ready, sca
 @dataclass
 class Event:
     """Enhanced event model with full traceability."""
-    
+
     # Core fields
     id: str = field(default_factory=lambda: str(uuid4()))
     type: str = ""
     payload: Dict[str, Any] = field(default_factory=dict)
-    
+
     # Routing fields
     source: str = ""
     target: Optional[str] = None
     topic: Optional[str] = None
-    
+
     # Metadata fields
     timestamp: datetime = field(default_factory=datetime.utcnow)
     correlation_id: Optional[str] = None
     causation_id: Optional[str] = None
-    
+
     # Priority and TTL
     priority: int = 5  # 1-10, higher is more important
     ttl: Optional[int] = None  # Time to live in seconds
     expires_at: Optional[datetime] = None
-    
+
     # Delivery tracking
     attempts: int = 0
     max_attempts: int = 3
     last_error: Optional[str] = None
-    
+
     # Audit fields
     created_by: Optional[str] = None
     tags: List[str] = field(default_factory=list)
@@ -199,22 +199,22 @@ class Event:
 ```python
 class Transport(ABC):
     """Abstract transport interface."""
-    
+
     @abstractmethod
     async def connect(self) -> None:
         """Establish connection."""
         pass
-    
+
     @abstractmethod
     async def disconnect(self) -> None:
         """Close connection."""
         pass
-    
+
     @abstractmethod
     async def publish(self, event: Event) -> str:
         """Publish an event."""
         pass
-    
+
     @abstractmethod
     async def subscribe(
         self,
@@ -223,12 +223,12 @@ class Transport(ABC):
     ) -> str:
         """Subscribe to topics."""
         pass
-    
+
     @abstractmethod
     async def unsubscribe(self, subscription_id: str) -> None:
         """Unsubscribe from topics."""
         pass
-    
+
     @abstractmethod
     def is_connected(self) -> bool:
         """Check connection status."""
@@ -240,12 +240,12 @@ class Transport(ABC):
 ```python
 class EventRouterClient:
     """Simple, developer-friendly client SDK."""
-    
+
     def __init__(self, url: str = "localhost:8080", transport: str = "auto"):
         """Initialize client with auto-detection."""
         self.transport = TransportFactory.create(url, transport)
         self.reconnector = AutoReconnector(self.transport)
-        
+
     async def publish(self, event_type: str, payload: Dict, **kwargs) -> str:
         """Publish an event with simple API."""
         event = Event(
@@ -254,12 +254,12 @@ class EventRouterClient:
             **kwargs
         )
         return await self.transport.publish(event)
-    
+
     async def subscribe(self, *topics, handler=None) -> Subscription:
         """Subscribe to topics with decorator support."""
         if handler:
             return await self.transport.subscribe(topics, handler)
-        
+
         # Decorator style
         def decorator(func):
             asyncio.create_task(
@@ -267,7 +267,7 @@ class EventRouterClient:
             )
             return func
         return decorator
-    
+
     def on(self, event_type: str):
         """Decorator for event handlers."""
         def decorator(func):
@@ -312,7 +312,7 @@ event_router:
         enabled: true
         max_attempts: 5
         backoff: "exponential"
-        
+
   # Persistence settings
   persistence:
     enabled: true
@@ -325,19 +325,19 @@ event_router:
       by_type:
         audit: "90d"
         debug: "1d"
-        
+
   # Queue settings
   queue:
     max_size: 10000
     overflow_policy: "drop_oldest"  # drop_oldest, drop_newest, block
     priority_levels: 10
-    
+
   # Performance settings
   performance:
     worker_threads: 4
     batch_size: 100
     flush_interval: "100ms"
-    
+
   # Monitoring settings
   monitoring:
     health_check:
@@ -474,11 +474,11 @@ from event_router_v1 import EventRouter as V1Router
 
 class CompatibilityRouter(V1Router):
     """Wrapper to maintain V1 API compatibility."""
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.v2_client = EventRouterClient()
-    
+
     async def publish_event(self, event):
         """V1 compatible publish."""
         return await self.v2_client.publish(
@@ -503,7 +503,7 @@ async def migrate_events():
     """Migrate events from V1 to V2."""
     v1_store = V1EventStore()
     v2_store = V2EventStore()
-    
+
     async for event in v1_store.get_all():
         v2_event = convert_v1_to_v2(event)
         await v2_store.save(v2_event)

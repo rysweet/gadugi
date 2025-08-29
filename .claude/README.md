@@ -95,20 +95,20 @@ def execute_task(task_id, description):
         'operation': 'create',
         'task_id': task_id
     })
-    
+
     # 2. Write code in worktree
     code_result = execute('code', {
         'action': 'write',
         'file_path': f"{worktree['worktree_path']}/solution.py",
         'content': '# Implementation here'
     })
-    
+
     # 3. Run tests
     test_result = execute('test', {
         'test_framework': 'pytest',
         'working_dir': worktree['worktree_path']
     })
-    
+
     # 4. Create PR if tests pass
     if test_result['success']:
         pr = execute('github', {
@@ -116,7 +116,7 @@ def execute_task(task_id, description):
             'title': f'Fix: {description}',
             'body': 'All tests passing'
         })
-        
+
     return {'task_id': task_id, 'success': test_result['success']}
 ```
 

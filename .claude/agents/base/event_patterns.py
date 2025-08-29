@@ -208,7 +208,7 @@ class ExampleEventReactionAgent(EventSubscriber):
         self.performance_metrics: List[Dict[str, Any]] = []
         self.collaboration_history: List[Dict[str, Any]] = []
         self.learned_patterns: Dict[str, List[Dict]] = defaultdict(list)
-        
+
         # Mock memory attribute for demonstration
         self.memory: Dict[str, Any] = {}
 
@@ -853,7 +853,7 @@ class ExampleEventReactionAgent(EventSubscriber):
 
     # ========== Helper Methods ==========
 
-    async def emit_collaboration(self, message: str, message_type: str, tags: Optional[List[str]] = None, 
+    async def emit_collaboration(self, message: str, message_type: str, tags: Optional[List[str]] = None,
                                 recipient_id: Optional[str] = None, requires_response: bool = False) -> bool:
         """Emit a collaboration message (stub method for demonstration)."""
         # In a real implementation, this would emit an event
@@ -865,14 +865,14 @@ class ExampleEventReactionAgent(EventSubscriber):
         # In a real implementation, this would emit an error event
         print(f"[{self.agent_id}] Error: {error_type} - {error_message}")
         return True
-    
+
     async def emit_knowledge_learned(self, knowledge_type: str, content: str, confidence: float = 0.8) -> bool:
         """Emit a knowledge learned event (stub method for demonstration)."""
         # In a real implementation, this would emit a knowledge event
         print(f"[{self.agent_id}] Knowledge: {knowledge_type} - {content} (confidence: {confidence})")
         return True
 
-    def subscribe_to_events(self, pattern: Optional[EventPattern] = None, handler: Optional[Any] = None, 
+    def subscribe_to_events(self, pattern: Optional[EventPattern] = None, handler: Optional[Any] = None,
                   reaction_type: Optional[ReactionType] = None, **kwargs) -> str:
         """Subscribe to events (stub method for demonstration)."""
         # In a real implementation, this would set up event subscriptions

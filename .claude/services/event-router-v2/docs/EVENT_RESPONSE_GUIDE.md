@@ -19,7 +19,7 @@ await client.connect()
 @client.on("task.created")
 async def handle_task_created(event):
     print(f"New task: {event.payload['task_id']}")
-    
+
     # Respond by claiming the task
     await client.publish(
         topic="task.claimed",
@@ -74,7 +74,7 @@ Check event payload and respond conditionally:
 @client.on("order.placed")
 async def handle_order(event):
     total = event.payload.get("total", 0)
-    
+
     if total > 1000:
         # High-value order - priority processing
         await client.publish(
@@ -104,21 +104,21 @@ One event triggers multiple coordinated responses:
 @client.on("deployment.started")
 async def handle_deployment(event):
     deployment_id = event.payload["deployment_id"]
-    
+
     # Trigger multiple responses in sequence or parallel
-    
+
     # 1. Notify team
     await client.publish(
         topic="notification.slack",
         payload={"channel": "#deployments", "message": f"Deployment {deployment_id} started"}
     )
-    
+
     # 2. Start monitoring
     await client.publish(
         topic="monitoring.track",
         payload={"deployment_id": deployment_id, "metrics": ["cpu", "memory", "errors"]}
     )
-    
+
     # 3. Create rollback checkpoint
     await client.publish(
         topic="backup.create",
@@ -136,33 +136,33 @@ class StatefulResponder:
         self.client = client
         self.active_tasks = {}
         self.error_counts = {}
-    
+
     async def start(self):
         @self.client.on("task.started")
         async def track_start(event):
             task_id = event.payload["task_id"]
             self.active_tasks[task_id] = event.payload
-        
+
         @self.client.on("task.completed")
         async def track_completion(event):
             task_id = event.payload["task_id"]
             if task_id in self.active_tasks:
                 duration = time.time() - self.active_tasks[task_id]["start_time"]
-                
+
                 # Respond if task took too long
                 if duration > 300:  # 5 minutes
                     await self.client.publish(
                         topic="performance.alert",
                         payload={"task_id": task_id, "duration": duration}
                     )
-                
+
                 del self.active_tasks[task_id]
-        
+
         @self.client.on("error.*")
         async def track_errors(event):
             source = event.source
             self.error_counts[source] = self.error_counts.get(source, 0) + 1
-            
+
             # Circuit breaker pattern
             if self.error_counts[source] >= 5:
                 await self.client.publish(
@@ -180,17 +180,17 @@ class AggregatorResponder:
     def __init__(self, client):
         self.client = client
         self.metrics = []
-    
+
     async def start(self):
         @self.client.on("metrics.reported")
         async def collect_metrics(event):
             self.metrics.append(event.payload)
-            
+
             # Every 10 metrics, publish aggregate
             if len(self.metrics) >= 10:
                 avg_cpu = sum(m["cpu"] for m in self.metrics) / len(self.metrics)
                 max_memory = max(m["memory"] for m in self.metrics)
-                
+
                 await self.client.publish(
                     topic="metrics.aggregate",
                     payload={
@@ -200,7 +200,7 @@ class AggregatorResponder:
                         "sample_count": len(self.metrics)
                     }
                 )
-                
+
                 self.metrics = []  # Reset
 ```
 
@@ -211,33 +211,33 @@ class AggregatorResponder:
 ```python
 class TaskWorkerAgent:
     """Agent that responds to task.created events by processing tasks."""
-    
+
     def __init__(self, client, capabilities):
         self.client = client
         self.capabilities = capabilities  # What tasks this worker can handle
         self.busy = False
-    
+
     async def start(self):
         @self.client.on("task.created")
         async def respond_to_task(event):
             # Only respond if not busy and capable
             if not self.busy and event.payload["type"] in self.capabilities:
                 await self.process_task(event)
-    
+
     async def process_task(self, event):
         self.busy = True
         task_id = event.payload["task_id"]
-        
+
         # Claim the task
         await self.client.publish(
             topic="task.claimed",
             payload={"task_id": task_id, "worker": self.worker_id}
         )
-        
+
         try:
             # Process based on type
             result = await self.execute_task(event.payload)
-            
+
             # Publish completion
             await self.client.publish(
                 topic="task.completed",
@@ -258,7 +258,7 @@ class TaskWorkerAgent:
 ```python
 class MonitorAgent:
     """Agent that responds to ALL events for monitoring."""
-    
+
     def __init__(self, client):
         self.client = client
         self.event_counts = {}
@@ -267,14 +267,14 @@ class MonitorAgent:
             "failure": 5,
             "timeout": 3
         }
-    
+
     async def start(self):
         # Monitor everything
         @self.client.on("*")
         async def monitor_all(event):
             # Count by topic
             self.event_counts[event.topic] = self.event_counts.get(event.topic, 0) + 1
-            
+
             # Check for alert conditions
             for keyword, threshold in self.alert_thresholds.items():
                 if keyword in event.topic:
@@ -297,11 +297,11 @@ class MonitorAgent:
 ```python
 class OrchestratorAgent:
     """Agent that coordinates workflows by responding to phase completions."""
-    
+
     def __init__(self, client):
         self.client = client
         self.workflows = {}
-    
+
     async def start(self):
         @self.client.on("workflow.started")
         async def init_workflow(event):
@@ -310,22 +310,22 @@ class OrchestratorAgent:
                 "phases": event.payload["phases"],
                 "current": 0
             }
-            
+
             # Start first phase
             await self.start_phase(workflow_id, 0)
-        
+
         @self.client.on("phase.completed")
         async def handle_phase_completion(event):
             workflow_id = event.payload["workflow_id"]
             phase_num = event.payload["phase_number"]
-            
+
             if workflow_id in self.workflows:
                 workflow = self.workflows[workflow_id]
-                
+
                 if phase_num == workflow["current"]:
                     # Move to next phase
                     next_phase = phase_num + 1
-                    
+
                     if next_phase < len(workflow["phases"]):
                         await self.start_phase(workflow_id, next_phase)
                     else:
@@ -335,12 +335,12 @@ class OrchestratorAgent:
                             payload={"workflow_id": workflow_id}
                         )
                         del self.workflows[workflow_id]
-    
+
     async def start_phase(self, workflow_id, phase_num):
         workflow = self.workflows[workflow_id]
         phase = workflow["phases"][phase_num]
         workflow["current"] = phase_num
-        
+
         await self.client.publish(
             topic="phase.start",
             payload={
@@ -407,14 +407,14 @@ async def test_response_handler():
     # Create test client
     client = EventRouterClient()
     await client.connect()
-    
+
     # Track responses
     responses = []
-    
+
     @client.on("response.test")
     async def capture_response(event):
         responses.append(event)
-    
+
     # Set up handler to test
     @client.on("input.test")
     async def handler_under_test(event):
@@ -423,20 +423,20 @@ async def test_response_handler():
             topic="response.test",
             payload={"processed": event.payload["value"] * 2}
         )
-    
+
     # Send test event
     await client.publish(
         topic="input.test",
         payload={"value": 5}
     )
-    
+
     # Wait for response
     await asyncio.sleep(0.5)
-    
+
     # Verify
     assert len(responses) == 1
     assert responses[0].payload["processed"] == 10
-    
+
     await client.disconnect()
 ```
 

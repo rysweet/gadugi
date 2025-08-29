@@ -601,7 +601,7 @@ results = run_full_test_suite()
 
 if results['all_passed']:
     print("🎉 All checks passed! Ready to create PR.")
-    
+
     # Check coverage too
     coverage = check_test_coverage(threshold=80)
     if coverage['meets_threshold']:
@@ -618,41 +618,41 @@ else:
 # CI/CD pipeline check
 def ci_check():
     """Run all checks required for CI."""
-    
+
     # Detect project type first
     project = detect_uv_project()
     print(f"Project type: {'UV' if project['is_uv_project'] else 'Standard Python'}")
-    
+
     # Format check (don't modify)
     format_check = run_ruff_format(".", check=True)
     if format_check['files_changed'] > 0:
         print(f"❌ {format_check['files_changed']} files need formatting")
         return False
-    
+
     # Linting
     lint_check = run_ruff_check(".")
     if lint_check['issues_found'] > 0:
         print(f"❌ {lint_check['issues_found']} linting issues")
         return False
-    
+
     # Type checking
     type_check = run_pyright(".")
     if type_check['errors'] > 0:
         print(f"❌ {type_check['errors']} type errors")
         return False
-    
+
     # Tests with coverage
     test_check = run_pytest("tests/", coverage=True)
     if test_check['exit_code'] != 0:
         print(f"❌ {test_check['failed']} tests failed")
         return False
-    
+
     # Coverage threshold
     coverage_check = check_test_coverage(threshold=80)
     if not coverage_check['meets_threshold']:
         print(f"❌ Coverage {coverage_check['current_coverage']}% below threshold")
         return False
-    
+
     print("✅ All CI checks passed!")
     return True
 

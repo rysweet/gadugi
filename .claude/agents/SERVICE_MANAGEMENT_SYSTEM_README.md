@@ -256,7 +256,7 @@ export GITHUB_TOKEN="your_github_token"
     },
     "memory": {
       "name": "Memory System",
-      "status": "DEGRADED", 
+      "status": "DEGRADED",
       "message": "Using SQLite fallback",
       "details": {
         "active_backend": "sqlite",
@@ -408,7 +408,7 @@ start_service() {
 }
 
 stop_service() {
-    # Implement service stop logic  
+    # Implement service stop logic
     return 0  # success
 }
 

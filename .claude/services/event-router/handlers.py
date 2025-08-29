@@ -45,11 +45,11 @@ class SQLiteMemoryBackend(Protocol):
         ...
     async def initialize(self) -> None:
         ...
-    async def store_memory(self, agent_id: str, content: str, memory_type: str, 
-                           task_id: Optional[str], importance_score: float, 
+    async def store_memory(self, agent_id: str, content: str, memory_type: str,
+                           task_id: Optional[str], importance_score: float,
                            metadata: Dict[str, Any]) -> str:
         ...
-    async def get_memories(self, agent_id: str, memory_type: Optional[str] = None, 
+    async def get_memories(self, agent_id: str, memory_type: Optional[str] = None,
                            task_id: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
         ...
     async def get_stats(self) -> Dict[str, Any]:
@@ -80,17 +80,17 @@ except ImportError:
                 return "mock-memory-id"
             async def recall_memories(self, limit: int) -> List[Dict[str, Any]]:
                 return []
-        
+
         class SQLiteMemoryBackendImpl:  # type: ignore
             def __init__(self, db_path: str) -> None:
                 pass
             async def initialize(self) -> None:
                 pass
-            async def store_memory(self, agent_id: str, content: str, memory_type: str, 
-                                   task_id: Optional[str], importance_score: float, 
+            async def store_memory(self, agent_id: str, content: str, memory_type: str,
+                                   task_id: Optional[str], importance_score: float,
                                    metadata: Dict[str, Any]) -> str:
                 return "mock-memory-id"
-            async def get_memories(self, agent_id: str, memory_type: Optional[str] = None, 
+            async def get_memories(self, agent_id: str, memory_type: Optional[str] = None,
                                    task_id: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
                 return []
             async def get_stats(self) -> Dict[str, Any]:
@@ -240,7 +240,7 @@ class MemoryEventStorage:
                 # Convert datetime to ISO format string
                 if isinstance(event_dict.get('timestamp'), datetime):
                     event_dict['timestamp'] = event_dict['timestamp'].isoformat()
-                
+
                 memory_id = await self.sqlite_backend.store_memory(
                     agent_id=event.agent_id,
                     content=json.dumps(event_dict),
@@ -556,26 +556,26 @@ class EventHandler:
 
             # Route to subscribers
             await self._route_to_subscribers(event)
-            
+
             logger.info(f"✅ Event {event.id} processed successfully")
             return result
 
         except Exception as e:
             logger.error(f"❌ Error handling event {event.id}: {e}")
             raise
-    
+
     async def _route_to_subscribers(self, event: AgentEvent) -> None:
         """Route event to all subscribed agents."""
         try:
             # Get subscribers for this event type
             subscribers = self.subscription_manager.get_subscribers(event.event_type)
-            
+
             if not subscribers:
                 logger.debug(f"No subscribers for event type: {event.event_type}")
                 return
-            
+
             logger.info(f"📨 Routing {event.event_type} to {len(subscribers)} subscribers")
-            
+
             # Process subscriptions by priority
             for subscription in subscribers:
                 try:
@@ -583,30 +583,30 @@ class EventHandler:
                     if subscription.filter:
                         if not self._matches_filter(event, subscription.filter):
                             continue
-                    
+
                     # In production, this would invoke the agent
                     # For now, we'll log the routing
                     logger.info(
                         f"  → Routing to {subscription.agent_id}.{subscription.handler} "
                         f"(priority: {subscription.priority.value})"
                     )
-                    
+
                     # TODO: Implement actual agent invocation
                     # This would typically:
                     # 1. Start agent container if not running
                     # 2. Send event to agent's handler function
                     # 3. Track agent response
-                    
+
                 except Exception as e:
                     logger.error(
                         f"Failed to route to {subscription.agent_id}.{subscription.handler}: {e}"
                     )
                     # Continue routing to other subscribers
-                    
+
         except Exception as e:
             logger.error(f"Error in event routing: {e}")
             # Don't fail the entire event processing if routing fails
-    
+
     def _matches_filter(self, event: AgentEvent, filter_dict: Dict[str, Any]) -> bool:
         """Check if event matches subscription filter."""
         for key, value in filter_dict.items():

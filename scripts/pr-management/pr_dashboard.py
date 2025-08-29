@@ -13,9 +13,11 @@ from datetime import datetime
 # List of PRs to monitor
 PR_NUMBERS = [247, 268, 269, 270, 278, 279, 280, 281, 282, 286, 287, 293, 294, 295]
 
+
 def clear_screen():
     """Clear terminal screen"""
-    os.system('clear' if os.name == 'posix' else 'cls')
+    os.system("clear" if os.name == "posix" else "cls")
+
 
 def run_command(cmd):
     """Run command and return output"""
@@ -25,9 +27,12 @@ def run_command(cmd):
     except:
         return None
 
+
 def get_pr_info(pr_number):
     """Get detailed PR information"""
-    cmd = f"gh pr view {pr_number} --json number,title,baseRefName,mergeable,state,statusCheckRollup"
+    cmd = (
+        f"gh pr view {pr_number} --json number,title,baseRefName,mergeable,state,statusCheckRollup"
+    )
     output = run_command(cmd)
     if output:
         try:
@@ -35,6 +40,7 @@ def get_pr_info(pr_number):
         except:
             return None
     return None
+
 
 def get_merge_status_symbol(mergeable):
     """Get symbol for merge status"""
@@ -44,6 +50,7 @@ def get_merge_status_symbol(mergeable):
         return "⚠️ "
     else:
         return "❓"
+
 
 def get_check_status_symbol(checks):
     """Get symbol for CI checks"""
@@ -58,6 +65,7 @@ def get_check_status_symbol(checks):
             elif check.get("conclusion") == "FAILURE":
                 return "❌"
     return "⏳"
+
 
 def display_dashboard():
     """Display the PR monitoring dashboard"""
@@ -74,7 +82,7 @@ def display_dashboard():
         "Infrastructure": [287, 280, 278],
         "Pyright Fixes": [279, 270, 286, 293],
         "Features": [282, 281, 247],
-        "Workflows": [295, 294, 269, 268]
+        "Workflows": [295, 294, 269, 268],
     }
 
     for category, prs in categories.items():
@@ -103,6 +111,7 @@ def display_dashboard():
     print("Legend: ✅ = OK, ⚠️ = Conflicts, ❌ = Failed, ⏳ = In Progress, ❓ = Unknown")
     print("Refreshing every 30 seconds... Press Ctrl+C to exit")
 
+
 def main():
     """Main dashboard loop"""
     print("Starting PR Monitoring Dashboard...")
@@ -115,6 +124,7 @@ def main():
     except KeyboardInterrupt:
         print("\n\nDashboard stopped by user.")
         print("Goodbye!")
+
 
 if __name__ == "__main__":
     main()

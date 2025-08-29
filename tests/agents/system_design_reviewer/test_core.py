@@ -12,8 +12,9 @@ from unittest.mock import Mock, patch
 from datetime import datetime
 from pathlib import Path
 import sys
+
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
 
 from claude.agents.system_design_reviewer.core import (
     SystemDesignReviewer,
@@ -271,9 +272,7 @@ class TestSystemDesignReviewer:
             impact_level=ImpactLevel.LOW,
         )
 
-        comments = reviewer._generate_review_comments(
-            [low_impact_change], ImpactLevel.LOW
-        )
+        comments = reviewer._generate_review_comments([low_impact_change], ImpactLevel.LOW)
 
         assert len(comments) > 0
         comment_text = "\n".join(comments)
@@ -461,8 +460,7 @@ class TestSystemDesignStateManager:
             # Create initial state with many reviews
             initial_state = manager.get_default_state()
             initial_state["completed_reviews"] = [
-                {"pr_number": str(i), "timestamp": datetime.now().isoformat()}
-                for i in range(105)
+                {"pr_number": str(i), "timestamp": datetime.now().isoformat()} for i in range(105)
             ]
             manager.save_state(initial_state)
 

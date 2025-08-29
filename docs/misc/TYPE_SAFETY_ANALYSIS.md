@@ -47,7 +47,7 @@ uv run pyright 2>&1 | grep -o "error: [^(]*" | sort | uniq -c | sort -rn | head 
 
 Most common error types:
 - Import could not be resolved
-- Argument type is "None" 
+- Argument type is "None"
 - Type is unknown
 - Cannot access attribute
 - Object is not callable

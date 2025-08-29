@@ -14,9 +14,7 @@ from datetime import datetime
 
 import pytest
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 try:
     from claude.shared.task_tracking import (
@@ -123,9 +121,7 @@ class TestEnhancedSeparationBasic:
         )
 
         # Create checkpoint
-        checkpoint_id = checkpoint_manager.create_checkpoint(
-            task_state, "Test checkpoint"
-        )
+        checkpoint_id = checkpoint_manager.create_checkpoint(task_state, "Test checkpoint")
         assert checkpoint_id is not None
 
         # Verify checkpoint was created
@@ -142,18 +138,14 @@ class TestEnhancedSeparationBasic:
         def recover_from_value_error(error, context):
             return f"Recovered from: {error}"
 
-        self.error_handler.register_recovery_strategy(
-            ValueError, recover_from_value_error
-        )
+        self.error_handler.register_recovery_strategy(ValueError, recover_from_value_error)
 
         # Test error handling with context
         try:
             raise ValueError("Test error for error handler")
         except Exception as e:
             # This should not raise an exception now that we have a recovery strategy
-            result = self.error_handler.handle_error(
-                e, context={"test": "error_handling"}
-            )
+            result = self.error_handler.handle_error(e, context={"test": "error_handling"})
             assert "Recovered from:" in result
 
         # Test error handler functionality
@@ -337,9 +329,7 @@ class TestEnhancedSeparationBasic:
 
             # Create checkpoint
             checkpoint_manager = CheckpointManager(self.state_manager)
-            checkpoint_manager.create_checkpoint(
-                task_state, f"Checkpoint for {workflow_id}"
-            )
+            checkpoint_manager.create_checkpoint(task_state, f"Checkpoint for {workflow_id}")
 
             # Complete task
             self.task_tracker.update_task_status(task.id, TaskStatus.COMPLETED)
@@ -433,7 +423,7 @@ class TestEnhancedSeparationCodeReduction:
         from claude.shared.interfaces import AgentConfig
         from claude.shared.state_management import StateManager
         from claude.shared.task_tracking import TaskTracker
-        from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
+        from claude.shared.utils.error_handling import ErrorHandler  # type: ignore[import]
 
         # Test instantiation
         github_ops = GitHubOperations()
@@ -457,26 +447,18 @@ class TestEnhancedSeparationCodeReduction:
         # Before Enhanced Separation (simulated code counts)
         orchestrator_original_lines = 1200
         workflow_master_original_lines = 1500
-        total_original_lines = (
-            orchestrator_original_lines + workflow_master_original_lines
-        )
+        total_original_lines = orchestrator_original_lines + workflow_master_original_lines
 
         # Estimated duplicated code (29% as identified in analysis)
         duplicated_lines = int(total_original_lines * 0.29)
 
         # After Enhanced Separation
         shared_module_lines = 2100  # Actual lines from our shared modules
-        orchestrator_reduced_lines = orchestrator_original_lines - int(
-            duplicated_lines * 0.4
-        )
-        workflow_master_reduced_lines = workflow_master_original_lines - int(
-            duplicated_lines * 0.6
-        )
+        orchestrator_reduced_lines = orchestrator_original_lines - int(duplicated_lines * 0.4)
+        workflow_master_reduced_lines = workflow_master_original_lines - int(duplicated_lines * 0.6)
 
         total_after_lines = (
-            shared_module_lines
-            + orchestrator_reduced_lines
-            + workflow_master_reduced_lines
+            shared_module_lines + orchestrator_reduced_lines + workflow_master_reduced_lines
         )
 
         # Calculate duplication reduction (the shared modules eliminate duplicated code)
@@ -486,13 +468,9 @@ class TestEnhancedSeparationCodeReduction:
 
         # Estimate remaining duplication after Enhanced Separation (should be much lower)
         # Since we have comprehensive shared modules, duplication should be <5%
-        estimated_remaining_duplication = (
-            total_after_lines * 0.05
-        )  # 5% remaining duplication
+        estimated_remaining_duplication = total_after_lines * 0.05  # 5% remaining duplication
 
-        duplication_eliminated = (
-            original_duplication_lines - estimated_remaining_duplication
-        )
+        duplication_eliminated = original_duplication_lines - estimated_remaining_duplication
         duplication_reduction_percentage = (
             duplication_eliminated / original_duplication_lines
         ) * 100
@@ -501,19 +479,17 @@ class TestEnhancedSeparationCodeReduction:
         print(f"Original total lines: {total_original_lines}")
         print(f"Original duplicated lines (29%): {duplicated_lines}")
         print(f"After Enhanced Separation: {total_after_lines}")
-        print(
-            f"Estimated remaining duplication (5%): {estimated_remaining_duplication:.0f}"
-        )
+        print(f"Estimated remaining duplication (5%): {estimated_remaining_duplication:.0f}")
         print(f"Duplication eliminated: {duplication_eliminated:.0f}")
         print(f"Duplication reduction: {duplication_reduction_percentage:.1f}%")
 
         # Should achieve significant duplication reduction (>70% of duplication eliminated)
-        assert duplication_reduction_percentage > 70.0, (
-            f"Expected >70% duplication reduction, got {duplication_reduction_percentage:.1f}%"
-        )
-        assert duplication_eliminated > 500, (
-            f"Expected >500 duplication lines eliminated, got {duplication_eliminated:.0f}"
-        )
+        assert (
+            duplication_reduction_percentage > 70.0
+        ), f"Expected >70% duplication reduction, got {duplication_reduction_percentage:.1f}%"
+        assert (
+            duplication_eliminated > 500
+        ), f"Expected >500 duplication lines eliminated, got {duplication_eliminated:.0f}"
 
         print(
             f"✅ Enhanced Separation eliminates {duplication_reduction_percentage:.1f}% of code duplication"

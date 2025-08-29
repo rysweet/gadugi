@@ -83,21 +83,21 @@ A recipe consists of:
 ```python
 def analyze_recipe(recipe_dir: str) -> dict:
     """Analyze recipe files and extract implementation details."""
-    
+
     # Load recipe files
     requirements = load_markdown(f"{recipe_dir}/requirements.md")
     design = load_markdown(f"{recipe_dir}/design.md")
     dependencies = load_json(f"{recipe_dir}/dependencies.json")
-    
+
     # Parse requirements for validation criteria
     validation_criteria = extract_validation_criteria(requirements)
-    
+
     # Identify component type from design
     component_type = identify_component_type(design)
-    
+
     # Map integrations
     integrations = map_integrations(design, dependencies)
-    
+
     return {
         "type": component_type,
         "requirements": parse_requirements(requirements),
@@ -118,31 +118,31 @@ def analyze_recipe(recipe_dir: str) -> dict:
 ```python
 def generate_implementation(recipe_analysis: dict, output_dir: str) -> None:
     """Generate complete implementation from recipe analysis."""
-    
+
     component_type = recipe_analysis["type"]
-    
+
     if component_type == "service":
         # Generate FastAPI service
         generate_service_main(recipe_analysis, f"{output_dir}/main.py")
         generate_service_routers(recipe_analysis, f"{output_dir}/routers/")
         generate_service_models(recipe_analysis, f"{output_dir}/models/")
         generate_service_config(recipe_analysis, f"{output_dir}/config.py")
-        
+
     elif component_type == "agent":
         # Generate agent implementation
         generate_agent_main(recipe_analysis, f"{output_dir}/agent.py")
         generate_agent_tools(recipe_analysis, f"{output_dir}/tools/")
         generate_agent_state(recipe_analysis, f"{output_dir}/state.py")
-        
+
     elif component_type == "library":
         # Generate library
         generate_library_api(recipe_analysis, f"{output_dir}/__init__.py")
         generate_library_core(recipe_analysis, f"{output_dir}/core/")
         generate_library_utils(recipe_analysis, f"{output_dir}/utils/")
-    
+
     # Generate tests for all types
     generate_test_suite(recipe_analysis, f"{output_dir}/tests/")
-    
+
     # Generate configuration files
     generate_pyproject_toml(recipe_analysis, f"{output_dir}/pyproject.toml")
     generate_dockerfile(recipe_analysis, f"{output_dir}/Dockerfile")
@@ -159,7 +159,7 @@ def generate_implementation(recipe_analysis: dict, output_dir: str) -> None:
 ```python
 def validate_implementation(output_dir: str, validation_criteria: dict) -> dict:
     """Validate generated implementation meets all requirements."""
-    
+
     results = {
         "valid": True,
         "type_check": None,
@@ -167,21 +167,21 @@ def validate_implementation(output_dir: str, validation_criteria: dict) -> dict:
         "tests": None,
         "requirements": None
     }
-    
+
     # Type checking
     pyright_result = run_command(f"uv run pyright {output_dir}")
     results["type_check"] = {
         "passed": pyright_result["exit_code"] == 0,
         "errors": pyright_result.get("errors", 0)
     }
-    
+
     # Linting
     ruff_result = run_command(f"uv run ruff check {output_dir}")
     results["linting"] = {
         "passed": ruff_result["exit_code"] == 0,
         "issues": ruff_result.get("issues", 0)
     }
-    
+
     # Tests
     pytest_result = run_command(f"uv run pytest {output_dir}/tests/ -v")
     results["tests"] = {
@@ -189,11 +189,11 @@ def validate_implementation(output_dir: str, validation_criteria: dict) -> dict:
         "total": pytest_result.get("total_tests", 0),
         "failed": pytest_result.get("failed", 0)
     }
-    
+
     # Requirements validation
     req_validation = validate_requirements(output_dir, validation_criteria)
     results["requirements"] = req_validation
-    
+
     # Overall validation
     results["valid"] = all([
         results["type_check"]["passed"],
@@ -201,7 +201,7 @@ def validate_implementation(output_dir: str, validation_criteria: dict) -> dict:
         results["tests"]["passed"],
         results["requirements"]["met"]
     ])
-    
+
     return results
 ```
 
@@ -386,32 +386,32 @@ results = []
 for recipe_dir in recipes:
     recipe_name = os.path.basename(recipe_dir)
     print(f"\nProcessing recipe: {recipe_name}")
-    
+
     try:
         # Analyze
         analysis = executor.analyze_recipe(recipe_dir)
-        
+
         # Generate
         output_dir = f"./generated/{recipe_name}"
         executor.generate_implementation(analysis, output_dir)
-        
+
         # Validate
         validation = executor.validate_implementation(
             output_dir,
             analysis["validation"]
         )
-        
+
         results.append({
             "recipe": recipe_name,
             "success": validation["valid"],
             "details": validation
         })
-        
+
         if validation["valid"]:
             print(f"✅ {recipe_name} generated successfully")
         else:
             print(f"❌ {recipe_name} has issues")
-            
+
     except Exception as e:
         print(f"❌ Failed to process {recipe_name}: {e}")
         results.append({
@@ -445,7 +445,7 @@ An implementation is considered COMPLETE when:
 ```python
 def validate_requirements(impl_dir: str, requirements: list) -> dict:
     """Validate that all requirements are implemented."""
-    
+
     results = {
         "met": True,
         "total": len(requirements),
@@ -453,7 +453,7 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
         "missing": [],
         "details": []
     }
-    
+
     for req in requirements:
         # Check if requirement is implemented
         if req["type"] == "endpoint":
@@ -464,7 +464,7 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
                 req["path"]
             )
             req_met = endpoint_exists
-            
+
         elif req["type"] == "function":
             # Check for function implementation
             func_exists = check_function_exists(
@@ -473,7 +473,7 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
                 req["name"]
             )
             req_met = func_exists
-            
+
         elif req["type"] == "class":
             # Check for class implementation
             class_exists = check_class_exists(
@@ -482,7 +482,7 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
                 req["name"]
             )
             req_met = class_exists
-            
+
         elif req["type"] == "test":
             # Check for test coverage
             test_exists = check_test_exists(
@@ -490,20 +490,20 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
                 req["test_name"]
             )
             req_met = test_exists
-        
+
         # Record result
         if req_met:
             results["met_count"] += 1
         else:
             results["missing"].append(req["id"])
             results["met"] = False
-        
+
         results["details"].append({
             "id": req["id"],
             "description": req["description"],
             "met": req_met
         })
-    
+
     return results
 ```
 
@@ -511,33 +511,33 @@ def validate_requirements(impl_dir: str, requirements: list) -> dict:
 ```python
 def generate_test_suite(recipe: dict, test_dir: str) -> None:
     """Generate comprehensive test suite from recipe."""
-    
+
     # Create test structure
     os.makedirs(test_dir, exist_ok=True)
-    
+
     # Generate unit tests
     for component in recipe["requirements"]:
         if component["type"] in ["function", "class"]:
             test_content = generate_unit_test(component)
             test_file = f"{test_dir}/test_{component['name']}.py"
             write_file(test_file, test_content)
-    
+
     # Generate integration tests
     if recipe["integrations"]:
         integration_tests = generate_integration_tests(
             recipe["integrations"]
         )
         write_file(f"{test_dir}/test_integration.py", integration_tests)
-    
+
     # Generate end-to-end tests
     if recipe["type"] == "service":
         e2e_tests = generate_e2e_tests(recipe["architecture"])
         write_file(f"{test_dir}/test_e2e.py", e2e_tests)
-    
+
     # Generate fixtures and conftest
     fixtures = generate_fixtures(recipe)
     write_file(f"{test_dir}/conftest.py", fixtures)
-    
+
     print(f"Generated test suite with:")
     print(f"  - Unit tests: {len(recipe['requirements'])}")
     print(f"  - Integration tests: {len(recipe['integrations'])}")

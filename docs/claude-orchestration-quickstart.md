@@ -64,29 +64,29 @@ import threading
 
 def fix_bug(issue_num, description):
     """Fix a single bug in its own worktree"""
-    
+
     # Create worktree
     worktree = f".worktrees/issue-{issue_num}"
     branch = f"feature/issue-{issue_num}-fix"
-    
+
     subprocess.run([
         "git", "worktree", "add", worktree, "-b", branch
     ])
-    
+
     # Make fixes in worktree
     # ... implementation ...
-    
+
     # Test
     subprocess.run(["uv", "run", "pytest"], cwd=worktree)
-    
+
     # Commit and push
     subprocess.run(["git", "add", "-A"], cwd=worktree)
     subprocess.run(["git", "commit", "-m", f"fix: {description}"], cwd=worktree)
     subprocess.run(["git", "push", "-u", "origin", branch], cwd=worktree)
-    
+
     # Create PR
     subprocess.run([
-        "gh", "pr", "create", 
+        "gh", "pr", "create",
         "--base", "main",
         "--title", f"fix: {description} (#{issue_num})"
     ])

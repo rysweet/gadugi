@@ -119,18 +119,14 @@ class TestPRBacklogManager:
         return mock
 
     @pytest.fixture
-    def pr_backlog_manager(
-        self, mock_github_ops, mock_state_manager, mock_task_tracker
-    ):
+    def pr_backlog_manager(self, mock_github_ops, mock_state_manager, mock_task_tracker):
         """Create PRBacklogManager instance with mocked dependencies."""
         with (
             patch("core.GitHubOperations", return_value=mock_github_ops),
             patch("core.StateManager", return_value=mock_state_manager),
             patch("core.TaskTracker", return_value=mock_task_tracker),
         ):
-            config = AgentConfig(
-                agent_id="test-pr-backlog", name="Test PR Backlog Manager"
-            )
+            config = AgentConfig(agent_id="test-pr-backlog", name="Test PR Backlog Manager")
             manager = PRBacklogManager(config=config, auto_approve=False)
             return manager
 
@@ -163,9 +159,7 @@ class TestPRBacklogManager:
 
     def test_detect_auto_approve_context(self):
         """Test auto-approve context detection."""
-        with patch.dict(
-            os.environ, {"GITHUB_ACTIONS": "true", "CLAUDE_AUTO_APPROVE": "true"}
-        ):
+        with patch.dict(os.environ, {"GITHUB_ACTIONS": "true", "CLAUDE_AUTO_APPROVE": "true"}):
             manager = PRBacklogManager()
             assert manager.auto_approve is True
 
@@ -194,16 +188,12 @@ class TestPRBacklogManager:
 
         # Test missing GITHUB_ACTIONS
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(
-                GadugiError, match="Auto-approve only allowed in GitHub Actions"
-            ):
+            with pytest.raises(GadugiError, match="Auto-approve only allowed in GitHub Actions"):
                 pr_backlog_manager.validate_auto_approve_safety()
 
         # Test missing CLAUDE_AUTO_APPROVE
         with patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}):
-            with pytest.raises(
-                GadugiError, match="Auto-approve not explicitly enabled"
-            ):
+            with pytest.raises(GadugiError, match="Auto-approve not explicitly enabled"):
                 pr_backlog_manager.validate_auto_approve_safety()
 
         # Test invalid event type
@@ -429,9 +419,7 @@ class TestPRBacklogManager:
         assert any("CI" in action for action in actions)
         assert any("CodeReviewer" in action for action in actions)
 
-    def test_process_single_pr_success(
-        self, pr_backlog_manager, sample_pr_data, mock_github_ops
-    ):
+    def test_process_single_pr_success(self, pr_backlog_manager, sample_pr_data, mock_github_ops):
         """Test successful single PR processing."""
         mock_github_ops.get_pr_details.return_value = sample_pr_data
 
@@ -529,9 +517,7 @@ class TestPRBacklogManager:
         """Test applying ready-seeking-human label."""
         pr_backlog_manager._apply_ready_label(123)
 
-        mock_github_ops.add_pr_labels.assert_called_once_with(
-            123, ["ready-seeking-human"]
-        )
+        mock_github_ops.add_pr_labels.assert_called_once_with(123, ["ready-seeking-human"])
         mock_github_ops.add_pr_comment.assert_called_once()
 
         # Check comment content

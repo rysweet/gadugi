@@ -9,10 +9,10 @@ from typing import List, Optional
 
 def run_pyright(path: str) -> List[str]:
     """Run pyright and return errors.
-    
+
     Args:
         path: Path to check with pyright
-        
+
     Returns:
         List of output lines from pyright
     """
@@ -26,7 +26,7 @@ def run_pyright(path: str) -> List[str]:
 
 def main() -> int:
     """Main function to check pyright errors.
-    
+
     Returns:
         Exit code: 0 if no errors, 1 if errors found
     """
@@ -35,7 +35,7 @@ def main() -> int:
         ".claude/services/mcp/",
         ".claude/agents/recipe-implementation/",
     ]
-    
+
     total_errors: int = 0
     for path in paths:
         if Path(path).exists():
@@ -44,9 +44,9 @@ def main() -> int:
             error_count: int = sum(1 for line in errors if "error:" in line)
             print(f"  Found {error_count} errors")
             total_errors += error_count
-    
+
     print(f"\nTotal errors: {total_errors}")
-    
+
     if total_errors == 0:
         print("✅ All code is pyright clean!")
         return 0

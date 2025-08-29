@@ -17,9 +17,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
-_IMPL_PATH = (
-    Path(__file__).resolve().parent.parent / ".claude" / "shared" / "interfaces.py"
-)
+_IMPL_PATH = Path(__file__).resolve().parent.parent / ".claude" / "shared" / "interfaces.py"
 
 if not _IMPL_PATH.is_file():  # pragma: no cover
     raise ImportError(f"Canonical implementation not found at {_IMPL_PATH}")

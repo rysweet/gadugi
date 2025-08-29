@@ -41,12 +41,12 @@ try:
     from ..shared.state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
     from ..shared.task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
     from ..shared.github_operations import GitHubOperations  # type: ignore
-    
+
     # Create aliases with consistent types
     WorkflowReliabilityManager = SharedWorkflowReliabilityManager  # type: ignore[misc]
     WorkflowStage = SharedWorkflowStage  # type: ignore[misc]
     monitor_workflow = shared_monitor_workflow  # type: ignore[misc]
-    
+
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
     # Fallback for basic functionality
@@ -59,14 +59,14 @@ except ImportError as e:
         def stop_workflow_monitoring(self, workflow_id: str, status: str = 'completed') -> bool: return True
 
     class WorkflowStage: pass  # type: ignore[no-redef]
-    
+
     class WorkflowReliabilityContext:
         """Mock context manager for workflow monitoring"""
         def __enter__(self) -> WorkflowReliabilityManager:
             return WorkflowReliabilityManager()
         def __exit__(self, *args: Any) -> None:
             pass
-    
+
     def monitor_workflow(workflow_id: str, workflow_context: Dict[str, Any], reliability_manager: Optional[WorkflowReliabilityManager] = None) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
         return WorkflowReliabilityContext()
 

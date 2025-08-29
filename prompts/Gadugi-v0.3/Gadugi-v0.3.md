@@ -10,9 +10,9 @@
 - Agents are started as subprocesses by the event-router (usually in containers)
 - Use Claude Code directory and yaml format
 - Agents have
-  - id 
+  - id
   - names(namespace)
-  - descriptions 
+  - descriptions
   - job descriptions (the prompt)
   - events that they care about (listen to)
   - events that they emit
@@ -71,7 +71,7 @@ Agent sessions end with a reflection loop that uses a Team Coach agent to reflec
   - id
   - type ({agentname}.{eventname})
   - payload
-- Known Events: 
+- Known Events:
   - started (input)
   - stopped (output)
   - hasQuestion (question)
@@ -98,23 +98,23 @@ Agent sessions end with a reflection loop that uses a Team Coach agent to reflec
 - location: /repo/src/db
 - graph database (containerized neo4j)
 - runs as a service
-- stores agent shared memory 
+- stores agent shared memory
 
 ## MCP Service
 
 - based on https://github.com/neo4j-contrib/mcp-neo4j/tree/main/servers/mcp-neo4j-memory
 - sits in front of the graph database
-- has operations from 
+- has operations from
 
 ## Gadugi Agent:
 
 - Gadugi agent(s)
-- starts event router and graph db service 
+- starts event router and graph db service
 - can invoke other agents directly (but they still emit events to event router)
 - tries to remember (store) which agents are running
 - is the installer and bootstrap point - starts/stops/installs/updates the Gadugi agents and the rest of the system
 - reports on agent activity
-- can stream filter of agent events 
+- can stream filter of agent events
 - can send cancel events
 
 ## LLM Provider Proxy
@@ -132,7 +132,7 @@ Agent sessions end with a reflection loop that uses a Team Coach agent to reflec
 - Location: /repo/design-patterns
 - The system contains a library of design patterns that can be used by agents
 - These design patterns are "recipes" for reusable components that can be used to solve common problems
-- Design patterns are defined in a structured JSON format 
+- Design patterns are defined in a structured JSON format
 - A specific "recipe tool" can be used to generate code for each recipe.
 - Here is a version of the recipe-tool: https://github.com/microsoft/recipe-tool that you can use
 - That repo has examples of recipes in the /recipes directory

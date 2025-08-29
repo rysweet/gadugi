@@ -23,16 +23,16 @@ registry.register('worktree', WorktreeExecutor)
 # Convenience functions for CLAUDE.md orchestration
 def execute(executor_name: str, params: dict) -> dict:
     """Execute an operation using a named executor.
-    
+
     This is the primary interface for CLAUDE.md to use executors.
-    
+
     Args:
         executor_name: Name of the executor ('code', 'test', 'github', 'worktree')
         params: Parameters for the operation
-        
+
     Returns:
         Operation result dictionary
-        
+
     Example:
         # Write a file
         result = execute('code', {
@@ -40,7 +40,7 @@ def execute(executor_name: str, params: dict) -> dict:
             'file_path': 'hello.py',
             'content': 'print("Hello, World!")'
         })
-        
+
         # Run tests
         result = execute('test', {
             'test_framework': 'pytest',
@@ -52,7 +52,7 @@ def execute(executor_name: str, params: dict) -> dict:
 
 def list_executors() -> list:
     """List all available executors.
-    
+
     Returns:
         List of executor names
     """
@@ -65,19 +65,19 @@ __all__ = [
     'BaseExecutor',
     'ExecutorRegistry',
     'registry',
-    
+
     # Executor classes
     'CodeExecutor',
-    'TestExecutor', 
+    'TestExecutor',
     'GitHubExecutor',
     'WorktreeExecutor',
-    
+
     # Direct function interfaces
     'execute_code_operation',
     'execute_tests',
     'execute_github_operation',
     'execute_worktree_operation',
-    
+
     # Convenience functions
     'execute',
     'list_executors'

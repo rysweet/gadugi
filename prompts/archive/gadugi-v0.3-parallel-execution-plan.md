@@ -13,23 +13,23 @@ graph TD
     RECIPES[Recipe Definitions #234]
     PROTOS[Protobuf Definitions]
     NEO4J[Neo4j Setup]
-    
+
     %% Batch 2: Core Infrastructure
     EVENT[Event System #236]
     MCP[MCP Service]
     RIA[Recipe Implementation Agent #235]
-    
+
     %% Batch 3: Memory & Framework
     MEMORY[Memory System #237]
     FRAMEWORK[Agent Framework #238]
-    
+
     %% Batch 4: Core Agents
     DECOMPOSER[Task Decomposer #240]
     COACH[Team Coach #241]
-    
+
     %% Batch 5: Orchestrator
     ORCHESTRATOR[Orchestrator #239]
-    
+
     %% Dependencies
     PROTOS --> EVENT
     NEO4J --> MCP
@@ -42,14 +42,14 @@ graph TD
     MEMORY --> COACH
     DECOMPOSER --> ORCHESTRATOR
     FRAMEWORK --> ORCHESTRATOR
-    
+
     %% Batch groupings
     classDef batch1 fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef batch2 fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef batch3 fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px
     classDef batch4 fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef batch5 fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    
+
     class QA,RECIPES,PROTOS,NEO4J batch1
     class EVENT,MCP,RIA batch2
     class MEMORY,FRAMEWORK batch3
@@ -361,22 +361,22 @@ from gadugi_v0_3.orchestrator import Orchestrator
 
 async def benchmark_parallel_execution():
     orchestrator = Orchestrator()
-    
+
     # Test 1: Independent tasks
     independent_tasks = [f"task_{i}" for i in range(10)]
     start = time.time()
     await orchestrator.execute_parallel(independent_tasks)
     parallel_time = time.time() - start
-    
+
     # Test 2: Sequential baseline
     start = time.time()
     for task in independent_tasks:
         await orchestrator.execute_single(task)
     sequential_time = time.time() - start
-    
+
     speedup = sequential_time / parallel_time
     assert speedup >= 3.0, f"Failed to achieve 3x speedup: {speedup:.2f}x"
-    
+
     return speedup
 ```
 
@@ -428,7 +428,7 @@ uv sync --all-extras
 /agent:OrchestratorAgent
 
 Begin Gadugi v0.3 implementation following the parallel execution plan.
-Start with Batch 1: QA Framework (#242), Recipe Definitions (#234), 
+Start with Batch 1: QA Framework (#242), Recipe Definitions (#234),
 Protobuf Definitions, and Neo4j Setup.
 ```
 

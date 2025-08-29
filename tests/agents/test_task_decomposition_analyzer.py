@@ -248,9 +248,7 @@ class TestTaskDecomposer:
         result = task_decomposer.decompose(high_risk_task)
 
         assert result["strategy"] == "RISK_DECOMPOSITION"  # type: ignore[index]
-        research_tasks = [
-            s for s in result["subtasks"] if s["type"] == "RESEARCH_PROTOTYPE"
-        ]
+        research_tasks = [s for s in result["subtasks"] if s["type"] == "RESEARCH_PROTOTYPE"]
         assert len(research_tasks) == 1
         assert research_tasks[0]["risk_level"] == "HIGH"  # type: ignore[index]
 
@@ -326,9 +324,7 @@ class TestTaskResearchAgent:
         result = research_agent.research(research_task)
 
         assert result["research_type"] == "TECHNOLOGY_RESEARCH"  # type: ignore[index]
-        assert (
-            result["findings"]["implementation_feasibility"] == "TECHNICALLY_FEASIBLE"
-        )
+        assert result["findings"]["implementation_feasibility"] == "TECHNICALLY_FEASIBLE"
         assert "primary_recommendation" in result["recommendations"]  # type: ignore[index]
 
     def test_solution_research(self):
@@ -355,10 +351,7 @@ class TestTaskResearchAgent:
         result = research_agent.research({"research_type": "SOLUTION_RESEARCH"})
 
         assert len(result["findings"]["existing_solutions"]) == 2  # type: ignore[index]
-        assert (
-            result["findings"]["comparative_analysis"]["recommended_solution"]
-            == "Solution A"
-        )
+        assert result["findings"]["comparative_analysis"]["recommended_solution"] == "Solution A"
 
     def test_feasibility_research(self):
         """Test feasibility research for novel approaches"""
@@ -384,9 +377,7 @@ class TestTaskResearchAgent:
 
         result = research_agent.research({"research_type": "FEASIBILITY_RESEARCH"})
 
-        assert (
-            result["findings"]["technical_feasibility"] == "FEASIBLE_WITH_CONSTRAINTS"
-        )
+        assert result["findings"]["technical_feasibility"] == "FEASIBLE_WITH_CONSTRAINTS"
         assert len(result["findings"]["risk_assessment"]["high_risks"]) == 1  # type: ignore[index]
 
 
@@ -407,9 +398,7 @@ class TestTaskPatternClassifier:
             "has_testing_requirements": True,
         }
 
-        task_description = (
-            "Implement REST API with comprehensive testing and integration"
-        )
+        task_description = "Implement REST API with comprehensive testing and integration"
         target_files = ["api/endpoints.py", "api/models.py", "config.yaml"]
 
         features = classifier.extract_features(task_description, target_files)
@@ -463,18 +452,13 @@ class TestTaskPatternClassifier:
             },
         ]
 
-        task_description = (
-            "Design API interface first, then implement with TDD approach"
-        )
+        task_description = "Design API interface first, then implement with TDD approach"
 
         patterns = pattern_system.recognize_patterns(task_description)
 
         assert len(patterns) == 2
         assert patterns[0]["confidence"] > 0.8  # type: ignore[index]
-        assert (
-            "parallel_client_server_development"
-            in patterns[0]["optimization_strategies"]
-        )
+        assert "parallel_client_server_development" in patterns[0]["optimization_strategies"]
 
 
 class TestEnhancedTaskAnalyzer:
@@ -533,10 +517,7 @@ class TestEnhancedTaskAnalyzer:
 
         result = optimizer.optimize_parallel_execution(tasks)
 
-        assert (
-            result["execution_plan"]["parallel_phases"][0]["parallelization_confidence"]
-            > 0.9
-        )
+        assert result["execution_plan"]["parallel_phases"][0]["parallelization_confidence"] > 0.9
         assert result["performance_prediction"]["speedup_factor"] > 1.5  # type: ignore[index]
 
     def test_integration_with_orchestrator_agent(self):
@@ -669,7 +650,9 @@ class TestIntegrationScenarios:
 
         metrics = metrics_tracker.track_enhanced_analysis(analysis_session)
 
-        assert metrics["total_enhancement_overhead"] < 70  # Acceptable overhead  # type: ignore[index]
+        assert (
+            metrics["total_enhancement_overhead"] < 70
+        )  # Acceptable overhead  # type: ignore[index]
         assert metrics["actual_vs_predicted_accuracy"] > 0.8  # type: ignore[index]
         assert metrics["performance_improvement_predicted"] == "180%"  # type: ignore[index]
 
@@ -682,9 +665,7 @@ class TestErrorHandlingAndResilience:
         enhanced_analyzer = Mock()
 
         # Simulate ML component failure
-        enhanced_analyzer.classify_with_ml.side_effect = Exception(
-            "ML service unavailable"
-        )
+        enhanced_analyzer.classify_with_ml.side_effect = Exception("ML service unavailable")
 
         # Should fall back to rule-based classification
         enhanced_analyzer.analyze_with_fallback.return_value = {
@@ -705,9 +686,7 @@ class TestErrorHandlingAndResilience:
         decomposer = Mock()
 
         # Simulate decomposition failure
-        decomposer.decompose.side_effect = Exception(
-            "Decomposition complexity exceeded"
-        )
+        decomposer.decompose.side_effect = Exception("Decomposition complexity exceeded")
 
         # Should handle gracefully
         decomposer.safe_decompose.return_value = {

@@ -49,7 +49,7 @@ Create hooks that intercept execution attempts:
 ### 5. Create Workflow Validation Checklist
 Develop `.claude/workflow-validation.md`:
 - [ ] Is this a code change? → Use orchestrator
-- [ ] Will files be modified? → Use orchestrator  
+- [ ] Will files be modified? → Use orchestrator
 - [ ] Is this adding functionality? → Use orchestrator
 - [ ] Is this fixing bugs? → Use orchestrator
 - [ ] Is this only reading/analyzing? → Direct execution OK

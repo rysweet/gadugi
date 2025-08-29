@@ -87,9 +87,7 @@ class TaskOrchestrator:
             )
 
             # Check if it's a UV project and set up environment
-            if (worktree_path / "pyproject.toml").exists() and (
-                worktree_path / "uv.lock"
-            ).exists():
+            if (worktree_path / "pyproject.toml").exists() and (worktree_path / "uv.lock").exists():
                 logger.info(f"Setting up UV environment for {task_id}")
                 subprocess.run(
                     ["uv", "sync", "--all-extras"],

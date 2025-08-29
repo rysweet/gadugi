@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 class EventType(Enum):
     """Types of events that can be emitted."""
     AGENT_INITIALIZED = "agent_initialized"
-    TASK_STARTED = "task_started" 
+    TASK_STARTED = "task_started"
     TASK_COMPLETED = "task_completed"
     TASK_FAILED = "task_failed"
     KNOWLEDGE_LEARNED = "knowledge_learned"
@@ -49,18 +49,18 @@ class AgentInitializedEvent(AgentEvent):
     """Event emitted when an agent is initialized."""
     agent_type: str = ""
     capabilities: List[str] = field(default_factory=list)
-    
+
     def __post_init__(self):
         self.event_type = EventType.AGENT_INITIALIZED
 
 
-@dataclass  
+@dataclass
 class TaskStartedEvent(AgentEvent):
     """Event emitted when a task is started."""
     task_id: str = ""
     task_description: str = ""
     estimated_duration: Optional[int] = None
-    
+
     def __post_init__(self):
         self.event_type = EventType.TASK_STARTED
 
@@ -75,7 +75,7 @@ class TaskCompletedEvent(AgentEvent):
     result: Optional[str] = None
     artifacts: List[str] = field(default_factory=list)
     error: Optional[str] = None
-    
+
     def __post_init__(self):
         self.event_type = EventType.TASK_COMPLETED if self.success else EventType.TASK_FAILED
 
@@ -87,7 +87,7 @@ class KnowledgeLearnedEvent(AgentEvent):
     content: str = ""
     confidence: float = 0.0
     source: Optional[str] = None
-    
+
     def __post_init__(self):
         self.event_type = EventType.KNOWLEDGE_LEARNED
 
@@ -100,6 +100,6 @@ class CollaborationMessageEvent(AgentEvent):
     recipient_agents: List[str] = field(default_factory=list)
     whiteboard_id: Optional[str] = None
     decision: Optional[str] = None
-    
+
     def __post_init__(self):
         self.event_type = EventType.COLLABORATION_MESSAGE

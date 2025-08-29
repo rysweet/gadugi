@@ -5,7 +5,7 @@ from .queue import EventQueue, MultiQueue
 
 __all__ = [
     'Event',
-    'EventType', 
+    'EventType',
     'EventPriority',
     'Subscription',
     'EventRouter',

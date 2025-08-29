@@ -32,7 +32,7 @@ class StateMixinProtocol(Protocol):
 class StateMixin:
     """
     Mixin providing state management capabilities for V03Agent.
-    
+
     This mixin requires the following attributes to be present on the class:
     - agent_id: str
     - agent_type: str
@@ -43,7 +43,7 @@ class StateMixin:
     - learned_patterns: Dict[str, List[Dict]]
     - memory: Optional[AgentMemoryInterface]
     """
-    
+
     # Type hints for attributes expected from the base class
     agent_id: str
     agent_type: str

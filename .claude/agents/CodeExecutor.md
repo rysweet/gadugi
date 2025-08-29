@@ -393,7 +393,7 @@ new_impl = '''def calculate_average(numbers: list) -> float:
     """Calculate average with error handling."""
     if not numbers:
         raise ValueError("Cannot calculate average of empty list")
-    
+
     try:
         total = sum(numbers)
         count = len(numbers)
@@ -435,7 +435,7 @@ for imp in imports:
     # Check if already exists
     if any(imp in line for line in lines):
         continue
-    
+
     # Insert import
     lines.insert(insert_index, f"{imp}\n")
     insert_index += 1
@@ -482,18 +482,18 @@ try:
     # First try AST parsing for detailed errors
     with open(file_path, 'r') as f:
         source = f.read()
-    
+
     ast.parse(source)
-    
+
     # Then compile to catch additional issues
     py_compile.compile(file_path, doraise=True)
-    
+
     return {
         "valid": True,
         "error": None,
         "line": None
     }
-    
+
 except SyntaxError as e:
     return {
         "valid": False,
@@ -566,22 +566,22 @@ add_imports("src/legacy.py", [
 # Refactor old function with type hints
 new_implementation = '''def process_data(data: Dict[str, Any], validate: bool = True) -> Dict[str, Any]:
     """Process data with optional validation.
-    
+
     Args:
         data: Input data dictionary
         validate: Whether to validate input
-        
+
     Returns:
         Processed data dictionary
     """
     if validate and not isinstance(data, dict):
         raise TypeError("Data must be a dictionary")
-    
+
     result = {}
     for key, value in data.items():
         if value is not None:
             result[key] = str(value).strip()
-    
+
     return result'''
 
 refactor_function("src/legacy.py", "process_data", new_implementation)

@@ -76,7 +76,9 @@ except ImportError:
 
     class TaskTrackerInterface(ABC):
         @abstractmethod
-        def create_task(self, content: str, priority: str = "medium", **kwargs: Any) -> Dict[str, Any]:
+        def create_task(
+            self, content: str, priority: str = "medium", **kwargs: Any
+        ) -> Dict[str, Any]:
             pass
 
     class ErrorHandlerInterface(ABC):
@@ -90,14 +92,10 @@ except ImportError:
         agent_id: str
         name: str
         version: str = "1.0.0"
-        
+
         @property
         def config_data(self) -> Dict[str, Any]:
-            return {
-                "agent_id": self.agent_id,
-                "name": self.name,
-                "version": self.version
-            }
+            return {"agent_id": self.agent_id, "name": self.name, "version": self.version}
 
     @dataclass
     class WorkflowPhase:
@@ -302,9 +300,7 @@ class TestGitHubOperationsInterface:
                 self.issue_counter += 1
                 return {"success": True, "issue_number": issue_number}
 
-            def create_pr(
-                self, title: str, body: str, base: str, head: str
-            ) -> Dict[str, Any]:
+            def create_pr(self, title: str, body: str, base: str, head: str) -> Dict[str, Any]:
                 pr_number = self.pr_counter
                 self.prs[pr_number] = {
                     "number": pr_number,
@@ -340,7 +336,9 @@ class TestTaskTrackerInterface:
                 self.tasks = {}
                 self.task_counter = 1
 
-            def create_task(self, content: str, priority: str = "medium", **kwargs: Any) -> Dict[str, Any]:
+            def create_task(
+                self, content: str, priority: str = "medium", **kwargs: Any
+            ) -> Dict[str, Any]:
                 task_id = f"task-{self.task_counter}"
                 self.tasks[task_id] = {
                     "id": task_id,
@@ -634,9 +632,7 @@ class TestFactoryInterfaces:
         """Test ComponentFactory interface."""
 
         class MockComponentFactory(ComponentFactory):
-            def create_component(
-                self, component_type: str, config: Dict[str, Any]
-            ) -> Any:
+            def create_component(self, component_type: str, config: Dict[str, Any]) -> Any:
                 if component_type == "state_manager":
                     return {"type": "state_manager", "config": config}
                 elif component_type == "task_tracker":
@@ -652,9 +648,7 @@ class TestFactoryInterfaces:
         assert state_manager["config"]["storage"] == "memory"  # type: ignore[index]
 
         # Test creating task tracker
-        task_tracker = factory.create_component(
-            "task_tracker", {"backend": "todowrite"}
-        )
+        task_tracker = factory.create_component("task_tracker", {"backend": "todowrite"})
         assert task_tracker["type"] == "task_tracker"  # type: ignore[index]
         assert task_tracker["config"]["backend"] == "todowrite"  # type: ignore[index]
 
@@ -673,9 +667,7 @@ class TestFactoryInterfaces:
                 return {"agent_id": self.config.agent_id, "result": "success"}
 
         class MockAgentFactory(AgentFactory):
-            def create_agent(
-                self, agent_type: str, config: AgentConfig
-            ) -> AgentInterface:
+            def create_agent(self, agent_type: str, config: AgentConfig) -> AgentInterface:
                 if agent_type == "mock_agent":
                     return MockAgent(config)
                 else:
@@ -780,14 +772,10 @@ class TestInterfaceIntegration:
 
             def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
                 # Create issue
-                issue_result = self.github_ops.create_issue(
-                    "Test Issue", "Created by agent"
-                )
+                issue_result = self.github_ops.create_issue("Test Issue", "Created by agent")
 
                 # Create task
-                task_result = self.task_tracker.create_task(
-                    "Complete test workflow", "high"
-                )
+                task_result = self.task_tracker.create_task("Complete test workflow", "high")
 
                 # Save state
                 state_data = {
@@ -876,18 +864,14 @@ class TestInterfaceIntegration:
         """Test using factories to create components and agents."""
 
         class TestComponentFactory(ComponentFactory):
-            def create_component(
-                self, component_type: str, config: Dict[str, Any]
-            ) -> Any:
+            def create_component(self, component_type: str, config: Dict[str, Any]) -> Any:
                 if component_type == "state_manager":
 
                     class SimpleStateManager(StateManagerInterface):
                         def __init__(self):
                             self.data = {}
 
-                        def save_state(
-                            self, state_id: str, data: Dict[str, Any]
-                        ) -> bool:
+                        def save_state(self, state_id: str, data: Dict[str, Any]) -> bool:
                             self.data[state_id] = data
                             return True
 
@@ -922,9 +906,7 @@ class TestInterfaceIntegration:
                             )
                             return {"success": True, "task_id": task_id}
 
-                        def update_task_status(
-                            self, task_id: str, status: str
-                        ) -> Dict[str, Any]:
+                        def update_task_status(self, task_id: str, status: str) -> Dict[str, Any]:
                             for task in self.tasks:
                                 if task["id"] == task_id:
                                     task["status"] = status
@@ -939,15 +921,11 @@ class TestInterfaceIntegration:
             def __init__(self, component_factory: ComponentFactory):
                 self.component_factory = component_factory
 
-            def create_agent(
-                self, agent_type: str, config: AgentConfig
-            ) -> AgentInterface:
+            def create_agent(self, agent_type: str, config: AgentConfig) -> AgentInterface:
                 if agent_type == "workflow_agent":
 
                     class WorkflowAgent(AgentInterface):
-                        def __init__(
-                            self, config: AgentConfig, components: Dict[str, Any]
-                        ):
+                        def __init__(self, config: AgentConfig, components: Dict[str, Any]):
                             self.config = config
                             self.components = components
 
@@ -966,9 +944,7 @@ class TestInterfaceIntegration:
                         "state_manager": self.component_factory.create_component(
                             "state_manager", {}
                         ),
-                        "task_tracker": self.component_factory.create_component(
-                            "task_tracker", {}
-                        ),
+                        "task_tracker": self.component_factory.create_component("task_tracker", {}),
                     }
 
                     return WorkflowAgent(config, components)

@@ -255,9 +255,7 @@ class TestPhaseEnforcer:
             returncode=0, stdout="Code review completed successfully", stderr=""
         )
 
-        success, message, details = self.enforcer._enforce_code_review(
-            self.workflow_state, {}
-        )
+        success, message, details = self.enforcer._enforce_code_review(self.workflow_state, {})
 
         assert success is True
         assert "code review completed" in message.lower()
@@ -281,9 +279,7 @@ class TestPhaseEnforcer:
 
         # Mock script file existence
         with patch("os.path.exists", return_value=True):
-            success, message, details = self.enforcer._enforce_code_review(
-                self.workflow_state, {}
-            )
+            success, message, details = self.enforcer._enforce_code_review(self.workflow_state, {})
 
         assert success is True
         assert "enforced via script" in message.lower()
@@ -303,9 +299,7 @@ class TestPhaseEnforcer:
 
         # Mock script file not existing (skips script method)
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
-                self.workflow_state, {}
-            )
+            success, message, details = self.enforcer._enforce_code_review(self.workflow_state, {})
 
         assert success is True
         assert "automated code review posted" in message.lower()
@@ -325,9 +319,7 @@ class TestPhaseEnforcer:
         ]
 
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
-                self.workflow_state, {}
-            )
+            success, message, details = self.enforcer._enforce_code_review(self.workflow_state, {})
 
         assert success is True
         assert "enforcement comment added" in message.lower()
@@ -337,14 +329,10 @@ class TestPhaseEnforcer:
     def test_enforce_code_review_all_methods_fail(self, mock_subprocess):
         """Test code review enforcement when all methods fail"""
         # Mock all methods failing
-        mock_subprocess.return_value = Mock(
-            returncode=1, stdout="", stderr="All failed"
-        )
+        mock_subprocess.return_value = Mock(returncode=1, stdout="", stderr="All failed")
 
         with patch("os.path.exists", return_value=False):
-            success, message, details = self.enforcer._enforce_code_review(
-                self.workflow_state, {}
-            )
+            success, message, details = self.enforcer._enforce_code_review(self.workflow_state, {})
 
         assert success is False
         assert "all code review enforcement methods failed" in message.lower()
@@ -360,9 +348,7 @@ class TestPhaseEnforcer:
             pr_number=None,
         )
 
-        success, message, details = self.enforcer._enforce_code_review(
-            workflow_state, {}
-        )
+        success, message, details = self.enforcer._enforce_code_review(workflow_state, {})
 
         assert success is False
         assert "no pr number available" in message.lower()
@@ -380,20 +366,18 @@ class TestPhaseEnforcer:
         }
 
         mock_subprocess.side_effect = [
-            Mock(
-                returncode=0, stdout=json.dumps(mock_review_data), stderr=""
-            ),  # gh pr view
+            Mock(returncode=0, stdout=json.dumps(mock_review_data), stderr=""),  # gh pr view
             Mock(returncode=0, stdout="Comment posted", stderr=""),  # gh pr comment
         ]
 
-        success, message, details = self.enforcer._enforce_review_response(
-            self.workflow_state, {}
-        )
+        success, message, details = self.enforcer._enforce_review_response(self.workflow_state, {})
 
         assert success is True
         assert "review response posted" in message.lower()
         assert details["response_method"] == "review_response_comment"  # type: ignore[index]
-        assert details["addressed_reviews"] == 1  # One CHANGES_REQUESTED review  # type: ignore[index]
+        assert (
+            details["addressed_reviews"] == 1
+        )  # One CHANGES_REQUESTED review  # type: ignore[index]
 
     @patch("subprocess.run")
     def test_enforce_review_response_no_changes_needed(self, mock_subprocess):
@@ -405,9 +389,7 @@ class TestPhaseEnforcer:
             returncode=0, stdout=json.dumps(mock_review_data), stderr=""
         )
 
-        success, message, details = self.enforcer._enforce_review_response(
-            self.workflow_state, {}
-        )
+        success, message, details = self.enforcer._enforce_review_response(self.workflow_state, {})
 
         assert success is True
         assert "no review response needed" in message.lower()
@@ -425,9 +407,7 @@ class TestPhaseEnforcer:
             pr_number=None,
         )
 
-        success, message, details = self.enforcer._enforce_review_response(
-            workflow_state, {}
-        )
+        success, message, details = self.enforcer._enforce_review_response(workflow_state, {})
 
         assert success is False
         assert "no pr number available" in message.lower()
@@ -491,9 +471,7 @@ class TestPhaseEnforcer:
 
         # Mock successful subprocess calls for both phases
         mock_subprocess.side_effect = [
-            Mock(
-                returncode=0, stdout="Code review completed successfully", stderr=""
-            ),  # Phase 9
+            Mock(returncode=0, stdout="Code review completed successfully", stderr=""),  # Phase 9
             Mock(returncode=0, stdout='{"reviews": []}', stderr=""),  # Phase 10 check
         ]
 
@@ -507,9 +485,7 @@ class TestPhaseEnforcer:
 
     @patch("time.sleep")
     @patch("subprocess.run")
-    def test_enforce_critical_phases_failure_stops_chain(
-        self, mock_subprocess, mock_sleep
-    ):
+    def test_enforce_critical_phases_failure_stops_chain(self, mock_subprocess, mock_sleep):
         """Test that critical phase failure stops dependent phases"""
         # Create workflow state without critical phases completed
         workflow_state = WorkflowState(
@@ -533,9 +509,7 @@ class TestPhaseEnforcer:
         assert len(results) == 1
         result_keys = [k.name if hasattr(k, "name") else k for k in results]
         assert "CODE_REVIEW" in result_keys
-        key = next(
-            k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW"
-        )
+        key = next(k for k in results if (k.name if hasattr(k, "name") else k) == "CODE_REVIEW")
         assert results[key].success is False  # type: ignore[index]
         assert "REVIEW_RESPONSE" not in result_keys
 

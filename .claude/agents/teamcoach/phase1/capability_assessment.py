@@ -46,7 +46,7 @@ except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):  # type: ignore
             pass
-        
+
         def get_agent_task_results(self, agent_id, start_time, end_time):  # type: ignore
             return []
 
@@ -929,7 +929,7 @@ class CapabilityAssessment:
         except Exception as e:
             self.logger.error(f"Failed to calculate capability match score: {e}")
             return 0.0
-    
+
     def get_agent_capabilities(self, agent_id: str):
         """Get agent capabilities for strategic planner compatibility."""
         # Return a mock object with the expected interface

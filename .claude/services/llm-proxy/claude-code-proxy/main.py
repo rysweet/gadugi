@@ -29,12 +29,12 @@ class LogIncomingRequestsMiddleware(BaseHTTPMiddleware):
             # Read body and preserve it for the next handler
             body_bytes = await request.body()
             body_str = body_bytes.decode(errors='replace')
-            
+
             # Log the incoming request
             logger.info(f"[PROXY-LOG] Incoming /v1/messages POST request")
             logger.info(f"[PROXY-LOG] Headers: {dict(request.headers)}")
             logger.info(f"[PROXY-LOG] Body (first 2048 chars): {body_str[:2048]}")
-            
+
             # Try to parse and log key fields
             try:
                 body_json = json.loads(body_str)
@@ -47,13 +47,13 @@ class LogIncomingRequestsMiddleware(BaseHTTPMiddleware):
                     logger.info(f"[PROXY-LOG] First message content preview: {content_preview}")
             except Exception as e:
                 logger.warning(f"[PROXY-LOG] Could not parse request body as JSON: {e}")
-            
+
             # Reconstruct the request with the preserved body
             async def receive():
                 return {"type": "http.request", "body": body_bytes}
-            
+
             request._receive = receive
-        
+
         response = await call_next(request)
         return response
 
@@ -107,7 +107,7 @@ def main():
 
     # Parse log level - extract just the first word to handle comments
     log_level = config.log_level.split()[0].lower()
-    
+
     # Validate and set default if invalid
     valid_levels = ['debug', 'info', 'warning', 'error', 'critical']
     if log_level not in valid_levels:

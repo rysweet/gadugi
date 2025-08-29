@@ -19,23 +19,23 @@ try:
     from ...shared.state_management import StateManager  # type: ignore
     from ...shared.task_tracking import TaskTracker  # type: ignore
     from ...shared.interfaces import AgentConfig, OperationResult  # type: ignore
-    
+
     # Create proper aliases
     GadugiError = SharedGadugiError  # type: ignore[misc]
-    
+
     # Define missing error handling types that might not be exported
     class RetryStrategy(Enum):  # type: ignore[no-redef]
         EXPONENTIAL = "exponential"
         EXPONENTIAL_BACKOFF = "exponential_backoff"
         LINEAR_BACKOFF = "linear_backoff"
         FIXED_DELAY = "fixed_delay"
-    
+
     class ErrorSeverity(Enum):  # type: ignore[no-redef]
         LOW = "low"
         MEDIUM = "medium"
         HIGH = "high"
         CRITICAL = "critical"
-    
+
     def retry_with_backoff(max_retries: int = 3, delay: float = 1.0):  # type: ignore[no-redef]
         """Decorator for retry with backoff"""
         def decorator(func):
@@ -43,13 +43,13 @@ try:
                 return func(*args, **kwargs)
             return wrapper
         return decorator
-    
+
     class CircuitBreaker:  # type: ignore[no-redef]
         """Circuit breaker pattern implementation"""
         def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 60):
             self.failure_threshold = failure_threshold
             self.recovery_timeout = recovery_timeout
-            
+
 except ImportError as e:
     logging.warning(f"Failed to import shared modules: {e}")
 

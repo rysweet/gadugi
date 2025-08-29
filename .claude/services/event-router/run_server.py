@@ -34,7 +34,7 @@ async def main():
     print()
     print("Press Ctrl+C to stop the server")
     print("=" * 60)
-    
+
     # Create and start service
     service = EventRouterService(
         host="localhost",
@@ -42,7 +42,7 @@ async def main():
         max_workers=10,
         queue_size=10000
     )
-    
+
     try:
         await service.start()
         # Keep running until interrupted

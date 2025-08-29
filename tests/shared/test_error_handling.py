@@ -24,8 +24,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 try:
     from claude.shared.utils.error_handling import (  # type: ignore[import]
-        ErrorHandler, ErrorSeverity, GadugiError, RecoverableError,  # type: ignore[attr-defined]
-        NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext  # type: ignore[attr-defined]
+        ErrorHandler,
+        ErrorSeverity,
+        GadugiError,
+        RecoverableError,  # type: ignore[attr-defined]
+        NonRecoverableError,
+        RetryStrategy,
+        CircuitBreaker,
+        ErrorContext,  # type: ignore[attr-defined]
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
@@ -97,9 +103,9 @@ except ImportError:
                             if strategy == RetryStrategy.EXPONENTIAL:
                                 delay = delay * backoff_factor
                             elif strategy == RetryStrategy.LINEAR:
-                                delay = initial_delay + initial_delay * (
-                                    backoff_factor - 1
-                                ) * (attempt + 1)
+                                delay = initial_delay + initial_delay * (backoff_factor - 1) * (
+                                    attempt + 1
+                                )
                             elif strategy == RetryStrategy.FIXED:
                                 delay = initial_delay
 
@@ -164,7 +170,7 @@ except ImportError:
                     raise error
             else:
                 # Handle ErrorContext objects
-                if hasattr(error, 'error') and error.error:
+                if hasattr(error, "error") and error.error:
                     error_type = type(error.error).__name__
                 else:
                     error_type = type(error).__name__
@@ -178,9 +184,7 @@ except ImportError:
         def get_error_statistics(self):
             total_errors = sum(self.error_counts.values())
             unique_errors = len(self.error_counts)
-            top_errors = sorted(
-                self.error_counts.items(), key=lambda x: x[1], reverse=True
-            )
+            top_errors = sorted(self.error_counts.items(), key=lambda x: x[1], reverse=True)
             recent_errors = self.error_history[-10:]
 
             return {
@@ -207,9 +211,7 @@ except ImportError:
                 if self.is_open:
                     # Check if we should try to recover
                     if self.last_failure_time:
-                        elapsed = (
-                            datetime.now() - self.last_failure_time
-                        ).total_seconds()
+                        elapsed = (datetime.now() - self.last_failure_time).total_seconds()
                         if elapsed >= self.recovery_timeout:
                             # Try to recover
                             self.is_open = False
@@ -271,9 +273,7 @@ except ImportError:
                     try:
                         self.cleanup_func()
                     except Exception as cleanup_error:
-                        logger.error(
-                            f"Cleanup failed for {self.operation_name}: {cleanup_error}"
-                        )
+                        logger.error(f"Cleanup failed for {self.operation_name}: {cleanup_error}")
 
                 # Suppress errors if requested
                 if self.suppress_errors:
@@ -604,7 +604,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch.object(logger, 'error') as mock_logger:
+        with patch.object(logger, "error") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -616,7 +616,7 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch.object(logger, 'error') as mock_logger:
+        with patch.object(logger, "error") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -926,7 +926,7 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch.object(logger, 'warning') as mock_logger:
+        with patch.object(logger, "warning") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -944,7 +944,7 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch.object(logger, 'debug') as mock_logger:
+        with patch.object(logger, "debug") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 pass
 
@@ -958,7 +958,7 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch.object(logger, 'error') as mock_logger:
+        with patch.object(logger, "error") as mock_logger:
             ctx = None
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as context_obj:
@@ -988,7 +988,7 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch.object(logger, 'error') as mock_logger:
+        with patch.object(logger, "error") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")
@@ -1134,9 +1134,7 @@ class TestErrorHandlingIntegration:
         handler.register_recovery_strategy(ValueError, recovery_strategy)
 
         # Test error context with handler
-        with ErrorContext(
-            "test operation", cleanup_func=cleanup_func, suppress_errors=True
-        ) as ctx:
+        with ErrorContext("test operation", cleanup_func=cleanup_func, suppress_errors=True) as ctx:
             raise ValueError("Test error")
 
         assert cleanup_called

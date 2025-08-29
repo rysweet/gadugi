@@ -141,8 +141,7 @@ class TestDelegationCreation:
 
         # Test unknown issue (defaults to CI failure)
         assert (
-            coordinator._classify_issue_type("Some unknown issue")
-            == DelegationType.CI_FAILURE_FIX
+            coordinator._classify_issue_type("Some unknown issue") == DelegationType.CI_FAILURE_FIX
         )
 
     def test_assess_issue_priority(self, coordinator):
@@ -157,8 +156,7 @@ class TestDelegationCreation:
         # Test high priority from labels
         pr_context = {"labels": ["priority-high"]}
         assert (
-            coordinator._assess_issue_priority("Some issue", pr_context)
-            == DelegationPriority.HIGH
+            coordinator._assess_issue_priority("Some issue", pr_context) == DelegationPriority.HIGH
         )
 
         # Test medium priority from labels
@@ -194,32 +192,21 @@ class TestDelegationCreation:
             coordinator._select_target_agent(DelegationType.MERGE_CONFLICT_RESOLUTION)
             == "workflow-master"
         )
-        assert (
-            coordinator._select_target_agent(DelegationType.CI_FAILURE_FIX)
-            == "workflow-master"
-        )
-        assert (
-            coordinator._select_target_agent(DelegationType.BRANCH_UPDATE)
-            == "workflow-master"
-        )
+        assert coordinator._select_target_agent(DelegationType.CI_FAILURE_FIX) == "workflow-master"
+        assert coordinator._select_target_agent(DelegationType.BRANCH_UPDATE) == "workflow-master"
         assert (
             coordinator._select_target_agent(DelegationType.METADATA_IMPROVEMENT)
             == "workflow-master"
         )
 
         # Test CodeReviewer capabilities
-        assert (
-            coordinator._select_target_agent(DelegationType.AI_CODE_REVIEW)
-            == "CodeReviewer"
-        )
+        assert coordinator._select_target_agent(DelegationType.AI_CODE_REVIEW) == "CodeReviewer"
 
     def test_create_delegation_task(self, coordinator, sample_pr_context):
         """Test delegation task creation."""
         blocking_issue = "PR has merge conflicts that need resolution"
 
-        task = coordinator._create_delegation_task(
-            123, blocking_issue, sample_pr_context
-        )
+        task = coordinator._create_delegation_task(123, blocking_issue, sample_pr_context)
 
         assert task is not None  # type: ignore[comparison-overlap]
         assert task.pr_number == 123
@@ -312,9 +299,7 @@ class TestPromptGeneration:
 class TestDelegationExecution:
     """Test delegation execution functionality."""
 
-    def test_delegate_issue_resolution(
-        self, coordinator, sample_pr_context, mock_github_ops
-    ):
+    def test_delegate_issue_resolution(self, coordinator, sample_pr_context, mock_github_ops):
         """Test issue resolution delegation."""
         blocking_issues = [
             "PR has merge conflicts that need resolution",
@@ -322,9 +307,7 @@ class TestDelegationExecution:
         ]
 
         with patch.object(coordinator, "_execute_delegation") as mock_execute:
-            tasks = coordinator.delegate_issue_resolution(
-                123, blocking_issues, sample_pr_context
-            )
+            tasks = coordinator.delegate_issue_resolution(123, blocking_issues, sample_pr_context)
 
             assert len(tasks) == 2
             assert tasks[0].task_type == DelegationType.MERGE_CONFLICT_RESOLUTION  # type: ignore[index]
@@ -424,9 +407,7 @@ class TestWorkflowMasterDelegation:
             status=DelegationStatus.PENDING,
         )
 
-        expected_path = (
-            ".github/workflow-states/resolve-pr-456-merge_conflict_resolution.md"
-        )
+        expected_path = ".github/workflow-states/resolve-pr-456-merge_conflict_resolution.md"
 
         with patch("builtins.open", mock_open()) as mock_file:
             coordinator._create_workflow_master_prompt(task)
@@ -480,9 +461,7 @@ class TestCodeReviewerDelegation:
 
             mock_file.assert_called_once_with(expected_path, "w")
             # Check that workflow content was written
-            written_content = "".join(
-                call.args[0] for call in mock_file().write.call_args_list
-            )
+            written_content = "".join(call.args[0] for call in mock_file().write.call_args_list)
             assert "AI Code Review for PR #123" in written_content
             assert "CodeReviewer" in written_content
             assert task is not None  # type: ignore[comparison-overlap] and task.status == DelegationStatus.IN_PROGRESS
@@ -842,9 +821,7 @@ class TestDelegationManagement:
         )  # 7.5 minutes average (5+10)/2
 
         # Check task type breakdown
-        assert (
-            metrics["task_types"][DelegationType.MERGE_CONFLICT_RESOLUTION.value] == 1
-        )
+        assert metrics["task_types"][DelegationType.MERGE_CONFLICT_RESOLUTION.value] == 1
         assert metrics["task_types"][DelegationType.CI_FAILURE_FIX.value] == 1  # type: ignore[index]
         assert metrics["task_types"][DelegationType.AI_CODE_REVIEW.value] == 1  # type: ignore[index]
         assert metrics["task_types"][DelegationType.BRANCH_UPDATE.value] == 1  # type: ignore[index]

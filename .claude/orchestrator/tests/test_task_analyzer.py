@@ -23,18 +23,18 @@ except ImportError:
     # Define stub classes for type checking
     from enum import Enum
     from dataclasses import dataclass
-    
+
     class TaskType(Enum):
         TEST_COVERAGE = "test_coverage"
         BUG_FIX = "bug_fix"
         FEATURE_IMPLEMENTATION = "feature_implementation"
-    
+
     class TaskComplexity(Enum):
         LOW = "low"
         MEDIUM = "medium"
         HIGH = "high"
         CRITICAL = "critical"
-    
+
     @dataclass
     class TaskInfo:
         id: str
@@ -50,54 +50,54 @@ except ImportError:
         conflicts: List[str]
         parallelizable: bool
         description: str
-    
+
     class TaskAnalyzer:
         def __init__(self, prompts_dir: str, project_root: str):
             self.tasks: List[TaskInfo] = []
             self.dependency_graph: dict = {}
-        
+
         def analyze_all_prompts(self) -> List[TaskInfo]:
             return []
-        
+
         def _extract_task_name(self, content: str) -> str:
             return ""
-        
+
         def _classify_task_type(self, content: str, name: str) -> TaskType:
             return TaskType.TEST_COVERAGE
-        
+
         def _assess_complexity(self, content: str) -> TaskComplexity:
             return TaskComplexity.LOW
-        
+
         def _extract_target_files(self, content: str) -> List[str]:
             return []
-        
+
         def _extract_test_files(self, content: str, target_files: List[str]) -> List[str]:
             return []
-        
+
         def _estimate_duration(self, complexity: TaskComplexity, files: List[str]) -> int:
             return 30
-        
+
         def _estimate_resources(self, complexity: TaskComplexity, file_count: int) -> dict:
             return {}
-        
+
         def _analyze_python_imports(self, file_path: Path) -> List[str]:
             return []
-        
+
         def _analyze_prompt_file(self, prompt_file: Path) -> Optional[TaskInfo]:
             return None
-        
+
         def _detect_conflicts(self) -> None:
             pass
-        
+
         def _classify_parallelizability(self) -> None:
             pass
-        
+
         def get_parallel_groups(self) -> List[List[TaskInfo]]:
             return []
-        
+
         def generate_execution_plan(self) -> dict:
             return {}
-        
+
         def save_analysis(self, output_file: str) -> None:
             pass
 

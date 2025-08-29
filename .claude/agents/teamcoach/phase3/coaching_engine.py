@@ -325,7 +325,7 @@ class CoachingEngine:
         """Analyze capability gaps and generate development recommendations."""
         recommendations = []
 
-        # Find weak capabilities  
+        # Find weak capabilities
         weak_capabilities = [
             (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
             for domain, score in capabilities.capability_scores.items()

@@ -44,7 +44,7 @@ except ImportError:
             current_phase: Optional[WorkflowPhase] = None
             phases_completed: Dict[str, bool] = field(default_factory=dict)
             context: Dict[str, Any] = field(default_factory=dict)
-            
+
             def __post_init__(self):  # type: ignore
                 if self.context is None:
                     self.context = {}

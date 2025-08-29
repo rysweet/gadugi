@@ -77,7 +77,7 @@ python .claude/type-fixing-tools/<tool_name>.py
 ## Workflow
 
 1. **Identify Errors**: Run `uv run pyright` to see current errors
-2. **Choose Tool**: 
+2. **Choose Tool**:
    - Use `final_comprehensive_fix.py` for general fixes
    - Use test-specific tools for test files
    - Use targeted tools for specific error types

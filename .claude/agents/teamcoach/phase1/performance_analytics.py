@@ -40,19 +40,19 @@ except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
-        
+
         def get_agent_task_results(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_execution_times(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_resource_usage(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_quality_metrics(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_collaboration_metrics(self, agent_id, start_time, end_time):
             return []
 
@@ -183,7 +183,7 @@ class AgentPerformanceAnalyzer:
         self.task_metrics = task_metrics or TaskMetrics()
         self.error_handler = error_handler or ErrorHandler()
 
-        # Circuit breaker for performance analysis operations  
+        # Circuit breaker for performance analysis operations
         self.analysis_circuit_breaker = CircuitBreaker(
             failure_threshold=3, recovery_timeout=300.0
         )
@@ -748,7 +748,7 @@ class AgentPerformanceAnalyzer:
         )
 
         return min(100.0, score * 100.0)
-    
+
     def get_agent_performance(self, agent_id: str):
         """Get agent performance data for strategic planner compatibility."""
         # Return a mock object with the expected interface

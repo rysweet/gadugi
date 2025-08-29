@@ -23,9 +23,7 @@ from .image_manager import ImageManager
 import sys
 import os
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 from error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
@@ -147,9 +145,7 @@ class ContainerExecutionEngine:
 
         # Validate system capacity
         if not self.resource_manager.check_system_capacity():
-            raise GadugiError(
-                "System at capacity - cannot execute additional containers"
-            )
+            raise GadugiError("System at capacity - cannot execute additional containers")
 
         audit_events = []
         security_events = []
@@ -187,9 +183,7 @@ class ContainerExecutionEngine:
             }
 
             # Execute container
-            result = self._execute_container(
-                request_id, container_config, request.user_id
-            )
+            result = self._execute_container(request_id, container_config, request.user_id)
 
             # Build response
             response = ExecutionResponse(
@@ -204,9 +198,7 @@ class ContainerExecutionEngine:
                 audit_events=audit_events,
             )
 
-            logger.info(
-                f"Execution completed: {request_id} (success={response.success})"
-            )
+            logger.info(f"Execution completed: {request_id} (success={response.success})")
             return response
 
         except Exception as e:
@@ -304,9 +296,7 @@ class ContainerExecutionEngine:
                 hasattr(result, "container_id")
                 and result.container_id in self.container_manager.active_containers
             ):
-                container = self.container_manager.active_containers[
-                    result.container_id
-                ]
+                container = self.container_manager.active_containers[result.container_id]
                 self.resource_manager.register_container(result.container_id, container)
 
             # Log container completion
@@ -488,9 +478,7 @@ class ContainerExecutionEngine:
             "available_policies": self.security_policy.list_policies(),
         }
 
-    def get_security_alerts(
-        self, since: Optional[datetime] = None
-    ) -> List[ResourceAlert]:
+    def get_security_alerts(self, since: Optional[datetime] = None) -> List[ResourceAlert]:
         """Get recent security alerts."""
         return self.resource_manager.get_alerts(severity="critical", since=since)
 

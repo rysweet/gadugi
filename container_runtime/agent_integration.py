@@ -38,9 +38,7 @@ class AgentContainerExecutor:
         self.audit_enabled = audit_enabled
         self.execution_engine = ContainerExecutionEngine()
 
-        logger.info(
-            f"Agent container executor initialized with policy: {default_policy}"
-        )
+        logger.info(f"Agent container executor initialized with policy: {default_policy}")
 
     def execute_script(
         self,

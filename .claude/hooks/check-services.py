@@ -51,7 +51,7 @@ def get_service_status():
             'ports': [8000]
         }
     }
-    
+
     # Check Neo4j
     if check_docker_container('gadugi-neo4j'):
         if check_port('localhost', 7475) and check_port('localhost', 7689):
@@ -61,21 +61,21 @@ def get_service_status():
             services['neo4j']['details'] = 'Container running but ports not accessible'
     else:
         services['neo4j']['details'] = 'Container not running'
-    
+
     # Check Memory Service
     if check_port('localhost', 5000):
         services['memory']['status'] = True
         services['memory']['details'] = 'Running (Port 5000)'
     else:
         services['memory']['details'] = 'Not running (Fallback: SQLite/Markdown)'
-    
+
     # Check Event Router
     if check_port('localhost', 8000):
         services['event_router']['status'] = True
         services['event_router']['details'] = 'Running (Port 8000)'
     else:
         services['event_router']['details'] = 'Not running'
-    
+
     return services
 
 def print_status(services):
@@ -85,14 +85,14 @@ def print_status(services):
     print("="*50)
     print(f"\nTimestamp: {datetime.now().isoformat()}")
     print("\n### Core Services:")
-    
+
     all_running = True
     for key, service in services.items():
         icon = "✅" if service['status'] else "❌"
         print(f"{icon} {service['name']}: {service['details']}")
         if not service['status']:
             all_running = False
-    
+
     print("\n### Overall Status:", end=" ")
     if all_running:
         print("✅ FULLY OPERATIONAL")
@@ -100,15 +100,15 @@ def print_status(services):
         print("⚠️  PARTIALLY OPERATIONAL")
     else:
         print("❌ NOT OPERATIONAL")
-    
+
     print("="*50 + "\n")
-    
+
     return 0 if all_running else 1
 
 if __name__ == "__main__":
     try:
         services = get_service_status()
-        
+
         if '--json' in sys.argv:
             print(json.dumps(services, indent=2))
             sys.exit(0)

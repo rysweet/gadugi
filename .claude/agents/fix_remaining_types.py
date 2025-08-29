@@ -66,7 +66,7 @@ SPECIFIC_FIXES = {
          '@retry_with_backoff(3, 1.0)  # type: ignore[misc]'),
     ],
     "recipe-implementation/recipe_parser.py": [
-        # Fix indentation issues for conditional blocks  
+        # Fix indentation issues for conditional blocks
         (r'if self\.recipe_spec:\n            self\.recipe_spec\.requirements\.append\(requirement\)',
          'if self.recipe_spec:\n                self.recipe_spec.requirements.append(requirement)'),
     ],
@@ -87,19 +87,19 @@ def apply_specific_fixes(file_path: Path, fixes):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        
+
         original = content
-        
+
         for old, new in fixes:
             if old in content:
                 content = content.replace(old, new)
-        
+
         if content != original:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             print(f"Applied specific fixes to: {file_path}")
             return True
-            
+
         return False
     except Exception as e:
         print(f"Error processing {file_path}: {e}")
@@ -109,19 +109,19 @@ def fix_list_comprehensions_with_none(content: str) -> str:
     """Fix list comprehensions that might have None values."""
     # Pattern to find list comprehensions with .get() that might return None
     pattern = r'\[([^]]*\.get\([^)]+\)[^]]*for[^]]+)\]'
-    
+
     def fix_comp(match):
         comp = match.group(1)
         # Check if there's already a filter
         if ' if ' in comp and 'is not None' in comp:
             return f'[{comp}]'
-        
+
         # Add None filtering
         parts = comp.split(' for ')
         if len(parts) >= 2:
             expr_part = parts[0].strip()
             rest = ' for '.join(parts[1:])
-            
+
             # Extract the variable being used
             if '.get(' in expr_part:
                 # Find the expression before .get
@@ -130,14 +130,14 @@ def fix_list_comprehensions_with_none(content: str) -> str:
                     var = get_match.group(1)
                     # Add None check
                     return f'[{comp} if {var}.get({get_match.group(0).split("(")[1].split(")")[0]}) is not None]'
-        
+
         return f'[{comp}]'
-    
+
     return re.sub(pattern, fix_comp, content)
 
 def main():
     base_dir = Path('/home/rysweet/gadugi/.claude/agents')
-    
+
     # Apply specific fixes
     for rel_path, fixes in SPECIFIC_FIXES.items():
         file_path = base_dir / rel_path
@@ -145,7 +145,7 @@ def main():
             apply_specific_fixes(file_path, fixes)
         else:
             print(f"File not found: {file_path}")
-    
+
     print("Specific fixes applied.")
 
 if __name__ == '__main__':

@@ -6,7 +6,7 @@ The Event Router V2 has been successfully implemented as a production-ready, Web
 
 ## What Was Built
 
-### 1. ✅ **Core Event Router Service** 
+### 1. ✅ **Core Event Router Service**
 - **WebSocket Server**: Full WebSocket protocol support with websockets library v15
 - **Priority Queue System**: 10 priority levels from LOWEST to SYSTEM
 - **Multi-Queue Option**: Configurable priority-based multi-queue for high-volume environments
@@ -79,19 +79,19 @@ async def example():
     # Create client
     client = EventRouterClient(url="ws://localhost:9090")
     await client.connect()
-    
+
     # Subscribe to events
     @client.on("task.*")
     async def handle_task(event):
         print(f"Task event: {event.topic} - {event.payload}")
-    
+
     # Publish an event
     await client.publish(
         topic="task.created",
         payload={"task_id": "123", "description": "Process data"},
         priority=EventPriority.HIGH
     )
-    
+
     # Keep running
     await asyncio.sleep(60)
     await client.disconnect()

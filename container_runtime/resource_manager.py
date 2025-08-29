@@ -17,9 +17,7 @@ import psutil
 import sys
 import os
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 
 logger = logging.getLogger(__name__)
 
@@ -55,9 +53,7 @@ class ResourceAlert:
 class ResourceMonitor:
     """Monitors resource usage for a single container."""
 
-    def __init__(
-        self, container_id: str, container, alert_callback: Optional[Callable] = None
-    ):
+    def __init__(self, container_id: str, container, alert_callback: Optional[Callable] = None):
         """Initialize resource monitor for a container."""
         self.container_id = container_id
         self.container = container
@@ -87,18 +83,14 @@ class ResourceMonitor:
             target=self._monitor_loop, args=(interval,), daemon=True
         )
         self.monitor_thread.start()
-        logger.info(
-            f"Started resource monitoring for container {self.container_id[:8]}"
-        )
+        logger.info(f"Started resource monitoring for container {self.container_id[:8]}")
 
     def stop_monitoring(self) -> None:
         """Stop resource monitoring."""
         self.monitoring = False
         if self.monitor_thread and self.monitor_thread.is_alive():
             self.monitor_thread.join(timeout=1.0)
-        logger.info(
-            f"Stopped resource monitoring for container {self.container_id[:8]}"
-        )
+        logger.info(f"Stopped resource monitoring for container {self.container_id[:8]}")
 
     def _monitor_loop(self, interval: float) -> None:
         """Main monitoring loop."""
@@ -114,9 +106,7 @@ class ResourceMonitor:
                         self.usage_history = self.usage_history[-1000:]
 
             except Exception as e:
-                logger.warning(
-                    f"Error collecting usage for {self.container_id[:8]}: {e}"
-                )
+                logger.warning(f"Error collecting usage for {self.container_id[:8]}: {e}")
 
             time.sleep(interval)
 
@@ -131,17 +121,15 @@ class ResourceMonitor:
 
             cpu_percent = 0.0
             if cpu_stats and precpu_stats:
-                cpu_delta = cpu_stats.get("cpu_usage", {}).get(
-                    "total_usage", 0
-                ) - precpu_stats.get("cpu_usage", {}).get("total_usage", 0)
+                cpu_delta = cpu_stats.get("cpu_usage", {}).get("total_usage", 0) - precpu_stats.get(
+                    "cpu_usage", {}
+                ).get("total_usage", 0)
                 system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
                     "system_cpu_usage", 0
                 )
 
                 if system_delta > 0 and cpu_delta >= 0:
-                    num_cpus = len(
-                        cpu_stats.get("cpu_usage", {}).get("percpu_usage", [])
-                    )
+                    num_cpus = len(cpu_stats.get("cpu_usage", {}).get("percpu_usage", []))
                     if num_cpus == 0:
                         num_cpus = 1
                     cpu_percent = (cpu_delta / system_delta) * num_cpus * 100.0
@@ -150,9 +138,7 @@ class ResourceMonitor:
             memory_stats = stats.get("memory_stats", {})
             memory_usage = memory_stats.get("usage", 0)
             memory_limit = memory_stats.get("limit", 0)
-            memory_percent = (
-                (memory_usage / memory_limit * 100) if memory_limit > 0 else 0
-            )
+            memory_percent = (memory_usage / memory_limit * 100) if memory_limit > 0 else 0
 
             # Network usage
             networks = stats.get("networks", {})
@@ -248,9 +234,7 @@ class ResourceMonitor:
         """Get current resource usage snapshot."""
         return self._collect_usage()
 
-    def get_usage_history(
-        self, duration: Optional[timedelta] = None
-    ) -> List[ResourceUsage]:
+    def get_usage_history(self, duration: Optional[timedelta] = None) -> List[ResourceUsage]:
         """Get resource usage history."""
         if not duration:
             return self.usage_history.copy()
@@ -302,9 +286,7 @@ class ResourceManager:
             ResourceMonitor instance for the container
         """
         if container_id in self.monitors:
-            logger.warning(
-                f"Container {container_id[:8]} already registered for monitoring"
-            )
+            logger.warning(f"Container {container_id[:8]} already registered for monitoring")
             return self.monitors[container_id]
 
         monitor = ResourceMonitor(
@@ -369,9 +351,7 @@ class ResourceManager:
                 "cpu_percent": psutil.cpu_percent(interval=1),
                 "memory_percent": psutil.virtual_memory().percent,
                 "disk_percent": psutil.disk_usage("/").percent,
-                "load_average": psutil.getloadavg()
-                if hasattr(psutil, "getloadavg")
-                else None,
+                "load_average": psutil.getloadavg() if hasattr(psutil, "getloadavg") else None,
                 "active_containers": len(self.monitors),
                 "max_containers": self.system_limits["max_containers"],
             }
@@ -401,9 +381,7 @@ class ResourceManager:
                 return False
 
             if memory_percent > self.system_limits["max_total_memory_percent"]:
-                logger.warning(
-                    f"System memory usage {memory_percent:.1f}% exceeds limit"
-                )
+                logger.warning(f"System memory usage {memory_percent:.1f}% exceeds limit")
                 return False
 
             return True

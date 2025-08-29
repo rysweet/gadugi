@@ -6,12 +6,12 @@ echo "Resolving merge conflicts for PR #296..."
 resolve_conflicts() {
     local file="$1"
     local strategy="$2"
-    
+
     if [[ ! -f "$file" ]]; then
         echo "File not found: $file"
         return 1
     fi
-    
+
     case "$strategy" in
         "theirs")
             # Keep the v0.3-regeneration version

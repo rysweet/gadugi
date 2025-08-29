@@ -129,7 +129,7 @@ async def convert_openai_streaming_to_claude(
                     if "tool_calls" in delta:
                         for tc_delta in delta["tool_calls"]:
                             tc_index = tc_delta.get("index", 0)
-                            
+
                             # Initialize tool call tracking by index if not exists
                             if tc_index not in current_tool_calls:
                                 current_tool_calls[tc_index] = {
@@ -140,31 +140,31 @@ async def convert_openai_streaming_to_claude(
                                     "claude_index": None,
                                     "started": False
                                 }
-                            
+
                             tool_call = current_tool_calls[tc_index]
-                            
+
                             # Update tool call ID if provided
                             if tc_delta.get("id"):
                                 tool_call["id"] = tc_delta["id"]
-                            
+
                             # Update function name and start content block if we have both id and name
                             function_data = tc_delta.get(Constants.TOOL_FUNCTION, {})
                             if function_data.get("name"):
                                 tool_call["name"] = function_data["name"]
-                            
+
                             # Start content block when we have complete initial data
                             if (tool_call["id"] and tool_call["name"] and not tool_call["started"]):
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
                                 tool_call["started"] = True
-                                
+
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': claude_index, 'content_block': {'type': Constants.CONTENT_TOOL_USE, 'id': tool_call['id'], 'name': tool_call['name'], 'input': {}}}, ensure_ascii=False)}\n\n"
-                            
+
                             # Handle function arguments
                             if "arguments" in function_data and tool_call["started"] and function_data["arguments"] is not None:
                                 tool_call["args_buffer"] += function_data["arguments"]
-                                
+
                                 # Try to parse complete JSON and send delta when we have valid JSON
                                 try:
                                     json.loads(tool_call["args_buffer"])
@@ -288,7 +288,7 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                     if "tool_calls" in delta and delta["tool_calls"]:
                         for tc_delta in delta["tool_calls"]:
                             tc_index = tc_delta.get("index", 0)
-                            
+
                             # Initialize tool call tracking by index if not exists
                             if tc_index not in current_tool_calls:
                                 current_tool_calls[tc_index] = {
@@ -299,31 +299,31 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                                     "claude_index": None,
                                     "started": False
                                 }
-                            
+
                             tool_call = current_tool_calls[tc_index]
-                            
+
                             # Update tool call ID if provided
                             if tc_delta.get("id"):
                                 tool_call["id"] = tc_delta["id"]
-                            
+
                             # Update function name and start content block if we have both id and name
                             function_data = tc_delta.get(Constants.TOOL_FUNCTION, {})
                             if function_data.get("name"):
                                 tool_call["name"] = function_data["name"]
-                            
+
                             # Start content block when we have complete initial data
                             if (tool_call["id"] and tool_call["name"] and not tool_call["started"]):
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
                                 tool_call["started"] = True
-                                
+
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': claude_index, 'content_block': {'type': Constants.CONTENT_TOOL_USE, 'id': tool_call['id'], 'name': tool_call['name'], 'input': {}}}, ensure_ascii=False)}\n\n"
-                            
+
                             # Handle function arguments
                             if "arguments" in function_data and tool_call["started"] and function_data["arguments"] is not None:
                                 tool_call["args_buffer"] += function_data["arguments"]
-                                
+
                                 # Try to parse complete JSON and send delta when we have valid JSON
                                 try:
                                     json.loads(tool_call["args_buffer"])

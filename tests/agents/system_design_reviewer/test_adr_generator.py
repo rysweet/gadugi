@@ -11,8 +11,9 @@ import os
 from pathlib import Path
 from datetime import datetime
 import sys
+
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / '.claude'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
 
 from claude.agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
 from claude.agents.system_design_reviewer.ast_parser import (
@@ -180,7 +181,9 @@ class TestADRGenerator:
         groups = generator._group_changes_by_decision(sample_changes_requiring_adr)
 
         assert "security_change" in groups
-        assert len(groups["security_change"]) == 2  # Both changes are security-related  # type: ignore[index]
+        assert (
+            len(groups["security_change"]) == 2
+        )  # Both changes are security-related  # type: ignore[index]
 
         # Should not have empty groups
         for _group_name, changes in groups.items():
@@ -200,9 +203,7 @@ class TestADRGenerator:
         """Test generating title for multiple changes"""
         generator = ADRGenerator()
 
-        title = generator._generate_title(
-            "security_change", sample_changes_requiring_adr
-        )
+        title = generator._generate_title("security_change", sample_changes_requiring_adr)
 
         assert "Security architecture modification" in title
         # Should handle multiple changes gracefully
@@ -226,9 +227,7 @@ class TestADRGenerator:
         """Test generating decision description"""
         generator = ADRGenerator()
 
-        decision = generator._generate_decision(
-            "security_change", sample_changes_requiring_adr
-        )
+        decision = generator._generate_decision("security_change", sample_changes_requiring_adr)
 
         assert len(decision) > 0
         # Should contain template-based decision text
@@ -238,9 +237,7 @@ class TestADRGenerator:
         """Test generating rationale section"""
         generator = ADRGenerator()
 
-        rationale = generator._generate_rationale(
-            "security_change", sample_changes_requiring_adr
-        )
+        rationale = generator._generate_rationale("security_change", sample_changes_requiring_adr)
 
         assert len(rationale) > 0
         assert "security" in rationale.lower()
@@ -275,9 +272,7 @@ class TestADRGenerator:
 
         # Check for reasonable alternatives
         alternatives_text = "\n".join(alternatives).lower()
-        assert any(
-            word in alternatives_text for word in ["minimal", "third-party", "delay"]
-        )
+        assert any(word in alternatives_text for word in ["minimal", "third-party", "delay"])
 
     def test_generate_implementation_notes(self, sample_changes_requiring_adr):
         """Test generating implementation notes"""
@@ -291,15 +286,11 @@ class TestADRGenerator:
         assert "auth/core.py" in notes
         assert "**Testing Requirements:**" in notes
 
-    def test_generate_related_changes(
-        self, sample_changes_requiring_adr, sample_pr_info
-    ):
+    def test_generate_related_changes(self, sample_changes_requiring_adr, sample_pr_info):
         """Test generating related changes references"""
         generator = ADRGenerator()
 
-        related = generator._generate_related_changes(
-            sample_changes_requiring_adr, sample_pr_info
-        )
+        related = generator._generate_related_changes(sample_changes_requiring_adr, sample_pr_info)
 
         assert len(related) > 0
         assert "PR #456" in related
@@ -338,8 +329,7 @@ class TestADRGenerator:
         )
         assert generator._slugify("Multi---Hyphen--Title") == "multi-hyphen-title"
         assert (
-            generator._slugify("  Leading and Trailing Spaces  ")
-            == "leading-and-trailing-spaces"
+            generator._slugify("  Leading and Trailing Spaces  ") == "leading-and-trailing-spaces"
         )
 
     def test_format_adr_content(self):
@@ -455,8 +445,7 @@ class TestADRGenerator:
 
                 assert "# ADR-" in content
                 assert (
-                    "Security architecture modification" in content
-                    or "security" in content.lower()
+                    "Security architecture modification" in content or "security" in content.lower()
                 )
 
 

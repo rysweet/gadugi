@@ -217,9 +217,7 @@ class TestOrchestratorGovernance:
         assert len(enforced_details["required_phases"]) == 11  # type: ignore[index]
 
     @pytest.mark.asyncio
-    async def test_parallel_executor_creates_workflow_prompt(
-        self, parallel_executor, sample_task
-    ):
+    async def test_parallel_executor_creates_workflow_prompt(self, parallel_executor, sample_task):
         """Test that parallel executor creates proper workflow prompts."""
         prompt_content = parallel_executor._create_workflow_prompt(sample_task)
 
@@ -232,9 +230,7 @@ class TestOrchestratorGovernance:
         assert sample_task.name in prompt_content
 
     @pytest.mark.asyncio
-    async def test_parallel_executor_invokes_workflow_manager(
-        self, parallel_executor, sample_task
-    ):
+    async def test_parallel_executor_invokes_workflow_manager(self, parallel_executor, sample_task):
         """Test that parallel executor properly invokes WorkflowManager."""
         # Mock subprocess execution
         with patch("asyncio.create_subprocess_exec") as mock_subprocess:

@@ -23,14 +23,14 @@ while true; do
     echo "PR STATUS DASHBOARD - $(date '+%Y-%m-%d %H:%M:%S')"
     echo "============================================"
     echo ""
-    
+
     echo "INFRASTRUCTURE PRs:"
     echo "-------------------"
     check_pr_status 287
     check_pr_status 280
     check_pr_status 278
     echo ""
-    
+
     echo "PYRIGHT ERROR FIX PRs:"
     echo "----------------------"
     check_pr_status 279
@@ -38,14 +38,14 @@ while true; do
     check_pr_status 286
     check_pr_status 293
     echo ""
-    
+
     echo "FEATURE PRs:"
     echo "------------"
     check_pr_status 282
     check_pr_status 281
     check_pr_status 247
     echo ""
-    
+
     echo "WORKFLOW PRs:"
     echo "-------------"
     check_pr_status 295
@@ -53,7 +53,7 @@ while true; do
     check_pr_status 269
     check_pr_status 268
     echo ""
-    
+
     echo "Press Ctrl+C to exit"
     echo "Refreshing in 30 seconds..."
     sleep 30

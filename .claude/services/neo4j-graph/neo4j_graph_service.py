@@ -42,10 +42,10 @@ except ImportError:
     class MockSession:
         def close(self) -> None:
             pass
-            
+
         def __enter__(self) -> 'MockSession':
             return self
-            
+
         def __exit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> None:
             pass
 
@@ -330,7 +330,7 @@ class GraphDatabaseService:
             self.driver.close()
             self.connected = False
             self.logger.info("Disconnected from Neo4j database")
-    
+
     def _get_session(self):
         """Get a database session with proper null checking."""
         if not self.driver:

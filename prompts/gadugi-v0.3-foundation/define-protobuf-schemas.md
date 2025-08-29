@@ -200,9 +200,9 @@ def generate_python_bindings():
     proto_dir = Path(".claude/protos")
     output_dir = proto_dir / "generated" / "python"
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     proto_files = proto_dir.glob("*.proto")
-    
+
     for proto_file in proto_files:
         cmd = [
             "python", "-m", "grpc_tools.protoc",

@@ -45,27 +45,27 @@ except ImportError:
         def __init__(self, task_id: str): pass
         def create_issue(self, **kwargs) -> Any: return None
         def create_pull_request(self, **kwargs) -> Any: return None
-    
+
     class StateManager: pass
     class TaskTracker: pass
     class TaskMetrics: pass
     class ErrorHandler: pass
-    
+
     class RetryManager:
         def execute_with_retry(self, func: Callable, **kwargs) -> Any: return func()
-    
+
     class CircuitBreaker:
-        def __init__(self, **kwargs): 
+        def __init__(self, **kwargs):
             self.failure_count = 0
             self.is_open = False
         def __enter__(self): return self
         def __exit__(self, *args): pass
-    
+
     class AgentConfig:
         def __init__(self, agent_id: str, name: str):
             self.agent_id = agent_id
             self.name = name
-    
+
     class WorkflowPhase:
         INITIALIZATION = "initialization"
         ISSUE_CREATION = "issue_creation"
@@ -83,9 +83,9 @@ try:
 except ImportError:
     class AgentContainerExecutor:
         def __init__(self, **kwargs): pass
-        def execute_python_code(self, **kwargs) -> Dict[str, Any]: 
+        def execute_python_code(self, **kwargs) -> Dict[str, Any]:
             return {"success": True, "stdout": "", "stderr": ""}
-        def execute_command(self, **kwargs) -> Dict[str, Any]: 
+        def execute_command(self, **kwargs) -> Dict[str, Any]:
             return {"success": True, "stdout": "", "stderr": ""}
         def cleanup(self) -> None: pass
         def shutdown(self) -> None: pass
@@ -100,21 +100,21 @@ except ImportError:
             self.resolution_applied = "mock"
             self.final_status = type('Status', (), {'value': 'pass'})()
             self.skip_justification = "mock"
-    
+
     class TestWriterResult:
         def __init__(self):
             self.tests_created = []
             self.fixtures_created = []
             self.module_name = "mock"
-    
+
     class TestSolverAgent:
         def __init__(self, config: AgentConfig): pass
-        def solve_test_failure(self, test_id: str) -> TestSolverResult: 
+        def solve_test_failure(self, test_id: str) -> TestSolverResult:
             return TestSolverResult()
-    
+
     class TestWriterAgent:
         def __init__(self, config: AgentConfig): pass
-        def create_tests(self, file: str, context: str) -> TestWriterResult: 
+        def create_tests(self, file: str, context: str) -> TestWriterResult:
             return TestWriterResult()
 
 # Configure logging

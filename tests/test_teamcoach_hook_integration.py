@@ -58,16 +58,12 @@ This is a simple task to test hook execution.
 
         # Detect Claude rate-limit message and skip test gracefully
         if "usage limit reached" in result.stdout.lower():
-            pytest.skip(
-                "Claude CLI usage limit reached – skipping TeamCoach integration test"
-            )
+            pytest.skip("Claude CLI usage limit reached – skipping TeamCoach integration test")
 
         # Check stdout for TeamCoach invocation messages
         if "TeamCoach" in result.stdout:
             print("✅ Found TeamCoach references in stdout")
-            teamcoach_lines = [
-                line for line in result.stdout.split("\n") if "TeamCoach" in line
-            ]
+            teamcoach_lines = [line for line in result.stdout.split("\n") if "TeamCoach" in line]
             for line in teamcoach_lines[:5]:  # Show first 5 matches
                 print(f"   → {line}")
         else:
@@ -108,9 +104,9 @@ This is a simple task to test hook execution.
         print(f"   • Duration: {duration:.2f}s")
 
         # Test results for validation - pytest tests should not return values
-        assert result.returncode == 0 or len(found_indicators) > 0, (
-            "Test task should complete successfully or show hook indicators"
-        )
+        assert (
+            result.returncode == 0 or len(found_indicators) > 0
+        ), "Test task should complete successfully or show hook indicators"
 
 
 @pytest.mark.skip(
@@ -159,10 +155,7 @@ def calculate_sum(a, b):
 
     found_indicators = []
     for indicator in subagent_indicators:
-        if (
-            indicator.lower() in result.stdout.lower()
-            or indicator.lower() in result.stderr.lower()
-        ):
+        if indicator.lower() in result.stdout.lower() or indicator.lower() in result.stderr.lower():
             found_indicators.append(indicator)
 
     if found_indicators:

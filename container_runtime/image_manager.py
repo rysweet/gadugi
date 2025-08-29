@@ -32,9 +32,7 @@ except ImportError:
 import sys
 import os
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 from error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
@@ -109,9 +107,7 @@ class ImageManager:
         except (subprocess.TimeoutExpired, FileNotFoundError):
             pass
 
-        logger.warning(
-            "Trivy security scanner not available - security scanning disabled"
-        )
+        logger.warning("Trivy security scanner not available - security scanning disabled")
         return False
 
     def _load_image_registry(self) -> None:
@@ -131,9 +127,7 @@ class ImageManager:
                         size=data["size"],
                         created=datetime.fromisoformat(data["created"]),
                         layers=data["layers"],
-                        security_scan_date=datetime.fromisoformat(
-                            data["security_scan_date"]
-                        )
+                        security_scan_date=datetime.fromisoformat(data["security_scan_date"])
                         if data.get("security_scan_date")
                         else None,
                         vulnerability_count=data.get("vulnerability_count"),
@@ -457,9 +451,7 @@ CMD ["/bin/bash"]
             )
 
             if result.returncode != 0:
-                logger.warning(
-                    f"Security scan failed for {image_name}: {result.stderr}"
-                )
+                logger.warning(f"Security scan failed for {image_name}: {result.stderr}")
                 return None
 
             scan_data = json.loads(result.stdout)
@@ -486,9 +478,7 @@ CMD ["/bin/bash"]
             # Update image registry
             if image_name in self.image_registry:
                 self.image_registry[image_name].security_scan_date = datetime.now()
-                self.image_registry[
-                    image_name
-                ].vulnerability_count = total_vulnerabilities
+                self.image_registry[image_name].vulnerability_count = total_vulnerabilities
                 self.image_registry[image_name].security_score = security_score
                 self._save_image_registry()
 
@@ -616,9 +606,7 @@ CMD ["/bin/bash"]
         """Get security summary for all managed images."""
         total_images = len(self.image_registry)
         scanned_images = sum(
-            1
-            for img in self.image_registry.values()
-            if img.security_scan_date is not None
+            1 for img in self.image_registry.values() if img.security_scan_date is not None
         )
 
         vulnerability_counts = [
@@ -636,11 +624,8 @@ CMD ["/bin/bash"]
         return {
             "total_images": total_images,
             "scanned_images": scanned_images,
-            "scan_coverage": (scanned_images / total_images * 100)
-            if total_images > 0
-            else 0,
-            "average_vulnerabilities": sum(vulnerability_counts)
-            / len(vulnerability_counts)
+            "scan_coverage": (scanned_images / total_images * 100) if total_images > 0 else 0,
+            "average_vulnerabilities": sum(vulnerability_counts) / len(vulnerability_counts)
             if vulnerability_counts
             else 0,
             "average_security_score": sum(security_scores) / len(security_scores)

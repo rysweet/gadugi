@@ -69,9 +69,7 @@ class TestMemorySection(unittest.TestCase):
 
     def test_memory_section_creation(self):
         """Test MemorySection object creation"""
-        section = MemorySection(
-            name="test-section", priority="high", related_issues=[123, 456]
-        )
+        section = MemorySection(name="test-section", priority="high", related_issues=[123, 456])
 
         self.assertEqual(section.name, "test-section")
         self.assertEqual(section.priority, "high")
@@ -164,9 +162,7 @@ class TestSimpleMemoryManager(unittest.TestCase):
 
         # Verify issue creation parameters
         call_args = self.github_mock.create_issue.call_args
-        self.assertEqual(
-            call_args[1]["title"], "🧠 Project Memory - AI Assistant Context"
-        )
+        self.assertEqual(call_args[1]["title"], "🧠 Project Memory - AI Assistant Context")
         self.assertIn("enhancement", call_args[1]["labels"])
 
     def test_create_memory_issue_body(self):
@@ -375,9 +371,7 @@ spanning multiple lines.
             "success": True,
             "data": {
                 "comments": [
-                    {
-                        "body": "### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Content**:\nTest"
-                    }
+                    {"body": "### CURRENT-GOALS - 2025-01-01T12:00:00\n\n**Content**:\nTest"}
                 ],
                 "updatedAt": "2025-01-01T12:00:00Z",
             },
@@ -398,9 +392,7 @@ spanning multiple lines.
         # Mock memory content for cleanup
         self.github_mock._execute_gh_command.return_value = {
             "success": True,
-            "data": {
-                "comments": [{"body": "test comment 1"}, {"body": "test comment 2"}]
-            },
+            "data": {"comments": [{"body": "test comment 1"}, {"body": "test comment 2"}]},
         }
 
         result = manager.cleanup_old_memory(days_old=30, dry_run=True)
@@ -420,9 +412,7 @@ spanning multiple lines.
             "error": "API rate limit exceeded",
         }
 
-        result = manager.update_memory(
-            content="Test", section="current-goals", agent="TestAgent"
-        )
+        result = manager.update_memory(content="Test", section="current-goals", agent="TestAgent")
 
         self.assertFalse(result["success"])
         self.assertIn("error", result)
@@ -736,9 +726,7 @@ class TestMemoryLocking(unittest.TestCase):
 
         self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
 
-        manager = SimpleMemoryManager(
-            str(self.repo_path), auto_lock=True, strict_security=True
-        )
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=True, strict_security=True)
         result = manager.get_security_status()
 
         self.assertTrue(result["success"])
@@ -762,9 +750,7 @@ class TestMemoryLocking(unittest.TestCase):
 
         self.github_mock._execute_gh_command.side_effect = mock_execute_side_effect
 
-        manager = SimpleMemoryManager(
-            str(self.repo_path), auto_lock=False, strict_security=False
-        )
+        manager = SimpleMemoryManager(str(self.repo_path), auto_lock=False, strict_security=False)
         result = manager.get_security_status()
 
         self.assertTrue(result["success"])
@@ -838,9 +824,7 @@ class TestMemoryLocking(unittest.TestCase):
 
         # Should raise GitHubError in strict mode
         with self.assertRaises(Exception):  # GitHubError will be raised
-            SimpleMemoryManager(
-                str(self.repo_path), auto_lock=True, strict_security=True
-            )
+            SimpleMemoryManager(str(self.repo_path), auto_lock=True, strict_security=True)
 
     def test_custom_lock_reason(self):
         """Test custom lock reason configuration"""

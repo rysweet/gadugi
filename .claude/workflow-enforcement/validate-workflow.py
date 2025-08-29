@@ -41,31 +41,31 @@ def print_section(title: str):
 
 class WorkflowValidator:
     """Validates workflow requirements and provides guidance."""
-    
+
     def __init__(self, repo_root: str = "."):
         self.repo_root = Path(repo_root).resolve()
         self.claude_dir = self.repo_root / ".claude"
         self.enforcement_dir = self.claude_dir / "workflow-enforcement"
-    
+
     def validate_task(
-        self, 
-        task_description: str, 
+        self,
+        task_description: str,
         files: List[str] = None,
         execution_method: str = "direct"
     ) -> Tuple[bool, List[str], List[str]]:
         """
         Validate a task against workflow requirements.
-        
+
         Returns:
             (is_compliant, violations, recommendations)
         """
         violations = []
         recommendations = []
         files = files or []
-        
+
         # Check if task requires orchestrator
         requires_orchestrator = self._requires_orchestrator(task_description, files)
-        
+
         if requires_orchestrator and execution_method != "orchestrator":
             violations.append(
                 f"❌ Code change detected but orchestrator not being used"
@@ -77,7 +77,7 @@ class WorkflowValidator:
                 violations.append(
                     f"   Files: {', '.join(files)}"
                 )
-            
+
             recommendations.extend([
                 "🚀 Use orchestrator for this task:",
                 f"   python .claude/orchestrator/main.py --task \"{task_description}\"",
@@ -85,20 +85,20 @@ class WorkflowValidator:
                 "📚 Review workflow requirements:",
                 "   cat .claude/workflow-enforcement/workflow-reminder.md"
             ])
-        
+
         # Check orchestrator availability
         if requires_orchestrator:
             orchestrator_issues = self._check_orchestrator_setup()
             if orchestrator_issues:
                 violations.extend(orchestrator_issues)
-        
+
         is_compliant = len(violations) == 0
-        
+
         return is_compliant, violations, recommendations
-    
+
     def _requires_orchestrator(self, task_description: str, files: List[str]) -> bool:
         """Determine if a task requires orchestrator workflow."""
-        
+
         # Check files
         if files:
             code_extensions = {
@@ -106,7 +106,7 @@ class WorkflowValidator:
                 '.json', '.yaml', '.yml', '.md', '.txt', '.sh', '.bash', '.zsh',
                 '.css', '.scss', '.html', '.xml', '.sql', '.r', '.rb', '.php'
             }
-            
+
             for file_path in files:
                 if any(file_path.endswith(ext) for ext in code_extensions):
                     return True
@@ -114,74 +114,74 @@ class WorkflowValidator:
                 config_indicators = ['config', 'settings', 'setup', 'requirements', 'package']
                 if any(indicator in file_path.lower() for indicator in config_indicators):
                     return True
-        
+
         # Check task description
         code_change_indicators = [
             # Direct modification words
             'fix', 'implement', 'create', 'add', 'update', 'modify', 'refactor',
             'delete', 'remove', 'change', 'edit', 'write', 'develop', 'build',
             'install', 'configure', 'setup', 'deploy', 'merge', 'commit',
-            
+
             # Technical operation words
             'debug', 'optimize', 'enhance', 'improve', 'migrate', 'upgrade',
             'patch', 'rename', 'move', 'copy', 'generate', 'compile',
-            
+
             # Git operations
             'branch', 'pull', 'push', 'rebase', 'cherry-pick', 'revert',
-            
+
             # Package management
             'pip install', 'npm install', 'yarn add', 'gem install',
             'apt-get', 'brew install', 'conda install'
         ]
-        
+
         task_lower = task_description.lower()
-        
+
         for indicator in code_change_indicators:
             if indicator in task_lower:
                 return True
-        
+
         # Check for file operation patterns
         file_operation_patterns = [
             'create file', 'delete file', 'modify file', 'edit file',
             'new file', 'add file', 'remove file', 'update file'
         ]
-        
+
         for pattern in file_operation_patterns:
             if pattern in task_lower:
                 return True
-        
+
         return False
-    
+
     def _check_orchestrator_setup(self) -> List[str]:
         """Check if orchestrator is properly set up."""
         issues = []
-        
+
         # Check if orchestrator exists
         orchestrator_main = self.claude_dir / "orchestrator" / "main.py"
         if not orchestrator_main.exists():
             issues.append(
                 "⚠️ Orchestrator main.py not found at .claude/orchestrator/main.py"
             )
-        
+
         # Check if workflow manager exists
         workflow_master = self.claude_dir / "agents" / "WorkflowMaster.md"
         if not workflow_master.exists():
             issues.append(
                 "⚠️ WorkflowMaster agent not found at .claude/agents/WorkflowMaster.md"
             )
-        
+
         return issues
-    
+
     def show_workflow_guide(self):
         """Display comprehensive workflow guidance."""
         print_header("GADUGI WORKFLOW ENFORCEMENT GUIDE")
-        
+
         print_section("🚨 CRITICAL: When to Use Orchestrator")
-        
+
         print_colored(Colors.GREEN, "✅ REQUIRES ORCHESTRATOR:")
         orchestrator_tasks = [
             "• Any file modifications (.py, .js, .json, .md, etc.)",
-            "• Creating or deleting files/directories", 
+            "• Creating or deleting files/directories",
             "• Installing or updating dependencies",
             "• Configuration changes",
             "• Bug fixes and feature implementations",
@@ -191,7 +191,7 @@ class WorkflowValidator:
         ]
         for task in orchestrator_tasks:
             print(f"  {task}")
-        
+
         print_colored(Colors.YELLOW, "\n❌ DIRECT EXECUTION OK:")
         direct_tasks = [
             "• Reading and analyzing existing files",
@@ -203,12 +203,12 @@ class WorkflowValidator:
         ]
         for task in direct_tasks:
             print(f"  {task}")
-        
+
         print_section("📋 The 11-Phase Workflow")
         phases = [
             "1. Task Validation - Validate requirements and scope",
             "2. Environment Setup - Prepare development environment",
-            "3. Dependency Analysis - Analyze impact and dependencies", 
+            "3. Dependency Analysis - Analyze impact and dependencies",
             "4. Worktree Creation - Create isolated development branch",
             "5. Implementation - Execute the actual code changes",
             "6. Testing - Run comprehensive test suites",
@@ -218,16 +218,16 @@ class WorkflowValidator:
             "10. Integration - Merge to target branch",
             "11. Cleanup - Clean up temporary resources"
         ]
-        
+
         for phase in phases:
             print_colored(Colors.WHITE, f"  {phase}")
-        
+
         print_section("🚀 How to Use Orchestrator")
         print_colored(Colors.CYAN, "  cd /Users/ryan/src/gadugi5/gadugi")
         print_colored(Colors.CYAN, "  python .claude/orchestrator/main.py \\")
         print_colored(Colors.CYAN, "    --task \"Your task description\" \\")
         print_colored(Colors.CYAN, "    --auto-approve")
-        
+
         print_section("🔍 Validation Commands")
         validation_commands = [
             "# Check if your task needs orchestrator:",
@@ -239,13 +239,13 @@ class WorkflowValidator:
             "# View workflow reminder:",
             "cat .claude/workflow-enforcement/workflow-reminder.md"
         ]
-        
+
         for cmd in validation_commands:
             if cmd.startswith("#"):
                 print_colored(Colors.GREEN, f"  {cmd}")
             else:
                 print_colored(Colors.WHITE, f"  {cmd}")
-        
+
         print_colored(Colors.PURPLE, f"\n{'=' * 60}")
         print_colored(Colors.WHITE + Colors.BOLD, "  Remember: The workflow protects code quality!")
         print_colored(Colors.PURPLE, f"{'=' * 60}\n")
@@ -263,57 +263,57 @@ Examples:
   %(prog)s --task "Add new feature" --method orchestrator  # Should be compliant
         """
     )
-    
+
     parser.add_argument(
-        "--task", 
+        "--task",
         help="Task description to validate"
     )
-    
+
     parser.add_argument(
-        "--files", 
-        nargs="*", 
+        "--files",
+        nargs="*",
         help="Files that will be modified"
     )
-    
+
     parser.add_argument(
-        "--method", 
+        "--method",
         default="direct",
         choices=["direct", "orchestrator"],
         help="Execution method (default: direct)"
     )
-    
+
     parser.add_argument(
         "--guide",
-        action="store_true", 
+        action="store_true",
         help="Show comprehensive workflow guide"
     )
-    
+
     parser.add_argument(
         "--json",
         action="store_true",
         help="Output results in JSON format"
     )
-    
+
     args = parser.parse_args()
-    
+
     validator = WorkflowValidator()
-    
+
     if args.guide:
         validator.show_workflow_guide()
         return
-    
+
     if not args.task:
         print_colored(Colors.RED, "❌ Error: --task is required (or use --guide)")
         parser.print_help()
         sys.exit(1)
-    
+
     # Validate the task
     is_compliant, violations, recommendations = validator.validate_task(
-        args.task, 
-        args.files or [], 
+        args.task,
+        args.files or [],
         args.method
     )
-    
+
     if args.json:
         # JSON output
         result = {
@@ -329,12 +329,12 @@ Examples:
     else:
         # Human-readable output
         print_header("WORKFLOW VALIDATION RESULTS")
-        
+
         print_colored(Colors.BLUE, f"📝 Task: {args.task}")
         if args.files:
             print_colored(Colors.BLUE, f"📁 Files: {', '.join(args.files)}")
         print_colored(Colors.BLUE, f"⚙️  Method: {args.method}")
-        
+
         if is_compliant:
             print_colored(Colors.GREEN, f"\n✅ WORKFLOW COMPLIANT")
             print_colored(Colors.GREEN, "   This task follows proper workflow requirements.")
@@ -343,7 +343,7 @@ Examples:
             print_section("Issues Found")
             for violation in violations:
                 print_colored(Colors.RED, f"  {violation}")
-            
+
             if recommendations:
                 print_section("Recommendations")
                 for rec in recommendations:
@@ -351,7 +351,7 @@ Examples:
                         print_colored(Colors.GREEN, f"  {rec}")
                     else:
                         print_colored(Colors.WHITE, f"  {rec}")
-    
+
     sys.exit(0 if is_compliant else 1)
 
 if __name__ == "__main__":

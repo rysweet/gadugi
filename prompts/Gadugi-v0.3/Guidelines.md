@@ -180,7 +180,7 @@ def calculate_discount(price, discount_percent):
 class DiscountCalculator:
     def __init__(self, strategy_factory):
         self.strategy = strategy_factory.create_strategy()
-    
+
     def calculate(self, price, discount):
         return self.strategy.apply(price, discount)
 ```

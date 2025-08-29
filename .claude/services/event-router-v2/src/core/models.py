@@ -27,7 +27,7 @@ class EventType(str, Enum):
     AGENT_STOPPED = "agent.stopped"
     AGENT_FAILED = "agent.failed"
     AGENT_COMPLETED = "agent.completed"
-    
+
     # Task lifecycle
     TASK_CREATED = "task.created"
     TASK_ASSIGNED = "task.assigned"
@@ -35,18 +35,18 @@ class EventType(str, Enum):
     TASK_PROGRESS = "task.progress"
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
-    
+
     # Workflow lifecycle
     WORKFLOW_STARTED = "workflow.started"
     WORKFLOW_STEP_COMPLETED = "workflow.step_completed"
     WORKFLOW_COMPLETED = "workflow.completed"
     WORKFLOW_FAILED = "workflow.failed"
-    
+
     # System events
     SYSTEM_ALERT = "system.alert"
     SYSTEM_ERROR = "system.error"
     SYSTEM_INFO = "system.info"
-    
+
     # Custom events
     CUSTOM = "custom"
 
@@ -72,7 +72,7 @@ class EventMetadata:
     span_id: Optional[str] = None
     tags: Dict[str, str] = field(default_factory=dict)
     headers: Dict[str, str] = field(default_factory=dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -86,7 +86,7 @@ class EventMetadata:
             "tags": self.tags,
             "headers": self.headers,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> EventMetadata:
         """Create from dictionary."""
@@ -108,13 +108,13 @@ class Event:
     metadata: EventMetadata = field(default_factory=EventMetadata)
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     version: str = "1.0"
-    
+
     # Delivery tracking
     delivery_status: DeliveryStatus = DeliveryStatus.PENDING
     delivery_attempts: int = 0
     last_delivery_attempt: Optional[datetime] = None
     delivery_error: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary."""
         return {
@@ -133,7 +133,7 @@ class Event:
             "last_delivery_attempt": self.last_delivery_attempt.isoformat() if self.last_delivery_attempt else None,
             "delivery_error": self.delivery_error,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Event:
         """Create event from dictionary."""
@@ -143,56 +143,56 @@ class Event:
                 data["type"] = EventType(data["type"])
             except ValueError:
                 data["type"] = EventType.CUSTOM
-        
+
         if "priority" in data:
             data["priority"] = EventPriority(int(data["priority"]))
-        
+
         if "delivery_status" in data and isinstance(data["delivery_status"], str):
             data["delivery_status"] = DeliveryStatus(data["delivery_status"])
-        
+
         # Handle datetime fields
         if "timestamp" in data and isinstance(data["timestamp"], str):
             data["timestamp"] = datetime.fromisoformat(data["timestamp"])
-        
+
         if "last_delivery_attempt" in data and data["last_delivery_attempt"]:
             if isinstance(data["last_delivery_attempt"], str):
                 data["last_delivery_attempt"] = datetime.fromisoformat(data["last_delivery_attempt"])
-        
+
         # Handle metadata
         if "metadata" in data and isinstance(data["metadata"], dict):
             data["metadata"] = EventMetadata.from_dict(data["metadata"])
-        
+
         return cls(**data)
-    
+
     def to_json(self) -> str:
         """Convert to JSON string."""
         return json.dumps(self.to_dict())
-    
+
     @classmethod
     def from_json(cls, json_str: str) -> Event:
         """Create from JSON string."""
         return cls.from_dict(json.loads(json_str))
-    
+
     def matches_topic(self, pattern: str) -> bool:
         """Check if event topic matches pattern (supports wildcards)."""
         if pattern == "*":
             return True
         if pattern == self.topic:
             return True
-        
+
         # Support wildcard matching (e.g., "user.*" matches "user.created")
         if "*" in pattern:
             pattern_parts = pattern.split(".")
             topic_parts = self.topic.split(".")
-            
+
             if len(pattern_parts) != len(topic_parts):
                 return False
-            
+
             for pattern_part, topic_part in zip(pattern_parts, topic_parts):
                 if pattern_part != "*" and pattern_part != topic_part:
                     return False
             return True
-        
+
         return False
 
 
@@ -207,44 +207,44 @@ class Subscription:
     sources: List[str] = field(default_factory=list)  # Source filters
     active: bool = True
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    
+
     # Delivery configuration
     max_retries: int = 3
     retry_delay: float = 1.0  # seconds
     timeout: float = 30.0  # seconds
     batch_size: int = 1  # For batched delivery
-    
+
     # Callback or endpoint
     callback: Optional[Callable[[Event], None]] = None
     endpoint: Optional[str] = None  # For HTTP/WebSocket delivery
-    
+
     def matches(self, event: Event) -> bool:
         """Check if subscription matches event."""
         if not self.active:
             return False
-        
+
         # Check topic patterns
         if self.topics:
             topic_match = any(event.matches_topic(pattern) for pattern in self.topics)
             if not topic_match:
                 return False
-        
+
         # Check event types
         if self.types and event.type not in self.types:
             return False
-        
+
         # Check priorities (subscription specifies minimum priority)
         if self.priorities:
             min_priority = min(self.priorities)
             if event.priority < min_priority:
                 return False
-        
+
         # Check sources
         if self.sources and event.source not in self.sources:
             return False
-        
+
         return True
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {
@@ -262,24 +262,24 @@ class Subscription:
             "batch_size": self.batch_size,
             "endpoint": self.endpoint,
         }
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> Subscription:
         """Create from dictionary."""
         # Handle enums
         if "types" in data:
             data["types"] = [EventType(t) if isinstance(t, str) else t for t in data["types"]]
-        
+
         if "priorities" in data:
             data["priorities"] = [EventPriority(int(p)) for p in data["priorities"]]
-        
+
         # Handle datetime
         if "created_at" in data and isinstance(data["created_at"], str):
             data["created_at"] = datetime.fromisoformat(data["created_at"])
-        
+
         # Remove callback from dict (can't serialize functions)
         data.pop("callback", None)
-        
+
         return cls(**data)
 
 
@@ -288,15 +288,15 @@ class EventBatch:
     """Batch of events for efficient delivery."""
     events: List[Event] = field(default_factory=list)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    
+
     def add(self, event: Event) -> None:
         """Add event to batch."""
         self.events.append(event)
-    
+
     def size(self) -> int:
         """Get batch size."""
         return len(self.events)
-    
+
     def clear(self) -> List[Event]:
         """Clear and return events."""
         events = self.events.copy()
@@ -316,7 +316,7 @@ class HealthStatus:
     connected_clients: int = 0
     last_event_at: Optional[datetime] = None
     errors: List[str] = field(default_factory=list)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
         return {

@@ -28,9 +28,7 @@ class Neo4jConnection:
     def connect(self) -> bool:
         """Establish connection to Neo4j."""
         try:
-            self.driver = GraphDatabase.driver(
-                self.uri, auth=basic_auth(self.user, self.password)
-            )
+            self.driver = GraphDatabase.driver(self.uri, auth=basic_auth(self.user, self.password))
             # Test connection
             with self.driver.session() as session:
                 result = session.run("RETURN 1 AS test")
@@ -65,9 +63,7 @@ class Neo4jConnection:
         try:
             with self.driver.session() as session:
                 # Check for system agent
-                result = session.run(
-                    "MATCH (a:Agent {id: 'system'}) RETURN a.name AS name"
-                )
+                result = session.run("MATCH (a:Agent {id: 'system'}) RETURN a.name AS name")
                 record = result.single()
                 if record:
                     print(f"✅ System agent found: {record['name']}")
@@ -76,9 +72,7 @@ class Neo4jConnection:
                     return False
 
                 # Check for root memory
-                result = session.run(
-                    "MATCH (m:Memory {id: 'root'}) RETURN m.type AS type"
-                )
+                result = session.run("MATCH (m:Memory {id: 'root'}) RETURN m.type AS type")
                 record = result.single()
                 if record:
                     print(f"✅ Root memory found: {record['type']}")
@@ -87,9 +81,7 @@ class Neo4jConnection:
                     return False
 
                 # Count constraints
-                result = session.run(
-                    "SHOW CONSTRAINTS YIELD name RETURN count(*) AS count"
-                )
+                result = session.run("SHOW CONSTRAINTS YIELD name RETURN count(*) AS count")
                 count = result.single()["count"]
                 print(f"✅ Found {count} constraints")
 
@@ -233,9 +225,7 @@ class Neo4jConnection:
                     result = session.run("MATCH (n) RETURN count(n) AS nodes")
                     node_count = result.single()["nodes"]
 
-                    result = session.run(
-                        "MATCH ()-[r]->() RETURN count(r) AS relationships"
-                    )
+                    result = session.run("MATCH ()-[r]->() RETURN count(r) AS relationships")
                     rel_count = result.single()["relationships"]
 
                     print("\n📊 Basic Statistics:")

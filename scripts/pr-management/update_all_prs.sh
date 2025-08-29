@@ -17,43 +17,43 @@ CONFLICTS=0
 for PR in "${PRS[@]}"; do
     echo "----------------------------------------"
     echo "Processing PR #$PR..."
-    
+
     # Get PR branch name
     BRANCH=$(gh pr view $PR --json headRefName --jq '.headRefName')
-    
+
     if [ -z "$BRANCH" ]; then
         echo "❌ Failed to get branch name for PR #$PR"
         ((FAILED++))
         continue
     fi
-    
+
     echo "Branch: $BRANCH"
-    
+
     # Checkout the PR branch
     echo "Checking out PR #$PR..."
     gh pr checkout $PR 2>/dev/null || git checkout $BRANCH
-    
+
     if [ $? -ne 0 ]; then
         echo "❌ Failed to checkout PR #$PR"
         ((FAILED++))
         continue
     fi
-    
+
     # Fetch latest v0.3-regeneration
     echo "Fetching latest v0.3-regeneration..."
     git fetch origin feature/gadugi-v0.3-regeneration
-    
+
     # Attempt to merge
     echo "Attempting to merge v0.3-regeneration..."
     git merge origin/feature/gadugi-v0.3-regeneration --no-edit
-    
+
     if [ $? -eq 0 ]; then
         echo "✅ Successfully merged for PR #$PR"
-        
+
         # Push the changes
         echo "Pushing updates..."
         git push origin $BRANCH
-        
+
         if [ $? -eq 0 ]; then
             echo "✅ PR #$PR updated successfully!"
             ((SUCCESS++))
@@ -66,7 +66,7 @@ for PR in "${PRS[@]}"; do
         git merge --abort
         ((CONFLICTS++))
     fi
-    
+
     echo ""
 done
 

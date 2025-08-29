@@ -78,7 +78,7 @@ async def _execute_single_task(self, task: Any) -> Any:
 <<<<<<< HEAD
 
 =======
-    
+
 >>>>>>> feature/gadugi-v0.3-regeneration
     GOVERNANCE REQUIREMENT: All tasks MUST be delegated to WorkflowManager
     to ensure complete 11-phase workflow execution (Issue #148).
@@ -92,7 +92,7 @@ async def _invoke_workflow_manager(self, task: Any) -> Dict[str, Any]:
 <<<<<<< HEAD
 
 =======
-    
+
 >>>>>>> feature/gadugi-v0.3-regeneration
     GOVERNANCE: This is the MANDATORY delegation point.
     """
@@ -103,7 +103,7 @@ async def _invoke_workflow_manager(self, task: Any) -> Dict[str, Any]:
 <<<<<<< HEAD
 
 =======
-    
+
 >>>>>>> feature/gadugi-v0.3-regeneration
     # Execute via claude subprocess
     workflow_cmd = ["claude", "-p", str(prompt_file)]

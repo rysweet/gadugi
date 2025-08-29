@@ -49,4 +49,3 @@ For detailed instructions, see:
 - [CLAUDE.md](./CLAUDE.md) - Complete orchestration instructions
 - [Quick Start Guide](./docs/claude-orchestration-quickstart.md)
 - [Migration Guide](./docs/migration-to-claude-orchestration.md)
-

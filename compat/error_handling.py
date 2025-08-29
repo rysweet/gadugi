@@ -20,9 +20,7 @@ from types import ModuleType
 
 # Absolute path to the real implementation inside the Enhanced Separation tree.
 _IMPL_PATH = (
-    Path(__file__)
-    .resolve()
-    .parent.parent  # Go up one more level since we're now in compat/
+    Path(__file__).resolve().parent.parent  # Go up one more level since we're now in compat/
     / ".claude"
     / "shared"
     / "utils"
@@ -32,9 +30,7 @@ _IMPL_PATH = (
 if not _IMPL_PATH.is_file():  # pragma: no cover
     raise ImportError(f"Canonical implementation not found at {_IMPL_PATH}")
 
-_spec = importlib.util.spec_from_file_location(
-    "_gadugi_error_handling_impl", _IMPL_PATH
-)
+_spec = importlib.util.spec_from_file_location("_gadugi_error_handling_impl", _IMPL_PATH)
 if _spec is None or _spec.loader is None:  # pragma: no cover
     raise ImportError(f"Unable to load spec for {_IMPL_PATH}")
 

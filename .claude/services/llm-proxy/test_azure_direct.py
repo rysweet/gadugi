@@ -26,7 +26,7 @@ print()
 # Test different API versions
 api_versions = [
     "2025-01-01-preview",
-    "2024-10-01-preview", 
+    "2024-10-01-preview",
     "2024-08-01-preview",
     "2024-06-01",
     "2024-02-15-preview",
@@ -44,20 +44,20 @@ print("=" * 60)
 
 for version in api_versions:
     url = f"{base_url}/openai/deployments/{deployment}/chat/completions?api-version={version}"
-    
+
     headers = {
         "api-key": api_key,
         "Content-Type": "application/json"
     }
-    
+
     payload = {
         "messages": [{"role": "user", "content": "test"}],
         "max_tokens": 1
     }
-    
+
     try:
         response = httpx.post(url, json=payload, headers=headers, timeout=10)
-        
+
         if response.status_code == 200:
             print(f"✅ {version}: SUCCESS")
             print(f"   Valid API version found!")
@@ -71,7 +71,7 @@ for version in api_versions:
             print(f"⚠️  {version}: 400 Bad Request - {error_detail}")
         else:
             print(f"❓ {version}: {response.status_code}")
-            
+
     except Exception as e:
         print(f"❌ {version}: Error - {str(e)}")
 

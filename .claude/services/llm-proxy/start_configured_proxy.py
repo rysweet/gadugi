@@ -44,15 +44,15 @@ sys.path.append(str(Path(__file__).parent.parent.parent))
 
 async def main():
     """Start the LLM Proxy with Azure configuration."""
-    
+
     logger.info("="*60)
     logger.info("Starting LLM Proxy Service")
     logger.info(f"Log file: {log_file}")
     logger.info("="*60)
-    
+
     try:
         from llm_proxy_service import LLMProxyService, LoadBalanceStrategy
-        
+
         # Create service
         service = LLMProxyService(
             cache_size=int(os.getenv("LLM_PROXY_CACHE_SIZE", "1000")),
@@ -60,15 +60,15 @@ async def main():
             load_balance_strategy=LoadBalanceStrategy.ROUND_ROBIN,
             enable_failover=False
         )
-        
+
         # Configure Azure OpenAI if available
         if os.getenv("AZURE_OPENAI_API_KEY"):
             logger.info("Configuring Azure OpenAI provider")
             logger.info(f"Endpoint: {os.getenv('AZURE_OPENAI_ENDPOINT')}")
             logger.info(f"Deployment: {os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME')}")
-            
+
             from llm_proxy_service import ModelConfig, LLMProvider, ModelCapability
-            
+
             azure_config = ModelConfig(
                 provider=LLMProvider.AZURE,
                 model_name="gpt-4",
@@ -86,22 +86,22 @@ async def main():
                 api_key=os.getenv("AZURE_OPENAI_API_KEY"),
                 api_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
             )
-            
+
             # Register the Azure configuration
             service.register_model_config("azure-gpt-4", azure_config)
             logger.info("Azure OpenAI provider registered successfully")
-        
+
         # Start service without initializing default providers
         service.running = False  # Ensure it's not already marked as running
         logger.info("Starting service...")
-        
+
         # Manually start without default providers
         service.running = True
         service.cleanup_task = asyncio.create_task(service._cleanup_loop())
         logger.info("Service started without default providers")
         logger.info("LLM Proxy Service started successfully")
         logger.info(f"Port: {os.getenv('LLM_PROXY_PORT', '8080')}")
-        
+
         print("\n" + "="*60)
         print("✅ LLM Proxy Service Started Successfully!")
         print("="*60)
@@ -117,13 +117,13 @@ async def main():
         print(f"\n🛑 To stop service:")
         print(f"   Press Ctrl+C or kill {os.getpid()}")
         print("="*60)
-        
+
         # Keep running
         while True:
             await asyncio.sleep(60)
             stats = service.get_service_stats()
             logger.info(f"Stats - Requests: {stats.get('total_requests', 0)}")
-            
+
     except KeyboardInterrupt:
         logger.info("Shutdown requested")
     except ImportError as e:

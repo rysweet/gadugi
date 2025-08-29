@@ -74,7 +74,7 @@ print_service_status() {
     local status="$1"
     local name="$2"
     local message="$3"
-    
+
     case "$status" in
         "HEALTHY"|"OPTIMAL"|"FULLY_OPERATIONAL")
             echo -e "${GREEN}✅ $name${NC} - $message"
@@ -103,28 +103,28 @@ check_enabled() {
 # Check prerequisites
 check_prerequisites() {
     log_verbose "Checking prerequisites..."
-    
+
     # Check if we're in the right directory
     if [[ ! -f "$GADUGI_ROOT/pyproject.toml" ]]; then
         log_error "Not in Gadugi project root (no pyproject.toml found)"
         return 1
     fi
-    
+
     # Check if coordinator agent exists
     if [[ ! -f "$COORDINATOR_AGENT" ]]; then
         log_error "Gadugi Coordinator agent not found: $COORDINATOR_AGENT"
         return 1
     fi
-    
+
     # Check Python availability
     if ! command -v python3 &> /dev/null; then
         log_error "Python 3 not available"
         return 1
     fi
-    
+
     # Create log directory
     mkdir -p "$(dirname "$LOG_FILE")"
-    
+
     log_verbose "Prerequisites satisfied"
     return 0
 }
@@ -132,17 +132,17 @@ check_prerequisites() {
 # Get service status via coordinator
 get_service_status() {
     log_verbose "Requesting service status from coordinator..."
-    
+
     cd "$GADUGI_ROOT"
-    
+
     # Use the Python service checker directly
     local checker_script="${SCRIPT_DIR}/check-services.py"
-    
+
     if [[ ! -f "$checker_script" ]]; then
         log_error "Service checker script not found: $checker_script"
         return 1
     fi
-    
+
     # Run the service checker and convert output to JSON format
     local status_json
     if status_json=$(python3 "$checker_script" --json 2>/dev/null); then
@@ -182,7 +182,7 @@ for service_id, service_info in services.items():
     else:
         status = 'DOWN'
         status_response['summary']['down'] += 1
-        
+
     status_response['services'][service_id] = {
         'name': service_info['name'],
         'status': status,
@@ -212,7 +212,7 @@ print(json.dumps(status_response))
 # Display service status
 display_service_status() {
     local status_json="$1"
-    
+
     # Parse JSON with Python
     python3 -c "
 import json
@@ -220,16 +220,16 @@ import sys
 
 try:
     status = json.loads('''$status_json''')
-    
+
     print('## Gadugi v0.3 Services Status')
     print()
     print('### Core Services:')
-    
+
     for service_id, service_info in status.get('services', {}).items():
         name = service_info.get('name', service_id)
         service_status = service_info.get('status', 'UNKNOWN')
         message = service_info.get('message', '')
-        
+
         # Status icon
         if service_status in ['HEALTHY', 'OPTIMAL']:
             icon = '✅'
@@ -239,11 +239,11 @@ try:
             icon = '❌'
         else:
             icon = '❓'
-        
+
         print(f'{icon} {name} - {service_status}')
         if message and message != name:
             print(f'   {message}')
-    
+
     print()
     print('### Agent Updates:')
     agent_info = status.get('agent_updates', {})
@@ -251,11 +251,11 @@ try:
         print('✅ All agents up to date')
     else:
         print('⚠️  Agent updates available')
-    
+
     print()
     overall = status.get('overall_status', 'UNKNOWN').replace('_', ' ').title()
     print(f'### Overall Status: {overall}')
-    
+
     # Show recommendations if any issues
     recommendations = status.get('recommendations', [])
     if len(recommendations) > 1 or (recommendations and 'no actions needed' not in recommendations[0].lower()):
@@ -263,7 +263,7 @@ try:
         print('### Recommendations:')
         for rec in recommendations[:3]:
             print(f'- {rec}')
-    
+
 except json.JSONDecodeError as e:
     print('ERROR: Failed to parse service status JSON')
     sys.exit(1)
@@ -276,12 +276,12 @@ except Exception as e:
 # Auto-start services if needed
 auto_start_services() {
     local status_json="$1"
-    
+
     if [[ "$GADUGI_SERVICE_CHECK_AUTO_START" != "true" ]]; then
         log_verbose "Auto-start disabled"
         return 0
     fi
-    
+
     # Check if any services need starting
     local needs_start
     needs_start=$(python3 -c "
@@ -291,16 +291,16 @@ summary = status.get('summary', {})
 down_count = summary.get('down', 0)
 print('true' if down_count > 0 else 'false')
 ")
-    
+
     if [[ "$needs_start" == "true" ]]; then
         log "Some services are down, attempting auto-start..."
-        
+
         # This would invoke the coordinator's start command
         # For now, we'll simulate it
         echo -e "${YELLOW}🚀 Auto-starting services...${NC}"
         sleep 2  # Simulate startup time
         echo -e "${GREEN}✅ Services started${NC}"
-        
+
         return 0
     else
         log_verbose "All services running, no auto-start needed"
@@ -311,23 +311,23 @@ print('true' if down_count > 0 else 'false')
 # Main service check function
 run_service_check() {
     local exit_code=0
-    
+
     print_header
-    
+
     # Get service status
     local status_json
     if status_json=$(get_service_status); then
         log_verbose "Service status retrieved successfully"
-        
+
         # Display status
         display_service_status "$status_json"
-        
+
         # Auto-start if needed
         if ! auto_start_services "$status_json"; then
             log_warning "Auto-start failed"
             exit_code=1
         fi
-        
+
         # Check overall status for exit code
         local overall_status
         overall_status=$(echo "$status_json" | python3 -c "
@@ -336,7 +336,7 @@ import sys
 status = json.loads(sys.stdin.read())
 print(status.get('overall_status', 'UNKNOWN'))
 ")
-        
+
         case "$overall_status" in
             "FULLY_OPERATIONAL"|"OPTIMAL")
                 exit_code=0
@@ -352,15 +352,15 @@ print(status.get('overall_status', 'UNKNOWN'))
                 exit_code=1
                 ;;
         esac
-        
+
     else
         log_error "Failed to get service status"
         echo -e "${RED}❌ Unable to check service status${NC}"
         exit_code=1
     fi
-    
+
     print_footer
-    
+
     return $exit_code
 }
 
@@ -421,31 +421,31 @@ EOF
 # Main entry point
 main() {
     local command="${1:-check}"
-    
+
     case "$command" in
         "check"|"")
             if ! check_enabled; then
                 exit 0
             fi
-            
+
             if ! check_prerequisites; then
                 exit 2
             fi
-            
+
             run_service_check
             exit $?
             ;;
-        
+
         "config")
             show_config
             exit 0
             ;;
-        
+
         "help"|"--help"|"-h")
             show_help
             exit 0
             ;;
-        
+
         *)
             echo "Unknown command: $command"
             echo "Use '$0 help' for usage information"

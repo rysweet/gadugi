@@ -77,21 +77,21 @@ class EventPattern:
     priorities: Optional[Set[str]] = None
     tag_patterns: Optional[List[Pattern]] = None
     custom_filters: Optional[List[CustomFilter]] = None
-    
+
     def matches(self, event: AgentEvent) -> bool:
         """Check if an event matches this pattern."""
         # Check event type
         if self.event_types and event.event_type not in self.event_types:
             return False
-            
+
         # Check agent source
         if self.agent_sources and event.agent_id not in self.agent_sources:
             return False
-            
+
         # Check priority
         if self.priorities and event.priority.value not in self.priorities:
             return False
-            
+
         # Check tags
         if self.tag_patterns:
             if not any(
@@ -99,16 +99,16 @@ class EventPattern:
                 for pattern in self.tag_patterns
             ):
                 return False
-                
+
         # Apply custom filters
         if self.custom_filters:
             for cf in self.custom_filters:
                 field_value = self._get_nested_field(event.data, cf.field)
                 if not self._evaluate_filter(field_value, cf.operator, cf.value):
                     return False
-                    
+
         return True
-    
+
     def _get_nested_field(self, data: Dict[str, Any], field: str) -> Any:
         """Get a nested field from a dictionary."""
         parts = field.split('.')
@@ -119,7 +119,7 @@ class EventPattern:
             else:
                 return None
         return value
-    
+
     def _evaluate_filter(self, field_value: Any, operator: FilterOperator, value: Any) -> bool:
         """Evaluate a custom filter."""
         if operator == FilterOperator.EQUALS:

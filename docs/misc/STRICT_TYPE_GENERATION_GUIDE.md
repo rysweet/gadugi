@@ -108,7 +108,7 @@ T = TypeVar('T')
 class Container(Generic[T]):
     def __init__(self) -> None:
         self._items: List[T] = []
-    
+
     def add(self, item: T) -> None:
         self._items.append(item)
 ```
@@ -144,12 +144,12 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExampleClass:
     """Example with proper typing."""
-    
+
     required_field: str
     optional_field: Optional[int] = None
     list_field: List[str] = field(default_factory=list)
     dict_field: Dict[str, Any] = field(default_factory=dict)
-    
+
     def method(self, param: str) -> Optional[str]:
         """Method with full type annotations."""
         if not param:
@@ -164,17 +164,17 @@ def example_function(
 ) -> Dict[str, Any]:
     """Function with complete type annotations."""
     result: Dict[str, Any] = {"required": required}
-    
+
     if optional is not None:
         result["optional"] = optional
-    
+
     result.update(kwargs)
     return result
 
 
 class ExampleProtocol(Protocol):
     """Protocol for type checking."""
-    
+
     def required_method(self, value: str) -> int:
         """Required method signature."""
         ...
@@ -184,7 +184,7 @@ def main() -> None:
     """Entry point with type annotation."""
     instance = ExampleClass(required_field="test")
     result = instance.method("hello")
-    
+
     if result is not None:
         print(f"Result: {result}")
 

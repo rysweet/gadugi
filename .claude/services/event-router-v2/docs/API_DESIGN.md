@@ -192,11 +192,11 @@ async def get_user(request):
     user_id = request.payload.get("id")
     if not user_id:
         raise ValueError("User ID required")
-    
+
     user = await db.get_user(user_id)
     if not user:
         raise NotFoundError(f"User {user_id} not found")
-    
+
     return user.to_dict()
 ```
 
@@ -235,7 +235,7 @@ class ProcessOrderSaga:
             "order_id": event.payload["id"],
             "items": event.payload["items"]
         })
-    
+
     @client.on("inventory.reserved")
     async def inventory_reserved(self, event):
         # Process payment
@@ -243,7 +243,7 @@ class ProcessOrderSaga:
             "order_id": event.payload["order_id"],
             "amount": event.payload["total"]
         })
-    
+
     @client.on("payment.completed")
     async def payment_completed(self, event):
         # Ship order
@@ -251,7 +251,7 @@ class ProcessOrderSaga:
             "order_id": event.payload["order_id"]
         })
         self.complete()  # Saga done
-    
+
     @client.on("inventory.failed", "payment.failed")
     async def handle_failure(self, event):
         # Compensate
@@ -286,19 +286,19 @@ from gadugi.event_router import EventEnabledAgent
 
 class MyAgent(EventEnabledAgent):
     """Agent with built-in event support."""
-    
+
     async def on_start(self):
         """Called when agent starts."""
         await self.publish("agent.started", {
             "agent_id": self.id,
             "capabilities": self.capabilities
         })
-    
+
     @event_handler("task.assigned")
     async def handle_task(self, event):
         """Handle assigned tasks."""
         task = event.payload
-        
+
         try:
             result = await self.process_task(task)
             await self.publish("task.completed", {
@@ -310,7 +310,7 @@ class MyAgent(EventEnabledAgent):
                 "task_id": task["id"],
                 "error": str(e)
             })
-    
+
     async def process_task(self, task):
         """Process the task."""
         # Implementation here
@@ -324,13 +324,13 @@ from gadugi.event_router import OrchestratorMixin
 
 class WorkflowOrchestrator(OrchestratorMixin):
     """Orchestrator with event coordination."""
-    
+
     async def execute_workflow(self, workflow_id: str):
         """Execute a workflow with event tracking."""
-        
+
         # Start workflow
         await self.publish_workflow_event("started", workflow_id)
-        
+
         # Execute steps with event coordination
         async with self.workflow_context(workflow_id) as ctx:
             # Step 1: Assign task
@@ -340,7 +340,7 @@ class WorkflowOrchestrator(OrchestratorMixin):
                 wait_for="task.completed",
                 timeout=30
             )
-            
+
             # Step 2: Based on result, route to next step
             if task_event.payload["result"]["issues"]:
                 await ctx.publish("review.needed", {
@@ -350,7 +350,7 @@ class WorkflowOrchestrator(OrchestratorMixin):
                 await ctx.publish("deployment.approved", {
                     "workflow_id": workflow_id
                 })
-        
+
         # Workflow complete
         await self.publish_workflow_event("completed", workflow_id)
 ```
@@ -414,7 +414,7 @@ if not health.is_healthy:
 dlq = await manager.get_dead_letter_queue()
 for event in dlq:
     print(f"Failed event: {event.id} - {event.last_error}")
-    
+
 # Retry failed events
 await manager.retry_failed_events(event_ids=[e.id for e in dlq])
 ```

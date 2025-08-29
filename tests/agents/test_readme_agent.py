@@ -141,9 +141,7 @@ Internal link to [agent](/.claude/agents/test-agent.md).
                 issues = validator.validate_links(readme_with_links, self.temp_dir)
 
                 # Should find one broken internal link (docs/README.md)
-                broken_links = [
-                    issue for issue in issues if issue["type"] == "broken_link"
-                ]
+                broken_links = [issue for issue in issues if issue["type"] == "broken_link"]
                 assert len(broken_links) == 1
                 assert "docs/README.md" in broken_links[0]["link"]  # type: ignore[index]
 
@@ -198,9 +196,7 @@ class TestProjectAnalyzer:
         for agent_file in self.agent_files:
             agent_path = os.path.join(self.agents_dir, agent_file)
             with open(agent_path, "w") as f:
-                f.write(
-                    f"# {agent_file.replace('.md', '').title()}\nTest agent content"
-                )
+                f.write(f"# {agent_file.replace('.md', '').title()}\nTest agent content")
 
     def teardown_method(self):
         """Clean up test fixtures."""
@@ -401,9 +397,7 @@ Current version: 1.0.0
             "additional_steps": ["yarn global add @gadugi/cli"],
         }
 
-        updated_content = updater.update_installation_instructions(
-            content, new_instructions
-        )
+        updated_content = updater.update_installation_instructions(content, new_instructions)
 
         assert "yarn install" in updated_content or "yarn add" in updated_content
         assert "@gadugi/cli" in updated_content
@@ -506,9 +500,7 @@ MIT License
                 mock_response.status_code = 200
                 mock_get.return_value = mock_response
 
-                validation_results = validator.validate_comprehensive(
-                    readme_content, "/tmp"
-                )
+                validation_results = validator.validate_comprehensive(readme_content, "/tmp")
 
                 assert "structure" in validation_results
                 assert "links" in validation_results
@@ -595,9 +587,7 @@ See [documentation](https://unreachable-site.example.com).
         with patch("requests.get", side_effect=Exception("Network error")):
             issues = validator.validate_links(readme_with_external_links, "/tmp")
 
-            network_errors = [
-                issue for issue in issues if issue["type"] == "network_error"
-            ]
+            network_errors = [issue for issue in issues if issue["type"] == "network_error"]
             assert len(network_errors) == 1
             assert "unreachable-site.example.com" in network_errors[0]["link"]  # type: ignore[index]
 
@@ -637,11 +627,7 @@ class READMEAnalyzer:
             "License",
             "Contributing",
         ]
-        return [
-            section
-            for section in standard_sections
-            if section not in analysis["sections"]
-        ]
+        return [section for section in standard_sections if section not in analysis["sections"]]
 
     def analyze_readme_file(self, path):
         with open(path, "r") as f:
@@ -933,9 +919,7 @@ class READMEQualityScorer:
 
         # Count sections
         sections = [line for line in lines if line.startswith("## ")]
-        section_score = (
-            min(len(sections) / 5.0, 1.0) * 0.3
-        )  # Changed from 8 to 5 ideal sections
+        section_score = min(len(sections) / 5.0, 1.0) * 0.3  # Changed from 8 to 5 ideal sections
         score += section_score
 
         # Check for code examples

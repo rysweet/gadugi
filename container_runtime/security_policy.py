@@ -16,9 +16,7 @@ from pathlib import Path
 import sys
 import os
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
 from error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)
@@ -274,9 +272,7 @@ class SecurityPolicyEngine:
         except Exception as e:
             raise GadugiError(f"Failed to load policies from {policy_file}: {e}")
 
-    def _parse_policy_config(
-        self, name: str, config: Dict[str, Any]
-    ) -> ExecutionPolicy:
+    def _parse_policy_config(self, name: str, config: Dict[str, Any]) -> ExecutionPolicy:
         """Parse policy configuration from dictionary."""
         try:
             # Parse resource limits
@@ -368,9 +364,7 @@ class SecurityPolicyEngine:
                 self._normalize_image_reference(img) for img in policy.allowed_images
             )
             if normalized_image not in normalized_allowed:
-                raise GadugiError(
-                    f"Image '{image}' not allowed by policy '{policy.name}'"
-                )
+                raise GadugiError(f"Image '{image}' not allowed by policy '{policy.name}'")
 
         # Check command blacklist
         if command and policy.blocked_commands:
@@ -379,9 +373,7 @@ class SecurityPolicyEngine:
                     # Check if any part of the command is blocked
                     for blocked in policy.blocked_commands:
                         if blocked in cmd_part:
-                            raise GadugiError(
-                                f"Command contains blocked element '{blocked}'"
-                            )
+                            raise GadugiError(f"Command contains blocked element '{blocked}'")
 
         return True
 
@@ -440,13 +432,9 @@ class SecurityPolicyEngine:
         if policy.security_constraints.no_new_privileges:
             security_opt.append("no-new-privileges:true")
         if policy.security_constraints.seccomp_profile:
-            security_opt.append(
-                f"seccomp={policy.security_constraints.seccomp_profile}"
-            )
+            security_opt.append(f"seccomp={policy.security_constraints.seccomp_profile}")
         if policy.security_constraints.apparmor_profile:
-            security_opt.append(
-                f"apparmor={policy.security_constraints.apparmor_profile}"
-            )
+            security_opt.append(f"apparmor={policy.security_constraints.apparmor_profile}")
         config["security_opt"] = security_opt
 
         # Capabilities

@@ -21,7 +21,7 @@
 When using the orchestrator, all tasks follow these mandatory phases:
 
 1. **Task Validation** - Validate requirements and scope
-2. **Environment Setup** - Prepare development environment  
+2. **Environment Setup** - Prepare development environment
 3. **Dependency Analysis** - Analyze impact and dependencies
 4. **Worktree Creation** - Create isolated development branch
 5. **Implementation** - Execute the actual code changes

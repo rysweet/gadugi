@@ -57,7 +57,7 @@ After renaming files, update all references throughout the codebase:
 **Locations to check and update:**
 - Task tool invocations in all Python files
 - Agent invocations in prompts/ directory
-- Documentation files (*.md) 
+- Documentation files (*.md)
 - Scripts in scripts/ directory
 - Test files referencing agents
 - The orchestrator implementation

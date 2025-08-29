@@ -26,9 +26,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
 
 from claude.shared.github_operations import GitHubOperations  # type: ignore[import]
 from claude.shared.interfaces import AgentConfig, ErrorContext  # type: ignore[import]
@@ -40,16 +38,21 @@ from claude.shared.task_tracking import (  # type: ignore[import]
     TodoWriteIntegration,
     WorkflowPhaseTracker,
 )
+
+
 # from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 # Create stub classes for missing error handling imports
 class ErrorHandler:
     pass
 
+
 class CircuitBreaker:
     pass
 
+
 class ErrorSeverity:
     pass
+
 
 # Define retry decorator if not available from module
 def retry(max_attempts=3, initial_delay=0.1):
@@ -62,9 +65,12 @@ def retry(max_attempts=3, initial_delay=0.1):
                     if attempt == max_attempts - 1:
                         raise e
                     import time
+
                     time.sleep(initial_delay)
             return None
+
         return wrapper
+
     return decorator
 
 
@@ -79,7 +85,9 @@ class TestWorkflowManagerIntegration:
         )
 
         # Initialize shared modules with proper configuration
-        self.github_ops = GitHubOperations(config=self.config.config_data if hasattr(self.config, 'config_data') else {})  # type: ignore[misc]
+        self.github_ops = GitHubOperations(
+            config=self.config.config_data if hasattr(self.config, "config_data") else {}
+        )  # type: ignore[misc]
         self.state_manager = StateManager()  # type: ignore[misc]
         self.error_handler = ErrorHandler()  # type: ignore[misc]
         self.task_tracker = TaskTracker()  # type: ignore[misc]
@@ -89,7 +97,7 @@ class TestWorkflowManagerIntegration:
         # Mock external dependencies
         self.mock_gh_api = Mock()
         # Set API client if attribute exists
-        if hasattr(self.github_ops, '_api_client'):
+        if hasattr(self.github_ops, "_api_client"):
             self.github_ops._api_client = self.mock_gh_api  # type: ignore[attr-defined]
 
     def teardown_method(self):
@@ -108,15 +116,17 @@ class TestWorkflowManagerIntegration:
         assert self.task_metrics is not None  # type: ignore[union-attr]
 
         # Test configuration propagation
-        expected_config = self.config.config_data if hasattr(self.config, 'config_data') else {}
+        expected_config = self.config.config_data if hasattr(self.config, "config_data") else {}
         assert self.github_ops.config == expected_config
 
         # Test circuit breaker initialization
         github_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
-            failure_threshold=3, recovery_timeout=300  # type: ignore[call-overload]
+            failure_threshold=3,
+            recovery_timeout=300,  # type: ignore[call-overload]
         )
         implementation_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
-            failure_threshold=5, recovery_timeout=600  # type: ignore[call-overload]
+            failure_threshold=5,
+            recovery_timeout=600,  # type: ignore[call-overload]
         )
 
         assert github_circuit_breaker.failure_threshold == 3  # type: ignore[attr-defined]
@@ -216,9 +226,7 @@ class TestWorkflowManagerIntegration:
 
             # Test checkpoint creation
             checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore[misc]
-            checkpoint_manager.create_checkpoint(
-                workflow_state, "Test issue creation checkpoint"
-            )
+            checkpoint_manager.create_checkpoint(workflow_state, "Test issue creation checkpoint")
 
             # Test phase completion tracking
             self.phase_tracker.complete_phase("issue_creation")
@@ -258,9 +266,7 @@ class TestWorkflowManagerIntegration:
             }
 
             # Mock PR verification
-            with patch.object(
-                self.github_ops, "verify_pull_request_exists"
-            ) as mock_verify:
+            with patch.object(self.github_ops, "verify_pull_request_exists") as mock_verify:
                 mock_verify.return_value = {"exists": True}
 
                 # Test PR creation with retry logic
@@ -294,9 +300,7 @@ class TestWorkflowManagerIntegration:
 
                 # Test critical checkpoint after PR creation
                 checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore[misc]
-                checkpoint_manager.create_checkpoint(
-                    workflow_state, "Test PR creation checkpoint"
-                )
+                checkpoint_manager.create_checkpoint(workflow_state, "Test PR creation checkpoint")
 
                 # Test phase completion
                 self.phase_tracker.complete_phase("pr_creation")
@@ -395,23 +399,28 @@ class TestWorkflowManagerIntegration:
 
         # Test error context creation
         test_error = Exception("Simulated implementation failure")
-        error_context = ErrorContext(  # type: ignore[misc]
-            operation="implementation",
-            details={
-                "branch": "feature/test-123",
-                "issue": 123,
-                "commits": 3,
-                "recovery_action": "retry_implementation_with_fallback",
-            },
-            workflow_id=task_id,
-        ) if hasattr(ErrorContext, '__init__') and 'workflow_id' in ErrorContext.__init__.__code__.co_varnames else ErrorContext(  # type: ignore[misc]
-            operation="implementation",
-            details={
-                "branch": "feature/test-123",
-                "issue": 123,
-                "commits": 3,
-                "recovery_action": "retry_implementation_with_fallback",
-            }
+        error_context = (
+            ErrorContext(  # type: ignore[misc]
+                operation="implementation",
+                details={
+                    "branch": "feature/test-123",
+                    "issue": 123,
+                    "commits": 3,
+                    "recovery_action": "retry_implementation_with_fallback",
+                },
+                workflow_id=task_id,
+            )
+            if hasattr(ErrorContext, "__init__")
+            and "workflow_id" in ErrorContext.__init__.__code__.co_varnames
+            else ErrorContext(  # type: ignore[misc]
+                operation="implementation",
+                details={
+                    "branch": "feature/test-123",
+                    "issue": 123,
+                    "commits": 3,
+                    "recovery_action": "retry_implementation_with_fallback",
+                },
+            )
         )
 
         # Test error handling
@@ -421,7 +430,8 @@ class TestWorkflowManagerIntegration:
 
         # Test circuit breaker functionality
         implementation_circuit_breaker = CircuitBreaker(  # type: ignore[misc]
-            failure_threshold=2, recovery_timeout=300  # type: ignore[call-overload]
+            failure_threshold=2,
+            recovery_timeout=300,  # type: ignore[call-overload]
         )
 
         # Test failure scenarios
@@ -433,11 +443,14 @@ class TestWorkflowManagerIntegration:
                     @implementation_circuit_breaker  # type: ignore[call-overload]
                     def failing_operation():
                         raise Exception("Test failure")
+
                     failing_operation()
                 else:  # Third call should trigger circuit breaker
+
                     @implementation_circuit_breaker  # type: ignore[call-overload]
                     def success_operation():
                         return {"success": True}
+
                     success_operation()
             except Exception:
                 failure_count += 1
@@ -548,9 +561,7 @@ class TestWorkflowManagerIntegration:
         prompt_file = "end-to-end-test.md"
 
         # Initialize workflow
-        self.task_metrics.start_workflow_phase(
-            "initialization", "Starting end-to-end workflow"
-        )
+        self.task_metrics.start_workflow_phase("initialization", "Starting end-to-end workflow")
 
         workflow_state = TaskState(  # type: ignore[misc]
             task_id=task_id,
@@ -561,9 +572,7 @@ class TestWorkflowManagerIntegration:
 
         # Phase 1: Issue Creation
         workflow_state.current_phase = 2  # ISSUE_CREATION
-        self.task_metrics.start_workflow_phase(
-            "issue_creation", "Creating GitHub issue"
-        )
+        self.task_metrics.start_workflow_phase("issue_creation", "Creating GitHub issue")
 
         with patch.object(self.github_ops, "create_issue") as mock_issue:
             mock_issue.return_value = {
@@ -609,9 +618,7 @@ class TestWorkflowManagerIntegration:
                 "pr_url": "pr-test-url",
             }
 
-            with patch.object(
-                self.github_ops, "verify_pull_request_exists"
-            ) as mock_verify:
+            with patch.object(self.github_ops, "verify_pull_request_exists") as mock_verify:
                 mock_verify.return_value = {"exists": True}
 
                 pr_result = self.github_ops.create_pull_request(
@@ -642,7 +649,9 @@ class TestWorkflowManagerTaskValidation:
 
     def setup_method(self) -> None:
         """Setup test environment"""
-        self.task_tracker = TaskTracker()  # TodoWriteIntegration is internal to TaskTracker  # type: ignore[misc]
+        self.task_tracker = (
+            TaskTracker()
+        )  # TodoWriteIntegration is internal to TaskTracker  # type: ignore[misc]
 
     def test_task_dependency_validation(self):
         """Test comprehensive task dependency validation"""

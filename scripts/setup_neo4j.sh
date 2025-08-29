@@ -28,7 +28,7 @@ while [ $attempt -lt $max_attempts ]; do
 <<<<<<< HEAD
 
 =======
-    
+
 >>>>>>> feature/gadugi-v0.3-regeneration
     attempt=$((attempt + 1))
     echo "   Attempt $attempt/$max_attempts..."

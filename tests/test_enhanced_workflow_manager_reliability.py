@@ -102,9 +102,7 @@ class TestWorkflowReliabilityManager:
     def test_update_workflow_stage_success(self):
         """Test successful workflow stage updates"""
         # Start monitoring first
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Update to new stage
         result = self.reliability_manager.update_workflow_stage(
@@ -126,9 +124,7 @@ class TestWorkflowReliabilityManager:
 
     def test_perform_health_check_healthy_system(self):
         """Test health check on healthy system"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         with (
             patch("psutil.cpu_percent", return_value=30.0),
@@ -144,9 +140,7 @@ class TestWorkflowReliabilityManager:
             # Mock successful CLI checks (GitHub and Claude availability)
             mock_subprocess.return_value.returncode = 0
 
-            health_check = self.reliability_manager.perform_health_check(
-                self.workflow_id
-            )
+            health_check = self.reliability_manager.perform_health_check(self.workflow_id)
 
             assert isinstance(health_check, SystemHealthCheck)
             assert health_check is not None  # type: ignore[comparison-overlap] and health_check.status == HealthStatus.HEALTHY
@@ -157,9 +151,7 @@ class TestWorkflowReliabilityManager:
 
     def test_perform_health_check_degraded_system(self):
         """Test health check on degraded system"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         with (
             patch("psutil.cpu_percent", return_value=85.0),
@@ -171,9 +163,7 @@ class TestWorkflowReliabilityManager:
             mock_memory.return_value.available = 1 * (1024**3)  # 1GB available
             mock_disk.return_value.percent = 75.0
 
-            health_check = self.reliability_manager.perform_health_check(
-                self.workflow_id
-            )
+            health_check = self.reliability_manager.perform_health_check(self.workflow_id)
 
             assert health_check is not None  # type: ignore[comparison-overlap] and health_check.status in [HealthStatus.WARNING, HealthStatus.DEGRADED]
             assert health_check.cpu_usage == 85.0
@@ -182,9 +172,7 @@ class TestWorkflowReliabilityManager:
 
     def test_handle_workflow_error_with_recovery(self):
         """Test error handling with recovery strategies"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Update to implementation stage
         self.reliability_manager.update_workflow_stage(
@@ -195,9 +183,7 @@ class TestWorkflowReliabilityManager:
         test_error = Exception("Simulated implementation failure")
         recovery_context = {"test_context": "value"}
 
-        with patch.object(
-            self.reliability_manager.error_handler, "handle_error"
-        ) as mock_handle:
+        with patch.object(self.reliability_manager.error_handler, "handle_error") as mock_handle:
             result = self.reliability_manager.handle_workflow_error(
                 self.workflow_id,
                 test_error,
@@ -212,16 +198,12 @@ class TestWorkflowReliabilityManager:
             mock_handle.assert_called_once()
 
             # Verify error count increased
-            monitoring_state = self.reliability_manager.monitoring_states[
-                self.workflow_id
-            ]
+            monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]
             assert monitoring_state.error_count > 0
 
     def test_check_workflow_timeouts_warning(self):
         """Test timeout detection with warning threshold"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Update to a stage with known timeout
         self.reliability_manager.update_workflow_stage(
@@ -246,9 +228,7 @@ class TestWorkflowReliabilityManager:
 
     def test_create_workflow_persistence_success(self):
         """Test successful workflow state persistence"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         workflow_state = {
             "prompt_file": "test-prompt.md",
@@ -266,9 +246,7 @@ class TestWorkflowReliabilityManager:
     def test_restore_workflow_from_persistence_success(self):
         """Test successful workflow state restoration"""
         # First create persisted state
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         workflow_state = {
             "prompt_file": "test-prompt.md",
@@ -277,9 +255,7 @@ class TestWorkflowReliabilityManager:
             "test_data": "persistence_test",
         }
 
-        self.reliability_manager.create_workflow_persistence(
-            self.workflow_id, workflow_state
-        )
+        self.reliability_manager.create_workflow_persistence(self.workflow_id, workflow_state)
 
         # Stop monitoring to clear state
         self.reliability_manager.stop_workflow_monitoring(self.workflow_id)
@@ -295,18 +271,14 @@ class TestWorkflowReliabilityManager:
 
     def test_stop_workflow_monitoring_success(self):
         """Test successful workflow monitoring cleanup"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Add some monitoring data
         self.reliability_manager.update_workflow_stage(
             self.workflow_id, WorkflowStage.IMPLEMENTATION_PROGRESS
         )
 
-        result = self.reliability_manager.stop_workflow_monitoring(
-            self.workflow_id, "completed"
-        )
+        result = self.reliability_manager.stop_workflow_monitoring(self.workflow_id, "completed")
 
         assert result
         assert self.workflow_id not in self.reliability_manager.monitoring_states
@@ -314,9 +286,7 @@ class TestWorkflowReliabilityManager:
 
     def test_get_workflow_diagnostics_comprehensive(self):
         """Test comprehensive workflow diagnostics"""
-        self.reliability_manager.start_workflow_monitoring(
-            self.workflow_id, self.workflow_context
-        )
+        self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Simulate some workflow progress
         self.reliability_manager.update_workflow_stage(
@@ -326,9 +296,7 @@ class TestWorkflowReliabilityManager:
             self.workflow_id, WorkflowStage.IMPLEMENTATION_PROGRESS
         )
 
-        diagnostics = self.reliability_manager.get_workflow_diagnostics(
-            self.workflow_id
-        )
+        diagnostics = self.reliability_manager.get_workflow_diagnostics(self.workflow_id)
 
         assert isinstance(diagnostics, dict)
         assert "workflow_id" in diagnostics
@@ -401,12 +369,8 @@ class TestEnhancedWorkflowManager:
                 "start_workflow_monitoring",
                 return_value=True,
             ),
-            patch.object(
-                manager.reliability_manager, "update_workflow_stage", return_value=True
-            ),
-            patch.object(
-                manager.reliability_manager, "perform_health_check", return_value=None
-            ),
+            patch.object(manager.reliability_manager, "update_workflow_stage", return_value=True),
+            patch.object(manager.reliability_manager, "perform_health_check", return_value=None),
             patch.object(
                 manager.reliability_manager,
                 "get_workflow_diagnostics",
@@ -495,9 +459,7 @@ class TestEnhancedWorkflowManager:
         # Mock reliability manager methods
         mock_reliability = Mock()
         mock_reliability.update_workflow_stage.return_value = True
-        mock_reliability.perform_health_check.return_value = Mock(
-            status=HealthStatus.HEALTHY
-        )
+        mock_reliability.perform_health_check.return_value = Mock(status=HealthStatus.HEALTHY)
         mock_reliability.create_workflow_persistence.return_value = True
 
         # Test phase execution
@@ -551,9 +513,7 @@ class TestEnhancedWorkflowManager:
         manager = EnhancedWorkflowManager(self.config, self.temp_dir)
         mock_reliability = Mock()
 
-        result = manager._phase_prompt_analysis(
-            str(self.test_prompt_file), mock_reliability
-        )
+        result = manager._phase_prompt_analysis(str(self.test_prompt_file), mock_reliability)
 
         assert isinstance(result, dict)
         assert "prompt_file" in result
@@ -606,9 +566,7 @@ class TestEnhancedWorkflowManager:
         # Mock reliability manager
         mock_reliability = Mock()
         mock_reliability.update_workflow_stage.return_value = True
-        mock_reliability.perform_health_check.return_value = Mock(
-            status=HealthStatus.HEALTHY
-        )
+        mock_reliability.perform_health_check.return_value = Mock(status=HealthStatus.HEALTHY)
         mock_reliability.create_workflow_persistence.return_value = True
 
         prompt_data = {"feature_name": "Test Feature", "complexity_estimate": 1200}
@@ -643,9 +601,7 @@ class TestEnhancedWorkflowManager:
         # Mock reliability manager
         mock_reliability = Mock()
         mock_reliability.update_workflow_stage.return_value = True
-        mock_reliability.perform_health_check.return_value = Mock(
-            status=HealthStatus.HEALTHY
-        )
+        mock_reliability.perform_health_check.return_value = Mock(status=HealthStatus.HEALTHY)
         mock_reliability.create_workflow_persistence.return_value = True
 
         implementation_result = {
@@ -795,12 +751,8 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 "start_workflow_monitoring",
                 return_value=True,
             ),
-            patch.object(
-                manager.reliability_manager, "update_workflow_stage", return_value=True
-            ),
-            patch.object(
-                manager.reliability_manager, "perform_health_check"
-            ) as mock_health,
+            patch.object(manager.reliability_manager, "update_workflow_stage", return_value=True),
+            patch.object(manager.reliability_manager, "perform_health_check") as mock_health,
             patch.object(
                 manager.reliability_manager, "get_workflow_diagnostics"
             ) as mock_diagnostics,
@@ -883,9 +835,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 "start_workflow_monitoring",
                 return_value=True,
             ),
-            patch.object(
-                manager.reliability_manager, "handle_workflow_error"
-            ) as mock_handle_error,
+            patch.object(manager.reliability_manager, "handle_workflow_error") as mock_handle_error,
         ):
             # Configure error handler to simulate successful recovery
             mock_handle_error.return_value = {
@@ -990,18 +940,14 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             ),
         ):
             # Test persistence creation
-            persistence_result = (
-                manager.reliability_manager.create_workflow_persistence(
-                    workflow_id, test_state
-                )
+            persistence_result = manager.reliability_manager.create_workflow_persistence(
+                workflow_id, test_state
             )
             assert persistence_result
 
             # Test restoration
-            restored_state = (
-                manager.reliability_manager.restore_workflow_from_persistence(
-                    workflow_id
-                )
+            restored_state = manager.reliability_manager.restore_workflow_from_persistence(
+                workflow_id
             )
             assert restored_state == test_state
 
@@ -1035,9 +981,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 "start_workflow_monitoring",
                 return_value=True,
             ),
-            patch.object(
-                manager.reliability_manager, "update_workflow_stage", return_value=True
-            ),
+            patch.object(manager.reliability_manager, "update_workflow_stage", return_value=True),
             patch.object(
                 manager.reliability_manager,
                 "perform_health_check",
@@ -1099,8 +1043,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             return {
                 "workflow_id": workflow_id,
                 "status": "active",
-                "total_duration": len(diagnostics_calls)
-                * 30.0,  # Simulate increasing duration
+                "total_duration": len(diagnostics_calls) * 30.0,  # Simulate increasing duration
                 "current_stage": {"stage": "implementation_progress", "duration": 45.0},
                 "stage_history": {
                     "initialization": {"duration": 5.0, "status": "fast"},
@@ -1126,9 +1069,7 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                 "start_workflow_monitoring",
                 return_value=True,
             ),
-            patch.object(
-                manager.reliability_manager, "update_workflow_stage", return_value=True
-            ),
+            patch.object(manager.reliability_manager, "update_workflow_stage", return_value=True),
             patch.object(
                 manager.reliability_manager,
                 "get_workflow_diagnostics",
@@ -1198,9 +1139,7 @@ class TestWorkflowReliabilityContextManager:
         mock_manager.start_workflow_monitoring.assert_called_once_with(
             workflow_id, workflow_context
         )
-        mock_manager.stop_workflow_monitoring.assert_called_once_with(
-            workflow_id, "completed"
-        )
+        mock_manager.stop_workflow_monitoring.assert_called_once_with(workflow_id, "completed")
 
     def test_context_manager_error_flow(self):
         """Test context manager with workflow error"""
@@ -1214,9 +1153,7 @@ class TestWorkflowReliabilityContextManager:
         mock_manager.stop_workflow_monitoring.return_value = True
 
         with pytest.raises(Exception):
-            with monitor_workflow(
-                workflow_id, workflow_context, mock_manager
-            ):
+            with monitor_workflow(workflow_id, workflow_context, mock_manager):
                 # Simulate workflow error
                 raise test_error
 
@@ -1225,9 +1162,7 @@ class TestWorkflowReliabilityContextManager:
             workflow_id, workflow_context
         )
         mock_manager.handle_workflow_error.assert_called_once()
-        mock_manager.stop_workflow_monitoring.assert_called_once_with(
-            workflow_id, "failed"
-        )
+        mock_manager.stop_workflow_monitoring.assert_called_once_with(workflow_id, "failed")
 
 
 # Test configuration and fixtures
@@ -1286,9 +1221,7 @@ class TestWorkflowReliabilityPerformance:
 
         # Monitoring should not add more than 15 seconds overhead for 10 workflows
         # (increased from 5s to account for module imports and test environment overhead in CI)
-        assert execution_time < 15.0, (
-            f"Monitoring overhead too high: {execution_time:.2f}s"
-        )
+        assert execution_time < 15.0, f"Monitoring overhead too high: {execution_time:.2f}s"
 
     def test_concurrent_workflow_monitoring(self):
         """Test concurrent workflow monitoring"""

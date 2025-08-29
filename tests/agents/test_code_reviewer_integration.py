@@ -172,9 +172,7 @@ class TaskOrchestrator:
         # 3. Clear documentation explains the complexity
 
         # Mock successful review that doesn't flag simplicity issues
-        mock_subprocess.return_value = Mock(
-            returncode=0, stdout="Review posted successfully"
-        )
+        mock_subprocess.return_value = Mock(returncode=0, stdout="Review posted successfully")
 
         self.assertTrue(True)  # Placeholder for actual validation
 

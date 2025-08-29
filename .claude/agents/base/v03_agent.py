@@ -191,7 +191,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         """Begin a new task with memory tracking."""
         # Start task using StateMixin
         task_id = await super().start_task(task_description)
-        
+
         # Initialize task in memory
         if self.memory:
             self.memory.task_id = self.current_task_id
@@ -217,7 +217,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         """Learn from task execution outcome."""
         # Learn using MemoryMixin
         await super().learn_from_outcome(outcome)
-        
+
         # Emit task completed event
         await self.emit_task_completed(
             outcome.task_id,
@@ -233,7 +233,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         """Collaborate with other agents via whiteboard."""
         # Use WhiteboardMixin for collaboration
         await super().collaborate(message, decision)
-        
+
         # Emit collaboration event
         await self.emit_collaboration(
             message=message,

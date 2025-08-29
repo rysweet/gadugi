@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 @runtime_checkable
 class WhiteboardMixinHost(Protocol):
     """Protocol defining the interface expected by WhiteboardMixin from its host class."""
-    
+
     # Required attributes from V03Agent
     agent_id: str
     agent_type: str
@@ -37,7 +37,7 @@ class WhiteboardMixinHost(Protocol):
 class WhiteboardMixin:
     """
     Mixin providing whiteboard collaboration capabilities for V03Agent.
-    
+
     This mixin requires the host class to implement the WhiteboardMixinHost protocol.
     """
 
@@ -59,10 +59,10 @@ class WhiteboardMixin:
         try:
             # Try to find existing whiteboard for this task
             existing = self.whiteboard_manager.find_whiteboards()
-            
+
             # Filter for task-related whiteboards
             task_whiteboards = [
-                wb for wb in existing 
+                wb for wb in existing
                 if hasattr(wb, 'metadata') and wb.metadata and wb.metadata.get('task_id') == self.current_task_id
             ]
 
@@ -240,12 +240,12 @@ class WhiteboardMixin:
         try:
             # Search by current task
             relevant: List[Dict[str, Any]] = []
-            
+
             # Get all whiteboards and filter
             all_whiteboards = self.whiteboard_manager.find_whiteboards(
                 accessible_by=self.agent_id
             )
-            
+
             # Filter for task-related whiteboards
             if self.current_task_id:
                 for wb in all_whiteboards:
@@ -256,7 +256,7 @@ class WhiteboardMixin:
                             'owner': wb.owner_agent,
                             'metadata': wb.metadata
                         })
-            
+
             # Filter by expertise areas
             for expertise in self.capabilities.expertise_areas:
                 for wb in all_whiteboards:
@@ -287,7 +287,7 @@ class WhiteboardMixin:
             if whiteboard:
                 # Get whiteboard metadata directly from attributes
                 content = await whiteboard.read(self.agent_id)
-                
+
                 info = {
                     "whiteboard_id": whiteboard.whiteboard_id,
                     "type": whiteboard.whiteboard_type.value,
@@ -341,7 +341,7 @@ class WhiteboardMixin:
         try:
             whiteboard = self.current_whiteboards[self.current_task_id]
             issues_data = await whiteboard.read(self.agent_id, "issues") or {}
-            
+
             # Ensure we have a list of issues
             if isinstance(issues_data, dict):
                 current_issues = issues_data.get("issues", [])

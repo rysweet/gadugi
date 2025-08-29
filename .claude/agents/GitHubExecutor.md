@@ -214,7 +214,7 @@ merge_success=$?
 if [[ $merge_success -eq 0 ]]; then
     # Get merge commit
     merge_commit=$(gh pr view ${pr_number} --json mergeCommit -q '.mergeCommit.oid')
-    
+
     echo "{
         \"merged\": true,
         \"merge_commit\": \"${merge_commit}\",
@@ -538,7 +538,7 @@ prs = list_open_prs(
 
 for pr in prs:
     status = "[DRAFT] " if pr['isDraft'] else ""
-    print(f"{status}#{pr['number']}: {pr['title']} ({pr['headRefName']})") 
+    print(f"{status}#{pr['number']}: {pr['title']} ({pr['headRefName']})")
 ```
 
 ## Complete Usage Examples
@@ -584,12 +584,12 @@ open_prs = list_open_prs(base="main", limit=50)
 
 for pr in open_prs:
     status = get_pr_status(pr['number'])
-    
+
     print(f"\nPR #{pr['number']}: {pr['title']}")
     print(f"  Author: {status['author']}")
     print(f"  Status: {status['state']}")
     print(f"  Checks: {status['checks']}")
-    
+
     if status['reviews']['changes_requested'] > 0:
         print(f"  ❌ Needs changes")
         add_pr_comment(
@@ -611,22 +611,22 @@ for issue in issues:
     if not issue.get('labels'):
         # Get full issue details
         details = get_issue_status(issue['number'])
-        
+
         # Auto-label based on title keywords
         labels = []
         title_lower = details['title'].lower()
-        
+
         if 'bug' in title_lower or 'error' in title_lower:
             labels.append('bug')
         elif 'feature' in title_lower or 'add' in title_lower:
             labels.append('enhancement')
         elif 'doc' in title_lower:
             labels.append('documentation')
-        
+
         if labels:
             # Add labels via gh command
             os.system(f"gh issue edit {issue['number']} --add-label {','.join(labels)}")
-            
+
             # Add triage comment
             add_issue_comment(
                 issue['number'],

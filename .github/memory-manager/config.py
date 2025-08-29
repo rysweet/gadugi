@@ -98,9 +98,7 @@ class SyncConfig:
 class IssueCreationConfig:
     """Configuration for GitHub issue creation"""
 
-    default_labels: List[str] = field(
-        default_factory=lambda: ["memory-sync", "ai-assistant"]
-    )
+    default_labels: List[str] = field(default_factory=lambda: ["memory-sync", "ai-assistant"])
     priority_labels: bool = True
     auto_assign: bool = False
     assignee: Optional[str] = None
@@ -397,9 +395,7 @@ def create_default_config() -> MemoryManagerConfig:
             default_labels=["memory-sync", "ai-assistant", "automated"],
             priority_labels=True,
         ),
-        content_rules=ContentRules(
-            max_items_per_section=30, maintain_chronological_order=True
-        ),
+        content_rules=ContentRules(max_items_per_section=30, maintain_chronological_order=True),
         monitoring=MonitoringConfig(enable_logging=True, track_sync_performance=True),
     )
 

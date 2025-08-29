@@ -160,9 +160,7 @@ class TestEndToEndWorkflow:
 
             yield {"state_manager": mock_state, "task_tracker": mock_tracker}
 
-    def test_single_pr_ready_workflow(
-        self, mock_environment, mock_github_ops, mock_shared_modules
-    ):
+    def test_single_pr_ready_workflow(self, mock_environment, mock_github_ops, mock_shared_modules):
         """Test complete workflow for a ready PR."""
         # Set up PR Backlog Manager
         with patch("core.GitHubOperations", return_value=mock_github_ops):
@@ -181,9 +179,7 @@ class TestEndToEndWorkflow:
 
             # Verify GitHub operations were called
             mock_github_ops.get_pr_details.assert_called_once_with(123)
-            mock_github_ops.add_pr_labels.assert_called_once_with(
-                123, ["ready-seeking-human"]
-            )
+            mock_github_ops.add_pr_labels.assert_called_once_with(123, ["ready-seeking-human"])
             mock_github_ops.add_pr_comment.assert_called_once()
 
     def test_single_pr_blocked_workflow(
@@ -262,9 +258,7 @@ class TestEndToEndWorkflow:
                 resolution_actions=["Fix CI"],
             )
 
-            manager.process_single_pr = Mock(
-                side_effect=[ready_assessment, blocked_assessment]
-            )
+            manager.process_single_pr = Mock(side_effect=[ready_assessment, blocked_assessment])
             manager._generate_backlog_report = Mock()
 
             # Process backlog
@@ -536,9 +530,7 @@ class TestErrorScenarios:
 
         # Test with missing required environment variables
         with patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(
-                RuntimeError, match="GitHub Actions integration requires"
-            ):
+            with pytest.raises(RuntimeError, match="GitHub Actions integration requires"):
                 GitHubActionsIntegration(mock_manager)
 
     def test_processing_timeout_simulation(self):

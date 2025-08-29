@@ -112,7 +112,7 @@ def check_memory_system_status() -> Dict[str, Any]:
         "fallback_active": False,
         "message": ""
     }
-    
+
     # Determine overall status and active backend
     if status["layers"]["neo4j"]["status"] == "HEALTHY":
         status["overall_status"] = "OPTIMAL"
@@ -127,7 +127,7 @@ def check_memory_system_status() -> Dict[str, Any]:
         status["overall_status"] = "CRITICAL"
         status["active_backend"] = "memory-only"
         status["message"] = "Critical: No persistent storage available"
-    
+
     return status
 
 def check_neo4j_memory_backend() -> Dict[str, Any]:
@@ -135,20 +135,20 @@ def check_neo4j_memory_backend() -> Dict[str, Any]:
     try:
         # Test Neo4j connection via Neo4jServiceManager
         result = subprocess.run([
-            "bash", "-c", 
+            "bash", "-c",
             "curl -f http://localhost:7475/db/data/ >/dev/null 2>&1"
         ], capture_output=True, timeout=5)
-        
+
         if result.returncode == 0:
             # Test Bolt connection for memory operations
             try:
                 from neo4j import GraphDatabase
-                driver = GraphDatabase.driver("bolt://localhost:7689", 
+                driver = GraphDatabase.driver("bolt://localhost:7689",
                                             auth=("neo4j", "changeme"))
                 with driver.session() as session:
                     session.run("RETURN 1").single()
                 driver.close()
-                
+
                 return {
                     "status": "HEALTHY",
                     "backend": "neo4j",
@@ -185,17 +185,17 @@ def check_sqlite_fallback() -> Dict[str, Any]:
         # Ensure SQLite directory exists
         memory_dir = Path(".claude/memory")
         memory_dir.mkdir(parents=True, exist_ok=True)
-        
+
         sqlite_path = memory_dir / "fallback.db"
-        
+
         # Test SQLite connection
         conn = sqlite3.connect(sqlite_path)
         cursor = conn.cursor()
-        
+
         # Test basic operations
         cursor.execute("SELECT 1")
         result = cursor.fetchone()
-        
+
         # Check if memory tables exist, create if needed
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS memory_entries (
@@ -207,7 +207,7 @@ def check_sqlite_fallback() -> Dict[str, Any]:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS memory_relationships (
                 id INTEGER PRIMARY KEY,
@@ -218,10 +218,10 @@ def check_sqlite_fallback() -> Dict[str, Any]:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         conn.commit()
         conn.close()
-        
+
         return {
             "status": "HEALTHY",
             "backend": "sqlite",
@@ -230,7 +230,7 @@ def check_sqlite_fallback() -> Dict[str, Any]:
             "features": ["local", "persistent", "acid"],
             "message": "SQLite fallback operational"
         }
-        
+
     except Exception as e:
         return {
             "status": "ERROR",
@@ -245,7 +245,7 @@ def check_memory_cache() -> Dict[str, Any]:
         # Test basic Python memory cache
         cache_test = {"test": "value"}
         cache_test.get("test")
-        
+
         # Check if Redis is available (optional)
         redis_available = False
         try:
@@ -255,7 +255,7 @@ def check_memory_cache() -> Dict[str, Any]:
             redis_available = True
         except:
             pass
-        
+
         return {
             "status": "HEALTHY",
             "backend": "memory",
@@ -266,7 +266,7 @@ def check_memory_cache() -> Dict[str, Any]:
             "features": ["fast", "temporary"],
             "message": f"Memory cache operational ({'with Redis' if redis_available else 'Python-only'})"
         }
-        
+
     except Exception as e:
         return {
             "status": "ERROR",
@@ -281,17 +281,17 @@ def check_memory_cache() -> Dict[str, Any]:
 def start_memory_service():
     """Initialize memory service with fallback chain."""
     print("Starting Memory Service...")
-    
+
     status = check_memory_system_status()
-    
+
     # Ensure SQLite fallback is always ready
     sqlite_status = check_sqlite_fallback()
     if sqlite_status["status"] != "HEALTHY":
         print(f"ERROR: SQLite fallback initialization failed: {sqlite_status.get('error')}")
         return False
-    
+
     print("✅ SQLite fallback ready")
-    
+
     # Try to connect to Neo4j primary
     neo4j_status = check_neo4j_memory_backend()
     if neo4j_status["status"] == "HEALTHY":
@@ -299,27 +299,27 @@ def start_memory_service():
     else:
         print(f"⚠️ Neo4j unavailable: {neo4j_status.get('message')}")
         print("📦 Will use SQLite fallback")
-    
+
     # Initialize memory cache
     cache_status = check_memory_cache()
     if cache_status["status"] == "HEALTHY":
         print("✅ Memory cache initialized")
     else:
         print(f"⚠️ Memory cache issues: {cache_status.get('message')}")
-    
+
     print(f"Memory Service Status: {status['overall_status']}")
     print(f"Active Backend: {status['active_backend']}")
-    
+
     return True
 
 def stop_memory_service():
     """Gracefully stop memory service."""
     print("Stopping Memory Service...")
-    
+
     # Memory service doesn't need explicit stopping as it's primarily
     # a client to other services (Neo4j) or local resources (SQLite)
     # But we can clean up any resources if needed
-    
+
     print("Memory Service stopped")
     return True
 
@@ -335,13 +335,13 @@ def restart_memory_service():
 def test_memory_operations():
     """Test memory operations across the fallback chain."""
     print("Testing memory operations across fallback chain...")
-    
+
     test_results = {
         "neo4j": {"read": False, "write": False, "error": None},
         "sqlite": {"read": False, "write": False, "error": None},
         "cache": {"read": False, "write": False, "error": None}
     }
-    
+
     # Test Neo4j operations
     try:
         # This would use actual Gadugi memory client
@@ -352,29 +352,29 @@ def test_memory_operations():
             test_results["neo4j"]["write"] = True
     except Exception as e:
         test_results["neo4j"]["error"] = str(e)
-    
+
     # Test SQLite operations
     try:
         import sqlite3
         conn = sqlite3.connect(".claude/memory/fallback.db")
         cursor = conn.cursor()
-        
+
         # Test write
-        cursor.execute("INSERT OR REPLACE INTO memory_entries (key, value) VALUES (?, ?)", 
+        cursor.execute("INSERT OR REPLACE INTO memory_entries (key, value) VALUES (?, ?)",
                       ("test_key", "test_value"))
         conn.commit()
         test_results["sqlite"]["write"] = True
-        
+
         # Test read
         cursor.execute("SELECT value FROM memory_entries WHERE key = ?", ("test_key",))
         result = cursor.fetchone()
         if result and result[0] == "test_value":
             test_results["sqlite"]["read"] = True
-        
+
         conn.close()
     except Exception as e:
         test_results["sqlite"]["error"] = str(e)
-    
+
     # Test cache operations
     try:
         cache = {}
@@ -384,7 +384,7 @@ def test_memory_operations():
             test_results["cache"]["write"] = True
     except Exception as e:
         test_results["cache"]["error"] = str(e)
-    
+
     return test_results
 
 def get_memory_statistics():
@@ -394,7 +394,7 @@ def get_memory_statistics():
         "performance": {},
         "usage": {}
     }
-    
+
     # Neo4j statistics
     neo4j_status = check_neo4j_memory_backend()
     if neo4j_status["status"] == "HEALTHY":
@@ -408,30 +408,30 @@ def get_memory_statistics():
             }
         except:
             pass
-    
+
     # SQLite statistics
     sqlite_path = Path(".claude/memory/fallback.db")
     if sqlite_path.exists():
         try:
             conn = sqlite3.connect(sqlite_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("SELECT COUNT(*) FROM memory_entries")
             entry_count = cursor.fetchone()[0]
-            
+
             cursor.execute("SELECT COUNT(*) FROM memory_relationships")
             relationship_count = cursor.fetchone()[0]
-            
+
             stats["backends"]["sqlite"] = {
                 "entries": entry_count,
                 "relationships": relationship_count,
                 "size_bytes": sqlite_path.stat().st_size
             }
-            
+
             conn.close()
         except Exception as e:
             stats["backends"]["sqlite"] = {"error": str(e)}
-    
+
     return stats
 ```
 
