@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-09T21:20:26.261006",
+  "timestamp": "2025-08-29T10:25:45.262251",
   "processes": {
     "fix-all-pyright-errors": {
       "task_id": "fix-all-pyright-errors",
@@ -63,6 +63,70 @@
       "last_heartbeat": "2025-08-09T21:20:26.260949",
       "exit_code": null,
       "error_message": "Process became unresponsive (heartbeat timeout)",
+      "resource_usage": null
+    },
+    "configure-claude-code-start-hook": {
+      "task_id": "configure-claude-code-start-hook",
+      "task_name": "Configure Claude Code Start Hook",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-configure-claude-code-start-hook",
+      "created_at": "2025-08-29T10:25:45.252219",
+      "prompt_file": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-configure-claude-code-start-hook/prompts/configure-claude-code-start-hook-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-29T10:25:45.261805",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-29T10:25:45.261802",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    },
+    "start-event-router-service": {
+      "task_id": "start-event-router-service",
+      "task_name": "Start Event Router Service",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-start-event-router-service",
+      "created_at": "2025-08-29T10:25:45.253339",
+      "prompt_file": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-start-event-router-service/prompts/start-event-router-service-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-29T10:25:45.261955",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-29T10:25:45.261954",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    },
+    "rename-agents-to-camelcase": {
+      "task_id": "rename-agents-to-camelcase",
+      "task_name": "Rename All Agents from kebab-case to CamelCase",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-rename-agents-to-camelcase",
+      "created_at": "2025-08-29T10:25:45.256279",
+      "prompt_file": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-rename-agents-to-camelcase/prompts/rename-agents-to-camelcase-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-29T10:25:45.262099",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-29T10:25:45.262097",
+      "exit_code": null,
+      "error_message": null,
+      "resource_usage": null
+    },
+    "reinforce-workflow-for-code-changes": {
+      "task_id": "reinforce-workflow-for-code-changes",
+      "task_name": "Reinforce Workflow for Code Changes",
+      "status": "running",
+      "command": "claude /agent:workflow-manager",
+      "working_directory": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-reinforce-workflow-for-code-changes",
+      "created_at": "2025-08-29T10:25:45.258950",
+      "prompt_file": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-reinforce-workflow-for-code-changes/prompts/reinforce-workflow-for-code-changes-workflow.md",
+      "pid": null,
+      "started_at": "2025-08-29T10:25:45.262250",
+      "completed_at": null,
+      "last_heartbeat": "2025-08-29T10:25:45.262249",
+      "exit_code": null,
+      "error_message": null,
       "resource_usage": null
     }
   }

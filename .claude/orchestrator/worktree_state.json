@@ -89,6 +89,42 @@
       "status": "active",
       "created_at": "2025-08-09T21:18:26.135040",
       "pid": null
+    },
+    "configure-claude-code-start-hook": {
+      "task_id": "configure-claude-code-start-hook",
+      "task_name": "Configure Claude Code Start Hook",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-configure-claude-code-start-hook",
+      "branch_name": "feature/parallel-configure-claude-code-start-hook-configure-claude-code-start-hook",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:44.836810",
+      "pid": null
+    },
+    "start-event-router-service": {
+      "task_id": "start-event-router-service",
+      "task_name": "Start Event Router Service",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-start-event-router-service",
+      "branch_name": "feature/parallel-start-event-router-service-start-event-router-service",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:44.974492",
+      "pid": null
+    },
+    "rename-agents-to-camelcase": {
+      "task_id": "rename-agents-to-camelcase",
+      "task_name": "Rename All Agents from kebab-case to CamelCase",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-rename-agents-to-camelcase",
+      "branch_name": "feature/parallel-rename-all-agents-from-kebab-case-to-camelcase-rename-agents-to-camelcase",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:45.109392",
+      "pid": null
+    },
+    "reinforce-workflow-for-code-changes": {
+      "task_id": "reinforce-workflow-for-code-changes",
+      "task_name": "Reinforce Workflow for Code Changes",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-reinforce-workflow-for-code-changes",
+      "branch_name": "feature/parallel-reinforce-workflow-for-code-changes-reinforce-workflow-for-code-changes",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:45.248538",
+      "pid": null
     }
   }
 }
