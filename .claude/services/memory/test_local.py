@@ -232,7 +232,7 @@ async def test_agent_integration():
 
         async with AgentMemoryInterface(
             agent_id="integration_test_agent",
-            mcp_url="http://localhost:8000"
+            mcp_base_url="http://localhost:8000"
         ) as memory:
             print("\n✅ Connected to memory system")
 
@@ -240,9 +240,9 @@ async def test_agent_integration():
             mem_id = await memory.remember_short_term("Testing agent integration")
             print(f"✅ Stored short-term memory: {mem_id}")
 
-            # Create task and whiteboard
-            task_id = await memory.start_task("Integration test task")
-            print(f"✅ Started task: {task_id}")
+            # Create whiteboard for task collaboration
+            whiteboard_id = await memory.create_whiteboard()
+            print(f"✅ Created whiteboard: {whiteboard_id}")
 
             # Write to whiteboard
             await memory.write_to_whiteboard("test_data", {"status": "testing"})
@@ -255,12 +255,14 @@ async def test_agent_integration():
             )
             print(f"✅ Added knowledge: {knowledge_id}")
 
-            # Learn from experience
-            await memory.learn_from_experience(
-                "Tested memory integration",
-                "Integration works correctly"
+            # Learn from experience (Note: This method may not exist in basic interface)
+            # Instead, use learn_procedure which is available
+            proc_id = await memory.learn_procedure(
+                "Test memory integration",
+                ["Step 1: Connect to memory", "Step 2: Store data", "Step 3: Retrieve data"],
+                context="Testing the memory integration workflow"
             )
-            print("✅ Learned from experience")
+            print(f"✅ Learned procedure: {proc_id}")
 
             # Recall memories
             memories = await memory.recall_memories(limit=5)

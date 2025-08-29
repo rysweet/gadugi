@@ -155,8 +155,8 @@ class TestStatusEndpoint:
         assert data["status"] == "operational"
 
 
-class TestErrorHandling:
-    """Test error handling."""
+class TestProcessErrorHandling:
+    """Test error handling in process endpoint."""
 
     @patch(".claude.services.event-router.main.process_request")
     def test_process_error_handling(
@@ -211,7 +211,12 @@ def sample_agent_event() -> AgentEvent:
         task_id="task-123",
         data={"description": "Test task"},
         tags=["test", "integration"],
-        priority=EventPriority.NORMAL
+        priority=EventPriority.NORMAL,
+        project_id=None,
+        session_id=None,
+        metadata={},
+        stored_in_memory=False,
+        memory_id=None
     )
 
 
@@ -223,7 +228,15 @@ def sample_task_started_event() -> TaskStartedEvent:
         task_id="task-456",
         task_description="Implement feature X",
         estimated_duration=60,
-        dependencies=["task-123"]
+        dependencies=["task-123"],
+        data={},
+        project_id=None,
+        session_id=None,
+        metadata={},
+        tags=[],
+        priority=EventPriority.NORMAL,
+        stored_in_memory=False,
+        memory_id=None
     )
 
 
@@ -235,7 +248,16 @@ def sample_knowledge_event() -> KnowledgeLearnedEvent:
         knowledge_type="pattern",
         content="Always validate input parameters before processing",
         confidence=0.9,
-        source="experience"
+        source="experience",
+        data={},
+        task_id=None,
+        project_id=None,
+        session_id=None,
+        metadata={},
+        tags=[],
+        priority=EventPriority.NORMAL,
+        stored_in_memory=False,
+        memory_id=None
     )
 
 
@@ -289,7 +311,15 @@ class TestMemoryEventStorage:
 
         event_filter = EventFilter(
             event_types=[EventType.TASK_STARTED],
-            limit=10
+            limit=10,
+            agent_ids=None,
+            task_ids=None,
+            project_ids=None,
+            priority=None,
+            tags=None,
+            start_time=None,
+            end_time=None,
+            offset=0
         )
 
         events = await storage.get_events(event_filter)
@@ -325,7 +355,15 @@ class TestEventHandler:
         error_event = AgentEvent(
             event_type=EventType.ERROR_OCCURRED,
             agent_id="test-agent",
-            priority=EventPriority.NORMAL  # Should be upgraded to HIGH
+            priority=EventPriority.NORMAL,  # Should be upgraded to HIGH
+            data={},
+            task_id=None,
+            project_id=None,
+            session_id=None,
+            metadata={},
+            tags=[],
+            stored_in_memory=False,
+            memory_id=None
         )
 
         await handler.handle_event(error_event)
@@ -347,19 +385,43 @@ class TestEventFilterEngine:
             AgentEvent(
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
-                task_id="task-1"
+                task_id="task-1",
+                data={},
+                project_id=None,
+                session_id=None,
+                metadata={},
+                tags=[],
+                priority=EventPriority.NORMAL,
+                stored_in_memory=False,
+                memory_id=None
             ),
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-2",
-                task_id="task-2"
+                task_id="task-2",
+                data={},
+                project_id=None,
+                session_id=None,
+                metadata={},
+                tags=[],
+                priority=EventPriority.NORMAL,
+                stored_in_memory=False,
+                memory_id=None
             )
         ]
         mock_memory_storage.get_events.return_value = mock_events
 
         event_filter = EventFilter(
             event_types=[EventType.TASK_STARTED],
-            limit=10
+            limit=10,
+            agent_ids=None,
+            task_ids=None,
+            project_ids=None,
+            priority=None,
+            tags=None,
+            start_time=None,
+            end_time=None,
+            offset=0
         )
 
         filtered_events = await filter_engine.filter_events(mock_memory_storage, event_filter)
@@ -374,7 +436,14 @@ class TestEventFilterEngine:
         event_filter = EventFilter(
             event_types=[EventType.TASK_STARTED],
             agent_ids=["agent-1"],
-            limit=50
+            limit=50,
+            task_ids=None,
+            project_ids=None,
+            priority=None,
+            tags=None,
+            start_time=None,
+            end_time=None,
+            offset=0
         )
 
         cache_key = filter_engine._get_cache_key(event_filter)
@@ -397,19 +466,39 @@ class TestEventReplayEngine:
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
                 session_id="session-123",
-                timestamp=datetime.utcnow() - timedelta(hours=1)
+                timestamp=datetime.utcnow() - timedelta(hours=1),
+                data={},
+                task_id=None,
+                project_id=None,
+                metadata={},
+                tags=[],
+                priority=EventPriority.NORMAL,
+                stored_in_memory=False,
+                memory_id=None
             ),
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-1",
                 session_id="session-123",
-                timestamp=datetime.utcnow()
+                timestamp=datetime.utcnow(),
+                data={},
+                task_id=None,
+                project_id=None,
+                metadata={},
+                tags=[],
+                priority=EventPriority.NORMAL,
+                stored_in_memory=False,
+                memory_id=None
             )
         ]
         mock_memory_storage.get_events_by_session.return_value = session_events
 
         replay_request = EventReplayRequest(
-            session_id="session-123"
+            session_id="session-123",
+            agent_id=None,
+            from_timestamp=None,
+            to_timestamp=None,
+            event_types=None
         )
 
         result = await replay_engine.replay_events(replay_request)
@@ -426,13 +515,25 @@ class TestEventReplayEngine:
         event = AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="agent-1",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.utcnow(),
+            data={},
+            task_id=None,
+            project_id=None,
+            session_id=None,
+            metadata={},
+            tags=[],
+            priority=EventPriority.NORMAL,
+            stored_in_memory=False,
+            memory_id=None
         )
 
         # Test agent ID filter
         replay_request = EventReplayRequest(
             session_id="session-123",
-            agent_id="agent-2"  # Different agent
+            agent_id="agent-2",  # Different agent
+            from_timestamp=None,
+            to_timestamp=None,
+            event_types=None
         )
 
         should_replay = replay_engine._should_replay_event(event, replay_request)
@@ -540,7 +641,16 @@ class TestSpecificEventTypes:
             recipient_id="agent-receiver",
             message_type="request",
             content="Can you help with task X?",
-            requires_response=True
+            requires_response=True,
+            data={},
+            task_id=None,
+            project_id=None,
+            session_id=None,
+            metadata={},
+            tags=[],
+            priority=EventPriority.NORMAL,
+            stored_in_memory=False,
+            memory_id=None
         )
 
         assert collab_event.event_type == EventType.COLLABORATION_MESSAGE
@@ -587,7 +697,7 @@ class TestEnhancedHealthChecks:
         assert "version" in data
 
 
-class TestErrorHandling:
+class TestEventSystemErrorHandling:
     """Test error handling in event system."""
 
     @pytest.mark.asyncio
@@ -598,11 +708,32 @@ class TestErrorHandling:
         # Don't initialize storage to trigger error
         event = AgentEvent(
             event_type=EventType.TASK_STARTED,
-            agent_id="test-agent"
+            agent_id="test-agent",
+            data={},
+            task_id=None,
+            project_id=None,
+            session_id=None,
+            metadata={},
+            tags=[],
+            priority=EventPriority.NORMAL,
+            stored_in_memory=False,
+            memory_id=None
         )
 
         # Should handle missing backend gracefully
-        events = await storage.get_events(EventFilter(limit=10))
+        event_filter = EventFilter(
+            limit=10,
+            event_types=None,
+            agent_ids=None,
+            task_ids=None,
+            project_ids=None,
+            priority=None,
+            tags=None,
+            start_time=None,
+            end_time=None,
+            offset=0
+        )
+        events = await storage.get_events(event_filter)
         assert events == []
 
     @pytest.mark.asyncio
@@ -616,7 +747,16 @@ class TestErrorHandling:
 
         event = AgentEvent(
             event_type=EventType.TASK_STARTED,
-            agent_id="test-agent"
+            agent_id="test-agent",
+            data={},
+            task_id=None,
+            project_id=None,
+            session_id=None,
+            metadata={},
+            tags=[],
+            priority=EventPriority.NORMAL,
+            stored_in_memory=False,
+            memory_id=None
         )
 
         await handler.initialize()

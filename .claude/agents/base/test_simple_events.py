@@ -85,7 +85,7 @@ async def _initialize_event_system_and_setup(self):
 
 # Patch methods
 V03Agent.initialize = patched_initialize
-V03Agent._initialize_event_system_and_setup = _initialize_event_system_and_setup
+V03Agent._initialize_event_system_and_setup = _initialize_event_system_and_setup  # type: ignore[attr-defined]
 
 
 class TestAgent(V03Agent):

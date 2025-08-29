@@ -9,17 +9,17 @@ import json
 from datetime import datetime, timedelta
 from typing import List
 
-from models import (
+from .models import (
     AgentEvent, EventType, EventPriority,
     AgentInitializedEvent, TaskStartedEvent, TaskCompletedEvent,
     KnowledgeLearnedEvent, CollaborationMessageEvent,
     EventFilter, EventReplayRequest
 )
-from handlers import (
+from .handlers import (
     MemoryEventStorage, EventHandler, EventFilterEngine,
     EventReplayEngine
 )
-from config import get_settings
+from .config import get_settings
 
 
 async def demonstrate_event_system():
@@ -93,7 +93,14 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         version="1.0.0",
         session_id=session_id,
         capabilities=["task_breakdown", "dependency_analysis", "estimation"],
-        priority=EventPriority.HIGH
+        priority=EventPriority.HIGH,
+        data={},
+        task_id=None,
+        project_id=None,
+        metadata={},
+        tags=[],
+        stored_in_memory=False,
+        memory_id=None
     )
 
     result = await event_handler.handle_event(init_event)
@@ -110,7 +117,12 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         dependencies=["task_database_setup"],
         session_id=session_id,
         project_id="gadugi_v03",
-        tags=["authentication", "security", "backend"]
+        tags=["authentication", "security", "backend"],
+        data={},
+        metadata={},
+        priority=EventPriority.NORMAL,
+        stored_in_memory=False,
+        memory_id=None
     )
 
     result = await event_handler.handle_event(task_event)
@@ -127,7 +139,12 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         session_id=session_id,
         task_id="task_feature_x_001",
         tags=["security", "jwt", "validation"],
-        priority=EventPriority.HIGH
+        priority=EventPriority.HIGH,
+        data={},
+        project_id=None,
+        metadata={},
+        stored_in_memory=False,
+        memory_id=None
     )
 
     result = await event_handler.handle_event(knowledge_event)
@@ -144,7 +161,13 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         requires_response=True,
         session_id=session_id,
         task_id="task_feature_x_001",
-        tags=["collaboration", "security", "implementation"]
+        tags=["collaboration", "security", "implementation"],
+        data={},
+        project_id=None,
+        metadata={},
+        priority=EventPriority.NORMAL,
+        stored_in_memory=False,
+        memory_id=None
     )
 
     result = await event_handler.handle_event(collab_event)
@@ -166,7 +189,12 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
             "estimated_vs_actual_duration": 0.79  # 95/120
         },
         tags=["completion", "authentication", "decomposition"],
-        priority=EventPriority.NORMAL
+        priority=EventPriority.NORMAL,
+        data={},
+        project_id=None,
+        metadata={},
+        stored_in_memory=False,
+        memory_id=None
     )
 
     result = await event_handler.handle_event(completion_event)
@@ -187,7 +215,15 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
     print("1️⃣ Filter by Event Type (Task Events)...")
     task_filter = EventFilter(
         event_types=[EventType.TASK_STARTED, EventType.TASK_COMPLETED],
-        limit=10
+        limit=10,
+        agent_ids=None,
+        task_ids=None,
+        project_ids=None,
+        priority=None,
+        tags=None,
+        start_time=None,
+        end_time=None,
+        offset=0
     )
 
     task_events = await filter_engine.filter_events(storage, task_filter)
@@ -197,7 +233,15 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
     print("\n2️⃣ Filter by Priority (High Priority Events)...")
     priority_filter = EventFilter(
         priority=EventPriority.HIGH,
-        limit=10
+        limit=10,
+        event_types=None,
+        agent_ids=None,
+        task_ids=None,
+        project_ids=None,
+        tags=None,
+        start_time=None,
+        end_time=None,
+        offset=0
     )
 
     high_priority_events = await filter_engine.filter_events(storage, priority_filter)
@@ -207,7 +251,15 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
     print("\n3️⃣ Filter by Tags (Security-related)...")
     tag_filter = EventFilter(
         tags=["security"],
-        limit=20
+        limit=20,
+        event_types=None,
+        agent_ids=None,
+        task_ids=None,
+        project_ids=None,
+        priority=None,
+        start_time=None,
+        end_time=None,
+        offset=0
     )
 
     security_events = await filter_engine.filter_events(storage, tag_filter)
@@ -217,7 +269,15 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
     print("\n4️⃣ Filter by Time (Last Hour)...")
     time_filter = EventFilter(
         start_time=datetime.utcnow() - timedelta(hours=1),
-        limit=50
+        limit=50,
+        event_types=None,
+        agent_ids=None,
+        task_ids=None,
+        project_ids=None,
+        priority=None,
+        tags=None,
+        end_time=None,
+        offset=0
     )
 
     recent_events = await filter_engine.filter_events(storage, time_filter)
@@ -242,7 +302,15 @@ async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: Me
     # Get recent session events for replay
     recent_filter = EventFilter(
         start_time=datetime.utcnow() - timedelta(hours=1),
-        limit=100
+        limit=100,
+        event_types=None,
+        agent_ids=None,
+        task_ids=None,
+        project_ids=None,
+        priority=None,
+        tags=None,
+        end_time=None,
+        offset=0
     )
 
     recent_events = await storage.get_events(recent_filter)
@@ -267,7 +335,10 @@ async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: Me
     # Create replay request
     replay_request = EventReplayRequest(
         session_id=demo_session_id,
-        from_timestamp=datetime.utcnow() - timedelta(hours=2)
+        from_timestamp=datetime.utcnow() - timedelta(hours=2),
+        agent_id=None,
+        to_timestamp=None,
+        event_types=None
     )
 
     # Execute replay

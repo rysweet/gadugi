@@ -16,7 +16,8 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing_extensions import LiteralString
 
 from neo4j import AsyncGraphDatabase, AsyncDriver
 from neo4j.exceptions import Neo4jError
@@ -212,7 +213,7 @@ class MemoryManager:
             
             for query in queries:
                 try:
-                    await session.run(query)
+                    await session.run(cast(LiteralString, query))
                 except Neo4jError as e:
                     # Ignore if already exists
                     if "already exists" not in str(e).lower():
@@ -279,7 +280,7 @@ class MemoryManager:
         WHERE m.is_active = true
         """
         
-        params = {"agent_id": agent_id}
+        params: Dict[str, Any] = {"agent_id": agent_id}
         
         if memory_type:
             query += " AND m.type = $memory_type"
@@ -295,10 +296,10 @@ class MemoryManager:
         ORDER BY m.updated_at DESC
         LIMIT $limit
         """
-        params["limit"] = limit
+        params["limit"] = limit  # Neo4j accepts int for LIMIT
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
             
         return [self._record_to_memory(r["m"]) for r in records]
@@ -336,7 +337,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
         
         return [self._record_to_memory(r["m"]) for r in records]
@@ -384,7 +385,7 @@ class MemoryManager:
         params = {"project_id": project_id, "limit": limit}
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
         
         return [self._record_to_memory(r["m"]) for r in records]
@@ -436,7 +437,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            await session.run(query, params)
+            await session.run(cast(LiteralString, query), params)
         
         return whiteboard
     
@@ -477,7 +478,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            await session.run(query, params)
+            await session.run(cast(LiteralString, query), params)
     
     async def get_whiteboard(self, task_id: str) -> Optional[Whiteboard]:
         """Retrieve a task whiteboard."""
@@ -492,7 +493,7 @@ class MemoryManager:
         params = {"task_id": task_id}
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
         
         if not records:
@@ -568,7 +569,7 @@ class MemoryManager:
         """
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
         
         return [self._record_to_memory(r["m"]) for r in records]
@@ -619,7 +620,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            await session.run(query, params)
+            await session.run(cast(LiteralString, query), params)
         
         return node
     
@@ -653,7 +654,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            await session.run(query, params)
+            await session.run(cast(LiteralString, query), params)
     
     async def get_knowledge_graph(
         self,
@@ -673,7 +674,7 @@ class MemoryManager:
         params = {"agent_id": agent_id}
         
         async with self._driver.session(database=self.database) as session:
-            result = await session.run(query, params)
+            result = await session.run(cast(LiteralString, query), params)
             records = await result.data()
         
         # Build graph structure
@@ -775,7 +776,7 @@ class MemoryManager:
         }
         
         async with self._driver.session(database=self.database) as session:
-            await session.run(query, params)
+            await session.run(cast(LiteralString, query), params)
     
     def _record_to_memory(self, record: Dict[str, Any]) -> Memory:
         """Convert a Neo4j record to a Memory object."""

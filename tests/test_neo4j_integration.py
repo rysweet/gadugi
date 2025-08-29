@@ -7,6 +7,7 @@ Tests Neo4j connectivity, schema initialization, and basic operations.
 import os
 import pytest
 from typing import Optional
+from neo4j import GraphDatabase, Driver
 from neo4j.exceptions import ServiceUnavailable, AuthError
 
 
@@ -46,7 +47,8 @@ class Neo4jConnection:
             driver = self.connect()
             with driver.session() as session:
                 result = session.run("RETURN 1 as test")
-                return result.single()["test"] == 1
+                single_result = result.single()
+                return single_result is not None and single_result["test"] == 1
         except (ServiceUnavailable, AuthError) as e:
             print(f"Connection failed: {e}")
             return False

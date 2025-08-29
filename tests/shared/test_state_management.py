@@ -846,14 +846,13 @@ class TestStateManager:
         """Test listing states filtered by status."""
         # Create states with different statuses
         states = [  # type: ignore[misc]
-            TaskState(task_id="pending-001", prompt_file="test1.md", status=TaskStatus.PENDING  # type: ignore[arg-type]),
-            TaskState(task_id="pending-002", prompt_file="test2.md", status=TaskStatus.PENDING  # type: ignore[arg-type]),
+            TaskState(task_id="pending-001", prompt_file="test1.md", status=TaskStatus.PENDING),  # type: ignore[arg-type]
+            TaskState(task_id="pending-002", prompt_file="test2.md", status=TaskStatus.PENDING),  # type: ignore[arg-type]
             TaskState(
                 task_id="progress-001", prompt_file="test3.md", status="in_progress"
             ),
             TaskState(
-                task_id="complete-001", prompt_file="test4.md", status=TaskStatus.COMPLETED  # type: ignore[arg-type]
-            ),
+                task_id="complete-001", prompt_file="test4.md", status=TaskStatus.COMPLETED),  # type: ignore[arg-type]
         ]
 
         for state in states:

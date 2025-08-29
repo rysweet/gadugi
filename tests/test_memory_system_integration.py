@@ -1,12 +1,14 @@
 """
 End-to-end integration tests for the Neo4j memory system
 """
+# pyright: reportAttributeAccessIssue=false
 
 import asyncio
 import json
 import pytest
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, AsyncGenerator
+from unittest.mock import MagicMock
 
 import sys
 from pathlib import Path
@@ -14,14 +16,24 @@ sys.path.append(str(Path(__file__).parent.parent / ".claude" / "services" / "neo
 sys.path.append(str(Path(__file__).parent.parent / ".claude" / "shared"))
 
 try:
-    from memory_manager import (
+    from memory_manager import (  # type: ignore[import-not-found,import]
         MemoryManager, Memory, MemoryType, MemoryScope,
         MemoryPersistence, KnowledgeNode, Whiteboard
     )
-    from memory_integration import AgentMemoryInterface, MemoryEnabledAgent
+    from memory_integration import AgentMemoryInterface, MemoryEnabledAgent  # type: ignore[import-not-found,import]
     HAS_MEMORY_SYSTEM = True
 except ImportError:
+    # Create mock classes for type checking when imports fail
     HAS_MEMORY_SYSTEM = False
+    MemoryManager = MagicMock  # type: ignore[misc,assignment]
+    Memory = MagicMock  # type: ignore[misc,assignment]
+    MemoryType = MagicMock  # type: ignore[misc,assignment]
+    MemoryScope = MagicMock  # type: ignore[misc,assignment]
+    MemoryPersistence = MagicMock  # type: ignore[misc,assignment]
+    KnowledgeNode = MagicMock  # type: ignore[misc,assignment]
+    Whiteboard = MagicMock  # type: ignore[misc,assignment]
+    AgentMemoryInterface = MagicMock  # type: ignore[misc,assignment]
+    MemoryEnabledAgent = MagicMock  # type: ignore[misc,assignment]
 
 
 @pytest.mark.skipif(not HAS_MEMORY_SYSTEM, reason="Memory system not available")
@@ -30,24 +42,24 @@ class TestMemorySystem:
     """Test the complete memory system integration."""
     
     @pytest.fixture
-    async def memory_manager(self):
+    async def memory_manager(self) -> AsyncGenerator[Any, None]:  # type: ignore[misc]
         """Create and connect a memory manager."""
-        mm = MemoryManager()
+        mm = MemoryManager()  # type: ignore[misc]
         await mm.connect()
         yield mm
         await mm.disconnect()
     
     @pytest.fixture
-    async def agent_memory(self):
+    async def agent_memory(self) -> AgentMemoryInterface:  # type: ignore[misc]
         """Create an agent memory interface."""
-        interface = AgentMemoryInterface(
+        interface = AgentMemoryInterface(  # type: ignore[misc]
             agent_id="test_agent_001",
             project_id="test_project",
             task_id="test_task"
         )
         return interface
     
-    async def test_short_term_memory(self, memory_manager):
+    async def test_short_term_memory(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test short-term memory storage and retrieval."""
         # Store short-term memory
         memory = await memory_manager.store_agent_memory(
@@ -71,7 +83,7 @@ class TestMemorySystem:
         assert len(memories) > 0
         assert any(m.id == memory.id for m in memories)
     
-    async def test_long_term_memory(self, memory_manager):
+    async def test_long_term_memory(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test long-term memory storage and retrieval."""
         # Store long-term memory
         memory = await memory_manager.store_agent_memory(
@@ -96,7 +108,7 @@ class TestMemorySystem:
         assert len(memories) > 0
         assert any(m.id == memory.id for m in memories)
     
-    async def test_memory_consolidation(self, memory_manager):
+    async def test_memory_consolidation(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test consolidation of short-term to long-term memories."""
         agent_id = "consolidation_test_agent"
         
@@ -121,7 +133,7 @@ class TestMemorySystem:
         assert len(consolidated) > 0
         assert consolidated[0].persistence == MemoryPersistence.PERSISTENT
     
-    async def test_project_shared_memory(self, memory_manager):
+    async def test_project_shared_memory(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test project-wide shared memory."""
         project_id = "test_project"
         
@@ -142,7 +154,7 @@ class TestMemorySystem:
         assert len(memories) > 0
         assert any(m.id == memory.id for m in memories)
     
-    async def test_task_whiteboard(self, memory_manager):
+    async def test_task_whiteboard(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test task whiteboard functionality."""
         task_id = "test_task_123"
         agent_id = "whiteboard_agent"
@@ -167,7 +179,7 @@ class TestMemorySystem:
         assert len(retrieved.notes) > 0
         assert "agent_2" in retrieved.participants
     
-    async def test_procedural_memory(self, memory_manager):
+    async def test_procedural_memory(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test procedural memory storage."""
         agent_id = "procedural_agent"
         
@@ -190,7 +202,7 @@ class TestMemorySystem:
         )
         assert len(procedures) > 0
     
-    async def test_knowledge_graph(self, memory_manager):
+    async def test_knowledge_graph(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test knowledge graph functionality."""
         agent_id = "knowledge_agent"
         
@@ -222,7 +234,7 @@ class TestMemorySystem:
         assert len(graph["nodes"]) >= 2
         assert len(graph["edges"]) >= 1
     
-    async def test_agent_memory_interface(self, agent_memory):
+    async def test_agent_memory_interface(self, agent_memory: AgentMemoryInterface) -> None:  # type: ignore[misc]
         """Test the agent memory interface."""
         async with agent_memory as mem:
             # Test short-term memory
@@ -262,7 +274,7 @@ class TestMemorySystem:
             )
             assert knowledge_id
     
-    async def test_memory_enabled_agent(self):
+    async def test_memory_enabled_agent(self) -> None:
         """Test the memory-enabled agent example."""
         agent = MemoryEnabledAgent(
             agent_id="integration_test_agent",
@@ -298,7 +310,7 @@ class TestMemorySystem:
         await agent.end_task("Task completed successfully")
         assert agent.current_task_id is None
     
-    async def test_memory_expiration(self, memory_manager):
+    async def test_memory_expiration(self, memory_manager: MemoryManager) -> None:  # type: ignore[misc]
         """Test cleanup of expired memories."""
         agent_id = "expiration_test"
         
@@ -322,7 +334,7 @@ class TestMemorySystem:
 
 
 @pytest.mark.skipif(not HAS_MEMORY_SYSTEM, reason="Memory system not available")
-def test_memory_types():
+def test_memory_types() -> None:
     """Test memory type definitions."""
     assert MemoryType.SHORT_TERM.value == "short_term"
     assert MemoryType.LONG_TERM.value == "long_term"
@@ -338,7 +350,7 @@ def test_memory_types():
 
 
 @pytest.mark.skipif(not HAS_MEMORY_SYSTEM, reason="Memory system not available")
-def test_memory_scope():
+def test_memory_scope() -> None:
     """Test memory scope definitions."""
     assert MemoryScope.PRIVATE.value == "private"
     assert MemoryScope.TASK.value == "task"
@@ -348,7 +360,7 @@ def test_memory_scope():
 
 
 @pytest.mark.skipif(not HAS_MEMORY_SYSTEM, reason="Memory system not available")
-def test_memory_persistence():
+def test_memory_persistence() -> None:
     """Test memory persistence levels."""
     assert MemoryPersistence.VOLATILE.value == "volatile"
     assert MemoryPersistence.SESSION.value == "session"

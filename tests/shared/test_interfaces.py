@@ -13,9 +13,8 @@ from typing import Any, Dict, List, Optional, Protocol
 
 import pytest
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared")
-)
+# Add project root to path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 try:
     from claude.shared.interfaces import (  # type: ignore[import]

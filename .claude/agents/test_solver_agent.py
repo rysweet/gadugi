@@ -12,11 +12,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
-# Add shared modules to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
-
 try:
-    from utils.error_handling import CircuitBreaker  # type: ignore[import]
+    from ..shared.utils.error_handling import CircuitBreaker  # type: ignore[import]
 except ImportError:
     # Fallback definitions for missing imports
     from dataclasses import dataclass

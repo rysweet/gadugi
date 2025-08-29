@@ -143,7 +143,7 @@ class SQLiteMemoryBackend:
     ) -> List[Dict[str, Any]]:
         """Retrieve memories."""
         query = "SELECT * FROM memories WHERE agent_id = ?"
-        params = [agent_id]
+        params: List[Any] = [agent_id]
 
         if memory_type:
             query += " AND memory_type = ?"
@@ -354,13 +354,17 @@ class SQLiteMemoryBackend:
                 FROM memories
                 GROUP BY memory_type
             """) as cursor:
-                memory_counts = dict(await cursor.fetchall())
+                rows = await cursor.fetchall()
+                memory_counts = {row[0]: row[1] for row in rows}
 
             # Total counts
             for table in ['memories', 'knowledge_nodes', 'knowledge_edges', 'whiteboards', 'procedures']:
                 async with db.execute(f"SELECT COUNT(*) FROM {table}") as cursor:
                     count = await cursor.fetchone()
-                    stats[f'total_{table}'] = count[0]
+                    if count is not None:
+                        stats[f'total_{table}'] = count[0]
+                    else:
+                        stats[f'total_{table}'] = 0
 
             stats['memory_types'] = memory_counts
 
@@ -429,7 +433,10 @@ async def test_sqlite_backend():
     print(f"✅ Retrieved {len(memories)} memories")
 
     whiteboard = await backend.get_whiteboard(task_id)
-    print(f"✅ Retrieved whiteboard: {whiteboard['content']}")
+    if whiteboard is not None:
+        print(f"✅ Retrieved whiteboard: {whiteboard['content']}")
+    else:
+        print("⚠️ Whiteboard not found")
 
     graph = await backend.get_knowledge_graph(agent_id)
     print(f"✅ Retrieved knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")

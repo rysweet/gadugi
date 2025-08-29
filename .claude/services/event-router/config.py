@@ -3,7 +3,7 @@ Configuration for event-router.
 """
 
 import os
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 # Try to import from pydantic_settings (newer version) or fall back to pydantic
 try:
@@ -102,7 +102,7 @@ class Settings(BaseSettings):  # type: ignore
     api_key: Optional[str] = Field(default=None, description="API Key for authentication")
     secret_key: str = Field(default="change-me-in-production", description="Secret key")
     cors_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:8080"],
+        default_factory=lambda: ["http://localhost:3000", "http://localhost:8080"],
         description="CORS allowed origins"
     )
 

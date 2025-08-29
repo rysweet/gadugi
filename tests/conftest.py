@@ -1,14 +1,19 @@
-import sys
-from pathlib import Path
-
-# Add .claude directory to sys.path if not already present
-project_root = Path(__file__).resolve().parent.parent
-claude_path = project_root / ".claude"
-if str(claude_path) not in sys.path:
-    sys.path.insert(0, str(claude_path))
 """
 Pytest configuration and shared fixtures for Gadugi tests.
 """
+
+import sys
+from pathlib import Path
+
+# Add parent directory to Python path for imports
+parent_dir = Path(__file__).parent.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
+# Add claude directory for agent imports
+claude_dir = parent_dir / "claude"
+if claude_dir.exists() and str(claude_dir) not in sys.path:
+    sys.path.insert(0, str(claude_dir))
 
 import shutil
 import tempfile

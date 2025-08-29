@@ -7,7 +7,8 @@ import sys
 import os
 from datetime import datetime
 
-# Add parent directory to path for imports
+# Import from the proper package structure - we add the project root to path  
+# so we can import from .claude package
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from claude.shared.github_operations import GitHubOperations

@@ -22,7 +22,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 # Import workflow engine components
-from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
+from .workflow_engine import WorkflowPhase, WorkflowState
 
 
 @dataclass

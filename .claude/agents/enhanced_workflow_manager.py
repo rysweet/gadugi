@@ -29,9 +29,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
-# Add shared modules to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
-
 try:
     from ..shared.workflow_reliability import (  # type: ignore
         WorkflowReliabilityManager as SharedWorkflowReliabilityManager,

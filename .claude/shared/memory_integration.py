@@ -38,7 +38,7 @@ class AgentMemoryInterface:
     async def remember_short_term(
         self,
         content: str,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         importance: float = 0.5
     ) -> str:
         """Store a short-term memory."""
@@ -67,7 +67,7 @@ class AgentMemoryInterface:
         self,
         content: str,
         memory_type: str = "semantic",
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         importance: float = 0.7
     ) -> str:
         """Store a long-term memory."""
@@ -120,7 +120,7 @@ class AgentMemoryInterface:
     
     async def search_memories(
         self,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Search memories by tags."""
@@ -299,7 +299,7 @@ class AgentMemoryInterface:
     async def share_with_project(
         self,
         content: str,
-        tags: List[str] = None,
+        tags: Optional[List[str]] = None,
         importance: float = 0.7
     ) -> str:
         """Share a memory with the entire project."""

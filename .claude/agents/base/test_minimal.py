@@ -5,7 +5,7 @@ Minimal test for whiteboard components
 
 import asyncio
 from datetime import datetime
-from whiteboard_collaboration import SharedWhiteboard, ConflictResolutionStrategy
+from whiteboard_collaboration import SharedWhiteboard, WhiteboardType
 
 
 async def test_minimal():
@@ -14,16 +14,15 @@ async def test_minimal():
 
     wb = SharedWhiteboard(
         whiteboard_id="test_001",
-        name="Test Board",
-        created_by="test_agent",
-        conflict_strategy=ConflictResolutionStrategy.LAST_WRITER_WINS
+        whiteboard_type=WhiteboardType.TASK_COORDINATION,
+        owner_agent="test_agent"
     )
 
     print("✅ Whiteboard created")
 
     try:
         # Test write operation
-        success = await wb.write("test_agent", "test.key", "test_value")
+        success = await wb.write("test_agent", "test.key", {"value": "test_value"})
         print(f"✅ Write operation: {success}")
 
         # Test read operation

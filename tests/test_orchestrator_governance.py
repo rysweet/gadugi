@@ -10,13 +10,18 @@ import tempfile
 from pathlib import Path
 
 import pytest
+import sys
+import os
 
-from ..claude.agents.orchestrator.governance_validator import (
+# Add claude directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), ".claude"))
+
+from agents.orchestrator.governance_validator import (  # type: ignore[import-not-found]
     GovernanceValidator,
     validate_orchestrator_compliance,
 )
-from ..claude.agents.orchestrator.orchestrator import Orchestrator, TaskDefinition
-from ..claude.agents.orchestrator.parallel_executor import ParallelExecutor
+from agents.orchestrator.orchestrator import Orchestrator, TaskDefinition  # type: ignore[import-not-found]
+from agents.orchestrator.parallel_executor import ParallelExecutor  # type: ignore[import-not-found]
 
 
 class TestOrchestratorGovernance:

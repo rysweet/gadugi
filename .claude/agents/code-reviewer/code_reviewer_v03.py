@@ -16,14 +16,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
 
 # Import V03Agent base class
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent / "base"))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "shared"))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "engines"))
-
-from v03_agent import V03Agent, AgentCapabilities, TaskOutcome
-from memory_integration import AgentMemoryInterface
-from code_reviewer_engine import CodeReviewerEngine, ReviewResult, ReviewStatus, IssueType, IssueCategory
+from ..base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
+from ...shared.memory_integration import AgentMemoryInterface
+from ...engines.code_reviewer_engine import CodeReviewerEngine, ReviewResult, ReviewStatus, IssueType, IssueCategory
 
 
 @dataclass
@@ -126,6 +121,10 @@ class CodeReviewerV03(V03Agent):
         """Load historical patterns from long-term memory."""
         try:
             # Search for pattern-related memories
+            if not self.memory:
+                self.logger.warning("Memory not initialized, skipping pattern loading")
+                return
+            
             pattern_memories = await self.memory.search_memories(
                 tags=["pattern", "developer", "module"],
                 limit=100
@@ -227,6 +226,8 @@ class CodeReviewerV03(V03Agent):
 
         # Step 1: Run standard code review
         steps.append("Running standard code analysis")
+        if not self.review_engine:
+            raise ValueError("Review engine not initialized")
         review_result = await self.review_engine.review_files(files)
 
         # Step 2: Apply adaptive scoring based on patterns
@@ -291,7 +292,7 @@ class CodeReviewerV03(V03Agent):
                             issue.severity = min(5, issue.severity + 1)
 
                 # Remember the adjustment
-                if issue.severity != original_severity:
+                if issue.severity != original_severity and self.memory:
                     await self.memory.remember_short_term(
                         f"Adjusted severity for {issue.rule_id} from {original_severity} to {issue.severity} "
                         f"based on patterns for {author} in {file_review.file_path}",
@@ -355,23 +356,25 @@ class CodeReviewerV03(V03Agent):
             f"score: {review_result.overall_score}"
         )
 
-        await self.memory.remember_long_term(
-            content=review_summary,
-            memory_type="episodic",
-            tags=["code_review", "completed", author] + [Path(f).stem for f in files[:3]],
-            importance=0.8
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                content=review_summary,
+                memory_type="episodic",
+                tags=["code_review", "completed", author] + [Path(f).stem for f in files[:3]],
+                importance=0.8
+            )
 
         # Store specific insights
-        for file_review in review_result.file_reviews:
-            if file_review.issues:
-                issue_summary = f"File {file_review.file_path}: {len(file_review.issues)} issues"
-                await self.memory.remember_long_term(
-                    content=issue_summary,
-                    memory_type="semantic",
-                    tags=["file_review", Path(file_review.file_path).stem, author],
-                    importance=0.6
-                )
+        if self.memory:
+            for file_review in review_result.file_reviews:
+                if file_review.issues:
+                    issue_summary = f"File {file_review.file_path}: {len(file_review.issues)} issues"
+                    await self.memory.remember_long_term(
+                        content=issue_summary,
+                        memory_type="semantic",
+                        tags=["file_review", Path(file_review.file_path).stem, author],
+                        importance=0.6
+                    )
 
     async def _update_patterns_from_review(
         self,
@@ -432,12 +435,13 @@ class CodeReviewerV03(V03Agent):
                 f"Last reviewed: {pattern.last_reviewed}"
             )
 
-            await self.memory.remember_long_term(
-                content=pattern_content,
-                memory_type="semantic",
-                tags=["pattern", "developer", author],
-                importance=0.7
-            )
+            if self.memory:
+                await self.memory.remember_long_term(
+                    content=pattern_content,
+                    memory_type="semantic",
+                    tags=["pattern", "developer", author],
+                    importance=0.7
+                )
 
         # Store module patterns
         for file_path in files:
@@ -451,12 +455,13 @@ class CodeReviewerV03(V03Agent):
                     f"Last reviewed: {pattern.last_reviewed}"
                 )
 
-                await self.memory.remember_long_term(
-                    content=pattern_content,
-                    memory_type="semantic",
-                    tags=["pattern", "module", Path(file_path).stem],
-                    importance=0.7
-                )
+                if self.memory:
+                    await self.memory.remember_long_term(
+                        content=pattern_content,
+                        memory_type="semantic",
+                        tags=["pattern", "module", Path(file_path).stem],
+                        importance=0.7
+                    )
 
     async def _learn_from_feedback_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """Learn from human feedback on previous reviews."""
@@ -493,12 +498,13 @@ class CodeReviewerV03(V03Agent):
                 f"for {review_feedback.file_path}"
             )
 
-            await self.memory.remember_long_term(
-                content=feedback_content,
-                memory_type="episodic",
-                tags=["feedback", "learning", review_feedback.developer, review_feedback.rule_id],
-                importance=0.9  # High importance for learning
-            )
+            if self.memory:
+                await self.memory.remember_long_term(
+                    content=feedback_content,
+                    memory_type="episodic",
+                    tags=["feedback", "learning", review_feedback.developer, review_feedback.rule_id],
+                    importance=0.9  # High importance for learning
+                )
 
         steps.append(f"Updated patterns based on {learned_patterns} feedback items")
 
@@ -535,12 +541,13 @@ class CodeReviewerV03(V03Agent):
                 )
 
         # Store the learning
-        await self.memory.remember_long_term(
-            content=f"Learned: {feedback.developer} {'accepts' if feedback.accepted else 'rejects'} {feedback.rule_id}",
-            memory_type="procedural",
-            tags=["learning", "pattern", feedback.developer, feedback.rule_id],
-            importance=0.8
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                content=f"Learned: {feedback.developer} {'accepts' if feedback.accepted else 'rejects'} {feedback.rule_id}",
+                memory_type="procedural",
+                tags=["learning", "pattern", feedback.developer, feedback.rule_id],
+                importance=0.8
+            )
 
     async def _analyze_patterns_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze current patterns and generate insights."""
@@ -563,13 +570,14 @@ class CodeReviewerV03(V03Agent):
 
         # Store insights
         steps.append("Storing pattern analysis insights")
-        for insight in insights:
-            await self.memory.remember_long_term(
-                content=f"Pattern insight: {insight}",
-                memory_type="semantic",
-                tags=["insight", "pattern", "analysis"],
-                importance=0.7
-            )
+        if self.memory:
+            for insight in insights:
+                await self.memory.remember_long_term(
+                    content=f"Pattern insight: {insight}",
+                    memory_type="semantic",
+                    tags=["insight", "pattern", "analysis"],
+                    importance=0.7
+                )
 
         return {
             "steps": steps,
@@ -584,11 +592,12 @@ class CodeReviewerV03(V03Agent):
         description = task.get('description', 'Generic code review task')
 
         # Remember starting the task
-        await self.memory.remember_short_term(
-            f"Starting generic code review: {description}",
-            tags=["task_start", "generic_review"],
-            importance=0.5
-        )
+        if self.memory:
+            await self.memory.remember_short_term(
+                f"Starting generic code review: {description}",
+                tags=["task_start", "generic_review"],
+                importance=0.5
+            )
 
         return {
             "steps": ["Processed generic review task"],

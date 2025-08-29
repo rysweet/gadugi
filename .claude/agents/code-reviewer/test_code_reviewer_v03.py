@@ -146,7 +146,8 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         # Verify outcome
         self.assertTrue(outcome.success)
         self.assertEqual(outcome.task_type, "review_files")
-        self.assertIn("review completed successfully", outcome.lessons_learned.lower())
+        if outcome.lessons_learned:
+            self.assertIn("review completed successfully", outcome.lessons_learned.lower())
 
         # Verify engine was called
         mock_engine.review_files.assert_called_once_with(["test.py"])

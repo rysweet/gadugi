@@ -13,10 +13,6 @@ from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-# Add shared modules to path for import resolution
-shared_path = os.path.join(os.path.dirname(__file__), "..", "..", "shared")
-sys.path.insert(0, os.path.abspath(shared_path))
-
 try:
     from ...shared.github_operations import GitHubOperations  # type: ignore
     from ...shared.utils.error_handling import GadugiError as SharedGadugiError  # type: ignore

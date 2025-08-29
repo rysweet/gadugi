@@ -18,15 +18,27 @@ from datetime import datetime
 import sys
 import os
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", ".claude", "agents", "teamcoach")
-)
+# Add parent directory to path to import as package
+parent_dir = os.path.join(os.path.dirname(__file__), "..")
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
-from team_coach import (  # type: ignore[import]
-    TeamCoach,
-    SessionMetrics,
-    ImprovementType,
-)
+try:
+    from claude.agents.teamcoach.team_coach import (  # type: ignore[import]
+        TeamCoach,
+        SessionMetrics,
+        ImprovementType,
+    )
+except ImportError:
+    # Fallback if package structure is different
+    sys.path.insert(
+        0, os.path.join(os.path.dirname(__file__), "..", ".claude", "agents")
+    )
+    from teamcoach.team_coach import (  # type: ignore[import]
+        TeamCoach,
+        SessionMetrics,
+        ImprovementType,
+    )
 
 
 class TestTeamCoachInitialization:

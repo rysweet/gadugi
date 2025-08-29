@@ -30,10 +30,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 from dataclasses import dataclass, field
 
 # Import the V03Agent base class
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
+from ..base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
 
 
 class WorkflowPhase(Enum):
@@ -154,6 +151,10 @@ class WorkflowManagerV03(V03Agent):
 
         self.logger.info(f"Starting workflow execution for task: {task_id}")
 
+        # Initialize variables that might be referenced in exception handlers
+        steps_taken = []
+        context = None
+
         try:
             # Create workflow context
             context = WorkflowContext(
@@ -170,7 +171,6 @@ class WorkflowManagerV03(V03Agent):
             await self._learn_from_similar_workflows(task_description)
 
             # Execute the 13-phase workflow
-            steps_taken = []
 
             for phase in WorkflowPhase:
                 self.logger.info(f"Executing phase: {phase.value}")
@@ -192,11 +192,12 @@ class WorkflowManagerV03(V03Agent):
                     steps_taken.append(f"Completed {phase.value}: {phase_result.get('summary', 'Success')}")
 
                     # Remember progress in memory
-                    await self.memory.remember_short_term(
+                    if self.memory:
+                        await self.memory.remember_short_term(
                         f"Phase {phase.value} completed for task {task_id}",
                         tags=["workflow", "phase_complete", phase.value],
                         importance=0.7
-                    )
+                        )
 
                 except Exception as e:
                     # Handle phase error with recovery
@@ -253,7 +254,7 @@ class WorkflowManagerV03(V03Agent):
                 steps_taken=steps_taken if 'steps_taken' in locals() else [],
                 duration_seconds=duration,
                 error=error_msg,
-                lessons_learned=f"Workflow failed at {context.current_phase.value if 'context' in locals() and context.current_phase else 'initialization'}: {str(e)}"
+                lessons_learned=f"Workflow failed at {context.current_phase.value if context and context.current_phase else 'initialization'}: {str(e)}"
             )
 
             return outcome
@@ -301,14 +302,14 @@ class WorkflowManagerV03(V03Agent):
                         })
 
                 # Store insights for current workflow
-                if successful_patterns:
+                if successful_patterns and self.memory:
                     await self.memory.remember_short_term(
                         f"Found {len(successful_patterns)} successful similar workflows",
                         tags=["workflow", "learning", "similar_tasks"],
                         importance=0.8
                     )
 
-                if common_errors:
+                if common_errors and self.memory:
                     await self.memory.remember_short_term(
                         f"Aware of {len(common_errors)} common errors in similar workflows",
                         tags=["workflow", "error_prevention", "similar_tasks"],
@@ -382,11 +383,12 @@ class WorkflowManagerV03(V03Agent):
             requirements['is_feature'] = True
 
         # Remember requirements analysis
-        await self.memory.remember_long_term(
-            f"Requirements analysis for {context.task_description}: {json.dumps(requirements)}",
-            tags=["requirements", "analysis", "workflow"],
-            importance=0.8
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Requirements analysis for {context.task_description}: {json.dumps(requirements)}",
+                tags=["requirements", "analysis", "workflow"],
+                importance=0.8
+            )
 
         return {
             'summary': 'Requirements analyzed successfully',
@@ -417,10 +419,12 @@ class WorkflowManagerV03(V03Agent):
             design_plan['components'] = ['api_design', 'implementation', 'testing', 'documentation']
 
         # Check for similar designs in memory
-        similar_designs = await self.memory.search_memories(
-            tags=["design", "planning"],
-            limit=5
-        )
+        similar_designs = []
+        if self.memory:
+            similar_designs = await self.memory.search_memories(
+                tags=["design", "planning"],
+                limit=5
+            )
 
         if similar_designs:
             self.logger.info(f"Found {len(similar_designs)} similar design patterns")
@@ -556,11 +560,12 @@ class WorkflowManagerV03(V03Agent):
                 implementation_results.append(result)
 
         # Remember implementation approach
-        await self.memory.remember_long_term(
+        if self.memory:
+            await self.memory.remember_long_term(
             f"Implementation approach for {context.task_description}: {len(implementation_results)} components implemented",
             tags=["implementation", "workflow", "approach"],
             importance=0.8
-        )
+            )
 
         return {
             'summary': f'Implementation completed for {len(implementation_results)} components',
@@ -996,11 +1001,12 @@ class WorkflowManagerV03(V03Agent):
         }
 
         # Save to memory
-        await self.memory.remember_long_term(
-            f"Checkpoint for task {task_id}: {json.dumps(checkpoint_data)}",
-            tags=["checkpoint", "workflow", task_id],
-            importance=0.9
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Checkpoint for task {task_id}: {json.dumps(checkpoint_data)}",
+                tags=["checkpoint", "workflow", task_id],
+                importance=0.9
+            )
 
         # Also save to filesystem if possible
         checkpoint_dir = Path(context.repository_path) / ".github" / "workflow-states"
@@ -1026,11 +1032,12 @@ class WorkflowManagerV03(V03Agent):
             'completed_at': datetime.now().isoformat()
         }
 
-        await self.memory.remember_long_term(
-            f"Workflow completed: {json.dumps(final_state)}",
-            tags=["workflow_complete", "final_state", task_id],
-            importance=0.9
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Workflow completed: {json.dumps(final_state)}",
+                tags=["workflow_complete", "final_state", task_id],
+                importance=0.9
+            )
 
     async def _extract_lessons_learned(self, context: WorkflowContext) -> str:
         """Extract lessons learned from workflow execution."""
@@ -1059,34 +1066,38 @@ class WorkflowManagerV03(V03Agent):
     async def _learn_from_successful_workflow(self, context: WorkflowContext, outcome: TaskOutcome) -> None:
         """Learn from successful workflow execution."""
         # Store successful procedure
-        await self.memory.learn_procedure(
+        if self.memory:
+            await self.memory.learn_procedure(
             procedure_name=f"successful_workflow_{context.current_phase.value if context.current_phase else 'complete'}",
             steps=outcome.steps_taken,
             context=f"Task: {context.task_description}, Duration: {outcome.duration_seconds}s"
-        )
+            )
 
         # Store successful pattern for similar tasks
-        await self.memory.remember_long_term(
+        if self.memory:
+            await self.memory.remember_long_term(
             f"Successful workflow pattern: {context.task_description} completed in {outcome.duration_seconds:.1f}s with {len(context.completed_phases)} phases",
             tags=["success", "workflow", "pattern"],
             importance=0.8
-        )
+            )
 
     async def _learn_from_workflow_failure(self, task_description: str, error: str) -> None:
         """Learn from workflow failure."""
-        await self.memory.remember_long_term(
+        if self.memory:
+            await self.memory.remember_long_term(
             f"Workflow failure pattern: {task_description} failed with error: {error}",
             tags=["failure", "workflow", "error", "learning"],
             importance=0.9
-        )
+            )
 
     async def _learn_from_workflow_error(self, phase: WorkflowPhase, error: str, recovery: Dict[str, Any]) -> None:
         """Learn from phase-specific errors."""
-        await self.memory.remember_long_term(
-            f"Phase {phase.value} error pattern: {error}. Recovery: {recovery}",
-            tags=["error", "phase_error", phase.value, "recovery"],
-            importance=0.85
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Phase {phase.value} error pattern: {error}. Recovery: {recovery}",
+                tags=["error", "phase_error", phase.value, "recovery"],
+                importance=0.85
+            )
 
     # PR Review Feedback Learning
 
@@ -1111,11 +1122,12 @@ class WorkflowManagerV03(V03Agent):
                 feedback_analysis['critical_issues'] += 1
 
             # Store individual feedback as learning opportunity
-            await self.memory.remember_long_term(
-                f"PR feedback from {feedback.reviewer}: {feedback.comment}",
-                tags=["pr_feedback", "review", feedback.severity],
-                importance=0.8 if feedback.severity in ['critical', 'major'] else 0.6
-            )
+            if self.memory:
+                await self.memory.remember_long_term(
+                    f"PR feedback from {feedback.reviewer}: {feedback.comment}",
+                    tags=["pr_feedback", "review", feedback.severity],
+                    importance=0.8 if feedback.severity in ['critical', 'major'] else 0.6
+                )
 
         # Extract learning patterns
         await self._extract_feedback_patterns(feedback_list)
@@ -1144,21 +1156,24 @@ class WorkflowManagerV03(V03Agent):
         # Store patterns for future reference
         for pattern, count in pattern_counts.items():
             if count > 0:
-                await self.memory.remember_long_term(
-                    f"PR feedback pattern: {count} comments about {pattern}",
-                    tags=["feedback_pattern", pattern, "learning"],
-                    importance=0.7
-                )
+                if self.memory:
+                    await self.memory.remember_long_term(
+                        f"PR feedback pattern: {count} comments about {pattern}",
+                        tags=["feedback_pattern", pattern, "learning"],
+                        importance=0.7
+                    )
 
     async def get_proactive_recommendations(self, task_description: str) -> List[str]:
         """Get proactive recommendations based on learned patterns."""
         recommendations = []
 
         # Get feedback patterns from memory
-        feedback_memories = await self.memory.search_memories(
-            tags=["feedback_pattern"],
-            limit=20
-        )
+        feedback_memories = []
+        if self.memory:
+            feedback_memories = await self.memory.search_memories(
+                tags=["feedback_pattern"],
+                limit=20
+            )
 
         # Generate recommendations based on past feedback
         common_issues = {}

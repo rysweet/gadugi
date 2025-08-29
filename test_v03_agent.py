@@ -7,11 +7,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-# Add path for imports
-sys.path.insert(0, str(Path(__file__).parent / ".claude" / "agents" / "base"))
-sys.path.insert(0, str(Path(__file__).parent / ".claude"))
-
-from agents.base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
+from claude.agents.base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
 
 
 class TestWorkflowAgent(V03Agent):

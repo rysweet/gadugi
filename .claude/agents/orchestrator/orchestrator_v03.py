@@ -29,36 +29,18 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 # Import V03Agent base class
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-
-try:
-    from shared.memory_integration import AgentMemoryInterface
-    from agents.base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
-except ImportError:
-    # Fallback for direct execution
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'shared')))
-    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'base')))
-    from memory_integration import AgentMemoryInterface
-    from v03_agent import V03Agent, AgentCapabilities, TaskOutcome
+from ...shared.memory_integration import AgentMemoryInterface
+from ..base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
 
 # Import existing orchestrator components
-try:
-    from task_analyzer import TaskAnalyzer, TaskDependency
-    from parallel_executor import ParallelExecutor, ExecutionMode
-except ImportError:
-    # Create placeholder classes if not available
-    class TaskAnalyzer:
-        async def analyze_dependencies(self, tasks): return []
-    class TaskDependency:
-        def __init__(self, **kwargs): pass
-    class ParallelExecutor:
-        def __init__(self, **kwargs): pass
-        async def initialize(self): pass
-        async def execute_batch(self, tasks, mode): return []
-    class ExecutionMode:
-        PARALLEL = "parallel"
+from .task_analyzer import TaskAnalyzer as _TaskAnalyzer, TaskDependency as _TaskDependency
+from .parallel_executor import ParallelExecutor as _ParallelExecutor, ExecutionMode as _ExecutionMode
+
+# Rename to avoid conflicts
+TaskAnalyzer = _TaskAnalyzer
+TaskDependency = _TaskDependency
+ParallelExecutor = _ParallelExecutor
+ExecutionMode = _ExecutionMode
 
 logger = logging.getLogger(__name__)
 
@@ -175,8 +157,8 @@ class OrchestratorV03(V03Agent):
             enable_worktrees=True
         )
 
-        # Learning components
-        self.learned_patterns: Dict[str, TaskPattern] = {}
+        # Learning components - use different name to avoid base class conflict
+        self.task_patterns: Dict[str, TaskPattern] = {}
         self.decomposition_strategies: Dict[str, DecompositionStrategy] = {}
         self.execution_history: List[ExecutionMetrics] = []
 
@@ -269,7 +251,8 @@ class OrchestratorV03(V03Agent):
 
     async def _find_matching_patterns(self, task_description: str) -> List[TaskPattern]:
         """Find patterns that match the current task using learned knowledge."""
-        await self.memory.remember_short_term(f"Searching for patterns matching: {task_description}")
+        if self.memory:
+            await self.memory.remember_short_term(f"Searching for patterns matching: {task_description}")
 
         # Get relevant knowledge from memory
         relevant_memories = await self.get_relevant_knowledge(task_description)
@@ -281,7 +264,7 @@ class OrchestratorV03(V03Agent):
         # Find matching patterns
         matching_patterns = []
 
-        for pattern in self.learned_patterns.values():
+        for pattern in self.task_patterns.values():
             # Check task type match
             if pattern.task_type == task_type:
                 confidence = 0.8
@@ -313,9 +296,10 @@ class OrchestratorV03(V03Agent):
         else:
             self.pattern_hit_rate = self.pattern_hit_rate * 0.9
 
-        await self.memory.remember_short_term(
-            f"Found {len(matching_patterns)} matching patterns (hit rate: {self.pattern_hit_rate:.2f})"
-        )
+        if self.memory:
+            await self.memory.remember_short_term(
+                f"Found {len(matching_patterns)} matching patterns (hit rate: {self.pattern_hit_rate:.2f})"
+            )
 
         return matching_patterns[:3]  # Top 3 matches
 
@@ -332,9 +316,10 @@ class OrchestratorV03(V03Agent):
             best_pattern = similar_patterns[0]
             confidence = float(best_pattern.pattern_id.split('_')[1])
 
-            await self.memory.remember_short_term(
-                f"Using pattern '{best_pattern.task_type}' with {confidence:.2f} confidence"
-            )
+            if self.memory:
+                await self.memory.remember_short_term(
+                    f"Using pattern '{best_pattern.task_type}' with {confidence:.2f} confidence"
+                )
 
             # Create subtasks based on pattern
             subtasks = []
@@ -362,12 +347,14 @@ class OrchestratorV03(V03Agent):
 
         else:
             # No patterns found - use intelligent analysis
-            await self.memory.remember_short_term("No patterns found, using intelligent decomposition")
+            if self.memory:
+                await self.memory.remember_short_term("No patterns found, using intelligent decomposition")
             subtasks = await self._decompose_without_patterns(task)
 
-        await self.memory.remember_short_term(
-            f"Decomposed into {len(subtasks)} intelligent subtasks"
-        )
+        if self.memory:
+            await self.memory.remember_short_term(
+                f"Decomposed into {len(subtasks)} intelligent subtasks"
+            )
 
         return subtasks
 
@@ -632,10 +619,13 @@ class OrchestratorV03(V03Agent):
         for task in subtasks:
             if task.similar_past_tasks:
                 # Use similar task patterns to predict additional dependencies
-                similar_memories = await self.memory.recall_memories(
-                    memory_types=["procedural"],
-                    limit=10
-                )
+                if self.memory:
+                    similar_memories = await self.memory.recall_memories(
+                        memory_type="procedural",
+                        limit=10
+                    )
+                else:
+                    similar_memories = []
 
                 for memory in similar_memories:
                     if memory.get("metadata", {}).get("task_type") == task.task_type:
@@ -646,9 +636,10 @@ class OrchestratorV03(V03Agent):
                                 # Extract dependency information
                                 pass  # Could implement dependency extraction logic
 
-        await self.memory.remember_short_term(
-            f"Enhanced dependency analysis: {len(enhanced_deps)} dependencies found"
-        )
+        if self.memory:
+            await self.memory.remember_short_term(
+                f"Enhanced dependency analysis: {len(enhanced_deps)} dependencies found"
+            )
 
         return enhanced_deps
 
@@ -690,9 +681,10 @@ class OrchestratorV03(V03Agent):
         async with self._optimization_lock:
             self.active_plans[plan_id] = execution_plan
 
-        await self.memory.remember_short_term(
-            f"Created optimized plan {plan_id} with {estimated_speedup:.1f}x speedup"
-        )
+        if self.memory:
+            await self.memory.remember_short_term(
+                f"Created optimized plan {plan_id} with {estimated_speedup:.1f}x speedup"
+            )
 
         return execution_plan
 
@@ -790,16 +782,18 @@ class OrchestratorV03(V03Agent):
         start_time = time.time()
 
         try:
-            await self.memory.remember_short_term(f"Starting adaptive execution of plan {plan_id}")
+            if self.memory:
+                await self.memory.remember_short_term(f"Starting adaptive execution of plan {plan_id}")
 
             # Execute batches with monitoring
             for batch_idx, batch in enumerate(parallel_batches):
                 batch_start = time.time()
                 batch_tasks = [subtasks[i] for i in batch]
 
-                await self.memory.remember_short_term(
-                    f"Executing batch {batch_idx + 1}/{len(parallel_batches)} with {len(batch_tasks)} tasks"
-                )
+                if self.memory:
+                    await self.memory.remember_short_term(
+                        f"Executing batch {batch_idx + 1}/{len(parallel_batches)} with {len(batch_tasks)} tasks"
+                    )
 
                 # Execute batch with parallel executor
                 batch_results = await self.parallel_executor.execute_batch(
@@ -819,9 +813,10 @@ class OrchestratorV03(V03Agent):
                     self.capabilities.max_parallel_tasks = max(
                         2, self.capabilities.max_parallel_tasks - 1
                     )
-                    await self.memory.remember_short_term(
-                        f"Reduced parallelism due to batch failures: {successful_in_batch}/{len(batch_tasks)}"
-                    )
+                    if self.memory:
+                        await self.memory.remember_short_term(
+                            f"Reduced parallelism due to batch failures: {successful_in_batch}/{len(batch_tasks)}"
+                        )
 
                 # Stop if critical failures
                 critical_failures = sum(
@@ -830,9 +825,10 @@ class OrchestratorV03(V03Agent):
                 )
 
                 if critical_failures > 0:
-                    await self.memory.remember_short_term(
-                        f"Stopping execution due to {critical_failures} critical failures"
-                    )
+                    if self.memory:
+                        await self.memory.remember_short_term(
+                            f"Stopping execution due to {critical_failures} critical failures"
+                        )
                     break
 
             # Calculate execution metrics
@@ -858,7 +854,8 @@ class OrchestratorV03(V03Agent):
             return results
 
         except Exception as e:
-            await self.memory.remember_short_term(f"Execution failed: {str(e)}")
+            if self.memory:
+                await self.memory.remember_short_term(f"Execution failed: {str(e)}")
             raise
 
     async def _learn_from_execution(
@@ -887,8 +884,8 @@ class OrchestratorV03(V03Agent):
         for task in subtasks:
             if task.pattern_match_confidence > 0.5:  # Task was based on a pattern
                 pattern_id = task.similar_past_tasks[0] if task.similar_past_tasks else None
-                if pattern_id and pattern_id in self.learned_patterns:
-                    pattern = self.learned_patterns[pattern_id]
+                if pattern_id and pattern_id in self.task_patterns:
+                    pattern = self.task_patterns[pattern_id]
 
                     # Update pattern success rate and duration
                     task_result = next((r for r in results if r.get("task_id") == task.id), None)
@@ -929,11 +926,12 @@ class OrchestratorV03(V03Agent):
         if actual_success_rate < 0.7:
             learning_summary["lessons"].append("Task decomposition strategy needs refinement")
 
-        await self.memory.remember_long_term(
-            f"Execution learning from plan {plan_id}: {json.dumps(learning_summary, indent=2)}",
-            tags=["learning", "execution_analysis", "performance"],
-            importance=0.8
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Execution learning from plan {plan_id}: {json.dumps(learning_summary, indent=2)}",
+                tags=["learning", "execution_analysis", "performance"],
+                importance=0.8
+            )
 
         # Collaborate findings with other agents
         await self.collaborate(
@@ -990,15 +988,16 @@ class OrchestratorV03(V03Agent):
         )
 
         # Store the new pattern
-        self.learned_patterns[pattern_id] = new_pattern
+        self.task_patterns[pattern_id] = new_pattern
 
         # Remember in long-term memory
-        await self.memory.remember_long_term(
-            f"Created new pattern {pattern_id} from successful execution: " +
-            f"{new_pattern.success_rate:.1%} success rate, {actual_duration:.1f}s duration",
-            tags=["pattern_learning", "new_pattern", pattern_id],
-            importance=0.9
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"Created new pattern {pattern_id} from successful execution: " +
+                f"{new_pattern.success_rate:.1%} success rate, {actual_duration:.1f}s duration",
+                tags=["pattern_learning", "new_pattern", pattern_id],
+                importance=0.9
+            )
 
     # Helper methods
 
@@ -1061,7 +1060,7 @@ class OrchestratorV03(V03Agent):
         return {
             "pattern_hit_rate": self.pattern_hit_rate,
             "avg_speedup": self.avg_speedup,
-            "learned_patterns": len(self.learned_patterns),
+            "learned_patterns": len(self.task_patterns),
             "execution_history": len(self.execution_history),
             "success_rate_by_pattern": dict(self.success_rate_by_pattern),
             "active_plans": len(self.active_plans),

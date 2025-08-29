@@ -14,11 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
+from ..base.v03_agent import V03Agent, AgentCapabilities, TaskOutcome
 
 
 @dataclass
@@ -140,8 +136,10 @@ class TaskDecomposerV03(V03Agent):
         """Load previously learned decomposition strategies."""
         try:
             # Try to recall strategy patterns from memory
+            if not self.memory:
+                return
             strategy_memories = await self.memory.recall_memories(
-                memory_types=["procedural", "long_term"],
+                memory_type="procedural",
                 limit=50
             )
 
@@ -272,6 +270,7 @@ class TaskDecomposerV03(V03Agent):
     async def execute_task(self, task: Dict[str, Any]) -> TaskOutcome:
         """Execute task decomposition with learning."""
         start_time = datetime.now()
+        task_id = "unknown"  # Initialize with default value
 
         try:
             task_description = task.get('description', '')
@@ -281,10 +280,11 @@ class TaskDecomposerV03(V03Agent):
             task_id = await self.start_task(f"Decompose: {task_description}")
 
             # Remember the decomposition request
-            await self.memory.remember_short_term(
-                f"Starting decomposition: {task_description}",
-                tags=["decomposition", "start"]
-            )
+            if self.memory:
+                await self.memory.remember_short_term(
+                    f"Starting decomposition: {task_description}",
+                    tags=["decomposition", "start"]
+                )
 
             # Perform decomposition
             result = await self.decompose_task(task_description, context)
@@ -295,12 +295,13 @@ class TaskDecomposerV03(V03Agent):
             duration = (datetime.now() - start_time).total_seconds()
 
             # Remember success
-            await self.memory.remember_long_term(
-                f"Successfully decomposed task into {len(result.subtasks)} subtasks. "
-                f"Parallelization score: {result.parallelization_score:.2f}",
-                tags=["success", "decomposition", result.strategy_used or "unknown"],
-                importance=0.8
-            )
+            if self.memory:
+                await self.memory.remember_long_term(
+                    f"Successfully decomposed task into {len(result.subtasks)} subtasks. "
+                    f"Parallelization score: {result.parallelization_score:.2f}",
+                    tags=["success", "decomposition", result.strategy_used or "unknown"],
+                    importance=0.8
+                )
 
             return TaskOutcome(
                 success=True,
@@ -319,11 +320,12 @@ class TaskDecomposerV03(V03Agent):
         except Exception as e:
             duration = (datetime.now() - start_time).total_seconds()
 
-            await self.memory.remember_long_term(
-                f"Failed decomposition: {str(e)}",
-                tags=["failure", "decomposition", "error"],
-                importance=0.9
-            )
+            if self.memory:
+                await self.memory.remember_long_term(
+                    f"Failed decomposition: {str(e)}",
+                    tags=["failure", "decomposition", "error"],
+                    importance=0.9
+                )
 
             return TaskOutcome(
                 success=False,
@@ -521,11 +523,12 @@ class TaskDecomposerV03(V03Agent):
             best_strategy = strategy_scores[0][0]
 
             # Remember the selection reasoning
-            await self.memory.remember_short_term(
-                f"Selected strategy '{best_strategy.name}' with score {strategy_scores[0][1]:.2f} "
-                f"for task: {task_description[:50]}...",
-                tags=["strategy_selection", best_strategy.name]
-            )
+            if self.memory:
+                await self.memory.remember_short_term(
+                    f"Selected strategy '{best_strategy.name}' with score {strategy_scores[0][1]:.2f} "
+                    f"for task: {task_description[:50]}...",
+                    tags=["strategy_selection", best_strategy.name]
+                )
 
             return best_strategy
 
@@ -1035,12 +1038,16 @@ class TaskDecomposerV03(V03Agent):
         # Store as procedural memory
         steps = [f"{st.name}: {st.description[:50]}..." for st in result.subtasks]
 
-        procedure_id = await self.memory.store_procedure(
-            procedure_name=f"decomposition_{result.strategy_used or 'adaptive'}",
-            steps=steps,
-            context=f"Decomposed '{result.original_task}' into {len(result.subtasks)} "
-                   f"subtasks with {result.parallelization_score:.1%} parallelization"
-        )
+        # Store as procedural memory - using learn_procedure instead of store_procedure
+        if self.memory:
+            procedure_id = await self.memory.learn_procedure(
+                procedure_name=f"decomposition_{result.strategy_used or 'adaptive'}",
+                steps=steps,
+                context=f"Decomposed '{result.original_task}' into {len(result.subtasks)} "
+                       f"subtasks with {result.parallelization_score:.1%} parallelization"
+            )
+        else:
+            procedure_id = None
 
         # Store detailed result as long-term memory
         detailed_result = {
@@ -1053,11 +1060,12 @@ class TaskDecomposerV03(V03Agent):
             "optimizations": result.optimization_suggestions
         }
 
-        await self.memory.remember_long_term(
-            f"decomposition_result: {json.dumps(detailed_result)}",
-            tags=["decomposition", "result", result.strategy_used or "adaptive"],
-            importance=0.8
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"decomposition_result: {json.dumps(detailed_result)}",
+                tags=["decomposition", "result", result.strategy_used or "adaptive"],
+                importance=0.8
+            )
 
     async def _update_strategy_in_memory(self, strategy: DecompositionStrategy) -> None:
         """Update strategy information in memory."""
@@ -1074,11 +1082,12 @@ class TaskDecomposerV03(V03Agent):
             "subtask_template": strategy.subtask_template
         }
 
-        await self.memory.remember_long_term(
-            f"decomposition_strategy: {json.dumps(strategy_data)}",
-            tags=["strategy", "learning", strategy.name],
-            importance=0.9
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"decomposition_strategy: {json.dumps(strategy_data)}",
+                tags=["strategy", "learning", strategy.name],
+                importance=0.9
+            )
 
     async def learn_from_execution(self, feedback: ExecutionFeedback) -> None:
         """Learn from execution feedback to improve future decompositions."""
@@ -1095,11 +1104,12 @@ class TaskDecomposerV03(V03Agent):
         )
 
         # Store feedback as learning experience
-        await self.memory.remember_long_term(
-            f"execution_feedback: {json.dumps(asdict(feedback))}",
-            tags=["feedback", "learning", "execution"],
-            importance=0.9
-        )
+        if self.memory:
+            await self.memory.remember_long_term(
+                f"execution_feedback: {json.dumps(asdict(feedback))}",
+                tags=["feedback", "learning", "execution"],
+                importance=0.9
+            )
 
         # Learn from specific aspects
         await self._learn_from_bottlenecks(feedback.bottlenecks)
@@ -1108,10 +1118,13 @@ class TaskDecomposerV03(V03Agent):
 
         # Update relevant strategies
         strategy_name = None
-        decomposition_memories = await self.memory.recall_memories(
-            memory_types=["long_term"],
-            limit=10
-        )
+        if self.memory:
+            decomposition_memories = await self.memory.recall_memories(
+                memory_type="semantic",
+                limit=10
+            )
+        else:
+            decomposition_memories = []
 
         for memory in decomposition_memories:
             if feedback.decomposition_id in memory.get('content', ''):
@@ -1135,33 +1148,36 @@ class TaskDecomposerV03(V03Agent):
 
     async def _learn_from_bottlenecks(self, bottlenecks: List[str]) -> None:
         """Learn patterns from identified bottlenecks."""
-        for bottleneck in bottlenecks:
-            await self.memory.remember_long_term(
-                f"bottleneck_pattern: {bottleneck}",
-                tags=["bottleneck", "learning", "optimization"],
-                importance=0.8
-            )
+        if self.memory:
+            for bottleneck in bottlenecks:
+                await self.memory.remember_long_term(
+                    f"bottleneck_pattern: {bottleneck}",
+                    tags=["bottleneck", "learning", "optimization"],
+                    importance=0.8
+                )
 
     async def _learn_from_improvements(self, improvements: List[str]) -> None:
         """Learn patterns from successful improvements."""
-        for improvement in improvements:
-            await self.memory.remember_long_term(
-                f"improvement_pattern: {improvement}",
-                tags=["improvement", "learning", "optimization"],
-                importance=0.7
-            )
+        if self.memory:
+            for improvement in improvements:
+                await self.memory.remember_long_term(
+                    f"improvement_pattern: {improvement}",
+                    tags=["improvement", "learning", "optimization"],
+                    importance=0.7
+                )
 
     async def _update_agent_performance_knowledge(
         self,
         agent_performance: Dict[str, float]
     ) -> None:
         """Update knowledge about agent performance for different task types."""
-        for agent_type, performance in agent_performance.items():
-            await self.memory.remember_long_term(
-                f"agent_performance: {agent_type} scored {performance:.2f}",
-                tags=["agent_performance", agent_type, "learning"],
-                importance=0.6
-            )
+        if self.memory:
+            for agent_type, performance in agent_performance.items():
+                await self.memory.remember_long_term(
+                    f"agent_performance: {agent_type} scored {performance:.2f}",
+                    tags=["agent_performance", agent_type, "learning"],
+                    importance=0.6
+                )
 
     async def _update_strategy_performance(
         self,
@@ -1205,10 +1221,13 @@ class TaskDecomposerV03(V03Agent):
             }
 
         # Get recent learning
-        recent_memories = await self.memory.recall_memories(
-            memory_types=["long_term"],
-            limit=20
-        )
+        if self.memory:
+            recent_memories = await self.memory.recall_memories(
+                memory_type="semantic",
+                limit=20
+            )
+        else:
+            recent_memories = []
 
         learning_insights = []
         for memory in recent_memories:

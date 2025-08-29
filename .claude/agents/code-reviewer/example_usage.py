@@ -23,6 +23,7 @@ async def example_basic_review():
 
     # Create reviewer agent
     reviewer = CodeReviewerV03()
+    test_files = []  # Initialize before try block
 
     try:
         # Initialize with memory system (would connect to actual MCP in production)

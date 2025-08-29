@@ -8,11 +8,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# Add paths
-sys.path.insert(0, str(Path(__file__).parent / ".claude"))
-
 # Import SQLite backend directly
-from services.memory.sqlite_memory_backend import SQLiteMemoryBackend
+from claude.services.memory.sqlite_memory_backend import SQLiteMemoryBackend
 
 
 class DirectMemoryInterface:

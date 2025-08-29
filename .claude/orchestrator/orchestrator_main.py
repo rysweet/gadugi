@@ -37,13 +37,12 @@ except ImportError:
     from components.prompt_generator import PromptGenerator, PromptContext
 
 # Import Enhanced Separation shared modules
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
 try:
-    from github_operations import GitHubOperations  # type: ignore[import]
-    from state_management import StateManager, CheckpointManager  # type: ignore[import]
-    from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
-    from task_tracking import TaskMetrics  # type: ignore[import]
-    from interfaces import AgentConfig, OperationResult  # type: ignore
+    from ..shared.github_operations import GitHubOperations  # type: ignore[import]
+    from ..shared.state_management import StateManager, CheckpointManager  # type: ignore[import]
+    from ..shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
+    from ..shared.task_tracking import TaskMetrics  # type: ignore[import]
+    from ..shared.interfaces import AgentConfig, OperationResult  # type: ignore
 except ImportError as e:
     logging.warning(f"Could not import shared modules: {e}")
     # Fallback definitions for development

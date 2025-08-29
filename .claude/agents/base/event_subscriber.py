@@ -28,6 +28,121 @@ class EventPriority(Enum):
     CRITICAL = "critical"
 
 
+class ReactionType(Enum):
+    """Types of event reactions."""
+    IMMEDIATE = "immediate"
+    THROTTLED = "throttled"
+    DEBOUNCED = "debounced"
+    AGGREGATED = "aggregated"
+    CHAINED = "chained"
+
+
+class FilterOperator(Enum):
+    """Filter operators for custom filters."""
+    EQUALS = "equals"
+    NOT_EQUALS = "not_equals"
+    CONTAINS = "contains"
+    NOT_CONTAINS = "not_contains"
+    GREATER_THAN = "greater_than"
+    LESS_THAN = "less_than"
+    IN = "in"
+    NOT_IN = "not_in"
+    MATCHES = "matches"  # For regex patterns
+
+
+@dataclass
+class CustomFilter:
+    """Custom filter for event patterns."""
+    field: str
+    operator: FilterOperator
+    value: Any
+
+
+@dataclass
+class AgentEvent:
+    """Represents an event from an agent."""
+    event_type: str
+    agent_id: str
+    data: Dict[str, Any]
+    priority: EventPriority = EventPriority.NORMAL
+    tags: List[str] = field(default_factory=list)
+    timestamp: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
+class EventPattern:
+    """Pattern for matching events."""
+    event_types: Optional[Set[str]] = None
+    agent_sources: Optional[Set[str]] = None
+    priorities: Optional[Set[str]] = None
+    tag_patterns: Optional[List[Pattern]] = None
+    custom_filters: Optional[List[CustomFilter]] = None
+    
+    def matches(self, event: AgentEvent) -> bool:
+        """Check if an event matches this pattern."""
+        # Check event type
+        if self.event_types and event.event_type not in self.event_types:
+            return False
+            
+        # Check agent source
+        if self.agent_sources and event.agent_id not in self.agent_sources:
+            return False
+            
+        # Check priority
+        if self.priorities and event.priority.value not in self.priorities:
+            return False
+            
+        # Check tags
+        if self.tag_patterns:
+            if not any(
+                any(pattern.match(tag) for tag in event.tags)
+                for pattern in self.tag_patterns
+            ):
+                return False
+                
+        # Apply custom filters
+        if self.custom_filters:
+            for cf in self.custom_filters:
+                field_value = self._get_nested_field(event.data, cf.field)
+                if not self._evaluate_filter(field_value, cf.operator, cf.value):
+                    return False
+                    
+        return True
+    
+    def _get_nested_field(self, data: Dict[str, Any], field: str) -> Any:
+        """Get a nested field from a dictionary."""
+        parts = field.split('.')
+        value = data
+        for part in parts:
+            if isinstance(value, dict):
+                value = value.get(part)
+            else:
+                return None
+        return value
+    
+    def _evaluate_filter(self, field_value: Any, operator: FilterOperator, value: Any) -> bool:
+        """Evaluate a custom filter."""
+        if operator == FilterOperator.EQUALS:
+            return field_value == value
+        elif operator == FilterOperator.NOT_EQUALS:
+            return field_value != value
+        elif operator == FilterOperator.CONTAINS:
+            return value in str(field_value)
+        elif operator == FilterOperator.NOT_CONTAINS:
+            return value not in str(field_value)
+        elif operator == FilterOperator.GREATER_THAN:
+            return field_value > value
+        elif operator == FilterOperator.LESS_THAN:
+            return field_value < value
+        elif operator == FilterOperator.IN:
+            return field_value in value
+        elif operator == FilterOperator.NOT_IN:
+            return field_value not in value
+        elif operator == FilterOperator.MATCHES:
+            return bool(re.match(value, str(field_value)))
+        return False
+
+
 @dataclass
 class EventFilter:
     """Filter criteria for event subscriptions."""
@@ -139,7 +254,7 @@ class EventSubscriberMixin:
         self._subscription_lock = threading.RLock()
 
         # Event processing
-        self._event_queue: asyncio.Queue = None
+        self._event_queue: Optional[asyncio.Queue] = None
         self._processing_task: Optional[asyncio.Task] = None
         self._shutdown_event = threading.Event()
 
@@ -233,9 +348,9 @@ class EventSubscriberMixin:
 
     def event_handler(
         self,
-        event_type: str = None,
-        priority: EventPriority = None,
-        agent_source: str = None
+        event_type: Optional[str] = None,
+        priority: Optional[EventPriority] = None,
+        agent_source: Optional[str] = None
     ):
         """
         Decorator for registering event handlers.
@@ -272,7 +387,8 @@ class EventSubscriberMixin:
         if self._event_queue is None:
             await self.start_event_processing()
 
-        await self._event_queue.put(event)
+        if self._event_queue is not None:
+            await self._event_queue.put(event)
 
     async def _process_events(self):
         """Main event processing loop."""
@@ -281,10 +397,14 @@ class EventSubscriberMixin:
         while not self._shutdown_event.is_set():
             try:
                 # Wait for event with timeout
-                event = await asyncio.wait_for(
-                    self._event_queue.get(),
-                    timeout=1.0
-                )
+                if self._event_queue is not None:
+                    event = await asyncio.wait_for(
+                        self._event_queue.get(),
+                        timeout=1.0
+                    )
+                else:
+                    await asyncio.sleep(1.0)
+                    continue
 
                 # Process the event
                 await self._handle_event(event)
@@ -374,7 +494,7 @@ class EventSubscriberMixin:
 
                 # Emit reaction event
                 if hasattr(self, '_emit_event'):
-                    await self._emit_event(
+                    await self._emit_event(  # type: ignore[attr-defined]
                         reaction.reaction_event_type,
                         reaction_event.get('data', {})
                     )

@@ -4,50 +4,84 @@ Simple test for Task Decomposer v0.3 Agent
 
 import asyncio
 from datetime import datetime
+from typing import Dict, Any, List, Optional
 from task_decomposer_v03 import TaskDecomposerV03, ExecutionFeedback
+from ...shared.memory_integration import AgentMemoryInterface
 
 
-class MockMemoryInterface:
+class MockMemoryInterface(AgentMemoryInterface):
     """Mock memory interface for testing."""
 
     def __init__(self):
+        # Initialize parent with agent_id
+        super().__init__(agent_id="test_agent", mcp_base_url="http://localhost:8000")
+        # Mock state
         self.memories = []
         self.procedures = []
         self.knowledge = []
         self.whiteboard = {}
         self.current_task = None
+        self._client = None
 
     async def __aenter__(self):
+        # Don't actually create a client in tests
+        self._client = "mock_client"  # type: ignore
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
+        self._client = None
 
-    async def remember_short_term(self, content, tags=None):
+    async def remember_short_term(self, content: str, tags: Optional[List[str]] = None, importance: float = 0.5) -> str:
         self.memories.append({
             'content': content,
             'tags': tags or [],
             'type': 'short_term',
             'timestamp': datetime.now().isoformat()
         })
+        return f"memory_{len(self.memories)}"
 
-    async def remember_long_term(self, content, tags=None, importance=0.5):
+    async def remember_long_term(
+        self,
+        content: str,
+        memory_type: str = "semantic",
+        tags: Optional[List[str]] = None,
+        importance: float = 0.7
+    ) -> str:
         self.memories.append({
             'content': content,
             'tags': tags or [],
             'type': 'long_term',
+            'memory_type': memory_type,
             'importance': importance,
             'timestamp': datetime.now().isoformat()
         })
+        return f"memory_{len(self.memories)}"
 
-    async def recall_memories(self, memory_types=None, limit=10):
+    async def recall_memories(
+        self,
+        memory_type: Optional[str] = None,
+        short_term_only: bool = False,
+        long_term_only: bool = False,
+        limit: int = 50
+    ) -> List[Dict[str, Any]]:
         relevant_memories = []
         for memory in self.memories:
-            if memory_types is None or memory['type'] in memory_types:
-                relevant_memories.append(memory)
+            if short_term_only and memory['type'] != 'short_term':
+                continue
+            if long_term_only and memory['type'] != 'long_term':
+                continue
+            if memory_type and memory.get('memory_type') != memory_type:
+                continue
+            relevant_memories.append(memory)
         return relevant_memories[-limit:]
 
-    async def store_procedure(self, procedure_name, steps, context=""):
+    async def store_procedure(
+        self,
+        procedure_name: str,
+        steps: List[str],
+        context: str = "",
+        tags: Optional[List[str]] = None
+    ) -> str:
         procedure = {
             'procedure_name': procedure_name,
             'steps': steps,
@@ -57,10 +91,20 @@ class MockMemoryInterface:
         self.procedures.append(procedure)
         return f"proc_{len(self.procedures)}"
 
-    async def recall_procedure(self):
+    async def recall_procedure(
+        self,
+        procedure_name: Optional[str] = None,
+        task_type: Optional[str] = None,
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
         return self.procedures
 
-    async def add_knowledge(self, concept, description, confidence=0.7):
+    async def add_knowledge(
+        self,
+        concept: str,
+        description: str,
+        confidence: float = 1.0
+    ) -> str:
         knowledge = {
             'concept': concept,
             'description': description,
@@ -70,14 +114,19 @@ class MockMemoryInterface:
         self.knowledge.append(knowledge)
         return f"knowledge_{len(self.knowledge)}"
 
-    async def start_task(self, task_description):
+    async def start_task(self, task_description: str) -> str:
         self.current_task = {
             'description': task_description,
             'start_time': datetime.now().isoformat()
         }
+        return "task_001"
 
-    async def write_to_whiteboard(self, key, value):
-        self.whiteboard[key] = value
+    async def write_to_whiteboard(
+        self,
+        section: str,
+        content: Dict[str, Any]
+    ) -> None:
+        self.whiteboard[section] = content
 
 
 async def test_task_decomposer():

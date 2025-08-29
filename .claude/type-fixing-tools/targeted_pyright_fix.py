@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
+from typing import Dict, List
 
 
 def get_pyright_diagnostics() -> Dict:

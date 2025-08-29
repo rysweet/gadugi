@@ -10,7 +10,7 @@ from pathlib import Path
 # Add current directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from whiteboard_collaboration import WhiteboardManager, WhiteboardPermission
+from whiteboard_collaboration import WhiteboardManager, WhiteboardType, AccessLevel
 
 
 async def test_basic_functionality():
@@ -18,38 +18,39 @@ async def test_basic_functionality():
     print("Testing Whiteboard System...")
 
     # Initialize manager
-    manager = WhiteboardManager(db_path=".claude/data/test_whiteboards.db")
+    manager = WhiteboardManager()
     await manager.initialize()
     print("✅ Manager initialized")
 
     # Create whiteboard
-    whiteboard_id = await manager.create_whiteboard(
-        name="Test Whiteboard",
-        created_by="test_agent",
-        template_id="task_coordination"
+    wb = await manager.create_whiteboard(
+        whiteboard_type=WhiteboardType.TASK_COORDINATION,
+        owner_agent="test_agent"
     )
+    whiteboard_id = wb.whiteboard_id
     print(f"✅ Created whiteboard: {whiteboard_id}")
 
     # Get whiteboard
-    wb = await manager.get_whiteboard(whiteboard_id, "test_agent")
+    wb = manager.get_whiteboard(whiteboard_id)
     if wb:
         print("✅ Retrieved whiteboard")
 
         # Write some data
-        await wb.write("test_agent", "test_key", "test_value")
+        await wb.write("test_agent", "test_key", {"value": "test_value"})
         print("✅ Wrote data to whiteboard")
 
         # Read data back
         value = await wb.read("test_agent", "test_key")
         print(f"✅ Read value: {value}")
 
-        # Get info
-        info = await wb.get_info("test_agent")
-        print(f"✅ Whiteboard info: {info['statistics']['total_changes']} changes")
+        # Get stats
+        stats = wb.get_stats()
+        print(f"✅ Whiteboard stats: {stats['total_entries']} entries")
 
-        # Get templates
-        templates = await manager.get_templates()
-        print(f"✅ Found {len(templates)} templates")
+        # List all whiteboards
+        # Note: list_whiteboards method doesn't exist, use the internal _whiteboards dict
+        whiteboards = list(manager._whiteboards.keys())
+        print(f"✅ Found {len(whiteboards)} whiteboards")
 
     print("✅ All tests passed!")
 

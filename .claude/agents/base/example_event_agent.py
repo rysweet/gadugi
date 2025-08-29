@@ -8,13 +8,14 @@ for lifecycle management, task tracking, and collaboration.
 
 import asyncio
 from datetime import datetime
+from typing import Optional
 from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome
 
 
 class MyCustomAgent(V03Agent):
     """Example custom agent with event publishing."""
 
-    def __init__(self, agent_id: str = None):
+    def __init__(self, agent_id: Optional[str] = None):
         # Define agent capabilities
         capabilities = AgentCapabilities(
             can_parallelize=True,

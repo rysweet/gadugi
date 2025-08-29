@@ -4,10 +4,18 @@
 import subprocess
 import sys
 from pathlib import Path
+from typing import List, Optional
 
 
-def run_pyright(path: str) -> list[str]:
-    """Run pyright and return errors."""
+def run_pyright(path: str) -> List[str]:
+    """Run pyright and return errors.
+    
+    Args:
+        path: Path to check with pyright
+        
+    Returns:
+        List of output lines from pyright
+    """
     result = subprocess.run(
         ["uv", "run", "pyright", path],
         capture_output=True,
@@ -16,35 +24,29 @@ def run_pyright(path: str) -> list[str]:
     return result.stdout.split("\n")
 
 
-def main():
-    """Main function to check pyright errors."""
-    paths = [
+def main() -> int:
+    """Main function to check pyright errors.
+    
+    Returns:
+        Exit code: 0 if no errors, 1 if errors found
+    """
+    paths: List[str] = [
         ".claude/services/event-router/",
         ".claude/services/mcp/",
         ".claude/agents/recipe-implementation/",
     ]
-<<<<<<< HEAD
-
-=======
     
->>>>>>> feature/gadugi-v0.3-regeneration
-    total_errors = 0
+    total_errors: int = 0
     for path in paths:
         if Path(path).exists():
             print(f"\nChecking {path}...")
-            errors = run_pyright(path)
-            error_count = sum(1 for line in errors if "error:" in line)
+            errors: List[str] = run_pyright(path)
+            error_count: int = sum(1 for line in errors if "error:" in line)
             print(f"  Found {error_count} errors")
             total_errors += error_count
-<<<<<<< HEAD
-
-    print(f"\nTotal errors: {total_errors}")
-
-=======
     
     print(f"\nTotal errors: {total_errors}")
     
->>>>>>> feature/gadugi-v0.3-regeneration
     if total_errors == 0:
         print("✅ All code is pyright clean!")
         return 0
@@ -54,8 +56,4 @@ def main():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     sys.exit(main())
-=======
-    sys.exit(main())
->>>>>>> feature/gadugi-v0.3-regeneration

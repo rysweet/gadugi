@@ -16,22 +16,85 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'shared'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'services', 'memory'))
 
-try:
-    from memory_integration import AgentMemoryInterface
-    from sqlite_memory_backend import SQLiteMemoryBackend
-except ImportError:
-    # Fallback imports with relative paths
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
     try:
-        from ...shared.memory_integration import AgentMemoryInterface
-        from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend
+        from ...shared.memory_integration import AgentMemoryInterface as _AgentMemoryInterfaceType
+        from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend as _SQLiteMemoryBackendType
     except ImportError:
-        # Create mock classes if imports fail
-        class AgentMemoryInterface:
-            def __init__(self, *args, **kwargs):
+        pass
+
+# Create protocol classes for type checking
+@runtime_checkable
+class AgentMemoryInterface(Protocol):
+    def __init__(self, agent_id: str, mcp_base_url: str) -> None:
+        ...
+    async def __aenter__(self) -> 'AgentMemoryInterface':
+        ...
+    async def __aexit__(self, *args: Any) -> None:
+        ...
+    async def remember_long_term(self, content: str, memory_type: str, tags: List[str], importance: float) -> str:
+        ...
+    async def recall_memories(self, limit: int) -> List[Dict[str, Any]]:
+        ...
+
+@runtime_checkable
+class SQLiteMemoryBackend(Protocol):
+    def __init__(self, db_path: str) -> None:
+        ...
+    async def initialize(self) -> None:
+        ...
+    async def store_memory(self, agent_id: str, content: str, memory_type: str, 
+                           task_id: Optional[str], importance_score: float, 
+                           metadata: Dict[str, Any]) -> str:
+        ...
+    async def get_memories(self, agent_id: str, memory_type: Optional[str] = None, 
+                           task_id: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
+        ...
+    async def get_stats(self) -> Dict[str, Any]:
+        ...
+
+# Try to import the actual implementations
+try:
+    from memory_integration import AgentMemoryInterface as _AgentMemoryInterface  # type: ignore
+    from sqlite_memory_backend import SQLiteMemoryBackend as _SQLiteMemoryBackend  # type: ignore
+    AgentMemoryInterfaceImpl = _AgentMemoryInterface
+    SQLiteMemoryBackendImpl = _SQLiteMemoryBackend
+except ImportError:
+    try:
+        from ...shared.memory_integration import AgentMemoryInterface as _AgentMemoryInterface  # type: ignore
+        from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend as _SQLiteMemoryBackend  # type: ignore
+        AgentMemoryInterfaceImpl = _AgentMemoryInterface  # type: ignore
+        SQLiteMemoryBackendImpl = _SQLiteMemoryBackend  # type: ignore
+    except ImportError:
+        # Fallback - create mock implementations
+        class AgentMemoryInterfaceImpl:  # type: ignore
+            def __init__(self, agent_id: str, mcp_base_url: str) -> None:
                 pass
-        class SQLiteMemoryBackend:
-            def __init__(self, *args, **kwargs):
+            async def __aenter__(self) -> Any:
+                return self
+            async def __aexit__(self, *args: Any) -> None:
                 pass
+            async def remember_long_term(self, content: str, memory_type: str, tags: List[str], importance: float) -> str:
+                return "mock-memory-id"
+            async def recall_memories(self, limit: int) -> List[Dict[str, Any]]:
+                return []
+        
+        class SQLiteMemoryBackendImpl:  # type: ignore
+            def __init__(self, db_path: str) -> None:
+                pass
+            async def initialize(self) -> None:
+                pass
+            async def store_memory(self, agent_id: str, content: str, memory_type: str, 
+                                   task_id: Optional[str], importance_score: float, 
+                                   metadata: Dict[str, Any]) -> str:
+                return "mock-memory-id"
+            async def get_memories(self, agent_id: str, memory_type: Optional[str] = None, 
+                                   task_id: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
+                return []
+            async def get_stats(self) -> Dict[str, Any]:
+                return {"total_memories": 0, "memory_types": {}}
 
 from .models import (
     AgentEvent, EventType, EventPriority, EventFilter,
@@ -143,11 +206,12 @@ class MemoryEventStorage:
         """Initialize the storage backend."""
         try:
             # Initialize SQLite backend
-            self.sqlite_backend = SQLiteMemoryBackend(self.sqlite_db_path)
-            await self.sqlite_backend.initialize()
+            self.sqlite_backend = SQLiteMemoryBackendImpl(self.sqlite_db_path)  # type: ignore
+            if hasattr(self.sqlite_backend, 'initialize'):
+                await self.sqlite_backend.initialize()
 
             # Initialize memory interface for high-priority events
-            self.memory_interface = AgentMemoryInterface(
+            self.memory_interface = AgentMemoryInterfaceImpl(  # type: ignore
                 agent_id="event_router_service",
                 mcp_base_url=self.memory_backend_url
             )
@@ -261,7 +325,16 @@ class MemoryEventStorage:
     async def get_events_by_session(self, session_id: str) -> List[AgentEvent]:
         """Get all events for a specific session."""
         event_filter = EventFilter(
-            limit=1000  # High limit for session recovery
+            limit=1000,  # High limit for session recovery
+            event_types=None,
+            agent_ids=None,
+            task_ids=None,
+            project_ids=None,
+            priority=None,
+            tags=None,
+            start_time=None,
+            end_time=None,
+            offset=0
         )
 
         all_events = await self.get_events(event_filter)
@@ -271,7 +344,13 @@ class MemoryEventStorage:
         """Get information about event storage."""
         try:
             if not self.sqlite_backend:
-                return EventStorageInfo(total_events=0)
+                return EventStorageInfo(
+                    total_events=0,
+                    events_by_type={},
+                    oldest_event=None,
+                    newest_event=None,
+                    storage_size_mb=None
+                )
 
             stats = await self.sqlite_backend.get_stats()
 
@@ -285,12 +364,20 @@ class MemoryEventStorage:
             return EventStorageInfo(
                 total_events=stats.get("total_memories", 0),
                 events_by_type=events_by_type,
+                oldest_event=None,
+                newest_event=None,
                 storage_size_mb=None  # Could calculate if needed
             )
 
         except Exception as e:
             logger.error(f"❌ Error getting storage info: {e}")
-            return EventStorageInfo(total_events=0)
+            return EventStorageInfo(
+                total_events=0,
+                events_by_type={},
+                oldest_event=None,
+                newest_event=None,
+                storage_size_mb=None
+            )
 
     async def get_integration_status(self) -> MemoryIntegrationStatus:
         """Get memory system integration status."""
@@ -319,7 +406,10 @@ class MemoryEventStorage:
             logger.error(f"❌ Error getting integration status: {e}")
             return MemoryIntegrationStatus(
                 connected=False,
-                backend_type="error"
+                backend_type="error",
+                last_sync=None,
+                pending_events=0,
+                failed_events=0
             )
 
     async def get_health_status(self) -> Dict[str, Any]:

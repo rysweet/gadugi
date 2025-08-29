@@ -17,9 +17,7 @@ import hashlib
 from pathlib import Path
 
 # Import memory backend
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from services.memory.sqlite_memory_backend import SQLiteMemoryBackend
+from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend
 
 
 class AccessLevel(Enum):
@@ -106,7 +104,7 @@ class SharedWhiteboard:
         """Initialize whiteboard in backend."""
         if not hasattr(self.backend, '_initialized'):
             await self.backend.initialize()
-            self.backend._initialized = True
+            self.backend._initialized = True  # type: ignore[attr-defined]
 
         # Create whiteboard in backend
         await self.backend.create_whiteboard(self.whiteboard_id, self.owner_agent)

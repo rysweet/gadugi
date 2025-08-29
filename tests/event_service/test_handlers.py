@@ -1,5 +1,8 @@
 """Tests for event handlers and filtering."""
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from typing import Any
 from gadugi.event_service.events import (
@@ -135,7 +138,7 @@ class TestEventFilter:
 
         event1 = create_github_event("issues", "owner/repo", "opened")
         event2 = create_local_event("file_changed")
-        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
+        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED)  # type: ignore[arg-type]
 
         assert filter.matches(event1)
         assert filter.matches(event2)
@@ -147,7 +150,7 @@ class TestEventFilter:
 
         event1 = create_github_event("issues", "owner/repo", "opened")
         event2 = create_local_event("file_changed")
-        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
+        event3 = create_agent_event("test-agent", status=TaskStatus.COMPLETED)  # type: ignore[arg-type]
         event4 = create_agent_event("test-agent", status="started")
 
         assert filter.matches(event1)  # github.*
@@ -402,7 +405,7 @@ class TestCommonFilters:
         """Test agent completions filter."""
         filter = CommonFilters.agent_completions()
 
-        event1 = create_agent_event("test-agent", status=TaskStatus.COMPLETED  # type: ignore[arg-type])
+        event1 = create_agent_event("test-agent", status=TaskStatus.COMPLETED)  # type: ignore[arg-type]
         event2 = create_agent_event("test-agent", status="started")
         event3 = create_github_event("issues", "owner/repo", "opened")
 

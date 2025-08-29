@@ -33,24 +33,14 @@ from .prompt_generator import PromptContext, PromptGenerator  # type: ignore
 
 # Import ContainerManager for Docker-based execution (CRITICAL FIX #167)
 try:
-    # Try absolute import first (works when run directly)
-    import sys
-    import os
-    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.insert(0, parent_dir)
-    from container_manager import ContainerManager, ContainerConfig, ContainerResult
+    from ..container_manager import ContainerManager, ContainerConfig, ContainerResult
     CONTAINER_EXECUTION_AVAILABLE = True
 except ImportError:
-    try:
-        # Fallback to relative import (works when imported as module)
-        from ..container_manager import ContainerManager, ContainerConfig, ContainerResult
-        CONTAINER_EXECUTION_AVAILABLE = True
-    except ImportError:
-        logging.warning("ContainerManager not available - falling back to subprocess execution")
-        CONTAINER_EXECUTION_AVAILABLE = False
-        ContainerManager = None
-        ContainerConfig = None
-        ContainerResult = None
+    logging.warning("ContainerManager not available - falling back to subprocess execution")
+    CONTAINER_EXECUTION_AVAILABLE = False
+    ContainerManager = None
+    ContainerConfig = None
+    ContainerResult = None
 
 # Security: Define strict resource limits
 MAX_CONCURRENT_TASKS = 8

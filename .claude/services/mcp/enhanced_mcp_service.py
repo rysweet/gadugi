@@ -19,7 +19,7 @@ import uvicorn
 import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent / "neo4j-memory"))
-from memory_manager import (
+from memory_manager import (  # type: ignore[import]
     MemoryManager, Memory, MemoryType, MemoryScope, 
     MemoryPersistence, KnowledgeNode, Whiteboard
 )
@@ -155,7 +155,8 @@ async def startup_event():
     """Initialize the memory manager on startup."""
     global memory_manager
     memory_manager = MemoryManager()
-    await memory_manager.connect()
+    if memory_manager:
+        await memory_manager.connect()
     
     # Start background task for memory cleanup
     asyncio.create_task(periodic_memory_cleanup())

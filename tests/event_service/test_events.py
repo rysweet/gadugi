@@ -2,6 +2,10 @@
 
 import json
 
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
 from gadugi.event_service.events import (
     Event,
     GitHubEvent,
@@ -83,7 +87,7 @@ class TestAgentEvent:
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",
-            status=TaskStatus.COMPLETED  # type: ignore[arg-type],
+            status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
             message="Task completed successfully",
             context={"branch": "feature/test"},
         )
@@ -298,7 +302,7 @@ class TestEventCreators:
             agent_name="workflow-manager",
             task_id="task-123",
             phase="implementation",
-            status=TaskStatus.COMPLETED  # type: ignore[arg-type],
+            status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
             message="Task done",
             context={"branch": "feature/test"},
             custom_field="custom_value",

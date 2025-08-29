@@ -30,16 +30,10 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
-# Import shared modules with absolute path resolution
-import sys
-import os
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "shared"))
-
 # Import available shared module components
-from interfaces import AgentConfig, OperationResult  # type: ignore
-from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
-from state_management import StateManager  # type: ignore
+from ....shared.interfaces import AgentConfig, OperationResult  # type: ignore
+from ....shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+from ....shared.state_management import StateManager  # type: ignore
 
 # Define missing classes locally
 TaskResult = OperationResult
