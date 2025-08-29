@@ -1,5 +1,5 @@
 {
-  "enforcement_level": "warning",
+  "enforcement_level": "strict",
   "auto_redirect": true,
   "log_violations": true,
   "log_compliant": true,

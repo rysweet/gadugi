@@ -338,7 +338,7 @@ recover_neo4j_service() {
 ## Environment Variables
 
 ### Configuration
-- `NEO4J_AUTH` - Authentication (default: neo4j/changeme)
+- `NEO4J_AUTH` - Authentication (default: read from environment, never hardcode)
 - `NEO4J_PAGECACHE_SIZE` - Page cache size (default: 1G)
 - `NEO4J_HEAP_INITIAL_SIZE` - Initial heap (default: 1G)
 - `NEO4J_HEAP_MAX_SIZE` - Max heap (default: 2G)
