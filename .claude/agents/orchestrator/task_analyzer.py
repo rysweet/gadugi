@@ -4,7 +4,7 @@ import ast
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import   # type: ignore
+from pathlib import Path  # type: ignore
 from typing import Any, Dict, List, Optional, Set, Tuple  # type: ignore
 
 logger = logging.getLogger(__name__)
