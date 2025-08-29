@@ -521,7 +521,10 @@ class MarkdownMemoryBackend(MemoryBackend):
             return []
     
     async def _save_memories_to_file(self, file_path: Path, memories: List[Memory]) -> None:
-        """Save memories to a markdown file."""
+        """Save memories to a markdown file using atomic operations."""
+        import tempfile
+        import os
+        
         try:
             content = f"# Memory Storage\n\nGenerated: {datetime.now().isoformat()}\n\n"
             
@@ -536,8 +539,29 @@ class MarkdownMemoryBackend(MemoryBackend):
                 content += "\n```\n\n"
             
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            file_path.write_text(content, encoding='utf-8')
+            
+            # Write to temporary file first, then rename atomically
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=file_path.parent,
+                delete=False,
+                prefix='.tmp_',
+                suffix='.md'
+            ) as tmp_file:
+                tmp_file.write(content)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename operation
+            os.replace(tmp_path, str(file_path))
+            
         except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
             logger.error(f"Failed to save memories to {file_path}: {e}")
             raise
     
@@ -821,10 +845,33 @@ class MarkdownMemoryBackend(MemoryBackend):
         
         nodes.append(node)
         
-        # Save back
-        knowledge_path.write_text(
-            json.dumps([node.to_dict() for node in nodes], indent=2)
-        )
+        # Save back with atomic operation
+        import tempfile
+        import os
+        
+        try:
+            # Write to temporary file first
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=knowledge_path.parent,
+                delete=False,
+                prefix='.tmp_',
+                suffix='.json'
+            ) as tmp_file:
+                json.dump([node.to_dict() for node in nodes], tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename
+            os.replace(tmp_path, str(knowledge_path))
+        except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
+            raise
         
         return node
     
@@ -856,7 +903,34 @@ class MarkdownMemoryBackend(MemoryBackend):
         }
         
         links.append(link)
-        links_path.write_text(json.dumps(links, indent=2))
+        
+        # Save with atomic operation
+        import tempfile
+        import os
+        
+        try:
+            # Write to temporary file first
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=links_path.parent,
+                delete=False,
+                prefix='.tmp_',
+                suffix='.json'
+            ) as tmp_file:
+                json.dump(links, tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename
+            os.replace(tmp_path, str(links_path))
+        except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
+            raise
     
     async def get_knowledge_graph(
         self,
@@ -910,7 +984,34 @@ class MarkdownMemoryBackend(MemoryBackend):
         
         whiteboard_path = self.storage_path / "whiteboards" / f"{task_id}.json"
         whiteboard_path.parent.mkdir(parents=True, exist_ok=True)
-        whiteboard_path.write_text(json.dumps(whiteboard.to_dict(), indent=2))
+        
+        # Save with atomic operation
+        import tempfile
+        import os
+        
+        try:
+            # Write to temporary file first
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=whiteboard_path.parent,
+                delete=False,
+                prefix='.tmp_',
+                suffix='.json'
+            ) as tmp_file:
+                json.dump(whiteboard.to_dict(), tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename
+            os.replace(tmp_path, str(whiteboard_path))
+        except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
+            raise
         
         return whiteboard
     
@@ -948,8 +1049,33 @@ class MarkdownMemoryBackend(MemoryBackend):
         
         whiteboard.updated_at = datetime.now()
         
-        # Save back
-        whiteboard_path.write_text(json.dumps(whiteboard.to_dict(), indent=2))
+        # Save back with atomic operation
+        import tempfile
+        import os
+        
+        try:
+            # Write to temporary file first
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=whiteboard_path.parent,
+                delete=False,
+                prefix='.tmp_',
+                suffix='.json'
+            ) as tmp_file:
+                json.dump(whiteboard.to_dict(), tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename
+            os.replace(tmp_path, str(whiteboard_path))
+        except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
+            raise
     
     async def get_whiteboard(
         self,
@@ -1017,7 +1143,34 @@ class MarkdownMemoryBackend(MemoryBackend):
         }
         
         backup_file = Path(backup_path)
-        backup_file.write_text(json.dumps(backup_data, indent=2))
+        
+        # Save backup with atomic operation
+        import tempfile
+        import os
+        
+        try:
+            # Write to temporary file first
+            with tempfile.NamedTemporaryFile(
+                mode='w',
+                encoding='utf-8',
+                dir=backup_file.parent if backup_file.parent.exists() else Path.cwd(),
+                delete=False,
+                prefix='.tmp_backup_',
+                suffix='.json'
+            ) as tmp_file:
+                json.dump(backup_data, tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            
+            # Atomic rename
+            os.replace(tmp_path, str(backup_file))
+        except Exception as e:
+            # Clean up temp file if it exists
+            if 'tmp_path' in locals():
+                try:
+                    os.unlink(tmp_path)
+                except:
+                    pass
+            raise
         
         return str(backup_file.absolute())
 
@@ -1027,11 +1180,15 @@ class MarkdownMemoryBackend(MemoryBackend):
 # ============================================================================
 
 class SQLiteMemoryBackend(MemoryBackend):
-    """SQLite-based memory backend for reliable local storage."""
+    """SQLite-based memory backend for reliable local storage with connection pooling."""
     
-    def __init__(self, db_path: str = ".memory/memory.db"):
+    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5):
         self.db_path = Path(db_path)
         self.is_connected = False
+        self.pool_size = pool_size
+        self._connection_pool: List[Any] = []
+        self._pool_lock = asyncio.Lock()
+        self._pool_semaphore = asyncio.Semaphore(pool_size)
     
     async def connect(self) -> None:
         """Initialize SQLite database with schema."""
@@ -1065,7 +1222,7 @@ class SQLiteMemoryBackend(MemoryBackend):
                         expires_at TEXT,
                         parent_id TEXT,
                         associations TEXT,
-                        references TEXT,
+                        memory_references TEXT,
                         version INTEGER DEFAULT 1,
                         is_active INTEGER DEFAULT 1
                     )
@@ -1137,7 +1294,16 @@ class SQLiteMemoryBackend(MemoryBackend):
             raise
     
     async def disconnect(self) -> None:
-        """Clean up SQLite resources."""
+        """Clean up SQLite resources and close connection pool."""
+        async with self._pool_lock:
+            # Close all pooled connections
+            while self._connection_pool:
+                conn = self._connection_pool.pop()
+                try:
+                    await conn.close()
+                except Exception as e:
+                    logger.warning(f"Error closing pooled connection: {e}")
+        
         self.is_connected = False
         logger.info("SQLite memory backend disconnected")
     
@@ -1151,6 +1317,37 @@ class SQLiteMemoryBackend(MemoryBackend):
                 return True
         except Exception:
             return False
+    
+    async def _get_connection(self):
+        """Get a connection from the pool or create a new one."""
+        async with self._pool_semaphore:
+            async with self._pool_lock:
+                if self._connection_pool:
+                    return self._connection_pool.pop()
+            
+            # Create new connection if pool was empty
+            conn = await aiosqlite.connect(str(self.db_path))
+            conn.row_factory = aiosqlite.Row
+            return conn
+    
+    async def _return_connection(self, conn):
+        """Return a connection to the pool."""
+        try:
+            # Check if connection is still valid
+            await conn.execute("SELECT 1")
+            
+            async with self._pool_lock:
+                if len(self._connection_pool) < self.pool_size:
+                    self._connection_pool.append(conn)
+                else:
+                    # Pool is full, close the connection
+                    await conn.close()
+        except Exception:
+            # Connection is broken, close it
+            try:
+                await conn.close()
+            except:
+                pass
     
     def _memory_to_row(self, memory: Memory) -> Dict[str, Any]:
         """Convert Memory object to database row."""
@@ -1178,7 +1375,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             'expires_at': memory.expires_at.isoformat() if memory.expires_at else None,
             'parent_id': memory.parent_id,
             'associations': json.dumps(memory.associations),
-            'references': json.dumps(memory.references),
+            'memory_references': json.dumps(memory.references),
             'version': memory.version,
             'is_active': 1 if memory.is_active else 0
         }
@@ -1209,18 +1406,18 @@ class SQLiteMemoryBackend(MemoryBackend):
             expires_at=datetime.fromisoformat(row['expires_at']) if row['expires_at'] else None,
             parent_id=row['parent_id'],
             associations=json.loads(row['associations']) if row['associations'] else [],
-            references=json.loads(row['references']) if row['references'] else [],
+            references=json.loads(row['memory_references']) if row['memory_references'] else [],
             version=row['version'],
             is_active=bool(row['is_active'])
         )
     
     async def store_memory(self, memory: Memory) -> Memory:
-        """Store memory in SQLite."""
+        """Store memory in SQLite using connection pool."""
         if not await self.is_available():
             raise RuntimeError("SQLite backend not available")
         
-        async with aiosqlite.connect(str(self.db_path)) as db:
-            db.row_factory = aiosqlite.Row
+        conn = await self._get_connection()
+        try:
             row_data = self._memory_to_row(memory)
             
             # Use INSERT OR REPLACE to handle updates
@@ -1228,20 +1425,22 @@ class SQLiteMemoryBackend(MemoryBackend):
             columns = ', '.join(row_data.keys())
             query = f"INSERT OR REPLACE INTO memories ({columns}) VALUES ({placeholders})"
             
-            await db.execute(query, list(row_data.values()))
-            await db.commit()
-        
-        logger.debug(f"Stored memory {memory.id} in SQLite backend")
-        return memory
+            await conn.execute(query, list(row_data.values()))
+            await conn.commit()
+            
+            logger.debug(f"Stored memory {memory.id} in SQLite backend")
+            return memory
+        finally:
+            await self._return_connection(conn)
     
     async def get_memory(self, memory_id: str) -> Optional[Memory]:
-        """Get memory by ID."""
+        """Get memory by ID using connection pool."""
         if not await self.is_available():
             raise RuntimeError("SQLite backend not available")
         
-        async with aiosqlite.connect(str(self.db_path)) as db:
-            db.row_factory = aiosqlite.Row
-            cursor = await db.execute(
+        conn = await self._get_connection()
+        try:
+            cursor = await conn.execute(
                 "SELECT * FROM memories WHERE id = ? AND is_active = 1",
                 (memory_id,)
             )
@@ -1249,8 +1448,10 @@ class SQLiteMemoryBackend(MemoryBackend):
             
             if row:
                 return self._row_to_memory(dict(row))
-        
-        return None
+            
+            return None
+        finally:
+            await self._return_connection(conn)
     
     async def get_agent_memories(
         self,
@@ -1260,7 +1461,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         long_term_only: bool = False,
         limit: int = 50
     ) -> List[Memory]:
-        """Get agent memories with filters."""
+        """Get agent memories with filters using connection pool."""
         if not await self.is_available():
             raise RuntimeError("SQLite backend not available")
         
@@ -1281,12 +1482,14 @@ class SQLiteMemoryBackend(MemoryBackend):
         query += " ORDER BY created_at DESC LIMIT ?"
         params.append(limit)
         
-        async with aiosqlite.connect(str(self.db_path)) as db:
-            db.row_factory = aiosqlite.Row
-            cursor = await db.execute(query, params)
+        conn = await self._get_connection()
+        try:
+            cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
             
             return [self._row_to_memory(dict(row)) for row in rows]
+        finally:
+            await self._return_connection(conn)
     
     async def search_memories_by_tags(
         self,
@@ -1294,7 +1497,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         tags: List[str],
         limit: int = 50
     ) -> List[Memory]:
-        """Search memories by tags."""
+        """Search memories by tags using connection pool."""
         if not await self.is_available():
             raise RuntimeError("SQLite backend not available")
         
@@ -1313,12 +1516,14 @@ class SQLiteMemoryBackend(MemoryBackend):
         """
         params.append(limit)
         
-        async with aiosqlite.connect(str(self.db_path)) as db:
-            db.row_factory = aiosqlite.Row
-            cursor = await db.execute(query, params)
+        conn = await self._get_connection()
+        try:
+            cursor = await conn.execute(query, params)
             rows = await cursor.fetchall()
             
             return [self._row_to_memory(dict(row)) for row in rows]
+        finally:
+            await self._return_connection(conn)
     
     async def delete_memory(self, memory_id: str) -> bool:
         """Delete memory (soft delete)."""
@@ -1874,7 +2079,7 @@ class InMemoryBackend(MemoryBackend):
 
 class MemoryFallbackChain(MemoryBackend):
     """
-    Manages automatic fallback between multiple memory backends.
+    Manages automatic fallback between multiple memory backends with rate limiting.
     
     Fallback order:
     1. Neo4j Memory (primary)
@@ -1912,9 +2117,17 @@ class MemoryFallbackChain(MemoryBackend):
         self.backend_health: Dict[int, bool] = {}
         self.last_health_check: Dict[int, datetime] = {}
         self.health_check_interval = timedelta(minutes=5)
+        
+        # Rate limiting for background sync
+        self.sync_rate_limit = self.fallback_config.get('sync_rate_limit', 10)  # Max syncs per second
+        self.sync_semaphore = asyncio.Semaphore(self.sync_rate_limit)
+        self.sync_queue: asyncio.Queue = asyncio.Queue(maxsize=1000)
+        self.sync_task: Optional[asyncio.Task] = None
+        self.last_sync_time = datetime.now()
+        self.sync_interval = timedelta(seconds=1.0 / self.sync_rate_limit)
     
     async def connect(self) -> None:
-        """Connect to the fallback chain."""
+        """Connect to the fallback chain and start background sync."""
         logger.info("Initializing memory fallback chain...")
         
         # Try to connect to all backends
@@ -1931,11 +2144,30 @@ class MemoryFallbackChain(MemoryBackend):
         await self._find_available_backend()
         self.is_connected = True
         
+        # Start background sync task with rate limiting
+        self.sync_task = asyncio.create_task(self._background_sync_worker())
+        
         logger.info(f"Memory fallback chain initialized. Using backend {self.current_backend_index} ({self.backends[self.current_backend_index].__class__.__name__})")
     
     async def disconnect(self) -> None:
-        """Disconnect from all backends."""
+        """Disconnect from all backends and stop background sync."""
         logger.info("Disconnecting memory fallback chain...")
+        
+        # Stop background sync task
+        if self.sync_task and not self.sync_task.done():
+            self.sync_task.cancel()
+            try:
+                await self.sync_task
+            except asyncio.CancelledError:
+                pass
+        
+        # Process remaining sync queue items
+        while not self.sync_queue.empty():
+            try:
+                sync_item = self.sync_queue.get_nowait()
+                await self._perform_sync(sync_item)
+            except:
+                pass
         
         for i, backend in enumerate(self.backends):
             try:
@@ -2029,21 +2261,65 @@ class MemoryFallbackChain(MemoryBackend):
         else:
             raise RuntimeError(f"All memory backends failed for operation: {operation}")
     
-    async def _sync_to_higher_priority_backends(self, memory: Memory) -> None:
-        """Attempt to sync data to higher priority backends when they recover."""
-        current_idx = self.current_backend_index
+    async def _background_sync_worker(self) -> None:
+        """Background worker that processes sync queue with rate limiting."""
+        logger.info("Background sync worker started")
         
-        # Try to sync to higher priority backends (lower index = higher priority)
-        for i in range(current_idx):
+        while self.is_connected:
             try:
-                backend = self.backends[i]
-                if await backend.is_available():
-                    await backend.store_memory(memory)
-                    logger.debug(f"Synced memory {memory.id} to higher priority backend {i}")
-                    self.backend_health[i] = True
+                # Get sync item from queue with timeout
+                sync_item = await asyncio.wait_for(self.sync_queue.get(), timeout=1.0)
+                
+                # Apply rate limiting
+                now = datetime.now()
+                time_since_last_sync = now - self.last_sync_time
+                if time_since_last_sync < self.sync_interval:
+                    sleep_time = (self.sync_interval - time_since_last_sync).total_seconds()
+                    await asyncio.sleep(sleep_time)
+                
+                # Perform sync with semaphore to limit concurrent syncs
+                async with self.sync_semaphore:
+                    await self._perform_sync(sync_item)
+                    self.last_sync_time = datetime.now()
+                    
+            except asyncio.TimeoutError:
+                # No items in queue, continue
+                continue
+            except asyncio.CancelledError:
+                logger.info("Background sync worker cancelled")
+                break
             except Exception as e:
-                logger.debug(f"Failed to sync to backend {i}: {e}")
-                self.backend_health[i] = False
+                logger.error(f"Error in background sync worker: {e}")
+                await asyncio.sleep(1)  # Brief pause on error
+        
+        logger.info("Background sync worker stopped")
+    
+    async def _perform_sync(self, sync_item: Dict[str, Any]) -> None:
+        """Perform the actual sync operation."""
+        if sync_item['type'] == 'memory':
+            memory = sync_item['data']
+            current_idx = self.current_backend_index
+            
+            # Try to sync to higher priority backends (lower index = higher priority)
+            for i in range(current_idx):
+                try:
+                    backend = self.backends[i]
+                    if await backend.is_available():
+                        await backend.store_memory(memory)
+                        logger.debug(f"Synced memory {memory.id} to higher priority backend {i}")
+                        self.backend_health[i] = True
+                except Exception as e:
+                    logger.debug(f"Failed to sync to backend {i}: {e}")
+                    self.backend_health[i] = False
+    
+    async def _sync_to_higher_priority_backends(self, memory: Memory) -> None:
+        """Queue sync to higher priority backends with rate limiting."""
+        try:
+            # Add to sync queue if not full
+            sync_item = {'type': 'memory', 'data': memory}
+            self.sync_queue.put_nowait(sync_item)
+        except asyncio.QueueFull:
+            logger.warning(f"Sync queue is full, skipping sync for memory {memory.id}")
     
     # ========== Implement all MemoryBackend methods with fallback ==========
     
@@ -2319,10 +2595,24 @@ def create_memory_fallback_chain(
     
     Args:
         neo4j_config: Neo4j connection configuration (optional)
+            Example: {
+                'uri': os.environ.get('NEO4J_URI', 'bolt://localhost:7687'),
+                'username': os.environ.get('NEO4J_USERNAME', 'neo4j'),
+                'password': os.environ.get('NEO4J_PASSWORD')  # Never hardcode!
+            }
         fallback_config: Fallback backend configuration (optional)
+            Example: {
+                'sqlite_path': '.memory/memory.db',
+                'markdown_path': '.memory',
+                'sync_rate_limit': 10  # Max syncs per second
+            }
     
     Returns:
         Configured MemoryFallbackChain instance
+    
+    Security Note:
+        NEVER hardcode credentials in configuration. Always use environment
+        variables or secure configuration management systems.
     """
     primary_backend = None
     
