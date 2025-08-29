@@ -101,11 +101,11 @@ def validate_input(self, input):
 
 **⚠️ Your working directory is {output_path}/ ⚠️**
 
-- **Edit tool**: Fix existing files in `{output_path}/src/*.py` and `{output_path}/tests/*.py`
-- **Write tool**: Create any NEW files needed in `{output_path}/`
+- **Edit tool**: Fix existing files in `{output_path}/src/recipe_executor/*.py` and `{output_path}/src/recipe_executor/tests/*.py`
+- **Write tool**: Create any NEW files needed in `{output_path}/src/recipe_executor/`
 - **Read/Grep tools**: Research patterns and validate fixes as needed
 - **Bash tool**: Run tests and validate your fixes
-- **DO NOT modify** `src/recipe_executor/` - that's the reference implementation
+- **DO NOT modify** the original `src/recipe_executor/` - that's the reference implementation outside your working directory
 
 ## MANDATORY FIXES
 For EVERY function in EVERY file:
@@ -123,31 +123,33 @@ Target directory: {output_path}/
 **⚠️ CRITICAL: You MUST use EXACT paths as shown below - no shortcuts! ⚠️**
 
 IMPORTANT - You MUST create/fix files using these EXACT paths:
-- Main source files: {output_path}/src/*.py  
-- Test files: {output_path}/tests/*.py
-- CLI entry: {output_path}/cli.py
+- Main source files: {output_path}/src/recipe_executor/*.py  
+- Test files: {output_path}/src/recipe_executor/tests/*.py
+- CLI entry: {output_path}/src/recipe_executor/cli.py
 - Configuration: {output_path}/pyproject.toml
 
 **MANDATORY FILE CREATION INSTRUCTIONS:**
 
 1. **For NEW files** - Use Write tool with EXACT paths like:
    ```
-   Write tool with file_path: {output_path}/src/__init__.py
-   Write tool with file_path: {output_path}/src/recipe_executor.py
-   Write tool with file_path: {output_path}/src/recipe_model.py
-   Write tool with file_path: {output_path}/tests/test_recipe_executor.py
-   Write tool with file_path: {output_path}/cli.py
+   Write tool with file_path: {output_path}/src/recipe_executor/__init__.py
+   Write tool with file_path: {output_path}/src/recipe_executor/recipe_executor.py
+   Write tool with file_path: {output_path}/src/recipe_executor/recipe_model.py
+   Write tool with file_path: {output_path}/src/recipe_executor/ast_stub_detector.py
+   Write tool with file_path: {output_path}/src/recipe_executor/tests/test_recipe_executor.py
+   Write tool with file_path: {output_path}/src/recipe_executor/cli.py
    Write tool with file_path: {output_path}/pyproject.toml
    ```
 
 2. **DO NOT CREATE FILES IN:**
-   - ❌ `src/recipe_executor/` (wrong - this is the existing source)
+   - ❌ `{output_path}/src/` (wrong - missing recipe_executor subdirectory)
    - ❌ `./` (wrong - this is root directory)
    - ❌ Any path without `{output_path}` prefix
 
 3. **ALWAYS INCLUDE THE FULL PATH:**
-   - ✅ CORRECT: `{output_path}/src/ast_stub_detector.py`
+   - ✅ CORRECT: `{output_path}/src/recipe_executor/ast_stub_detector.py`
    - ❌ WRONG: `ast_stub_detector.py`
    - ❌ WRONG: `src/ast_stub_detector.py`
+   - ❌ WRONG: `{output_path}/src/ast_stub_detector.py`
 
 THIS IS MANDATORY - The build will FAIL if ANY stubs remain or if no files are created!
