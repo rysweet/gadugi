@@ -3,6 +3,7 @@
 ⚠️ **CRITICAL**: This is the refactored, streamlined version optimized for parallel task execution.
 
 🚨 **WORKFLOW ENFORCEMENT ACTIVE**: ALL code changes MUST use orchestrator workflow.
+⛔ **NO EMERGENCY OVERRIDES**: If blocked, FIX THE PROBLEM. Iterate until compliant.
 
 ## 🚀 Default Approach: Parallel Task Execution
 
@@ -17,7 +18,7 @@
 # When given: "Fix all type errors in the codebase"
 # DO THIS (parallel):
 Task 1: Fix .claude/agents errors
-Task 2: Fix tests/ errors  
+Task 2: Fix tests/ errors
 Task 3: Fix .claude/shared errors
 Task 4: Fix orchestrator errors
 # All execute simultaneously
@@ -40,8 +41,9 @@ Fix file 1, then file 2, then file 3...
 
 ### 3. Development Workflow
 **For code changes:**
-- Use orchestrator → WorkflowManager → 13 phases
-- Never edit files directly
+- Use Task tool to hand off to WorkflowManager (orchestrator cannot call subagents)
+- Follow all 11 phases
+- Never edit files directly without workflow
 - Always create worktrees for isolation
 
 ### 4. 🚨 CRITICAL: Workflow Enforcement
@@ -90,8 +92,11 @@ Fix file 1, then file 2, then file 3...
 cat .claude/workflow-enforcement/workflow-reminder.md
 ```
 
-#### Emergency Override:
-Only for critical production issues - requires explicit justification and is logged.
+#### ⛔ NO Emergency Overrides:
+NEVER use emergency overrides. If workflow blocks you:
+1. Fix the underlying problem
+2. Iterate and improve until compliant
+3. Emergency overrides = failure to follow process
 
 ### 5. PR Policy
 - **NEVER merge without explicit user approval**
@@ -139,7 +144,7 @@ cat .claude/instructions/agent-development.md
 ## 🎯 Quick Decision Tree
 
 **🚨 FIRST: Will this modify ANY files?** → ✅ MUST use orchestrator workflow
-**Multiple related tasks?** → Use parallel Task execution  
+**Multiple related tasks?** → Use parallel Task execution
 **Working with Python?** → Check for UV project (`uv.lock` exists)
 **Creating PR?** → Wait for user merge approval
 **Tests failing?** → Load testing-qa.md
@@ -174,3 +179,12 @@ Each task runs in its own Claude subprocess with focused context.
 ---
 *This refactored version is ~100 lines vs 1,100 lines in the original.*
 *Load task-specific instructions only when needed to minimize context usage.*
+
+## 📁 Repository Organization
+
+**KEEP ROOT CLEAN** - Never create files in repository root:
+- Scripts → `.claude/scripts/` or `scripts/`
+- Tests → `tests/`
+- Docs → `docs/` or `.claude/docs/`
+- Services → `.claude/services/`
+- Temp files → `/tmp/`
