@@ -191,21 +191,22 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                     
                     # Check for stubs and TODOs
                     if self.enforce_no_stubs:
-                    # Try intelligent detection first (if iteration > 2, use Claude)
-                    if iteration > 2:
-                        try:
-                            logger.info("Using intelligent stub detection with Claude...")
-                            has_stubs, stub_errors = self.intelligent_detector.detect_stubs_with_claude(generated_files)
-                            is_valid = not has_stubs
-                        except Exception as e:
-                            logger.warning(f"Intelligent detection failed: {e}, falling back to regex")
+                        # Try intelligent detection first (if iteration > 2, use Claude)
+                        if iteration > 2:
+                            try:
+                                logger.info("Using intelligent stub detection with Claude...")
+                                has_stubs, stub_errors = self.intelligent_detector.detect_stubs_with_claude(generated_files)
+                                is_valid = not has_stubs
+                            except Exception as e:
+                                logger.warning(f"Intelligent detection failed: {e}, falling back to regex")
+                                is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
+                        else:
+                            # Use basic detection for early iterations (faster)
                             is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
-                    else:
-                        # Use basic detection for early iterations (faster)
-                        is_valid, stub_errors = self.stub_detector.validate_no_stubs(generated_files)
 
                         if not is_valid:
                             all_errors.extend(stub_errors)
+                            stub_errors = stub_errors  # Track separately for reporting
                     
                     # Check if all validations passed
                     if not all_errors:
