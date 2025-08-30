@@ -11,8 +11,8 @@ from unittest.mock import MagicMock
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent / ".gadugi" / "services" / "neo4j-memory"))
-sys.path.append(str(Path(__file__).parent.parent / ".gadugi" / "shared"))
+sys.path.append(str(Path(__file__).parent.parent / ".gadugi" / ".gadugi" / "src" / "services" / "neo4j-memory"))
+sys.path.append(str(Path(__file__).parent.parent / ".gadugi" / ".gadugi" / "src" / "shared"))
 
 try:
     from memory_manager import (  # type: ignore[import-not-found,import]

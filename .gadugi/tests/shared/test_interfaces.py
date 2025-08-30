@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional, Protocol
 import pytest
 
 # Add project root to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
 
 try:
     from shared.interfaces import (  # type: ignore[import]

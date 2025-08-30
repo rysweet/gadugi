@@ -7,9 +7,9 @@ import sys
 import os
 from datetime import datetime
 
-# Import from the proper package structure - we add the project root to path
-# so we can import from .claude package
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Import from the proper package structure - we add the .gadugi/src directory to path
+# so we can import from the reorganized structure
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.gadugi', 'src'))
 
 from shared.github_operations import GitHubOperations
 

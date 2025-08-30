@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 """Test orchestrator governance compliance with Issue #148.
 
@@ -13,8 +13,8 @@ import pytest
 import sys
 import os
 
-# Add claude directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), ".gadugi"))
+# Add .gadugi/src directory to path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), ".gadugi", "src"))
 
 from agents.orchestrator.governance_validator import (  # type: ignore[import-not-found]
     GovernanceValidator,

@@ -33,8 +33,8 @@ import pytest
 # Add project paths
 test_dir = Path(__file__).parent
 project_root = test_dir.parent
-sys.path.insert(0, str(project_root / ".gadugi" / "shared"))
-sys.path.insert(0, str(project_root / ".gadugi" / "agents"))
+sys.path.insert(0, str(project_root / ".gadugi" / ".gadugi" / "src" / "shared"))
+sys.path.insert(0, str(project_root / ".gadugi" / ".gadugi" / "src" / "agents"))
 
 # Import modules under test
 try:

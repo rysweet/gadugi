@@ -21,10 +21,10 @@ import pytest
 
 import sys
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent / ".gadugi" / "src"))
 
 try:
-    from .claude.shared.memory_health import (
+    from shared.memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
         HealthStatus,
@@ -37,8 +37,8 @@ try:
         create_memory_health_monitor,
     )
 except ImportError:
-    # Fallback to direct import
-    from shared.memory_health import (
+    # Try alternate import path
+    from .claude.shared.memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
         HealthStatus,

@@ -25,7 +25,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "shared"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", ".gadugi", "src", "shared"))
 
 from shared.github_operations import GitHubOperations  # type: ignore[import]
 from shared.interfaces import AgentConfig, TaskData, ErrorContext  # type: ignore[import]

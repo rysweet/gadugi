@@ -14,7 +14,7 @@ from datetime import datetime
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "shared"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", ".gadugi", "src", "shared"))
 
 try:
     from shared.task_tracking import (

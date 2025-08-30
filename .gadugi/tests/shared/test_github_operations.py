@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
 
 try:
     from shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]

@@ -1,0 +1,72 @@
+# Docker Compose for Claude Orchestrator Parallel Execution
+# Enables true parallel, containerized execution of multiple WorkflowManager tasks
+version: '3.8'
+
+services:
+  # Base orchestrator service for building the image
+  orchestrator-base:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    image: claude-orchestrator:latest
+    command: ["echo", "Base image built successfully"]
+
+  # Monitoring dashboard service
+  orchestrator-monitor:
+    image: claude-orchestrator:latest
+    container_name: orchestrator-monitor
+    ports:
+      - "8080:8080"  # Monitoring dashboard
+      - "9001:9001"  # WebSocket streaming
+    volumes:
+      - ../monitoring:/workspace/monitoring
+      - ../results:/workspace/results
+    environment:
+      - CLAUDE_MONITOR_MODE=1
+      - WEBSOCKET_PORT=9001
+      - HTTP_PORT=8080
+    command: python /workspace/monitoring/dashboard.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Template service for parallel task execution
+  # This is used as a template - actual services are created dynamically
+  orchestrator-task-template:
+    image: claude-orchestrator:latest
+    profiles: ["template"]  # Don't start by default
+    volumes:
+      - ./worktrees:/workspace
+      - ./results:/results
+    environment:
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - TASK_ID=${TASK_ID:-unknown}
+      - PYTHONUNBUFFERED=1
+    working_dir: /workspace
+    command: ["claude", "--help"]
+    cpu_count: 2.0
+    mem_limit: 4g
+    restart: "no"
+
+networks:
+  default:
+    name: orchestrator-network
+    driver: bridge
+
+volumes:
+  orchestrator-results:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./results
+      o: bind
+
+  orchestrator-monitoring:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./monitoring
+      o: bind

@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 # Import the module under test
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
 
 from workflow_engine import (  # type: ignore[import]
     WorkflowEngine,

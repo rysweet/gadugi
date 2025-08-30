@@ -20,7 +20,7 @@ import pytest
 
 # TYPE_CHECKING imports removed due to conflicts with stub implementations
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src")))
 
 try:
     from shared.state_management import (  # type: ignore[import]

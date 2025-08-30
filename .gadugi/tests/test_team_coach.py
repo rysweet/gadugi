@@ -18,10 +18,10 @@ from datetime import datetime
 import sys
 import os
 
-# Add parent directory to path to import as package
-parent_dir = os.path.join(os.path.dirname(__file__), "..")
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# Add .gadugi/src directory to path to import as package  
+src_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".gadugi", "src")
+if src_dir not in sys.path:
+    sys.path.insert(0, src_dir)
 
 try:
     from agents.teamcoach.team_coach import (  # type: ignore[import]
@@ -31,7 +31,7 @@ try:
     )
 except ImportError:
     # Fallback if package structure is different
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".gadugi", "agents"))
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), ".gadugi", "src", "agents"))
     from teamcoach.team_coach import (  # type: ignore[import]
         TeamCoach,
         SessionMetrics,
