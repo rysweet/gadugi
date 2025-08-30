@@ -47,6 +47,14 @@ error_msg = "Circular dependency detected: recipe-a → recipe-b → recipe-c �
 
 # ✅ FIX:
 error_msg = "Circular dependency detected: recipe-a → recipe-b → recipe-c → recipe-a"
+
+# ❌ IMPORT ERROR - Absolute imports within same package:
+from recipe_executor import parser
+from recipe_executor.parser import RecipeParser
+
+# ✅ FIX - Use relative imports within same package:
+from . import parser
+from .parser import RecipeParser
 ```
 
 ## HOW TO FIX STUB IMPLEMENTATIONS

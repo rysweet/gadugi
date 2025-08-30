@@ -121,6 +121,25 @@ def process_recipe(self, recipe_data: dict) -> ProcessedRecipe:
 - MUST use standard {language} project structure
 - MUST use appropriate testing framework for {language}
 
+## Import Convention Requirements
+
+**CRITICAL FOR PYTHON PACKAGES**:
+- MUST use relative imports within the same package (e.g., `from . import module`, `from .module import Class`)
+- NEVER use absolute imports with the package name for internal imports
+- For cross-package imports, use absolute imports
+- Example for a package named `recipe_executor`:
+  ```python
+  # CORRECT - relative imports within package:
+  from . import parser
+  from .parser import RecipeParser
+  from ..utils import helper  # parent package
+  
+  # WRONG - absolute imports within same package:
+  from recipe_executor import parser  # DON'T DO THIS
+  from recipe_executor.parser import RecipeParser  # DON'T DO THIS
+  ```
+- This ensures the package works correctly when installed or run as a module
+
 ## Output Structure
 
 Generate files as specified in the design section.
