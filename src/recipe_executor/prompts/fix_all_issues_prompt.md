@@ -1,10 +1,12 @@
 # Fix ALL Issues for {recipe_name}
 
-## CRITICAL: COMPREHENSIVE FIX REQUIRED
+## CRITICAL: ZERO STUBS REQUIRED - COMPREHENSIVE FIX MANDATORY
+
+**FAILURE WARNING**: The build will FAIL if even ONE stub remains. You MUST fix ALL stubs.
 
 The code has multiple types of issues that MUST ALL be fixed in this iteration:
 - **Syntax Errors**: {syntax_count} files with invalid Python syntax
-- **Stub Implementations**: {stub_count} incomplete implementations  
+- **Stub Implementations**: {stub_count} incomplete implementations **[ZERO TOLERANCE - ALL MUST BE FIXED]**
 - **Quality Issues**: {quality_count} pyright/ruff violations
 
 ## ALL Issues Found

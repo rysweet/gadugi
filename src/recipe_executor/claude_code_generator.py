@@ -131,7 +131,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
             temp_path.mkdir(parents=True, exist_ok=True)
             logger.info(f"Using output directory: {temp_path}")
 
-            max_iterations = 5  # Prevent infinite loops
+            max_iterations = 10  # Increased to ensure zero stubs
             iteration = 0
             all_errors: List[str] = []  # Track ALL errors: syntax, stubs, quality
             syntax_errors: List[str] = []  # Track syntax errors separately
@@ -222,11 +222,23 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                             f"      ⚠️  Iteration {iteration} has {total_issues} issues, requesting fixes..."
                         )
 
+            # CRITICAL: Fail if ANY stubs remain - we require ZERO stubs
+            if stub_errors:
+                error_msg = (
+                    f"FAILED: Code still contains {len(stub_errors)} stubs after {iteration} iterations.\n"
+                    + "Recipe Executor requires ZERO stubs - all functions must be fully implemented.\n"
+                    + f"Syntax errors: {len(syntax_errors)}\n"
+                    + f"Stub errors: {len(stub_errors)}\n"
+                    + "\n".join(stub_errors[:20])  # Show stub errors
+                )
+                logger.error(error_msg)
+                raise ClaudeCodeGenerationError(error_msg)
+            
             if iteration >= max_iterations and all_errors:
                 error_msg = (
                     f"Failed to generate clean code after {max_iterations} iterations:\n"
                     + f"Syntax errors: {len(syntax_errors)}\n"
-                    + f"Stub errors: {len(stub_errors)}\n"
+                    + f"Quality errors: {len(all_errors) - len(syntax_errors)}\n"
                     + "\n".join(all_errors[:50])  # Limit error output
                 )
                 raise ClaudeCodeGenerationError(error_msg)
