@@ -30,25 +30,22 @@ Gadugi implements a sophisticated multi-agent architecture with four distinct la
 
 ```mermaid
 graph TD
-    subgraph "🔵 Orchestration Layer"
+    subgraph "🔵 Analysis & Planning Layer"
         direction TB
-        OA[OrchestratorAgent<br/>🎯 Main Coordinator<br/>Parallel execution planning]
         TA[TaskAnalyzer<br/>🧠 Dependency Analysis<br/>Task decomposition]
+        TB[TaskBoundsEval<br/>📏 Scope Assessment<br/>Research needs]
+        TD[TaskDecomposer<br/>🔀 Task Breakdown<br/>Parallelization]
         WM[WorktreeManager<br/>🌿 Environment Isolation<br/>Git worktree lifecycle]
         EM[ExecutionMonitor<br/>📊 Progress Tracking<br/>Parallel monitoring]
-
-        OA --> TA
-        OA --> WM
-        OA --> EM
     end
 
     subgraph "🟢 Implementation Layer"
         direction TB
-        WF[WorkflowManager<br/>⚡ 11-Phase Executor<br/>Complete workflows]
         PW[PromptWriter<br/>📝 Structured Prompts<br/>Template creation]
         TW[TestWriter<br/>🧪 Test Generation<br/>Comprehensive suites]
         TS[TestSolver<br/>🔧 Test Diagnosis<br/>Failure resolution]
         TFA[TypeFixAgent<br/>🔍 Type Resolution<br/>Error correction]
+        TR[TaskResearchAgent<br/>🔬 Solution Research<br/>Technology investigation]
     end
 
     subgraph "🟣 Review Layer"
@@ -68,10 +65,10 @@ graph TD
     end
 
     %% Inter-layer connections
-    OA -.-> WF
-    WF -.-> CR
+    TA -.-> PW
+    TD -.-> EM
     CR -.-> CRR
-    WF -.-> MM
+    EM -.-> MM
 
     %% Styling
     classDef orchestration fill:#3498db,stroke:#2980b9,color:#fff,stroke-width:2px
@@ -79,15 +76,15 @@ graph TD
     classDef review fill:#9b59b6,stroke:#8e44ad,color:#fff,stroke-width:2px
     classDef maintenance fill:#e67e22,stroke:#d35400,color:#fff,stroke-width:2px
 
-    class OA,TA,WM,EM orchestration
-    class WF,PW,TW,TS,TFA implementation
+    class TA,TB,TD,WM,EM orchestration
+    class PW,TW,TS,TFA,TR implementation
     class CR,CRR,SDR review
     class PBM,AU,MM,RA,CSU maintenance
 ```
 
 ### Comprehensive Workflow Process
 
-The WorkflowManager orchestrates a complete 11-phase development lifecycle, ensuring consistent quality and delivery:
+Developers follow a complete 13-phase development lifecycle (documented in CLAUDE.md), ensuring consistent quality and delivery:
 
 ```mermaid
 flowchart TD
@@ -151,8 +148,8 @@ flowchart TD
 gadugi/
 ├── .claude/
 │   ├── agents/                     # All agents stored here
-│   │   ├── WorkflowManager.md         # Main workflow orchestrator
-│   │   ├── OrchestratorAgent.md       # Parallel execution coordinator
+│   │   ├── TaskAnalyzer.md            # Task analysis and decomposition
+│   │   ├── TaskDecomposer.md          # Parallel task breakdown
 │   │   ├── CodeReviewer.md            # Code review automation
 │   │   ├── CodeReviewResponse.md     # Review feedback processing
 │   │   ├── PromptWriter.md            # Structured prompt creation
@@ -171,7 +168,7 @@ gadugi/
 │   │   ├── TestSolver.md              # Test failure diagnosis
 │   │   ├── TestWriter.md              # Test suite creation
 │   │   ├── XpiaDefenseAgent.md       # Security protection
-│   │   └── WorkflowManagerPhase9Enforcement.md  # Review enforcement
+│   │   └── XpiaDefenseAgent.md       # Security protection
 │   ├── shared/                     # Shared utilities and modules
 │   ├── docs/                       # Additional documentation
 │   └── templates/                  # Workflow templates
@@ -290,9 +287,9 @@ The agent-manager will handle all necessary configuration updates.
 
 Once installed, invoke agents as needed:
 
-#### Primary Orchestrators
-- `/agent:OrchestratorAgent` - For coordinating multiple parallel workflows
-- `/agent:WorkflowManager` - For complete development workflows (issue → code → PR)
+#### Primary Task Management
+- **Use Task tool with multiple agents** - For parallel execution of independent tasks
+- **Follow 13-phase workflow in CLAUDE.md** - For complete development workflows (issue → code → PR)
 
 #### Specialized Agents
 - `/agent:CodeReviewer` - For comprehensive code reviews
@@ -304,7 +301,7 @@ Gadugi's orchestrator enables efficient parallel execution of multiple independe
 
 ### Parallel Execution Architecture
 
-The orchestrator coordinates multiple WorkflowManager instances running in isolated git worktrees, enabling true parallel development:
+The Task tool enables spawning multiple Claude instances running in isolated git worktrees, enabling true parallel development:
 
 ```
 🎯 Orchestrator
@@ -359,11 +356,9 @@ To execute multiple tasks in parallel:
    echo "Clean up old worktrees" > prompts/cleanup.md
    ```
 
-2. **Invoke the orchestrator**:
+2. **Use the Task tool for parallel execution**:
    ```
-   /agent:OrchestratorAgent
-
-   Execute the following tasks in parallel:
+   Use the Task tool to execute the following in parallel:
    - prompts/fix-pyright.md
    - prompts/TeamCoach.md
    - prompts/cleanup.md
@@ -384,7 +379,7 @@ To execute multiple tasks in parallel:
 ### Governance and Quality Assurance
 
 All parallel executions maintain strict quality standards:
-- **Mandatory WorkflowManager delegation** (Issue #148 compliance)
+- **Mandatory 13-phase workflow compliance** (documented in CLAUDE.md)
 - **All 11 workflow phases executed** for each task
 - **Quality gates enforced** (pyright, ruff, pytest must pass)
 - **Code review invocation** (Phase 9) for every PR
@@ -798,17 +793,17 @@ See [LLM Proxy Documentation](.claude/services/llm-proxy/README.md) for detailed
 - **WorkflowManager** → Main workflow orchestrator that invokes specialized agents as needed
 
 ### Agent Dependencies
-- **OrchestratorAgent** uses:
+- **Parallel execution** requires:
   - **TaskAnalyzer** - To analyze dependencies and plan parallel execution
   - **WorktreeManager** - To create isolated development environments
   - **ExecutionMonitor** - To track progress of parallel executions
-- **WorkflowManager** integrates with:
+- **Workflow execution** integrates:
   - **CodeReviewer** - For automated code review (Phase 9)
   - **MemoryManager** - For state persistence and GitHub sync
   - **PrBacklogManager** - For PR lifecycle management
 - **TeamCoach** provides optimization for:
-  - **OrchestratorAgent** - Performance analytics and team coordination
-  - **WorkflowManager** - Intelligent task assignment and coaching
+  - **Parallel execution** - Performance analytics and team coordination
+  - **Workflow processes** - Intelligent task assignment and coaching
 
 ### Usage Patterns
 - **For multiple related tasks**: Use **OrchestratorAgent** to coordinate parallel **WorkflowManager** instances

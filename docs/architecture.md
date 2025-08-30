@@ -24,7 +24,7 @@ Mandatory testing and review phases ensure code quality before merging.
 
 **Purpose**: Coordinate and manage parallel execution of tasks
 
-- **OrchestratorAgent**: Main coordinator for parallel task execution
+- **Task Tool**: Enables parallel task execution via multiple Claude instances
 - **TaskAnalyzer**: Analyzes task dependencies and parallelization opportunities
 - **WorktreeManager**: Creates and manages isolated git environments
 - **ExecutionMonitor**: Tracks progress of parallel executions
@@ -33,7 +33,7 @@ Mandatory testing and review phases ensure code quality before merging.
 
 **Purpose**: Execute actual development work
 
-- **WorkflowManager**: Executes complete 11-phase development workflows
+- **13-Phase Workflow**: Complete development lifecycle (documented in CLAUDE.md)
 - **PromptWriter**: Creates structured prompts for complex tasks
 - **TestWriter**: Generates comprehensive test suites
 - **TestSolver**: Diagnoses and fixes failing tests
@@ -210,7 +210,7 @@ Task description and requirements
 4. Add to appropriate layer
 
 ### Custom Workflows
-- Extend WorkflowManager phases
+- Extend the 13-phase workflow as needed
 - Add domain-specific quality gates
 - Integrate with external systems
 

@@ -89,10 +89,9 @@ Create or update `.claude/settings.json`:
 gh issue create --title "Fix import error in module X" --body "Description of the bug"
 ```
 
-2. **Invoke the workflow manager**:
+2. **Follow the 13-phase workflow**:
 ```
-/agent:WorkflowManager
-
+Follow the workflow phases in CLAUDE.md to:
 Fix the import error in module X as described in issue #[number].
 This requires debugging the import statements and ensuring all dependencies are correct.
 ```
@@ -108,12 +107,10 @@ This requires debugging the import statements and ensuring all dependencies are 
 
 ### Example: Parallel Tasks
 
-For multiple independent tasks, use the orchestrator:
+For multiple independent tasks, use parallel execution:
 
 ```
-/agent:OrchestratorAgent
-
-Execute these tasks in parallel:
+Use the Task tool to execute these tasks in parallel:
 - Fix import error in module X
 - Add unit tests for module Y
 - Update documentation for feature Z
@@ -152,11 +149,11 @@ Run the setup verification script:
 | Check linting | `uv run ruff check .` |
 | Create issue | `gh issue create` |
 | List PRs | `gh pr list` |
-| Invoke agent | `/agent:[agent-name]` |
+| Use Task tool | `Task tool with agent name` |
 
 ## Getting Help
 
 - **Documentation**: Browse the `/docs` directory
 - **Issues**: Check [GitHub Issues](https://github.com/rysweet/gadugi/issues)
-- **Agent Help**: Use `/agent:TaskAnalyzer` for task guidance
+- **Task Analysis**: Use TaskAnalyzer agent for task guidance
 - **Memory**: Check `.github/Memory.md` for context

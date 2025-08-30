@@ -42,22 +42,37 @@ Only for critical production issues:
 ## Overview
 These agents are DEPRECATED as of V0.3 migration. They used complex delegation patterns that have been replaced by the simplified executor architecture.
 
-## Deprecated Agents
+## Removed Agents (as of latest update)
 
-### 1. OrchestratorAgent.md
-- **Reason**: Complex delegation to WorkflowManager
-- **Replacement**: Direct orchestration in CLAUDE.md using executors
-- **Migration**: Use execute() calls to coordinate executors
+### 1. OrchestratorAgent.md (REMOVED)
+- **Reason**: Agents can no longer invoke other agents via Task tool
+- **Replacement**: Use Task tool directly for parallel execution
+- **Migration**: Spawn multiple Claude instances via Task tool
 
-### 2. WorkflowManager.md
-- **Reason**: Multi-phase workflow with agent delegation
-- **Replacement**: Direct phase execution in CLAUDE.md
-- **Migration**: Implement phases using executor calls
+### 2. WorkflowManager.md (REMOVED)
+- **Reason**: Agents can no longer invoke other agents
+- **Replacement**: 13-phase workflow integrated into CLAUDE.md
+- **Migration**: Developers follow workflow phases themselves
 
-### 3. WorkflowManagerPhase9Enforcement.md
-- **Reason**: Enforcement via delegation
-- **Replacement**: Direct enforcement in CLAUDE.md
-- **Migration**: Use GitHub executor for PR checks
+### 3. WorkflowManagerPhase9Enforcement.md (REMOVED)
+- **Reason**: Part of WorkflowManager which is now removed
+- **Replacement**: Phase 9 enforcement in CLAUDE.md workflow
+- **Migration**: Follow the review phase in the 13-phase workflow
+
+### 4. WorkflowManagerSimplified.md (REMOVED)
+- **Reason**: Variant of WorkflowManager, no longer needed
+- **Replacement**: 13-phase workflow in CLAUDE.md
+- **Migration**: Follow CLAUDE.md instructions
+
+### 5. .claude/agents/orchestrator/ directory (REMOVED)
+- **Reason**: Agent-based orchestrator no longer viable
+- **Replacement**: Infrastructure remains in .claude/orchestrator/
+- **Migration**: Use orchestrator infrastructure, not agent
+
+### 6. .claude/agents/workflow-manager/ directory (REMOVED)
+- **Reason**: Agent-based workflow manager no longer viable
+- **Replacement**: Workflow instructions in CLAUDE.md
+- **Migration**: Follow 13-phase workflow manually
 
 ### 4. AgentUpdater.md
 - **Reason**: Updates via agent delegation
