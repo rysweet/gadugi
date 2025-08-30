@@ -1,0 +1,11 @@
+{
+  "name": "simple-calculator",
+  "version": "1.0.0",
+  "type": "library",
+  "description": "Simple calculator for testing third generation",
+  "dependencies": [],
+  "python_dependencies": [],
+  "patterns": [],
+  "tags": ["calculator", "test", "simple"],
+  "author": "Recipe Executor Test"
+}

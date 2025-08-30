@@ -160,8 +160,7 @@ class EnhancedRecipeOrchestrator:
         output_dir: Optional[Path] = None,
         dry_run: bool = False,
         verbose: bool = False,
-        force_rebuild: bool = False,
-        self_hosting: bool = False
+        force_rebuild: bool = False
     ) -> PipelineResult:
         """
         Execute a recipe through the complete 10-stage pipeline.
@@ -172,7 +171,6 @@ class EnhancedRecipeOrchestrator:
             dry_run: If True, don't write files
             verbose: Enable verbose logging
             force_rebuild: Force rebuild even if up to date
-            self_hosting: Enable self-hosting mode (regenerating Recipe Executor)
             
         Returns:
             PipelineResult with complete execution information
@@ -271,7 +269,7 @@ class EnhancedRecipeOrchestrator:
                 
                 # Stage 10: Artifact Completeness
                 stage_result = self._execute_stage_10_artifact_check(
-                    recipe, final_artifact, self_hosting
+                    recipe, final_artifact
                 )
                 self.stage_results.append(stage_result)
                 
@@ -594,8 +592,7 @@ class EnhancedRecipeOrchestrator:
     def _execute_stage_10_artifact_check(
         self,
         recipe: Recipe,
-        artifact: Any,
-        self_hosting: bool
+        artifact: Any
     ) -> StageResult:
         """Stage 10: Artifact completeness validation."""
         start_time = time.time()
@@ -604,17 +601,18 @@ class EnhancedRecipeOrchestrator:
         errors: List[str] = []
         data: Dict[str, Any] = {}
         
-        if self_hosting and recipe.name == "recipe-executor":
-            # Special validation for self-hosting
+        # Standard artifact validation for all recipes
+        if recipe.name == "recipe-executor":
+            # Recipe executor is just another recipe - validate like any other
             is_complete, missing = self.component_registry.validate_completeness(
                 artifact.files if artifact and hasattr(artifact, 'files') else {}
             )
             
-            data["self_hosting_complete"] = is_complete
+            data["completeness_check"] = is_complete
             data["missing_components"] = missing
             
             if not is_complete:
-                errors.append(f"Self-hosting incomplete: missing {len(missing)} components")
+                errors.append(f"Recipe incomplete: missing {len(missing)} components")
         
         # General artifact completeness checks
         if artifact and hasattr(artifact, 'files'):
