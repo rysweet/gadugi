@@ -167,5 +167,8 @@
     "type": "git",
     "url": "https://github.com/gadugi/gadugi-vscode-extension"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "claude": "^0.1.1"
+  }
 }

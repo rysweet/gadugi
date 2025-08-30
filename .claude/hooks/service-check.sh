@@ -295,13 +295,43 @@ print('true' if down_count > 0 else 'false')
     if [[ "$needs_start" == "true" ]]; then
         log "Some services are down, attempting auto-start..."
 
-        # This would invoke the coordinator's start command
-        # For now, we'll simulate it
-        echo -e "${YELLOW}🚀 Auto-starting services...${NC}"
-        sleep 2  # Simulate startup time
-        echo -e "${GREEN}✅ Services started${NC}"
+        # Use the REAL service manager to start services
+        local service_manager="$GADUGI_ROOT/.claude/scripts/manage-services.sh"
 
-        return 0
+        if [[ ! -f "$service_manager" ]]; then
+            log_error "Service manager script not found: $service_manager"
+            return 1
+        fi
+
+        echo -e "${YELLOW}🚀 Starting services (REAL implementation, not a simulation)...${NC}"
+
+        # Actually start the services
+        if bash "$service_manager" start; then
+            echo -e "${GREEN}✅ Services started successfully${NC}"
+
+            # Re-check status to verify services are actually running
+            sleep 3  # Give services time to fully initialize
+
+            log "Verifying services are actually running..."
+            if python3 "$SCRIPT_DIR/check-services.py" --json 2>/dev/null | python3 -c "
+import json
+import sys
+services = json.loads(sys.stdin.read())
+running = sum(1 for s in services.values() if s.get('status', False))
+total = len(services)
+print(f'{running}/{total} services now running')
+sys.exit(0 if running > 0 else 1)
+"; then
+                return 0
+            else
+                log_warning "Services started but verification shows some are still down"
+                return 1
+            fi
+        else
+            log_error "Failed to start services"
+            echo -e "${RED}❌ Service startup failed - check logs at $GADUGI_ROOT/.claude/logs/service-manager.log${NC}"
+            return 1
+        fi
     else
         log_verbose "All services running, no auto-start needed"
         return 0

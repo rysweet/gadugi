@@ -5,6 +5,26 @@
 🚨 **WORKFLOW ENFORCEMENT ACTIVE**: ALL code changes MUST use orchestrator workflow.
 ⛔ **NO EMERGENCY OVERRIDES**: If blocked, FIX THE PROBLEM. Iterate until compliant.
 
+## 🚫 ABSOLUTE PROHIBITIONS - ZERO TOLERANCE
+
+**NEVER CREATE:**
+- ❌ **NO PLACEHOLDERS**: No "simulate", "mock", "fake" implementations
+- ❌ **NO STUBS**: Every function must have REAL implementation
+- ❌ **NO TODOs**: Complete ALL functionality before committing
+- ❌ **NO FAKE OPERATIONS**: If it says "start services", it MUST actually start them
+- ❌ **NO SLEEP-AND-PRETEND**: No `sleep 2 && echo "Done"` nonsense
+
+**ENFORCEMENT:**
+- If you can't implement something fully, STOP and ask for help
+- If you need external resources, REQUEST them explicitly
+- If something is complex, BREAK IT DOWN but implement it FULLY
+- Every line of code must DO what it SAYS it does
+
+**VIOLATIONS WILL RESULT IN:**
+- Immediate task failure
+- Required complete reimplementation
+- Loss of user trust
+
 ## 🚀 Default Approach: Parallel Task Execution
 
 **For ANY new task, ALWAYS:**
@@ -25,6 +45,23 @@ Task 4: Fix orchestrator errors
 
 # NOT THIS (sequential):
 Fix file 1, then file 2, then file 3...
+```
+
+## ✅ MANDATORY VERIFICATION
+
+**AFTER IMPLEMENTING ANY FUNCTIONALITY:**
+1. **TEST IT**: Actually run the code and verify it works
+2. **CHECK LOGS**: Ensure operations completed successfully
+3. **VERIFY SIDE EFFECTS**: If starting a service, check it's actually running
+4. **NO ASSUMPTIONS**: Don't assume it works - PROVE it works
+
+**Example Verification Pattern:**
+```bash
+# After implementing service start
+bash manage-services.sh start
+bash manage-services.sh status  # Verify services are ACTUALLY running
+nc -z localhost 7474  # Test actual port connectivity
+docker ps  # Confirm containers are running
 ```
 
 ## 📋 Essential Instructions (ALWAYS Apply)

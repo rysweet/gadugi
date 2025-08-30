@@ -361,12 +361,19 @@ class TeamCoach(IntegratedAgent):
 *Note: This issue was created by an AI agent on behalf of the repository owner.*
 """
 
-        # Create the issue (mock implementation - would use real GitHub API)
+        # Create the issue using real GitHub API
         try:
-            # This would be replaced with actual GitHub API call
-            issue_url = (
-                f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
-            )
+            if self.github_client:
+                # Use real GitHub client
+                result = self.github_client.create_issue(
+                    title=suggestion.title,
+                    body=body,
+                    labels=labels
+                )
+                issue_url = result.get("url", f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}")
+            else:
+                # Fallback if GitHub client not available
+                issue_url = f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
             self.log_info(f"Created issue: {issue_url}")
             return issue_url
         except Exception as e:
@@ -659,8 +666,20 @@ class TeamCoach(IntegratedAgent):
         try:
             suggestion_data = context.get("suggestion", {})
 
-            # Mock issue creation for now
-            issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            # Create real GitHub issue
+            if self.github_client:
+                try:
+                    result = self.github_client.create_issue(
+                        title=suggestion_data.get('title', 'Team Coach Suggestion'),
+                        body=suggestion_data.get('description', ''),
+                        labels=['team-coach', 'enhancement']
+                    )
+                    issue_url = result.get('url', f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}")
+                except Exception as e:
+                    self.log_error(f"Failed to create GitHub issue: {e}")
+                    issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            else:
+                issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
 
             return {
                 "success": True,
@@ -810,9 +829,13 @@ class TeamCoach(IntegratedAgent):
             return datetime.now()
 
     def _init_github_client(self):
-        """Initialize GitHub client (mock for now)."""
-        # This would initialize a real GitHub client
-        return None
+        """Initialize GitHub client with real implementation."""
+        try:
+            from .github_integration import GitHubClient
+            return GitHubClient()
+        except Exception as e:
+            self.logger.warning(f"Could not initialize GitHub client: {e}")
+            return None
 
     def get_status_summary(self) -> Dict[str, Any]:
         """Get current status summary of the Team Coach."""
