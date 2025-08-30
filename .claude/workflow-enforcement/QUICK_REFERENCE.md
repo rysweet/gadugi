@@ -29,12 +29,11 @@ python .claude/orchestrator/main.py --task "your task description"
 .claude/workflow-enforcement/compliance-monitor.py --check
 ```
 
-### Emergency Override (Use Sparingly)
+### NO EMERGENCY OVERRIDES
 ```bash
-# Set emergency override for direct git operations
-export GADUGI_EMERGENCY_OVERRIDE=true
-git commit -m "Critical hotfix - justification here"
-unset GADUGI_EMERGENCY_OVERRIDE  # Always unset after use
+# ⛔ EMERGENCY OVERRIDES ARE STRICTLY FORBIDDEN
+# All code changes MUST go through the orchestrator workflow
+# NO EXCEPTIONS - If blocked, fix the underlying problem
 ```
 
 ## 🎯 Decision Matrix
@@ -70,7 +69,7 @@ unset GADUGI_EMERGENCY_OVERRIDE  # Always unset after use
 
 ### "Pre-commit hook blocked commit"
 - **Cause**: Direct git commit without orchestrator context
-- **Solution**: Use orchestrator workflow or emergency override with justification
+- **Solution**: Use orchestrator workflow - NO EXCEPTIONS
 
 ### "Orchestrator not found"
 - **Cause**: Missing orchestrator setup
@@ -88,27 +87,18 @@ tail -f .claude/workflow-enforcement/workflow_activity.log
 python .claude/workflow-enforcement/workflow-checker.py --report
 ```
 
-### View Emergency Overrides
+## 🚨 NO EMERGENCY PROCEDURES
+
+### All Changes Must Use Workflow
+- **NO EXCEPTIONS**: Every change goes through orchestrator
+- **NO OVERRIDES**: If blocked, fix the problem
+- **NO BYPASSES**: Workflow enforcement is mandatory
+- **If stuck**: Debug and fix the underlying issue
+
+### Proper Workflow Usage
 ```bash
-cat .claude/workflow-enforcement/emergency_overrides.log
-```
-
-## 🚨 Emergency Procedures
-
-### Production Hotfix
-1. Set emergency override: `export GADUGI_EMERGENCY_OVERRIDE=true`
-2. Make minimal changes
-3. Commit with clear justification
-4. Unset override: `unset GADUGI_EMERGENCY_OVERRIDE`
-5. Schedule proper workflow review
-
-### Disable Enforcement Temporarily
-```bash
-# Disable git hooks temporarily
-mv .git/hooks/pre-commit .git/hooks/pre-commit.disabled
-
-# Re-enable when ready
-mv .git/hooks/pre-commit.disabled .git/hooks/pre-commit
+# Always use orchestrator for code changes
+python .claude/orchestrator/main.py --task "your task description"
 ```
 
 ---
