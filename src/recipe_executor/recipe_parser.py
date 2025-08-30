@@ -140,7 +140,7 @@ class RecipeParser:
         )
 
     def _parse_components(self, path: Path) -> Components:
-        """Parse components.json for dependencies."""
+        """Parse components.json and optionally dependencies.json for dependencies."""
         try:
             data = json.loads(path.read_text())
         except json.JSONDecodeError as e:
@@ -153,11 +153,25 @@ class RecipeParser:
         except ValueError:
             component_type = ComponentType.LIBRARY
 
+        # Get dependencies from components.json
+        dependencies = data.get("dependencies", [])
+        
+        # Also check for separate dependencies.json file
+        dependencies_path = path.parent / "dependencies.json"
+        if dependencies_path.exists():
+            try:
+                deps_data = json.loads(dependencies_path.read_text())
+                # Override with dependencies from dependencies.json if it exists
+                dependencies = deps_data.get("dependencies", dependencies)
+            except json.JSONDecodeError:
+                # If dependencies.json is malformed, fall back to components.json
+                pass
+
         return Components(
             name=data.get("name", ""),
             version=data.get("version", "1.0.0"),
             type=component_type,
-            dependencies=data.get("dependencies", []),
+            dependencies=dependencies,
             description=data.get("description", ""),
             metadata=data.get("metadata", {}),
         )
