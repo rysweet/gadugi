@@ -28,13 +28,27 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if current directory is a UV project
-is_uv_project() {
+# Check if host project (root) is a UV project
+is_host_uv_project() {
     if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
         return 0
     else
         return 1
     fi
+}
+
+# Check if Gadugi's UV environment exists
+is_gadugi_uv_project() {
+    if [[ -f ".gadugi/pyproject.toml" && -f ".gadugi/uv.lock" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Legacy compatibility - check current directory
+is_uv_project() {
+    is_host_uv_project
 }
 
 # Check if UV is installed and available

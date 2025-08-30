@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# Gadugi CLI - Wrapper for running Gadugi with isolated UV environment
+# This script ensures Gadugi uses its own dependencies regardless of the host project
+
+set -e
+
+# Get the directory where this script is located (should be in repo root)
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+GADUGI_DIR="$SCRIPT_DIR/.gadugi"
+
+# Check if .gadugi directory exists
+if [[ ! -d "$GADUGI_DIR" ]]; then
+    echo "Error: .gadugi directory not found. Are you in a Gadugi-enabled repository?" >&2
+    exit 1
+fi
+
+# Check if UV is installed
+if ! command -v uv &> /dev/null; then
+    echo "Error: UV is not installed. Please install it first:" >&2
+    echo "  curl -LsSf https://astral.sh/uv/install.sh | sh" >&2
+    exit 1
+fi
+
+# Function to run Python commands in Gadugi's UV environment
+gadugi_python() {
+    cd "$GADUGI_DIR" && uv run python "$@"
+}
+
+# Function to run pytest in Gadugi's UV environment
+gadugi_pytest() {
+    cd "$GADUGI_DIR" && uv run pytest "$@"
+}
+
+# Parse command
+COMMAND="${1:-help}"
+shift || true
+
+case "$COMMAND" in
+    test)
+        echo "Running Gadugi tests in isolated environment..."
+        gadugi_pytest tests/ "$@"
+        ;;
+    
+    orchestrator)
+        echo "Running Gadugi orchestrator..."
+        # Convert relative prompt paths to include .gadugi/ prefix if needed
+        ARGS=()
+        for arg in "$@"; do
+            if [[ -f ".gadugi/prompts/$arg" ]]; then
+                # If the file exists in .gadugi/prompts/, use that path
+                ARGS+=(".gadugi/prompts/$arg")
+            elif [[ -f "$arg" ]]; then
+                # Use the path as-is if it exists
+                ARGS+=("$arg")
+            else
+                # Pass through other arguments unchanged
+                ARGS+=("$arg")
+            fi
+        done
+        gadugi_python "$SCRIPT_DIR/.claude/orchestrator/orchestrator_main.py" "${ARGS[@]}"
+        ;;
+    
+    validate-workflow)
+        echo "Validating workflow compliance..."
+        gadugi_python "$SCRIPT_DIR/.claude/workflow-enforcement/validate-workflow.py" "$@"
+        ;;
+    
+    python)
+        # Direct Python access in Gadugi environment
+        gadugi_python "$@"
+        ;;
+    
+    install)
+        echo "Installing Gadugi dependencies..."
+        cd "$GADUGI_DIR" && uv sync
+        ;;
+    
+    help|--help|-h)
+        cat << EOF
+Gadugi CLI - Multi-agent system for AI-assisted coding
+
+Usage: gadugi <command> [options]
+
+Commands:
+  test [args]           Run Gadugi tests in isolated environment
+  orchestrator [args]   Run the Gadugi orchestrator
+  validate-workflow     Check workflow compliance
+  python [args]         Run Python in Gadugi's environment
+  install               Install/update Gadugi dependencies
+  help                  Show this help message
+
+Environment:
+  Gadugi runs in an isolated UV environment located in .gadugi/
+  This ensures no conflicts with your project's dependencies.
+
+Examples:
+  gadugi test                          # Run all tests
+  gadugi orchestrator prompt.md         # Run orchestrator with prompt
+  gadugi validate-workflow --task "fix bug"  # Check workflow compliance
+  gadugi python -c "import sys; print(sys.path)"  # Check Python environment
+
+EOF
+        ;;
+    
+    *)
+        echo "Unknown command: $COMMAND" >&2
+        echo "Run 'gadugi help' for usage information" >&2
+        exit 1
+        ;;
+esac

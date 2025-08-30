@@ -77,9 +77,10 @@ class TestEnvironmentVariableConfiguration(unittest.TestCase):
 
     def test_env_example_file_exists(self):
         """Verify that .env.example file exists with proper template."""
+        # Since tests are in .gadugi/tests/, go up to .gadugi/ for .env.example
         env_example_path = Path(__file__).parent.parent / ".env.example"
 
-        self.assertTrue(env_example_path.exists(), ".env.example file does not exist")
+        self.assertTrue(env_example_path.exists(), f".env.example file does not exist at {env_example_path}")
 
         # Read and verify content
         with open(env_example_path, "r") as f:
@@ -99,7 +100,8 @@ class TestEnvironmentVariableConfiguration(unittest.TestCase):
 
     def test_docker_compose_uses_env_vars(self):
         """Verify docker-compose files use environment variables."""
-        docker_compose_path = Path(__file__).parent.parent / "docker-compose.yml"
+        # Docker compose is now in .gadugi/docker/
+        docker_compose_path = Path(__file__).parent.parent / "docker" / "docker-compose.yml"
 
         if docker_compose_path.exists():
             with open(docker_compose_path, "r") as f:

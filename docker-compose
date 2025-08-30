@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Docker Compose wrapper for Gadugi
+# Automatically uses the docker-compose.yml in .gadugi/docker/
+
+exec docker-compose -f .gadugi/docker/docker-compose.yml "$@"

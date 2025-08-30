@@ -34,10 +34,17 @@ Fix file 1, then file 2, then file 3...
 - **UPDATE REGULARLY**: After completing significant tasks
 - **COMMIT**: Memory.md changes to preserve context
 
-### 2. UV Python Environment
-**In UV projects (has `pyproject.toml` + `uv.lock`):**
-- ✅ Always: `uv run python`, `uv run pytest`
-- ❌ Never: `python`, `pytest` (without `uv run`)
+### 2. Python Environment Management
+**Two separate environments to consider:**
+
+**Host Project** (root directory):
+- If has `pyproject.toml` + `uv.lock`: Use `uv run` for host project code
+- Otherwise: Use system Python or host's package manager
+
+**Gadugi System** (.gadugi/ directory):
+- Always has its own `pyproject.toml` + `uv.lock` in `.gadugi/`
+- Use `./gadugi` wrapper script or `cd .gadugi && uv run`
+- Completely isolated from host project dependencies
 
 ### 3. Development Workflow - 13-Phase Process
 **For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**

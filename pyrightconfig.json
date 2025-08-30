@@ -1,1 +1,16 @@
-.gadugi/pyrightconfig.json
+{
+  "include": [
+    ".gadugi/**/*.py",
+    ".claude/**/*.py"
+  ],
+  "exclude": [
+    ".gadugi/.venv",
+    ".gadugi/.pytest_cache",
+    ".gadugi/node_modules",
+    "**/__pycache__"
+  ],
+  "pythonVersion": "3.12",
+  "venvPath": ".gadugi",
+  "venv": ".venv",
+  "typeCheckingMode": "standard"
+}
