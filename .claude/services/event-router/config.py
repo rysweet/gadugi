@@ -9,15 +9,18 @@ from typing import Optional, Any, List
 try:
     from pydantic_settings import BaseSettings  # type: ignore[import-untyped]
     from pydantic import Field
+    PYDANTIC_AVAILABLE = True
 except ImportError:
     try:
         from pydantic import BaseSettings, Field  # type: ignore[import-untyped]
+        PYDANTIC_AVAILABLE = True
     except ImportError:
         # Fallback for older versions
         from typing import Any
+        PYDANTIC_AVAILABLE = False
         BaseSettings = object  # type: ignore[misc]
-        def Field(*args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
-            return None
+        def Field(default: Any = None, *args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
+            return default
 
 
 class Settings(BaseSettings):  # type: ignore
@@ -27,9 +30,9 @@ class Settings(BaseSettings):  # type: ignore
     service_name: str = Field(default="event-router", description="Service name")
     service_version: str = Field(default="1.0.0", description="Service version")
 
-    # Server configuration
-    host: str = Field(default="0.0.0.0", description="Server host")
-    port: int = Field(default=8001, description="Server port")
+    # Server configuration - respects environment variables
+    host: str = Field(default="0.0.0.0", description="Server host", env="EVENT_ROUTER_HOST")
+    port: int = Field(default=8000, description="Server port", env="EVENT_ROUTER_PORT")
     debug: bool = Field(default=False, description="Debug mode")
 
     # Memory System Configuration
@@ -135,7 +138,40 @@ class Settings(BaseSettings):  # type: ignore
 
 def get_settings() -> Settings:
     """Get application settings."""
-    return Settings()  # type: ignore
+    if PYDANTIC_AVAILABLE:
+        return Settings()  # type: ignore
+    else:
+        # Create a simple settings object with defaults when pydantic is not available
+        settings = Settings()  # type: ignore
+        settings.service_name = "event-router"
+        settings.service_version = "1.0.0"
+        settings.host = os.environ.get("EVENT_ROUTER_HOST", "0.0.0.0")
+        settings.port = int(os.environ.get("EVENT_ROUTER_PORT", "8000"))
+        settings.debug = os.environ.get("DEBUG", "False").lower() == "true"
+        settings.memory_backend_url = "http://localhost:8000"
+        settings.sqlite_db_path = ".claude/data/events.db"
+        settings.enable_memory_integration = True
+        settings.max_event_cache_size = 1000
+        settings.event_retention_days = 30
+        settings.high_priority_events_to_memory = True
+        settings.max_replay_events = 5000
+        settings.replay_timeout_seconds = 300
+        settings.filter_cache_ttl_minutes = 5
+        settings.max_filter_results = 1000
+        settings.database_url = None
+        settings.redis_url = None
+        settings.enable_redis_cache = False
+        settings.log_level = "INFO"
+        settings.log_file = ".claude/logs/event-router.log"
+        settings.enable_structured_logging = True
+        settings.api_key = None
+        settings.secret_key = "change-me-in-production"
+        settings.cors_origins = ["http://localhost:3000", "http://localhost:8080"]
+        settings.health_check_interval_seconds = 60
+        settings.memory_health_check_enabled = True
+        settings.async_workers = 4
+        settings.batch_size = 100
+        return settings
 
 
 # Flask-specific config class
