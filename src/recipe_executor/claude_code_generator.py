@@ -522,6 +522,106 @@ def another_method(self):
 
         return prompt
 
+    def _create_fix_all_issues_prompt(
+        self,
+        recipe: Recipe,
+        output_path: Path,
+        current_files: Dict[str, str],
+        syntax_errors: List[str],
+        stub_errors: List[str],
+        quality_errors: List[str],
+    ) -> str:
+        """Create a comprehensive prompt to fix ALL issues: syntax, stubs, and quality."""
+        # Use relative path from current directory for Claude
+        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
+        
+        # Prepare comprehensive error summary
+        all_issues = []
+        
+        if syntax_errors:
+            all_issues.append("## CRITICAL: Syntax Errors (MUST FIX FIRST)")
+            all_issues.append("The following files have syntax errors that prevent them from being imported:")
+            for error in syntax_errors[:10]:  # Show first 10
+                all_issues.append(f"  - {error}")
+            if len(syntax_errors) > 10:
+                all_issues.append(f"  ... and {len(syntax_errors) - 10} more syntax errors")
+            all_issues.append("")
+        
+        if stub_errors:
+            all_issues.append("## Stub Implementations (MUST REPLACE)")
+            all_issues.append("The following stub implementations were detected:")
+            for error in stub_errors[:10]:  # Show first 10
+                all_issues.append(f"  - {error}")
+            if len(stub_errors) > 10:
+                all_issues.append(f"  ... and {len(stub_errors) - 10} more stubs")
+            all_issues.append("")
+        
+        if quality_errors:
+            all_issues.append("## Quality Issues (MUST RESOLVE)")
+            all_issues.append("The following quality issues were detected:")
+            for error in quality_errors[:10]:  # Show first 10
+                all_issues.append(f"  - {error}")
+            if len(quality_errors) > 10:
+                all_issues.append(f"  ... and {len(quality_errors) - 10} more quality issues")
+            all_issues.append("")
+        
+        # Prepare variables for prompt template
+        variables = {
+            "recipe_name": recipe.name,
+            "all_issues": chr(10).join(all_issues),
+            "output_path": str(rel_output_path),
+            "requirements": self._format_requirements(recipe.requirements),
+            "design": self._format_design(recipe.design),
+            "syntax_count": str(len(syntax_errors)),
+            "stub_count": str(len(stub_errors)),
+            "quality_count": str(len(quality_errors)),
+        }
+
+        # Check if we have a comprehensive fix template, otherwise use fix_stubs_prompt
+        template_name = "fix_all_issues_prompt"
+        available_templates = self.prompt_loader.list_templates()
+        if template_name not in available_templates:
+            # Fall back to fix_stubs_prompt but modify variables
+            template_name = "fix_stubs_prompt"
+            variables["stub_errors"] = variables["all_issues"]
+        
+        # Use PromptLoader to assemble the prompt with context
+        prompt = self.prompt_loader.assemble_prompt(
+            template_name=template_name,
+            variables=variables,
+            include_context=True,  # Include CRITICAL_GUIDELINES.md
+        )
+        
+        # Add quality enforcement instructions
+        prompt += "\n\n## CRITICAL: Quality Gates MUST Pass\n"
+        prompt += "Your implementation MUST:\n"
+        prompt += "1. Fix ALL syntax errors first - every file must be valid Python\n"
+        prompt += "2. Replace ALL stub implementations with real working code\n"
+        prompt += "3. Pass pyright type checking with ZERO errors\n"
+        prompt += "4. Be formatted with ruff format\n"
+        prompt += "5. Pass ruff check with no linting issues\n"
+        prompt += "\nDO NOT return until ALL issues are resolved. This is iteration focused on FIXING issues.\n"
+        
+        # Add supplementary documentation if available
+        if recipe.metadata.supplementary_docs:
+            supp_docs = [
+                "\n## Additional Context Documentation\n",
+                "The following supplementary documentation provides additional context:\n",
+            ]
+
+            for doc_name, doc_content in recipe.metadata.supplementary_docs.items():
+                supp_docs.extend(
+                    [
+                        f"\n### {doc_name}\n",
+                        doc_content[:1500],  # Include first 1500 chars
+                        "\n",
+                    ]
+                )
+
+            prompt += "\n".join(supp_docs)
+
+        return prompt
+
     def _create_generation_prompt(self, recipe: Recipe, output_path: Optional[Path] = None) -> str:
         """Create a comprehensive prompt for Claude Code from recipe using PromptLoader."""
         from .language_detector import LanguageDetector, Language
