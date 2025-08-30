@@ -225,7 +225,14 @@ class StateManager:
             config: Configuration dictionary
         """
         self.config = config or {}
-        self.state_dir = Path(self.config.get("state_dir", ".github/workflow-states"))
+        # Resolve state_dir relative to the repository root, not current working directory
+        default_state_dir = ".github/workflow-states"
+        if "state_dir" in self.config:
+            self.state_dir = Path(self.config["state_dir"])
+        else:
+            # Find repository root by looking for .git directory
+            repo_root = self._find_repo_root()
+            self.state_dir = repo_root / default_state_dir
         self.backup_enabled = self.config.get("backup_enabled", True)
         self.cleanup_after_days = self.config.get("cleanup_after_days", 30)
         self.max_states_per_task = self.config.get("max_states_per_task", 20)
@@ -233,6 +240,16 @@ class StateManager:
 
         # Ensure state directory exists
         self.state_dir.mkdir(parents=True, exist_ok=True)
+
+    def _find_repo_root(self) -> Path:
+        """Find the repository root directory by looking for .git."""
+        current = Path.cwd().resolve()
+        while current != current.parent:
+            if (current / ".git").exists():
+                return current
+            current = current.parent
+        # Fallback to current directory if .git not found
+        return Path.cwd().resolve()
 
     def _get_state_file(self, task_id: str) -> Path:
         """Get path to state file for task."""
@@ -714,13 +731,19 @@ class CheckpointManager:
 
         # Use default values when StateManager is passed instead of config
         if self.state_manager:
-            self.checkpoint_dir = Path(".github/workflow-checkpoints")
+            # Find repository root and use absolute path
+            repo_root = self._find_repo_root()
+            self.checkpoint_dir = repo_root / ".github/workflow-checkpoints"
             self.max_checkpoints_per_task = 10
             self.compression_enabled = False
         else:
-            self.checkpoint_dir = Path(
-                str(self.config.get("checkpoint_dir", ".github/workflow-checkpoints"))
-            )  # type: ignore
+            # Resolve checkpoint_dir relative to repository root
+            default_checkpoint_dir = ".github/workflow-checkpoints"
+            if "checkpoint_dir" in self.config:
+                self.checkpoint_dir = Path(str(self.config["checkpoint_dir"]))
+            else:
+                repo_root = self._find_repo_root()
+                self.checkpoint_dir = repo_root / default_checkpoint_dir
             self.max_checkpoints_per_task = int(
                 self.config.get("max_checkpoints_per_task", 10)
             )  # type: ignore
@@ -731,6 +754,16 @@ class CheckpointManager:
 
         # Ensure checkpoint directory exists
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    def _find_repo_root(self) -> Path:
+        """Find the repository root directory by looking for .git."""
+        current = Path.cwd().resolve()
+        while current != current.parent:
+            if (current / ".git").exists():
+                return current
+            current = current.parent
+        # Fallback to current directory if .git not found
+        return Path.cwd().resolve()
 
     def create_checkpoint(self, state: TaskState, description: str) -> str:
         """

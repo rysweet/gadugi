@@ -9,11 +9,12 @@ import pytest
 import os
 import json
 import time
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch
 
-# Import the module under test
-
-# sys.path manipulation removed to ensure consistent package imports
+# Add the correct path to src/src directory where shared module is located
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
 
 from shared.phase_enforcer import (
     PhaseEnforcer,

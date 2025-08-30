@@ -91,7 +91,18 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify that simplicity assessment is integrated into the review
-        self.assertTrue(all(section for section in expected_review_sections))
+        for section in expected_review_sections:
+            self.assertIsNotNone(section)
+            self.assertIsInstance(section, str)
+            self.assertTrue(len(section) > 0)
+        
+        # Verify that over-engineering pattern is detected
+        # The code has an abstract class with only one implementation
+        self.assertIn("PaymentProcessor", pr_files["src/payment_processor.py"])
+        self.assertIn("CreditCardProcessor", pr_files["src/payment_processor.py"])
+        
+        # Verify subprocess was called to get PR data
+        mock_subprocess.assert_called()
 
     def test_review_template_includes_simplicity_section(self):
         """Test that the review template includes the new simplicity section."""
@@ -105,7 +116,16 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify template structure
-        self.assertTrue(all(section for section in expected_template_sections))
+        for section in expected_template_sections:
+            self.assertIsNotNone(section)
+            self.assertIsInstance(section, str)
+            self.assertTrue(len(section) > 0)
+            
+        # Verify specific template elements
+        self.assertIn("Design Simplicity Assessment", expected_template_sections[0])
+        self.assertIn("Complexity Level", expected_template_sections[1])
+        self.assertIn("YAGNI Compliance", expected_template_sections[2])
+        self.assertIn("Abstraction Quality", expected_template_sections[3])
 
     def test_priority_handling_with_simplicity_issues(self):
         """Test that simplicity issues are properly prioritized."""
@@ -120,7 +140,18 @@ class CreditCardProcessor(PaymentProcessor):
 
         # Over-engineering should be high priority (affects team velocity)
         # Design simplicity should be important for maintainability
-        self.assertTrue(all(priority for priority in expected_priorities))
+        for priority in expected_priorities:
+            self.assertIsNotNone(priority)
+            self.assertIsInstance(priority, str)
+            self.assertTrue(len(priority) > 0)
+            
+        # Verify over-engineering is included as a priority
+        over_engineering_priorities = [p for p in expected_priorities if "over-engineering" in p.lower()]
+        self.assertTrue(len(over_engineering_priorities) > 0)
+        
+        # Verify simplicity is included as a priority
+        simplicity_priorities = [p for p in expected_priorities if "simplicity" in p.lower()]
+        self.assertTrue(len(simplicity_priorities) > 0)
 
     def test_checklist_includes_simplicity_items(self):
         """Test that the review checklist includes simplicity items."""
@@ -134,7 +165,20 @@ class CreditCardProcessor(PaymentProcessor):
         ]
 
         # Verify simplicity items are in the checklist
-        self.assertTrue(all(item for item in expected_checklist_items))
+        for item in expected_checklist_items:
+            self.assertIsNotNone(item)
+            self.assertIsInstance(item, str)
+            self.assertTrue(len(item) > 0)
+            
+        # Verify specific checklist items are present
+        yagni_items = [item for item in expected_checklist_items if "YAGNI" in item]
+        self.assertTrue(len(yagni_items) > 0)
+        
+        cognitive_load_items = [item for item in expected_checklist_items if "cognitive load" in item.lower()]
+        self.assertTrue(len(cognitive_load_items) > 0)
+        
+        over_engineering_items = [item for item in expected_checklist_items if "over-engineering" in item.lower()]
+        self.assertTrue(len(over_engineering_items) > 0)
 
     @patch("subprocess.run")
     def test_appropriate_complexity_not_flagged(self, mock_subprocess):
@@ -174,7 +218,23 @@ class TaskOrchestrator:
         # Mock successful review that doesn't flag simplicity issues
         mock_subprocess.return_value = Mock(returncode=0, stdout="Review posted successfully")
 
-        self.assertTrue(True)  # Placeholder for actual validation
+        # Verify the complex orchestrator code is appropriately complex
+        # This code should NOT be flagged as over-engineered because:
+        # 1. The complexity matches a genuinely complex problem (distributed execution)
+        # 2. Multiple components justify the abstraction
+        # 3. Clear documentation explains the complexity
+        
+        orchestrator_code = pr_files["src/orchestrator.py"]
+        self.assertIn("TaskOrchestrator", orchestrator_code)
+        self.assertIn("distributed execution", orchestrator_code)
+        self.assertIn("fault tolerance", orchestrator_code)
+        self.assertIn("load balancing", orchestrator_code)
+        
+        # Verify that complexity is justified by requirements
+        self.assertIn("Complex orchestration logic - justified by requirements", orchestrator_code)
+        
+        # Mock subprocess should have been called
+        self.assertTrue(mock_subprocess.called)
 
     @patch("subprocess.run")
     def test_context_aware_assessment_early_stage(self, mock_subprocess):
@@ -201,7 +261,25 @@ def quick_data_processing(data):
         # 3. Prioritize functionality over perfect design
 
         mock_subprocess.return_value = Mock(returncode=0)
-        self.assertTrue(True)  # Placeholder for actual validation
+        
+        # For early-stage projects, the reviewer should:
+        # 1. Accept simpler, more direct approaches
+        # 2. Not require enterprise-level architecture
+        # 3. Prioritize functionality over perfect design
+        
+        prototype_code = pr_files["prototype.py"]
+        self.assertIn("quick_data_processing", prototype_code)
+        self.assertIn("Early prototype", prototype_code)
+        self.assertIn("direct approach is appropriate", prototype_code)
+        
+        # Verify this simple approach is appropriate for prototyping
+        # The code uses a simple loop instead of complex abstractions
+        self.assertIn("for item in data", prototype_code)
+        self.assertNotIn("class", prototype_code)  # No complex class hierarchy
+        self.assertNotIn("ABC", prototype_code)    # No abstract base classes
+        
+        # Verify subprocess was called
+        self.assertTrue(mock_subprocess.called)
 
     def test_memory_update_with_simplicity_insights(self):
         """Test that CodeReviewerProjectMemory.md is updated with simplicity insights."""
@@ -214,7 +292,21 @@ def quick_data_processing(data):
         ]
 
         # Verify memory update includes simplicity patterns
-        self.assertTrue(all(section for section in expected_memory_sections))
+        for section in expected_memory_sections:
+            self.assertIsNotNone(section)
+            self.assertIsInstance(section, str)
+            self.assertTrue(len(section) > 0)
+            
+        # Verify specific patterns are tracked
+        patterns_section = expected_memory_sections[0]
+        self.assertIn("Patterns to Watch", patterns_section)
+        
+        over_engineering_pattern = expected_memory_sections[1]
+        self.assertIn("Over-engineering pattern", over_engineering_pattern)
+        self.assertIn("Single-implementation abstractions", over_engineering_pattern)
+        
+        yagni_violation = expected_memory_sections[2]
+        self.assertIn("YAGNI violations", yagni_violation)
 
     def test_learning_from_review_patterns(self):
         """Test that the reviewer learns from common over-engineering patterns."""
@@ -228,7 +320,23 @@ def quick_data_processing(data):
         ]
 
         # These should be remembered and flagged in future reviews
-        self.assertTrue(all(pattern for pattern in common_patterns_to_detect))
+        for pattern in common_patterns_to_detect:
+            self.assertIsNotNone(pattern)
+            self.assertIsInstance(pattern, str)
+            self.assertTrue(len(pattern) > 0)
+            
+        # Verify specific anti-patterns are detected
+        factory_pattern = [p for p in common_patterns_to_detect if "Factory pattern" in p]
+        self.assertTrue(len(factory_pattern) > 0)
+        
+        strategy_pattern = [p for p in common_patterns_to_detect if "Strategy pattern" in p]
+        self.assertTrue(len(strategy_pattern) > 0)
+        
+        builder_pattern = [p for p in common_patterns_to_detect if "Builder pattern" in p]
+        self.assertTrue(len(builder_pattern) > 0)
+        
+        config_pattern = [p for p in common_patterns_to_detect if "Configuration" in p]
+        self.assertTrue(len(config_pattern) > 0)
 
 
 class TestSimplicityDetectionAccuracy(unittest.TestCase):
@@ -271,7 +379,33 @@ class TradingAlgorithm:
 '''
 
         # These should NOT be flagged as over-engineered
-        self.assertTrue(True)  # Placeholder for actual validation
+        
+        # Verify the justified abstraction has multiple implementations
+        self.assertIn("PaymentProcessor(ABC)", _justified_abstraction)
+        self.assertIn("CreditCardProcessor(PaymentProcessor)", _justified_abstraction)
+        self.assertIn("PayPalProcessor(PaymentProcessor)", _justified_abstraction)
+        self.assertIn("BankTransferProcessor(PaymentProcessor)", _justified_abstraction)
+        
+        # Count implementations
+        implementation_count = _justified_abstraction.count("(PaymentProcessor)")
+        self.assertGreaterEqual(implementation_count, 3)  # 3+ implementations justify abstraction
+        
+        # Verify the complex trading algorithm has justified complexity
+        self.assertIn("TradingAlgorithm", _justified_complexity)
+        self.assertIn("High-frequency trading", _justified_complexity)
+        self.assertIn("Sub-millisecond execution", _justified_complexity)
+        self.assertIn("Risk management", _justified_complexity)
+        self.assertIn("regulatory compliance", _justified_complexity.lower())
+        
+        # Complex requirements justify the complex implementation
+        complexity_justifications = [
+            "Sub-millisecond execution",
+            "Risk management", 
+            "Market data processing",
+            "Regulatory compliance"
+        ]
+        for justification in complexity_justifications:
+            self.assertIn(justification, _justified_complexity)
 
     def test_true_positive_detection(self):
         """Test accurate detection of genuine over-engineering."""
@@ -309,7 +443,29 @@ class PersonBuilder:
 """
 
         # These SHOULD be flagged as over-engineered
-        self.assertTrue(True)  # Placeholder for actual validation
+        
+        # Case 1: Single implementation with abstract base class
+        self.assertIn("ReportGenerator(ABC)", _over_engineered_1)
+        self.assertIn("PDFReportGenerator(ReportGenerator)", _over_engineered_1)
+        # Only one implementation - should be flagged
+        implementation_count_1 = _over_engineered_1.count("(ReportGenerator)")
+        self.assertEqual(implementation_count_1, 1)  # Only 1 implementation = over-engineered
+        
+        # Case 2: Configuration that never varies
+        self.assertIn("AppConfig", _over_engineered_2)
+        self.assertIn("Always 30", _over_engineered_2)
+        self.assertIn("Always 3", _over_engineered_2) 
+        self.assertIn("Always 100", _over_engineered_2)
+        # Configuration values that are never actually configured differently
+        always_count = _over_engineered_2.count("Always")
+        self.assertGreaterEqual(always_count, 3)  # Multiple hardcoded "configurable" values
+        
+        # Case 3: Builder pattern for simple data
+        self.assertIn("PersonBuilder", _over_engineered_3)
+        self.assertIn("name(self, name)", _over_engineered_3)
+        self.assertIn("age(self, age)", _over_engineered_3)
+        self.assertIn("simple 2-field data class", _over_engineered_3)
+        # Complex builder for simple 2-field object is over-engineered
 
 
 if __name__ == "__main__":

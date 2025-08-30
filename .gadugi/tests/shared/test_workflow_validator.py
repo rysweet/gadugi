@@ -9,15 +9,15 @@ import pytest
 import tempfile
 import os
 import json
+import sys
+from pathlib import Path
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-# Import the module under test
-import sys
+# Add the correct path to src/src directory where shared module is located
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
-
-from workflow_validator import (  # type: ignore[import]
+from shared.workflow_validator import (  # type: ignore[import]
     WorkflowValidator,
     ValidationLevel,
     ValidationCategory,
@@ -29,7 +29,7 @@ from workflow_validator import (  # type: ignore[import]
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from workflow_engine import WorkflowPhase, WorkflowState  # type: ignore[import]
+from shared.workflow_engine import WorkflowPhase, WorkflowState  # type: ignore[import]
 
 
 class TestWorkflowValidator:

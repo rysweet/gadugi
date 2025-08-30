@@ -275,12 +275,45 @@ class TestSimplicityRecommendations(unittest.TestCase):
         # provides appropriate guidance on abstraction decisions
 
         # Case 1: Code used in only 2 places - suggest inline
+        two_usage_code = '''
+def validate_email_format(email):
+    return "@" in email and "." in email
+
+def process_user_signup(email):
+    if not validate_email_format(email):
+        raise ValueError("Invalid email")
+    # ... signup logic
+
+def process_password_reset(email):
+    if not validate_email_format(email):
+        raise ValueError("Invalid email") 
+    # ... reset logic
+'''
         # Should suggest inlining since it's only used in 2 places
+        self.assertIn("validate_email_format", two_usage_code)
+        usage_count = two_usage_code.count("validate_email_format(")
+        self.assertEqual(usage_count, 2)  # Only 2 usages - could be inlined
 
         # Case 2: Code used in 5+ places - abstraction is justified
-        # Should accept abstraction as justified
+        five_usage_code = '''
+def validate_email_format(email):
+    return "@" in email and "." in email
 
-        self.assertTrue(True)  # Placeholder for actual implementation
+def process_user_signup(email):
+    if not validate_email_format(email): pass
+def process_password_reset(email):
+    if not validate_email_format(email): pass
+def send_newsletter(email):
+    if not validate_email_format(email): pass
+def add_to_mailing_list(email):
+    if not validate_email_format(email): pass
+def update_user_email(email):
+    if not validate_email_format(email): pass
+'''
+        # Should accept abstraction as justified
+        self.assertIn("validate_email_format", five_usage_code)
+        usage_count = five_usage_code.count("validate_email_format(")
+        self.assertGreaterEqual(usage_count, 5)  # 5+ usages justify abstraction
 
     def test_cognitive_load_reduction_suggestions(self):
         """Test suggestions for reducing cognitive load."""

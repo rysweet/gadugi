@@ -833,11 +833,46 @@ class PRBacklogManager:
 
     def _should_process_pr(self, pr_data: Dict[str, Any]) -> bool:
         """Check if PR should be processed."""
+        # Check for draft PRs
+        if pr_data.get("draft", False):
+            return False
+        
+        # Check for already processed PRs
+        labels = pr_data.get("labels", [])
+        if any(label.get("name") == "ready-seeking-human" for label in labels):
+            return False
+        
+        # Check if PR is too recent
+        from datetime import datetime, timedelta
+        created_at_str = pr_data.get("created_at", "")
+        if created_at_str:
+            try:
+                # Remove trailing Z and parse
+                created_at_str = created_at_str.rstrip("Z")
+                created_at = datetime.fromisoformat(created_at_str)
+                if datetime.now() - created_at < timedelta(minutes=10):
+                    return False
+            except (ValueError, TypeError):
+                pass
+        
         return True
 
     def _prioritize_prs(self, prs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Prioritize PRs for processing."""
-        return prs
+        # Sort by priority labels first, then by age
+        def get_priority(pr):
+            labels = pr.get("labels", [])
+            for label in labels:
+                if label.get("name") == "priority-high":
+                    return 0
+                elif label.get("name") == "priority-medium":
+                    return 1
+                elif label.get("name") == "priority-low":
+                    return 2
+            # Default priority based on age
+            return 3
+        
+        return sorted(prs, key=get_priority)
 
     def _evaluate_readiness_criteria(
         self, pr_data: Dict[str, Any]
@@ -847,6 +882,17 @@ class PRBacklogManager:
 
     def _check_merge_conflicts(self, pr_data: Dict[str, Any]) -> bool:
         """Check for merge conflicts."""
+        mergeable = pr_data.get("mergeable", True)
+        mergeable_state = pr_data.get("mergeable_state", "clean")
+        
+        # None means unknown state
+        if mergeable is None or mergeable_state == "unknown":
+            return False
+        
+        # Check for conflicts
+        if not mergeable or mergeable_state == "dirty":
+            return False
+        
         return True
 
     def _check_ci_status(self, pr_data: Dict[str, Any]) -> bool:

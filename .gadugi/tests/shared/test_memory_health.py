@@ -21,35 +21,21 @@ import pytest
 
 import sys
 
-sys.path.append(str(Path(__file__).parent.parent.parent / ".gadugi" / "src"))
+# Add the correct path to src/src directory where shared module is located
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
 
-try:
-    from shared.memory_health import (
-        MemoryHealthMonitor,
-        MemoryBackendType,
-        HealthStatus,
-        HealthCheckResult,
-        BackendConfig,
-        HealthMonitorConfig,
-        FailoverStrategy,
-        create_default_backends,
-        create_default_config,
-        create_memory_health_monitor,
-    )
-except ImportError:
-    # Try alternate import path
-    from .claude.shared.memory_health import (
-        MemoryHealthMonitor,
-        MemoryBackendType,
-        HealthStatus,
-        HealthCheckResult,
-        BackendConfig,
-        HealthMonitorConfig,
-        FailoverStrategy,
-        create_default_backends,
-        create_default_config,
-        create_memory_health_monitor,
-    )
+from shared.memory_health import (
+    MemoryHealthMonitor,
+    MemoryBackendType,
+    HealthStatus,
+    HealthCheckResult,
+    BackendConfig,
+    HealthMonitorConfig,
+    FailoverStrategy,
+    create_default_backends,
+    create_default_config,
+    create_memory_health_monitor,
+)
 
 
 class TestHealthCheckResults:

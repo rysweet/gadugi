@@ -1,5 +1,3 @@
-from shared.task_tracking import TaskStatus  # type: ignore[import]
-
 """
 Comprehensive tests for state_management.py module.
 Tests the Enhanced Separation architecture implementation for state persistence.
@@ -18,9 +16,10 @@ from typing import Any, Dict, List, Optional, Union
 
 import pytest
 
-# TYPE_CHECKING imports removed due to conflicts with stub implementations
+# Add the correct path to src/src directory where shared module is located
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src")))
+from shared.task_tracking import TaskStatus  # type: ignore[import]
 
 try:
     from shared.state_management import (  # type: ignore[import]
