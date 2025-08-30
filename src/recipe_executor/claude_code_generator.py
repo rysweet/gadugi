@@ -483,8 +483,8 @@ def another_method(self):
         stub_errors: List[str],
     ) -> str:
         """Create a prompt to fix stubs and TODOs in existing code using PromptLoader."""
-        # Use relative path from current directory for Claude
-        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
+        # Use the path as-is for Claude (don't try to make it relative to cwd)
+        rel_output_path = output_path
         
         # Prepare variables for prompt template
         variables = {
@@ -534,8 +534,8 @@ def another_method(self):
         quality_errors: List[str],
     ) -> str:
         """Create a comprehensive prompt to fix ALL issues: syntax, stubs, and quality."""
-        # Use relative path from current directory for Claude
-        rel_output_path = output_path.relative_to(Path.cwd()) if output_path.is_absolute() else output_path
+        # Use the path as-is for Claude (don't try to make it relative to cwd)
+        rel_output_path = output_path
         
         # Prepare comprehensive error summary
         all_issues = []
