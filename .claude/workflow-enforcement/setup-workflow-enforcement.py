@@ -52,19 +52,11 @@ if [[ -z "${{GADUGI_ORCHESTRATOR_ACTIVE}}" && -z "${{ORCHESTRATOR_TASK_ID}}" ]];
     echo "✅ Correct approach:"
     echo "   python .claude/orchestrator/main.py --task 'your changes description'"
     echo ""
-    echo "🔓 Emergency override (use with caution):"
-    echo "   export GADUGI_EMERGENCY_OVERRIDE=true"
-    echo "   git commit -m 'your message' # then unset the variable"
+    echo "⛔ NO EMERGENCY OVERRIDES ALLOWED"
+    echo "   If blocked, fix the underlying problem"
     echo ""
-
-    # Check for emergency override
-    if [[ -n "${{GADUGI_EMERGENCY_OVERRIDE}}" ]]; then
-        echo "⚠️  Emergency override detected - logging violation"
-        echo "$(date): Emergency commit override used" >> {self.enforcement_dir}/emergency_overrides.log
-    else
-        echo "🛑 Commit blocked by workflow enforcement"
-        exit 1
-    fi
+    echo "🛑 Commit blocked by workflow enforcement - NO EXCEPTIONS"
+    exit 1
 fi
 
 echo "✅ Workflow compliance validated"
@@ -90,14 +82,12 @@ COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
 # Log the commit event
 echo "$(date): Commit: $COMMIT_MSG" >> {self.enforcement_dir}/workflow_activity.log
 
-# Check for proper commit message format if not emergency override
-if [[ -z "${{GADUGI_EMERGENCY_OVERRIDE}}" ]]; then
-    # Validate commit message includes workflow context
-    if [[ ! "$COMMIT_MSG" =~ (orchestrator|workflow|phase) ]] && [[ ! "$COMMIT_MSG" =~ ^(fix|feat|docs|style|refactor|test|chore): ]]; then
-        echo "⚠️  Commit message should indicate workflow context or follow conventional format"
-        echo "   Examples: 'feat: add user authentication via orchestrator workflow'"
-        echo "   Or: 'fix: resolve type errors (workflow phase 7)'"
-    fi
+# Always validate commit message format - NO EXCEPTIONS
+# Validate commit message includes workflow context
+if [[ ! "$COMMIT_MSG" =~ (orchestrator|workflow|phase) ]] && [[ ! "$COMMIT_MSG" =~ ^(fix|feat|docs|style|refactor|test|chore): ]]; then
+    echo "⚠️  Commit message should indicate workflow context or follow conventional format"
+    echo "   Examples: 'feat: add user authentication via orchestrator workflow'"
+    echo "   Or: 'fix: resolve type errors (workflow phase 7)'"
 fi
 
 exit 0
@@ -140,9 +130,9 @@ exit 0
                     "weekly_reports": False
                 },
                 "emergency_override": {
-                    "enabled": True,
-                    "require_justification": True,
-                    "log_overrides": True
+                    "enabled": False,
+                    "status": "STRICTLY_FORBIDDEN",
+                    "message": "NO EXCEPTIONS - All changes must use workflow"
                 },
                 "excluded_paths": [
                     ".git/",
@@ -185,7 +175,6 @@ exit 0
             log_files = [
                 "compliance_log.json",
                 "workflow_activity.log",
-                "emergency_overrides.log",
                 "monitoring.log"
             ]
 
@@ -256,14 +245,10 @@ git_with_validation() {{
 
     case "$git_command" in
         "commit"|"add"|"rm"|"mv")
-            if [[ -z "${{GADUGI_ORCHESTRATOR_ACTIVE}}" && -z "${{GADUGI_EMERGENCY_OVERRIDE}}" ]]; then
-                echo "⚠️  Git operation detected without orchestrator context"
-                echo "   Consider using: python .claude/orchestrator/main.py"
-                read -p "Continue anyway? [y/N]: " -n 1 -r
-                echo
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                    return 1
-                fi
+            if [[ -z "${{GADUGI_ORCHESTRATOR_ACTIVE}}" ]]; then
+                echo "❌ Git operation blocked - orchestrator required"
+                echo "   NO EXCEPTIONS: Use python .claude/orchestrator/main.py"
+                return 1
             fi
             ;;
     esac
@@ -340,12 +325,11 @@ python .claude/orchestrator/main.py --task "your task description"
 .claude/workflow-enforcement/compliance-monitor.py --check
 ```
 
-### Emergency Override (Use Sparingly)
+### NO EMERGENCY OVERRIDES
 ```bash
-# Set emergency override for direct git operations
-export GADUGI_EMERGENCY_OVERRIDE=true
-git commit -m "Critical hotfix - justification here"
-unset GADUGI_EMERGENCY_OVERRIDE  # Always unset after use
+# ⛔ EMERGENCY OVERRIDES ARE STRICTLY FORBIDDEN
+# All code changes MUST go through the orchestrator workflow
+# NO EXCEPTIONS - If blocked, fix the underlying problem
 ```
 
 ## 🎯 Decision Matrix
@@ -381,7 +365,7 @@ unset GADUGI_EMERGENCY_OVERRIDE  # Always unset after use
 
 ### "Pre-commit hook blocked commit"
 - **Cause**: Direct git commit without orchestrator context
-- **Solution**: Use orchestrator workflow or emergency override with justification
+- **Solution**: Use orchestrator workflow - NO EXCEPTIONS
 
 ### "Orchestrator not found"
 - **Cause**: Missing orchestrator setup
@@ -399,27 +383,18 @@ tail -f .claude/workflow-enforcement/workflow_activity.log
 python .claude/workflow-enforcement/workflow-checker.py --report
 ```
 
-### View Emergency Overrides
+## 🚨 NO EMERGENCY PROCEDURES
+
+### All Changes Must Use Workflow
+- **NO EXCEPTIONS**: Every change goes through orchestrator
+- **NO OVERRIDES**: If blocked, fix the problem
+- **NO BYPASSES**: Workflow enforcement is mandatory
+- **If stuck**: Debug and fix the underlying issue
+
+### Proper Workflow Usage
 ```bash
-cat .claude/workflow-enforcement/emergency_overrides.log
-```
-
-## 🚨 Emergency Procedures
-
-### Production Hotfix
-1. Set emergency override: `export GADUGI_EMERGENCY_OVERRIDE=true`
-2. Make minimal changes
-3. Commit with clear justification
-4. Unset override: `unset GADUGI_EMERGENCY_OVERRIDE`
-5. Schedule proper workflow review
-
-### Disable Enforcement Temporarily
-```bash
-# Disable git hooks temporarily
-mv .git/hooks/pre-commit .git/hooks/pre-commit.disabled
-
-# Re-enable when ready
-mv .git/hooks/pre-commit.disabled .git/hooks/pre-commit
+# Always use orchestrator for code changes
+python .claude/orchestrator/main.py --task "your task description"
 ```
 
 ---
