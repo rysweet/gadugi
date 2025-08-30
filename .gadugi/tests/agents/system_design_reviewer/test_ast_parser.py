@@ -11,10 +11,10 @@ import os
 import sys
 from pathlib import Path
 
-# Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gadugi"))
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from agents.system_design_reviewer.ast_parser import (
+from src.agents.system_design_reviewer.ast_parser import (
     ASTParserFactory,
     PythonASTParser,
     ArchitecturalElement,

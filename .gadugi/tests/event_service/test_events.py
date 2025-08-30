@@ -5,13 +5,15 @@ import json
 import sys
 import os
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+# Add the src directory to the path
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'src', 'src'))
 
 from event_service.events import (
     Event,
     GitHubEvent,
     LocalEvent,
     AgentEvent,
+    TaskStatus,
     create_github_event,
     create_local_event,
     create_agent_event,
@@ -84,11 +86,11 @@ class TestAgentEvent:
 
     def test_creation(self):
         """Test AgentEvent creation."""
-        event = AgentEvent(  # type: ignore[misc]
+        event = AgentEvent(
             agent_name="WorkflowManager",
             task_id="task-123",
             phase="implementation",
-            status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
+            status=TaskStatus.COMPLETED.value,
             message="Task completed successfully",
             context={"branch": "feature/test"},
         )
@@ -96,7 +98,7 @@ class TestAgentEvent:
         assert event.agent_name == "WorkflowManager"
         assert event.task_id == "task-123"
         assert event.phase == "implementation"
-        assert event is not None  # type: ignore[comparison-overlap] and event.status == "completed"
+        assert event.status == "completed"
         assert event.message == "Task completed successfully"
         assert event.context == {"branch": "feature/test"}
 
@@ -106,7 +108,7 @@ class TestAgentEvent:
         assert event.agent_name == ""
         assert event.task_id == ""
         assert event.phase == ""
-        assert event is not None  # type: ignore[comparison-overlap] and event.status == ""
+        assert event.status == ""
         assert event.message == ""
         assert event.context == {}
 
@@ -187,7 +189,7 @@ class TestEvent:
         assert event.source == "github"
 
         restored_github_event = event.get_github_event()
-        assert restored_github_event is not None  # type: ignore[comparison-overlap]
+        assert restored_github_event is not None
         assert restored_github_event.webhook_event == "issues"
         assert restored_github_event.repository == "owner/repo"
 
@@ -262,7 +264,7 @@ class TestEventCreators:
         assert event.is_github_event()
 
         github_event = event.get_github_event()
-        assert github_event is not None  # type: ignore[comparison-overlap]
+        assert github_event is not None
         assert github_event.webhook_event == "issues"
         assert github_event.repository == "owner/repo"
         assert github_event.action == "opened"
@@ -287,7 +289,7 @@ class TestEventCreators:
         assert event.metadata["custom_field"] == "custom_value"  # type: ignore[index]
 
         local_event = event.get_local_event()
-        assert local_event is not None  # type: ignore[comparison-overlap]
+        assert local_event is not None
         assert local_event.event_name == "file_changed"
         assert local_event.working_directory == "/path/to/project"
         assert local_event.environment == {"VAR": "value"}
@@ -295,11 +297,11 @@ class TestEventCreators:
 
     def test_create_agent_event(self):
         """Test create_agent_event function."""
-        event = create_agent_event(  # type: ignore[misc]
+        event = create_agent_event(
             agent_name="WorkflowManager",
             task_id="task-123",
             phase="implementation",
-            status=TaskStatus.COMPLETED,  # type: ignore[arg-type]
+            status=TaskStatus.COMPLETED,
             message="Task done",
             context={"branch": "feature/test"},
             custom_field="custom_value",
@@ -311,10 +313,10 @@ class TestEventCreators:
         assert event.metadata["custom_field"] == "custom_value"  # type: ignore[index]
 
         agent_event = event.get_agent_event()
-        assert agent_event is not None  # type: ignore[comparison-overlap]
+        assert agent_event is not None
         assert agent_event.agent_name == "WorkflowManager"
         assert agent_event.task_id == "task-123"
         assert agent_event.phase == "implementation"
-        assert agent_event is not None  # type: ignore[comparison-overlap] and agent_event.status == "completed"
+        assert agent_event.status == "completed"
         assert agent_event.message == "Task done"
         assert agent_event.context == {"branch": "feature/test"}

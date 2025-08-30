@@ -26,8 +26,10 @@ except ImportError:
 import sys
 import os
 
-# Add parent directory to path to import from shared
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+# Add path to import from shared
+parent_dir = os.path.dirname(os.path.dirname(__file__))
+shared_path = os.path.join(parent_dir, 'src', 'src')
+sys.path.insert(0, shared_path)
 from shared.utils.error_handling import GadugiError  # type: ignore[import]
 
 logger = logging.getLogger(__name__)

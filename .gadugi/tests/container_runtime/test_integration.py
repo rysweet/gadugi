@@ -2,9 +2,14 @@
 Integration tests for Container Execution Environment.
 """
 
+import sys
+from pathlib import Path
+
+# Add the parent directory to sys.path to import container_runtime
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import pytest
 import tempfile
-from pathlib import Path
 from unittest.mock import patch, Mock
 
 from container_runtime import ContainerExecutionEngine

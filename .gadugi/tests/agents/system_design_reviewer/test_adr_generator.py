@@ -12,11 +12,11 @@ from pathlib import Path
 from datetime import datetime
 import sys
 
-# Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gadugi"))
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
-from agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
-from agents.system_design_reviewer.ast_parser import (
+from src.agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
+from src.agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,

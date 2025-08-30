@@ -2,8 +2,13 @@
 Tests for Security Policy Engine.
 """
 
-import pytest
+import sys
 from pathlib import Path
+
+# Add the parent directory to sys.path to import container_runtime
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import pytest
 from unittest.mock import patch, mock_open
 
 from container_runtime.security_policy import (
