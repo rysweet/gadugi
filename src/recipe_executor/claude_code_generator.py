@@ -581,9 +581,17 @@ def another_method(self):
 
         # Check if we have a comprehensive fix template, otherwise use fix_stubs_prompt
         template_name = "fix_all_issues_prompt"
-        available_templates = self.prompt_loader.list_templates()
-        if template_name not in available_templates:
-            # Fall back to fix_stubs_prompt but modify variables
+        # Try to use fix_all_issues_prompt if it exists, otherwise fall back to fix_stubs_prompt
+        try:
+            # Try to load the fix_all_issues_prompt template
+            from pathlib import Path
+            prompts_dir = Path(__file__).parent / "prompts"
+            if not (prompts_dir / f"{template_name}.md").exists():
+                # Fall back to fix_stubs_prompt but modify variables
+                template_name = "fix_stubs_prompt"
+                variables["stub_errors"] = variables["all_issues"]
+        except Exception:
+            # Fall back to fix_stubs_prompt
             template_name = "fix_stubs_prompt"
             variables["stub_errors"] = variables["all_issues"]
         
