@@ -149,7 +149,8 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                 else:
                     # Subsequent iterations: fix ALL issues (syntax, stubs, quality)
                     impl_prompt = self._create_fix_all_issues_prompt(
-                        recipe, temp_path, generated_files, all_errors
+                        recipe, temp_path, generated_files,
+                        syntax_errors, stub_errors, quality_errors
                     )
 
                 # Invoke Claude to write files (pass output_dir for --add-dir)
