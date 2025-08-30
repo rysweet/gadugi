@@ -17,7 +17,7 @@ import psutil
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "shared", "utils"))
 
 logger = logging.getLogger(__name__)
 

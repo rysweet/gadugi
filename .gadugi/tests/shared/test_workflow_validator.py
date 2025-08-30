@@ -15,7 +15,7 @@ from datetime import datetime
 # Import the module under test
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
 
 from workflow_validator import (  # type: ignore[import]
     WorkflowValidator,

@@ -11,7 +11,7 @@ from datetime import datetime
 # so we can import from .claude package
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from claude.shared.github_operations import GitHubOperations
+from shared.github_operations import GitHubOperations
 
 
 def test_task_id_formatting():

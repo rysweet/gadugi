@@ -1,8 +1,7 @@
-from unittest.mock import Mock, patch
+
 """Tests for the BaseAgent class."""
 
 import asyncio
-from pathlib import Path
 
 import pytest
 
@@ -95,6 +94,7 @@ class TestBaseAgent:
     @pytest.mark.asyncio
     async def test_tool_invocation(self, test_agent):
         """Test tool invocation."""
+
         # Register a test tool
         async def test_tool_handler(param1: str) -> str:
             return f"Result: {param1}"
@@ -113,9 +113,7 @@ class TestBaseAgent:
     async def test_ask_question(self, test_agent):
         """Test interactive question asking."""
         # Start question in background
-        question_task = asyncio.create_task(
-            test_agent.ask_question("Test question?")
-        )
+        question_task = asyncio.create_task(test_agent.ask_question("Test question?"))
 
         # Give time for event to be published
         await asyncio.sleep(0.1)
@@ -133,9 +131,7 @@ class TestBaseAgent:
     async def test_request_approval(self, test_agent):
         """Test approval request."""
         # Start approval request in background
-        approval_task = asyncio.create_task(
-            test_agent.request_approval("Delete file?")
-        )
+        approval_task = asyncio.create_task(test_agent.request_approval("Delete file?"))
 
         # Give time for event to be published
         await asyncio.sleep(0.1)

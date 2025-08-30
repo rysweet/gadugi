@@ -38,7 +38,7 @@ try:
     )
 except ImportError:
     # Fallback to direct import
-    from claude.shared.memory_health import (
+    from shared.memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
         HealthStatus,

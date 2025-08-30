@@ -14,7 +14,7 @@ from datetime import datetime
 # Add the source directories to the Python path for imports
 import sys
 
-# Add PrBacklogManager directory
+# Add pr-backlog-manager directory
 pr_backlog_path = os.path.join(
     os.path.dirname(__file__),
     "..",
@@ -22,7 +22,7 @@ pr_backlog_path = os.path.join(
     "..",
     ".claude",
     "agents",
-    "PrBacklogManager",
+    "pr-backlog-manager",
 )
 sys.path.insert(0, pr_backlog_path)
 
@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 else:
     # For runtime, try real imports
     try:
-        from claude.agents.pr_backlog_manager.core import (  # type: ignore[import]
+        from agents.pr_backlog_manager.core import (  # type: ignore[import]
             PRBacklogManager,
             PRAssessment,
             PRStatus,
@@ -62,7 +62,7 @@ else:
             BacklogMetrics,
             GadugiError,
         )
-        from claude.shared.interfaces import AgentConfig  # type: ignore[import]
+        from shared.interfaces import AgentConfig  # type: ignore[import]
     except ImportError:
         # Fall back to stubs if real imports fail
         from .test_stubs import (
@@ -122,9 +122,9 @@ class TestPRBacklogManager:
     def pr_backlog_manager(self, mock_github_ops, mock_state_manager, mock_task_tracker):
         """Create PRBacklogManager instance with mocked dependencies."""
         with (
-            patch("core.GitHubOperations", return_value=mock_github_ops),
-            patch("core.StateManager", return_value=mock_state_manager),
-            patch("core.TaskTracker", return_value=mock_task_tracker),
+            patch("agents.pr_backlog_manager.core.GitHubOperations", return_value=mock_github_ops),
+            patch("agents.pr_backlog_manager.core.StateManager", return_value=mock_state_manager),
+            patch("agents.pr_backlog_manager.core.TaskTracker", return_value=mock_task_tracker),
         ):
             config = AgentConfig(agent_id="test-pr-backlog", name="Test PR Backlog Manager")
             manager = PRBacklogManager(config=config, auto_approve=False)

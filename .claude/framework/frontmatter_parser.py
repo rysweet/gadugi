@@ -38,7 +38,9 @@ def parse_agent_definition(filepath: Path) -> AgentMetadata:
 
     # Validate required fields
     if "name" not in metadata_dict:
-        raise ValueError(f"Agent definition missing required field 'name' in {filepath}")
+        raise ValueError(
+            f"Agent definition missing required field 'name' in {filepath}"
+        )
 
     # Create metadata object
     metadata = AgentMetadata.from_dict(metadata_dict)
@@ -59,7 +61,7 @@ def extract_frontmatter(content: str) -> Tuple[Optional[str], str]:
         Tuple of (frontmatter, body)
     """
     # Pattern to match YAML frontmatter between --- markers
-    pattern = r'^---\s*\n(.*?)\n---\s*\n(.*)$'
+    pattern = r"^---\s*\n(.*?)\n---\s*\n(.*)$"
     match = re.match(pattern, content, re.DOTALL)
 
     if match:
@@ -88,7 +90,7 @@ def validate_agent_specification(metadata: AgentMetadata) -> bool:
         raise ValueError("Agent version is required")
 
     # Validate version format (semantic versioning)
-    version_pattern = r'^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$'
+    version_pattern = r"^\d+\.\d+\.\d+(-[\w.]+)?(\+[\w.]+)?$"
     if not re.match(version_pattern, metadata.version):
         raise ValueError(f"Invalid version format: {metadata.version}")
 

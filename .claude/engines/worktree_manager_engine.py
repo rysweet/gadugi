@@ -135,7 +135,9 @@ class WorktreeEnvironmentSetup:
                 result["uv_env_ready"] = await self._setup_uv_environment(requirements)
 
             # Install development tools
-            result["development_tools_installed"] = await self._install_development_tools(
+            result[
+                "development_tools_installed"
+            ] = await self._install_development_tools(
                 requirements.development_tools,
             )
 
@@ -317,7 +319,9 @@ class WorktreeHealthMonitor:
             metadata.disk_usage_mb = disk_usage["usage_mb"]
 
             # Check if inactive
-            inactive_hours = (datetime.now() - metadata.last_accessed).total_seconds() / 3600
+            inactive_hours = (
+                datetime.now() - metadata.last_accessed
+            ).total_seconds() / 3600
             health["metrics"]["inactive_hours"] = inactive_hours
 
             if inactive_hours > self.config["inactive_threshold"] / 3600:
@@ -711,7 +715,9 @@ class WorktreeCleanupManager:
             return True
 
         except Exception as e:
-            self.logger.exception(f"Failed to remove worktree {worktree.task_id}: {e!s}")
+            self.logger.exception(
+                f"Failed to remove worktree {worktree.task_id}: {e!s}"
+            )
             return False
 
     async def _backup_worktree(self, worktree: WorktreeMetadata) -> None:
@@ -720,7 +726,9 @@ class WorktreeCleanupManager:
             backup_dir = Path(".gadugi/backups/worktrees")
             backup_dir.mkdir(parents=True, exist_ok=True)
 
-            backup_name = f"{worktree.task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
+            backup_name = (
+                f"{worktree.task_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.tar.gz"
+            )
             backup_path = backup_dir / backup_name
 
             import tarfile
@@ -770,7 +778,9 @@ class WorktreeManagerEngine:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+            stdout, stderr = await asyncio.wait_for(
+                process.communicate(), timeout=timeout
+            )
 
             # Create a CompletedProcess-like result for compatibility
             result = subprocess.CompletedProcess(
@@ -1149,7 +1159,9 @@ async def main() -> None:
     if args.command == "create":
         requirements = WorktreeRequirements(
             uv_project=args.uv_project,
-            development_tools=args.tools.split(",") if args.tools else ["pytest", "ruff"],
+            development_tools=args.tools.split(",")
+            if args.tools
+            else ["pytest", "ruff"],
         )
 
         result = await manager.create_worktree(

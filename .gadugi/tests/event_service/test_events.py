@@ -7,7 +7,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from gadugi.event_service.events import (
+from event_service.events import (
     Event,
     GitHubEvent,
     LocalEvent,

@@ -18,7 +18,7 @@ shared_path = Path(__file__).parent.parent / ".claude" / "shared"
 sys.path.insert(0, str(shared_path))
 
 try:
-    from claude.shared.xpia_defense import (
+    from shared.xpia_defense import (
         XPIADefenseEngine,  # type: ignore[assignment]
         XPIADefenseAgent,  # type: ignore[assignment]
         ThreatPattern,  # type: ignore[assignment]

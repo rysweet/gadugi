@@ -590,7 +590,9 @@ class {AGENT_CLASS_NAME}Engine:
                 "file_structure": {
                     "agent_file": str(agent_file.path),
                     "engine_file": str(engine_file.path),
-                    "test_file": str(generated_files[2].path) if len(generated_files) > 2 else None,
+                    "test_file": str(generated_files[2].path)
+                    if len(generated_files) > 2
+                    else None,
                     "readme_file": str(generated_files[-1].path)
                     if template_options.include_documentation
                     else None,
@@ -751,7 +753,9 @@ This agent integrates with the Gadugi ecosystem through:
         template = self.templates[template_options.base_template.value]
 
         # Generate class name (PascalCase)
-        class_name = "".join(word.title() for word in spec.name.replace("-", "_").split("_"))
+        class_name = "".join(
+            word.title() for word in spec.name.replace("-", "_").split("_")
+        )
 
         # Generate template variables
         variables = {
@@ -794,7 +798,9 @@ This agent integrates with the Gadugi ecosystem through:
         output_dir: Path,
     ) -> GeneratedFile:
         """Generate test file for agent."""
-        class_name = "".join(word.title() for word in spec.name.replace("-", "_").split("_"))
+        class_name = "".join(
+            word.title() for word in spec.name.replace("-", "_").split("_")
+        )
 
         test_content = f'''#!/usr/bin/env python3
 """

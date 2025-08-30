@@ -10,10 +10,7 @@ parent_dir = Path(__file__).parent.parent
 if str(parent_dir) not in sys.path:
     sys.path.insert(0, str(parent_dir))
 
-# Add claude directory for agent imports
-claude_dir = parent_dir / "claude"
-if claude_dir.exists() and str(claude_dir) not in sys.path:
-    sys.path.insert(0, str(claude_dir))
+# All Gadugi code is now in .gadugi/, no need for additional paths
 
 import shutil
 import tempfile

@@ -17,7 +17,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 try:
-    from claude.shared.interfaces import (  # type: ignore[import]
+    from shared.interfaces import (  # type: ignore[import]
         AgentConfig,  # type: ignore[assignment]
         AgentConfigSchema,  # type: ignore[assignment]
         AgentFactory,  # type: ignore[assignment]
@@ -43,7 +43,7 @@ try:
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
     print(
-        "Warning: Could not import claude.shared.interfaces as interfaces module. Tests will define what needs to be implemented."
+        "Warning: Could not import shared.interfaces as interfaces module. Tests will define what needs to be implemented."
     )
 
     from abc import ABC, abstractmethod

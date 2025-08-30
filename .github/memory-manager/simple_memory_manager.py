@@ -135,7 +135,9 @@ class SimpleMemoryManager:
         # Validate lock reason
         valid_reasons = ["off-topic", "too heated", "resolved", "spam"]
         if self.lock_reason not in valid_reasons:
-            self.logger.warning(f"Invalid lock reason '{self.lock_reason}', using default")
+            self.logger.warning(
+                f"Invalid lock reason '{self.lock_reason}', using default"
+            )
             self.lock_reason = self.DEFAULT_LOCK_REASON
 
         # Initialize GitHub operations using shared module
@@ -155,7 +157,9 @@ class SimpleMemoryManager:
             if search_result["success"] and search_result["data"]:
                 for issue in search_result["data"]:
                     if issue.get("title") == self.MEMORY_ISSUE_TITLE:
-                        self.logger.info(f"Found existing memory issue #{issue['number']}")
+                        self.logger.info(
+                            f"Found existing memory issue #{issue['number']}"
+                        )
                         return issue["number"]
 
             # Create new memory issue
@@ -184,7 +188,9 @@ class SimpleMemoryManager:
 
                 return issue_number
             else:
-                raise GitHubError("Failed to create memory issue", "create_issue", result)
+                raise GitHubError(
+                    "Failed to create memory issue", "create_issue", result
+                )
 
         except Exception as e:
             self.logger.error(f"Failed to get or create memory issue: {e}")
@@ -300,9 +306,13 @@ enhanced integration with GitHub's collaboration features."""
 
             # Filter by section if requested
             if section:
-                memory_data["filtered_section"] = memory_data["sections"].get(section, [])
+                memory_data["filtered_section"] = memory_data["sections"].get(
+                    section, []
+                )
                 if limit:
-                    memory_data["filtered_section"] = memory_data["filtered_section"][-limit:]
+                    memory_data["filtered_section"] = memory_data["filtered_section"][
+                        -limit:
+                    ]
 
             # Apply limit to all updates if specified
             if limit:
@@ -435,7 +445,9 @@ enhanced integration with GitHub's collaboration features."""
             result = self.github.add_comment(self.memory_issue_number, comment_body)
 
             if result["success"]:
-                self.logger.info(f"Added memory update to section '{section}' by {agent}")
+                self.logger.info(
+                    f"Added memory update to section '{section}' by {agent}"
+                )
                 return {
                     "success": True,
                     "comment_id": result["data"].get("id"),
@@ -445,7 +457,9 @@ enhanced integration with GitHub's collaboration features."""
                     "timestamp": update.timestamp,
                 }
             else:
-                raise GitHubError("Failed to add memory comment", "update_memory", result)
+                raise GitHubError(
+                    "Failed to add memory comment", "update_memory", result
+                )
 
         except Exception as e:
             self.logger.error(f"Failed to update memory: {e}")
@@ -456,7 +470,9 @@ enhanced integration with GitHub's collaboration features."""
                 "agent": agent,
             }
 
-    def search_memory(self, query: str, section: Optional[str] = None) -> Dict[str, Any]:
+    def search_memory(
+        self, query: str, section: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Search memory using GitHub Issues search.
 
@@ -493,9 +509,14 @@ enhanced integration with GitHub's collaboration features."""
                         # Parse comments for matches
                         for comment in item.get("comments", []):
                             if query.lower() in comment.get("body", "").lower():
-                                parsed_comment = self._parse_memory_comment(comment["body"])
+                                parsed_comment = self._parse_memory_comment(
+                                    comment["body"]
+                                )
                                 if parsed_comment:
-                                    if not section or parsed_comment.get("section") == section:
+                                    if (
+                                        not section
+                                        or parsed_comment.get("section") == section
+                                    ):
                                         search_results.append(parsed_comment)
 
             return {
@@ -517,7 +538,9 @@ enhanced integration with GitHub's collaboration features."""
             issue_result = self.github.get_issue(self.memory_issue_number)
 
             if not issue_result["success"]:
-                raise GitHubError("Failed to get memory issue status", "get_status", issue_result)
+                raise GitHubError(
+                    "Failed to get memory issue status", "get_status", issue_result
+                )
 
             issue_data = issue_result["data"]
 
@@ -533,7 +556,9 @@ enhanced integration with GitHub's collaboration features."""
                     "created_at": issue_data.get("created_at"),
                     "updated_at": issue_data.get("updated_at"),
                     "url": issue_data.get("html_url"),
-                    "labels": [label.get("name") for label in issue_data.get("labels", [])],
+                    "labels": [
+                        label.get("name") for label in issue_data.get("labels", [])
+                    ],
                 },
                 "memory_content": {
                     "total_comments": memory_data.get("total_comments", 0),
@@ -558,7 +583,9 @@ enhanced integration with GitHub's collaboration features."""
                 "memory_issue_number": self.memory_issue_number,
             }
 
-    def cleanup_old_memory(self, days_old: int = 30, dry_run: bool = True) -> Dict[str, Any]:
+    def cleanup_old_memory(
+        self, days_old: int = 30, dry_run: bool = True
+    ) -> Dict[str, Any]:
         """
         Archive old memory comments by moving them to a separate issue.
 
@@ -607,7 +634,9 @@ enhanced integration with GitHub's collaboration features."""
             )
 
             if result["success"]:
-                self.logger.info(f"Locked issue #{issue_number} with reason: {self.lock_reason}")
+                self.logger.info(
+                    f"Locked issue #{issue_number} with reason: {self.lock_reason}"
+                )
                 return True
             else:
                 self.logger.error(
@@ -640,7 +669,9 @@ enhanced integration with GitHub's collaboration features."""
                 )
                 return True
             else:
-                self.logger.error(f"Failed to unlock issue: {result.get('error', 'Unknown error')}")
+                self.logger.error(
+                    f"Failed to unlock issue: {result.get('error', 'Unknown error')}"
+                )
                 return False
 
         except Exception as e:

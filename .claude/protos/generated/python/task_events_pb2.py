@@ -4,74 +4,72 @@
 # source: task_events.proto
 # Protobuf Python Version: 5.29.3
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    5,
-    29,
-    3,
-    '',
-    'task_events.proto'
+    _runtime_version.Domain.PUBLIC, 5, 29, 3, "", "task_events.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-from . import common_pb2 as common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11task_events.proto\x12\x0bgadugi.task\x1a\x0c\x63ommon.proto\"\xf3\x03\n\x0bTaskStarted\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x16\n\x0eparent_task_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x04 \x01(\t\x12\x11\n\ttask_type\x18\x05 \x01(\t\x12\x11\n\ttask_name\x18\x06 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x07 \x01(\t\x12+\n\ttimestamp\x18\x08 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08priority\x18\t \x01(\x0e\x32\x17.gadugi.common.Priority\x12<\n\nparameters\x18\n \x03(\x0b\x32(.gadugi.task.TaskStarted.ParametersEntry\x12)\n\x08metadata\x18\x0b \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x36\n\tresources\x18\x0c \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x17\n\x0ftimeout_seconds\x18\r \x01(\x05\x12\x14\n\x0c\x64\x65pendencies\x18\x0e \x03(\t\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xf6\x02\n\x0cTaskProgress\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x18\n\x10percent_complete\x18\x03 \x01(\x05\x12\x16\n\x0estatus_message\x18\x04 \x01(\t\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0f\x63ompleted_steps\x18\x06 \x03(\t\x12\x17\n\x0fremaining_steps\x18\x07 \x03(\t\x12\x12\n\nelapsed_ms\x18\x08 \x01(\x03\x12\x1e\n\x16\x65stimated_remaining_ms\x18\t \x01(\x03\x12\x37\n\x07metrics\x18\n \x03(\x0b\x32&.gadugi.task.TaskProgress.MetricsEntry\x12\x15\n\rcurrent_phase\x18\x0b \x01(\t\x1a.\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xf9\x03\n\rTaskCompleted\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x19\n\x0fsuccess_message\x18\x04 \x01(\tH\x00\x12\x15\n\x0boutput_data\x18\x05 \x01(\x0cH\x00\x12\x38\n\x07outputs\x18\x06 \x03(\x0b\x32\'.gadugi.task.TaskCompleted.OutputsEntry\x12\x13\n\x0b\x64uration_ms\x18\x07 \x01(\x03\x12)\n\x08metadata\x18\x08 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12O\n\x13performance_metrics\x18\t \x03(\x0b\x32\x32.gadugi.task.TaskCompleted.PerformanceMetricsEntry\x12\x13\n\x0bretry_count\x18\n \x01(\x05\x12\x11\n\tartifacts\x18\x0b \x03(\t\x1a.\n\x0cOutputsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17PerformanceMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\x42\x08\n\x06result\"\xf9\x02\n\nTaskFailed\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12#\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x11\n\tretriable\x18\x05 \x01(\x08\x12\x13\n\x0bretry_count\x18\x06 \x01(\x05\x12\x1b\n\x13recovery_suggestion\x18\x07 \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x08 \x01(\x03\x12\x15\n\rfailure_phase\x18\t \x01(\t\x12\x17\n\x0fpartial_outputs\x18\n \x03(\t\x12:\n\ndebug_info\x18\x0b \x03(\x0b\x32&.gadugi.task.TaskFailed.DebugInfoEntry\x1a\x30\n\x0e\x44\x65\x62ugInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xd7\x01\n\rTaskCancelled\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x14\n\x0c\x63\x61ncelled_by\x18\x05 \x01(\t\x12\x17\n\x0f\x66orce_cancelled\x18\x06 \x01(\x08\x12\x1d\n\x15state_at_cancellation\x18\x07 \x01(\t\x12\x18\n\x10percent_complete\x18\x08 \x01(\x05\"\xc6\x01\n\nTaskPaused\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x11\n\tpaused_by\x18\x05 \x01(\t\x12\x17\n\x0f\x63heckpoint_data\x18\x06 \x01(\x0c\x12\x18\n\x10percent_complete\x18\x07 \x01(\x05\x12\x12\n\ncan_resume\x18\x08 \x01(\x08\"\xa5\x01\n\x0bTaskResumed\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x12\n\nresumed_by\x18\x04 \x01(\t\x12\x19\n\x11pause_duration_ms\x18\x05 \x01(\x03\x12\x17\n\x0f\x63heckpoint_data\x18\x06 \x01(\x0c\"\xc6\x01\n\x14TaskDependencyUpdate\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x12\n\ndepends_on\x18\x02 \x03(\t\x12\x0e\n\x06\x62locks\x18\x03 \x03(\t\x12\x1a\n\x12ready_dependencies\x18\x04 \x03(\t\x12\x12\n\nwaiting_on\x18\x05 \x03(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x1c\n\x14\x61ll_dependencies_met\x18\x07 \x01(\x08\"\xe4\x01\n\x0cTaskRetrying\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x16\n\x0e\x61ttempt_number\x18\x03 \x01(\x05\x12\x14\n\x0cmax_attempts\x18\x04 \x01(\x05\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12,\n\x0eprevious_error\x18\x06 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x10\n\x08\x64\x65lay_ms\x18\x07 \x01(\x05\x12\x16\n\x0eretry_strategy\x18\x08 \x01(\t\"\xbb\x01\n\x0bTaskTimeout\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0ftimeout_seconds\x18\x04 \x01(\x05\x12\x1a\n\x12\x61\x63tual_duration_ms\x18\x05 \x01(\x03\x12\x13\n\x0blast_status\x18\x06 \x01(\t\x12\x12\n\nwill_retry\x18\x07 \x01(\x08\"\x9d\x02\n\x15TaskResourceAllocated\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x36\n\tallocated\x18\x03 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x36\n\trequested\x18\x04 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x15\n\rallocation_id\x18\x06 \x01(\t\x12\x16\n\x0equeue_position\x18\x07 \x01(\x05\x12\x15\n\rqueue_time_ms\x18\x08 \x01(\x03\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x11task_events.proto\x12\x0bgadugi.task\x1a\x0c\x63ommon.proto"\xf3\x03\n\x0bTaskStarted\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x16\n\x0eparent_task_id\x18\x02 \x01(\t\x12\x13\n\x0bworkflow_id\x18\x03 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x04 \x01(\t\x12\x11\n\ttask_type\x18\x05 \x01(\t\x12\x11\n\ttask_name\x18\x06 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x07 \x01(\t\x12+\n\ttimestamp\x18\x08 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08priority\x18\t \x01(\x0e\x32\x17.gadugi.common.Priority\x12<\n\nparameters\x18\n \x03(\x0b\x32(.gadugi.task.TaskStarted.ParametersEntry\x12)\n\x08metadata\x18\x0b \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x36\n\tresources\x18\x0c \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x17\n\x0ftimeout_seconds\x18\r \x01(\x05\x12\x14\n\x0c\x64\x65pendencies\x18\x0e \x03(\t\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xf6\x02\n\x0cTaskProgress\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x18\n\x10percent_complete\x18\x03 \x01(\x05\x12\x16\n\x0estatus_message\x18\x04 \x01(\t\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0f\x63ompleted_steps\x18\x06 \x03(\t\x12\x17\n\x0fremaining_steps\x18\x07 \x03(\t\x12\x12\n\nelapsed_ms\x18\x08 \x01(\x03\x12\x1e\n\x16\x65stimated_remaining_ms\x18\t \x01(\x03\x12\x37\n\x07metrics\x18\n \x03(\x0b\x32&.gadugi.task.TaskProgress.MetricsEntry\x12\x15\n\rcurrent_phase\x18\x0b \x01(\t\x1a.\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01"\xf9\x03\n\rTaskCompleted\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x19\n\x0fsuccess_message\x18\x04 \x01(\tH\x00\x12\x15\n\x0boutput_data\x18\x05 \x01(\x0cH\x00\x12\x38\n\x07outputs\x18\x06 \x03(\x0b\x32\'.gadugi.task.TaskCompleted.OutputsEntry\x12\x13\n\x0b\x64uration_ms\x18\x07 \x01(\x03\x12)\n\x08metadata\x18\x08 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12O\n\x13performance_metrics\x18\t \x03(\x0b\x32\x32.gadugi.task.TaskCompleted.PerformanceMetricsEntry\x12\x13\n\x0bretry_count\x18\n \x01(\x05\x12\x11\n\tartifacts\x18\x0b \x03(\t\x1a.\n\x0cOutputsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x39\n\x17PerformanceMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\x42\x08\n\x06result"\xf9\x02\n\nTaskFailed\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12#\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x11\n\tretriable\x18\x05 \x01(\x08\x12\x13\n\x0bretry_count\x18\x06 \x01(\x05\x12\x1b\n\x13recovery_suggestion\x18\x07 \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x08 \x01(\x03\x12\x15\n\rfailure_phase\x18\t \x01(\t\x12\x17\n\x0fpartial_outputs\x18\n \x03(\t\x12:\n\ndebug_info\x18\x0b \x03(\x0b\x32&.gadugi.task.TaskFailed.DebugInfoEntry\x1a\x30\n\x0e\x44\x65\x62ugInfoEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xd7\x01\n\rTaskCancelled\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x14\n\x0c\x63\x61ncelled_by\x18\x05 \x01(\t\x12\x17\n\x0f\x66orce_cancelled\x18\x06 \x01(\x08\x12\x1d\n\x15state_at_cancellation\x18\x07 \x01(\t\x12\x18\n\x10percent_complete\x18\x08 \x01(\x05"\xc6\x01\n\nTaskPaused\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x11\n\tpaused_by\x18\x05 \x01(\t\x12\x17\n\x0f\x63heckpoint_data\x18\x06 \x01(\x0c\x12\x18\n\x10percent_complete\x18\x07 \x01(\x05\x12\x12\n\ncan_resume\x18\x08 \x01(\x08"\xa5\x01\n\x0bTaskResumed\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x12\n\nresumed_by\x18\x04 \x01(\t\x12\x19\n\x11pause_duration_ms\x18\x05 \x01(\x03\x12\x17\n\x0f\x63heckpoint_data\x18\x06 \x01(\x0c"\xc6\x01\n\x14TaskDependencyUpdate\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x12\n\ndepends_on\x18\x02 \x03(\t\x12\x0e\n\x06\x62locks\x18\x03 \x03(\t\x12\x1a\n\x12ready_dependencies\x18\x04 \x03(\t\x12\x12\n\nwaiting_on\x18\x05 \x03(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x1c\n\x14\x61ll_dependencies_met\x18\x07 \x01(\x08"\xe4\x01\n\x0cTaskRetrying\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x16\n\x0e\x61ttempt_number\x18\x03 \x01(\x05\x12\x14\n\x0cmax_attempts\x18\x04 \x01(\x05\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12,\n\x0eprevious_error\x18\x06 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x10\n\x08\x64\x65lay_ms\x18\x07 \x01(\x05\x12\x16\n\x0eretry_strategy\x18\x08 \x01(\t"\xbb\x01\n\x0bTaskTimeout\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12+\n\ttimestamp\x18\x03 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0ftimeout_seconds\x18\x04 \x01(\x05\x12\x1a\n\x12\x61\x63tual_duration_ms\x18\x05 \x01(\x03\x12\x13\n\x0blast_status\x18\x06 \x01(\t\x12\x12\n\nwill_retry\x18\x07 \x01(\x08"\x9d\x02\n\x15TaskResourceAllocated\x12\x0f\n\x07task_id\x18\x01 \x01(\t\x12\x10\n\x08\x61gent_id\x18\x02 \x01(\t\x12\x36\n\tallocated\x18\x03 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x36\n\trequested\x18\x04 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12+\n\ttimestamp\x18\x05 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x15\n\rallocation_id\x18\x06 \x01(\t\x12\x16\n\x0equeue_position\x18\x07 \x01(\x05\x12\x15\n\rqueue_time_ms\x18\x08 \x01(\x03\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'task_events_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "task_events_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_TASKSTARTED_PARAMETERSENTRY']._loaded_options = None
-  _globals['_TASKSTARTED_PARAMETERSENTRY']._serialized_options = b'8\001'
-  _globals['_TASKPROGRESS_METRICSENTRY']._loaded_options = None
-  _globals['_TASKPROGRESS_METRICSENTRY']._serialized_options = b'8\001'
-  _globals['_TASKCOMPLETED_OUTPUTSENTRY']._loaded_options = None
-  _globals['_TASKCOMPLETED_OUTPUTSENTRY']._serialized_options = b'8\001'
-  _globals['_TASKCOMPLETED_PERFORMANCEMETRICSENTRY']._loaded_options = None
-  _globals['_TASKCOMPLETED_PERFORMANCEMETRICSENTRY']._serialized_options = b'8\001'
-  _globals['_TASKFAILED_DEBUGINFOENTRY']._loaded_options = None
-  _globals['_TASKFAILED_DEBUGINFOENTRY']._serialized_options = b'8\001'
-  _globals['_TASKSTARTED']._serialized_start=49
-  _globals['_TASKSTARTED']._serialized_end=548
-  _globals['_TASKSTARTED_PARAMETERSENTRY']._serialized_start=499
-  _globals['_TASKSTARTED_PARAMETERSENTRY']._serialized_end=548
-  _globals['_TASKPROGRESS']._serialized_start=551
-  _globals['_TASKPROGRESS']._serialized_end=925
-  _globals['_TASKPROGRESS_METRICSENTRY']._serialized_start=879
-  _globals['_TASKPROGRESS_METRICSENTRY']._serialized_end=925
-  _globals['_TASKCOMPLETED']._serialized_start=928
-  _globals['_TASKCOMPLETED']._serialized_end=1433
-  _globals['_TASKCOMPLETED_OUTPUTSENTRY']._serialized_start=1318
-  _globals['_TASKCOMPLETED_OUTPUTSENTRY']._serialized_end=1364
-  _globals['_TASKCOMPLETED_PERFORMANCEMETRICSENTRY']._serialized_start=1366
-  _globals['_TASKCOMPLETED_PERFORMANCEMETRICSENTRY']._serialized_end=1423
-  _globals['_TASKFAILED']._serialized_start=1436
-  _globals['_TASKFAILED']._serialized_end=1813
-  _globals['_TASKFAILED_DEBUGINFOENTRY']._serialized_start=1765
-  _globals['_TASKFAILED_DEBUGINFOENTRY']._serialized_end=1813
-  _globals['_TASKCANCELLED']._serialized_start=1816
-  _globals['_TASKCANCELLED']._serialized_end=2031
-  _globals['_TASKPAUSED']._serialized_start=2034
-  _globals['_TASKPAUSED']._serialized_end=2232
-  _globals['_TASKRESUMED']._serialized_start=2235
-  _globals['_TASKRESUMED']._serialized_end=2400
-  _globals['_TASKDEPENDENCYUPDATE']._serialized_start=2403
-  _globals['_TASKDEPENDENCYUPDATE']._serialized_end=2601
-  _globals['_TASKRETRYING']._serialized_start=2604
-  _globals['_TASKRETRYING']._serialized_end=2832
-  _globals['_TASKTIMEOUT']._serialized_start=2835
-  _globals['_TASKTIMEOUT']._serialized_end=3022
-  _globals['_TASKRESOURCEALLOCATED']._serialized_start=3025
-  _globals['_TASKRESOURCEALLOCATED']._serialized_end=3310
+    DESCRIPTOR._loaded_options = None
+    _globals["_TASKSTARTED_PARAMETERSENTRY"]._loaded_options = None
+    _globals["_TASKSTARTED_PARAMETERSENTRY"]._serialized_options = b"8\001"
+    _globals["_TASKPROGRESS_METRICSENTRY"]._loaded_options = None
+    _globals["_TASKPROGRESS_METRICSENTRY"]._serialized_options = b"8\001"
+    _globals["_TASKCOMPLETED_OUTPUTSENTRY"]._loaded_options = None
+    _globals["_TASKCOMPLETED_OUTPUTSENTRY"]._serialized_options = b"8\001"
+    _globals["_TASKCOMPLETED_PERFORMANCEMETRICSENTRY"]._loaded_options = None
+    _globals["_TASKCOMPLETED_PERFORMANCEMETRICSENTRY"]._serialized_options = b"8\001"
+    _globals["_TASKFAILED_DEBUGINFOENTRY"]._loaded_options = None
+    _globals["_TASKFAILED_DEBUGINFOENTRY"]._serialized_options = b"8\001"
+    _globals["_TASKSTARTED"]._serialized_start = 49
+    _globals["_TASKSTARTED"]._serialized_end = 548
+    _globals["_TASKSTARTED_PARAMETERSENTRY"]._serialized_start = 499
+    _globals["_TASKSTARTED_PARAMETERSENTRY"]._serialized_end = 548
+    _globals["_TASKPROGRESS"]._serialized_start = 551
+    _globals["_TASKPROGRESS"]._serialized_end = 925
+    _globals["_TASKPROGRESS_METRICSENTRY"]._serialized_start = 879
+    _globals["_TASKPROGRESS_METRICSENTRY"]._serialized_end = 925
+    _globals["_TASKCOMPLETED"]._serialized_start = 928
+    _globals["_TASKCOMPLETED"]._serialized_end = 1433
+    _globals["_TASKCOMPLETED_OUTPUTSENTRY"]._serialized_start = 1318
+    _globals["_TASKCOMPLETED_OUTPUTSENTRY"]._serialized_end = 1364
+    _globals["_TASKCOMPLETED_PERFORMANCEMETRICSENTRY"]._serialized_start = 1366
+    _globals["_TASKCOMPLETED_PERFORMANCEMETRICSENTRY"]._serialized_end = 1423
+    _globals["_TASKFAILED"]._serialized_start = 1436
+    _globals["_TASKFAILED"]._serialized_end = 1813
+    _globals["_TASKFAILED_DEBUGINFOENTRY"]._serialized_start = 1765
+    _globals["_TASKFAILED_DEBUGINFOENTRY"]._serialized_end = 1813
+    _globals["_TASKCANCELLED"]._serialized_start = 1816
+    _globals["_TASKCANCELLED"]._serialized_end = 2031
+    _globals["_TASKPAUSED"]._serialized_start = 2034
+    _globals["_TASKPAUSED"]._serialized_end = 2232
+    _globals["_TASKRESUMED"]._serialized_start = 2235
+    _globals["_TASKRESUMED"]._serialized_end = 2400
+    _globals["_TASKDEPENDENCYUPDATE"]._serialized_start = 2403
+    _globals["_TASKDEPENDENCYUPDATE"]._serialized_end = 2601
+    _globals["_TASKRETRYING"]._serialized_start = 2604
+    _globals["_TASKRETRYING"]._serialized_end = 2832
+    _globals["_TASKTIMEOUT"]._serialized_start = 2835
+    _globals["_TASKTIMEOUT"]._serialized_end = 3022
+    _globals["_TASKRESOURCEALLOCATED"]._serialized_start = 3025
+    _globals["_TASKRESOURCEALLOCATED"]._serialized_end = 3310
 # @@protoc_insertion_point(module_scope)

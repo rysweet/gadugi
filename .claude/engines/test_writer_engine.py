@@ -469,7 +469,9 @@ class TestWriterEngine:
             for info in source_info
         )
 
-        tested_functions = sum(tf.test_count for tf in test_files)  # Simplified estimate
+        tested_functions = sum(
+            tf.test_count for tf in test_files
+        )  # Simplified estimate
 
         # Identify test gaps (simplified)
         test_gaps = []
@@ -637,7 +639,9 @@ class TestWriterEngine:
         language = TestLanguage(target.get("language", "python"))
 
         # Parse test requirements
-        test_types = [TestType(t) for t in requirements_data.get("test_types", ["unit"])]
+        test_types = [
+            TestType(t) for t in requirements_data.get("test_types", ["unit"])
+        ]
         requirements = TestRequirements(
             test_types=test_types,
             coverage_target=requirements_data.get("coverage_target", 95.0),
@@ -1261,7 +1265,15 @@ class PythonCodeAnalyzer:
         for child in ast.walk(node):
             if isinstance(
                 child,
-                (ast.If, ast.While, ast.For, ast.AsyncFor, ast.ExceptHandler, ast.And, ast.Or),
+                (
+                    ast.If,
+                    ast.While,
+                    ast.For,
+                    ast.AsyncFor,
+                    ast.ExceptHandler,
+                    ast.And,
+                    ast.Or,
+                ),
             ):
                 complexity += 1
 
@@ -1435,7 +1447,8 @@ class PytestGenerator:
 
         # Calculate metrics
         test_count = (
-            len(file_info.functions) * 3 + sum(len(cls.methods) for cls in file_info.classes) * 3
+            len(file_info.functions) * 3
+            + sum(len(cls.methods) for cls in file_info.classes) * 3
         )
         coverage_estimate = min(95.0, test_count * 5)  # Simplified estimate
 
@@ -1499,7 +1512,9 @@ class PytestGenerator:
         if options.include_setup_teardown:
             lines.append("    def setup_method(self):")
             lines.append('        """Set up test fixtures before each test method."""')
-            init_params = ", ".join(f'"{p}"' for p in cls.init_parameters[:3])  # Limit params
+            init_params = ", ".join(
+                f'"{p}"' for p in cls.init_parameters[:3]
+            )  # Limit params
             lines.append(f"        self.instance = {cls.name}({init_params})")
             lines.append("")
 
@@ -1625,7 +1640,8 @@ class JestGenerator:
 
         # Calculate metrics
         test_count = (
-            len(file_info.functions) * 2 + sum(len(cls.methods) for cls in file_info.classes) * 2
+            len(file_info.functions) * 2
+            + sum(len(cls.methods) for cls in file_info.classes) * 2
         )
         coverage_estimate = min(90.0, test_count * 4)
 

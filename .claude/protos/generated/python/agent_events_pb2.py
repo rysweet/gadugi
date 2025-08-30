@@ -4,70 +4,70 @@
 # source: agent_events.proto
 # Protobuf Python Version: 5.29.3
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    5,
-    29,
-    3,
-    '',
-    'agent_events.proto'
+    _runtime_version.Domain.PUBLIC, 5, 29, 3, "", "agent_events.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-from . import common_pb2 as common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12\x61gent_events.proto\x12\x0cgadugi.agent\x1a\x0c\x63ommon.proto\"\xff\x02\n\x0c\x41gentStarted\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nagent_type\x18\x02 \x01(\t\x12\x12\n\nagent_name\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08metadata\x18\x05 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x0f\n\x07version\x18\x06 \x01(\t\x12\x14\n\x0c\x63\x61pabilities\x18\x07 \x03(\t\x12\x36\n\tresources\x18\x08 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x17\n\x0fparent_agent_id\x18\t \x01(\t\x12\x36\n\x06\x63onfig\x18\n \x03(\x0b\x32&.gadugi.agent.AgentStarted.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xb9\x02\n\x0c\x41gentStopped\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12+\n\ttimestamp\x18\x02 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12\x11\n\texit_code\x18\x04 \x01(\x05\x12#\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x12\n\nruntime_ms\x18\x06 \x01(\x03\x12\x43\n\rfinal_metrics\x18\x07 \x03(\x0b\x32,.gadugi.agent.AgentStopped.FinalMetricsEntry\x12\x14\n\x0cwill_restart\x18\x08 \x01(\x08\x1a\x33\n\x11\x46inalMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\x95\x02\n\x10\x41gentHasQuestion\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x13\n\x0bquestion_id\x18\x02 \x01(\t\x12\x10\n\x08question\x18\x03 \x01(\t\x12\x0f\n\x07options\x18\x04 \x03(\t\x12)\n\x08priority\x18\x05 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0ftimeout_seconds\x18\x07 \x01(\x05\x12\x0f\n\x07\x63ontext\x18\x08 \x01(\t\x12\x1d\n\x15requires_confirmation\x18\t \x01(\x08\x12\x16\n\x0e\x64\x65\x66\x61ult_answer\x18\n \x01(\t\"\xa3\x03\n\x12\x41gentNeedsApproval\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x13\n\x0b\x61pproval_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61\x63tion\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x44\n\nparameters\x18\x05 \x03(\x0b\x32\x30.gadugi.agent.AgentNeedsApproval.ParametersEntry\x12)\n\x08priority\x18\x06 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x07 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x11\n\tapprovers\x18\x08 \x03(\t\x12\x17\n\x0ftimeout_seconds\x18\t \x01(\x05\x12\x12\n\nrisk_level\x18\n \x01(\t\x12\x0f\n\x07impacts\x18\x0b \x03(\t\x12\x1f\n\x17\x61uto_approve_on_timeout\x18\x0c \x01(\x08\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x93\x02\n\rAgentResponse\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x06\x61nswer\x18\x03 \x01(\tH\x00\x12\x12\n\x08\x61pproval\x18\x04 \x01(\x08H\x00\x12%\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x14.gadugi.common.ErrorH\x00\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08metadata\x18\x07 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x14\n\x0cresponder_id\x18\x08 \x01(\t\x12\x15\n\rjustification\x18\t \x01(\tB\n\n\x08response\"\xf0\x02\n\x0e\x41gentHeartbeat\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12+\n\ttimestamp\x18\x02 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12*\n\x06status\x18\x03 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12:\n\x07metrics\x18\x04 \x03(\x0b\x32).gadugi.agent.AgentHeartbeat.MetricsEntry\x12\x17\n\x0fmemory_usage_mb\x18\x05 \x01(\x03\x12\x19\n\x11\x63pu_usage_percent\x18\x06 \x01(\x01\x12\x14\n\x0c\x61\x63tive_tasks\x18\x07 \x01(\x05\x12\x14\n\x0cqueued_tasks\x18\x08 \x01(\x05\x12\x15\n\rhealth_status\x18\t \x01(\t\x12\x10\n\x08warnings\x18\n \x03(\t\x1a.\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01\"\xdd\x01\n\x11\x41gentStateChanged\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x33\n\x0fprevious_status\x18\x02 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12.\n\nnew_status\x18\x03 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x0e\n\x06reason\x18\x05 \x01(\t\x12\x14\n\x0ctriggered_by\x18\x06 \x01(\t\"\xba\x02\n\x19\x41gentCapabilityRegistered\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63\x61pability_name\x18\x02 \x01(\t\x12\x1a\n\x12\x63\x61pability_version\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x14\n\x0c\x64\x65pendencies\x18\x05 \x03(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12K\n\nparameters\x18\x07 \x03(\x0b\x32\x37.gadugi.agent.AgentCapabilityRegistered.ParametersEntry\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x99\x02\n\x0c\x41gentMessage\x12\x15\n\rfrom_agent_id\x18\x01 \x01(\t\x12\x13\n\x0bto_agent_id\x18\x02 \x01(\t\x12\x12\n\nmessage_id\x18\x03 \x01(\t\x12\x14\n\x0cmessage_type\x18\x04 \x01(\t\x12\x0f\n\x07payload\x18\x05 \x01(\x0c\x12)\n\x08priority\x18\x06 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x07 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x16\n\x0e\x63orrelation_id\x18\x08 \x01(\t\x12\x19\n\x11requires_response\x18\t \x01(\x08\x12\x17\n\x0ftimeout_seconds\x18\n \x01(\x05\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x12\x61gent_events.proto\x12\x0cgadugi.agent\x1a\x0c\x63ommon.proto"\xff\x02\n\x0c\x41gentStarted\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nagent_type\x18\x02 \x01(\t\x12\x12\n\nagent_name\x18\x03 \x01(\t\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08metadata\x18\x05 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x0f\n\x07version\x18\x06 \x01(\t\x12\x14\n\x0c\x63\x61pabilities\x18\x07 \x03(\t\x12\x36\n\tresources\x18\x08 \x01(\x0b\x32#.gadugi.common.ResourceRequirements\x12\x17\n\x0fparent_agent_id\x18\t \x01(\t\x12\x36\n\x06\x63onfig\x18\n \x03(\x0b\x32&.gadugi.agent.AgentStarted.ConfigEntry\x1a-\n\x0b\x43onfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xb9\x02\n\x0c\x41gentStopped\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12+\n\ttimestamp\x18\x02 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x0e\n\x06reason\x18\x03 \x01(\t\x12\x11\n\texit_code\x18\x04 \x01(\x05\x12#\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x14.gadugi.common.Error\x12\x12\n\nruntime_ms\x18\x06 \x01(\x03\x12\x43\n\rfinal_metrics\x18\x07 \x03(\x0b\x32,.gadugi.agent.AgentStopped.FinalMetricsEntry\x12\x14\n\x0cwill_restart\x18\x08 \x01(\x08\x1a\x33\n\x11\x46inalMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01"\x95\x02\n\x10\x41gentHasQuestion\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x13\n\x0bquestion_id\x18\x02 \x01(\t\x12\x10\n\x08question\x18\x03 \x01(\t\x12\x0f\n\x07options\x18\x04 \x03(\t\x12)\n\x08priority\x18\x05 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x17\n\x0ftimeout_seconds\x18\x07 \x01(\x05\x12\x0f\n\x07\x63ontext\x18\x08 \x01(\t\x12\x1d\n\x15requires_confirmation\x18\t \x01(\x08\x12\x16\n\x0e\x64\x65\x66\x61ult_answer\x18\n \x01(\t"\xa3\x03\n\x12\x41gentNeedsApproval\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x13\n\x0b\x61pproval_id\x18\x02 \x01(\t\x12\x0e\n\x06\x61\x63tion\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x44\n\nparameters\x18\x05 \x03(\x0b\x32\x30.gadugi.agent.AgentNeedsApproval.ParametersEntry\x12)\n\x08priority\x18\x06 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x07 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x11\n\tapprovers\x18\x08 \x03(\t\x12\x17\n\x0ftimeout_seconds\x18\t \x01(\x05\x12\x12\n\nrisk_level\x18\n \x01(\t\x12\x0f\n\x07impacts\x18\x0b \x03(\t\x12\x1f\n\x17\x61uto_approve_on_timeout\x18\x0c \x01(\x08\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\x93\x02\n\rAgentResponse\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x12\n\nrequest_id\x18\x02 \x01(\t\x12\x10\n\x06\x61nswer\x18\x03 \x01(\tH\x00\x12\x12\n\x08\x61pproval\x18\x04 \x01(\x08H\x00\x12%\n\x05\x65rror\x18\x05 \x01(\x0b\x32\x14.gadugi.common.ErrorH\x00\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12)\n\x08metadata\x18\x07 \x01(\x0b\x32\x17.gadugi.common.Metadata\x12\x14\n\x0cresponder_id\x18\x08 \x01(\t\x12\x15\n\rjustification\x18\t \x01(\tB\n\n\x08response"\xf0\x02\n\x0e\x41gentHeartbeat\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12+\n\ttimestamp\x18\x02 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12*\n\x06status\x18\x03 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12:\n\x07metrics\x18\x04 \x03(\x0b\x32).gadugi.agent.AgentHeartbeat.MetricsEntry\x12\x17\n\x0fmemory_usage_mb\x18\x05 \x01(\x03\x12\x19\n\x11\x63pu_usage_percent\x18\x06 \x01(\x01\x12\x14\n\x0c\x61\x63tive_tasks\x18\x07 \x01(\x05\x12\x14\n\x0cqueued_tasks\x18\x08 \x01(\x05\x12\x15\n\rhealth_status\x18\t \x01(\t\x12\x10\n\x08warnings\x18\n \x03(\t\x1a.\n\x0cMetricsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x01:\x02\x38\x01"\xdd\x01\n\x11\x41gentStateChanged\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x33\n\x0fprevious_status\x18\x02 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12.\n\nnew_status\x18\x03 \x01(\x0e\x32\x1a.gadugi.common.AgentStatus\x12+\n\ttimestamp\x18\x04 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x0e\n\x06reason\x18\x05 \x01(\t\x12\x14\n\x0ctriggered_by\x18\x06 \x01(\t"\xba\x02\n\x19\x41gentCapabilityRegistered\x12\x10\n\x08\x61gent_id\x18\x01 \x01(\t\x12\x17\n\x0f\x63\x61pability_name\x18\x02 \x01(\t\x12\x1a\n\x12\x63\x61pability_version\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x14\n\x0c\x64\x65pendencies\x18\x05 \x03(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12K\n\nparameters\x18\x07 \x03(\x0b\x32\x37.gadugi.agent.AgentCapabilityRegistered.ParametersEntry\x1a\x31\n\x0fParametersEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\x99\x02\n\x0c\x41gentMessage\x12\x15\n\rfrom_agent_id\x18\x01 \x01(\t\x12\x13\n\x0bto_agent_id\x18\x02 \x01(\t\x12\x12\n\nmessage_id\x18\x03 \x01(\t\x12\x14\n\x0cmessage_type\x18\x04 \x01(\t\x12\x0f\n\x07payload\x18\x05 \x01(\x0c\x12)\n\x08priority\x18\x06 \x01(\x0e\x32\x17.gadugi.common.Priority\x12+\n\ttimestamp\x18\x07 \x01(\x0b\x32\x18.gadugi.common.Timestamp\x12\x16\n\x0e\x63orrelation_id\x18\x08 \x01(\t\x12\x19\n\x11requires_response\x18\t \x01(\x08\x12\x17\n\x0ftimeout_seconds\x18\n \x01(\x05\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'agent_events_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "agent_events_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_AGENTSTARTED_CONFIGENTRY']._loaded_options = None
-  _globals['_AGENTSTARTED_CONFIGENTRY']._serialized_options = b'8\001'
-  _globals['_AGENTSTOPPED_FINALMETRICSENTRY']._loaded_options = None
-  _globals['_AGENTSTOPPED_FINALMETRICSENTRY']._serialized_options = b'8\001'
-  _globals['_AGENTNEEDSAPPROVAL_PARAMETERSENTRY']._loaded_options = None
-  _globals['_AGENTNEEDSAPPROVAL_PARAMETERSENTRY']._serialized_options = b'8\001'
-  _globals['_AGENTHEARTBEAT_METRICSENTRY']._loaded_options = None
-  _globals['_AGENTHEARTBEAT_METRICSENTRY']._serialized_options = b'8\001'
-  _globals['_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY']._loaded_options = None
-  _globals['_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY']._serialized_options = b'8\001'
-  _globals['_AGENTSTARTED']._serialized_start=51
-  _globals['_AGENTSTARTED']._serialized_end=434
-  _globals['_AGENTSTARTED_CONFIGENTRY']._serialized_start=389
-  _globals['_AGENTSTARTED_CONFIGENTRY']._serialized_end=434
-  _globals['_AGENTSTOPPED']._serialized_start=437
-  _globals['_AGENTSTOPPED']._serialized_end=750
-  _globals['_AGENTSTOPPED_FINALMETRICSENTRY']._serialized_start=699
-  _globals['_AGENTSTOPPED_FINALMETRICSENTRY']._serialized_end=750
-  _globals['_AGENTHASQUESTION']._serialized_start=753
-  _globals['_AGENTHASQUESTION']._serialized_end=1030
-  _globals['_AGENTNEEDSAPPROVAL']._serialized_start=1033
-  _globals['_AGENTNEEDSAPPROVAL']._serialized_end=1452
-  _globals['_AGENTNEEDSAPPROVAL_PARAMETERSENTRY']._serialized_start=1403
-  _globals['_AGENTNEEDSAPPROVAL_PARAMETERSENTRY']._serialized_end=1452
-  _globals['_AGENTRESPONSE']._serialized_start=1455
-  _globals['_AGENTRESPONSE']._serialized_end=1730
-  _globals['_AGENTHEARTBEAT']._serialized_start=1733
-  _globals['_AGENTHEARTBEAT']._serialized_end=2101
-  _globals['_AGENTHEARTBEAT_METRICSENTRY']._serialized_start=2055
-  _globals['_AGENTHEARTBEAT_METRICSENTRY']._serialized_end=2101
-  _globals['_AGENTSTATECHANGED']._serialized_start=2104
-  _globals['_AGENTSTATECHANGED']._serialized_end=2325
-  _globals['_AGENTCAPABILITYREGISTERED']._serialized_start=2328
-  _globals['_AGENTCAPABILITYREGISTERED']._serialized_end=2642
-  _globals['_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY']._serialized_start=1403
-  _globals['_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY']._serialized_end=1452
-  _globals['_AGENTMESSAGE']._serialized_start=2645
-  _globals['_AGENTMESSAGE']._serialized_end=2926
+    DESCRIPTOR._loaded_options = None
+    _globals["_AGENTSTARTED_CONFIGENTRY"]._loaded_options = None
+    _globals["_AGENTSTARTED_CONFIGENTRY"]._serialized_options = b"8\001"
+    _globals["_AGENTSTOPPED_FINALMETRICSENTRY"]._loaded_options = None
+    _globals["_AGENTSTOPPED_FINALMETRICSENTRY"]._serialized_options = b"8\001"
+    _globals["_AGENTNEEDSAPPROVAL_PARAMETERSENTRY"]._loaded_options = None
+    _globals["_AGENTNEEDSAPPROVAL_PARAMETERSENTRY"]._serialized_options = b"8\001"
+    _globals["_AGENTHEARTBEAT_METRICSENTRY"]._loaded_options = None
+    _globals["_AGENTHEARTBEAT_METRICSENTRY"]._serialized_options = b"8\001"
+    _globals["_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY"]._loaded_options = None
+    _globals[
+        "_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY"
+    ]._serialized_options = b"8\001"
+    _globals["_AGENTSTARTED"]._serialized_start = 51
+    _globals["_AGENTSTARTED"]._serialized_end = 434
+    _globals["_AGENTSTARTED_CONFIGENTRY"]._serialized_start = 389
+    _globals["_AGENTSTARTED_CONFIGENTRY"]._serialized_end = 434
+    _globals["_AGENTSTOPPED"]._serialized_start = 437
+    _globals["_AGENTSTOPPED"]._serialized_end = 750
+    _globals["_AGENTSTOPPED_FINALMETRICSENTRY"]._serialized_start = 699
+    _globals["_AGENTSTOPPED_FINALMETRICSENTRY"]._serialized_end = 750
+    _globals["_AGENTHASQUESTION"]._serialized_start = 753
+    _globals["_AGENTHASQUESTION"]._serialized_end = 1030
+    _globals["_AGENTNEEDSAPPROVAL"]._serialized_start = 1033
+    _globals["_AGENTNEEDSAPPROVAL"]._serialized_end = 1452
+    _globals["_AGENTNEEDSAPPROVAL_PARAMETERSENTRY"]._serialized_start = 1403
+    _globals["_AGENTNEEDSAPPROVAL_PARAMETERSENTRY"]._serialized_end = 1452
+    _globals["_AGENTRESPONSE"]._serialized_start = 1455
+    _globals["_AGENTRESPONSE"]._serialized_end = 1730
+    _globals["_AGENTHEARTBEAT"]._serialized_start = 1733
+    _globals["_AGENTHEARTBEAT"]._serialized_end = 2101
+    _globals["_AGENTHEARTBEAT_METRICSENTRY"]._serialized_start = 2055
+    _globals["_AGENTHEARTBEAT_METRICSENTRY"]._serialized_end = 2101
+    _globals["_AGENTSTATECHANGED"]._serialized_start = 2104
+    _globals["_AGENTSTATECHANGED"]._serialized_end = 2325
+    _globals["_AGENTCAPABILITYREGISTERED"]._serialized_start = 2328
+    _globals["_AGENTCAPABILITYREGISTERED"]._serialized_end = 2642
+    _globals["_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY"]._serialized_start = 1403
+    _globals["_AGENTCAPABILITYREGISTERED_PARAMETERSENTRY"]._serialized_end = 1452
+    _globals["_AGENTMESSAGE"]._serialized_start = 2645
+    _globals["_AGENTMESSAGE"]._serialized_end = 2926
 # @@protoc_insertion_point(module_scope)

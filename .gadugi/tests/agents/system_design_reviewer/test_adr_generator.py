@@ -13,10 +13,10 @@ from datetime import datetime
 import sys
 
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gadugi"))
 
-from claude.agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
-from claude.agents.system_design_reviewer.ast_parser import (
+from agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
+from agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,

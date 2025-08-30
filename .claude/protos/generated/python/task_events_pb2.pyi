@@ -2,19 +2,43 @@ import common_pb2 as _common_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import (
+    ClassVar as _ClassVar,
+    Iterable as _Iterable,
+    Mapping as _Mapping,
+    Optional as _Optional,
+    Union as _Union,
+)
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class TaskStarted(_message.Message):
-    __slots__ = ("task_id", "parent_task_id", "workflow_id", "agent_id", "task_type", "task_name", "description", "timestamp", "priority", "parameters", "metadata", "resources", "timeout_seconds", "dependencies")
+    __slots__ = (
+        "task_id",
+        "parent_task_id",
+        "workflow_id",
+        "agent_id",
+        "task_type",
+        "task_name",
+        "description",
+        "timestamp",
+        "priority",
+        "parameters",
+        "metadata",
+        "resources",
+        "timeout_seconds",
+        "dependencies",
+    )
     class ParametersEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     PARENT_TASK_ID_FIELD_NUMBER: _ClassVar[int]
     WORKFLOW_ID_FIELD_NUMBER: _ClassVar[int]
@@ -43,17 +67,48 @@ class TaskStarted(_message.Message):
     resources: _common_pb2.ResourceRequirements
     timeout_seconds: int
     dependencies: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, task_id: _Optional[str] = ..., parent_task_id: _Optional[str] = ..., workflow_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., task_type: _Optional[str] = ..., task_name: _Optional[str] = ..., description: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., priority: _Optional[_Union[_common_pb2.Priority, str]] = ..., parameters: _Optional[_Mapping[str, str]] = ..., metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ..., resources: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ..., timeout_seconds: _Optional[int] = ..., dependencies: _Optional[_Iterable[str]] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        parent_task_id: _Optional[str] = ...,
+        workflow_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        task_type: _Optional[str] = ...,
+        task_name: _Optional[str] = ...,
+        description: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        priority: _Optional[_Union[_common_pb2.Priority, str]] = ...,
+        parameters: _Optional[_Mapping[str, str]] = ...,
+        metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ...,
+        resources: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ...,
+        timeout_seconds: _Optional[int] = ...,
+        dependencies: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
 
 class TaskProgress(_message.Message):
-    __slots__ = ("task_id", "agent_id", "percent_complete", "status_message", "timestamp", "completed_steps", "remaining_steps", "elapsed_ms", "estimated_remaining_ms", "metrics", "current_phase")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "percent_complete",
+        "status_message",
+        "timestamp",
+        "completed_steps",
+        "remaining_steps",
+        "elapsed_ms",
+        "estimated_remaining_ms",
+        "metrics",
+        "current_phase",
+    )
     class MetricsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: float
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[float] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[float] = ...
+        ) -> None: ...
+
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     PERCENT_COMPLETE_FIELD_NUMBER: _ClassVar[int]
@@ -76,24 +131,55 @@ class TaskProgress(_message.Message):
     estimated_remaining_ms: int
     metrics: _containers.ScalarMap[str, float]
     current_phase: str
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., percent_complete: _Optional[int] = ..., status_message: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., completed_steps: _Optional[_Iterable[str]] = ..., remaining_steps: _Optional[_Iterable[str]] = ..., elapsed_ms: _Optional[int] = ..., estimated_remaining_ms: _Optional[int] = ..., metrics: _Optional[_Mapping[str, float]] = ..., current_phase: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        percent_complete: _Optional[int] = ...,
+        status_message: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        completed_steps: _Optional[_Iterable[str]] = ...,
+        remaining_steps: _Optional[_Iterable[str]] = ...,
+        elapsed_ms: _Optional[int] = ...,
+        estimated_remaining_ms: _Optional[int] = ...,
+        metrics: _Optional[_Mapping[str, float]] = ...,
+        current_phase: _Optional[str] = ...,
+    ) -> None: ...
 
 class TaskCompleted(_message.Message):
-    __slots__ = ("task_id", "agent_id", "timestamp", "success_message", "output_data", "outputs", "duration_ms", "metadata", "performance_metrics", "retry_count", "artifacts")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "timestamp",
+        "success_message",
+        "output_data",
+        "outputs",
+        "duration_ms",
+        "metadata",
+        "performance_metrics",
+        "retry_count",
+        "artifacts",
+    )
     class OutputsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     class PerformanceMetricsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: float
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[float] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[float] = ...
+        ) -> None: ...
+
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -116,17 +202,45 @@ class TaskCompleted(_message.Message):
     performance_metrics: _containers.ScalarMap[str, float]
     retry_count: int
     artifacts: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., success_message: _Optional[str] = ..., output_data: _Optional[bytes] = ..., outputs: _Optional[_Mapping[str, str]] = ..., duration_ms: _Optional[int] = ..., metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ..., performance_metrics: _Optional[_Mapping[str, float]] = ..., retry_count: _Optional[int] = ..., artifacts: _Optional[_Iterable[str]] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        success_message: _Optional[str] = ...,
+        output_data: _Optional[bytes] = ...,
+        outputs: _Optional[_Mapping[str, str]] = ...,
+        duration_ms: _Optional[int] = ...,
+        metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ...,
+        performance_metrics: _Optional[_Mapping[str, float]] = ...,
+        retry_count: _Optional[int] = ...,
+        artifacts: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
 
 class TaskFailed(_message.Message):
-    __slots__ = ("task_id", "agent_id", "timestamp", "error", "retriable", "retry_count", "recovery_suggestion", "duration_ms", "failure_phase", "partial_outputs", "debug_info")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "timestamp",
+        "error",
+        "retriable",
+        "retry_count",
+        "recovery_suggestion",
+        "duration_ms",
+        "failure_phase",
+        "partial_outputs",
+        "debug_info",
+    )
     class DebugInfoEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -149,10 +263,32 @@ class TaskFailed(_message.Message):
     failure_phase: str
     partial_outputs: _containers.RepeatedScalarFieldContainer[str]
     debug_info: _containers.ScalarMap[str, str]
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ..., retriable: bool = ..., retry_count: _Optional[int] = ..., recovery_suggestion: _Optional[str] = ..., duration_ms: _Optional[int] = ..., failure_phase: _Optional[str] = ..., partial_outputs: _Optional[_Iterable[str]] = ..., debug_info: _Optional[_Mapping[str, str]] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ...,
+        retriable: bool = ...,
+        retry_count: _Optional[int] = ...,
+        recovery_suggestion: _Optional[str] = ...,
+        duration_ms: _Optional[int] = ...,
+        failure_phase: _Optional[str] = ...,
+        partial_outputs: _Optional[_Iterable[str]] = ...,
+        debug_info: _Optional[_Mapping[str, str]] = ...,
+    ) -> None: ...
 
 class TaskCancelled(_message.Message):
-    __slots__ = ("task_id", "agent_id", "reason", "timestamp", "cancelled_by", "force_cancelled", "state_at_cancellation", "percent_complete")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "reason",
+        "timestamp",
+        "cancelled_by",
+        "force_cancelled",
+        "state_at_cancellation",
+        "percent_complete",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     REASON_FIELD_NUMBER: _ClassVar[int]
@@ -169,10 +305,29 @@ class TaskCancelled(_message.Message):
     force_cancelled: bool
     state_at_cancellation: str
     percent_complete: int
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., reason: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., cancelled_by: _Optional[str] = ..., force_cancelled: bool = ..., state_at_cancellation: _Optional[str] = ..., percent_complete: _Optional[int] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        reason: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        cancelled_by: _Optional[str] = ...,
+        force_cancelled: bool = ...,
+        state_at_cancellation: _Optional[str] = ...,
+        percent_complete: _Optional[int] = ...,
+    ) -> None: ...
 
 class TaskPaused(_message.Message):
-    __slots__ = ("task_id", "agent_id", "reason", "timestamp", "paused_by", "checkpoint_data", "percent_complete", "can_resume")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "reason",
+        "timestamp",
+        "paused_by",
+        "checkpoint_data",
+        "percent_complete",
+        "can_resume",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     REASON_FIELD_NUMBER: _ClassVar[int]
@@ -189,10 +344,27 @@ class TaskPaused(_message.Message):
     checkpoint_data: bytes
     percent_complete: int
     can_resume: bool
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., reason: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., paused_by: _Optional[str] = ..., checkpoint_data: _Optional[bytes] = ..., percent_complete: _Optional[int] = ..., can_resume: bool = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        reason: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        paused_by: _Optional[str] = ...,
+        checkpoint_data: _Optional[bytes] = ...,
+        percent_complete: _Optional[int] = ...,
+        can_resume: bool = ...,
+    ) -> None: ...
 
 class TaskResumed(_message.Message):
-    __slots__ = ("task_id", "agent_id", "timestamp", "resumed_by", "pause_duration_ms", "checkpoint_data")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "timestamp",
+        "resumed_by",
+        "pause_duration_ms",
+        "checkpoint_data",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -205,10 +377,26 @@ class TaskResumed(_message.Message):
     resumed_by: str
     pause_duration_ms: int
     checkpoint_data: bytes
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., resumed_by: _Optional[str] = ..., pause_duration_ms: _Optional[int] = ..., checkpoint_data: _Optional[bytes] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        resumed_by: _Optional[str] = ...,
+        pause_duration_ms: _Optional[int] = ...,
+        checkpoint_data: _Optional[bytes] = ...,
+    ) -> None: ...
 
 class TaskDependencyUpdate(_message.Message):
-    __slots__ = ("task_id", "depends_on", "blocks", "ready_dependencies", "waiting_on", "timestamp", "all_dependencies_met")
+    __slots__ = (
+        "task_id",
+        "depends_on",
+        "blocks",
+        "ready_dependencies",
+        "waiting_on",
+        "timestamp",
+        "all_dependencies_met",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     DEPENDS_ON_FIELD_NUMBER: _ClassVar[int]
     BLOCKS_FIELD_NUMBER: _ClassVar[int]
@@ -223,10 +411,28 @@ class TaskDependencyUpdate(_message.Message):
     waiting_on: _containers.RepeatedScalarFieldContainer[str]
     timestamp: _common_pb2.Timestamp
     all_dependencies_met: bool
-    def __init__(self, task_id: _Optional[str] = ..., depends_on: _Optional[_Iterable[str]] = ..., blocks: _Optional[_Iterable[str]] = ..., ready_dependencies: _Optional[_Iterable[str]] = ..., waiting_on: _Optional[_Iterable[str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., all_dependencies_met: bool = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        depends_on: _Optional[_Iterable[str]] = ...,
+        blocks: _Optional[_Iterable[str]] = ...,
+        ready_dependencies: _Optional[_Iterable[str]] = ...,
+        waiting_on: _Optional[_Iterable[str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        all_dependencies_met: bool = ...,
+    ) -> None: ...
 
 class TaskRetrying(_message.Message):
-    __slots__ = ("task_id", "agent_id", "attempt_number", "max_attempts", "timestamp", "previous_error", "delay_ms", "retry_strategy")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "attempt_number",
+        "max_attempts",
+        "timestamp",
+        "previous_error",
+        "delay_ms",
+        "retry_strategy",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     ATTEMPT_NUMBER_FIELD_NUMBER: _ClassVar[int]
@@ -243,10 +449,28 @@ class TaskRetrying(_message.Message):
     previous_error: _common_pb2.Error
     delay_ms: int
     retry_strategy: str
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., attempt_number: _Optional[int] = ..., max_attempts: _Optional[int] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., previous_error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ..., delay_ms: _Optional[int] = ..., retry_strategy: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        attempt_number: _Optional[int] = ...,
+        max_attempts: _Optional[int] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        previous_error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ...,
+        delay_ms: _Optional[int] = ...,
+        retry_strategy: _Optional[str] = ...,
+    ) -> None: ...
 
 class TaskTimeout(_message.Message):
-    __slots__ = ("task_id", "agent_id", "timestamp", "timeout_seconds", "actual_duration_ms", "last_status", "will_retry")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "timestamp",
+        "timeout_seconds",
+        "actual_duration_ms",
+        "last_status",
+        "will_retry",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
@@ -261,10 +485,28 @@ class TaskTimeout(_message.Message):
     actual_duration_ms: int
     last_status: str
     will_retry: bool
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., timeout_seconds: _Optional[int] = ..., actual_duration_ms: _Optional[int] = ..., last_status: _Optional[str] = ..., will_retry: bool = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        timeout_seconds: _Optional[int] = ...,
+        actual_duration_ms: _Optional[int] = ...,
+        last_status: _Optional[str] = ...,
+        will_retry: bool = ...,
+    ) -> None: ...
 
 class TaskResourceAllocated(_message.Message):
-    __slots__ = ("task_id", "agent_id", "allocated", "requested", "timestamp", "allocation_id", "queue_position", "queue_time_ms")
+    __slots__ = (
+        "task_id",
+        "agent_id",
+        "allocated",
+        "requested",
+        "timestamp",
+        "allocation_id",
+        "queue_position",
+        "queue_time_ms",
+    )
     TASK_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     ALLOCATED_FIELD_NUMBER: _ClassVar[int]
@@ -281,4 +523,14 @@ class TaskResourceAllocated(_message.Message):
     allocation_id: str
     queue_position: int
     queue_time_ms: int
-    def __init__(self, task_id: _Optional[str] = ..., agent_id: _Optional[str] = ..., allocated: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ..., requested: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., allocation_id: _Optional[str] = ..., queue_position: _Optional[int] = ..., queue_time_ms: _Optional[int] = ...) -> None: ...
+    def __init__(
+        self,
+        task_id: _Optional[str] = ...,
+        agent_id: _Optional[str] = ...,
+        allocated: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ...,
+        requested: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        allocation_id: _Optional[str] = ...,
+        queue_position: _Optional[int] = ...,
+        queue_time_ms: _Optional[int] = ...,
+    ) -> None: ...

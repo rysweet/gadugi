@@ -1,4 +1,4 @@
-from claude.shared.task_tracking import TaskStatus  # type: ignore[import]
+from shared.task_tracking import TaskStatus  # type: ignore[import]
 
 """
 Comprehensive tests for state_management.py module.
@@ -23,7 +23,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.state_management import (  # type: ignore[import]
+    from shared.state_management import (  # type: ignore[import]
         CheckpointManager as _ImportedCheckpointManager,
         StateError as _ImportedStateError,
         StateManager as _ImportedStateManager,
@@ -42,7 +42,7 @@ try:
 except ImportError as e:
     # These will be implemented after tests pass
     print(
-        f"Warning: Could not import claude.shared.state_management as state_management module: {e}"
+        f"Warning: Could not import shared.state_management as state_management module: {e}"
     )
 
     # Define stubs for all needed classes

@@ -143,7 +143,9 @@ class AgentMemoryIntegration:
         memory_data = self.memory.read_memory(section="important-context")
         return memory_data.get("filtered_section", [])
 
-    def search_memory(self, query: str, section: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search_memory(
+        self, query: str, section: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
         """Search memory for specific content"""
         result = self.memory.search_memory(query, section)
         return result.get("results", []) if result.get("success") else []
@@ -251,8 +253,12 @@ class OrchestratorAgentMemoryMixin:
     ) -> Dict[str, Any]:
         """Record orchestration completion results"""
         content = f"**Orchestration ID**: {orchestration_id}\n"
-        content += f"**Success Rate**: {successful_tasks}/{successful_tasks + failed_tasks}\n"
-        content += f"**Performance**: {performance_metrics.get('total_time', 'N/A')} seconds\n"
+        content += (
+            f"**Success Rate**: {successful_tasks}/{successful_tasks + failed_tasks}\n"
+        )
+        content += (
+            f"**Performance**: {performance_metrics.get('total_time', 'N/A')} seconds\n"
+        )
         content += f"**Speedup**: {performance_metrics.get('speedup_factor', 'N/A')}x\n"
         if created_prs:
             content += f"**Created PRs**: {', '.join([f'#{pr}' for pr in created_prs])}"
@@ -293,8 +299,12 @@ class CodeReviewerMemoryMixin:
         """Record code review insights"""
         content = f"**PR**: #{pr_number}\n"
         content += f"**Summary**: {review_summary}\n\n"
-        content += "**Key Findings**:\n" + "\n".join([f"- {finding}" for finding in key_findings])
-        content += "\n\n**Recommendations**:\n" + "\n".join([f"- {rec}" for rec in recommendations])
+        content += "**Key Findings**:\n" + "\n".join(
+            [f"- {finding}" for finding in key_findings]
+        )
+        content += "\n\n**Recommendations**:\n" + "\n".join(
+            [f"- {rec}" for rec in recommendations]
+        )
 
         return self.memory_agent.add_important_context(
             context=content, related_prs=[pr_number], priority="medium"
@@ -377,10 +387,16 @@ def migrate_memory_md_to_github(
             if line.startswith("## Current Goals") or "current goals" in line.lower():
                 current_section = "current-goals"
                 current_content = []
-            elif line.startswith("## Recent Accomplishments") or "accomplishments" in line.lower():
+            elif (
+                line.startswith("## Recent Accomplishments")
+                or "accomplishments" in line.lower()
+            ):
                 current_section = "completed-tasks"
                 current_content = []
-            elif line.startswith("## Important Context") or "important context" in line.lower():
+            elif (
+                line.startswith("## Important Context")
+                or "important context" in line.lower()
+            ):
                 current_section = "important-context"
                 current_content = []
             elif line.startswith("## Next Steps") or "next steps" in line.lower():
@@ -450,7 +466,9 @@ def quick_add_accomplishment(
 ) -> bool:
     """Quickly add accomplished task"""
     memory = AgentMemoryIntegration(agent_name)
-    result = memory.add_completed_task(task, related_prs=[pr_number] if pr_number else None)
+    result = memory.add_completed_task(
+        task, related_prs=[pr_number] if pr_number else None
+    )
     return result.get("success", False)
 
 

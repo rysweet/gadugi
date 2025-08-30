@@ -458,7 +458,9 @@ class PhaseExecutor:
             )
             await process1.communicate()
             if process1.returncode != 0:
-                raise subprocess.CalledProcessError(process1.returncode or 1, "git checkout main")  # type: ignore
+                raise subprocess.CalledProcessError(
+                    process1.returncode or 1, "git checkout main"
+                )  # type: ignore
 
             process2 = await asyncio.create_subprocess_exec(
                 "git",
@@ -468,7 +470,9 @@ class PhaseExecutor:
             )
             await process2.communicate()
             if process2.returncode != 0:
-                raise subprocess.CalledProcessError(process2.returncode or 1, "git pull")  # type: ignore
+                raise subprocess.CalledProcessError(
+                    process2.returncode or 1, "git pull"
+                )  # type: ignore
 
             # Create feature branch
             process3 = await asyncio.create_subprocess_exec(
@@ -767,7 +771,9 @@ class WorkflowManagerEngine:
         implementation_data = state.checkpoint_data.get("implementation_result", {})
         artifacts = {
             "implementation_files": state.task.target_files,
-            "test_files": [f"tests/test_{Path(f).stem}.py" for f in state.task.target_files],
+            "test_files": [
+                f"tests/test_{Path(f).stem}.py" for f in state.task.target_files
+            ],
             "documentation": ["README.md"],
         }
 

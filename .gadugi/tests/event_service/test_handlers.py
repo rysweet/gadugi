@@ -5,20 +5,20 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from gadugi.event_service.events import (
+from event_service.events import (
     Event,
     create_github_event,
     create_local_event,
     create_agent_event,
 )
-from gadugi.event_service.handlers import (
+from event_service.handlers import (
     GitHubFilter,
     EventFilter,
     EventHandler,
     EventMatcher,
     CommonFilters,
 )
-from gadugi.event_service.config import AgentInvocation
+from event_service.config import AgentInvocation
 
 
 class TestGitHubFilter:

@@ -79,7 +79,7 @@ def main():
     logger.info(f"Configuration written to: {config_file}")
 
     # Import and run the orchestrator directly
-    sys.path.insert(0, str(repo_dir / ".claude" / "orchestrator"))
+    sys.path.insert(0, str(repo_dir / ".gadugi" / "orchestrator"))
 
     try:
         from orchestrator_main import OrchestratorAgent

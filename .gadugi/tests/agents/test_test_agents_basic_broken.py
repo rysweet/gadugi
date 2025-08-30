@@ -7,7 +7,7 @@ import sys
 import os
 
 # Add agents to path for testing
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "agents"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "agents"))
 
 
 def test_shared_test_instructions_import():

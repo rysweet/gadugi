@@ -4,59 +4,56 @@
 # source: common.proto
 # Protobuf Python Version: 5.29.3
 """Generated protocol buffer code."""
+
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+
 _runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    5,
-    29,
-    3,
-    '',
-    'common.proto'
+    _runtime_version.Domain.PUBLIC, 5, 29, 3, "", "common.proto"
 )
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0c\x63ommon.proto\x12\rgadugi.common\"+\n\tTimestamp\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x12\r\n\x05nanos\x18\x02 \x01(\x05\"\x84\x02\n\x08Metadata\x12\x33\n\x06labels\x18\x01 \x03(\x0b\x32#.gadugi.common.Metadata.LabelsEntry\x12=\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32(.gadugi.common.Metadata.AnnotationsEntry\x12\x10\n\x08trace_id\x18\x03 \x01(\t\x12\x0f\n\x07span_id\x18\x04 \x01(\t\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\x89\x01\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07\x64\x65tails\x18\x03 \x01(\t\x12\x13\n\x0bstack_trace\x18\x04 \x01(\t\x12\x0e\n\x06source\x18\x05 \x01(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp\"\xe6\x01\n\x14ResourceRequirements\x12\x11\n\tcpu_cores\x18\x01 \x01(\x01\x12\x11\n\tmemory_mb\x18\x02 \x01(\x03\x12\x0f\n\x07\x64isk_mb\x18\x03 \x01(\x03\x12\x14\n\x0cnetwork_mbps\x18\x04 \x01(\x03\x12\x11\n\tgpu_count\x18\x05 \x01(\x05\x12?\n\x06\x63ustom\x18\x06 \x03(\x0b\x32/.gadugi.common.ResourceRequirements.CustomEntry\x1a-\n\x0b\x43ustomEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01\"\x89\x01\n\x0bRetryPolicy\x12\x14\n\x0cmax_attempts\x18\x01 \x01(\x05\x12\x18\n\x10initial_delay_ms\x18\x02 \x01(\x05\x12\x1a\n\x12\x62\x61\x63koff_multiplier\x18\x03 \x01(\x01\x12\x14\n\x0cmax_delay_ms\x18\x04 \x01(\x05\x12\x18\n\x10retriable_errors\x18\x05 \x03(\t*u\n\x08Priority\x12\x18\n\x14PRIORITY_UNSPECIFIED\x10\x00\x12\x10\n\x0cPRIORITY_LOW\x10\x01\x12\x13\n\x0fPRIORITY_NORMAL\x10\x02\x12\x11\n\rPRIORITY_HIGH\x10\x03\x12\x15\n\x11PRIORITY_CRITICAL\x10\x04*\xe8\x01\n\x0b\x41gentStatus\x12\x1c\n\x18\x41GENT_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n\x19\x41GENT_STATUS_INITIALIZING\x10\x01\x12\x18\n\x14\x41GENT_STATUS_RUNNING\x10\x02\x12\x17\n\x13\x41GENT_STATUS_PAUSED\x10\x03\x12\x19\n\x15\x41GENT_STATUS_STOPPING\x10\x04\x12\x18\n\x14\x41GENT_STATUS_STOPPED\x10\x05\x12\x16\n\x12\x41GENT_STATUS_ERROR\x10\x06\x12\x1c\n\x18\x41GENT_STATUS_MAINTENANCE\x10\x07*\xf5\x01\n\nTaskStatus\x12\x1b\n\x17TASK_STATUS_UNSPECIFIED\x10\x00\x12\x17\n\x13TASK_STATUS_PENDING\x10\x01\x12\x19\n\x15TASK_STATUS_SCHEDULED\x10\x02\x12\x17\n\x13TASK_STATUS_RUNNING\x10\x03\x12\x16\n\x12TASK_STATUS_PAUSED\x10\x04\x12\x19\n\x15TASK_STATUS_COMPLETED\x10\x05\x12\x16\n\x12TASK_STATUS_FAILED\x10\x06\x12\x19\n\x15TASK_STATUS_CANCELLED\x10\x07\x12\x17\n\x13TASK_STATUS_TIMEOUT\x10\x08\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x0c\x63ommon.proto\x12\rgadugi.common"+\n\tTimestamp\x12\x0f\n\x07seconds\x18\x01 \x01(\x03\x12\r\n\x05nanos\x18\x02 \x01(\x05"\x84\x02\n\x08Metadata\x12\x33\n\x06labels\x18\x01 \x03(\x0b\x32#.gadugi.common.Metadata.LabelsEntry\x12=\n\x0b\x61nnotations\x18\x02 \x03(\x0b\x32(.gadugi.common.Metadata.AnnotationsEntry\x12\x10\n\x08trace_id\x18\x03 \x01(\t\x12\x0f\n\x07span_id\x18\x04 \x01(\t\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x32\n\x10\x41nnotationsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\x89\x01\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x0f\n\x07\x64\x65tails\x18\x03 \x01(\t\x12\x13\n\x0bstack_trace\x18\x04 \x01(\t\x12\x0e\n\x06source\x18\x05 \x01(\t\x12+\n\ttimestamp\x18\x06 \x01(\x0b\x32\x18.gadugi.common.Timestamp"\xe6\x01\n\x14ResourceRequirements\x12\x11\n\tcpu_cores\x18\x01 \x01(\x01\x12\x11\n\tmemory_mb\x18\x02 \x01(\x03\x12\x0f\n\x07\x64isk_mb\x18\x03 \x01(\x03\x12\x14\n\x0cnetwork_mbps\x18\x04 \x01(\x03\x12\x11\n\tgpu_count\x18\x05 \x01(\x05\x12?\n\x06\x63ustom\x18\x06 \x03(\x0b\x32/.gadugi.common.ResourceRequirements.CustomEntry\x1a-\n\x0b\x43ustomEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x05:\x02\x38\x01"\x89\x01\n\x0bRetryPolicy\x12\x14\n\x0cmax_attempts\x18\x01 \x01(\x05\x12\x18\n\x10initial_delay_ms\x18\x02 \x01(\x05\x12\x1a\n\x12\x62\x61\x63koff_multiplier\x18\x03 \x01(\x01\x12\x14\n\x0cmax_delay_ms\x18\x04 \x01(\x05\x12\x18\n\x10retriable_errors\x18\x05 \x03(\t*u\n\x08Priority\x12\x18\n\x14PRIORITY_UNSPECIFIED\x10\x00\x12\x10\n\x0cPRIORITY_LOW\x10\x01\x12\x13\n\x0fPRIORITY_NORMAL\x10\x02\x12\x11\n\rPRIORITY_HIGH\x10\x03\x12\x15\n\x11PRIORITY_CRITICAL\x10\x04*\xe8\x01\n\x0b\x41gentStatus\x12\x1c\n\x18\x41GENT_STATUS_UNSPECIFIED\x10\x00\x12\x1d\n\x19\x41GENT_STATUS_INITIALIZING\x10\x01\x12\x18\n\x14\x41GENT_STATUS_RUNNING\x10\x02\x12\x17\n\x13\x41GENT_STATUS_PAUSED\x10\x03\x12\x19\n\x15\x41GENT_STATUS_STOPPING\x10\x04\x12\x18\n\x14\x41GENT_STATUS_STOPPED\x10\x05\x12\x16\n\x12\x41GENT_STATUS_ERROR\x10\x06\x12\x1c\n\x18\x41GENT_STATUS_MAINTENANCE\x10\x07*\xf5\x01\n\nTaskStatus\x12\x1b\n\x17TASK_STATUS_UNSPECIFIED\x10\x00\x12\x17\n\x13TASK_STATUS_PENDING\x10\x01\x12\x19\n\x15TASK_STATUS_SCHEDULED\x10\x02\x12\x17\n\x13TASK_STATUS_RUNNING\x10\x03\x12\x16\n\x12TASK_STATUS_PAUSED\x10\x04\x12\x19\n\x15TASK_STATUS_COMPLETED\x10\x05\x12\x16\n\x12TASK_STATUS_FAILED\x10\x06\x12\x19\n\x15TASK_STATUS_CANCELLED\x10\x07\x12\x17\n\x13TASK_STATUS_TIMEOUT\x10\x08\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'common_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "common_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_METADATA_LABELSENTRY']._loaded_options = None
-  _globals['_METADATA_LABELSENTRY']._serialized_options = b'8\001'
-  _globals['_METADATA_ANNOTATIONSENTRY']._loaded_options = None
-  _globals['_METADATA_ANNOTATIONSENTRY']._serialized_options = b'8\001'
-  _globals['_RESOURCEREQUIREMENTS_CUSTOMENTRY']._loaded_options = None
-  _globals['_RESOURCEREQUIREMENTS_CUSTOMENTRY']._serialized_options = b'8\001'
-  _globals['_PRIORITY']._serialized_start=852
-  _globals['_PRIORITY']._serialized_end=969
-  _globals['_AGENTSTATUS']._serialized_start=972
-  _globals['_AGENTSTATUS']._serialized_end=1204
-  _globals['_TASKSTATUS']._serialized_start=1207
-  _globals['_TASKSTATUS']._serialized_end=1452
-  _globals['_TIMESTAMP']._serialized_start=31
-  _globals['_TIMESTAMP']._serialized_end=74
-  _globals['_METADATA']._serialized_start=77
-  _globals['_METADATA']._serialized_end=337
-  _globals['_METADATA_LABELSENTRY']._serialized_start=240
-  _globals['_METADATA_LABELSENTRY']._serialized_end=285
-  _globals['_METADATA_ANNOTATIONSENTRY']._serialized_start=287
-  _globals['_METADATA_ANNOTATIONSENTRY']._serialized_end=337
-  _globals['_ERROR']._serialized_start=340
-  _globals['_ERROR']._serialized_end=477
-  _globals['_RESOURCEREQUIREMENTS']._serialized_start=480
-  _globals['_RESOURCEREQUIREMENTS']._serialized_end=710
-  _globals['_RESOURCEREQUIREMENTS_CUSTOMENTRY']._serialized_start=665
-  _globals['_RESOURCEREQUIREMENTS_CUSTOMENTRY']._serialized_end=710
-  _globals['_RETRYPOLICY']._serialized_start=713
-  _globals['_RETRYPOLICY']._serialized_end=850
+    DESCRIPTOR._loaded_options = None
+    _globals["_METADATA_LABELSENTRY"]._loaded_options = None
+    _globals["_METADATA_LABELSENTRY"]._serialized_options = b"8\001"
+    _globals["_METADATA_ANNOTATIONSENTRY"]._loaded_options = None
+    _globals["_METADATA_ANNOTATIONSENTRY"]._serialized_options = b"8\001"
+    _globals["_RESOURCEREQUIREMENTS_CUSTOMENTRY"]._loaded_options = None
+    _globals["_RESOURCEREQUIREMENTS_CUSTOMENTRY"]._serialized_options = b"8\001"
+    _globals["_PRIORITY"]._serialized_start = 852
+    _globals["_PRIORITY"]._serialized_end = 969
+    _globals["_AGENTSTATUS"]._serialized_start = 972
+    _globals["_AGENTSTATUS"]._serialized_end = 1204
+    _globals["_TASKSTATUS"]._serialized_start = 1207
+    _globals["_TASKSTATUS"]._serialized_end = 1452
+    _globals["_TIMESTAMP"]._serialized_start = 31
+    _globals["_TIMESTAMP"]._serialized_end = 74
+    _globals["_METADATA"]._serialized_start = 77
+    _globals["_METADATA"]._serialized_end = 337
+    _globals["_METADATA_LABELSENTRY"]._serialized_start = 240
+    _globals["_METADATA_LABELSENTRY"]._serialized_end = 285
+    _globals["_METADATA_ANNOTATIONSENTRY"]._serialized_start = 287
+    _globals["_METADATA_ANNOTATIONSENTRY"]._serialized_end = 337
+    _globals["_ERROR"]._serialized_start = 340
+    _globals["_ERROR"]._serialized_end = 477
+    _globals["_RESOURCEREQUIREMENTS"]._serialized_start = 480
+    _globals["_RESOURCEREQUIREMENTS"]._serialized_end = 710
+    _globals["_RESOURCEREQUIREMENTS_CUSTOMENTRY"]._serialized_start = 665
+    _globals["_RESOURCEREQUIREMENTS_CUSTOMENTRY"]._serialized_end = 710
+    _globals["_RETRYPOLICY"]._serialized_start = 713
+    _globals["_RETRYPOLICY"]._serialized_end = 850
 # @@protoc_insertion_point(module_scope)

@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 # sys.path manipulation removed to ensure consistent package imports
 
-from claude.shared.phase_enforcer import (
+from shared.phase_enforcer import (
     PhaseEnforcer,
     EnforcementRule,
     EnforcementResult,
@@ -24,7 +24,7 @@ from claude.shared.phase_enforcer import (
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from claude.shared.workflow_engine import WorkflowPhase, WorkflowState
+from shared.workflow_engine import WorkflowPhase, WorkflowState
 
 
 class TestPhaseEnforcer:

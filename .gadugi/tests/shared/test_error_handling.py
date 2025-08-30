@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.utils.error_handling import (  # type: ignore[import]
+    from shared.utils.error_handling import (  # type: ignore[import]
         ErrorHandler,
         ErrorSeverity,
         GadugiError,

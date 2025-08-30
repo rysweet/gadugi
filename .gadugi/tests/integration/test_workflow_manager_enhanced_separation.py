@@ -26,12 +26,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "shared"))
 
-from claude.shared.github_operations import GitHubOperations  # type: ignore[import]
-from claude.shared.interfaces import AgentConfig, ErrorContext  # type: ignore[import]
-from claude.shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase  # type: ignore[import]
-from claude.shared.task_tracking import (  # type: ignore[import]
+from shared.github_operations import GitHubOperations  # type: ignore[import]
+from shared.interfaces import AgentConfig, ErrorContext  # type: ignore[import]
+from shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase  # type: ignore[import]
+from shared.task_tracking import (  # type: ignore[import]
     TaskMetrics,
     TaskStatus,
     TaskTracker,
@@ -40,7 +40,7 @@ from claude.shared.task_tracking import (  # type: ignore[import]
 )
 
 
-# from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
+# from shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 # Create stub classes for missing error handling imports
 class ErrorHandler:
     pass

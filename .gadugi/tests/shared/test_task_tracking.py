@@ -1,4 +1,4 @@
-# from claude.shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
+# from shared.task_tracking import TaskPriority, TaskStatus  # type: ignore[import]
 
 """
 Comprehensive tests for task_tracking.py module (TodoWrite integration).
@@ -23,7 +23,7 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 try:
-    from claude.shared.task_tracking import (  # type: ignore[import]
+    from shared.task_tracking import (  # type: ignore[import]
         Task as _ImportedTask,
         TaskError as _ImportedTaskError,
         TaskList as _ImportedTaskList,
@@ -50,7 +50,7 @@ try:
 except ImportError as e:
     # If import fails, create stub classes to show what needs to be implemented
     print(
-        f"Warning: Could not import claude.shared.task_tracking as task_tracking module: {e}. Tests will define what needs to be implemented."
+        f"Warning: Could not import shared.task_tracking as task_tracking module: {e}. Tests will define what needs to be implemented."
     )
 
     from enum import Enum

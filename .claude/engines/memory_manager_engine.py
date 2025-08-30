@@ -175,9 +175,14 @@ class MemoryManager:
         """Determine the priority of a memory item."""
         line_lower = line.lower()
 
-        if any(marker in line_lower for marker in ["critical", "urgent", "high priority", "major"]):
+        if any(
+            marker in line_lower
+            for marker in ["critical", "urgent", "high priority", "major"]
+        ):
             return "high"
-        if any(marker in line_lower for marker in ["low priority", "minor", "nice to have"]):
+        if any(
+            marker in line_lower for marker in ["low priority", "minor", "nice to have"]
+        ):
             return "low"
         return "medium"
 
@@ -335,7 +340,9 @@ class GitHubSync:
     def _check_gh_cli(self) -> bool:
         """Check if GitHub CLI is available."""
         try:
-            result = subprocess.run(["gh", "--version"], check=False, capture_output=True)
+            result = subprocess.run(
+                ["gh", "--version"], check=False, capture_output=True
+            )
             return result.returncode == 0
         except FileNotFoundError:
             return False
@@ -756,7 +763,9 @@ class MemoryManagerEngine:
             for section in sections.values():
                 for item in section.items:
                     type_counts[item.type] = type_counts.get(item.type, 0) + 1
-                    priority_counts[item.priority] = priority_counts.get(item.priority, 0) + 1
+                    priority_counts[item.priority] = (
+                        priority_counts.get(item.priority, 0) + 1
+                    )
 
             statistics.update(
                 {"items_by_type": type_counts, "items_by_priority": priority_counts},

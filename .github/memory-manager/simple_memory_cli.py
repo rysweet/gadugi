@@ -17,7 +17,9 @@ from simple_memory_manager import SimpleMemoryManager
 def setup_logging(verbose: bool = False):
     """Setup logging configuration"""
     level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(level=level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    logging.basicConfig(
+        level=level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
 
 def handle_status(manager: SimpleMemoryManager, args) -> int:
@@ -74,7 +76,9 @@ def handle_read(manager: SimpleMemoryManager, args) -> int:
                 print(f"👤 Agent: {entry.get('agent', 'Unknown')}")
                 print(f"🔥 Priority: {entry.get('priority', 'medium')}")
                 if entry.get("related_issues"):
-                    print(f"🔗 Related: {', '.join([f'#{i}' for i in entry['related_issues']])}")
+                    print(
+                        f"🔗 Related: {', '.join([f'#{i}' for i in entry['related_issues']])}"
+                    )
                 print()
                 print(entry.get("content", "No content"))
                 print("-" * 40)
@@ -232,7 +236,9 @@ def handle_lock_status(manager: SimpleMemoryManager, args) -> int:
                 print("\n⚠️  Memory is NOT locked - anyone can comment!")
                 print("Consider locking for security")
         else:
-            print(f"❌ Failed to check lock status: {result.get('error', 'Unknown error')}")
+            print(
+                f"❌ Failed to check lock status: {result.get('error', 'Unknown error')}"
+            )
             return 1
 
     return 0
@@ -242,7 +248,9 @@ def handle_unlock(manager: SimpleMemoryManager, args) -> int:
     """Handle unlock command"""
     if not args.confirm:
         print("⚠️  WARNING: Unlocking the memory issue reduces security!")
-        print("Non-collaborators will be able to add comments (potential memory poisoning)")
+        print(
+            "Non-collaborators will be able to add comments (potential memory poisoning)"
+        )
         print("\nTo proceed, use: --confirm")
         return 1
 
@@ -297,7 +305,9 @@ Examples:
         """,
     )
 
-    parser.add_argument("--repo-path", help="Path to repository (default: current directory)")
+    parser.add_argument(
+        "--repo-path", help="Path to repository (default: current directory)"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
     parser.add_argument("--json", action="store_true", help="Output results as JSON")
 
@@ -309,11 +319,15 @@ Examples:
     # Read command
     read_parser = subparsers.add_parser("read", help="Read memory content")
     read_parser.add_argument("--section", help="Read specific section only")
-    read_parser.add_argument("--limit", type=int, help="Limit number of entries returned")
+    read_parser.add_argument(
+        "--limit", type=int, help="Limit number of entries returned"
+    )
 
     # Update command
     update_parser = subparsers.add_parser("update", help="Add memory update")
-    update_parser.add_argument("content", help='Memory content (use "-" to read from stdin)')
+    update_parser.add_argument(
+        "content", help='Memory content (use "-" to read from stdin)'
+    )
     update_parser.add_argument(
         "--section",
         required=True,
@@ -326,7 +340,9 @@ Examples:
         ],
         help="Memory section",
     )
-    update_parser.add_argument("--agent", required=True, help="Agent name adding the memory")
+    update_parser.add_argument(
+        "--agent", required=True, help="Agent name adding the memory"
+    )
     update_parser.add_argument(
         "--priority",
         choices=["high", "medium", "low"],

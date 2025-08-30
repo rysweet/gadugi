@@ -14,10 +14,10 @@ from datetime import datetime
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "shared"))
 
 try:
-    from claude.shared.task_tracking import (
+    from shared.task_tracking import (
         Task,
         TaskList,
         TaskStatus,
@@ -25,9 +25,9 @@ try:
         TaskTracker,
         TodoWriteIntegration,
     )
-    from claude.shared.github_operations import GitHubOperations
-    from claude.shared.state_management import CheckpointManager, StateManager, TaskState
-    from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
+    from shared.github_operations import GitHubOperations
+    from shared.state_management import CheckpointManager, StateManager, TaskState
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
 except ImportError as e:
     # If imports fail, we'll skip tests that require these modules
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
@@ -420,11 +420,11 @@ class TestEnhancedSeparationCodeReduction:
 
         try:
             # Test all shared modules can be imported
-            from claude.shared.github_operations import GitHubOperations
-            from claude.shared.interfaces import AgentConfig
-            from claude.shared.state_management import StateManager
-            from claude.shared.task_tracking import TaskTracker
-            from claude.shared.utils.error_handling import (
+            from shared.github_operations import GitHubOperations
+            from shared.interfaces import AgentConfig
+            from shared.state_management import StateManager
+            from shared.task_tracking import TaskTracker
+            from shared.utils.error_handling import (
                 ErrorHandler,
                 CircuitBreaker,
                 ErrorSeverity,

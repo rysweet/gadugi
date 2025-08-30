@@ -4,7 +4,6 @@
 import sys
 import time
 from pathlib import Path
-from datetime import datetime
 
 # Add generated protos to path
 sys.path.append(str(Path(__file__).parent.parent / "generated" / "python"))
@@ -39,7 +38,9 @@ def example_agent_started():
     event.agent_name = "Primary Workflow Manager"
     event.timestamp.CopyFrom(create_timestamp())
     event.version = "0.3.0"
-    event.capabilities.extend(["task_execution", "parallel_processing", "state_management"])
+    event.capabilities.extend(
+        ["task_execution", "parallel_processing", "state_management"]
+    )
 
     # Set resource requirements
     event.resources.cpu_cores = 2.0
@@ -58,7 +59,9 @@ def example_agent_started():
     print(f"  Agent ID: {event.agent_id}")
     print(f"  Agent Type: {event.agent_type}")
     print(f"  Capabilities: {list(event.capabilities)}")
-    print(f"  Resources: CPU={event.resources.cpu_cores}, Memory={event.resources.memory_mb}MB")
+    print(
+        f"  Resources: CPU={event.resources.cpu_cores}, Memory={event.resources.memory_mb}MB"
+    )
 
     # Serialize and show size
     serialized = event.SerializeToString()
@@ -143,7 +146,9 @@ def example_agent_has_question():
     event.agent_id = "agent-123"
     event.question_id = "q-001"
     event.question = "Multiple implementation approaches found. Which should I use?"
-    event.options.extend(["Functional approach", "Object-oriented approach", "Hybrid approach"])
+    event.options.extend(
+        ["Functional approach", "Object-oriented approach", "Hybrid approach"]
+    )
     event.priority = common_pb2.PRIORITY_NORMAL
     event.timestamp.CopyFrom(create_timestamp())
     event.timeout_seconds = 60
@@ -182,11 +187,9 @@ def example_task_completed():
     event.performance_metrics["efficiency"] = 0.88
 
     # Add artifacts
-    event.artifacts.extend([
-        "/tmp/review-report.md",
-        "/tmp/metrics.json",
-        "/tmp/suggestions.txt"
-    ])
+    event.artifacts.extend(
+        ["/tmp/review-report.md", "/tmp/metrics.json", "/tmp/suggestions.txt"]
+    )
 
     print(f"  Task ID: {event.task_id}")
     print(f"  Status: {event.success_message}")
@@ -219,7 +222,7 @@ def example_serialization():
     assert deserialized.agent_id == original.agent_id
     assert deserialized.agent_type == original.agent_type
     assert deserialized.version == original.version
-    print(f"  ✓ Deserialization successful")
+    print("  ✓ Deserialization successful")
     print(f"  Agent ID: {deserialized.agent_id}")
     print(f"  Agent Type: {deserialized.agent_type}")
 
@@ -248,6 +251,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

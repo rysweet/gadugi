@@ -12,13 +12,13 @@ import sys
 from pathlib import Path
 
 # Add .claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".gadugi"))
 
-from claude.agents.system_design_reviewer.documentation_manager import (
+from agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,
 )
-from claude.agents.system_design_reviewer.ast_parser import (
+from agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,

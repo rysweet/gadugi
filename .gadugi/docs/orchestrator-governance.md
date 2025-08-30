@@ -126,7 +126,7 @@ The `governance_validator.py` module provides:
 
 ```bash
 # Run governance compliance check
-python -m claude.agents.orchestrator.governance_validator
+python -m agents.orchestrator.governance_validator
 
 # Run tests
 pytest tests/test_orchestrator_governance.py -v
@@ -230,11 +230,11 @@ When adding new orchestrator features:
 tail -f logs/orchestrator.log
 
 # Validate governance compliance
-python -m claude.agents.orchestrator.governance_validator
+python -m agents.orchestrator.governance_validator
 
 # Test specific task delegation
 python -c "
-from claude.agents.orchestrator import Orchestrator
+from agents.orchestrator import Orchestrator
 orchestrator = Orchestrator()
 # Test task execution...
 "
@@ -243,9 +243,9 @@ orchestrator = Orchestrator()
 ## References
 
 - Issue #148: Enforce orchestrator governance requirements
-- WorkflowManager Documentation: `.claude/agents/WorkflowManager.md`
-- Orchestrator Implementation: `.claude/agents/orchestrator/`
-- Governance Validator: `.claude/agents/orchestrator/governance_validator.py`
+- WorkflowManager Documentation: `.gadugi/agents/WorkflowManager.md`
+- Orchestrator Implementation: `.gadugi/agents/orchestrator/`
+- Governance Validator: `.gadugi/agents/orchestrator/governance_validator.py`
 <<<<<<< HEAD
 - Test Suite: `tests/test_orchestrator_governance.py`
 =======

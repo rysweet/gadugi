@@ -20,7 +20,7 @@ def camel_to_kebab(name: str) -> str:
         kebab-case string like "code-reviewer"
     """
     # Insert hyphens before uppercase letters that follow lowercase letters
-    s1 = re.sub('([a-z0-9])([A-Z])', r'\1-\2', name)
+    s1 = re.sub("([a-z0-9])([A-Z])", r"\1-\2", name)
     return s1.lower()
 
 
@@ -33,8 +33,8 @@ def kebab_to_camel(name: str) -> str:
     Returns:
         CamelCase string like "CodeReviewer"
     """
-    components = name.split('-')
-    return ''.join(word.capitalize() for word in components)
+    components = name.split("-")
+    return "".join(word.capitalize() for word in components)
 
 
 # Agent name mapping - kebab-case to CamelCase
@@ -98,11 +98,11 @@ def normalize_agent_name(agent_name: str) -> str:
         return AGENT_NAME_MAPPING[agent_name]
 
     # If already CamelCase and exists, use as-is
-    if agent_name[0].isupper() and '-' not in agent_name:
+    if agent_name[0].isupper() and "-" not in agent_name:
         return agent_name
 
     # Convert kebab-case to CamelCase
-    if '-' in agent_name:
+    if "-" in agent_name:
         return kebab_to_camel(agent_name)
 
     # Default: assume it's already correct
@@ -119,8 +119,8 @@ def get_gadugi_base_dir() -> Path:
         RuntimeError: If base directory cannot be determined
     """
     # Strategy 1: Use GADUGI_HOME environment variable if set
-    if 'GADUGI_HOME' in os.environ:
-        base_dir = Path(os.environ['GADUGI_HOME'])
+    if "GADUGI_HOME" in os.environ:
+        base_dir = Path(os.environ["GADUGI_HOME"])
         if base_dir.exists():
             return base_dir
 
@@ -131,13 +131,13 @@ def get_gadugi_base_dir() -> Path:
     base_dir = current_file.parent.parent.parent
 
     # Verify we found the right directory by checking for expected subdirs
-    if (base_dir / '.claude' / 'agents').exists():
+    if (base_dir / ".claude" / "agents").exists():
         return base_dir
 
     # Strategy 3: Look for gadugi-v0.3 in parent directories
     current = current_file.parent
     while current != current.parent:
-        if current.name == 'gadugi-v0.3' and (current / 'agents').exists():
+        if current.name == "gadugi-v0.3" and (current / "agents").exists():
             return current
         current = current.parent
 
@@ -149,20 +149,23 @@ def get_gadugi_base_dir() -> Path:
 
 # Initialize base directory and paths
 GADUGI_BASE = get_gadugi_base_dir()
-AGENTS_DIR = GADUGI_BASE / '.claude' / 'agents'
-SERVICES_DIR = GADUGI_BASE / '.claude' / 'services'
+AGENTS_DIR = GADUGI_BASE / ".claude" / "agents"
+SERVICES_DIR = GADUGI_BASE / ".claude" / "services"
 SRC_DIR = GADUGI_BASE
 
 # Add src directory to Python path for imports
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
-if str(SRC_DIR / 'orchestrator') not in sys.path:
-    sys.path.insert(0, str(SRC_DIR / 'orchestrator'))
+if str(SRC_DIR / "orchestrator") not in sys.path:
+    sys.path.insert(0, str(SRC_DIR / "orchestrator"))
 
 # Import version after path setup
 try:
     from version import get_version_string  # type: ignore[import]
-    print(f"{get_version_string()} initialized with base: {GADUGI_BASE}", file=sys.stderr)
+
+    print(
+        f"{get_version_string()} initialized with base: {GADUGI_BASE}", file=sys.stderr
+    )
 except ImportError:
     print(f"Gadugi v0.3 initialized with base: {GADUGI_BASE}", file=sys.stderr)
 
@@ -288,7 +291,9 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
                 if result["integration_notes"]:
                     output += f"\nIntegration: {result['integration_notes']}"
             else:
-                output = f"Code generation failed: {result.get('error', 'Unknown error')}"
+                output = (
+                    f"Code generation failed: {result.get('error', 'Unknown error')}"
+                )
 
             return {
                 "agent": normalized_name,
@@ -359,9 +364,13 @@ def run_agent(agent_name: str, task_description: str = "") -> dict:
     # For minimal implementation, let's simplify and just use a basic prompt
     # Skip the agent file for now and just simulate the response
     if task_description:
-        simple_prompt = f"Act as a {normalized_name}. {task_description}. Respond briefly."
+        simple_prompt = (
+            f"Act as a {normalized_name}. {task_description}. Respond briefly."
+        )
     else:
-        simple_prompt = f"Act as a {normalized_name}. Respond with a simple confirmation."
+        simple_prompt = (
+            f"Act as a {normalized_name}. Respond with a simple confirmation."
+        )
 
     try:
         # Run claude with a simple non-interactive command
@@ -436,7 +445,7 @@ Examples:
   gadugi-orchestrator orchestrator --task "Build an API"
   gadugi-orchestrator TaskDecomposer --task "Create authentication"
   export GADUGI_HOME=/path/to/gadugi-v0.3 && gadugi-orchestrator TestAgent
-        """
+        """,
     )
 
     parser.add_argument("agent", help="Name of the agent to run")
@@ -449,6 +458,7 @@ Examples:
 
     if args.json:
         import json
+
         print(json.dumps(result, indent=2))
     else:
         if result["stdout"]:

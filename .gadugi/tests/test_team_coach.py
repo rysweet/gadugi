@@ -24,14 +24,14 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 try:
-    from claude.agents.teamcoach.team_coach import (  # type: ignore[import]
+    from agents.teamcoach.team_coach import (  # type: ignore[import]
         TeamCoach,
         SessionMetrics,
         ImprovementType,
     )
 except ImportError:
     # Fallback if package structure is different
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".claude", "agents"))
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".gadugi", "agents"))
     from teamcoach.team_coach import (  # type: ignore[import]
         TeamCoach,
         SessionMetrics,

@@ -1244,7 +1244,9 @@ class GadugiEngine:
 
         for service_name in self.core_services:
             if (
-                self.config.get("services", {}).get(service_name, {}).get("enabled", True)
+                self.config.get("services", {})
+                .get(service_name, {})
+                .get("enabled", True)
             ) and self._start_service(service_name):
                 started.append(service_name)
 
@@ -1488,7 +1490,9 @@ class GadugiEngine:
         for service_name in self.core_services:
             service_health = {
                 "name": service_name,
-                "status": "healthy" if self._is_service_running(service_name) else "unhealthy",
+                "status": "healthy"
+                if self._is_service_running(service_name)
+                else "unhealthy",
                 "response_time": "N/A",
             }
 
@@ -1503,7 +1507,9 @@ class GadugiEngine:
         for agent_name in self.available_agents:
             agent_health = {
                 "name": agent_name,
-                "status": "healthy" if self._is_agent_running(agent_name) else "unhealthy",
+                "status": "healthy"
+                if self._is_agent_running(agent_name)
+                else "unhealthy",
                 "last_heartbeat": "N/A",
             }
 
@@ -1748,7 +1754,11 @@ class GadugiEngine:
                             ],
                         ),
                         "agents_active": len(
-                            [a for a in self.agents.values() if a["status"] == "active"],
+                            [
+                                a
+                                for a in self.agents.values()
+                                if a["status"] == "active"
+                            ],
                         ),
                     },
                 )
@@ -1787,7 +1797,9 @@ class GadugiEngine:
         except Exception as e:
             self.logger.exception(f"Error updating service in database: {e}")
 
-    def _update_agent_in_db(self, agent_name: str, status: str, pid: int | None) -> None:
+    def _update_agent_in_db(
+        self, agent_name: str, status: str, pid: int | None
+    ) -> None:
         """Update agent status in database."""
         try:
             with sqlite3.connect(self.db_path) as conn:

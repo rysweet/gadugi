@@ -80,7 +80,9 @@ class TestEnvironmentVariableConfiguration(unittest.TestCase):
         # Since tests are in .gadugi/tests/, go up to .gadugi/ for .env.example
         env_example_path = Path(__file__).parent.parent / ".env.example"
 
-        self.assertTrue(env_example_path.exists(), f".env.example file does not exist at {env_example_path}")
+        self.assertTrue(
+            env_example_path.exists(), f".env.example file does not exist at {env_example_path}"
+        )
 
         # Read and verify content
         with open(env_example_path, "r") as f:

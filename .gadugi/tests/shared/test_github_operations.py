@@ -18,12 +18,12 @@ from unittest.mock import Mock, patch
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
+    from shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".claude", "shared"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
 
 try:
-    from claude.shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
+    from shared.github_operations import GitHubError, GitHubOperations, RateLimitError  # type: ignore[assignment]
 except ImportError:
     # These will be implemented after tests pass
     import subprocess

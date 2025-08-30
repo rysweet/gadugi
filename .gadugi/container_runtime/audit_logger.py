@@ -10,7 +10,6 @@ from enum import Enum
 import uuid
 import sys
 import os
-from error_handling import GadugiError  # type: ignore[import]
 
 """
 Audit Logger for Container Execution.
@@ -19,10 +18,9 @@ Provides comprehensive audit logging for container execution activities,
 including security events, resource usage, and operational activities.
 """
 
-
-# Import Enhanced Separation shared modules
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".claude", "shared", "utils"))
+# Add parent directory to path to import from shared
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from shared.utils.error_handling import GadugiError  # type: ignore[import]
 logger = logging.getLogger(__name__)
 
 

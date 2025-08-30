@@ -146,52 +146,23 @@ flowchart TD
 
 ```
 gadugi/
-├── .claude/
-│   ├── agents/                     # All agents stored here
-│   │   ├── TaskAnalyzer.md            # Task analysis and decomposition
-│   │   ├── TaskDecomposer.md          # Parallel task breakdown
-│   │   ├── CodeReviewer.md            # Code review automation
-│   │   ├── CodeReviewResponse.md     # Review feedback processing
-│   │   ├── PromptWriter.md            # Structured prompt creation
-│   │   ├── agent-manager.md            # Agent repository management
-│   │   ├── TaskAnalyzer.md            # Task dependency analysis
-│   │   ├── TaskBoundsEval.md         # Task complexity evaluation
-│   │   ├── TaskDecomposer.md          # Task breakdown specialist
-│   │   ├── TaskResearchAgent.md      # Research and planning
-│   │   ├── WorktreeManager.md         # Git worktree lifecycle
-│   │   ├── ExecutionMonitor.md        # Parallel execution tracking
-│   │   ├── TeamCoach.md               # Team coordination & analytics
-│   │   ├── TeamcoachAgent.md          # Alternative team coaching
-│   │   ├── PrBacklogManager.md       # PR readiness management
-│   │   ├── ProgramManager.md          # Project health & strategy
-│   │   ├── MemoryManager.md           # Memory.md synchronization
-│   │   ├── TestSolver.md              # Test failure diagnosis
-│   │   ├── TestWriter.md              # Test suite creation
-│   │   ├── XpiaDefenseAgent.md       # Security protection
-│   │   └── XpiaDefenseAgent.md       # Security protection
-│   ├── shared/                     # Shared utilities and modules
-│   ├── docs/                       # Additional documentation
-│   └── templates/                  # Workflow templates
-├── .github/
-│   ├── Memory.md                   # AI assistant persistent memory
-│   └── workflows/                  # GitHub Actions workflows
-├── prompts/                        # Prompt templates
-├── docs/                           # Documentation
-│   ├── architecture/
-│   │   ├── AGENT_HIERARCHY.md      # Agent system hierarchy
-│   │   └── SYSTEM_DESIGN.md        # System design documentation
-│   └── templates/
-│       └── CLAUDE_TEMPLATE.md      # Claude instruction template
-├── scripts/                        # Utility scripts
-│   ├── claude                      # Claude CLI executable
-│   ├── claude-WorktreeManager.sh  # Worktree management
-│   └── launch-claude-*.sh          # Launch helpers
-├── config/                         # Configuration files
-│   ├── manifest.yaml               # Agent registry and versions
-│   └── vscode-claude-terminals.json # VSCode configuration
-├── compat/                         # Compatibility shims for legacy imports
-├── types/                          # Type definitions and stubs
-├── CLAUDE.md                       # Project-specific AI instructions
+├── .gadugi/              # Complete Gadugi system (self-contained)
+│   ├── agents/           # AI agents
+│   ├── orchestrator/     # Task orchestration
+│   ├── services/         # Event router, LLM proxy
+│   ├── shared/           # Shared utilities
+│   ├── tests/            # Test suite
+│   └── pyproject.toml    # Python dependencies (UV environment)
+├── .claude/              # Claude AI assistant instructions only
+│   ├── instructions/     # Task-specific instructions
+│   ├── hooks/            # Git hooks
+│   └── Guidelines.md     # Coding guidelines
+├── .github/              # GitHub configuration
+│   ├── Memory.md         # AI assistant persistent memory
+│   └── workflows/        # GitHub Actions workflows
+├── gadugi                # CLI wrapper (entry point)
+├── CLAUDE.md            # Main Claude AI instructions
+├── STRUCTURE.md         # Detailed structure documentation
 ├── claude-generic-instructions.md  # Generic Claude Code best practices
 ├── LICENSE                         # MIT License
 └── README.md                       # This file
@@ -221,11 +192,14 @@ pip install uv
    git clone https://github.com/rysweet/gadugi.git
    cd gadugi
 
-   # Install dependencies (creates .venv automatically)
-   uv sync --extra dev
+   # Install Gadugi dependencies in isolated environment
+   ./gadugi install
 
    # Verify installation
-   uv run python -c "import gadugi; print(f'Gadugi {gadugi.get_version()} ready!')"
+   ./gadugi python -c "import gadugi; print('Gadugi ready!')"
+   
+   # Run tests to verify everything works
+   ./gadugi test
    ```
 
 2. **Configure environment variables**:

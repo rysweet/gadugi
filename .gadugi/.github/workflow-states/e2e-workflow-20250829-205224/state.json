@@ -1,0 +1,16 @@
+{
+  "task_id": "e2e-workflow-20250829-205224",
+  "prompt_file": "end-to-end-test.md",
+  "status": "in_progress",
+  "branch": "feature/e2e-test-101",
+  "issue_number": 101,
+  "pr_number": 201,
+  "current_phase": 9,
+  "current_phase_name": "Task Initialization & Resumption Check",
+  "created_at": "2025-08-30T03:52:24.655039+00:00Z",
+  "updated_at": "2025-08-30T03:52:24.655041+00:00Z",
+  "context": {
+    "completed_at": "2025-08-29T20:52:24.655345"
+  },
+  "error_info": {}
+}
