@@ -39,12 +39,86 @@ Fix file 1, then file 2, then file 3...
 - ✅ Always: `uv run python`, `uv run pytest`
 - ❌ Never: `python`, `pytest` (without `uv run`)
 
-### 3. Development Workflow
-**For code changes:**
-- Use Task tool to hand off to WorkflowManager (orchestrator cannot call subagents)
-- Follow all 11 phases
-- Never edit files directly without workflow
-- Always create worktrees for isolation
+### 3. Development Workflow - 13-Phase Process
+**For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
+
+#### Phase 1: Requirements Analysis
+- Parse the task/prompt
+- Identify success criteria
+- Extract constraints
+- Define deliverables
+
+#### Phase 2: Design Planning
+- Architecture decisions
+- Technology choices
+- Component breakdown
+- Interface definitions
+
+#### Phase 3: Task Decomposition
+- Break into subtasks
+- Identify dependencies
+- Estimate effort
+- Assign priorities
+
+#### Phase 4: Environment Setup
+- Create worktree/branch
+- Set up dependencies
+- Configure tools
+- Verify environment
+
+#### Phase 5: Implementation
+- Core functionality
+- Follow TDD when possible
+- Incremental commits
+- Code documentation
+
+#### Phase 6: Testing
+- Unit tests
+- Integration tests
+- Edge cases
+- Performance tests
+
+#### Phase 7: Code Review Prep
+- Self-review
+- Linting
+- Format code
+- Update documentation
+
+#### Phase 8: Quality Gates
+- Type checking (pyright/mypy)
+- Pre-commit hooks MUST pass
+- Coverage requirements
+- Performance benchmarks
+
+#### Phase 9: Documentation
+- API documentation
+- Usage examples
+- Configuration guide
+- Changelog update
+
+#### Phase 10: PR Creation
+- Descriptive title
+- Comprehensive description
+- Link issues
+- Add reviewers
+
+#### Phase 11: CI/CD Validation
+- Monitor CI pipeline
+- Fix any failures
+- Verify all checks pass
+- Update if needed
+
+#### Phase 12: Review Response
+- Address feedback
+- Make requested changes
+- Discuss alternatives
+- Update PR description
+
+#### Phase 13: Merge & Cleanup
+- Squash if needed
+- Merge PR (WITH USER APPROVAL ONLY)
+- Delete branch
+- Update issues
 
 ### 4. 🚨 CRITICAL: Workflow Enforcement
 
