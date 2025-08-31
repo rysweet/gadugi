@@ -47,208 +47,11 @@ try:
     monitor_workflow = shared_monitor_workflow  # type: ignore[assignment]
 
 except ImportError as e:
-    logging.warning(f"Enhanced Separation modules not available: {e}")
-
-    # Define retry decorator fallback since it's used directly in the code
-    def retry(max_attempts=3, initial_delay=1.0, backoff_factor=2.0, exceptions=(Exception,)):
-        """Fallback retry decorator"""
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                attempt = 0
-                delay = initial_delay
-                _last_exception = None
-
-                while attempt < max_attempts:
-                    try:
-                        return func(*args, **kwargs)
-                    except exceptions as e:
-                        attempt += 1
-                        _last_exception = e
-
-                        if attempt >= max_attempts:
-                            raise
-
-                        time.sleep(delay)
-                        delay *= backoff_factor
-
-                return None
-
-            return wrapper
-
-        return decorator
-
-    # Fallback for basic functionality
-    class WorkflowReliabilityManager:  # type: ignore[no-redef]
-        def __init__(self, config: Any = None) -> None:
-            self.config = config or {}
-            # Initialize attributes that are expected by the tests
-            self.monitoring_states: Dict[str, Any] = {}
-            self.active_workflows: Dict[str, Any] = {}
-            self.default_timeouts: Dict[str, Any] = {}
-
-        def start_workflow_monitoring(self, workflow_id: str, context: Any) -> bool:
-            # Create a mock monitoring state
-            from datetime import datetime
-
-            mock_state = type(
-                "MockMonitoringState",
-                (),
-                {
-                    "workflow_id": workflow_id,
-                    "current_stage": type("MockStage", (), {"value": "initialization"})(),
-                    "error_count": 0,
-                    "recovery_attempts": 0,
-                    "timeout_warnings": 0,
-                    "stage_history": [],
-                    "start_time": datetime.now(),
-                    "stage_start_time": datetime.now(),
-                    "last_heartbeat": datetime.now(),
-                    "health_checks": [],
-                },
-            )()
-            self.monitoring_states[workflow_id] = mock_state
-            self.active_workflows[workflow_id] = context
-            return True
-
-        def update_workflow_stage(self, workflow_id: str, stage: Any, context: Any = None) -> bool:
-            return True
-
-        def handle_workflow_error(
-            self, workflow_id: str, error: Any, stage: Any = None, context: Any = None
-        ) -> Dict[str, Any]:
-            return {
-                "success": False,
-                "recommendations": ["Manual intervention required", "Review error logs"],
-                "recovery_actions": [],
-            }
-
-        def perform_health_check(self, workflow_id: str) -> Any:
-            return None
-
-        def stop_workflow_monitoring(self, workflow_id: str, status: str = "completed") -> bool:
-            # Clean up monitoring state
-            if workflow_id in self.monitoring_states:
-                del self.monitoring_states[workflow_id]
-            if workflow_id in self.active_workflows:
-                del self.active_workflows[workflow_id]
-            return True
-
-        def get_workflow_diagnostics(self, workflow_id: str) -> Dict[str, Any]:
-            """Get workflow diagnostics (fallback implementation)"""
-            return {
-                "workflow_id": workflow_id,
-                "status": "running",
-                "stages": [],
-                "performance": {},
-                "errors": [],
-                "health": "healthy",
-            }
-
-        def create_workflow_persistence(self, workflow_id: str, context: Dict[str, Any]) -> bool:
-            """Create workflow persistence (fallback implementation)"""
-            return True
-
-        def restore_workflow_from_persistence(self, workflow_id: str) -> Dict[str, Any]:
-            """Restore workflow from persistence (fallback implementation)"""
-            return {}
-
-        def check_workflow_timeouts(self, workflow_id: str) -> Dict[str, Any]:
-            """Check workflow timeouts (fallback implementation)"""
-            return {"timeouts": [], "warnings": []}
-
-        def shutdown(self):
-            """Shutdown the reliability manager (fallback implementation)"""
-            self.monitoring_states.clear()
-            self.active_workflows.clear()
-
-    class WorkflowStageValue:
-        """Mock enum value that has a .value attribute"""
-
-        def __init__(self, value):
-            self.value = value
-
-        def __str__(self):
-            return self.value
-
-        def __eq__(self, other):
-            if hasattr(other, "value"):
-                return self.value == other.value
-            return self.value == other
-
-    class WorkflowStage:  # type: ignore[no-redef]
-        # Add common workflow stages as enum-like objects
-        INITIALIZATION = WorkflowStageValue("initialization")
-        PROMPT_ANALYSIS = WorkflowStageValue("prompt_analysis")
-        TASK_PREPARATION = WorkflowStageValue("task_preparation")
-        ISSUE_CREATION = WorkflowStageValue("issue_creation")
-        BRANCH_SETUP = WorkflowStageValue("branch_setup")
-        RESEARCH_PLANNING = WorkflowStageValue("research_planning")
-        IMPLEMENTATION_START = WorkflowStageValue("implementation_start")
-        IMPLEMENTATION_PROGRESS = WorkflowStageValue("implementation_progress")
-        IMPLEMENTATION_COMPLETE = WorkflowStageValue("implementation_complete")
-        TESTING_START = WorkflowStageValue("testing_start")
-        TESTING_COMPLETE = WorkflowStageValue("testing_complete")
-        DOCUMENTATION_UPDATE = WorkflowStageValue("documentation_update")
-        PR_PREPARATION = WorkflowStageValue("pr_preparation")
-        PR_CREATION = WorkflowStageValue("pr_creation")
-        PR_VERIFICATION = WorkflowStageValue("pr_verification")
-        REVIEW_REQUEST = WorkflowStageValue("review_request")
-        REVIEW_PROCESSING = WorkflowStageValue("review_processing")
-        FINAL_CLEANUP = WorkflowStageValue("final_cleanup")
-        COMPLETION = WorkflowStageValue("completion")
-
-    class WorkflowReliabilityContext:
-        """Mock context manager for workflow monitoring"""
-
-        def __init__(
-            self,
-            workflow_id: str,
-            workflow_context: Dict[str, Any],
-            reliability_manager: Optional[WorkflowReliabilityManager] = None,
-        ):
-            self.workflow_id = workflow_id
-            self.workflow_context = workflow_context
-            self.reliability_manager = reliability_manager or WorkflowReliabilityManager()
-            self.started = False
-
-        def __enter__(self) -> WorkflowReliabilityManager:
-            self.started = self.reliability_manager.start_workflow_monitoring(
-                self.workflow_id, self.workflow_context
-            )
-            return self.reliability_manager
-
-        def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-            if self.started:
-                if exc_type:
-                    self.reliability_manager.handle_workflow_error(self.workflow_id, exc_val)
-                    completion_status = "failed"
-                else:
-                    completion_status = "completed"
-                self.reliability_manager.stop_workflow_monitoring(
-                    self.workflow_id, completion_status
-                )
-
-    def monitor_workflow(
-        workflow_id: str,
-        workflow_context: Dict[str, Any],
-        reliability_manager: Optional[WorkflowReliabilityManager] = None,
-    ) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
-        return WorkflowReliabilityContext(workflow_id, workflow_context, reliability_manager)
-
-    def create_reliability_manager(
-        config: Optional[Dict[str, Any]] = None,
-    ) -> WorkflowReliabilityManager:  # type: ignore[no-redef]
-        """Create a fallback WorkflowReliabilityManager instance"""
-        return WorkflowReliabilityManager(config)
-
-    # Define HealthStatus fallback
-    class HealthStatus:  # type: ignore[no-redef]
-        HEALTHY = "healthy"
-        WARNING = "warning"
-        DEGRADED = "degraded"
-        CRITICAL = "critical"
-        FAILED = "failed"
+    logging.error(f"Enhanced Separation modules not available: {e}")
+    raise ImportError(
+        "Required modules not available. Please ensure Enhanced Separation modules are properly installed: "
+        f"{e}"
+    ) from e
 
 
 # Configure logging
@@ -302,64 +105,11 @@ class EnhancedWorkflowManager:
         )
 
         # Initialize Enhanced Separation components
-        try:
-            self.error_handler = ErrorHandler()  # type: ignore
-            self.state_manager = StateManager()  # type: ignore
-            self.task_tracker = TaskTracker()  # type: ignore
-            self.phase_tracker = WorkflowPhaseTracker()  # type: ignore
-            self.github_ops = GitHubOperations(task_id=task_id)  # type: ignore
-        except Exception:
-            # Fallback for basic functionality with mock objects
-            class FallbackErrorHandler:
-                def handle_error(self, *args, **kwargs):
-                    pass
-
-            class FallbackStateManager:
-                def __init__(self):
-                    pass
-
-            class FallbackTaskTracker:
-                def __init__(self):
-                    pass
-
-                def initialize_workflow(self, workflow_id):
-                    """Initialize workflow tracking (fallback implementation)"""
-                    return True
-
-                def initialize_task_list(self, tasks, workflow_id):
-                    """Initialize task list tracking (fallback implementation)"""
-                    return True
-
-            class FallbackWorkflowPhaseTracker:
-                def __init__(self):
-                    pass
-
-            class FallbackGitHubOperations:
-                def __init__(self, task_id=None):
-                    self.task_id = task_id
-
-                def create_issue(self, *args, **kwargs):
-                    return {
-                        "success": True,
-                        "number": 1,
-                        "url": "https://github.com/test/test/issues/1",
-                    }
-
-                def create_branch(self, *args, **kwargs):
-                    return {"success": True, "branch_name": "test-branch"}
-
-                def create_pull_request(self, *args, **kwargs):
-                    return {
-                        "success": True,
-                        "pr_number": 456,
-                        "pr_url": "https://github.com/test/test/pull/456",
-                    }
-
-            self.error_handler = FallbackErrorHandler()
-            self.state_manager = FallbackStateManager()
-            self.task_tracker = FallbackTaskTracker()
-            self.phase_tracker = FallbackWorkflowPhaseTracker()
-            self.github_ops = FallbackGitHubOperations(task_id)
+        self.error_handler = ErrorHandler()  # type: ignore
+        self.state_manager = StateManager()  # type: ignore
+        self.task_tracker = TaskTracker()  # type: ignore
+        self.phase_tracker = WorkflowPhaseTracker()  # type: ignore
+        self.github_ops = GitHubOperations(task_id=task_id)  # type: ignore
 
         # Workflow state tracking
         self.current_phase: Optional[WorkflowStage] = None
@@ -899,12 +649,7 @@ class EnhancedWorkflowManager:
         logger.info("Creating GitHub issue")
 
         if not self.github_ops:
-            # Simulate issue creation for testing
-            return {
-                "issue_number": 999,
-                "issue_url": "https://github.com/test/repo/issues/999",
-                "simulated": True,
-            }
+            raise NotImplementedError("GitHub operations not available. Cannot create issue.")
 
         try:
             issue_data = {
@@ -940,20 +685,16 @@ class EnhancedWorkflowManager:
         """Set up feature branch with validation"""
         logger.info("Setting up feature branch")
 
-        issue_number = issue_result.get("issue_number", 999)
+        issue_number = issue_result.get("issue_number")
+        if not issue_number:
+            raise ValueError("No issue number available from issue creation result")
         branch_name = f"feature/WorkflowManager-reliability-{issue_number}"
 
         try:
-            # Git operations would go here
-            # For now, simulate successful branch creation
-
-            logger.info(f"Created and checked out branch: {branch_name}")
-            return {
-                "branch_name": branch_name,
-                "issue_number": issue_number,
-                "git_status": "clean",
-                "branch_created": True,
-            }
+            # Git operations would go here - implement real branch creation
+            raise NotImplementedError(
+                f"Branch setup not yet implemented for branch '{branch_name}'. Real git operations required."
+            )
 
         except Exception as e:
             logger.error(f"Branch setup failed: {e}")
@@ -965,23 +706,10 @@ class EnhancedWorkflowManager:
         """Research existing implementation and create detailed plan"""
         logger.info("Conducting research and planning")
 
-        # This would involve actual codebase analysis
-        # For now, return simulated research results
-
-        return {
-            "existing_patterns_found": [
-                ".claude/shared/workflow_reliability.py",
-                ".claude/shared/utils/error_handling.py",
-                ".claude/shared/state_management.py",
-            ],
-            "integration_points": [
-                "Enhanced Separation shared modules",
-                "WorkflowManager agent definition",
-                "OrchestratorAgent coordination",
-            ],
-            "implementation_strategy": "Enhance existing WorkflowManager with reliability wrapper",
-            "estimated_complexity": prompt_data.get("complexity_estimate", 1800),
-        }
+        # This would involve actual codebase analysis - implement real research
+        raise NotImplementedError(
+            "Research and planning phase not yet implemented. Real codebase analysis required."
+        )
 
     def _phase_implementation_start(
         self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -989,15 +717,9 @@ class EnhancedWorkflowManager:
         """Start implementation with proper setup"""
         logger.info("Starting implementation phase")
 
-        return {
-            "implementation_started": True,
-            "files_to_create": [
-                ".claude/shared/workflow_reliability.py",
-                ".claude/agents/enhanced_workflow_manager.py",
-            ],
-            "files_to_modify": [".claude/agents/WorkflowManager.md"],
-            "start_time": datetime.now().isoformat(),
-        }
+        raise NotImplementedError(
+            "Implementation start not yet implemented. Real file planning required."
+        )
 
     def _phase_implementation_progress(
         self, impl_start_result: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -1005,20 +727,10 @@ class EnhancedWorkflowManager:
         """Execute main implementation work with progress tracking"""
         logger.info("Executing implementation progress")
 
-        # Simulate progressive implementation
-        files_created = impl_start_result.get("files_to_create", [])
-        files_modified = impl_start_result.get("files_to_modify", [])
-
-        # In real implementation, this would create/modify the actual files
-        # For now, simulate the work
-
-        return {
-            "files_created": files_created,
-            "files_modified": files_modified,
-            "lines_added": 2500,  # Simulated
-            "implementation_progress": 100,
-            "progress_time": datetime.now().isoformat(),
-        }
+        # Real implementation would create/modify actual files
+        raise NotImplementedError(
+            "Implementation progress phase not yet implemented. Real file operations required."
+        )
 
     def _phase_implementation_complete(
         self,
@@ -1028,18 +740,9 @@ class EnhancedWorkflowManager:
         """Complete implementation with validation"""
         logger.info("Completing implementation phase")
 
-        return {
-            "implementation_complete": True,
-            "files_created": impl_progress_result.get("files_created", []),
-            "files_modified": impl_progress_result.get("files_modified", []),
-            "completion_time": datetime.now().isoformat(),
-            "summary": {
-                "total_files": len(impl_progress_result.get("files_created", []))
-                + len(impl_progress_result.get("files_modified", [])),
-                "lines_added": impl_progress_result.get("lines_added", 0),
-                "implementation_successful": True,
-            },
-        }
+        raise NotImplementedError(
+            "Implementation completion not yet implemented. Real validation required."
+        )
 
     def _phase_testing(
         self,
@@ -1049,18 +752,9 @@ class EnhancedWorkflowManager:
         """Execute comprehensive testing"""
         logger.info("Executing testing phase")
 
-        return {
-            "tests_created": [
-                "tests/test_enhanced_workflow_manager.py",
-                "tests/test_workflow_reliability.py",
-            ],
-            "test_status": "passed",
-            "test_coverage": 95,
-            "tests_run": 45,
-            "tests_passed": 43,
-            "tests_failed": 0,
-            "tests_skipped": 2,
-        }
+        raise NotImplementedError(
+            "Testing phase not yet implemented. Real test execution required."
+        )
 
     def _phase_documentation(
         self,
@@ -1070,13 +764,9 @@ class EnhancedWorkflowManager:
         """Update documentation"""
         logger.info("Updating documentation")
 
-        return {
-            "files_updated": [
-                "README.md",
-                ".claude/docs/WORKFLOW_MANAGER_RELIABILITY.md",
-            ],
-            "documentation_complete": True,
-        }
+        raise NotImplementedError(
+            "Documentation phase not yet implemented. Real document updates required."
+        )
 
     def _phase_pr_preparation(
         self,
@@ -1086,11 +776,9 @@ class EnhancedWorkflowManager:
         """Prepare pull request"""
         logger.info("Preparing pull request")
 
-        return {
-            "pr_title": "Fix issue #73: WorkflowManager execution reliability improvements",
-            "pr_body": self._format_pr_body(implementation_result),
-            "pr_ready": True,
-        }
+        raise NotImplementedError(
+            "PR preparation not yet implemented. Real PR formatting required."
+        )
 
     def _phase_pr_creation(
         self, pr_prep_result: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -1098,13 +786,10 @@ class EnhancedWorkflowManager:
         """Create pull request with verification"""
         logger.info("Creating pull request")
 
-        # Simulate PR creation
-        return {
-            "pr_number": 125,
-            "pr_url": "https://github.com/test/repo/pull/125",
-            "pr_title": pr_prep_result.get("pr_title"),
-            "pr_created": True,
-        }
+        # Real PR creation implementation required
+        raise NotImplementedError(
+            "PR creation not yet implemented. Real GitHub API integration required."
+        )
 
     def _phase_pr_verification(
         self, pr_create_result: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -1112,12 +797,9 @@ class EnhancedWorkflowManager:
         """Verify pull request was created successfully"""
         logger.info("Verifying pull request")
 
-        return {
-            "pr_verified": True,
-            "pr_number": pr_create_result.get("pr_number"),
-            "checks_status": "pending",
-            "verification_complete": True,
-        }
+        raise NotImplementedError(
+            "PR verification not yet implemented. Real GitHub API integration required."
+        )
 
     def _phase_review_processing(
         self, pr_result: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -1125,12 +807,10 @@ class EnhancedWorkflowManager:
         """Process code review"""
         logger.info("Processing code review")
 
-        # This would invoke the CodeReviewer agent
-        return {
-            "review_requested": True,
-            "review_status": "pending",
-            "pr_number": pr_result.get("pr_number"),
-        }
+        # Real code review processing required
+        raise NotImplementedError(
+            "Review processing not yet implemented. CodeReviewer agent integration required."
+        )
 
     def _phase_final_cleanup(
         self, review_result: Dict[str, Any], reliability: WorkflowReliabilityManager
@@ -1138,11 +818,9 @@ class EnhancedWorkflowManager:
         """Perform final cleanup"""
         logger.info("Performing final cleanup")
 
-        return {
-            "cleanup_complete": True,
-            "status": "success",
-            "final_status": "workflow_completed_successfully",
-        }
+        raise NotImplementedError(
+            "Final cleanup not yet implemented. Real cleanup operations required."
+        )
 
     # Helper methods
 
@@ -1203,84 +881,11 @@ class EnhancedWorkflowManager:
 
     def _format_issue_body(self, prompt_data: Dict[str, Any]) -> str:
         """Format GitHub issue body"""
-        requirements = prompt_data.get("requirements", [])
-        success_criteria = prompt_data.get("success_criteria", [])
-
-        body = f"""# {prompt_data.get('feature_name', 'Feature Implementation')}
-
-## Context
-This issue was created automatically by the Enhanced WorkflowManager to track implementation progress.  # noqa: E501
-
-## Requirements
-"""
-
-        for req in requirements:
-            body += f"- {req}\n"
-
-        body += "\n## Success Criteria\n"
-
-        for criterion in success_criteria:
-            body += f"- {criterion}\n"
-
-        body += f"""
-## Implementation Details
-- **Workflow ID**: {self.workflow_id}
-- **Complexity Estimate**: {prompt_data.get('complexity_estimate', 'Unknown')} seconds
-- **Monitoring Enabled**: {self.config.enable_monitoring}
-
-*Note: This issue was created by an AI agent on behalf of the repository owner.*
-"""
-
-        return body
+        raise NotImplementedError("Issue body formatting not yet implemented.")
 
     def _format_pr_body(self, implementation_result: Dict[str, Any]) -> str:
         """Format pull request body"""
-        files_created = implementation_result.get("files_created", [])
-        files_modified = implementation_result.get("files_modified", [])
-
-        body = """# WorkflowManager Execution Reliability Improvements
-
-## Summary
-This PR implements comprehensive reliability improvements for the WorkflowManager addressing Issue #73.  # noqa: E501
-
-## Changes Made
-### Files Created
-"""
-
-        for file_path in files_created:
-            body += f"- `{file_path}`\n"
-
-        body += "\n### Files Modified\n"
-
-        for file_path in files_modified:
-            body += f"- `{file_path}`\n"
-
-        body += f"""
-## Key Features Implemented
-- Comprehensive logging throughout all workflow phases
-- Enhanced error handling with graceful recovery mechanisms
-- Timeout detection between phases with automatic recovery
-- State persistence for workflow resumption after interruption
-- Health checks between phases for system stability
-- Performance monitoring and diagnostics
-
-## Test Plan
-- [x] Unit tests for reliability manager
-- [x] Integration tests for enhanced workflow manager
-- [x] Error handling and recovery scenarios
-- [x] Performance monitoring validation
-
-## Workflow Details
-- **Workflow ID**: {self.workflow_id}
-- **Files Created**: {len(files_created)}
-- **Files Modified**: {len(files_modified)}
-- **Implementation Duration**: {implementation_result.get('summary',
-    {}).get('lines_added', 0)} lines added
-
-*Note: This PR was created by an AI agent on behalf of the repository owner.*
-"""
-
-        return body
+        raise NotImplementedError("PR body formatting not yet implemented.")
 
     def resume_workflow(self, workflow_id: str) -> Dict[str, Any]:
         """Resume a previously interrupted workflow"""
@@ -1297,22 +902,10 @@ This PR implements comprehensive reliability improvements for the WorkflowManage
                     "workflow_id": workflow_id,
                 }
 
-            # Resume workflow from saved state
-            self.workflow_id = workflow_id
-            self.workflow_context = restored_state
-
-            # Determine resumption point and continue execution
-            # This would involve sophisticated state analysis and resumption logic
-
-            logger.info(f"Successfully resumed workflow: {workflow_id}")
-            return {
-                "success": True,
-                "workflow_id": workflow_id,
-                "resumed_from": restored_state.get("monitoring_state", {}).get(
-                    "current_stage", "unknown"
-                ),
-                "resumption_time": datetime.now().isoformat(),
-            }
+            # Real workflow resumption logic required
+            raise NotImplementedError(
+                "Workflow resumption not yet implemented. Sophisticated state analysis and resumption logic required."
+            )
 
         except Exception as e:
             logger.error(f"Failed to resume workflow {workflow_id}: {e}")

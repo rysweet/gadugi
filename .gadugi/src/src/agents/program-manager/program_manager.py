@@ -1,5 +1,6 @@
 from datetime import timedelta
 import json
+import logging
 import os
 import re
 import subprocess
@@ -28,20 +29,29 @@ try:
 
     AgentMemoryInterface = BaseAgentMemoryInterface
 except ImportError:
-    # Fallback if memory_utils not available
+    # Import fallback - provides basic memory interface when memory_utils not available
     class AgentMemoryInterface:
         def __init__(self, agent_id: str, agent_type: str):
             self.agent_id = agent_id
             self.agent_type = agent_type
+            logging.warning(
+                f"Using fallback AgentMemoryInterface for {agent_id}. "
+                "memory_utils module not available - memory operations will be limited."
+            )
 
         def get_project_context(self) -> Dict:
+            logging.warning("get_project_context: Using fallback - returning empty context")
             return {}
 
         def record_project_memory(self, category: str, content: str):
-            print(f"[Memory] {category}: {content}")
+            # Fallback: log to console with clear indication this is fallback behavior
+            logging.info(f"[FALLBACK Memory] {category}: {content}")
+            print(f"[FALLBACK Memory] {category}: {content}")
 
         def record_agent_memory(self, category: str, content: str):
-            print(f"[Agent Memory] {category}: {content}")
+            # Fallback: log to console with clear indication this is fallback behavior
+            logging.info(f"[FALLBACK Agent Memory] {category}: {content}")
+            print(f"[FALLBACK Agent Memory] {category}: {content}")
 
 
 class IssueStage(Enum):

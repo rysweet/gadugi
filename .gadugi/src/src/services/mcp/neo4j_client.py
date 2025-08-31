@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
@@ -18,23 +19,24 @@ class Neo4jMemoryClient:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7687",
-        username: str = "neo4j",
-        password: str = "password",
-        database: str = "neo4j",
+        uri: str = None,
+        username: str = None,
+        password: str = None,
+        database: str = None,
     ):
         """Initialize Neo4j client.
 
         Args:
-            uri: Neo4j connection URI
-            username: Neo4j username
-            password: Neo4j password
-            database: Database name
+            uri: Neo4j connection URI (defaults to env var NEO4J_URI or bolt://localhost:7689)
+            username: Neo4j username (defaults to env var NEO4J_USERNAME or neo4j)
+            password: Neo4j password (defaults to env var NEO4J_PASSWORD or gadugi-password)
+            database: Database name (defaults to env var NEO4J_DATABASE or gadugi)
         """
-        self.uri = uri
-        self.username = username
-        self.password = password
-        self.database = database
+        # Use environment variables with correct defaults for Gadugi
+        self.uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7689")
+        self.username = username or os.getenv("NEO4J_USERNAME", "neo4j")
+        self.password = password or os.getenv("NEO4J_PASSWORD", "gadugi-password")
+        self.database = database or os.getenv("NEO4J_DATABASE", "neo4j")
 
         self.logger = logging.getLogger(__name__)
         self._driver: Optional[AsyncDriver] = None

@@ -5,7 +5,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/service-check.sh"
+            "command": "python3 .claude/hooks/startup-service-manager.py",
+            "description": "Enhanced service manager - checks .env, Neo4j config, and auto-repairs"
+          },
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/service-check.sh",
+            "description": "Legacy service check for compatibility"
           }
         ]
       }

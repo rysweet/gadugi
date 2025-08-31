@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -249,18 +250,19 @@ class GraphDatabaseService:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7687",
-        username: str = "neo4j",
-        password: str = "password",
+        uri: str = None,
+        username: str = None,
+        password: str = None,
         database: str = "gadugi",
         max_pool_size: int = 50,
         connection_timeout: float = 30.0,
         max_transaction_retry_time: float = 30.0,
     ) -> None:
         """Initialize the graph database service."""
-        self.uri = uri
-        self.username = username
-        self.password = password
+        # Use environment variables with correct defaults for Gadugi
+        self.uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7689")
+        self.username = username or os.getenv("NEO4J_USERNAME", "neo4j")
+        self.password = password or os.getenv("NEO4J_PASSWORD", "gadugi-password")
         self.database = database
         self.max_pool_size = max_pool_size
         self.connection_timeout = connection_timeout

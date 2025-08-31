@@ -46,6 +46,110 @@
 - Required complete reimplementation
 - Loss of user trust
 
+## 🔥 ABSOLUTELY FORBIDDEN PATTERNS - FIRING OFFENSE
+
+**These code patterns are NEVER acceptable under ANY circumstances:**
+
+### ❌ FAKE METHOD IMPLEMENTATIONS
+```python
+# FORBIDDEN - Fake cache method
+def get_from_cache(self, key):
+    # TODO: Implement cache logic
+    return None
+
+# FORBIDDEN - Mock service call
+async def start_service(self):
+    # Simulate service start
+    time.sleep(2)
+    print("Service started")
+
+# FORBIDDEN - Empty stub with pass
+def process_data(self, data):
+    pass  # Will implement later
+```
+
+### ❌ FALLBACK CLASSES THAT DO NOTHING
+```python
+# FORBIDDEN - Empty fallback class
+class DatabaseManager:
+    def __init__(self):
+        pass  # Fallback when DB not available
+
+    def save(self, data):
+        pass  # No-op fallback
+```
+
+### ❌ FAKE EXTERNAL OPERATIONS
+```python
+# FORBIDDEN - Pretend file operations
+def backup_database(self):
+    print("Creating database backup...")
+    time.sleep(3)
+    print("Backup completed successfully")
+    return True  # Lie - no backup was created
+
+# FORBIDDEN - Fake service management
+def restart_docker_container(self):
+    subprocess.run(["echo", "Restarting container"])
+    return True  # Container was never restarted
+```
+
+### ❌ SLEEP-AND-PRETEND ANTIPATTERN
+```python
+# FORBIDDEN - The worst antipattern
+def deploy_application(self):
+    print("Deploying application...")
+    time.sleep(5)  # Pretend to deploy
+    print("Deployment successful!")
+    return {"status": "success"}  # Complete lie
+```
+
+### ✅ ACCEPTABLE ALTERNATIVES
+
+**Instead of fake implementations, use:**
+
+```python
+# CORRECT - Clear NotImplementedError
+def get_from_cache(self, key):
+    raise NotImplementedError(
+        "Cache implementation required. Please provide Redis client or implement cache backend."
+    )
+
+# CORRECT - Real fallback with clear limitations
+class DatabaseManager:
+    def __init__(self, db_client=None):
+        if not db_client:
+            logging.warning("No database client - using file-based fallback")
+        self.db_client = db_client
+
+    def save(self, data):
+        if self.db_client:
+            return self.db_client.save(data)
+        else:
+            # Real fallback - actually saves to file
+            with open("fallback_data.json", "a") as f:
+                json.dump(data, f)
+                f.write("\n")
+            return True
+
+# CORRECT - Real service operation with error handling
+def restart_docker_container(self, container_name):
+    try:
+        result = subprocess.run(
+            ["docker", "restart", container_name],
+            capture_output=True, text=True, check=True
+        )
+        return True
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to restart container {container_name}: {e}")
+```
+
+**ENFORCEMENT:**
+- Code review will REJECT any PR containing these patterns
+- Any discovered fake implementation triggers immediate rework
+- No exceptions, no "temporary" fake code
+- If you can't implement it fully, raise NotImplementedError with clear message
+
 ## 🚀 Default Approach: Parallel Task Execution
 
 **For ANY new task, ALWAYS:**

@@ -32,6 +32,7 @@ class AgentType(Enum):
     PR_BACKLOG_MANAGER = "PrBacklogManager"
     MEMORY_MANAGER = "MemoryManager"
     EVENT_ROUTER_SERVICE_MANAGER = "EventRouterServiceManager"
+    TEAM_COACH = "TeamCoach"
 
 
 @dataclass
@@ -190,6 +191,43 @@ class AgentRegistry:
             ],
             knowledge_dir=Path(".claude/agents/TaskDecomposer/knowledge"),
             description="Decomposes complex tasks into optimal parallel subtasks",
+            enabled=True,
+        )
+
+        # Team Coach
+        self._registry[AgentType.TEAM_COACH] = AgentRegistration(
+            agent_type=AgentType.TEAM_COACH,
+            agent_class=self._lazy_load_class("teamcoach", "team_coach", "TeamCoach"),
+            module_path=".claude/agents/teamcoach/team_coach.py",
+            capabilities=AgentCapabilities(
+                can_create_prs=True,
+                can_parallelize=False,
+                can_write_code=False,
+                can_review_code=True,
+                can_test=False,
+                can_document=True,
+                expertise_areas=[
+                    "performance_analysis",
+                    "team_optimization",
+                    "coaching",
+                    "metrics_collection",
+                    "workflow_analysis",
+                    "session_analysis",
+                ],
+                max_parallel_tasks=1,
+            ),
+            expertise_areas=[
+                "team_performance",
+                "coaching",
+                "metrics_analysis",
+                "workflow_optimization",
+                "session_analysis",
+                "improvement_identification",
+                "github_integration",
+                "performance_trends",
+            ],
+            knowledge_dir=Path(".claude/agents/teamcoach/knowledge"),
+            description="Analyzes team performance, provides coaching insights, and creates improvement recommendations",
             enabled=True,
         )
 
@@ -382,6 +420,24 @@ class AgentRegistry:
             word in task_lower for word in ["break down", "subtask", "decomposition"]
         ):
             return AgentType.TASK_DECOMPOSER
+        elif any(
+            word in task_lower
+            for word in [
+                "team",
+                "coaching",
+                "performance",
+                "metrics",
+                "session analysis",
+                "improvement",
+                "optimize team",
+                "team performance",
+                "analyze session",
+                "coaching insights",
+                "performance trends",
+                "workflow analysis",
+            ]
+        ):
+            return AgentType.TEAM_COACH
 
         # Default to orchestrator for complex tasks
         return AgentType.ORCHESTRATOR

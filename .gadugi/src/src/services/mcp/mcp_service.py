@@ -27,39 +27,11 @@ from pathlib import Path
 from typing import Any
 
 try:
-    # import redis  # Commented out to fix unused import lint error
-    REDIS_AVAILABLE = True  # type: ignore
+    import redis  # type: ignore[import] # noqa: F401
+
+    REDIS_AVAILABLE = True
 except ImportError:
-    REDIS_AVAILABLE = False  # type: ignore
-
-    # Mock Redis for development
-    class MockRedis:
-        def __init__(self, *args, **kwargs) -> None:  # type: ignore
-            pass
-
-        def get(self, key) -> None:  # type: ignore
-            return None
-
-        def set(self, key, value, ex=None) -> bool:  # type: ignore
-            return True
-
-        def delete(self, key) -> bool:  # type: ignore
-            return True
-
-        def exists(self, key) -> bool:  # type: ignore
-            return False
-
-        def keys(self, pattern="*"):  # type: ignore
-            return []
-
-        def flushdb(self) -> bool:
-            return True
-
-        def ping(self) -> bool:
-            return True
-
-        def close(self) -> None:
-            pass
+    REDIS_AVAILABLE = False
 
 
 class MemoryType(Enum):
@@ -677,6 +649,72 @@ class MemoryManager:
             return MemoryStats()
 
 
+class InMemoryContextCache:
+    """In-memory context cache for when Redis is not available."""
+
+    def __init__(self) -> None:
+        self._data: dict[str, str] = {}
+        self._expiry: dict[str, datetime] = {}
+        self._lock = threading.RLock()
+
+    def set(self, key: str, value: str, ex: int | None = None) -> bool:
+        """Set a key-value pair with optional expiration."""
+        with self._lock:
+            self._data[key] = value
+            if ex is not None:
+                self._expiry[key] = datetime.now() + timedelta(seconds=ex)
+            elif key in self._expiry:
+                del self._expiry[key]
+            return True
+
+    def get(self, key: str) -> str | None:
+        """Get a value by key, returns None if not found or expired."""
+        with self._lock:
+            if key not in self._data:
+                return None
+
+            # Check if expired
+            if key in self._expiry and datetime.now() > self._expiry[key]:
+                del self._data[key]
+                del self._expiry[key]
+                return None
+
+            return self._data[key]
+
+    def delete(self, key: str) -> int:
+        """Delete a key, returns number of keys deleted."""
+        with self._lock:
+            if key in self._data:
+                del self._data[key]
+                if key in self._expiry:
+                    del self._expiry[key]
+                return 1
+            return 0
+
+    def keys(self, pattern: str = "*") -> list[str]:
+        """Get all keys matching pattern (simplified - only supports '*')."""
+        with self._lock:
+            # Clean up expired keys first
+            current_time = datetime.now()
+            expired_keys = [k for k, exp_time in self._expiry.items() if current_time > exp_time]
+            for key in expired_keys:
+                if key in self._data:
+                    del self._data[key]
+                del self._expiry[key]
+
+            if pattern == "*":
+                return list(self._data.keys())
+            # For simplicity, only implement basic prefix matching
+            if pattern.endswith("*"):
+                prefix = pattern[:-1]
+                return [k for k in self._data.keys() if k.startswith(prefix)]
+            return [k for k in self._data.keys() if k == pattern]
+
+    def close(self) -> None:
+        """Close the cache (no-op for in-memory)."""
+        pass
+
+
 class ContextManager:
     """Context management component of MCP service."""
 
@@ -686,20 +724,34 @@ class ContextManager:
 
         # Redis for fast context access
         self.redis_client = None
+        self.use_in_memory_cache = False
+
         if REDIS_AVAILABLE and redis_url:
             try:
                 import redis  # type: ignore[import]
 
                 self.redis_client = redis.from_url(redis_url)
                 self.redis_client.ping()  # Test connection
+                self.logger.info("Connected to Redis for context caching")
             except Exception as e:
                 self.logger.warning(
-                    f"Redis connection failed, using local storage: {e}",
+                    f"Redis connection failed, using in-memory cache: {e}",
                 )
                 self.redis_client = None
 
         if not self.redis_client:
-            self.redis_client = MockRedis()
+            if redis_url:
+                # Redis was requested but failed - raise exception
+                raise RuntimeError(
+                    f"Redis connection required but failed. Redis URL: {redis_url}. "
+                    "Either install Redis and ensure it's running, or set redis_url=None "
+                    "to use in-memory caching for development."
+                )
+            else:
+                # No Redis requested, use in-memory cache
+                self.redis_client = InMemoryContextCache()
+                self.use_in_memory_cache = True
+                self.logger.info("Using in-memory cache for context storage")
 
         # Local storage fallback
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -912,16 +964,19 @@ class ContextManager:
             with self.lock:
                 contexts = []
 
-                # Get from Redis
+                # Get from Redis or in-memory cache
                 pattern = "context:*"
-                redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
-                )
+                redis_keys = self.redis_client.keys(pattern) if self.redis_client else []
 
                 for key in redis_keys:
                     try:
-                        key_str = key.decode() if isinstance(key, bytes) else str(key)
-                        redis_data = self.redis_client.get(key_str)  # type: ignore[attr-defined]
+                        # Handle both Redis bytes and in-memory string keys
+                        if self.use_in_memory_cache:
+                            key_str = str(key)
+                        else:
+                            key_str = key.decode() if isinstance(key, bytes) else str(key)
+
+                        redis_data = self.redis_client.get(key_str)
                         if redis_data:
                             data = json.loads(redis_data)
                             if context_type is None or data["type"] == context_type.value:
@@ -980,9 +1035,10 @@ class ContextManager:
 
         try:
             with self.lock:
-                # Delete from Redis
+                # Delete from Redis or in-memory cache
                 redis_key = f"context:{context_id}"
-                self.redis_client.delete(redis_key)  # type: ignore[attr-defined]
+                if self.redis_client:
+                    self.redis_client.delete(redis_key)
 
                 # Delete from database
                 with sqlite3.connect(str(self.db_path)) as conn:
@@ -1036,25 +1092,24 @@ class ContextManager:
                     deleted_count += cursor.rowcount
                     conn.commit()
 
-                # Redis contexts expire automatically, but we can check manually
-                pattern = "context:*"
-                redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
-                )
+                # Redis contexts expire automatically, but we can check manually for in-memory cache
+                if self.use_in_memory_cache and self.redis_client:
+                    pattern = "context:*"
+                    redis_keys = self.redis_client.keys(pattern)
 
-                for key in redis_keys:
-                    try:
-                        key_str = key.decode() if isinstance(key, bytes) else str(key)
-                        redis_data = self.redis_client.get(key_str)  # type: ignore[attr-defined]
-                        if redis_data:
-                            data = json.loads(redis_data)
-                            if data.get("expires_at"):
-                                expires_at = datetime.fromisoformat(data["expires_at"])
-                                if expires_at < current_time:
-                                    self.redis_client.delete(key_str)  # type: ignore[attr-defined]
-                                    deleted_count += 1
-                    except Exception:
-                        continue
+                    for key in redis_keys:
+                        try:
+                            key_str = str(key)
+                            redis_data = self.redis_client.get(key_str)
+                            if redis_data:
+                                data = json.loads(redis_data)
+                                if data.get("expires_at"):
+                                    expires_at = datetime.fromisoformat(data["expires_at"])
+                                    if expires_at < current_time:
+                                        self.redis_client.delete(key_str)
+                                        deleted_count += 1
+                        except Exception:
+                            continue
 
                 execution_time = time.time() - start_time
 
@@ -1163,8 +1218,11 @@ class MCPService:
 
         # Check dependencies
         self.redis_available = REDIS_AVAILABLE
-        if not REDIS_AVAILABLE:
-            self.logger.warning("Redis not available, using mock implementation")
+        if not REDIS_AVAILABLE and redis_url:
+            self.logger.warning(
+                "Redis package not installed but Redis URL provided. "
+                "Install redis-py: pip install redis"
+            )
 
     def _setup_logging(self) -> logging.Logger:
         """Set up logging for the MCP service."""
@@ -1213,8 +1271,8 @@ class MCPService:
         self.executor.shutdown(wait=True)
 
         # Close Redis connection if available
-        if hasattr(self.context_manager.redis_client, "close"):
-            self.context_manager.redis_client.close()  # type: ignore[attr-defined]
+        if self.context_manager.redis_client:
+            self.context_manager.redis_client.close()
 
         self.logger.info("MCP service stopped")
 

@@ -11,6 +11,7 @@ Implements all required memory types per specification:
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -159,15 +160,16 @@ class MemoryManager:
 
     def __init__(
         self,
-        uri: str = "bolt://localhost:7687",
-        user: str = "neo4j",
-        password: str = "gadugi123!",
-        database: str = "neo4j",
+        uri: str = None,
+        user: str = None,
+        password: str = None,
+        database: str = None,
     ):
-        self.uri = uri
-        self.user = user
-        self.password = password
-        self.database = database
+        # Use environment variables with correct defaults for Gadugi
+        self.uri = uri or os.getenv("NEO4J_URI", "bolt://localhost:7689")
+        self.user = user or os.getenv("NEO4J_USERNAME", "neo4j")
+        self.password = password or os.getenv("NEO4J_PASSWORD", "gadugi-password")
+        self.database = database or os.getenv("NEO4J_DATABASE", "neo4j")
         self._driver: Optional[AsyncDriver] = None
 
     async def connect(self) -> None:
