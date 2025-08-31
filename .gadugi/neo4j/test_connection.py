@@ -82,14 +82,16 @@ class Neo4jConnection:
 
                 # Count constraints
                 result = session.run("SHOW CONSTRAINTS YIELD name RETURN count(*) AS count")
-                count = result.single()["count"]
+                record = result.single()
+                count = record["count"] if record else 0
                 print(f"✅ Found {count} constraints")
 
                 # Count indexes
                 result = session.run(
                     "SHOW INDEXES YIELD name WHERE name <> 'constraint' RETURN count(*) AS count"
                 )
-                count = result.single()["count"]
+                record = result.single()
+                count = record["count"] if record else 0
                 print(f"✅ Found {count} indexes")
 
                 return True
@@ -120,7 +122,8 @@ class Neo4jConnection:
                     content="This is a test memory created by the connection test script",
                 )
 
-                memory_id = result.single()["id"]
+                record = result.single()
+                memory_id = record["id"] if record else "unknown"
                 print(f"✅ Created test memory: {memory_id}")
                 return True
 
@@ -224,10 +227,12 @@ class Neo4jConnection:
             try:
                 with self.driver.session() as session:
                     result = session.run("MATCH (n) RETURN count(n) AS nodes")
-                    node_count = result.single()["nodes"]
+                    record = result.single()
+                    node_count = record["nodes"] if record else 0
 
                     result = session.run("MATCH ()-[r]->() RETURN count(r) AS relationships")
-                    rel_count = result.single()["relationships"]
+                    record = result.single()
+                    rel_count = record["relationships"] if record else 0
 
                     print("\n📊 Basic Statistics:")
                     print(f"  Total nodes: {node_count}")

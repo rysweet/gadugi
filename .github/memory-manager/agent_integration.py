@@ -15,7 +15,7 @@ import sys
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
-from simple_memory_manager import SimpleMemoryManager
+from simple_memory_manager import SimpleMemoryManager  # noqa: E402
 
 
 class AgentMemoryIntegration:

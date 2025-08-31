@@ -34,11 +34,9 @@ try:
     from .state_management import (
         StateManager,
         TaskState,
-        WorkflowPhase,
         CheckpointManager,
     )  # type: ignore
-    from .task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
-    from .github_operations import GitHubOperations  # type: ignore
+    from .task_tracking import TaskTracker, WorkflowPhaseTracker  # type: ignore
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
 

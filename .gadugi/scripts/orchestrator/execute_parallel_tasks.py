@@ -249,12 +249,13 @@ Execute complete workflow for {task_id} using prompt file {prompt_file}
                 logger.error(f"Task {task['id']} failed with exception: {result}")
                 self.results[task["id"]] = {"success": False, "error": str(result)}
                 failed += 1
-            elif result.get("success"):
+            elif isinstance(result, dict) and result.get("success"):
                 logger.info(f"✅ Task {task['id']}: SUCCESS")
                 self.results[task["id"]] = result
                 successful += 1
             else:
-                logger.error(f"❌ Task {task['id']}: FAILED - {result.get('error')}")
+                error_msg = result.get("error") if isinstance(result, dict) else str(result)
+                logger.error(f"❌ Task {task['id']}: FAILED - {error_msg}")
                 self.results[task["id"]] = result
                 failed += 1
 

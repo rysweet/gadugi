@@ -97,14 +97,14 @@ try:
         f.write('test')
     print("  /tmp write: SUCCESS")
     os.remove('/tmp/test_write.txt')
-except:
+except Exception:
     print("  /tmp write: FAILED")
 
 try:
     with open('/test_root_write.txt', 'w') as f:
         f.write('test')
     print("  Root write: SUCCESS (SECURITY ISSUE!)")
-except:
+except Exception:
     print("  Root write: BLOCKED (Good!)")
 """
 

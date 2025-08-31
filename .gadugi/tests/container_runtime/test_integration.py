@@ -12,7 +12,7 @@ import pytest
 import tempfile
 from unittest.mock import patch, Mock
 
-from container_runtime import ContainerExecutionEngine
+from container_runtime.execution_engine import ContainerExecutionEngine  # type: ignore
 from container_runtime.agent_integration import AgentContainerExecutor
 
 

@@ -12,7 +12,7 @@ from pathlib import Path
 shared_path = Path(__file__).parent.parent / "shared"
 sys.path.insert(0, str(shared_path))
 
-from xpia_defense import XPIADefenseAgent, SecurityMode  # type: ignore[import]
+from xpia_defense import XPIADefenseAgent, SecurityMode  # type: ignore[import]  # noqa: E402
 
 
 def validate_web_operation(hook_data):

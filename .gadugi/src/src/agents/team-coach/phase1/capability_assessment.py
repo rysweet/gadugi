@@ -349,7 +349,9 @@ class CapabilityAssessment:
             if execution_times:
                 # Normalize execution times (lower is better)
                 avg_time = np.mean(execution_times)
-                efficiency_factor = min(1.0, 300.0 / max(1.0, avg_time))  # 5 minutes as baseline
+                efficiency_factor = min(
+                    1.0, 300.0 / max(1.0, float(avg_time))
+                )  # 5 minutes as baseline
                 performance_score = (performance_score * 0.8) + (efficiency_factor * 0.2)
 
             # Determine proficiency level
@@ -476,7 +478,7 @@ class CapabilityAssessment:
         # Adjust for consistency
         if len(success_rates) > 1:
             consistency = 1.0 - np.std(success_rates)
-            consistency_factor = max(0.0, consistency)
+            consistency_factor = max(0.0, float(consistency))
         else:
             consistency_factor = 0.5  # Moderate confidence for single data point
 

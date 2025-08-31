@@ -31,15 +31,13 @@ except ImportError:
     WebSocketServerProtocol = None
 
 try:
-    from aiohttp import web, WSMsgType  # type: ignore
+    from aiohttp import web  # type: ignore
 
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
 
 try:
-    import docker  # type: ignore
-
     DOCKER_AVAILABLE = True
 except ImportError:
     DOCKER_AVAILABLE = False

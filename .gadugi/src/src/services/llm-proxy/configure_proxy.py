@@ -638,7 +638,7 @@ def main():
             # Clean up scheduler script
             try:
                 os.unlink(__file__)
-            except:
+            except Exception:
                 pass
 
             sys.exit(0)

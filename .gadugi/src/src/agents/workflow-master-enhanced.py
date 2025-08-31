@@ -1081,7 +1081,7 @@ for pattern in patterns:
                 content = f.read().lower()
                 if pattern in content:
                     count += 1
-        except:
+        except Exception:
             pass
     if count > 0:
         analysis_results['patterns_found'].append({

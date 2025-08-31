@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 
 def print_section(title: str):
@@ -19,7 +19,7 @@ def print_section(title: str):
     print("=" * 60)
 
 
-def run_command(cmd: List[str], description: str = None) -> Tuple[int, str, str]:
+def run_command(cmd: List[str], description: Optional[str] = None) -> Tuple[int, str, str]:
     """Run a command and return exit code, stdout, stderr."""
     if description:
         print(f"  Running: {description}")

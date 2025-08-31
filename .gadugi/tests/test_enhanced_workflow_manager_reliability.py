@@ -475,7 +475,7 @@ class TestEnhancedWorkflowManager:
             return {"test_result": "success", "phase_completed": True}
 
         result = manager._execute_phase_with_monitoring(
-            WorkflowStage.INITIALIZATION,
+            WorkflowStage.INITIALIZATION,  # type: ignore[arg-type]
             test_phase_func,
             mock_reliability,  # type: ignore[arg-type]
         )
@@ -511,7 +511,7 @@ class TestEnhancedWorkflowManager:
 
         # Should succeed after retry
         result = manager._execute_phase_with_monitoring(
-            WorkflowStage.IMPLEMENTATION_START,
+            WorkflowStage.IMPLEMENTATION_START,  # type: ignore[arg-type]
             flaky_phase_func,
             mock_reliability,  # type: ignore[arg-type]
         )

@@ -17,7 +17,6 @@ try:
     from .memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
-        BackendConfig,
         HealthMonitorConfig,
         create_memory_health_monitor,
     )
