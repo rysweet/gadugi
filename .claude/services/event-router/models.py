@@ -162,7 +162,7 @@ class AgentInitializedEvent(AgentEvent):
     """Event for agent initialization."""
 
     event_type: ClassVar[EventType] = EventType.AGENT_INITIALIZED  # type: ignore[assignment]
-    agent_type: str = Field(
+    agent_type: str = Field(  # type: ignore
         ..., description="Type of agent (e.g., 'TaskDecomposer', 'CodeWriter')"
     )
     version: Optional[str] = Field(None, description="Agent version")

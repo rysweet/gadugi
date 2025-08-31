@@ -241,7 +241,7 @@ def parse_tool_result_content(content):
                 else:
                     try:
                         result_parts.append(json.dumps(item, ensure_ascii=False))
-                    except:
+                    except Exception:
                         result_parts.append(str(item))
         return "\n".join(result_parts).strip()
 
@@ -250,10 +250,10 @@ def parse_tool_result_content(content):
             return content.get("text", "")
         try:
             return json.dumps(content, ensure_ascii=False)
-        except:
+        except Exception:
             return str(content)
 
     try:
         return str(content)
-    except:
+    except Exception:
         return "Unparseable content"

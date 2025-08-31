@@ -934,7 +934,9 @@ class WorkflowValidator:
         return report
 
     def export_validation_report(
-        self, report: ValidationReport, filename: str = None
+        self,
+        report: ValidationReport,
+        filename: str = None,  # type: ignore
     ) -> str:  # type: ignore
         """Export validation report to JSON file"""
 

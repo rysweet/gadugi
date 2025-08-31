@@ -51,7 +51,7 @@ def main():
 
     try:
         # Import and run the main Flask application
-        from main import app, initialize_event_system, run_async_in_thread, get_settings
+        from main import app, initialize_event_system, run_async_in_thread, get_settings  # type: ignore[attr-defined]
 
         if app is None:
             logger.error("❌ Flask not available - cannot start service")

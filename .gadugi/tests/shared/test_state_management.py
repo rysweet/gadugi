@@ -385,7 +385,7 @@ except ImportError as e:
             if isinstance(config, dict) and "checkpoint_dir" in config:
                 self.checkpoint_dir = Path(config["checkpoint_dir"])
             elif hasattr(config, "state_dir"):  # StateManager passed
-                self.checkpoint_dir = config.state_dir / "checkpoints"
+                self.checkpoint_dir = config.state_dir / "checkpoints"  # type: ignore[attr-defined]
             else:
                 self.checkpoint_dir = Path(".claude/checkpoints")
             self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
@@ -1057,7 +1057,7 @@ class TestCheckpointManager:
         # Create multiple checkpoints
         checkpoint_ids = []
         for i in range(3):
-            {
+            _ = {  # Assign to _ to avoid unused expression warning
                 "task_id": "list-checkpoints",
                 "current_phase": i + 1,
                 "status": "in_progress",

@@ -1146,7 +1146,7 @@ class TaskDecomposerV03(V03Agent):
                         data = json.loads(content.split("decomposition_result:")[1])
                         strategy_name = data.get("strategy_used")
                         break
-                    except:
+                    except Exception:
                         continue
 
         if strategy_name and strategy_name in self.strategies:

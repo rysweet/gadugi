@@ -187,7 +187,7 @@ class TestMemoryHealthMonitor:
 
         monitor = MemoryHealthMonitor(config=monitor_config, backends=backends)
 
-        assert monitor.current_backend.backend_type == MemoryBackendType.NEO4J
+        assert monitor.current_backend.backend_type == MemoryBackendType.NEO4J  # type: ignore[union-attr]
 
     def test_disabled_backend_skipping(self, monitor_config):
         """Test that disabled backends are skipped."""
@@ -199,7 +199,7 @@ class TestMemoryHealthMonitor:
 
         monitor = MemoryHealthMonitor(config=monitor_config, backends=backends)
 
-        assert monitor.current_backend.backend_type == MemoryBackendType.SQLITE
+        assert monitor.current_backend.backend_type == MemoryBackendType.SQLITE  # type: ignore[union-attr]
 
 
 class TestHealthChecks:
@@ -302,7 +302,7 @@ class TestHealthChecks:
             config={"uri": "bolt://localhost:7687"},
         )
 
-        with patch("shared.memory_health.NEO4J_AVAILABLE", False):
+        with patch("src.src.shared.memory_health.NEO4J_AVAILABLE", False):
             result = await monitor._check_neo4j_health(config)
 
             assert result.backend_type == MemoryBackendType.NEO4J
@@ -404,7 +404,7 @@ class TestFailoverMechanism:
         )
 
         # Initially should select Neo4j
-        assert monitor.current_backend.backend_type == MemoryBackendType.NEO4J
+        assert monitor.current_backend.backend_type == MemoryBackendType.NEO4J  # type: ignore[union-attr]
 
         # Mock a failed health check for the find_healthy_backend method
         async def mock_find_healthy_backend(exclude=None):
@@ -416,7 +416,7 @@ class TestFailoverMechanism:
         success = await monitor.handle_backend_failure(MemoryBackendType.NEO4J)
 
         assert success
-        assert monitor.current_backend.backend_type == MemoryBackendType.IN_MEMORY
+        assert monitor.current_backend.backend_type == MemoryBackendType.IN_MEMORY  # type: ignore[union-attr]
         assert monitor._failover_count == 1
 
         # Check that event was emitted
@@ -446,7 +446,7 @@ class TestMonitoringLoop:
     async def test_start_stop_monitoring(self):
         """Test starting and stopping monitoring."""
         config = HealthMonitorConfig(
-            check_interval=0.1,  # Very fast for testing
+            check_interval=0.1,  # Very fast for testing  # type: ignore[arg-type]
             enable_periodic_monitoring=True,
         )
         backends = [BackendConfig(MemoryBackendType.IN_MEMORY, priority=40, enabled=True)]
@@ -468,7 +468,7 @@ class TestMonitoringLoop:
     @pytest.mark.asyncio
     async def test_monitoring_context_manager(self):
         """Test using monitoring as context manager."""
-        config = HealthMonitorConfig(check_interval=0.1, enable_periodic_monitoring=True)
+        config = HealthMonitorConfig(check_interval=0.1, enable_periodic_monitoring=True)  # type: ignore[arg-type]
         backends = [BackendConfig(MemoryBackendType.IN_MEMORY, priority=40, enabled=True)]
 
         monitor = MemoryHealthMonitor(config=config, backends=backends)
@@ -552,7 +552,7 @@ class TestFactoryFunctions:
         monitor = create_memory_health_monitor(backends=backends)
 
         assert len(monitor.backends) == 1
-        assert monitor.current_backend.backend_type == MemoryBackendType.IN_MEMORY
+        assert monitor.current_backend.backend_type == MemoryBackendType.IN_MEMORY  # type: ignore[union-attr]
 
 
 class TestIntegration:

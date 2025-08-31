@@ -8,6 +8,7 @@ to parallel execution coordination.
 
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from typing import Any
@@ -230,7 +231,7 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,  # type: ignore
             command="claude /agent:WorkflowManager",
             working_directory=str(self.test_dir),
-            created_at=time.time()
+            created_at=time.time()  # type: ignore
             if hasattr(registry, "_get_current_time")
             else None,  # type: ignore
         )

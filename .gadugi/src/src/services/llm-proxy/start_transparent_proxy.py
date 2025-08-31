@@ -50,9 +50,9 @@ def is_proxy_running():
                     proc = psutil.Process(pid)
                     if "python" in proc.name().lower():
                         return True
-                except:
+                except Exception:
                     pass
-        except:
+        except Exception:
             pass
     return False
 
@@ -117,7 +117,7 @@ def start_proxy():
             if response.status_code == 200:
                 print("✅ Proxy server started successfully")
                 return True
-        except:
+        except Exception:
             pass
         time.sleep(1)
 
@@ -135,7 +135,7 @@ def stop_proxy():
             os.kill(pid, signal.SIGTERM)
             PROXY_PID_FILE.unlink()
             print("🛑 Proxy stopped")
-        except:
+        except Exception:
             pass
 
 

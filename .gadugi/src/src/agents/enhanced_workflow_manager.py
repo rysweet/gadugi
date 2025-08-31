@@ -32,9 +32,9 @@ try:
     from ..shared.workflow_reliability import (  # type: ignore
         WorkflowReliabilityManager as SharedWorkflowReliabilityManager,
         WorkflowStage as SharedWorkflowStage,
-        HealthStatus,
+        HealthStatus,  # type: ignore[assignment]
         monitor_workflow as shared_monitor_workflow,
-        create_reliability_manager,
+        create_reliability_manager,  # type: ignore[assignment]
     )
     from ..shared.utils.error_handling import ErrorHandler, retry  # type: ignore
     from ..shared.state_management import StateManager  # type: ignore
@@ -42,9 +42,9 @@ try:
     from ..shared.github_operations import GitHubOperations  # type: ignore
 
     # Create aliases - these are runtime assignments, not type aliases
-    WorkflowReliabilityManager = SharedWorkflowReliabilityManager
-    WorkflowStage = SharedWorkflowStage
-    monitor_workflow = shared_monitor_workflow
+    WorkflowReliabilityManager = SharedWorkflowReliabilityManager  # type: ignore[assignment]
+    WorkflowStage = SharedWorkflowStage  # type: ignore[assignment]
+    monitor_workflow = shared_monitor_workflow  # type: ignore[assignment]
 
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
@@ -1209,7 +1209,7 @@ class EnhancedWorkflowManager:
         body = f"""# {prompt_data.get('feature_name', 'Feature Implementation')}
 
 ## Context
-This issue was created automatically by the Enhanced WorkflowManager to track implementation progress.
+This issue was created automatically by the Enhanced WorkflowManager to track implementation progress.  # noqa: E501
 
 ## Requirements
 """
@@ -1241,7 +1241,7 @@ This issue was created automatically by the Enhanced WorkflowManager to track im
         body = """# WorkflowManager Execution Reliability Improvements
 
 ## Summary
-This PR implements comprehensive reliability improvements for the WorkflowManager addressing Issue #73.
+This PR implements comprehensive reliability improvements for the WorkflowManager addressing Issue #73.  # noqa: E501
 
 ## Changes Made
 ### Files Created
@@ -1274,7 +1274,8 @@ This PR implements comprehensive reliability improvements for the WorkflowManage
 - **Workflow ID**: {self.workflow_id}
 - **Files Created**: {len(files_created)}
 - **Files Modified**: {len(files_modified)}
-- **Implementation Duration**: {implementation_result.get('summary', {}).get('lines_added', 0)} lines added
+- **Implementation Duration**: {implementation_result.get('summary',
+    {}).get('lines_added', 0)} lines added
 
 *Note: This PR was created by an AI agent on behalf of the repository owner.*
 """

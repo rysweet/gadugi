@@ -38,7 +38,7 @@ shared_path = os.path.join(
 sys.path.insert(0, shared_path)
 
 # Always use stubs for delegation coordinator tests
-from .test_stubs import (
+from .test_stubs import (  # noqa: E402
     DelegationCoordinator,
     DelegationTask,
     DelegationType,

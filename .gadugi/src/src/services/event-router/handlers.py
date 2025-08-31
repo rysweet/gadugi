@@ -64,7 +64,7 @@ try:
     from src.src.shared.memory_integration import AgentMemoryInterface as _AgentMemoryInterface  # type: ignore
     from sqlite_memory_backend import SQLiteMemoryBackend as _SQLiteMemoryBackend  # type: ignore
 
-    AgentMemoryInterfaceImpl = _AgentMemoryInterface
+    AgentMemoryInterfaceImpl = _AgentMemoryInterface  # type: ignore[assignment]
     SQLiteMemoryBackendImpl = _SQLiteMemoryBackend
 except ImportError:
     try:
@@ -128,7 +128,7 @@ except ImportError:
                 return {"total_memories": 0, "memory_types": {}}
 
 
-from models import (
+from models import (  # noqa: E402
     AgentEvent,
     EventType,
     EventPriority,
@@ -137,7 +137,7 @@ from models import (
     EventStorageInfo,
     MemoryIntegrationStatus,
 )
-from subscriptions import get_subscription_manager
+from subscriptions import get_subscription_manager  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

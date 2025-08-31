@@ -154,7 +154,7 @@ class MemoryHealthMonitor:
         self._shutdown_event = asyncio.Event()
 
         # Backend connections
-        self._neo4j_driver: Optional[AsyncDriver] = None
+        self._neo4j_driver: Optional[AsyncDriver] = None  # type: ignore
         self._sqlite_connections: Dict[str, str] = {}  # path -> connection_id
 
         # Initialize current backend
@@ -196,12 +196,12 @@ class MemoryHealthMonitor:
 
             # Reuse existing driver or create new one
             if not self._neo4j_driver:
-                self._neo4j_driver = AsyncGraphDatabase.driver(
+                self._neo4j_driver = AsyncGraphDatabase.driver(  # type: ignore
                     uri, auth=(user, password)
                 )
 
             # Test connection with a simple query
-            async with self._neo4j_driver.session(database=database) as session:
+            async with self._neo4j_driver.session(database=database) as session:  # type: ignore
                 result = await session.run("RETURN 1 as test")
                 record = await result.single()
                 if not record or record["test"] != 1:
@@ -259,7 +259,7 @@ class MemoryHealthMonitor:
             db_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Test file access and database operations
-            async with aiosqlite.connect(db_path) as db:
+            async with aiosqlite.connect(db_path) as db:  # type: ignore
                 # Test basic query
                 async with db.execute("SELECT 1 as test") as cursor:
                     row = await cursor.fetchone()
@@ -515,7 +515,8 @@ class MemoryHealthMonitor:
         return True
 
     async def _find_healthy_backend(
-        self, exclude: List[MemoryBackendType] = None
+        self,
+        exclude: List[MemoryBackendType] = None,  # type: ignore
     ) -> Optional[BackendConfig]:
         """Find the highest priority healthy backend."""
         exclude = exclude or []

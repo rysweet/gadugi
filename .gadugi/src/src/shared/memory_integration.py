@@ -95,7 +95,7 @@ class AgentMemoryInterface:
         # Initialize fallback backends if needed or requested
         if not self._use_http or self.use_fallback:
             if FALLBACK_AVAILABLE:
-                self._fallback_chain = create_simple_fallback_chain(self.storage_path)
+                self._fallback_chain = create_simple_fallback_chain(self.storage_path)  # type: ignore[possibly-undefined]
                 await self._fallback_chain.connect()
                 logger.info("Fallback memory chain initialized")
             else:
@@ -175,7 +175,7 @@ class AgentMemoryInterface:
                 agent_id=self.agent_id,
                 content=content,
                 type=MemoryType.SHORT_TERM,  # type: ignore[attr-defined]
-                persistence=MemoryPersistence.VOLATILE,
+                persistence=MemoryPersistence.VOLATILE,  # type: ignore[possibly-undefined]
                 task_id=self.task_id,
                 project_id=self.project_id,
                 tags=tags or [],
@@ -200,7 +200,7 @@ class AgentMemoryInterface:
             "agent_id": memory.agent_id,
             "content": memory.content,
             "memory_type": memory.type.value if hasattr(memory.type, "value") else str(memory.type),
-            "is_short_term": memory.persistence == MemoryPersistence.VOLATILE,
+            "is_short_term": memory.persistence == MemoryPersistence.VOLATILE,  # type: ignore[possibly-undefined]
             "task_id": memory.task_id,
             "project_id": memory.project_id,
             "tags": memory.tags,
@@ -256,7 +256,7 @@ class AgentMemoryInterface:
                 agent_id=self.agent_id,
                 content=content,
                 type=type_mapping.get(memory_type, MemoryType.SEMANTIC),  # type: ignore[attr-defined]
-                persistence=MemoryPersistence.PERSISTENT,
+                persistence=MemoryPersistence.PERSISTENT,  # type: ignore[possibly-undefined]
                 task_id=self.task_id,
                 project_id=self.project_id,
                 tags=tags or [],

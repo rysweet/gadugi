@@ -24,7 +24,7 @@ def run_command(cmd):
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, shell=True)
         return result.stdout.strip()
-    except:
+    except Exception:
         return None
 
 
@@ -37,7 +37,7 @@ def get_pr_info(pr_number):
     if output:
         try:
             return json.loads(output)
-        except:
+        except Exception:
             return None
     return None
 

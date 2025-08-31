@@ -175,7 +175,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
         """Test capability match calculation"""
         # Test perfect match
         match_score = self.matcher._calculate_capability_match(
-            self.mock_capability_profile,
+            self.mock_capability_profile,  # type: ignore
             self.task_requirements,  # type: ignore
         )
 
@@ -204,7 +204,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
         )
 
         match_score = self.matcher._calculate_capability_match(
-            incomplete_profile,
+            incomplete_profile,  # type: ignore
             self.task_requirements,  # type: ignore
         )
 

@@ -472,7 +472,7 @@ It also doesn't have enough content to be considered a valid prompt.
 
     def test_validate_workflow_state_complete(self):
         """Test complete workflow state validation"""
-        report = self.validator.validate_workflow_state(self.workflow_state)
+        report = self.validator.validate_workflow_state(self.workflow_state)  # type: ignore[arg-type]
 
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD
@@ -500,7 +500,7 @@ It also doesn't have enough content to be considered a valid prompt.
             returncode=0, stdout=json.dumps(mock_pr_data), stderr=""
         )
 
-        report = self.validator.validate_github_integration(self.workflow_state)
+        report = self.validator.validate_github_integration(self.workflow_state)  # type: ignore[arg-type]
 
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD
@@ -516,7 +516,7 @@ It also doesn't have enough content to be considered a valid prompt.
             stderr="",
         )
 
-        report = self.validator.validate_end_to_end(self.good_prompt_file, self.workflow_state)
+        report = self.validator.validate_end_to_end(self.good_prompt_file, self.workflow_state)  # type: ignore[arg-type]
 
         assert isinstance(report, ValidationReport)
         assert report.validation_level == ValidationLevel.STANDARD

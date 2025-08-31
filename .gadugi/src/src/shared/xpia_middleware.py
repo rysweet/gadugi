@@ -17,7 +17,7 @@ import sys
 shared_path = Path(__file__).parent
 sys.path.insert(0, str(shared_path))
 
-from xpia_defense import XPIADefenseAgent, SecurityMode, ValidationResult
+from xpia_defense import XPIADefenseAgent, SecurityMode, ValidationResult  # noqa: E402
 
 
 class XPIAMiddleware:

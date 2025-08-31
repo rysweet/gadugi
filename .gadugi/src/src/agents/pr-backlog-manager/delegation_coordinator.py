@@ -596,7 +596,7 @@ jobs:
             comment_templates = {
                 DelegationType.MERGE_CONFLICT_RESOLUTION: (
                     "🔧 **Automated Merge Conflict Resolution**\n\n"
-                    f"The PR Backlog Manager has detected merge conflicts and delegated resolution to WorkflowMaster.\n\n"
+                    f"The PR Backlog Manager has detected merge conflicts and delegated resolution to WorkflowMaster.\n\n"  # noqa: E501
                     f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
                     f"**Status:** {task.status.value}\n\n"
@@ -604,7 +604,7 @@ jobs:
                 ),
                 DelegationType.CI_FAILURE_FIX: (
                     "🚨 **Automated CI Failure Resolution**\n\n"
-                    f"The PR Backlog Manager has detected CI failures and delegated fixes to WorkflowMaster.\n\n"
+                    f"The PR Backlog Manager has detected CI failures and delegated fixes to WorkflowMaster.\n\n"  # noqa: E501
                     f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
                     f"**Status:** {task.status.value}\n\n"
@@ -612,7 +612,7 @@ jobs:
                 ),
                 DelegationType.BRANCH_UPDATE: (
                     "🔄 **Automated Branch Update**\n\n"
-                    f"The PR Backlog Manager has detected that this branch is behind main and delegated update to WorkflowMaster.\n\n"
+                    f"The PR Backlog Manager has detected that this branch is behind main and delegated update to WorkflowMaster.\n\n"  # noqa: E501
                     f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
                     f"**Status:** {task.status.value}\n\n"
@@ -620,7 +620,7 @@ jobs:
                 ),
                 DelegationType.AI_CODE_REVIEW: (
                     "🤖 **AI Code Review Initiated**\n\n"
-                    f"The PR Backlog Manager has initiated AI code review (Phase 9) for this PR.\n\n"
+                    f"The PR Backlog Manager has initiated AI code review (Phase 9) for this PR.\n\n"  # noqa: E501
                     f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
                     f"**Status:** {task.status.value}\n\n"
@@ -628,7 +628,7 @@ jobs:
                 ),
                 DelegationType.METADATA_IMPROVEMENT: (
                     "📝 **Metadata Improvement Request**\n\n"
-                    f"The PR Backlog Manager has identified metadata improvements needed for this PR.\n\n"
+                    f"The PR Backlog Manager has identified metadata improvements needed for this PR.\n\n"  # noqa: E501
                     f"**Task ID:** `{task.task_id}`\n"
                     f"**Priority:** {task.priority.value}\n"
                     f"**Status:** {task.status.value}\n\n"
@@ -683,7 +683,7 @@ jobs:
                     f"✅ **Delegation Completed Successfully**\n\n"
                     f"Task `{task.task_id}` has been completed by {task.agent_target}.\n"
                     f"Issue type: {task.task_type.value}\n"
-                    f"Completion time: {task.completion_time.isoformat() if task.completion_time else 'N/A'}\n\n"
+                    f"Completion time: {task.completion_time.isoformat() if task.completion_time else 'N/A'}\n\n"  # noqa: E501
                     "Please verify the resolution and re-run PR readiness assessment."
                 )
             else:

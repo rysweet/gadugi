@@ -15,11 +15,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "components"))
 
 
-def run_test_suite():
+def run_test_suite():  # noqa: E402
     """Run all OrchestratorAgent test suites"""
     print("🧪 Running OrchestratorAgent Test Suite")
     print("=" * 50)
-
+    # noqa: E402
     # Discover and run all tests
     loader = unittest.TestLoader()
     start_dir = Path(__file__).parent

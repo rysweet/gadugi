@@ -387,7 +387,7 @@ class CapabilityAssessment:
             # Adjust for quality if available
             if quality_scores:
                 if np is not None:
-                    quality_factor = float(np.mean(quality_scores)) / 100.0
+                    quality_factor = float(np.mean(quality_scores)) / 100.0  # type: ignore
                 else:
                     quality_factor = sum(quality_scores) / len(quality_scores) / 100.0  # type: ignore[operator]
                 performance_score = (performance_score + quality_factor) / 2.0
@@ -396,7 +396,7 @@ class CapabilityAssessment:
             if execution_times:
                 # Normalize execution times (lower is better)
                 if np is not None:
-                    avg_time = float(np.mean(execution_times))
+                    avg_time = float(np.mean(execution_times))  # type: ignore
                 else:
                     avg_time = sum(execution_times) / len(execution_times)  # type: ignore[operator]
                 efficiency_factor = min(

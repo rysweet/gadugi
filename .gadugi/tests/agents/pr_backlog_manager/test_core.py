@@ -25,7 +25,7 @@ claude_path = os.path.join(
 sys.path.insert(0, claude_path)
 
 # TYPE_CHECKING is always False at runtime but True for type checkers
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING  # noqa: E402
 
 if TYPE_CHECKING:
     # For type checking, use stubs

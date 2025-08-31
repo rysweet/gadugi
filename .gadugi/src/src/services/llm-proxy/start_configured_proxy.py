@@ -135,7 +135,7 @@ async def main():
         try:
             await service.stop()  # type: ignore[assignment]
             logger.info("Service stopped")
-        except:
+        except Exception:
             pass
 
 

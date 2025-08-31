@@ -28,10 +28,12 @@
 - ❌ **NO SLEEP-AND-PRETEND**: No `sleep 2 && echo "Done"` nonsense
 
 **NEVER BYPASS QUALITY GATES:**
-- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks
+- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks - THIS IS A CRITICAL VIOLATION
 - ❌ **NO FORCE PUSHES**: NEVER use `git push --force` without explicit user permission
 - ❌ **NO TEST SKIPPING**: ALL tests must pass before committing
 - ❌ **NO SHORTCUTS**: If blocked by tests or hooks, FIX THE PROBLEM, don't bypass it
+- ❌ **NO COMMITS WITH ERRORS**: NEVER commit if there are ANY pyright errors, ruff errors, or failing tests
+- ❌ **ITERATE UNTIL PERFECT**: Keep working until ALL checks pass - no exceptions
 
 **ENFORCEMENT:**
 - If you can't implement something fully, STOP and ask for help

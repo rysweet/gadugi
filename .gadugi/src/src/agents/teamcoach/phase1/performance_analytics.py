@@ -605,7 +605,7 @@ class AgentPerformanceAnalyzer:
     def _get_agent_config(self, agent_id: str) -> Optional[AgentConfig]:
         """Get agent configuration from state manager."""
         try:
-            config_data = self.state_manager.get_agent_config(agent_id)
+            config_data = self.state_manager.get_agent_config(agent_id)  # type: ignore[attr-defined]
             if config_data:
                 return AgentConfig(**config_data)
             return None

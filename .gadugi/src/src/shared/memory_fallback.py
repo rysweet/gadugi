@@ -27,6 +27,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class DateTimeEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles datetime objects."""
+
+    def default(self, o):  # type: ignore[override]
+        if isinstance(o, datetime):
+            return o.isoformat()
+        elif hasattr(o, "__dict__"):
+            # Handle dataclass-like objects
+            return {k: self.default(v) for k, v in o.__dict__.items()}
+        return super().default(o)
+
+
 # ============================================================================
 # Memory Data Models (Compatible with Neo4j system)
 # ============================================================================
@@ -408,7 +420,7 @@ class MemoryBackend(ABC):
 class MarkdownMemoryBackend(MemoryBackend):
     """File-based memory backend using structured markdown files."""
 
-    def __init__(self, storage_path: str = ".memory") -> Any:
+    def __init__(self, storage_path: str = ".memory") -> None:
         self.storage_path = Path(storage_path)
         self.is_connected = False
 
@@ -531,8 +543,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             logger.error(f"Failed to save memories to {file_path}: {e}")
             raise
@@ -825,8 +837,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             raise
 
@@ -880,8 +892,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             raise
 
@@ -950,8 +962,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             raise
 
@@ -1012,8 +1024,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             raise
 
@@ -1099,8 +1111,8 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
-                except:
+                    os.unlink(tmp_path)  # type: ignore[possibly-undefined]
+                except Exception:
                     pass
             raise
 
@@ -1115,7 +1127,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 class SQLiteMemoryBackend(MemoryBackend):
     """SQLite-based memory backend for reliable local storage with connection pooling."""
 
-    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5) -> Any:
+    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5) -> None:
         self.db_path = Path(db_path)
         self.is_connected = False
         self.pool_size = pool_size
@@ -1289,7 +1301,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             # Connection is broken, close it
             try:
                 await conn.close()
-            except:
+            except Exception:
                 pass
 
     def _memory_to_row(self, memory: Memory) -> Dict[str, Any]:
@@ -1306,12 +1318,14 @@ class SQLiteMemoryBackend(MemoryBackend):
             "project_id": memory.project_id,
             "team_id": memory.team_id,
             "content": memory.content,
-            "structured_data": json.dumps(memory.structured_data)
+            "structured_data": json.dumps(memory.structured_data, cls=DateTimeEncoder)
             if memory.structured_data
             else None,
-            "embedding": json.dumps(memory.embedding) if memory.embedding else None,
-            "tags": json.dumps(memory.tags),
-            "metadata": json.dumps(memory.metadata),
+            "embedding": json.dumps(memory.embedding, cls=DateTimeEncoder)
+            if memory.embedding
+            else None,
+            "tags": json.dumps(memory.tags, cls=DateTimeEncoder),
+            "metadata": json.dumps(memory.metadata, cls=DateTimeEncoder),
             "importance_score": memory.importance_score,
             "confidence_score": memory.confidence_score,
             "decay_rate": memory.decay_rate,
@@ -1321,8 +1335,8 @@ class SQLiteMemoryBackend(MemoryBackend):
             "last_accessed": memory.last_accessed.isoformat() if memory.last_accessed else None,
             "expires_at": memory.expires_at.isoformat() if memory.expires_at else None,
             "parent_id": memory.parent_id,
-            "associations": json.dumps(memory.associations),
-            "memory_references": json.dumps(memory.references),
+            "associations": json.dumps(memory.associations, cls=DateTimeEncoder),
+            "memory_references": json.dumps(memory.references, cls=DateTimeEncoder),
             "version": memory.version,
             "is_active": 1 if memory.is_active else 0,
         }
@@ -1791,7 +1805,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 class InMemoryBackend(MemoryBackend):
     """In-memory storage backend for emergency fallback."""
 
-    def __init__(self) -> Any:
+    def __init__(self) -> None:
         self.memories: Dict[str, Memory] = {}
         self.knowledge_nodes: Dict[str, KnowledgeNode] = {}
         self.knowledge_links: List[Dict[str, Any]] = []
@@ -2076,7 +2090,7 @@ class MemoryFallbackChain(MemoryBackend):
         self,
         primary_backend: Optional[MemoryBackend] = None,
         fallback_config: Optional[Dict[str, Any]] = None,
-    ) -> Any:
+    ) -> Any:  # type: ignore
         self.fallback_config = fallback_config or {}
         self.backends: List[MemoryBackend] = []
         self.current_backend_index = 0
@@ -2154,7 +2168,7 @@ class MemoryFallbackChain(MemoryBackend):
             try:
                 sync_item = self.sync_queue.get_nowait()
                 await self._perform_sync(sync_item)
-            except:
+            except Exception:
                 pass
 
         for i, backend in enumerate(self.backends):

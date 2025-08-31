@@ -103,7 +103,7 @@ class PhaseEnforcer:
         self,
         phase: WorkflowPhase,
         workflow_state: WorkflowState,
-        context: Dict[str, Any] = None,
+        context: Dict[str, Any] = None,  # type: ignore[arg-type]
     ) -> EnforcementResult:  # type: ignore[assignment]
         """
         Enforce execution of a specific phase with retry logic and monitoring

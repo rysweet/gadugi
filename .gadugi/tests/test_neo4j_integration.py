@@ -122,6 +122,10 @@ class TestNeo4jIntegration:
         assert neo4j_conn.test_connection(), "Failed to connect to Neo4j on port 7689 (Bolt)"
 
     @pytest.mark.skipif(not neo4j_available(), reason="Neo4j not available")
+    @pytest.mark.skipif(
+        not os.path.exists("neo4j/init/init_schema.cypher"),
+        reason="Schema file not available in test environment",
+    )
     def test_schema_initialization(self, neo4j_conn):
         """Test that schema can be initialized."""
         driver = neo4j_conn.connect()

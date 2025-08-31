@@ -114,7 +114,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
 
     # 2. Task Started
     print("\n2️⃣ Task Started...")
-    task_event = TaskStartedEvent(
+    task_event = TaskStartedEvent(  # type: ignore
         agent_id="TaskDecomposer_001",
         task_id="task_feature_x_001",
         task_description="Implement user authentication system",
@@ -135,7 +135,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
 
     # 3. Knowledge Learned
     print("\n3️⃣ Knowledge Learned...")
-    knowledge_event = KnowledgeLearnedEvent(
+    knowledge_event = KnowledgeLearnedEvent(  # type: ignore
         agent_id="TaskDecomposer_001",
         knowledge_type="pattern",
         content="JWT tokens should always be validated server-side to prevent security vulnerabilities",
@@ -158,7 +158,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
 
     # 4. Collaboration Message
     print("\n4️⃣ Inter-Agent Collaboration...")
-    collab_event = CollaborationMessageEvent(
+    collab_event = CollaborationMessageEvent(  # type: ignore
         agent_id="TaskDecomposer_001",
         recipient_id="CodeWriter_001",
         message_type="request",
@@ -180,7 +180,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
 
     # 5. Task Completed
     print("\n5️⃣ Task Completed...")
-    completion_event = TaskCompletedEvent(
+    completion_event = TaskCompletedEvent(  # type: ignore
         agent_id="TaskDecomposer_001",
         task_id="task_feature_x_001",
         result="Successfully decomposed authentication system into 5 subtasks with security patterns identified",

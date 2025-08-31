@@ -22,10 +22,10 @@ class MockPerformanceData:
 Tests for TeamCoach Phase 3: Coaching Engine
 """
 
-import unittest
-from datetime import datetime
-from unittest.mock import Mock, patch
-from ..phase3.coaching_engine import (
+import unittest  # noqa: E402
+from datetime import datetime  # noqa: E402
+from unittest.mock import Mock, patch  # noqa: E402
+from ..phase3.coaching_engine import (  # noqa: E402
     CoachingEngine,
     CoachingRecommendation,
     TeamCoachingPlan,

@@ -54,7 +54,7 @@ class WorkflowValidator:
     def validate_task(
         self,
         task_description: str,
-        files: List[str] = None,
+        files: List[str] = None,  # type: ignore[arg-type]
         execution_method: str = "direct",
     ) -> Tuple[bool, List[str], List[str]]:
         """

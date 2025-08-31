@@ -147,8 +147,13 @@ class TestWorkflowReliabilityManager:
             assert health_check.disk_usage == 50.0
             assert len(health_check.recommendations) == 0
 
-    def test_perform_health_check_degraded_system(self):
+    @patch("subprocess.run")
+    def test_perform_health_check_degraded_system(self, mock_subprocess):
         """Test health check on degraded system"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         with (
@@ -168,8 +173,13 @@ class TestWorkflowReliabilityManager:
             assert health_check.memory_usage == 80.0
             assert len(health_check.recommendations) > 0
 
-    def test_handle_workflow_error_with_recovery(self):
+    @patch("subprocess.run")
+    def test_handle_workflow_error_with_recovery(self, mock_subprocess):
         """Test error handling with recovery strategies"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         self.reliability_manager.start_workflow_monitoring(self.workflow_id, self.workflow_context)
 
         # Update to implementation stage
@@ -465,7 +475,9 @@ class TestEnhancedWorkflowManager:
             return {"test_result": "success", "phase_completed": True}
 
         result = manager._execute_phase_with_monitoring(
-            WorkflowStage.INITIALIZATION, test_phase_func, mock_reliability
+            WorkflowStage.INITIALIZATION,
+            test_phase_func,
+            mock_reliability,  # type: ignore[arg-type]
         )
 
         assert result is not None  # type: ignore[comparison-overlap]
@@ -499,7 +511,9 @@ class TestEnhancedWorkflowManager:
 
         # Should succeed after retry
         result = manager._execute_phase_with_monitoring(
-            WorkflowStage.IMPLEMENTATION_START, flaky_phase_func, mock_reliability
+            WorkflowStage.IMPLEMENTATION_START,
+            flaky_phase_func,
+            mock_reliability,  # type: ignore[arg-type]
         )
 
         assert result is not None  # type: ignore[comparison-overlap]
@@ -818,12 +832,17 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             assert "reliability_metrics" in result
 
             # Verify monitoring was properly integrated
-            assert manager.reliability_manager.start_workflow_monitoring.called
-            assert manager.reliability_manager.update_workflow_stage.call_count > 0
-            assert manager.reliability_manager.stop_workflow_monitoring.called
+            assert manager.reliability_manager.start_workflow_monitoring.called  # type: ignore[attr-defined]
+            assert manager.reliability_manager.update_workflow_stage.call_count > 0  # type: ignore[attr-defined]
+            assert manager.reliability_manager.stop_workflow_monitoring.called  # type: ignore[attr-defined]
 
-    def test_workflow_error_handling_and_recovery_integration(self):
+    @patch("subprocess.run")
+    def test_workflow_error_handling_and_recovery_integration(self, mock_subprocess):
         """Test error handling and recovery in integrated workflow"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         manager = EnhancedWorkflowManager(self.config, self.temp_dir)
 
         # Mock error scenario
@@ -871,8 +890,13 @@ This is a comprehensive integration test for the enhanced workflow reliability f
                     error_call_args = mock_handle_error.call_args[0]
                     assert len(error_call_args) >= 2  # workflow_id, error
 
-    def test_workflow_timeout_detection_integration(self):
+    @patch("subprocess.run")
+    def test_workflow_timeout_detection_integration(self, mock_subprocess):
         """Test timeout detection in integrated workflow"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         # Use faster timeouts for testing
         fast_config = WorkflowConfiguration(
             enable_monitoring=True,
@@ -1029,8 +1053,13 @@ This is a comprehensive integration test for the enhanced workflow reliability f
             # (The exact number depends on which phases are considered critical)
             assert all(call == manager.workflow_id for call in health_check_calls)
 
-    def test_performance_monitoring_integration(self):
+    @patch("subprocess.run")
+    def test_performance_monitoring_integration(self, mock_subprocess):
         """Test performance monitoring throughout workflow execution"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         manager = EnhancedWorkflowManager(self.config, self.temp_dir)
 
         # Track performance monitoring calls
@@ -1197,8 +1226,13 @@ def enhanced_workflow_manager():
 class TestWorkflowReliabilityPerformance:
     """Performance tests for workflow reliability features"""
 
-    def test_monitoring_overhead_performance(self):
+    @patch("subprocess.run")
+    def test_monitoring_overhead_performance(self, mock_subprocess):
         """Test that monitoring doesn't add significant overhead"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         config = WorkflowConfiguration(enable_monitoring=True)
         manager = EnhancedWorkflowManager(config)
 
@@ -1221,8 +1255,13 @@ class TestWorkflowReliabilityPerformance:
         # (increased from 5s to account for module imports and test environment overhead in CI)
         assert execution_time < 15.0, f"Monitoring overhead too high: {execution_time:.2f}s"
 
-    def test_concurrent_workflow_monitoring(self):
+    @patch("subprocess.run")
+    def test_concurrent_workflow_monitoring(self, mock_subprocess):
         """Test concurrent workflow monitoring"""
+        # Mock claude availability check
+        mock_subprocess.return_value.returncode = 0
+        mock_subprocess.return_value.stdout = b"claude version 1.0.0"
+
         config = WorkflowConfiguration(enable_monitoring=True)
         manager = EnhancedWorkflowManager(config)
 

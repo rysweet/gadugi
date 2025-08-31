@@ -925,7 +925,7 @@ class ContextManager:
                 # Get from Redis
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern)
+                    self.redis_client.keys(pattern)  # type: ignore
                     if hasattr(self.redis_client, "keys")
                     else []  # type: ignore[attr-defined]
                 )
@@ -1054,7 +1054,7 @@ class ContextManager:
                 # Redis contexts expire automatically, but we can check manually
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern)
+                    self.redis_client.keys(pattern)  # type: ignore
                     if hasattr(self.redis_client, "keys")
                     else []  # type: ignore[attr-defined]
                 )

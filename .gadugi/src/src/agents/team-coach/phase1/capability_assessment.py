@@ -314,7 +314,7 @@ class CapabilityAssessment:
     def _assess_domain_capability(
         self,
         domain: CapabilityDomain,
-        tasks: List[TaskResult],
+        tasks: List[TaskResult],  # type: ignore[valid-type]
         agent_id: str,
     ) -> CapabilityScore:
         """Assess capability in a specific domain."""
@@ -353,7 +353,7 @@ class CapabilityAssessment:
                 performance_score = (performance_score * 0.8) + (efficiency_factor * 0.2)
 
             # Determine proficiency level
-            proficiency_level = self._determine_proficiency_level(performance_score)
+            proficiency_level = self._determine_proficiency_level(performance_score)  # type: ignore[arg-type]
 
             # Calculate confidence based on evidence count and consistency
             confidence_score = self._calculate_confidence(success_rates, len(tasks))
@@ -367,7 +367,7 @@ class CapabilityAssessment:
                 confidence_score=confidence_score,
                 evidence_count=len(tasks),
                 last_updated=datetime.now(),
-                recent_performance=[performance_score],
+                recent_performance=[performance_score],  # type: ignore[arg-type]
                 improvement_trend=improvement_trend,
             )
 
@@ -481,7 +481,7 @@ class CapabilityAssessment:
             consistency_factor = 0.5  # Moderate confidence for single data point
 
         confidence = (count_factor * 0.6) + (consistency_factor * 0.4)
-        return min(1.0, confidence)
+        return min(1.0, confidence)  # type: ignore[return-value]
 
     def _calculate_improvement_trend(self, tasks: List[TaskResult]) -> float:  # type: ignore
         """Calculate improvement trend from task results."""

@@ -249,7 +249,7 @@ class ImplementationValidator:
                         return False
 
             return True
-        except:
+        except Exception:
             return False
 
     def _check_type_hints(self, content: str) -> bool:
@@ -269,7 +269,7 @@ class ImplementationValidator:
                             return False
 
             return True
-        except:
+        except Exception:
             return False
 
     def _run_ruff(self, file_path: Path) -> bool:

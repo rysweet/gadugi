@@ -890,7 +890,8 @@ class ExecutionEngine:
         print(f"🐳 Container task progress: {task_id}, status={result.status}")
 
     def _convert_container_to_execution_result(
-        self, container_result: "ContainerResult"
+        self,
+        container_result: "ContainerResult",  # type: ignore[valid-type]
     ) -> ExecutionResult:  # type: ignore
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(

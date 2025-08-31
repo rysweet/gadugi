@@ -21,22 +21,22 @@ sys.path.insert(0, str(project_root))
 
 try:
     # Import actual shared modules with correct paths
-    from src.src.shared.interfaces import TaskData, AgentConfig  # noqa: E402
+    from src.src.shared.interfaces import TaskData, AgentConfig  # noqa: E402  # type: ignore[assignment]
     from src.src.shared.state_management import (  # noqa: E402
-        TaskState,
-        WorkflowPhase,
-        StateManager,
-        CheckpointManager,
+        TaskState,  # type: ignore[assignment]
+        WorkflowPhase,  # type: ignore[assignment]
+        StateManager,  # type: ignore[assignment]
+        CheckpointManager,  # type: ignore[assignment]
     )
-    from src.src.shared.task_tracking import TaskTracker, TaskStatus, TaskPriority, TaskMetrics  # noqa: E402
-    from src.src.shared.github_operations import GitHubOperations  # noqa: E402
-    from src.src.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # noqa: E402
+    from src.src.shared.task_tracking import TaskTracker, TaskStatus, TaskPriority, TaskMetrics  # noqa: E402  # type: ignore[assignment]
+    from src.src.shared.github_operations import GitHubOperations  # noqa: E402  # type: ignore[assignment]
+    from src.src.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # noqa: E402  # type: ignore[assignment]
 
     try:
-        from src.src.shared.utils.error_handling import ErrorContext  # noqa: E402
+        from src.src.shared.utils.error_handling import ErrorContext  # noqa: E402  # type: ignore[assignment]
     except ImportError:
 
-        class ErrorContext:
+        class ErrorContext:  # type: ignore[no-redef]
             def __init__(self, *args, **kwargs):
                 pass
 except ImportError:

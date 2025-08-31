@@ -38,7 +38,7 @@ class Neo4jConnection:
         except ServiceUnavailable:
             print(f"❌ Neo4j is not available at {self.uri}")
             print(
-                "   Please ensure Neo4j is running: docker-compose -f docker-compose.gadugi.yml up -d neo4j"
+                "   Please ensure Neo4j is running: docker-compose -f docker-compose.gadugi.yml up -d neo4j"  # noqa: E501
             )
             return False
         except AuthError:
@@ -139,7 +139,8 @@ class Neo4jConnection:
                     """
                     MATCH (m:Memory)
                     WHERE m.id <> 'root'
-                    RETURN m.id AS id, m.type AS type, m.content AS content, m.timestamp AS timestamp
+                    RETURN m.id AS id, m.type AS type, m.content AS content,
+                        m.timestamp AS timestamp
                     ORDER BY m.timestamp DESC
                     LIMIT $limit
                     """,
@@ -233,7 +234,7 @@ class Neo4jConnection:
                     print(f"  Total relationships: {rel_count}")
 
                     return {"total_nodes": node_count, "total_relationships": rel_count}
-            except:
+            except Exception:
                 return {}
 
 
@@ -254,8 +255,8 @@ def main():
     print("\n🔍 Testing Schema...")
     if not conn.test_schema():
         print("\n⚠️  Schema not initialized. Run the init script:")
-        print(
-            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"
+        print(  # noqa: E501
+            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"  # noqa: E501
         )
 
     # Create test memory

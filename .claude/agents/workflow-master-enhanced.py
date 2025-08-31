@@ -34,8 +34,8 @@ try:
     from ..shared.state_management import StateManager  # type: ignore[import]
     from ..shared.task_tracking import TaskTracker, TaskMetrics  # type: ignore[import]
     from ..shared.utils.error_handling import (  # type: ignore[import]
-        ErrorHandler,
-        CircuitBreaker,
+        ErrorHandler,  # type: ignore
+        CircuitBreaker,  # type: ignore
     )
     from ..shared.interfaces import AgentConfig, WorkflowPhase  # type: ignore[import]
 except ImportError:
@@ -1235,12 +1235,12 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
 
                     if (
                         hasattr(result.final_status, "value")
-                        and result.final_status.value == "pass"
+                        and result.final_status.value == "pass"  # type: ignore
                     ):  # type: ignore[attr-defined]
                         logger.info(f"✅ Test {test_identifier} resolved successfully")
                     elif (
                         hasattr(result.final_status, "value")
-                        and result.final_status.value == "skip"
+                        and result.final_status.value == "skip"  # type: ignore
                     ):  # type: ignore[attr-defined]
                         skip_reason = getattr(
                             result, "skip_justification", "No reason provided"

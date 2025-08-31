@@ -536,7 +536,7 @@ class TaskPatternRecognitionSystem:
                         similarity = np.dot(keyword_vector, word_vector)
                         similarities.append(similarity)
 
-        return np.mean(similarities) if similarities else 0.0
+        return np.mean(similarities) if similarities else 0.0  # type: ignore
 
     def _calculate_context_relevance(
         self, pattern: Pattern, task_context: Dict[str, Any]

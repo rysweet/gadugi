@@ -60,14 +60,14 @@ def test_orchestrator_modules():
                 if stderr:
                     print(f"     Error: {stderr.strip()}")
                 results.append(False)
-        except Exception as e:
-            print(f"  ❌ {module_path}: Exception - {e}")
+        except Exception as e:  # noqa: E501
+            print(f"  ❌ {module_path}: Exception - {e}")  # noqa: E501
             results.append(False)
 
-    return all(results)
+    return all(results)  # noqa: E501
 
 
-def test_prompt_files():
+def test_prompt_files():  # noqa: E501
     """Test that all required prompt files exist."""
     print_section("Testing Prompt Files")
 

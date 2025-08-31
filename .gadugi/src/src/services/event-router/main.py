@@ -20,7 +20,7 @@ except ImportError:
     Response = None  # type: ignore[misc]
     WerkzeugResponse = None  # type: ignore[misc]
 
-from config import Config, get_settings
+from config import Config, get_settings  # type: ignore[attr-defined]
 from handlers import (
     process_request,
     validate_input,

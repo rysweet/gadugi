@@ -539,7 +539,7 @@ class PRBacklogManager:
         for criteria, is_met in criteria_met.items():
             if not is_met:
                 issue_description = {
-                    ReadinessCriteria.NO_MERGE_CONFLICTS: "PR has merge conflicts that need resolution",
+                    ReadinessCriteria.NO_MERGE_CONFLICTS: "PR has merge conflicts that need resolution",  # noqa: E501
                     ReadinessCriteria.CI_PASSING: "CI checks are failing and need to be fixed",
                     ReadinessCriteria.UP_TO_DATE: "Branch is behind main and needs to be updated",
                     ReadinessCriteria.HUMAN_REVIEW_COMPLETE: "PR needs human review approval",

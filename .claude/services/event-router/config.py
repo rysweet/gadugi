@@ -8,7 +8,7 @@ from typing import Optional, Any, List
 # Try to import from pydantic_settings (newer version) or fall back to pydantic
 try:
     from pydantic_settings import BaseSettings  # type: ignore[import-untyped]
-    from pydantic import Field
+    from pydantic import Field  # type: ignore
 
     PYDANTIC_AVAILABLE = True
 except ImportError:

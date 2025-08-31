@@ -190,7 +190,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         await self.emit_initialized()
 
         print(
-            f"✅ {self.agent_type} agent ready with memory system, whiteboards, and event publishing"
+            f"✅ {self.agent_type} agent ready with memory system, whiteboards, and event publishing"  # noqa: E501
         )
 
     # Memory and whiteboard initialization are now handled by mixins
