@@ -29,7 +29,7 @@ async def simulate_agent_lifecycle():
     print("📋 PHASE 1: User Request → Orchestration")
     print("-" * 40)
 
-    orchestration_started = {
+    _orchestration_started = {
         "event_type": "orchestration.started",
         "agent_id": "orchestration-001",
         "data": {
@@ -47,7 +47,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 2: Problem Identified → Task Decomposition")
     print("-" * 40)
 
-    problem_identified = {
+    _problem_identified = {
         "event_type": "orchestration.problem_identified",
         "agent_id": "orchestration-001",
         "data": {
@@ -66,7 +66,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 3: Decomposition Complete → Orchestration")
     print("-" * 40)
 
-    decomposition_complete = {
+    _decomposition_complete = {
         "event_type": "decomposition.completed",
         "agent_id": "taskdecomposer-001",
         "data": {
@@ -90,7 +90,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 4: Tasks Distributed → Multiple WorkflowManagers")
     print("-" * 40)
 
-    tasks_distributed = {
+    _tasks_distributed = {
         "event_type": "orchestration.tasks_distributed",
         "agent_id": "orchestration-001",
         "data": {
@@ -112,7 +112,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 5: PR Created → Code Review")
     print("-" * 40)
 
-    pr_created = {
+    _pr_created = {
         "event_type": "workflow.pr_created",
         "agent_id": "workflow-001",
         "data": {
@@ -132,7 +132,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 6: Agent Needs Approval → Orchestration → User")
     print("-" * 40)
 
-    needs_approval = {
+    _needs_approval = {
         "event_type": "workflow.needsApproval",
         "agent_id": "workflow-001",
         "data": {
@@ -152,7 +152,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 7: Tests Failed → TestSolver")
     print("-" * 40)
 
-    tests_failed = {
+    _tests_failed = {
         "event_type": "workflow.tests_failed",
         "agent_id": "workflow-001",
         "data": {
@@ -172,7 +172,7 @@ async def simulate_agent_lifecycle():
     print("-" * 40)
 
     for i in range(3):
-        workflow_stopped = {
+        _workflow_stopped = {
             "event_type": "workflow.stopped",
             "agent_id": f"workflow-00{i+1}",
             "data": {
@@ -194,7 +194,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 9: Orchestration Complete → Team Coach Reflection")
     print("-" * 40)
 
-    orchestration_stopped = {
+    _orchestration_stopped = {
         "event_type": "orchestration.stopped",
         "agent_id": "orchestration-001",
         "data": {
@@ -215,7 +215,7 @@ async def simulate_agent_lifecycle():
     print("\n📋 PHASE 10: Lessons Learned → Memory Storage")
     print("-" * 40)
 
-    lessons_learned = {
+    _lessons_learned = {
         "event_type": "teamcoach.lessons_learned",
         "agent_id": "teamcoach-001",
         "data": {

@@ -7,7 +7,6 @@ Replaces mock operations with actual GitHub API calls.
 import json
 import subprocess
 from typing import Dict, List, Optional, Any
-from datetime import datetime
 
 
 class GitHubClient:
@@ -26,15 +25,14 @@ class GitHubClient:
         """Verify gh CLI is installed and authenticated."""
         try:
             result = subprocess.run(
-                ["gh", "auth", "status"],
-                capture_output=True,
-                text=True,
-                check=False
+                ["gh", "auth", "status"], capture_output=True, text=True, check=False
             )
             if result.returncode != 0:
                 raise RuntimeError("gh CLI not authenticated. Run 'gh auth login'")
         except FileNotFoundError:
-            raise RuntimeError("gh CLI not installed. Install from https://cli.github.com/")
+            raise RuntimeError(
+                "gh CLI not installed. Install from https://cli.github.com/"
+            )
 
     def _run_gh_command(self, args: List[str]) -> Dict[str, Any]:
         """Run a gh command and return JSON output.
@@ -50,12 +48,7 @@ class GitHubClient:
             cmd.extend(["--repo", self.repo])
 
         try:
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             # Try to parse as JSON, otherwise return as dict with output
             try:
@@ -66,7 +59,9 @@ class GitHubClient:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"gh command failed: {e.stderr}")
 
-    def create_issue(self, title: str, body: str, labels: Optional[List[str]] = None) -> Dict[str, Any]:
+    def create_issue(
+        self, title: str, body: str, labels: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """Create a GitHub issue.
 
         Args:
@@ -105,11 +100,18 @@ class GitHubClient:
         Returns:
             Issue data
         """
-        args = ["issue", "view", str(issue_number), "--json",
-                "number,title,body,state,labels,assignees,url,createdAt,updatedAt"]
+        args = [
+            "issue",
+            "view",
+            str(issue_number),
+            "--json",
+            "number,title,body,state,labels,assignees,url,createdAt,updatedAt",
+        ]
         return self._run_gh_command(args)
 
-    def list_pull_requests(self, state: str = "open", limit: int = 30) -> List[Dict[str, Any]]:
+    def list_pull_requests(
+        self, state: str = "open", limit: int = 30
+    ) -> List[Dict[str, Any]]:
         """List pull requests.
 
         Args:
@@ -119,9 +121,25 @@ class GitHubClient:
         Returns:
             List of PR data
         """
-        args = ["pr", "list", "--state", state, "--limit", str(limit),
-                "--json", "number,title,state,url,author,createdAt,updatedAt,isDraft,labels"]
-        return self._run_gh_command(args)
+        args = [
+            "pr",
+            "list",
+            "--state",
+            state,
+            "--limit",
+            str(limit),
+            "--json",
+            "number,title,state,url,author,createdAt,updatedAt,isDraft,labels",
+        ]
+        result = self._run_gh_command(args)
+        # gh pr list returns a list directly
+        if isinstance(result, list):
+            return result
+        elif "output" in result:
+            # Parse output if it's not JSON
+            return []
+        else:
+            return [result]
 
     def get_pull_request(self, pr_number: int) -> Dict[str, Any]:
         """Get pull request details.
@@ -132,8 +150,13 @@ class GitHubClient:
         Returns:
             PR data including review status
         """
-        args = ["pr", "view", str(pr_number), "--json",
-                "number,title,body,state,url,author,labels,reviewDecision,statusCheckRollup"]
+        args = [
+            "pr",
+            "view",
+            str(pr_number),
+            "--json",
+            "number,title,body,state,url,author,labels,reviewDecision,statusCheckRollup",
+        ]
         return self._run_gh_command(args)
 
     def get_pr_reviews(self, pr_number: int) -> List[Dict[str, Any]]:
@@ -171,8 +194,20 @@ class GitHubClient:
             List of contributor data
         """
         repo = self.repo or self._get_current_repo()
-        args = ["api", f"/repos/{repo}/contributors", "-H", "Accept: application/vnd.github+json"]
-        return self._run_gh_command(args)[:limit]
+        args = [
+            "api",
+            f"/repos/{repo}/contributors",
+            "-H",
+            "Accept: application/vnd.github+json",
+        ]
+        result = self._run_gh_command(args)
+        # gh api returns data directly, slice it
+        if isinstance(result, list):
+            return result[:limit]
+        elif isinstance(result, dict) and "items" in result:
+            return result["items"][:limit]
+        else:
+            return []
 
     def _get_current_repo(self) -> str:
         """Get current repository from git config.
@@ -185,7 +220,7 @@ class GitHubClient:
                 ["gh", "repo", "view", "--json", "nameWithOwner"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             data = json.loads(result.stdout)
             return data["nameWithOwner"]
@@ -202,9 +237,24 @@ class GitHubClient:
         Returns:
             List of matching issues
         """
-        args = ["search", "issues", query, "--limit", str(limit),
-                "--json", "number,title,state,url,repository,createdAt"]
-        return self._run_gh_command(args)
+        args = [
+            "search",
+            "issues",
+            query,
+            "--limit",
+            str(limit),
+            "--json",
+            "number,title,state,url,repository,createdAt",
+        ]
+        result = self._run_gh_command(args)
+        # gh search issues returns a list directly
+        if isinstance(result, list):
+            return result
+        elif "output" in result:
+            # Parse output if it's not JSON
+            return []
+        else:
+            return [result]
 
     def add_issue_comment(self, issue_number: int, comment: str) -> Dict[str, Any]:
         """Add a comment to an issue.

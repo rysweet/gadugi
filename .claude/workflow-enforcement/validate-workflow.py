@@ -71,9 +71,7 @@ class WorkflowValidator:
         requires_orchestrator = self._requires_orchestrator(task_description, files)
 
         if requires_orchestrator and execution_method != "orchestrator":
-            violations.append(
-                "❌ Code change detected but orchestrator not being used"
-            )
+            violations.append("❌ Code change detected but orchestrator not being used")
             violations.append(f"   Task: {task_description}")
             if files:
                 violations.append(f"   Files: {', '.join(files)}")

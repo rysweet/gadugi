@@ -204,14 +204,10 @@ def main():
         elif sys.argv[1] == "--help":
             print("Claude Code Transparent Proxy")
             print("\nUsage:")
-            print(
-                "  python start_transparent_proxy.py         # Start proxy and launch Claude"
-            )
+            print("  python start_transparent_proxy.py         # Start proxy and launch Claude")
             print("  python start_transparent_proxy.py --stop  # Stop the proxy")
             print("  python start_transparent_proxy.py --status # Check proxy status")
-            print(
-                "  python start_transparent_proxy.py --install # Create shell wrapper"
-            )
+            print("  python start_transparent_proxy.py --install # Create shell wrapper")
             print("\nThe proxy runs in the background and routes all Claude API calls")
             print("through your configured LLM provider (OpenAI, Azure, etc.)")
             return 0

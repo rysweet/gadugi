@@ -73,9 +73,7 @@ def fix_integration_test_imports(filepath: Path) -> None:
         # Fix lines with optional member access on task/result objects
         if "assert task.status" in line and "assert task is not None" not in line:
             new_lines.append(
-                line.replace(
-                    "assert task.status", "assert task is not None and task.status"
-                )
+                line.replace("assert task.status", "assert task is not None and task.status")
             )
         elif "assert result.status" in line and "assert result is not None" not in line:
             new_lines.append(
@@ -84,11 +82,7 @@ def fix_integration_test_imports(filepath: Path) -> None:
                     "assert result is not None and result.status",
                 )
             )
-        elif (
-            "tracker.get_task" in line
-            and ".status" in line
-            and "is not None" not in line
-        ):
+        elif "tracker.get_task" in line and ".status" in line and "is not None" not in line:
             # Handle patterns like: assert tracker.get_task("test-task-001").status == "completed"
             new_lines.append(
                 re.sub(

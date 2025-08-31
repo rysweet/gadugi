@@ -68,9 +68,7 @@ class PyrightErrorFixer:
             import_names = []
             for error in unused_imports:
                 if 'Import "' in error and '" is not accessed' in error:
-                    import_name = error.split('Import "')[1].split('" is not accessed')[
-                        0
-                    ]
+                    import_name = error.split('Import "')[1].split('" is not accessed')[0]
                     import_names.append(import_name)
 
             # Remove or comment out unused imports
@@ -78,10 +76,7 @@ class PyrightErrorFixer:
             for line in lines:
                 line_modified = False
                 for import_name in import_names:
-                    if (
-                        f"import {import_name}" in line
-                        or f"from .* import.*{import_name}" in line
-                    ):
+                    if f"import {import_name}" in line or f"from .* import.*{import_name}" in line:
                         if not line.strip().startswith("#"):
                             # Comment out instead of removing to be safe
                             modified_lines.append(f"# {line}")
@@ -199,9 +194,7 @@ class PyrightErrorFixer:
                 # Extract file path from error line
                 if self.project_root.as_posix() in error:
                     try:
-                        file_path = error.split(self.project_root.as_posix())[1].split(
-                            ":"
-                        )[0]
+                        file_path = error.split(self.project_root.as_posix())[1].split(":")[0]
                         file_path = file_path.removeprefix("/")
                         error_files.add(file_path)
                     except (IndexError, AttributeError):
@@ -226,14 +219,10 @@ class PyrightErrorFixer:
                 self.fix_unused_imports(str(full_path), file_patterns["unused_imports"])
 
             if file_patterns["undefined_variables"]:
-                self.fix_undefined_variables(
-                    str(full_path), file_patterns["undefined_variables"]
-                )
+                self.fix_undefined_variables(str(full_path), file_patterns["undefined_variables"])
 
             if file_patterns["optional_access"]:
-                self.fix_optional_access_errors(
-                    str(full_path), file_patterns["optional_access"]
-                )
+                self.fix_optional_access_errors(str(full_path), file_patterns["optional_access"])
 
         print("Comprehensive fix completed!")
 

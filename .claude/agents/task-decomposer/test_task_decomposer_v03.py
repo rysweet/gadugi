@@ -218,7 +218,7 @@ async def test_dependency_analysis(decomposer):
 
     if implementation_tasks and testing_tasks:
         test_task_id = testing_tasks[0].id
-        impl_task_id = implementation_tasks[0].id
+        implementation_tasks[0].id
         # Test task should have implementation as dependency
         assert any(
             impl_task_id in result.dependency_graph.get(test_task_id, [])
@@ -246,7 +246,7 @@ async def test_learning_from_execution(decomposer):
     """Test learning from execution feedback."""
     # First, decompose a task
     task_description = "Implement user profile management"
-    result = await decomposer.decompose_task(task_description)
+    await decomposer.decompose_task(task_description)
 
     # Simulate execution feedback
     feedback = ExecutionFeedback(
@@ -259,7 +259,6 @@ async def test_learning_from_execution(decomposer):
         agent_performance={"code-writer": 0.85, "TestWriter": 0.90},
     )
 
-    initial_decompositions = decomposer.total_decompositions
     await decomposer.learn_from_execution(feedback)
 
     # Check that learning was recorded
@@ -279,7 +278,7 @@ async def test_execution_task_interface(decomposer):
 
     outcome = await decomposer.execute_task(task)
 
-    assert outcome.success == True
+    assert outcome.success
     assert outcome.task_type == "decomposition"
     assert len(outcome.steps_taken) > 0
     assert outcome.duration_seconds >= 0

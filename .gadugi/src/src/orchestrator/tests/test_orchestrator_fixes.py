@@ -49,9 +49,7 @@ class TestClaudeCLICommandFix(unittest.TestCase):
 
     @patch("components.execution_engine.subprocess.Popen")
     @patch("components.execution_engine.psutil.Process")
-    def test_claude_cli_uses_workflow_master_agent(
-        self, mock_psutil_process, mock_popen
-    ):
+    def test_claude_cli_uses_workflow_master_agent(self, mock_psutil_process, mock_popen):
         """Test that Claude CLI command uses /agent:WorkflowManager instead of -p"""
 
         # Create mock process
@@ -82,15 +80,11 @@ class TestClaudeCLICommandFix(unittest.TestCase):
         self.assertTrue(mock_popen.called, "subprocess.Popen should be called")
 
         # Get the command that was used
-        call_args = mock_popen.call_args[0][
-            0
-        ]  # First positional argument (the command list)
+        call_args = mock_popen.call_args[0][0]  # First positional argument (the command list)
 
         # Critical assertions
         self.assertEqual(call_args[0], "claude", "Should use claude CLI")
-        self.assertEqual(
-            call_args[1], "/agent:WorkflowManager", "Should use WorkflowManager agent"
-        )
+        self.assertEqual(call_args[1], "/agent:WorkflowManager", "Should use WorkflowManager agent")
         self.assertIn(
             "Execute the complete workflow",
             call_args[2],
@@ -217,18 +211,14 @@ The implementation requires:
         prompt_file = self.generator.generate_workflow_prompt(context, worktree_path)
 
         # Verify prompt file was created
-        self.assertTrue(
-            Path(prompt_file).exists(), "Workflow prompt file should be created"
-        )
+        self.assertTrue(Path(prompt_file).exists(), "Workflow prompt file should be created")
 
         # Read and validate content
         with open(prompt_file, "r") as f:
             content = f.read()
 
         # Critical validations
-        self.assertIn(
-            "WorkflowManager Task Execution", content, "Should be WorkflowManager task"
-        )
+        self.assertIn("WorkflowManager Task Execution", content, "Should be WorkflowManager task")
         self.assertIn("test-001", content, "Should include task ID")
         self.assertIn("Test Task", content, "Should include task name")
         self.assertIn("Implementation", content, "Should include phase focus")
@@ -237,12 +227,8 @@ The implementation requires:
         self.assertIn("output.py", content, "Should include target files")
 
         # Verify original prompt content is included
-        self.assertIn(
-            "Test Implementation Task", content, "Should include original prompt"
-        )
-        self.assertIn(
-            "Implement test functionality", content, "Should include requirements"
-        )
+        self.assertIn("Test Implementation Task", content, "Should include original prompt")
+        self.assertIn("Implement test functionality", content, "Should include requirements")
 
     def test_prompt_validation(self):
         """Test prompt validation functionality"""
@@ -281,9 +267,7 @@ Missing required sections
 
         # Check for specific issues
         issue_text = " ".join(issues)
-        self.assertIn(
-            "Missing required section", issue_text, "Should detect missing sections"
-        )
+        self.assertIn("Missing required section", issue_text, "Should detect missing sections")
 
 
 class TestExecutionEngineIntegration(unittest.TestCase):
@@ -318,7 +302,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
         ]
 
         # Temporarily store original method
-        original_method = self.engine._execute_with_concurrency_control
+        _original_method = self.engine._execute_with_concurrency_control
 
         # Track executors created
         created_executors = []
@@ -365,9 +349,7 @@ class TestEndToEndWorkflowValidation(unittest.TestCase):
 
         # Create initial commit
         (self.project_root / "README.md").write_text("# Test Project")
-        os.system(
-            f"cd {self.project_root} && git add . && git commit -m 'Initial commit'"
-        )
+        os.system(f"cd {self.project_root} && git add . && git commit -m 'Initial commit'")
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir, ignore_errors=True)
@@ -407,9 +389,7 @@ class TestEndToEndWorkflowValidation(unittest.TestCase):
             task_id=task_id, task_name="Test Task", original_prompt="prompts/test.md"
         )
 
-        workflow_prompt = generator.generate_workflow_prompt(
-            context, worktree_info.worktree_path
-        )
+        workflow_prompt = generator.generate_workflow_prompt(context, worktree_info.worktree_path)
 
         # Verify prompt was created in worktree
         self.assertTrue(Path(workflow_prompt).exists(), "Workflow prompt should exist")
@@ -437,9 +417,7 @@ class TestRegressionPrevention(unittest.TestCase):
         """Ensure the old broken pattern is never reintroduced"""
 
         # Read the current ExecutionEngine code
-        engine_file = (
-            Path(__file__).parent.parent / "components" / "execution_engine.py"
-        )
+        engine_file = Path(__file__).parent.parent / "components" / "execution_engine.py"
 
         with open(engine_file, "r") as f:
             code_content = f.read()
@@ -468,12 +446,8 @@ class TestRegressionPrevention(unittest.TestCase):
     def test_prompt_generator_exists(self):
         """Ensure PromptGenerator component exists and is functional"""
 
-        generator_file = (
-            Path(__file__).parent.parent / "components" / "prompt_generator.py"
-        )
-        self.assertTrue(
-            generator_file.exists(), "PromptGenerator component should exist"
-        )
+        generator_file = Path(__file__).parent.parent / "components" / "prompt_generator.py"
+        self.assertTrue(generator_file.exists(), "PromptGenerator component should exist")
 
         # Test basic instantiation
         from components.prompt_generator import PromptGenerator
@@ -486,10 +460,7 @@ class TestRegressionPrevention(unittest.TestCase):
 
         # Check if WorkflowManager agent file exists
         agent_file = (
-            Path(__file__).parent.parent.parent.parent
-            / ".claude"
-            / "agents"
-            / "workflow-master.md"
+            Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "workflow-master.md"
         )
         self.assertTrue(agent_file.exists(), "WorkflowManager agent should exist")
 
@@ -498,12 +469,8 @@ class TestRegressionPrevention(unittest.TestCase):
             agent_content = f.read()
 
         # Verify key components
-        self.assertIn(
-            "workflow-master", agent_content, "Should be WorkflowManager agent"
-        )
-        self.assertIn(
-            "Phase 5: Implementation", agent_content, "Should have implementation phase"
-        )
+        self.assertIn("workflow-master", agent_content, "Should be WorkflowManager agent")
+        self.assertIn("Phase 5: Implementation", agent_content, "Should have implementation phase")
         self.assertIn("CREATE", agent_content.upper(), "Should mention file creation")
 
 

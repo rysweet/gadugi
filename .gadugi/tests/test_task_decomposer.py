@@ -84,7 +84,10 @@ except ImportError:
 
     class PatternDatabase:
         def __init__(self, storage_path: Optional[str] = None):
-            self.patterns: Dict[str, Any] = {
+            self.storage_path = storage_path
+
+            # Default patterns
+            default_patterns: Dict[str, Any] = {
                 "feature_implementation": {
                     "success_rate": 0.85,
                     "avg_parallelization": 0.7,
@@ -103,8 +106,16 @@ except ImportError:
                     "triggers": ["refactor", "optimize"],
                     "subtasks": ["analyze", "refactor", "test"],
                 },
+                "testing": {
+                    "success_rate": 0.8,
+                    "avg_parallelization": 0.8,
+                    "triggers": ["test", "tests", "testing", "unit", "integration"],
+                    "subtasks": ["setup", "implement", "verify"],
+                },
             }
-            self.storage_path = storage_path
+
+            # Try to load patterns from storage, otherwise use defaults
+            self.patterns = self._load_patterns() or default_patterns
 
         def find_matching_pattern(self, task_description: str) -> Optional[str]:
             # Simple pattern matching based on keywords
@@ -142,6 +153,23 @@ except ImportError:
                 with open(Path(self.storage_path), "w") as f:
                     json.dump(self.patterns, f, indent=2)
 
+        def _load_patterns(self) -> Optional[Dict[str, Any]]:
+            """Load patterns from storage file if it exists."""
+            if not self.storage_path:
+                return None
+
+            import json
+            from pathlib import Path
+
+            try:
+                storage_file = Path(self.storage_path)
+                if storage_file.exists():
+                    with open(storage_file, "r") as f:
+                        return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
+            return None
+
     class TaskDecomposer:
         def __init__(
             self, storage_path: Optional[str] = None, patterns_db: Optional[PatternDatabase] = None
@@ -156,25 +184,42 @@ except ImportError:
             # Find matching pattern
             pattern = self.pattern_db.find_matching_pattern(task_description)
 
+            # Check for task complexity to determine if we need expanded decomposition
+            is_complex_task = self._is_complex_task(task_description)
+
             # Generate subtasks based on pattern
             if pattern and pattern in self.pattern_db.patterns:
                 pattern_data = self.pattern_db.patterns[pattern]
-                subtasks = []
-                for i, subtask_name in enumerate(pattern_data["subtasks"]):
-                    subtask_id = self._generate_subtask_id(f"{pattern}_{i}")
-                    subtask = SubTask(
-                        id=subtask_id,
-                        name=subtask_name.title(),
-                        description=f"{subtask_name} for {task_description}",
-                        estimated_time=30 + i * 15,  # Simple time estimation
+
+                if is_complex_task:
+                    # Expand subtasks for complex tasks
+                    subtasks = self._generate_expanded_subtasks(
+                        task_description, pattern, pattern_data
                     )
-                    subtasks.append(subtask)
+                else:
+                    # Use standard pattern subtasks
+                    subtasks = []
+                    for i, subtask_name in enumerate(pattern_data["subtasks"]):
+                        subtask_id = self._generate_subtask_id(f"{pattern}_{i}")
+                        subtask = SubTask(
+                            id=subtask_id,
+                            name=subtask_name.title(),
+                            description=f"{subtask_name} for {task_description}",
+                            estimated_time=30 + i * 15,  # Simple time estimation
+                        )
+                        subtasks.append(subtask)
+
+                # Calculate dependencies and total estimated time
+                dependencies = await self.analyze_dependencies(subtasks)
+                total_time = sum(task.estimated_time for task in subtasks)
 
                 return DecompositionResult(
                     subtasks=subtasks,
                     original_task=task_description,
                     decomposition_pattern=pattern,
                     parallelization_score=pattern_data["avg_parallelization"],
+                    estimated_total_time=total_time,
+                    dependency_graph=dependencies,
                     **kwargs,
                 )
             else:
@@ -192,27 +237,135 @@ except ImportError:
                     ),
                 ]
 
+                # Calculate dependencies and total estimated time
+                dependencies = await self.analyze_dependencies(subtasks)
+                total_time = sum(task.estimated_time for task in subtasks)
+
                 return DecompositionResult(
                     subtasks=subtasks,
                     original_task=task_description,
                     decomposition_pattern=None,
+                    estimated_total_time=total_time,
+                    dependency_graph=dependencies,
                     **kwargs,
                 )
 
         def _generate_subtask_id(self, base: str) -> str:
             import time
+            import random
 
-            return f"subtask_{base}_{int(time.time() * 1000) % 1000:03d}"
+            # Use time and random to ensure uniqueness
+            timestamp = int(time.time() * 1000000) % 10000  # Use microseconds for better uniqueness
+            rand_suffix = random.randint(0, 999)
+            return f"subtask_{base}_{timestamp:04d}_{rand_suffix:03d}"
+
+        def _is_complex_task(self, task_description: str) -> bool:
+            """Determine if a task is complex based on keywords and length."""
+            complexity_indicators = [
+                "pipeline",
+                "machine learning",
+                "deployment",
+                "production",
+                "preprocessing",
+                "evaluation",
+                "training",
+                "multiple",
+                "end-to-end",
+                "full",
+                "complete",
+                "comprehensive",
+            ]
+
+            # Check for complexity keywords
+            desc_lower = task_description.lower()
+            has_complexity_keywords = sum(
+                1 for keyword in complexity_indicators if keyword in desc_lower
+            )
+
+            # Check length (longer descriptions often indicate more complex tasks)
+            word_count = len(task_description.split())
+
+            return has_complexity_keywords >= 2 or word_count > 12
+
+        def _generate_expanded_subtasks(
+            self, task_description: str, pattern: str, pattern_data: Dict[str, Any]
+        ) -> List[SubTask]:
+            """Generate expanded subtasks for complex tasks."""
+            subtasks = []
+
+            # For ML pipeline tasks, create detailed subtasks
+            if (
+                "machine learning" in task_description.lower()
+                or "pipeline" in task_description.lower()
+            ):
+                expanded_tasks = [
+                    "Data Collection and Preparation",
+                    "Data Preprocessing and Feature Engineering",
+                    "Model Selection and Training",
+                    "Model Evaluation and Validation",
+                    "Deployment Setup and Configuration",
+                    "Testing and Quality Assurance",
+                ]
+            elif "implement" in task_description.lower() and len(task_description.split()) > 10:
+                # Other complex implementation tasks
+                expanded_tasks = [
+                    "Requirements Analysis and Planning",
+                    "Architecture and Design",
+                    "Core Implementation",
+                    "Integration and Testing",
+                    "Documentation and Deployment",
+                ]
+            else:
+                # Fallback to expanded generic pattern
+                base_tasks = pattern_data["subtasks"]
+                expanded_tasks = []
+                for task in base_tasks:
+                    if task.lower() == "design":
+                        expanded_tasks.extend(["Requirements Analysis", "System Design"])
+                    elif task.lower() == "implement":
+                        expanded_tasks.extend(["Core Implementation", "Integration"])
+                    elif task.lower() == "test":
+                        expanded_tasks.extend(["Unit Testing", "Integration Testing"])
+                    else:
+                        expanded_tasks.append(task.title())
+
+            for i, task_name in enumerate(expanded_tasks):
+                subtask_id = self._generate_subtask_id(f"{pattern}_{i}")
+                subtask = SubTask(
+                    id=subtask_id,
+                    name=task_name,
+                    description=f"{task_name.lower()} for {task_description}",
+                    estimated_time=45 + i * 20,  # Longer times for complex subtasks
+                )
+                subtasks.append(subtask)
+
+            return subtasks
 
         async def analyze_dependencies(self, subtasks: List[SubTask]) -> Dict[str, List[str]]:
-            # Simple dependency analysis
+            # Smarter dependency analysis based on task names and types
             deps = {}
-            for i, subtask in enumerate(subtasks):
-                if i == 0:
-                    deps[subtask.id] = []
-                else:
-                    # Each task depends on the previous one
-                    deps[subtask.id] = [subtasks[i - 1].id]
+
+            for subtask in subtasks:
+                deps[subtask.id] = []
+
+                # Documentation tasks can typically run in parallel
+                if "document" in subtask.name.lower():
+                    continue
+
+                # Test tasks depend on implementation
+                if "test" in subtask.name.lower():
+                    for other_subtask in subtasks:
+                        if "implement" in other_subtask.name.lower():
+                            deps[subtask.id].append(other_subtask.id)
+                            break
+
+                # Implementation tasks may depend on design
+                elif "implement" in subtask.name.lower():
+                    for other_subtask in subtasks:
+                        if "design" in other_subtask.name.lower():
+                            deps[subtask.id].append(other_subtask.id)
+                            break
+
             return deps
 
         async def estimate_parallelization(
@@ -221,15 +374,82 @@ except ImportError:
             if not subtasks:
                 return 0.0
 
-            # Count tasks with no dependencies (can run in parallel)
-            parallel_tasks = sum(1 for task_id in dependencies if not dependencies[task_id])
-            return parallel_tasks / len(subtasks)
+            # Calculate parallelization score based on multiple factors
+            total_tasks = len(subtasks)
+
+            # Factor 1: Tasks with no dependencies (can start immediately)
+            independent_tasks = sum(1 for task_id in dependencies if not dependencies[task_id])
+            independence_score = independent_tasks / total_tasks
+
+            # Factor 2: Overall dependency chain length (penalize long chains)
+            max_chain_length = 0
+            for task_id in dependencies:
+                chain_length = self._calculate_chain_length(task_id, dependencies)
+                max_chain_length = max(max_chain_length, chain_length)
+
+            chain_penalty = max_chain_length / total_tasks if total_tasks > 0 else 0
+
+            # Factor 3: Task parallelizability settings
+            parallelizable_tasks = sum(1 for task in subtasks if task.can_parallelize)
+            parallelizability_score = parallelizable_tasks / total_tasks
+
+            # Combine factors (weighted average)
+            combined_score = (
+                independence_score * 0.4 + (1 - chain_penalty) * 0.4 + parallelizability_score * 0.2
+            )
+
+            return max(0.0, min(1.0, combined_score))
+
+        def _calculate_chain_length(self, task_id: str, dependencies: Dict[str, List[str]]) -> int:
+            """Calculate the length of the dependency chain for a given task."""
+            if not dependencies.get(task_id):
+                return 1
+
+            max_parent_chain = 0
+            for parent_id in dependencies[task_id]:
+                parent_chain = self._calculate_chain_length(parent_id, dependencies)
+                max_parent_chain = max(max_parent_chain, parent_chain)
+
+            return max_parent_chain + 1
 
         async def _find_critical_path_length(
             self, subtasks: List[SubTask], dependencies: Dict[str, List[str]]
         ) -> int:
-            # Simple critical path calculation
-            return sum(task.estimated_time for task in subtasks)
+            # Real critical path calculation - find the longest path through the dependency graph
+            task_times = {task.id: task.estimated_time for task in subtasks}
+
+            # Calculate earliest finish time for each task using dynamic programming
+            earliest_finish = {}
+
+            def calculate_earliest_finish(task_id: str) -> int:
+                if task_id in earliest_finish:
+                    return earliest_finish[task_id]
+
+                task_time = task_times.get(task_id, 0)
+
+                # If no dependencies, task can start immediately
+                if not dependencies.get(task_id):
+                    earliest_finish[task_id] = task_time
+                    return task_time
+
+                # Find the maximum earliest finish time of all dependencies
+                max_dependency_finish = 0
+                for dep_id in dependencies[task_id]:
+                    dep_finish = calculate_earliest_finish(dep_id)
+                    max_dependency_finish = max(max_dependency_finish, dep_finish)
+
+                # This task finishes after its dependencies plus its own time
+                finish_time = max_dependency_finish + task_time
+                earliest_finish[task_id] = finish_time
+                return finish_time
+
+            # Calculate earliest finish time for all tasks
+            max_finish_time = 0
+            for task in subtasks:
+                finish_time = calculate_earliest_finish(task.id)
+                max_finish_time = max(max_finish_time, finish_time)
+
+            return max_finish_time
 
         def _calculate_total_time(
             self,
@@ -242,8 +462,56 @@ except ImportError:
             return int(total_time * (1 - parallelization_score * 0.5))
 
         async def learn_pattern(self, result: DecompositionResult, metrics: Dict[str, Any]) -> None:
-            # Mock implementation for learning
-            pass
+            # Learn new patterns from successful decomposition
+            if not metrics.get("success", False):
+                return  # Don't learn from failed executions
+
+            task_words = result.original_task.lower().split()
+
+            # Learn a main pattern for the specific task
+            pattern_name = "_".join([word for word in task_words[:3] if word.isalnum()])
+            if len(pattern_name) < 3 or pattern_name in self.pattern_db.patterns:
+                import hashlib
+
+                task_hash = hashlib.md5(result.original_task.encode()).hexdigest()[:6]
+                pattern_name = f"learned_{task_hash}"
+
+            # Extract triggers and subtasks
+            triggers = [word.lower() for word in task_words if len(word) > 3 and word.isalnum()][:5]
+            subtask_names = [task.name.lower() for task in result.subtasks]
+
+            # Create main pattern
+            main_pattern = {
+                "triggers": triggers,
+                "subtasks": subtask_names,
+                "success_rate": 1.0,
+                "avg_parallelization": result.parallelization_score or 0.5,
+            }
+
+            self.pattern_db.patterns[pattern_name] = main_pattern
+
+            # Also learn some generalized patterns based on common workflows
+            if any(word in result.original_task.lower() for word in ["optimize", "performance"]):
+                if "optimization" not in self.pattern_db.patterns:
+                    self.pattern_db.patterns["optimization"] = {
+                        "triggers": ["optimize", "performance", "improve"],
+                        "subtasks": ["analyze", "optimize", "test"],
+                        "success_rate": 1.0,
+                        "avg_parallelization": 0.4,
+                    }
+
+            if any(word in result.original_task.lower() for word in ["database", "query"]):
+                if "database_work" not in self.pattern_db.patterns:
+                    self.pattern_db.patterns["database_work"] = {
+                        "triggers": ["database", "query", "sql"],
+                        "subtasks": ["analyze", "modify", "test"],
+                        "success_rate": 1.0,
+                        "avg_parallelization": 0.3,
+                    }
+
+            # Save patterns to storage if configured
+            if hasattr(self.pattern_db, "save_patterns"):
+                self.pattern_db.save_patterns()
 
         async def find_similar_patterns(self, task_description: str) -> List[str]:
             # Return patterns that might match
@@ -447,7 +715,7 @@ class TestTaskDecomposer:
 
         # IDs should have expected format
         assert id1.startswith("subtask_")
-        assert "_001" in id1
+        assert "task1" in id1
 
     @pytest.mark.asyncio
     async def test_decompose_task_with_pattern(self, decomposer):

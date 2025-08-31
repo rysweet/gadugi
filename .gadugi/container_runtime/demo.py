@@ -13,8 +13,8 @@ from pathlib import Path
 # Add the container runtime to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from container_runtime.execution_engine import ContainerExecutionEngine
-from container_runtime.agent_integration import AgentContainerExecutor
+from container_runtime.execution_engine import ContainerExecutionEngine  # noqa: E402
+from container_runtime.agent_integration import AgentContainerExecutor  # noqa: E402
 
 
 def setup_logging():

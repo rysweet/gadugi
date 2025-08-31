@@ -113,9 +113,7 @@ class AgentCapabilityProfile:
     profile_generated: datetime
 
     # Core capabilities
-    capability_scores: Dict[CapabilityDomain, CapabilityScore] = field(
-        default_factory=dict
-    )
+    capability_scores: Dict[CapabilityDomain, CapabilityScore] = field(default_factory=dict)
 
     # Derived insights
     primary_strengths: List[CapabilityDomain] = field(default_factory=list)
@@ -142,9 +140,7 @@ class TaskCapabilityRequirement:
 
     task_type: str
     required_capabilities: Dict[CapabilityDomain, ProficiencyLevel]
-    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(
-        default_factory=dict
-    )
+    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(default_factory=dict)
     collaborative_aspects: List[CapabilityDomain] = field(default_factory=list)
     complexity_level: int = 1  # 1-5 scale
 
@@ -232,9 +228,7 @@ class CapabilityAssessment:
             profile = self.capability_profiles[agent_id]
             # Refresh if profile is older than 7 days
             if (datetime.now() - profile.profile_generated) < timedelta(days=7):
-                self.logger.debug(
-                    f"Returning cached capability profile for agent {agent_id}"
-                )
+                self.logger.debug(f"Returning cached capability profile for agent {agent_id}")
                 return profile
 
         try:
@@ -281,12 +275,8 @@ class CapabilityAssessment:
             return profile
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to assess capabilities for agent {agent_id}: {e}"
-            )
-            raise AssessmentError(
-                f"Capability assessment failed for agent {agent_id}: {e}"
-            )
+            self.logger.error(f"Failed to assess capabilities for agent {agent_id}: {e}")
+            raise AssessmentError(f"Capability assessment failed for agent {agent_id}: {e}")
 
     def _assess_domain_capabilities(self, profile: AgentCapabilityProfile) -> None:
         """Assess capabilities across all domains."""
@@ -300,9 +290,7 @@ class CapabilityAssessment:
             )
 
             if not task_results:
-                self.logger.warning(
-                    f"No task results found for agent {profile.agent_id}"
-                )
+                self.logger.warning(f"No task results found for agent {profile.agent_id}")
                 return
 
             # Group tasks by capability domain
@@ -325,9 +313,7 @@ class CapabilityAssessment:
                         last_updated=datetime.now(),
                     )
 
-            self.logger.debug(
-                f"Assessed {len(profile.capability_scores)} capability domains"
-            )
+            self.logger.debug(f"Assessed {len(profile.capability_scores)} capability domains")
 
         except Exception as e:
             self.logger.error(f"Failed to assess domain capabilities: {e}")
@@ -363,9 +349,7 @@ class CapabilityAssessment:
 
             # Calculate domain performance score
             if np is not None:
-                performance_score = (
-                    float(np.mean(success_rates)) if success_rates else 0.0
-                )
+                performance_score = float(np.mean(success_rates)) if success_rates else 0.0
             else:
                 performance_score = (
                     sum(success_rates) / len(success_rates) if success_rates else 0.0
@@ -386,12 +370,8 @@ class CapabilityAssessment:
                     avg_time = float(np.mean(execution_times))
                 else:
                     avg_time = sum(execution_times) / len(execution_times)  # type: ignore[operator]
-                efficiency_factor = min(
-                    1.0, 300.0 / max(1.0, avg_time)
-                )  # 5 minutes as baseline
-                performance_score = (performance_score * 0.8) + (
-                    efficiency_factor * 0.2
-                )
+                efficiency_factor = min(1.0, 300.0 / max(1.0, avg_time))  # 5 minutes as baseline
+                performance_score = (performance_score * 0.8) + (efficiency_factor * 0.2)
 
             # Determine proficiency level
             proficiency_level = self._determine_proficiency_level(performance_score)
@@ -436,9 +416,7 @@ class CapabilityAssessment:
 
         return domain_tasks
 
-    def _determine_task_domain(
-        self, task: OperationResult
-    ) -> Optional[CapabilityDomain]:
+    def _determine_task_domain(self, task: OperationResult) -> Optional[CapabilityDomain]:
         """Determine the primary capability domain for a task."""
         # This would analyze task type, description, etc. to determine domain
         # For now, use basic heuristics based on task type
@@ -492,9 +470,7 @@ class CapabilityAssessment:
         # Default to code generation if no specific match
         return CapabilityDomain.CODE_GENERATION
 
-    def _determine_proficiency_level(
-        self, performance_score: float
-    ) -> ProficiencyLevel:
+    def _determine_proficiency_level(self, performance_score: float) -> ProficiencyLevel:
         """Determine proficiency level based on performance score."""
         thresholds = self.assessment_config["proficiency_thresholds"]
 
@@ -509,9 +485,7 @@ class CapabilityAssessment:
         else:
             return ProficiencyLevel.NOVICE
 
-    def _calculate_confidence(
-        self, success_rates: List[float], evidence_count: int
-    ) -> float:
+    def _calculate_confidence(self, success_rates: List[float], evidence_count: int) -> float:
         """Calculate confidence score based on evidence consistency and count."""
         if not success_rates or evidence_count == 0:
             return 0.0
@@ -526,9 +500,7 @@ class CapabilityAssessment:
             else:
                 # Manual standard deviation calculation
                 mean_val = sum(success_rates) / len(success_rates)
-                variance = sum((x - mean_val) ** 2 for x in success_rates) / len(
-                    success_rates
-                )
+                variance = sum((x - mean_val) ** 2 for x in success_rates) / len(success_rates)
                 consistency = 1.0 - (variance**0.5)
             consistency_factor = max(0.0, consistency)
         else:
@@ -593,8 +565,7 @@ class CapabilityAssessment:
             for domain, score in sorted_capabilities[:3]:
                 if (
                     score.proficiency_level.value >= 3
-                    and score.confidence_score
-                    >= self.assessment_config["confidence_threshold"]
+                    and score.confidence_score >= self.assessment_config["confidence_threshold"]
                 ):
                     profile.primary_strengths.append(domain)
 
@@ -613,9 +584,7 @@ class CapabilityAssessment:
                     if len(profile.improvement_areas) >= 3:
                         break
 
-            self.logger.debug(
-                f"Identified {len(profile.primary_strengths)} primary strengths"
-            )
+            self.logger.debug(f"Identified {len(profile.primary_strengths)} primary strengths")
 
         except Exception as e:
             self.logger.error(f"Failed to identify capability patterns: {e}")
@@ -628,8 +597,7 @@ class CapabilityAssessment:
                 1
                 for score in profile.capability_scores.values()
                 if score.proficiency_level.value >= 3
-                and score.confidence_score
-                >= self.assessment_config["confidence_threshold"]
+                and score.confidence_score >= self.assessment_config["confidence_threshold"]
             )
 
             total_domains = len(CapabilityDomain)
@@ -640,8 +608,7 @@ class CapabilityAssessment:
                 if (
                     score.proficiency_level.value >= 4
                     and score.confidence_score >= 0.8
-                    and score.evidence_count
-                    >= self.assessment_config["min_evidence_count"]
+                    and score.evidence_count >= self.assessment_config["min_evidence_count"]
                 ):
                     profile.specialization_areas.append(domain)
 
@@ -669,9 +636,7 @@ class CapabilityAssessment:
         except Exception as e:
             self.logger.error(f"Failed to determine optimal tasks: {e}")
 
-    def _assess_collaboration_preferences(
-        self, profile: AgentCapabilityProfile
-    ) -> None:
+    def _assess_collaboration_preferences(self, profile: AgentCapabilityProfile) -> None:
         """Assess collaboration preferences and patterns."""
         try:
             # Analyze collaboration domains
@@ -685,10 +650,7 @@ class CapabilityAssessment:
             for domain in collaboration_domains:
                 if domain in profile.capability_scores:
                     score = profile.capability_scores[domain]
-                    if (
-                        score.proficiency_level.value >= 3
-                        and score.confidence_score >= 0.6
-                    ):
+                    if score.proficiency_level.value >= 3 and score.confidence_score >= 0.6:
                         profile.collaboration_preferences.append(domain.value)
 
         except Exception as e:
@@ -703,18 +665,14 @@ class CapabilityAssessment:
         except Exception as e:
             self.logger.error(f"Failed to track capability evolution: {e}")
 
-    def _generate_development_recommendations(
-        self, profile: AgentCapabilityProfile
-    ) -> None:
+    def _generate_development_recommendations(self, profile: AgentCapabilityProfile) -> None:
         """Generate skill development recommendations."""
         try:
             recommendations = []
 
             # Recommendations for improvement areas
             for domain in profile.improvement_areas:
-                recommendations.append(
-                    f"Focus on {domain.value} tasks to build proficiency"
-                )
+                recommendations.append(f"Focus on {domain.value} tasks to build proficiency")
 
             # Recommendations for emerging strengths
             for domain, score in profile.capability_scores.items():
@@ -818,9 +776,7 @@ class CapabilityAssessment:
             ),
             "code_review": TaskCapabilityRequirement(
                 task_type="code_review",
-                required_capabilities={
-                    CapabilityDomain.CODE_REVIEW: ProficiencyLevel.ADVANCED
-                },
+                required_capabilities={CapabilityDomain.CODE_REVIEW: ProficiencyLevel.ADVANCED},
                 preferred_capabilities={
                     CapabilityDomain.SECURITY: ProficiencyLevel.INTERMEDIATE,
                     CapabilityDomain.PERFORMANCE_OPTIMIZATION: ProficiencyLevel.INTERMEDIATE,
@@ -857,18 +813,10 @@ class CapabilityAssessment:
                     }
                     for domain, score in profile.capability_scores.items()
                 },
-                "primary_strengths": [
-                    domain.value for domain in profile.primary_strengths
-                ],
-                "secondary_strengths": [
-                    domain.value for domain in profile.secondary_strengths
-                ],
-                "improvement_areas": [
-                    domain.value for domain in profile.improvement_areas
-                ],
-                "specialization_areas": [
-                    domain.value for domain in profile.specialization_areas
-                ],
+                "primary_strengths": [domain.value for domain in profile.primary_strengths],
+                "secondary_strengths": [domain.value for domain in profile.secondary_strengths],
+                "improvement_areas": [domain.value for domain in profile.improvement_areas],
+                "specialization_areas": [domain.value for domain in profile.specialization_areas],
                 "versatility_score": profile.versatility_score,
                 "optimal_task_types": profile.optimal_task_types,
                 "challenging_task_types": profile.challenging_task_types,
@@ -881,9 +829,7 @@ class CapabilityAssessment:
             )
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to persist capability profile for {profile.agent_id}: {e}"
-            )
+            self.logger.error(f"Failed to persist capability profile for {profile.agent_id}: {e}")
 
     def get_capability_match_score(
         self, agent_id: str, task_requirements: TaskCapabilityRequirement

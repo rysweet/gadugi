@@ -31,7 +31,7 @@ class AgentType(Enum):
     WORKTREE_MANAGER = "WorktreeManager"
     PR_BACKLOG_MANAGER = "PrBacklogManager"
     MEMORY_MANAGER = "MemoryManager"
-    EVENT_ROUTER_MANAGER = "EventRouterManager"
+    EVENT_ROUTER_SERVICE_MANAGER = "EventRouterServiceManager"
 
 
 @dataclass

@@ -170,14 +170,10 @@ class TestWriterAgent:
 
             # Phase 3: Test Implementation
             fixtures_created = self._create_fixtures(fixture_plan["create_new"])
-            tests_created = self._create_test_methods(
-                test_plan, code_analysis, tdd_context
-            )
+            tests_created = self._create_test_methods(test_plan, code_analysis, tdd_context)
 
             # Phase 4: Quality Assurance
-            quality_metrics = self._validate_test_quality(
-                tests_created, fixtures_created
-            )
+            quality_metrics = self._validate_test_quality(tests_created, fixtures_created)
             coverage_analysis = self._analyze_coverage(code_path, tests_created)
 
             # Phase 5: Documentation and Validation
@@ -202,9 +198,7 @@ class TestWriterAgent:
             self.logger.error(f"Error creating tests: {e}")
             return self._create_error_result(code_path, str(e))
 
-    def _analyze_code_for_testing(
-        self, code_path: str, context: str = ""
-    ) -> CodeAnalysis:
+    def _analyze_code_for_testing(self, code_path: str, context: str = "") -> CodeAnalysis:
         """Analyze code to understand testing requirements."""
         self.logger.info("Analyzing code for testing requirements...")
 
@@ -257,14 +251,10 @@ class TestWriterAgent:
             )
 
         elif test_type == TestType.INTEGRATION:
-            base_scope["integration_tests"].extend(
-                ["dependency_interactions", "external_services"]
-            )
+            base_scope["integration_tests"].extend(["dependency_interactions", "external_services"])
 
         elif test_type == TestType.PERFORMANCE:
-            base_scope["performance_tests"].extend(
-                ["response_time", "memory_usage", "throughput"]
-            )
+            base_scope["performance_tests"].extend(["response_time", "memory_usage", "throughput"])
 
         elif test_type == TestType.SECURITY:
             base_scope["security_tests"].extend(
@@ -277,14 +267,11 @@ class TestWriterAgent:
 
         return base_scope
 
-    def _analyze_tdd_context(
-        self, context: str, code_analysis: CodeAnalysis
-    ) -> Dict[str, Any]:
+    def _analyze_tdd_context(self, context: str, code_analysis: CodeAnalysis) -> Dict[str, Any]:
         """Analyze TDD context for test design guidance."""
 
         tdd_context = {
-            "is_tdd_scenario": "tdd" in context.lower()
-            or "test-driven" in context.lower(),
+            "is_tdd_scenario": "tdd" in context.lower() or "test-driven" in context.lower(),
             "provides_design_guidance": False,
             "specifies_interfaces": False,
             "documents_behaviors": False,
@@ -293,22 +280,15 @@ class TestWriterAgent:
 
         if tdd_context["is_tdd_scenario"]:
             # Extract design guidance from context
-            if any(
-                keyword in context.lower()
-                for keyword in ["interface", "api", "contract"]
-            ):
+            if any(keyword in context.lower() for keyword in ["interface", "api", "contract"]):
                 tdd_context["specifies_interfaces"] = True
 
             if any(
-                keyword in context.lower()
-                for keyword in ["behavior", "should", "must", "expected"]
+                keyword in context.lower() for keyword in ["behavior", "should", "must", "expected"]
             ):
                 tdd_context["documents_behaviors"] = True
 
-            if any(
-                keyword in context.lower()
-                for keyword in ["design", "architecture", "pattern"]
-            ):
+            if any(keyword in context.lower() for keyword in ["design", "architecture", "pattern"]):
                 tdd_context["provides_design_guidance"] = True
 
         return tdd_context
@@ -451,9 +431,7 @@ class TestWriterAgent:
         tests = []
 
         for test_method in test_plan.test_methods:
-            test_spec = self._create_individual_test(
-                test_method, code_analysis, tdd_context
-            )
+            test_spec = self._create_individual_test(test_method, code_analysis, tdd_context)
 
             # Apply shared instructions to enhance test
             enhanced_test = self._enhance_test_with_shared_instructions(test_spec)
@@ -482,9 +460,7 @@ class TestWriterAgent:
         elif category == "boundary_conditions":
             test_code = self._generate_boundary_test(target_method, code_analysis)
         else:
-            test_code = self._generate_generic_test(
-                target_method, category, code_analysis
-            )
+            test_code = self._generate_generic_test(target_method, category, code_analysis)
 
         # Determine fixtures used
         fixtures_used = self._determine_test_fixtures(test_code, code_analysis)
@@ -526,27 +502,23 @@ def {test_spec.name}({", ".join(test_spec.fixtures_used)}):
         enhanced_code = self.shared_instructions.ensure_resource_cleanup(enhanced_code)
 
         # Validate structure
-        is_valid, issues = self.shared_instructions.validate_test_structure(
-            enhanced_code
-        )
+        is_valid, issues = self.shared_instructions.validate_test_structure(enhanced_code)
         if not is_valid:
             enhanced_code = self._fix_structure_issues(enhanced_code, issues)
 
         # Validate dependency management
-        deps_valid, dep_issues = (
-            self.shared_instructions.validate_dependency_management(enhanced_code)
+        deps_valid, dep_issues = self.shared_instructions.validate_dependency_management(
+            enhanced_code
         )
         if not deps_valid:
             enhanced_code = self._fix_dependency_issues(enhanced_code, dep_issues)
 
         # Validate parallel safety
-        parallel_safe, parallel_issues = (
-            self.shared_instructions.validate_parallel_safety(enhanced_code)
+        parallel_safe, parallel_issues = self.shared_instructions.validate_parallel_safety(
+            enhanced_code
         )
         if not parallel_safe:
-            enhanced_code = self._fix_parallel_safety_issues(
-                enhanced_code, parallel_issues
-            )
+            enhanced_code = self._fix_parallel_safety_issues(enhanced_code, parallel_issues)
 
         # Update test spec with enhanced code
         test_spec.test_code = enhanced_code
@@ -572,9 +544,7 @@ def {test_spec.name}({", ".join(test_spec.fixtures_used)}):
             quality_metrics["idempotent"] &= is_idempotent
 
             # Check parallel safety
-            is_parallel_safe, _ = self.shared_instructions.validate_parallel_safety(
-                test.test_code
-            )
+            is_parallel_safe, _ = self.shared_instructions.validate_parallel_safety(test.test_code)
             quality_metrics["parallel_safe"] &= is_parallel_safe
 
             # Check documentation
@@ -588,16 +558,13 @@ def {test_spec.name}({", ".join(test_spec.fixtures_used)}):
         # Validate fixtures
         for fixture in fixtures_created:
             has_cleanup = (
-                "cleanup" in fixture.cleanup_code.lower()
-                or fixture.cleanup_code.strip() != ""
+                "cleanup" in fixture.cleanup_code.lower() or fixture.cleanup_code.strip() != ""
             )
             quality_metrics["fixtures_appropriate"] &= has_cleanup
 
         return quality_metrics
 
-    def _analyze_coverage(
-        self, code_path: str, tests_created: List[TestSpec]
-    ) -> Dict[str, Any]:
+    def _analyze_coverage(self, code_path: str, tests_created: List[TestSpec]) -> Dict[str, Any]:
         """Analyze test coverage for the code."""
 
         # This would typically run coverage analysis tools
@@ -651,9 +618,7 @@ Maintenance notes:
         if len(tests_created) >= 3:
             validation_results.append("✅ Adequate test coverage provided")
         else:
-            validation_results.append(
-                "⚠️ Limited test coverage - consider additional tests"
-            )
+            validation_results.append("⚠️ Limited test coverage - consider additional tests")
 
         # Check test variety
         test_categories = set()
@@ -666,9 +631,7 @@ Maintenance notes:
             validation_results.append("⚠️ Limited test variety")
 
         # Check documentation quality
-        well_documented = sum(
-            1 for test in tests_created if len(test.documentation) > 100
-        )
+        well_documented = sum(1 for test in tests_created if len(test.documentation) > 100)
         if well_documented == len(tests_created):
             validation_results.append("✅ All tests well documented")
         else:
@@ -778,9 +741,7 @@ Maintenance notes:
 
     # Test generation helper methods
 
-    def _generate_happy_path_test(
-        self, method_name: str, code_analysis: CodeAnalysis
-    ) -> str:
+    def _generate_happy_path_test(self, method_name: str, code_analysis: CodeAnalysis) -> str:
         """Generate happy path test code."""
         return f"""
     # Arrange
@@ -795,9 +756,7 @@ Maintenance notes:
     assert validate_result_properties(actual_result)
 """
 
-    def _generate_error_handling_test(
-        self, method_name: str, code_analysis: CodeAnalysis
-    ) -> str:
+    def _generate_error_handling_test(self, method_name: str, code_analysis: CodeAnalysis) -> str:
         """Generate error handling test code."""
         return f"""
     # Arrange
@@ -811,9 +770,7 @@ Maintenance notes:
     assert exc_info.value.args[0] is not None
 """
 
-    def _generate_edge_case_test(
-        self, method_name: str, code_analysis: CodeAnalysis
-    ) -> str:
+    def _generate_edge_case_test(self, method_name: str, code_analysis: CodeAnalysis) -> str:
         """Generate edge case test code."""
         return f"""
     # Test various edge cases
@@ -834,9 +791,7 @@ Maintenance notes:
             pass
 """
 
-    def _generate_boundary_test(
-        self, method_name: str, code_analysis: CodeAnalysis
-    ) -> str:
+    def _generate_boundary_test(self, method_name: str, code_analysis: CodeAnalysis) -> str:
         """Generate boundary condition test code."""
         return f"""
     # Test boundary conditions
@@ -960,8 +915,7 @@ Maintenance notes:
             requirements.append("Cleanup temporary files")
 
         if any(
-            "db" in dep.lower() or "database" in dep.lower()
-            for dep in code_analysis.dependencies
+            "db" in dep.lower() or "database" in dep.lower() for dep in code_analysis.dependencies
         ):
             requirements.append("Cleanup database state")
 
@@ -969,9 +923,7 @@ Maintenance notes:
 
         return requirements
 
-    def _determine_test_fixtures(
-        self, test_code: str, code_analysis: CodeAnalysis
-    ) -> List[str]:
+    def _determine_test_fixtures(self, test_code: str, code_analysis: CodeAnalysis) -> List[str]:
         """Determine which fixtures a test needs."""
         fixtures = []
 
@@ -992,9 +944,7 @@ Maintenance notes:
     def _generate_test_setup(self, method_name: str, fixtures_used: List[str]) -> str:
         """Generate test setup code."""
         if not fixtures_used:
-            return (
-                f"# Setup for {method_name} test\ntarget_object = create_test_target()"
-            )
+            return f"# Setup for {method_name} test\ntarget_object = create_test_target()"
 
         return f"""
     # Setup for {method_name} test
@@ -1061,9 +1011,7 @@ Validation Strategy:
 
         return has_arrange and has_act and has_assert
 
-    def _identify_coverage_gaps(
-        self, code_path: str, tests_created: List[TestSpec]
-    ) -> List[str]:
+    def _identify_coverage_gaps(self, code_path: str, tests_created: List[TestSpec]) -> List[str]:
         """Identify potential coverage gaps."""
         gaps = []
 
@@ -1129,9 +1077,7 @@ Validation Strategy:
         """Describe the test strategy."""
         return f"Test {test.test_type.value} functionality using {len(test.fixtures_used)} fixtures"
 
-    def _format_test_requirements(
-        self, test: TestSpec, code_analysis: CodeAnalysis
-    ) -> str:
+    def _format_test_requirements(self, test: TestSpec, code_analysis: CodeAnalysis) -> str:
         """Format test requirements."""
         requirements = code_analysis.test_requirements
         if not requirements:
@@ -1154,9 +1100,7 @@ Validation Strategy:
         """Describe test dependencies."""
         return f"Fixtures: {', '.join(test.fixtures_used) if test.fixtures_used else 'None'}"
 
-    def _create_error_result(
-        self, code_path: str, error_message: str
-    ) -> TestWriterResult:
+    def _create_error_result(self, code_path: str, error_message: str) -> TestWriterResult:
         """Create error result when test creation fails."""
         return TestWriterResult(
             module_name=self._extract_module_name(code_path),

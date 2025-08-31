@@ -156,17 +156,11 @@ class GitHubOperations:
                 retries += 1
 
                 # Check for rate limit
-                if (
-                    hasattr(e, "stderr")
-                    and e.stderr
-                    and "rate limit" in e.stderr.lower()
-                ):
+                if hasattr(e, "stderr") and e.stderr and "rate limit" in e.stderr.lower():
                     raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}")
 
                 if retries >= self.retry_config["max_retries"]:
-                    self.logger.error(
-                        f"GitHub command failed after {retries} retries: {e}"
-                    )
+                    self.logger.error(f"GitHub command failed after {retries} retries: {e}")
                     return {
                         "success": False,
                         "error": str(e),
@@ -519,9 +513,7 @@ class GitHubOperations:
             self.logger.error(f"Timeout creating branch {branch_name}")
             return False
 
-    def push_branch(
-        self, branch_name: Optional[str] = None, force: bool = False
-    ) -> bool:
+    def push_branch(self, branch_name: Optional[str] = None, force: bool = False) -> bool:
         """
         Push branch to remote.
 
@@ -583,9 +575,7 @@ class GitHubOperations:
 
         return result
 
-    def close_issue(
-        self, issue_number: int, reason: str = "completed"
-    ) -> Dict[str, Any]:
+    def close_issue(self, issue_number: int, reason: str = "completed") -> Dict[str, Any]:
         """
         Close an issue.
 
@@ -612,9 +602,7 @@ class GitHubOperations:
 
         return result
 
-    def get_workflow_runs(
-        self, workflow: Optional[str] = None, limit: int = 10
-    ) -> Dict[str, Any]:
+    def get_workflow_runs(self, workflow: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
         """
         Get workflow run information.
 
@@ -847,9 +835,7 @@ class GitHubOperations:
                 result = self.merge_pr(pr_number, merge_method)
                 results.append(result)
             except Exception as e:
-                results.append(
-                    {"success": False, "error": str(e), "pr_number": pr_number}
-                )
+                results.append({"success": False, "error": str(e), "pr_number": pr_number})
         return results
 
     def verify_pull_request_exists(self, pr_number: int) -> Dict[str, Any]:

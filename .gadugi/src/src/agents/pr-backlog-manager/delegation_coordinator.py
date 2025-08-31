@@ -126,9 +126,7 @@ class DelegationCoordinator:
                     self.active_delegations[task.task_id] = task
 
             except Exception as e:
-                logger.error(
-                    f"Failed to create delegation task for issue '{issue}': {e}"
-                )
+                logger.error(f"Failed to create delegation task for issue '{issue}': {e}")
 
         # Execute delegations
         for task in delegation_tasks:
@@ -162,7 +160,9 @@ class DelegationCoordinator:
         )
 
         # Create task
-        task_id = f"delegation-{pr_number}-{task_type.value}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        task_id = (
+            f"delegation-{pr_number}-{task_type.value}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        )
 
         return DelegationTask(
             task_id=task_id,
@@ -188,11 +188,7 @@ class DelegationCoordinator:
             return DelegationType.BRANCH_UPDATE
         elif "ai review" in issue_lower or "code review" in issue_lower:
             return DelegationType.AI_CODE_REVIEW
-        elif (
-            "metadata" in issue_lower
-            or "title" in issue_lower
-            or "description" in issue_lower
-        ):
+        elif "metadata" in issue_lower or "title" in issue_lower or "description" in issue_lower:
             return DelegationType.METADATA_IMPROVEMENT
         else:
             # Default to CI failure fix for unknown issues
@@ -205,9 +201,7 @@ class DelegationCoordinator:
         issue_lower = blocking_issue.lower()
 
         # High priority issues
-        if any(
-            keyword in issue_lower for keyword in ["security", "critical", "urgent"]
-        ):
+        if any(keyword in issue_lower for keyword in ["security", "critical", "urgent"]):
             return DelegationPriority.CRITICAL
 
         # Check PR context for priority indicators
@@ -502,9 +496,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{{{ secrets.ANTHROPIC_API_KEY }}}}
 """
 
-        workflow_path = (
-            f".github/workflows/resolve-pr-{task.pr_number}-{task.task_type.value}.yml"
-        )
+        workflow_path = f".github/workflows/resolve-pr-{task.pr_number}-{task.task_type.value}.yml"
 
         try:
             with open(workflow_path, "w") as f:
@@ -662,9 +654,7 @@ jobs:
         """Check status of a delegation task."""
         return self.active_delegations.get(task_id)
 
-    def get_active_delegations(
-        self, pr_number: Optional[int] = None
-    ) -> List[DelegationTask]:
+    def get_active_delegations(self, pr_number: Optional[int] = None) -> List[DelegationTask]:
         """Get list of active delegation tasks."""
         tasks = list(self.active_delegations.values())
 
@@ -677,17 +667,13 @@ jobs:
         """Mark a delegation task as completed."""
         task = self.active_delegations.get(task_id)
         if task:
-            task.status = (
-                DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
-            )
+            task.status = DelegationStatus.COMPLETED if success else DelegationStatus.FAILED
             task.completion_time = datetime.now()
 
             # Add completion comment
             self._add_completion_comment(task, success)
 
-            logger.info(
-                f"Marked delegation {task_id} as {'completed' if success else 'failed'}"
-            )
+            logger.info(f"Marked delegation {task_id} as {'completed' if success else 'failed'}")
 
     def _add_completion_comment(self, task: DelegationTask, success: bool) -> None:
         """Add comment about delegation completion."""
@@ -748,9 +734,7 @@ jobs:
         )
 
         failed_tasks = sum(
-            1
-            for task in self.active_delegations.values()
-            if task.status == DelegationStatus.FAILED
+            1 for task in self.active_delegations.values() if task.status == DelegationStatus.FAILED
         )
 
         success_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
@@ -779,9 +763,7 @@ jobs:
             "average_completion_time_seconds": avg_completion_time,
             "task_types": {
                 task_type.value: sum(
-                    1
-                    for task in self.active_delegations.values()
-                    if task.task_type == task_type
+                    1 for task in self.active_delegations.values() if task.task_type == task_type
                 )
                 for task_type in DelegationType
             },

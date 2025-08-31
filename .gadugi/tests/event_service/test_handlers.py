@@ -3,24 +3,24 @@
 import sys
 import os
 
-# Add the src directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'src', 'src'))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from event_service.events import (
+from src.src.event_service.events import (
     Event,
     TaskStatus,
     create_github_event,
     create_local_event,
     create_agent_event,
 )
-from event_service.handlers import (
+from src.src.event_service.handlers import (
     GitHubFilter,
     EventFilter,
     EventHandler,
     EventMatcher,
     CommonFilters,
 )
-from event_service.config import AgentInvocation
+from src.src.event_service.config import AgentInvocation
 
 
 class TestGitHubFilter:

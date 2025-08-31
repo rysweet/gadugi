@@ -119,9 +119,7 @@ class ADRGenerator:
 
         # Integration-related changes
         integration_indicators = ["github", "api", "webhook", "cli", "integration"]
-        if any(
-            indicator in element.name.lower() for indicator in integration_indicators
-        ):
+        if any(indicator in element.name.lower() for indicator in integration_indicators):
             return "integration_change"
 
         # Framework/technology changes
@@ -211,9 +209,7 @@ class ADRGenerator:
 
         return max(numbers) + 1 if numbers else 1
 
-    def _generate_title(
-        self, decision_type: str, changes: List[ArchitecturalChange]
-    ) -> str:
+    def _generate_title(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
         """Generate ADR title"""
         base_title = self.decision_patterns.get(decision_type, "Architectural Change")
 
@@ -257,15 +253,15 @@ class ADRGenerator:
         critical_impact = [c for c in changes if c.impact_level == ImpactLevel.CRITICAL]
 
         if critical_impact:
-            context += f"\n{len(critical_impact)} critical impact changes require architectural review.\n"
+            context += (
+                f"\n{len(critical_impact)} critical impact changes require architectural review.\n"
+            )
         elif high_impact:
             context += f"\n{len(high_impact)} high impact changes affect system architecture.\n"
 
         return context
 
-    def _generate_decision(
-        self, decision_type: str, changes: List[ArchitecturalChange]
-    ) -> str:
+    def _generate_decision(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
         """Generate decision description"""
         decision_templates = {
             "new_pattern": "We will adopt the {pattern} architectural pattern for {component}.",
@@ -287,9 +283,8 @@ class ADRGenerator:
             return template.format(**details)
         except KeyError:
             # Fallback if template formatting fails
-            return (
-                "We will implement the following architectural changes:\n"
-                + "\n".join([f"- {change.get_description()}" for change in changes])
+            return "We will implement the following architectural changes:\n" + "\n".join(
+                [f"- {change.get_description()}" for change in changes]
             )
 
     def _extract_decision_details(
@@ -305,12 +300,8 @@ class ADRGenerator:
                 patterns.update(change.element.patterns)
                 components.add(change.element.name)
 
-            details["pattern"] = (
-                ", ".join(patterns) if patterns else "architectural pattern"
-            )
-            details["component"] = (
-                ", ".join(list(components)[:3]) if components else "components"
-            )
+            details["pattern"] = ", ".join(patterns) if patterns else "architectural pattern"
+            details["component"] = ", ".join(list(components)[:3]) if components else "components"
 
         elif decision_type == "framework_change":
             frameworks = set()
@@ -321,9 +312,7 @@ class ADRGenerator:
                     frameworks.add("pytest testing framework")
                 # Add more framework detection logic
 
-            details["framework"] = (
-                ", ".join(frameworks) if frameworks else "new framework"
-            )
+            details["framework"] = ", ".join(frameworks) if frameworks else "new framework"
 
         elif decision_type == "interface_change":
             components = [change.element.name for change in changes]
@@ -339,18 +328,12 @@ class ADRGenerator:
                     security_measures.append("XPIA defense systems")
 
             details["security_measure"] = (
-                ", ".join(security_measures)
-                if security_measures
-                else "security enhancements"
+                ", ".join(security_measures) if security_measures else "security enhancements"
             )
 
         elif decision_type == "performance_change":
-            components = [
-                change.element.name for change in changes if change.element.is_async
-            ]
-            details["component"] = (
-                ", ".join(components) if components else "system components"
-            )
+            components = [change.element.name for change in changes if change.element.is_async]
+            details["component"] = ", ".join(components) if components else "system components"
 
         elif decision_type == "integration_change":
             systems = []
@@ -360,15 +343,11 @@ class ADRGenerator:
                 elif "api" in change.element.name.lower():
                     systems.append("external APIs")
 
-            details["external_system"] = (
-                ", ".join(systems) if systems else "external systems"
-            )
+            details["external_system"] = ", ".join(systems) if systems else "external systems"
 
         return details
 
-    def _generate_rationale(
-        self, decision_type: str, changes: List[ArchitecturalChange]
-    ) -> str:
+    def _generate_rationale(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
         """Generate rationale section"""
         rationale_templates = {
             "new_pattern": "This pattern provides better separation of concerns and improves maintainability.",
@@ -524,9 +503,7 @@ class ADRGenerator:
 
         # Add issue references if available
         pr_body = pr_info.get("body", "")
-        issue_matches = re.findall(
-            r"(?:closes|fixes|resolves)\s+#(\d+)", pr_body, re.IGNORECASE
-        )
+        issue_matches = re.findall(r"(?:closes|fixes|resolves)\s+#(\d+)", pr_body, re.IGNORECASE)
         for issue_num in issue_matches:
             related.append(f"Issue #{issue_num}")
 

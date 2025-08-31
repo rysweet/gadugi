@@ -239,9 +239,7 @@ class PythonASTParser(ASTParser):
 
         return changes
 
-    def _elements_differ(
-        self, old: ArchitecturalElement, new: ArchitecturalElement
-    ) -> bool:
+    def _elements_differ(self, old: ArchitecturalElement, new: ArchitecturalElement) -> bool:
         """Check if two elements are significantly different"""
         # Check important attributes that indicate architectural changes
         return (
@@ -296,14 +294,10 @@ class PythonASTParser(ASTParser):
             implications.append("May affect inheritance hierarchy and client code")
 
         if "abc" in element.patterns:
-            implications.append(
-                "Abstract base class change affects all implementations"
-            )
+            implications.append("Abstract base class change affects all implementations")
 
         if "singleton" in element.patterns:
-            implications.append(
-                "Singleton pattern change affects global state management"
-            )
+            implications.append("Singleton pattern change affects global state management")
 
         if element.is_async:
             implications.append("Async function change affects concurrency patterns")
@@ -385,9 +379,7 @@ class PythonASTVisitor(ast.NodeVisitor):
         """Handle async function definitions"""
         self._handle_function(node, is_async=True)
 
-    def _handle_function(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef], is_async: bool
-    ):
+    def _handle_function(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef], is_async: bool):
         """Common handler for function and async function definitions"""
         decorators = [self._get_decorator_name(d) for d in node.decorator_list]
         parameters = [arg.arg for arg in node.args.args]
@@ -440,16 +432,10 @@ class PythonASTVisitor(ast.NodeVisitor):
             return f"{self._get_attr_name(node.value)}.{node.attr}"
         return str(node)
 
-    def _get_return_type(
-        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
-    ) -> Optional[str]:
+    def _get_return_type(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> Optional[str]:
         """Extract return type annotation if present"""
         if node.returns:
-            return (
-                ast.unparse(node.returns)
-                if hasattr(ast, "unparse")
-                else str(node.returns)
-            )
+            return ast.unparse(node.returns) if hasattr(ast, "unparse") else str(node.returns)
         return None
 
 

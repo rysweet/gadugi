@@ -584,12 +584,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             from_agent = event.agent_id
 
             # Store feedback for learning
-            feedback_record = {
-                "feedback": feedback,
-                "type": feedback_type,
-                "from_agent": from_agent,
-                "timestamp": datetime.now(),
-            }
+            # (feedback record would be created and stored in a real implementation)
 
             # Store in memory if available
             if hasattr(self, "memory") and self.memory:

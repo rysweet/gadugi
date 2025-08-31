@@ -31,7 +31,7 @@ class AgentType(Enum):
     WORKTREE_MANAGER = "WorktreeManager"
     PR_BACKLOG_MANAGER = "PrBacklogManager"
     MEMORY_MANAGER = "MemoryManager"
-    EVENT_ROUTER_MANAGER = "EventRouterManager"
+    EVENT_ROUTER_SERVICE_MANAGER = "EventRouterServiceManager"
 
 
 @dataclass
@@ -193,9 +193,7 @@ class AgentRegistry:
             enabled=True,
         )
 
-    def _lazy_load_class(
-        self, agent_dir: str, module_name: str, class_name: str
-    ) -> Type[V03Agent]:
+    def _lazy_load_class(self, agent_dir: str, module_name: str, class_name: str) -> Type[V03Agent]:
         """
         Lazy load an agent class.
         Returns a placeholder that loads the actual class when needed.
@@ -210,13 +208,9 @@ class AgentRegistry:
             def __new__(cls, *args, **kwargs):
                 if cls._actual_class is None:
                     # Load the actual class
-                    module_path = (
-                        Path(__file__).parent / agent_dir / f"{cls._module_name}.py"
-                    )
+                    module_path = Path(__file__).parent / agent_dir / f"{cls._module_name}.py"
                     if module_path.exists():
-                        spec = importlib.util.spec_from_file_location(
-                            cls._module_name, module_path
-                        )
+                        spec = importlib.util.spec_from_file_location(cls._module_name, module_path)
                         if spec and spec.loader:
                             module = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(module)
@@ -253,9 +247,7 @@ class AgentRegistry:
         """
         agents = []
         for reg in self._registry.values():
-            if hasattr(reg.capabilities, capability) and getattr(
-                reg.capabilities, capability
-            ):
+            if hasattr(reg.capabilities, capability) and getattr(reg.capabilities, capability):
                 agents.append(reg)
         return agents
 
@@ -271,10 +263,7 @@ class AgentRegistry:
         """
         agents = []
         for reg in self._registry.values():
-            if (
-                expertise in reg.expertise_areas
-                or expertise in reg.capabilities.expertise_areas
-            ):
+            if expertise in reg.expertise_areas or expertise in reg.capabilities.expertise_areas:
                 agents.append(reg)
         return agents
 
@@ -364,23 +353,13 @@ class AgentRegistry:
         task_lower = task_description.lower()
 
         # Simple keyword matching (could be enhanced with NLP)
-        if any(
-            word in task_lower for word in ["pr", "pull request", "workflow", "merge"]
-        ):
+        if any(word in task_lower for word in ["pr", "pull request", "workflow", "merge"]):
             return AgentType.WORKFLOW_MANAGER
-        elif any(
-            word in task_lower
-            for word in ["parallel", "orchestrate", "decompose", "split"]
-        ):
+        elif any(word in task_lower for word in ["parallel", "orchestrate", "decompose", "split"]):
             return AgentType.ORCHESTRATOR
-        elif any(
-            word in task_lower
-            for word in ["review", "code quality", "security", "lint"]
-        ):
+        elif any(word in task_lower for word in ["review", "code quality", "security", "lint"]):
             return AgentType.CODE_REVIEWER
-        elif any(
-            word in task_lower for word in ["break down", "subtask", "decomposition"]
-        ):
+        elif any(word in task_lower for word in ["break down", "subtask", "decomposition"]):
             return AgentType.TASK_DECOMPOSER
 
         # Default to orchestrator for complex tasks

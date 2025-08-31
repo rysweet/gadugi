@@ -84,12 +84,8 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_create_team_evolution_plan(self):
         """Test creation of comprehensive team evolution plan."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Create plan
         plan = self.planner.create_team_evolution_plan(
@@ -115,18 +111,14 @@ class TestStrategicPlanner(unittest.TestCase):
         self.assertIn("efficiency", vision.lower())
 
         # Test with innovation objective
-        innovation_objectives = [
-            {"description": "Foster innovation and continuous improvement"}
-        ]
+        innovation_objectives = [{"description": "Foster innovation and continuous improvement"}]
         vision = self.planner._define_team_vision(innovation_objectives)
         self.assertIn("innovation", vision.lower())
 
     def test_create_strategic_goals(self):
         """Test strategic goal creation from business objectives."""
         # Configure mock
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
 
         goals = self.planner._create_strategic_goals(
             self.business_objectives, ["agent_1", "agent_2"]
@@ -148,9 +140,7 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_create_default_strategic_goals(self):
         """Test creation of default goals when none provided."""
         # Configure mock
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
 
         goals = self.planner._create_strategic_goals([], ["agent_1"])
 
@@ -168,12 +158,8 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_analyze_current_state(self):
         """Test current state analysis."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         state = self.planner._analyze_current_state(["agent_1", "agent_2"])
 
@@ -192,12 +178,8 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_create_capacity_plan(self):
         """Test capacity planning."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Create goals and state
         goals = self.planner._create_strategic_goals(
@@ -206,9 +188,7 @@ class TestStrategicPlanner(unittest.TestCase):
         state = self.planner._analyze_current_state(["agent_1", "agent_2"])
 
         # Create capacity plan
-        capacity_plan = self.planner._create_capacity_plan(
-            ["agent_1", "agent_2"], goals, state
-        )
+        capacity_plan = self.planner._create_capacity_plan(["agent_1", "agent_2"], goals, state)
 
         # Verify plan structure
         self.assertIsInstance(capacity_plan, CapacityPlan)
@@ -225,23 +205,15 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_create_skill_development_plan(self):
         """Test skill development planning."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Create goals and state
-        goals = self.planner._create_strategic_goals(
-            self.business_objectives, ["agent_1"]
-        )
+        goals = self.planner._create_strategic_goals(self.business_objectives, ["agent_1"])
         state = self.planner._analyze_current_state(["agent_1"])
 
         # Create skill plan
-        skill_plan = self.planner._create_skill_development_plan(
-            ["agent_1"], goals, state
-        )
+        skill_plan = self.planner._create_skill_development_plan(["agent_1"], goals, state)
 
         # Verify plan structure
         self.assertIsInstance(skill_plan, SkillDevelopmentPlan)
@@ -257,21 +229,15 @@ class TestStrategicPlanner(unittest.TestCase):
     def test_generate_strategic_initiatives(self):
         """Test generation of strategic initiatives."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Create prerequisites
         goals = self.planner._create_strategic_goals(
             self.business_objectives, ["agent_1", "agent_2"]
         )
         state = self.planner._analyze_current_state(["agent_1", "agent_2"])
-        capacity_plan = self.planner._create_capacity_plan(
-            ["agent_1", "agent_2"], goals, state
-        )
+        capacity_plan = self.planner._create_capacity_plan(["agent_1", "agent_2"], goals, state)
         skill_plan = self.planner._create_skill_development_plan(
             ["agent_1", "agent_2"], goals, state
         )
@@ -428,12 +394,8 @@ class TestStrategicPlanner(unittest.TestCase):
         """Test calculation of training investment."""
         # Create development paths
         development_paths = {
-            "agent_1": [
-                {"skill": "ml", "duration_weeks": 4, "training_type": "intensive"}
-            ],
-            "agent_2": [
-                {"skill": "devops", "duration_weeks": 2, "training_type": "moderate"}
-            ],
+            "agent_1": [{"skill": "ml", "duration_weeks": 4, "training_type": "intensive"}],
+            "agent_2": [{"skill": "devops", "duration_weeks": 2, "training_type": "moderate"}],
         }
 
         # Create training calendar

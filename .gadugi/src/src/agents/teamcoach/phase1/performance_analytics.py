@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "sh
 # Import available shared module components
 from interfaces import AgentConfig, OperationResult  # type: ignore[import]
 from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
-from state_management import StateManager  # type: ignore[import]
+from src.src.shared.state_management import StateManager  # type: ignore[import]
 
 # Import task tracking if available
 try:
@@ -184,9 +184,7 @@ class AgentPerformanceAnalyzer:
         self.error_handler = error_handler or ErrorHandler()
 
         # Circuit breaker for performance analysis operations
-        self.analysis_circuit_breaker = CircuitBreaker(
-            failure_threshold=3, recovery_timeout=300.0
-        )
+        self.analysis_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=300.0)
 
         # Performance data cache
         self.performance_cache: Dict[str, AgentPerformanceData] = {}
@@ -236,9 +234,7 @@ class AgentPerformanceAnalyzer:
             time_period = (start_time, end_time)
 
         # Check cache if not forcing refresh
-        cache_key = (
-            f"{agent_id}_{time_period[0].isoformat()}_{time_period[1].isoformat()}"
-        )
+        cache_key = f"{agent_id}_{time_period[0].isoformat()}_{time_period[1].isoformat()}"
         if not force_refresh and cache_key in self.performance_cache:
             self.logger.debug(f"Returning cached performance data for agent {agent_id}")
             return self.performance_cache[cache_key]
@@ -276,12 +272,8 @@ class AgentPerformanceAnalyzer:
             return performance_data
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to analyze performance for agent {agent_id}: {e}"
-            )
-            raise AnalysisError(
-                f"Performance analysis failed for agent {agent_id}: {e}"
-            )
+            self.logger.error(f"Failed to analyze performance for agent {agent_id}: {e}")
+            raise AnalysisError(f"Performance analysis failed for agent {agent_id}: {e}")
 
     def _calculate_success_metrics(
         self,
@@ -299,15 +291,11 @@ class AgentPerformanceAnalyzer:
                 task_results = []
 
             if not task_results:
-                self.logger.warning(
-                    f"No task results found for agent {performance_data.agent_id}"
-                )
+                self.logger.warning(f"No task results found for agent {performance_data.agent_id}")
                 return
 
             performance_data.total_tasks = len(task_results)
-            performance_data.completed_tasks = sum(
-                1 for result in task_results if result.success
-            )
+            performance_data.completed_tasks = sum(1 for result in task_results if result.success)
             performance_data.failed_tasks = (
                 performance_data.total_tasks - performance_data.completed_tasks
             )
@@ -377,20 +365,14 @@ class AgentPerformanceAnalyzer:
                 resource_data = []
 
             if not resource_data:
-                self.logger.warning(
-                    f"No resource data found for agent {performance_data.agent_id}"
-                )
+                self.logger.warning(f"No resource data found for agent {performance_data.agent_id}")
                 return
 
             # Calculate average resource usage
             memory_usage = [
-                data.memory_usage
-                for data in resource_data
-                if data.memory_usage is not None
+                data.memory_usage for data in resource_data if data.memory_usage is not None
             ]
-            cpu_usage = [
-                data.cpu_usage for data in resource_data if data.cpu_usage is not None
-            ]
+            cpu_usage = [data.cpu_usage for data in resource_data if data.cpu_usage is not None]
 
             if memory_usage:
                 performance_data.avg_memory_usage = statistics.mean(memory_usage)
@@ -398,16 +380,11 @@ class AgentPerformanceAnalyzer:
                 performance_data.avg_cpu_usage = statistics.mean(cpu_usage)
 
             # Calculate efficiency score (inverse of resource usage with quality weighting)
-            if (
-                performance_data.avg_memory_usage > 0
-                and performance_data.avg_cpu_usage > 0
-            ):
+            if performance_data.avg_memory_usage > 0 and performance_data.avg_cpu_usage > 0:
                 resource_factor = (
                     performance_data.avg_memory_usage + performance_data.avg_cpu_usage
                 ) / 2
-                performance_data.resource_efficiency_score = min(
-                    100.0, 100.0 / resource_factor
-                )
+                performance_data.resource_efficiency_score = min(100.0, 100.0 / resource_factor)
 
             self.logger.debug(
                 f"Resource usage measured: {performance_data.resource_efficiency_score:.2f} efficiency"
@@ -434,24 +411,16 @@ class AgentPerformanceAnalyzer:
                 quality_data = []
 
             if not quality_data:
-                self.logger.warning(
-                    f"No quality data found for agent {performance_data.agent_id}"
-                )
+                self.logger.warning(f"No quality data found for agent {performance_data.agent_id}")
                 return
 
             # Calculate aggregate quality scores
             quality_scores = [
-                data.quality_score
-                for data in quality_data
-                if data.quality_score is not None
+                data.quality_score for data in quality_data if data.quality_score is not None
             ]
-            error_rates = [
-                data.error_rate for data in quality_data if data.error_rate is not None
-            ]
+            error_rates = [data.error_rate for data in quality_data if data.error_rate is not None]
             coverage_scores = [
-                data.test_coverage
-                for data in quality_data
-                if data.test_coverage is not None
+                data.test_coverage for data in quality_data if data.test_coverage is not None
             ]
 
             if quality_scores:
@@ -506,13 +475,9 @@ class AgentPerformanceAnalyzer:
                 ]
 
                 if success_rates:
-                    performance_data.collaboration_success_rate = statistics.mean(
-                        success_rates
-                    )
+                    performance_data.collaboration_success_rate = statistics.mean(success_rates)
                 if communication_scores:
-                    performance_data.communication_score = statistics.mean(
-                        communication_scores
-                    )
+                    performance_data.communication_score = statistics.mean(communication_scores)
 
             self.logger.debug(
                 f"Collaboration measured: {performance_data.collaboration_success_rate:.2%} success rate"
@@ -532,9 +497,7 @@ class AgentPerformanceAnalyzer:
         try:
             # Calculate trend periods
             total_duration = time_period[1] - time_period[0]
-            period_duration = (
-                total_duration / self.analysis_config["trend_analysis_periods"]
-            )
+            period_duration = total_duration / self.analysis_config["trend_analysis_periods"]
 
             trend_values = []
 
@@ -558,13 +521,9 @@ class AgentPerformanceAnalyzer:
                         "Overall performance trending upward"
                     )
                 elif recent_change < -0.05:  # 5% decline threshold
-                    performance_data.areas_for_improvement.append(
-                        "Overall performance declining"
-                    )
+                    performance_data.areas_for_improvement.append("Overall performance declining")
 
-            self.logger.debug(
-                f"Trend analysis completed: {len(trend_values)} periods analyzed"
-            )
+            self.logger.debug(f"Trend analysis completed: {len(trend_values)} periods analyzed")
 
         except Exception as e:
             self.logger.error(f"Failed to analyze performance trends: {e}")
@@ -588,9 +547,7 @@ class AgentPerformanceAnalyzer:
                 return 0.0
 
             # Calculate weighted performance score
-            success_rate = sum(1 for result in task_results if result.success) / len(
-                task_results
-            )
+            success_rate = sum(1 for result in task_results if result.success) / len(task_results)
 
             # Additional metrics would be calculated here in a full implementation
             # For now, use success rate as the primary metric
@@ -602,9 +559,7 @@ class AgentPerformanceAnalyzer:
             self.logger.error(f"Failed to calculate period performance score: {e}")
             return 0.0
 
-    def _identify_improvement_areas(
-        self, performance_data: AgentPerformanceData
-    ) -> None:
+    def _identify_improvement_areas(self, performance_data: AgentPerformanceData) -> None:
         """Identify specific areas for performance improvement."""
         try:
             # Success rate improvements
@@ -729,9 +684,7 @@ class AgentPerformanceAnalyzer:
             return report
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to generate performance report for agent {agent_id}: {e}"
-            )
+            self.logger.error(f"Failed to generate performance report for agent {agent_id}: {e}")
             raise ReportGenerationError(f"Failed to generate performance report: {e}")
 
     def _calculate_overall_score(self, performance_data: AgentPerformanceData) -> float:
@@ -742,8 +695,7 @@ class AgentPerformanceAnalyzer:
             performance_data.success_rate * config["reliability_weight"]
             + min(1.0, 60.0 / max(1.0, performance_data.avg_execution_time))
             * config["speed_weight"]
-            + (performance_data.resource_efficiency_score / 100.0)
-            * config["efficiency_weight"]
+            + (performance_data.resource_efficiency_score / 100.0) * config["efficiency_weight"]
             + (performance_data.code_quality_score / 100.0) * config["quality_weight"]
         )
 

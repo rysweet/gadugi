@@ -138,9 +138,7 @@ class EventHandlerMixin:
                 if response.status == 200:
                     return True
                 else:
-                    raise aiohttp.ClientError(
-                        f"Health check failed with status {response.status}"
-                    )
+                    raise aiohttp.ClientError(f"Health check failed with status {response.status}")
         except Exception as e:
             if not self.event_config.graceful_degradation:
                 raise
@@ -184,9 +182,7 @@ class EventHandlerMixin:
                             pass  # Don't fail event emission for memory storage issues
                     return True
                 else:
-                    raise aiohttp.ClientError(
-                        f"Event router returned status {response.status}"
-                    )
+                    raise aiohttp.ClientError(f"Event router returned status {response.status}")
 
         except Exception:
             if self.event_config.graceful_degradation:
@@ -194,9 +190,7 @@ class EventHandlerMixin:
                 self._event_batch.append(event_data)
                 if len(self._event_batch) > self.event_config.batch_size:
                     # Remove oldest events to prevent unbounded growth
-                    self._event_batch = self._event_batch[
-                        -self.event_config.batch_size :
-                    ]
+                    self._event_batch = self._event_batch[-self.event_config.batch_size :]
                 return False
             else:
                 raise
@@ -471,9 +465,7 @@ class EventHandlerMixin:
                     "context": context or {},
                     "agent_state": {
                         "current_task": self.current_task_id,
-                        "uptime_seconds": (
-                            datetime.now() - self.start_time
-                        ).total_seconds(),
+                        "uptime_seconds": (datetime.now() - self.start_time).total_seconds(),
                         "tasks_completed": self.tasks_completed,
                     },
                 },
@@ -492,9 +484,7 @@ class EventHandlerMixin:
                         "data": {
                             "tasks_completed": self.tasks_completed,
                             "success_rate": self.success_rate,
-                            "uptime_seconds": (
-                                datetime.now() - self.start_time
-                            ).total_seconds(),
+                            "uptime_seconds": (datetime.now() - self.start_time).total_seconds(),
                         },
                     }
                 )

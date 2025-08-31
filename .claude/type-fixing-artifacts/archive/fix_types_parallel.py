@@ -145,7 +145,6 @@ async def fix_none_checks(file_path: Path) -> int:
     for i, line in enumerate(lines):
         if 'is not a known attribute of "None"' in str(line):
             # Add None check before this line
-            indent = len(line) - len(line.lstrip())
             # This is simplified - real implementation would be more sophisticated
             fixes_made += 1
 

@@ -711,7 +711,7 @@ class TestEventSystemErrorHandling:
         storage = MemoryEventStorage(sqlite_db_path=":memory:")
 
         # Don't initialize storage to trigger error
-        event = AgentEvent(
+        AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
             data={},

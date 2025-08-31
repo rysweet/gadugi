@@ -151,9 +151,7 @@ class TaskDecomposerV03(V03Agent):
                 if "decomposition_strategy:" in content:
                     try:
                         # Extract strategy data from memory
-                        strategy_data = json.loads(
-                            content.split("decomposition_strategy:")[1]
-                        )
+                        strategy_data = json.loads(content.split("decomposition_strategy:")[1])
 
                         strategy = DecompositionStrategy(
                             name=strategy_data["name"],
@@ -162,9 +160,7 @@ class TaskDecomposerV03(V03Agent):
                             avg_parallelization=strategy_data["avg_parallelization"],
                             avg_completion_time=strategy_data["avg_completion_time"],
                             usage_count=strategy_data["usage_count"],
-                            last_used=datetime.fromisoformat(
-                                strategy_data["last_used"]
-                            ),
+                            last_used=datetime.fromisoformat(strategy_data["last_used"]),
                             complexity_level=strategy_data["complexity_level"],
                             triggers=strategy_data["triggers"],
                             subtask_template=strategy_data["subtask_template"],
@@ -177,9 +173,7 @@ class TaskDecomposerV03(V03Agent):
                         print(f"  ⚠️ Failed to parse strategy from memory: {e}")
 
             if strategies_found > 0:
-                print(
-                    f"  📚 Restored {strategies_found} learned strategies from memory"
-                )
+                print(f"  📚 Restored {strategies_found} learned strategies from memory")
             else:
                 # Initialize with default strategies
                 await self._initialize_default_strategies()
@@ -354,14 +348,10 @@ class TaskDecomposerV03(V03Agent):
         Main decomposition logic with learning integration.
         """
         # Analyze task complexity
-        complexity_analysis = await self._analyze_task_complexity(
-            task_description, context
-        )
+        complexity_analysis = await self._analyze_task_complexity(task_description, context)
 
         # Find best matching strategy
-        strategy = await self._select_best_strategy(
-            task_description, complexity_analysis
-        )
+        strategy = await self._select_best_strategy(task_description, complexity_analysis)
 
         # Generate subtasks using selected strategy
         subtasks = await self._generate_smart_subtasks(
@@ -418,7 +408,7 @@ class TaskDecomposerV03(V03Agent):
     ) -> Dict[str, Any]:
         """Analyze task complexity using learned patterns."""
         # Get relevant knowledge about complexity analysis
-        complexity_knowledge = await self.get_relevant_knowledge("complexity analysis")
+        _complexity_knowledge = await self.get_relevant_knowledge("complexity analysis")
 
         task_lower = task_description.lower()
         words = task_lower.split()
@@ -518,9 +508,7 @@ class TaskDecomposerV03(V03Agent):
             score = 0.0
 
             # Pattern matching score
-            pattern_matches = sum(
-                1 for trigger in strategy.triggers if trigger in task_lower
-            )
+            pattern_matches = sum(1 for trigger in strategy.triggers if trigger in task_lower)
             score += pattern_matches * 2.0
 
             # Success rate bonus
@@ -547,10 +535,7 @@ class TaskDecomposerV03(V03Agent):
         # Sort by score and select best
         strategy_scores.sort(key=lambda x: x[1], reverse=True)
 
-        if (
-            strategy_scores
-            and strategy_scores[0][1] > self.pattern_confidence_threshold
-        ):
+        if strategy_scores and strategy_scores[0][1] > self.pattern_confidence_threshold:
             best_strategy = strategy_scores[0][0]
 
             # Remember the selection reasoning
@@ -587,15 +572,9 @@ class TaskDecomposerV03(V03Agent):
                     id=subtask_id,
                     name=f"{subtask_type.replace('_', ' ').title()} - {task_target}",
                     description=f"Execute {subtask_type} phase for: {task_description[:80]}...",
-                    dependencies=self._calculate_dependencies(
-                        i, subtasks, subtask_type
-                    ),
-                    estimated_time=self._estimate_smart_time(
-                        subtask_type, complexity_analysis
-                    ),
-                    complexity=self._map_complexity(
-                        subtask_type, complexity_analysis["level"]
-                    ),
+                    dependencies=self._calculate_dependencies(i, subtasks, subtask_type),
+                    estimated_time=self._estimate_smart_time(subtask_type, complexity_analysis),
+                    complexity=self._map_complexity(subtask_type, complexity_analysis["level"]),
                     can_parallelize=self._can_parallelize(subtask_type, i),
                     priority=self._calculate_priority(subtask_type, i),
                     confidence=strategy.success_rate,
@@ -685,17 +664,14 @@ class TaskDecomposerV03(V03Agent):
             # Reviews depend on implementation and testing
             for subtask in existing_subtasks:
                 if any(
-                    keyword in subtask.name.lower()
-                    for keyword in ["implementation", "testing"]
+                    keyword in subtask.name.lower() for keyword in ["implementation", "testing"]
                 ):
                     if subtask.id not in dependencies:
                         dependencies.append(subtask.id)
 
         return dependencies
 
-    def _estimate_smart_time(
-        self, subtask_type: str, complexity_analysis: Dict[str, Any]
-    ) -> int:
+    def _estimate_smart_time(self, subtask_type: str, complexity_analysis: Dict[str, Any]) -> int:
         """Estimate time with complexity adjustment."""
         base_estimates = {
             "analysis_and_planning": 45,
@@ -823,9 +799,7 @@ class TaskDecomposerV03(V03Agent):
         else:
             return "task"
 
-    async def _analyze_dependencies_smart(
-        self, subtasks: List[SubTask]
-    ) -> Dict[str, List[str]]:
+    async def _analyze_dependencies_smart(self, subtasks: List[SubTask]) -> Dict[str, List[str]]:
         """Enhanced dependency analysis with pattern learning."""
         dependency_graph = {}
 
@@ -846,7 +820,7 @@ class TaskDecomposerV03(V03Agent):
     ) -> None:
         """Apply learned dependency patterns."""
         # Get knowledge about dependency patterns
-        dependency_knowledge = await self.get_relevant_knowledge("dependency patterns")
+        _dependency_knowledge = await self.get_relevant_knowledge("dependency patterns")
 
         for subtask in subtasks:
             subtask_name = subtask.name.lower()
@@ -855,10 +829,7 @@ class TaskDecomposerV03(V03Agent):
             if "test" in subtask_name:
                 for other in subtasks:
                     if (
-                        (
-                            "implement" in other.name.lower()
-                            or "code" in other.name.lower()
-                        )
+                        ("implement" in other.name.lower() or "code" in other.name.lower())
                         and other.id != subtask.id
                         and other.id not in dependency_graph[subtask.id]
                     ):
@@ -868,10 +839,7 @@ class TaskDecomposerV03(V03Agent):
             if "review" in subtask_name:
                 for other in subtasks:
                     if (
-                        (
-                            "implement" in other.name.lower()
-                            or "develop" in other.name.lower()
-                        )
+                        ("implement" in other.name.lower() or "develop" in other.name.lower())
                         and other.id != subtask.id
                         and other.id not in dependency_graph[subtask.id]
                     ):
@@ -881,10 +849,7 @@ class TaskDecomposerV03(V03Agent):
             if "integration" in subtask_name:
                 for other in subtasks:
                     if (
-                        (
-                            "implement" in other.name.lower()
-                            or "unit_test" in other.name.lower()
-                        )
+                        ("implement" in other.name.lower() or "unit_test" in other.name.lower())
                         and other.id != subtask.id
                         and other.id not in dependency_graph[subtask.id]
                     ):
@@ -905,9 +870,7 @@ class TaskDecomposerV03(V03Agent):
                 critical_deps = []
                 for dep_id in deps:
                     dep_subtask = subtask_map.get(dep_id)
-                    if dep_subtask and self._is_critical_dependency(
-                        subtask, dep_subtask
-                    ):
+                    if dep_subtask and self._is_critical_dependency(subtask, dep_subtask):
                         critical_deps.append(dep_id)
 
                 dependency_graph[subtask_id] = critical_deps
@@ -920,8 +883,7 @@ class TaskDecomposerV03(V03Agent):
 
         # Architecture/design must complete before implementation
         if "implement" in subtask.name.lower() and (
-            "design" in dependency.name.lower()
-            or "architect" in dependency.name.lower()
+            "design" in dependency.name.lower() or "architect" in dependency.name.lower()
         ):
             return True
 
@@ -943,9 +905,7 @@ class TaskDecomposerV03(V03Agent):
             return 0.0
 
         # Calculate based on dependency analysis
-        critical_path_time = await self._calculate_critical_path(
-            subtasks, dependency_graph
-        )
+        critical_path_time = await self._calculate_critical_path(subtasks, dependency_graph)
         total_sequential_time = sum(st.estimated_time or 60 for st in subtasks)
 
         if total_sequential_time == 0:
@@ -1005,9 +965,7 @@ class TaskDecomposerV03(V03Agent):
         strategy: Optional[DecompositionStrategy],
     ) -> Tuple[int, float]:
         """Estimate total time with confidence interval."""
-        critical_path_time = await self._calculate_critical_path(
-            subtasks, dependency_graph
-        )
+        critical_path_time = await self._calculate_critical_path(subtasks, dependency_graph)
 
         # Adjust for parallelization potential
         time_savings = parallelization_score * 0.4  # Conservative estimate
@@ -1023,9 +981,7 @@ class TaskDecomposerV03(V03Agent):
         # Subtask confidence average
         subtask_confidences = [st.confidence for st in subtasks if st.confidence]
         if subtask_confidences:
-            confidence_factors.append(
-                sum(subtask_confidences) / len(subtask_confidences) * 0.3
-            )
+            confidence_factors.append(sum(subtask_confidences) / len(subtask_confidences) * 0.3)
 
         # Dependency clarity confidence
         clear_dependencies = sum(1 for deps in dependency_graph.values() if deps)
@@ -1097,14 +1053,13 @@ class TaskDecomposerV03(V03Agent):
 
         # Store as procedural memory - using learn_procedure instead of store_procedure
         if self.memory:
-            procedure_id = await self.memory.learn_procedure(
+            await self.memory.learn_procedure(
                 procedure_name=f"decomposition_{result.strategy_used or 'adaptive'}",
                 steps=steps,
                 context=f"Decomposed '{result.original_task}' into {len(result.subtasks)} "
                 f"subtasks with {result.parallelization_score:.1%} parallelization",
             )
-        else:
-            procedure_id = None
+        # Note: procedure_id not needed in else branch
 
         # Store detailed result as long-term memory
         detailed_result = {
@@ -1245,12 +1200,9 @@ class TaskDecomposerV03(V03Agent):
 
             # Update with exponential moving average
             alpha = 0.2
-            strategy.success_rate = (
-                alpha * success_rate + (1 - alpha) * strategy.success_rate
-            )
+            strategy.success_rate = alpha * success_rate + (1 - alpha) * strategy.success_rate
             strategy.avg_parallelization = (
-                alpha * parallelization_achieved
-                + (1 - alpha) * strategy.avg_parallelization
+                alpha * parallelization_achieved + (1 - alpha) * strategy.avg_parallelization
             )
 
             # Save updated strategy
@@ -1277,19 +1229,14 @@ class TaskDecomposerV03(V03Agent):
 
         # Get recent learning
         if self.memory:
-            recent_memories = await self.memory.recall_memories(
-                memory_type="semantic", limit=20
-            )
+            recent_memories = await self.memory.recall_memories(memory_type="semantic", limit=20)
         else:
             recent_memories = []
 
         learning_insights = []
         for memory in recent_memories:
             content = memory.get("content", "")
-            if any(
-                keyword in content
-                for keyword in ["bottleneck", "improvement", "feedback"]
-            ):
+            if any(keyword in content for keyword in ["bottleneck", "improvement", "feedback"]):
                 learning_insights.append(content[:100] + "...")
 
         return {

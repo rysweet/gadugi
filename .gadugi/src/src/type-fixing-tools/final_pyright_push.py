@@ -10,9 +10,7 @@ from pathlib import Path
 
 def run_pyright_get_errors():
     """Get pyright errors as structured data."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     errors = []
     for line in result.stderr.split("\n"):
@@ -21,9 +19,9 @@ def run_pyright_get_errors():
             and " - error:" in line
         ):
             try:
-                file_part = line.split(
-                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
-                )[1]
+                file_part = line.split("/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/")[
+                    1
+                ]
                 file_path = file_part.split(":")[0]
                 line_num = int(file_part.split(":")[1])
                 error_desc = line.split(" - error: ")[1] if " - error: " in line else ""
@@ -131,8 +129,7 @@ def fix_unused_variables(errors):
             if 0 <= line_idx < len(lines):
                 if "# Used:" not in lines[line_idx]:
                     lines[line_idx] = (
-                        lines[line_idx].rstrip()
-                        + "  # Used: suppress pyright warning\n"
+                        lines[line_idx].rstrip() + "  # Used: suppress pyright warning\n"
                     )
 
                     with open(file_path, "w") as f:
@@ -226,8 +223,7 @@ def fix_missing_attributes(errors):
             if 0 <= line_idx < len(lines):
                 if "# type: ignore" not in lines[line_idx]:
                     lines[line_idx] = (
-                        lines[line_idx].rstrip()
-                        + "  # type: ignore[reportAttributeAccessIssue]\n"
+                        lines[line_idx].rstrip() + "  # type: ignore[reportAttributeAccessIssue]\n"
                     )
 
                     with open(file_path, "w") as f:

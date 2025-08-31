@@ -20,7 +20,7 @@ import secrets
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -30,15 +30,14 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 try:
-    from .gadugi/.gadugi/src/shared.github_operations import GitHubOperations  # type: ignore[import]
-    from .gadugi/.gadugi/src/shared.state_management import StateManager  # type: ignore[import]
-    from .gadugi/.gadugi/src/shared.task_tracking import TaskTracker, TaskMetrics  # type: ignore[import]
-    from .gadugi/.gadugi/src/shared.utils.error_handling import (  # type: ignore[import]
+    from ..shared.github_operations import GitHubOperations  # type: ignore[import]
+    from ..shared.state_management import StateManager  # type: ignore[import]
+    from ..shared.task_tracking import TaskTracker, TaskMetrics  # type: ignore[import]
+    from ..shared.utils.error_handling import (  # type: ignore[import]
         ErrorHandler,
-        RetryManager,
         CircuitBreaker,
     )
-    from .gadugi/.gadugi/src/shared.interfaces import AgentConfig, WorkflowPhase  # type: ignore[import]
+    from ..shared.interfaces import AgentConfig, WorkflowPhase  # type: ignore[import]
 except ImportError:
     # Mock classes for type checking when imports are not available
     class GitHubOperations:
@@ -61,16 +60,15 @@ except ImportError:
         pass
 
     class ErrorHandler:
-        pass
-
-    class RetryManager:
-        def execute_with_retry(self, func: Callable, **kwargs) -> Any:
-            return func()
+        def handle_error(self, error: Exception, context: Dict[str, Any]) -> None:
+            pass
 
     class CircuitBreaker:
-        def __init__(self, **kwargs):
+        def __init__(self, failure_threshold: int = 5, timeout: float = 60.0, **kwargs):
             self.failure_count = 0
             self.is_open = False
+            self.failure_threshold = failure_threshold
+            self.timeout = timeout
 
         def __enter__(self):
             return self
@@ -83,16 +81,16 @@ except ImportError:
             self.agent_id = agent_id
             self.name = name
 
+    from dataclasses import dataclass, field
+
+    @dataclass
     class WorkflowPhase:
-        INITIALIZATION = "initialization"
-        ISSUE_CREATION = "issue_creation"
-        BRANCH_MANAGEMENT = "branch_management"
-        RESEARCH_PLANNING = "research_planning"
-        IMPLEMENTATION = "implementation"
-        TESTING = "testing"
-        DOCUMENTATION = "documentation"
-        PULL_REQUEST_CREATION = "pull_request_creation"
-        REVIEW = "review"
+        name: str
+        description: str = ""
+        order: int = 0
+        timeout_minutes: int = 60
+        dependencies: List[str] = field(default_factory=list)
+        tasks: List[Any] = field(default_factory=list)
 
 
 # Container execution imports
@@ -204,7 +202,7 @@ class WorkflowState:
     branch_name: Optional[str] = None
     pr_number: Optional[int] = None
     pr_url: Optional[str] = None
-    current_phase: WorkflowPhase = WorkflowPhase.INITIALIZATION
+    current_phase: Optional[WorkflowPhase] = None
     status: str = "active"
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -252,7 +250,6 @@ class EnhancedWorkflowMaster:
         self.task_tracker = TaskTracker()
         self.task_metrics = TaskMetrics()
         self.error_handler = ErrorHandler()
-        self.retry_manager = RetryManager()
 
         # Circuit breakers
         self.github_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
@@ -329,7 +326,9 @@ class EnhancedWorkflowMaster:
                 id="1",
                 name="setup",
                 description="Initialize workflow and validate prompt",
-                phase=WorkflowPhase.INITIALIZATION,
+                phase=WorkflowPhase(
+                    name="initialization", description="Initialize workflow"
+                ),
                 priority="high",
                 estimated_minutes=3,
                 container_policy="minimal",
@@ -338,7 +337,9 @@ class EnhancedWorkflowMaster:
                 id="2",
                 name="issue_creation",
                 description="Create GitHub issue for tracking",
-                phase=WorkflowPhase.ISSUE_CREATION,
+                phase=WorkflowPhase(
+                    name="issue_creation", description="Create GitHub issue"
+                ),
                 priority="high",
                 estimated_minutes=2,
                 dependencies=["1"],
@@ -348,7 +349,9 @@ class EnhancedWorkflowMaster:
                 id="3",
                 name="branch_management",
                 description="Create and checkout feature branch",
-                phase=WorkflowPhase.BRANCH_MANAGEMENT,
+                phase=WorkflowPhase(
+                    name="branch_management", description="Manage branches"
+                ),
                 priority="high",
                 estimated_minutes=2,
                 dependencies=["2"],
@@ -358,7 +361,9 @@ class EnhancedWorkflowMaster:
                 id="4",
                 name="research_planning",
                 description="Analyze codebase and create implementation plan",
-                phase=WorkflowPhase.RESEARCH_PLANNING,
+                phase=WorkflowPhase(
+                    name="research_planning", description="Research and planning"
+                ),
                 priority="high",
                 estimated_minutes=15,
                 dependencies=["3"],
@@ -368,7 +373,9 @@ class EnhancedWorkflowMaster:
                 id="5",
                 name="implementation",
                 description="Implement core functionality",
-                phase=WorkflowPhase.IMPLEMENTATION,
+                phase=WorkflowPhase(
+                    name="implementation", description="Implementation"
+                ),
                 priority="high",
                 estimated_minutes=45,
                 dependencies=["4"],
@@ -378,7 +385,7 @@ class EnhancedWorkflowMaster:
                 id="6",
                 name="testing",
                 description="Write and run comprehensive tests",
-                phase=WorkflowPhase.TESTING,
+                phase=WorkflowPhase(name="testing", description="Testing"),
                 priority="high",
                 estimated_minutes=30,
                 dependencies=["5"],
@@ -388,7 +395,7 @@ class EnhancedWorkflowMaster:
                 id="7",
                 name="documentation",
                 description="Update documentation",
-                phase=WorkflowPhase.DOCUMENTATION,
+                phase=WorkflowPhase(name="documentation", description="Documentation"),
                 priority="medium",
                 estimated_minutes=20,
                 dependencies=["5"],
@@ -398,7 +405,9 @@ class EnhancedWorkflowMaster:
                 id="8",
                 name="pull_request",
                 description="Create pull request",
-                phase=WorkflowPhase.PULL_REQUEST_CREATION,
+                phase=WorkflowPhase(
+                    name="pull_request_creation", description="Create PR"
+                ),
                 priority="high",
                 estimated_minutes=10,
                 dependencies=["6", "7"],
@@ -408,7 +417,7 @@ class EnhancedWorkflowMaster:
                 id="9",
                 name="code_review",
                 description="Complete code review process",
-                phase=WorkflowPhase.REVIEW,
+                phase=WorkflowPhase(name="review", description="Code review"),
                 priority="high",
                 estimated_minutes=15,
                 dependencies=["8"],
@@ -648,14 +657,11 @@ This issue tracks the implementation of WorkflowMaster robustness and brittlenes
 
             # Use circuit breaker for GitHub operations
             with self.github_circuit_breaker:
-                result = self.retry_manager.execute_with_retry(
-                    lambda: self.github_ops.create_issue(
-                        title=issue_title,
-                        body=issue_body,
-                        labels=["enhancement", "ai-generated", "workflow-master"],
-                    ),
-                    max_attempts=3,
-                    backoff_strategy="exponential",
+                # Direct call without retry_manager
+                result = self.github_ops.create_issue(
+                    title=issue_title,
+                    body=issue_body,
+                    labels=["enhancement", "ai-generated", "workflow-master"],
                 )
 
             if result and hasattr(result, "number"):
@@ -1454,21 +1460,18 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
             # Use circuit breaker for GitHub operations
             with self.github_circuit_breaker:
-                result = self.retry_manager.execute_with_retry(
-                    lambda: self.github_ops.create_pull_request(
-                        title=pr_title,
-                        body=pr_body,
-                        head=workflow.branch_name,
-                        base="main",
-                        labels=[
-                            "enhancement",
-                            "ai-generated",
-                            "workflow-master",
-                            "container-execution",
-                        ],
-                    ),
-                    max_attempts=3,
-                    backoff_strategy="exponential",
+                # Direct call without retry_manager
+                result = self.github_ops.create_pull_request(
+                    title=pr_title,
+                    body=pr_body,
+                    head=workflow.branch_name,
+                    base="main",
+                    labels=[
+                        "enhancement",
+                        "ai-generated",
+                        "workflow-master",
+                        "container-execution",
+                    ],
                 )
 
             if result and hasattr(result, "number"):

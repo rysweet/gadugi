@@ -17,7 +17,6 @@ try:
     from .memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
-        BackendConfig,
         HealthMonitorConfig,
         create_memory_health_monitor,
     )
@@ -29,7 +28,7 @@ except ImportError:
         HealthMonitorConfig,
         create_memory_health_monitor,
     )
-    from memory_integration import AgentMemoryInterface
+    from src.src.shared.memory_integration import AgentMemoryInterface
 
 
 class HealthAwareMemoryInterface(AgentMemoryInterface):
@@ -138,9 +137,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                     else:
                         connection.close()
             except Exception as e:
-                self._logger.warning(
-                    f"Error closing {backend_type.value} connection: {e}"
-                )
+                self._logger.warning(f"Error closing {backend_type.value} connection: {e}")
 
         self._backend_connections.clear()
 
@@ -180,9 +177,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
     async def trigger_failover(self, from_backend: str) -> bool:
         """Manually trigger a failover from the specified backend."""
         if not self._health_monitor:
-            self._logger.warning(
-                "Cannot trigger failover: health monitoring not enabled"
-            )
+            self._logger.warning("Cannot trigger failover: health monitoring not enabled")
             return False
 
         try:
@@ -226,9 +221,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                         )
 
                         # Retry with new backend
-                        return await super().remember_short_term(
-                            content, tags, importance
-                        )
+                        return await super().remember_short_term(content, tags, importance)
 
             raise  # Re-raise original exception if retry not enabled or failed
 
@@ -242,9 +235,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
     ) -> str:
         """Store long-term memory with automatic retry on backend failure."""
         try:
-            return await super().remember_long_term(
-                content, memory_type, tags, importance
-            )
+            return await super().remember_long_term(content, memory_type, tags, importance)
         except Exception as e:
             if retry_on_failure and self._health_monitor:
                 self._logger.warning(f"Long-term memory storage failed: {e}")
@@ -485,9 +476,7 @@ class HealthAwareMemoryAgent:
             ]
 
             if unhealthy_backends:
-                self._logger.warning(
-                    f"Unhealthy backends detected: {unhealthy_backends}"
-                )
+                self._logger.warning(f"Unhealthy backends detected: {unhealthy_backends}")
 
                 # Try to trigger failover from first unhealthy backend
                 if unhealthy_backends:
@@ -523,9 +512,7 @@ async def example_health_aware_usage():
     ) as memory:
         # Store some memories
         await memory.remember_short_term("Testing health-aware memory system")
-        await memory.remember_long_term(
-            "This is a persistent memory with health monitoring"
-        )
+        await memory.remember_long_term("This is a persistent memory with health monitoring")
 
         # Check memory health
         health_status = memory.get_memory_health_status()

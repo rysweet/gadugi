@@ -78,9 +78,7 @@ def fix_unused_imports(file_path: Path) -> bool:
                                 lines.pop(line_num)
 
                     file_path.write_text("\n".join(lines) + "\n")
-                    print(
-                        f"Removed {len(lines_to_remove)} unused imports from {file_path}"
-                    )
+                    print(f"Removed {len(lines_to_remove)} unused imports from {file_path}")
                     return True
 
             except json.JSONDecodeError:
@@ -175,7 +173,7 @@ def main():
             print(f"⚠️  {final_error_count} errors remain. Manual intervention needed.")
             # Show a sample of remaining errors
             lines = result.stdout.splitlines()
-            error_lines = [l for l in lines if "error:" in l][:10]
+            error_lines = [line for line in lines if "error:" in line][:10]
             if error_lines:
                 print("\nSample of remaining errors:")
                 for line in error_lines:

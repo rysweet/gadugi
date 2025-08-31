@@ -143,9 +143,7 @@ async def subscriber_client():
                         print(f"   Type: {event.get('type')}")
                         print(f"   Priority: {event.get('priority')}")
                         print(f"   Source: {event.get('source')}")
-                        print(
-                            f"   Payload: {json.dumps(event.get('payload', {}), indent=6)}"
-                        )
+                        print(f"   Payload: {json.dumps(event.get('payload', {}), indent=6)}")
                     else:
                         print(f"Subscriber: Received: {event_data}")
 

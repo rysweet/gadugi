@@ -30,17 +30,13 @@ class PromptGenerator:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root).resolve()
-        self.templates_dir = (
-            self.project_root / ".claude" / "orchestrator" / "templates"
-        )
+        self.templates_dir = self.project_root / ".claude" / "orchestrator" / "templates"
         self.templates_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize default templates if they don't exist
         self._create_default_templates()
 
-    def generate_workflow_prompt(
-        self, context: PromptContext, worktree_path: Path
-    ) -> str:
+    def generate_workflow_prompt(self, context: PromptContext, worktree_path: Path) -> str:
         """Generate a complete workflow prompt for WorkflowManager execution"""
 
         prompt_content = self._build_workflow_prompt(context)
@@ -167,9 +163,7 @@ class PromptGenerator:
                     current_section = "requirements"
                 elif "technical" in header or "analysis" in header:
                     current_section = "technical_analysis"
-                elif "implementation" in header and (
-                    "plan" in header or "step" in header
-                ):
+                elif "implementation" in header and ("plan" in header or "step" in header):
                     current_section = "implementation_plan"
                 elif "success" in header or "criteria" in header:
                     current_section = "success_criteria"
@@ -293,14 +287,10 @@ def main():
     parser = argparse.ArgumentParser(description="Generate WorkflowManager prompts")
     parser.add_argument("--task-id", required=True, help="Task ID")
     parser.add_argument("--task-name", required=True, help="Task name")
-    parser.add_argument(
-        "--original-prompt", required=True, help="Original prompt file path"
-    )
+    parser.add_argument("--original-prompt", required=True, help="Original prompt file path")
     parser.add_argument("--worktree-path", required=True, help="Target worktree path")
     parser.add_argument("--phase-focus", help="Specific phase to focus on")
-    parser.add_argument(
-        "--validate", action="store_true", help="Validate generated prompt"
-    )
+    parser.add_argument("--validate", action="store_true", help="Validate generated prompt")
 
     args = parser.parse_args()
 
@@ -315,9 +305,7 @@ def main():
 
     try:
         # Generate prompt
-        prompt_file = generator.generate_workflow_prompt(
-            context, Path(args.worktree_path)
-        )
+        prompt_file = generator.generate_workflow_prompt(context, Path(args.worktree_path))
 
         print(f"✅ Generated prompt: {prompt_file}")
 

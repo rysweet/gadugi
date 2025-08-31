@@ -105,8 +105,9 @@ check_prerequisites() {
     log_verbose "Checking prerequisites..."
 
     # Check if we're in the right directory
-    if [[ ! -f "$GADUGI_ROOT/pyproject.toml" ]]; then
-        log_error "Not in Gadugi project root (no pyproject.toml found)"
+    # The pyproject.toml is actually in .gadugi/ subdirectory
+    if [[ ! -f "$GADUGI_ROOT/.gadugi/pyproject.toml" ]] && [[ ! -f "$GADUGI_ROOT/pyproject.toml" ]]; then
+        log_error "Not in Gadugi project root (no pyproject.toml found in root or .gadugi/)"
         return 1
     fi
 

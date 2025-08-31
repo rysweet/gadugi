@@ -80,9 +80,7 @@ def main():
         print("=" * 60)
 
         # Start the Flask server
-        app.run(
-            host=settings.host, port=settings.port, debug=settings.debug, threaded=True
-        )
+        app.run(host=settings.host, port=settings.port, debug=settings.debug, threaded=True)
 
     except ImportError as e:
         logger.error(f"❌ Import error: {e}")

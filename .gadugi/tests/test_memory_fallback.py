@@ -5,14 +5,22 @@ Tests all backends, fallback chain behavior, and integration
 
 import asyncio
 import pytest
+import pytest_asyncio
 import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Import the fallback system
+import sys
+
+# Fix import paths for .gadugi structure
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+# Import with proper error handling
 try:
-    from ..claude.shared.memory_fallback import (
+    from src.src.shared.memory_fallback import (
         Memory,
         MemoryType,
         MemoryScope,
@@ -26,7 +34,7 @@ try:
         MemoryFallbackChain,
         create_simple_fallback_chain,
     )
-    from ..claude.shared.memory_integration import (
+    from src.src.shared.memory_integration import (
         EnhancedAgentMemoryInterface,
         create_enhanced_memory_interface,
         create_fallback_only_interface,
@@ -36,11 +44,21 @@ try:
 except ImportError:
     HAS_FALLBACK_SYSTEM = False
     # Create placeholder classes for tests
-    Memory = MagicMock
-    MemoryType = MagicMock
-    MemoryBackend = MagicMock
-    MemoryFallbackChain = MagicMock
-    EnhancedAgentMemoryInterface = MagicMock
+    Memory = MagicMock  # type: ignore
+    MemoryType = MagicMock  # type: ignore
+    MemoryScope = MagicMock  # type: ignore
+    MemoryPersistence = MagicMock  # type: ignore
+    KnowledgeNode = MagicMock  # type: ignore
+    Whiteboard = MagicMock  # type: ignore
+    MemoryBackend = MagicMock  # type: ignore
+    MarkdownMemoryBackend = MagicMock  # type: ignore
+    SQLiteMemoryBackend = MagicMock  # type: ignore
+    InMemoryBackend = MagicMock  # type: ignore
+    MemoryFallbackChain = MagicMock  # type: ignore
+    create_simple_fallback_chain = MagicMock  # type: ignore
+    EnhancedAgentMemoryInterface = MagicMock  # type: ignore
+    create_enhanced_memory_interface = MagicMock  # type: ignore
+    create_fallback_only_interface = MagicMock  # type: ignore
 
 
 @pytest.mark.skipif(not HAS_FALLBACK_SYSTEM, reason="Fallback system not available")
@@ -241,7 +259,7 @@ class TestMarkdownBackend:
     """Test the markdown file backend."""
 
     @pytest.fixture
-    async def temp_storage(self):
+    def temp_storage(self):
         """Create temporary storage directory."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir
@@ -402,7 +420,7 @@ class TestMarkdownBackend:
 class TestSQLiteBackend:
     """Test the SQLite backend."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def temp_db(self):
         """Create temporary SQLite database."""
         with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_file:
@@ -511,7 +529,7 @@ class TestMemoryFallbackChain:
     """Test the memory fallback chain."""
 
     @pytest.fixture
-    async def temp_storage(self):
+    def temp_storage(self):
         """Create temporary storage for fallback chain."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir
@@ -628,7 +646,7 @@ class TestMemoryFallbackChain:
         assert len(tagged_memories) >= 1
 
         # Test knowledge graph
-        node = await chain.add_knowledge_node(
+        await chain.add_knowledge_node(
             agent_id, "Fallback Concept", "A concept stored via fallback", confidence=0.9
         )
 
@@ -644,7 +662,7 @@ class TestEnhancedMemoryInterface:
     """Test the enhanced memory interface with fallback support."""
 
     @pytest.fixture
-    async def temp_storage(self):
+    def temp_storage(self):
         """Create temporary storage."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir
@@ -747,7 +765,7 @@ class TestEnhancedMemoryInterface:
 
         async with interface:
             # Should start with HTTP if available
-            initial_status = interface.get_backend_status()
+            interface.get_backend_status()
 
             # Force switch to fallback
             switched = await interface.force_backend_switch(use_http=False)
@@ -769,7 +787,7 @@ class TestMemoryFallbackIntegration:
     """Integration tests for the complete fallback system."""
 
     @pytest.fixture
-    async def temp_storage(self):
+    def temp_storage(self):
         """Create temporary storage."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir
@@ -830,7 +848,6 @@ class TestMemoryFallbackIntegration:
         assert stored.id == memory.id
 
         # Simulate progressive backend failures
-        original_backend = chain.current_backend_index
 
         # Mark current backend as unhealthy
         chain.backend_health[chain.current_backend_index] = False
@@ -910,9 +927,7 @@ class TestMemoryFallbackIntegration:
         assert len(tag_results) == 20  # Should be 20 memories with tag_0
 
         # Test filtering
-        short_term_results = await chain.get_agent_memories(
-            agent_id, short_term_only=True, limit=memory_count
-        )
+        await chain.get_agent_memories(agent_id, short_term_only=True, limit=memory_count)
         # All should be considered short-term by default
 
         await chain.disconnect()
@@ -929,7 +944,7 @@ class TestMemoryFallbackPerformance:
     """Performance tests for the fallback system."""
 
     @pytest.fixture
-    async def temp_storage(self):
+    def temp_storage(self):
         """Create temporary storage."""
         with tempfile.TemporaryDirectory() as temp_dir:
             yield temp_dir

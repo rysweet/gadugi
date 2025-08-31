@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 else:
     # For runtime, try real imports
     try:
-        from agents.pr_backlog_manager.core import (  # type: ignore[import]
+        from src.src.agents.pr_backlog_manager.core import (  # type: ignore[import]
             PRBacklogManager,
             PRAssessment,
             PRStatus,
@@ -49,7 +49,7 @@ else:
             BacklogMetrics,
             GadugiError,
         )
-        from shared.interfaces import AgentConfig  # type: ignore[import]
+        from src.src.shared.interfaces import AgentConfig  # type: ignore[import]
     except ImportError:
         # Fall back to stubs if real imports fail
         from .test_stubs import (
@@ -112,11 +112,11 @@ class TestPRBacklogManager:
         config = AgentConfig(agent_id="test-pr-backlog", name="Test PR Backlog Manager")
         manager = PRBacklogManager(config=config, auto_approve=False, github_ops=mock_github_ops)
         # Inject mocks if the manager has these attributes
-        if hasattr(manager, 'github_ops'):
+        if hasattr(manager, "github_ops"):
             manager.github_ops = mock_github_ops
-        if hasattr(manager, 'state_manager'):
+        if hasattr(manager, "state_manager"):
             manager.state_manager = mock_state_manager
-        if hasattr(manager, 'task_tracker'):
+        if hasattr(manager, "task_tracker"):
             manager.task_tracker = mock_task_tracker
         return manager
 
@@ -436,7 +436,8 @@ class TestPRBacklogManager:
         assessment = pr_backlog_manager.process_single_pr(123)
 
         assert assessment.pr_number == 123
-        assert assessment is not None  # type: ignore[comparison-overlap] and assessment.status == PRStatus.READY
+        assert assessment is not None  # type: ignore[comparison-overlap]
+        assert assessment.status == PRStatus.READY
         assert assessment.is_ready is True
         assert assessment.readiness_score == 100.0
         assert len(assessment.blocking_issues) == 0
@@ -467,7 +468,8 @@ class TestPRBacklogManager:
         assessment = pr_backlog_manager.process_single_pr(123)
 
         assert assessment.pr_number == 123
-        assert assessment is not None  # type: ignore[comparison-overlap] and assessment.status == PRStatus.BLOCKED
+        assert assessment is not None  # type: ignore[comparison-overlap]
+        assert assessment.status == PRStatus.BLOCKED
         assert assessment.is_ready is False
         assert assessment.readiness_score < 100.0
         assert len(assessment.blocking_issues) > 0

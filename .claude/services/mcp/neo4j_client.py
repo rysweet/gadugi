@@ -495,7 +495,6 @@ class Neo4jMemoryClient:
             # Merge into first context
             merged_context = None
             all_memories = set()
-            merged_working_memory = {}
 
             async for record in result:
                 context = self._record_to_context(dict(record))

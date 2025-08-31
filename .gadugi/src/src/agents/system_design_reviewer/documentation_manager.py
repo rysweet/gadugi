@@ -77,9 +77,7 @@ class DocumentationManager:
             # Add evolution history entry
             evolution_entry = self._create_evolution_entry(changes, pr_info)
             if evolution_entry:
-                updated_content = self._add_evolution_entry(
-                    updated_content, evolution_entry
-                )
+                updated_content = self._add_evolution_entry(updated_content, evolution_entry)
                 updates_made.append("Added evolution history entry")
 
             # Write updated document if changes were made
@@ -191,9 +189,7 @@ Specialized Agents
         with open(self.architecture_file, "w", encoding="utf-8") as f:
             f.write(template)
 
-    def _identify_sections_to_update(
-        self, changes: List[ArchitecturalChange]
-    ) -> List[str]:
+    def _identify_sections_to_update(self, changes: List[ArchitecturalChange]) -> List[str]:
         """Identify which sections need updates based on changes"""
         sections_to_update = []
 
@@ -206,10 +202,7 @@ Specialized Agents
                     sections_to_update.append("component_architecture")
 
             # Agent ecosystem updates for agent-related changes
-            if (
-                "agent" in element.name.lower()
-                or "agent" in str(element.location).lower()
-            ):
+            if "agent" in element.name.lower() or "agent" in str(element.location).lower():
                 if "agent_ecosystem" not in sections_to_update:
                     sections_to_update.append("agent_ecosystem")
 
@@ -440,9 +433,7 @@ Specialized Agents
 
         # Categorize changes
         high_impact_changes = [c for c in changes if c.impact_level == ImpactLevel.HIGH]
-        critical_changes = [
-            c for c in changes if c.impact_level == ImpactLevel.CRITICAL
-        ]
+        critical_changes = [c for c in changes if c.impact_level == ImpactLevel.CRITICAL]
 
         if not high_impact_changes and not critical_changes:
             return None
@@ -477,22 +468,16 @@ Specialized Agents
     def _add_evolution_entry(self, content: str, entry: str) -> str:
         """Add an entry to the evolution history section"""
         # Find evolution history section
-        pattern = (
-            r"(##\s+Evolution History.*?)(\n### Recent Changes.*?)(?=\n###|\n##|\Z)"
-        )
+        pattern = r"(##\s+Evolution History.*?)(\n### Recent Changes.*?)(?=\n###|\n##|\Z)"
 
         if re.search(pattern, content, re.DOTALL):
             # Replace "Recent Changes" with the new entry
-            return re.sub(
-                pattern, f"\\1\\n### Recent Changes{entry}", content, flags=re.DOTALL
-            )
+            return re.sub(pattern, f"\\1\\n### Recent Changes{entry}", content, flags=re.DOTALL)
         else:
             # Just append to evolution history section
             evolution_pattern = r"(##\s+Evolution History.*?)(?=\n##|\Z)"
             if re.search(evolution_pattern, content, re.DOTALL):
-                return re.sub(
-                    evolution_pattern, f"\\1{entry}", content, flags=re.DOTALL
-                )
+                return re.sub(evolution_pattern, f"\\1{entry}", content, flags=re.DOTALL)
             else:
                 # Append at end
                 return content + f"\n\n## Evolution History{entry}"

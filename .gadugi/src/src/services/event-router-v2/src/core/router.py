@@ -141,9 +141,7 @@ class EventRouter:
 
         logger.info("Event Router stopped")
 
-    async def _handle_client(
-        self, websocket: Any
-    ):  # WebSocketServerProtocol when available
+    async def _handle_client(self, websocket: Any):  # WebSocketServerProtocol when available
         """Handle WebSocket client connection."""
         client_id = str(uuid.uuid4())
         client_address = websocket.remote_address
@@ -303,9 +301,7 @@ class EventRouter:
             self.subscriptions[subscription.id] = subscription
             self.subscriber_subscriptions[client_id].add(subscription.id)
 
-            logger.info(
-                f"Subscription {subscription.id} created for client {client_id}"
-            )
+            logger.info(f"Subscription {subscription.id} created for client {client_id}")
 
             await self._send_to_client(
                 client_id,
@@ -342,9 +338,7 @@ class EventRouter:
     async def _handle_get_health(self, client_id: str):
         """Handle health check request."""
         health = await self.get_health()
-        await self._send_to_client(
-            client_id, {"type": "health", "health": health.to_dict()}
-        )
+        await self._send_to_client(client_id, {"type": "health", "health": health.to_dict()})
 
     async def _send_to_client(self, client_id: str, data: Dict):
         """Send message to specific client."""
@@ -453,9 +447,7 @@ class EventRouter:
                         event.delivery_error = str(e)
 
         if delivered_to:
-            logger.debug(
-                f"Event {event.id} delivered to {len(delivered_to)} subscribers"
-            )
+            logger.debug(f"Event {event.id} delivered to {len(delivered_to)} subscribers")
         else:
             logger.debug(f"Event {event.id} had no matching subscribers")
 
@@ -514,9 +506,7 @@ class EventRouter:
         if subscription_id in self.subscriptions:
             subscription = self.subscriptions[subscription_id]
             del self.subscriptions[subscription_id]
-            self.subscriber_subscriptions[subscription.subscriber_id].discard(
-                subscription_id
-            )
+            self.subscriber_subscriptions[subscription.subscriber_id].discard(subscription_id)
 
     async def get_health(self) -> HealthStatus:
         """Get health status.

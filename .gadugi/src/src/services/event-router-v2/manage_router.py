@@ -222,9 +222,7 @@ if __name__ == "__main__":
                     print(f"  Events Processed: {health.get('events_processed', 0)}")
                     print(f"  Events Failed: {health.get('events_failed', 0)}")
                     print(f"  Events in Queue: {health.get('events_in_queue', 0)}")
-                    print(
-                        f"  Active Subscriptions: {health.get('active_subscriptions', 0)}"
-                    )
+                    print(f"  Active Subscriptions: {health.get('active_subscriptions', 0)}")
                     print(f"  Connected Clients: {health.get('connected_clients', 0)}")
 
                     if health.get("errors"):
@@ -275,9 +273,7 @@ if __name__ == "__main__":
 
         # Multi-queue
         use_multi = (
-            input(
-                f"Use Multi-Queue (y/n) [{'y' if config['use_multi_queue'] else 'n'}]: "
-            )
+            input(f"Use Multi-Queue (y/n) [{'y' if config['use_multi_queue'] else 'n'}]: ")
             .strip()
             .lower()
         )
@@ -286,9 +282,7 @@ if __name__ == "__main__":
 
         # Log level
         log_level = (
-            input(
-                f"Log Level (DEBUG/INFO/WARNING/ERROR) [{config.get('log_level', 'INFO')}]: "
-            )
+            input(f"Log Level (DEBUG/INFO/WARNING/ERROR) [{config.get('log_level', 'INFO')}]: ")
             .strip()
             .upper()
         )
@@ -299,9 +293,7 @@ if __name__ == "__main__":
 
         # Offer to restart if running
         if self.is_running():
-            restart = (
-                input("\nEvent Router is running. Restart now? (y/n): ").strip().lower()
-            )
+            restart = input("\nEvent Router is running. Restart now? (y/n): ").strip().lower()
             if restart == "y":
                 self.restart()
 
@@ -329,9 +321,7 @@ if __name__ == "__main__":
                     else "??:??:??"
                 )
                 priority = (
-                    event.priority.name
-                    if hasattr(event.priority, "name")
-                    else str(event.priority)
+                    event.priority.name if hasattr(event.priority, "name") else str(event.priority)
                 )
                 print(
                     f"[{timestamp}] [{priority:8}] {event.topic:30} | {event.source:20} | {json.dumps(event.payload)[:100]}"
@@ -389,9 +379,7 @@ async def async_main():
         action="store_true",
         help="Start as daemon (background process)",
     )
-    parser.add_argument(
-        "--lines", "-n", type=int, default=50, help="Number of log lines to show"
-    )
+    parser.add_argument("--lines", "-n", type=int, default=50, help="Number of log lines to show")
     parser.add_argument("--follow", "-f", action="store_true", help="Follow log output")
 
     args = parser.parse_args()
@@ -416,9 +404,7 @@ async def async_main():
         print("\nExamples:")
         print("  python manage_router.py start --daemon    # Start in background")
         print("  python manage_router.py status            # Check status and health")
-        print(
-            "  python manage_router.py monitor           # Monitor events in real-time"
-        )
+        print("  python manage_router.py monitor           # Monitor events in real-time")
         print("  python manage_router.py logs -f           # Follow logs")
         print("  python manage_router.py configure         # Interactive configuration")
 
@@ -456,9 +442,7 @@ def main():
         parser.add_argument(
             "--lines", "-n", type=int, default=50, help="Number of log lines to show"
         )
-        parser.add_argument(
-            "--follow", "-f", action="store_true", help="Follow log output"
-        )
+        parser.add_argument("--follow", "-f", action="store_true", help="Follow log output")
 
         args = parser.parse_args()
         manager = EventRouterManager()
@@ -477,16 +461,10 @@ def main():
             parser.print_help()
             print("\nExamples:")
             print("  python manage_router.py start --daemon    # Start in background")
-            print(
-                "  python manage_router.py status            # Check status and health"
-            )
-            print(
-                "  python manage_router.py monitor           # Monitor events in real-time"
-            )
+            print("  python manage_router.py status            # Check status and health")
+            print("  python manage_router.py monitor           # Monitor events in real-time")
             print("  python manage_router.py logs -f           # Follow logs")
-            print(
-                "  python manage_router.py configure         # Interactive configuration"
-            )
+            print("  python manage_router.py configure         # Interactive configuration")
         else:
             # Async commands
             asyncio.run(async_main())

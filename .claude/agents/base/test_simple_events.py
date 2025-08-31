@@ -14,6 +14,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Mock the memory integration to avoid dependency issues
 sys.modules["shared.memory_integration"] = MagicMock()
 
+from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome  # noqa: E402
+
 
 class MockMemoryInterface:
     """Mock memory interface for testing."""
@@ -45,8 +47,6 @@ class MockMemoryInterface:
 
 
 # Patch the memory integration
-from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome
-
 # Override the memory interface creation
 original_init = V03Agent.__init__
 

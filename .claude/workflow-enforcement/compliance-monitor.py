@@ -115,7 +115,6 @@ class ComplianceMonitor:
 
                 for change in changes:
                     if change.strip():
-                        status = change[:2]
                         filepath = change[3:].strip()
                         modified_files.append(filepath)
 

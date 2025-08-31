@@ -315,12 +315,8 @@ class TaskPatternClassifier:
         # Text-based feature extraction
         features.description_length = len(task_description)
         features.keyword_counts = self._count_keywords(task_description)
-        features.complexity_indicators = self._extract_complexity_indicators(
-            task_description
-        )
-        features.technical_depth_score = self._calculate_technical_depth(
-            task_description
-        )
+        features.complexity_indicators = self._extract_complexity_indicators(task_description)
+        features.technical_depth_score = self._calculate_technical_depth(task_description)
 
         # File-based feature extraction
         features.file_count = len(target_files)
@@ -330,9 +326,7 @@ class TaskPatternClassifier:
 
         # Dependency feature extraction
         features.dependency_count = len(dependencies)
-        features.external_dependency_count = self._count_external_dependencies(
-            dependencies
-        )
+        features.external_dependency_count = self._count_external_dependencies(dependencies)
         features.api_interaction_count = self._count_api_interactions(task_description)
         features.database_interaction = self._has_database_interaction(task_description)
 
@@ -340,30 +334,18 @@ class TaskPatternClassifier:
         similar_tasks = self._find_similar_tasks(task_description)
         features.similar_task_count = len(similar_tasks)
         if similar_tasks:
-            features.historical_success_rate = self._calculate_success_rate(
-                similar_tasks
-            )
-            features.average_completion_time = self._calculate_average_time(
-                similar_tasks
-            )
+            features.historical_success_rate = self._calculate_success_rate(similar_tasks)
+            features.average_completion_time = self._calculate_average_time(similar_tasks)
             features.typical_complexity = self._get_typical_complexity(similar_tasks)
 
         # Semantic feature extraction
-        features.has_testing_requirements = self._has_testing_requirements(
-            task_description
-        )
+        features.has_testing_requirements = self._has_testing_requirements(task_description)
         features.has_documentation_requirements = self._has_documentation_requirements(
             task_description
         )
-        features.has_security_implications = self._has_security_implications(
-            task_description
-        )
-        features.has_performance_requirements = self._has_performance_requirements(
-            task_description
-        )
-        features.has_integration_requirements = self._has_integration_requirements(
-            task_description
-        )
+        features.has_security_implications = self._has_security_implications(task_description)
+        features.has_performance_requirements = self._has_performance_requirements(task_description)
+        features.has_integration_requirements = self._has_integration_requirements(task_description)
 
         return features
 
@@ -398,9 +380,7 @@ class TaskPatternClassifier:
         risk_factors = self._identify_risk_factors(features, complexity_scores)
 
         # Recommended approach
-        recommended_approach = self._recommend_approach(
-            features, primary_type, complexity_scores
-        )
+        recommended_approach = self._recommend_approach(features, primary_type, complexity_scores)
 
         return TaskClassification(
             primary_type=primary_type,
@@ -525,9 +505,7 @@ class TaskPatternClassifier:
         description_words = set(description.lower().split())
         similar_tasks = []
 
-        for task_id, task_data in self.historical_data.get(
-            "task_descriptions", {}
-        ).items():
+        for task_id, task_data in self.historical_data.get("task_descriptions", {}).items():
             task_words = set(task_data.lower().split())
             overlap = len(description_words & task_words)
 
@@ -567,9 +545,7 @@ class TaskPatternClassifier:
             return ComplexityLevel.MEDIUM
 
         complexities = [
-            self.historical_data.get("complexities", {}).get(
-                task_id, ComplexityLevel.MEDIUM
-            )
+            self.historical_data.get("complexities", {}).get(task_id, ComplexityLevel.MEDIUM)
             for task_id in similar_tasks
         ]
 
@@ -619,38 +595,25 @@ class TaskPatternClassifier:
             score += keyword_count * 2.0
 
             # Feature-based scoring
-            if (
-                task_type == TaskType.TEST_COVERAGE
-                and features.has_testing_requirements
-            ):
+            if task_type == TaskType.TEST_COVERAGE and features.has_testing_requirements:
                 score += 3.0
-            elif (
-                task_type == TaskType.DOCUMENTATION
-                and features.has_documentation_requirements
-            ):
+            elif task_type == TaskType.DOCUMENTATION and features.has_documentation_requirements:
                 score += 3.0
             elif task_type == TaskType.SECURITY and features.has_security_implications:
                 score += 3.0
-            elif (
-                task_type == TaskType.OPTIMIZATION
-                and features.has_performance_requirements
-            ):
+            elif task_type == TaskType.OPTIMIZATION and features.has_performance_requirements:
                 score += 3.0
 
             # File type scoring
             if task_type == TaskType.TEST_COVERAGE:
-                test_files = features.file_types.get(
-                    "test", 0
-                ) + features.file_types.get("spec", 0)
+                test_files = features.file_types.get("test", 0) + features.file_types.get("spec", 0)
                 score += test_files * 1.5
 
             scores[task_type] = max(score, 0.1)  # Minimum score
 
         return scores
 
-    def _identify_subtypes(
-        self, features: TaskFeatures, primary_type: TaskType
-    ) -> List[str]:
+    def _identify_subtypes(self, features: TaskFeatures, primary_type: TaskType) -> List[str]:
         """Identify task subtypes based on features"""
         subtypes = []
 
@@ -745,9 +708,7 @@ class TaskPatternClassifier:
 
         return scores
 
-    def _suggest_optimizations(
-        self, features: TaskFeatures, patterns: List[str]
-    ) -> List[str]:
+    def _suggest_optimizations(self, features: TaskFeatures, patterns: List[str]) -> List[str]:
         """Suggest optimization strategies based on features and patterns"""
         optimizations = []
 
@@ -858,9 +819,7 @@ if __name__ == "__main__":
     test_dependencies = ["tensorflow", "scikit-learn", "api_service"]
 
     # Extract features
-    features = classifier.extract_features(
-        test_description, test_files, test_dependencies
-    )
+    features = classifier.extract_features(test_description, test_files, test_dependencies)
 
     # Classify task
     classification = classifier.classify_task(features)

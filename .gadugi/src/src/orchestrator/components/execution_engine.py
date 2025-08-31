@@ -36,9 +36,7 @@ try:
 
     CONTAINER_EXECUTION_AVAILABLE = True
 except ImportError:
-    logging.warning(
-        "ContainerManager not available - falling back to subprocess execution"
-    )
+    logging.warning("ContainerManager not available - falling back to subprocess execution")
     CONTAINER_EXECUTION_AVAILABLE = False
     ContainerManager = None
     ContainerConfig = None
@@ -53,9 +51,7 @@ MIN_AVAILABLE_MEMORY_GB = 1.0
 MAX_OUTPUT_SIZE_MB = 100
 
 # Configure secure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 @dataclass
@@ -138,9 +134,7 @@ class ResourceMonitor:
             disk_usage_percent=disk.percent,
             available_memory_gb=memory.available / (1024**3),
             cpu_count=psutil.cpu_count() or 1,
-            load_avg=list(os.getloadavg())
-            if hasattr(os, "getloadavg")
-            else [0.0, 0.0, 0.0],
+            load_avg=list(os.getloadavg()) if hasattr(os, "getloadavg") else [0.0, 0.0, 0.0],
         )
 
     def is_system_overloaded(self) -> bool:
@@ -199,9 +193,7 @@ class TaskExecutor:
         self.worktree_path = worktree_path
         self.prompt_file = prompt_file
         self.task_context = task_context or {}
-        self.process: Optional[subprocess.Popen] = (
-            None  # Kept for fallback compatibility
-        )
+        self.process: Optional[subprocess.Popen] = None  # Kept for fallback compatibility
         self.start_time: Optional[datetime] = None
         self.result: Optional[ExecutionResult] = None
         self.prompt_generator = PromptGenerator()
@@ -248,23 +240,14 @@ class TaskExecutor:
 
                 # Check if containerized execution failed due to missing prerequisites
                 # (e.g., no API key, Docker issues) and should fall back to subprocess
-                if (
-                    container_result.status == "failed"
-                    and container_result.exit_code == -1
-                ):
-                    if "CLAUDE_API_KEY not set" in (
-                        container_result.error_message or ""
-                    ):
-                        print(
-                            f"⚠️  Container execution requires API key for {self.task_id}"
-                        )
+                if container_result.status == "failed" and container_result.exit_code == -1:
+                    if "CLAUDE_API_KEY not set" in (container_result.error_message or ""):
+                        print(f"⚠️  Container execution requires API key for {self.task_id}")
                         print("🔄 Falling back to subprocess execution...")
                         # Fall through to subprocess fallback
                     else:
                         # This is a real failure, return it
-                        execution_result = self._convert_container_result(
-                            container_result
-                        )
+                        execution_result = self._convert_container_result(container_result)
                         print(
                             f"❌ Containerized task failed: {self.task_id}, status={execution_result.status}"
                         )
@@ -320,9 +303,7 @@ class TaskExecutor:
         """Progress callback for containerized execution"""
         print(f"📊 Task progress: {task_id}, status={result.status}")
 
-    def _convert_container_result(
-        self, container_result: "ContainerResult"
-    ) -> ExecutionResult:  # type: ignore
+    def _convert_container_result(self, container_result: "ContainerResult") -> ExecutionResult:  # type: ignore
         """Convert ContainerResult to ExecutionResult for compatibility"""
         return ExecutionResult(
             task_id=container_result.task_id,
@@ -339,9 +320,7 @@ class TaskExecutor:
             resource_usage=container_result.resource_usage,
         )
 
-    def _execute_subprocess_fallback(
-        self, timeout: Optional[int] = None
-    ) -> ExecutionResult:
+    def _execute_subprocess_fallback(self, timeout: Optional[int] = None) -> ExecutionResult:
         """Fallback subprocess execution (original implementation)"""
         # Prepare output files
         output_dir = self.worktree_path / "results"
@@ -386,9 +365,7 @@ class TaskExecutor:
 
             # Wait for completion with timeout
             try:
-                stdout_content, stderr_content = self.process.communicate(
-                    timeout=timeout
-                )
+                stdout_content, stderr_content = self.process.communicate(timeout=timeout)
                 exit_code = self.process.returncode
 
             except subprocess.TimeoutExpired:
@@ -417,9 +394,7 @@ class TaskExecutor:
                     pass  # Not JSON output, that's okay  # type: ignore
 
         except FileNotFoundError:
-            error_message = (
-                "Claude CLI not found - please ensure it's installed and in PATH"
-            )
+            error_message = "Claude CLI not found - please ensure it's installed and in PATH"
             exit_code = -2
             stderr_content = error_message
 
@@ -498,9 +473,7 @@ class TaskExecutor:
 class ExecutionEngine:
     """Main execution engine for parallel task management with containerized execution"""
 
-    def __init__(
-        self, max_concurrent: Optional[int] = None, default_timeout: int = 3600
-    ):
+    def __init__(self, max_concurrent: Optional[int] = None, default_timeout: int = 3600):
         self.max_concurrent = max_concurrent or self._get_default_concurrency()
         self.default_timeout = default_timeout
         self.resource_monitor = ResourceMonitor()
@@ -574,14 +547,10 @@ class ExecutionEngine:
         # CRITICAL FIX #167: Use ContainerManager for true parallel containerized execution
         if self.container_manager and CONTAINER_EXECUTION_AVAILABLE:
             print("🐳 Using containerized parallel execution...")
-            return self._execute_tasks_containerized(
-                tasks, worktree_manager, progress_callback
-            )
+            return self._execute_tasks_containerized(tasks, worktree_manager, progress_callback)
         else:
             print("🔧 Using subprocess parallel execution...")
-            return self._execute_tasks_subprocess(
-                tasks, worktree_manager, progress_callback
-            )
+            return self._execute_tasks_subprocess(tasks, worktree_manager, progress_callback)
 
     def _execute_tasks_containerized(
         self,
@@ -642,9 +611,7 @@ class ExecutionEngine:
             # Convert container results to execution results
             results = {}
             for task_id, container_result in container_results.items():
-                results[task_id] = self._convert_container_to_execution_result(
-                    container_result
-                )
+                results[task_id] = self._convert_container_to_execution_result(container_result)
 
                 # Update statistics
                 if results[task_id].status == "success":
@@ -729,9 +696,7 @@ class ExecutionEngine:
                 return {}
 
             # Execute tasks with controlled concurrency
-            results = self._execute_with_concurrency_control(
-                executors, progress_callback
-            )
+            results = self._execute_with_concurrency_control(executors, progress_callback)
 
             # Update statistics
             execution_end = datetime.now()
@@ -800,9 +765,7 @@ class ExecutionEngine:
                     if self.resource_monitor.is_system_overloaded():
                         optimal = self.resource_monitor.get_optimal_concurrency()
                         if optimal < self.max_concurrent:
-                            print(
-                                f"⚡ Reducing concurrency due to system load: {optimal}"
-                            )
+                            print(f"⚡ Reducing concurrency due to system load: {optimal}")
                             # Note: ProcessPoolExecutor doesn't support dynamic resizing
                             # This would need a more sophisticated implementation
 
@@ -887,25 +850,18 @@ class ExecutionEngine:
         print(f"   Cancelled: {self.stats['cancelled_tasks']}")
 
         if self.stats["parallel_execution_time"] > 0:
-            print(
-                f"   Parallel execution time: {self.stats['parallel_execution_time']:.1f}s"
-            )
+            print(f"   Parallel execution time: {self.stats['parallel_execution_time']:.1f}s")
 
             if self.stats["total_execution_time"] > 0:
-                speedup = (
-                    self.stats["total_execution_time"]
-                    / self.stats["parallel_execution_time"]
-                )
-                print(
-                    f"   Estimated sequential time: {self.stats['total_execution_time']:.1f}s"
-                )
+                speedup = self.stats["total_execution_time"] / self.stats["parallel_execution_time"]
+                print(f"   Estimated sequential time: {self.stats['total_execution_time']:.1f}s")
                 print(f"   Speed improvement: {speedup:.2f}x")
 
         # Resource usage summary
         if self.resource_monitor.resource_history:
-            avg_cpu = sum(
-                r.cpu_percent for r in self.resource_monitor.resource_history
-            ) / len(self.resource_monitor.resource_history)
+            avg_cpu = sum(r.cpu_percent for r in self.resource_monitor.resource_history) / len(
+                self.resource_monitor.resource_history
+            )
             avg_memory = sum(
                 r.memory_percent for r in self.resource_monitor.resource_history
             ) / len(self.resource_monitor.resource_history)
@@ -918,14 +874,10 @@ class ExecutionEngine:
             "execution_summary": {
                 "timestamp": datetime.now().isoformat(),
                 "statistics": self.stats,
-                "system_resources": asdict(
-                    self.resource_monitor.get_current_resources()
-                ),
+                "system_resources": asdict(self.resource_monitor.get_current_resources()),
                 "execution_mode": self.execution_mode,
             },
-            "task_results": {
-                task_id: asdict(result) for task_id, result in self.results.items()
-            },
+            "task_results": {task_id: asdict(result) for task_id, result in self.results.items()},
         }
 
         with open(output_file, "w") as f:
@@ -963,12 +915,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="Execute tasks in parallel")
     parser.add_argument("--max-concurrent", type=int, help="Maximum concurrent tasks")
-    parser.add_argument(
-        "--timeout", type=int, default=3600, help="Task timeout in seconds"
-    )
-    parser.add_argument(
-        "--tasks-file", required=True, help="JSON file containing task definitions"
-    )
+    parser.add_argument("--timeout", type=int, default=3600, help="Task timeout in seconds")
+    parser.add_argument("--tasks-file", required=True, help="JSON file containing task definitions")
     parser.add_argument(
         "--output", default="execution_results.json", help="Output file for results"
     )
@@ -985,9 +933,7 @@ def main():
         return 1
 
     # Create execution engine
-    engine = ExecutionEngine(
-        max_concurrent=args.max_concurrent, default_timeout=args.timeout
-    )
+    engine = ExecutionEngine(max_concurrent=args.max_concurrent, default_timeout=args.timeout)
 
     # Mock worktree manager for CLI usage
     class MockWorktreeManager:

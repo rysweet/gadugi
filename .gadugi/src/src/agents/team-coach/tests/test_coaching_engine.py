@@ -81,12 +81,8 @@ class TestCoachingEngine(unittest.TestCase):
     def test_generate_agent_coaching_performance_issues(self):
         """Test coaching generation for performance issues."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate coaching
         recommendations = self.engine.generate_agent_coaching("agent_1")
@@ -95,9 +91,7 @@ class TestCoachingEngine(unittest.TestCase):
         self.assertGreater(len(recommendations), 0)
 
         # Check for performance recommendations
-        perf_recs = [
-            r for r in recommendations if r.category == CoachingCategory.PERFORMANCE
-        ]
+        perf_recs = [r for r in recommendations if r.category == CoachingCategory.PERFORMANCE]
         self.assertGreater(len(perf_recs), 0)
 
         # Verify critical performance issue detected
@@ -114,20 +108,14 @@ class TestCoachingEngine(unittest.TestCase):
     def test_generate_agent_coaching_efficiency_issues(self):
         """Test coaching generation for efficiency issues."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate coaching
         recommendations = self.engine.generate_agent_coaching("agent_1")
 
         # Check for efficiency recommendations
-        eff_recs = [
-            r for r in recommendations if r.category == CoachingCategory.EFFICIENCY
-        ]
+        eff_recs = [r for r in recommendations if r.category == CoachingCategory.EFFICIENCY]
         self.assertGreater(len(eff_recs), 0)
 
         # Verify efficiency issues detected
@@ -138,24 +126,16 @@ class TestCoachingEngine(unittest.TestCase):
     def test_generate_agent_coaching_capability_gaps(self):
         """Test coaching generation for capability gaps."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Mock capability utilization
-        with patch.object(
-            self.engine, "_calculate_capability_utilization", return_value=0.2
-        ):
+        with patch.object(self.engine, "_calculate_capability_utilization", return_value=0.2):
             recommendations = self.engine.generate_agent_coaching("agent_1")
 
         # Check for skill development recommendations
         skill_recs = [
-            r
-            for r in recommendations
-            if r.category == CoachingCategory.SKILL_DEVELOPMENT
+            r for r in recommendations if r.category == CoachingCategory.SKILL_DEVELOPMENT
         ]
         self.assertGreater(len(skill_recs), 0)
 
@@ -172,20 +152,14 @@ class TestCoachingEngine(unittest.TestCase):
     def test_generate_agent_coaching_workload_issues(self):
         """Test coaching generation for workload issues."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate coaching
         recommendations = self.engine.generate_agent_coaching("agent_1")
 
         # Check for workload recommendations
-        workload_recs = [
-            r for r in recommendations if r.category == CoachingCategory.WORKLOAD
-        ]
+        workload_recs = [r for r in recommendations if r.category == CoachingCategory.WORKLOAD]
         self.assertGreater(len(workload_recs), 0)
 
         # Verify overload detected
@@ -199,12 +173,8 @@ class TestCoachingEngine(unittest.TestCase):
     def test_generate_team_coaching_plan(self):
         """Test team coaching plan generation."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Mock team analysis methods
         with patch.object(
@@ -212,9 +182,7 @@ class TestCoachingEngine(unittest.TestCase):
             "_analyze_team_capability_balance",
             return_value={"gaps": ["ai", "ml"], "total_domains": 10},
         ):
-            with patch.object(
-                self.engine, "_calculate_team_collaboration_score", return_value=0.6
-            ):
+            with patch.object(self.engine, "_calculate_team_collaboration_score", return_value=0.6):
                 # Generate team plan
                 plan = self.engine.generate_team_coaching_plan(
                     "team_1",
@@ -281,20 +249,14 @@ class TestCoachingEngine(unittest.TestCase):
         """Test collaboration pattern analysis."""
         # Set up performance with low collaboration score
         self.mock_performance.metrics["collaboration_score"] = 0.4
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate coaching
         recommendations = self.engine.generate_agent_coaching("agent_1")
 
         # Check for collaboration recommendations
-        collab_recs = [
-            r for r in recommendations if r.category == CoachingCategory.COLLABORATION
-        ]
+        collab_recs = [r for r in recommendations if r.category == CoachingCategory.COLLABORATION]
         self.assertGreater(len(collab_recs), 0)
 
         # Verify collaboration improvement suggested
@@ -305,12 +267,8 @@ class TestCoachingEngine(unittest.TestCase):
     def test_task_variety_analysis(self):
         """Test task variety analysis and recommendations."""
         # Performance already has low task variety (0.2)
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate coaching
         recommendations = self.engine.generate_agent_coaching("agent_1")
@@ -326,23 +284,15 @@ class TestCoachingEngine(unittest.TestCase):
     def test_underutilized_strengths_detection(self):
         """Test detection of underutilized strengths."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Mock low utilization for strong skills
-        with patch.object(
-            self.engine, "_calculate_capability_utilization", return_value=0.1
-        ):
+        with patch.object(self.engine, "_calculate_capability_utilization", return_value=0.1):
             recommendations = self.engine.generate_agent_coaching("agent_1")
 
         # Check for underutilization recommendations
-        underutil_recs = [
-            r for r in recommendations if "underutilized" in r.title.lower()
-        ]
+        underutil_recs = [r for r in recommendations if "underutilized" in r.title.lower()]
         self.assertGreater(len(underutil_recs), 0)
 
         # Verify it's about strong skills
@@ -353,12 +303,8 @@ class TestCoachingEngine(unittest.TestCase):
     def test_success_metrics_definition(self):
         """Test success metrics are properly defined."""
         # Configure mocks
-        self.mock_performance_analyzer.get_agent_performance.return_value = (
-            self.mock_performance
-        )
-        self.mock_capability_assessment.get_agent_capabilities.return_value = (
-            self.mock_capability
-        )
+        self.mock_performance_analyzer.get_agent_performance.return_value = self.mock_performance
+        self.mock_capability_assessment.get_agent_capabilities.return_value = self.mock_capability
 
         # Generate team plan
         plan = self.engine.generate_team_coaching_plan("team_1", ["agent_1", "agent_2"])

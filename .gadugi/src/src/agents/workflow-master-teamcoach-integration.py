@@ -76,9 +76,7 @@ class TeamCoachIntegration:
         # Configuration
         self.optimization_enabled = self.config.get("optimization_enabled", True)
         self.learning_enabled = self.config.get("learning_enabled", True)
-        self.auto_apply_optimizations = self.config.get(
-            "auto_apply_optimizations", False
-        )
+        self.auto_apply_optimizations = self.config.get("auto_apply_optimizations", False)
 
         logger.info("TeamCoach integration initialized")
 
@@ -86,16 +84,12 @@ class TeamCoachIntegration:
         """Analyze workflow performance using TeamCoach capabilities."""
         try:
             # Calculate current metrics
-            completed_tasks = [
-                t for t in workflow_state.tasks if t.status == "completed"
-            ]
+            completed_tasks = [t for t in workflow_state.tasks if t.status == "completed"]
             failed_tasks = [t for t in workflow_state.tasks if t.status == "failed"]
             total_tasks = len(workflow_state.tasks)
 
             # Task completion rate
-            completion_rate = (
-                len(completed_tasks) / total_tasks if total_tasks > 0 else 0.0
-            )
+            completion_rate = len(completed_tasks) / total_tasks if total_tasks > 0 else 0.0
 
             # Average task duration
             durations = []
@@ -138,9 +132,7 @@ class TeamCoachIntegration:
             )
 
             # User satisfaction (based on autonomous decisions and completion)
-            user_satisfaction = min(
-                completion_rate + (autonomous_decision_rate * 0.2), 1.0
-            )
+            user_satisfaction = min(completion_rate + (autonomous_decision_rate * 0.2), 1.0)
 
             # Improvement trends (would be calculated from history)
             improvement_trends = {
@@ -171,9 +163,7 @@ class TeamCoachIntegration:
                 }
             )
 
-            logger.info(
-                f"Performance analysis completed - Quality Score: {quality_score:.2f}"
-            )
+            logger.info(f"Performance analysis completed - Quality Score: {quality_score:.2f}")
             return metrics
 
         except Exception as e:
@@ -281,9 +271,7 @@ class TeamCoachIntegration:
 
             # Resource efficiency optimization
             max_resource_usage = (
-                max(metrics.resource_utilization.values())
-                if metrics.resource_utilization
-                else 0
+                max(metrics.resource_utilization.values()) if metrics.resource_utilization else 0
             )
             if max_resource_usage > 0.8:
                 recommendations.append(
@@ -313,22 +301,18 @@ class TeamCoachIntegration:
                 reverse=True,
             )
 
-            logger.info(
-                f"Generated {len(recommendations)} optimization recommendations"
-            )
+            logger.info(f"Generated {len(recommendations)} optimization recommendations")
             return recommendations
 
         except Exception as e:
             logger.error(f"Failed to generate optimization recommendations: {e}")
             return []
 
-    def apply_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ) -> bool:
+    def apply_optimization(self, optimization: WorkflowOptimization, workflow_state) -> bool:
         """Apply optimization recommendation to workflow."""
         try:  # type: ignore
-                optimization_record = None
-                optimization_record = None
+            optimization_record = None
+            optimization_record = None
             logger.info(f"Applying optimization: {optimization.strategy.value}")  # type: ignore
 
             # Record optimization attempt
@@ -355,9 +339,7 @@ class TeamCoachIntegration:
             optimization_record["result"] = "success"
             self.optimization_history.append(optimization_record)
 
-            logger.info(
-                f"Optimization {optimization.strategy.value} applied successfully"
-            )
+            logger.info(f"Optimization {optimization.strategy.value} applied successfully")
             return True
 
         except Exception as e:  # type: ignore
@@ -368,9 +350,7 @@ class TeamCoachIntegration:
             self.optimization_history.append(optimization_record)
             return False
 
-    def _apply_performance_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ):
+    def _apply_performance_optimization(self, optimization: WorkflowOptimization, workflow_state):
         """Apply performance-specific optimizations."""
         # Identify independent tasks that can be parallelized
         independent_tasks = []
@@ -389,17 +369,13 @@ class TeamCoachIntegration:
 
         logger.info(f"Marked {len(independent_tasks)} tasks for parallel execution")
 
-    def _apply_reliability_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ):
+    def _apply_reliability_optimization(self, optimization: WorkflowOptimization, workflow_state):
         """Apply reliability-specific optimizations."""
         # Increase retry limits for critical tasks
         for task in workflow_state.tasks:
             if task.priority == "high":
                 task.max_retries = min(task.max_retries + 2, 5)
-                task.timeout_seconds = min(
-                    task.timeout_seconds * 1.5, 900
-                )  # Max 15 minutes
+                task.timeout_seconds = min(task.timeout_seconds * 1.5, 900)  # Max 15 minutes
 
         # Update circuit breaker settings
         if hasattr(self.workflow_master, "execution_circuit_breaker"):
@@ -407,16 +383,12 @@ class TeamCoachIntegration:
 
         logger.info("Applied reliability optimizations: increased retries and timeouts")
 
-    def _apply_speed_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ):
+    def _apply_speed_optimization(self, optimization: WorkflowOptimization, workflow_state):
         """Apply speed-specific optimizations."""
         # Reduce timeout for non-critical tasks
         for task in workflow_state.tasks:
             if task.priority != "high":
-                task.timeout_seconds = max(
-                    task.timeout_seconds * 0.8, 60
-                )  # Min 1 minute
+                task.timeout_seconds = max(task.timeout_seconds * 0.8, 60)  # Min 1 minute
 
         # Optimize container policy for faster startup
         for task in workflow_state.tasks:
@@ -427,9 +399,7 @@ class TeamCoachIntegration:
             "Applied speed optimizations: reduced timeouts and optimized container policies"
         )
 
-    def _apply_quality_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ):
+    def _apply_quality_optimization(self, optimization: WorkflowOptimization, workflow_state):
         """Apply quality-specific optimizations."""
         # Add validation steps for critical tasks
         validation_tasks = []
@@ -449,13 +419,9 @@ class TeamCoachIntegration:
         # Add validation tasks to workflow
         workflow_state.tasks.extend(validation_tasks)
 
-        logger.info(
-            f"Added {len(validation_tasks)} validation tasks for quality assurance"
-        )
+        logger.info(f"Added {len(validation_tasks)} validation tasks for quality assurance")
 
-    def _apply_resource_optimization(
-        self, optimization: WorkflowOptimization, workflow_state
-    ):
+    def _apply_resource_optimization(self, optimization: WorkflowOptimization, workflow_state):
         """Apply resource efficiency optimizations."""
         # Optimize container policies for resource usage
         for task in workflow_state.tasks:
@@ -479,8 +445,7 @@ class TeamCoachIntegration:
                 - metrics_before.task_completion_rate,
                 "error_rate": metrics_before.error_rate
                 - metrics_after.error_rate,  # Reduction is good
-                "quality_score": metrics_after.quality_score
-                - metrics_before.quality_score,
+                "quality_score": metrics_after.quality_score - metrics_before.quality_score,
                 "user_satisfaction": metrics_after.user_satisfaction
                 - metrics_before.user_satisfaction,
             }
@@ -497,9 +462,7 @@ class TeamCoachIntegration:
             # Record successful optimizations
             for opt_record in self.optimization_history[-5:]:  # Last 5 optimizations
                 if opt_record["result"] == "success":
-                    self.learning_data[workflow_type][
-                        "successful_optimizations"
-                    ].append(
+                    self.learning_data[workflow_type]["successful_optimizations"].append(
                         {
                             "optimization": opt_record["optimization"],
                             "improvements": improvements,
@@ -519,13 +482,11 @@ class TeamCoachIntegration:
             # Prune old learning data (keep last 100 records)
             for category in self.learning_data[workflow_type]:
                 if len(self.learning_data[workflow_type][category]) > 100:
-                    self.learning_data[workflow_type][category] = self.learning_data[
-                        workflow_type
-                    ][category][-100:]
+                    self.learning_data[workflow_type][category] = self.learning_data[workflow_type][
+                        category
+                    ][-100:]
 
-            logger.info(
-                f"Continuous learning updated for workflow type: {workflow_type}"
-            )
+            logger.info(f"Continuous learning updated for workflow type: {workflow_type}")
 
         except Exception as e:
             logger.error(f"Continuous learning failed: {e}")
@@ -547,9 +508,7 @@ class TeamCoachIntegration:
         dependency_count = sum(len(task.dependencies) for task in workflow_state.tasks)
         error_count = workflow_state.error_count
 
-        complexity = (
-            task_count * 0.4 + dependency_count * 0.4 + error_count * 0.2
-        ) / 10
+        complexity = (task_count * 0.4 + dependency_count * 0.4 + error_count * 0.2) / 10
         return min(complexity, 1.0)
 
     def get_optimization_insights(self) -> Dict[str, Any]:
@@ -558,11 +517,7 @@ class TeamCoachIntegration:
             insights = {
                 "total_optimizations_applied": len(self.optimization_history),
                 "successful_optimizations": len(
-                    [
-                        opt
-                        for opt in self.optimization_history
-                        if opt["result"] == "success"
-                    ]
+                    [opt for opt in self.optimization_history if opt["result"] == "success"]
                 ),
                 "most_effective_strategies": self._get_most_effective_strategies(),
                 "learning_data_summary": self._summarize_learning_data(),
@@ -582,9 +537,7 @@ class TeamCoachIntegration:
         for opt_record in self.optimization_history:
             if opt_record["result"] == "success":
                 strategy = opt_record["optimization"]["strategy"]
-                expected_improvement = opt_record["optimization"][
-                    "expected_improvement"
-                ]
+                expected_improvement = opt_record["optimization"]["expected_improvement"]
 
                 if strategy not in strategy_effectiveness:
                     strategy_effectiveness[strategy] = {
@@ -594,9 +547,7 @@ class TeamCoachIntegration:
                     }
 
                 strategy_effectiveness[strategy]["count"] += 1
-                strategy_effectiveness[strategy]["total_improvement"] += (
-                    expected_improvement
-                )
+                strategy_effectiveness[strategy]["total_improvement"] += expected_improvement
                 strategy_effectiveness[strategy]["average_improvement"] = (
                     strategy_effectiveness[strategy]["total_improvement"]
                     / strategy_effectiveness[strategy]["count"]
@@ -677,9 +628,7 @@ class TeamCoachIntegration:
                 )
 
         if not recommendations:
-            recommendations.append(
-                "Continue monitoring and collecting performance data"
-            )
+            recommendations.append("Continue monitoring and collecting performance data")
 
         return recommendations
 
@@ -744,9 +693,7 @@ class TeamCoachIntegration:
 
 
 # Integration helper functions
-def create_teamcoach_integration(
-    workflow_master, config: Optional[Dict[str, Any]] = None
-):
+def create_teamcoach_integration(workflow_master, config: Optional[Dict[str, Any]] = None):
     """Create TeamCoach integration for WorkflowMaster."""
     return TeamCoachIntegration(workflow_master, config)
 

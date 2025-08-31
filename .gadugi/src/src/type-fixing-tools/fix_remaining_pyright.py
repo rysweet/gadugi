@@ -53,8 +53,7 @@ def fix_shared_test_instructions():
                             indent = len(lines[j]) - len(lines[j].lstrip())
                             lines.insert(
                                 j,
-                                " " * indent
-                                + 'config = AgentConfig("test", "1.0", [])',
+                                " " * indent + 'config = AgentConfig("test", "1.0", [])',
                             )
                             break
             content = "\n".join(lines)
@@ -91,9 +90,7 @@ def fix_unused_imports_in_core():
                 continue
             # Check if this is the actual import line
             if "from" in line and (
-                "ArchitecturalElement" in line
-                or "ChangeType" in line
-                or "ElementType" in line
+                "ArchitecturalElement" in line or "ChangeType" in line or "ElementType" in line
             ):
                 # Parse and remove only unused ones
                 if "ArchitecturalElement" not in content.replace(line, ""):
@@ -135,9 +132,7 @@ def fix_task_matcher():
         ):
             lines = []
             for line in content.split("\n"):
-                if "TaskCapabilityRequirement" in line and (
-                    "import" in line or "from" in line
-                ):
+                if "TaskCapabilityRequirement" in line and ("import" in line or "from" in line):
                     # Remove it from imports
                     line = (
                         line.replace("TaskCapabilityRequirement,", "")
@@ -214,10 +209,7 @@ def fix_performance_data_calls():
             content = file_path.read_text()
 
             # First check if AgentPerformance class needs to be defined
-            if (
-                "AgentPerformance" in content
-                and "class AgentPerformance" not in content
-            ):
+            if "AgentPerformance" in content and "class AgentPerformance" not in content:
                 # Add the class definition
                 class_def = """
 @dataclass
@@ -265,9 +257,7 @@ def fix_all_test_files():
             lines = content.split("\n")
             for i, line in enumerate(lines):
                 if line.startswith("from unittest"):
-                    lines.insert(
-                        i + 1, "from unittest.mock import Mock, patch, MagicMock"
-                    )
+                    lines.insert(i + 1, "from unittest.mock import Mock, patch, MagicMock")
                     modified = True
                     break
             if modified:
@@ -304,11 +294,9 @@ def main():
     fix_all_test_files()
 
     # Check results
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
-    error_count = len([l for l in result.stdout.split("\n") if "error:" in l])
+    error_count = len([line for line in result.stdout.split("\n") if "error:" in line])
     print(f"\nErrors remaining: {error_count}")
 
 

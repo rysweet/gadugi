@@ -117,9 +117,7 @@ def find_files_to_update() -> List[Path]:
     ]
 
 
-def update_file_references(
-    file_path: Path, mapping: Dict[str, str]
-) -> Tuple[bool, List[str]]:
+def update_file_references(file_path: Path, mapping: Dict[str, str]) -> Tuple[bool, List[str]]:
     """Update references in a single file."""
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -136,9 +134,7 @@ def update_file_references(
             count = content.count(old)
             if count > 0:
                 content = content.replace(old, new)
-                changes.append(
-                    f"  - Replaced {count} occurrences of '{old}' with '{new}'"
-                )
+                changes.append(f"  - Replaced {count} occurrences of '{old}' with '{new}'")
 
     # Save if changed
     if content != original_content:

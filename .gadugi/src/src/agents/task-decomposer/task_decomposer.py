@@ -130,9 +130,7 @@ class PatternDatabase:
             # Update success rate with exponential moving average
             alpha = 0.1
             current_rate = pattern.get("success_rate", 0.5)
-            pattern["success_rate"] = (
-                alpha * (1.0 if success else 0.0) + (1 - alpha) * current_rate
-            )
+            pattern["success_rate"] = alpha * (1.0 if success else 0.0) + (1 - alpha) * current_rate
 
             # Update parallelization score
             current_parallel = pattern.get("avg_parallelization", 0.5)
@@ -174,17 +172,13 @@ class TaskDecomposer:
         pattern_name = self.patterns_db.find_matching_pattern(task_description)
 
         # Generate subtasks based on pattern or default analysis
-        subtasks = await self._generate_subtasks(
-            task_description, pattern_name, context
-        )
+        subtasks = await self._generate_subtasks(task_description, pattern_name, context)
 
         # Analyze dependencies
         dependency_graph = await self.analyze_dependencies(subtasks)
 
         # Estimate parallelization potential
-        parallelization_score = await self.estimate_parallelization(
-            subtasks, dependency_graph
-        )
+        parallelization_score = await self.estimate_parallelization(subtasks, dependency_graph)
 
         # Calculate total estimated time
         estimated_total_time = self._calculate_total_time(
@@ -337,9 +331,7 @@ class TaskDecomposer:
         }
         return complexity_map.get(subtask_type, "medium")
 
-    async def analyze_dependencies(
-        self, subtasks: List[SubTask]
-    ) -> Dict[str, List[str]]:
+    async def analyze_dependencies(self, subtasks: List[SubTask]) -> Dict[str, List[str]]:
         """
         Identify dependencies between subtasks.
 
@@ -374,8 +366,7 @@ class TaskDecomposer:
             if "review" in subtask.name.lower():
                 for other in subtasks:
                     if (
-                        "implement" in other.name.lower()
-                        or "test" in other.name.lower()
+                        "implement" in other.name.lower() or "test" in other.name.lower()
                     ) and other.id not in dependency_graph[subtask.id]:
                         dependency_graph[subtask.id].append(other.id)
 
@@ -398,9 +389,7 @@ class TaskDecomposer:
             return 0.0
 
         # Calculate critical path length
-        critical_path_length = await self._find_critical_path_length(
-            subtasks, dependencies
-        )
+        critical_path_length = await self._find_critical_path_length(subtasks, dependencies)
 
         # Calculate total work if done sequentially
         total_sequential_time = sum(task.estimated_time or 60 for task in subtasks)
@@ -526,9 +515,7 @@ class TaskDecomposer:
 
         if triggers and success_metrics.get("success", False):
             # Create a new pattern entry
-            pattern_name = (
-                f"learned_{hashlib.md5(result.original_task.encode()).hexdigest()[:8]}"
-            )
+            pattern_name = f"learned_{hashlib.md5(result.original_task.encode()).hexdigest()[:8]}"
 
             subtask_types = []
             for subtask in result.subtasks:

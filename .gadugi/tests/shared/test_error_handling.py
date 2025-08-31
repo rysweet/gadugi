@@ -20,10 +20,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     pass
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src")))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from shared.utils.error_handling import (  # type: ignore[import]
+    from src.src.shared.utils.error_handling import (  # type: ignore[import]
         ErrorHandler,
         ErrorSeverity,
         GadugiError,
@@ -32,6 +33,10 @@ try:
         RetryStrategy,
         CircuitBreaker,
         ErrorContext,  # type: ignore[attr-defined]
+        retry,
+        graceful_degradation,
+        handle_with_fallback,
+        validate_input,
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented
@@ -604,7 +609,9 @@ class TestGracefulDegradation:
 
     def test_graceful_degradation_logging(self):
         """Test graceful degradation logs errors."""
-        with patch.object(logger, "error") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "error") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=True)
             def failing_func():
@@ -612,11 +619,13 @@ class TestGracefulDegradation:
 
             result = failing_func()
             assert result == "fallback"
-            mock_logger.assert_called_once()
+            mock_logger.assert_called_once()  # type: ignore[attr-defined]
 
     def test_graceful_degradation_no_logging(self):
         """Test graceful degradation without logging."""
-        with patch.object(logger, "error") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "error") as mock_logger:
 
             @graceful_degradation(fallback_value="fallback", log_errors=False)
             def failing_func():
@@ -926,7 +935,9 @@ class TestHandleWithFallback:
 
     def test_handle_with_fallback_logging(self):
         """Test fallback handler logs warnings."""
-        with patch.object(logger, "warning") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "warning") as mock_logger:
 
             def primary():
                 raise ValueError("Primary failed")
@@ -936,7 +947,7 @@ class TestHandleWithFallback:
 
             result = handle_with_fallback(primary, fallback)
             assert result == "fallback result"
-            mock_logger.assert_called_once()
+            mock_logger.assert_called_once()  # type: ignore[attr-defined]
 
 
 class TestErrorContext:
@@ -944,7 +955,9 @@ class TestErrorContext:
 
     def test_error_context_success(self):
         """Test ErrorContext with successful operation."""
-        with patch.object(logger, "debug") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "debug") as mock_logger:
             with ErrorContext("test operation") as ctx:
                 pass
 
@@ -958,7 +971,9 @@ class TestErrorContext:
 
     def test_error_context_with_error(self):
         """Test ErrorContext with error."""
-        with patch.object(logger, "error") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "error") as mock_logger:
             ctx = None
             with pytest.raises(ValueError):
                 with ErrorContext("test operation") as context_obj:
@@ -966,7 +981,7 @@ class TestErrorContext:
                     raise ValueError("Test error")
 
             assert ctx is not None and isinstance(ctx.error, ValueError)
-            mock_logger.assert_called_with("Error in test operation: Test error")
+            mock_logger.assert_called_with("Error in test operation: Test error")  # type: ignore[attr-defined]
 
     def test_error_context_with_cleanup(self):
         """Test ErrorContext with cleanup function."""
@@ -988,7 +1003,9 @@ class TestErrorContext:
         def failing_cleanup():
             raise RuntimeError("Cleanup failed")
 
-        with patch.object(logger, "error") as mock_logger:
+        import src.src.shared.utils.error_handling as eh_module
+
+        with patch.object(eh_module.logger, "error") as mock_logger:
             with pytest.raises(ValueError):
                 with ErrorContext("test operation", failing_cleanup):
                     raise ValueError("Test error")

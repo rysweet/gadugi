@@ -13,20 +13,13 @@ import sys
 import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), "..", "..", "services", "memory")
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "services", "memory"))
 
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     try:
-        from ...shared.memory_integration import (
-            AgentMemoryInterface as _AgentMemoryInterfaceType,
-        )
-        from ...services.memory.sqlite_memory_backend import (
-            SQLiteMemoryBackend as _SQLiteMemoryBackendType,
-        )
+        pass
     except ImportError:
         pass
 
@@ -68,7 +61,7 @@ class SQLiteMemoryBackend(Protocol):
 
 # Try to import the actual implementations
 try:
-    from memory_integration import AgentMemoryInterface as _AgentMemoryInterface  # type: ignore
+    from src.src.shared.memory_integration import AgentMemoryInterface as _AgentMemoryInterface  # type: ignore
     from sqlite_memory_backend import SQLiteMemoryBackend as _SQLiteMemoryBackend  # type: ignore
 
     AgentMemoryInterfaceImpl = _AgentMemoryInterface
@@ -323,9 +316,7 @@ class MemoryEventStorage:
                     logger.warning(f"Failed to store in memory system: {e}")
 
             # Update event with storage info
-            event.stored_in_memory = (
-                result["stored_in_memory"] or result["stored_in_sqlite"]
-            )
+            event.stored_in_memory = result["stored_in_memory"] or result["stored_in_sqlite"]
             event.memory_id = result["memory_id"]
 
             # Cache for quick access
@@ -507,10 +498,7 @@ class MemoryEventStorage:
         """Check if event matches filter criteria."""
         try:
             # Event type filter
-            if (
-                event_filter.event_types
-                and event.event_type not in event_filter.event_types
-            ):
+            if event_filter.event_types and event.event_type not in event_filter.event_types:
                 return False
 
             # Agent ID filter
@@ -522,10 +510,7 @@ class MemoryEventStorage:
                 return False
 
             # Project ID filter
-            if (
-                event_filter.project_ids
-                and event.project_id not in event_filter.project_ids
-            ):
+            if event_filter.project_ids and event.project_id not in event_filter.project_ids:
                 return False
 
             # Priority filter
@@ -630,9 +615,7 @@ class EventHandler:
                 logger.debug(f"No subscribers for event type: {event.event_type}")
                 return
 
-            logger.info(
-                f"📨 Routing {event.event_type} to {len(subscribers)} subscribers"
-            )
+            logger.info(f"📨 Routing {event.event_type} to {len(subscribers)} subscribers")
 
             # Process subscriptions by priority
             for subscription in subscribers:
@@ -712,9 +695,7 @@ class EventFilterEngine:
             # Cache results
             self.filter_cache[cache_key] = filtered_events
 
-            logger.info(
-                f"🔍 Filtered {len(events)} events to {len(filtered_events)} results"
-            )
+            logger.info(f"🔍 Filtered {len(events)} events to {len(filtered_events)} results")
             return filtered_events
 
         except Exception as e:
@@ -725,9 +706,7 @@ class EventFilterEngine:
         """Generate cache key for filter."""
         return f"filter_{hash(str(event_filter.dict()))}"
 
-    def _apply_advanced_filters(
-        self, event: AgentEvent, event_filter: EventFilter
-    ) -> bool:
+    def _apply_advanced_filters(self, event: AgentEvent, event_filter: EventFilter) -> bool:
         """Apply advanced filtering logic."""
         # Could add more sophisticated filtering here
         return True
@@ -758,14 +737,10 @@ class EventReplayEngine:
     async def replay_events(self, replay_request: EventReplayRequest) -> Dict[str, Any]:
         """Replay events for crash recovery."""
         try:
-            logger.info(
-                f"🔄 Starting event replay for session {replay_request.session_id}"
-            )
+            logger.info(f"🔄 Starting event replay for session {replay_request.session_id}")
 
             # Get events for the session
-            session_events = await self.storage.get_events_by_session(
-                replay_request.session_id
-            )
+            session_events = await self.storage.get_events_by_session(replay_request.session_id)
 
             # Filter by time range if specified
             filtered_events = []
@@ -794,32 +769,21 @@ class EventReplayEngine:
             logger.error(f"❌ Error replaying events: {e}")
             raise
 
-    def _should_replay_event(
-        self, event: AgentEvent, replay_request: EventReplayRequest
-    ) -> bool:
+    def _should_replay_event(self, event: AgentEvent, replay_request: EventReplayRequest) -> bool:
         """Determine if event should be included in replay."""
         # Agent ID filter
         if replay_request.agent_id and event.agent_id != replay_request.agent_id:
             return False
 
         # Time range filters
-        if (
-            replay_request.from_timestamp
-            and event.timestamp < replay_request.from_timestamp
-        ):
+        if replay_request.from_timestamp and event.timestamp < replay_request.from_timestamp:
             return False
 
-        if (
-            replay_request.to_timestamp
-            and event.timestamp > replay_request.to_timestamp
-        ):
+        if replay_request.to_timestamp and event.timestamp > replay_request.to_timestamp:
             return False
 
         # Event type filter
-        if (
-            replay_request.event_types
-            and event.event_type not in replay_request.event_types
-        ):
+        if replay_request.event_types and event.event_type not in replay_request.event_types:
             return False
 
         return True
@@ -837,9 +801,7 @@ class EventReplayEngine:
         for event in events:
             # Count by event type
             event_type = event.event_type
-            summary["event_types"][event_type] = (
-                summary["event_types"].get(event_type, 0) + 1
-            )
+            summary["event_types"][event_type] = summary["event_types"].get(event_type, 0) + 1
 
             # Track agents and tasks
             summary["agents"].add(event.agent_id)

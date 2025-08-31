@@ -25,9 +25,9 @@ import os
 
 # Add path to import from shared
 parent_dir = os.path.dirname(os.path.dirname(__file__))
-shared_path = os.path.join(parent_dir, 'src', 'src')
+shared_path = os.path.join(parent_dir, "src", "src")
 sys.path.insert(0, shared_path)
-from shared.utils.error_handling import GadugiError  # type: ignore[import]
+from src.src.shared.utils.error_handling import GadugiError  # type: ignore[import]  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

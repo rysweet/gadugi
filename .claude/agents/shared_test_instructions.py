@@ -140,8 +140,7 @@ class SharedTestInstructions:
             expected_outcome=SharedTestInstructions._derive_expected_outcome(test_code),
             dependencies=dependencies,
             resources_used=resources,
-            complexity_score=complexity,
-        )
+            complexity_score=complexity)
 
     @staticmethod
     def validate_test_structure(test_code: str) -> Tuple[bool, List[str]]:

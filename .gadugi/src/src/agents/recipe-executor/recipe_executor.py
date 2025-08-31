@@ -15,9 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List  # type: ignore
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -86,9 +84,7 @@ class RecipeExecutor:
             logger.warning(f"No dependencies.json found for {recipe.name}")
 
         # Extract validation criteria from requirements
-        recipe.validation_criteria = self._extract_validation_criteria(
-            recipe.requirements
-        )
+        recipe.validation_criteria = self._extract_validation_criteria(recipe.requirements)
 
         self.recipes[recipe.name] = recipe
         return recipe
@@ -102,10 +98,7 @@ class RecipeExecutor:
         for line in lines:
             line = line.strip()
             # Look for lines that describe testable behavior
-            if any(
-                keyword in line.lower()
-                for keyword in ["must", "should", "shall", "will"]
-            ):
+            if any(keyword in line.lower() for keyword in ["must", "should", "shall", "will"]):
                 if len(line) > 10:  # Avoid trivial lines
                     criteria.append(line)
 
@@ -138,11 +131,7 @@ class RecipeExecutor:
 
         combined_text = (recipe.requirements + " " + recipe.design).lower()
 
-        if (
-            "service" in combined_text
-            or "api" in combined_text
-            or "server" in combined_text
-        ):
+        if "service" in combined_text or "api" in combined_text or "server" in combined_text:
             return "service"
         elif "agent" in combined_text:
             return "agent"
@@ -1866,9 +1855,7 @@ def main():
     )
     parser.add_argument("recipe_path", type=Path, help="Path to recipe directory")
     parser.add_argument("--output", type=Path, help="Output directory", default=None)
-    parser.add_argument(
-        "--validate", action="store_true", help="Validate generated implementation"
-    )
+    parser.add_argument("--validate", action="store_true", help="Validate generated implementation")
 
     args = parser.parse_args()
 

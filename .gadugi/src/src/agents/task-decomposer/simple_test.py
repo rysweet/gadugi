@@ -105,9 +105,7 @@ class MockMemoryInterface(AgentMemoryInterface):
     ) -> List[Dict[str, Any]]:
         return self.procedures
 
-    async def add_knowledge(
-        self, concept: str, description: str, confidence: float = 1.0
-    ) -> str:
+    async def add_knowledge(self, concept: str, description: str, confidence: float = 1.0) -> str:
         knowledge = {
             "concept": concept,
             "description": description,
@@ -142,9 +140,7 @@ async def test_task_decomposer():
     decomposer.knowledge_loaded = True
 
     try:
-        print(
-            f"🧠 Loaded {len(decomposer.strategies)} learned decomposition strategies"
-        )
+        print(f"🧠 Loaded {len(decomposer.strategies)} learned decomposition strategies")
 
         # Test 1: Basic decomposition
         print("\n📋 Test 1: Basic task decomposition")
@@ -159,9 +155,7 @@ async def test_task_decomposer():
 
         print("\nSubtasks:")
         for i, subtask in enumerate(result.subtasks[:5]):  # Show first 5
-            deps = (
-                f" (deps: {len(subtask.dependencies)})" if subtask.dependencies else ""
-            )
+            deps = f" (deps: {len(subtask.dependencies)})" if subtask.dependencies else ""
             parallel = " [||]" if subtask.can_parallelize else " [->]"
             agent = f" [{subtask.agent_hint}]" if subtask.agent_hint else ""
             print(f"  {i+1}. {subtask.name[:50]}...{parallel}{deps}{agent}")
@@ -208,9 +202,7 @@ async def test_task_decomposer():
         # Test 4: Get insights
         print("\n📋 Test 4: Performance insights")
         insights = await decomposer.get_decomposition_insights()
-        print(
-            f"  Total decompositions: {insights['performance_metrics']['total_decompositions']}"
-        )
+        print(f"  Total decompositions: {insights['performance_metrics']['total_decompositions']}")
         print(f"  Success rate: {insights['performance_metrics']['success_rate']:.1%}")
         print(
             f"  Avg parallelization: {insights['performance_metrics']['avg_parallelization_achieved']:.2f}"

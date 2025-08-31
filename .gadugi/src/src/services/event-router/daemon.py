@@ -121,9 +121,7 @@ def status_service():
             import urllib.request
             import json
 
-            with urllib.request.urlopen(
-                "http://localhost:8000/health", timeout=5
-            ) as response:
+            with urllib.request.urlopen("http://localhost:8000/health", timeout=5) as response:
                 if response.status == 200:
                     health_data = json.loads(response.read().decode())
                     print(f"💚 Health status: {health_data.get('status', 'unknown')}")

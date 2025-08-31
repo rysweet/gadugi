@@ -203,9 +203,7 @@ class AuthManager:
         if self.github_token:
             import base64
 
-            secret_data["github-token"] = base64.b64encode(
-                self.github_token.encode()
-            ).decode()
+            secret_data["github-token"] = base64.b64encode(self.github_token.encode()).decode()
 
         # For Claude auth, we'd need to create a ConfigMap from .claude directory
         # This is more complex and would require creating a tar archive

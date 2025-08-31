@@ -329,7 +329,7 @@ class CapabilityAssessment:
         self,
         domain: CapabilityDomain,
         tasks: List[TaskResult],
-        agent_id: str,  # type: ignore
+        agent_id: str,
     ) -> CapabilityScore:
         """Assess capability in a specific domain."""
         try:
@@ -364,14 +364,16 @@ class CapabilityAssessment:
                 # Normalize execution times (lower is better)
                 avg_time = np.mean(execution_times)
                 efficiency_factor = min(
-                    1.0, 300.0 / max(1.0, avg_time)
+                    1.0, 300.0 / max(1.0, float(avg_time))
                 )  # 5 minutes as baseline
                 performance_score = (performance_score * 0.8) + (
                     efficiency_factor * 0.2
                 )
 
             # Determine proficiency level
-            proficiency_level = self._determine_proficiency_level(performance_score)
+            proficiency_level = self._determine_proficiency_level(
+                float(performance_score)
+            )
 
             # Calculate confidence based on evidence count and consistency
             confidence_score = self._calculate_confidence(success_rates, len(tasks))
@@ -385,7 +387,7 @@ class CapabilityAssessment:
                 confidence_score=confidence_score,
                 evidence_count=len(tasks),
                 last_updated=datetime.now(),
-                recent_performance=[performance_score],
+                recent_performance=[float(performance_score)],
                 improvement_trend=improvement_trend,
             )
 

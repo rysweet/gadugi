@@ -43,9 +43,7 @@ class GitHubOperations:
         """Get PR details using GitHub CLI"""
         try:
             cmd = f"gh pr view {pr_number} --json number,title,body,author,baseRefName,headRefName"
-            result = subprocess.run(
-                cmd.split(), capture_output=True, text=True, timeout=30
-            )
+            result = subprocess.run(cmd.split(), capture_output=True, text=True, timeout=30)
 
             if result.returncode == 0:
                 return json.loads(result.stdout)
@@ -87,9 +85,7 @@ class StateManager:
     """Fallback state manager implementation"""
 
     def __init__(self, state_dir: Optional[Path] = None, task_id: str = "fallback"):
-        self.state_dir = state_dir or Path(
-            ".github/workflow-states/SystemDesignReviewer"
-        )
+        self.state_dir = state_dir or Path(".github/workflow-states/SystemDesignReviewer")
         self.task_id = task_id
         self.state_file = self.state_dir / "fallback_state.json"
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -183,9 +179,7 @@ class TaskTracker:
         self.agent_type = agent_type
         self.tasks = {}
 
-    def create_task(
-        self, task_id: str, content: str, priority: str = "medium"
-    ) -> Dict[str, Any]:
+    def create_task(self, task_id: str, content: str, priority: str = "medium") -> Dict[str, Any]:
         """Create a new task"""
         task = {
             "id": task_id,

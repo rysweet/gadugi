@@ -59,9 +59,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
     def test_analyze_agent_performance_success(self):
         """Test successful agent performance analysis"""
         # Mock dependencies
-        self.mock_task_metrics.get_agent_task_results.return_value = (
-            self.mock_task_results
-        )
+        self.mock_task_metrics.get_agent_task_results.return_value = self.mock_task_results
         self.mock_task_metrics.get_agent_execution_times.return_value = [
             120.0,
             150.0,
@@ -78,9 +76,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         self.mock_state_manager.get_agent_config.return_value = {"name": "Test Agent"}
 
         # Execute analysis
-        result = self.analyzer.analyze_agent_performance(
-            self.agent_id, self.time_period
-        )
+        result = self.analyzer.analyze_agent_performance(self.agent_id, self.time_period)
 
         # Verify result
         self.assertIsInstance(result, AgentPerformanceData)
@@ -109,9 +105,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         self.mock_state_manager.get_agent_config.return_value = {"name": "Test Agent"}
 
         # Execute analysis
-        result = self.analyzer.analyze_agent_performance(
-            self.agent_id, self.time_period
-        )
+        result = self.analyzer.analyze_agent_performance(self.agent_id, self.time_period)
 
         # Verify result with no data
         self.assertEqual(result.total_tasks, 0)
@@ -128,9 +122,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         )
 
         # Mock task results
-        self.mock_task_metrics.get_agent_task_results.return_value = (
-            self.mock_task_results
-        )
+        self.mock_task_metrics.get_agent_task_results.return_value = self.mock_task_results
 
         # Execute calculation
         self.analyzer._calculate_success_metrics(performance_data, self.time_period)
@@ -156,12 +148,8 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         self.analyzer._analyze_execution_times(performance_data, self.time_period)
 
         # Verify calculations
-        self.assertEqual(
-            performance_data.avg_execution_time, 142.5
-        )  # (120+150+200+100)/4
-        self.assertEqual(
-            performance_data.median_execution_time, 135.0
-        )  # median of sorted list
+        self.assertEqual(performance_data.avg_execution_time, 142.5)  # (120+150+200+100)/4
+        self.assertEqual(performance_data.median_execution_time, 135.0)  # median of sorted list
         self.assertEqual(performance_data.min_execution_time, 100.0)
         self.assertEqual(performance_data.max_execution_time, 200.0)
 
@@ -219,9 +207,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
     def test_caching_behavior(self):
         """Test performance data caching"""
         # Mock dependencies
-        self.mock_task_metrics.get_agent_task_results.return_value = (
-            self.mock_task_results
-        )
+        self.mock_task_metrics.get_agent_task_results.return_value = self.mock_task_results
         self.mock_task_metrics.get_agent_execution_times.return_value = [120.0, 150.0]
         self.mock_task_metrics.get_agent_resource_usage.return_value = []
         self.mock_task_metrics.get_agent_quality_metrics.return_value = []
@@ -235,7 +221,9 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
         self.analyzer.analyze_agent_performance(self.agent_id, self.time_period)
 
         # Verify cache was used (same object)
-        cache_key = f"{self.agent_id}_{self.time_period[0].isoformat()}_{self.time_period[1].isoformat()}"
+        cache_key = (
+            f"{self.agent_id}_{self.time_period[0].isoformat()}_{self.time_period[1].isoformat()}"
+        )
         self.assertIn(cache_key, self.analyzer.performance_cache)
 
         # Verify get_agent_task_results was called only once (due to caching)
@@ -244,9 +232,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
     def test_error_handling(self):
         """Test error handling in analysis"""
         # Mock exception in task metrics
-        self.mock_task_metrics.get_agent_task_results.side_effect = Exception(
-            "Mock error"
-        )
+        self.mock_task_metrics.get_agent_task_results.side_effect = Exception("Mock error")
 
         # Should raise AnalysisError
         with self.assertRaises(AnalysisError):
@@ -266,9 +252,7 @@ class TestAgentPerformanceAnalyzer(unittest.TestCase):
             "_get_period_performance_score",
             side_effect=[0.6, 0.7, 0.8, 0.75, 0.85],
         ):
-            self.analyzer._analyze_performance_trends(
-                performance_data, self.time_period
-            )
+            self.analyzer._analyze_performance_trends(performance_data, self.time_period)
 
             # Verify trend data
             self.assertEqual(len(performance_data.performance_trend), 5)
@@ -331,9 +315,7 @@ class TestTeamPerformanceData(unittest.TestCase):
         time_period = (datetime.now() - timedelta(days=1), datetime.now())
         team_composition = ["agent1", "agent2", "agent3"]
 
-        data = TeamPerformanceData(
-            team_composition=team_composition, time_period=time_period
-        )
+        data = TeamPerformanceData(team_composition=team_composition, time_period=time_period)
 
         self.assertEqual(data.team_composition, team_composition)
         self.assertEqual(data.time_period, time_period)

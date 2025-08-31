@@ -33,9 +33,7 @@ async def test_proxy():
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(url, json=payload, headers=headers)
-            print(
-                f"[{datetime.now().isoformat()}] Response status: {response.status_code}"
-            )
+            print(f"[{datetime.now().isoformat()}] Response status: {response.status_code}")
             print(f"Response headers: {dict(response.headers)}")
 
             if response.status_code == 200:

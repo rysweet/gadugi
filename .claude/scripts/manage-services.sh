@@ -550,6 +550,7 @@ REQUIREMENTS:
     - Logs are written to .claude/logs/
     - PIDs are tracked in .claude/pids/
     - NO simulated operations - everything is real
+    - NO PLACEHOLDERS - all implementations are complete
 
 EOF
 }

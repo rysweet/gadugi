@@ -54,10 +54,7 @@ async def health_check():  # type: ignore[misc]
         health_status["configuration"]["provider"] = "Azure OpenAI"
     elif "openai.com" in config.openai_base_url.lower():
         health_status["configuration"]["provider"] = "OpenAI"
-    elif (
-        "localhost" in config.openai_base_url.lower()
-        or "127.0.0.1" in config.openai_base_url
-    ):
+    elif "localhost" in config.openai_base_url.lower() or "127.0.0.1" in config.openai_base_url:
         health_status["configuration"]["provider"] = "Ollama (Local)"
     else:
         health_status["configuration"]["provider"] = "Custom OpenAI-compatible"
@@ -84,9 +81,7 @@ async def health_check():  # type: ignore[misc]
 
                 if response.status_code == 404:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(
-                        "Azure OpenAI endpoint not found (404)"
-                    )
+                    health_status["errors"].append("Azure OpenAI endpoint not found (404)")
                     health_status["instructions"].extend(
                         [
                             "Verify your Azure OpenAI configuration:",
@@ -104,9 +99,7 @@ async def health_check():  # type: ignore[misc]
                     )
                 elif response.status_code == 401:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(
-                        "Azure OpenAI authentication failed (401)"
-                    )
+                    health_status["errors"].append("Azure OpenAI authentication failed (401)")
                     health_status["instructions"].extend(
                         [
                             "Your API key is invalid or expired.",
@@ -123,9 +116,7 @@ async def health_check():  # type: ignore[misc]
                     health_status["upstream_status"] = "healthy"
                 else:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(
-                        f"Unexpected response: {response.status_code}"
-                    )
+                    health_status["errors"].append(f"Unexpected response: {response.status_code}")
 
         elif "openai.com" in config.openai_base_url.lower():
             # OpenAI validation
@@ -145,9 +136,7 @@ async def health_check():  # type: ignore[misc]
                     )
                 else:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(
-                        f"OpenAI API error: {response.status_code}"
-                    )
+                    health_status["errors"].append(f"OpenAI API error: {response.status_code}")
 
         else:
             # Generic OpenAI-compatible endpoint
@@ -174,9 +163,7 @@ async def health_check():  # type: ignore[misc]
     except Exception as e:
         health_status["upstream_status"] = "error"
         health_status["errors"].append(f"Validation error: {str(e)}")
-        health_status["instructions"].append(
-            "Check logs for details: ~/.claude-proxy.log"
-        )
+        health_status["instructions"].append("Check logs for details: ~/.claude-proxy.log")
 
     # Set overall status
     if health_status["upstream_status"] == "error":
@@ -239,9 +226,7 @@ async def create_message(
         if request.messages:
             request_logger.info(f"[MESSAGE_COUNT] {len(request.messages)}")
 
-        logger.debug(
-            f"Processing Claude request: model={request.model}, stream={request.stream}"
-        )
+        logger.debug(f"Processing Claude request: model={request.model}, stream={request.stream}")
 
         # Generate unique request ID for cancellation tracking
         request_id = str(uuid.uuid4())
@@ -293,9 +278,7 @@ async def create_message(
             openai_response = await openai_client.create_chat_completion(  # type: ignore
                 openai_request, request_id
             )
-            claude_response = convert_openai_to_claude_response(
-                openai_response, request
-            )
+            claude_response = convert_openai_to_claude_response(openai_response, request)
             return claude_response
     except HTTPException:
         raise
@@ -309,9 +292,7 @@ async def create_message(
 
 
 @router.post("/v1/messages/count_tokens")
-async def count_tokens(
-    request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)
-):  # type: ignore
+async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)):  # type: ignore
     try:
         # For token counting, we'll use a simple estimation
         # In a real implementation, you might want to use tiktoken or similar
@@ -348,16 +329,7 @@ async def count_tokens(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "openai_api_configured": bool(config.openai_api_key),
-        "api_key_valid": config.validate_api_key(),
-        "client_api_key_validation": bool(config.anthropic_api_key),
-    }
+# Removed duplicate health_check function - keeping the more comprehensive one above
 
 
 @router.get("/test-connection")

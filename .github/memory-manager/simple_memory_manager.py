@@ -18,7 +18,7 @@ import os
 shared_path = Path(__file__).parent.parent.parent / ".claude" / "shared"
 sys.path.insert(0, str(shared_path))
 
-from github_operations import GitHubOperations, GitHubError
+from github_operations import GitHubOperations, GitHubError  # noqa: E402
 
 
 class MemorySection:

@@ -237,12 +237,12 @@ def main():
 
     try:
         # Run examples
-        agent_started = example_agent_started()
-        task_started = example_task_started()
-        task_progress = example_task_progress()
-        agent_question = example_agent_has_question()
-        task_completed = example_task_completed()
-        deserialized = example_serialization()
+        example_agent_started()
+        example_task_started()
+        example_task_progress()
+        example_agent_has_question()
+        example_task_completed()
+        example_serialization()
 
         print("\n" + "=" * 60)
         print("✅ All examples completed successfully!")

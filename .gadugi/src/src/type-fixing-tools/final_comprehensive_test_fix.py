@@ -52,9 +52,7 @@ def fix_optional_access_comprehensively(filepath: Path) -> None:
             match = re.search(r"assert (\w+)\.status", line)
             if match:
                 var = match.group(1)
-                line = line.replace(
-                    f"{var}.status", f"{var} is not None and {var}.status"
-                )
+                line = line.replace(f"{var}.status", f"{var} is not None and {var}.status")
 
         # Pattern 2: function().attribute access
         elif "assert" in line and re.search(r"\w+\([^)]*\)\.\w+", line):
@@ -131,9 +129,7 @@ def add_missing_imports(filepath: Path) -> None:
     needs_imports = []
 
     if "TaskPriority.HIGH" in content or "TaskPriority.MEDIUM" in content:
-        if (
-            "TaskPriority" not in content.split("\n")[0:50]
-        ):  # Check first 50 lines for import
+        if "TaskPriority" not in content.split("\n")[0:50]:  # Check first 50 lines for import
             needs_imports.append("TaskPriority")
 
     if "TaskStatus.COMPLETED" in content or "TaskStatus.PENDING" in content:
@@ -142,7 +138,9 @@ def add_missing_imports(filepath: Path) -> None:
 
     # Add imports if needed
     if needs_imports:
-        import_line = f"from shared.task_tracking import {', '.join(needs_imports)}  # type: ignore[import]\n"
+        import_line = (
+            f"from shared.task_tracking import {', '.join(needs_imports)}  # type: ignore[import]\n"
+        )
         # Add after other imports
         lines = content.split("\n")
         for i, line in enumerate(lines):
@@ -203,9 +201,7 @@ def main():
     # Final verification
     print("\nRunning final pyright check...")
     error_count = (
-        os.popen("uv run pyright tests/ 2>&1 | grep -c 'error:' || echo '0'")
-        .read()
-        .strip()
+        os.popen("uv run pyright tests/ 2>&1 | grep -c 'error:' || echo '0'").read().strip()
     )
 
     if error_count == "0":

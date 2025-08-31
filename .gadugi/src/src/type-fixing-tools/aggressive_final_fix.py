@@ -10,9 +10,7 @@ from pathlib import Path
 
 def analyze_errors():
     """Analyze current errors and group by type."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
     errors = {}
     for line in result.stdout.split("\n"):
@@ -48,10 +46,7 @@ def fix_orchestrator_test_files():
 
         # Add common missing imports
         if "Mock" in content and "from unittest.mock import" not in content:
-            content = (
-                "from unittest.mock import Mock, patch, MagicMock, AsyncMock\n"
-                + content
-            )
+            content = "from unittest.mock import Mock, patch, MagicMock, AsyncMock\n" + content
             modified = True
 
         if "TestCase" in content and "import unittest" not in content:
@@ -107,9 +102,7 @@ from typing import Dict, List, Any, Optional
     for line in lines:
         if skip_imports and (line.startswith("import ") or line.startswith("from ")):
             continue
-        elif (
-            skip_imports and line.strip() and not line.startswith(("import ", "from "))
-        ):
+        elif skip_imports and line.strip() and not line.startswith(("import ", "from ")):
             skip_imports = False
             # Add our imports before the first non-import line
             new_lines.extend(imports.split("\n"))
@@ -119,9 +112,7 @@ from typing import Dict, List, Any, Optional
 
     # Fix specific undefined variables
     if "EventRouter" in content and "from ..event_router import" not in content:
-        content = content.replace(
-            imports, imports + "from ..event_router import EventRouter\n"
-        )
+        content = content.replace(imports, imports + "from ..event_router import EventRouter\n")
 
     test_file.write_text(content)
     print("Fixed event router test file")
@@ -192,9 +183,7 @@ from ..framework.base_agent import BaseAgent
 
 def remove_all_unused_imports():
     """Remove all remaining unused imports."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
     for line in result.stdout.split("\n"):
         if "is not accessed" in line and ".claude/" in line:
@@ -251,11 +240,9 @@ def main():
     remove_all_unused_imports()
 
     # Final check
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
-    final_errors = [l for l in result.stdout.split("\n") if "error:" in l]
+    final_errors = [line for line in result.stdout.split("\n") if "error:" in line]
     print(f"\nFinal error count: {len(final_errors)}")
 
     if len(final_errors) > 0 and len(final_errors) < 20:

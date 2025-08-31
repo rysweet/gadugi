@@ -56,9 +56,7 @@ class WhiteboardMixin:
             print(f"  ⚠️ Whiteboard system initialization failed: {e}")
             self.whiteboard_manager = None
 
-    async def _setup_task_whiteboard(
-        self: WhiteboardMixinHost, task_description: str
-    ) -> None:
+    async def _setup_task_whiteboard(self: WhiteboardMixinHost, task_description: str) -> None:
         """Set up whiteboard for the current task."""
         if not self.whiteboard_manager or not self.current_task_id:
             return
@@ -133,13 +131,9 @@ class WhiteboardMixin:
 
             try:
                 # Add communication to whiteboard
-                comms_data = (
-                    await whiteboard.read(self.agent_id, "communications") or {}
-                )
+                comms_data = await whiteboard.read(self.agent_id, "communications") or {}
                 current_comms = (
-                    comms_data.get("messages", [])
-                    if isinstance(comms_data, dict)
-                    else []
+                    comms_data.get("messages", []) if isinstance(comms_data, dict) else []
                 )
                 current_comms.append(
                     {
@@ -150,15 +144,11 @@ class WhiteboardMixin:
                         "type": "message",
                     }
                 )
-                await whiteboard.write(
-                    self.agent_id, "communications", {"messages": current_comms}
-                )
+                await whiteboard.write(self.agent_id, "communications", {"messages": current_comms})
 
                 # Add decision if provided
                 if decision:
-                    decisions_data = (
-                        await whiteboard.read(self.agent_id, "decisions") or {}
-                    )
+                    decisions_data = await whiteboard.read(self.agent_id, "decisions") or {}
                     current_decisions = (
                         decisions_data.get("decisions", [])
                         if isinstance(decisions_data, dict)
@@ -303,9 +293,7 @@ class WhiteboardMixin:
             relevant: List[Dict[str, Any]] = []
 
             # Get all whiteboards and filter
-            all_whiteboards = self.whiteboard_manager.find_whiteboards(
-                accessible_by=self.agent_id
-            )
+            all_whiteboards = self.whiteboard_manager.find_whiteboards(accessible_by=self.agent_id)
 
             # Filter for task-related whiteboards
             if self.current_task_id:
@@ -395,10 +383,7 @@ class WhiteboardMixin:
         blocked_items: Optional[List[str]] = None,
     ) -> None:
         """Update task progress on the whiteboard."""
-        if (
-            not self.current_task_id
-            or self.current_task_id not in self.current_whiteboards
-        ):
+        if not self.current_task_id or self.current_task_id not in self.current_whiteboards:
             return
 
         try:
@@ -422,10 +407,7 @@ class WhiteboardMixin:
         self: WhiteboardMixinHost, issue_description: str, severity: str = "medium"
     ) -> None:
         """Report an issue to the task whiteboard."""
-        if (
-            not self.current_task_id
-            or self.current_task_id not in self.current_whiteboards
-        ):
+        if not self.current_task_id or self.current_task_id not in self.current_whiteboards:
             return
 
         try:

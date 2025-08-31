@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "sh
 try:
     from interfaces import OperationResult  # type: ignore[import]
     from utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
-    from state_management import StateManager  # type: ignore[import]
+    from src.src.shared.state_management import StateManager  # type: ignore[import]
 except ImportError:
     # Define minimal stubs if shared modules are not available
     class OperationResult:
@@ -123,9 +123,7 @@ class TaskRequirements:
 
     # Capability requirements
     required_capabilities: Dict[CapabilityDomain, ProficiencyLevel]
-    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(
-        default_factory=dict
-    )
+    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(default_factory=dict)
 
     # Constraints and preferences
     estimated_duration: Optional[timedelta] = None
@@ -153,9 +151,7 @@ class AgentAvailability:
     scheduled_tasks: List[str]
     available_from: datetime
     capacity_until: Optional[datetime] = None
-    preferred_work_periods: List[Tuple[datetime, datetime]] = field(
-        default_factory=list
-    )
+    preferred_work_periods: List[Tuple[datetime, datetime]] = field(default_factory=list)
     blackout_periods: List[Tuple[datetime, datetime]] = field(default_factory=list)
 
 
@@ -294,9 +290,7 @@ class TaskAgentMatcher:
             MatchingError: If matching process fails
         """
         try:
-            self.logger.info(
-                f"Finding optimal agent for task {task_requirements.task_id}"
-            )
+            self.logger.info(f"Finding optimal agent for task {task_requirements.task_id}")
 
             # Update agent profiles and availability
             self._update_agent_data(available_agents)
@@ -304,9 +298,7 @@ class TaskAgentMatcher:
             # Score all available agents
             agent_scores = {}
             for agent_id in available_agents:
-                score = self._calculate_agent_task_score(
-                    agent_id, task_requirements, strategy
-                )
+                score = self._calculate_agent_task_score(agent_id, task_requirements, strategy)
                 if score.overall_score >= self.matching_config["min_capability_match"]:
                     agent_scores[agent_id] = score
 
@@ -321,22 +313,16 @@ class TaskAgentMatcher:
             )
 
             # Add reasoning and explanations
-            self._enhance_recommendation_reasoning(
-                recommendation, task_requirements, strategy
-            )
+            self._enhance_recommendation_reasoning(recommendation, task_requirements, strategy)
 
-            self.logger.info(
-                f"Generated recommendation for task {task_requirements.task_id}"
-            )
+            self.logger.info(f"Generated recommendation for task {task_requirements.task_id}")
             return recommendation
 
         except Exception as e:
             self.logger.error(
                 f"Failed to find optimal agent for task {task_requirements.task_id}: {e}"
             )
-            raise MatchingError(
-                f"Matching failed for task {task_requirements.task_id}: {e}"
-            )
+            raise MatchingError(f"Matching failed for task {task_requirements.task_id}: {e}")
 
     def _calculate_agent_task_score(
         self,
@@ -355,17 +341,11 @@ class TaskAgentMatcher:
                 capability_profile, task_requirements
             )
 
-            performance_prediction = self._predict_task_performance(
-                agent_id, task_requirements
-            )
+            performance_prediction = self._predict_task_performance(agent_id, task_requirements)
 
-            availability_score = self._calculate_availability_score(
-                availability, task_requirements
-            )
+            availability_score = self._calculate_availability_score(availability, task_requirements)
 
-            workload_balance = self._calculate_workload_balance_score(
-                availability, strategy
-            )
+            workload_balance = self._calculate_workload_balance_score(availability, strategy)
 
             # Apply strategy-specific weights
             weights = self._get_strategy_weights(strategy)
@@ -460,9 +440,7 @@ class TaskAgentMatcher:
                     # Higher weight for required vs preferred capabilities
                     requirement_weight = 2.0
 
-                    weighted_match += (
-                        level_match * confidence_weight * requirement_weight
-                    )
+                    weighted_match += level_match * confidence_weight * requirement_weight
                     total_weight += requirement_weight
                 else:
                     # Agent lacks required capability
@@ -478,15 +456,12 @@ class TaskAgentMatcher:
 
                     level_match = min(
                         1.0,
-                        agent_capability.proficiency_level.value
-                        / preferred_level.value,
+                        agent_capability.proficiency_level.value / preferred_level.value,
                     )
                     confidence_weight = agent_capability.confidence_score
                     requirement_weight = 1.0  # Lower weight for preferred
 
-                    weighted_match += (
-                        level_match * confidence_weight * requirement_weight
-                    )
+                    weighted_match += level_match * confidence_weight * requirement_weight
                     total_weight += requirement_weight
 
             # Calculate final capability match score
@@ -555,14 +530,10 @@ class TaskAgentMatcher:
             # Adjust for time constraints
             time_score = 1.0
             if task_requirements.deadline:
-                time_to_deadline = (
-                    task_requirements.deadline - availability.available_from
-                )
+                time_to_deadline = task_requirements.deadline - availability.available_from
                 if time_to_deadline.total_seconds() > 0:
                     if task_requirements.estimated_duration:
-                        urgency_ratio = (
-                            task_requirements.estimated_duration / time_to_deadline
-                        )
+                        urgency_ratio = task_requirements.estimated_duration / time_to_deadline
                         time_score = max(0.0, 1.0 - urgency_ratio)
                 else:
                     time_score = 0.0  # Past deadline
@@ -597,18 +568,14 @@ class TaskAgentMatcher:
             self.logger.error(f"Failed to calculate workload balance score: {e}")
             return 0.5
 
-    def _calculate_task_type_similarity_adjustment(
-        self, agent_id: str, task_type: str
-    ) -> float:
+    def _calculate_task_type_similarity_adjustment(self, agent_id: str, task_type: str) -> float:
         """Calculate adjustment based on agent's experience with similar tasks."""
         try:
             # Get recent task history
             end_time = datetime.now()
             start_time = end_time - timedelta(days=60)
 
-            task_results = self.task_metrics.get_agent_task_results(
-                agent_id, start_time, end_time
-            )
+            task_results = self.task_metrics.get_agent_task_results(agent_id, start_time, end_time)
 
             if not task_results:
                 return 0.0  # No adjustment if no history
@@ -618,25 +585,22 @@ class TaskAgentMatcher:
                 result
                 for result in task_results
                 if hasattr(result, "task_type")
-                and self._calculate_task_type_similarity(result.task_type, task_type)
-                > 0.7
+                and self._calculate_task_type_similarity(result.task_type, task_type) > 0.7
             ]
 
             if not similar_tasks:
                 return -0.1  # Small penalty for unfamiliar task type
 
             # Calculate success rate for similar tasks
-            similar_success_rate = sum(
-                1 for task in similar_tasks if task.success
-            ) / len(similar_tasks)
+            similar_success_rate = sum(1 for task in similar_tasks if task.success) / len(
+                similar_tasks
+            )
 
             # Return adjustment factor (-0.3 to +0.3)
             return (similar_success_rate - 0.5) * 0.6
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to calculate task type similarity adjustment: {e}"
-            )
+            self.logger.error(f"Failed to calculate task type similarity adjustment: {e}")
             return 0.0
 
     def _calculate_task_type_similarity(self, type1: str, type2: str) -> float:
@@ -705,9 +669,7 @@ class TaskAgentMatcher:
             # Compare with agent's average execution time (proxy for handling complexity)
             if performance_data.avg_execution_time > 0:
                 # Agents with faster avg execution might handle complexity better
-                time_factor = max(
-                    0.1, min(1.0, 300.0 / performance_data.avg_execution_time)
-                )
+                time_factor = max(0.1, min(1.0, 300.0 / performance_data.avg_execution_time))
                 complexity_adjustment = (time_factor - complexity_score) * 0.1
             else:
                 complexity_adjustment = -complexity_score * 0.1
@@ -729,9 +691,9 @@ class TaskAgentMatcher:
             confidence_factors = []
 
             # Capability confidence
-            relevant_capabilities = list(
-                task_requirements.required_capabilities.keys()
-            ) + list(task_requirements.preferred_capabilities.keys())
+            relevant_capabilities = list(task_requirements.required_capabilities.keys()) + list(
+                task_requirements.preferred_capabilities.keys()
+            )
 
             capability_confidences = []
             for domain in relevant_capabilities:
@@ -747,9 +709,7 @@ class TaskAgentMatcher:
                 confidence_factors.append(avg_capability_confidence)
 
             # Performance history confidence (based on data points)
-            performance_data = self.performance_analyzer.analyze_agent_performance(
-                agent_id
-            )
+            performance_data = self.performance_analyzer.analyze_agent_performance(agent_id)
             if performance_data.total_tasks > 0:
                 # More tasks = higher confidence, plateau at 20 tasks
                 task_confidence = min(1.0, performance_data.total_tasks / 20.0)
@@ -773,18 +733,14 @@ class TaskAgentMatcher:
             self.logger.error(f"Failed to calculate confidence level: {e}")
             return 0.5
 
-    def _calculate_task_familiarity_confidence(
-        self, agent_id: str, task_type: str
-    ) -> float:
+    def _calculate_task_familiarity_confidence(self, agent_id: str, task_type: str) -> float:
         """Calculate confidence based on agent's familiarity with task type."""
         try:
             # Get task history
             end_time = datetime.now()
             start_time = end_time - timedelta(days=90)
 
-            task_results = self.task_metrics.get_agent_task_results(
-                agent_id, start_time, end_time
-            )
+            task_results = self.task_metrics.get_agent_task_results(agent_id, start_time, end_time)
 
             if not task_results:
                 return 0.3  # Low confidence with no history
@@ -794,8 +750,7 @@ class TaskAgentMatcher:
                 result
                 for result in task_results
                 if hasattr(result, "task_type")
-                and self._calculate_task_type_similarity(result.task_type, task_type)
-                > 0.5
+                and self._calculate_task_type_similarity(result.task_type, task_type) > 0.5
             ]
 
             # Confidence based on number of similar tasks
@@ -853,9 +808,7 @@ class TaskAgentMatcher:
                     required_level,
                 ) in task_requirements.required_capabilities.items():
                     if domain in capability_profile.capability_scores:
-                        agent_level = capability_profile.capability_scores[
-                            domain
-                        ].proficiency_level
+                        agent_level = capability_profile.capability_scores[domain].proficiency_level
                         if agent_level.value < required_level.value:
                             concerns.append(f"Insufficient {domain.value} capability")
                     else:
@@ -869,24 +822,18 @@ class TaskAgentMatcher:
 
             # Generate recommendations
             if capability_match < 0.7:
-                recommendations.append(
-                    "Consider pairing with agent strong in missing capabilities"
-                )
+                recommendations.append("Consider pairing with agent strong in missing capabilities")
 
             if performance_prediction < 0.6:
                 recommendations.append("Provide additional monitoring and support")
 
             if availability_score < 0.6:
-                recommendations.append(
-                    "Consider adjusting timeline or workload distribution"
-                )
+                recommendations.append("Consider adjusting timeline or workload distribution")
 
             # Check for improvement areas that align with task
             for domain in capability_profile.improvement_areas:
                 if domain in task_requirements.required_capabilities:
-                    recommendations.append(
-                        f"Good opportunity to develop {domain.value} skills"
-                    )
+                    recommendations.append(f"Good opportunity to develop {domain.value} skills")
 
         except Exception as e:
             self.logger.error(f"Failed to analyze match factors: {e}")
@@ -954,22 +901,17 @@ class TaskAgentMatcher:
             # Determine number of agents to recommend
             if task_requirements.requires_collaboration:
                 max_agents = min(task_requirements.max_agents, len(sorted_agents))
-                recommended_count = min(
-                    3, max_agents
-                )  # Recommend up to 3 for collaboration
+                recommended_count = min(3, max_agents)  # Recommend up to 3 for collaboration
             else:
                 recommended_count = 1
 
             # Select recommended agents
-            recommended_agents = [
-                agent_id for agent_id, _ in sorted_agents[:recommended_count]
-            ]
+            recommended_agents = [agent_id for agent_id, _ in sorted_agents[:recommended_count]]
 
             # Calculate overall success probability
             if recommended_agents:
                 top_scores = [
-                    agent_scores[agent_id].overall_score
-                    for agent_id in recommended_agents
+                    agent_scores[agent_id].overall_score for agent_id in recommended_agents
                 ]
                 success_probability = sum(top_scores) / len(top_scores)
             else:
@@ -978,9 +920,7 @@ class TaskAgentMatcher:
             # Generate alternative options
             alternative_options = [
                 (agent_id, score.overall_score)
-                for agent_id, score in sorted_agents[
-                    recommended_count : recommended_count + 3
-                ]
+                for agent_id, score in sorted_agents[recommended_count : recommended_count + 3]
             ]
 
             # Estimate completion time
@@ -1028,9 +968,7 @@ class TaskAgentMatcher:
             }
 
             reasoning_parts.append(
-                strategy_explanations.get(
-                    strategy, "Standard matching algorithm applied"
-                )
+                strategy_explanations.get(strategy, "Standard matching algorithm applied")
             )
 
             # Top recommendation analysis
@@ -1045,9 +983,7 @@ class TaskAgentMatcher:
 
                 # Highlight key strengths
                 if top_score.strengths:
-                    reasoning_parts.append(
-                        f"Key strengths: {', '.join(top_score.strengths[:2])}"
-                    )
+                    reasoning_parts.append(f"Key strengths: {', '.join(top_score.strengths[:2])}")
 
             # Risk assessment
             if recommendation.risk_factors:
@@ -1104,18 +1040,14 @@ class TaskAgentMatcher:
 
             # Get primary agent's average execution time
             primary_agent = recommended_agents[0]
-            performance_data = self.performance_analyzer.analyze_agent_performance(
-                primary_agent
-            )
+            performance_data = self.performance_analyzer.analyze_agent_performance(primary_agent)
 
             if performance_data.avg_execution_time > 0:
                 # Adjust estimated duration based on agent performance
                 agent_efficiency = min(
                     2.0, 300.0 / performance_data.avg_execution_time
                 )  # Baseline 5 minutes
-                adjusted_duration = (
-                    task_requirements.estimated_duration / agent_efficiency
-                )
+                adjusted_duration = task_requirements.estimated_duration / agent_efficiency
             else:
                 adjusted_duration = task_requirements.estimated_duration
 
@@ -1152,15 +1084,11 @@ class TaskAgentMatcher:
 
                 # Capability risks
                 if score.capability_match < 0.7:
-                    risk_factors.append(
-                        f"Below-optimal capability match for {agent_id}"
-                    )
+                    risk_factors.append(f"Below-optimal capability match for {agent_id}")
 
                 # Performance risks
                 if score.performance_prediction < 0.6:
-                    risk_factors.append(
-                        f"Uncertain performance prediction for {agent_id}"
-                    )
+                    risk_factors.append(f"Uncertain performance prediction for {agent_id}")
 
                 # Availability risks
                 if score.availability_score < 0.6:
@@ -1179,17 +1107,11 @@ class TaskAgentMatcher:
                 ):
                     risk_factors.append("Tight deadline with limited buffer time")
 
-            if (
-                task_requirements.requires_collaboration
-                and len(recommended_agents) == 1
-            ):
-                risk_factors.append(
-                    "Collaboration required but single agent recommended"
-                )
+            if task_requirements.requires_collaboration and len(recommended_agents) == 1:
+                risk_factors.append("Collaboration required but single agent recommended")
 
             if task_requirements.priority == TaskPriority.CRITICAL and not any(
-                agent_scores[agent_id].overall_score > 0.8
-                for agent_id in recommended_agents
+                agent_scores[agent_id].overall_score > 0.8 for agent_id in recommended_agents
             ):
                 risk_factors.append("Critical task assigned to non-optimal agent")
 
@@ -1205,12 +1127,9 @@ class TaskAgentMatcher:
             for agent_id in agent_ids:
                 # Update capability profile if not cached or stale
                 if agent_id not in self.agent_profiles_cache or (
-                    datetime.now()
-                    - self.agent_profiles_cache[agent_id].profile_generated
+                    datetime.now() - self.agent_profiles_cache[agent_id].profile_generated
                 ) > timedelta(hours=24):
-                    profile = self.capability_assessment.assess_agent_capabilities(
-                        agent_id
-                    )
+                    profile = self.capability_assessment.assess_agent_capabilities(agent_id)
                     self.agent_profiles_cache[agent_id] = profile
 
                 # Update availability data
@@ -1248,14 +1167,10 @@ class TaskAgentMatcher:
 
             # Get current tasks from task metrics
             current_tasks = self.task_metrics.get_agent_active_tasks(agent_id)
-            scheduled_tasks = [
-                task.task_id for task in current_tasks if hasattr(task, "task_id")
-            ]
+            scheduled_tasks = [task.task_id for task in current_tasks if hasattr(task, "task_id")]
 
             # Calculate workload based on active tasks
-            workload = min(
-                1.0, len(current_tasks) / 5.0
-            )  # Assume 5 tasks = 100% workload
+            workload = min(1.0, len(current_tasks) / 5.0)  # Assume 5 tasks = 100% workload
 
             return AgentAvailability(
                 agent_id=agent_id,
@@ -1318,9 +1233,7 @@ class TaskAgentMatcher:
                     self._simulate_assignment_impact(recommendation)
 
                 except Exception as e:
-                    self.logger.error(
-                        f"Failed to match task {task_requirements.task_id}: {e}"
-                    )
+                    self.logger.error(f"Failed to match task {task_requirements.task_id}: {e}")
                     # Continue with other tasks
 
             return recommendations
@@ -1329,9 +1242,7 @@ class TaskAgentMatcher:
             self.logger.error(f"Failed to perform batch matching: {e}")
             return {}
 
-    def _simulate_assignment_impact(
-        self, recommendation: MatchingRecommendation
-    ) -> None:
+    def _simulate_assignment_impact(self, recommendation: MatchingRecommendation) -> None:
         """Simulate the impact of assignment on agent availability."""
         try:
             # Update workload for assigned agents
@@ -1339,9 +1250,7 @@ class TaskAgentMatcher:
                 if agent_id in self.agent_availability_cache:
                     availability = self.agent_availability_cache[agent_id]
                     # Increase workload (simplified simulation)
-                    availability.current_workload = min(
-                        1.0, availability.current_workload + 0.2
-                    )
+                    availability.current_workload = min(1.0, availability.current_workload + 0.2)
 
         except Exception as e:
             self.logger.error(f"Failed to simulate assignment impact: {e}")

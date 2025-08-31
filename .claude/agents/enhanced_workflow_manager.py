@@ -29,16 +29,15 @@ from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 try:
-    from ..shared.workflow_reliability import (  # type: ignore
+    from ..shared.workflow_reliability import (  # type: ignore[import]
         WorkflowReliabilityManager as SharedWorkflowReliabilityManager,
         WorkflowStage as SharedWorkflowStage,
-        HealthStatus,
         monitor_workflow as shared_monitor_workflow,
         create_reliability_manager,
     )
-    from ..shared.utils.error_handling import ErrorHandler, retry, graceful_degradation  # type: ignore
-    from ..shared.state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
-    from ..shared.task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
+    from ..shared.utils.error_handling import ErrorHandler, retry  # type: ignore
+    from ..shared.state_management import StateManager  # type: ignore
+    from ..shared.task_tracking import TaskTracker, WorkflowPhaseTracker  # type: ignore
     from ..shared.github_operations import GitHubOperations  # type: ignore
 
     # Create aliases with consistent types
@@ -70,13 +69,45 @@ except ImportError as e:
         def perform_health_check(self, workflow_id: str) -> Any:
             return None
 
+        def get_workflow_diagnostics(self, workflow_id: str) -> Dict[str, Any]:
+            return {}
+
+        def create_workflow_persistence(self, workflow_id: str) -> Any:
+            return None
+
         def stop_workflow_monitoring(
             self, workflow_id: str, status: str = "completed"
         ) -> bool:
             return True
 
-    class WorkflowStage:
-        pass  # type: ignore[no-redef]
+    class WorkflowStage:  # type: ignore[no-redef]
+        INITIALIZATION = "initialization"
+        PROMPT_ANALYSIS = "prompt_analysis"
+        TASK_PREPARATION = "task_preparation"
+        ISSUE_CREATION = "issue_creation"
+        BRANCH_SETUP = "branch_setup"
+        RESEARCH_PLANNING = "research_planning"
+        IMPLEMENTATION_START = "implementation_start"
+        IMPLEMENTATION_PROGRESS = "implementation_progress"
+        IMPLEMENTATION_COMPLETE = "implementation_complete"
+        TESTING_START = "testing_start"
+        DOCUMENTATION_UPDATE = "documentation_update"
+        PR_PREPARATION = "pr_preparation"
+        PR_CREATION = "pr_creation"
+        PR_VERIFICATION = "pr_verification"
+        REVIEW_PROCESSING = "review_processing"
+        FINAL_CLEANUP = "final_cleanup"
+
+        @classmethod
+        def _get_value(cls, name: str) -> str:
+            return getattr(cls, name, name.lower())
+
+        def __init__(self, value: str):
+            self._value = value
+
+        @property
+        def value(self) -> str:
+            return self._value if hasattr(self, "_value") else str(self)
 
     class WorkflowReliabilityContext:
         """Mock context manager for workflow monitoring"""
@@ -93,6 +124,18 @@ except ImportError as e:
         reliability_manager: Optional[WorkflowReliabilityManager] = None,
     ) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
         return WorkflowReliabilityContext()
+
+    class HealthStatus:  # type: ignore[no-redef]
+        HEALTHY = "healthy"
+        WARNING = "warning"
+        DEGRADED = "degraded"
+        CRITICAL = "critical"
+        FAILED = "failed"
+
+    def create_reliability_manager(
+        config: Optional[Dict[str, Any]] = None,
+    ) -> WorkflowReliabilityManager:  # type: ignore[no-redef]
+        return WorkflowReliabilityManager(config)
 
 
 # Configure logging
@@ -137,13 +180,17 @@ class EnhancedWorkflowManager:
         self.task_id = task_id
 
         # Initialize reliability components
-        self.reliability_manager = create_reliability_manager(
-            {  # type: ignore
-                "log_level": self.config.log_level,
-                "enable_health_checks": self.config.enable_health_checks,
-                "enable_recovery": self.config.enable_recovery,
-            }
-        )
+        try:
+            self.reliability_manager = create_reliability_manager(
+                {  # type: ignore
+                    "log_level": self.config.log_level,
+                    "enable_health_checks": self.config.enable_health_checks,
+                    "enable_recovery": self.config.enable_recovery,
+                }
+            )
+        except NameError:
+            # If create_reliability_manager is not available
+            self.reliability_manager = WorkflowReliabilityManager()
 
         # Initialize Enhanced Separation components
         try:
@@ -541,7 +588,7 @@ class EnhancedWorkflowManager:
         if self.config.enable_persistence and reliability:
             reliability.create_workflow_persistence(
                 self.workflow_id, self.workflow_context
-            )  # type: ignore
+            )  # type: ignore[call-arg]  # type: ignore
 
         return {
             "workflow_id": self.workflow_id,

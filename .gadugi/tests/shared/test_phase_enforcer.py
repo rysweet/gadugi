@@ -10,13 +10,12 @@ import os
 import json
 import time
 import sys
-from pathlib import Path
 from unittest.mock import Mock, patch
 
-# Add the correct path to src/src directory where shared module is located
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from shared.phase_enforcer import (
+from src.src.shared.phase_enforcer import (
     PhaseEnforcer,
     EnforcementRule,
     EnforcementResult,
@@ -25,7 +24,7 @@ from shared.phase_enforcer import (
 )
 
 # Import workflow engine for WorkflowPhase and WorkflowState
-from shared.workflow_engine import WorkflowPhase, WorkflowState
+from src.src.shared.workflow_engine import WorkflowPhase, WorkflowState
 
 
 class TestPhaseEnforcer:

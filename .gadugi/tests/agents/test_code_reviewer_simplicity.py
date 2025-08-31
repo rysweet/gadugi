@@ -275,7 +275,7 @@ class TestSimplicityRecommendations(unittest.TestCase):
         # provides appropriate guidance on abstraction decisions
 
         # Case 1: Code used in only 2 places - suggest inline
-        two_usage_code = '''
+        two_usage_code = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
@@ -286,16 +286,23 @@ def process_user_signup(email):
 
 def process_password_reset(email):
     if not validate_email_format(email):
-        raise ValueError("Invalid email") 
+        raise ValueError("Invalid email")
     # ... reset logic
-'''
+"""
         # Should suggest inlining since it's only used in 2 places
         self.assertIn("validate_email_format", two_usage_code)
-        usage_count = two_usage_code.count("validate_email_format(")
+        # Count function calls only (exclude the definition)
+        lines = two_usage_code.split("\n")
+        call_lines = [
+            line
+            for line in lines
+            if "validate_email_format(" in line and not line.strip().startswith("def ")
+        ]
+        usage_count = len(call_lines)
         self.assertEqual(usage_count, 2)  # Only 2 usages - could be inlined
 
         # Case 2: Code used in 5+ places - abstraction is justified
-        five_usage_code = '''
+        five_usage_code = """
 def validate_email_format(email):
     return "@" in email and "." in email
 
@@ -309,7 +316,7 @@ def add_to_mailing_list(email):
     if not validate_email_format(email): pass
 def update_user_email(email):
     if not validate_email_format(email): pass
-'''
+"""
         # Should accept abstraction as justified
         self.assertIn("validate_email_format", five_usage_code)
         usage_count = five_usage_code.count("validate_email_format(")

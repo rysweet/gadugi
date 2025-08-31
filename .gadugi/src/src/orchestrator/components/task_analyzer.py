@@ -28,9 +28,7 @@ MAX_PARALLEL_TASKS = 8
 ALLOWED_FILE_EXTENSIONS = {".md", ".txt", ".py", ".js", ".json"}
 
 # Configure secure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 class TaskComplexity(Enum):
@@ -155,9 +153,7 @@ class TaskAnalyzer:
             raise ValueError("prompt_files must be a list")
 
         if len(prompt_files) > MAX_PROMPT_FILES:
-            raise ValueError(
-                f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}"
-            )
+            raise ValueError(f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}")
 
         print(
             f"🔍 Analyzing {len(prompt_files)} prompt files for parallel execution opportunities..."
@@ -197,9 +193,7 @@ class TaskAnalyzer:
                 task_info = self._analyze_prompt_file(prompt_file)
                 if task_info:
                     self.tasks.append(task_info)
-                    print(
-                        f"✅ Analyzed: {task_info.name} ({task_info.task_type.value})"
-                    )
+                    print(f"✅ Analyzed: {task_info.name} ({task_info.task_type.value})")
             except Exception as e:
                 print(f"⚠️  Failed to analyze {prompt_file}: {e}")
 
@@ -406,9 +400,7 @@ class TaskAnalyzer:
             "database",
             "migration",
         ]
-        complexity_score += sum(
-            1 for keyword in complex_keywords if keyword in content.lower()
-        )
+        complexity_score += sum(1 for keyword in complex_keywords if keyword in content.lower())
 
         # Number of files mentioned
         file_mentions = len(re.findall(r"\w+\.(py|js|ts|java|cpp|c|h)(?:\w)*", content))
@@ -531,9 +523,7 @@ class TaskAnalyzer:
 
         return dependencies
 
-    def _estimate_duration(
-        self, complexity: TaskComplexity, target_files: List[str]
-    ) -> int:
+    def _estimate_duration(self, complexity: TaskComplexity, target_files: List[str]) -> int:
         """Estimate task duration in minutes"""
         base_duration = {
             TaskComplexity.LOW: 30,
@@ -550,9 +540,7 @@ class TaskAnalyzer:
         # Cap at reasonable maximum
         return min(duration, 480)  # Max 8 hours
 
-    def _estimate_resources(
-        self, complexity: TaskComplexity, file_count: int
-    ) -> Dict[str, int]:
+    def _estimate_resources(self, complexity: TaskComplexity, file_count: int) -> Dict[str, int]:
         """Estimate resource requirements"""
         base_resources = {
             TaskComplexity.LOW: {"cpu": 1, "memory": 512, "disk": 100},
@@ -578,11 +566,7 @@ class TaskAnalyzer:
         in_description = False
 
         for line in lines:
-            if (
-                line.lower()
-                .strip()
-                .startswith(("## overview", "## description", "## summary"))
-            ):
+            if line.lower().strip().startswith(("## overview", "## description", "## summary")):
                 in_description = True
                 continue
             elif line.startswith("##") and in_description:
@@ -599,9 +583,7 @@ class TaskAnalyzer:
         paragraphs = content.split("\n\n")
         for paragraph in paragraphs:
             if len(paragraph.strip()) > 50:
-                return paragraph.strip()[:200] + (
-                    "..." if len(paragraph.strip()) > 200 else ""
-                )
+                return paragraph.strip()[:200] + ("..." if len(paragraph.strip()) > 200 else "")
 
         return "No description available"
 
@@ -619,9 +601,7 @@ class TaskAnalyzer:
                     if (
                         dep.lower() in other_task.name.lower()
                         or dep.lower() in other_task.id.lower()
-                        or any(
-                            dep.lower() in f.lower() for f in other_task.target_files
-                        )
+                        or any(dep.lower() in f.lower() for f in other_task.target_files)
                     ):
                         self.dependency_graph[task.id].append(other_task.id)
 
@@ -715,8 +695,7 @@ class TaskAnalyzer:
                     "estimated_time": max(task.estimated_duration for task in group)
                     if group
                     else 0,
-                    "parallelizable": len(group) > 1
-                    and all(task.parallelizable for task in group),
+                    "parallelizable": len(group) > 1 and all(task.parallelizable for task in group),
                 }
                 for i, group in enumerate(parallel_groups)
             ],
@@ -746,9 +725,7 @@ def main():
     """CLI entry point for TaskAnalyzer"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Analyze prompt files for parallel execution"
-    )
+    parser = argparse.ArgumentParser(description="Analyze prompt files for parallel execution")
     parser.add_argument(
         "--prompts-dir", default="/prompts/", help="Directory containing prompt files"
     )
@@ -764,7 +741,7 @@ def main():
     analyzer = TaskAnalyzer(args.prompts_dir)
 
     try:
-        tasks = analyzer.analyze_all_prompts()  # type: ignore
+        _tasks = analyzer.analyze_all_prompts()  # type: ignore
         execution_plan = analyzer.generate_execution_plan()
 
         print("\n📊 Analysis Summary:")

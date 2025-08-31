@@ -61,9 +61,7 @@ def fix_missing_type_imports(file_path: Path) -> bool:
                     existing_imports = {t.strip() for t in match.group(1).split(",")}
 
                 all_imports = existing_imports | missing_types
-                lines[typing_line_idx] = (
-                    f"from typing import {', '.join(sorted(all_imports))}"
-                )
+                lines[typing_line_idx] = f"from typing import {', '.join(sorted(all_imports))}"
             else:
                 # Add new typing import after other imports
                 import_idx = 0
@@ -77,9 +75,7 @@ def fix_missing_type_imports(file_path: Path) -> bool:
                     ):
                         break
 
-                lines.insert(
-                    import_idx, f"from typing import {', '.join(sorted(missing_types))}"
-                )
+                lines.insert(import_idx, f"from typing import {', '.join(sorted(missing_types))}")
 
             file_path.write_text("\n".join(lines) + "\n")
             print(f"Fixed type imports in {file_path}")
@@ -91,9 +87,7 @@ def fix_missing_type_imports(file_path: Path) -> bool:
     return False
 
 
-def remove_unused_variables_and_imports(
-    file_path: Path, diagnostics: List[Dict]
-) -> bool:
+def remove_unused_variables_and_imports(file_path: Path, diagnostics: List[Dict]) -> bool:
     """Remove unused variables and imports from a file."""
     try:
         content = file_path.read_text()
@@ -210,7 +204,7 @@ def main():
         else:
             # Show sample of remaining errors
             lines = result.stdout.splitlines()
-            error_lines = [l for l in lines if "error:" in l][:5]
+            error_lines = [line for line in lines if "error:" in line][:5]
             if error_lines:
                 print("\nSample of remaining errors:")
                 for line in error_lines:

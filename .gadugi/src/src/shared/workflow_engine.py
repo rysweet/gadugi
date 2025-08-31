@@ -27,7 +27,7 @@ try:
     from .github_operations import GitHubOperations  # type: ignore
     from .state_management import StateManager  # type: ignore
     from .task_tracking import TaskTracker  # type: ignore
-    from .utils.error_handling import ErrorHandler, ErrorCategory, ErrorSeverity  # type: ignore
+    from .utils.error_handling import ErrorHandler, ErrorSeverity  # type: ignore
 except ImportError:
     # Fallback for testing or standalone usage
     print("Warning: Some shared modules not available, using fallback implementations")
@@ -164,9 +164,7 @@ class WorkflowEngine:
         self.workflow_state: Optional[WorkflowState] = None
         self.execution_log: List[PhaseResult] = []
 
-    def execute_workflow(
-        self, prompt_file: str, task_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def execute_workflow(self, prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Execute the complete workflow for a given prompt file.
 
@@ -229,17 +227,14 @@ class WorkflowEngine:
                 self.workflow_state.last_checkpoint = datetime.now()
 
                 # Save checkpoint periodically
-                if (
-                    len(self.workflow_state.completed_phases) % self.checkpoint_interval
-                    == 0
-                ):
+                if len(self.workflow_state.completed_phases) % self.checkpoint_interval == 0:
                     self._save_checkpoint()
 
             return self._create_success_result()
 
         except Exception as e:
             self.error_handler.handle_error(
-                e, ErrorCategory.WORKFLOW_EXECUTION, ErrorSeverity.HIGH
+                e, context={"category": "workflow_execution", "severity": "high"}
             )
             return self._create_failure_result(f"Workflow execution failed: {str(e)}")
 
@@ -379,16 +374,12 @@ class WorkflowEngine:
             issue_match = re.search(r"issue-(\d+)", prompt_filename)
             if issue_match:
                 issue_number = issue_match.group(1)
-                branch_name = (
-                    f"feature/fix-WorkflowManager-repeatability-{issue_number}"
-                )
+                branch_name = f"feature/fix-WorkflowManager-repeatability-{issue_number}"
             else:
                 # Generate branch name from prompt title
                 with open(self.workflow_state.prompt_file, "r") as f:  # type: ignore
                     first_line = f.readline().strip()
-                title_slug = re.sub(
-                    r"[^a-zA-Z0-9\s-]", "", first_line.replace("#", "").strip()
-                )
+                title_slug = re.sub(r"[^a-zA-Z0-9\s-]", "", first_line.replace("#", "").strip())
                 title_slug = re.sub(r"\s+", "-", title_slug).lower()[:50]
 
                 # Use timestamp for uniqueness

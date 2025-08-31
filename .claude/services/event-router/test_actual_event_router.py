@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Test the actual Flask-based Event Router implementation."""
 
-import time
 import requests
-import json
-from datetime import datetime
 
 # Base URL for the event router
 BASE_URL = "http://localhost:8000"
+
 
 def test_health_check():
     """Test the health endpoint."""
@@ -19,6 +17,7 @@ def test_health_check():
     assert data["service"] == "event-router"
     print("✅ Health check passed")
 
+
 def test_root_endpoint():
     """Test the root endpoint."""
     print("Testing root endpoint...")
@@ -29,6 +28,7 @@ def test_root_endpoint():
     assert "endpoints" in data
     print("✅ Root endpoint passed")
 
+
 def test_create_event():
     """Test creating an event."""
     print("Testing event creation...")
@@ -38,20 +38,18 @@ def test_create_event():
         "agent_id": "test-agent-1",
         "task_id": "task-123",
         "priority": "high",
-        "payload": {
-            "description": "Test task",
-            "status": "pending"
-        },
-        "tags": ["test", "integration"]
+        "payload": {"description": "Test task", "status": "pending"},
+        "tags": ["test", "integration"],
     }
 
     response = requests.post(f"{BASE_URL}/events", json=event_data)
     assert response.status_code == 201
     data = response.json()
-    assert data["success"] == True
+    assert data["success"]
     assert "event_id" in data
     print(f"✅ Event created with ID: {data['event_id']}")
     return data["event_id"]
+
 
 def test_list_events():
     """Test listing events."""
@@ -64,15 +62,12 @@ def test_list_events():
     assert "count" in data
     print(f"✅ Listed {data['count']} events")
 
+
 def test_filter_events():
     """Test filtering events."""
     print("Testing event filtering...")
 
-    filter_data = {
-        "event_types": ["task.started"],
-        "priority": "high",
-        "limit": 10
-    }
+    filter_data = {"event_types": ["task.started"], "priority": "high", "limit": 10}
 
     response = requests.post(f"{BASE_URL}/events/filter", json=filter_data)
     assert response.status_code == 200
@@ -80,6 +75,7 @@ def test_filter_events():
     assert "events" in data
     assert "count" in data
     print(f"✅ Filtered {data['count']} events")
+
 
 def test_storage_info():
     """Test storage info endpoint."""
@@ -91,6 +87,7 @@ def test_storage_info():
     assert "total_events" in data
     print(f"✅ Storage info: {data['total_events']} total events")
 
+
 def test_memory_status():
     """Test memory integration status."""
     print("Testing memory integration status...")
@@ -101,6 +98,7 @@ def test_memory_status():
     assert "connected" in data
     assert "backend_type" in data
     print(f"✅ Memory status: {data['backend_type']} backend")
+
 
 def main():
     """Run all tests."""
@@ -124,7 +122,7 @@ def main():
     try:
         test_health_check()
         test_root_endpoint()
-        event_id = test_create_event()
+        test_create_event()
         test_list_events()
         test_filter_events()
         test_storage_info()
@@ -142,6 +140,8 @@ def main():
         print(f"\n❌ Error during testing: {e}")
         return 1
 
+
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

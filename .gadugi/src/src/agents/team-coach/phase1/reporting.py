@@ -177,9 +177,7 @@ class ReportingSystem:
             self.logger.info(f"Generating {config.report_type.value} report")
 
             # Generate unique report ID
-            report_id = (
-                f"{config.report_type.value}_{start_time.strftime('%Y%m%d_%H%M%S')}"
-            )
+            report_id = f"{config.report_type.value}_{start_time.strftime('%Y%m%d_%H%M%S')}"
 
             # Initialize report structure
             report = GeneratedReport(  # type: ignore
@@ -219,9 +217,7 @@ class ReportingSystem:
             # Cache the report
             self.report_cache[report_id] = report
 
-            self.logger.info(
-                f"Report {report_id} generated in {report.generation_time:.2f}s"
-            )
+            self.logger.info(f"Report {report_id} generated in {report.generation_time:.2f}s")
             return report
 
         except Exception as e:
@@ -264,9 +260,7 @@ class ReportingSystem:
         except Exception as e:
             self.logger.error(f"Failed to generate agent performance report: {e}")
 
-    def _generate_team_overview_report(
-        self, report: GeneratedReport, config: ReportConfig
-    ) -> None:
+    def _generate_team_overview_report(self, report: GeneratedReport, config: ReportConfig) -> None:
         """Generate team overview report."""
         try:
             # Collect team-wide metrics
@@ -325,9 +319,7 @@ class ReportingSystem:
         try:
             for agent_id in config.agents:
                 # Get capability profile
-                capability_profile = (
-                    self.capability_assessment.assess_agent_capabilities(agent_id)
-                )
+                capability_profile = self.capability_assessment.assess_agent_capabilities(agent_id)
 
                 # Create capability section
                 section = ReportSection(
@@ -438,23 +430,21 @@ class ReportingSystem:
                 all_quality_scores.append(performance_data.code_quality_score)
 
                 # Collect recommendations
-                summary_data["recommendations"].extend(
-                    performance_data.areas_for_improvement
-                )
+                summary_data["recommendations"].extend(performance_data.areas_for_improvement)
 
             # Calculate summary metrics
             if all_success_rates:
-                summary_data["key_metrics"]["avg_success_rate"] = sum(
+                summary_data["key_metrics"]["avg_success_rate"] = sum(all_success_rates) / len(
                     all_success_rates
-                ) / len(all_success_rates)
+                )
             if all_execution_times:
-                summary_data["key_metrics"]["avg_execution_time"] = sum(
+                summary_data["key_metrics"]["avg_execution_time"] = sum(all_execution_times) / len(
                     all_execution_times
-                ) / len(all_execution_times)
+                )
             if all_quality_scores:
-                summary_data["key_metrics"]["avg_quality_score"] = sum(
+                summary_data["key_metrics"]["avg_quality_score"] = sum(all_quality_scores) / len(
                     all_quality_scores
-                ) / len(all_quality_scores)
+                )
 
             # Create executive summary section
             section = ReportSection(
@@ -473,9 +463,7 @@ class ReportingSystem:
         except Exception as e:
             self.logger.error(f"Failed to generate executive summary report: {e}")
 
-    def _format_performance_analysis(
-        self, performance_data: AgentPerformanceData
-    ) -> str:
+    def _format_performance_analysis(self, performance_data: AgentPerformanceData) -> str:
         """Format performance analysis content."""
         content = f"""
 ## Performance Summary
@@ -518,18 +506,14 @@ class ReportingSystem:
 
             metrics = summary.get("metrics", {})
             if "task_success_rate" in metrics:
-                content += (
-                    f"Success Rate: {metrics['task_success_rate']['value']:.1%}, "
-                )
+                content += f"Success Rate: {metrics['task_success_rate']['value']:.1%}, "
             if "task_execution_time" in metrics:
                 content += f"Avg Time: {metrics['task_execution_time']['value']:.1f}s"
             content += "\n"
 
         return content
 
-    def _format_capability_analysis(
-        self, capability_profile: AgentCapabilityProfile
-    ) -> str:
+    def _format_capability_analysis(self, capability_profile: AgentCapabilityProfile) -> str:
         """Format capability analysis content."""
         content = f"""
 ## Capability Analysis
@@ -573,15 +557,14 @@ class ReportingSystem:
         if performance_data.performance_trend:
             trend_direction = (
                 "improving"
-                if performance_data.performance_trend[-1]
-                > performance_data.performance_trend[0]
+                if performance_data.performance_trend[-1] > performance_data.performance_trend[0]
                 else "declining"
             )
             content += f"- Overall trend: {trend_direction}\n"
-            content += f"- Current performance level: {performance_data.performance_trend[-1]:.2f}\n"
             content += (
-                f"- Trend data points: {len(performance_data.performance_trend)}\n"
+                f"- Current performance level: {performance_data.performance_trend[-1]:.2f}\n"
             )
+            content += f"- Trend data points: {len(performance_data.performance_trend)}\n"
         else:
             content += "- Insufficient data for trend analysis\n"
 
@@ -600,14 +583,10 @@ class ReportingSystem:
 
         content += "### Success Rate Ranking\n"
         for i, (_agent_id, performance) in enumerate(sorted_agents, 1):
-            content += (
-                f"{i}. **{performance.agent_name}**: {performance.success_rate:.1%}\n"
-            )
+            content += f"{i}. **{performance.agent_name}**: {performance.success_rate:.1%}\n"
 
         # Rank by execution time (lower is better)
-        sorted_by_time = sorted(
-            agent_performances.items(), key=lambda x: x[1].avg_execution_time
-        )
+        sorted_by_time = sorted(agent_performances.items(), key=lambda x: x[1].avg_execution_time)
 
         content += "\n### Execution Time Ranking (Fastest First)\n"
         for i, (_agent_id, performance) in enumerate(sorted_by_time, 1):
@@ -628,15 +607,13 @@ class ReportingSystem:
         content += "### Key Performance Indicators\n"
         key_metrics = summary_data["key_metrics"]
         if "avg_success_rate" in key_metrics:
-            content += (
-                f"- **Team Success Rate**: {key_metrics['avg_success_rate']:.1%}\n"
-            )
+            content += f"- **Team Success Rate**: {key_metrics['avg_success_rate']:.1%}\n"
         if "avg_execution_time" in key_metrics:
-            content += f"- **Average Execution Time**: {key_metrics['avg_execution_time']:.1f} seconds\n"
-        if "avg_quality_score" in key_metrics:
             content += (
-                f"- **Average Quality Score**: {key_metrics['avg_quality_score']:.1f}\n"
+                f"- **Average Execution Time**: {key_metrics['avg_execution_time']:.1f} seconds\n"
             )
+        if "avg_quality_score" in key_metrics:
+            content += f"- **Average Quality Score**: {key_metrics['avg_quality_score']:.1f}\n"
 
         content += "\n### Key Recommendations\n"
         unique_recommendations = list(set(summary_data["recommendations"]))[
@@ -647,9 +624,7 @@ class ReportingSystem:
 
         return content
 
-    def _generate_performance_charts(
-        self, performance_data: AgentPerformanceData
-    ) -> List[str]:
+    def _generate_performance_charts(self, performance_data: AgentPerformanceData) -> List[str]:
         """Generate performance charts."""
         charts = []
 
@@ -692,10 +667,7 @@ class ReportingSystem:
                 plt.close()
 
             # Trend chart if available
-            if (
-                performance_data.performance_trend
-                and len(performance_data.performance_trend) > 1
-            ):
+            if performance_data.performance_trend and len(performance_data.performance_trend) > 1:
                 _fig, ax = plt.subplots(figsize=(10, 6))
 
                 x = range(len(performance_data.performance_trend))
@@ -769,18 +741,14 @@ class ReportingSystem:
 
         return charts
 
-    def _generate_capability_charts(
-        self, capability_profile: AgentCapabilityProfile
-    ) -> List[str]:
+    def _generate_capability_charts(self, capability_profile: AgentCapabilityProfile) -> List[str]:
         """Generate capability analysis charts."""
         charts = []
 
         try:
             # Capability radar chart
             if capability_profile.capability_scores:
-                _fig, ax = plt.subplots(
-                    figsize=(10, 10), subplot_kw=dict(projection="polar")
-                )
+                _fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(projection="polar"))
 
                 capabilities = list(capability_profile.capability_scores.keys())[
                     :8
@@ -790,16 +758,12 @@ class ReportingSystem:
                     for cap in capabilities
                 ]
                 confidence_values = [
-                    capability_profile.capability_scores[cap].confidence_score
-                    * 5  # Scale to 0-5
+                    capability_profile.capability_scores[cap].confidence_score * 5  # Scale to 0-5
                     for cap in capabilities
                 ]
 
                 # Calculate angles for each capability
-                angles = [
-                    i * 2 * 3.14159 / len(capabilities)
-                    for i in range(len(capabilities))
-                ]
+                angles = [i * 2 * 3.14159 / len(capabilities) for i in range(len(capabilities))]
                 angles += angles[:1]  # Complete the circle
                 proficiency_values += proficiency_values[:1]
                 confidence_values += confidence_values[:1]
@@ -826,12 +790,8 @@ class ReportingSystem:
                 # Customize the chart
                 ax.set_ylim(0, 5)
                 ax.set_xticks(angles[:-1])
-                ax.set_xticklabels(
-                    [cap.value.replace("_", " ").title() for cap in capabilities]
-                )
-                ax.set_title(
-                    f"Capability Profile - {capability_profile.agent_name}", y=1.08
-                )
+                ax.set_xticklabels([cap.value.replace("_", " ").title() for cap in capabilities])
+                ax.set_title(f"Capability Profile - {capability_profile.agent_name}", y=1.08)
                 ax.legend()
 
                 plt.tight_layout()
@@ -848,17 +808,12 @@ class ReportingSystem:
 
         return charts
 
-    def _generate_trend_charts(
-        self, performance_data: AgentPerformanceData
-    ) -> List[str]:
+    def _generate_trend_charts(self, performance_data: AgentPerformanceData) -> List[str]:
         """Generate trend analysis charts."""
         charts = []
 
         try:
-            if (
-                performance_data.performance_trend
-                and len(performance_data.performance_trend) > 1
-            ):
+            if performance_data.performance_trend and len(performance_data.performance_trend) > 1:
                 _fig, ax = plt.subplots(figsize=(12, 6))
 
                 x = range(len(performance_data.performance_trend))
@@ -883,9 +838,7 @@ class ReportingSystem:
 
                 ax.set_xlabel("Time Period")
                 ax.set_ylabel("Performance Score")
-                ax.set_title(
-                    f"Performance Trend Analysis - {performance_data.agent_name}"
-                )
+                ax.set_title(f"Performance Trend Analysis - {performance_data.agent_name}")
                 ax.grid(True, alpha=0.3)
                 ax.legend()
 
@@ -937,12 +890,8 @@ class ReportingSystem:
 
                 list(agent_performances.keys())
                 agent_names = [perf.agent_name for perf in agent_performances.values()]
-                success_rates = [
-                    perf.success_rate * 100 for perf in agent_performances.values()
-                ]
-                quality_scores = [
-                    perf.code_quality_score for perf in agent_performances.values()
-                ]
+                success_rates = [perf.success_rate * 100 for perf in agent_performances.values()]
+                quality_scores = [perf.code_quality_score for perf in agent_performances.values()]
 
                 # Success rate comparison
                 bars1 = ax1.bar(agent_names, success_rates, color="#4169E1")
@@ -1066,24 +1015,18 @@ class ReportingSystem:
 
         return title_map.get(config.report_type, f"Performance Report ({period_str})")
 
-    def _generate_executive_summary(
-        self, report: GeneratedReport, config: ReportConfig
-    ) -> str:
+    def _generate_executive_summary(self, report: GeneratedReport, config: ReportConfig) -> str:
         """Generate executive summary for the report."""
         summary = f"This {config.report_type.value} report analyzes performance data for {len(config.agents)} agent(s) "
         summary += f"from {config.time_period[0].strftime('%Y-%m-%d')} to {config.time_period[1].strftime('%Y-%m-%d')}. "
 
         if report.sections:
             summary += f"The report contains {len(report.sections)} detailed sections covering "
-            summary += (
-                "performance metrics, trends, and recommendations for optimization."
-            )
+            summary += "performance metrics, trends, and recommendations for optimization."
 
         return summary
 
-    def _format_report_content(
-        self, report: GeneratedReport, config: ReportConfig
-    ) -> str:
+    def _format_report_content(self, report: GeneratedReport, config: ReportConfig) -> str:
         """Format the complete report content based on output format."""
         if config.format == ReportFormat.JSON:
             return self._format_json_report(report)
@@ -1177,9 +1120,7 @@ class ReportingSystem:
         """Format report as Markdown."""
         content = f"# {report.title}\n\n"
 
-        content += (
-            f"**Generated:** {report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}  \n"
-        )
+        content += f"**Generated:** {report.generated_at.strftime('%Y-%m-%d %H:%M:%S')}  \n"
         content += f"**Period:** {report.time_period[0].strftime('%Y-%m-%d')} to {report.time_period[1].strftime('%Y-%m-%d')}  \n"
         content += f"**Generation Time:** {report.generation_time:.2f} seconds  \n\n"
 

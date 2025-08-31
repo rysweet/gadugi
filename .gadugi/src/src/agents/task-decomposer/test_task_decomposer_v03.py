@@ -110,9 +110,7 @@ class MockMemoryInterface(AgentMemoryInterface):
     ) -> List[Dict[str, Any]]:
         return self.procedures
 
-    async def add_knowledge(
-        self, concept: str, description: str, confidence: float = 1.0
-    ) -> str:
+    async def add_knowledge(self, concept: str, description: str, confidence: float = 1.0) -> str:
         knowledge = {
             "concept": concept,
             "description": description,
@@ -151,9 +149,7 @@ async def create_test_decomposer():
 async def test_basic_decomposition():
     """Test basic task decomposition functionality."""
     decomposer = await create_test_decomposer()
-    task_description = (
-        "Implement user authentication system with login and registration"
-    )
+    task_description = "Implement user authentication system with login and registration"
 
     result = await decomposer.decompose_task(task_description)
 
@@ -162,10 +158,7 @@ async def test_basic_decomposition():
     assert result.parallelization_score >= 0.0
     assert result.parallelization_score <= 1.0
     assert result.estimated_total_time > 0
-    assert (
-        result.strategy_used in decomposer.strategies
-        or result.strategy_used == "adaptive"
-    )
+    assert result.strategy_used in decomposer.strategies or result.strategy_used == "adaptive"
 
 
 @pytest.mark.asyncio
@@ -211,14 +204,12 @@ async def test_dependency_analysis(decomposer):
     assert len(result.dependency_graph) == len(result.subtasks)
 
     # Verify logical dependencies (testing should depend on implementation)
-    implementation_tasks = [
-        st for st in result.subtasks if "implement" in st.name.lower()
-    ]
+    implementation_tasks = [st for st in result.subtasks if "implement" in st.name.lower()]
     testing_tasks = [st for st in result.subtasks if "test" in st.name.lower()]
 
     if implementation_tasks and testing_tasks:
         test_task_id = testing_tasks[0].id
-        impl_task_id = implementation_tasks[0].id
+        _impl_task_id = implementation_tasks[0].id
         # Test task should have implementation as dependency
         assert any(
             impl_task_id in result.dependency_graph.get(test_task_id, [])
@@ -246,7 +237,7 @@ async def test_learning_from_execution(decomposer):
     """Test learning from execution feedback."""
     # First, decompose a task
     task_description = "Implement user profile management"
-    result = await decomposer.decompose_task(task_description)
+    _result = await decomposer.decompose_task(task_description)
 
     # Simulate execution feedback
     feedback = ExecutionFeedback(
@@ -259,7 +250,7 @@ async def test_learning_from_execution(decomposer):
         agent_performance={"code-writer": 0.85, "TestWriter": 0.90},
     )
 
-    initial_decompositions = decomposer.total_decompositions
+    _initial_decompositions = decomposer.total_decompositions
     await decomposer.learn_from_execution(feedback)
 
     # Check that learning was recorded
@@ -279,7 +270,7 @@ async def test_execution_task_interface(decomposer):
 
     outcome = await decomposer.execute_task(task)
 
-    assert outcome.success == True
+    assert outcome.success
     assert outcome.task_type == "decomposition"
     assert len(outcome.steps_taken) > 0
     assert outcome.duration_seconds >= 0
@@ -384,9 +375,7 @@ if __name__ == "__main__":
                 )
                 parallel_marker = " [PARALLEL]" if subtask.can_parallelize else ""
                 print(f"  {i+1}. {subtask.name}{parallel_marker}{deps}")
-                print(
-                    f"     Complexity: {subtask.complexity}, Time: {subtask.estimated_time}min"
-                )
+                print(f"     Complexity: {subtask.complexity}, Time: {subtask.estimated_time}min")
                 if subtask.agent_hint:
                     print(f"     Suggested agent: {subtask.agent_hint}")
 

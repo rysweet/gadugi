@@ -99,8 +99,7 @@ class EventPattern:
         # Check tags
         if self.tag_patterns:
             if not any(
-                any(pattern.match(tag) for tag in event.tags)
-                for pattern in self.tag_patterns
+                any(pattern.match(tag) for tag in event.tags) for pattern in self.tag_patterns
             ):
                 return False
 
@@ -124,9 +123,7 @@ class EventPattern:
                 return None
         return value
 
-    def _evaluate_filter(
-        self, field_value: Any, operator: FilterOperator, value: Any
-    ) -> bool:
+    def _evaluate_filter(self, field_value: Any, operator: FilterOperator, value: Any) -> bool:
         """Evaluate a custom filter."""
         if operator == FilterOperator.EQUALS:
             return field_value == value
@@ -179,8 +176,7 @@ class EventFilter:
         if self.tag_patterns:
             event_tags = event.get("tags", [])
             if not any(
-                any(pattern.match(tag) for tag in event_tags)
-                for pattern in self.tag_patterns
+                any(pattern.match(tag) for tag in event_tags) for pattern in self.tag_patterns
             ):
                 return False
 
@@ -220,9 +216,7 @@ class EventSubscription:
             except Exception as e:
                 retries += 1
                 if retries > self.max_retries:
-                    logger.error(
-                        f"Failed to handle event after {self.max_retries} retries: {e}"
-                    )
+                    logger.error(f"Failed to handle event after {self.max_retries} retries: {e}")
                     return False
                 await asyncio.sleep(self.retry_delay * retries)
 
@@ -301,9 +295,7 @@ class EventSubscriberMixin:
             except asyncio.CancelledError:
                 pass
 
-        logger.info(
-            f"Stopped event processing for agent {getattr(self, 'agent_id', 'unknown')}"
-        )
+        logger.info(f"Stopped event processing for agent {getattr(self, 'agent_id', 'unknown')}")
 
     def subscribe(
         self,
@@ -409,9 +401,7 @@ class EventSubscriberMixin:
 
     async def _process_events(self):
         """Main event processing loop."""
-        logger.info(
-            f"Event processing loop started for {getattr(self, 'agent_id', 'unknown')}"
-        )
+        logger.info(f"Event processing loop started for {getattr(self, 'agent_id', 'unknown')}")
 
         while not self._shutdown_event.is_set():
             try:
@@ -549,9 +539,7 @@ class EventSubscriberMixin:
                     reaction.window_start = current_time
 
                 # Check if window expired
-                if (
-                    current_time - reaction.window_start
-                ).total_seconds() > reaction.window_seconds:
+                if (current_time - reaction.window_start).total_seconds() > reaction.window_seconds:
                     # Reset window
                     reaction.collected_events = []
                     reaction.window_start = current_time
@@ -583,8 +571,7 @@ class EventSubscriberMixin:
             "events_received": self._events_received,
             "events_processed": self._events_processed,
             "events_failed": self._events_failed,
-            "processing_active": self._processing_task
-            and not self._processing_task.done(),
+            "processing_active": self._processing_task and not self._processing_task.done(),
         }
 
 

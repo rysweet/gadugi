@@ -98,9 +98,7 @@ class XPIAMiddleware:
             user_context = self._extract_user_context(context)
 
             # Perform validation with strict mode for user input
-            result = self.defense_agent.validate_user_input(
-                content, user_context=user_context
-            )
+            result = self.defense_agent.validate_user_input(content, user_context=user_context)
 
             # Update statistics
             processing_time = (time.time() - start_time) * 1000
@@ -225,9 +223,7 @@ class XPIAMiddleware:
             self._update_stats(result, processing_time)
 
             # Log security decision
-            self._log_security_decision(
-                result, "file_content", f"{filename} ({file_type})"
-            )
+            self._log_security_decision(result, "file_content", f"{filename} ({file_type})")
 
             # Process result
             return self._process_validation_result(result, "file_content")
@@ -284,9 +280,7 @@ class XPIAMiddleware:
         elif result.threat_level.value == "malicious":
             should_block = True  # Always block malicious content
         elif result.threat_level.value == "suspicious":
-            should_block = (
-                context_type == "user_input" and self.config["strict_user_input"]
-            )
+            should_block = context_type == "user_input" and self.config["strict_user_input"]
 
         # Create response
         response = {
@@ -316,9 +310,7 @@ class XPIAMiddleware:
 
         # Add reason for decision
         if should_block:
-            response["reason"] = (
-                f"Blocked due to {result.threat_level.value} threat level"
-            )
+            response["reason"] = f"Blocked due to {result.threat_level.value} threat level"
         elif result.threats_detected:
             response["reason"] = (
                 f"Allowed with sanitization - {len(result.threats_detected)} threats mitigated"
@@ -365,9 +357,7 @@ class XPIAMiddleware:
         )
 
         # Log individual threats if present
-        if result.threats_detected and (
-            self.config["log_all_validations"] or not result.is_safe
-        ):
+        if result.threats_detected and (self.config["log_all_validations"] or not result.is_safe):
             for threat in result.threats_detected:
                 security_logger.log(
                     log_level,
@@ -392,9 +382,7 @@ class XPIAMiddleware:
                 "threats_blocked": self.stats["threats_blocked"],
                 "threats_warned": self.stats["threats_warned"],
                 "block_rate": (
-                    self.stats["threats_blocked"]
-                    / max(self.stats["total_validations"], 1)
-                    * 100
+                    self.stats["threats_blocked"] / max(self.stats["total_validations"], 1) * 100
                 ),
             },
         }
@@ -417,9 +405,7 @@ class XPIAMiddleware:
                 new_mode = SecurityMode(new_config["security_mode"])
                 self.defense_agent.engine.update_security_mode(new_mode)
             except ValueError:
-                self.logger.error(
-                    f"Invalid security mode: {new_config['security_mode']}"
-                )
+                self.logger.error(f"Invalid security mode: {new_config['security_mode']}")
 
         return {
             "success": True,

@@ -11,9 +11,7 @@ from typing import List, Tuple
 
 def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
     """Get all pyright errors for a directory."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", directory], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", directory], capture_output=True, text=True)
 
     errors = []
     for line in result.stderr.split("\n") + result.stdout.split("\n"):
@@ -104,9 +102,7 @@ def main():
             if match:
                 import_name = match.group(1)
                 if fix_unused_imports(filepath, line_num, import_name):
-                    print(
-                        f"  Fixed unused import '{import_name}' in {filepath}:{line_num}"
-                    )
+                    print(f"  Fixed unused import '{import_name}' in {filepath}:{line_num}")
                     fixed = True
                     total_fixed += 1
 
@@ -115,9 +111,7 @@ def main():
             if match and not fixed:
                 var_name = match.group(1)
                 if fix_possibly_unbound(filepath, line_num, var_name):
-                    print(
-                        f"  Fixed possibly unbound '{var_name}' in {filepath}:{line_num}"
-                    )
+                    print(f"  Fixed possibly unbound '{var_name}' in {filepath}:{line_num}")
                     fixed = True
                     total_fixed += 1
 

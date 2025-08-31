@@ -199,7 +199,7 @@ class TestTestExecutor(unittest.TestCase):
             Path(temp_dir, "pyproject.toml").touch()
             Path(temp_dir, "uv.lock").touch()
 
-            result = self.executor.execute(
+            self.executor.execute(
                 {
                     "test_framework": "pytest",
                     "test_path": "tests/",

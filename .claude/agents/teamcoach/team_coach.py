@@ -365,15 +365,27 @@ class TeamCoach(IntegratedAgent):
         try:
             if self.github_client:
                 # Use real GitHub client
+                # Define labels based on suggestion type and priority
+                labels = ["improvement", "team-coach"]
+                if suggestion.priority == "high":
+                    labels.append("priority:high")
+                elif suggestion.priority == "medium":
+                    labels.append("priority:medium")
+                else:
+                    labels.append("priority:low")
+
                 result = self.github_client.create_issue(
-                    title=suggestion.title,
-                    body=body,
-                    labels=labels
+                    title=suggestion.title, body=issue_body, labels=labels
                 )
-                issue_url = result.get("url", f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}")
+                issue_url = result.get(
+                    "url",
+                    f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}",
+                )
             else:
                 # Fallback if GitHub client not available
-                issue_url = f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
+                issue_url = (
+                    f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
+                )
             self.log_info(f"Created issue: {issue_url}")
             return issue_url
         except Exception as e:
@@ -445,7 +457,7 @@ class TeamCoach(IntegratedAgent):
         coaching_recommendations = []
         if recent_sessions:
             # Get coaching recommendations for recent performance
-            latest_session = recent_sessions[-1]
+            recent_sessions[-1]
             # This would integrate with the actual coaching engine
             coaching_recommendations.append(
                 {
@@ -670,11 +682,14 @@ class TeamCoach(IntegratedAgent):
             if self.github_client:
                 try:
                     result = self.github_client.create_issue(
-                        title=suggestion_data.get('title', 'Team Coach Suggestion'),
-                        body=suggestion_data.get('description', ''),
-                        labels=['team-coach', 'enhancement']
+                        title=suggestion_data.get("title", "Team Coach Suggestion"),
+                        body=suggestion_data.get("description", ""),
+                        labels=["team-coach", "enhancement"],
                     )
-                    issue_url = result.get('url', f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}")
+                    issue_url = result.get(
+                        "url",
+                        f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}",
+                    )
                 except Exception as e:
                     self.log_error(f"Failed to create GitHub issue: {e}")
                     issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
@@ -832,6 +847,7 @@ class TeamCoach(IntegratedAgent):
         """Initialize GitHub client with real implementation."""
         try:
             from .github_integration import GitHubClient
+
             return GitHubClient()
         except Exception as e:
             self.logger.warning(f"Could not initialize GitHub client: {e}")

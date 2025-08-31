@@ -348,16 +348,7 @@ async def count_tokens(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "openai_api_configured": bool(config.openai_api_key),
-        "api_key_valid": config.validate_api_key(),
-        "client_api_key_validation": bool(config.anthropic_api_key),
-    }
+# Removed duplicate health_check function - keeping the more comprehensive one above
 
 
 @router.get("/test-connection")

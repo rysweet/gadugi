@@ -10,6 +10,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
@@ -229,7 +230,7 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,  # type: ignore
             command="claude /agent:WorkflowManager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time()
+            created_at=time.time()
             if hasattr(registry, "_get_current_time")
             else None,  # type: ignore
         )

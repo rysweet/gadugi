@@ -2,7 +2,6 @@
 
 import asyncio
 from datetime import datetime, timedelta
-from pathlib import  # type: ignore[import]
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -164,7 +163,9 @@ Need to focus on edge cases.
 
         mock_client_instance = AsyncMock()
         mock_client_instance.get.return_value = mock_response
-        mock_client_instance.post.return_value = MagicMock(status_code=201, json=lambda: {"number": 1})
+        mock_client_instance.post.return_value = MagicMock(
+            status_code=201, json=lambda: {"number": 1}
+        )
         mock_client.return_value.__aenter__.return_value = mock_client_instance
 
         # Add a TODO memory

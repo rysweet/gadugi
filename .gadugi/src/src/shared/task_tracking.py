@@ -113,12 +113,8 @@ class Task:
         return {
             "id": self.id,
             "content": self.content,
-            "status": self.status.value
-            if hasattr(self.status, "value")
-            else self.status,
-            "priority": self.priority.value
-            if hasattr(self.priority, "value")
-            else self.priority,
+            "status": self.status.value if hasattr(self.status, "value") else self.status,
+            "priority": self.priority.value if hasattr(self.priority, "value") else self.priority,
         }
 
     @classmethod
@@ -136,17 +132,12 @@ class Task:
         old_status = self.status
         self.status = new_status
 
-        if (
-            new_status == TaskStatus.IN_PROGRESS
-            and old_status != TaskStatus.IN_PROGRESS
-        ):
+        if new_status == TaskStatus.IN_PROGRESS and old_status != TaskStatus.IN_PROGRESS:
             self.started_at = datetime.now()
         elif new_status == TaskStatus.COMPLETED and old_status != TaskStatus.COMPLETED:
             self.completed_at = datetime.now()
 
-        logger.debug(
-            f"Task {self.id} status changed: {old_status.value} -> {new_status.value}"
-        )
+        logger.debug(f"Task {self.id} status changed: {old_status.value} -> {new_status.value}")
 
     def update_priority(self, new_priority: TaskPriority) -> None:
         """Update task priority."""
@@ -297,9 +288,7 @@ class TaskList:
         return stats
 
 
-def claude_function_call(
-    function_name: str, parameters: Dict[str, Any]
-) -> Dict[str, Any]:
+def claude_function_call(function_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
     """
     Mock function for Claude Code function calls.
     In real implementation, this would call the actual Claude Code function.
@@ -345,15 +334,11 @@ class TodoWriteIntegration:
                 }
             )
 
-            logger.info(
-                f"Successfully submitted task list with {task_list.count()} tasks"
-            )
+            logger.info(f"Successfully submitted task list with {task_list.count()} tasks")
 
         return result
 
-    def update_task_status(
-        self, task_id: str, new_status: TaskStatus
-    ) -> Dict[str, Any]:
+    def update_task_status(self, task_id: str, new_status: TaskStatus) -> Dict[str, Any]:
         """Update a single task's status."""
         if not self.current_task_list:
             raise TaskError("No current task list to update")
@@ -403,12 +388,8 @@ class TodoWriteIntegration:
         """Get TodoWrite usage statistics."""
         return {
             "total_calls": self.call_count,
-            "last_update": self.last_update_time.isoformat()
-            if self.last_update_time
-            else None,
-            "current_task_count": self.current_task_list.count()
-            if self.current_task_list
-            else 0,
+            "last_update": self.last_update_time.isoformat() if self.last_update_time else None,
+            "current_task_count": self.current_task_list.count() if self.current_task_list else 0,
             "call_history": self.call_history[-10:],  # Last 10 calls
         }
 
@@ -469,10 +450,7 @@ class WorkflowPhaseTracker:
         # Find the current phase entry
         current_entry = None
         for entry in reversed(self.phase_history):
-            if (
-                entry["phase"] == self.current_phase
-                and entry["status"] == "in_progress"
-            ):
+            if entry["phase"] == self.current_phase and entry["status"] == "in_progress":
                 current_entry = entry
                 break
 
@@ -481,9 +459,7 @@ class WorkflowPhaseTracker:
             current_entry["status"] = "completed"
             current_entry["completed_at"] = now
             current_entry["completion_note"] = completion_note
-            current_entry["duration_seconds"] = (
-                now - current_entry["started_at"]
-            ).total_seconds()
+            current_entry["duration_seconds"] = (now - current_entry["started_at"]).total_seconds()
 
         logger.info(f"Completed workflow phase: {self.current_phase}")
         self.current_phase = None
@@ -498,10 +474,7 @@ class WorkflowPhaseTracker:
         # Find the current phase entry
         current_entry = None
         for entry in reversed(self.phase_history):
-            if (
-                entry["phase"] == self.current_phase
-                and entry["status"] == "in_progress"
-            ):
+            if entry["phase"] == self.current_phase and entry["status"] == "in_progress":
                 current_entry = entry
                 break
 
@@ -511,18 +484,14 @@ class WorkflowPhaseTracker:
             current_entry["completed_at"] = now
             current_entry["failure_reason"] = failure_reason
             current_entry["error_context"] = error_context or {}
-            current_entry["duration_seconds"] = (
-                now - current_entry["started_at"]
-            ).total_seconds()
+            current_entry["duration_seconds"] = (now - current_entry["started_at"]).total_seconds()
 
         logger.error(f"Failed workflow phase: {self.current_phase} - {failure_reason}")
         self.current_phase = None
 
     def get_phase_summary(self) -> Dict[str, Any]:
         """Get summary of all workflow phases."""
-        completed_phases = sum(
-            1 for p in self.phase_history if p["status"] == "completed"
-        )
+        completed_phases = sum(1 for p in self.phase_history if p["status"] == "completed")
         failed_phases = sum(1 for p in self.phase_history if p["status"] == "failed")
         total_phases = len(self.phase_history)
 
@@ -543,9 +512,7 @@ class WorkflowPhaseTracker:
             "current_phase": self.current_phase,
         }
 
-    def create_phase_task_list(
-        self, phase_name: str, tasks: List[Dict[str, Any]]
-    ) -> TaskList:
+    def create_phase_task_list(self, phase_name: str, tasks: List[Dict[str, Any]]) -> TaskList:
         """Create a task list for a specific phase."""
         task_list = TaskList()
 
@@ -604,14 +571,10 @@ class TaskMetrics:
 
             logger.debug(f"Recorded completion for task {task.id}: {duration:.1f}s")
 
-    def record_status_change(
-        self, from_status: TaskStatus, to_status: TaskStatus
-    ) -> None:
+    def record_status_change(self, from_status: TaskStatus, to_status: TaskStatus) -> None:
         """Record status change for analytics."""
         change_key = f"{from_status.value}->{to_status.value}"
-        self.status_change_count[change_key] = (
-            self.status_change_count.get(change_key, 0) + 1
-        )
+        self.status_change_count[change_key] = self.status_change_count.get(change_key, 0) + 1
 
     def calculate_completion_rate(self, task_list: TaskList) -> float:
         """Calculate task completion rate."""
@@ -626,9 +589,7 @@ class TaskMetrics:
         if not self.task_completion_times:
             return 0.0
 
-        total_time = sum(
-            record["duration_seconds"] for record in self.task_completion_times
-        )
+        total_time = sum(record["duration_seconds"] for record in self.task_completion_times)
         return total_time / len(self.task_completion_times)
 
     def get_productivity_metrics(self, task_list: TaskList) -> Dict[str, Any]:
@@ -646,9 +607,7 @@ class TaskMetrics:
             "task_completion_count": len(self.task_completion_times),
         }
 
-    def start_workflow_phase(
-        self, phase_name: str, description: Optional[str] = None
-    ) -> None:
+    def start_workflow_phase(self, phase_name: str, description: Optional[str] = None) -> None:
         """Start tracking a workflow phase."""
         self.current_phase = phase_name
         self.phase_start_time = datetime.now()
@@ -735,9 +694,7 @@ class TaskMetrics:
         if hasattr(self, "current_phase") and self.current_phase == phase_name:
             if hasattr(self, "phase_start_time"):
                 duration = (datetime.now() - self.phase_start_time).total_seconds()
-                logger.info(
-                    f"Completed workflow phase: {phase_name} in {duration:.1f}s"
-                )
+                logger.info(f"Completed workflow phase: {phase_name} in {duration:.1f}s")
             else:
                 logger.info(f"Completed workflow phase: {phase_name}")
         else:
@@ -836,9 +793,7 @@ class TaskTracker:
         try:
             # Create task list for this phase (if tasks provided)
             if phase_tasks:
-                phase_task_list = self.phase_tracker.create_phase_task_list(
-                    phase_name, phase_tasks
-                )
+                phase_task_list = self.phase_tracker.create_phase_task_list(phase_name, phase_tasks)
 
                 # Add tasks to main task list
                 for task in phase_task_list.tasks.values():
@@ -894,9 +849,7 @@ class TaskTracker:
         return {
             "task_summary": task_summary,
             "phase_summary": self.phase_tracker.get_phase_summary(),
-            "productivity_metrics": self.metrics.get_productivity_metrics(
-                self.task_list
-            ),
+            "productivity_metrics": self.metrics.get_productivity_metrics(self.task_list),
             "todowrite_stats": self.todowrite.get_statistics(),
             "created_at": self.created_at.isoformat(),
         }
@@ -918,9 +871,7 @@ class TaskTracker:
 
         return data
 
-    def initialize_task_list(
-        self, tasks: List[Dict[str, Any]], workflow_id: str
-    ) -> None:
+    def initialize_task_list(self, tasks: List[Dict[str, Any]], workflow_id: str) -> None:
         """Initialize task list with given tasks."""
         self.task_list = TaskList()
         for task_data in tasks:
@@ -933,9 +884,7 @@ class TaskTracker:
             if "dependencies" in task_data:
                 task.dependencies = task_data["dependencies"]
             self.task_list.add_task(task)
-        logger.info(
-            f"Initialized task list with {len(tasks)} tasks for workflow {workflow_id}"
-        )
+        logger.info(f"Initialized task list with {len(tasks)} tasks for workflow {workflow_id}")
 
     def initialize_workflow(self, workflow_id: str) -> None:
         """Initialize workflow tracking for the given workflow ID."""

@@ -67,9 +67,7 @@ class MemoryMixin:
 
         if not knowledge_dir.exists():
             # Try alternative path
-            knowledge_dir = Path(
-                f".claude/agents/{self.agent_type.replace('-', '_')}/knowledge"
-            )
+            knowledge_dir = Path(f".claude/agents/{self.agent_type.replace('-', '_')}/knowledge")
 
         if knowledge_dir.exists():
             print(f"📚 Loading knowledge base from {knowledge_dir}")
@@ -89,7 +87,7 @@ class MemoryMixin:
 
                     # Create knowledge node
                     if self.memory:
-                        knowledge_id = await self.memory.add_knowledge(
+                        await self.memory.add_knowledge(
                             concept=title,
                             description=content[:500],  # First 500 chars as description
                             confidence=0.9,  # High confidence for pre-loaded knowledge
@@ -139,7 +137,7 @@ class MemoryMixin:
             # Store successful pattern
             if not self.memory:
                 return
-            procedure_id = await self.memory.learn_procedure(
+            await self.memory.learn_procedure(
                 procedure_name=f"successful_{outcome.task_type}",
                 steps=outcome.steps_taken,
                 context=f"Task {outcome.task_id} completed in {outcome.duration_seconds}s",
@@ -223,9 +221,7 @@ class MemoryMixin:
 
         # Filter procedures related to topic
         relevant_procedures = [
-            p
-            for p in procedures
-            if topic.lower() in p.get("procedure_name", "").lower()
+            p for p in procedures if topic.lower() in p.get("procedure_name", "").lower()
         ]
 
         return {
@@ -233,7 +229,7 @@ class MemoryMixin:
             "agent_type": self.agent_type,
             "expertise_shared": topic,
             "knowledge_items": len(knowledge),
-            "procedures": len(relevant_procedures),
+            "procedure_count": len(relevant_procedures),
             "confidence": self.success_rate,
             "knowledge": knowledge[:5],  # Top 5 items
             "procedures": relevant_procedures[:3],  # Top 3 procedures

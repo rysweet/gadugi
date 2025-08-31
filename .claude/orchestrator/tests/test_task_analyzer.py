@@ -709,14 +709,14 @@ This is a complex feature requiring careful architecture and extensive testing.
         self.assertTrue(test_task.parallelizable)
 
         # Check that feature implementation is likely not parallelizable (due to complexity)
-        feature_task = next(
+        next(
             task for task in tasks if task.task_type == TaskType.FEATURE_IMPLEMENTATION
         )
         # Complex feature tasks might not be parallelizable
 
     def test_execution_plan_generation(self):
         """Test execution plan generation with sample prompts"""
-        tasks = self.analyzer.analyze_all_prompts()
+        self.analyzer.analyze_all_prompts()
         execution_plan = self.analyzer.generate_execution_plan()
 
         # Verify plan makes sense

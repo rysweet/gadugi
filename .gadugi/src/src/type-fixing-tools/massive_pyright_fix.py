@@ -10,9 +10,7 @@ from pathlib import Path
 
 def run_pyright():
     """Run pyright and return error output."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
     return result.stderr
 
 
@@ -47,9 +45,7 @@ def add_type_ignores_for_optional_access():
                                 with open(full_path, "w") as f:
                                     f.writelines(lines)
 
-                                print(
-                                    f"Added type ignore to {file_path}:{line_num + 1}"
-                                )
+                                print(f"Added type ignore to {file_path}:{line_num + 1}")
 
             except (ValueError, IndexError, FileNotFoundError):
                 continue
@@ -174,21 +170,15 @@ def fix_call_issues():
                         with open(full_path, "r") as f:
                             lines = f.readlines()
 
-                        if (
-                            0 <= line_num < len(lines)
-                            and "# type: ignore" not in lines[line_num]
-                        ):
+                        if 0 <= line_num < len(lines) and "# type: ignore" not in lines[line_num]:
                             lines[line_num] = (
-                                lines[line_num].rstrip()
-                                + "  # type: ignore[reportCallIssue]\n"
+                                lines[line_num].rstrip() + "  # type: ignore[reportCallIssue]\n"
                             )
 
                             with open(full_path, "w") as f:
                                 f.writelines(lines)
 
-                            print(
-                                f"Added type ignore for call issue in {file_path}:{line_num + 1}"
-                            )
+                            print(f"Added type ignore for call issue in {file_path}:{line_num + 1}")
 
             except (ValueError, IndexError, FileNotFoundError):
                 continue
@@ -229,9 +219,7 @@ def comment_out_more_unused_imports():
                                     or f"{import_name}," in line_content
                                 ):
                                     if not line_content.strip().startswith("#"):
-                                        lines[i] = (
-                                            f"# {line_content.strip()}  # Unused import"
-                                        )
+                                        lines[i] = f"# {line_content.strip()}  # Unused import"
                                         modified = True
                                         print(
                                             f"Commented out unused import {import_name} in {file_path}"

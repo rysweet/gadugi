@@ -119,9 +119,7 @@ def health() -> Tuple[Any, int]:
         if memory_storage:
             try:
                 memory_status = run_async_in_thread(memory_storage.get_health_status())
-                health_info["memory_system"] = json.dumps(
-                    memory_status
-                )  # Convert to string
+                health_info["memory_system"] = json.dumps(memory_status)  # Convert to string
             except Exception as e:
                 health_info["memory_system"] = json.dumps(
                     {"status": "error", "error": str(e)}
@@ -251,22 +249,14 @@ def list_events() -> Tuple[Any, int]:
 
         # Create filter from params
         event_filter = EventFilter(
-            event_types=[
-                EventType(t) for t in params.get("event_types", "").split(",") if t
-            ]
+            event_types=[EventType(t) for t in params.get("event_types", "").split(",") if t]
             or None,
-            agent_ids=params.get("agent_ids", "").split(",")
-            if params.get("agent_ids")
-            else None,
-            task_ids=params.get("task_ids", "").split(",")
-            if params.get("task_ids")
-            else None,
+            agent_ids=params.get("agent_ids", "").split(",") if params.get("agent_ids") else None,
+            task_ids=params.get("task_ids", "").split(",") if params.get("task_ids") else None,
             project_ids=params.get("project_ids", "").split(",")
             if params.get("project_ids")
             else None,
-            priority=EventPriority(params.get("priority"))
-            if params.get("priority")
-            else None,
+            priority=EventPriority(params.get("priority")) if params.get("priority") else None,
             tags=params.get("tags", "").split(",") if params.get("tags") else None,
             start_time=None,  # Could parse from params if needed
             end_time=None,  # Could parse from params if needed
@@ -303,9 +293,7 @@ def filter_events() -> Tuple[Any, int]:
         event_filter = EventFilter(**data)
 
         # Apply filtering
-        events = run_async_in_thread(
-            filter_engine.filter_events(memory_storage, event_filter)
-        )
+        events = run_async_in_thread(filter_engine.filter_events(memory_storage, event_filter))
 
         return jsonify(
             {  # type: ignore[misc]

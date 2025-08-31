@@ -9,16 +9,20 @@ from typing import Optional, Any, List
 try:
     from pydantic_settings import BaseSettings  # type: ignore[import-untyped]
     from pydantic import Field
+
     PYDANTIC_AVAILABLE = True
 except ImportError:
     try:
         from pydantic import BaseSettings, Field  # type: ignore[import-untyped]
+
         PYDANTIC_AVAILABLE = True
     except ImportError:
         # Fallback for older versions
         from typing import Any
+
         PYDANTIC_AVAILABLE = False
         BaseSettings = object  # type: ignore[misc]
+
         def Field(default: Any = None, *args: Any, **kwargs: Any) -> Any:  # type: ignore[misc]
             return default
 
@@ -27,13 +31,15 @@ class Settings(BaseSettings):  # type: ignore
     """Enhanced application settings with memory system integration."""
 
     # Service configuration
-    service_name: str = Field(default="event-router", description="Service name")
-    service_version: str = Field(default="1.0.0", description="Service version")
+    service_name: str = Field(default="event-router", description="Service name")  # type: ignore[assignment]
+    service_version: str = Field(default="1.0.0", description="Service version")  # type: ignore[assignment]
 
     # Server configuration - respects environment variables
-    host: str = Field(default="0.0.0.0", description="Server host", env="EVENT_ROUTER_HOST")
-    port: int = Field(default=8000, description="Server port", env="EVENT_ROUTER_PORT")
-    debug: bool = Field(default=False, description="Debug mode")
+    host: str = Field(
+        default="0.0.0.0", description="Server host", env="EVENT_ROUTER_HOST"
+    )
+    port: int = Field(default=8000, description="Server port", env="EVENT_ROUTER_PORT")  # type: ignore[assignment]
+    debug: bool = Field(default=False, description="Debug mode")  # type: ignore[assignment]
 
     # Memory System Configuration
     memory_backend_url: str = Field(
@@ -81,11 +87,11 @@ class Settings(BaseSettings):  # type: ignore
     )
 
     # Redis configuration (for future use)
-    redis_url: Optional[str] = Field(default=None, description="Redis URL for caching")
-    enable_redis_cache: bool = Field(default=False, description="Enable Redis caching")
+    redis_url: Optional[str] = Field(default=None, description="Redis URL for caching")  # type: ignore[assignment]
+    enable_redis_cache: bool = Field(default=False, description="Enable Redis caching")  # type: ignore[assignment]
 
     # Logging configuration
-    log_level: str = Field(default="INFO", description="Log level")
+    log_level: str = Field(default="INFO", description="Log level")  # type: ignore[assignment]
     log_file: Optional[str] = Field(
         default=".claude/logs/event-router.log", description="Log file path"
     )
@@ -97,7 +103,7 @@ class Settings(BaseSettings):  # type: ignore
     api_key: Optional[str] = Field(
         default=None, description="API Key for authentication"
     )
-    secret_key: str = Field(default="change-me-in-production", description="Secret key")
+    secret_key: str = Field(default="change-me-in-production", description="Secret key")  # type: ignore[assignment]
     cors_origins: List[str] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://localhost:8080"],
         description="CORS allowed origins",
@@ -115,7 +121,7 @@ class Settings(BaseSettings):  # type: ignore
     async_workers: int = Field(
         default=4, description="Number of async workers for event processing"
     )
-    batch_size: int = Field(default=100, description="Batch size for bulk operations")
+    batch_size: int = Field(default=100, description="Batch size for bulk operations")  # type: ignore[assignment]
 
     class Config:
         """Pydantic config."""

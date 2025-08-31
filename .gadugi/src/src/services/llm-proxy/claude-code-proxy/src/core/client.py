@@ -40,9 +40,7 @@ class OpenAIClient:
                 timeout=timeout,
             )
         else:
-            self.client = AsyncOpenAI(
-                api_key=api_key, base_url=base_url, timeout=timeout
-            )
+            self.client = AsyncOpenAI(api_key=api_key, base_url=base_url, timeout=timeout)
         self.active_requests: Dict[str, asyncio.Event] = {}
 
     async def create_chat_completion(
@@ -57,9 +55,7 @@ class OpenAIClient:
 
         try:
             # Create task that can be cancelled
-            completion_task = asyncio.create_task(
-                self.client.chat.completions.create(**request)
-            )
+            completion_task = asyncio.create_task(self.client.chat.completions.create(**request))
 
             if request_id:
                 # Wait for either completion or cancellation
@@ -79,9 +75,7 @@ class OpenAIClient:
                 # Check if request was cancelled
                 if cancel_task in done:
                     completion_task.cancel()
-                    raise HTTPException(
-                        status_code=499, detail="Request cancelled by client"
-                    )
+                    raise HTTPException(status_code=499, detail="Request cancelled by client")
 
                 completion = await completion_task
             else:
@@ -91,22 +85,14 @@ class OpenAIClient:
             return completion.model_dump()
 
         except AuthenticationError as e:
-            raise HTTPException(
-                status_code=401, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=401, detail=self.classify_openai_error(str(e)))
         except RateLimitError as e:
-            raise HTTPException(
-                status_code=429, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=429, detail=self.classify_openai_error(str(e)))
         except BadRequestError as e:
-            raise HTTPException(
-                status_code=400, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=400, detail=self.classify_openai_error(str(e)))
         except APIError as e:
             status_code = getattr(e, "status_code", 500)
-            raise HTTPException(
-                status_code=status_code, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=status_code, detail=self.classify_openai_error(str(e)))
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
@@ -139,9 +125,7 @@ class OpenAIClient:
                 # Check for cancellation before yielding each chunk
                 if request_id and request_id in self.active_requests:
                     if self.active_requests[request_id].is_set():
-                        raise HTTPException(
-                            status_code=499, detail="Request cancelled by client"
-                        )
+                        raise HTTPException(status_code=499, detail="Request cancelled by client")
 
                 # Convert chunk to SSE format matching original HTTP client format
                 chunk_dict = chunk.model_dump()
@@ -152,22 +136,14 @@ class OpenAIClient:
             yield "data: [DONE]"
 
         except AuthenticationError as e:
-            raise HTTPException(
-                status_code=401, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=401, detail=self.classify_openai_error(str(e)))
         except RateLimitError as e:
-            raise HTTPException(
-                status_code=429, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=429, detail=self.classify_openai_error(str(e)))
         except BadRequestError as e:
-            raise HTTPException(
-                status_code=400, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=400, detail=self.classify_openai_error(str(e)))
         except APIError as e:
             status_code = getattr(e, "status_code", 500)
-            raise HTTPException(
-                status_code=status_code, detail=self.classify_openai_error(str(e))
-            )
+            raise HTTPException(status_code=status_code, detail=self.classify_openai_error(str(e)))
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
@@ -196,9 +172,7 @@ class OpenAIClient:
             return "Rate limit exceeded. Please wait and try again, or upgrade your API plan."
 
         # Model not found
-        if "model" in error_str and (
-            "not found" in error_str or "does not exist" in error_str
-        ):
+        if "model" in error_str and ("not found" in error_str or "does not exist" in error_str):
             return "Model not found. Please check your BIG_MODEL and SMALL_MODEL configuration."
 
         # Billing issues

@@ -55,9 +55,7 @@ class ProjectRequirements:
 
     # Capability requirements
     required_capabilities: Dict[CapabilityDomain, ProficiencyLevel]
-    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(
-        default_factory=dict
-    )
+    preferred_capabilities: Dict[CapabilityDomain, ProficiencyLevel] = field(default_factory=dict)
 
     # Project constraints
     timeline: Tuple[datetime, datetime]  # type: ignore
@@ -235,15 +233,11 @@ class TeamCompositionOptimizer:
             # Evaluate each composition
             evaluated_compositions = []
             for composition in candidate_compositions:
-                self._evaluate_team_composition(
-                    composition, project_requirements, objectives
-                )
+                self._evaluate_team_composition(composition, project_requirements, objectives)
                 evaluated_compositions.append(composition)
 
             # Select optimal and alternative compositions
-            optimal_composition = max(
-                evaluated_compositions, key=lambda c: c.overall_score
-            )
+            optimal_composition = max(evaluated_compositions, key=lambda c: c.overall_score)
 
             # Get top alternatives (exclude optimal)
             alternatives = sorted(
@@ -306,17 +300,15 @@ class TeamCompositionOptimizer:
                     break
 
                 # Generate all combinations of this size
-                for agent_combination in itertools.combinations(
-                    available_agents, team_size
-                ):
+                for agent_combination in itertools.combinations(available_agents, team_size):
                     if combinations_generated >= max_combinations:
                         break
 
                     # Quick feasibility check
-                    if self._is_feasible_composition(
-                        list(agent_combination), project_requirements
-                    ):
-                        composition_id = f"{project_requirements.project_id}_comp_{combinations_generated}"
+                    if self._is_feasible_composition(list(agent_combination), project_requirements):
+                        composition_id = (
+                            f"{project_requirements.project_id}_comp_{combinations_generated}"
+                        )
 
                         composition = TeamComposition(  # type: ignore
                             composition_id=composition_id,
@@ -349,12 +341,10 @@ class TeamCompositionOptimizer:
                         covered_capabilities.add(domain)
 
             # Check if critical capabilities are covered
-            required_capabilities = set(
-                project_requirements.required_capabilities.keys()
+            required_capabilities = set(project_requirements.required_capabilities.keys())
+            coverage_ratio = len(covered_capabilities.intersection(required_capabilities)) / len(
+                required_capabilities
             )
-            coverage_ratio = len(
-                covered_capabilities.intersection(required_capabilities)
-            ) / len(required_capabilities)
 
             return coverage_ratio >= 0.5  # At least 50% coverage for feasibility
 
@@ -387,9 +377,7 @@ class TeamCompositionOptimizer:
                 composition.objective_scores[objective] = score
 
             # Calculate overall composite score
-            composition.overall_score = self._calculate_overall_score(
-                composition, objectives
-            )
+            composition.overall_score = self._calculate_overall_score(composition, objectives)
 
             # Generate strengths, weaknesses, and recommendations
             self._analyze_composition_factors(composition, project_requirements)
@@ -420,9 +408,7 @@ class TeamCompositionOptimizer:
                         profile = self.agent_profiles_cache[agent_id]
                         if domain in profile.capability_scores:
                             capability_score = profile.capability_scores[domain]
-                            agent_capabilities.append(
-                                capability_score.proficiency_level.value
-                            )
+                            agent_capabilities.append(capability_score.proficiency_level.value)
 
                 if agent_capabilities:
                     # Coverage is the highest capability level available
@@ -432,9 +418,7 @@ class TeamCompositionOptimizer:
 
                     # Redundancy is the number of agents with this capability
                     capable_agents = sum(
-                        1
-                        for level in agent_capabilities
-                        if level >= required_level.value * 0.8
+                        1 for level in agent_capabilities if level >= required_level.value * 0.8
                     )
                     capability_redundancy[domain] = capable_agents
                 else:
@@ -465,23 +449,17 @@ class TeamCompositionOptimizer:
             individual_completion_times = []
 
             for agent_id in composition.agents:
-                performance_data = self.performance_analyzer.analyze_agent_performance(
-                    agent_id
-                )
+                performance_data = self.performance_analyzer.analyze_agent_performance(agent_id)
                 individual_success_rates.append(performance_data.success_rate)
                 individual_completion_times.append(performance_data.avg_execution_time)
 
             if individual_success_rates:
                 # Team success rate is not just average - consider collaboration effects
-                avg_success_rate = sum(individual_success_rates) / len(
-                    individual_success_rates
-                )
+                avg_success_rate = sum(individual_success_rates) / len(individual_success_rates)
                 team_size_factor = 1.0 - (
                     0.05 * (len(composition.agents) - 1)
                 )  # Small penalty for coordination
-                composition.predicted_success_rate = max(
-                    0.0, avg_success_rate * team_size_factor
-                )
+                composition.predicted_success_rate = max(0.0, avg_success_rate * team_size_factor)
 
             # Predict completion time
             if individual_completion_times and project_requirements.task_list:
@@ -495,9 +473,7 @@ class TeamCompositionOptimizer:
                     * avg_completion_time
                     * parallelization_factor
                 )
-                composition.predicted_completion_time = timedelta(
-                    seconds=estimated_total_time
-                )
+                composition.predicted_completion_time = timedelta(seconds=estimated_total_time)
 
             # Calculate risk score
             composition.risk_score = self._calculate_team_risk_score(
@@ -563,9 +539,7 @@ class TeamCompositionOptimizer:
 
             # Team size factor (not too small, not too large)
             optimal_size = 4
-            size_factor = (
-                1.0 - abs(len(composition.agents) - optimal_size) / optimal_size
-            )
+            size_factor = 1.0 - abs(len(composition.agents) - optimal_size) / optimal_size
             collaboration_factors.append(max(0.0, size_factor))
 
             return sum(collaboration_factors) / len(collaboration_factors)
@@ -593,9 +567,9 @@ class TeamCompositionOptimizer:
 
             # Balance is better when workloads are similar
             avg_workload = sum(workload_scores) / len(workload_scores)
-            workload_variance = sum(
-                (score - avg_workload) ** 2 for score in workload_scores
-            ) / len(workload_scores)
+            workload_variance = sum((score - avg_workload) ** 2 for score in workload_scores) / len(
+                workload_scores
+            )
 
             # Convert variance to balance score (lower variance = better balance)
             balance_score = max(0.0, 1.0 - workload_variance * 4)  # Scale variance
@@ -690,11 +664,7 @@ class TeamCompositionOptimizer:
                 max_possible_learning = len(composition.agents) * len(
                     project_requirements.required_capabilities
                 )
-                return (
-                    learning_score / max_possible_learning
-                    if max_possible_learning > 0
-                    else 0.0
-                )
+                return learning_score / max_possible_learning if max_possible_learning > 0 else 0.0
 
             elif objective == OptimizationObjective.MINIMIZE_COST:
                 # Simplified cost model - smaller teams cost less
@@ -705,9 +675,7 @@ class TeamCompositionOptimizer:
                 return 0.5  # Default neutral score
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to calculate objective score for {objective}: {e}"
-            )
+            self.logger.error(f"Failed to calculate objective score for {objective}: {e}")
             return 0.0
 
     def _calculate_overall_score(
@@ -724,9 +692,7 @@ class TeamCompositionOptimizer:
             total_score = 0.0
             for objective in objectives:
                 if objective in composition.objective_scores:
-                    total_score += (
-                        composition.objective_scores[objective] * objective_weight
-                    )
+                    total_score += composition.objective_scores[objective] * objective_weight
 
             return total_score
 
@@ -750,25 +716,19 @@ class TeamCompositionOptimizer:
                 if coverage >= 0.9
             ]
             if strong_capabilities:
-                strengths.append(
-                    f"Strong coverage in: {', '.join(strong_capabilities[:3])}"
-                )
+                strengths.append(f"Strong coverage in: {', '.join(strong_capabilities[:3])}")
 
             if composition.capability_gaps:
                 gap_names = [domain.value for domain in composition.capability_gaps]
                 weaknesses.append(f"Capability gaps in: {', '.join(gap_names[:3])}")
-                recommendations.append(
-                    "Consider adding agents with missing capabilities"
-                )
+                recommendations.append("Consider adding agents with missing capabilities")
 
             # Analyze team dynamics
             if composition.collaboration_score >= 0.8:
                 strengths.append("Excellent collaboration potential")
             elif composition.collaboration_score < 0.5:
                 weaknesses.append("Limited collaboration synergy")
-                recommendations.append(
-                    "Focus on team building and communication protocols"
-                )
+                recommendations.append("Focus on team building and communication protocols")
 
             # Analyze performance prediction
             if composition.predicted_success_rate >= 0.8:
@@ -789,16 +749,12 @@ class TeamCompositionOptimizer:
             if team_size == 1:
                 if project_requirements.requires_coordination:
                     weaknesses.append("Single agent for collaborative project")
-                    recommendations.append(
-                        "Consider expanding team for better coverage"
-                    )
+                    recommendations.append("Consider expanding team for better coverage")
                 else:
                     strengths.append("Efficient single-agent solution")
             elif team_size > 6:
                 weaknesses.append("Large team may have coordination challenges")
-                recommendations.append(
-                    "Establish clear communication and coordination protocols"
-                )
+                recommendations.append("Establish clear communication and coordination protocols")
 
             composition.strengths = strengths
             composition.weaknesses = weaknesses
@@ -818,9 +774,9 @@ class TeamCompositionOptimizer:
 
             # Capability coverage confidence
             if optimal_composition.capability_coverage:
-                avg_coverage = sum(
-                    optimal_composition.capability_coverage.values()
-                ) / len(optimal_composition.capability_coverage)
+                avg_coverage = sum(optimal_composition.capability_coverage.values()) / len(
+                    optimal_composition.capability_coverage
+                )
                 confidence_factors.append(avg_coverage)
 
             # Performance prediction confidence
@@ -855,12 +811,8 @@ class TeamCompositionOptimizer:
             # Generate reasoning
             reasoning_parts = []
 
-            objective_names = [
-                obj.value.replace("_", " ").title() for obj in objectives
-            ]
-            reasoning_parts.append(
-                f"Optimization focused on: {', '.join(objective_names)}"
-            )
+            objective_names = [obj.value.replace("_", " ").title() for obj in objectives]
+            reasoning_parts.append(f"Optimization focused on: {', '.join(objective_names)}")
 
             optimal = result.optimal_composition
             reasoning_parts.append(
@@ -879,13 +831,9 @@ class TeamCompositionOptimizer:
                     "Larger team provides better coverage but increases coordination complexity"
                 )
             if optimal.capability_gaps:
-                trade_offs.append(
-                    "Some capability gaps accepted to optimize other objectives"
-                )
+                trade_offs.append("Some capability gaps accepted to optimize other objectives")
             if optimal.risk_score > 0.5:
-                trade_offs.append(
-                    "Higher risk accepted for better performance/capability match"
-                )
+                trade_offs.append("Higher risk accepted for better performance/capability match")
 
             result.trade_offs = trade_offs
 
@@ -908,9 +856,7 @@ class TeamCompositionOptimizer:
             # Risk mitigation
             risk_mitigation = []
             if optimal.capability_gaps:
-                risk_mitigation.append(
-                    "Monitor capability gaps and provide training/support"
-                )
+                risk_mitigation.append("Monitor capability gaps and provide training/support")
             if optimal.risk_score > 0.6:
                 risk_mitigation.append("Implement enhanced monitoring and checkpoints")
             if len(optimal.agents) > 5:
@@ -928,9 +874,7 @@ class TeamCompositionOptimizer:
         try:
             for agent_id in agent_ids:
                 if agent_id not in self.agent_profiles_cache:
-                    profile = self.capability_assessment.assess_agent_capabilities(
-                        agent_id
-                    )
+                    profile = self.capability_assessment.assess_agent_capabilities(agent_id)
                     self.agent_profiles_cache[agent_id] = profile
 
         except Exception as e:
@@ -989,9 +933,7 @@ class TeamCompositionOptimizer:
             for criterion in criteria:
                 if criterion == "risk_score":
                     # Lower is better for risk
-                    ranked = sorted(
-                        compositions, key=lambda c: getattr(c, criterion, 1.0)
-                    )
+                    ranked = sorted(compositions, key=lambda c: getattr(c, criterion, 1.0))
                 else:
                     # Higher is better for other criteria
                     ranked = sorted(
@@ -1000,9 +942,7 @@ class TeamCompositionOptimizer:
                         reverse=True,
                     )
 
-                comparison["rankings"][criterion] = [
-                    comp.composition_id for comp in ranked
-                ]
+                comparison["rankings"][criterion] = [comp.composition_id for comp in ranked]
 
             return comparison
 

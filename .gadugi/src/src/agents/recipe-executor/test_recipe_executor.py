@@ -113,11 +113,7 @@ class TestRecipeLoading:
 
         # Check that MUST/SHALL/SHOULD requirements are captured
         criteria_text = " ".join(recipe.validation_criteria).lower()
-        assert (
-            "must" in criteria_text
-            or "shall" in criteria_text
-            or "should" in criteria_text
-        )
+        assert "must" in criteria_text or "shall" in criteria_text or "should" in criteria_text
 
 
 class TestComponentTypeIdentification:

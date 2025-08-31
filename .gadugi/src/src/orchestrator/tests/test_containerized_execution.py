@@ -39,7 +39,6 @@ try:
     from components.execution_engine import (
         ExecutionEngine,
         TaskExecutor,
-        ExecutionResult,
     )
     from container_manager import ContainerManager, ContainerConfig, ContainerResult
     from monitoring.dashboard import OrchestrationMonitor
@@ -163,9 +162,7 @@ class TestContainerManager(unittest.TestCase):
         # Create manager and execute task
         config = ContainerConfig()  # type: ignore[misc]
         manager = ContainerManager(config)  # type: ignore[misc]
-        manager.docker_client = (
-            self.docker_mock
-        )  # Use our mock  # type: ignore[attr-defined]
+        manager.docker_client = self.docker_mock  # Use our mock  # type: ignore[attr-defined]
 
         result = manager.execute_containerized_task(  # type: ignore[attr-defined]
             task_id="test-task-1",
@@ -318,9 +315,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
 
     @patch("components.execution_engine.CONTAINER_EXECUTION_AVAILABLE", True)  # type: ignore[misc]
     @patch("components.execution_engine.ContainerManager")  # type: ignore[misc]
-    def test_execution_engine_uses_containers(
-        self, mock_container_manager: Mock
-    ) -> None:
+    def test_execution_engine_uses_containers(self, mock_container_manager: Mock) -> None:
         """Test that ExecutionEngine uses ContainerManager when available"""
         mock_manager = Mock()
         mock_container_manager.return_value = mock_manager
@@ -342,9 +337,7 @@ class TestExecutionEngineContainerization(unittest.TestCase):
 
     @patch("components.execution_engine.CONTAINER_EXECUTION_AVAILABLE", True)  # type: ignore[misc]
     @patch("components.execution_engine.ContainerManager")  # type: ignore[misc]
-    def test_task_executor_containerized_execution(
-        self, mock_container_manager: Mock
-    ) -> None:
+    def test_task_executor_containerized_execution(self, mock_container_manager: Mock) -> None:
         """Test TaskExecutor uses containerized execution"""
         mock_manager = Mock()
         mock_container_result = Mock()
@@ -488,9 +481,7 @@ class TestPerformanceComparisons(unittest.TestCase):
         }
 
         # Calculate speedup
-        speedup = (
-            mock_stats["total_execution_time"] / mock_stats["parallel_execution_time"]
-        )
+        speedup = mock_stats["total_execution_time"] / mock_stats["parallel_execution_time"]
 
         self.assertGreater(speedup, 3.0)  # Should achieve 3-5x speedup
         self.assertEqual(mock_stats["execution_mode"], "containerized")
@@ -564,7 +555,7 @@ Test containerized execution
 
         # Verify results
         self.assertEqual(len(results), 1)
-        result = results["test-workflow-task"]
+        _result = results["test-workflow-task"]
 
         # Verify containerized execution characteristics
         if engine.execution_mode == "containerized":  # type: ignore[attr-defined]

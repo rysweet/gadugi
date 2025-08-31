@@ -63,7 +63,7 @@ async def example_basic_review():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (FileNotFoundError, PermissionError):
                 pass
 
 
@@ -77,7 +77,7 @@ async def example_learning_from_feedback():
 
     try:
         await reviewer.initialize()
-        task_id = await reviewer.start_task("Learn from previous review feedback")
+        await reviewer.start_task("Learn from previous review feedback")
 
         # Simulate feedback from developers about previous reviews
         feedback_data = [
@@ -240,7 +240,7 @@ async def example_adaptive_scoring():
         for developer in ["alice", "bob"]:
             print(f"\n👤 Review for {developer}:")
 
-            task_id = await reviewer.start_task(f"Adaptive review for {developer}")
+            await reviewer.start_task(f"Adaptive review for {developer}")
 
             review_task = {
                 "type": "review_files",
@@ -270,7 +270,7 @@ async def example_adaptive_scoring():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (OSError, FileNotFoundError):
                 pass
 
     finally:
@@ -441,9 +441,7 @@ async def example_production_workflow():
         test_files = await create_production_like_files()
 
         # Step 2: Comprehensive review
-        task_id = await reviewer.start_task(
-            "Production code review for feature/user-auth"
-        )
+        await reviewer.start_task("Production code review for feature/user-auth")
 
         review_task = {
             "type": "review_files",
@@ -488,7 +486,7 @@ async def example_production_workflow():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (OSError, FileNotFoundError):
                 pass
 
     finally:

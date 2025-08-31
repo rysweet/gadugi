@@ -300,10 +300,7 @@ class EventRouterClient:
                 await asyncio.sleep(self.heartbeat_interval)
 
                 # Check for missed pong
-                if (
-                    self.last_pong
-                    and time.time() - self.last_pong > self.heartbeat_interval * 2
-                ):
+                if self.last_pong and time.time() - self.last_pong > self.heartbeat_interval * 2:
                     logger.warning("Heartbeat timeout, reconnecting...")
                     if self.websocket:
                         await self.websocket.close()
@@ -345,9 +342,7 @@ class EventRouterClient:
         """Restore subscriptions after reconnection."""
         for sub_id, sub_data in list(self.subscriptions.items()):
             if sub_data.get("active"):
-                await self._send(
-                    {"type": "subscribe", "subscription": sub_data["config"]}
-                )
+                await self._send({"type": "subscribe", "subscription": sub_data["config"]})
 
     async def _send_pending_messages(self):
         """Send pending messages after reconnection."""
@@ -483,9 +478,7 @@ class EventRouterClient:
         if subscription_id not in self.subscriptions:
             return False
 
-        success = await self._send(
-            {"type": "unsubscribe", "subscription_id": subscription_id}
-        )
+        success = await self._send({"type": "unsubscribe", "subscription_id": subscription_id})
 
         if success:
             self.subscriptions[subscription_id]["active"] = False

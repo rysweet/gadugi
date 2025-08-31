@@ -36,9 +36,7 @@ async def main():
     print("=" * 60)
 
     # Create and start service
-    service = EventRouterService(
-        host="localhost", port=9090, max_workers=10, queue_size=10000
-    )
+    service = EventRouterService(host="localhost", port=9090, max_workers=10, queue_size=10000)
 
     try:
         await service.start()

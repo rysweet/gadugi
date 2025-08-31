@@ -291,9 +291,7 @@ class LLMProxyManager:
         print("🚀 Starting LLM Proxy server...")
 
         # Check configuration
-        if not self.config.get("OPENAI_API_KEY") and not self.config.get(
-            "AZURE_OPENAI_API_KEY"
-        ):
+        if not self.config.get("OPENAI_API_KEY") and not self.config.get("AZURE_OPENAI_API_KEY"):
             print("❌ No API key configured. Run with --configure first.")
             return False
 
@@ -408,9 +406,7 @@ class LLMProxyManager:
         try:
             # Try 24-hour format
             if ":" in time_str and len(time_str.split(":")[0]) <= 2:
-                hour, minute = (
-                    time_str.replace("PM", "").replace("AM", "").strip().split(":")
-                )
+                hour, minute = time_str.replace("PM", "").replace("AM", "").strip().split(":")
                 hour = int(hour)
                 minute = int(minute)
 
@@ -421,9 +417,7 @@ class LLMProxyManager:
                     hour = 0
 
                 now = datetime.now()
-                shutdown = now.replace(
-                    hour=hour, minute=minute, second=0, microsecond=0
-                )
+                shutdown = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
                 if shutdown <= now:
                     print("❌ Time has already passed today")
@@ -468,18 +462,14 @@ class LLMProxyManager:
         try:
             hour, minute = time_str.split(":")
             tomorrow = datetime.now() + timedelta(days=1)
-            return tomorrow.replace(
-                hour=int(hour), minute=int(minute), second=0, microsecond=0
-            )
+            return tomorrow.replace(hour=int(hour), minute=int(minute), second=0, microsecond=0)
         except:
             print("❌ Invalid time format")
             return None
 
     def _schedule_shutdown(self, shutdown_time: datetime):
         """Schedule automatic shutdown."""
-        print(
-            f"\n⏰ Scheduling shutdown for {shutdown_time.strftime('%Y-%m-%d %H:%M')}"
-        )
+        print(f"\n⏰ Scheduling shutdown for {shutdown_time.strftime('%Y-%m-%d %H:%M')}")
 
         # Create scheduler script
         scheduler_script = f"""
@@ -620,9 +610,7 @@ for f in ['{PROXY_PID_FILE}', '{SCHEDULER_PID_FILE}']:
                 test_message = {
                     "model": "claude-3-5-sonnet-20241022",
                     "max_tokens": 10,
-                    "messages": [
-                        {"role": "user", "content": "Reply with 'test ok' only"}
-                    ],
+                    "messages": [{"role": "user", "content": "Reply with 'test ok' only"}],
                 }
 
                 headers = {}
@@ -643,9 +631,7 @@ for f in ['{PROXY_PID_FILE}', '{SCHEDULER_PID_FILE}']:
                         print("   ✅ API call successful")
                         result = response.json()
                         if "content" in result and result["content"]:
-                            response_text = result["content"][0].get("text", "No text")[
-                                :100
-                            ]
+                            response_text = result["content"][0].get("text", "No text")[:100]
                             print(f'   Response: "{response_text}"')
                     else:
                         print(f"   ❌ API call failed: {response.status_code}")
@@ -658,15 +644,11 @@ for f in ['{PROXY_PID_FILE}', '{SCHEDULER_PID_FILE}']:
                 print("\n✨ Summary:")
                 if health_data["upstream_status"] == "healthy":
                     print("   Your LLM Proxy is fully operational!")
-                    print(
-                        "   You can now use: ANTHROPIC_BASE_URL=http://localhost:8082 claude"
-                    )
+                    print("   You can now use: ANTHROPIC_BASE_URL=http://localhost:8082 claude")
                 else:
                     print("   Proxy is running but needs configuration fixes.")
             else:
-                print(
-                    "\n⚠️  Skipping API test - upstream configuration needs to be fixed first"
-                )
+                print("\n⚠️  Skipping API test - upstream configuration needs to be fixed first")
                 print("\n💡 Next Steps:")
                 print("   1. Fix the configuration issues listed above")
                 print(

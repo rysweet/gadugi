@@ -58,9 +58,7 @@ class WorkflowReflectionCollector:
         """Collect git repository metrics."""
         try:
             # Get recent commits (last hour)
-            since_time = (datetime.now() - timedelta(hours=1)).strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+            since_time = (datetime.now() - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
 
             # Count recent commits
             result = subprocess.run(
@@ -78,9 +76,7 @@ class WorkflowReflectionCollector:
                 text=True,
                 cwd=self.project_root,
             )
-            current_branch = (
-                result.stdout.strip() if result.returncode == 0 else "unknown"
-            )
+            current_branch = result.stdout.strip() if result.returncode == 0 else "unknown"
 
             # Get diff stats
             result = subprocess.run(
@@ -263,17 +259,14 @@ class WorkflowReflectionCollector:
 
         # Save reflection
         reflection_file = (
-            self.reflection_dir
-            / f"reflection-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
+            self.reflection_dir / f"reflection-{datetime.now().strftime('%Y%m%d-%H%M%S')}.md"
         )
         with open(reflection_file, "w") as f:
             f.write(reflection)
 
         return str(reflection_file)
 
-    def _aggregate_session_data(
-        self, session_data: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _aggregate_session_data(self, session_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Aggregate multiple session data points."""
 
         total_sessions = len(session_data)
@@ -289,8 +282,7 @@ class WorkflowReflectionCollector:
                 s.get("test_metrics", {}).get("total_tests", 0) for s in session_data
             ),
             "avg_project_size": sum(
-                s.get("performance_metrics", {}).get("project_size_mb", 0)
-                for s in session_data
+                s.get("performance_metrics", {}).get("project_size_mb", 0) for s in session_data
             )
             / max(total_sessions, 1),
             "issues_created": sum(
@@ -356,15 +348,11 @@ class WorkflowReflectionCollector:
 
         # Positive insights
         if data.get("total_commits", 0) > 5:
-            insights["insight_positive_1"] = (
-                "High commit frequency indicates active development"
-            )
+            insights["insight_positive_1"] = "High commit frequency indicates active development"
         else:
             insights["insight_positive_1"] = "Steady development progress maintained"
 
-        insights["insight_positive_2"] = (
-            "No infinite loops detected in reflection system"
-        )
+        insights["insight_positive_2"] = "No infinite loops detected in reflection system"
         insights["insight_positive_n"] = (
             "Successfully migrated from hook-based to phase-based reflection"
         )
@@ -373,42 +361,26 @@ class WorkflowReflectionCollector:
         insights["insight_improvement_1"] = (
             "Consider implementing automated test coverage reporting"
         )
-        insights["insight_improvement_2"] = (
-            "Explore automated code quality metrics collection"
-        )
-        insights["insight_improvement_n"] = (
-            "Investigate performance baseline establishment"
-        )
+        insights["insight_improvement_2"] = "Explore automated code quality metrics collection"
+        insights["insight_improvement_n"] = "Investigate performance baseline establishment"
 
         # Patterns
-        insights["pattern_1"] = (
-            "Reflection data collection is more reliable without hooks"
-        )
+        insights["pattern_1"] = "Reflection data collection is more reliable without hooks"
         insights["pattern_2"] = "Workflow-integrated reflection provides better context"
         insights["pattern_n"] = "Safe reflection prevents cascade failures"
 
         # Discoveries
         insights["discovery_1"] = "Hook-based reflection caused infinite loops"
-        insights["discovery_2"] = (
-            "Phase-based reflection is more controlled and reliable"
-        )
-        insights["discovery_n"] = (
-            "Data collection can be decoupled from real-time execution"
-        )
+        insights["discovery_2"] = "Phase-based reflection is more controlled and reliable"
+        insights["discovery_n"] = "Data collection can be decoupled from real-time execution"
 
         # Recommendations
-        insights["process_recommendation_1"] = (
-            "Continue using phase-based reflection approach"
-        )
+        insights["process_recommendation_1"] = "Continue using phase-based reflection approach"
         insights["process_recommendation_2"] = "Implement scheduled reflection analysis"
         insights["process_recommendation_n"] = "Add reflection data to CI/CD pipeline"
 
-        insights["tool_recommendation_1"] = (
-            "Develop reflection dashboard for visualization"
-        )
-        insights["tool_recommendation_2"] = (
-            "Create automated improvement issue generation"
-        )
+        insights["tool_recommendation_1"] = "Develop reflection dashboard for visualization"
+        insights["tool_recommendation_2"] = "Create automated improvement issue generation"
         insights["tool_recommendation_n"] = "Integrate with project management tools"
 
         return insights
@@ -484,9 +456,7 @@ class WorkflowReflectionCollector:
                 if len(item_text) > 10:  # Filter out placeholder text
                     action_items.append(
                         {
-                            "title": item_text[:50] + "..."
-                            if len(item_text) > 50
-                            else item_text,
+                            "title": item_text[:50] + "..." if len(item_text) > 50 else item_text,
                             "description": f"Identified improvement opportunity: {item_text}",
                             "category": current_section,
                         }
@@ -551,9 +521,7 @@ def main():
         if reflection_files:
             latest_reflection = max(reflection_files, key=lambda f: f.stat().st_mtime)
             issues = collector.create_improvement_issues(str(latest_reflection))
-            print(
-                f"✅ Created {len(issues)} improvement issues from {latest_reflection}"
-            )
+            print(f"✅ Created {len(issues)} improvement issues from {latest_reflection}")
         else:
             print("⚠️ No reflection files found")
 

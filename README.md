@@ -197,7 +197,7 @@ pip install uv
 
    # Verify installation
    ./gadugi python -c "import gadugi; print('Gadugi ready!')"
-   
+
    # Run tests to verify everything works
    ./gadugi test
    ```

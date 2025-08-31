@@ -718,9 +718,9 @@ class AgentConfigSchema:
 
         # Required fields
         required_fields = ["agent_id", "name"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Version validation
         if "version" in config:
@@ -794,9 +794,9 @@ class TaskConfigSchema:
 
         # Required fields
         required_fields = ["id", "content"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Status validation
         if "status" in config:

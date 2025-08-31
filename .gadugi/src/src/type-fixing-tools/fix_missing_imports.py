@@ -9,9 +9,7 @@ from pathlib import Path
 
 def get_missing_import_errors():
     """Get all missing import errors from pyright."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     errors = []
     for line in result.stderr.split("\n"):
@@ -98,10 +96,7 @@ def fix_missing_imports():
                                 content = f.read()
 
                             # Check if import is already fixed
-                            if (
-                                fix_info["import"] in content
-                                or f"# {import_name}" in content
-                            ):
+                            if fix_info["import"] in content or f"# {import_name}" in content:
                                 continue
 
                             # Replace the problematic import
@@ -126,11 +121,8 @@ def fix_missing_imports():
                                     ("import ", "from ")
                                 ) and not line.strip().startswith("#"):
                                     import_insert_idx = i
-                                elif (
-                                    import_insert_idx > 0
-                                    and not line.strip().startswith(
-                                        ("import ", "from ", "#")
-                                    )
+                                elif import_insert_idx > 0 and not line.strip().startswith(
+                                    ("import ", "from ", "#")
                                 ):
                                     break
 
@@ -208,9 +200,7 @@ def main():
     fix_missing_imports()
 
     # Check improvement
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     for line in result.stderr.split("\n"):
         if "errors," in line:

@@ -11,9 +11,7 @@ from typing import Dict, List, Tuple
 
 def get_pyright_errors(directory: str) -> List[Tuple[str, int, str]]:
     """Get all pyright errors for a directory."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", directory], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", directory], capture_output=True, text=True)
 
     errors = []
     for line in result.stderr.split("\n") + result.stdout.split("\n"):
@@ -113,9 +111,7 @@ def main():
                 print(f"  Fixed {len(import_errors)} import errors")
 
         # For other errors, add type: ignore
-        other_errors = [
-            (ln, msg) for ln, msg in file_errors if (ln, msg) not in import_errors
-        ]
+        other_errors = [(ln, msg) for ln, msg in file_errors if (ln, msg) not in import_errors]
 
         for line_num, error_msg in other_errors:
             # Skip certain error types
@@ -137,9 +133,7 @@ def main():
 
     # Run pyright again to show remaining errors
     print("\n🔍 Running pyright to check remaining errors...")
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude/"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude/"], capture_output=True, text=True)
 
     # Parse final count
     for line in result.stdout.split("\n"):

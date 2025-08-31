@@ -318,7 +318,6 @@ class TestExecutionEngineIntegration(unittest.TestCase):
         ]
 
         # Temporarily store original method
-        original_method = self.engine._execute_with_concurrency_control
 
         # Track executors created
         created_executors = []

@@ -47,9 +47,7 @@ class CollaborationPatterns:
     @staticmethod
     def create_task_completion_notification_pattern() -> EventPattern:
         """Pattern to match task completion notifications."""
-        return EventPattern(
-            event_types={"task.completed"}, priorities={"normal", "high"}
-        )
+        return EventPattern(event_types={"task.completed"}, priorities={"normal", "high"})
 
     @staticmethod
     def create_error_escalation_pattern() -> EventPattern:
@@ -238,9 +236,7 @@ class ExampleEventReactionAgent(EventSubscriber):
         )
 
         # Celebrate task completions
-        completion_pattern = (
-            CollaborationPatterns.create_task_completion_notification_pattern()
-        )
+        completion_pattern = CollaborationPatterns.create_task_completion_notification_pattern()
         self.subscribe_to_events(
             pattern=completion_pattern,
             handler=self.handle_task_completion_celebration,
@@ -292,9 +288,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 )
 
         except Exception as e:
-            await self.emit_error(
-                "collaboration_error", f"Failed to handle help request: {e}"
-            )
+            await self.emit_error("collaboration_error", f"Failed to handle help request: {e}")
 
     async def handle_task_completion_celebration(self, event: AgentEvent):
         """Celebrate task completions from team members."""
@@ -413,9 +407,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             agent_id = event.agent_id
 
             # Determine appropriate pipeline
-            if trigger_type == "task.completed" and "test" in event.data.get(
-                "task_type", ""
-            ):
+            if trigger_type == "task.completed" and "test" in event.data.get("task_type", ""):
                 # Tests completed - trigger deployment pipeline
                 await self.emit_collaboration(
                     message="Tests completed successfully. Initiating deployment pipeline.",
@@ -431,9 +423,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 )
 
         except Exception as e:
-            await self.emit_error(
-                "pipeline_error", f"Failed to handle pipeline trigger: {e}"
-            )
+            await self.emit_error("pipeline_error", f"Failed to handle pipeline trigger: {e}")
 
     async def handle_rollback_request(self, event: AgentEvent):
         """Handle rollback requests."""
@@ -515,9 +505,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 )
 
         except Exception as e:
-            await self.emit_error(
-                "knowledge_error", f"Failed to handle knowledge sharing: {e}"
-            )
+            await self.emit_error("knowledge_error", f"Failed to handle knowledge sharing: {e}")
 
     async def handle_pattern_recognition(self, event: AgentEvent):
         """Handle individual events for pattern recognition."""
@@ -572,9 +560,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 )
 
         except Exception as e:
-            await self.emit_error(
-                "pattern_error", f"Failed to analyze task patterns: {e}"
-            )
+            await self.emit_error("pattern_error", f"Failed to analyze task patterns: {e}")
 
     async def handle_feedback(self, event: AgentEvent):
         """Handle feedback from other agents."""
@@ -584,7 +570,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             from_agent = event.agent_id
 
             # Store feedback for learning
-            feedback_record = {
+            _feedback_record = {
                 "feedback": feedback,
                 "type": feedback_type,
                 "from_agent": from_agent,
@@ -664,9 +650,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             )
 
         except Exception as e:
-            await self.emit_error(
-                "health_check_error", f"Failed to respond to health check: {e}"
-            )
+            await self.emit_error("health_check_error", f"Failed to respond to health check: {e}")
 
     async def handle_performance_anomaly(self, event: AgentEvent):
         """Handle performance anomaly detection."""
@@ -694,9 +678,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             )
 
         except Exception as e:
-            await self.emit_error(
-                "performance_error", f"Failed to handle performance anomaly: {e}"
-            )
+            await self.emit_error("performance_error", f"Failed to handle performance anomaly: {e}")
 
     async def handle_resource_alert(self, event: AgentEvent):
         """Handle resource-related alerts."""
@@ -718,9 +700,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 await self.handle_resource_management(event)
 
         except Exception as e:
-            await self.emit_error(
-                "resource_alert_error", f"Failed to handle resource alert: {e}"
-            )
+            await self.emit_error("resource_alert_error", f"Failed to handle resource alert: {e}")
 
     # ========== Chain Reactions ==========
 
@@ -772,9 +752,7 @@ class ExampleEventReactionAgent(EventSubscriber):
                 )
 
         except Exception as e:
-            await self.emit_error(
-                "test_completion_error", f"Failed to handle test completion: {e}"
-            )
+            await self.emit_error("test_completion_error", f"Failed to handle test completion: {e}")
 
     async def handle_error_investigation(self, event: AgentEvent):
         """Handle error investigation initiation."""
@@ -789,10 +767,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             )
 
             # If we're a debugging agent, start analysis
-            if (
-                "debug" in self.agent_type.lower()
-                or "investigator" in self.agent_type.lower()
-            ):
+            if "debug" in self.agent_type.lower() or "investigator" in self.agent_type.lower():
                 await self.start_error_analysis(event)
 
         except Exception as e:
@@ -858,9 +833,7 @@ class ExampleEventReactionAgent(EventSubscriber):
             )
 
         except Exception as e:
-            await self.emit_error(
-                "instability_error", f"Failed to handle system instability: {e}"
-            )
+            await self.emit_error("instability_error", f"Failed to handle system instability: {e}")
 
     async def handle_individual_knowledge(self, event: AgentEvent):
         """Handle individual knowledge events (part of aggregation)."""
@@ -871,9 +844,7 @@ class ExampleEventReactionAgent(EventSubscriber):
         """Trigger knowledge sharing session after multiple learning events."""
         try:
             learning_agents = set(event.agent_id for event in events)
-            knowledge_types = [
-                event.data.get("knowledge_type", "general") for event in events
-            ]
+            knowledge_types = [event.data.get("knowledge_type", "general") for event in events]
 
             await self.emit_collaboration(
                 message=f"📚 KNOWLEDGE SHARING SESSION: {len(events)} new learnings from "
@@ -997,9 +968,7 @@ class PatternBuilder:
         custom_filters = []
         if task_types:
             custom_filters.append(
-                CustomFilter(
-                    field="data.task_type", operator=FilterOperator.IN, value=task_types
-                )
+                CustomFilter(field="data.task_type", operator=FilterOperator.IN, value=task_types)
             )
 
         return EventPattern(

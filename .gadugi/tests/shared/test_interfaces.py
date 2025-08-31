@@ -17,7 +17,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
 
 try:
-    from shared.interfaces import (  # type: ignore[import]
+    from src.src.shared.interfaces import (  # type: ignore[import]
         AgentConfig,  # type: ignore[assignment]
         AgentConfigSchema,  # type: ignore[assignment]
         AgentFactory,  # type: ignore[assignment]

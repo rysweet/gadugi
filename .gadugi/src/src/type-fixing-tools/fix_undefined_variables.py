@@ -9,9 +9,7 @@ from pathlib import Path
 
 def get_undefined_variable_errors():
     """Get undefined variable errors from pyright."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     errors = []
     for line in result.stderr.split("\n"):
@@ -74,10 +72,7 @@ def add_missing_imports_for_undefined_vars():
                                     content = f.read()
 
                                 # Check if already fixed
-                                if (
-                                    f"class {var_name}" in content
-                                    or f"def {var_name}" in content
-                                ):
+                                if f"class {var_name}" in content or f"def {var_name}" in content:
                                     continue
 
                                 # Add the definition
@@ -93,9 +88,7 @@ def add_missing_imports_for_undefined_vars():
                                     elif (
                                         insert_idx > 0
                                         and line.strip()
-                                        and not line.strip().startswith(
-                                            ("import ", "from ", "#")
-                                        )
+                                        and not line.strip().startswith(("import ", "from ", "#"))
                                     ):
                                         insert_idx = i
                                         break
@@ -120,9 +113,7 @@ def add_missing_imports_for_undefined_vars():
 
 def fix_unused_imports():
     """Remove or comment out unused imports."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     for line in result.stderr.split("\n"):
         if "is not accessed" in line and 'Import "' in line:
@@ -136,9 +127,7 @@ def fix_unused_imports():
 
                     # Extract import name
                     if 'Import "' in line and '" is not accessed' in line:
-                        import_name = line.split('Import "')[1].split(
-                            '" is not accessed'
-                        )[0]
+                        import_name = line.split('Import "')[1].split('" is not accessed')[0]
 
                         full_path = Path(file_path)
                         if full_path.exists():
@@ -156,18 +145,14 @@ def fix_unused_imports():
                                     or f", {import_name}" in line_content
                                 ):
                                     if not line_content.strip().startswith("#"):
-                                        lines[i] = (
-                                            f"# {line_content.strip()}  # Unused import"
-                                        )
+                                        lines[i] = f"# {line_content.strip()}  # Unused import"
                                         modified = True
                                         break
 
                             if modified:
                                 with open(full_path, "w") as f:
                                     f.write("\n".join(lines))
-                                print(
-                                    f"Commented out unused import {import_name} in {file_path}"
-                                )
+                                print(f"Commented out unused import {import_name} in {file_path}")
 
             except Exception as e:
                 print(f"Error processing unused import: {e}")
@@ -180,9 +165,7 @@ def main():
     fix_unused_imports()
 
     # Check improvement
-    result = subprocess.run(
-        ["uv", "run", "pyright", "--stats"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", "--stats"], capture_output=True, text=True)
 
     for line in result.stderr.split("\n"):
         if "errors," in line:

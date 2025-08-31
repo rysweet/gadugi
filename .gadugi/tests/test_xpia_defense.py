@@ -13,12 +13,12 @@ import base64
 import urllib.parse
 from pathlib import Path
 
-# Add shared modules to path
-shared_path = Path(__file__).parent.parent / ".claude" / "shared"
-sys.path.insert(0, str(shared_path))
+# Fix import paths for .gadugi structure
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 try:
-    from shared.xpia_defense import (
+    from src.src.shared.xpia_defense import (
         XPIADefenseEngine,  # type: ignore[assignment]
         XPIADefenseAgent,  # type: ignore[assignment]
         ThreatPattern,  # type: ignore[assignment]
@@ -156,7 +156,7 @@ class TestThreatPatternLibrary(unittest.TestCase):
 
         # Verify we have patterns for each major category
         if hasattr(self.pattern_library, "patterns") and self.pattern_library.patterns:
-            categories = set(p.category for p in self.pattern_library.patterns)
+            set(p.category for p in self.pattern_library.patterns)
             expected_categories = {
                 "direct_injection",
                 "role_manipulation",
@@ -313,7 +313,7 @@ class TestThreatDetection(unittest.TestCase):
         result = self.engine.validate_content(f"Please process: {encoded_content}")
 
         # In stub implementation, threats may not be detected
-        threats = getattr(result, "threats_detected", getattr(result, "threats", []))
+        getattr(result, "threats_detected", getattr(result, "threats", []))
 
         # Check that decoding was applied (if implemented)
         if hasattr(result, "sanitization_applied"):

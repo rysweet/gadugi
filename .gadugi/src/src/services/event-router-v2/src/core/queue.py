@@ -143,9 +143,7 @@ class EventQueue:
                 return self._queue[0].event
             return None
 
-    async def get_batch(
-        self, max_items: int = 10, timeout: Optional[float] = None
-    ) -> List[Event]:
+    async def get_batch(self, max_items: int = 10, timeout: Optional[float] = None) -> List[Event]:
         """Get batch of events.
 
         Args:
@@ -209,9 +207,7 @@ class EventQueue:
                 "utilization": self._size / self.max_size if self.max_size > 0 else 0,
             }
 
-    async def get_events_by_priority(
-        self, priority: EventPriority, limit: int = 10
-    ) -> List[Event]:
+    async def get_events_by_priority(self, priority: EventPriority, limit: int = 10) -> List[Event]:
         """Get events with specific priority.
 
         Args:

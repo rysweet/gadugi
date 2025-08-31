@@ -176,14 +176,10 @@ class StrategicPlanner:
         current_state = self._analyze_current_state(agent_ids)
 
         # Create capacity plan
-        capacity_plan = self._create_capacity_plan(
-            agent_ids, strategic_goals, current_state
-        )
+        capacity_plan = self._create_capacity_plan(agent_ids, strategic_goals, current_state)
 
         # Create skill development plan
-        skill_plan = self._create_skill_development_plan(
-            agent_ids, strategic_goals, current_state
-        )
+        skill_plan = self._create_skill_development_plan(agent_ids, strategic_goals, current_state)
 
         # Generate strategic initiatives
         initiatives = self._generate_strategic_initiatives(
@@ -233,9 +229,7 @@ class StrategicPlanner:
         if themes:
             return f"Build a world-class team delivering {', '.join(set(themes))}"
         else:
-            return (
-                "Create a high-performing, adaptable team ready for future challenges"
-            )
+            return "Create a high-performing, adaptable team ready for future challenges"
 
     def _create_strategic_goals(
         self, business_objectives: List[Dict[str, Any]], agent_ids: List[str]
@@ -254,8 +248,7 @@ class StrategicPlanner:
                     obj.get("metric", "performance_score"), agent_ids
                 ),
                 target_value=obj.get("target", 0.85),
-                deadline=datetime.utcnow()
-                + timedelta(days=obj.get("timeline_days", 90)),
+                deadline=datetime.utcnow() + timedelta(days=obj.get("timeline_days", 90)),
                 priority=StrategyPriority(obj.get("priority", "medium")),
                 dependencies=obj.get("dependencies", []),
             )
@@ -267,9 +260,7 @@ class StrategicPlanner:
 
         return goals
 
-    def _create_default_strategic_goals(
-        self, agent_ids: List[str]
-    ) -> List[StrategicGoal]:
+    def _create_default_strategic_goals(self, agent_ids: List[str]) -> List[StrategicGoal]:
         """Create default strategic goals."""
         current_performance = self._calculate_team_performance(agent_ids)
 
@@ -329,9 +320,7 @@ class StrategicPlanner:
 
         # Average the metrics
         for metric, values in state["performance_metrics"].items():
-            state["performance_metrics"][metric] = (
-                sum(values) / len(values) if values else 0
-            )
+            state["performance_metrics"][metric] = sum(values) / len(values) if values else 0
 
         # Analyze capability coverage
         all_skills = set()
@@ -398,14 +387,10 @@ class StrategicPlanner:
         # Create development paths for each agent
         development_paths = {}
         for agent_id in agent_ids:
-            development_paths[agent_id] = self._create_agent_development_path(
-                agent_id, skill_gaps
-            )
+            development_paths[agent_id] = self._create_agent_development_path(agent_id, skill_gaps)
 
         # Create training calendar
-        training_calendar = self._create_training_calendar(
-            development_paths, skill_gaps
-        )
+        training_calendar = self._create_training_calendar(development_paths, skill_gaps)
 
         # Calculate investment required
         investment_required = self._calculate_training_investment(
@@ -438,9 +423,7 @@ class StrategicPlanner:
                         type=StrategyType.CAPACITY_EXPANSION,
                         title=f"Expand Team Capacity - {timeframe}",
                         description=f"Address capacity gaps in {', '.join(gaps.keys())}",
-                        goals_addressed=[
-                            g.goal_id for g in goals if "scale" in g.title.lower()
-                        ],
+                        goals_addressed=[g.goal_id for g in goals if "scale" in g.title.lower()],
                         impact_estimate={"capacity": sum(gaps.values())},
                         resource_requirements={
                             "new_agents": int(sum(gaps.values())),
@@ -478,9 +461,7 @@ class StrategicPlanner:
                     type=StrategyType.SKILL_DEVELOPMENT,
                     title="Comprehensive Skill Development Program",
                     description=f"Address skill gaps in {', '.join(critical_gaps.keys())}",
-                    goals_addressed=[
-                        g.goal_id for g in goals if "quality" in g.title.lower()
-                    ],
+                    goals_addressed=[g.goal_id for g in goals if "quality" in g.title.lower()],
                     impact_estimate={
                         "skill_coverage": 0.5,  # 50% improvement
                         "quality_improvement": 0.2,  # 20% quality boost
@@ -521,9 +502,7 @@ class StrategicPlanner:
                 type=StrategyType.PROCESS_IMPROVEMENT,
                 title="Workflow Optimization Initiative",
                 description="Streamline processes for maximum efficiency",
-                goals_addressed=[
-                    g.goal_id for g in goals if "efficiency" in g.title.lower()
-                ],
+                goals_addressed=[g.goal_id for g in goals if "efficiency" in g.title.lower()],
                 impact_estimate={
                     "efficiency_ratio": 0.25,  # 25% improvement
                     "throughput": 0.3,  # 30% throughput increase
@@ -597,9 +576,7 @@ class StrategicPlanner:
 
         return metrics
 
-    def _create_review_schedule(
-        self, roadmap: Dict[PlanningHorizon, List[str]]
-    ) -> List[datetime]:
+    def _create_review_schedule(self, roadmap: Dict[PlanningHorizon, List[str]]) -> List[datetime]:
         """Create review schedule for the strategic plan."""
         schedule = []
         now = datetime.utcnow()
@@ -648,9 +625,7 @@ class StrategicPlanner:
         for agent_id in agent_ids:
             performance = self.performance_analyzer.get_agent_performance(agent_id)
             if performance.success_rate:
-                metrics["success_rate"] = (
-                    metrics["success_rate"] + performance.success_rate
-                ) / 2
+                metrics["success_rate"] = (metrics["success_rate"] + performance.success_rate) / 2
 
         return metrics
 
@@ -709,9 +684,7 @@ class StrategicPlanner:
 
         return gaps
 
-    def _generate_capacity_recommendations(
-        self, gaps: Dict[str, Dict[str, float]]
-    ) -> List[str]:
+    def _generate_capacity_recommendations(self, gaps: Dict[str, Dict[str, float]]) -> List[str]:
         """Generate recommendations for capacity planning."""
         recommendations = []
 
@@ -721,9 +694,7 @@ class StrategicPlanner:
             recommendations.append(
                 f"Immediate action needed: {total_gap:.1f} FTE capacity gap in short term"
             )
-            recommendations.append(
-                "Consider temporary contractors or overtime for immediate needs"
-            )
+            recommendations.append("Consider temporary contractors or overtime for immediate needs")
 
         # Check medium-term gaps
         if "medium_term" in gaps and gaps["medium_term"]:
@@ -783,9 +754,7 @@ class StrategicPlanner:
                         "skill": skill,
                         "current_level": current_score,
                         "target_level": 0.8,
-                        "training_type": "intensive"
-                        if current_score < 0.4
-                        else "moderate",
+                        "training_type": "intensive" if current_score < 0.4 else "moderate",
                         "duration_weeks": 4 if current_score < 0.4 else 2,
                         "resources": [
                             f"{skill} fundamentals course",
@@ -824,9 +793,7 @@ class StrategicPlanner:
         current_date = start_date
         for skill, agents in skill_groups.items():
             if len(agents) >= 2:  # Group training
-                calendar[current_date] = [
-                    f"Group training: {skill} ({len(agents)} agents)"
-                ]
+                calendar[current_date] = [f"Group training: {skill} ({len(agents)} agents)"]
                 current_date += timedelta(weeks=1)
 
         return calendar
@@ -851,14 +818,10 @@ class StrategicPlanner:
                 investment["training_hours"] += hours
 
         # Calculate external training cost
-        investment["external_training"] = (
-            len(training_calendar) * 2000
-        )  # $2k per session
+        investment["external_training"] = len(training_calendar) * 2000  # $2k per session
 
         # Calculate lost productivity (training hours * hourly rate)
-        investment["lost_productivity"] = (
-            investment["training_hours"] * 100
-        )  # $100/hour
+        investment["lost_productivity"] = investment["training_hours"] * 100  # $100/hour
 
         # Materials and resources
         investment["materials"] = len(development_paths) * 500  # $500 per agent

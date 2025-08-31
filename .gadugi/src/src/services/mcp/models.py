@@ -63,9 +63,7 @@ class Memory:
             "access_count": self.access_count,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "last_accessed": self.last_accessed.isoformat()
-            if self.last_accessed
-            else None,
+            "last_accessed": self.last_accessed.isoformat() if self.last_accessed else None,
             "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "version": self.version,
             "parent_id": self.parent_id,
@@ -85,12 +83,8 @@ class Memory:
             metadata=data.get("metadata", {}),
             importance_score=data.get("importance_score", 0.5),
             access_count=data.get("access_count", 0),
-            created_at=datetime.fromisoformat(
-                data.get("created_at", datetime.now().isoformat())
-            ),
-            updated_at=datetime.fromisoformat(
-                data.get("updated_at", datetime.now().isoformat())
-            ),
+            created_at=datetime.fromisoformat(data.get("created_at", datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(data.get("updated_at", datetime.now().isoformat())),
             last_accessed=datetime.fromisoformat(data["last_accessed"])
             if data.get("last_accessed")
             else None,
@@ -107,9 +101,7 @@ class Memory:
         self.last_accessed = datetime.now()
         self.access_count += 1
 
-    def calculate_relevance_score(
-        self, query_embedding: Optional[List[float]] = None
-    ) -> float:
+    def calculate_relevance_score(self, query_embedding: Optional[List[float]] = None) -> float:
         """Calculate relevance score based on importance, recency, and similarity."""
         # Time decay factor (memories become less relevant over time)
         if self.last_accessed:
@@ -186,12 +178,8 @@ class Context:
             working_memory=data.get("working_memory", {}),
             parent_context_id=data.get("parent_context_id"),
             child_contexts=data.get("child_contexts", []),
-            created_at=datetime.fromisoformat(
-                data.get("created_at", datetime.now().isoformat())
-            ),
-            updated_at=datetime.fromisoformat(
-                data.get("updated_at", datetime.now().isoformat())
-            ),
+            created_at=datetime.fromisoformat(data.get("created_at", datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(data.get("updated_at", datetime.now().isoformat())),
             metadata=data.get("metadata", {}),
         )
 

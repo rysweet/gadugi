@@ -94,12 +94,8 @@ class SQLiteMemoryBackend:
             """)
 
             # Create indices
-            await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_memories_agent ON memories(agent_id)"
-            )
-            await db.execute(
-                "CREATE INDEX IF NOT EXISTS idx_memories_task ON memories(task_id)"
-            )
+            await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_agent ON memories(agent_id)")
+            await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_task ON memories(task_id)")
             await db.execute(
                 "CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)"
             )
@@ -413,9 +409,7 @@ async def test_sqlite_backend():
     task_id = "task_001"
 
     # Store different memory types
-    mem1 = await backend.store_memory(
-        agent_id, "Starting test task", "short_term", task_id, 0.8
-    )
+    mem1 = await backend.store_memory(agent_id, "Starting test task", "short_term", task_id, 0.8)
     print(f"✅ Stored short-term memory: {mem1}")
 
     mem2 = await backend.store_memory(
@@ -442,7 +436,7 @@ async def test_sqlite_backend():
     node2 = await backend.add_knowledge_node(
         agent_id, "Memory System", "Stores agent memories", confidence=0.9
     )
-    edge = await backend.add_knowledge_edge(node1, node2, "used_by", weight=0.8)
+    _edge = await backend.add_knowledge_edge(node1, node2, "used_by", weight=0.8)
     print("✅ Added knowledge nodes and edge")
 
     # Store procedure
@@ -465,9 +459,7 @@ async def test_sqlite_backend():
         print("⚠️ Whiteboard not found")
 
     graph = await backend.get_knowledge_graph(agent_id)
-    print(
-        f"✅ Retrieved knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges"
-    )
+    print(f"✅ Retrieved knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")
 
     procedures = await backend.get_procedures(agent_id)
     print(f"✅ Retrieved {len(procedures)} procedures")

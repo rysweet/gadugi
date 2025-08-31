@@ -8,7 +8,7 @@ from datetime import datetime
 
 from neo4j import GraphDatabase, basic_auth
 from neo4j.exceptions import ServiceUnavailable, AuthError
-from typing import List
+from typing import List, Dict
 
 
 class Neo4jConnection:

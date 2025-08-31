@@ -137,9 +137,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
 
         # Find resource bottlenecks
         resource_bottlenecks = [
-            b
-            for b in analysis.bottlenecks
-            if b.type == BottleneckType.RESOURCE_CONSTRAINT
+            b for b in analysis.bottlenecks if b.type == BottleneckType.RESOURCE_CONSTRAINT
         ]
 
         # Should detect GPU bottleneck
@@ -174,17 +172,13 @@ class TestWorkflowOptimizer(unittest.TestCase):
         )
 
         # Find skill bottlenecks
-        skill_bottlenecks = [
-            b for b in analysis.bottlenecks if b.type == BottleneckType.SKILL_GAP
-        ]
+        skill_bottlenecks = [b for b in analysis.bottlenecks if b.type == BottleneckType.SKILL_GAP]
 
         # Should detect skill gaps
         self.assertGreater(len(skill_bottlenecks), 0)
 
         # Verify specific skills identified
-        dl_bottlenecks = [
-            b for b in skill_bottlenecks if "deep_learning" in b.description
-        ]
+        dl_bottlenecks = [b for b in skill_bottlenecks if "deep_learning" in b.description]
         self.assertGreater(len(dl_bottlenecks), 0)
 
     def test_detect_dependency_bottlenecks(self):
@@ -230,15 +224,11 @@ class TestWorkflowOptimizer(unittest.TestCase):
 
         # Find process bottlenecks
         process_bottlenecks = [
-            b
-            for b in analysis.bottlenecks
-            if b.type == BottleneckType.PROCESS_INEFFICIENCY
+            b for b in analysis.bottlenecks if b.type == BottleneckType.PROCESS_INEFFICIENCY
         ]
 
         # Should detect rework issue
-        rework_bottlenecks = [
-            b for b in process_bottlenecks if "rework" in b.description.lower()
-        ]
+        rework_bottlenecks = [b for b in process_bottlenecks if "rework" in b.description.lower()]
         self.assertGreater(len(rework_bottlenecks), 0)
 
     def test_generate_resource_optimization(self):
@@ -262,9 +252,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
 
         # Should have optimization for resource issues
         resource_opts = [
-            o
-            for o in analysis.optimizations
-            if o.type == OptimizationType.RESOURCE_REALLOCATION
+            o for o in analysis.optimizations if o.type == OptimizationType.RESOURCE_REALLOCATION
         ]
 
         if resource_opts:
@@ -286,18 +274,14 @@ class TestWorkflowOptimizer(unittest.TestCase):
             parallel_efficiency=0.3,  # Low
         )
 
-        with patch.object(
-            self.optimizer, "_calculate_workflow_metrics", return_value=metrics
-        ):
+        with patch.object(self.optimizer, "_calculate_workflow_metrics", return_value=metrics):
             analysis = self.optimizer.analyze_workflow(
                 self.workflow_data, self.agent_states, self.task_history
             )
 
         # Should have parallelization optimization
         parallel_opts = [
-            o
-            for o in analysis.optimizations
-            if o.type == OptimizationType.PARALLELIZATION
+            o for o in analysis.optimizations if o.type == OptimizationType.PARALLELIZATION
         ]
         self.assertGreater(len(parallel_opts), 0)
 
@@ -315,9 +299,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
 
                 # Higher priority or higher impact should come first
                 if opt1.priority == opt2.priority:
-                    self.assertGreaterEqual(
-                        opt1.expected_improvement, opt2.expected_improvement
-                    )
+                    self.assertGreaterEqual(opt1.expected_improvement, opt2.expected_improvement)
 
     def test_projected_improvements(self):
         """Test projection of improvements after optimizations."""
@@ -380,9 +362,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
 
         # Find communication bottlenecks
         comm_bottlenecks = [
-            b
-            for b in analysis.bottlenecks
-            if b.type == BottleneckType.COMMUNICATION_LAG
+            b for b in analysis.bottlenecks if b.type == BottleneckType.COMMUNICATION_LAG
         ]
 
         # Should detect communication issues
@@ -396,9 +376,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
     def test_workflow_pattern_learning(self):
         """Test that workflow patterns are stored for learning."""
         # Run analysis
-        self.optimizer.analyze_workflow(
-            self.workflow_data, self.agent_states, self.task_history
-        )
+        self.optimizer.analyze_workflow(self.workflow_data, self.agent_states, self.task_history)
 
         # Verify pattern storage
         workflow_id = self.workflow_data["id"]
@@ -412,9 +390,7 @@ class TestWorkflowOptimizer(unittest.TestCase):
         self.assertGreater(len(patterns["analyses"]), 0)
 
         # Run again to see pattern accumulation
-        self.optimizer.analyze_workflow(
-            self.workflow_data, self.agent_states, self.task_history
-        )
+        self.optimizer.analyze_workflow(self.workflow_data, self.agent_states, self.task_history)
 
         self.assertEqual(len(patterns["analyses"]), 2)
 

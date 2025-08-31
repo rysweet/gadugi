@@ -117,9 +117,7 @@ class TestSubscription:
 
     def test_namespace_match(self):
         """Test namespace filtering."""
-        sub = Subscription(
-            subscriber_id="test", topic_pattern="*", namespace="production"
-        )
+        sub = Subscription(subscriber_id="test", topic_pattern="*", namespace="production")
 
         assert sub.matches("any.topic", "production") is True
         assert sub.matches("any.topic", "development") is False
@@ -137,9 +135,7 @@ class TestProcessManager:
             mock_process.returncode = None
             mock_subprocess.return_value = mock_process
 
-            agent = await process_manager.spawn_agent(
-                "test-agent", ["python", "-m", "test"]
-            )
+            agent = await process_manager.spawn_agent("test-agent", ["python", "-m", "test"])
 
             assert agent.agent_id == "test-agent"
             assert agent.process == mock_process
@@ -183,9 +179,7 @@ class TestProcessManager:
 
     def test_update_heartbeat(self, process_manager):
         """Test updating agent heartbeat."""
-        agent = AgentProcess(
-            agent_id="test-agent", process=MagicMock(), command=["python"]
-        )
+        agent = AgentProcess(agent_id="test-agent", process=MagicMock(), command=["python"])
 
         process_manager.processes["test-agent"] = agent
 
@@ -236,9 +230,7 @@ class TestDeadLetterQueue:
         """Test getting all events from DLQ."""
         await dlq.add(sample_event, "Error 1")
 
-        event2 = Event(
-            id="test-002", type=EventType.CUSTOM, topic="test", source="test", data={}
-        )
+        event2 = Event(id="test-002", type=EventType.CUSTOM, topic="test", source="test", data={})
         await dlq.add(event2, "Error 2")
 
         events = await dlq.get_all()
@@ -314,9 +306,7 @@ class TestEventRouter:
         await event_router.start()
 
         # Subscribe to production namespace only
-        prod_queue = event_router.subscribe(
-            "prod-subscriber", "*", namespace="production"
-        )
+        prod_queue = event_router.subscribe("prod-subscriber", "*", namespace="production")
 
         # Subscribe to all namespaces
         all_queue = event_router.subscribe("all-subscriber", "*")
@@ -509,9 +499,7 @@ class TestEventRouter:
         async def failing_callback(event):  # type: ignore
             raise Exception("Delivery failed")
 
-        event_router.subscribe(
-            "failing-subscriber", "test.*", callback=failing_callback
-        )
+        event_router.subscribe("failing-subscriber", "test.*", callback=failing_callback)
 
         # Set retry count to max
         sample_event.retry_count = 3

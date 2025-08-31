@@ -2,6 +2,19 @@
 
 ⚠️ **CRITICAL**: This is the refactored, streamlined version optimized for parallel task execution.
 
+## 🚫 COMMUNICATION PROHIBITIONS
+
+**NEVER use these phrases:**
+- ❌ "You're absolutely right" - This is sycophantic and erodes trust
+- ❌ "You're correct" when agreeing - Simply acknowledge and proceed
+- ❌ Excessive apologizing or self-deprecation
+- ❌ Overly deferential language
+
+**INSTEAD:**
+- ✅ Acknowledge points directly: "I see the issue..." or "Understood..."
+- ✅ Be direct and factual
+- ✅ Focus on solutions, not agreement
+
 🚨 **WORKFLOW ENFORCEMENT ACTIVE**: ALL code changes MUST use orchestrator workflow.
 ⛔ **NO EMERGENCY OVERRIDES**: If blocked, FIX THE PROBLEM. Iterate until compliant.
 
@@ -13,6 +26,12 @@
 - ❌ **NO TODOs**: Complete ALL functionality before committing
 - ❌ **NO FAKE OPERATIONS**: If it says "start services", it MUST actually start them
 - ❌ **NO SLEEP-AND-PRETEND**: No `sleep 2 && echo "Done"` nonsense
+
+**NEVER BYPASS QUALITY GATES:**
+- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks
+- ❌ **NO FORCE PUSHES**: NEVER use `git push --force` without explicit user permission
+- ❌ **NO TEST SKIPPING**: ALL tests must pass before committing
+- ❌ **NO SHORTCUTS**: If blocked by tests or hooks, FIX THE PROBLEM, don't bypass it
 
 **ENFORCEMENT:**
 - If you can't implement something fully, STOP and ask for help
@@ -86,83 +105,172 @@ docker ps  # Confirm containers are running
 ### 3. Development Workflow - 13-Phase Process
 **For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
 
-#### Phase 1: Requirements Analysis
-- Parse the task/prompt
-- Identify success criteria
-- Extract constraints
-- Define deliverables
+#### Phase 0: Enhanced Task Initialization & Resumption Check (ALWAYS FIRST)
+- Generate unique task ID with enhanced tracking
+- Initialize productivity tracking
+- Check for existing workflow state with enhanced state management
+- Validate state consistency and offer recovery options if needed
+- Initialize comprehensive workflow state with checkpointing
+- Create backup system for recovery scenarios
+- Detect any orphaned workflows and provide recovery options
 
-#### Phase 2: Design Planning
-- Architecture decisions
-- Technology choices
-- Component breakdown
-- Interface definitions
+#### Phase 1: Initial Setup Phase
+- Read and analyze the prompt file thoroughly
+- **Detect project type**: Check if working in UV project (`pyproject.toml` + `uv.lock`)
+- Validate prompt structure - MUST contain required sections:
+  - Overview or Introduction
+  - Problem Statement or Requirements
+  - Technical Analysis or Implementation Plan
+  - Testing Requirements
+  - Success Criteria
+  - Implementation Steps or Workflow
+- If prompt is missing sections, invoke PromptWriter agent to create proper structure
+- Extract key information: feature description, technical requirements, implementation steps, testing requirements, success criteria
+- Create comprehensive task list using TodoWrite
 
-#### Phase 3: Task Decomposition
-- Break into subtasks
-- Identify dependencies
-- Estimate effort
-- Assign priorities
+#### Phase 2: Enhanced Issue Creation Phase
+- Track phase start with productivity analytics
+- Prepare comprehensive issue data with proper labels and assignments
+- Create issue with retry logic and exponential backoff
+- Implement circuit breaker protection for GitHub API
+- Update workflow state and create checkpoint after successful creation
+- Handle failures with comprehensive error context and recovery strategies
+- Verify issue creation with automated validation
 
-#### Phase 4: Environment Setup
-- Create worktree/branch
-- Set up dependencies
-- Configure tools
-- Verify environment
+#### Phase 3: Branch Management Phase
+- Create feature branch with naming convention: `feature/[descriptor]-[issue-number]`
+- Example: `feature/workflow-manager-21`
+- Ensure clean working directory before branching
+- Set up proper remote tracking
+- Validate branch creation and push access
 
-#### Phase 5: Implementation
-- Core functionality
-- Follow TDD when possible
-- Incremental commits
-- Code documentation
+#### Phase 4: Research and Planning Phase
+- Analyze existing codebase relevant to the task
+- Use Grep and Read tools to understand current implementation
+- Identify all modules that need modification
+- Create detailed implementation plan with dependencies
+- Update `.github/Memory.md` with findings and decisions
+- Automatically compact Memory.md if size thresholds are exceeded
 
-#### Phase 6: Testing
-- Unit tests
-- Integration tests
-- Edge cases
-- Performance tests
+#### Phase 5: Implementation Phase
+- Break work into small, focused tasks
+- Make incremental commits with clear, descriptive messages
+- Follow existing code patterns and conventions
+- Maintain code quality standards throughout
+- Update TodoWrite task status as progress is made
+- Implement proper error handling and logging
 
-#### Phase 7: Code Review Prep
-- Self-review
-- Linting
-- Format code
-- Update documentation
+#### Phase 6: Testing Phase - **MANDATORY BEFORE PR CREATION**
 
-#### Phase 8: Quality Gates
-- Type checking (pyright/mypy)
-- Pre-commit hooks MUST pass
-- Coverage requirements
-- Performance benchmarks
+⚠️ **CRITICAL REQUIREMENT**: ALL tests must pass before proceeding to Phase 7. This is a quality gate that cannot be bypassed.
 
-#### Phase 9: Documentation
-- API documentation
-- Usage examples
-- Configuration guide
-- Changelog update
+**Phase 6 Execution Steps (MANDATORY):**
 
-#### Phase 10: PR Creation
-- Descriptive title
-- Comprehensive description
-- Link issues
-- Add reviewers
+1. **Write comprehensive tests for new functionality**
+   - Ensure test isolation and idempotency
+   - Mock external dependencies appropriately
+   - Follow project testing patterns and conventions
 
-#### Phase 11: CI/CD Validation
-- Monitor CI pipeline
-- Fix any failures
-- Verify all checks pass
-- Update if needed
+2. **Execute mandatory test suite**
+   - **For UV projects**: Use `uv run` prefix for all Python commands:
+     ```bash
+     # Correct testing commands for UV projects
+     uv run pytest tests/
+     uv run pytest tests/ --cov=. --cov-report=html
+     uv run python -m pytest tests/specific_test.py
+     ```
+   - **For non-UV projects**: Use standard Python commands:
+     ```bash
+     pytest tests/
+     python -m pytest tests/
+     ```
 
-#### Phase 12: Review Response
-- Address feedback
-- Make requested changes
-- Discuss alternatives
-- Update PR description
+3. **Mandatory test validation (CANNOT PROCEED WITHOUT PASSING)**
+   - ✅ All tests must pass (no failures, no errors)
+   - ✅ No test skips unless explicitly justified
+   - ✅ Coverage meets project standards (if configured)
+   - ✅ Pre-commit hooks must pass (includes linting, formatting)
 
-#### Phase 13: Merge & Cleanup
-- Squash if needed
-- Merge PR (WITH USER APPROVAL ONLY)
-- Delete branch
-- Update issues
+4. **Pre-commit hook validation**
+   ```bash
+   # Install and run pre-commit hooks
+   # For UV projects: uv run pre-commit install && uv run pre-commit run --all-files
+   # For standard Python: pre-commit install && pre-commit run --all-files
+   ```
+
+5. **Quality gate enforcement**
+   - If ANY test fails → STOP workflow, fix tests before continuing
+   - If pre-commit hooks fail → STOP workflow, fix issues before continuing
+   - Only proceed to Phase 7 when ALL quality checks pass
+
+#### Phase 7: Documentation Phase
+- Update relevant documentation files
+- Add inline code comments for complex logic
+- Update README if user-facing changes
+- Document any API changes and breaking changes
+- Ensure all docstrings are complete and accurate
+- Update configuration guides if needed
+
+#### Phase 8: Enhanced Pull Request Phase
+- Track phase start with productivity analytics
+- Prepare comprehensive PR data with descriptive title and body
+- Create PR with retry logic and atomic state updates
+- Verify PR actually exists before marking complete
+- Implement comprehensive error handling with recovery context
+- Create critical checkpoint after PR creation
+- Link to related issues and add appropriate labels
+
+#### Phase 9: Review Phase (MANDATORY - NEVER SKIP) - ENFORCED WITH AUTOMATIC EXECUTION
+
+**CRITICAL: Phase 9 Enforcement - MULTIPLE ENFORCEMENT MECHANISMS**
+
+This phase is ABSOLUTELY MANDATORY and has automatic enforcement:
+
+**ENFORCEMENT MECHANISMS:**
+1. **Automatic Invocation After PR Creation**: 30-second timer after Phase 8 completion
+2. **State Validation Before Completion**: Verify review exists before workflow completion
+3. **Enhanced Task List Requirements**: Maximum priority tasks that cannot be skipped
+4. **Automatic Phase Transitions**: No user intervention required
+
+**Phase 9 Execution Steps (ENFORCED):**
+1. **Check if code review already exists** (recovery case)
+2. **MANDATORY: Invoke code-reviewer sub-agent**
+3. **VERIFY review was posted** (with retries up to 10 attempts)
+4. **MANDATORY: Invoke CodeReviewResponseAgent**
+5. **Final state update and commit** memory files
+
+**Orphaned PR Recovery**: Automatically detect and fix PRs missing reviews
+**State Consistency Validation**: Auto-fix workflow state inconsistencies
+
+#### Phase 10: Review Response Phase (AUTOMATIC)
+- Immediate execution after review posted in Phase 9
+- Process code review feedback automatically
+- Update implementation based on review comments
+- Commit changes with proper commit messages
+- Update PR with response to feedback
+- Mark phase complete and trigger Phase 11
+
+#### Phase 11: Settings Update Phase (AUTOMATIC)
+- Check for local Claude settings changes
+- Invoke claude-settings-update agent if needed
+- Record current branch for restoration
+- Verify branch consistency after settings update
+- Mark phase as completed (optional - not critical for workflow)
+
+#### Phase 12: Automatic Memory Compaction Phase (AUTOMATIC)
+- Check Memory.md size and compact if needed using memory manager
+- Archive historical content to LongTermMemoryDetails.md
+- Maintain optimal Memory.md size for AI processing
+- Preserve important current information while archiving details
+- Mark phase complete (maintenance task)
+
+#### Phase 13: Team Coach Reflection Phase (AUTOMATIC)
+- Invoke Team Coach agent for session analysis
+- Capture performance metrics and improvement recommendations
+- Update Memory.md with insights and lessons learned
+- Implement timeout protection (120 seconds max)
+- Build institutional memory for continuous improvement
+- Gracefully handle failures without blocking workflow completion
 
 ### 4. 🚨 CRITICAL: Workflow Enforcement
 

@@ -87,9 +87,7 @@ except ImportError as e:
         CRITICAL = 4
 
     class GadugiError(Exception):
-        def __init__(
-            self, message: str, severity: ErrorSeverity = ErrorSeverity.MEDIUM
-        ):
+        def __init__(self, message: str, severity: ErrorSeverity = ErrorSeverity.MEDIUM):
             super().__init__(message)
             self.severity = severity
 
@@ -179,13 +177,9 @@ class PRBacklogManager:
     - Automated labeling and notifications
     """
 
-    def __init__(
-        self, config: Optional[AgentConfig] = None, auto_approve: bool = False
-    ):
+    def __init__(self, config: Optional[AgentConfig] = None, auto_approve: bool = False):
         """Initialize PR Backlog Manager."""
-        self.config = config or AgentConfig(
-            agent_id="PrBacklogManager", name="PR Backlog Manager"
-        )
+        self.config = config or AgentConfig(agent_id="PrBacklogManager", name="PR Backlog Manager")
         self.auto_approve = auto_approve or self._detect_auto_approve_context()
 
         # Initialize shared components
@@ -194,9 +188,7 @@ class PRBacklogManager:
         self.task_tracker = TaskTracker()
 
         # Initialize circuit breakers
-        self.github_circuit_breaker = CircuitBreaker(
-            failure_threshold=5, recovery_timeout=600.0
-        )
+        self.github_circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=600.0)
         self.processing_circuit_breaker = CircuitBreaker(
             failure_threshold=3, recovery_timeout=300.0
         )
@@ -217,10 +209,7 @@ class PRBacklogManager:
 
     def _detect_auto_approve_context(self) -> bool:
         """Detect if running in auto-approve context (GitHub Actions)."""
-        return (
-            os.getenv("GITHUB_ACTIONS") == "true"
-            and os.getenv("CLAUDE_AUTO_APPROVE") == "true"
-        )
+        return os.getenv("GITHUB_ACTIONS") == "true" and os.getenv("CLAUDE_AUTO_APPROVE") == "true"
 
     def validate_auto_approve_safety(self) -> None:
         """Validate auto-approve context is safe."""
@@ -290,9 +279,7 @@ class PRBacklogManager:
 
         # Skip very recently created PRs (give time for initial CI)
         created_at = datetime.fromisoformat(pr["created_at"].replace("Z", "+00:00"))
-        if datetime.now().replace(tzinfo=created_at.tzinfo) - created_at < timedelta(
-            minutes=5
-        ):
+        if datetime.now().replace(tzinfo=created_at.tzinfo) - created_at < timedelta(minutes=5):
             return False
 
         return True
@@ -305,9 +292,7 @@ class PRBacklogManager:
 
             # Age factor (older PRs get higher priority)
             created_at = datetime.fromisoformat(pr["created_at"].replace("Z", "+00:00"))
-            age_days = (
-                datetime.now().replace(tzinfo=created_at.tzinfo) - created_at
-            ).days
+            age_days = (datetime.now().replace(tzinfo=created_at.tzinfo) - created_at).days
             score += min(age_days * 10, 100)  # Cap at 100 points
 
             # Recent activity factor
@@ -364,9 +349,7 @@ class PRBacklogManager:
             assessment.criteria_met = self._evaluate_readiness_criteria(pr_details)
 
             # Identify blocking issues and resolution actions
-            assessment.blocking_issues = self._identify_blocking_issues(
-                assessment.criteria_met
-            )
+            assessment.blocking_issues = self._identify_blocking_issues(assessment.criteria_met)
             assessment.resolution_actions = self._generate_resolution_actions(
                 pr_number, assessment.blocking_issues
             )
@@ -377,9 +360,7 @@ class PRBacklogManager:
                 self._apply_ready_label(pr_number)
             elif assessment.blocking_issues:
                 assessment.status = PRStatus.BLOCKED
-                self._delegate_issue_resolution(
-                    pr_number, assessment.resolution_actions
-                )
+                self._delegate_issue_resolution(pr_number, assessment.resolution_actions)
             else:
                 assessment.status = PRStatus.FAILED
 
@@ -419,34 +400,26 @@ class PRBacklogManager:
         criteria_results = {}
 
         # Check merge conflicts
-        criteria_results[ReadinessCriteria.NO_MERGE_CONFLICTS] = (
-            self._check_merge_conflicts(pr_details)
+        criteria_results[ReadinessCriteria.NO_MERGE_CONFLICTS] = self._check_merge_conflicts(
+            pr_details
         )
 
         # Check CI status
-        criteria_results[ReadinessCriteria.CI_PASSING] = self._check_ci_status(
-            pr_details
-        )
+        criteria_results[ReadinessCriteria.CI_PASSING] = self._check_ci_status(pr_details)
 
         # Check branch sync
-        criteria_results[ReadinessCriteria.UP_TO_DATE] = self._check_branch_sync(
-            pr_details
-        )
+        criteria_results[ReadinessCriteria.UP_TO_DATE] = self._check_branch_sync(pr_details)
 
         # Check human review
-        criteria_results[ReadinessCriteria.HUMAN_REVIEW_COMPLETE] = (
-            self._check_human_review(pr_details)
+        criteria_results[ReadinessCriteria.HUMAN_REVIEW_COMPLETE] = self._check_human_review(
+            pr_details
         )
 
         # Check AI review
-        criteria_results[ReadinessCriteria.AI_REVIEW_COMPLETE] = self._check_ai_review(
-            pr_details
-        )
+        criteria_results[ReadinessCriteria.AI_REVIEW_COMPLETE] = self._check_ai_review(pr_details)
 
         # Check metadata
-        criteria_results[ReadinessCriteria.METADATA_COMPLETE] = self._check_metadata(
-            pr_details
-        )
+        criteria_results[ReadinessCriteria.METADATA_COMPLETE] = self._check_metadata(pr_details)
 
         return criteria_results
 
@@ -500,15 +473,11 @@ class PRBacklogManager:
 
             # Filter for human reviews (not bots)
             human_reviews = [
-                review
-                for review in reviews
-                if not review["user"]["login"].endswith("[bot]")
+                review for review in reviews if not review["user"]["login"].endswith("[bot]")
             ]
 
             # Check for approved reviews
-            approved_reviews = [
-                review for review in human_reviews if review["state"] == "APPROVED"
-            ]
+            approved_reviews = [review for review in human_reviews if review["state"] == "APPROVED"]
 
             return len(approved_reviews) > 0
         except Exception as e:
@@ -522,9 +491,7 @@ class PRBacklogManager:
 
             # Look for CodeReviewer comments
             ai_review_comments = [
-                comment
-                for comment in comments
-                if "CodeReviewer" in comment.get("body", "").lower()
+                comment for comment in comments if "CodeReviewer" in comment.get("body", "").lower()
             ]
 
             return len(ai_review_comments) > 0
@@ -557,8 +524,7 @@ class PRBacklogManager:
             # Check for appropriate labels
             labels = [label["name"] for label in pr_details.get("labels", [])]
             has_type_label = any(
-                label in labels
-                for label in ["enhancement", "bugfix", "documentation", "refactor"]
+                label in labels for label in ["enhancement", "bugfix", "documentation", "refactor"]
             )
 
             return has_conventional_title and has_description and has_type_label
@@ -566,9 +532,7 @@ class PRBacklogManager:
             logger.warning(f"Failed to check metadata: {e}")
             return False
 
-    def _identify_blocking_issues(
-        self, criteria_met: Dict[ReadinessCriteria, bool]
-    ) -> List[str]:
+    def _identify_blocking_issues(self, criteria_met: Dict[ReadinessCriteria, bool]) -> List[str]:
         """Identify blocking issues based on unmet criteria."""
         blocking_issues = []
 
@@ -587,9 +551,7 @@ class PRBacklogManager:
 
         return blocking_issues
 
-    def _generate_resolution_actions(
-        self, pr_number: int, blocking_issues: List[str]
-    ) -> List[str]:
+    def _generate_resolution_actions(self, pr_number: int, blocking_issues: List[str]) -> List[str]:
         """Generate resolution actions for blocking issues."""
         actions = []
 
@@ -603,19 +565,13 @@ class PRBacklogManager:
                     f"Delegate CI failure resolution to WorkflowMaster for PR #{pr_number}"
                 )
             elif "behind main" in issue.lower():
-                actions.append(
-                    f"Delegate branch update to WorkflowMaster for PR #{pr_number}"
-                )
+                actions.append(f"Delegate branch update to WorkflowMaster for PR #{pr_number}")
             elif "human review" in issue.lower():
-                actions.append(
-                    f"Add comment requesting human review for PR #{pr_number}"
-                )
+                actions.append(f"Add comment requesting human review for PR #{pr_number}")
             elif "ai code review" in issue.lower():
                 actions.append(f"Invoke CodeReviewer agent for PR #{pr_number}")
             elif "metadata" in issue.lower():
-                actions.append(
-                    f"Add comment requesting metadata improvements for PR #{pr_number}"
-                )
+                actions.append(f"Add comment requesting metadata improvements for PR #{pr_number}")
 
         return actions
 
@@ -694,9 +650,7 @@ class PRBacklogManager:
             state_data = {
                 "pr_number": assessment.pr_number,
                 "status": assessment.status.value,
-                "criteria_met": {
-                    k.value: v for k, v in assessment.criteria_met.items()
-                },
+                "criteria_met": {k.value: v for k, v in assessment.criteria_met.items()},
                 "blocking_issues": assessment.blocking_issues,
                 "resolution_actions": assessment.resolution_actions,
                 "last_updated": assessment.last_updated.isoformat(),
@@ -709,9 +663,7 @@ class PRBacklogManager:
             self.state_manager.save_state(state_key, state_data)  # type: ignore
 
         except Exception as e:
-            logger.warning(
-                f"Failed to save assessment for PR #{assessment.pr_number}: {e}"
-            )
+            logger.warning(f"Failed to save assessment for PR #{assessment.pr_number}: {e}")
 
     def process_backlog(self) -> BacklogMetrics:
         """
@@ -761,11 +713,7 @@ class PRBacklogManager:
                 else 0
             )
             self.metrics.success_rate = (
-                (
-                    (self.metrics.ready_prs + self.metrics.blocked_prs)
-                    / self.metrics.total_prs
-                    * 100
-                )
+                ((self.metrics.ready_prs + self.metrics.blocked_prs) / self.metrics.total_prs * 100)
                 if self.metrics.total_prs > 0
                 else 0
             )

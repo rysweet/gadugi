@@ -69,9 +69,7 @@ def client() -> Any:
 @pytest.fixture
 def sample_request() -> RequestModel:
     """Create sample request."""
-    return RequestModel(
-        id="test-123", data={"test": "data"}, metadata={"source": "test"}
-    )
+    return RequestModel(id="test-123", data={"test": "data"}, metadata={"source": "test"})
 
 
 class TestHealthEndpoint:
@@ -110,9 +108,7 @@ class TestRootEndpoint:
 class TestProcessEndpoint:
     """Test process endpoint."""
 
-    def test_process_valid_request(
-        self, client: Any, sample_request: RequestModel
-    ) -> None:
+    def test_process_valid_request(self, client: Any, sample_request: RequestModel) -> None:
         """Test processing valid request."""
         response = client.post("/process", json=sample_request.dict())
         assert response.status_code == 200
@@ -205,6 +201,7 @@ def sample_agent_event() -> AgentEvent:
     return AgentEvent(
         event_type=EventType.TASK_STARTED,
         agent_id="test-agent-001",
+        agent_type="TestAgent",
         task_id="task-123",
         data={"description": "Test task"},
         tags=["test", "integration"],
@@ -222,6 +219,7 @@ def sample_task_started_event() -> TaskStartedEvent:
     """Create a sample task started event."""
     return TaskStartedEvent(
         agent_id="test-agent-001",
+        agent_type="TestAgent",
         task_id="task-456",
         task_description="Implement feature X",
         estimated_duration=60,
@@ -242,6 +240,7 @@ def sample_knowledge_event() -> KnowledgeLearnedEvent:
     """Create a sample knowledge learned event."""
     return KnowledgeLearnedEvent(
         agent_id="test-agent-002",
+        agent_type="TestAgent",
         knowledge_type="pattern",
         content="Always validate input parameters before processing",
         confidence=0.9,
@@ -352,6 +351,7 @@ class TestEventHandler:
         error_event = AgentEvent(
             event_type=EventType.ERROR_OCCURRED,
             agent_id="test-agent",
+            agent_type="TestAgent",
             priority=EventPriority.NORMAL,  # Should be upgraded to HIGH
             data={},
             task_id=None,
@@ -382,6 +382,7 @@ class TestEventFilterEngine:
             AgentEvent(
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
+                agent_type="TestAgent",
                 task_id="task-1",
                 data={},
                 project_id=None,
@@ -395,6 +396,7 @@ class TestEventFilterEngine:
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-2",
+                agent_type="TestAgent",
                 task_id="task-2",
                 data={},
                 project_id=None,
@@ -421,9 +423,7 @@ class TestEventFilterEngine:
             offset=0,
         )
 
-        filtered_events = await filter_engine.filter_events(
-            mock_memory_storage, event_filter
-        )
+        filtered_events = await filter_engine.filter_events(mock_memory_storage, event_filter)
 
         assert len(filtered_events) <= 10
         mock_memory_storage.get_events.assert_called_once_with(event_filter)
@@ -464,6 +464,7 @@ class TestEventReplayEngine:
             AgentEvent(
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
+                agent_type="TestAgent",
                 session_id="session-123",
                 timestamp=datetime.utcnow() - timedelta(hours=1),
                 data={},
@@ -478,6 +479,7 @@ class TestEventReplayEngine:
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-1",
+                agent_type="TestAgent",
                 session_id="session-123",
                 timestamp=datetime.utcnow(),
                 data={},
@@ -514,6 +516,7 @@ class TestEventReplayEngine:
         event = AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="agent-1",
+            agent_type="TestAgent",
             timestamp=datetime.utcnow(),
             data={},
             task_id=None,
@@ -609,9 +612,7 @@ class TestSpecificEventTypes:
     """Test specific event type handling."""
 
     @pytest.mark.asyncio
-    async def test_task_started_event(
-        self, sample_task_started_event, mock_memory_storage
-    ):
+    async def test_task_started_event(self, sample_task_started_event, mock_memory_storage):
         """Test handling task started events."""
         filter_engine = EventFilterEngine()
         handler = EventHandler(mock_memory_storage, filter_engine)
@@ -624,9 +625,7 @@ class TestSpecificEventTypes:
         mock_memory_storage.store_event.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_knowledge_learned_event(
-        self, sample_knowledge_event, mock_memory_storage
-    ):
+    async def test_knowledge_learned_event(self, sample_knowledge_event, mock_memory_storage):
         """Test handling knowledge learned events."""
         filter_engine = EventFilterEngine()
         handler = EventHandler(mock_memory_storage, filter_engine)
@@ -643,6 +642,7 @@ class TestSpecificEventTypes:
         """Test collaboration message event creation."""
         collab_event = CollaborationMessageEvent(
             agent_id="agent-sender",
+            agent_type="TestAgent",
             recipient_id="agent-receiver",
             message_type="request",
             content="Can you help with task X?",
@@ -711,9 +711,10 @@ class TestEventSystemErrorHandling:
         storage = MemoryEventStorage(sqlite_db_path=":memory:")
 
         # Don't initialize storage to trigger error
-        event = AgentEvent(
+        _event = AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
+            agent_type="TestAgent",
             data={},
             task_id=None,
             project_id=None,
@@ -753,6 +754,7 @@ class TestEventSystemErrorHandling:
         event = AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
+            agent_type="TestAgent",
             data={},
             task_id=None,
             project_id=None,

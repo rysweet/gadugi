@@ -257,9 +257,7 @@ class RetryCoordinator:
                     },
                     priority=EventPriority.HIGH,
                 )
-                print(
-                    f"[{self.name}] Created retry task {new_task_id} (attempt {retry_count})"
-                )
+                print(f"[{self.name}] Created retry task {new_task_id} (attempt {retry_count})")
             else:
                 print(f"[{self.name}] Max retries exceeded for {original_task_id}")
 

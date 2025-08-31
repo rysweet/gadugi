@@ -11,9 +11,7 @@ from typing import List
 
 def run_pyright(path: str) -> List[str]:
     """Run pyright and return list of errors."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", path], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", path], capture_output=True, text=True)
     errors = []
     for line in result.stdout.split("\n"):
         if "error:" in line:
@@ -50,15 +48,11 @@ def fix_unused_imports(file_path: Path) -> bool:
                         # Parse the imports
                         imports = re.search(r"from typing import (.+)", import_line)
                         if imports:
-                            import_list = [
-                                i.strip() for i in imports.group(1).split(",")
-                            ]
+                            import_list = [i.strip() for i in imports.group(1).split(",")]
                             if "Set" in import_list:
                                 import_list.remove("Set")
                                 if import_list:
-                                    new_import = (
-                                        f"from typing import {', '.join(import_list)}"
-                                    )
+                                    new_import = f"from typing import {', '.join(import_list)}"
                                     content = content.replace(import_line, new_import)
                                 else:
                                     # Remove the entire line if Set was the only import

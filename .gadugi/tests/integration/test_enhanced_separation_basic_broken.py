@@ -14,10 +14,11 @@ from datetime import datetime
 
 import pytest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", ".gadugi", "src", "shared"))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from shared.task_tracking import (
+    from src.src.shared.task_tracking import (
         Task,
         TaskList,
         TaskStatus,
@@ -25,9 +26,9 @@ try:
         TaskTracker,
         TodoWriteIntegration,
     )
-    from shared.github_operations import GitHubOperations
-    from shared.state_management import CheckpointManager, StateManager, TaskState
-    from shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
+    from src.src.shared.github_operations import GitHubOperations
+    from src.src.shared.state_management import CheckpointManager, StateManager, TaskState
+    from src.src.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
 except ImportError as e:
     # If imports fail, we'll skip tests that require these modules
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
@@ -88,14 +89,14 @@ class TestEnhancedSeparationBasic:
             context=state_data,
         )
         result = self.state_manager.save_state(task_state)
-        assert result == True
+        assert result
 
         # Load state
         loaded_state = self.state_manager.load_state(state_id)
         assert loaded_state is not None
         assert loaded_state.task_id == state_id
         assert loaded_state is not None and loaded_state.context["phase"] == "implementation"
-        assert loaded_state is not None and loaded_state.context["metadata"]["test"] == True
+        assert loaded_state is not None and loaded_state.context["metadata"]["test"]
 
     def test_checkpoint_manager_integration(self):
         """Test CheckpointManager integration with StateManager"""
@@ -256,12 +257,12 @@ class TestEnhancedSeparationBasic:
 
         # Test task list validation
         is_valid = todowrite_integration.validate_task_list(task_list)
-        assert is_valid == True
+        assert is_valid
 
         # Test invalid task list - create invalid TaskList
         invalid_task_list = TaskList()
         is_valid_invalid = todowrite_integration.validate_task_list(invalid_task_list)
-        assert is_valid_invalid == False
+        assert not is_valid_invalid
 
     def test_integration_workflow_simulation(self):
         """Test a simplified workflow simulation using all shared modules"""
@@ -419,11 +420,11 @@ class TestEnhancedSeparationCodeReduction:
         """Test that all expected shared modules are available"""
 
         # Test all shared modules can be imported
-        from shared.github_operations import GitHubOperations
-        from shared.interfaces import AgentConfig
-        from shared.state_management import StateManager
-        from shared.task_tracking import TaskTracker
-        from shared.utils.error_handling import ErrorHandler  # type: ignore[import]
+        from src.src.shared.github_operations import GitHubOperations
+        from src.src.shared.interfaces import AgentConfig
+        from src.src.shared.state_management import StateManager
+        from src.src.shared.task_tracking import TaskTracker
+        from src.src.shared.utils.error_handling import ErrorHandler  # type: ignore[import]
 
         # Test instantiation
         github_ops = GitHubOperations()

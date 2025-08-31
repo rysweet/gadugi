@@ -431,14 +431,10 @@ class TaskPatternRecognitionSystem:
         context_score = self._calculate_context_relevance(pattern, task_context)
 
         # 5. Historical relevance
-        historical_score = self._calculate_historical_relevance(
-            pattern, historical_context
-        )
+        historical_score = self._calculate_historical_relevance(pattern, historical_context)
 
         # 6. Anti-pattern violations
-        anti_pattern_penalty = self._calculate_anti_pattern_penalty(
-            pattern, task_description
-        )
+        anti_pattern_penalty = self._calculate_anti_pattern_penalty(pattern, task_description)
 
         # Combine scores with weights
         total_confidence = (
@@ -456,9 +452,7 @@ class TaskPatternRecognitionSystem:
         # Collect matching details
         matched_keywords = self._find_matched_keywords(pattern, task_description)
         matched_indicators = self._find_matched_indicators(pattern, task_description)
-        anti_pattern_violations = self._find_anti_pattern_violations(
-            pattern, task_description
-        )
+        anti_pattern_violations = self._find_anti_pattern_violations(pattern, task_description)
 
         # Generate suggestions
         suggested_modifications = self._generate_suggested_modifications(
@@ -481,9 +475,7 @@ class TaskPatternRecognitionSystem:
             optimization_opportunities=optimization_opportunities,
         )
 
-    def _calculate_keyword_score(
-        self, pattern: Pattern, task_description: str
-    ) -> float:
+    def _calculate_keyword_score(self, pattern: Pattern, task_description: str) -> float:
         """Calculate keyword-based matching score"""
         if not pattern.keywords:
             return 0.0
@@ -497,9 +489,7 @@ class TaskPatternRecognitionSystem:
 
         return matched_keywords / len(pattern.keywords)
 
-    def _calculate_indicator_score(
-        self, pattern: Pattern, task_description: str
-    ) -> float:
+    def _calculate_indicator_score(self, pattern: Pattern, task_description: str) -> float:
         """Calculate indicator-based matching score"""
         if not pattern.indicators:
             return 0.0
@@ -513,9 +503,7 @@ class TaskPatternRecognitionSystem:
 
         return matched_indicators / len(pattern.indicators)
 
-    def _calculate_semantic_similarity(
-        self, pattern: Pattern, task_description: str
-    ) -> float:
+    def _calculate_semantic_similarity(self, pattern: Pattern, task_description: str) -> float:
         """Calculate semantic similarity using word vectors"""
         if not self.semantic_vectors:
             return 0.0
@@ -536,11 +524,9 @@ class TaskPatternRecognitionSystem:
                         similarity = np.dot(keyword_vector, word_vector)
                         similarities.append(similarity)
 
-        return np.mean(similarities) if similarities else 0.0
+        return float(np.mean(similarities)) if similarities else 0.0
 
-    def _calculate_context_relevance(
-        self, pattern: Pattern, task_context: Dict[str, Any]
-    ) -> float:
+    def _calculate_context_relevance(self, pattern: Pattern, task_context: Dict[str, Any]) -> float:
         """Calculate context-based relevance score"""
         if not task_context:
             return 0.5  # Neutral score when no context available
@@ -552,10 +538,7 @@ class TaskPatternRecognitionSystem:
             file_types = task_context["file_types"]
 
             # API patterns are more relevant for API-related files
-            if (
-                pattern.pattern_type == PatternType.IMPLEMENTATION
-                and "api" in pattern.pattern_id
-            ):
+            if pattern.pattern_type == PatternType.IMPLEMENTATION and "api" in pattern.pattern_id:
                 if any(ft in ["js", "py", "java"] for ft in file_types):
                     relevance_score += 0.2
 
@@ -570,15 +553,9 @@ class TaskPatternRecognitionSystem:
 
             if phase == "design" and pattern.pattern_type == PatternType.ARCHITECTURAL:
                 relevance_score += 0.2
-            elif (
-                phase == "implementation"
-                and pattern.pattern_type == PatternType.IMPLEMENTATION
-            ):
+            elif phase == "implementation" and pattern.pattern_type == PatternType.IMPLEMENTATION:
                 relevance_score += 0.2
-            elif (
-                phase == "optimization"
-                and pattern.pattern_type == PatternType.PERFORMANCE
-            ):
+            elif phase == "optimization" and pattern.pattern_type == PatternType.PERFORMANCE:
                 relevance_score += 0.2
 
         # Check team size
@@ -612,9 +589,7 @@ class TaskPatternRecognitionSystem:
 
         return 0.5
 
-    def _calculate_anti_pattern_penalty(
-        self, pattern: Pattern, task_description: str
-    ) -> float:
+    def _calculate_anti_pattern_penalty(self, pattern: Pattern, task_description: str) -> float:
         """Calculate penalty for anti-pattern violations"""
         if not pattern.anti_patterns:
             return 0.0
@@ -628,9 +603,7 @@ class TaskPatternRecognitionSystem:
 
         return violations / len(pattern.anti_patterns) if pattern.anti_patterns else 0.0
 
-    def _find_matched_keywords(
-        self, pattern: Pattern, task_description: str
-    ) -> List[str]:
+    def _find_matched_keywords(self, pattern: Pattern, task_description: str) -> List[str]:
         """Find which keywords matched in the task description"""
         matched = []
         description_lower = task_description.lower()
@@ -641,9 +614,7 @@ class TaskPatternRecognitionSystem:
 
         return matched
 
-    def _find_matched_indicators(
-        self, pattern: Pattern, task_description: str
-    ) -> List[str]:
+    def _find_matched_indicators(self, pattern: Pattern, task_description: str) -> List[str]:
         """Find which indicators matched in the task description"""
         matched = []
         description_lower = task_description.lower()
@@ -654,9 +625,7 @@ class TaskPatternRecognitionSystem:
 
         return matched
 
-    def _find_anti_pattern_violations(
-        self, pattern: Pattern, task_description: str
-    ) -> List[str]:
+    def _find_anti_pattern_violations(self, pattern: Pattern, task_description: str) -> List[str]:
         """Find anti-pattern violations in the task description"""
         violations = []
         description_lower = task_description.lower()
@@ -712,9 +681,7 @@ class TaskPatternRecognitionSystem:
         # Boost complementary patterns
         for i, match1 in enumerate(filtered_matches):
             for j, match2 in enumerate(filtered_matches):
-                if i != j and self._are_complementary_patterns(
-                    match1.pattern, match2.pattern
-                ):
+                if i != j and self._are_complementary_patterns(match1.pattern, match2.pattern):
                     filtered_matches[i].confidence *= 1.1
                     filtered_matches[j].confidence *= 1.1
 
@@ -741,9 +708,7 @@ class TaskPatternRecognitionSystem:
 
         return pair in complementary_pairs or reverse_pair in complementary_pairs
 
-    def update_pattern_usage(
-        self, pattern_id: str, success: bool, completion_time: float
-    ):
+    def update_pattern_usage(self, pattern_id: str, success: bool, completion_time: float):
         """Update historical data for a pattern based on actual usage"""
         if pattern_id in self.patterns:
             pattern = self.patterns[pattern_id]
@@ -763,12 +728,8 @@ class TaskPatternRecognitionSystem:
 
             # Update historical data
             self.historical_data["pattern_usage"][pattern_id] += 1
-            self.historical_data["pattern_success_rates"][pattern_id] = (
-                pattern.success_rate
-            )
-            self.historical_data["pattern_completion_times"][pattern_id].append(
-                completion_time
-            )
+            self.historical_data["pattern_success_rates"][pattern_id] = pattern.success_rate
+            self.historical_data["pattern_completion_times"][pattern_id].append(completion_time)
 
     def get_pattern_recommendations(
         self, recognized_patterns: List[PatternMatch]
@@ -863,9 +824,7 @@ class ContextAnalyzer:
 class PerformancePatternPredictor:
     """Predicts performance characteristics based on recognized patterns"""
 
-    def predict_performance_impact(
-        self, patterns: List[PatternMatch]
-    ) -> Dict[str, float]:
+    def predict_performance_impact(self, patterns: List[PatternMatch]) -> Dict[str, float]:
         """Predict performance impact of recognized patterns"""
         if not patterns:
             return {"complexity_multiplier": 1.0, "time_multiplier": 1.0}
@@ -877,13 +836,11 @@ class PerformancePatternPredictor:
             return {"complexity_multiplier": 1.0, "time_multiplier": 1.0}
 
         complexity_multiplier = (
-            sum(p.pattern.complexity_multiplier * p.confidence for p in patterns)
-            / total_confidence
+            sum(p.pattern.complexity_multiplier * p.confidence for p in patterns) / total_confidence
         )
 
         time_multiplier = (
-            sum(p.pattern.time_multiplier * p.confidence for p in patterns)
-            / total_confidence
+            sum(p.pattern.time_multiplier * p.confidence for p in patterns) / total_confidence
         )
 
         return {
@@ -932,10 +889,6 @@ if __name__ == "__main__":
     recommendations = pattern_system.get_pattern_recommendations(patterns)
     print("Recommendations:")
     print(f"Risk Assessment: {recommendations['risk_assessment']}")
-    print(
-        f"Parallelization Potential: {recommendations['parallelization_potential']:.2f}"
-    )
-    print(
-        f"Complexity Multiplier: {recommendations['estimated_complexity_multiplier']:.2f}"
-    )
+    print(f"Parallelization Potential: {recommendations['parallelization_potential']:.2f}")
+    print(f"Complexity Multiplier: {recommendations['estimated_complexity_multiplier']:.2f}")
     print(f"Time Multiplier: {recommendations['estimated_time_multiplier']:.2f}")

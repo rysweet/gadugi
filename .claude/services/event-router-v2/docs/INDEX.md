@@ -75,8 +75,8 @@ This index provides a comprehensive overview of all Event Router V2 documentatio
 
 ## Agent Documentation
 
-### 5. **EventRouterManager.md** (Management Agent)
-**Location**: `/.claude/agents/EventRouterManager.md`
+### 5. **EventRouterServiceManager.md** (Management Agent)
+**Location**: `/.claude/agents/EventRouterServiceManager.md`
 
 **Contents**:
 - ✅ Agent responsibilities
@@ -127,7 +127,7 @@ This index provides a comprehensive overview of all Event Router V2 documentatio
 - **Starting/Stopping**: See `manage_router.py` usage in README
 - **Configuration**: Interactive via `manage_router.py configure`
 - **Monitoring**: Real-time via `manage_router.py monitor`
-- **Agent Control**: Via `/agent:EventRouterManager`
+- **Agent Control**: Via `/agent:EventRouterServiceManager`
 
 ### 📡 Event Handling
 - **Publishing Events**: See Client SDK section in README
@@ -243,7 +243,7 @@ Event Router V2
 - **Respond to Events**: See EVENT_RESPONSE_GUIDE.md
 
 ### Support Resources
-- **Agent Help**: `/agent:EventRouterManager`
+- **Agent Help**: `/agent:EventRouterServiceManager`
 - **Logs**: `event_router.log`
 - **Config**: `router_config.json`
 - **Examples**: `/examples/` directory

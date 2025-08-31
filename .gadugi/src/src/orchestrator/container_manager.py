@@ -52,14 +52,11 @@ except ImportError:
 
 
 try:
-    import websockets  # type: ignore
     import asyncio
 
     WEBSOCKET_AVAILABLE = True
 except ImportError:
-    logging.warning(
-        "WebSocket support not available. Install with: pip install websockets"
-    )
+    logging.warning("WebSocket support not available. Install with: pip install websockets")
     WEBSOCKET_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
@@ -185,9 +182,7 @@ class ContainerManager:
     def _initialize_docker(self):
         """Initialize Docker client"""
         if not DOCKER_AVAILABLE:
-            raise RuntimeError(
-                "Docker SDK not available. Please install: pip install docker"
-            )
+            raise RuntimeError("Docker SDK not available. Please install: pip install docker")
 
         try:  # type: ignore
             self.docker_client = docker.from_env()  # type: ignore
@@ -282,13 +277,9 @@ CMD ["bash"]
             raise RuntimeError("Docker client not initialized")
 
         # Try subprocess first as fallback for auth issues
-        subprocess_result = self._try_subprocess_execution(
-            task_id, worktree_path, prompt_file
-        )
+        subprocess_result = self._try_subprocess_execution(task_id, worktree_path, prompt_file)
         if subprocess_result.exit_code == 0:
-            logger.info(
-                f"Task {task_id} completed successfully via subprocess fallback"
-            )
+            logger.info(f"Task {task_id} completed successfully via subprocess fallback")
             return subprocess_result
 
         # If subprocess failed, try container execution
@@ -311,9 +302,7 @@ CMD ["bash"]
 
             mem = psutil.virtual_memory()
             if mem.available < 1024 * 1024 * 1024:  # Less than 1GB available
-                logger.warning(
-                    f"Low memory available: {mem.available / (1024**3):.2f}GB"
-                )
+                logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
                 if mem.available < 512 * 1024 * 1024:  # Less than 512MB
                     return ContainerResult(  # type: ignore
                         task_id=task_id,
@@ -370,9 +359,7 @@ CMD ["bash"]
                     "PYTHONUNBUFFERED": "1",
                     "CLAUDE_API_KEY": os.getenv("CLAUDE_API_KEY", ""),
                     "CLAUDE_CODE_SSE_PORT": os.getenv("CLAUDE_CODE_SSE_PORT", ""),
-                    "CLAUDE_CODE_ENTRYPOINT": os.getenv(
-                        "CLAUDE_CODE_ENTRYPOINT", "cli"
-                    ),
+                    "CLAUDE_CODE_ENTRYPOINT": os.getenv("CLAUDE_CODE_ENTRYPOINT", "cli"),
                     "CLAUDECODE": os.getenv("CLAUDECODE", "1"),
                     "GH_TOKEN": os.getenv("GH_TOKEN", ""),
                     "GITHUB_TOKEN": os.getenv("GITHUB_TOKEN", ""),
@@ -395,9 +382,7 @@ CMD ["bash"]
                 streaming_thread.start()
 
             # Wait for completion with timeout
-            exit_code = container.wait(timeout=self.config.timeout_seconds)[
-                "StatusCode"
-            ]  # type: ignore
+            exit_code = container.wait(timeout=self.config.timeout_seconds)["StatusCode"]  # type: ignore
 
             # Get container logs
             logs = container.logs().decode("utf-8")
@@ -411,15 +396,9 @@ CMD ["bash"]
             stats = container.stats(stream=False)
             resource_usage = {
                 "memory_usage": stats.get("memory_stats", {}).get("usage", 0),
-                "cpu_usage": stats.get("cpu_stats", {})
-                .get("cpu_usage", {})
-                .get("total_usage", 0),
-                "network_rx": stats.get("networks", {})
-                .get("eth0", {})
-                .get("rx_bytes", 0),
-                "network_tx": stats.get("networks", {})
-                .get("eth0", {})
-                .get("tx_bytes", 0),
+                "cpu_usage": stats.get("cpu_stats", {}).get("cpu_usage", {}).get("total_usage", 0),
+                "network_rx": stats.get("networks", {}).get("eth0", {}).get("rx_bytes", 0),
+                "network_tx": stats.get("networks", {}).get("eth0", {}).get("tx_bytes", 0),
             }
 
         except docker.errors.ImageNotFound as e:  # type: ignore
@@ -625,18 +604,14 @@ CMD ["bash"]
             cpu_usage = cpu_stats.get("cpu_usage", {})
             precpu_usage = precpu_stats.get("cpu_usage", {})
 
-            cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get(
-                "total_usage", 0
-            )
+            cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get("total_usage", 0)
             system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
                 "system_cpu_usage", 0
             )
 
             if system_delta > 0 and cpu_delta > 0:
                 cpu_percent = (
-                    (cpu_delta / system_delta)
-                    * len(cpu_usage.get("percpu_usage", []))
-                    * 100
+                    (cpu_delta / system_delta) * len(cpu_usage.get("percpu_usage", [])) * 100
                 )
                 return round(cpu_percent, 2)
 
@@ -682,9 +657,7 @@ CMD ["bash"]
 
             # Prepare Claude CLI command
             escaped_prompt = shlex.quote(prompt_file)
-            claude_cmd = ["claude", "-p", escaped_prompt] + (
-                self.config.claude_flags or []
-            )
+            claude_cmd = ["claude", "-p", escaped_prompt] + (self.config.claude_flags or [])
 
             logger.info(f"Subprocess command: {' '.join(claude_cmd)}")
 
@@ -707,9 +680,7 @@ CMD ["bash"]
                 exit_code=result.returncode,
                 stdout=result.stdout,
                 stderr=result.stderr,
-                logs=[result.stdout, result.stderr]
-                if result.stderr
-                else [result.stdout],
+                logs=[result.stdout, result.stderr] if result.stderr else [result.stdout],
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
@@ -765,9 +736,7 @@ def main():
     parser.add_argument("--task-id", required=True, help="Task ID")
     parser.add_argument("--worktree-path", required=True, help="Worktree path")
     parser.add_argument("--prompt-file", required=True, help="Prompt file")
-    parser.add_argument(
-        "--image", default="claude-orchestrator:latest", help="Docker image"
-    )
+    parser.add_argument("--image", default="claude-orchestrator:latest", help="Docker image")
 
     args = parser.parse_args()
 

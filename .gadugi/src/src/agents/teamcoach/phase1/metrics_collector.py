@@ -242,9 +242,7 @@ class MetricsCollector:
                 self.metric_data[metric_definition.name] = deque(maxlen=10000)
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to register metric {metric_definition.name}: {e}"
-            )
+            self.logger.error(f"Failed to register metric {metric_definition.name}: {e}")
 
     @ErrorHandler.with_circuit_breaker
     def collect_metric(
@@ -305,9 +303,7 @@ class MetricsCollector:
             if self.enable_real_time:
                 self._trigger_real_time_hooks(data_point)
 
-            self.logger.debug(
-                f"Collected metric {metric_name} for agent {agent_id}: {value}"
-            )
+            self.logger.debug(f"Collected metric {metric_name} for agent {agent_id}: {value}")
             return True
 
         except Exception as e:
@@ -421,9 +417,7 @@ class MetricsCollector:
             method = aggregation_method or metric_def.aggregation_method
 
             # Get data points
-            data_points = self.get_metric_data(
-                metric_name, agent_id, start_time, end_time
-            )
+            data_points = self.get_metric_data(metric_name, agent_id, start_time, end_time)
 
             if not data_points:
                 return None
@@ -507,9 +501,7 @@ class MetricsCollector:
 
             # Aggregate all metrics for the agent
             for metric_name in self.metric_definitions:
-                aggregated = self.aggregate_metric(
-                    metric_name, agent_id, start_time, end_time
-                )
+                aggregated = self.aggregate_metric(metric_name, agent_id, start_time, end_time)
 
                 if aggregated:
                     summary["metrics"][metric_name] = {
@@ -522,9 +514,7 @@ class MetricsCollector:
             return summary
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to get metrics summary for agent {agent_id}: {e}"
-            )
+            self.logger.error(f"Failed to get metrics summary for agent {agent_id}: {e}")
             return {}
 
     def register_collection_hook(
@@ -559,23 +549,14 @@ class MetricsCollector:
 
             # Range validation for numeric values
             if isinstance(value, (int, float)):
-                if (
-                    "min_value" in validation_rules
-                    and value < validation_rules["min_value"]
-                ):
+                if "min_value" in validation_rules and value < validation_rules["min_value"]:
                     return False
-                if (
-                    "max_value" in validation_rules
-                    and value > validation_rules["max_value"]
-                ):
+                if "max_value" in validation_rules and value > validation_rules["max_value"]:
                     return False
 
             # String validation
             if isinstance(value, str):
-                if (
-                    "max_length" in validation_rules
-                    and len(value) > validation_rules["max_length"]
-                ):
+                if "max_length" in validation_rules and len(value) > validation_rules["max_length"]:
                     return False
                 if (
                     "allowed_values" in validation_rules
@@ -641,12 +622,10 @@ class MetricsCollector:
                     self.stop_collection.wait(sleep_time.total_seconds())  # type: ignore[attr-defined]
 
                 except Exception as e:
-                    self.logger.error(
-                        f"Error in collection worker for {source.value}: {e}"
-                    )
-                    self.stop_collection.wait(
+                    self.logger.error(f"Error in collection worker for {source.value}: {e}")
+                    self.stop_collection.wait(  # type: ignore[attr-defined]
                         60
-                    )  # Wait 1 minute on error  # type: ignore[attr-defined]
+                    )  # Wait 1 minute on error
 
         except Exception as e:
             self.logger.error(f"Collection worker {source.value} failed: {e}")
@@ -733,9 +712,7 @@ class MetricsCollector:
         try:
             stats = self.collection_stats.copy()
             stats["active_metrics"] = len(self.metric_definitions)
-            stats["stored_data_points"] = sum(
-                len(data) for data in self.metric_data.values()
-            )
+            stats["stored_data_points"] = sum(len(data) for data in self.metric_data.values())
             stats["collection_threads"] = len(self.collection_threads)
 
             return stats

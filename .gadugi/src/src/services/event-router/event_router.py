@@ -191,9 +191,7 @@ class ProcessManager:
     ) -> AgentProcess:
         """Spawn a new agent subprocess or container."""
 
-        logger.info(
-            f"Spawning agent {agent_id}", command=command, container=use_container
-        )
+        logger.info(f"Spawning agent {agent_id}", command=command, container=use_container)
 
         # Kill existing process if any
         if agent_id in self.processes:
@@ -219,9 +217,7 @@ class ProcessManager:
         )
 
         # Create agent process entry
-        agent_process = AgentProcess(
-            agent_id=agent_id, process=process, command=command
-        )
+        agent_process = AgentProcess(agent_id=agent_id, process=process, command=command)
 
         self.processes[agent_id] = agent_process
 
@@ -593,9 +589,7 @@ class EventRouter:
         while self.running:
             try:
                 # Get next event from priority queue
-                _priority, event = await asyncio.wait_for(
-                    self.event_queue.get(), timeout=1.0
-                )
+                _priority, event = await asyncio.wait_for(self.event_queue.get(), timeout=1.0)
 
                 # Process event
                 await self._route_event(event)
@@ -656,9 +650,7 @@ class EventRouter:
         if agent_id and command:
             if use_container:
                 # Spawn in container with authentication
-                await self.process_manager.spawn_agent_container(
-                    agent_id, container_image, command
-                )
+                await self.process_manager.spawn_agent_container(agent_id, container_image, command)
             else:
                 # Spawn as subprocess
                 await self.process_manager.spawn_agent(agent_id, command)

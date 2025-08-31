@@ -71,10 +71,7 @@ def fix_enhanced_separation_tests(filepath: Path) -> None:
     content = re.sub(r"priority=['\"]low['\"]", "priority=TaskPriority.LOW", content)
 
     # Add TaskPriority import if needed
-    if (
-        "TaskPriority" in content
-        and "from shared.task_tracking import" in content
-    ):
+    if "TaskPriority" in content and "from shared.task_tracking import" in content:
         # Add TaskPriority to imports
         content = re.sub(
             r"from shared\.task_tracking import ([^)]+)",

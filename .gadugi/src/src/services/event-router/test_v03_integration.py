@@ -10,13 +10,11 @@ import os
 import aiohttp
 
 # Add parent directories to path
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), "..", "..", "..")
-)  # Add gadugi root
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", ".."))  # Add gadugi root
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from agents.base.v03_agent import V03Agent
-from dataclasses import dataclass
+from src.src.agents.base.v03_agent import V03Agent
+from dataclasses import dataclass, field
 from typing import List
 
 
@@ -51,12 +49,8 @@ async def test_event_emission():
         can_review_code: bool = False
         can_test: bool = True
         can_document: bool = True
-        expertise_areas: List[str] = None
+        expertise_areas: List[str] = field(default_factory=lambda: ["testing", "event-emission"])
         max_parallel_tasks: int = 3
-
-        def __post_init__(self):
-            if self.expertise_areas is None:
-                self.expertise_areas = ["testing", "event-emission"]
 
     # Create a minimal test agent
     class TestAgent(V03Agent):
@@ -175,7 +169,8 @@ async def test_event_emission():
     print(f"  {'✅' if success else '❌'} emit_stopped: {success}")
 
     # Clean up
-    await agent.cleanup()
+    if hasattr(agent, "cleanup"):
+        await agent.cleanup()  # type: ignore[attr-defined]
 
     print("\n" + "=" * 60)
     print("✅ EVENT EMISSION TESTS COMPLETE")
@@ -192,9 +187,7 @@ async def check_event_persistence():
     async with aiohttp.ClientSession() as session:
         # Query recent events
         try:
-            async with session.get(
-                "http://localhost:8001/events/recent?limit=10"
-            ) as response:
+            async with session.get("http://localhost:8001/events/recent?limit=10") as response:
                 if response.status == 200:
                     events = await response.json()
                     print(f"📊 Found {len(events)} recent events:")

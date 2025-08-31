@@ -564,7 +564,7 @@ Test containerized execution
 
         # Verify results
         self.assertEqual(len(results), 1)
-        result = results["test-workflow-task"]
+        results["test-workflow-task"]
 
         # Verify containerized execution characteristics
         if engine.execution_mode == "containerized":  # type: ignore[attr-defined]

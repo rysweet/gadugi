@@ -256,9 +256,7 @@ class EnhancedWorkflowMaster:
 
         # Circuit breakers
         self.github_circuit_breaker = CircuitBreaker(failure_threshold=3, timeout=300)
-        self.execution_circuit_breaker = CircuitBreaker(
-            failure_threshold=5, timeout=600
-        )
+        self.execution_circuit_breaker = CircuitBreaker(failure_threshold=5, timeout=600)
 
         # State
         self.current_workflow: Optional[WorkflowState] = None
@@ -431,9 +429,7 @@ class EnhancedWorkflowMaster:
 
                 # Check dependencies
                 if not self.are_dependencies_met(task, workflow.tasks or []):
-                    logger.warning(
-                        f"Dependencies not met for task {task.id}, skipping for now"
-                    )
+                    logger.warning(f"Dependencies not met for task {task.id}, skipping for now")
                     continue
 
                 # Execute task
@@ -449,14 +445,9 @@ class EnhancedWorkflowMaster:
                     decision = self.make_autonomous_decision(task, workflow)
                     self.record_autonomous_decision(workflow, task.id, decision)
 
-                    if (
-                        decision == WorkflowDecision.RETRY
-                        and task.retry_count < task.max_retries
-                    ):
+                    if decision == WorkflowDecision.RETRY and task.retry_count < task.max_retries:
                         task.retry_count += 1
-                        logger.info(
-                            f"Retrying task {task.id} (attempt {task.retry_count})"
-                        )
+                        logger.info(f"Retrying task {task.id} (attempt {task.retry_count})")
                         success = self.execute_task(task, workflow)
                         if success:
                             task.status = "completed"
@@ -466,9 +457,7 @@ class EnhancedWorkflowMaster:
                             self.execution_stats["failed_tasks"] += 1
                     elif decision == WorkflowDecision.SKIP:
                         task.status = "skipped"
-                        logger.warning(
-                            f"Task {task.id} skipped due to autonomous decision"
-                        )
+                        logger.warning(f"Task {task.id} skipped due to autonomous decision")
                     elif decision == WorkflowDecision.ABORT:
                         logger.error(f"Workflow aborted due to task {task.id} failure")
                         workflow.status = "aborted"
@@ -487,9 +476,7 @@ class EnhancedWorkflowMaster:
             critical_tasks = [t for t in tasks if t.priority == "high"]
             completed_critical = [t for t in completed_tasks if t.priority == "high"]
 
-            if (
-                len(completed_critical) >= len(critical_tasks) * 0.8
-            ):  # 80% of critical tasks
+            if len(completed_critical) >= len(critical_tasks) * 0.8:  # 80% of critical tasks
                 workflow.status = "completed"
                 logger.info(f"Workflow {workflow.task_id} completed successfully")
                 return True
@@ -613,9 +600,7 @@ print(f"Workspace initialized: {{workspace_dir}}")
             logger.error(f"Setup task execution failed: {e}")
             return False
 
-    def execute_issue_creation_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_issue_creation_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute GitHub issue creation with retry logic."""
         try:
             # Prepare issue data
@@ -671,15 +656,11 @@ This issue tracks the implementation of WorkflowMaster robustness and brittlenes
             logger.error(f"Issue creation failed: {e}")
             return False
 
-    def execute_branch_management_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_branch_management_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute branch creation and management."""
         try:
             # Create branch name
-            branch_name = (
-                f"feature/workflow-master-enhanced-{workflow.issue_number or 'dev'}"
-            )
+            branch_name = f"feature/workflow-master-enhanced-{workflow.issue_number or 'dev'}"
             workflow.branch_name = branch_name
 
             # Git operations in container
@@ -725,9 +706,7 @@ echo "Branch {branch_name} created and pushed successfully"
             logger.error(f"Branch management failed: {e}")
             return False
 
-    def make_autonomous_decision(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> WorkflowDecision:
+    def make_autonomous_decision(self, task: TaskInfo, workflow: WorkflowState) -> WorkflowDecision:
         """Make autonomous decisions for task failures."""
         if not self.autonomous_mode:
             return WorkflowDecision.ESCALATE
@@ -778,9 +757,7 @@ echo "Branch {branch_name} created and pushed successfully"
             return "rate_limit"
         elif any(term in error_msg for term in ["permission", "auth", "forbidden"]):
             return "permission"
-        elif any(
-            term in error_msg for term in ["not found", "missing", "does not exist"]
-        ):
+        elif any(term in error_msg for term in ["not found", "missing", "does not exist"]):
             return "resource"
         else:
             return "unknown"
@@ -808,8 +785,7 @@ echo "Branch {branch_name} created and pushed successfully"
         # Task success rate
         if self.execution_stats["total_tasks"] > 0:
             success_rate = (
-                self.execution_stats["completed_tasks"]
-                / self.execution_stats["total_tasks"]
+                self.execution_stats["completed_tasks"] / self.execution_stats["total_tasks"]
             )
             health_factors.append(success_rate)
 
@@ -953,9 +929,7 @@ echo "Branch {branch_name} created and pushed successfully"
                                 orphaned.append(workflow)
 
                         except Exception as e:
-                            logger.warning(
-                                f"Could not load state from {state_file}: {e}"
-                            )
+                            logger.warning(f"Could not load state from {state_file}: {e}")
 
         except Exception as e:
             logger.error(f"Error detecting orphaned workflows: {e}")
@@ -981,9 +955,7 @@ echo "Branch {branch_name} created and pushed successfully"
 
         # Resume if no critical failures
         tasks = workflow.tasks or []
-        failed_critical = [
-            t for t in tasks if t.status == "failed" and t.priority == "high"
-        ]
+        failed_critical = [t for t in tasks if t.status == "failed" and t.priority == "high"]
         if failed_critical:
             return False
 
@@ -1040,9 +1012,7 @@ echo "Branch {branch_name} created and pushed successfully"
         stats = {
             **self.execution_stats,
             "runtime_seconds": runtime,
-            "current_workflow": self.current_workflow.task_id
-            if self.current_workflow
-            else None,
+            "current_workflow": self.current_workflow.task_id if self.current_workflow else None,
             "autonomous_mode": self.autonomous_mode,
             "github_circuit_breaker_status": {
                 "failure_count": self.github_circuit_breaker.failure_count,
@@ -1079,9 +1049,7 @@ echo "Branch {branch_name} created and pushed successfully"
         self.container_executor.shutdown()
         logger.info("Enhanced WorkflowMaster shutdown completed")
 
-    def execute_research_planning_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_research_planning_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute research and planning task with codebase analysis."""
         try:
             # Analyze existing codebase for patterns and dependencies
@@ -1153,9 +1121,7 @@ print(json.dumps(analysis_results, indent=2))
             logger.error(f"Research and planning execution failed: {e}")
             return False
 
-    def execute_implementation_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_implementation_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute core implementation with containerized development."""
         try:
             # Implementation placeholder - would be specific to the feature being implemented
@@ -1216,29 +1182,23 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
             # Phase 1: Detect failing tests and use Test Solver
             failing_tests = self.detect_failing_tests(workflow)
             if failing_tests:
-                logger.info(
-                    f"Found {len(failing_tests)} failing tests, invoking Test Solver"
-                )
+                logger.info(f"Found {len(failing_tests)} failing tests, invoking Test Solver")
                 self.execution_stats["test_solver_invocations"] += 1
 
                 for test_identifier in failing_tests:
                     result = self.test_solver.solve_test_failure(test_identifier)
-                    self.log_execution_step(
-                        workflow, f"Test Solver: {result.resolution_applied}"
-                    )
+                    self.log_execution_step(workflow, f"Test Solver: {result.resolution_applied}")
 
                     if (
                         hasattr(result.final_status, "value")
-                        and result.final_status.value == "pass"
-                    ):  # type: ignore[attr-defined]
+                        and result.final_status.value == "pass"  # type: ignore[attr-defined]
+                    ):
                         logger.info(f"✅ Test {test_identifier} resolved successfully")
                     elif (
                         hasattr(result.final_status, "value")
-                        and result.final_status.value == "skip"
-                    ):  # type: ignore[attr-defined]
-                        skip_reason = getattr(
-                            result, "skip_justification", "No reason provided"
-                        )
+                        and result.final_status.value == "skip"  # type: ignore[attr-defined]
+                    ):
+                        skip_reason = getattr(result, "skip_justification", "No reason provided")
                         logger.info(f"⚠️ Test {test_identifier} skipped: {skip_reason}")
                     else:
                         logger.warning(
@@ -1248,13 +1208,13 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
             # Phase 2: Detect code without test coverage and use Test Writer
             coverage_gaps = self.detect_coverage_gaps(workflow)
             if coverage_gaps:
-                logger.info(
-                    f"Found {len(coverage_gaps)} coverage gaps, invoking Test Writer"
-                )
+                logger.info(f"Found {len(coverage_gaps)} coverage gaps, invoking Test Writer")
                 self.execution_stats["test_writer_invocations"] += 1
 
                 for code_file in coverage_gaps:
-                    context = f"Creating tests for {code_file} as part of workflow {workflow.task_id}"
+                    context = (
+                        f"Creating tests for {code_file} as part of workflow {workflow.task_id}"
+                    )
                     result = self.test_writer.create_tests(code_file, context)
                     self.log_execution_step(
                         workflow,
@@ -1264,9 +1224,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
                     # Write created tests to appropriate location
                     test_file_path = self.determine_test_file_path(code_file)
                     self.write_test_suite(test_file_path, result)
-                    logger.info(
-                        f"✅ Created {len(result.tests_created)} tests in {test_file_path}"
-                    )
+                    logger.info(f"✅ Created {len(result.tests_created)} tests in {test_file_path}")
 
             # Phase 3: Run full test suite to validate changes
             final_test_result = self.run_test_suite(workflow)
@@ -1274,9 +1232,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
             self.execution_stats["container_executions"] += 1
 
             if final_test_result["success"]:
-                logger.info(
-                    "Testing task completed successfully with integrated test agents"
-                )
+                logger.info("Testing task completed successfully with integrated test agents")
                 # Log summary of test agent activities
                 self.log_execution_step(
                     workflow,
@@ -1293,9 +1249,7 @@ print(f"Artifacts saved to: {{artifacts_dir}}")
             logger.error(f"Testing execution failed: {e}")
             return False
 
-    def execute_documentation_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_documentation_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute documentation updates."""
         try:
             # Documentation generation
@@ -1393,9 +1347,7 @@ print(f"Documentation generated successfully in {{docs_dir}}")
             logger.error(f"Documentation execution failed: {e}")
             return False
 
-    def execute_pull_request_task(
-        self, task: TaskInfo, workflow: WorkflowState
-    ) -> bool:
+    def execute_pull_request_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute pull request creation with comprehensive details."""
         try:
             # Prepare PR data
@@ -1598,9 +1550,7 @@ print(f"Review status saved: {{review_status}}")
                 try:
                     # In real implementation, would parse JSON report
                     # For now, extract from stdout/stderr
-                    output = test_execution.get("stdout", "") + test_execution.get(
-                        "stderr", ""
-                    )
+                    output = test_execution.get("stdout", "") + test_execution.get("stderr", "")
                     lines = output.split("\n")
 
                     for line in lines:
@@ -1656,15 +1606,11 @@ print(f"Review status saved: {{review_status}}")
                     # Look for Python files with low or no coverage
                     # In real implementation, would parse JSON coverage report
                     for line in output.split("\n"):
-                        if ".py" in line and (
-                            "0%" in line or "missing" in line.lower()
-                        ):
+                        if ".py" in line and ("0%" in line or "missing" in line.lower()):
                             # Extract filename
                             parts = line.split()
                             for part in parts:
-                                if part.endswith(".py") and not part.startswith(
-                                    "test_"
-                                ):
+                                if part.endswith(".py") and not part.startswith("test_"):
                                     coverage_gaps.append(part)
                                     break
                 except Exception as e:
@@ -1702,11 +1648,7 @@ print(f"Review status saved: {{review_status}}")
             if git_result["success"]:
                 files = git_result.get("stdout", "").strip().split("\n")
                 for file in files:
-                    if (
-                        file.endswith(".py")
-                        and not file.startswith("test_")
-                        and "test" not in file
-                    ):
+                    if file.endswith(".py") and not file.startswith("test_") and "test" not in file:
                         new_code_files.append(file)
 
             return new_code_files
@@ -1800,9 +1742,7 @@ print(f"Review status saved: {{review_status}}")
                 content_parts.append("")
 
             # Add test method
-            fixtures_params = (
-                ", ".join(test.fixtures_used) if test.fixtures_used else ""
-            )
+            fixtures_params = ", ".join(test.fixtures_used) if test.fixtures_used else ""
             content_parts.append(
                 f"    def {test.name}(self{', ' + fixtures_params if fixtures_params else ''}):"
             )
@@ -1889,9 +1829,7 @@ def main():
     parser.add_argument(
         "--autonomous", action="store_true", default=True, help="Enable autonomous mode"
     )
-    parser.add_argument(
-        "--security-policy", default="standard", help="Container security policy"
-    )
+    parser.add_argument("--security-policy", default="standard", help="Container security policy")
 
     args = parser.parse_args()
 

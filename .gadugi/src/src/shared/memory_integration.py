@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 import httpx
 import logging
 
@@ -18,10 +18,7 @@ try:
     from .memory_fallback import (
         Memory,
         MemoryType,
-        MemoryScope,
         MemoryPersistence,
-        KnowledgeNode,
-        Whiteboard,
         MemoryBackend,
         create_simple_fallback_chain,
         MemoryFallbackChain,
@@ -30,11 +27,17 @@ try:
     FALLBACK_AVAILABLE = True
 except ImportError:
     FALLBACK_AVAILABLE = False
-    # Define stubs for type checking
-    Memory = Any  # type: ignore[misc,assignment]
-    MemoryType = Any  # type: ignore[misc,assignment]
-    MemoryBackend = Any  # type: ignore[misc,assignment]
-    MemoryFallbackChain = Any  # type: ignore[misc,assignment]
+    # Define stubs for type checking - avoid using runtime values as types
+    if TYPE_CHECKING:
+        Memory = Any
+        MemoryType = Any
+        MemoryBackend = Any
+        MemoryFallbackChain = Any
+    else:
+        Memory = None  # type: ignore[misc,assignment]
+        MemoryType = None  # type: ignore[misc,assignment]
+        MemoryBackend = None  # type: ignore[misc,assignment]
+        MemoryFallbackChain = None  # type: ignore[misc,assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +60,7 @@ class AgentMemoryInterface:
 
     # Internal state
     _client: Optional[httpx.AsyncClient] = None
-    _fallback_chain: Optional[MemoryFallbackChain] = None
+    _fallback_chain: Optional[Any] = None  # Using Any to avoid type issues with conditional imports
     _use_http: bool = True  # Start with HTTP, fall back if needed
 
     async def __aenter__(self):
@@ -105,7 +108,11 @@ class AgentMemoryInterface:
     async def _cleanup_backends(self) -> None:
         """Clean up all backend connections."""
         if self._client:
-            await self._client.aclose()
+            try:
+                await self._client.aclose()
+            except (TypeError, AttributeError):
+                # Handle mock objects or other test scenarios
+                pass
 
         if self._fallback_chain:
             await self._fallback_chain.disconnect()
@@ -167,7 +174,7 @@ class AgentMemoryInterface:
             memory = Memory(
                 agent_id=self.agent_id,
                 content=content,
-                type=MemoryType.SHORT_TERM,
+                type=MemoryType.SHORT_TERM,  # type: ignore[attr-defined]
                 persistence=MemoryPersistence.VOLATILE,
                 task_id=self.task_id,
                 project_id=self.project_id,
@@ -178,27 +185,21 @@ class AgentMemoryInterface:
             stored_memory = await self._fallback_chain.store_memory(memory)
             return stored_memory.id
 
-        return await self._execute_with_fallback(
-            "remember_short_term", http_store, fallback_store
-        )
+        return await self._execute_with_fallback("remember_short_term", http_store, fallback_store)
 
     # ========== Helper Methods ==========
 
-    def _convert_http_memory_to_dict(
-        self, http_memory: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _convert_http_memory_to_dict(self, http_memory: Dict[str, Any]) -> Dict[str, Any]:
         """Convert HTTP memory response to standard format."""
         return http_memory
 
-    def _convert_fallback_memory_to_dict(self, memory: Memory) -> Dict[str, Any]:
+    def _convert_fallback_memory_to_dict(self, memory: Any) -> Dict[str, Any]:
         """Convert fallback Memory object to standard format."""
         return {
             "id": memory.id,
             "agent_id": memory.agent_id,
             "content": memory.content,
-            "memory_type": memory.type.value
-            if hasattr(memory.type, "value")
-            else str(memory.type),
+            "memory_type": memory.type.value if hasattr(memory.type, "value") else str(memory.type),
             "is_short_term": memory.persistence == MemoryPersistence.VOLATILE,
             "task_id": memory.task_id,
             "project_id": memory.project_id,
@@ -245,16 +246,16 @@ class AgentMemoryInterface:
 
             # Map memory_type string to MemoryType enum
             type_mapping = {
-                "semantic": MemoryType.SEMANTIC,
-                "episodic": MemoryType.EPISODIC,
-                "procedural": MemoryType.PROCEDURAL,
-                "long_term": MemoryType.LONG_TERM,
+                "semantic": MemoryType.SEMANTIC,  # type: ignore[attr-defined]
+                "episodic": MemoryType.EPISODIC,  # type: ignore[attr-defined]
+                "procedural": MemoryType.PROCEDURAL,  # type: ignore[attr-defined]
+                "long_term": MemoryType.LONG_TERM,  # type: ignore[attr-defined]
             }
 
             memory = Memory(
                 agent_id=self.agent_id,
                 content=content,
-                type=type_mapping.get(memory_type, MemoryType.SEMANTIC),
+                type=type_mapping.get(memory_type, MemoryType.SEMANTIC),  # type: ignore[attr-defined]
                 persistence=MemoryPersistence.PERSISTENT,
                 task_id=self.task_id,
                 project_id=self.project_id,
@@ -265,9 +266,7 @@ class AgentMemoryInterface:
             stored_memory = await self._fallback_chain.store_memory(memory)
             return stored_memory.id
 
-        return await self._execute_with_fallback(
-            "remember_long_term", http_store, fallback_store
-        )
+        return await self._execute_with_fallback("remember_long_term", http_store, fallback_store)
 
     # ========== Memory Retrieval ==========
 
@@ -292,9 +291,7 @@ class AgentMemoryInterface:
             if memory_type:
                 params["memory_type"] = memory_type
 
-            response = await self._client.get(
-                f"/memory/agent/{self.agent_id}", params=params
-            )
+            response = await self._client.get(f"/memory/agent/{self.agent_id}", params=params)
             response.raise_for_status()
             return response.json()
 
@@ -306,11 +303,11 @@ class AgentMemoryInterface:
             memory_type_enum = None
             if memory_type:
                 type_mapping = {
-                    "semantic": MemoryType.SEMANTIC,
-                    "episodic": MemoryType.EPISODIC,
-                    "procedural": MemoryType.PROCEDURAL,
-                    "short_term": MemoryType.SHORT_TERM,
-                    "long_term": MemoryType.LONG_TERM,
+                    "semantic": MemoryType.SEMANTIC,  # type: ignore[attr-defined]
+                    "episodic": MemoryType.EPISODIC,  # type: ignore[attr-defined]
+                    "procedural": MemoryType.PROCEDURAL,  # type: ignore[attr-defined]
+                    "short_term": MemoryType.SHORT_TERM,  # type: ignore[attr-defined]
+                    "long_term": MemoryType.LONG_TERM,  # type: ignore[attr-defined]
                 }
                 memory_type_enum = type_mapping.get(memory_type)
 
@@ -324,23 +321,39 @@ class AgentMemoryInterface:
 
             return [self._convert_fallback_memory_to_dict(m) for m in memories]
 
-        return await self._execute_with_fallback(
-            "recall_memories", http_recall, fallback_recall
-        )
+        return await self._execute_with_fallback("recall_memories", http_recall, fallback_recall)
 
     async def search_memories(
         self, tags: Optional[List[str]] = None, limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Search memories by tags."""
-        if not self._client:
-            raise RuntimeError("Client not initialized. Use async with statement.")
 
-        response = await self._client.post(
-            "/memory/search",
-            json={"agent_id": self.agent_id, "tags": tags or [], "limit": limit},
-        )
-        response.raise_for_status()
-        return response.json()
+        async def http_search():
+            if not self._client:
+                raise RuntimeError("Client not initialized")
+            response = await self._client.post(
+                "/memory/search",
+                json={"agent_id": self.agent_id, "tags": tags or [], "limit": limit},
+            )
+            response.raise_for_status()
+            return response.json()
+
+        async def fallback_search():
+            if not self._fallback_chain:
+                raise RuntimeError("Fallback chain not available")
+            memories = await self._fallback_chain.get_agent_memories(
+                agent_id=self.agent_id, limit=limit
+            )
+            # Filter by tags if provided
+            if tags:
+                filtered = []
+                for memory in memories:
+                    if any(tag in memory.tags for tag in tags):
+                        filtered.append(memory.to_dict())
+                return filtered
+            return [memory.to_dict() for memory in memories]
+
+        return await self._execute_with_fallback("search_memories", http_search, fallback_search)
 
     # ========== Procedural Memory ==========
 
@@ -363,9 +376,7 @@ class AgentMemoryInterface:
         response.raise_for_status()
         return response.json()["id"]
 
-    async def recall_procedure(
-        self, procedure_name: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    async def recall_procedure(self, procedure_name: Optional[str] = None) -> List[Dict[str, Any]]:
         """Recall procedural knowledge."""
         if not self._client:
             raise RuntimeError("Client not initialized. Use async with statement.")
@@ -374,17 +385,13 @@ class AgentMemoryInterface:
         if procedure_name:
             params["procedure_name"] = procedure_name
 
-        response = await self._client.get(
-            f"/memory/procedural/{self.agent_id}", params=params
-        )
+        response = await self._client.get(f"/memory/procedural/{self.agent_id}", params=params)
         response.raise_for_status()
         return response.json()
 
     # ========== Knowledge Graph ==========
 
-    async def add_knowledge(
-        self, concept: str, description: str, confidence: float = 1.0
-    ) -> str:
+    async def add_knowledge(self, concept: str, description: str, confidence: float = 1.0) -> str:
         """Add a concept to the knowledge graph."""
         if not self._client:
             raise RuntimeError("Client not initialized. Use async with statement.")
@@ -556,9 +563,7 @@ class MemoryEnabledAgent:
 
     async def initialize(self):
         """Initialize the agent and memory interface."""
-        self.memory = AgentMemoryInterface(
-            agent_id=self.agent_id, project_id=self.project_id
-        )
+        self.memory = AgentMemoryInterface(agent_id=self.agent_id, project_id=self.project_id)
 
     async def start_task(self, task_id: str, task_description: str):
         """Start working on a task."""
@@ -589,7 +594,7 @@ class MemoryEnabledAgent:
 
         async with self.memory as mem:
             # Store the experience as episodic memory
-            experience_id = await mem.remember_long_term(
+            await mem.remember_long_term(
                 content=experience,
                 memory_type="episodic",
                 tags=["experience", "learning"],
@@ -597,7 +602,7 @@ class MemoryEnabledAgent:
             )
 
             # Store the lesson as semantic knowledge
-            lesson_id = await mem.remember_long_term(
+            await mem.remember_long_term(
                 content=lesson,
                 memory_type="semantic",
                 tags=["lesson", "knowledge"],
@@ -605,7 +610,7 @@ class MemoryEnabledAgent:
             )
 
             # Add to knowledge graph
-            concept_id = await mem.add_knowledge(
+            await mem.add_knowledge(
                 concept=f"Lesson_{datetime.now().strftime('%Y%m%d_%H%M')}",
                 description=lesson,
                 confidence=0.9,
@@ -644,9 +649,7 @@ class MemoryEnabledAgent:
 
         async with self.memory as mem:
             # Get recent short-term memories
-            context["short_term"] = await mem.recall_memories(
-                short_term_only=True, limit=10
-            )
+            context["short_term"] = await mem.recall_memories(short_term_only=True, limit=10)
 
             # Get relevant procedures
             context["procedures"] = await mem.recall_procedure()
@@ -672,9 +675,7 @@ class MemoryEnabledAgent:
             )
 
             # Update whiteboard with final result
-            await mem.write_to_whiteboard(
-                "action_items", {"result": result, "completed": True}
-            )
+            await mem.write_to_whiteboard("action_items", {"result": result, "completed": True})
 
             # Consolidate short-term memories
             consolidation = await mem.consolidate_memories(threshold_hours=1)
@@ -842,9 +843,7 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
                 sync_result["target_backend"] = "Fallback"
 
                 # Get memories from HTTP
-                memories_data = await self.recall_memories(
-                    limit=1000
-                )  # Use existing method
+                memories_data = await self.recall_memories(limit=1000)  # Use existing method
 
                 # Store in fallback (would need more complex conversion)
                 # This is a simplified version - full implementation would need proper conversion
@@ -857,9 +856,7 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
 
                 # Get memories from fallback
                 if self._fallback_chain:
-                    memories = await self._fallback_chain.get_agent_memories(
-                        agent_id, limit=1000
-                    )
+                    memories = await self._fallback_chain.get_agent_memories(agent_id, limit=1000)
                     # Would need to convert and store in HTTP backend
                     sync_result["synced_count"] = len(memories)
 

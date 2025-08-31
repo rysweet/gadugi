@@ -42,9 +42,7 @@ class RecipeImplementationAgent:
 
         if not logger.handlers:
             handler = logging.StreamHandler()
-            formatter = logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
@@ -105,9 +103,7 @@ class RecipeImplementationAgent:
                     ImplementationGap(
                         requirement_id=req.id,
                         description=f"Not implemented: {req.description}",
-                        severity=GapSeverity.HIGH
-                        if req.priority >= 3
-                        else GapSeverity.MEDIUM,
+                        severity=GapSeverity.HIGH if req.priority >= 3 else GapSeverity.MEDIUM,
                         current_state="Not implemented",
                         expected_state=req.description,
                         suggested_fix=f"Implement {req.description}",
@@ -255,15 +251,9 @@ class RecipeImplementationAgent:
         if self.generated_code:
             report["generation"] = {
                 "files_generated": len(self.generated_code),
-                "classes_added": sum(
-                    len(code.classes_added) for code in self.generated_code
-                ),
-                "functions_added": sum(
-                    len(code.functions_added) for code in self.generated_code
-                ),
-                "tests_generated": sum(
-                    len(code.tests_generated) for code in self.generated_code
-                ),
+                "classes_added": sum(len(code.classes_added) for code in self.generated_code),
+                "functions_added": sum(len(code.functions_added) for code in self.generated_code),
+                "tests_generated": sum(len(code.tests_generated) for code in self.generated_code),
             }
 
         if self.validation_result:
@@ -280,9 +270,7 @@ class RecipeImplementationAgent:
             report["summary"]["issues"] = (
                 self.validation_result.errors + self.validation_result.warnings[:3]
             )
-            report["summary"]["recommendations"] = self.validation_result.suggestions[
-                :5
-            ]
+            report["summary"]["recommendations"] = self.validation_result.suggestions[:5]
 
         return report
 
@@ -336,9 +324,7 @@ def main():
             print(f"Functions Added: {result['generation']['functions_added']}")
 
         if result["validation"]:
-            print(
-                f"Validation: {'PASSED' if result['validation']['is_valid'] else 'FAILED'}"
-            )
+            print(f"Validation: {'PASSED' if result['validation']['is_valid'] else 'FAILED'}")
             print(f"Test Pass Rate: {result['validation']['test_pass_rate']:.1%}")
             print(f"Quality Score: {result['validation']['quality_score']:.1%}")
 

@@ -149,7 +149,7 @@ class DeadLetterQueue:
                 await self._persist_entry(entry)
 
             self.logger.warning(
-                f"Added event {event.id} to dead letter queue: {error_message}",  # type: ignore[assignment]
+                f"Added event {event.id} to dead letter queue: {str(error)}",
                 extra={"event_id": event.id, "error_type": type(error).__name__},
             )
 

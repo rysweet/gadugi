@@ -25,9 +25,7 @@ def fix_matplotlib_imports(content: str) -> str:
 
 def fix_seaborn_imports(content: str) -> str:
     """Add type ignore comment to seaborn imports."""
-    return content.replace(
-        "import seaborn", "import seaborn  # type: ignore[import-not-found]"
-    )
+    return content.replace("import seaborn", "import seaborn  # type: ignore[import-not-found]")
 
 
 def fix_missing_shared_imports(content: str) -> str:
@@ -55,9 +53,7 @@ def fix_missing_shared_imports(content: str) -> str:
 def fix_optional_parameters(content: str) -> str:
     """Fix optional parameter type hints."""
     # Pattern to find function definitions with = None but without Optional
-    pattern = (
-        r"(\w+):\s*(List\[[^\]]+\]|Dict\[[^\]]+\]|str|int|float|bool|Any)\s*=\s*None"
-    )
+    pattern = r"(\w+):\s*(List\[[^\]]+\]|Dict\[[^\]]+\]|str|int|float|bool|Any)\s*=\s*None"
 
     def replace_with_optional(match):
         param_name = match.group(1)
@@ -123,9 +119,7 @@ def fix_datetime_optional(content: str) -> str:
 def fix_dict_type_variance(content: str) -> str:
     """Fix Dict type variance issues."""
     # Replace Dict[str, int] with Dict[str, float] where needed for compatibility
-    content = content.replace(
-        "durations: Dict[str, int]", "durations: Dict[str, float]"
-    )
+    content = content.replace("durations: Dict[str, int]", "durations: Dict[str, float]")
     return content
 
 

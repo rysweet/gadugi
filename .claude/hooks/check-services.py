@@ -44,11 +44,11 @@ def check_docker_container(container_name):
 def get_service_status():
     """Get status of all Gadugi services"""
     services = {
-        'neo4j': {
-            'name': 'Neo4j Database',
-            'status': False,
-            'details': '',
-            'ports': [7474, 7687]
+        "neo4j": {
+            "name": "Neo4j Database",
+            "status": False,
+            "details": "",
+            "ports": [7474, 7687],  # Standard Neo4j ports
         },
         "memory": {
             "name": "Memory Service",
@@ -67,8 +67,8 @@ def get_service_status():
     # Check Neo4j
     if check_docker_container("gadugi-neo4j"):
         if check_port("localhost", 7474) and check_port("localhost", 7687):
-            services['neo4j']['status'] = True
-            services['neo4j']['details'] = 'Running (Ports 7474/7687)'
+            services["neo4j"]["status"] = True
+            services["neo4j"]["details"] = "Running (Ports 7474/7687)"
         else:
             services["neo4j"]["details"] = "Container running but ports not accessible"
     else:

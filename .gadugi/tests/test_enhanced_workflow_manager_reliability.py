@@ -21,7 +21,6 @@ Test Categories:
 """
 
 import shutil
-import sys
 import tempfile
 import time
 from datetime import datetime, timedelta
@@ -33,21 +32,20 @@ import pytest
 # Add project paths
 test_dir = Path(__file__).parent
 project_root = test_dir.parent
-sys.path.insert(0, str(project_root / ".gadugi" / ".gadugi" / "src" / "shared"))
-sys.path.insert(0, str(project_root / ".gadugi" / ".gadugi" / "src" / "agents"))
 
 # Import modules under test
 try:
-    from workflow_reliability import (  # type: ignore[import]
+    from src.src.shared.workflow_reliability import (  # type: ignore[import]
         WorkflowReliabilityManager,
         WorkflowStage,
         HealthStatus,
         SystemHealthCheck,
-        WorkflowMonitoringState,
         monitor_workflow,
-        create_reliability_manager,
     )
-    from enhanced_workflow_manager import EnhancedWorkflowManager, WorkflowConfiguration  # type: ignore[import]
+    from src.src.agents.enhanced_workflow_manager import (
+        EnhancedWorkflowManager,
+        WorkflowConfiguration,
+    )  # type: ignore[import]
 except ImportError as e:
     pytest.skip(f"Required modules not available: {e}", allow_module_level=True)
 
@@ -195,7 +193,7 @@ class TestWorkflowReliabilityManager:
             assert "recovery_actions" in result or "success" in result
 
             # Verify error handler was called
-            mock_handle.assert_called_once()
+            mock_handle.assert_called_once()  # type: ignore[attr-defined]
 
             # Verify error count increased
             monitoring_state = self.reliability_manager.monitoring_states[self.workflow_id]

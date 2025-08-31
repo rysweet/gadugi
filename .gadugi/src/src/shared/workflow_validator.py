@@ -32,7 +32,7 @@ try:
 except ImportError:
     try:
         # Try absolute import if relative import fails
-        from workflow_engine import (
+        from src.src.shared.workflow_engine import (
             WorkflowPhase as EngineWorkflowPhase,
             WorkflowState as EngineWorkflowState,
         )  # type: ignore
@@ -175,9 +175,7 @@ class WorkflowValidator:
 
         return self._generate_report(results, start_time, "Prompt File Validation")
 
-    def validate_workflow_state(
-        self, workflow_state: WorkflowState
-    ) -> ValidationReport:
+    def validate_workflow_state(self, workflow_state: WorkflowState) -> ValidationReport:
         """
         Validate current workflow state and phase completion
 
@@ -238,9 +236,7 @@ class WorkflowValidator:
 
         return self._generate_report(results, start_time, "Git Environment Validation")
 
-    def validate_github_integration(
-        self, workflow_state: WorkflowState
-    ) -> ValidationReport:
+    def validate_github_integration(self, workflow_state: WorkflowState) -> ValidationReport:
         """
         Validate GitHub integration (PRs, issues, etc.)
 
@@ -268,9 +264,7 @@ class WorkflowValidator:
             result = self._execute_validation_rule(rule, context)
             results.append(result)
 
-        return self._generate_report(
-            results, start_time, "GitHub Integration Validation"
-        )
+        return self._generate_report(results, start_time, "GitHub Integration Validation")
 
     def validate_end_to_end(
         self, prompt_file: str, workflow_state: WorkflowState
@@ -407,9 +401,7 @@ class WorkflowValidator:
                     missing_sections.append(section)
 
             if missing_sections:
-                issues.append(
-                    f'Missing recommended sections: {", ".join(missing_sections)}'
-                )
+                issues.append(f'Missing recommended sections: {", ".join(missing_sections)}')
                 suggestions.append("Add standard sections for better clarity")
 
             # Check for code blocks or implementation details
@@ -484,14 +476,8 @@ class WorkflowValidator:
                 message="Git repository is clean"
                 if not has_changes
                 else "Git repository has uncommitted changes",
-                details={
-                    "uncommitted_files": status_output.split("\n")
-                    if has_changes
-                    else []
-                },
-                suggestions=["Commit or stash changes before proceeding"]
-                if has_changes
-                else [],
+                details={"uncommitted_files": status_output.split("\n") if has_changes else []},
+                suggestions=["Commit or stash changes before proceeding"] if has_changes else [],
                 execution_time=(datetime.now() - start_time).total_seconds(),
             )
 
@@ -570,9 +556,7 @@ class WorkflowValidator:
                     "current_branch": current_branch,
                     "on_correct_branch": on_correct_branch,
                 },
-                suggestions=["Switch to workflow branch"]
-                if not on_correct_branch
-                else [],
+                suggestions=["Switch to workflow branch"] if not on_correct_branch else [],
                 execution_time=(datetime.now() - start_time).total_seconds(),
             )
 
@@ -699,15 +683,11 @@ class WorkflowValidator:
         # Check if any expected phases are missing
         if len(completed_phases) < len(expected_sequence):
             for i in range(len(completed_phases), len(expected_sequence)):
-                issues.append(
-                    f"Missing expected phase {expected_sequence[i].name} at position {i}"
-                )
+                issues.append(f"Missing expected phase {expected_sequence[i].name} at position {i}")
 
         passed = len(issues) == 0
         message = (
-            "Phase sequence is correct"
-            if passed
-            else f'Phase sequence issues: {"; ".join(issues)}'
+            "Phase sequence is correct" if passed else f'Phase sequence issues: {"; ".join(issues)}'
         )
 
         return ValidationResult(
@@ -797,9 +777,7 @@ class WorkflowValidator:
 
         try:
             # Check if all required context is available
-            missing_context = [
-                ctx for ctx in rule.required_context if ctx not in context
-            ]
+            missing_context = [ctx for ctx in rule.required_context if ctx not in context]
             if missing_context:
                 return ValidationResult(
                     rule_name=rule.name,
@@ -849,14 +827,12 @@ class WorkflowValidator:
         warnings = sum(
             1
             for r in results
-            if not r.passed
-            and r.level in [ValidationLevel.MINIMAL, ValidationLevel.STANDARD]
+            if not r.passed and r.level in [ValidationLevel.MINIMAL, ValidationLevel.STANDARD]
         )
         errors = sum(
             1
             for r in results
-            if not r.passed
-            and r.level in [ValidationLevel.STRICT, ValidationLevel.COMPREHENSIVE]
+            if not r.passed and r.level in [ValidationLevel.STRICT, ValidationLevel.COMPREHENSIVE]
         )
 
         # Determine overall status
@@ -915,12 +891,9 @@ class WorkflowValidator:
         # Update success rate
         if self.metrics["total_validations"] > 0:
             total_passed = sum(
-                len([r for r in report.results if r.passed])
-                for report in self.validation_history
+                len([r for r in report.results if r.passed]) for report in self.validation_history
             )
-            total_checks = sum(
-                len(report.results) for report in self.validation_history
-            )
+            total_checks = sum(len(report.results) for report in self.validation_history)
             if total_checks > 0:
                 self.metrics["success_rate"] = total_passed / total_checks
 
@@ -933,9 +906,7 @@ class WorkflowValidator:
 
         return report
 
-    def export_validation_report(
-        self, report: ValidationReport, filename: str = None
-    ) -> str:  # type: ignore
+    def export_validation_report(self, report: ValidationReport, filename: str = None) -> str:  # type: ignore
         """Export validation report to JSON file"""
 
         if filename is None:
@@ -1003,9 +974,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python workflow_validator.py <prompt_file> [validation_level]")
-        print(
-            "  validation_level: minimal, standard, strict, comprehensive (default: standard)"
-        )
+        print("  validation_level: minimal, standard, strict, comprehensive (default: standard)")
         sys.exit(1)
 
     prompt_file = sys.argv[1]

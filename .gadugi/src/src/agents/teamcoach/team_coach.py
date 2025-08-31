@@ -137,16 +137,12 @@ class TeamCoach(IntegratedAgent):
         self.metrics_collector = MetricsCollector()
         self.reporting_system = ReportingSystem()
 
-        self.task_matcher = TaskAgentMatcher(
-            self.capability_assessment, self.performance_analyzer
-        )
+        self.task_matcher = TaskAgentMatcher(self.capability_assessment, self.performance_analyzer)
         self.team_optimizer = TeamCompositionOptimizer(
             self.capability_assessment,
             self.task_matcher,  # type: ignore[assignment]
         )
-        self.recommendation_engine = RecommendationEngine(
-            self.task_matcher, self.team_optimizer
-        )
+        self.recommendation_engine = RecommendationEngine(self.task_matcher, self.team_optimizer)
 
         self.coaching_engine = CoachingEngine(
             self.performance_analyzer, self.capability_assessment, self.task_matcher
@@ -208,9 +204,7 @@ class TeamCoach(IntegratedAgent):
         self.log_info(f"Analyzing session: {session_data.get('session_id', 'unknown')}")
 
         # Extract session metrics
-        session_id = session_data.get(
-            "session_id", f"session_{datetime.now().isoformat()}"
-        )
+        session_id = session_data.get("session_id", f"session_{datetime.now().isoformat()}")
         start_time = self._parse_datetime(session_data.get("start_time"))
         end_time = self._parse_datetime(session_data.get("end_time", datetime.now()))
 
@@ -241,14 +235,10 @@ class TeamCoach(IntegratedAgent):
         # Store session history
         self.session_history.append(metrics)
 
-        self.log_info(
-            f"Session analysis completed: {performance_score:.2f} performance score"
-        )
+        self.log_info(f"Session analysis completed: {performance_score:.2f} performance score")
         return metrics
 
-    async def identify_improvements(
-        self, metrics: SessionMetrics
-    ) -> List[ImprovementSuggestion]:
+    async def identify_improvements(self, metrics: SessionMetrics) -> List[ImprovementSuggestion]:
         """Identify improvement opportunities from session metrics."""
         self.log_info("Identifying improvement opportunities")
 
@@ -364,9 +354,7 @@ class TeamCoach(IntegratedAgent):
         # Create the issue (mock implementation - would use real GitHub API)
         try:
             # This would be replaced with actual GitHub API call
-            issue_url = (
-                f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
-            )
+            issue_url = f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
             self.log_info(f"Created issue: {issue_url}")
             return issue_url
         except Exception as e:
@@ -388,11 +376,7 @@ class TeamCoach(IntegratedAgent):
         current_avg = sum(s.performance_score for s in recent_sessions[-5:]) / 5
         previous_avg = sum(s.performance_score for s in recent_sessions[-10:-5]) / 5
 
-        change_pct = (
-            ((current_avg - previous_avg) / previous_avg) * 100
-            if previous_avg > 0
-            else 0
-        )
+        change_pct = ((current_avg - previous_avg) / previous_avg) * 100 if previous_avg > 0 else 0
 
         if change_pct > 5:
             direction = "improving"
@@ -421,9 +405,7 @@ class TeamCoach(IntegratedAgent):
 
         # Get recent performance data
         recent_sessions = self.session_history[-10:] if self.session_history else []
-        recent_improvements = (
-            self.improvement_history[-20:] if self.improvement_history else []
-        )
+        recent_improvements = self.improvement_history[-20:] if self.improvement_history else []
 
         # Calculate summary metrics
         avg_performance = (
@@ -438,7 +420,7 @@ class TeamCoach(IntegratedAgent):
         coaching_recommendations = []
         if recent_sessions:
             # Get coaching recommendations for recent performance
-            latest_session = recent_sessions[-1]
+            _latest_session = recent_sessions[-1]
             # This would integrate with the actual coaching engine
             coaching_recommendations.append(
                 {
@@ -561,9 +543,7 @@ class TeamCoach(IntegratedAgent):
 
     def _sync_analyze_session(self, session_data: Dict[str, Any]) -> SessionMetrics:
         """Synchronous version of analyze_session for framework compatibility."""
-        session_id = session_data.get(
-            "session_id", f"session_{datetime.now().isoformat()}"
-        )
+        session_id = session_data.get("session_id", f"session_{datetime.now().isoformat()}")
         start_time = self._parse_datetime(session_data.get("start_time"))
         end_time = self._parse_datetime(session_data.get("end_time", datetime.now()))
 
@@ -589,9 +569,7 @@ class TeamCoach(IntegratedAgent):
             performance_score=performance_score,
         )
 
-    def _handle_improvement_identification(
-        self, context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _handle_improvement_identification(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Handle improvement identification request."""
         try:
             metrics_data = context.get("metrics", {})
@@ -617,9 +595,7 @@ class TeamCoach(IntegratedAgent):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _sync_identify_improvements(
-        self, metrics: SessionMetrics
-    ) -> List[ImprovementSuggestion]:
+    def _sync_identify_improvements(self, metrics: SessionMetrics) -> List[ImprovementSuggestion]:
         """Synchronous version of identify_improvements."""
         suggestions = []
 
@@ -660,7 +636,9 @@ class TeamCoach(IntegratedAgent):
             suggestion_data = context.get("suggestion", {})
 
             # Mock issue creation for now
-            issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            issue_url = (
+                f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            )
 
             return {
                 "success": True,
@@ -684,19 +662,13 @@ class TeamCoach(IntegratedAgent):
             recent_scores = [s.performance_score for s in self.session_history[-5:]]
             avg_recent = sum(recent_scores) / len(recent_scores)
 
-            previous_scores = [
-                s.performance_score for s in self.session_history[-10:-5]
-            ]
+            previous_scores = [s.performance_score for s in self.session_history[-10:-5]]
             avg_previous = (
-                sum(previous_scores) / len(previous_scores)
-                if previous_scores
-                else avg_recent
+                sum(previous_scores) / len(previous_scores) if previous_scores else avg_recent
             )
 
             change_pct = (
-                ((avg_recent - avg_previous) / avg_previous) * 100
-                if avg_previous > 0
-                else 0
+                ((avg_recent - avg_previous) / avg_previous) * 100 if avg_previous > 0 else 0
             )
 
             return {
@@ -768,9 +740,7 @@ class TeamCoach(IntegratedAgent):
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _calculate_session_performance_score(
-        self, session_data: Dict[str, Any]
-    ) -> float:
+    def _calculate_session_performance_score(self, session_data: Dict[str, Any]) -> float:
         """Calculate a performance score for the session."""
         tasks_completed = len(session_data.get("tasks", []))
         errors_encountered = len(session_data.get("errors", []))
@@ -820,9 +790,7 @@ class TeamCoach(IntegratedAgent):
             "name": self.name,
             "sessions_analyzed": len(self.session_history),
             "improvements_identified": len(self.improvement_history),
-            "last_analysis": self.session_history[-1].session_id
-            if self.session_history
-            else None,
+            "last_analysis": self.session_history[-1].session_id if self.session_history else None,
             "performance_metrics": self.get_performance_metrics(),
             "learning_summary": self.get_learning_summary(),
         }

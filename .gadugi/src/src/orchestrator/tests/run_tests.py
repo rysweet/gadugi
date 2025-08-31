@@ -29,9 +29,7 @@ def run_test_suite():
 
     # Run tests with detailed output
     stream = StringIO()
-    runner = unittest.TextTestRunner(
-        stream=stream, verbosity=2, buffer=True, failfast=False
-    )
+    runner = unittest.TextTestRunner(stream=stream, verbosity=2, buffer=True, failfast=False)
 
     start_time = time.time()
     result = runner.run(suite)

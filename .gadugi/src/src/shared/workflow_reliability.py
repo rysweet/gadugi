@@ -67,6 +67,69 @@ except ImportError as e:
         details: Dict[str, Any] = field(default_factory=dict)
         workflow_id: Optional[str] = None
 
+    # Fallback implementations for missing Enhanced Separation modules
+    class StateManager:
+        def __init__(self, config=None):
+            self.config = config or {}
+            self._states = {}
+
+        def save_state(self, task_state):
+            """Save task state (fallback implementation)"""
+            self._states[task_state.task_id] = task_state
+            return True
+
+        def load_state(self, task_id):
+            """Load task state (fallback implementation)"""
+            return self._states.get(task_id)
+
+    class TaskState:
+        def __init__(self, task_id, prompt_file=None, status="pending", phase=0, context=None):
+            self.task_id = task_id
+            self.prompt_file = prompt_file or "unknown"
+            self.status = status
+            self.phase = phase
+            self.context = context or {}
+            self.created_at = datetime.now()
+
+        def set_error(self, error_info):
+            """Set error information for the task state"""
+            self.error_info = error_info
+
+    class WorkflowPhase:
+        pass
+
+    class CheckpointManager:
+        def __init__(self, state_manager=None):
+            self.state_manager = state_manager
+            self._checkpoints = {}
+
+        def create_checkpoint(self, task_state, description=""):
+            """Create a checkpoint (fallback implementation)"""
+            import uuid
+
+            checkpoint_id = str(uuid.uuid4())[:8]
+            self._checkpoints[checkpoint_id] = {
+                "task_state": task_state,
+                "description": description,
+                "timestamp": datetime.now(),
+            }
+            return checkpoint_id
+
+    class TaskTracker:
+        def __init__(self, task_id=None):
+            self.task_id = task_id
+
+    class TaskStatus:
+        pass
+
+    class WorkflowPhaseTracker:
+        def __init__(self):
+            pass
+
+    class GitHubOperations:
+        def __init__(self, task_id=None):
+            self.task_id = task_id
+
 
 class WorkflowStage(Enum):
     """Detailed workflow stages for comprehensive tracking"""
@@ -138,9 +201,7 @@ class WorkflowMonitoringState:
     stage_start_time: datetime
     last_heartbeat: datetime
     health_checks: List[SystemHealthCheck] = field(default_factory=list)
-    stage_history: List[Tuple[WorkflowStage, datetime, datetime]] = field(
-        default_factory=list
-    )
+    stage_history: List[Tuple[WorkflowStage, datetime, datetime]] = field(default_factory=list)
     error_count: int = 0
     recovery_attempts: int = 0
     timeout_warnings: int = 0
@@ -175,15 +236,11 @@ class WorkflowReliabilityManager:
         self.phase_tracker = WorkflowPhaseTracker()  # type: ignore
 
         # Configure circuit breakers for different operations
-        self.github_circuit_breaker = CircuitBreaker(
-            failure_threshold=3, recovery_timeout=300.0
-        )
+        self.github_circuit_breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=300.0)
         self.implementation_circuit_breaker = CircuitBreaker(
             failure_threshold=5, recovery_timeout=600.0
         )
-        self.system_circuit_breaker = CircuitBreaker(
-            failure_threshold=2, recovery_timeout=120.0
-        )
+        self.system_circuit_breaker = CircuitBreaker(failure_threshold=2, recovery_timeout=120.0)
 
         # Default timeout configurations
         self.default_timeouts = self._initialize_default_timeouts()
@@ -294,9 +351,7 @@ class WorkflowReliabilityManager:
             ),
         }
 
-    def start_workflow_monitoring(
-        self, workflow_id: str, workflow_context: Dict[str, Any]
-    ) -> bool:
+    def start_workflow_monitoring(self, workflow_id: str, workflow_context: Dict[str, Any]) -> bool:
         """
         Start comprehensive monitoring for a workflow execution.
 
@@ -341,9 +396,7 @@ class WorkflowReliabilityManager:
             return True
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to start workflow monitoring for {workflow_id}: {e}"
-            )
+            self.logger.error(f"Failed to start workflow monitoring for {workflow_id}: {e}")
             return False
 
     def update_workflow_stage(
@@ -365,9 +418,7 @@ class WorkflowReliabilityManager:
         """
         try:
             if workflow_id not in self.monitoring_states:
-                self.logger.error(
-                    f"Workflow {workflow_id} not found in monitoring states"
-                )
+                self.logger.error(f"Workflow {workflow_id} not found in monitoring states")
                 return False
 
             monitoring_state = self.monitoring_states[workflow_id]
@@ -375,9 +426,7 @@ class WorkflowReliabilityManager:
             stage_end_time = datetime.now()
 
             # Record stage completion in history
-            stage_duration = (
-                stage_end_time - monitoring_state.stage_start_time
-            ).total_seconds()
+            stage_duration = (stage_end_time - monitoring_state.stage_start_time).total_seconds()
             monitoring_state.stage_history.append(
                 (old_stage, monitoring_state.stage_start_time, stage_end_time)
             )
@@ -469,11 +518,11 @@ class WorkflowReliabilityManager:
             health_issues = []
             recommendations = []
 
-            if cpu_usage > 90:
+            if cpu_usage > 80:
                 health_issues.append("high_cpu")
                 recommendations.append("Reduce concurrent operations")
 
-            if memory.percent > 85:
+            if memory.percent > 80:
                 health_issues.append("high_memory")
                 recommendations.append("Free up memory or restart services")
 
@@ -483,15 +532,11 @@ class WorkflowReliabilityManager:
 
             if not github_connectivity:
                 health_issues.append("github_connectivity")
-                recommendations.append(
-                    "Check network connectivity and GitHub API status"
-                )
+                recommendations.append("Check network connectivity and GitHub API status")
 
             if not claude_availability:
                 health_issues.append("claude_unavailable")
-                recommendations.append(
-                    "Verify Claude CLI installation and authentication"
-                )
+                recommendations.append("Verify Claude CLI installation and authentication")
 
             # Determine overall status
             if len(health_issues) == 0:
@@ -606,9 +651,7 @@ class WorkflowReliabilityManager:
                     "error_type": type(error).__name__,
                     "error_message": str(error),
                     "recovery_context": recovery_context or {},
-                    "error_count": monitoring_state.error_count
-                    if monitoring_state
-                    else 1,
+                    "error_count": monitoring_state.error_count if monitoring_state else 1,
                 },
                 exc_info=True,
             )
@@ -630,9 +673,7 @@ class WorkflowReliabilityManager:
             return recovery_result
 
         except Exception as recovery_error:
-            self.logger.error(
-                f"Error handling failed for {workflow_id}: {recovery_error}"
-            )
+            self.logger.error(f"Error handling failed for {workflow_id}: {recovery_error}")
             return {
                 "success": False,
                 "error": "Recovery handling failed",
@@ -658,9 +699,7 @@ class WorkflowReliabilityManager:
 
             monitoring_state = self.monitoring_states[workflow_id]
             current_time = datetime.now()
-            stage_duration = (
-                current_time - monitoring_state.stage_start_time
-            ).total_seconds()
+            stage_duration = (current_time - monitoring_state.stage_start_time).total_seconds()
 
             current_stage = monitoring_state.current_stage
             timeout_config = self.default_timeouts.get(current_stage)
@@ -718,9 +757,7 @@ class WorkflowReliabilityManager:
             self.logger.error(f"Timeout check failed for {workflow_id}: {e}")
             return {"status": "check_failed", "error": str(e)}
 
-    def create_workflow_persistence(
-        self, workflow_id: str, workflow_state: Dict[str, Any]
-    ) -> bool:
+    def create_workflow_persistence(self, workflow_id: str, workflow_state: Dict[str, Any]) -> bool:
         """
         Create comprehensive workflow state persistence for resumption.
 
@@ -781,14 +818,10 @@ class WorkflowReliabilityManager:
             return success
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to create workflow persistence for {workflow_id}: {e}"
-            )
+            self.logger.error(f"Failed to create workflow persistence for {workflow_id}: {e}")
             return False
 
-    def restore_workflow_from_persistence(
-        self, workflow_id: str
-    ) -> Optional[Dict[str, Any]]:
+    def restore_workflow_from_persistence(self, workflow_id: str) -> Optional[Dict[str, Any]]:
         """
         Restore workflow state from persistence for resumption.
 
@@ -812,9 +845,7 @@ class WorkflowReliabilityManager:
                     workflow_id=workflow_id,
                     start_time=task_state.created_at,  # type: ignore[assignment]
                     current_stage=WorkflowStage(monitoring_data["current_stage"]),
-                    stage_start_time=datetime.fromisoformat(
-                        monitoring_data["stage_start_time"]
-                    ),
+                    stage_start_time=datetime.fromisoformat(monitoring_data["stage_start_time"]),
                     last_heartbeat=datetime.now(),
                     error_count=monitoring_data.get("error_count", 0),
                     recovery_attempts=monitoring_data.get("recovery_attempts", 0),
@@ -824,9 +855,7 @@ class WorkflowReliabilityManager:
                             datetime.fromisoformat(start),
                             datetime.fromisoformat(end),
                         )
-                        for stage, start, end in monitoring_data.get(
-                            "stage_history", []
-                        )
+                        for stage, start, end in monitoring_data.get("stage_history", [])
                     ],
                 )
 
@@ -839,18 +868,14 @@ class WorkflowReliabilityManager:
                     "restored_stage": monitoring_data["current_stage"]
                     if monitoring_data
                     else "unknown",
-                    "error_count": monitoring_data.get("error_count", 0)
-                    if monitoring_data
-                    else 0,
+                    "error_count": monitoring_data.get("error_count", 0) if monitoring_data else 0,
                 },
             )
 
             return task_state.context
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to restore workflow from persistence for {workflow_id}: {e}"
-            )
+            self.logger.error(f"Failed to restore workflow from persistence for {workflow_id}: {e}")
             return None
 
     def stop_workflow_monitoring(
@@ -868,9 +893,7 @@ class WorkflowReliabilityManager:
         """
         try:
             if workflow_id not in self.monitoring_states:
-                self.logger.warning(
-                    f"Workflow {workflow_id} not found in monitoring states"
-                )
+                self.logger.warning(f"Workflow {workflow_id} not found in monitoring states")
                 return False
 
             monitoring_state = self.monitoring_states[workflow_id]
@@ -878,9 +901,7 @@ class WorkflowReliabilityManager:
             total_duration = (end_time - monitoring_state.start_time).total_seconds()
 
             # Create final performance report
-            performance_report = self._generate_performance_report(
-                workflow_id, monitoring_state
-            )
+            performance_report = self._generate_performance_report(workflow_id, monitoring_state)
 
             # Log workflow completion
             self.workflow_logger.info(
@@ -908,9 +929,7 @@ class WorkflowReliabilityManager:
             return True
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to stop workflow monitoring for {workflow_id}: {e}"
-            )
+            self.logger.error(f"Failed to stop workflow monitoring for {workflow_id}: {e}")
             return False
 
     def get_workflow_diagnostics(self, workflow_id: str) -> Dict[str, Any]:
@@ -947,17 +966,13 @@ class WorkflowReliabilityManager:
 
             # Recent health checks
             recent_health = (
-                monitoring_state.health_checks[-5:]
-                if monitoring_state.health_checks
-                else []
+                monitoring_state.health_checks[-5:] if monitoring_state.health_checks else []
             )
 
             return {
                 "workflow_id": workflow_id,
                 "status": "active",
-                "total_duration": (
-                    current_time - monitoring_state.start_time
-                ).total_seconds(),
+                "total_duration": (current_time - monitoring_state.start_time).total_seconds(),
                 "current_stage": {
                     "stage": monitoring_state.current_stage.value,
                     "duration": current_stage_duration,
@@ -981,9 +996,7 @@ class WorkflowReliabilityManager:
             }
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to get workflow diagnostics for {workflow_id}: {e}"
-            )
+            self.logger.error(f"Failed to get workflow diagnostics for {workflow_id}: {e}")
             return {"error": str(e)}
 
     # Private helper methods
@@ -1074,9 +1087,7 @@ class WorkflowReliabilityManager:
         try:
             import subprocess
 
-            result = subprocess.run(
-                ["gh", "api", "user"], capture_output=True, timeout=10
-            )
+            result = subprocess.run(["gh", "api", "user"], capture_output=True, timeout=10)
             return result.returncode == 0
         except Exception:
             return False
@@ -1086,9 +1097,7 @@ class WorkflowReliabilityManager:
         try:
             import subprocess
 
-            result = subprocess.run(
-                ["claude", "--version"], capture_output=True, timeout=10
-            )
+            result = subprocess.run(["claude", "--version"], capture_output=True, timeout=10)
             return result.returncode == 0
         except Exception:
             return False
@@ -1184,9 +1193,7 @@ class WorkflowReliabilityManager:
                     recovery_actions_taken.append("checkpoint_created")
                 elif action == "check_system_health":
                     health_check = self.perform_health_check(workflow_id)
-                    recovery_actions_taken.append(
-                        f"health_check_{health_check.status.value}"
-                    )
+                    recovery_actions_taken.append(f"health_check_{health_check.status.value}")
                 elif action == "retry_github_api":
                     # Circuit breaker will handle retry logic
                     recovery_actions_taken.append("github_retry_initiated")
@@ -1241,9 +1248,7 @@ class WorkflowReliabilityManager:
         except Exception as e:
             self.logger.error(f"Failed to create checkpoint for {workflow_id}: {e}")
 
-    def _create_error_checkpoint(
-        self, workflow_id: str, error: Exception, stage: WorkflowStage
-    ):
+    def _create_error_checkpoint(self, workflow_id: str, error: Exception, stage: WorkflowStage):
         """Create an error checkpoint for debugging and recovery"""
         try:
             error_state = TaskState(  # type: ignore
@@ -1308,9 +1313,7 @@ class WorkflowReliabilityManager:
     ) -> Dict[str, Any]:
         """Generate comprehensive performance report for workflow"""
         try:
-            total_duration = (
-                datetime.now() - monitoring_state.start_time
-            ).total_seconds()
+            total_duration = (datetime.now() - monitoring_state.start_time).total_seconds()
 
             # Calculate stage performance
             stage_performance = {}
@@ -1335,17 +1338,13 @@ class WorkflowReliabilityManager:
                 for stage, _, _ in monitoring_state.stage_history
             )
 
-            performance_score = (
-                (total_baseline / total_duration) if total_duration > 0 else 0
-            )
+            performance_score = (total_baseline / total_duration) if total_duration > 0 else 0
 
             return {
                 "total_duration": total_duration,
                 "total_baseline": total_baseline,
                 "performance_score": performance_score,
-                "performance_grade": self._calculate_performance_grade(
-                    performance_score
-                ),
+                "performance_grade": self._calculate_performance_grade(performance_score),
                 "stage_performance": stage_performance,
                 "error_rate": monitoring_state.error_count
                 / max(len(monitoring_state.stage_history), 1),
@@ -1430,9 +1429,7 @@ class WorkflowReliabilityContext:
             else:
                 completion_status = "completed"
 
-            self.reliability_manager.stop_workflow_monitoring(
-                self.workflow_id, completion_status
-            )
+            self.reliability_manager.stop_workflow_monitoring(self.workflow_id, completion_status)
 
         # Don't suppress exceptions
         return False
@@ -1452,6 +1449,4 @@ def monitor_workflow(
     reliability_manager: Optional[WorkflowReliabilityManager] = None,
 ):
     """Create a workflow reliability context manager"""
-    return WorkflowReliabilityContext(
-        workflow_id, workflow_context, reliability_manager
-    )
+    return WorkflowReliabilityContext(workflow_id, workflow_context, reliability_manager)

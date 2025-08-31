@@ -83,24 +83,16 @@ class EventSubscriptionManager:
         )
 
         # Team Coach subscriptions
-        self.add_subscription(
-            "teamcoach", "orchestration.stopped", "trigger_reflection"
-        )
+        self.add_subscription("teamcoach", "orchestration.stopped", "trigger_reflection")
         self.add_subscription("teamcoach", "*.stopped", "collect_metrics")
 
         # WorkflowManager subscriptions
-        self.add_subscription(
-            "workflow", "orchestration.implementation_started", "begin_workflow"
-        )
+        self.add_subscription("workflow", "orchestration.implementation_started", "begin_workflow")
         self.add_subscription(
             "workflow", "orchestration.tasks_distributed", "begin_assigned_workflow"
         )
-        self.add_subscription(
-            "workflow", "*.hasQuestion.response", "continue_after_answer"
-        )
-        self.add_subscription(
-            "workflow", "*.needsApproval.response", "continue_after_approval"
-        )
+        self.add_subscription("workflow", "*.hasQuestion.response", "continue_after_answer")
+        self.add_subscription("workflow", "*.needsApproval.response", "continue_after_approval")
         self.add_subscription("workflow", "codereview.completed", "proceed_to_phase_10")
         self.add_subscription("workflow", "tests.failed", "trigger_test_solver")
         self.add_subscription("workflow", "pr.conflict", "trigger_conflict_resolution")
@@ -109,17 +101,13 @@ class EventSubscriptionManager:
         self.add_subscription("codereview", "workflow.pr_created", "trigger_review")
         self.add_subscription("codereview", "workflow.code_changed", "re_review")
         self.add_subscription("codereview", "pr.updated", "re_review_changed_files")
-        self.add_subscription(
-            "codereview", "review.response_submitted", "verify_changes_addressed"
-        )
+        self.add_subscription("codereview", "review.response_submitted", "verify_changes_addressed")
 
         # MemoryManager subscriptions
         self.add_subscription("memory", "*.lessons_learned", "store_learnings")
         self.add_subscription("memory", "*.memory_updates", "update_memories")
         self.add_subscription("memory", "agent.started", "load_agent_memories")
-        self.add_subscription(
-            "memory", "orchestration.pattern_learned", "store_pattern"
-        )
+        self.add_subscription("memory", "orchestration.pattern_learned", "store_pattern")
         self.add_subscription("memory", "workflow.pr_merged", "update_memory_md")
         self.add_subscription("memory", "agent.initialized", "load_agent_memories")
         self.add_subscription("memory", "system.shutdown", "final_memory_sync")
@@ -151,16 +139,10 @@ class EventSubscriptionManager:
         self.add_subscription("prbacklog", "pr.created", "add_to_backlog_tracking")
         self.add_subscription("prbacklog", "codereview.completed", "update_readiness")
         self.add_subscription("prbacklog", "*.pr_conflict", "flag_for_resolution")
-        self.add_subscription(
-            "prbacklog", "pr.review_completed", "update_readiness_status"
-        )
-        self.add_subscription(
-            "prbacklog", "pr.conflict_detected", "flag_for_resolution"
-        )
+        self.add_subscription("prbacklog", "pr.review_completed", "update_readiness_status")
+        self.add_subscription("prbacklog", "pr.conflict_detected", "flag_for_resolution")
 
-        logger.info(
-            f"Initialized {len(self.subscriptions)} default subscription patterns"
-        )
+        logger.info(f"Initialized {len(self.subscriptions)} default subscription patterns")
 
     def add_subscription(
         self,

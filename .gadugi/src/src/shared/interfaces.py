@@ -160,9 +160,7 @@ class GitHubOperationsInterface(ABC):
         pass
 
     @abstractmethod
-    def create_pr(
-        self, title: str, body: str, base: str, head: str, **kwargs
-    ) -> Dict[str, Any]:
+    def create_pr(self, title: str, body: str, base: str, head: str, **kwargs) -> Dict[str, Any]:
         """
         Create a GitHub pull request.
 
@@ -235,9 +233,7 @@ class TaskTrackerInterface(ABC):
     """
 
     @abstractmethod
-    def create_task(
-        self, content: str, priority: str = "medium", **kwargs
-    ) -> Dict[str, Any]:
+    def create_task(self, content: str, priority: str = "medium", **kwargs) -> Dict[str, Any]:
         """
         Create a new task.
 
@@ -595,9 +591,7 @@ class OperationResult(Generic[T]):
         metadata: Optional[Dict[str, Any]] = None,
     ) -> "OperationResult[T]":
         """Create error result."""
-        return cls(
-            success=False, error=error, error_code=error_code, metadata=metadata or {}
-        )
+        return cls(success=False, error=error, error_code=error_code, metadata=metadata or {})
 
 
 @dataclass
@@ -718,9 +712,9 @@ class AgentConfigSchema:
 
         # Required fields
         required_fields = ["agent_id", "name"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Version validation
         if "version" in config:
@@ -794,9 +788,9 @@ class TaskConfigSchema:
 
         # Required fields
         required_fields = ["id", "content"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Status validation
         if "status" in config:
@@ -850,9 +844,7 @@ class ComponentFactory(ABC):
         """
         return []
 
-    def validate_config(
-        self, component_type: str, config: Dict[str, Any]
-    ) -> ValidationResult:
+    def validate_config(self, component_type: str, config: Dict[str, Any]) -> ValidationResult:
         """
         Validate component configuration (optional override).
 
@@ -892,9 +884,7 @@ class AgentFactory(ABC):
         """
         return []
 
-    def validate_agent_config(
-        self, agent_type: str, config: AgentConfig
-    ) -> ValidationResult:
+    def validate_agent_config(self, agent_type: str, config: AgentConfig) -> ValidationResult:
         """
         Validate agent configuration (optional override).
 
@@ -1097,9 +1087,7 @@ class ConfigurationManager(ABC):
 # ============================================================================
 
 
-def validate_interface_implementation(
-    instance: Any, interface_class: type
-) -> ValidationResult:
+def validate_interface_implementation(instance: Any, interface_class: type) -> ValidationResult:
     """
     Validate that an instance properly implements an interface.
 
@@ -1158,9 +1146,7 @@ class InterfaceRegistry:
     def __init__(self):
         self._implementations: Dict[type, List[type]] = {}
 
-    def register_implementation(
-        self, interface_class: type, implementation_class: type
-    ) -> None:
+    def register_implementation(self, interface_class: type, implementation_class: type) -> None:
         """
         Register an implementation for an interface.
 

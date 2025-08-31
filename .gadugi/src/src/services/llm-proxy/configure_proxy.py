@@ -58,9 +58,7 @@ class LLMProxyConfigurator:
         "ollama": {
             "name": "Ollama (Local)",
             "env_prefix": "OLLAMA",
-            "required_fields": [
-                ("host", "Ollama Host URL", False, "http://localhost:11434")
-            ],
+            "required_fields": [("host", "Ollama Host URL", False, "http://localhost:11434")],
             "models": ["llama2", "mistral", "codellama"],
         },
     }
@@ -101,9 +99,7 @@ class LLMProxyConfigurator:
         # Offer to start service
         if self.ask_yes_no("\nWould you like to start the LLM Proxy service now?"):
             # Ask about scheduling
-            if self.ask_yes_no(
-                "\nWould you like to schedule automatic shutdown?", default=False
-            ):
+            if self.ask_yes_no("\nWould you like to schedule automatic shutdown?", default=False):
                 self.start_service_with_schedule()
             else:
                 self.start_service()
@@ -149,9 +145,7 @@ class LLMProxyConfigurator:
     def configure_multiple_providers(self) -> Optional[str]:
         """Configure multiple providers."""
         print("\n🔄 Multiple Provider Configuration")
-        print(
-            "Configure providers one by one. The service will load balance between them."
-        )
+        print("Configure providers one by one. The service will load balance between them.")
 
         configured = []
         while True:
@@ -168,9 +162,7 @@ class LLMProxyConfigurator:
                 break
 
         if configured:
-            print(
-                f"\n✅ Configured {len(configured)} providers: {', '.join(configured)}"
-            )
+            print(f"\n✅ Configured {len(configured)} providers: {', '.join(configured)}")
             return "multiple"
         return None
 
@@ -232,9 +224,7 @@ class LLMProxyConfigurator:
         # Model selection
         if provider_info.get("models"):
             print(f"\n🎯 Available models: {', '.join(provider_info['models'])}")
-            selected_model = input(
-                f"  Primary model [{provider_info['models'][0]}]: "
-            ).strip()
+            selected_model = input(f"  Primary model [{provider_info['models'][0]}]: ").strip()
             config["primary_model"] = selected_model or provider_info["models"][0]
 
         config["env_vars"] = env_vars
@@ -316,8 +306,7 @@ class LLMProxyConfigurator:
             f.write("# Provider API Keys and Settings\n")
             for key in sorted(existing.keys()):
                 if any(
-                    prefix in key
-                    for prefix in ["AZURE", "OPENAI", "ANTHROPIC", "GOOGLE", "OLLAMA"]
+                    prefix in key for prefix in ["AZURE", "OPENAI", "ANTHROPIC", "GOOGLE", "OLLAMA"]
                 ):
                     # Mask API keys in comments
                     if "API_KEY" in key:
@@ -586,9 +575,7 @@ asyncio.run(test())
 
             # If scheduled shutdown, also create a scheduler process
             if scheduled_shutdown:
-                self.create_shutdown_scheduler(
-                    process.pid, scheduled_shutdown, log_file
-                )
+                self.create_shutdown_scheduler(process.pid, scheduled_shutdown, log_file)
 
             # Wait a moment to check if it started successfully
             import time
@@ -605,9 +592,7 @@ asyncio.run(test())
         except Exception as e:
             print(f"\n❌ Failed to start service: {e}")
 
-    def create_shutdown_scheduler(
-        self, service_pid: int, shutdown_time, log_file: Path
-    ):
+    def create_shutdown_scheduler(self, service_pid: int, shutdown_time, log_file: Path):
         """Create a background scheduler to shutdown the service at specified time."""
         scheduler_script = self.base_dir / f"scheduler_{service_pid}.py"
 
@@ -869,12 +854,10 @@ def main():
     try:
         # Check for required dependencies
         try:
-            import dotenv
+            import dotenv  # noqa: F401
         except ImportError:
             print("Installing required dependency: python-dotenv")
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "python-dotenv"]
-            )
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "python-dotenv"])
 
         configurator = LLMProxyConfigurator()
         configurator.run()

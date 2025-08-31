@@ -101,9 +101,7 @@ def validate_environment():
 
     # Check Python version
     python_version = sys.version_info
-    print(
-        f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
-    )
+    print(f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}")
 
     # Check required modules
     required_modules = [
@@ -167,9 +165,7 @@ def main():
         "--test",
         help="Run specific test (integration, performance, registry, process_info)",
     )
-    parser.add_argument(
-        "--validate", action="store_true", help="Validate test environment"
-    )
+    parser.add_argument("--validate", action="store_true", help="Validate test environment")
     parser.add_argument("--quiet", action="store_true", help="Reduce output verbosity")
 
     args = parser.parse_args()

@@ -2,8 +2,16 @@
 Pytest configuration and shared fixtures for Gadugi tests.
 """
 
+import shutil
+import subprocess
 import sys
+import tempfile
+import time
 from pathlib import Path
+from typing import Any, Dict, Generator, Optional
+from unittest.mock import patch
+
+import pytest
 
 # Add parent directory to Python path for imports
 parent_dir = Path(__file__).parent.parent
@@ -14,14 +22,6 @@ if str(parent_dir) not in sys.path:
 src_dir = parent_dir / "src"
 if str(src_dir) not in sys.path:
     sys.path.insert(0, str(src_dir))
-
-import shutil
-import tempfile
-from pathlib import Path
-from typing import Any, Dict, Generator, Optional
-from unittest.mock import patch
-
-import pytest
 
 
 @pytest.fixture
@@ -141,3 +141,84 @@ def mock_config():
         "task_tracking": {"todo_write_enabled": True, "max_tasks_per_list": 20},
         "performance": {"monitoring_enabled": True, "metrics_retention_days": 7},
     }
+
+
+def is_neo4j_running() -> bool:
+    """Check if Neo4j container is running."""
+    try:
+        result = subprocess.run(
+            ["docker", "ps", "--format", "{{.Names}}"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return "gadugi-neo4j" in result.stdout
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
+
+def start_neo4j_service() -> bool:
+    """Start Neo4j service using the manage-services script."""
+    script_path = Path(__file__).parent.parent.parent / ".claude" / "scripts" / "manage-services.sh"
+
+    if not script_path.exists():
+        print(f"Service management script not found: {script_path}")
+        return False
+
+    try:
+        # Start Neo4j using the service management script
+        result = subprocess.run(
+            [str(script_path), "start", "neo4j"],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        if result.returncode != 0:
+            print(f"Failed to start Neo4j: {result.stderr}")
+            return False
+
+        # Wait for Neo4j to be ready (max 30 seconds)
+        for _ in range(30):
+            try:
+                # Check if Bolt port is accessible
+                import socket
+
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(1)
+                result = sock.connect_ex(("localhost", 7689))
+                sock.close()
+
+                if result == 0:
+                    print("Neo4j is ready on port 7689 (Bolt)")
+                    return True
+            except Exception:
+                pass
+
+            time.sleep(1)
+
+        print("Neo4j started but not responding after 30 seconds")
+        return False
+
+    except subprocess.TimeoutExpired:
+        print("Timeout while starting Neo4j")
+        return False
+    except Exception as e:
+        print(f"Error starting Neo4j: {e}")
+        return False
+
+
+@pytest.fixture(scope="session")
+def ensure_neo4j():
+    """Ensure Neo4j is running for tests that need it."""
+    if not is_neo4j_running():
+        print("Neo4j not running, attempting to start...")
+        if not start_neo4j_service():
+            pytest.skip("Neo4j service could not be started")
+    else:
+        print("Neo4j is already running")
+
+    yield
+
+    # Note: We don't stop Neo4j after tests as other tests might need it
+    # and it's useful to keep running for development

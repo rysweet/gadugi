@@ -67,7 +67,7 @@ async def test_event_publishing():
         await agent.initialize(mcp_url="http://localhost:8000")
 
         print("\n2. Testing task lifecycle events...")
-        task_id = await agent.start_task("Test event publishing functionality")
+        _task_id = await agent.start_task("Test event publishing functionality")
 
         # Execute a test task
         outcome = await agent.execute_task(
@@ -156,12 +156,10 @@ async def test_without_event_router():
         await agent.initialize()
 
         print("\n2. Testing operations with degraded event system...")
-        task_id = await agent.start_task("Test resilience without event router")
+        _task_id = await agent.start_task("Test resilience without event router")
 
         # These should all work despite event router being unavailable
-        await agent.emit_knowledge_learned(
-            "resilience", "System continues to work", 0.8
-        )
+        await agent.emit_knowledge_learned("resilience", "System continues to work", 0.8)
         await agent.emit_collaboration("Still collaborating despite events being down")
 
         print(f"\n  📦 Batched events (should have some): {len(agent._event_batch)}")

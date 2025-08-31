@@ -74,8 +74,7 @@ Only for critical production issues:
     def has_workflow_section(self, content: str) -> bool:
         """Check if the file already has workflow enforcement section."""
         return (
-            "CRITICAL: Workflow Enforcement" in content
-            or "WORKFLOW ENFORCEMENT ACTIVE" in content
+            "CRITICAL: Workflow Enforcement" in content or "WORKFLOW ENFORCEMENT ACTIVE" in content
         )
 
     def update_agent_file(self, file_path: Path) -> Tuple[bool, str]:
@@ -214,9 +213,7 @@ Only for critical production issues:
                             and "Workflow Enforcement" not in line
                         ):
                             skip_section = False
-                        elif (
-                            skip_section and "REMEMBER: This workflow protects" in line
-                        ):
+                        elif skip_section and "REMEMBER: This workflow protects" in line:
                             skip_section = False
                             continue
 
@@ -308,9 +305,7 @@ Examples:
         "--remove", action="store_true", help="Remove workflow sections from all files"
     )
 
-    parser.add_argument(
-        "--restore", action="store_true", help="Restore all files from backups"
-    )
+    parser.add_argument("--restore", action="store_true", help="Restore all files from backups")
 
     parser.add_argument(
         "--repo-root",
@@ -329,9 +324,7 @@ Examples:
     if args.dry_run:
         print("🔍 DRY RUN: Checking what would be updated...")
         updated_count, total_count, errors = updater.update_all_agents(dry_run=True)
-        print(
-            f"\n📊 Summary: {updated_count} files would be updated out of {total_count} total"
-        )
+        print(f"\n📊 Summary: {updated_count} files would be updated out of {total_count} total")
 
         if errors:
             print("\n❌ Errors:")
@@ -361,9 +354,7 @@ Examples:
     elif args.restore:
         print("📁 Restoring all agent files from backups...")
         restored_count, total_backups, errors = updater.restore_backups()
-        print(
-            f"\n📊 Summary: {restored_count} files restored from {total_backups} backups"
-        )
+        print(f"\n📊 Summary: {restored_count} files restored from {total_backups} backups")
 
         if errors:
             print("\n❌ Errors:")

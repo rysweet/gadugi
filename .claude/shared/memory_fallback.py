@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 import aiosqlite
 import logging
 
@@ -77,7 +77,7 @@ class Memory:
     """Memory structure compatible with Neo4j system."""
 
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    type: MemoryType = MemoryType.SEMANTIC
+    type: Union[MemoryType, str] = MemoryType.SEMANTIC  # type: ignore[assignment]
     scope: MemoryScope = MemoryScope.PRIVATE
     persistence: MemoryPersistence = MemoryPersistence.SESSION
 
@@ -424,7 +424,7 @@ class MemoryBackend(ABC):
 class MarkdownMemoryBackend(MemoryBackend):
     """File-based memory backend using structured markdown files."""
 
-    def __init__(self, storage_path: str = ".memory"):
+    def __init__(self, storage_path: str = ".memory") -> None:
         self.storage_path = Path(storage_path)
         self.is_connected = False
 
@@ -554,7 +554,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             logger.error(f"Failed to save memories to {file_path}: {e}")
             raise
@@ -860,7 +860,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
 
@@ -915,7 +915,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
 
@@ -989,7 +989,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
 
@@ -1051,7 +1051,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
 
@@ -1142,7 +1142,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             if "tmp_path" in locals():
                 try:
                     os.unlink(tmp_path)
-                except:
+                except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
 
@@ -1157,7 +1157,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 class SQLiteMemoryBackend(MemoryBackend):
     """SQLite-based memory backend for reliable local storage with connection pooling."""
 
-    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5):
+    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5) -> None:
         self.db_path = Path(db_path)
         self.is_connected = False
         self.pool_size = pool_size
@@ -1305,7 +1305,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         except Exception:
             return False
 
-    async def _get_connection(self):
+    async def _get_connection(self) -> Any:
         """Get a connection from the pool or create a new one."""
         async with self._pool_semaphore:
             async with self._pool_lock:
@@ -1317,7 +1317,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             conn.row_factory = aiosqlite.Row
             return conn
 
-    async def _return_connection(self, conn):
+    async def _return_connection(self, conn: Any) -> Any:
         """Return a connection to the pool."""
         try:
             # Check if connection is still valid
@@ -1333,7 +1333,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             # Connection is broken, close it
             try:
                 await conn.close()
-            except:
+            except (AttributeError, ConnectionError, OSError):
                 pass
 
     def _memory_to_row(self, memory: Memory) -> Dict[str, Any]:
@@ -1863,7 +1863,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 class InMemoryBackend(MemoryBackend):
     """In-memory storage backend for emergency fallback."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.memories: Dict[str, Memory] = {}
         self.knowledge_nodes: Dict[str, KnowledgeNode] = {}
         self.knowledge_links: List[Dict[str, Any]] = []
@@ -2167,7 +2167,7 @@ class MemoryFallbackChain(MemoryBackend):
         self,
         primary_backend: Optional[MemoryBackend] = None,
         fallback_config: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> Any:
         self.fallback_config = fallback_config or {}
         self.backends: List[MemoryBackend] = []
         self.current_backend_index = 0
@@ -2249,7 +2249,7 @@ class MemoryFallbackChain(MemoryBackend):
             try:
                 sync_item = self.sync_queue.get_nowait()
                 await self._perform_sync(sync_item)
-            except:
+            except Exception:
                 pass
 
         for i, backend in enumerate(self.backends):

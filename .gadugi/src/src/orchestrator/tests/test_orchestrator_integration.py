@@ -10,6 +10,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
@@ -229,9 +230,9 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,  # type: ignore
             command="claude /agent:WorkflowManager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time()
+            created_at=registry._get_current_time()  # type: ignore[attr-defined]
             if hasattr(registry, "_get_current_time")
-            else None,  # type: ignore
+            else None,
         )
 
         registry.register_process(process_info)
@@ -289,9 +290,7 @@ Process these prompts in parallel:
         mock_worktree_mgr.return_value.create_worktree.return_value = mock_worktree_info
 
         # Mock prompt generator
-        mock_prompt_gen.return_value.generate_workflow_prompt.return_value = (
-            "generated_prompt.md"
-        )
+        mock_prompt_gen.return_value.generate_workflow_prompt.return_value = "generated_prompt.md"
 
         # Mock execution engine
         mock_result = Mock()
@@ -451,9 +450,7 @@ class TestOrchestratorPerformance(unittest.TestCase):
 
         # Test CLI parsing
         cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
-        user_input = "Execute these prompts:\n" + "\n".join(
-            f"- {pf}" for pf in prompt_files
-        )
+        user_input = "Execute these prompts:\n" + "\n".join(f"- {pf}" for pf in prompt_files)
 
         parsed_files = cli.parse_user_input(user_input)
         self.assertEqual(len(parsed_files), 20)

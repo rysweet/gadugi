@@ -34,8 +34,6 @@ try:
     from .components.task_analyzer import (
         TaskAnalyzer,
         TaskInfo,
-        TaskType,
-        TaskComplexity,
     )  # type: ignore
     from .components.prompt_generator import PromptGenerator, PromptContext
 except ImportError:
@@ -161,9 +159,7 @@ class OrchestratorCoordinator:
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()
-        self.orchestration_id = (
-            f"orchestration-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-        )
+        self.orchestration_id = f"orchestration-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
 
         # Initialize directories
         self.monitoring_dir = self.project_root / self.config.monitoring_dir
@@ -172,9 +168,7 @@ class OrchestratorCoordinator:
         # Initialize existing components
         logger.info("Initializing orchestrator components...")
         self.task_analyzer = TaskAnalyzer(project_root=str(self.project_root))
-        self.worktree_manager = WorktreeManager(
-            str(self.project_root), self.config.worktrees_dir
-        )
+        self.worktree_manager = WorktreeManager(str(self.project_root), self.config.worktrees_dir)
         self.execution_engine = ExecutionEngine()
         self.prompt_generator = PromptGenerator(str(self.project_root))
 
@@ -189,9 +183,7 @@ class OrchestratorCoordinator:
             except ImportError:
                 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 
-            self.process_registry = ProcessRegistry(
-                registry_dir=str(self.monitoring_dir)
-            )
+            self.process_registry = ProcessRegistry(registry_dir=str(self.monitoring_dir))
             # Set module-level references for other methods
             globals()["ProcessRegistry"] = ProcessRegistry
             globals()["ProcessStatus"] = ProcessStatus
@@ -224,9 +216,7 @@ class OrchestratorCoordinator:
         self._shutdown_requested = False
         self._monitoring_thread: Optional[threading.Thread] = None
 
-        logger.info(
-            f"OrchestratorCoordinator initialized with ID: {self.orchestration_id}"
-        )
+        logger.info(f"OrchestratorCoordinator initialized with ID: {self.orchestration_id}")
 
     def orchestrate(self, prompt_files: List[str]) -> OrchestrationResult:
         """
@@ -253,9 +243,7 @@ class OrchestratorCoordinator:
             task_analysis = self._analyze_tasks(prompt_files)
 
             if not task_analysis:
-                raise Exception(
-                    "Task analysis failed - cannot proceed with orchestration"
-                )
+                raise Exception("Task analysis failed - cannot proceed with orchestration")
 
             # Phase 2: Environment Setup
             logger.info("Phase 2: Setting up isolated execution environments...")
@@ -263,19 +251,13 @@ class OrchestratorCoordinator:
 
             # Phase 3: Parallel Execution
             logger.info("Phase 3: Executing tasks in parallel...")
-            execution_results = self._execute_parallel_tasks(
-                task_analysis, worktree_assignments
-            )
+            execution_results = self._execute_parallel_tasks(task_analysis, worktree_assignments)
 
             # Phase 4: Result Integration
             logger.info("Phase 4: Integrating results and cleanup...")
             result.task_results = execution_results
-            result.successful_tasks = len(
-                [r for r in execution_results if r.status == "success"]
-            )
-            result.failed_tasks = len(
-                [r for r in execution_results if r.status != "success"]
-            )
+            result.successful_tasks = len([r for r in execution_results if r.status == "success"])
+            result.failed_tasks = len([r for r in execution_results if r.status != "success"])
 
             # Calculate performance metrics
             result.execution_time_seconds = time.time() - start_time
@@ -338,9 +320,7 @@ class OrchestratorCoordinator:
                 )
 
                 worktree_assignments[task_info.id] = worktree_info
-                logger.info(
-                    f"Created worktree for {task_info.id}: {worktree_info.worktree_path}"
-                )
+                logger.info(f"Created worktree for {task_info.id}: {worktree_info.worktree_path}")
 
             except Exception as e:
                 logger.error(f"Failed to create worktree for {task_info.id}: {e}")
@@ -423,19 +403,13 @@ class OrchestratorCoordinator:
                 try:
                     result = future.result()
                     results.append(result)
-                    logger.info(
-                        f"Task completed: {task_executor.task_id}, status={result.status}"
-                    )
+                    logger.info(f"Task completed: {task_executor.task_id}, status={result.status}")
                 except Exception as e:
-                    logger.error(
-                        f"Task execution failed: {task_executor.task_id}, error={e}"
-                    )
+                    logger.error(f"Task execution failed: {task_executor.task_id}, error={e}")
                     # Create failed result
                     failed_result = ExecutionResult(
                         task_id=task_executor.task_id,
-                        task_name=task_executor.task_context.get(
-                            "task_name", "Unknown"
-                        ),
+                        task_name=task_executor.task_context.get("task_name", "Unknown"),
                         status="failed",
                         start_time=datetime.now(),
                         end_time=datetime.now(),
@@ -516,9 +490,7 @@ class OrchestratorCoordinator:
             return
 
         self._shutdown_requested = False
-        self._monitoring_thread = threading.Thread(
-            target=self._monitoring_loop, daemon=True
-        )
+        self._monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self._monitoring_thread.start()
         logger.info("Started monitoring thread")
 
@@ -539,9 +511,7 @@ class OrchestratorCoordinator:
 
                 # Save monitoring status
                 status = self._get_orchestration_status()
-                status_file = (
-                    self.monitoring_dir / f"{self.orchestration_id}_status.json"
-                )
+                status_file = self.monitoring_dir / f"{self.orchestration_id}_status.json"
                 with open(status_file, "w") as f:
                     json.dump(status, f, indent=2, default=str)
 
@@ -613,9 +583,7 @@ class OrchestratorCoordinator:
         # Archive process registry
         if self.process_registry:
             try:
-                archive_file = (
-                    self.monitoring_dir / f"{self.orchestration_id}_final.json"
-                )
+                archive_file = self.monitoring_dir / f"{self.orchestration_id}_final.json"
                 self.process_registry.save_to_file(str(archive_file))
                 logger.info(f"Saved final process registry to {archive_file}")
             except Exception as e:
@@ -669,15 +637,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Orchestrator Main - Parallel Workflow Coordination"
     )
-    parser.add_argument(
-        "prompt_files", nargs="+", help="Prompt files to execute in parallel"
-    )
-    parser.add_argument(
-        "--max-parallel", type=int, default=4, help="Maximum parallel tasks"
-    )
-    parser.add_argument(
-        "--timeout", type=int, default=12, help="Execution timeout in hours"
-    )
+    parser.add_argument("prompt_files", nargs="+", help="Prompt files to execute in parallel")
+    parser.add_argument("--max-parallel", type=int, default=4, help="Maximum parallel tasks")
+    parser.add_argument("--timeout", type=int, default=12, help="Execution timeout in hours")
     parser.add_argument("--project-root", default=".", help="Project root directory")
 
     args = parser.parse_args()

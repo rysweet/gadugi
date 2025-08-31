@@ -6,12 +6,13 @@ Test script to verify task ID inclusion in GitHub operations.
 import sys
 import os
 from datetime import datetime
+from pathlib import Path
 
-# Import from the proper package structure - we add the .gadugi/src/src directory to path
-# so we can import from the reorganized structure (where the actual modules are)
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src', 'src'))
+# Fix import paths for .gadugi structure
+project_root = Path(os.path.abspath(__file__)).parent.parent
+sys.path.insert(0, str(project_root))
 
-from shared.github_operations import GitHubOperations
+from src.src.shared.github_operations import GitHubOperations  # noqa: E402
 
 
 def test_task_id_formatting():
@@ -41,8 +42,6 @@ def test_task_id_formatting():
 
     print("✅ No task ID test passed")
 
-    return True
-
 
 def test_issue_creation_mock():
     """Mock test for issue creation with task ID."""
@@ -62,8 +61,6 @@ def test_issue_creation_mock():
     print(f"   Original body: {original_body}")
     print(f"   Body with task ID: {body_with_task_id}")
 
-    return True
-
 
 def test_pr_creation_mock():
     """Mock test for PR creation with task ID."""
@@ -82,8 +79,6 @@ def test_pr_creation_mock():
     print("✅ PR creation mock test passed")
     print(f"   Body includes task ID: {task_id}")
 
-    return True
-
 
 def test_comment_mock():
     """Mock test for comment creation with task ID."""
@@ -100,8 +95,6 @@ def test_comment_mock():
 
     print("✅ Comment mock test passed")
     print(f"   Comment includes task ID: {task_id}")
-
-    return True
 
 
 def main():

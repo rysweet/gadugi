@@ -442,7 +442,7 @@ async def test_sqlite_backend():
     node2 = await backend.add_knowledge_node(
         agent_id, "Memory System", "Stores agent memories", confidence=0.9
     )
-    edge = await backend.add_knowledge_edge(node1, node2, "used_by", weight=0.8)
+    await backend.add_knowledge_edge(node1, node2, "used_by", weight=0.8)
     print("✅ Added knowledge nodes and edge")
 
     # Store procedure

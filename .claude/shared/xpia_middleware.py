@@ -8,10 +8,10 @@ requiring changes to existing agent code.
 """
 
 import logging
-import time
-from typing import Dict, Any, Optional
-from pathlib import Path
 import sys
+import time
+from pathlib import Path
+from typing import Dict, Any, Optional
 
 # Add shared modules to path
 shared_path = Path(__file__).parent

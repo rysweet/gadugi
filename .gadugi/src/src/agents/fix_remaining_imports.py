@@ -49,9 +49,7 @@ def fix_numpy_usage(content: str) -> str:
                     break
 
             if import_index > 0:
-                lines.insert(
-                    import_index, "import numpy as np  # type: ignore[import-not-found]"
-                )
+                lines.insert(import_index, "import numpy as np  # type: ignore[import-not-found]")
                 content = "\n".join(lines)
 
     return content
@@ -67,9 +65,7 @@ def fix_matplotlib_usage(content: str) -> str:
             for i, line in enumerate(lines):
                 if "import matplotlib" in line:
                     # Replace existing matplotlib import
-                    lines[i] = (
-                        "import matplotlib.pyplot as plt  # type: ignore[import-not-found]"
-                    )
+                    lines[i] = "import matplotlib.pyplot as plt  # type: ignore[import-not-found]"
                     content = "\n".join(lines)
                     return content
                 elif line.startswith("import ") or line.startswith("from "):

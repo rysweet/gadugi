@@ -253,7 +253,7 @@ uv run python manage_router.py logs -f       # Follow logs
 You can also manage the Event Router using the dedicated agent:
 
 ```
-/agent:EventRouterManager
+/agent:EventRouterServiceManager
 
 Start the event router service and verify it's running
 ```

@@ -119,9 +119,7 @@ class TestSolverAgent:
         except NameError:
             self.error_handler = None
 
-    def solve_test_failure(
-        self, test_identifier: str, context: str = ""
-    ) -> TestSolverResult:
+    def solve_test_failure(self, test_identifier: str, context: str = "") -> TestSolverResult:
         """
         Main entry point for solving test failures.
 
@@ -140,25 +138,19 @@ class TestSolverAgent:
             test_code = self._extract_test_code(test_identifier)
 
             # Analyze test purpose using shared instructions
-            test_analysis = self.shared_instructions.analyze_test_purpose(
-                test_code, context
-            )
+            test_analysis = self.shared_instructions.analyze_test_purpose(test_code, context)
 
             # Validate test structure
-            is_valid_structure, structure_issues = (
-                self.shared_instructions.validate_test_structure(test_code)
+            is_valid_structure, structure_issues = self.shared_instructions.validate_test_structure(
+                test_code
             )
 
             # Phase 2: Root Cause Investigation
-            failure_analysis = self._investigate_root_cause(
-                failure_info, test_code, test_analysis
-            )
+            failure_analysis = self._investigate_root_cause(failure_info, test_code, test_analysis)
 
             # Phase 3: Resolution Strategy
             if failure_analysis.confidence_score > 0.7:
-                resolution_plan = self._create_resolution_plan(
-                    failure_analysis, test_code
-                )
+                resolution_plan = self._create_resolution_plan(failure_analysis, test_code)
 
                 # Phase 4: Implementation
                 resolution_result = self._apply_resolution(
@@ -166,9 +158,7 @@ class TestSolverAgent:
                 )
 
                 # Phase 5: Validation
-                validation_results = self._validate_resolution(
-                    test_identifier, resolution_result
-                )
+                validation_results = self._validate_resolution(test_identifier, resolution_result)
 
                 return TestSolverResult(
                     test_name=test_identifier,
@@ -189,9 +179,7 @@ class TestSolverAgent:
                 )
             else:
                 # If root cause unclear, provide skip with justification
-                skip_reason, justification = self._determine_skip_strategy(
-                    failure_analysis
-                )
+                skip_reason, justification = self._determine_skip_strategy(failure_analysis)
 
                 return TestSolverResult(
                     test_name=test_identifier,
@@ -204,9 +192,7 @@ class TestSolverAgent:
                     skip_reason=skip_reason,
                     skip_justification=justification,
                     validation_results=["Skipped - requires manual investigation"],
-                    recommendations=self._generate_investigation_recommendations(
-                        failure_analysis
-                    ),
+                    recommendations=self._generate_investigation_recommendations(failure_analysis),
                 )
 
         except Exception as e:
@@ -316,9 +302,7 @@ class TestSolverAgent:
         root_cause = self._analyze_failure_patterns(error_message, test_code, category)
 
         # Determine confidence score
-        confidence_score = self._calculate_confidence_score(
-            error_message, root_cause, category
-        )
+        confidence_score = self._calculate_confidence_score(error_message, root_cause, category)
 
         # Generate investigation steps
         investigation_steps = self._generate_investigation_steps(category, root_cause)
@@ -333,37 +317,23 @@ class TestSolverAgent:
             confidence_score=confidence_score,
         )
 
-    def _categorize_failure(
-        self, error_message: str, test_code: str
-    ) -> FailureCategory:
+    def _categorize_failure(self, error_message: str, test_code: str) -> FailureCategory:
         """Categorize the type of failure."""
         error_lower = error_message.lower()
 
         if "assertionerror" in error_lower or "assert" in error_lower:
             return FailureCategory.ASSERTION_ERROR
         elif any(
-            err in error_lower
-            for err in ["importerror", "modulenotfounderror", "attributeerror"]
+            err in error_lower for err in ["importerror", "modulenotfounderror", "attributeerror"]
         ):
             return FailureCategory.DEPENDENCY_ISSUE
-        elif any(
-            err in error_lower
-            for err in ["filenotfounderror", "permissionerror", "ioerror"]
-        ):
+        elif any(err in error_lower for err in ["filenotfounderror", "permissionerror", "ioerror"]):
             return FailureCategory.RESOURCE_ISSUE
-        elif any(
-            err in error_lower for err in ["timeout", "connectionerror", "socket"]
-        ):
+        elif any(err in error_lower for err in ["timeout", "connectionerror", "socket"]):
             return FailureCategory.TIMING_ISSUE
-        elif (
-            "setup" in error_lower
-            or "teardown" in error_lower
-            or "fixture" in error_lower
-        ):
+        elif "setup" in error_lower or "teardown" in error_lower or "fixture" in error_lower:
             return FailureCategory.SETUP_TEARDOWN
-        elif any(
-            err in error_lower for err in ["configerror", "configuration", "config"]
-        ):
+        elif any(err in error_lower for err in ["configerror", "configuration", "config"]):
             return FailureCategory.CONFIGURATION_ISSUE
         else:
             return FailureCategory.RUNTIME_ERROR
@@ -435,9 +405,7 @@ class TestSolverAgent:
         try:
             # Apply fixes based on plan
             if resolution_plan.fix_type == "test_fix":
-                fixed_code = self._apply_test_fixes(
-                    test_code, resolution_plan, failure_analysis
-                )
+                fixed_code = self._apply_test_fixes(test_code, resolution_plan, failure_analysis)
                 self._write_fixed_test(test_file, test_identifier, fixed_code)
 
             elif resolution_plan.fix_type == "setup_fix":
@@ -490,8 +458,7 @@ class TestSolverAgent:
                     validation_results.append(f"Run {i + 1}: FAILED")
                     return {
                         "success": False,
-                        "details": validation_results
-                        + [f"Test still failing: {result.stderr}"],
+                        "details": validation_results + [f"Test still failing: {result.stderr}"],
                     }
                 else:
                     validation_results.append(f"Run {i + 1}: PASSED")
@@ -524,9 +491,7 @@ class TestSolverAgent:
                 "details": validation_results + [f"Validation error: {e}"],
             }
 
-    def _determine_skip_strategy(
-        self, failure_analysis: FailureAnalysis
-    ) -> Tuple[SkipReason, str]:
+    def _determine_skip_strategy(self, failure_analysis: FailureAnalysis) -> Tuple[SkipReason, str]:
         """Determine appropriate skip strategy for unclear failures."""
 
         if (
@@ -668,10 +633,7 @@ class TestSolverAgent:
         base_score = 0.5
 
         # Higher confidence for clear error patterns
-        if (
-            category == FailureCategory.ASSERTION_ERROR
-            and "assert" in error_message.lower()
-        ):
+        if category == FailureCategory.ASSERTION_ERROR and "assert" in error_message.lower():
             base_score += 0.3
         elif category == FailureCategory.DEPENDENCY_ISSUE and any(
             dep in error_message.lower() for dep in ["import", "module"]
@@ -680,8 +642,7 @@ class TestSolverAgent:
 
         # Adjust based on error message clarity
         if len(error_message) > 100 and any(
-            keyword in error_message.lower()
-            for keyword in ["expected", "actual", "failed"]
+            keyword in error_message.lower() for keyword in ["expected", "actual", "failed"]
         ):
             base_score += 0.1
 
@@ -723,16 +684,12 @@ class TestSolverAgent:
         recommendations = []
 
         if failure_analysis.category == FailureCategory.ASSERTION_ERROR:
-            recommendations.append(
-                "Consider adding more descriptive assertion messages"
-            )
+            recommendations.append("Consider adding more descriptive assertion messages")
             recommendations.append("Review test data generation for consistency")
 
         elif failure_analysis.category == FailureCategory.DEPENDENCY_ISSUE:
             recommendations.append("Add dependency checks to test setup")
-            recommendations.append(
-                "Consider using mock objects for external dependencies"
-            )
+            recommendations.append("Consider using mock objects for external dependencies")
 
         recommendations.append("Add monitoring for similar test patterns")
         recommendations.append("Review test documentation and purpose clarity")
@@ -763,9 +720,7 @@ class TestSolverAgent:
             shutil.copy2(backup_path, test_file_path)
             os.remove(backup_path)
 
-    def _create_error_result(
-        self, test_identifier: str, error_message: str
-    ) -> TestSolverResult:
+    def _create_error_result(self, test_identifier: str, error_message: str) -> TestSolverResult:
         """Create error result when analysis fails."""
         return TestSolverResult(
             test_name=test_identifier,

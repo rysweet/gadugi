@@ -137,9 +137,7 @@ class OrchestrationCLI:
                 validated_files.append(prompt_file)
                 logger.info(f"Validated prompt file: {prompt_file}")
             else:
-                logger.warning(
-                    f"Prompt file not found: {prompt_file} (path: {prompt_path})"
-                )
+                logger.warning(f"Prompt file not found: {prompt_file} (path: {prompt_path})")
 
         return validated_files
 
@@ -226,18 +224,14 @@ class OrchestrationCLI:
         if result.successful_tasks == result.total_tasks:
             logger.info("🎉 All tasks completed successfully!")
         elif result.successful_tasks > 0:
-            logger.info(
-                f"⚠️  Partial success: {result.successful_tasks}/{result.total_tasks} tasks"
-            )
+            logger.info(f"⚠️  Partial success: {result.successful_tasks}/{result.total_tasks} tasks")
         else:
             logger.error("❌ All tasks failed")
 
     def run_interactive_mode(self) -> None:
         """Run in interactive mode for testing and development"""
         print("Orchestrator Agent - Interactive Mode")
-        print(
-            "Enter prompt files to execute in parallel (one per line, empty line to start):"
-        )
+        print("Enter prompt files to execute in parallel (one per line, empty line to start):")
 
         prompt_files = []
         while True:
@@ -269,9 +263,7 @@ class OrchestrationCLI:
             if result.successful_tasks == result.total_tasks:
                 print("\n🎉 Orchestration completed successfully!")
             else:
-                print(
-                    f"\n⚠️  Orchestration completed with {result.failed_tasks} failures"
-                )
+                print(f"\n⚠️  Orchestration completed with {result.failed_tasks} failures")
 
         except Exception as e:
             print(f"\n❌ Orchestration failed: {e}")
@@ -299,17 +291,13 @@ Examples:
     )
 
     # Input options
-    parser.add_argument(
-        "prompt_files", nargs="*", help="Prompt files to execute in parallel"
-    )
+    parser.add_argument("prompt_files", nargs="*", help="Prompt files to execute in parallel")
     parser.add_argument(
         "--stdin",
         action="store_true",
         help="Read user input from stdin (for agent invocation)",
     )
-    parser.add_argument(
-        "--interactive", action="store_true", help="Run in interactive mode"
-    )
+    parser.add_argument("--interactive", action="store_true", help="Run in interactive mode")
 
     # Configuration options
     parser.add_argument(
@@ -342,9 +330,7 @@ Examples:
 
     # Logging options
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument(
-        "--quiet", action="store_true", help="Suppress output except errors"
-    )
+    parser.add_argument("--quiet", action="store_true", help="Suppress output except errors")
 
     return parser.parse_args()
 

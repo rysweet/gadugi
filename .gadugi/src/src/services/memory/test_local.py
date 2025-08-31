@@ -160,9 +160,7 @@ async def test_memory_system():
                 "weight": 0.9,
             },
         )
-        print(
-            f"   ✅ Created edge: {node1['concept']} -> contains -> {node3['concept']}"
-        )
+        print(f"   ✅ Created edge: {node1['concept']} -> contains -> {node3['concept']}")
 
         response = await client.post(
             "/knowledge/edge/create",
@@ -262,7 +260,7 @@ async def test_agent_integration():
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
     try:
-        from shared.memory_integration import AgentMemoryInterface
+        from src.src.shared.memory_integration import AgentMemoryInterface
 
         async with AgentMemoryInterface(
             agent_id="integration_test_agent", mcp_base_url="http://localhost:8000"

@@ -28,16 +28,21 @@ import pytest
 # Add the correct path to the shared modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src", "src"))
 
-from shared.github_operations import GitHubOperations  # type: ignore[import]
-from shared.interfaces import AgentConfig, TaskData, ErrorContext  # type: ignore[import]
-from shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase  # type: ignore[import]
-from shared.task_tracking import (  # type: ignore[import]
+from src.src.shared.github_operations import GitHubOperations  # type: ignore[import]
+from src.src.shared.interfaces import AgentConfig, TaskData, ErrorContext  # type: ignore[import]
+from src.src.shared.state_management import (
+    CheckpointManager,
+    StateManager,
+    TaskState,
+    WorkflowPhase,
+)  # type: ignore[import]
+from src.src.shared.task_tracking import (  # type: ignore[import]
     TaskMetrics,
     TaskPriority,
     TaskStatus,
     TaskTracker,
 )
-from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
+from src.src.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
 
 
 class TestOrchestratorAgentIntegration:
@@ -93,7 +98,7 @@ class TestOrchestratorAgentIntegration:
         """Test parallel task analysis with enhanced error handling"""
 
         # Mock prompt files for analysis
-        prompt_files = ["test-feature-a.md", "test-feature-b.md", "test-feature-c.md"]
+        _prompt_files = ["test-feature-a.md", "test-feature-b.md", "test-feature-c.md"]
 
         # Mock task analysis result
         analysis_result = {
@@ -232,7 +237,7 @@ class TestOrchestratorAgentIntegration:
 
             assert result["merged"] == pr_numbers  # type: ignore[index]
             assert len(result["failed"]) == 0  # type: ignore[index]
-            mock_batch.assert_called_once_with(pr_numbers)
+            mock_batch.assert_called_once_with(pr_numbers)  # type: ignore[attr-defined]
 
     def test_performance_analytics_integration(self):
         """Test performance analytics and speedup calculation"""
@@ -301,7 +306,7 @@ class TestOrchestratorAgentIntegration:
         # Test error handling
         with patch.object(self.error_handler, "handle_error") as mock_handle:
             self.error_handler.handle_error(error_context)
-            mock_handle.assert_called_once_with(error_context)
+            mock_handle.assert_called_once_with(error_context)  # type: ignore[attr-defined]
 
         # Test recovery scenario with mocked recovery manager
         recovery_plan = {
@@ -335,8 +340,8 @@ class TestOrchestratorAgentIntegration:
             else:
                 reduced_parallelism = False
 
-            assert reduced_parallelism == True
-            mock_detect.assert_called_once()
+            assert reduced_parallelism
+            mock_detect.assert_called_once()  # type: ignore[attr-defined]
 
     def test_end_to_end_orchestration_workflow(self):
         """Test complete orchestration workflow with shared modules"""

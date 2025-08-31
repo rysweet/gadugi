@@ -12,10 +12,22 @@ import unittest
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-# Add .gadugi/src/src/agents/program-manager directory to path for imports (where the actual modules are)
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src', 'src', 'agents', 'program-manager'))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from program_manager import ProgramManager, Issue, IssueStage
+# Since program-manager has a hyphen, we need to add its path directly
+sys.path.insert(
+    0,
+    os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "src",
+        "src",
+        "agents",
+        "program-manager",
+    ),
+)
+
+from program_manager import ProgramManager, Issue, IssueStage  # type: ignore[import]
 
 
 class TestProgramManager(unittest.TestCase):

@@ -20,10 +20,12 @@ from unittest.mock import Mock, patch
 # TYPE_CHECKING imports removed due to conflicts with stub implementations
 
 # Fix imports for pyright
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".gadugi", "src"))
+)
 
 try:
-    from shared.task_tracking import (  # type: ignore[import]
+    from src.src.shared.task_tracking import (  # type: ignore[import]
         Task as _ImportedTask,
         TaskError as _ImportedTaskError,
         TaskList as _ImportedTaskList,
@@ -1056,7 +1058,7 @@ class TestTodoWriteIntegration:
         integration = TodoWriteIntegration()
 
         # Mock the Claude Code function call
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             task_list = TaskList()
@@ -1111,7 +1113,7 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("2", "Another task"))
         integration.current_task_list = task_list
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             result = integration.update_task_status("1", TaskStatus.COMPLETED)
@@ -1132,7 +1134,7 @@ class TestTodoWriteIntegration:
         existing_list.add_task(Task("1", "Existing task"))
         integration.current_task_list = existing_list
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             new_task = Task("2", "New task", priority=TaskPriority.HIGH)
@@ -1152,7 +1154,7 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("2", "Remove this"))
         integration.current_task_list = task_list
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             result = integration.remove_task("2")
@@ -1171,13 +1173,13 @@ class TestTodoWriteIntegration:
         task_list.add_task(Task("3", "Task 3"))
         integration.current_task_list = task_list
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             updates = [
-                {"task_id": "1", "status": TaskStatus.COMPLETED},
-                {"task_id": "2", "status": TaskStatus.IN_PROGRESS},
-                {"task_id": "3", "priority": TaskPriority.HIGH},
+                {"id": "1", "status": TaskStatus.COMPLETED},
+                {"id": "2", "status": TaskStatus.IN_PROGRESS},
+                {"id": "3", "priority": TaskPriority.HIGH},
             ]
 
             result = integration.batch_update(updates)
@@ -1326,7 +1328,7 @@ class TestWorkflowPhaseTracker:
         tracker = WorkflowPhaseTracker()
         integration = TodoWriteIntegration()
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Start phase and create tasks
@@ -1553,7 +1555,7 @@ class TestTaskTrackingIntegration:
         """Test complete workflow with task tracking."""
         tracker = TaskTracker()
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Start workflow phase
@@ -1605,7 +1607,7 @@ class TestTaskTrackingIntegration:
         """Test metrics collection during workflow execution."""
         tracker = TaskTracker()
 
-        with patch("__main__.claude_function_call") as mock_call:
+        with patch("shared.task_tracking.claude_function_call") as mock_call:
             mock_call.return_value = {"success": True}
 
             # Create and start tasks

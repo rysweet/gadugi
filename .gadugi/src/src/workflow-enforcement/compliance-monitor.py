@@ -115,7 +115,7 @@ class ComplianceMonitor:
 
                 for change in changes:
                     if change.strip():
-                        status = change[:2]
+                        _status = change[:2]
                         filepath = change[3:].strip()
                         modified_files.append(filepath)
 
@@ -165,9 +165,7 @@ class ComplianceMonitor:
         """Check if orchestrator is currently active."""
         return self._check_orchestrator_status()
 
-    def _log_potential_violation(
-        self, violation_type: str, description: str, files: List[str]
-    ):
+    def _log_potential_violation(self, violation_type: str, description: str, files: List[str]):
         """Log a potential workflow violation."""
         try:
             with open(self.compliance_log, "r") as f:
@@ -186,8 +184,7 @@ class ComplianceMonitor:
             recent_violations = [
                 v
                 for v in data["violations"]
-                if (datetime.now() - datetime.fromisoformat(v["timestamp"])).seconds
-                < 300
+                if (datetime.now() - datetime.fromisoformat(v["timestamp"])).seconds < 300
             ]
 
             # Check if similar violation already recorded recently
@@ -204,9 +201,7 @@ class ComplianceMonitor:
                 with open(self.compliance_log, "w") as f:
                     json.dump(data, f, indent=2)
 
-                logger.warning(
-                    f"Potential workflow violation detected: {violation_type}"
-                )
+                logger.warning(f"Potential workflow violation detected: {violation_type}")
 
         except Exception as e:
             logger.error(f"Failed to log potential violation: {e}")
@@ -242,9 +237,7 @@ class ComplianceMonitor:
             total_compliant = len(data.get("compliant_executions", []))
             total_checks = total_violations + total_compliant
 
-            compliance_rate = (
-                total_compliant / total_checks if total_checks > 0 else 1.0
-            )
+            compliance_rate = total_compliant / total_checks if total_checks > 0 else 1.0
 
             data["statistics"] = {
                 "total_checks": total_checks,
@@ -403,18 +396,10 @@ def main():
     parser = argparse.ArgumentParser(description="Workflow Compliance Monitor")
     parser.add_argument("--start", action="store_true", help="Start monitoring")
     parser.add_argument("--stop", action="store_true", help="Stop monitoring")
-    parser.add_argument(
-        "--report", action="store_true", help="Generate compliance report"
-    )
-    parser.add_argument(
-        "--check", action="store_true", help="Immediate compliance check"
-    )
-    parser.add_argument(
-        "--days", type=int, default=7, help="Days for report (default: 7)"
-    )
-    parser.add_argument(
-        "--interval", type=int, default=30, help="Monitoring interval in seconds"
-    )
+    parser.add_argument("--report", action="store_true", help="Generate compliance report")
+    parser.add_argument("--check", action="store_true", help="Immediate compliance check")
+    parser.add_argument("--days", type=int, default=7, help="Days for report (default: 7)")
+    parser.add_argument("--interval", type=int, default=30, help="Monitoring interval in seconds")
 
     args = parser.parse_args()
 

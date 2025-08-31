@@ -79,15 +79,11 @@ def fix_syntax_errors(file_path: Path) -> bool:
         )
 
         # Fix duplicate type imports on same line
-        content = re.sub(
-            r"from typing import ([\w, ]+), (\1)", r"from typing import \1", content
-        )
+        content = re.sub(r"from typing import ([\w, ]+), (\1)", r"from typing import \1", content)
 
         # Fix "Path" import issues - ensure it's imported from pathlib
         lines = content.splitlines()
-        has_path_import = any(
-            "from pathlib import" in line and "Path" in line for line in lines
-        )
+        has_path_import = any("from pathlib import" in line and "Path" in line for line in lines)
         uses_path = "Path(" in content or "Path." in content
 
         if uses_path and not has_path_import:
@@ -122,27 +118,19 @@ def add_missing_imports(file_path: Path) -> bool:
 
         # Common missing imports based on usage
         if "Dict[" in content or "Dict " in content:
-            if not any(
-                "Dict" in line for line in lines if "from typing import" in line
-            ):
+            if not any("Dict" in line for line in lines if "from typing import" in line):
                 imports_needed.add("Dict")
 
         if "List[" in content or "List " in content:
-            if not any(
-                "List" in line for line in lines if "from typing import" in line
-            ):
+            if not any("List" in line for line in lines if "from typing import" in line):
                 imports_needed.add("List")
 
         if "Optional[" in content:
-            if not any(
-                "Optional" in line for line in lines if "from typing import" in line
-            ):
+            if not any("Optional" in line for line in lines if "from typing import" in line):
                 imports_needed.add("Optional")
 
         if "Tuple[" in content or "Tuple " in content:
-            if not any(
-                "Tuple" in line for line in lines if "from typing import" in line
-            ):
+            if not any("Tuple" in line for line in lines if "from typing import" in line):
                 imports_needed.add("Tuple")
 
         if "Set[" in content or "Set " in content:
@@ -167,9 +155,7 @@ def add_missing_imports(file_path: Path) -> bool:
                 if match:
                     existing = set(t.strip() for t in match.group(1).split(","))
                     all_imports = existing | imports_needed
-                    lines[typing_line_idx] = (
-                        f"from typing import {', '.join(sorted(all_imports))}"
-                    )
+                    lines[typing_line_idx] = f"from typing import {', '.join(sorted(all_imports))}"
             else:
                 # Add new typing import after other imports
                 import_idx = 0
@@ -255,7 +241,7 @@ def main():
 
             # Show sample of remaining errors
             lines = result.stdout.splitlines()
-            error_lines = [l for l in lines if "error:" in l][:10]
+            error_lines = [line for line in lines if "error:" in line][:10]
             if error_lines:
                 print("\nSample of remaining errors:")
                 for line in error_lines:

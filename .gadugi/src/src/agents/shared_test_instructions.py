@@ -134,9 +134,7 @@ class SharedTestInstructions:
 
         return TestAnalysis(
             purpose=purpose,
-            requirements=SharedTestInstructions._extract_requirements(
-                test_code, docstring
-            ),
+            requirements=SharedTestInstructions._extract_requirements(test_code, docstring),
             expected_outcome=SharedTestInstructions._derive_expected_outcome(test_code),
             dependencies=dependencies,
             resources_used=resources,
@@ -189,15 +187,10 @@ class SharedTestInstructions:
             modified_lines.append(line)
 
             # Add cleanup after resource creation
-            if any(
-                keyword in line.lower()
-                for keyword in ["tempfile", "mkdir", "create", "open"]
-            ):
+            if any(keyword in line.lower() for keyword in ["tempfile", "mkdir", "create", "open"]):
                 if "with" not in line and "cleanup" not in line.lower():
                     indent = len(line) - len(line.lstrip())
-                    cleanup_comment = (
-                        " " * indent + "# TODO: Ensure proper cleanup for idempotency"
-                    )
+                    cleanup_comment = " " * indent + "# TODO: Ensure proper cleanup for idempotency"
                     modified_lines.append(cleanup_comment)
 
         return "\n".join(modified_lines)
@@ -215,9 +208,7 @@ class SharedTestInstructions:
         # Check for external service dependencies
         external_deps = ["requests", "http", "api", "network", "remote"]
         has_external = any(
-            dep in dep_name.lower()
-            for dep_name in dependencies
-            for dep in external_deps
+            dep in dep_name.lower() for dep_name in dependencies for dep in external_deps
         )
 
         if has_external:
@@ -226,15 +217,11 @@ class SharedTestInstructions:
 
         # Check for database dependencies
         db_deps = ["sqlite", "mysql", "postgres", "database", "db"]
-        has_db = any(
-            dep in dep_name.lower() for dep_name in dependencies for dep in db_deps
-        )
+        has_db = any(dep in dep_name.lower() for dep_name in dependencies for dep in db_deps)
 
         if has_db:
             if not SharedTestInstructions._has_transaction_rollback(test_code):
-                issues.append(
-                    "Database tests should use transactions or test databases"
-                )
+                issues.append("Database tests should use transactions or test databases")
 
         return len(issues) == 0, issues
 
@@ -254,19 +241,14 @@ class SharedTestInstructions:
             if any(resource in line for resource in ["open(", "tempfile.", "mkdir"]):
                 # Add comment suggesting context manager or cleanup
                 indent = len(line) - len(line.lstrip())
-                suggestion = (
-                    " " * indent
-                    + "# Consider using context manager or explicit cleanup"
-                )
+                suggestion = " " * indent + "# Consider using context manager or explicit cleanup"
                 lines.insert(i + 1, suggestion)
                 break
 
         return "\n".join(lines)
 
     @staticmethod
-    def recommend_shared_fixtures(
-        test_code: str, existing_fixtures: List[str]
-    ) -> List[str]:
+    def recommend_shared_fixtures(test_code: str, existing_fixtures: List[str]) -> List[str]:
         """
         Recommend shared fixtures for consistency.
 
@@ -286,9 +268,7 @@ class SharedTestInstructions:
             if fixture in existing_fixtures:
                 for keyword in keywords:
                     if keyword in test_code.lower():
-                        recommendations.append(
-                            f"Consider using existing '{fixture}' fixture"
-                        )
+                        recommendations.append(f"Consider using existing '{fixture}' fixture")
                         break
 
         return recommendations
@@ -438,9 +418,7 @@ class SharedTestInstructions:
         conditions = test_code.count("if ") + test_code.count("elif ")
 
         # Base complexity on various factors
-        complexity = min(
-            10, max(1, (lines // 10) + assertions + (loops * 2) + conditions)
-        )
+        complexity = min(10, max(1, (lines // 10) + assertions + (loops * 2) + conditions))
         return complexity
 
     @staticmethod

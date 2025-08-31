@@ -70,23 +70,17 @@ class Neo4jMemoryClient:
             raise RuntimeError("Driver not connected")
         async with self._driver.session(database=self.database) as session:
             # Memory indexes
-            await session.run(
-                "CREATE INDEX memory_id IF NOT EXISTS FOR (m:Memory) ON (m.id)"
-            )
+            await session.run("CREATE INDEX memory_id IF NOT EXISTS FOR (m:Memory) ON (m.id)")
             await session.run(
                 "CREATE INDEX memory_agent IF NOT EXISTS FOR (m:Memory) ON (m.agent_id)"
             )
-            await session.run(
-                "CREATE INDEX memory_type IF NOT EXISTS FOR (m:Memory) ON (m.type)"
-            )
+            await session.run("CREATE INDEX memory_type IF NOT EXISTS FOR (m:Memory) ON (m.type)")
             await session.run(
                 "CREATE INDEX memory_importance IF NOT EXISTS FOR (m:Memory) ON (m.importance_score)"
             )
 
             # Context indexes
-            await session.run(
-                "CREATE INDEX context_id IF NOT EXISTS FOR (c:Context) ON (c.id)"
-            )
+            await session.run("CREATE INDEX context_id IF NOT EXISTS FOR (c:Context) ON (c.id)")
             await session.run(
                 "CREATE INDEX context_agent IF NOT EXISTS FOR (c:Context) ON (c.agent_id)"
             )
@@ -128,12 +122,8 @@ class Neo4jMemoryClient:
                 "access_count": memory.access_count,
                 "created_at": memory.created_at.isoformat(),
                 "updated_at": memory.updated_at.isoformat(),
-                "last_accessed": memory.last_accessed.isoformat()
-                if memory.last_accessed
-                else None,
-                "expires_at": memory.expires_at.isoformat()
-                if memory.expires_at
-                else None,
+                "last_accessed": memory.last_accessed.isoformat() if memory.last_accessed else None,
+                "expires_at": memory.expires_at.isoformat() if memory.expires_at else None,
                 "version": memory.version,
                 "parent_id": memory.parent_id,
             }
@@ -147,9 +137,7 @@ class Neo4jMemoryClient:
 
             # Create version relationship if this is an update
             if memory.parent_id:
-                await self._create_version_relationship(
-                    session, memory.id, memory.parent_id
-                )
+                await self._create_version_relationship(session, memory.id, memory.parent_id)
 
             if record is not None:
                 return record["id"]
@@ -343,9 +331,7 @@ class Neo4jMemoryClient:
                 LIMIT $limit
             """
 
-            result = await session.run(
-                query, id=memory_id, threshold=threshold, limit=limit
-            )
+            result = await session.run(query, id=memory_id, threshold=threshold, limit=limit)
 
             memories = []
             async for record in result:
@@ -396,9 +382,7 @@ class Neo4jMemoryClient:
 
             # Create parent-child relationships
             if context.parent_context_id:
-                await self._create_context_hierarchy(
-                    session, context.id, context.parent_context_id
-                )
+                await self._create_context_hierarchy(session, context.id, context.parent_context_id)
 
             if record is not None:
                 return record["id"]
@@ -495,7 +479,7 @@ class Neo4jMemoryClient:
             # Merge into first context
             merged_context = None
             all_memories = set()
-            merged_working_memory = {}
+            _merged_working_memory = {}
 
             async for record in result:
                 context = self._record_to_context(dict(record))
@@ -602,9 +586,7 @@ class Neo4jMemoryClient:
                 RETURN m1, m2
             """
 
-            result = await session.run(
-                query, agent_id=agent_id, hours=time_window_hours
-            )
+            result = await session.run(query, agent_id=agent_id, hours=time_window_hours)
 
             consolidated = 0
             async for record in result:
@@ -702,12 +684,8 @@ class Neo4jMemoryClient:
             metadata=json.loads(node.get("metadata", "{}")),
             importance_score=node.get("importance_score", 0.5),
             access_count=node.get("access_count", 0),
-            created_at=datetime.fromisoformat(
-                node.get("created_at", datetime.now().isoformat())
-            ),
-            updated_at=datetime.fromisoformat(
-                node.get("updated_at", datetime.now().isoformat())
-            ),
+            created_at=datetime.fromisoformat(node.get("created_at", datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(node.get("updated_at", datetime.now().isoformat())),
             last_accessed=datetime.fromisoformat(node["last_accessed"])
             if node.get("last_accessed")
             else None,
@@ -735,11 +713,7 @@ class Neo4jMemoryClient:
             working_memory=json.loads(node.get("working_memory", "{}")),
             parent_context_id=record.get("parent_id"),
             child_contexts=record.get("children", []),
-            created_at=datetime.fromisoformat(
-                node.get("created_at", datetime.now().isoformat())
-            ),
-            updated_at=datetime.fromisoformat(
-                node.get("updated_at", datetime.now().isoformat())
-            ),
+            created_at=datetime.fromisoformat(node.get("created_at", datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(node.get("updated_at", datetime.now().isoformat())),
             metadata=json.loads(node.get("metadata", "{}")),
         )

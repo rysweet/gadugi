@@ -45,9 +45,7 @@ class LogIncomingRequestsMiddleware(BaseHTTPMiddleware):
                         f"[PROXY-LOG] First message role: {first_msg.get('role', 'unknown')}"
                     )
                     content_preview = str(first_msg.get("content", ""))[:100]
-                    logger.info(
-                        f"[PROXY-LOG] First message content preview: {content_preview}"
-                    )
+                    logger.info(f"[PROXY-LOG] First message content preview: {content_preview}")
             except Exception as e:
                 logger.warning(f"[PROXY-LOG] Could not parse request body as JSON: {e}")
 
@@ -78,9 +76,7 @@ def main():
         print("Optional environment variables:")
         print("  ANTHROPIC_API_KEY - Expected Anthropic API key for client validation")
         print("                      If set, clients must provide this exact API key")
-        print(
-            "  OPENAI_BASE_URL - OpenAI API base URL (default: https://api.openai.com/v1)"
-        )
+        print("  OPENAI_BASE_URL - OpenAI API base URL (default: https://api.openai.com/v1)")
         print("  BIG_MODEL - Model for opus requests (default: gpt-4o)")
         print("  MIDDLE_MODEL - Model for sonnet requests (default: gpt-4o)")
         print("  SMALL_MODEL - Model for haiku requests (default: gpt-4o-mini)")
@@ -106,9 +102,7 @@ def main():
     print(f"   Max Tokens Limit: {config.max_tokens_limit}")
     print(f"   Request Timeout: {config.request_timeout}s")
     print(f"   Server: {config.host}:{config.port}")
-    print(
-        f"   Client API Key Validation: {'Enabled' if config.anthropic_api_key else 'Disabled'}"
-    )
+    print(f"   Client API Key Validation: {'Enabled' if config.anthropic_api_key else 'Disabled'}")
     print("")
 
     # Parse log level - extract just the first word to handle comments

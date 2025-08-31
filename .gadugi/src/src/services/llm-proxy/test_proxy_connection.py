@@ -43,9 +43,7 @@ async def test_proxy_connection():
             # Convert request to dict for JSON serialization
             request_data = {
                 "id": request.id,
-                "type": request.type.value
-                if hasattr(request.type, "value")
-                else str(request.type),
+                "type": request.type.value if hasattr(request.type, "value") else str(request.type),
                 "model": request.model,
                 "messages": request.messages,
                 "max_tokens": request.max_tokens,
@@ -60,11 +58,7 @@ async def test_proxy_connection():
             ) as response:
                 if response.status == 200:
                     result = await response.json()
-                    content = (
-                        result.get("choices", [{}])[0]
-                        .get("message", {})
-                        .get("content", "")
-                    )
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
                     print(f"\n✅ Response received: {content}")
                     print("\n🎉 Proxy is successfully routing to Azure OpenAI!")
                     return True
@@ -140,9 +134,7 @@ async def check_proxy_logs():
     log_dir = Path(__file__).parent / "logs"
 
     # Find the most recent log file
-    log_files = sorted(
-        log_dir.glob("proxy_*.log"), key=lambda x: x.stat().st_mtime, reverse=True
-    )
+    log_files = sorted(log_dir.glob("proxy_*.log"), key=lambda x: x.stat().st_mtime, reverse=True)
 
     if log_files:
         latest_log = log_files[0]
@@ -183,9 +175,7 @@ async def main():
     if not proxy_success:
         print("\nℹ️  Note: The LLM Proxy service appears to be running but might not")
         print("   expose an HTTP endpoint. The service might be designed to be")
-        print(
-            "   imported and used directly in Python code rather than as an HTTP proxy."
-        )
+        print("   imported and used directly in Python code rather than as an HTTP proxy.")
 
 
 if __name__ == "__main__":

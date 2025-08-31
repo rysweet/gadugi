@@ -94,8 +94,7 @@ class MyCustomAgent(V03Agent):
             # Return successful outcome (triggers task completion event)
             return TaskOutcome(
                 success=True,
-                task_id=self.current_task_id
-                or f"task_{hash(task_description) % 1000:03d}",
+                task_id=self.current_task_id or f"task_{hash(task_description) % 1000:03d}",
                 task_type=task_type,
                 steps_taken=steps_taken,
                 duration_seconds=duration,
@@ -114,8 +113,7 @@ class MyCustomAgent(V03Agent):
 
             return TaskOutcome(
                 success=False,
-                task_id=self.current_task_id
-                or f"task_{hash(task_description) % 1000:03d}",
+                task_id=self.current_task_id or f"task_{hash(task_description) % 1000:03d}",
                 task_type=task_type,
                 steps_taken=steps_taken,
                 duration_seconds=duration,
@@ -152,7 +150,7 @@ async def demonstrate_event_agent():
 
         for i, task in enumerate(tasks, 1):
             print(f"\n   Task {i}/3:")
-            task_id = await agent.start_task(task["description"])
+            _task_id = await agent.start_task(task["description"])
             outcome = await agent.execute_task(task)
             await agent.learn_from_outcome(outcome)
 

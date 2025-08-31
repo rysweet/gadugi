@@ -94,9 +94,7 @@ class ServiceLauncher:
                 await self.service_instance.stop()
                 self.logger.info(f"{self.service_name} service stopped")
             except Exception as e:
-                self.logger.exception(
-                    f"Error stopping {self.service_name} service: {e}"
-                )
+                self.logger.exception(f"Error stopping {self.service_name} service: {e}")
 
 
 async def main() -> None:

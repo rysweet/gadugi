@@ -15,33 +15,32 @@ from pathlib import Path
 orchestrator_dir = Path(__file__).parent
 sys.path.insert(0, str(orchestrator_dir))
 
+
 def test_imports():
     """Test that orchestrator components can be imported"""
     print("Testing imports...")
 
     try:
-        from orchestrator_cli import  # type: ignore[import]
         print("✅ orchestrator_cli imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_cli import failed: {e}")
         return False
 
     try:
-        from process_registry import  # type: ignore[import]
         print("✅ process_registry imported successfully")
     except Exception as e:
         print(f"❌ process_registry import failed: {e}")
         return False
 
     try:
-        from orchestrator_main import  # type: ignore[import]
         print("✅ orchestrator_main imported successfully")
     except Exception as e:
         print(f"❌ orchestrator_main import failed: {e}")
-        print(f"   This may be expected if components are missing")
+        print("   This may be expected if components are missing")
         # This is non-fatal for basic testing
 
     return True
+
 
 def test_cli_basic():
     """Test basic CLI functionality"""
@@ -81,6 +80,7 @@ Execute these prompts in parallel:
             print(f"❌ CLI basic test failed: {e}")
             return False
 
+
 def test_process_registry_basic():
     """Test basic process registry functionality"""
     print("\nTesting process registry basic functionality...")
@@ -99,7 +99,7 @@ def test_process_registry_basic():
                 status=ProcessStatus.QUEUED,
                 command="test command",
                 working_directory=temp_dir,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
 
             registry.register_process(process_info)
@@ -118,6 +118,7 @@ def test_process_registry_basic():
         print(f"❌ Process registry test failed: {e}")
         return False
 
+
 def test_shell_script():
     """Test shell script exists and is executable"""
     print("\nTesting shell script...")
@@ -129,7 +130,7 @@ def test_shell_script():
         return False
 
     # Check if executable (Unix systems)
-    if os.name != 'nt':
+    if os.name != "nt":
         stat_info = script_path.stat()
         if not (stat_info.st_mode & 0o111):
             print("❌ Shell script not executable")
@@ -137,6 +138,7 @@ def test_shell_script():
 
     print("✅ Shell script exists and is executable")
     return True
+
 
 def main():
     """Run basic functionality tests"""
@@ -147,7 +149,7 @@ def main():
         test_imports,
         test_cli_basic,
         test_process_registry_basic,
-        test_shell_script
+        test_shell_script,
     ]
 
     passed = 0
@@ -173,6 +175,7 @@ def main():
     else:
         print("❌ Some tests failed")
         return 1
+
 
 if __name__ == "__main__":
     exit_code = main()

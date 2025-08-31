@@ -21,9 +21,7 @@ async def test_direct_api():
     print("=" * 60)
 
     # Create service
-    service = EventRouterService(
-        host="localhost", port=9090, max_workers=5, queue_size=1000
-    )
+    service = EventRouterService(host="localhost", port=9090, max_workers=5, queue_size=1000)
 
     print("\n1. Creating Event Router Service...")
 
@@ -132,9 +130,7 @@ async def test_direct_api():
     print("\n8. Testing event filtering...")
 
     # Create a filter
-    test_filter = EventFilter(
-        event_types=[EventType.TASK_CREATED], priorities=[EventPriority.HIGH]
-    )
+    test_filter = EventFilter(event_types=[EventType.TASK_CREATED], priorities=[EventPriority.HIGH])
 
     # Check which events match
     for event in events:

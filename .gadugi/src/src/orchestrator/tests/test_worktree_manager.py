@@ -50,9 +50,7 @@ class TestWorktreeManager(unittest.TestCase):
 
         # Create some basic files
         (self.project_root / "README.md").write_text("Test repository")
-        (self.project_root / "pyproject.toml").write_text(
-            "[build-system]\nrequires = []"
-        )
+        (self.project_root / "pyproject.toml").write_text("[build-system]\nrequires = []")
 
     @patch("subprocess.run")
     def test_create_worktree_success(self, mock_run):
@@ -94,9 +92,7 @@ class TestWorktreeManager(unittest.TestCase):
         """Test worktree creation failure"""
         # Mock failed git worktree add command
         error = subprocess.CalledProcessError(1, "git worktree add")
-        error.stderr = (
-            "fatal: 'feature/parallel-test-task-task1' is already checked out"
-        )
+        error.stderr = "fatal: 'feature/parallel-test-task-task1' is already checked out"
         mock_run.side_effect = error
 
         with self.assertRaises(RuntimeError) as context:
@@ -253,9 +249,7 @@ class TestWorktreeManager(unittest.TestCase):
 
         # Mock git commands for file changes and commits
         mock_run.side_effect = [
-            MagicMock(
-                returncode=0, stdout="file1.py\nfile2.py"
-            ),  # git diff --name-only
+            MagicMock(returncode=0, stdout="file1.py\nfile2.py"),  # git diff --name-only
             MagicMock(
                 returncode=0, stdout="abcd123 First commit\nefgh456 Second commit"
             ),  # git log --oneline
@@ -446,9 +440,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         self.project_root = Path(self.temp_dir)
 
         # Initialize real git repository
-        subprocess.run(
-            ["git", "init"], cwd=self.project_root, check=True, capture_output=True
-        )
+        subprocess.run(["git", "init"], cwd=self.project_root, check=True, capture_output=True)
         subprocess.run(
             ["git", "config", "user.name", "Test User"],
             cwd=self.project_root,
@@ -463,9 +455,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         # Create and commit initial file
         (self.project_root / "README.md").write_text("Test repository")
         subprocess.run(["git", "add", "README.md"], cwd=self.project_root, check=True)
-        subprocess.run(
-            ["git", "commit", "-m", "Initial commit"], cwd=self.project_root, check=True
-        )
+        subprocess.run(["git", "commit", "-m", "Initial commit"], cwd=self.project_root, check=True)
 
         self.manager = WorktreeManager(
             project_root=str(self.project_root), worktrees_dir=".worktrees"

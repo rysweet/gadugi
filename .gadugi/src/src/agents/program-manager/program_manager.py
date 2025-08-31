@@ -19,9 +19,7 @@ and documentation maintenance.
 
 # Add parent directory to path for imports
 
-sys.path.insert(
-    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 try:
     from memory_utils.agent_interface import (  # type: ignore[import]
@@ -87,9 +85,7 @@ class ProgramManager:
     def run_gh_command(self, args: List[str]) -> Tuple[bool, str]:
         """Execute GitHub CLI command and return success status and output"""
         try:
-            result = subprocess.run(
-                ["gh"] + args, capture_output=True, text=True, check=True
-            )
+            result = subprocess.run(["gh"] + args, capture_output=True, text=True, check=True)
             return True, result.stdout
         except subprocess.CalledProcessError as e:
             return False, f"Error: {e.stderr}"
@@ -110,9 +106,7 @@ class ProgramManager:
                 fields[key.rstrip(":")] = value
 
         # Extract body (everything after --)
-        body_start = next(
-            (i for i, line in enumerate(lines) if line.startswith("--")), -1
-        )
+        body_start = next((i for i, line in enumerate(lines) if line.startswith("--")), -1)
         body = "\n".join(lines[body_start + 1 :]) if body_start >= 0 else ""
 
         # Parse labels
@@ -243,9 +237,7 @@ class ProgramManager:
         ]
         body_lower = issue.body.lower()
 
-        structure_count = sum(
-            1 for indicator in structure_indicators if indicator in body_lower
-        )
+        structure_count = sum(1 for indicator in structure_indicators if indicator in body_lower)
         return structure_count >= 2
 
     def update_issue_label(
@@ -326,9 +318,7 @@ class ProgramManager:
                 print("  Issue needs more structure, keeping as idea")
 
         # Record in memory
-        summary = (
-            f"Reviewed {stats['total']} ideas, converted {stats['converted']} to drafts"
-        )
+        summary = f"Reviewed {stats['total']} ideas, converted {stats['converted']} to drafts"
         self.memory.record_agent_memory("idea_conversion", summary)
 
         return stats
@@ -510,8 +500,7 @@ class ProgramManager:
         for issue in ready_issues:
             # Check for blockers or dependencies mentioned
             has_blockers = any(
-                word in issue.body.lower()
-                for word in ["blocked", "depends on", "waiting for"]
+                word in issue.body.lower() for word in ["blocked", "depends on", "waiting for"]
             )
 
             # Estimate complexity based on description length and structure
@@ -533,9 +522,7 @@ class ProgramManager:
             )
 
         # Sort by age and complexity
-        analysis.sort(
-            key=lambda x: (x["has_blockers"], x["complexity"], -x["created_days_ago"])
-        )
+        analysis.sort(key=lambda x: (x["has_blockers"], x["complexity"], -x["created_days_ago"]))
 
         return analysis
 
@@ -638,7 +625,9 @@ class ProgramManager:
                 if info["state"] == "open":
                     total = info["open_issues"] + info["closed_issues"]
                     percent = (info["closed_issues"] / total * 100) if total > 0 else 0
-                    priority_content += f"- **{name}**: {percent:.0f}% complete ({info['closed_issues']}/{total})"
+                    priority_content += (
+                        f"- **{name}**: {percent:.0f}% complete ({info['closed_issues']}/{total})"
+                    )
                     if info["due_on"]:
                         priority_content += f" - Due: {info['due_on'][:10]}"
                     priority_content += "\n"
@@ -652,18 +641,20 @@ class ProgramManager:
             )
 
         if stage_counts.get("ready", 0) < 3:
-            priority_content += "- ⚠️ **Low ready pipeline**: Focus on moving issues through review stages\n"
+            priority_content += (
+                "- ⚠️ **Low ready pipeline**: Focus on moving issues through review stages\n"
+            )
 
         old_ready = [issue for issue in ready_issues if issue["created_days_ago"] > 14]
         if old_ready:
-            priority_content += f"- ⚠️ **Stale ready issues**: {len(old_ready)} issues ready for >2 weeks\n"
+            priority_content += (
+                f"- ⚠️ **Stale ready issues**: {len(old_ready)} issues ready for >2 weeks\n"
+            )
 
         # Write to memory
         try:
             # Create .memory/project directory if it doesn't exist
-            memory_dir = os.path.join(
-                os.path.dirname(__file__), "../../.memory/project"
-            )
+            memory_dir = os.path.join(os.path.dirname(__file__), "../../.memory/project")
             os.makedirs(memory_dir, exist_ok=True)
 
             # Write priorities file
@@ -719,9 +710,7 @@ class ProgramManager:
 
         # Look for feature indicators in title
         title = pr.get("title", "").lower()
-        if any(
-            word in title for word in ["add", "implement", "create", "feature", "new"]
-        ):
+        if any(word in title for word in ["add", "implement", "create", "feature", "new"]):
             features.append(pr["title"])
 
         # Parse body for features
@@ -732,9 +721,7 @@ class ProgramManager:
                 line = line.strip()
                 # Look for bullet points or numbered lists describing features
                 if (
-                    line.startswith("- ")
-                    or line.startswith("* ")
-                    or re.match(r"^\d+\.", line)
+                    line.startswith("- ") or line.startswith("* ") or re.match(r"^\d+\.", line)
                 ) and len(line) > 10:
                     features.append(line.lstrip("- *").lstrip("0123456789.").strip())
 
@@ -752,13 +739,11 @@ class ProgramManager:
                     agent_name = filename[:-3]  # Remove .md extension
 
                     # Check if agent is mentioned in README
-                    readme_path = os.path.join(
-                        os.path.dirname(__file__), "../../README.md"
-                    )
+                    readme_path = os.path.join(os.path.dirname(__file__), "../../README.md")
                     if os.path.exists(readme_path):
                         with open(readme_path, "r") as f:
                             readme_content = f.read().lower()
-                            if agent_name not in readme_content:
+                            if agent_name.lower() not in readme_content:
                                 new_agents.append(agent_name)
 
         return new_agents
@@ -847,9 +832,7 @@ class ProgramManager:
                     # Insert before the next section
                     insert_pos = next_section - 1
                     updated_readme = (
-                        updated_readme[:insert_pos]
-                        + agent_line
-                        + updated_readme[insert_pos:]
+                        updated_readme[:insert_pos] + agent_line + updated_readme[insert_pos:]
                     )
 
         # Write updated README

@@ -764,7 +764,7 @@ def main():
     analyzer = TaskAnalyzer(args.prompts_dir)
 
     try:
-        tasks = analyzer.analyze_all_prompts()  # type: ignore
+        analyzer.analyze_all_prompts()  # type: ignore
         execution_plan = analyzer.generate_execution_plan()
 
         print("\n📊 Analysis Summary:")

@@ -71,19 +71,13 @@ except ImportError:
         def _extract_target_files(self, content: str) -> List[str]:
             return []
 
-        def _extract_test_files(
-            self, content: str, target_files: List[str]
-        ) -> List[str]:
+        def _extract_test_files(self, content: str, target_files: List[str]) -> List[str]:
             return []
 
-        def _estimate_duration(
-            self, complexity: TaskComplexity, files: List[str]
-        ) -> int:
+        def _estimate_duration(self, complexity: TaskComplexity, files: List[str]) -> int:
             return 30
 
-        def _estimate_resources(
-            self, complexity: TaskComplexity, file_count: int
-        ) -> dict:
+        def _estimate_resources(self, complexity: TaskComplexity, file_count: int) -> dict:
             return {}
 
         def _analyze_python_imports(self, file_path: Path) -> List[str]:
@@ -289,9 +283,7 @@ class TestTaskAnalyzer(unittest.TestCase):
         mock_walk.return_value = [import_node, from_import_node]
 
         # Mock file content
-        mock_file.return_value.read.return_value = (
-            "import gadugi.agents.workflow_manager"
-        )
+        mock_file.return_value.read.return_value = "import gadugi.agents.workflow_manager"
 
         test_file = self.project_root / "test.py"
         test_file.touch()
@@ -703,20 +695,18 @@ This is a complex feature requiring careful architecture and extensive testing.
         self.assertGreater(len(complexities), 1)  # Should have different complexities
 
         # Check that test coverage task is parallelizable
-        test_task = next(
-            task for task in tasks if task.task_type == TaskType.TEST_COVERAGE
-        )
+        test_task = next(task for task in tasks if task.task_type == TaskType.TEST_COVERAGE)
         self.assertTrue(test_task.parallelizable)
 
         # Check that feature implementation is likely not parallelizable (due to complexity)
-        feature_task = next(
+        _feature_task = next(
             task for task in tasks if task.task_type == TaskType.FEATURE_IMPLEMENTATION
         )
         # Complex feature tasks might not be parallelizable
 
     def test_execution_plan_generation(self):
         """Test execution plan generation with sample prompts"""
-        tasks = self.analyzer.analyze_all_prompts()
+        _tasks = self.analyzer.analyze_all_prompts()
         execution_plan = self.analyzer.generate_execution_plan()
 
         # Verify plan makes sense

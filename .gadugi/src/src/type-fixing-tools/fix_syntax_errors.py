@@ -83,10 +83,7 @@ def main() -> None:
 
         for i, line in enumerate(lines):
             # Fix the specific indentation error
-            if (
-                i == 322
-                and '"""Test TaskExecutor uses containerized execution"""' in line
-            ):
+            if i == 322 and '"""Test TaskExecutor uses containerized execution"""' in line:
                 # This docstring should be indented properly
                 new_lines.append("    " + line.strip())
             else:

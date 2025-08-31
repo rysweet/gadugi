@@ -295,9 +295,7 @@ echo "   orchestrator                 - Launch orchestrator"
             messages.append("✅ Shell integration created")
 
             # Instructions for user
-            messages.append(
-                "💡 To enable shell integration, add to your shell profile:"
-            )
+            messages.append("💡 To enable shell integration, add to your shell profile:")
             messages.append(f"   source {shell_integration}")
 
             return True, messages
@@ -522,8 +520,8 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
                     with open(config_file, "r") as f:
                         config = json.load(f)
                     validation_results["configuration"]["valid"] = True
-                    validation_results["configuration"]["enforcement_level"] = (
-                        config.get("enforcement_level", "unknown")
+                    validation_results["configuration"]["enforcement_level"] = config.get(
+                        "enforcement_level", "unknown"
                     )
                     messages.append("✅ Configuration file is valid JSON")
                 except json.JSONDecodeError:
@@ -631,15 +629,11 @@ Examples:
         "--setup", action="store_true", help="Run complete workflow enforcement setup"
     )
 
-    parser.add_argument(
-        "--validate", action="store_true", help="Validate existing setup"
-    )
+    parser.add_argument("--validate", action="store_true", help="Validate existing setup")
 
     parser.add_argument("--git-hooks", action="store_true", help="Setup git hooks only")
 
-    parser.add_argument(
-        "--config", action="store_true", help="Create configuration only"
-    )
+    parser.add_argument("--config", action="store_true", help="Create configuration only")
 
     parser.add_argument(
         "--shell-integration", action="store_true", help="Setup shell integration only"

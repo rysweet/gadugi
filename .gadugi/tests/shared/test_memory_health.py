@@ -13,18 +13,19 @@ Tests all functionality including:
 
 import asyncio
 import tempfile
-from pathlib import Path
 from typing import Dict, Any
 from unittest.mock import patch
 
 import pytest
+import pytest_asyncio
 
 import sys
+import os
 
-# Add the correct path to src/src directory where shared module is located
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "src"))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from shared.memory_health import (
+from src.src.shared.memory_health import (
     MemoryHealthMonitor,
     MemoryBackendType,
     HealthStatus,
@@ -204,7 +205,7 @@ class TestMemoryHealthMonitor:
 class TestHealthChecks:
     """Test individual health check implementations."""
 
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def monitor(self):
         """Create a monitor for health check testing."""
         config = HealthMonitorConfig(enable_periodic_monitoring=False)
@@ -301,7 +302,7 @@ class TestHealthChecks:
             config={"uri": "bolt://localhost:7687"},
         )
 
-        with patch("...shared.memory_health.NEO4J_AVAILABLE", False):
+        with patch("shared.memory_health.NEO4J_AVAILABLE", False):
             result = await monitor._check_neo4j_health(config)
 
             assert result.backend_type == MemoryBackendType.NEO4J
@@ -501,8 +502,8 @@ class TestStatusReporting:
 
         assert status["current_backend"] == "in_memory"
         assert status["failover_count"] == 0
-        assert status["monitoring_enabled"] == False
-        assert status["auto_failover_enabled"] == True
+        assert not status["monitoring_enabled"]
+        assert status["auto_failover_enabled"]
 
     @pytest.mark.asyncio
     async def test_status_with_health_results(self):

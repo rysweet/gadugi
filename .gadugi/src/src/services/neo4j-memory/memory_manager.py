@@ -173,9 +173,7 @@ class MemoryManager:
     async def connect(self) -> None:
         """Connect to Neo4j database."""
         if not self._driver:
-            self._driver = AsyncGraphDatabase.driver(
-                self.uri, auth=(self.user, self.password)
-            )
+            self._driver = AsyncGraphDatabase.driver(self.uri, auth=(self.user, self.password))
             await self._initialize_schema()
 
     async def disconnect(self) -> None:
@@ -357,9 +355,7 @@ class MemoryManager:
         await self._store_memory(memory)
         return memory
 
-    async def get_project_memories(
-        self, project_id: str, limit: int = 100
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 100) -> List[Memory]:
         """Retrieve project-wide shared memories."""
         if not self._driver:
             raise RuntimeError("Not connected to database")
@@ -384,9 +380,7 @@ class MemoryManager:
 
     async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
         """Create a new task whiteboard."""
-        whiteboard = Whiteboard(
-            task_id=task_id, created_by=agent_id, participants=[agent_id]
-        )
+        whiteboard = Whiteboard(task_id=task_id, created_by=agent_id, participants=[agent_id])
 
         if not self._driver:
             raise RuntimeError("Not connected to database")
@@ -566,9 +560,7 @@ class MemoryManager:
         self, agent_id: str, concept: str, description: str, **kwargs
     ) -> KnowledgeNode:
         """Add a node to an agent's knowledge graph."""
-        node = KnowledgeNode(
-            agent_id=agent_id, concept=concept, description=description, **kwargs
-        )
+        node = KnowledgeNode(agent_id=agent_id, concept=concept, description=description, **kwargs)
 
         if not self._driver:
             raise RuntimeError("Not connected to database")
@@ -631,9 +623,7 @@ class MemoryManager:
         async with self._driver.session(database=self.database) as session:
             await session.run(cast(LiteralString, query), params)
 
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """Retrieve an agent's knowledge graph."""
         if not self._driver:
             raise RuntimeError("Not connected to database")

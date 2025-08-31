@@ -152,7 +152,7 @@ async def demonstrate_event_agent():
 
         for i, task in enumerate(tasks, 1):
             print(f"\n   Task {i}/3:")
-            task_id = await agent.start_task(task["description"])
+            await agent.start_task(task["description"])
             outcome = await agent.execute_task(task)
             await agent.learn_from_outcome(outcome)
 

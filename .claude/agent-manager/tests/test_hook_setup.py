@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import tempfile
-
 """
 Test the agent-manager hook setup functionality with external scripts.
 
@@ -12,6 +10,7 @@ import json
 import os
 import shutil
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 

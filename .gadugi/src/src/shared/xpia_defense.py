@@ -238,9 +238,7 @@ class ThreatPatternLibrary:
         """Get all patterns for a specific category"""
         return [p for p in self.patterns if p.category == category]
 
-    def get_patterns_by_threat_level(
-        self, threat_level: ThreatLevel
-    ) -> List[ThreatPattern]:
+    def get_patterns_by_threat_level(self, threat_level: ThreatLevel) -> List[ThreatPattern]:
         """Get all patterns for a specific threat level"""
         return [p for p in self.patterns if p.threat_level == threat_level]
 
@@ -426,9 +424,7 @@ class XPIADefenseEngine:
             effective_mode = SecurityMode.PERMISSIVE
 
         # Decode potentially obfuscated content
-        decoded_content, decoding_actions = self.sanitizer.decode_obfuscated_content(
-            content
-        )
+        decoded_content, decoding_actions = self.sanitizer.decode_obfuscated_content(content)
 
         # Analyze both original and decoded content
         threats = []
@@ -463,8 +459,7 @@ class XPIADefenseEngine:
             "content_length": len(content),
             "processing_performance": {
                 "processing_time_ms": processing_time,
-                "average_processing_time": self.total_processing_time
-                / self.validation_count,
+                "average_processing_time": self.total_processing_time / self.validation_count,
             },
         }
 
@@ -528,9 +523,7 @@ class XPIADefenseEngine:
         else:
             return ThreatLevel.SAFE
 
-    def _is_content_safe(
-        self, threat_level: ThreatLevel, security_mode: SecurityMode
-    ) -> bool:
+    def _is_content_safe(self, threat_level: ThreatLevel, security_mode: SecurityMode) -> bool:
         """Determine if content is safe based on threat level and security mode"""
         if threat_level == ThreatLevel.SAFE:
             return True
@@ -544,9 +537,7 @@ class XPIADefenseEngine:
 
         return False
 
-    def _group_threats_by_category(
-        self, threats: List[Dict[str, Any]]
-    ) -> Dict[str, int]:
+    def _group_threats_by_category(self, threats: List[Dict[str, Any]]) -> Dict[str, int]:
         """Group threats by category for analysis"""
         categories = {}
         for threat in threats:
@@ -598,9 +589,7 @@ class XPIADefenseEngine:
         """Update security mode"""
         old_mode = self.security_mode
         self.security_mode = new_mode
-        self.logger.info(
-            f"Security mode changed from {old_mode.value} to {new_mode.value}"
-        )
+        self.logger.info(f"Security mode changed from {old_mode.value} to {new_mode.value}")
 
 
 class XPIADefenseAgent:
@@ -628,17 +617,11 @@ class XPIADefenseAgent:
             handler.setFormatter(formatter)
             security_logger.addHandler(handler)
 
-    def validate_agent_input(
-        self, content: str, agent_name: str = "unknown"
-    ) -> ValidationResult:
+    def validate_agent_input(self, content: str, agent_name: str = "unknown") -> ValidationResult:
         """Validate input intended for agent processing"""
-        return self.engine.validate_content(
-            content, context=f"agent_input:{agent_name}"
-        )
+        return self.engine.validate_content(content, context=f"agent_input:{agent_name}")
 
-    def validate_user_input(
-        self, content: str, user_context: str = "general"
-    ) -> ValidationResult:
+    def validate_user_input(self, content: str, user_context: str = "general") -> ValidationResult:
         """Validate user-provided input"""
         return self.engine.validate_content(
             content,
@@ -646,9 +629,7 @@ class XPIADefenseAgent:
             strict_mode=True,  # Be strict with user input
         )
 
-    def validate_file_content(
-        self, content: str, filename: str = "unknown"
-    ) -> ValidationResult:
+    def validate_file_content(self, content: str, filename: str = "unknown") -> ValidationResult:
         """Validate content read from files"""
         return self.engine.validate_content(content, context=f"file_content:{filename}")
 
@@ -669,18 +650,14 @@ class XPIADefenseAgent:
             "security_mode": self.engine.security_mode.value,
             "performance_stats": stats,
             "threat_patterns": len(self.engine.pattern_library.patterns),
-            "categories": list(
-                set(p.category for p in self.engine.pattern_library.patterns)
-            ),
+            "categories": list(set(p.category for p in self.engine.pattern_library.patterns)),
             "uptime_stats": {
                 "validations_processed": stats["validation_count"],
                 "average_response_time_ms": stats["average_processing_time_ms"],
             },
         }
 
-    def update_threat_patterns(
-        self, new_patterns: List[ThreatPattern]
-    ) -> Dict[str, Any]:
+    def update_threat_patterns(self, new_patterns: List[ThreatPattern]) -> Dict[str, Any]:
         """Update threat pattern library"""
         added = 0
         errors = []

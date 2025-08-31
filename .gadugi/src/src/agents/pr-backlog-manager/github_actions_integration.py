@@ -99,8 +99,7 @@ class SecurityConstraints:
     def from_environment(cls) -> "SecurityConstraints":
         """Create security constraints from environment."""
         return cls(
-            auto_approve_enabled=os.getenv("CLAUDE_AUTO_APPROVE", "false").lower()
-            == "true",
+            auto_approve_enabled=os.getenv("CLAUDE_AUTO_APPROVE", "false").lower() == "true",
             restricted_operations=[
                 "delete_repository",
                 "force_push",
@@ -108,9 +107,7 @@ class SecurityConstraints:
                 "close_issue",
                 "merge_pr",
             ],
-            max_processing_time=int(
-                os.getenv("MAX_PROCESSING_TIME", "600")
-            ),  # 10 minutes
+            max_processing_time=int(os.getenv("MAX_PROCESSING_TIME", "600")),  # 10 minutes
             rate_limit_threshold=int(os.getenv("RATE_LIMIT_THRESHOLD", "50")),
         )
 
@@ -142,18 +139,14 @@ class GitHubActionsIntegration:
     def _validate_github_actions_environment(self) -> None:
         """Validate that we're running in a proper GitHub Actions environment."""
         if not os.getenv("GITHUB_ACTIONS"):
-            raise RuntimeError(
-                "GitHub Actions integration requires GITHUB_ACTIONS=true"
-            )
+            raise RuntimeError("GitHub Actions integration requires GITHUB_ACTIONS=true")
 
         if not os.getenv("GITHUB_TOKEN"):
             raise RuntimeError("GitHub Actions integration requires GITHUB_TOKEN")
 
         if self.security_constraints.auto_approve_enabled:
             if not os.getenv("CLAUDE_AUTO_APPROVE"):
-                raise RuntimeError(
-                    "Auto-approve requires explicit CLAUDE_AUTO_APPROVE=true"
-                )
+                raise RuntimeError("Auto-approve requires explicit CLAUDE_AUTO_APPROVE=true")
 
             # Validate allowed event types for auto-approve
             allowed_events = [
@@ -189,14 +182,10 @@ class GitHubActionsIntegration:
                     "reason": "manual_dispatch",
                 }
             else:
-                return ProcessingMode.FULL_BACKLOG, {
-                    "reason": "manual_backlog_dispatch"
-                }
+                return ProcessingMode.FULL_BACKLOG, {"reason": "manual_backlog_dispatch"}
 
         elif self.github_context.event_type == GitHubEventType.SCHEDULE:
-            return ProcessingMode.FULL_BACKLOG, {
-                "reason": "scheduled_backlog_processing"
-            }
+            return ProcessingMode.FULL_BACKLOG, {"reason": "scheduled_backlog_processing"}
 
         else:
             # Default to full backlog for unknown events
@@ -341,9 +330,7 @@ class GitHubActionsIntegration:
     def _validate_operation_safety(self, operation: str) -> None:
         """Validate that operation is safe for current context."""
         if operation in self.security_constraints.restricted_operations:
-            raise RuntimeError(
-                f"Operation {operation} is restricted in auto-approve mode"
-            )
+            raise RuntimeError(f"Operation {operation} is restricted in auto-approve mode")
 
         # Additional safety checks for auto-approve
         if self.security_constraints.auto_approve_enabled:
@@ -562,9 +549,7 @@ class GitHubActionsIntegration:
                         "pr_number": str(result["results"]["pr_number"]),
                         "pr_ready": str(assessment["is_ready"]).lower(),
                         "readiness_score": str(assessment["readiness_score"]),
-                        "blocking_issues_count": str(
-                            assessment["blocking_issues_count"]
-                        ),
+                        "blocking_issues_count": str(assessment["blocking_issues_count"]),
                     }
                 )
 

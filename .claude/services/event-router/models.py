@@ -7,7 +7,7 @@ Includes event models for agent lifecycle events and memory system integration.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, ClassVar
 from enum import Enum
 from pydantic import BaseModel, Field, validator
 from uuid import uuid4
@@ -161,7 +161,7 @@ class AgentEvent(BaseModel):
 class AgentInitializedEvent(AgentEvent):
     """Event for agent initialization."""
 
-    event_type: EventType = Field(default=EventType.AGENT_INITIALIZED)
+    event_type: ClassVar[EventType] = EventType.AGENT_INITIALIZED  # type: ignore[assignment]
     agent_type: str = Field(
         ..., description="Type of agent (e.g., 'TaskDecomposer', 'CodeWriter')"
     )
@@ -174,7 +174,7 @@ class AgentInitializedEvent(AgentEvent):
 class TaskStartedEvent(AgentEvent):
     """Event for task initiation."""
 
-    event_type: EventType = Field(default=EventType.TASK_STARTED)
+    event_type: ClassVar[EventType] = EventType.TASK_STARTED  # type: ignore[assignment]
     task_description: str = Field(..., description="Description of the task")
     estimated_duration: Optional[int] = Field(
         None, description="Estimated duration in minutes"
@@ -187,7 +187,7 @@ class TaskStartedEvent(AgentEvent):
 class TaskCompletedEvent(AgentEvent):
     """Event for task completion."""
 
-    event_type: EventType = Field(default=EventType.TASK_COMPLETED)
+    event_type: ClassVar[EventType] = EventType.TASK_COMPLETED  # type: ignore[assignment]
     result: str = Field(..., description="Task result or outcome")
     duration: Optional[int] = Field(None, description="Actual duration in minutes")
     artifacts: List[str] = Field(
@@ -201,7 +201,7 @@ class TaskCompletedEvent(AgentEvent):
 class KnowledgeLearnedEvent(AgentEvent):
     """Event for knowledge acquisition."""
 
-    event_type: EventType = Field(default=EventType.KNOWLEDGE_LEARNED)
+    event_type: ClassVar[EventType] = EventType.KNOWLEDGE_LEARNED  # type: ignore[assignment]
     knowledge_type: str = Field(
         ..., description="Type of knowledge (procedure, concept, pattern)"
     )
@@ -215,7 +215,7 @@ class KnowledgeLearnedEvent(AgentEvent):
 class CollaborationMessageEvent(AgentEvent):
     """Event for inter-agent collaboration."""
 
-    event_type: EventType = Field(default=EventType.COLLABORATION_MESSAGE)
+    event_type: ClassVar[EventType] = EventType.COLLABORATION_MESSAGE  # type: ignore[assignment]
     recipient_id: Optional[str] = Field(
         None, description="Target agent ID (None for broadcast)"
     )

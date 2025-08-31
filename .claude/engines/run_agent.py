@@ -45,7 +45,6 @@ AGENT_NAME_MAPPING = {
     "code-executor": "CodeExecutor",
     "code-review-response": "CodeReviewResponse",
     "code-reviewer": "CodeReviewer",
-    "event-router-manager": "EventRouterManager",
     "event-router-service-manager": "EventRouterServiceManager",
     "execution-monitor": "ExecutionMonitor",
     "gadugi-coordinator": "GadugiCoordinator",

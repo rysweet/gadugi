@@ -116,6 +116,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
     print("\n2️⃣ Task Started...")
     task_event = TaskStartedEvent(
         agent_id="TaskDecomposer_001",
+        agent_type="TaskDecomposer",
         task_id="task_feature_x_001",
         task_description="Implement user authentication system",
         estimated_duration=120,
@@ -137,6 +138,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
     print("\n3️⃣ Knowledge Learned...")
     knowledge_event = KnowledgeLearnedEvent(
         agent_id="TaskDecomposer_001",
+        agent_type="TaskDecomposer",
         knowledge_type="pattern",
         content="JWT tokens should always be validated server-side to prevent security vulnerabilities",
         confidence=0.95,
@@ -160,6 +162,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
     print("\n4️⃣ Inter-Agent Collaboration...")
     collab_event = CollaborationMessageEvent(
         agent_id="TaskDecomposer_001",
+        agent_type="TaskDecomposer",
         recipient_id="CodeWriter_001",
         message_type="request",
         content="Please implement JWT validation middleware based on learned security pattern",
@@ -182,6 +185,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
     print("\n5️⃣ Task Completed...")
     completion_event = TaskCompletedEvent(
         agent_id="TaskDecomposer_001",
+        agent_type="TaskDecomposer",
         task_id="task_feature_x_001",
         result="Successfully decomposed authentication system into 5 subtasks with security patterns identified",
         duration=95,  # minutes
@@ -305,9 +309,7 @@ async def demonstrate_event_filtering(
         print(f"   🏷️  Tags: {', '.join(sample_event.tags)}")
 
 
-async def demonstrate_event_replay(
-    replay_engine: EventReplayEngine, storage: MemoryEventStorage
-):
+async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: MemoryEventStorage):
     """Demonstrate event replay for crash recovery."""
     print("\n🔄 Event Replay Demonstration")
     print("-" * 40)
@@ -404,12 +406,8 @@ async def show_storage_statistics(storage: MemoryEventStorage):
         health_status = await storage.get_health_status()
         print("\n💚 Health Status:")
         print(f"   • Overall: {health_status['status']}")
-        print(
-            f"   • SQLite Backend: {'✅' if health_status['sqlite_backend'] else '❌'}"
-        )
-        print(
-            f"   • Memory Interface: {'✅' if health_status['memory_interface'] else '❌'}"
-        )
+        print(f"   • SQLite Backend: {'✅' if health_status['sqlite_backend'] else '❌'}")
+        print(f"   • Memory Interface: {'✅' if health_status['memory_interface'] else '❌'}")
         print(f"   • Cache Size: {health_status['cache_size']} events")
 
         if "sqlite_events" in health_status:

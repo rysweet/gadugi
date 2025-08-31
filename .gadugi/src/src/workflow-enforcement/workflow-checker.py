@@ -24,9 +24,7 @@ class WorkflowChecker:
     def __init__(self, repo_root: str = "."):
         self.repo_root = Path(repo_root).resolve()
         self.claude_dir = self.repo_root / ".claude"
-        self.workflow_state_file = (
-            self.claude_dir / "workflow-enforcement" / "compliance_log.json"
-        )
+        self.workflow_state_file = self.claude_dir / "workflow-enforcement" / "compliance_log.json"
 
         # Initialize compliance log
         self._ensure_compliance_log()
@@ -80,15 +78,11 @@ class WorkflowChecker:
 
         # Log compliant execution
         if is_code_change and execution_context == "orchestrator":
-            self._log_compliant_execution(
-                task_description, files_to_modify, execution_context
-            )
+            self._log_compliant_execution(task_description, files_to_modify, execution_context)
 
         return True, None, None
 
-    def _is_code_change(
-        self, task_description: str, files_to_modify: List[str]
-    ) -> bool:
+    def _is_code_change(self, task_description: str, files_to_modify: List[str]) -> bool:
         """Determine if a task constitutes a code change."""
 
         # Check file modifications
@@ -247,9 +241,7 @@ class WorkflowChecker:
         return {
             "phases": phase_status,
             "total_phases": len(required_phases),
-            "implemented_phases": sum(
-                1 for p in phase_status.values() if p["implemented"]
-            ),
+            "implemented_phases": sum(1 for p in phase_status.values() if p["implemented"]),
             "compliance": sum(1 for p in phase_status.values() if p["implemented"])
             / len(required_phases),
         }
@@ -263,9 +255,7 @@ def main():
     parser.add_argument("--task", help="Task description")
     parser.add_argument("--files", nargs="*", help="Files to be modified")
     parser.add_argument("--method", default="direct", help="Execution method")
-    parser.add_argument(
-        "--report", action="store_true", help="Generate compliance report"
-    )
+    parser.add_argument("--report", action="store_true", help="Generate compliance report")
     parser.add_argument("--phases", action="store_true", help="Check workflow phases")
 
     args = parser.parse_args()

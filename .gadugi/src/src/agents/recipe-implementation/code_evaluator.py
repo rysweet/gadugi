@@ -105,9 +105,7 @@ class CodeEvaluator:
             tree = ast.parse(content)
 
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) or isinstance(
-                    node, ast.AsyncFunctionDef
-                ):
+                if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
                     self.found_functions.add(node.name)
 
                     # Store function details
@@ -162,9 +160,7 @@ class CodeEvaluator:
         except Exception as e:
             print(f"Error analyzing {file_path}: {e}")
 
-    def _evaluate_requirement(
-        self, requirement: Requirement
-    ) -> Optional[ImplementationGap]:
+    def _evaluate_requirement(self, requirement: Requirement) -> Optional[ImplementationGap]:
         """Evaluate a single requirement."""
         # Check based on requirement type
         if requirement.type == RequirementType.FUNCTIONAL:
@@ -227,9 +223,7 @@ class CodeEvaluator:
         # This is handled separately in _evaluate_interface
         return None
 
-    def _evaluate_interface(
-        self, interface: InterfaceSpec
-    ) -> Optional[ImplementationGap]:
+    def _evaluate_interface(self, interface: InterfaceSpec) -> Optional[ImplementationGap]:
         """Evaluate an interface specification."""
         if interface.type == "class":
             if interface.name not in self.found_classes:
@@ -422,9 +416,7 @@ class CodeEvaluator:
         penalty = critical_gaps * 0.1
 
         # Bonus for no high/critical gaps
-        if not any(
-            g.severity in [GapSeverity.CRITICAL, GapSeverity.HIGH] for g in report.gaps
-        ):
+        if not any(g.severity in [GapSeverity.CRITICAL, GapSeverity.HIGH] for g in report.gaps):
             bonus = 0.1
         else:
             bonus = 0
@@ -447,9 +439,7 @@ class CodeEvaluator:
 
         # Check compliance
         if report.compliance_score < 0.5:
-            recommendations.append(
-                "Low compliance score - significant implementation needed"
-            )
+            recommendations.append("Low compliance score - significant implementation needed")
         elif report.compliance_score < 0.8:
             recommendations.append("Moderate compliance - focus on high-priority gaps")
         else:

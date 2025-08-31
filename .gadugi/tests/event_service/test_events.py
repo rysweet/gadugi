@@ -1,14 +1,13 @@
 """Tests for event data models."""
 
 import json
-
 import sys
 import os
 
-# Add the src directory to the path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'src', 'src'))
+# Use central test configuration for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from event_service.events import (
+from src.src.event_service.events import (
     Event,
     GitHubEvent,
     LocalEvent,

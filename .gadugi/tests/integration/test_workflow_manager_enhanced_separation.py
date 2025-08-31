@@ -29,10 +29,15 @@ import pytest
 # Add the correct path to the shared modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "src", "src"))
 
-from shared.github_operations import GitHubOperations  # type: ignore[import]
-from shared.interfaces import AgentConfig, ErrorContext  # type: ignore[import]
-from shared.state_management import CheckpointManager, StateManager, TaskState, WorkflowPhase  # type: ignore[import]
-from shared.task_tracking import (  # type: ignore[import]
+from src.src.shared.github_operations import GitHubOperations  # type: ignore[import]
+from src.src.shared.interfaces import AgentConfig, ErrorContext  # type: ignore[import]
+from src.src.shared.state_management import (
+    CheckpointManager,
+    StateManager,
+    TaskState,
+    WorkflowPhase,
+)  # type: ignore[import]
+from src.src.shared.task_tracking import (  # type: ignore[import]
     TaskMetrics,
     TaskStatus,
     TaskTracker,
@@ -41,18 +46,7 @@ from shared.task_tracking import (  # type: ignore[import]
 )
 
 
-# from shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity  # type: ignore[import]
-# Create stub classes for missing error handling imports
-class ErrorHandler:
-    pass
-
-
-class CircuitBreaker:
-    pass
-
-
-class ErrorSeverity:
-    pass
+from src.src.shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore[import]
 
 
 # Define retry decorator if not available from module
@@ -218,7 +212,7 @@ class TestWorkflowManagerIntegration:
 
             issue_result = create_issue_with_retry()
 
-            assert issue_result["success"] == True  # type: ignore[index]
+            assert issue_result["success"]  # type: ignore[index]
             assert issue_result["issue_number"] == 123  # type: ignore[index]
 
             # Test state update after successful creation
@@ -285,19 +279,19 @@ class TestWorkflowManagerIntegration:
 
                 pr_result = create_pr_with_retry()
 
-                assert pr_result["success"] == True  # type: ignore[index]
+                assert pr_result["success"]  # type: ignore[index]
                 assert pr_result["pr_number"] == 456  # type: ignore[index]
 
                 # Test atomic state update
                 workflow_state.pr_number = pr_result["pr_number"]
                 workflow_state.context["pr_url"] = pr_result["pr_url"]
-                workflow_state.current_phase = WorkflowPhase.PULL_REQUEST.value
+                workflow_state.current_phase = WorkflowPhase.PULL_REQUEST_CREATION.value
 
                 # Test verification step
                 verification_result = self.github_ops.verify_pull_request_exists(
                     pr_result["pr_number"]
                 )
-                assert verification_result["exists"] == True  # type: ignore[index]
+                assert verification_result["exists"]  # type: ignore[index]
 
                 # Test critical checkpoint after PR creation
                 checkpoint_manager = CheckpointManager(self.state_manager)  # type: ignore[misc]
@@ -361,7 +355,7 @@ class TestWorkflowManagerIntegration:
         self.task_tracker.todowrite.submit_task_list(self.task_tracker.task_list)
 
         # Test TodoWrite integration
-        todowrite_integration = TodoWriteIntegration()  # type: ignore[misc]
+        TodoWriteIntegration()  # type: ignore[misc]
         # todowrite_manager.create_enhanced_task_list(tasks)  # Not available in current API
 
         # Test basic task list initialization works
@@ -391,7 +385,7 @@ class TestWorkflowManagerIntegration:
         """Test comprehensive error handling scenarios"""
 
         task_id = "test-error-handling"
-        workflow_state = TaskState(  # type: ignore[misc]
+        TaskState(  # type: ignore[misc]
             task_id=task_id,
             prompt_file="test-error.md",
             phase=WorkflowPhase.IMPLEMENTATION,
@@ -399,7 +393,7 @@ class TestWorkflowManagerIntegration:
         )
 
         # Test error context creation
-        test_error = Exception("Simulated implementation failure")
+        Exception("Simulated implementation failure")
         error_context = (
             ErrorContext(  # type: ignore[misc]
                 operation="implementation",
@@ -473,8 +467,6 @@ class TestWorkflowManagerIntegration:
     def test_workflow_phase_tracking_integration(self):
         """Test comprehensive workflow phase tracking"""
 
-        task_id = "test-phase-tracking"
-
         # Test all workflow phases (using enum values)
         phases_to_test = [
             WorkflowPhase.INITIALIZATION,
@@ -484,7 +476,7 @@ class TestWorkflowManagerIntegration:
             WorkflowPhase.IMPLEMENTATION,
             WorkflowPhase.TESTING,
             WorkflowPhase.DOCUMENTATION,
-            WorkflowPhase.PULL_REQUEST,
+            WorkflowPhase.PULL_REQUEST_CREATION,
             WorkflowPhase.REVIEW,
         ]
 
@@ -531,7 +523,7 @@ class TestWorkflowManagerIntegration:
 
         # Test state consistency validation
         is_consistent = self.state_manager.validate_state_consistency(workflow_state)
-        assert is_consistent == True
+        assert is_consistent
 
         # Test inconsistent state detection
         from types import SimpleNamespace
@@ -547,7 +539,7 @@ class TestWorkflowManagerIntegration:
         is_consistent = self.state_manager.validate_state_consistency(
             inconsistent_state  # type: ignore[arg-type]
         )
-        assert is_consistent == False
+        assert not is_consistent
 
         # Test state recovery (mocked)
         # recovery_manager = RecoveryManager()

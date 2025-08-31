@@ -83,9 +83,7 @@ class TaskCompletedEvent(AgentEvent):
     error: Optional[str] = None
 
     def __post_init__(self):
-        self.event_type = (
-            EventType.TASK_COMPLETED if self.success else EventType.TASK_FAILED
-        )
+        self.event_type = EventType.TASK_COMPLETED if self.success else EventType.TASK_FAILED
 
 
 @dataclass

@@ -12,6 +12,23 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+# Export all public classes and functions
+__all__ = [
+    "ErrorSeverity",
+    "RetryStrategy",
+    "GadugiError",
+    "RecoverableError",
+    "NonRecoverableError",
+    "ErrorHandler",
+    "CircuitBreaker",
+    "ErrorContext",
+    "retry",
+    "graceful_degradation",
+    "handle_with_fallback",
+    "validate_input",
+    "logger",
+]
+
 
 class ErrorSeverity(Enum):
     """Error severity levels."""
@@ -92,9 +109,7 @@ def retry(
                     last_exception = e
 
                     if attempt >= max_attempts:
-                        logger.error(
-                            f"{func.__name__} failed after {max_attempts} attempts: {e}"
-                        )
+                        logger.error(f"{func.__name__} failed after {max_attempts} attempts: {e}")
                         raise
 
                     logger.warning(
@@ -159,9 +174,7 @@ class ErrorHandler:
         self.recovery_strategies: Dict[Type[Exception], Callable] = {}
         self.error_history: List[Dict[str, Any]] = []
 
-    def register_recovery_strategy(
-        self, exception_type: Type[Exception], strategy: Callable
-    ):
+    def register_recovery_strategy(self, exception_type: Type[Exception], strategy: Callable):
         """Register a recovery strategy for specific exception type."""
         self.recovery_strategies[exception_type] = strategy
 
@@ -205,9 +218,7 @@ class ErrorHandler:
         return {
             "total_errors": sum(self.error_counts.values()),
             "unique_errors": len(self.error_counts),
-            "top_errors": sorted(
-                self.error_counts.items(), key=lambda x: x[1], reverse=True
-            )[:5],
+            "top_errors": sorted(self.error_counts.items(), key=lambda x: x[1], reverse=True)[:5],
             "recent_errors": self.error_history[-10:],
         }
 
@@ -251,9 +262,7 @@ class CircuitBreaker:
                 result = func(*args, **kwargs)
                 # Success - reset failure count
                 if self.failure_count > 0:
-                    logger.info(
-                        f"Success after {self.failure_count} failures for {func.__name__}"
-                    )
+                    logger.info(f"Success after {self.failure_count} failures for {func.__name__}")
                 self.failure_count = 0
                 return result
 
@@ -307,9 +316,7 @@ class CircuitBreaker:
 
             if self.failure_count >= self.failure_threshold:
                 self.is_open = True
-                logger.warning(
-                    f"Circuit breaker opened after {self.failure_count} failures"
-                )
+                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
 
             raise
 

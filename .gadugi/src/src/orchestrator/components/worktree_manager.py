@@ -35,9 +35,7 @@ class WorktreeManager:
         self.project_root = Path(project_root).resolve()
         self.worktrees_dir = self.project_root / worktrees_dir
         self.worktrees: Dict[str, WorktreeInfo] = {}
-        self.state_file = (
-            self.project_root / ".claude" / "orchestrator" / "worktree_state.json"
-        )
+        self.state_file = self.project_root / ".claude" / "orchestrator" / "worktree_state.json"
 
         # Ensure directories exist
         self.worktrees_dir.mkdir(exist_ok=True)
@@ -54,9 +52,7 @@ class WorktreeManager:
 
         # Generate unique branch and directory names
         # Remove invalid characters for git branch names (including colons)
-        safe_task_name = (
-            task_name.lower().replace(" ", "-").replace(":", "").replace("/", "-")
-        )
+        safe_task_name = task_name.lower().replace(" ", "-").replace(":", "").replace("/", "-")
         branch_name = f"feature/parallel-{safe_task_name}-{task_id}"
         worktree_path = self.worktrees_dir / f"task-{task_id}"
 
@@ -142,9 +138,7 @@ class WorktreeManager:
         """Get worktree information for a specific task"""
         return self.worktrees.get(task_id)
 
-    def update_worktree_status(
-        self, task_id: str, status: str, pid: Optional[int] = None
-    ):
+    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None):
         """Update worktree status"""
         if task_id in self.worktrees:
             self.worktrees[task_id].status = status
@@ -227,9 +221,7 @@ class WorktreeManager:
                 )
 
             # Collect log files
-            log_files = list(
-                (worktree_info.worktree_path / ".claude" / "logs").glob("*.log")
-            )
+            log_files = list((worktree_info.worktree_path / ".claude" / "logs").glob("*.log"))
             if log_files:
                 results["logs"] = str(log_files[0])  # Most recent log
 
@@ -272,9 +264,7 @@ class WorktreeManager:
                 if force:
                     cmd.append("--force")
 
-                result = subprocess.run(
-                    cmd, cwd=self.project_root, capture_output=True, text=True
-                )
+                result = subprocess.run(cmd, cwd=self.project_root, capture_output=True, text=True)
 
                 if result.returncode != 0:
                     print(f"⚠️  Git worktree remove failed: {result.stderr}")
@@ -366,9 +356,7 @@ class WorktreeManager:
 
             # Check if worktree exists in git
             if path_str not in system_worktrees:
-                issues.append(
-                    f"Managed worktree {task_id} not found in git worktree list"
-                )
+                issues.append(f"Managed worktree {task_id} not found in git worktree list")
                 continue
 
             # Check if directory exists
@@ -466,12 +454,8 @@ def main():
     """CLI entry point for WorktreeManager"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Manage git worktrees for parallel execution"
-    )
-    parser.add_argument(
-        "command", choices=["list", "create", "cleanup", "validate", "status"]
-    )
+    parser = argparse.ArgumentParser(description="Manage git worktrees for parallel execution")
+    parser.add_argument("command", choices=["list", "create", "cleanup", "validate", "status"])
     parser.add_argument("--task-id", help="Task ID for operations")
     parser.add_argument("--task-name", help="Task name for create operation")
     parser.add_argument("--force", action="store_true", help="Force operation")

@@ -155,9 +155,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
             },
         )
 
-        self.mock_capability_assessment.assess_agent_capabilities.return_value = (
-            weak_profile
-        )
+        self.mock_capability_assessment.assess_agent_capabilities.return_value = weak_profile
         self.mock_performance_analyzer.analyze_agent_performance.return_value = Mock(
             success_rate=0.3, avg_execution_time=500.0, performance_trend=[]
         )
@@ -226,9 +224,7 @@ class TestTaskAgentMatcher(unittest.TestCase):
         self.mock_task_metrics.get_agent_task_results.return_value = []
 
         # Execute prediction
-        prediction = self.matcher._predict_task_performance(
-            "agent1", self.task_requirements
-        )
+        prediction = self.matcher._predict_task_performance("agent1", self.task_requirements)
 
         # Verify prediction
         self.assertIsInstance(prediction, float)
@@ -428,9 +424,7 @@ class TestTaskRequirements(unittest.TestCase):
             task_id="test_task",
             task_type="implementation",
             description="Test task description",
-            required_capabilities={
-                CapabilityDomain.CODE_GENERATION: ProficiencyLevel.INTERMEDIATE
-            },
+            required_capabilities={CapabilityDomain.CODE_GENERATION: ProficiencyLevel.INTERMEDIATE},
         )
 
         self.assertEqual(requirements.task_id, "test_task")

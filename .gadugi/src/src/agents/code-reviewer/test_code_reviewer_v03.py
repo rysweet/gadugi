@@ -50,20 +50,12 @@ class TestCodeReviewerV03(unittest.TestCase):
         """Test task handling detection."""
         # Should handle code review tasks
         self.assertTrue(asyncio.run(self.reviewer.can_handle_task("review this code")))
-        self.assertTrue(
-            asyncio.run(self.reviewer.can_handle_task("check code quality"))
-        )
-        self.assertTrue(
-            asyncio.run(self.reviewer.can_handle_task("security review needed"))
-        )
+        self.assertTrue(asyncio.run(self.reviewer.can_handle_task("check code quality")))
+        self.assertTrue(asyncio.run(self.reviewer.can_handle_task("security review needed")))
 
         # Should not handle unrelated tasks
-        self.assertFalse(
-            asyncio.run(self.reviewer.can_handle_task("deploy to production"))
-        )
-        self.assertFalse(
-            asyncio.run(self.reviewer.can_handle_task("write documentation"))
-        )
+        self.assertFalse(asyncio.run(self.reviewer.can_handle_task("deploy to production")))
+        self.assertFalse(asyncio.run(self.reviewer.can_handle_task("write documentation")))
 
     def test_developer_pattern_creation(self):
         """Test developer pattern tracking."""
@@ -156,9 +148,7 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         self.assertTrue(outcome.success)
         self.assertEqual(outcome.task_type, "review_files")
         if outcome.lessons_learned:
-            self.assertIn(
-                "review completed successfully", outcome.lessons_learned.lower()
-            )
+            self.assertIn("review completed successfully", outcome.lessons_learned.lower())
 
         # Verify engine was called
         mock_engine.review_files.assert_called_once_with(["test.py"])

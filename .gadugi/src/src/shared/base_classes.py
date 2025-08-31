@@ -78,9 +78,7 @@ class SecurityAwareAgent(BaseAgent):
         """Enforce security policy for given action."""
         allowed_actions = self.security_policies.get("allowed_actions", [])
         if allowed_actions and action not in allowed_actions:
-            self.audit_security_event(
-                "policy_violation", {"action": action, "context": context}
-            )
+            self.audit_security_event("policy_violation", {"action": action, "context": context})
             return False
         return True
 
@@ -128,9 +126,7 @@ class PerformanceMonitoredAgent(BaseAgent):
             self.execution_times.append(execution_time)
             self.metrics["execution_time"] = execution_time
             self.metrics["end_memory"] = self._get_memory_usage()
-            self.metrics["memory_delta"] = (
-                self.metrics["end_memory"] - self.metrics["start_memory"]
-            )
+            self.metrics["memory_delta"] = self.metrics["end_memory"] - self.metrics["start_memory"]
 
             # Check thresholds
             if execution_time > self.performance_thresholds["max_execution_time"]:
@@ -151,8 +147,7 @@ class PerformanceMonitoredAgent(BaseAgent):
             return {}
 
         return {
-            "average_execution_time": sum(self.execution_times)
-            / len(self.execution_times),
+            "average_execution_time": sum(self.execution_times) / len(self.execution_times),
             "max_execution_time": max(self.execution_times),
             "min_execution_time": min(self.execution_times),
             "total_executions": len(self.execution_times),
@@ -237,16 +232,12 @@ class LearningEnabledAgent(BaseAgent):
         return {
             "total_executions": len(self.history),
             "recognized_patterns": len(self.patterns),
-            "top_patterns": sorted(
-                self.patterns.items(), key=lambda x: x[1], reverse=True
-            )[:5],
+            "top_patterns": sorted(self.patterns.items(), key=lambda x: x[1], reverse=True)[:5],
             "current_adaptations": self.adaptations,
         }
 
 
-class IntegratedAgent(
-    SecurityAwareAgent, PerformanceMonitoredAgent, LearningEnabledAgent
-):
+class IntegratedAgent(SecurityAwareAgent, PerformanceMonitoredAgent, LearningEnabledAgent):
     """Fully integrated agent with all capabilities."""
 
     def __init__(self, name: str, config: Optional[Dict[str, Any]] = None):

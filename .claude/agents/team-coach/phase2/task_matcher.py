@@ -50,8 +50,8 @@ try:
         CapabilityAssessment as Phase1CapabilityAssessment,  # type: ignore[assignment]
         AgentCapabilityProfile as Phase1AgentCapabilityProfile,  # type: ignore[assignment]
         CapabilityDomain as Phase1CapabilityDomain,  # type: ignore[assignment]
-        ProficiencyLevel as Phase1ProficiencyLevel,
-    )  # type: ignore[assignment]
+        ProficiencyLevel as Phase1ProficiencyLevel,  # type: ignore[assignment]
+    )
     from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]
 except ImportError:
     # Define minimal stubs if Phase 1 imports fail

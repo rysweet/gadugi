@@ -71,9 +71,7 @@ class WorkflowValidator:
         requires_orchestrator = self._requires_orchestrator(task_description, files)
 
         if requires_orchestrator and execution_method != "orchestrator":
-            violations.append(
-                "❌ Code change detected but orchestrator not being used"
-            )
+            violations.append("❌ Code change detected but orchestrator not being used")
             violations.append(f"   Task: {task_description}")
             if files:
                 violations.append(f"   Files: {', '.join(files)}")
@@ -143,9 +141,7 @@ class WorkflowValidator:
                     "requirements",
                     "package",
                 ]
-                if any(
-                    indicator in file_path.lower() for indicator in config_indicators
-                ):
+                if any(indicator in file_path.lower() for indicator in config_indicators):
                     return True
 
         # Check task description
@@ -230,14 +226,18 @@ class WorkflowValidator:
         issues = []
 
         # Check if orchestrator exists
-        orchestrator_main = self.repo_root / ".gadugi" / ".gadugi" / "src" / "orchestrator" / "main.py"
+        orchestrator_main = (
+            self.repo_root / ".gadugi" / ".gadugi" / "src" / "orchestrator" / "main.py"
+        )
         if not orchestrator_main.exists():
             issues.append(
                 "⚠️ Orchestrator main.py not found at .gadugi/.gadugi/src/orchestrator/main.py"
             )
 
         # Check if workflow manager exists
-        workflow_master = self.repo_root / ".gadugi" / ".gadugi" / "src" / "agents" / "WorkflowMaster.md"
+        workflow_master = (
+            self.repo_root / ".gadugi" / ".gadugi" / "src" / "agents" / "WorkflowMaster.md"
+        )
         if not workflow_master.exists():
             issues.append(
                 "⚠️ WorkflowMaster agent not found at .gadugi/.gadugi/src/agents/WorkflowMaster.md"
@@ -352,13 +352,9 @@ Examples:
         help="Execution method (default: direct)",
     )
 
-    parser.add_argument(
-        "--guide", action="store_true", help="Show comprehensive workflow guide"
-    )
+    parser.add_argument("--guide", action="store_true", help="Show comprehensive workflow guide")
 
-    parser.add_argument(
-        "--json", action="store_true", help="Output results in JSON format"
-    )
+    parser.add_argument("--json", action="store_true", help="Output results in JSON format")
 
     args = parser.parse_args()
 
@@ -401,9 +397,7 @@ Examples:
 
         if is_compliant:
             print_colored(Colors.GREEN, "\n✅ WORKFLOW COMPLIANT")
-            print_colored(
-                Colors.GREEN, "   This task follows proper workflow requirements."
-            )
+            print_colored(Colors.GREEN, "   This task follows proper workflow requirements.")
         else:
             print_colored(Colors.RED, "\n❌ WORKFLOW VIOLATION DETECTED")
             print_section("Issues Found")

@@ -11,14 +11,14 @@ import os
 import sys
 from pathlib import Path
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+# Use central test configuration for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.agents.system_design_reviewer.documentation_manager import (
+from src.src.agents.system_design_reviewer.documentation_manager import (
     DocumentationManager,
     DocumentationUpdate,
 )
-from src.agents.system_design_reviewer.ast_parser import (
+from src.src.agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,

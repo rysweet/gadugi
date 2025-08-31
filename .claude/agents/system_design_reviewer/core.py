@@ -28,8 +28,7 @@ try:
     from shared.error_handling import (  # type: ignore
         ErrorHandler,
         ErrorCategory,
-        ErrorSeverity,
-    )
+        ErrorSeverity)
     from shared.task_tracking import TaskTracker  # type: ignore
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
@@ -39,8 +38,7 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
         from ..shared.error_handling import (  # type: ignore
             ErrorHandler,
             ErrorCategory,
-            ErrorSeverity,
-        )
+            ErrorSeverity)
         from ..shared.task_tracking import TaskTracker  # type: ignore
     except ImportError:
         # 3) Final fallback – use lightweight stub implementations
@@ -54,8 +52,7 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
             ErrorHandler,
             ErrorCategory,
             ErrorSeverity,
-            TaskTracker,
-        )
+            TaskTracker)
 
 from .ast_parser import ASTParserFactory, ArchitecturalChange, ImpactLevel
 from .documentation_manager import DocumentationManager
@@ -185,8 +182,7 @@ class SystemDesignReviewer:
                 changes,
                 doc_updates,
                 adrs_generated,
-                review_comments,
-            )
+                review_comments)
 
             # Create result
             end_time = datetime.now()
@@ -205,8 +201,7 @@ class SystemDesignReviewer:
                     "files_analyzed": len(pr_info.get("changed_files", [])),
                     "changes_detected": len(changes),
                 },
-                timestamp=end_time,
-            )
+                timestamp=end_time)
 
             # Update metrics and state
             self._update_metrics(result)
@@ -220,8 +215,7 @@ class SystemDesignReviewer:
                 e,
                 category=ErrorCategory.PROCESS_EXECUTION,
                 severity=ErrorSeverity.HIGH,
-                context={"pr_number": pr_number},
-            )
+                context={"pr_number": pr_number})
 
             # Create failure result
             result = ReviewResult(
@@ -233,8 +227,7 @@ class SystemDesignReviewer:
                 adrs_generated=[],
                 review_comments=[f"Review failed: {str(e)}"],
                 performance_metrics={},
-                timestamp=datetime.now(),
-            )
+                timestamp=datetime.now())
 
             self.task_tracker.update_task_status(f"review_pr_{pr_number}", "failed")  # type: ignore
             return result
@@ -256,8 +249,7 @@ class SystemDesignReviewer:
                 e,
                 category=ErrorCategory.GITHUB_API,
                 severity=ErrorSeverity.HIGH,
-                context={"pr_number": pr_number},
-            )
+                context={"pr_number": pr_number})
             return {}
 
     def _get_changed_files(self, pr_number: str) -> List[str]:
@@ -414,8 +406,7 @@ class SystemDesignReviewer:
         self,
         changes: List[ArchitecturalChange],
         pr_info: Dict[str, Any],
-        force: bool = False,
-    ) -> List[str]:
+        force: bool = False) -> List[str]:
         """Generate Architecture Decision Records for significant changes"""
         try:
             significant_changes = [
@@ -490,8 +481,7 @@ class SystemDesignReviewer:
         changes: List[ArchitecturalChange],
         doc_updates: List[str],
         adrs_generated: List[str],
-        review_comments: List[str],
-    ):
+        review_comments: List[str]):
         """Post the review to GitHub"""
         try:
             # Determine review action
@@ -519,8 +509,7 @@ class SystemDesignReviewer:
         changes: List[ArchitecturalChange],
         doc_updates: List[str],
         adrs_generated: List[str],
-        review_comments: List[str],
-    ) -> str:
+        review_comments: List[str]) -> str:
         """Build the review body content"""
         sections = [
             "## System Design Review Summary",
@@ -610,8 +599,7 @@ class SystemDesignStateManager(StateManager):  # type: ignore
     def __init__(self):
         super().__init__(
             state_dir=Path(".github/workflow-states/SystemDesignReviewer"),
-            task_id="SystemDesignReviewer",
-        )
+            task_id="SystemDesignReviewer")
 
     def get_default_state(self) -> Dict[str, Any]:
         """Get default state structure"""

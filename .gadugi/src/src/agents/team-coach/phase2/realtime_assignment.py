@@ -100,9 +100,7 @@ class RealtimeAssignment:
             str: Request ID for tracking
         """
         try:
-            request_id = (
-                f"rt_assign_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{priority}"
-            )
+            request_id = f"rt_assign_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{priority}"
 
             request = AssignmentRequest(
                 request_id=request_id,
@@ -168,9 +166,7 @@ class RealtimeAssignment:
             # Update average response time
             current_avg = self.assignment_stats["average_response_time"]
             total_successful = self.assignment_stats["successful_assignments"]
-            new_avg = (
-                (current_avg * (total_successful - 1)) + processing_time
-            ) / total_successful
+            new_avg = ((current_avg * (total_successful - 1)) + processing_time) / total_successful
             self.assignment_stats["average_response_time"] = new_avg
 
             self.logger.info(
@@ -178,9 +174,7 @@ class RealtimeAssignment:
             )
 
         except Exception as e:
-            self.logger.error(
-                f"Failed to process assignment request {request.request_id}: {e}"
-            )
+            self.logger.error(f"Failed to process assignment request {request.request_id}: {e}")
             self.active_assignments[request.request_id] = {
                 "request": request,
                 "error": str(e),

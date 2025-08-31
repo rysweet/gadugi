@@ -236,7 +236,8 @@ class CodeReviewerV03(V03Agent):
 
             self.logger.info(f"Migrating legacy data from {legacy_source}")
             await self._process_legacy_content(content)
-            await self._mark_migration_complete(legacy_source)
+            if legacy_source:
+                await self._mark_migration_complete(legacy_source)
 
         except Exception as e:
             self.logger.error(f"Legacy data migration failed: {e}")
@@ -879,9 +880,7 @@ async def test_code_reviewer_v03():
 
         # Test 1: Review files
         print("\n📋 Test 1: Review Files")
-        task_id = await reviewer.start_task(
-            "Review Python files for quality and security"
-        )
+        await reviewer.start_task("Review Python files for quality and security")
 
         review_task = {
             "type": "review_files",

@@ -149,9 +149,7 @@ class WorkflowOptimizer:
         )
 
         # Generate optimizations
-        optimizations = self._generate_optimizations(
-            workflow_data, bottlenecks, current_metrics
-        )
+        optimizations = self._generate_optimizations(workflow_data, bottlenecks, current_metrics)
 
         # Project improvements
         projected_metrics = self._project_improvements(current_metrics, optimizations)
@@ -201,8 +199,7 @@ class WorkflowOptimizer:
 
         # Calculate active time (sum of all task durations)
         active_time = sum(
-            t.get("end_time", t.get("start_time", 0)) - t.get("start_time", 0)
-            for t in sorted_tasks
+            t.get("end_time", t.get("start_time", 0)) - t.get("start_time", 0) for t in sorted_tasks
         )
 
         # Calculate wait time
@@ -217,9 +214,7 @@ class WorkflowOptimizer:
 
         # Calculate bottleneck impact
         bottleneck_time = sum(t.get("blocked_time", 0) for t in sorted_tasks)
-        bottleneck_impact = (
-            bottleneck_time / total_duration if total_duration > 0 else 0
-        )
+        bottleneck_impact = bottleneck_time / total_duration if total_duration > 0 else 0
 
         # Calculate parallel efficiency
         parallel_efficiency = self._calculate_parallel_efficiency(sorted_tasks)
@@ -257,9 +252,7 @@ class WorkflowOptimizer:
         bottlenecks.extend(skill_bottlenecks)
 
         # Check for dependency chains
-        dependency_bottlenecks = self._detect_dependency_bottlenecks(
-            workflow_data, task_history
-        )
+        dependency_bottlenecks = self._detect_dependency_bottlenecks(workflow_data, task_history)
         bottlenecks.extend(dependency_bottlenecks)
 
         # Check for communication lags
@@ -269,9 +262,7 @@ class WorkflowOptimizer:
         bottlenecks.extend(communication_bottlenecks)
 
         # Check for process inefficiencies
-        process_bottlenecks = self._detect_process_bottlenecks(
-            workflow_data, task_history, metrics
-        )
+        process_bottlenecks = self._detect_process_bottlenecks(workflow_data, task_history, metrics)
         bottlenecks.extend(process_bottlenecks)
 
         # Sort by impact
@@ -296,9 +287,7 @@ class WorkflowOptimizer:
                     optimizations.append(opt)
 
             elif bottleneck.type == BottleneckType.DEPENDENCY_CHAIN:
-                opt = self._generate_parallelization_optimization(
-                    bottleneck, workflow_data
-                )
+                opt = self._generate_parallelization_optimization(bottleneck, workflow_data)
                 if opt:
                     optimizations.append(opt)
 
@@ -313,9 +302,7 @@ class WorkflowOptimizer:
                     optimizations.append(opt)
 
             elif bottleneck.type == BottleneckType.COMMUNICATION_LAG:
-                opt = self._generate_communication_optimization(
-                    bottleneck, workflow_data
-                )
+                opt = self._generate_communication_optimization(bottleneck, workflow_data)
                 if opt:
                     optimizations.append(opt)
 
@@ -377,14 +364,12 @@ class WorkflowOptimizer:
                     affected_agents=[
                         str(t.get("agent_id", ""))
                         for t in task_history
-                        if resource in t.get("resources_used", [])
-                        and t.get("agent_id") is not None
+                        if resource in t.get("resources_used", []) and t.get("agent_id") is not None
                     ],
                     affected_tasks=[
                         str(t.get("task_id", ""))
                         for t in task_history
-                        if resource in t.get("resources_used", [])
-                        and t.get("task_id") is not None
+                        if resource in t.get("resources_used", []) and t.get("task_id") is not None
                     ],
                     description=f"Resource '{resource}' is overutilized ({utilization:.1%})",
                     evidence={
@@ -392,11 +377,7 @@ class WorkflowOptimizer:
                         "utilization": utilization,
                         "total_wait_time": resource_waits[resource],
                         "affected_task_count": len(
-                            [
-                                t
-                                for t in task_history
-                                if resource in t.get("resources_used", [])
-                            ]
+                            [t for t in task_history if resource in t.get("resources_used", [])]
                         ),
                     },
                     detected_at=datetime.utcnow(),
@@ -456,8 +437,7 @@ class WorkflowOptimizer:
                     affected_tasks=[
                         str(t.get("task_id", ""))
                         for t in task_history
-                        if skill in t.get("required_skills", [])
-                        and t.get("task_id") is not None
+                        if skill in t.get("required_skills", []) and t.get("task_id") is not None
                     ],
                     description=f"Insufficient agents with '{skill}' skill (demand: {demand}, supply: {supply})",
                     evidence={
@@ -465,9 +445,7 @@ class WorkflowOptimizer:
                         "demand": demand,
                         "supply": supply,
                         "total_delay": skill_delays[skill],
-                        "demand_supply_ratio": demand / supply
-                        if supply > 0
-                        else float("inf"),
+                        "demand_supply_ratio": demand / supply if supply > 0 else float("inf"),
                     },
                     detected_at=datetime.utcnow(),
                 )
@@ -510,8 +488,7 @@ class WorkflowOptimizer:
                         set(
                             str(t.get("agent_id", ""))
                             for t in task_history
-                            if t.get("task_id") in critical_path
-                            and t.get("agent_id") is not None
+                            if t.get("task_id") in critical_path and t.get("agent_id") is not None
                         )
                     ),
                     affected_tasks=critical_path,
@@ -608,17 +585,13 @@ class WorkflowOptimizer:
                     if t.get("agent_id") is not None
                 ],
                 affected_tasks=[
-                    str(t.get("task_id", ""))
-                    for t in rework_tasks
-                    if t.get("task_id") is not None
+                    str(t.get("task_id", "")) for t in rework_tasks if t.get("task_id") is not None
                 ],
                 description=f"High rework rate ({rework_rate:.1%}) indicating process issues",
                 evidence={
                     "rework_rate": rework_rate,
                     "rework_count": len(rework_tasks),
-                    "common_failure_reasons": self._analyze_rework_reasons(
-                        rework_tasks
-                    ),
+                    "common_failure_reasons": self._analyze_rework_reasons(rework_tasks),
                 },
                 detected_at=datetime.utcnow(),
             )
@@ -637,9 +610,7 @@ class WorkflowOptimizer:
                     if t.get("agent_id") is not None
                 ],
                 affected_tasks=[
-                    str(t.get("task_id", ""))
-                    for t in task_history
-                    if t.get("task_id") is not None
+                    str(t.get("task_id", "")) for t in task_history if t.get("task_id") is not None
                 ],
                 description=f"Low workflow efficiency ({metrics.efficiency_ratio:.1%})",
                 evidence={
@@ -667,9 +638,7 @@ class WorkflowOptimizer:
             type=OptimizationType.RESOURCE_REALLOCATION,
             priority="high" if bottleneck.impact > 20 else "medium",
             description=f"Optimize allocation of resource '{resource}'",
-            expected_improvement=min(
-                bottleneck.impact * 0.7, 30
-            ),  # Conservative estimate
+            expected_improvement=min(bottleneck.impact * 0.7, 30),  # Conservative estimate
             implementation_steps=[
                 f"1. Analyze current usage patterns for {resource}",
                 "2. Identify tasks that can use alternative resources",
@@ -869,9 +838,7 @@ class WorkflowOptimizer:
             # Score based on improvement vs effort
             effort_days = self._estimate_effort_days(opt.effort_estimate)
             impact_score = opt.expected_improvement
-            priority_multiplier = {"high": 3, "medium": 2, "low": 1}.get(
-                opt.priority, 1
-            )
+            priority_multiplier = {"high": 3, "medium": 2, "low": 1}.get(opt.priority, 1)
 
             return (impact_score * priority_multiplier) / (effort_days + 1)
 
@@ -891,9 +858,7 @@ class WorkflowOptimizer:
         total_improvement = 0
         for opt in optimizations:
             # Apply diminishing returns
-            marginal_improvement = opt.expected_improvement * (
-                1 - total_improvement / 100
-            )
+            marginal_improvement = opt.expected_improvement * (1 - total_improvement / 100)
             total_improvement += marginal_improvement * 0.8  # 80% realization factor
 
         improvement_factor = 1 + (total_improvement / 100)
@@ -903,20 +868,15 @@ class WorkflowOptimizer:
             total_duration=current_metrics.total_duration / improvement_factor,
             active_time=current_metrics.active_time,
             wait_time=current_metrics.wait_time / (improvement_factor * 1.5),
-            efficiency_ratio=min(
-                current_metrics.efficiency_ratio * improvement_factor, 0.95
-            ),
+            efficiency_ratio=min(current_metrics.efficiency_ratio * improvement_factor, 0.95),
             throughput=current_metrics.throughput * improvement_factor,
-            bottleneck_impact=current_metrics.bottleneck_impact
-            / (improvement_factor * 2),
+            bottleneck_impact=current_metrics.bottleneck_impact / (improvement_factor * 2),
             parallel_efficiency=min(current_metrics.parallel_efficiency * 1.3, 0.9),
         )
 
         return projected
 
-    def _calculate_parallel_efficiency(
-        self, sorted_tasks: List[Dict[str, Any]]
-    ) -> float:
+    def _calculate_parallel_efficiency(self, sorted_tasks: List[Dict[str, Any]]) -> float:
         """Calculate how well parallelization is being utilized."""
         if not sorted_tasks:
             return 0

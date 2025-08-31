@@ -43,7 +43,7 @@ Minimal files for easy integration into other projects:
 
 2. **Clean Integration**: Only essential files in root directory, making it easy to add Gadugi to any project.
 
-3. **Clear Boundaries**: 
+3. **Clear Boundaries**:
    - `.gadugi/` = The system being built/maintained
    - `.claude/` = Instructions for the AI assistant
 

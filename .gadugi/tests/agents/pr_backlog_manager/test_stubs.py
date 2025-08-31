@@ -827,23 +827,39 @@ class PRBacklogManager:
             self.github_ops = github_ops
         self.session_id = f"pr-backlog-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         self.metrics = BacklogMetrics()
+        self.state_manager = None  # Will be injected by tests
+        self.task_tracker = None  # Will be injected by tests
 
     def validate_auto_approve_safety(self) -> None:
         """Validate auto-approve safety checks."""
+        if not self.auto_approve:
+            return
+
+        # Check if running in GitHub Actions
+        if not os.environ.get("GITHUB_ACTIONS"):
+            raise GadugiError("Auto-approve only allowed in GitHub Actions")
+
+        # Check if auto-approve is explicitly enabled
+        if not os.environ.get("CLAUDE_AUTO_APPROVE"):
+            raise GadugiError("Auto-approve not explicitly enabled")
+
+        # Check for valid event type (if specified)
+        github_event = os.environ.get("GITHUB_EVENT_NAME")
+        if github_event and github_event not in ["pull_request", "pull_request_target"]:
+            raise GadugiError(f"Auto-approve not allowed for event type: {github_event}")
 
     def _should_process_pr(self, pr_data: Dict[str, Any]) -> bool:
         """Check if PR should be processed."""
         # Check for draft PRs
         if pr_data.get("draft", False):
             return False
-        
+
         # Check for already processed PRs
         labels = pr_data.get("labels", [])
         if any(label.get("name") == "ready-seeking-human" for label in labels):
             return False
-        
+
         # Check if PR is too recent
-        from datetime import datetime, timedelta
         created_at_str = pr_data.get("created_at", "")
         if created_at_str:
             try:
@@ -854,11 +870,12 @@ class PRBacklogManager:
                     return False
             except (ValueError, TypeError):
                 pass
-        
+
         return True
 
     def _prioritize_prs(self, prs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Prioritize PRs for processing."""
+
         # Sort by priority labels first, then by age
         def get_priority(pr):
             labels = pr.get("labels", [])
@@ -871,33 +888,44 @@ class PRBacklogManager:
                     return 2
             # Default priority based on age
             return 3
-        
+
         return sorted(prs, key=get_priority)
 
     def _evaluate_readiness_criteria(
         self, pr_data: Dict[str, Any]
     ) -> Dict[ReadinessCriteria, bool]:
         """Evaluate PR readiness criteria."""
-        return {criteria: True for criteria in ReadinessCriteria}
+        return {
+            ReadinessCriteria.NO_MERGE_CONFLICTS: self._check_merge_conflicts(pr_data),
+            ReadinessCriteria.CI_PASSING: self._check_ci_status(pr_data),
+            ReadinessCriteria.UP_TO_DATE: self._check_branch_sync(pr_data),
+            ReadinessCriteria.HUMAN_REVIEW_COMPLETE: self._check_human_review(pr_data),
+            ReadinessCriteria.AI_REVIEW_COMPLETE: self._check_ai_review(pr_data),
+            ReadinessCriteria.METADATA_COMPLETE: self._check_metadata(pr_data),
+        }
 
     def _check_merge_conflicts(self, pr_data: Dict[str, Any]) -> bool:
         """Check for merge conflicts."""
         mergeable = pr_data.get("mergeable", True)
         mergeable_state = pr_data.get("mergeable_state", "clean")
-        
+
         # None means unknown state
         if mergeable is None or mergeable_state == "unknown":
             return False
-        
+
         # Check for conflicts
         if not mergeable or mergeable_state == "dirty":
             return False
-        
+
         return True
 
     def _check_ci_status(self, pr_data: Dict[str, Any]) -> bool:
         """Check CI status."""
-        return True
+        if not self.github_ops:
+            return True
+
+        status_checks = self.github_ops.get_pr_status_checks(pr_data["number"])
+        return all(check["state"] == "success" for check in status_checks)
 
     def _check_branch_sync(self, pr_data: Dict[str, Any]) -> bool:
         """Check branch sync status."""
@@ -905,29 +933,118 @@ class PRBacklogManager:
 
     def _check_human_review(self, pr_data: Dict[str, Any]) -> bool:
         """Check human review status."""
-        return True
+        if not self.github_ops:
+            return True
+
+        reviews = self.github_ops.get_pr_reviews(pr_data["number"])
+        # Check for approved human reviews (exclude bot reviews)
+        human_reviews = [r for r in reviews if not r["user"]["login"].endswith("[bot]")]
+        return any(r["state"] == "APPROVED" for r in human_reviews)
 
     def _check_ai_review(self, pr_data: Dict[str, Any]) -> bool:
         """Check AI review status."""
-        return True
+        if not self.github_ops:
+            return True
+
+        comments = self.github_ops.get_pr_comments(pr_data["number"])
+        # Check for AI review comments
+        ai_keywords = ["code-reviewer", "ai approved", "automated review"]
+        for comment in comments:
+            body = comment.get("body", "").lower()
+            if any(keyword in body for keyword in ai_keywords):
+                return True
+        return False
 
     def _check_metadata(self, pr_data: Dict[str, Any]) -> bool:
         """Check metadata completeness."""
-        return True
+        # Basic metadata checks
+        title = pr_data.get("title", "")
+        body = pr_data.get("body", "")
+        labels = pr_data.get("labels", [])
+
+        # Title should follow conventional commit format
+        conventional_prefixes = ["feat:", "fix:", "docs:", "style:", "refactor:", "test:", "chore:"]
+        has_conventional_prefix = any(title.startswith(prefix) for prefix in conventional_prefixes)
+        if not has_conventional_prefix:
+            return False
+
+        # Body should have some description
+        if not body or len(body.strip()) < 20:
+            return False
+
+        # Should have at least one label
+        return len(labels) > 0
 
     def _identify_blocking_issues(self, criteria_met: Dict[ReadinessCriteria, bool]) -> List[str]:
         """Identify blocking issues."""
-        return []
+        issues = []
+        for criteria, met in criteria_met.items():
+            if not met:
+                if criteria == ReadinessCriteria.CI_PASSING:
+                    issues.append("CI checks are failing")
+                elif criteria == ReadinessCriteria.HUMAN_REVIEW_COMPLETE:
+                    issues.append("Human review required")
+                elif criteria == ReadinessCriteria.AI_REVIEW_COMPLETE:
+                    issues.append("AI code review required")
+                elif criteria == ReadinessCriteria.METADATA_COMPLETE:
+                    issues.append("Incomplete metadata")
+                elif criteria == ReadinessCriteria.NO_MERGE_CONFLICTS:
+                    issues.append("Merge conflicts present")
+                elif criteria == ReadinessCriteria.UP_TO_DATE:
+                    issues.append("Branch is behind main")
+        return issues
 
     def _generate_resolution_actions(self, pr_number: int, blocking_issues: List[str]) -> List[str]:
         """Generate resolution actions."""
-        return []
+        actions = []
+        for issue in blocking_issues:
+            if "merge conflict" in issue.lower():
+                actions.append("WorkflowMaster: Resolve merge conflicts")
+            elif "CI" in issue or "failing" in issue.lower():
+                actions.append("Investigate CI failure logs")
+            elif "behind main" in issue.lower():
+                actions.append("Update branch to latest main")
+            elif "AI" in issue or "code review" in issue.lower():
+                actions.append("CodeReviewer: Trigger AI code review")
+            elif "human review" in issue.lower():
+                actions.append("Request human review")
+            elif "metadata" in issue.lower():
+                actions.append("Update PR description and labels")
+        return actions
 
     def _apply_ready_label(self, pr_number: int) -> None:
         """Apply ready label to PR."""
+        if self.github_ops:
+            self.github_ops.add_pr_labels(pr_number, ["ready-seeking-human"])
+
+            # Add a comment explaining why it's ready
+            comment = """✅ **PR Ready for Human Review**
+
+This PR has met all automated readiness criteria:
+- ✅ No merge conflicts
+- ✅ CI/CD passing
+- ✅ All required checks complete
+
+Ready for human review and merge consideration."""
+
+            self.github_ops.add_pr_comment(pr_number, comment)
 
     def _save_assessment(self, assessment: PRAssessment) -> None:
         """Save assessment to state."""
+        if self.state_manager:
+            state_key = f"pr-assessment-{assessment.pr_number}"
+            state_data = {
+                "pr_number": assessment.pr_number,
+                "status": assessment.status.value,
+                "criteria_met": {k.value: v for k, v in assessment.criteria_met.items()},
+                "blocking_issues": assessment.blocking_issues,
+                "resolution_actions": assessment.resolution_actions,
+                "last_updated": assessment.last_updated.isoformat(),
+                "processing_time": assessment.processing_time,
+                "is_ready": assessment.is_ready,
+                "readiness_score": assessment.readiness_score,
+            }
+            self.state_manager.save_state(state_key, state_data)
 
     def _delegate_issue_resolution(
         self, pr_number: int, blocking_issues: List[str], resolution_actions: List[str]
@@ -940,7 +1057,17 @@ class PRBacklogManager:
 
     def discover_prs_for_processing(self) -> List[Dict[str, Any]]:
         """Discover PRs for processing."""
-        return []
+        if not self.github_ops:
+            return []
+
+        all_prs = self.github_ops.get_prs()
+        filtered_prs = []
+
+        for pr in all_prs:
+            if self._should_process_pr(pr):
+                filtered_prs.append(pr)
+
+        return filtered_prs
 
     def process_single_pr(self, pr_number: int) -> PRAssessment:
         """Process a single PR."""
@@ -948,30 +1075,46 @@ class PRBacklogManager:
             # Get PR details if github_ops is available
             if hasattr(self, "github_ops") and self.github_ops:
                 pr_details = self.github_ops.get_pr_details(pr_number)
-
-                # Check for blocking conditions
-                is_mergeable = pr_details.get("mergeable", True)
-                mergeable_state = pr_details.get("mergeable_state", "clean")
-
-                # Determine status based on PR state
-                if not is_mergeable or mergeable_state == "dirty":
-                    status = PRStatus.BLOCKED
-                    blocking_issues = ["PR has merge conflicts"]
-                    is_ready = False
-                else:
-                    status = PRStatus.READY
-                    blocking_issues = []
-                    is_ready = True
-
-                # Update labels if ready
-                if is_ready:
-                    self.github_ops.add_pr_labels(pr_number, ["ready-seeking-human"])
-                    self.github_ops.add_pr_comment(pr_number, "PR is ready for review")
             else:
-                # Default behavior without github_ops
+                # Default PR details when no github_ops
+                pr_details = {
+                    "pr_number": pr_number,
+                    "title": "Test PR",
+                    "description": "Test description",
+                }
+
+            # Evaluate readiness criteria (can be mocked in tests)
+            criteria_met = self._evaluate_readiness_criteria(pr_details)
+
+            # Determine if ready based on criteria
+            is_ready = all(criteria_met.values())
+
+            # Identify blocking issues
+            blocking_issues = []
+            if not is_ready:
+                for criteria, met in criteria_met.items():
+                    if not met:
+                        if criteria == ReadinessCriteria.NO_MERGE_CONFLICTS:
+                            blocking_issues.append("PR has merge conflicts")
+                        elif criteria == ReadinessCriteria.CI_PASSING:
+                            blocking_issues.append("CI checks are failing")
+                        elif criteria == ReadinessCriteria.UP_TO_DATE:
+                            blocking_issues.append("Branch is behind main")
+                        elif criteria == ReadinessCriteria.HUMAN_REVIEW_COMPLETE:
+                            blocking_issues.append("Human review not complete")
+                        elif criteria == ReadinessCriteria.AI_REVIEW_COMPLETE:
+                            blocking_issues.append("AI review not complete")
+                        elif criteria == ReadinessCriteria.METADATA_COMPLETE:
+                            blocking_issues.append("Metadata incomplete")
+
+            # Determine status and apply labels
+            if is_ready:
                 status = PRStatus.READY
-                blocking_issues = []
-                is_ready = True
+                self._apply_ready_label(pr_number)
+            elif blocking_issues:
+                status = PRStatus.BLOCKED
+            else:
+                status = PRStatus.PENDING
 
             # Delegate issue resolution if blocked
             if status == PRStatus.BLOCKED and blocking_issues:
@@ -1006,53 +1149,35 @@ class PRBacklogManager:
         """Process the entire PR backlog."""
         start_time = datetime.now()
 
-        # Get list of PRs if github_ops is available
-        if hasattr(self, "github_ops") and self.github_ops:
-            try:
-                prs = self.github_ops.get_prs()
+        # Use the discover method to get eligible PRs
+        eligible_prs = self.discover_prs_for_processing()
 
-                # Filter out draft PRs and already labeled PRs
-                eligible_prs = [
-                    pr
-                    for pr in prs
-                    if not pr.get("draft", False)
-                    and not any(
-                        label.get("name") == "ready-seeking-human" for label in pr.get("labels", [])
-                    )
-                ]
+        ready_count = 0
+        blocked_count = 0
 
-                ready_count = 0
-                blocked_count = 0
+        # Process each eligible PR
+        for pr in eligible_prs:
+            assessment = self.process_single_pr(pr["number"])
+            if assessment.status == PRStatus.READY:
+                ready_count += 1
+            elif assessment.status == PRStatus.BLOCKED:
+                blocked_count += 1
 
-                # Process each eligible PR
-                for pr in eligible_prs:
-                    assessment = self.process_single_pr(pr["number"])
-                    if assessment.status == PRStatus.READY:
-                        ready_count += 1
-                    elif assessment.status == PRStatus.BLOCKED:
-                        blocked_count += 1
+        # Generate report if method exists
+        if hasattr(self, "_generate_backlog_report"):
+            self._generate_backlog_report([])
 
-                # Generate report if method exists
-                if hasattr(self, "_generate_backlog_report"):
-                    self._generate_backlog_report([])
+        processing_time = (datetime.now() - start_time).total_seconds()
 
-                processing_time = (datetime.now() - start_time).total_seconds()
-
-                return BacklogMetrics(
-                    total_prs=len(eligible_prs),
-                    ready_prs=ready_count,
-                    blocked_prs=blocked_count,
-                    processing_time=processing_time,
-                    automation_rate=100.0 if eligible_prs else 0.0,
-                    success_rate=100.0,
-                    timestamp=datetime.now(),
-                )
-            except Exception:
-                # Return empty metrics on error
-                pass
-
-        # Default empty metrics
-        return BacklogMetrics()
+        return BacklogMetrics(
+            total_prs=len(eligible_prs),
+            ready_prs=ready_count,
+            blocked_prs=blocked_count,
+            processing_time=processing_time,
+            automation_rate=100.0 if eligible_prs else 0.0,
+            success_rate=100.0,
+            timestamp=datetime.now(),
+        )
 
 
 class ReadinessAssessor:
@@ -1168,7 +1293,10 @@ class ReadinessAssessor:
         changes_requested = [r for r in human_reviews if r["state"] == "CHANGES_REQUESTED"]
 
         ai_review_complete = any(
-            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower() for c in comments
+            "codereviewer" in c["body"].lower()
+            or "code-reviewer" in c["body"].lower()
+            or "phase 9" in c["body"].lower()
+            for c in comments
         )
 
         return ReviewAssessment(
@@ -1343,7 +1471,10 @@ class ReadinessAssessor:
 
         comments = self.github_ops.get_pr_comments(pr_number)
         return any(
-            "CodeReviewer" in c["body"].lower() or "phase 9" in c["body"].lower() for c in comments
+            "codereviewer" in c["body"].lower()
+            or "code-reviewer" in c["body"].lower()
+            or "phase 9" in c["body"].lower()
+            for c in comments
         )
 
     def _calculate_review_coverage(

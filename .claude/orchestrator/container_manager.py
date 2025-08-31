@@ -52,7 +52,6 @@ except ImportError:
 
 
 try:
-    import websockets  # type: ignore
     import asyncio
 
     WEBSOCKET_AVAILABLE = True

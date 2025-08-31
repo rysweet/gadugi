@@ -69,9 +69,7 @@ def convert_openai_to_claude_response(
         "stop_sequence": None,
         "usage": {
             "input_tokens": openai_response.get("usage", {}).get("prompt_tokens", 0),
-            "output_tokens": openai_response.get("usage", {}).get(
-                "completion_tokens", 0
-            ),
+            "output_tokens": openai_response.get("usage", {}).get("completion_tokens", 0),
         },
     }
 
@@ -112,9 +110,7 @@ async def convert_openai_streaming_to_claude(
                         if not choices:
                             continue
                     except json.JSONDecodeError as e:
-                        logger.warning(
-                            f"Failed to parse chunk: {chunk_data}, error: {e}"
-                        )
+                        logger.warning(f"Failed to parse chunk: {chunk_data}, error: {e}")
                         continue
 
                     choice = choices[0]
@@ -153,11 +149,7 @@ async def convert_openai_streaming_to_claude(
                                 tool_call["name"] = function_data["name"]
 
                             # Start content block when we have complete initial data
-                            if (
-                                tool_call["id"]
-                                and tool_call["name"]
-                                and not tool_call["started"]
-                            ):
+                            if tool_call["id"] and tool_call["name"] and not tool_call["started"]:
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
@@ -267,9 +259,7 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                         usage = chunk.get("usage", None)
                         if usage:
                             cache_read_input_tokens = 0
-                            prompt_tokens_details = usage.get(
-                                "prompt_tokens_details", {}
-                            )
+                            prompt_tokens_details = usage.get("prompt_tokens_details", {})
                             if prompt_tokens_details:
                                 cache_read_input_tokens = prompt_tokens_details.get(
                                     "cached_tokens", 0
@@ -283,9 +273,7 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                         if not choices:
                             continue
                     except json.JSONDecodeError as e:
-                        logger.warning(
-                            f"Failed to parse chunk: {chunk_data}, error: {e}"
-                        )
+                        logger.warning(f"Failed to parse chunk: {chunk_data}, error: {e}")
                         continue
 
                     choice = choices[0]
@@ -324,11 +312,7 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                                 tool_call["name"] = function_data["name"]
 
                             # Start content block when we have complete initial data
-                            if (
-                                tool_call["id"]
-                                and tool_call["name"]
-                                and not tool_call["started"]
-                            ):
+                            if tool_call["id"] and tool_call["name"] and not tool_call["started"]:
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index

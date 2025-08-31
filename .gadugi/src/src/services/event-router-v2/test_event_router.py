@@ -57,9 +57,7 @@ async def test_event_router():
     @consumer.on("test.*")
     async def handle_test_event(event):
         received_events.append(event)
-        print(
-            f"   📨 Consumer received: {event.topic} - {event.payload.get('message')}"
-        )
+        print(f"   📨 Consumer received: {event.topic} - {event.payload.get('message')}")
 
     sub_id = await consumer.subscribe(topics=["test.*"], callback=handle_test_event)
     print(f"   ✅ Subscription created: {sub_id}")
@@ -81,12 +79,8 @@ async def test_event_router():
     ]
 
     for topic, payload, priority in events_to_send:
-        event_id = await producer.publish(
-            topic=topic, payload=payload, priority=priority
-        )
-        print(
-            f"   📤 Published: {topic} (priority: {priority.name}) - Event ID: {event_id}"
-        )
+        event_id = await producer.publish(topic=topic, payload=payload, priority=priority)
+        print(f"   📤 Published: {topic} (priority: {priority.name}) - Event ID: {event_id}")
         await asyncio.sleep(0.5)
 
     # 6. Wait for events to be processed
@@ -101,9 +95,7 @@ async def test_event_router():
     if len(received_events) == len(events_to_send):
         print("   ✅ All events successfully delivered!")
     else:
-        print(
-            f"   ⚠️  Only {len(received_events)} of {len(events_to_send)} events received"
-        )
+        print(f"   ⚠️  Only {len(received_events)} of {len(events_to_send)} events received")
 
     # 8. Check health
     print("\n8. Health Check:")

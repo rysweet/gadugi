@@ -35,7 +35,7 @@ globals().update({k: v for k, v in _module.__dict__.items() if not k.startswith(
 __all__ = [name for name in globals() if not name.startswith("_")]
 
 # Fallback for static type checkers – dynamically expose missing attributes
-from typing import Any as _Any
+from typing import Any as _Any  # noqa: E402
 
 
 def __getattr__(name: str) -> _Any:  # type: ignore[misc]

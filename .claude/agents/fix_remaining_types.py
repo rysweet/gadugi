@@ -157,7 +157,7 @@ def fix_list_comprehensions_with_none(content: str) -> str:
         parts = comp.split(" for ")
         if len(parts) >= 2:
             expr_part = parts[0].strip()
-            rest = " for ".join(parts[1:])
+            " for ".join(parts[1:])
 
             # Extract the variable being used
             if ".get(" in expr_part:

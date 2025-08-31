@@ -178,9 +178,7 @@ class SharedWhiteboard:
             self._create_version_snapshot(agent_id, f"Updated {key}")
 
             # Update backend
-            await self.backend.update_whiteboard(
-                self.whiteboard_id, content={key: content}
-            )
+            await self.backend.update_whiteboard(self.whiteboard_id, content={key: content})
 
             # Notify subscribers
             await self._notify_subscribers(key, content, agent_id)
@@ -188,9 +186,7 @@ class SharedWhiteboard:
             self.last_modified = datetime.now()
             return True
 
-    async def read(
-        self, agent_id: str, key: Optional[str] = None
-    ) -> Optional[Dict[str, Any]]:
+    async def read(self, agent_id: str, key: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Read content from whiteboard.
 
@@ -327,9 +323,7 @@ class SharedWhiteboard:
             "version": self.current_version,
             "entries": len(self.entries),
             "subscribers": len(self._subscribers),
-            "permissions": {
-                agent: level.value for agent, level in self.permissions.items()
-            },
+            "permissions": {agent: level.value for agent, level in self.permissions.items()},
             "created": self.created_at.isoformat(),
             "modified": self.last_modified.isoformat(),
         }
@@ -454,9 +448,7 @@ class WhiteboardManager:
         return {
             "total_whiteboards": len(self._whiteboards),
             "by_type": self._count_by_type(),
-            "total_subscribers": sum(
-                len(wb._subscribers) for wb in self._whiteboards.values()
-            ),
+            "total_subscribers": sum(len(wb._subscribers) for wb in self._whiteboards.values()),
         }
 
     def _count_by_type(self) -> Dict[str, int]:

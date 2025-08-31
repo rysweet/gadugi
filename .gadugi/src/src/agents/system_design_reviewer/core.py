@@ -23,22 +23,20 @@ from enum import Enum
 # --------------------------------------------------------------------------- #
 try:
     # 1) Absolute imports (e.g. `python -m gadugi.system_design_reviewer`)
-    from shared.github_operations import GitHubOperations  # type: ignore
-    from shared.state_management import StateManager  # type: ignore
-    from shared.error_handling import (  # type: ignore
+    from src.src.shared.github_operations import GitHubOperations  # type: ignore
+    from src.src.shared.state_management import StateManager  # type: ignore
+    from src.src.shared.utils.error_handling import (  # type: ignore
         ErrorHandler,
-        ErrorCategory,
         ErrorSeverity,
     )
-    from shared.task_tracking import TaskTracker  # type: ignore
+    from src.src.shared.task_tracking import TaskTracker  # type: ignore
 except ImportError:  # pragma: no cover – fall through to relative/fallback
     try:
         # 2) Relative imports when executed inside repository package layout
         from ..shared.github_operations import GitHubOperations  # type: ignore
         from ..shared.state_management import StateManager  # type: ignore
-        from ..shared.error_handling import (  # type: ignore
+        from ..shared.utils.error_handling import (  # type: ignore
             ErrorHandler,
-            ErrorCategory,
             ErrorSeverity,
         )
         from ..shared.task_tracking import TaskTracker  # type: ignore
@@ -52,10 +50,15 @@ except ImportError:  # pragma: no cover – fall through to relative/fallback
             GitHubOperations,
             StateManager,
             ErrorHandler,
-            ErrorCategory,
-            ErrorSeverity,
             TaskTracker,
         )
+
+        # Define ErrorSeverity for fallback case
+        class ErrorSeverity:
+            HIGH = "high"
+            MEDIUM = "medium"
+            LOW = "low"
+
 
 from .ast_parser import ASTParserFactory, ArchitecturalChange, ImpactLevel
 from .documentation_manager import DocumentationManager
@@ -89,6 +92,8 @@ class ReviewResult:
         """Convert to dictionary for serialization"""
         return {
             **asdict(self),
+            "status": self.status.value,
+            "architectural_impact": self.architectural_impact.value,
             "timestamp": self.timestamp.isoformat(),
             "changes_detected": [
                 {
@@ -115,7 +120,13 @@ class SystemDesignReviewer:
         # Initialize shared modules from Enhanced Separation architecture
         self.github_ops = GitHubOperations(task_id=getattr(self, "task_id", None))
         self.state_manager = SystemDesignStateManager()
-        self.error_handler = ErrorHandler("SystemDesignReviewer")
+        # Handle both shared and fallback ErrorHandler signatures
+        try:
+            self.error_handler = ErrorHandler()  # Shared ErrorHandler (no args)
+        except TypeError:
+            self.error_handler = ErrorHandler(
+                "SystemDesignReviewer"
+            )  # Fallback ErrorHandler requires agent_type
         self.task_tracker = TaskTracker("SystemDesignReviewer")
 
         # Initialize specialized components
@@ -150,9 +161,7 @@ class SystemDesignReviewer:
                 f"Review PR #{pr_number} for architectural changes",
                 priority="high",  # type: ignore
             )
-            self.task_tracker.update_task_status(
-                f"review_pr_{pr_number}", "in_progress"
-            )  # type: ignore
+            self.task_tracker.update_task_status(f"review_pr_{pr_number}", "in_progress")  # type: ignore
 
             # Get PR information
             pr_info = self._get_pr_info(pr_number)
@@ -218,8 +227,6 @@ class SystemDesignReviewer:
         except Exception as e:
             self.error_handler.handle_error(
                 e,
-                category=ErrorCategory.PROCESS_EXECUTION,
-                severity=ErrorSeverity.HIGH,
                 context={"pr_number": pr_number},
             )
 
@@ -243,30 +250,45 @@ class SystemDesignReviewer:
         """Get PR information from GitHub"""
         try:
             # Use GitHub CLI to get PR details
-            result = self.github_ops.get_pr_details(pr_number)  # type: ignore
+            import subprocess
+            import json
+
+            result = subprocess.run(
+                [
+                    "gh",
+                    "pr",
+                    "view",
+                    pr_number,
+                    "--json",
+                    "number,title,body,author,baseRefName,headRefName",
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            if result.returncode != 0:
+                raise subprocess.CalledProcessError(result.returncode, result.args, result.stderr)
+
+            pr_info = json.loads(result.stdout)
 
             # Get changed files
             changed_files = self._get_changed_files(pr_number)
-            result["changed_files"] = changed_files
+            pr_info["changed_files"] = changed_files
 
-            return result
+            return pr_info
 
         except Exception as e:
-            self.error_handler.handle_error(
-                e,
-                category=ErrorCategory.GITHUB_API,
-                severity=ErrorSeverity.HIGH,
-                context={"pr_number": pr_number},
-            )
-            return {}
+            # Log error but don't re-raise - return empty result
+            import logging
+
+            logging.error(f"Failed to get PR info for {pr_number}: {e}")
+            return {"changed_files": []}
 
     def _get_changed_files(self, pr_number: str) -> List[str]:
         """Get list of changed files in the PR"""
         try:
             cmd = f"gh pr diff {pr_number} --name-only"
-            result = subprocess.run(
-                cmd.split(), capture_output=True, text=True, timeout=30
-            )
+            result = subprocess.run(cmd.split(), capture_output=True, text=True, timeout=30)
 
             if result.returncode == 0:
                 return [f.strip() for f in result.stdout.split("\n") if f.strip()]
@@ -288,9 +310,7 @@ class SystemDesignReviewer:
         # Filter for supported file types
         supported_extensions = self.ast_parser_factory.get_supported_extensions()
         analyzable_files = [
-            f
-            for f in changed_files
-            if any(f.endswith(ext) for ext in supported_extensions)
+            f for f in changed_files if any(f.endswith(ext) for ext in supported_extensions)
         ]
 
         if len(analyzable_files) > self.max_pr_size:
@@ -309,9 +329,7 @@ class SystemDesignReviewer:
 
         return all_changes
 
-    def _analyze_file_changes(
-        self, file_path: str, pr_number: str
-    ) -> List[ArchitecturalChange]:
+    def _analyze_file_changes(self, file_path: str, pr_number: str) -> List[ArchitecturalChange]:
         """Analyze changes in a specific file"""
         parser = self.ast_parser_factory.get_parser(file_path)
         if not parser:
@@ -349,9 +367,7 @@ class SystemDesignReviewer:
             print(f"Error analyzing file {file_path}: {e}")
             return []
 
-    def _get_file_content_at_base(
-        self, file_path: str, pr_number: str
-    ) -> Optional[str]:
+    def _get_file_content_at_base(self, file_path: str, pr_number: str) -> Optional[str]:
         """Get file content at the base branch of the PR"""
         try:
             # Get PR base branch
@@ -393,9 +409,7 @@ class SystemDesignReviewer:
             return ImpactLevel.CRITICAL
         elif impact_counts[ImpactLevel.HIGH] > 2:
             return ImpactLevel.HIGH
-        elif (
-            impact_counts[ImpactLevel.HIGH] > 0 or impact_counts[ImpactLevel.MEDIUM] > 3
-        ):
+        elif impact_counts[ImpactLevel.HIGH] > 0 or impact_counts[ImpactLevel.MEDIUM] > 3:
             return ImpactLevel.MEDIUM
         else:
             return ImpactLevel.LOW
@@ -418,9 +432,7 @@ class SystemDesignReviewer:
     ) -> List[str]:
         """Generate Architecture Decision Records for significant changes"""
         try:
-            significant_changes = [
-                change for change in changes if change.requires_adr or force
-            ]
+            significant_changes = [change for change in changes if change.requires_adr or force]
 
             if not significant_changes and not force:
                 return []
@@ -470,9 +482,7 @@ class SystemDesignReviewer:
                 )
 
                 if change.design_implications:
-                    comments.append(
-                        f"  - Impact: {', '.join(change.design_implications)}"
-                    )
+                    comments.append(f"  - Impact: {', '.join(change.design_implications)}")
 
                 if change.impact_level in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]:
                     comments.append(
@@ -608,10 +618,21 @@ class SystemDesignStateManager(StateManager):  # type: ignore
     """State manager for System Design Review Agent"""
 
     def __init__(self):
-        super().__init__(
-            state_dir=Path(".github/workflow-states/SystemDesignReviewer"),
-            task_id="SystemDesignReviewer",
-        )
+        # Handle both the shared StateManager and fallback StateManager
+        config = {
+            "state_dir": str(Path(".github/workflow-states/SystemDesignReviewer")),
+            "task_id": "SystemDesignReviewer",
+        }
+
+        try:
+            # Try shared StateManager signature (config dict as first arg)
+            super().__init__(config)
+        except TypeError:
+            # Fall back to fallback StateManager signature (state_dir, task_id)
+            super().__init__(state_dir=Path(config["state_dir"]), task_id=config["task_id"])
+
+        # Set task_id as instance attribute for compatibility with tests
+        self.task_id = "SystemDesignReviewer"
 
     def get_default_state(self) -> Dict[str, Any]:
         """Get default state structure"""
@@ -629,6 +650,44 @@ class SystemDesignStateManager(StateManager):  # type: ignore
                 "max_pr_size": 1000,
             },
         }
+
+    def save_state(self, state_data: Dict[str, Any]) -> bool:
+        """Save state data as a dict (simplified interface)"""
+        import json
+        from datetime import datetime
+
+        try:
+            # Add metadata to state
+            state_data["last_updated"] = datetime.now().isoformat()
+            state_data["task_id"] = self.task_id
+
+            # Ensure state directory exists
+            self.state_dir.mkdir(parents=True, exist_ok=True)
+
+            # Write state file
+            state_file = self.state_dir / "state.json"
+            with open(state_file, "w") as f:
+                json.dump(state_data, f, indent=2)
+
+            return True
+        except Exception as e:
+            print(f"Failed to save state: {e}")
+            return False
+
+    def load_state(self) -> Dict[str, Any]:
+        """Load state data as a dict (simplified interface)"""
+        import json
+
+        try:
+            state_file = self.state_dir / "state.json"
+            if not state_file.exists():
+                return self.get_default_state()
+
+            with open(state_file, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Failed to load state: {e}")
+            return self.get_default_state()
 
     def save_review_result(self, result: ReviewResult) -> bool:
         """Save a review result to state"""

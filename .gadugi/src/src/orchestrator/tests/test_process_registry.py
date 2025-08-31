@@ -39,9 +39,7 @@ class TestProcessRegistry(unittest.TestCase):
     def test_registry_initialization(self):
         """Test registry initializes correctly"""
         self.assertTrue(self.registry_dir.exists())
-        self.assertTrue(
-            self.registry.registry_file.exists() or True
-        )  # May not exist initially
+        self.assertTrue(self.registry.registry_file.exists() or True)  # May not exist initially
         self.assertEqual(len(self.registry.processes), 0)
         self.assertEqual(self.registry.heartbeat_interval, 30)
 
@@ -96,9 +94,7 @@ class TestProcessRegistry(unittest.TestCase):
             self.assertIsNotNone(process.started_at)
 
         # Test running -> completed
-        success = self.registry.update_process_status(
-            "test-task-2", ProcessStatus.COMPLETED
-        )
+        success = self.registry.update_process_status("test-task-2", ProcessStatus.COMPLETED)
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
@@ -135,18 +131,14 @@ class TestProcessRegistry(unittest.TestCase):
 
     def test_nonexistent_process_update(self):
         """Test updating nonexistent process"""
-        success = self.registry.update_process_status(
-            "nonexistent", ProcessStatus.RUNNING
-        )
+        success = self.registry.update_process_status("nonexistent", ProcessStatus.RUNNING)
         self.assertFalse(success)
 
     def test_get_processes_by_status(self):
         """Test filtering processes by status"""
         # Register multiple processes with different statuses
         processes = [
-            ProcessInfo(
-                "task-1", "Task 1", ProcessStatus.QUEUED, "cmd1", "/tmp", datetime.now()
-            ),
+            ProcessInfo("task-1", "Task 1", ProcessStatus.QUEUED, "cmd1", "/tmp", datetime.now()),
             ProcessInfo(
                 "task-2",
                 "Task 2",
@@ -209,12 +201,8 @@ class TestProcessRegistry(unittest.TestCase):
                 "/tmp",
                 datetime.now(),
             ),
-            ProcessInfo(
-                "task-3", "Task 3", ProcessStatus.FAILED, "cmd3", "/tmp", datetime.now()
-            ),
-            ProcessInfo(
-                "task-4", "Task 4", ProcessStatus.QUEUED, "cmd4", "/tmp", datetime.now()
-            ),
+            ProcessInfo("task-3", "Task 3", ProcessStatus.FAILED, "cmd3", "/tmp", datetime.now()),
+            ProcessInfo("task-4", "Task 4", ProcessStatus.QUEUED, "cmd4", "/tmp", datetime.now()),
         ]
 
         for process in processes:

@@ -316,9 +316,7 @@ async def get_agent_memories(
             for m in memories
         ]
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve memories: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve memories: {str(e)}")
 
 
 @app.post("/memory/agent/{agent_id}/consolidate")
@@ -338,9 +336,7 @@ async def consolidate_memories(
             "memories": [m.id for m in consolidated],
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to consolidate memories: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to consolidate memories: {str(e)}")
 
 
 # ========== Project Shared Memory Endpoints ==========
@@ -372,9 +368,7 @@ async def store_project_memory(
             access_count=memory.access_count,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to store project memory: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to store project memory: {str(e)}")
 
 
 @app.get("/memory/project/{project_id}", response_model=List[MemoryResponse])
@@ -414,9 +408,7 @@ async def create_whiteboard(
 ):
     """Create a new task whiteboard."""
     try:
-        whiteboard = await mm.create_whiteboard(
-            task_id=request.task_id, agent_id=request.agent_id
-        )
+        whiteboard = await mm.create_whiteboard(task_id=request.task_id, agent_id=request.agent_id)
 
         return {
             "id": whiteboard.id,
@@ -425,9 +417,7 @@ async def create_whiteboard(
             "created_at": whiteboard.created_at.isoformat(),
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to create whiteboard: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create whiteboard: {str(e)}")
 
 
 @app.post("/whiteboard/update")
@@ -445,9 +435,7 @@ async def update_whiteboard(
 
         return {"status": "success", "task_id": request.task_id}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to update whiteboard: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to update whiteboard: {str(e)}")
 
 
 @app.get("/whiteboard/{task_id}")
@@ -474,9 +462,7 @@ async def get_whiteboard(task_id: str, mm: MemoryManager = Depends(get_memory_ma
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve whiteboard: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve whiteboard: {str(e)}")
 
 
 # ========== Procedural Memory Endpoints ==========
@@ -508,9 +494,7 @@ async def store_procedural_memory(
             access_count=memory.access_count,
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to store procedural memory: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to store procedural memory: {str(e)}")
 
 
 @app.get("/memory/procedural/{agent_id}")
@@ -528,13 +512,9 @@ async def get_procedural_memories(
         return [
             {
                 "id": m.id,
-                "procedure": m.structured_data.get("procedure_name")
-                if m.structured_data
-                else None,
+                "procedure": m.structured_data.get("procedure_name") if m.structured_data else None,
                 "steps": m.structured_data.get("steps") if m.structured_data else [],
-                "context": m.structured_data.get("context")
-                if m.structured_data
-                else None,
+                "context": m.structured_data.get("context") if m.structured_data else None,
                 "access_count": m.access_count,
                 "created_at": m.created_at.isoformat(),
             }
@@ -572,9 +552,7 @@ async def create_knowledge_node(
             "created_at": node.created_at.isoformat(),
         }
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to create knowledge node: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create knowledge node: {str(e)}")
 
 
 @app.post("/knowledge/link")
@@ -592,9 +570,7 @@ async def link_knowledge_nodes(
 
         return {"status": "success", "linked": [request.node1_id, request.node2_id]}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to link knowledge nodes: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to link knowledge nodes: {str(e)}")
 
 
 @app.get("/knowledge/graph/{agent_id}")
@@ -607,9 +583,7 @@ async def get_knowledge_graph(
 
         return graph
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve knowledge graph: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve knowledge graph: {str(e)}")
 
 
 # ========== Memory Search Endpoints ==========
@@ -672,18 +646,14 @@ async def search_memories(
             for r in records
         ]
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to search memories: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to search memories: {str(e)}")
 
 
 # ========== Legacy MCP Context Endpoints (for compatibility) ==========
 
 
 @app.post("/context/store")
-async def store_context(
-    data: Dict[str, Any], mm: MemoryManager = Depends(get_memory_manager)
-):
+async def store_context(data: Dict[str, Any], mm: MemoryManager = Depends(get_memory_manager)):
     """Legacy endpoint for storing context (maps to memory storage)."""
     try:
         # Convert legacy context to memory
@@ -697,15 +667,11 @@ async def store_context(
 
         return {"context_id": memory.id, "status": "stored"}
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to store context: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to store context: {str(e)}")
 
 
 @app.get("/context/retrieve/{context_id}")
-async def retrieve_context(
-    context_id: str, mm: MemoryManager = Depends(get_memory_manager)
-):
+async def retrieve_context(context_id: str, mm: MemoryManager = Depends(get_memory_manager)):
     """Legacy endpoint for retrieving context."""
     try:
         # Retrieve as memory
@@ -737,9 +703,7 @@ async def retrieve_context(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve context: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve context: {str(e)}")
 
 
 if __name__ == "__main__":

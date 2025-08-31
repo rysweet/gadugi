@@ -165,9 +165,7 @@ class MemoryHealthMonitor:
         for backend in self.backends:
             if backend.enabled:
                 self._current_backend = backend
-                self.logger.info(
-                    f"Selected initial backend: {backend.backend_type.value}"
-                )
+                self.logger.info(f"Selected initial backend: {backend.backend_type.value}")
                 break
 
         if not self._current_backend:
@@ -196,9 +194,7 @@ class MemoryHealthMonitor:
 
             # Reuse existing driver or create new one
             if not self._neo4j_driver:
-                self._neo4j_driver = AsyncGraphDatabase.driver(
-                    uri, auth=(user, password)
-                )
+                self._neo4j_driver = AsyncGraphDatabase.driver(uri, auth=(user, password))
 
             # Test connection with a simple query
             async with self._neo4j_driver.session(database=database) as session:
@@ -368,13 +364,9 @@ class MemoryHealthMonitor:
 
     # ========== Health Check Orchestration ==========
 
-    async def check_backend_health(
-        self, backend_type: MemoryBackendType
-    ) -> HealthCheckResult:
+    async def check_backend_health(self, backend_type: MemoryBackendType) -> HealthCheckResult:
         """Check health of a specific backend."""
-        backend = next(
-            (b for b in self.backends if b.backend_type == backend_type), None
-        )
+        backend = next((b for b in self.backends if b.backend_type == backend_type), None)
         if not backend:
             return HealthCheckResult(
                 backend_type=backend_type,
@@ -430,9 +422,7 @@ class MemoryHealthMonitor:
         tasks = []
         for backend in self.backends:
             if backend.enabled:
-                task = asyncio.create_task(
-                    self.check_backend_health(backend.backend_type)
-                )
+                task = asyncio.create_task(self.check_backend_health(backend.backend_type))
                 tasks.append((backend.backend_type, task))
 
         # Collect results
@@ -503,9 +493,7 @@ class MemoryHealthMonitor:
             self.event_callback(
                 "backend_failover",
                 {
-                    "from_backend": old_backend.backend_type.value
-                    if old_backend
-                    else None,
+                    "from_backend": old_backend.backend_type.value if old_backend else None,
                     "to_backend": healthy_backend.backend_type.value,
                     "failover_count": self._failover_count,
                     "timestamp": self._last_failover.isoformat(),
@@ -542,9 +530,7 @@ class MemoryHealthMonitor:
             self.logger.warning("Monitoring already running")
             return
 
-        self.logger.info(
-            f"Starting health monitoring (interval: {self.config.check_interval}s)"
-        )
+        self.logger.info(f"Starting health monitoring (interval: {self.config.check_interval}s)")
         self._monitoring_task = asyncio.create_task(self._monitoring_loop())
 
     async def stop_monitoring(self) -> None:
@@ -608,9 +594,7 @@ class MemoryHealthMonitor:
             if self._current_backend
             else None,
             "failover_count": self._failover_count,
-            "last_failover": self._last_failover.isoformat()
-            if self._last_failover
-            else None,
+            "last_failover": self._last_failover.isoformat() if self._last_failover else None,
             "monitoring_enabled": self.config.enable_periodic_monitoring,
             "auto_failover_enabled": self.config.enable_auto_failover,
             "backends": backend_status,
@@ -700,10 +684,8 @@ def create_default_config() -> HealthMonitorConfig:
         check_interval=int(os.getenv("MEMORY_HEALTH_CHECK_INTERVAL", "30")),
         cache_ttl=int(os.getenv("MEMORY_HEALTH_CACHE_TTL", "10")),
         failover_strategy=FailoverStrategy.RETRY_THEN_SWITCH,
-        enable_auto_failover=os.getenv("MEMORY_ENABLE_AUTO_FAILOVER", "true").lower()
-        == "true",
-        enable_periodic_monitoring=os.getenv("MEMORY_ENABLE_MONITORING", "true").lower()
-        == "true",
+        enable_auto_failover=os.getenv("MEMORY_ENABLE_AUTO_FAILOVER", "true").lower() == "true",
+        enable_periodic_monitoring=os.getenv("MEMORY_ENABLE_MONITORING", "true").lower() == "true",
         log_backend_switches=True,
         emit_events=True,
     )

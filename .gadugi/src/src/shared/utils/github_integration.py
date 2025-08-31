@@ -16,9 +16,7 @@ logger = logging.getLogger(__name__)
 class GitHubIntegration:
     """Handles GitHub operations via gh CLI."""
 
-    def __init__(
-        self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None):
         self.repo = repo
         self.retry_config = retry_config or {
             "max_retries": 3,
@@ -183,18 +181,14 @@ class GitHubIntegration:
 
         # Create and checkout new branch
         try:
-            subprocess.run(
-                ["git", "checkout", "-b", branch_name, f"origin/{base}"], check=True
-            )
+            subprocess.run(["git", "checkout", "-b", branch_name, f"origin/{base}"], check=True)
             logger.info(f"Created branch: {branch_name}")
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to create branch: {e}")
             return False
 
-    def push_branch(
-        self, branch_name: Optional[str] = None, force: bool = False
-    ) -> bool:
+    def push_branch(self, branch_name: Optional[str] = None, force: bool = False) -> bool:
         """Push branch to remote."""
         args = ["git", "push", "origin"]
 
@@ -221,9 +215,7 @@ class GitHubIntegration:
         args = ["pr", "merge", str(pr_number), f"--{merge_method}", "--json", "merged"]
         return self._execute_gh_command(args)
 
-    def close_issue(
-        self, issue_number: int, reason: str = "completed"
-    ) -> Dict[str, Any]:
+    def close_issue(self, issue_number: int, reason: str = "completed") -> Dict[str, Any]:
         """Close an issue."""
         args = ["issue", "close", str(issue_number)]
 
@@ -232,9 +224,7 @@ class GitHubIntegration:
 
         return self._execute_gh_command(args)
 
-    def get_workflow_runs(
-        self, workflow: Optional[str] = None, limit: int = 10
-    ) -> Dict[str, Any]:
+    def get_workflow_runs(self, workflow: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
         """Get workflow run information."""
         args = ["run", "list", "--limit", str(limit)]
 

@@ -431,9 +431,7 @@ class ServiceManager:
                         # Calculate uptime
                         create_time = datetime.fromtimestamp(process.create_time())
                         uptime = datetime.now() - create_time
-                        service_info.uptime = str(uptime).split(".")[
-                            0
-                        ]  # Remove microseconds
+                        service_info.uptime = str(uptime).split(".")[0]  # Remove microseconds
                     else:
                         service_info.status = ServiceStatus.STOPPED
                         service_info.pid = None
@@ -449,9 +447,7 @@ class ServiceManager:
         if config:
             return ServiceInfo(
                 name=service_name,
-                type=ServiceType(service_name)
-                if service_name != "all"
-                else ServiceType.ALL,
+                type=ServiceType(service_name) if service_name != "all" else ServiceType.ALL,
                 status=ServiceStatus.STOPPED,
                 description=config["description"],
             )
@@ -1048,9 +1044,7 @@ Examples:
 
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M")
-                    if agent.last_used
-                    else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
                 )
                 table.add_row(
                     agent.name,
@@ -1065,9 +1059,7 @@ Examples:
         else:
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M")
-                    if agent.last_used
-                    else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
                 )
 
     def _print_agent_info(self, agent: AgentInfo) -> None:
@@ -1156,7 +1148,9 @@ Examples:
             pass
 
         # Python version
-        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        python_version = (
+            f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        )
 
         # Platform info
         import platform
@@ -1328,9 +1322,7 @@ Examples:
         # Run basic checks
         try:
             # Python syntax check
-            cmd = [sys.executable, "-m", "py_compile"] + [
-                str(f) for f in Path().rglob("*.py")
-            ]
+            cmd = [sys.executable, "-m", "py_compile"] + [str(f) for f in Path().rglob("*.py")]
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
@@ -1338,9 +1330,7 @@ Examples:
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
-                raise subprocess.CalledProcessError(
-                    process.returncode or 1, cmd, stderr
-                )
+                raise subprocess.CalledProcessError(process.returncode or 1, cmd, stderr)
 
             if RICH_AVAILABLE:
                 self.console.print("[green]Python syntax check passed[/green]")

@@ -140,9 +140,7 @@ class CoachingEngine:
         capabilities = self.capability_assessment.assess_agent_capabilities(agent_id)
 
         # Analyze performance issues
-        perf_recommendations = self._analyze_performance_issues(
-            agent_id, performance, capabilities
-        )
+        perf_recommendations = self._analyze_performance_issues(agent_id, performance, capabilities)
         recommendations.extend(perf_recommendations)
 
         # Analyze capability gaps
@@ -152,9 +150,7 @@ class CoachingEngine:
         recommendations.extend(capability_recommendations)
 
         # Analyze collaboration patterns
-        collab_recommendations = self._analyze_collaboration_patterns(
-            agent_id, performance
-        )
+        collab_recommendations = self._analyze_collaboration_patterns(agent_id, performance)
         recommendations.extend(collab_recommendations)
 
         # Analyze workload balance
@@ -162,9 +158,7 @@ class CoachingEngine:
         recommendations.extend(workload_recommendations)
 
         # Sort by priority
-        recommendations.sort(
-            key=lambda r: self._get_priority_rank(r.priority), reverse=True
-        )
+        recommendations.sort(key=lambda r: self._get_priority_rank(r.priority), reverse=True)
 
         return recommendations
 
@@ -190,9 +184,7 @@ class CoachingEngine:
             all_recommendations.extend(agent_recommendations)
 
         # Add team-level recommendations
-        team_recommendations = self._generate_team_recommendations(
-            team_id, agent_ids, objectives
-        )
+        team_recommendations = self._generate_team_recommendations(team_id, agent_ids, objectives)
         all_recommendations.extend(team_recommendations)
 
         # Define team goals based on recommendations and objectives
@@ -272,9 +264,7 @@ class CoachingEngine:
                 ],
                 expected_impact="Improve success rate to above 85% within 30 days",
                 metrics_to_track=["success_rate", "error_recovery_rate"],
-                resources=[
-                    {"type": "best_practice", "name": "Performance Optimization Guide"}
-                ],
+                resources=[{"type": "best_practice", "name": "Performance Optimization Guide"}],
                 timeframe="30 days",
                 created_at=datetime.utcnow(),
                 evidence={
@@ -286,9 +276,7 @@ class CoachingEngine:
 
         # Check efficiency
         avg_time = performance.avg_execution_time
-        if (
-            avg_time and avg_time > self.efficiency_thresholds["slow"] * 60
-        ):  # Convert to seconds
+        if avg_time and avg_time > self.efficiency_thresholds["slow"] * 60:  # Convert to seconds
             recommendation = CoachingRecommendation(
                 agent_id=agent_id,
                 category=CoachingCategory.EFFICIENCY,
@@ -332,8 +320,7 @@ class CoachingEngine:
         weak_capabilities = [
             (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
             for domain, score in capabilities.capability_scores.items()
-            if score.proficiency_level.value
-            < 3  # Below intermediate is considered weak
+            if score.proficiency_level.value < 3  # Below intermediate is considered weak
         ]
 
         if weak_capabilities:
@@ -371,9 +358,7 @@ class CoachingEngine:
                     evidence={
                         "current_score": score,
                         "domain": domain,
-                        "related_failures": self._get_domain_failures(
-                            performance, domain.value
-                        ),
+                        "related_failures": self._get_domain_failures(performance, domain.value),
                     },
                 )
                 recommendations.append(recommendation)
@@ -382,8 +367,7 @@ class CoachingEngine:
         strong_capabilities = [
             (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
             for domain, score in capabilities.capability_scores.items()
-            if score.proficiency_level.value
-            >= 4  # Advanced or expert is considered strong
+            if score.proficiency_level.value >= 4  # Advanced or expert is considered strong
         ]
 
         for domain, score in strong_capabilities:
@@ -405,9 +389,7 @@ class CoachingEngine:
                     ],
                     expected_impact=f"Increase {domain} utilization to 60% for better ROI",
                     metrics_to_track=[f"{domain}_utilization", f"{domain}_impact"],
-                    resources=[
-                        {"type": "opportunity", "name": f"Available {domain} Projects"}
-                    ],
+                    resources=[{"type": "opportunity", "name": f"Available {domain} Projects"}],
                     timeframe="2 weeks",
                     created_at=datetime.utcnow(),
                     evidence={
@@ -598,9 +580,7 @@ class CoachingEngine:
                 ],
                 expected_impact="Achieve balanced team capabilities within 8 weeks",
                 metrics_to_track=["team_capability_coverage", "gap_closure_rate"],
-                resources=[
-                    {"type": "analysis", "name": "Detailed Capability Gap Report"}
-                ],
+                resources=[{"type": "analysis", "name": "Detailed Capability Gap Report"}],
                 timeframe="8 weeks",
                 created_at=datetime.utcnow(),
                 evidence=team_capabilities,
@@ -657,9 +637,7 @@ class CoachingEngine:
             goals.extend(objectives)
 
         # Add recommendation-based goals
-        critical_recs = [
-            r for r in recommendations if r.priority == CoachingPriority.CRITICAL
-        ]
+        critical_recs = [r for r in recommendations if r.priority == CoachingPriority.CRITICAL]
         high_recs = [r for r in recommendations if r.priority == CoachingPriority.HIGH]
 
         if critical_recs:
@@ -703,9 +681,7 @@ class CoachingEngine:
 
         return metrics
 
-    def _create_coaching_timeline(
-        self, recommendations: List[CoachingRecommendation]
-    ) -> str:
+    def _create_coaching_timeline(self, recommendations: List[CoachingRecommendation]) -> str:
         """Create a timeline for implementing coaching recommendations."""
         # Group by timeframe
         timeframes = {}
@@ -721,9 +697,7 @@ class CoachingEngine:
         for tf in sorted_timeframes:
             count = len(timeframes[tf])
             priority_breakdown = self._get_priority_breakdown(timeframes[tf])
-            timeline_parts.append(
-                f"{tf}: {count} recommendations ({priority_breakdown})"
-            )
+            timeline_parts.append(f"{tf}: {count} recommendations ({priority_breakdown})")
 
         return " → ".join(timeline_parts)
 
@@ -750,9 +724,7 @@ class CoachingEngine:
         }
         return ranks.get(priority, 0)
 
-    def _get_domain_failures(
-        self, performance: AgentPerformanceData, domain: str
-    ) -> int:
+    def _get_domain_failures(self, performance: AgentPerformanceData, domain: str) -> int:
         """Get failure count related to a specific domain."""
         # This would analyze error patterns related to the domain
         return performance.failed_tasks  # Simplified - return total failures
@@ -775,9 +747,7 @@ class CoachingEngine:
         domain_coverage = {}
 
         for agent_id in agent_ids:
-            capabilities = self.capability_assessment.assess_agent_capabilities(
-                agent_id
-            )
+            capabilities = self.capability_assessment.assess_agent_capabilities(agent_id)
             for domain, score in capabilities.capability_scores.items():
                 all_domains.add(domain)
                 if domain not in domain_coverage:
@@ -786,15 +756,11 @@ class CoachingEngine:
                     domain_coverage[domain].append(agent_id)
 
         # Identify gaps
-        gaps = [
-            domain for domain in all_domains if len(domain_coverage.get(domain, [])) < 2
-        ]
+        gaps = [domain for domain in all_domains if len(domain_coverage.get(domain, [])) < 2]
 
         return {
             "total_domains": len(all_domains),
-            "covered_domains": len(
-                [d for d in domain_coverage if len(domain_coverage[d]) >= 2]
-            ),
+            "covered_domains": len([d for d in domain_coverage if len(domain_coverage[d]) >= 2]),
             "gaps": gaps,
             "coverage_details": domain_coverage,
         }
@@ -837,9 +803,7 @@ class CoachingEngine:
             return months * 30
         return 30  # Default
 
-    def _get_priority_breakdown(
-        self, recommendations: List[CoachingRecommendation]
-    ) -> str:
+    def _get_priority_breakdown(self, recommendations: List[CoachingRecommendation]) -> str:
         """Get priority breakdown string."""
         counts = {}
         for rec in recommendations:

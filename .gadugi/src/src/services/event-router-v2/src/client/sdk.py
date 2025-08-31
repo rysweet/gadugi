@@ -172,9 +172,7 @@ class EventRouterClient:
         logger.debug(f"Published event: {event.id}")
         return event.id
 
-    def publish_nowait(
-        self, event_type: str, payload: Dict[str, Any], **kwargs
-    ) -> None:
+    def publish_nowait(self, event_type: str, payload: Dict[str, Any], **kwargs) -> None:
         """
         Publish event without waiting (fire and forget).
 
@@ -329,9 +327,7 @@ class EventRouterClient:
         self.subscriptions[subscription.id] = subscription
 
         # Send subscription to router
-        await self.transport.send(
-            {"type": "subscribe", "subscription": subscription.to_dict()}
-        )
+        await self.transport.send({"type": "subscribe", "subscription": subscription.to_dict()})
 
         logger.info(f"Created subscription {subscription.id} for topics {topics}")
         return subscription
@@ -345,9 +341,7 @@ class EventRouterClient:
         """
         if subscription_id in self.subscriptions:
             # Send unsubscribe message
-            await self.transport.send(
-                {"type": "unsubscribe", "subscription_id": subscription_id}
-            )
+            await self.transport.send({"type": "unsubscribe", "subscription_id": subscription_id})
 
             # Remove subscription
             del self.subscriptions[subscription_id]

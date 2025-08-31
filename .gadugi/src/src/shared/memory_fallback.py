@@ -128,12 +128,8 @@ class Memory:
         if self.expires_at:
             data["expires_at"] = self.expires_at.isoformat()
         # Handle enums
-        data["type"] = (
-            self.type.value if isinstance(self.type, MemoryType) else self.type
-        )
-        data["scope"] = (
-            self.scope.value if isinstance(self.scope, MemoryScope) else self.scope
-        )
+        data["type"] = self.type.value if isinstance(self.type, MemoryType) else self.type
+        data["scope"] = self.scope.value if isinstance(self.scope, MemoryScope) else self.scope
         data["persistence"] = (
             self.persistence.value
             if isinstance(self.persistence, MemoryPersistence)
@@ -157,15 +153,11 @@ class Memory:
         # Handle enums
         if "type" in data:
             data["type"] = (
-                MemoryType(data["type"])
-                if isinstance(data["type"], str)
-                else data["type"]
+                MemoryType(data["type"]) if isinstance(data["type"], str) else data["type"]
             )
         if "scope" in data:
             data["scope"] = (
-                MemoryScope(data["scope"])
-                if isinstance(data["scope"], str)
-                else data["scope"]
+                MemoryScope(data["scope"]) if isinstance(data["scope"], str) else data["scope"]
             )
         if "persistence" in data:
             data["persistence"] = (
@@ -317,9 +309,7 @@ class MemoryBackend(ABC):
         pass
 
     @abstractmethod
-    async def consolidate_memories(
-        self, agent_id: str, threshold_hours: int = 24
-    ) -> List[Memory]:
+    async def consolidate_memories(self, agent_id: str, threshold_hours: int = 24) -> List[Memory]:
         """Consolidate short-term memories into long-term storage."""
         pass
 
@@ -333,9 +323,7 @@ class MemoryBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_project_memories(
-        self, project_id: str, limit: int = 50
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 50) -> List[Memory]:
         """Get project memories."""
         pass
 
@@ -376,9 +364,7 @@ class MemoryBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """Get agent's knowledge graph."""
         pass
 
@@ -409,9 +395,7 @@ class MemoryBackend(ABC):
         pass
 
     @abstractmethod
-    async def backup_agent_memories(
-        self, agent_id: str, backup_path: Optional[str] = None
-    ) -> str:
+    async def backup_agent_memories(self, agent_id: str, backup_path: Optional[str] = None) -> str:
         """Backup agent memories."""
         pass
 
@@ -424,7 +408,7 @@ class MemoryBackend(ABC):
 class MarkdownMemoryBackend(MemoryBackend):
     """File-based memory backend using structured markdown files."""
 
-    def __init__(self, storage_path: str = ".memory"):
+    def __init__(self, storage_path: str = ".memory") -> Any:
         self.storage_path = Path(storage_path)
         self.is_connected = False
 
@@ -451,11 +435,7 @@ class MarkdownMemoryBackend(MemoryBackend):
     async def is_available(self) -> bool:
         """Check if the file system is available."""
         try:
-            return (
-                self.is_connected
-                and self.storage_path.exists()
-                and self.storage_path.is_dir()
-            )
+            return self.is_connected and self.storage_path.exists() and self.storage_path.is_dir()
         except Exception:
             return False
 
@@ -512,9 +492,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             logger.error(f"Failed to load memories from {file_path}: {e}")
             return []
 
-    async def _save_memories_to_file(
-        self, file_path: Path, memories: List[Memory]
-    ) -> None:
+    async def _save_memories_to_file(self, file_path: Path, memories: List[Memory]) -> None:
         """Save memories to a markdown file using atomic operations."""
         import tempfile
         import os
@@ -566,9 +544,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 
         # Determine file based on memory type
         memory_type_str = (
-            memory.type.value
-            if isinstance(memory.type, MemoryType)
-            else str(memory.type)
+            memory.type.value if isinstance(memory.type, MemoryType) else str(memory.type)
         )
         file_path = self._get_memory_file_path(memory.agent_id, memory_type_str)
 
@@ -635,9 +611,7 @@ class MarkdownMemoryBackend(MemoryBackend):
         # Load from relevant files
         if memory_type:
             memory_type_str = (
-                memory_type.value
-                if isinstance(memory_type, MemoryType)
-                else str(memory_type)
+                memory_type.value if isinstance(memory_type, MemoryType) else str(memory_type)
             )
             file_path = self._get_memory_file_path(agent_id, memory_type_str)
             all_memories.extend(await self._load_memories_from_file(file_path))
@@ -667,9 +641,7 @@ class MarkdownMemoryBackend(MemoryBackend):
         if not await self.is_available():
             raise RuntimeError("Markdown backend not available")
 
-        all_memories = await self.get_agent_memories(
-            agent_id, limit=1000
-        )  # Get more for search
+        all_memories = await self.get_agent_memories(agent_id, limit=1000)  # Get more for search
 
         matching_memories = []
         for memory in all_memories:
@@ -704,9 +676,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 
         return False
 
-    async def consolidate_memories(
-        self, agent_id: str, threshold_hours: int = 24
-    ) -> List[Memory]:
+    async def consolidate_memories(self, agent_id: str, threshold_hours: int = 24) -> List[Memory]:
         """Consolidate short-term memories into long-term storage."""
         if not await self.is_available():
             raise RuntimeError("Markdown backend not available")
@@ -763,9 +733,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 
         return memory
 
-    async def get_project_memories(
-        self, project_id: str, limit: int = 50
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 50) -> List[Memory]:
         """Get project memories."""
         project_path = self.storage_path / "projects" / f"{project_id}.md"
         memories = await self._load_memories_from_file(project_path)
@@ -795,9 +763,7 @@ class MarkdownMemoryBackend(MemoryBackend):
         self, agent_id: str, procedure_name: Optional[str] = None
     ) -> List[Memory]:
         """Get procedural memories."""
-        memories = await self.get_agent_memories(
-            agent_id, MemoryType.PROCEDURAL, limit=100
-        )
+        memories = await self.get_agent_memories(agent_id, MemoryType.PROCEDURAL, limit=100)
 
         if procedure_name:
             filtered = []
@@ -919,9 +885,7 @@ class MarkdownMemoryBackend(MemoryBackend):
                     pass
             raise
 
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """Get agent's knowledge graph."""
         # Load nodes
         knowledge_path = self.storage_path / "knowledge" / f"{agent_id}_nodes.json"
@@ -958,9 +922,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 
     async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
         """Create a task whiteboard."""
-        whiteboard = Whiteboard(
-            task_id=task_id, created_by=agent_id, participants=[agent_id]
-        )
+        whiteboard = Whiteboard(task_id=task_id, created_by=agent_id, participants=[agent_id])
 
         whiteboard_path = self.storage_path / "whiteboards" / f"{task_id}.json"
         whiteboard_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1098,14 +1060,10 @@ class MarkdownMemoryBackend(MemoryBackend):
 
         return deleted_count
 
-    async def backup_agent_memories(
-        self, agent_id: str, backup_path: Optional[str] = None
-    ) -> str:
+    async def backup_agent_memories(self, agent_id: str, backup_path: Optional[str] = None) -> str:
         """Backup agent memories."""
         if not backup_path:
-            backup_path = (
-                f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            )
+            backup_path = f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         memories = await self.get_agent_memories(agent_id, limit=10000)
 
@@ -1157,7 +1115,7 @@ class MarkdownMemoryBackend(MemoryBackend):
 class SQLiteMemoryBackend(MemoryBackend):
     """SQLite-based memory backend for reliable local storage with connection pooling."""
 
-    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5):
+    def __init__(self, db_path: str = ".memory/memory.db", pool_size: int = 5) -> Any:
         self.db_path = Path(db_path)
         self.is_connected = False
         self.pool_size = pool_size
@@ -1256,9 +1214,7 @@ class SQLiteMemoryBackend(MemoryBackend):
                 await db.execute(
                     "CREATE INDEX IF NOT EXISTS idx_memories_agent ON memories (agent_id)"
                 )
-                await db.execute(
-                    "CREATE INDEX IF NOT EXISTS idx_memories_type ON memories (type)"
-                )
+                await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_type ON memories (type)")
                 await db.execute(
                     "CREATE INDEX IF NOT EXISTS idx_memories_task ON memories (task_id)"
                 )
@@ -1305,7 +1261,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         except Exception:
             return False
 
-    async def _get_connection(self):
+    async def _get_connection(self) -> Any:
         """Get a connection from the pool or create a new one."""
         async with self._pool_semaphore:
             async with self._pool_lock:
@@ -1317,7 +1273,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             conn.row_factory = aiosqlite.Row
             return conn
 
-    async def _return_connection(self, conn):
+    async def _return_connection(self, conn: Any) -> Any:
         """Return a connection to the pool."""
         try:
             # Check if connection is still valid
@@ -1341,12 +1297,8 @@ class SQLiteMemoryBackend(MemoryBackend):
         return {
             "id": memory.id,
             "agent_id": memory.agent_id,
-            "type": memory.type.value
-            if isinstance(memory.type, MemoryType)
-            else memory.type,
-            "scope": memory.scope.value
-            if isinstance(memory.scope, MemoryScope)
-            else memory.scope,
+            "type": memory.type.value if isinstance(memory.type, MemoryType) else memory.type,
+            "scope": memory.scope.value if isinstance(memory.scope, MemoryScope) else memory.scope,
             "persistence": memory.persistence.value
             if isinstance(memory.persistence, MemoryPersistence)
             else memory.persistence,
@@ -1366,9 +1318,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             "access_count": memory.access_count,
             "created_at": memory.created_at.isoformat() if memory.created_at else None,
             "updated_at": memory.updated_at.isoformat() if memory.updated_at else None,
-            "last_accessed": memory.last_accessed.isoformat()
-            if memory.last_accessed
-            else None,
+            "last_accessed": memory.last_accessed.isoformat() if memory.last_accessed else None,
             "expires_at": memory.expires_at.isoformat() if memory.expires_at else None,
             "parent_id": memory.parent_id,
             "associations": json.dumps(memory.associations),
@@ -1389,9 +1339,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             project_id=row["project_id"],
             team_id=row["team_id"],
             content=row["content"],
-            structured_data=json.loads(row["structured_data"])
-            if row["structured_data"]
-            else None,
+            structured_data=json.loads(row["structured_data"]) if row["structured_data"] else None,
             embedding=json.loads(row["embedding"]) if row["embedding"] else None,
             tags=json.loads(row["tags"]) if row["tags"] else [],
             metadata=json.loads(row["metadata"]) if row["metadata"] else {},
@@ -1401,21 +1349,17 @@ class SQLiteMemoryBackend(MemoryBackend):
             access_count=row["access_count"],
             created_at=datetime.fromisoformat(row["created_at"])
             if row["created_at"]
-            else None,
+            else datetime.now(),
             updated_at=datetime.fromisoformat(row["updated_at"])
             if row["updated_at"]
-            else None,
+            else datetime.now(),
             last_accessed=datetime.fromisoformat(row["last_accessed"])
             if row["last_accessed"]
             else None,
-            expires_at=datetime.fromisoformat(row["expires_at"])
-            if row["expires_at"]
-            else None,
+            expires_at=datetime.fromisoformat(row["expires_at"]) if row["expires_at"] else None,
             parent_id=row["parent_id"],
             associations=json.loads(row["associations"]) if row["associations"] else [],
-            references=json.loads(row["memory_references"])
-            if row["memory_references"]
-            else [],
+            references=json.loads(row["memory_references"]) if row["memory_references"] else [],
             version=row["version"],
             is_active=bool(row["is_active"]),
         )
@@ -1432,9 +1376,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             # Use INSERT OR REPLACE to handle updates
             placeholders = ", ".join(["?" for _ in row_data])
             columns = ", ".join(row_data.keys())
-            query = (
-                f"INSERT OR REPLACE INTO memories ({columns}) VALUES ({placeholders})"
-            )
+            query = f"INSERT OR REPLACE INTO memories ({columns}) VALUES ({placeholders})"
 
             await conn.execute(query, list(row_data.values()))
             await conn.commit()
@@ -1476,7 +1418,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             raise RuntimeError("SQLite backend not available")
 
         query = "SELECT * FROM memories WHERE agent_id = ? AND is_active = 1"
-        params = [agent_id]
+        params: List[Any] = [agent_id]
 
         if memory_type:
             query += " AND type = ?"
@@ -1510,7 +1452,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 
         # Build query to search for any of the tags in the JSON array
         tag_conditions = []
-        params = [agent_id]
+        params: List[Any] = [agent_id]
 
         for tag in tags:
             tag_conditions.append("tags LIKE ?")
@@ -1545,9 +1487,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 
             return cursor.rowcount > 0
 
-    async def consolidate_memories(
-        self, agent_id: str, threshold_hours: int = 24
-    ) -> List[Memory]:
+    async def consolidate_memories(self, agent_id: str, threshold_hours: int = 24) -> List[Memory]:
         """Consolidate short-term memories."""
         if not await self.is_available():
             raise RuntimeError("SQLite backend not available")
@@ -1599,9 +1539,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         )
         return await self.store_memory(memory)
 
-    async def get_project_memories(
-        self, project_id: str, limit: int = 50
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 50) -> List[Memory]:
         """Get project memories."""
         return await self.get_agent_memories("", limit=limit)  # Simplified
 
@@ -1693,9 +1631,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             )
             await db.commit()
 
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """Get knowledge graph."""
         async with aiosqlite.connect(str(self.db_path)) as db:
             db.row_factory = aiosqlite.Row
@@ -1727,9 +1663,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 
     async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
         """Create whiteboard."""
-        whiteboard = Whiteboard(
-            task_id=task_id, created_by=agent_id, participants=[agent_id]
-        )
+        whiteboard = Whiteboard(task_id=task_id, created_by=agent_id, participants=[agent_id])
 
         async with aiosqlite.connect(str(self.db_path)) as db:
             await db.execute(
@@ -1790,9 +1724,7 @@ class SQLiteMemoryBackend(MemoryBackend):
         """Get whiteboard."""
         async with aiosqlite.connect(str(self.db_path)) as db:
             db.row_factory = aiosqlite.Row
-            cursor = await db.execute(
-                "SELECT * FROM whiteboards WHERE task_id = ?", (task_id,)
-            )
+            cursor = await db.execute("SELECT * FROM whiteboards WHERE task_id = ?", (task_id,))
             row = await cursor.fetchone()
 
             if row:
@@ -1838,14 +1770,10 @@ class SQLiteMemoryBackend(MemoryBackend):
 
             return cursor.rowcount
 
-    async def backup_agent_memories(
-        self, agent_id: str, backup_path: Optional[str] = None
-    ) -> str:
+    async def backup_agent_memories(self, agent_id: str, backup_path: Optional[str] = None) -> str:
         """Backup agent memories."""
         if not backup_path:
-            backup_path = (
-                f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
-            )
+            backup_path = f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
 
         # Simple file copy for SQLite
         import shutil
@@ -1863,7 +1791,7 @@ class SQLiteMemoryBackend(MemoryBackend):
 class InMemoryBackend(MemoryBackend):
     """In-memory storage backend for emergency fallback."""
 
-    def __init__(self):
+    def __init__(self) -> Any:
         self.memories: Dict[str, Memory] = {}
         self.knowledge_nodes: Dict[str, KnowledgeNode] = {}
         self.knowledge_links: List[Dict[str, Any]] = []
@@ -1926,13 +1854,9 @@ class InMemoryBackend(MemoryBackend):
         if memory_type:
             memories = [m for m in memories if m.type == memory_type]
         if short_term_only:
-            memories = [
-                m for m in memories if m.persistence == MemoryPersistence.VOLATILE
-            ]
+            memories = [m for m in memories if m.persistence == MemoryPersistence.VOLATILE]
         if long_term_only:
-            memories = [
-                m for m in memories if m.persistence != MemoryPersistence.VOLATILE
-            ]
+            memories = [m for m in memories if m.persistence != MemoryPersistence.VOLATILE]
 
         # Sort by creation date
         memories.sort(key=lambda m: m.created_at or datetime.min, reverse=True)
@@ -1965,9 +1889,7 @@ class InMemoryBackend(MemoryBackend):
             return True
         return False
 
-    async def consolidate_memories(
-        self, agent_id: str, threshold_hours: int = 24
-    ) -> List[Memory]:
+    async def consolidate_memories(self, agent_id: str, threshold_hours: int = 24) -> List[Memory]:
         """Consolidate memories."""
         if not await self.is_available():
             raise RuntimeError("In-memory backend not available")
@@ -2004,9 +1926,7 @@ class InMemoryBackend(MemoryBackend):
         )
         return await self.store_memory(memory)
 
-    async def get_project_memories(
-        self, project_id: str, limit: int = 50
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 50) -> List[Memory]:
         memories = [m for m in self.memories.values() if m.project_id == project_id]
         return memories[:limit]
 
@@ -2037,8 +1957,7 @@ class InMemoryBackend(MemoryBackend):
             memories = [
                 m
                 for m in memories
-                if m.structured_data
-                and m.structured_data.get("procedure_name") == procedure_name
+                if m.structured_data and m.structured_data.get("procedure_name") == procedure_name
             ]
         return memories
 
@@ -2067,13 +1986,9 @@ class InMemoryBackend(MemoryBackend):
         }
         self.knowledge_links.append(link)
 
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         nodes = [
-            node.to_dict()
-            for node in self.knowledge_nodes.values()
-            if node.agent_id == agent_id
+            node.to_dict() for node in self.knowledge_nodes.values() if node.agent_id == agent_id
         ]
         node_ids = {node["id"] for node in nodes}
         edges = [
@@ -2084,9 +1999,7 @@ class InMemoryBackend(MemoryBackend):
         return {"nodes": nodes, "edges": edges, "agent_id": agent_id}
 
     async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
-        whiteboard = Whiteboard(
-            task_id=task_id, created_by=agent_id, participants=[agent_id]
-        )
+        whiteboard = Whiteboard(task_id=task_id, created_by=agent_id, participants=[agent_id])
         self.whiteboards[task_id] = whiteboard
         return whiteboard
 
@@ -2127,13 +2040,9 @@ class InMemoryBackend(MemoryBackend):
 
         return deleted_count
 
-    async def backup_agent_memories(
-        self, agent_id: str, backup_path: Optional[str] = None
-    ) -> str:
+    async def backup_agent_memories(self, agent_id: str, backup_path: Optional[str] = None) -> str:
         if not backup_path:
-            backup_path = (
-                f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            )
+            backup_path = f"backup_{agent_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         memories = await self.get_agent_memories(agent_id, limit=10000)
         backup_data = {
@@ -2167,7 +2076,7 @@ class MemoryFallbackChain(MemoryBackend):
         self,
         primary_backend: Optional[MemoryBackend] = None,
         fallback_config: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> Any:
         self.fallback_config = fallback_config or {}
         self.backends: List[MemoryBackend] = []
         self.current_backend_index = 0
@@ -2212,14 +2121,10 @@ class MemoryFallbackChain(MemoryBackend):
             try:
                 await backend.connect()
                 self.backend_health[i] = True
-                logger.info(
-                    f"Backend {i} ({backend.__class__.__name__}) connected successfully"
-                )
+                logger.info(f"Backend {i} ({backend.__class__.__name__}) connected successfully")
             except Exception as e:
                 self.backend_health[i] = False
-                logger.warning(
-                    f"Backend {i} ({backend.__class__.__name__}) failed to connect: {e}"
-                )
+                logger.warning(f"Backend {i} ({backend.__class__.__name__}) failed to connect: {e}")
 
         # Find the first available backend
         await self._find_available_backend()
@@ -2264,7 +2169,13 @@ class MemoryFallbackChain(MemoryBackend):
 
     async def is_available(self) -> bool:
         """Check if any backend is available."""
-        return self.is_connected and await self._get_current_backend().is_available()
+        if not self.is_connected:
+            return False
+        try:
+            backend = await self._get_current_backend()
+            return await backend.is_available()
+        except Exception:
+            return False
 
     async def _find_available_backend(self) -> None:
         """Find the first available backend and switch to it."""
@@ -2272,9 +2183,7 @@ class MemoryFallbackChain(MemoryBackend):
             try:
                 if await backend.is_available():
                     if i != self.current_backend_index:
-                        logger.info(
-                            f"Switching to backend {i} ({backend.__class__.__name__})"
-                        )
+                        logger.info(f"Switching to backend {i} ({backend.__class__.__name__})")
                         self.current_backend_index = i
                     return
             except Exception as e:
@@ -2291,8 +2200,7 @@ class MemoryFallbackChain(MemoryBackend):
         # Check if we need to verify backend health
         if (
             self.current_backend_index not in self.last_health_check
-            or now - self.last_health_check[self.current_backend_index]
-            > self.health_check_interval
+            or now - self.last_health_check[self.current_backend_index] > self.health_check_interval
         ):
             current_backend = self.backends[self.current_backend_index]
             try:
@@ -2306,9 +2214,7 @@ class MemoryFallbackChain(MemoryBackend):
                     )
                     await self._find_available_backend()
             except Exception as e:
-                logger.error(
-                    f"Health check failed for backend {self.current_backend_index}: {e}"
-                )
+                logger.error(f"Health check failed for backend {self.current_backend_index}: {e}")
                 self.backend_health[self.current_backend_index] = False
                 await self._find_available_backend()
 
@@ -2369,9 +2275,7 @@ class MemoryFallbackChain(MemoryBackend):
                 now = datetime.now()
                 time_since_last_sync = now - self.last_sync_time
                 if time_since_last_sync < self.sync_interval:
-                    sleep_time = (
-                        self.sync_interval - time_since_last_sync
-                    ).total_seconds()
+                    sleep_time = (self.sync_interval - time_since_last_sync).total_seconds()
                     await asyncio.sleep(sleep_time)
 
                 # Perform sync with semaphore to limit concurrent syncs
@@ -2403,9 +2307,7 @@ class MemoryFallbackChain(MemoryBackend):
                     backend = self.backends[i]
                     if await backend.is_available():
                         await backend.store_memory(memory)
-                        logger.debug(
-                            f"Synced memory {memory.id} to higher priority backend {i}"
-                        )
+                        logger.debug(f"Synced memory {memory.id} to higher priority backend {i}")
                         self.backend_health[i] = True
                 except Exception as e:
                     logger.debug(f"Failed to sync to backend {i}: {e}")
@@ -2457,21 +2359,15 @@ class MemoryFallbackChain(MemoryBackend):
         self, agent_id: str, tags: List[str], limit: int = 50
     ) -> List[Memory]:
         """Search memories with fallback."""
-        return await self._execute_with_fallback(
-            "search_memories_by_tags", agent_id, tags, limit
-        )
+        return await self._execute_with_fallback("search_memories_by_tags", agent_id, tags, limit)
 
     async def delete_memory(self, memory_id: str) -> bool:
         """Delete memory with fallback."""
         return await self._execute_with_fallback("delete_memory", memory_id)
 
-    async def consolidate_memories(
-        self, agent_id: str, threshold_hours: int = 24
-    ) -> List[Memory]:
+    async def consolidate_memories(self, agent_id: str, threshold_hours: int = 24) -> List[Memory]:
         """Consolidate memories with fallback."""
-        return await self._execute_with_fallback(
-            "consolidate_memories", agent_id, threshold_hours
-        )
+        return await self._execute_with_fallback("consolidate_memories", agent_id, threshold_hours)
 
     async def store_project_memory(
         self, project_id: str, content: str, created_by: str, **kwargs
@@ -2486,13 +2382,9 @@ class MemoryFallbackChain(MemoryBackend):
 
         return result
 
-    async def get_project_memories(
-        self, project_id: str, limit: int = 50
-    ) -> List[Memory]:
+    async def get_project_memories(self, project_id: str, limit: int = 50) -> List[Memory]:
         """Get project memories with fallback."""
-        return await self._execute_with_fallback(
-            "get_project_memories", project_id, limit
-        )
+        return await self._execute_with_fallback("get_project_memories", project_id, limit)
 
     async def store_procedural_memory(
         self,
@@ -2533,13 +2425,9 @@ class MemoryFallbackChain(MemoryBackend):
             "link_knowledge_nodes", node1_id, node2_id, relationship, strength
         )
 
-    async def get_knowledge_graph(
-        self, agent_id: str, max_depth: int = 2
-    ) -> Dict[str, Any]:
+    async def get_knowledge_graph(self, agent_id: str, max_depth: int = 2) -> Dict[str, Any]:
         """Get knowledge graph with fallback."""
-        return await self._execute_with_fallback(
-            "get_knowledge_graph", agent_id, max_depth
-        )
+        return await self._execute_with_fallback("get_knowledge_graph", agent_id, max_depth)
 
     async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
         """Create whiteboard with fallback."""
@@ -2561,13 +2449,9 @@ class MemoryFallbackChain(MemoryBackend):
         """Cleanup expired memories with fallback."""
         return await self._execute_with_fallback("cleanup_expired_memories")
 
-    async def backup_agent_memories(
-        self, agent_id: str, backup_path: Optional[str] = None
-    ) -> str:
+    async def backup_agent_memories(self, agent_id: str, backup_path: Optional[str] = None) -> str:
         """Backup agent memories with fallback."""
-        return await self._execute_with_fallback(
-            "backup_agent_memories", agent_id, backup_path
-        )
+        return await self._execute_with_fallback("backup_agent_memories", agent_id, backup_path)
 
     # ========== Additional management methods ==========
 
@@ -2605,9 +2489,7 @@ class MemoryFallbackChain(MemoryBackend):
                 old_index = self.current_backend_index
                 self.current_backend_index = backend_index
                 self.backend_health[backend_index] = True
-                logger.info(
-                    f"Forced switch from backend {old_index} to {backend_index}"
-                )
+                logger.info(f"Forced switch from backend {old_index} to {backend_index}")
                 return True
         except Exception as e:
             logger.error(f"Failed to force switch to backend {backend_index}: {e}")

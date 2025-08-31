@@ -58,9 +58,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
         # Fix task.status patterns
         elif "assert task.status" in line and "is not None" not in line:
             new_lines.append(
-                line.replace(
-                    "assert task.status", "assert task is not None and task.status"
-                )
+                line.replace("assert task.status", "assert task is not None and task.status")
             )
             modified = True
 
@@ -78,11 +76,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
                 modified = True
 
         # Fix .id access patterns
-        elif (
-            re.search(r"\w+_task\.id", line)
-            and "assert" in line
-            and "is not None" not in line
-        ):
+        elif re.search(r"\w+_task\.id", line) and "assert" in line and "is not None" not in line:
             match = re.search(r"assert (\w+_task)\.", line)
             if match:
                 new_lines.append(

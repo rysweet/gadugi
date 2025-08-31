@@ -35,9 +35,7 @@ class TestResourceMonitor(unittest.TestCase):
 
     def setUp(self):
         """Set up test environment"""
-        self.monitor = ResourceMonitor(
-            monitoring_interval=0.1
-        )  # Fast monitoring for tests
+        self.monitor = ResourceMonitor(monitoring_interval=0.1)  # Fast monitoring for tests
 
     def tearDown(self):
         """Clean up test environment"""
@@ -55,9 +53,7 @@ class TestResourceMonitor(unittest.TestCase):
         """Test current resource retrieval"""
         # Mock system resource calls
         mock_cpu.return_value = 45.5
-        mock_memory.return_value = MagicMock(
-            percent=62.3, available=4 * 1024**3
-        )  # 4GB available
+        mock_memory.return_value = MagicMock(percent=62.3, available=4 * 1024**3)  # 4GB available
         mock_disk.return_value = MagicMock(percent=78.9)
         mock_cpu_count.return_value = 8
         mock_loadavg.return_value = (1.2, 1.5, 1.8)
@@ -133,9 +129,7 @@ class TestResourceMonitor(unittest.TestCase):
 
         self.monitor.resource_history = [high_resources]
         optimal = self.monitor.get_optimal_concurrency()
-        self.assertEqual(
-            optimal, 4
-        )  # Min of CPU-based (7) and memory-based (4), capped at 4
+        self.assertEqual(optimal, 4)  # Min of CPU-based (7) and memory-based (4), capped at 4
 
         # Low resource availability
         low_resources = SystemResources(
@@ -324,9 +318,7 @@ class TestExecutionEngine(unittest.TestCase):
         def get_worktree(task_id):
             if task_id in task_ids:
                 mock_worktree = MagicMock()
-                mock_worktree.worktree_path = (
-                    Path(self.temp_dir) / f"worktree-{task_id}"
-                )
+                mock_worktree.worktree_path = Path(self.temp_dir) / f"worktree-{task_id}"
                 mock_worktree.worktree_path.mkdir(exist_ok=True)
                 return mock_worktree
             return None
@@ -530,9 +522,7 @@ class TestExecutionEngineIntegration(unittest.TestCase):
     def setUp(self):
         """Set up test environment"""
         self.temp_dir = tempfile.mkdtemp()
-        self.engine = ExecutionEngine(
-            max_concurrent=1, default_timeout=10
-        )  # Low timeout for tests
+        self.engine = ExecutionEngine(max_concurrent=1, default_timeout=10)  # Low timeout for tests
 
     def tearDown(self):
         """Clean up test environment"""

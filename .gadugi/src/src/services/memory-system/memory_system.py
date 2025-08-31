@@ -129,12 +129,8 @@ class MemorySystem:
         if self.neo4j_driver:
             async with self.neo4j_driver.session() as session:
                 await session.run("CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.id)")
-                await session.run(
-                    "CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.type)"
-                )
-                await session.run(
-                    "CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.created_at)"
-                )
+                await session.run("CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.type)")
+                await session.run("CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.created_at)")
 
         logger.info("Memory system initialized")
 
@@ -500,17 +496,12 @@ class MemorySystem:
                         memory_ids.add(record["id"])
 
                     # Archive memories (store to file before deletion)
-                    archive_path = (
-                        Path(".memory_archive")
-                        / f"archive_{datetime.now():%Y%m%d}.json"
-                    )
+                    archive_path = Path(".memory_archive") / f"archive_{datetime.now():%Y%m%d}.json"
                     archive_path.parent.mkdir(exist_ok=True)
 
                     archived_memories = []
                     for mem_id in memory_ids:
-                        memory_data = await self.mcp_service.retrieve(
-                            f"memory:{mem_id}"
-                        )
+                        memory_data = await self.mcp_service.retrieve(f"memory:{mem_id}")
                         if memory_data:
                             archived_memories.append(memory_data)
 
@@ -535,9 +526,7 @@ class MemorySystem:
             async with self._cache_lock:
                 old_cache_size = len(self._memory_cache)
                 self._memory_cache = {
-                    k: v
-                    for k, v in self._memory_cache.items()
-                    if v.updated_at >= cutoff_date
+                    k: v for k, v in self._memory_cache.items() if v.updated_at >= cutoff_date
                 }
                 cache_cleared = old_cache_size - len(self._memory_cache)
                 result.memories_pruned += cache_cleared

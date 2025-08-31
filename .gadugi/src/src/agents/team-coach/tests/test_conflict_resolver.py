@@ -102,19 +102,14 @@ class TestConflictResolver(unittest.TestCase):
         conflicts = self.resolver.detect_conflicts(self.agent_states, self.team_context)
 
         # Find task overlap conflicts
-        task_conflicts = [
-            c for c in conflicts if c.conflict_type == ConflictType.TASK_OVERLAP
-        ]
+        task_conflicts = [c for c in conflicts if c.conflict_type == ConflictType.TASK_OVERLAP]
 
         # Should detect task_1 overlap (non-collaborative, 2 agents)
         self.assertGreater(len(task_conflicts), 0)
 
         # Verify task_1 conflict
         task1_conflicts = [
-            c
-            for c in task_conflicts
-            if c.evidence.get("task_id") == "task_1"
-            if c is not None
+            c for c in task_conflicts if c.evidence.get("task_id") == "task_1" if c is not None
         ]
         self.assertEqual(len(task1_conflicts), 1)
 
@@ -137,10 +132,7 @@ class TestConflictResolver(unittest.TestCase):
 
         # Verify specific coordination failure
         long_wait = [
-            c
-            for c in coord_conflicts
-            if c.evidence.get("wait_time", 0) >= 7200
-            if c is not None
+            c for c in coord_conflicts if c.evidence.get("wait_time", 0) >= 7200 if c is not None
         ]
         self.assertGreater(len(long_wait), 0)
 
@@ -272,9 +264,7 @@ class TestConflictResolver(unittest.TestCase):
         resolution = ConflictResolution(
             conflict_id=conflict.conflict_id,
             strategy=ResolutionStrategy.IMMEDIATE_REALLOCATION,
-            actions=[
-                {"type": "remove_task", "agent_id": "agent_2", "task_id": "task_1"}
-            ],
+            actions=[{"type": "remove_task", "agent_id": "agent_2", "task_id": "task_1"}],
             expected_outcome="Task assigned to single agent",
             implementation_steps=["Remove task from agent_2"],
             timeline="Immediate",

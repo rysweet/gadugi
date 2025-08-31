@@ -732,9 +732,7 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.exception(
-                f"Failed to create relationship {relationship.id}: {e}"
-            )
+            self.logger.exception(f"Failed to create relationship {relationship.id}: {e}")
 
             return QueryResult(
                 success=False,
@@ -816,9 +814,7 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "node_type": node_type.value if node_type else None,
-                        "filter_properties": list(properties.keys())
-                        if properties
-                        else [],
+                        "filter_properties": list(properties.keys()) if properties else [],
                         "result_count": len(nodes),
                         "limit": limit,
                     },
@@ -924,9 +920,7 @@ class GraphDatabaseService:
                     metadata={
                         "source_id": source_id,
                         "target_id": target_id,
-                        "relationship_type": relationship_type.value
-                        if relationship_type
-                        else None,
+                        "relationship_type": relationship_type.value if relationship_type else None,
                         "result_count": len(relationships),
                         "limit": limit,
                     },
@@ -1293,9 +1287,7 @@ class GraphDatabaseService:
             for key, query in queries.items():
                 result = tx.run(query)
                 if key in ["node_types", "relationship_types"]:
-                    results[key] = {
-                        record["type"]: record["count"] for record in result
-                    }
+                    results[key] = {record["type"]: record["count"] for record in result}
                 else:
                     results[key] = result.single()["count"]
 
@@ -1366,8 +1358,7 @@ class GraphDatabaseService:
 
                 if type_queries:
                     full_query = (
-                        " UNION ".join(type_queries)
-                        + " YIELD node RETURN DISTINCT node LIMIT 50"
+                        " UNION ".join(type_queries) + " YIELD node RETURN DISTINCT node LIMIT 50"
                     )
                 else:
                     # Fallback to property search
@@ -1422,9 +1413,7 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "search_query": query,
-                        "node_types": [nt.value for nt in node_types]
-                        if node_types
-                        else None,
+                        "node_types": [nt.value for nt in node_types] if node_types else None,
                         "result_count": len(nodes),
                     },
                     execution_time=execution_time,
@@ -1527,9 +1516,7 @@ class GraphDatabaseService:
 
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
-        avg_query_time = (
-            self.total_query_time / self.query_count if self.query_count > 0 else 0
-        )
+        avg_query_time = self.total_query_time / self.query_count if self.query_count > 0 else 0
 
         return {
             "connected": self.connected,

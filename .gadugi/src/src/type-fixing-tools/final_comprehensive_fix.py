@@ -11,9 +11,7 @@ from typing import Set
 
 def get_error_files() -> Set[str]:
     """Get all files with pyright errors."""
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
     files = set()
     for line in result.stdout.split("\n"):
@@ -90,12 +88,8 @@ def fix_unused_imports():
             "ChangeType",
             "ElementType",
         ],
-        ".claude/agents/TeamCoach/phase2/task_matcher.py": [
-            "TaskCapabilityRequirement"
-        ],
-        ".claude/agents/teamcoach/phase2/task_matcher.py": [
-            "TaskCapabilityRequirement"
-        ],
+        ".claude/agents/TeamCoach/phase2/task_matcher.py": ["TaskCapabilityRequirement"],
+        ".claude/agents/teamcoach/phase2/task_matcher.py": ["TaskCapabilityRequirement"],
     }
 
     for filepath, unused_imports in files_to_fix.items():
@@ -296,11 +290,9 @@ def main():
     fix_event_router_tests()
 
     # Get final count
-    result = subprocess.run(
-        ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
-    )
+    result = subprocess.run(["uv", "run", "pyright", ".claude"], capture_output=True, text=True)
 
-    error_lines = [l for l in result.stdout.split("\n") if "error:" in l]
+    error_lines = [line for line in result.stdout.split("\n") if "error:" in line]
     print(f"\nTotal errors remaining: {len(error_lines)}")
 
     if len(error_lines) > 0:

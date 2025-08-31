@@ -75,9 +75,7 @@ class Settings(BaseSettings):  # type: ignore
     )
 
     # Database configuration (legacy)
-    database_url: Optional[str] = Field(
-        default=None, description="Database URL (legacy)"
-    )
+    database_url: Optional[str] = Field(default=None, description="Database URL (legacy)")
 
     # Redis configuration (for future use)
     redis_url: Optional[str] = Field(default=None, description="Redis URL for caching")
@@ -93,9 +91,7 @@ class Settings(BaseSettings):  # type: ignore
     )
 
     # Security configuration
-    api_key: Optional[str] = Field(
-        default=None, description="API Key for authentication"
-    )
+    api_key: Optional[str] = Field(default=None, description="API Key for authentication")
     secret_key: str = Field(default="change-me-in-production", description="Secret key")
     cors_origins: List[str] = Field(
         default_factory=lambda: ["http://localhost:3000", "http://localhost:8080"],

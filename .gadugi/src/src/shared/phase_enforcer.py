@@ -175,9 +175,7 @@ class PhaseEnforcer:
 
                 # Execute enforcement action
                 if rule.enforcement_action:
-                    success, message, details = rule.enforcement_action(
-                        workflow_state, context
-                    )
+                    success, message, details = rule.enforcement_action(workflow_state, context)
                 else:
                     success, message, details = (
                         False,
@@ -290,9 +288,7 @@ class PhaseEnforcer:
                     f"/agent:CodeReviewer\n\nReview PR #{pr_number} with comprehensive analysis",
                 ]
 
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True, timeout=600
-                )
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
 
                 if result.returncode == 0 and "completed" in result.stdout.lower():
                     return (
@@ -478,11 +474,7 @@ Thank you for the review feedback. The concerns raised have been noted and will 
                                 "pr_number": pr_number,
                                 "response_method": "review_response_comment",
                                 "addressed_reviews": len(
-                                    [
-                                        r
-                                        for r in reviews
-                                        if r.get("state") == "CHANGES_REQUESTED"
-                                    ]
+                                    [r for r in reviews if r.get("state") == "CHANGES_REQUESTED"]
                                 ),
                             },
                         )
@@ -630,9 +622,7 @@ Thank you for the review feedback. The concerns raised have been noted and will 
                 if phase_stats["total"] > 0:
                     phase_stats["avg_attempts"] /= phase_stats["total"]
                     phase_stats["avg_time"] /= phase_stats["total"]
-                    phase_stats["success_rate"] = (
-                        phase_stats["successful"] / phase_stats["total"]
-                    )
+                    phase_stats["success_rate"] = phase_stats["successful"] / phase_stats["total"]
 
         return stats
 
@@ -640,9 +630,7 @@ Thank you for the review feedback. The concerns raised have been noted and will 
         """Export enforcement log to JSON file"""
 
         if filename is None:
-            filename = (
-                f"phase_enforcement_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            )
+            filename = f"phase_enforcement_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         log_data = {
             "metadata": {

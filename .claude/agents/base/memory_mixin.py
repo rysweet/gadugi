@@ -89,7 +89,7 @@ class MemoryMixin:
 
                     # Create knowledge node
                     if self.memory:
-                        knowledge_id = await self.memory.add_knowledge(
+                        await self.memory.add_knowledge(
                             concept=title,
                             description=content[:500],  # First 500 chars as description
                             confidence=0.9,  # High confidence for pre-loaded knowledge
@@ -139,7 +139,7 @@ class MemoryMixin:
             # Store successful pattern
             if not self.memory:
                 return
-            procedure_id = await self.memory.learn_procedure(
+            await self.memory.learn_procedure(
                 procedure_name=f"successful_{outcome.task_type}",
                 steps=outcome.steps_taken,
                 context=f"Task {outcome.task_id} completed in {outcome.duration_seconds}s",
@@ -233,7 +233,7 @@ class MemoryMixin:
             "agent_type": self.agent_type,
             "expertise_shared": topic,
             "knowledge_items": len(knowledge),
-            "procedures": len(relevant_procedures),
+            "procedures_count": len(relevant_procedures),
             "confidence": self.success_rate,
             "knowledge": knowledge[:5],  # Top 5 items
             "procedures": relevant_procedures[:3],  # Top 3 procedures

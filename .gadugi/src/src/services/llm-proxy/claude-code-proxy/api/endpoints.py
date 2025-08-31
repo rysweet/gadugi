@@ -57,9 +57,7 @@ async def create_message(
     _: None = Depends(validate_api_key),
 ):  # type: ignore
     try:
-        logger.debug(
-            f"Processing Claude request: model={request.model}, stream={request.stream}"
-        )
+        logger.debug(f"Processing Claude request: model={request.model}, stream={request.stream}")
 
         # Generate unique request ID for cancellation tracking
         request_id = str(uuid.uuid4())
@@ -111,9 +109,7 @@ async def create_message(
             openai_response = await openai_client.create_chat_completion(  # type: ignore
                 openai_request, request_id
             )
-            claude_response = convert_openai_to_claude_response(
-                openai_response, request
-            )
+            claude_response = convert_openai_to_claude_response(openai_response, request)
             return claude_response
     except HTTPException:
         raise
@@ -127,9 +123,7 @@ async def create_message(
 
 
 @router.post("/v1/messages/count_tokens")
-async def count_tokens(
-    request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)
-):  # type: ignore
+async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)):  # type: ignore
     try:
         # For token counting, we'll use a simple estimation
         # In a real implementation, you might want to use tiktoken or similar

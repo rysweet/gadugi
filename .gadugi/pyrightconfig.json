@@ -6,6 +6,9 @@
     "tests",
     ".claude"
   ],
+  "extraPaths": [
+    "src/src"
+  ],
   "exclude": [
     "**/__pycache__",
     "**/node_modules",

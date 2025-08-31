@@ -278,9 +278,7 @@ class Subscription:
         """Create from dictionary."""
         # Handle enums
         if "types" in data:
-            data["types"] = [
-                EventType(t) if isinstance(t, str) else t for t in data["types"]
-            ]
+            data["types"] = [EventType(t) if isinstance(t, str) else t for t in data["types"]]
 
         if "priorities" in data:
             data["priorities"] = [EventPriority(int(p)) for p in data["priorities"]]
@@ -341,8 +339,6 @@ class HealthStatus:
             "events_in_queue": self.events_in_queue,
             "active_subscriptions": self.active_subscriptions,
             "connected_clients": self.connected_clients,
-            "last_event_at": self.last_event_at.isoformat()
-            if self.last_event_at
-            else None,
+            "last_event_at": self.last_event_at.isoformat() if self.last_event_at else None,
             "errors": self.errors,
         }

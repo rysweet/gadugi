@@ -13,16 +13,16 @@ from datetime import datetime
 from pathlib import Path
 import sys
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+# Use central test configuration for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.agents.system_design_reviewer.core import (
+from src.src.agents.system_design_reviewer.core import (
     SystemDesignReviewer,
     ReviewResult,
     ReviewStatus,
     SystemDesignStateManager,
 )
-from src.agents.system_design_reviewer.ast_parser import (
+from src.src.agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,
@@ -539,8 +539,8 @@ class TestReviewResult:
         result_dict = result.to_dict()
 
         assert result_dict["pr_number"] == "123"  # type: ignore[index]
-        assert result_dict["status"] == ReviewStatus.COMPLETED  # type: ignore[index]
-        assert result_dict["architectural_impact"] == ImpactLevel.MEDIUM  # type: ignore[index]
+        assert result_dict["status"] == "completed"  # type: ignore[index]
+        assert result_dict["architectural_impact"] == "medium"  # type: ignore[index]
         assert len(result_dict["changes_detected"]) == 1  # type: ignore[index]
         assert "timestamp" in result_dict
 

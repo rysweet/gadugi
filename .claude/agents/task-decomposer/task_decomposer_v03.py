@@ -418,7 +418,7 @@ class TaskDecomposerV03(V03Agent):
     ) -> Dict[str, Any]:
         """Analyze task complexity using learned patterns."""
         # Get relevant knowledge about complexity analysis
-        complexity_knowledge = await self.get_relevant_knowledge("complexity analysis")
+        await self.get_relevant_knowledge("complexity analysis")
 
         task_lower = task_description.lower()
         words = task_lower.split()
@@ -846,7 +846,7 @@ class TaskDecomposerV03(V03Agent):
     ) -> None:
         """Apply learned dependency patterns."""
         # Get knowledge about dependency patterns
-        dependency_knowledge = await self.get_relevant_knowledge("dependency patterns")
+        await self.get_relevant_knowledge("dependency patterns")
 
         for subtask in subtasks:
             subtask_name = subtask.name.lower()
@@ -1097,14 +1097,14 @@ class TaskDecomposerV03(V03Agent):
 
         # Store as procedural memory - using learn_procedure instead of store_procedure
         if self.memory:
-            procedure_id = await self.memory.learn_procedure(
+            await self.memory.learn_procedure(
                 procedure_name=f"decomposition_{result.strategy_used or 'adaptive'}",
                 steps=steps,
                 context=f"Decomposed '{result.original_task}' into {len(result.subtasks)} "
                 f"subtasks with {result.parallelization_score:.1%} parallelization",
             )
         else:
-            procedure_id = None
+            pass
 
         # Store detailed result as long-term memory
         detailed_result = {
@@ -1191,7 +1191,7 @@ class TaskDecomposerV03(V03Agent):
                         data = json.loads(content.split("decomposition_result:")[1])
                         strategy_name = data.get("strategy_used")
                         break
-                    except:
+                    except (json.JSONDecodeError, IndexError, KeyError):
                         continue
 
         if strategy_name and strategy_name in self.strategies:

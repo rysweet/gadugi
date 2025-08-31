@@ -128,9 +128,7 @@ class ConflictResolver:
         conflicts = []
 
         # Check for resource contention
-        resource_conflicts = self._detect_resource_contention(
-            agent_states, team_context
-        )
+        resource_conflicts = self._detect_resource_contention(agent_states, team_context)
         conflicts.extend(resource_conflicts)
 
         # Check for task overlap
@@ -142,15 +140,11 @@ class ConflictResolver:
         conflicts.extend(coord_conflicts)
 
         # Check for capability mismatches
-        capability_conflicts = self._detect_capability_mismatches(
-            agent_states, team_context
-        )
+        capability_conflicts = self._detect_capability_mismatches(agent_states, team_context)
         conflicts.extend(capability_conflicts)
 
         # Check for dependency deadlocks
-        deadlock_conflicts = self._detect_dependency_deadlocks(
-            agent_states, team_context
-        )
+        deadlock_conflicts = self._detect_dependency_deadlocks(agent_states, team_context)
         conflicts.extend(deadlock_conflicts)
 
         # Update active conflicts
@@ -177,9 +171,7 @@ class ConflictResolver:
         actions = self._generate_resolution_actions(conflict, strategy)
 
         # Create implementation steps
-        implementation_steps = self._create_implementation_steps(
-            conflict, strategy, actions
-        )
+        implementation_steps = self._create_implementation_steps(conflict, strategy, actions)
 
         # Determine timeline
         timeline = self._determine_resolution_timeline(conflict)
@@ -224,9 +216,7 @@ class ConflictResolver:
         try:
             # Execute resolution actions
             for action in resolution.actions:
-                action_result = self._execute_resolution_action(
-                    action, agent_states, conflict
-                )
+                action_result = self._execute_resolution_action(action, agent_states, conflict)
 
                 if action_result["success"]:
                     result["messages"].append(action_result["message"])
@@ -409,9 +399,7 @@ class ConflictResolver:
 
                 for task_id in state["assigned_tasks"]:
                     task_info = team_context.get("tasks", {}).get(task_id, {})
-                    required_capabilities = set(
-                        task_info.get("required_capabilities", [])
-                    )
+                    required_capabilities = set(task_info.get("required_capabilities", []))
 
                     missing_capabilities = required_capabilities - agent_capabilities
 
@@ -453,9 +441,7 @@ class ConflictResolver:
                         dependencies[agent_id].add(provider)
 
         # Detect cycles using DFS
-        def find_cycle(
-            node: str, visited: Set[str], path: List[str]
-        ) -> Optional[List[str]]:
+        def find_cycle(node: str, visited: Set[str], path: List[str]) -> Optional[List[str]]:
             if node in path:
                 cycle_start = path.index(node)
                 return path[cycle_start:]
@@ -489,18 +475,14 @@ class ConflictResolver:
                         detected_at=datetime.utcnow(),
                         evidence={
                             "cycle": cycle,
-                            "dependencies": {
-                                a: list(dependencies.get(a, [])) for a in cycle
-                            },
+                            "dependencies": {a: list(dependencies.get(a, [])) for a in cycle},
                         },
                     )
                     conflicts.append(conflict)
 
         return conflicts
 
-    def _select_resolution_strategy(
-        self, conflict: AgentConflict
-    ) -> ResolutionStrategy:
+    def _select_resolution_strategy(self, conflict: AgentConflict) -> ResolutionStrategy:
         """Select appropriate resolution strategy based on conflict type and severity."""
 
         # Critical conflicts need immediate action
@@ -620,12 +602,8 @@ class ConflictResolver:
         # Add action-specific steps
         for i, action in enumerate(actions, len(steps) + 1):
             if action["type"] == "reassign_resource":
-                steps.append(
-                    f"{i}. Find alternative resource for agent {action['agent_id']}"
-                )
-                steps.append(
-                    f"{i + 1}. Update agent {action['agent_id']} configuration"
-                )
+                steps.append(f"{i}. Find alternative resource for agent {action['agent_id']}")
+                steps.append(f"{i + 1}. Update agent {action['agent_id']} configuration")
             elif action["type"] == "remove_task":
                 steps.append(
                     f"{i}. Remove task {action['task_id']} from agent {action['agent_id']}"
@@ -633,9 +611,7 @@ class ConflictResolver:
                 steps.append(f"{i + 1}. Update task assignment records")
 
         # Add verification step
-        steps.append(
-            f"{len(steps) + 1}. Verify conflict resolution and monitor for recurrence"
-        )
+        steps.append(f"{len(steps) + 1}. Verify conflict resolution and monitor for recurrence")
 
         return steps
 
@@ -685,34 +661,24 @@ class ConflictResolver:
                             "resources": agent_states[agent_id]["resources"]
                         }
                         result["success"] = True
-                        result["message"] = (
-                            f"Removed resource {resource} from agent {agent_id}"
-                        )
+                        result["message"] = f"Removed resource {resource} from agent {agent_id}"
 
             elif action["type"] == "remove_task":
                 agent_id = action["agent_id"]
                 task_id = action["task_id"]
-                if (
-                    agent_id in agent_states
-                    and "assigned_tasks" in agent_states[agent_id]
-                ):
+                if agent_id in agent_states and "assigned_tasks" in agent_states[agent_id]:
                     if task_id in agent_states[agent_id]["assigned_tasks"]:
                         agent_states[agent_id]["assigned_tasks"].remove(task_id)
                         result["state_updates"][agent_id] = {
                             "assigned_tasks": agent_states[agent_id]["assigned_tasks"]
                         }
                         result["success"] = True
-                        result["message"] = (
-                            f"Removed task {task_id} from agent {agent_id}"
-                        )
+                        result["message"] = f"Removed task {task_id} from agent {agent_id}"
 
             elif action["type"] == "break_dependency":
                 from_agent = action["from_agent"]
                 to_agent = action["to_agent"]
-                if (
-                    from_agent in agent_states
-                    and "waiting_for" in agent_states[from_agent]
-                ):
+                if from_agent in agent_states and "waiting_for" in agent_states[from_agent]:
                     agent_states[from_agent]["waiting_for"] = [
                         dep
                         for dep in agent_states[from_agent]["waiting_for"]
@@ -722,9 +688,7 @@ class ConflictResolver:
                         "waiting_for": agent_states[from_agent]["waiting_for"]
                     }
                     result["success"] = True
-                    result["message"] = (
-                        f"Broke dependency from {from_agent} to {to_agent}"
-                    )
+                    result["message"] = f"Broke dependency from {from_agent} to {to_agent}"
 
             else:
                 result["message"] = f"Unknown action type: {action['type']}"
@@ -735,9 +699,7 @@ class ConflictResolver:
 
         return result
 
-    def _mark_conflict_resolved(
-        self, conflict: AgentConflict, resolution: ConflictResolution
-    ):
+    def _mark_conflict_resolved(self, conflict: AgentConflict, resolution: ConflictResolution):
         """Mark a conflict as resolved."""
         if conflict.conflict_id in self.active_conflicts:
             del self.active_conflicts[conflict.conflict_id]
@@ -751,9 +713,7 @@ class ConflictResolver:
     def _update_conflict_patterns(self, conflict: AgentConflict):
         """Update conflict pattern tracking."""
         pattern_key = f"{conflict.conflict_type.value}_{conflict.severity.value}"
-        self.conflict_patterns[pattern_key] = (
-            self.conflict_patterns.get(pattern_key, 0) + 1
-        )
+        self.conflict_patterns[pattern_key] = self.conflict_patterns.get(pattern_key, 0) + 1
 
     def _analyze_conflict_patterns(self) -> Dict[str, Any]:
         """Analyze patterns in conflicts."""
@@ -788,18 +748,14 @@ class ConflictResolver:
             patterns["most_common"] = {
                 "pattern": most_common_key,
                 "count": self.conflict_patterns[most_common_key],
-                "percentage": (
-                    self.conflict_patterns[most_common_key] / total_conflicts * 100
-                )
+                "percentage": (self.conflict_patterns[most_common_key] / total_conflicts * 100)
                 if total_conflicts > 0
                 else 0,
             }
 
         return patterns
 
-    def _generate_prevention_recommendations(
-        self, patterns: Dict[str, Any]
-    ) -> List[str]:
+    def _generate_prevention_recommendations(self, patterns: Dict[str, Any]) -> List[str]:
         """Generate recommendations to prevent future conflicts."""
         recommendations = []
 
@@ -808,32 +764,22 @@ class ConflictResolver:
             conflict_type = patterns["most_common"]["pattern"].split("_")[0]
 
             if conflict_type == "resource_contention":
-                recommendations.append(
-                    "Implement resource pooling and reservation system"
-                )
+                recommendations.append("Implement resource pooling and reservation system")
                 recommendations.append("Add resource capacity monitoring and alerts")
             elif conflict_type == "task_overlap":
-                recommendations.append(
-                    "Improve task assignment algorithm to check for duplicates"
-                )
-                recommendations.append(
-                    "Implement task ownership verification before assignment"
-                )
+                recommendations.append("Improve task assignment algorithm to check for duplicates")
+                recommendations.append("Implement task ownership verification before assignment")
             elif conflict_type == "coordination_failure":
                 recommendations.append("Establish SLAs for inter-agent dependencies")
                 recommendations.append("Implement dependency timeout alerts")
             elif conflict_type == "capability_mismatch":
-                recommendations.append(
-                    "Enhance capability validation in task assignment"
-                )
+                recommendations.append("Enhance capability validation in task assignment")
                 recommendations.append("Implement continuous capability assessment")
 
         # Based on severity patterns
         if patterns["by_severity"].get("critical", 0) > 5:
             recommendations.append("Implement proactive conflict detection system")
-            recommendations.append(
-                "Create emergency response protocols for critical conflicts"
-            )
+            recommendations.append("Create emergency response protocols for critical conflicts")
 
         # General recommendations
         recommendations.append("Regular team coordination reviews")

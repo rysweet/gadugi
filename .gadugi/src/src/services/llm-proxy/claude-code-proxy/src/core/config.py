@@ -12,13 +12,9 @@ class Config:
         # Add Anthropic API key for client validation
         self.anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
         if not self.anthropic_api_key:
-            print(
-                "Warning: ANTHROPIC_API_KEY not set. Client API key validation will be disabled."
-            )
+            print("Warning: ANTHROPIC_API_KEY not set. Client API key validation will be disabled.")
 
-        self.openai_base_url = os.environ.get(
-            "OPENAI_BASE_URL", "https://api.openai.com/v1"
-        )
+        self.openai_base_url = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
         self.azure_api_version = os.environ.get("AZURE_API_VERSION")  # For Azure OpenAI
         self.host = os.environ.get("HOST", "0.0.0.0")
         self.port = int(os.environ.get("PORT", "8082"))
@@ -56,9 +52,7 @@ class Config:
 
 try:
     config = Config()
-    print(
-        f" Configuration loaded: API_KEY={'*' * 20}..., BASE_URL='{config.openai_base_url}'"
-    )
+    print(f" Configuration loaded: API_KEY={'*' * 20}..., BASE_URL='{config.openai_base_url}'")
 except Exception as e:
     print(f"=4 Configuration Error: {e}")
     sys.exit(1)

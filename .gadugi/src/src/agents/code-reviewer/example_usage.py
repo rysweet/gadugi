@@ -77,7 +77,7 @@ async def example_learning_from_feedback():
 
     try:
         await reviewer.initialize()
-        task_id = await reviewer.start_task("Learn from previous review feedback")
+        _task_id = await reviewer.start_task("Learn from previous review feedback")
 
         # Simulate feedback from developers about previous reviews
         feedback_data = [
@@ -240,7 +240,7 @@ async def example_adaptive_scoring():
         for developer in ["alice", "bob"]:
             print(f"\n👤 Review for {developer}:")
 
-            task_id = await reviewer.start_task(f"Adaptive review for {developer}")
+            _task_id = await reviewer.start_task(f"Adaptive review for {developer}")
 
             review_task = {
                 "type": "review_files",
@@ -254,17 +254,13 @@ async def example_adaptive_scoring():
                 # In a real implementation, the adaptive scoring would be visible
                 # in the review results and recommendations
                 print("   ✅ Review completed with adaptive scoring")
-                print(
-                    f"   📝 Custom recommendations generated based on {developer}'s patterns"
-                )
+                print(f"   📝 Custom recommendations generated based on {developer}'s patterns")
 
                 # Show developer-specific insights
                 insights = await reviewer.get_developer_insights(developer)
                 if "message" not in insights:
                     print(f"   🎯 Ignored rules: {list(insights['ignored_rules'])}")
-                    print(
-                        f"   ⚠️  Common issues: {list(insights['common_issues'].keys())}"
-                    )
+                    print(f"   ⚠️  Common issues: {list(insights['common_issues'].keys())}")
 
         # Clean up
         for file_path in test_files:
@@ -441,9 +437,7 @@ async def example_production_workflow():
         test_files = await create_production_like_files()
 
         # Step 2: Comprehensive review
-        task_id = await reviewer.start_task(
-            "Production code review for feature/user-auth"
-        )
+        _task_id = await reviewer.start_task("Production code review for feature/user-auth")
 
         review_task = {
             "type": "review_files",
@@ -500,7 +494,7 @@ async def create_sample_files():
     files = []
 
     # File 1: Basic validation module
-    validation_content = '''
+    validation_content = r'''
 """User input validation module."""
 
 def validate_email(email):
@@ -542,9 +536,7 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 '''
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix="_validation.py", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix="_validation.py", delete=False) as f:
         f.write(validation_content)
         files.append(f.name)
 
@@ -772,9 +764,7 @@ class UserRateLimiter(RateLimiter):
         return self.is_allowed(user_id)
 '''
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix="_rate_limit.py", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix="_rate_limit.py", delete=False) as f:
         f.write(rate_limit_content)
         files.append(f.name)
 

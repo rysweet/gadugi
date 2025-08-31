@@ -102,9 +102,7 @@ class ProcessRegistry:
         # Load existing state
         self._load_registry()
 
-        logger.info(
-            f"ProcessRegistry initialized with {len(self.processes)} existing processes"
-        )
+        logger.info(f"ProcessRegistry initialized with {len(self.processes)} existing processes")
 
     def register_process(self, process_info: ProcessInfo) -> None:
         """Register a new process for tracking"""
@@ -115,9 +113,7 @@ class ProcessRegistry:
             raise ValueError("Process must have a task_id")
 
         if process_info.task_id in self.processes:
-            logger.warning(
-                f"Process {process_info.task_id} already registered, updating..."
-            )
+            logger.warning(f"Process {process_info.task_id} already registered, updating...")
 
         # Set initial status if not specified
         if process_info.status is None:
@@ -132,9 +128,7 @@ class ProcessRegistry:
         # Persist to disk
         self._save_registry()
 
-        logger.info(
-            f"Process registered: {process_info.task_id} ({process_info.status.value})"
-        )
+        logger.info(f"Process registered: {process_info.task_id} ({process_info.status.value})")
 
     def update_process_status(
         self,
@@ -175,9 +169,7 @@ class ProcessRegistry:
         # Persist changes
         self._save_registry()
 
-        logger.info(
-            f"Process status updated: {task_id} ({old_status.value} -> {status.value})"
-        )
+        logger.info(f"Process status updated: {task_id} ({old_status.value} -> {status.value})")
         return True
 
     def get_process(self, task_id: str) -> Optional[ProcessInfo]:
@@ -216,9 +208,7 @@ class ProcessRegistry:
                     proc = psutil.Process(process.pid)
                     if proc.is_running():
                         # Update resource usage
-                        process.resource_usage = self._get_process_resource_usage(
-                            process.pid
-                        )
+                        process.resource_usage = self._get_process_resource_usage(process.pid)
                         process.last_heartbeat = current_time
                     else:
                         stale_processes.append(task_id)
@@ -263,9 +253,7 @@ class ProcessRegistry:
             status_counts[status] = len([p for p in processes if p.status == status])
 
         # Calculate average execution time for completed processes
-        completed_processes = [
-            p for p in processes if p.status == ProcessStatus.COMPLETED
-        ]
+        completed_processes = [p for p in processes if p.status == ProcessStatus.COMPLETED]
         avg_execution_time = None
         if completed_processes:
             execution_times = []
@@ -332,9 +320,7 @@ class ProcessRegistry:
         process = self.processes[task_id]
 
         if process.status not in [ProcessStatus.QUEUED, ProcessStatus.RUNNING]:
-            logger.warning(
-                f"Cannot cancel process {task_id} in status {process.status.value}"
-            )
+            logger.warning(f"Cannot cancel process {task_id} in status {process.status.value}")
             return False
 
         # Try to terminate the process if it's running
@@ -371,9 +357,7 @@ class ProcessRegistry:
                     "status": p.status.value,
                     "created_at": p.created_at.isoformat() if p.created_at else None,
                     "started_at": p.started_at.isoformat() if p.started_at else None,
-                    "completed_at": p.completed_at.isoformat()
-                    if p.completed_at
-                    else None,
+                    "completed_at": p.completed_at.isoformat() if p.completed_at else None,
                     "execution_time_seconds": (
                         (p.completed_at - p.started_at).total_seconds()
                         if p.started_at and p.completed_at
@@ -438,9 +422,7 @@ class ProcessRegistry:
                 ]:
                     if process_data.get(field):
                         try:
-                            process_data[field] = datetime.fromisoformat(
-                                process_data[field]
-                            )
+                            process_data[field] = datetime.fromisoformat(process_data[field])
                         except (ValueError, TypeError):
                             process_data[field] = None
 
@@ -565,12 +547,8 @@ def main():
     )
     parser.add_argument("--task-id", help="Task ID for cancel command")
     parser.add_argument("--output", help="Output file for export command")
-    parser.add_argument(
-        "--older-than", type=int, default=24, help="Hours for cleanup command"
-    )
-    parser.add_argument(
-        "--registry-dir", default=".gadugi/monitoring", help="Registry directory"
-    )
+    parser.add_argument("--older-than", type=int, default=24, help="Hours for cleanup command")
+    parser.add_argument("--registry-dir", default=".gadugi/monitoring", help="Registry directory")
 
     args = parser.parse_args()
 
@@ -586,9 +564,7 @@ def main():
         print(f"  Completed: {stats.completed_count}")
         print(f"  Failed: {stats.failed_count}")
         if stats.average_execution_time:
-            print(
-                f"  Average execution time: {stats.average_execution_time:.1f} seconds"
-            )
+            print(f"  Average execution time: {stats.average_execution_time:.1f} seconds")
         if stats.total_cpu_usage:
             print(f"  Total CPU usage: {stats.total_cpu_usage:.1f}%")
         if stats.total_memory_usage:
@@ -600,8 +576,7 @@ def main():
 
     elif args.command == "export":
         output_file = (
-            args.output
-            or f"monitoring_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            args.output or f"monitoring_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
         registry.export_monitoring_data(output_file)
         print(f"Monitoring data exported to {output_file}")

@@ -19,11 +19,12 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Set  # type: ignore
+from typing import Dict, Set  # type: ignore
 
 try:
     import websockets
     from websockets.server import WebSocketServerProtocol  # type: ignore
+
     WEBSOCKETS_AVAILABLE = True
 except ImportError:
     WEBSOCKETS_AVAILABLE = False
@@ -31,12 +32,14 @@ except ImportError:
 
 try:
     from aiohttp import web, WSMsgType  # type: ignore
+
     AIOHTTP_AVAILABLE = True
 except ImportError:
     AIOHTTP_AVAILABLE = False
 
 try:
     import docker  # type: ignore
+
     DOCKER_AVAILABLE = True
 except ImportError:
     DOCKER_AVAILABLE = False
@@ -104,50 +107,56 @@ class OrchestrationMonitor:
         try:
             # Find orchestrator containers
             containers = self.docker_client.containers.list(
-                filters={"name": "orchestrator-"},
-                all=True
+                filters={"name": "orchestrator-"}, all=True
             )
 
             current_containers = {}
 
             for container in containers:
                 container_info = {
-                    'id': container.id,
-                    'name': container.name,
-                    'status': container.status,
-                    'created': container.attrs['Created'],
-                    'image': container.image.tags[0] if container.image.tags else 'unknown',
-                    'labels': container.labels,
-                    'ports': container.ports,
-                    'mounts': [mount['Source'] + ':' + mount['Destination'] for mount in container.attrs.get('Mounts', [])],
-                    'environment': container.attrs['Config'].get('Env', []),
-                    'task_id': container.labels.get('task_id', 'unknown'),
-                    'updated_at': datetime.now().isoformat()
+                    "id": container.id,
+                    "name": container.name,
+                    "status": container.status,
+                    "created": container.attrs["Created"],
+                    "image": container.image.tags[0] if container.image.tags else "unknown",
+                    "labels": container.labels,
+                    "ports": container.ports,
+                    "mounts": [
+                        mount["Source"] + ":" + mount["Destination"]
+                        for mount in container.attrs.get("Mounts", [])
+                    ],
+                    "environment": container.attrs["Config"].get("Env", []),
+                    "task_id": container.labels.get("task_id", "unknown"),
+                    "updated_at": datetime.now().isoformat(),
                 }
 
                 # Get resource stats for running containers
-                if container.status == 'running':
+                if container.status == "running":
                     try:
                         stats = container.stats(stream=False)
-                        container_info['stats'] = {
-                            'cpu_percent': self._calculate_cpu_percent(stats),
-                            'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
-                            'memory_limit': stats.get('memory_stats', {}).get('limit', 0),
-                            'network_rx': sum(net.get('rx_bytes', 0) for net in stats.get('networks', {}).values()),
-                            'network_tx': sum(net.get('tx_bytes', 0) for net in stats.get('networks', {}).values())
+                        container_info["stats"] = {
+                            "cpu_percent": self._calculate_cpu_percent(stats),
+                            "memory_usage": stats.get("memory_stats", {}).get("usage", 0),
+                            "memory_limit": stats.get("memory_stats", {}).get("limit", 0),
+                            "network_rx": sum(
+                                net.get("rx_bytes", 0) for net in stats.get("networks", {}).values()
+                            ),
+                            "network_tx": sum(
+                                net.get("tx_bytes", 0) for net in stats.get("networks", {}).values()
+                            ),
                         }
 
                         # Get recent logs
-                        logs = container.logs(tail=10).decode('utf-8').split('\n')
-                        container_info['recent_logs'] = [log for log in logs if log.strip()]
+                        logs = container.logs(tail=10).decode("utf-8").split("\n")
+                        container_info["recent_logs"] = [log for log in logs if log.strip()]
 
                     except Exception as e:
                         logger.warning(f"Failed to get stats for {container.name}: {e}")
-                        container_info['stats'] = {}
-                        container_info['recent_logs'] = []
+                        container_info["stats"] = {}
+                        container_info["recent_logs"] = []
                 else:
-                    container_info['stats'] = {}
-                    container_info['recent_logs'] = []
+                    container_info["stats"] = {}
+                    container_info["recent_logs"] = []
 
                 current_containers[container.name] = container_info
 
@@ -159,17 +168,21 @@ class OrchestrationMonitor:
     def _calculate_cpu_percent(self, stats: Dict) -> float:
         """Calculate CPU usage percentage"""
         try:
-            cpu_stats = stats.get('cpu_stats', {})
-            precpu_stats = stats.get('precpu_stats', {})
+            cpu_stats = stats.get("cpu_stats", {})
+            precpu_stats = stats.get("precpu_stats", {})
 
-            cpu_usage = cpu_stats.get('cpu_usage', {})
-            precpu_usage = precpu_stats.get('cpu_usage', {})
+            cpu_usage = cpu_stats.get("cpu_usage", {})
+            precpu_usage = precpu_stats.get("cpu_usage", {})
 
-            cpu_delta = cpu_usage.get('total_usage', 0) - precpu_usage.get('total_usage', 0)
-            system_delta = cpu_stats.get('system_cpu_usage', 0) - precpu_stats.get('system_cpu_usage', 0)
+            cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get("total_usage", 0)
+            system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
+                "system_cpu_usage", 0
+            )
 
             if system_delta > 0 and cpu_delta > 0:
-                cpu_percent = (cpu_delta / system_delta) * len(cpu_usage.get('percpu_usage', [])) * 100
+                cpu_percent = (
+                    (cpu_delta / system_delta) * len(cpu_usage.get("percpu_usage", [])) * 100
+                )
                 return round(cpu_percent, 2)
 
             return 0.0
@@ -182,14 +195,18 @@ class OrchestrationMonitor:
             return
 
         message = {
-            'type': 'status_update',
-            'timestamp': datetime.now().isoformat(),
-            'containers': self.active_containers,
-            'summary': {
-                'total_containers': len(self.active_containers),
-                'running_containers': len([c for c in self.active_containers.values() if c['status'] == 'running']),
-                'failed_containers': len([c for c in self.active_containers.values() if c['status'] == 'exited'])
-            }
+            "type": "status_update",
+            "timestamp": datetime.now().isoformat(),
+            "containers": self.active_containers,
+            "summary": {
+                "total_containers": len(self.active_containers),
+                "running_containers": len(
+                    [c for c in self.active_containers.values() if c["status"] == "running"]
+                ),
+                "failed_containers": len(
+                    [c for c in self.active_containers.values() if c["status"] == "exited"]
+                ),
+            },
         }
 
         # Send to all connected clients
@@ -208,26 +225,29 @@ class OrchestrationMonitor:
         if not self.active_containers:
             return
 
-        monitoring_file = self.monitoring_dir / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        monitoring_file = (
+            self.monitoring_dir
+            / f"orchestrator_status_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
 
         try:  # type: ignore
-                    aiofiles = None
+            aiofiles = None
             data = {  # type: ignore
-                'timestamp': datetime.now().isoformat(),
-                'containers': self.active_containers,
-                'monitoring_metadata': {
-                    'monitor_version': '1.0.0',
-                    'docker_available': DOCKER_AVAILABLE,
-                    'websockets_available': WEBSOCKETS_AVAILABLE,
-                    'connected_clients': len(self.websocket_clients)
-                }
+                "timestamp": datetime.now().isoformat(),
+                "containers": self.active_containers,
+                "monitoring_metadata": {
+                    "monitor_version": "1.0.0",
+                    "docker_available": DOCKER_AVAILABLE,
+                    "websockets_available": WEBSOCKETS_AVAILABLE,
+                    "connected_clients": len(self.websocket_clients),
+                },
             }
 
             if AIOHTTP_AVAILABLE:  # type: ignore
-                async with aiofiles.open(monitoring_file, 'w') as f:  # type: ignore
+                async with aiofiles.open(monitoring_file, "w") as f:  # type: ignore
                     await f.write(json.dumps(data, indent=2))
             else:
-                with open(monitoring_file, 'w') as f:
+                with open(monitoring_file, "w") as f:
                     json.dump(data, f, indent=2)
 
         except Exception as e:  # type: ignore
@@ -239,7 +259,7 @@ class OrchestrationMonitor:
             logger.warning("WebSockets not available - install websockets package")
             return
 
-        port = int(os.getenv('WEBSOCKET_PORT', 9001))
+        port = int(os.getenv("WEBSOCKET_PORT", 9001))
 
         async def handle_websocket(websocket, path):
             """Handle WebSocket connection"""
@@ -250,23 +270,19 @@ class OrchestrationMonitor:
                 # Send initial status
                 if self.active_containers:
                     initial_message = {
-                        'type': 'initial_status',
-                        'timestamp': datetime.now().isoformat(),
-                        'containers': self.active_containers
+                        "type": "initial_status",
+                        "timestamp": datetime.now().isoformat(),
+                        "containers": self.active_containers,
                     }
                     await websocket.send(json.dumps(initial_message))
 
                 # Keep connection alive
                 async for message in websocket:
                     # Handle client messages if needed
-                    try:  # type: ignore
-            websockets = None  # type: ignore
-                            message = None  # type: ignore
-                            message = None
-            _websockets = None
-                        data = json.loads(message)  # type: ignore
+                    try:
+                        data = json.loads(message)
                         await self.handle_client_message(websocket, data)
-                    except json.JSONDecodeError:  # type: ignore
+                    except json.JSONDecodeError:
                         logger.warning(f"Invalid JSON from client: {message}")  # type: ignore
 
             except Exception as e:  # type: ignore
@@ -283,13 +299,13 @@ class OrchestrationMonitor:
 
     async def handle_client_message(self, websocket, data):
         """Handle messages from WebSocket clients"""
-        message_type = data.get('type')
+        message_type = data.get("type")
 
-        if message_type == 'get_container_logs':
-            container_name = data.get('container_name')
+        if message_type == "get_container_logs":
+            container_name = data.get("container_name")
             await self.send_container_logs(websocket, container_name)
-        elif message_type == 'get_detailed_stats':
-            container_name = data.get('container_name')
+        elif message_type == "get_detailed_stats":
+            container_name = data.get("container_name")
             await self.send_detailed_stats(websocket, container_name)
 
     async def send_container_logs(self, websocket, container_name):
@@ -299,21 +315,21 @@ class OrchestrationMonitor:
 
         try:
             container = self.docker_client.containers.get(container_name)
-            logs = container.logs(tail=100).decode('utf-8')
+            logs = container.logs(tail=100).decode("utf-8")
 
             message = {
-                'type': 'container_logs',
-                'container_name': container_name,
-                'logs': logs.split('\n'),
-                'timestamp': datetime.now().isoformat()
+                "type": "container_logs",
+                "container_name": container_name,
+                "logs": logs.split("\n"),
+                "timestamp": datetime.now().isoformat(),
             }
 
             await websocket.send(json.dumps(message))
 
         except Exception as e:
             error_message = {
-                'type': 'error',
-                'message': f"Failed to get logs for {container_name}: {e}"
+                "type": "error",
+                "message": f"Failed to get logs for {container_name}: {e}",
             }
             await websocket.send(json.dumps(error_message))
 
@@ -325,36 +341,26 @@ class OrchestrationMonitor:
         try:
             container = self.docker_client.containers.get(container_name)
 
-            if container.status == 'running':
+            if container.status == "running":
                 stats = container.stats(stream=False)
 
                 detailed_stats = {
-                    'type': 'detailed_stats',
-                    'container_name': container_name,
-                    'stats': stats,
-                    'timestamp': datetime.now().isoformat()
+                    "type": "detailed_stats",
+                    "container_name": container_name,
+                    "stats": stats,
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 await websocket.send(json.dumps(detailed_stats))
 
         except Exception as e:
             error_message = {
-                'type': 'error',
-                'message': f"Failed to get detailed stats for {container_name}: {e}"
+                "type": "error",
+                "message": f"Failed to get detailed stats for {container_name}: {e}",
             }
             await websocket.send(json.dumps(error_message))
 
     def stop_monitoring(self):
-        _web = None
-        _web = None
-        _web = None
-        _web = None
-            web = None  # type: ignore
-        _web = None
-        _web = None
-        _web = None
-        _web = None
-            web = None  # type: ignore
         """Stop monitoring"""
         self.monitoring = False
         logger.info("Stopping orchestrator monitoring...")
@@ -369,7 +375,7 @@ async def create_web_app():
     app = web.Application()  # type: ignore
 
     # Serve static monitoring dashboard
-    dashboard_html = '''
+    dashboard_html = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -523,16 +529,16 @@ async def create_web_app():
         </script>
     </body>
     </html>
-    '''
+    """
 
     async def dashboard_handler(request):
-        return web.Response(text=dashboard_html, content_type='text/html')  # type: ignore
+        return web.Response(text=dashboard_html, content_type="text/html")  # type: ignore
 
     async def health_handler(request):
-        return web.Response(text='OK', status=200)  # type: ignore
+        return web.Response(text="OK", status=200)  # type: ignore
 
-    app.router.add_get('/', dashboard_handler)
-    app.router.add_get('/health', health_handler)
+    app.router.add_get("/", dashboard_handler)
+    app.router.add_get("/health", health_handler)
 
     return app
 
@@ -549,10 +555,10 @@ async def main():
     if AIOHTTP_AVAILABLE:
         app = await create_web_app()
         if app:
-            port = int(os.getenv('HTTP_PORT', 8080))
+            port = int(os.getenv("HTTP_PORT", 8080))
             runner = web.AppRunner(app)  # type: ignore
             await runner.setup()
-            site = web.TCPSite(runner, '0.0.0.0', port)  # type: ignore
+            site = web.TCPSite(runner, "0.0.0.0", port)  # type: ignore
             await site.start()
             logger.info(f"Monitoring dashboard available at http://localhost:{port}")
 

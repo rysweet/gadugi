@@ -124,11 +124,7 @@ class MetadataAssessment:
     @property
     def is_complete(self) -> bool:
         """Check if metadata is complete."""
-        return (
-            self.has_conventional_title
-            and self.has_description
-            and self.has_appropriate_labels
-        )
+        return self.has_conventional_title and self.has_description and self.has_appropriate_labels
 
 
 class ReadinessAssessor:
@@ -222,9 +218,7 @@ class ReadinessAssessor:
         except Exception:
             return []
 
-    def _assess_conflict_complexity(
-        self, affected_files: List[str]
-    ) -> ConflictComplexity:
+    def _assess_conflict_complexity(self, affected_files: List[str]) -> ConflictComplexity:
         """Assess complexity of merge conflicts."""
         if not affected_files:
             return ConflictComplexity.NONE
@@ -276,9 +270,7 @@ class ReadinessAssessor:
             checks = self.github_ops.get_pr_status_checks(pr_details["number"])
 
             failing_checks = [
-                check
-                for check in checks
-                if check.get("state") not in ["success", "pending"]
+                check for check in checks if check.get("state") not in ["success", "pending"]
             ]
 
             # Categorize failures
@@ -296,14 +288,11 @@ class ReadinessAssessor:
             last_run = None
             if checks:
                 timestamps = [
-                    check.get("updated_at")
-                    for check in checks
-                    if check.get("updated_at")
+                    check.get("updated_at") for check in checks if check.get("updated_at")
                 ]
                 if timestamps:
                     last_run = max(
-                        datetime.fromisoformat(ts.replace("Z", "+00:00"))
-                        for ts in timestamps
+                        datetime.fromisoformat(ts.replace("Z", "+00:00")) for ts in timestamps
                     )
 
             return CIAssessment(
@@ -364,21 +353,15 @@ class ReadinessAssessor:
 
             # Filter human reviews (exclude bots)
             human_reviews = [
-                review
-                for review in reviews
-                if not review["user"]["login"].endswith("[bot]")
+                review for review in reviews if not review["user"]["login"].endswith("[bot]")
             ]
 
             # Check for approved reviews
-            approved_reviews = [
-                review for review in human_reviews if review["state"] == "APPROVED"
-            ]
+            approved_reviews = [review for review in human_reviews if review["state"] == "APPROVED"]
 
             # Check for requested changes
             requested_changes = [
-                review
-                for review in human_reviews
-                if review["state"] == "CHANGES_REQUESTED"
+                review for review in human_reviews if review["state"] == "CHANGES_REQUESTED"
             ]
 
             # Get pending review requests
@@ -523,9 +506,7 @@ class ReadinessAssessor:
             commits = comparison.get("commits", [])
 
             # Check for merge commits in base
-            merge_commits = [
-                commit for commit in commits if len(commit.get("parents", [])) > 1
-            ]
+            merge_commits = [commit for commit in commits if len(commit.get("parents", [])) > 1]
 
             if behind_by <= 5 and not merge_commits:
                 return "simple"
@@ -548,9 +529,7 @@ class ReadinessAssessor:
         except Exception:
             return None
 
-    def assess_metadata_completeness(
-        self, pr_details: Dict[str, Any]
-    ) -> MetadataAssessment:
+    def assess_metadata_completeness(self, pr_details: Dict[str, Any]) -> MetadataAssessment:
         """
         Assess PR metadata completeness and quality.
 
@@ -584,9 +563,7 @@ class ReadinessAssessor:
 
             # Check description quality
             description_length = len(body.strip()) if body else 0
-            has_description = (
-                description_length >= self.config["min_description_length"]
-            )
+            has_description = description_length >= self.config["min_description_length"]
 
             # Check for appropriate labels
             expected_label_types = [
@@ -596,9 +573,7 @@ class ReadinessAssessor:
                 "refactor",
                 "test",
             ]
-            has_appropriate_labels = any(
-                label in labels for label in expected_label_types
-            )
+            has_appropriate_labels = any(label in labels for label in expected_label_types)
 
             # Check for linked issues
             has_linked_issues = self._check_linked_issues(body)
@@ -649,9 +624,7 @@ class ReadinessAssessor:
         body_lower = body.lower()
         return any(pattern in body_lower for pattern in issue_patterns)
 
-    def get_comprehensive_assessment(
-        self, pr_details: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def get_comprehensive_assessment(self, pr_details: Dict[str, Any]) -> Dict[str, Any]:
         """
         Get comprehensive readiness assessment for a PR.
 
@@ -729,9 +702,7 @@ class ReadinessAssessor:
             )
 
         if not assessments["ci"].all_passing:
-            blocking_factors.append(
-                f"CI failures ({len(assessments['ci'].failing_checks)} checks)"
-            )
+            blocking_factors.append(f"CI failures ({len(assessments['ci'].failing_checks)} checks)")
 
         if not assessments["reviews"].is_review_complete:
             blocking_factors.append("Review incomplete")

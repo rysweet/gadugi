@@ -45,9 +45,7 @@ class DeadLetterEntry:
             subscription=None,  # Will need to be resolved separately
             error_message=data.get("error_message", ""),
             error_type=data.get("error_type", ""),
-            failed_at=datetime.fromisoformat(
-                data.get("failed_at", datetime.now().isoformat())
-            ),
+            failed_at=datetime.fromisoformat(data.get("failed_at", datetime.now().isoformat())),
             retry_after=datetime.fromisoformat(data["retry_after"])
             if data.get("retry_after")
             else None,
@@ -149,7 +147,7 @@ class DeadLetterQueue:
                 await self._persist_entry(entry)
 
             self.logger.warning(
-                f"Added event {event.id} to dead letter queue: {error_message}",  # type: ignore[assignment]
+                f"Added event {event.id} to dead letter queue: {str(error)}",
                 extra={"event_id": event.id, "error_type": type(error).__name__},
             )
 
@@ -207,9 +205,7 @@ class DeadLetterQueue:
             extra={"event_id": entry.event.id},
         )
 
-    async def mark_retry_failure(
-        self, entry: DeadLetterEntry, error: Exception
-    ) -> None:
+    async def mark_retry_failure(self, entry: DeadLetterEntry, error: Exception) -> None:
         """Mark an entry as failed retry.
 
         Args:
@@ -253,9 +249,7 @@ class DeadLetterQueue:
             cutoff_date = datetime.now() - timedelta(days=self.retention_days)
             original_count = len(self.entries)
 
-            self.entries = [
-                entry for entry in self.entries if entry.failed_at > cutoff_date
-            ]
+            self.entries = [entry for entry in self.entries if entry.failed_at > cutoff_date]
 
             removed_count = original_count - len(self.entries)
 
@@ -306,9 +300,7 @@ class DeadLetterQueue:
                 retriable = await self.get_retriable_events()
 
                 if retriable:
-                    self.logger.info(
-                        f"Retrying {len(retriable)} events from dead letter queue"
-                    )
+                    self.logger.info(f"Retrying {len(retriable)} events from dead letter queue")
 
                     for entry in retriable:
                         try:
@@ -344,9 +336,7 @@ class DeadLetterQueue:
                     self.retry_successes = data.get("retry_successes", 0)
                     self.retry_failures = data.get("retry_failures", 0)
 
-                self.logger.info(
-                    f"Loaded {len(self.entries)} entries from dead letter queue"
-                )
+                self.logger.info(f"Loaded {len(self.entries)} entries from dead letter queue")
         except Exception as e:
             self.logger.exception(f"Error loading persisted dead letter entries: {e}")
 
@@ -392,9 +382,7 @@ class DeadLetterQueue:
         """Get dead letter queue statistics."""
         permanent_failures = sum(1 for e in self.entries if e.permanent_failure)
         retriable = sum(
-            1
-            for e in self.entries
-            if not e.permanent_failure and e.event.should_retry()
+            1 for e in self.entries if not e.permanent_failure and e.event.should_retry()
         )
 
         return {

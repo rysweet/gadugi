@@ -33,9 +33,7 @@ def fix_import_paths(content: str) -> str:
     for old_import, new_import in import_fixes.items():
         if new_import == "":
             # Remove the import line entirely
-            content = re.sub(
-                f"^.*{re.escape(old_import)}.*\n", "", content, flags=re.MULTILINE
-            )
+            content = re.sub(f"^.*{re.escape(old_import)}.*\n", "", content, flags=re.MULTILINE)
         else:
             content = content.replace(old_import, new_import)
 
@@ -117,10 +115,7 @@ def add_missing_imports(content: str, filename: str) -> str:
 
     # Check if unittest.mock is used but not imported
     if "Mock(" in content or "MagicMock(" in content or "patch(" in content:
-        if (
-            "from unittest.mock import" not in content
-            and "import unittest.mock" not in content
-        ):
+        if "from unittest.mock import" not in content and "import unittest.mock" not in content:
             additions.append("from unittest.mock import Mock, MagicMock, patch")
 
     # Add imports at the beginning of the file

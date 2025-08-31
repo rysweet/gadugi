@@ -12,11 +12,11 @@ from pathlib import Path
 from datetime import datetime
 import sys
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
+# Use central test configuration for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
-from src.agents.system_design_reviewer.ast_parser import (
+from src.src.agents.system_design_reviewer.adr_generator import ADRGenerator, ADRData
+from src.src.agents.system_design_reviewer.ast_parser import (
     ArchitecturalChange,
     ArchitecturalElement,
     ElementType,

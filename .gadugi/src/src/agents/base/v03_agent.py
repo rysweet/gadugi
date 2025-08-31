@@ -141,9 +141,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
 
         # Whiteboard collaboration
         self.whiteboard_manager: Optional[WhiteboardManager] = None
-        self.current_whiteboards: Dict[
-            str, SharedWhiteboard
-        ] = {}  # task_id -> whiteboard
+        self.current_whiteboards: Dict[str, SharedWhiteboard] = {}  # task_id -> whiteboard
 
         # Learning metrics
         self.tasks_completed = 0
@@ -383,9 +381,7 @@ async def test_v03_agent():
         )
 
         # Report an issue
-        await agent.report_issue(
-            "Password complexity validation missing", severity="medium"
-        )
+        await agent.report_issue("Password complexity validation missing", severity="medium")
 
         # Discover relevant whiteboards
         relevant_whiteboards = await agent.discover_relevant_whiteboards(limit=5)

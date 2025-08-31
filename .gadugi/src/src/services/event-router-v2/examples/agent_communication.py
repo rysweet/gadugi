@@ -265,9 +265,7 @@ class MonitorAgent:
     async def handle_event(self, event: Event):
         """Handle any event for monitoring."""
         # Count events by type
-        event_type = (
-            event.type.value if hasattr(event.type, "value") else str(event.type)
-        )
+        event_type = event.type.value if hasattr(event.type, "value") else str(event.type)
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
 
         # Track agent status
@@ -280,9 +278,7 @@ class MonitorAgent:
 
         # Log high-priority events
         if event.priority >= EventPriority.HIGH:
-            logger.info(
-                f"[MONITOR] High-priority event: {event.topic} from {event.source}"
-            )
+            logger.info(f"[MONITOR] High-priority event: {event.topic} from {event.source}")
 
     async def periodic_status(self):
         """Send periodic status reports."""
