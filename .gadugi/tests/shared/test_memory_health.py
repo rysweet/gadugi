@@ -92,13 +92,13 @@ class TestBackendConfigs:
             backend_type=MemoryBackendType.NEO4J,
             priority=100,
             enabled=True,
-            config={"uri": "bolt://localhost:7687"},
+            config={"uri": "bolt://localhost:7689"},
         )
 
         assert config.backend_type == MemoryBackendType.NEO4J
         assert config.priority == 100
         assert config.enabled
-        assert config.config["uri"] == "bolt://localhost:7687"
+        assert config.config["uri"] == "bolt://localhost:7689"
 
     def test_default_backends(self):
         """Test default backend creation."""
@@ -136,7 +136,7 @@ class TestMemoryHealthMonitor:
                 backend_type=MemoryBackendType.NEO4J,
                 priority=100,
                 enabled=True,
-                config={"uri": "bolt://localhost:7687"},
+                config={"uri": "bolt://localhost:7689"},
             ),
             BackendConfig(
                 backend_type=MemoryBackendType.SQLITE,
@@ -299,7 +299,7 @@ class TestHealthChecks:
             backend_type=MemoryBackendType.NEO4J,
             priority=100,
             enabled=True,
-            config={"uri": "bolt://localhost:7687"},
+            config={"uri": "bolt://localhost:7689"},
         )
 
         with patch("src.src.shared.memory_health.NEO4J_AVAILABLE", False):

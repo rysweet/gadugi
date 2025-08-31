@@ -2552,7 +2552,7 @@ def create_memory_fallback_chain(
     Args:
         neo4j_config: Neo4j connection configuration (optional)
             Example: {
-                'uri': os.environ.get('NEO4J_URI', 'bolt://localhost:7687'),
+                'uri': os.environ.get('NEO4J_URI', 'bolt://localhost:7689'),
                 'username': os.environ.get('NEO4J_USERNAME', 'neo4j'),
                 'password': os.environ.get('NEO4J_PASSWORD')  # Never hardcode!
             }

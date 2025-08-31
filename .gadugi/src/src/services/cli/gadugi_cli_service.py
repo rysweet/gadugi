@@ -258,7 +258,7 @@ class ServiceManager:
             "neo4j-graph": {
                 "module": "services.neo4j-graph.neo4j_graph_service",
                 "class": "GraphDatabaseService",
-                "port": 7687,
+                "port": 7689,
                 "description": "Graph database service for relationships and knowledge",
             },
             "mcp": {

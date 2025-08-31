@@ -187,9 +187,11 @@ class MemoryHealthMonitor:
 
         try:
             backend_config = config.config
-            uri = backend_config.get("uri", "bolt://localhost:7687")
+            uri = backend_config.get("uri", "bolt://localhost:7689")
             user = backend_config.get("user", "neo4j")
-            password = backend_config.get("password", "gadugi123!")
+            password = backend_config.get("password") or os.getenv(
+                "NEO4J_PASSWORD", "gadugi-password"
+            )
             database = backend_config.get("database", "neo4j")
 
             # Reuse existing driver or create new one
@@ -652,9 +654,9 @@ def create_default_backends() -> List[BackendConfig]:
             priority=100,  # Highest priority
             enabled=NEO4J_AVAILABLE,
             config={
-                "uri": os.getenv("NEO4J_URI", "bolt://localhost:7687"),
+                "uri": os.getenv("NEO4J_URI", "bolt://localhost:7689"),
                 "user": os.getenv("NEO4J_USER", "neo4j"),
-                "password": os.getenv("NEO4J_PASSWORD", "gadugi123!"),
+                "password": os.getenv("NEO4J_PASSWORD", "gadugi-password"),
                 "database": os.getenv("NEO4J_DATABASE", "neo4j"),
             },
         ),

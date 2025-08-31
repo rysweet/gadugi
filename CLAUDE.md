@@ -208,7 +208,21 @@ docker ps  # Confirm containers are running
 - Use `./gadugi` wrapper script or `cd .gadugi && uv run`
 - Completely isolated from host project dependencies
 
-### 3. Development Workflow - 13-Phase Process
+### 3. Development Workflow - 14-Phase Process
+
+## 🛑 WORKFLOW TRIGGER MECHANISM
+
+**BEFORE ANY CODE ACTION:**
+1. **STOP** - Do not write/edit ANY code yet
+2. **CREATE TODO LIST** - Use TodoWrite with all 14 phases
+3. **TRACK PROGRESS** - Update todo status at EACH phase
+4. **NO SKIPPING** - Complete phases sequentially
+
+**AUTOMATIC TRIGGER WORDS:**
+- "fix", "implement", "create", "update", "refactor", "add", "remove", "change"
+- ANY request involving code modification
+- ANY bug fix or feature request
+
 **For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
 
 #### Phase 0: Enhanced Task Initialization & Resumption Check (ALWAYS FIRST)

@@ -15,7 +15,7 @@ class Neo4jConfig:
 
     uri: str = field(
         default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST',
-            'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7687')}"
+            'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7689')}"
     )
     username: str = field(default_factory=lambda: os.getenv("NEO4J_USERNAME", "neo4j"))
     password: str = field(default_factory=lambda: os.getenv("NEO4J_PASSWORD", "changeme"))

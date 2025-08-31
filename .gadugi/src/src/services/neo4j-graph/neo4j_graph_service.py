@@ -15,87 +15,18 @@ import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 try:
     from neo4j import GraphDatabase  # type: ignore[misc]
-    # Unused imports commented out to fix lint errors:
-    # from neo4j import ManagedTransaction, Transaction
-    # from neo4j.exceptions import ServiceUnavailable, TransientError
-
+    # Note: ServiceUnavailable and TransientError would be imported here when needed
     NEO4J_AVAILABLE = True
 except ImportError:
     NEO4J_AVAILABLE = False
-
-    # Mock classes for development without Neo4j driver
-    class GraphDatabase:
-        @staticmethod
-        def driver(*args, **kwargs):
-            return MockDriver()
-
-    class MockDriver:
-        def close(self) -> None:
-            pass
-
-        def session(self) -> "MockSession":
-            return MockSession()
-
-    class MockSession:
-        def close(self) -> None:
-            pass
-
-        def __enter__(self) -> "MockSession":
-            return self
-
-        def __exit__(
-            self,
-            exc_type: Optional[type],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[Any],
-        ) -> None:
-            pass
-
-        def run(self, *args: Any, **kwargs: Any) -> "MockResult":
-            return MockResult()
-
-        def execute_read(self, func: Any) -> Any:
-            result = func(MockTransaction())
-            return result or []
-
-        def execute_write(self, func: Any) -> Any:
-            result = func(MockTransaction())
-            return result or MockSummary()
-
-    class MockTransaction:
-        def run(self, *args: Any, **kwargs: Any) -> "MockResult":
-            return MockResult()
-
-    class MockResult:
-        def single(self) -> "MockRecord":
-            return MockRecord()
-
-        def data(self) -> list[dict[str, Any]]:
-            return []
-
-        def consume(self) -> "MockSummary":
-            return MockSummary()
-
-    class MockRecord:
-        def __getitem__(self, key: str) -> Any:
-            return None
-
-        def get(self, key: str, default: Any = None) -> Any:
-            return default
-
-    class MockSummary:
-        def counters(self) -> "MockCounters":
-            return MockCounters()
-
-    class MockCounters:
-        nodes_created = 0
-        relationships_created = 0
-        nodes_deleted = 0
-        relationships_deleted = 0
+    # Raise an error if Neo4j is not available - no mock implementations allowed
+    raise ImportError(
+        "Neo4j driver is required for GraphDatabaseService. " "Install with: pip install neo4j"
+    )
 
 
 class NodeType(Enum):
@@ -282,11 +213,6 @@ class GraphDatabaseService:
         # Query cache for frequently used queries
         self.query_cache = {}
         self.cache_max_size = 1000
-
-        # Neo4j availability check
-        self.neo4j_available = NEO4J_AVAILABLE
-        if not NEO4J_AVAILABLE:
-            self.logger.warning("Neo4j driver not available, using mock implementation")
 
     def _setup_logging(self) -> logging.Logger:
         """Set up logging for the graph database service."""
@@ -1522,7 +1448,6 @@ class GraphDatabaseService:
 
         return {
             "connected": self.connected,
-            "neo4j_available": self.neo4j_available,
             "total_queries": self.query_count,
             "total_query_time": self.total_query_time,
             "average_query_time": avg_query_time,
@@ -1536,7 +1461,6 @@ class GraphDatabaseService:
         health_info = {
             "status": "unknown",
             "connected": self.connected,
-            "neo4j_available": self.neo4j_available,
             "database": self.database,
             "uri": self.uri,
             "performance": self.get_performance_stats(),

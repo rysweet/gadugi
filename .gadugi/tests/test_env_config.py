@@ -58,7 +58,7 @@ class TestEnvironmentVariableConfiguration(unittest.TestCase):
             config = Neo4jConfig()
 
             # Verify fallback values are used
-            self.assertEqual(config.uri, "bolt://localhost:7687")
+            self.assertEqual(config.uri, "bolt://localhost:7689")
             self.assertEqual(config.username, "neo4j")
             self.assertEqual(config.password, "changeme")
             self.assertEqual(config.database, "gadugi")
