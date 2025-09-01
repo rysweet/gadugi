@@ -1,18 +1,55 @@
 # Claude AI Assistant Core Instructions
 
-## 🔴 STOP! WORKFLOW IS MANDATORY - READ THIS FIRST
+## 🔴 STOP! UNDERSTAND WHEN WORKFLOWS ARE REQUIRED
 
-### THE #1 RULE: Any code modification = 14-phase workflow
-**NO EXCEPTIONS. NO SHORTCUTS. NO "QUICK FIXES".**
+### WORKFLOW TYPES AND TRIGGERS
 
-If user asks you to "fix", "implement", "create", "update", or "change" ANYTHING:
-1. **STOP** - Do not write code yet
-2. **CREATE TODO LIST** - All 14 phases using TodoWrite
-3. **ANNOUNCE** - "📋 Starting 14-phase workflow for [task]"
-4. **EXECUTE** - Complete each phase sequentially
-5. **REFLECT** - Run TeamCoach at the end
+#### 1️⃣ **CODE CHANGES** → 14-Phase Development Workflow (MANDATORY)
+**Triggers:** "fix", "implement", "create", "update", "change", "refactor", "add", "remove"
+**When:** ANY file modification (code, config, docs)
+**Process:** All 14 phases including TeamCoach reflection
 
-**Skipping workflow = TASK FAILURE** (See session 2025-08-31: 30% rework from skipping)
+#### 2️⃣ **ANALYSIS/RESEARCH** → Structured Investigation (RECOMMENDED)
+**Triggers:** "analyze", "investigate", "find", "search", "understand", "explain"
+**When:** Complex codebase exploration, debugging, understanding systems
+**Process:** Use TodoWrite to track investigation steps, findings, conclusions
+
+#### 3️⃣ **SIMPLE TASKS** → Direct Execution (ALLOWED)
+**Examples:** 
+- Reading a single file
+- Answering a simple question
+- Running a single command
+- Explaining a concept
+
+#### 4️⃣ **MULTI-STEP TASKS** → Task Decomposition (RECOMMENDED)
+**Triggers:** Multiple related requests, complex sequences
+**When:** Task has 3+ distinct steps
+**Process:** Use TodoWrite to track progress through steps
+
+### THE GOLDEN RULE:
+**If task has >3 steps OR modifies files → USE APPROPRIATE WORKFLOW**
+
+### 📝 WHEN TO USE TodoWrite TOOL:
+
+**ALWAYS USE for:**
+- 14-phase development workflow (mandatory for code changes)
+- Complex investigations with multiple search/analysis steps
+- Tasks with dependencies or sequential phases
+- Any task the user explicitly asks to track
+
+**CONSIDER USING for:**
+- Debugging sessions (track hypotheses and tests)
+- Research tasks (track sources and findings)
+- Multi-file analysis (track files examined)
+- Learning/exploration (track understanding progress)
+
+**DON'T NEED for:**
+- Single file reads
+- Simple questions/answers
+- Single command execution
+- Immediate responses
+
+**Session 2025-08-31 Learning:** Skipping workflow = 30% rework time
 
 ---
 
