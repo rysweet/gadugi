@@ -1,5 +1,21 @@
 # Claude AI Assistant Core Instructions
 
+## 🔴 STOP! WORKFLOW IS MANDATORY - READ THIS FIRST
+
+### THE #1 RULE: Any code modification = 14-phase workflow
+**NO EXCEPTIONS. NO SHORTCUTS. NO "QUICK FIXES".**
+
+If user asks you to "fix", "implement", "create", "update", or "change" ANYTHING:
+1. **STOP** - Do not write code yet
+2. **CREATE TODO LIST** - All 14 phases using TodoWrite
+3. **ANNOUNCE** - "📋 Starting 14-phase workflow for [task]"
+4. **EXECUTE** - Complete each phase sequentially
+5. **REFLECT** - Run TeamCoach at the end
+
+**Skipping workflow = TASK FAILURE** (See session 2025-08-31: 30% rework from skipping)
+
+---
+
 ⚠️ **CRITICAL**: This is the refactored, streamlined version optimized for parallel task execution.
 
 ## 🚫 COMMUNICATION PROHIBITIONS
@@ -210,18 +226,61 @@ docker ps  # Confirm containers are running
 
 ### 3. Development Workflow - 14-Phase Process
 
-## 🛑 WORKFLOW TRIGGER MECHANISM
+## 🚨 MANDATORY WORKFLOW ENFORCEMENT - ZERO EXCEPTIONS
 
-**BEFORE ANY CODE ACTION:**
-1. **STOP** - Do not write/edit ANY code yet
-2. **CREATE TODO LIST** - Use TodoWrite with all 14 phases
-3. **TRACK PROGRESS** - Update todo status at EACH phase
-4. **NO SKIPPING** - Complete phases sequentially
+### ⛔ WORKFLOW VIOLATION = TASK FAILURE
 
-**AUTOMATIC TRIGGER WORDS:**
-- "fix", "implement", "create", "update", "refactor", "add", "remove", "change"
-- ANY request involving code modification
-- ANY bug fix or feature request
+**THE RULE:** If you write/edit ANY code without completing ALL workflow phases, you have FAILED the task.
+
+### 🔴 AUTOMATIC WORKFLOW TRIGGER
+
+**BEFORE touching ANY file (Read is OK, Write/Edit triggers workflow):**
+
+1. **IMMEDIATE STOP** - Freeze all actions
+2. **CREATE TODO LIST** - TodoWrite with all 14 phases IMMEDIATELY
+3. **ANNOUNCE WORKFLOW** - Tell user: "Starting 14-phase workflow for [task]"
+4. **EXECUTE PHASES** - Complete each phase with status updates
+5. **NO SHORTCUTS** - Skipping = Failure
+
+**TRIGGER DETECTION (any of these = MUST use workflow):**
+- User says: "fix", "implement", "create", "update", "refactor", "add", "remove", "change", "build", "modify", "enhance", "improve"
+- You plan to use: Write, Edit, MultiEdit, NotebookEdit tools
+- Task involves: code, configuration, documentation updates
+- ANY doubt = use workflow
+
+### 📝 WORKFLOW COMPLIANCE CHECKLIST
+
+```python
+# This is what you MUST do EVERY TIME:
+def handle_any_task(task):
+    if will_modify_files(task):
+        # STEP 1: Create todo list IMMEDIATELY
+        todo_list = create_14_phase_todos()
+        
+        # STEP 2: Announce to user
+        print(f"📋 Starting 14-phase workflow for: {task}")
+        
+        # STEP 3: Execute phases sequentially
+        for phase in todo_list:
+            execute_phase(phase)
+            update_todo_status(phase, "completed")
+            
+        # STEP 4: Run TeamCoach reflection
+        run_teamcoach_reflection()
+    else:
+        # Read-only tasks can proceed directly
+        execute_readonly_task(task)
+```
+
+### ❌ WHAT HAPPENS WHEN YOU SKIP WORKFLOW
+
+**Real Example from Session 2025-08-31:**
+- Task: "Remove all stubs/placeholders"
+- Skipped workflow → Jumped to implementation
+- Result: 3+ critical issues missed, 30% rework time
+- TeamCoach Rating: 2/10 for initial approach
+
+**LESSON: Workflow shortcuts ALWAYS cost more time than they save**
 
 **For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
 
