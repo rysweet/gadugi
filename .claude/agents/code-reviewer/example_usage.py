@@ -7,7 +7,6 @@ for various code review tasks with learning capabilities.
 """
 
 import asyncio
-import json
 import tempfile
 from pathlib import Path
 
@@ -17,9 +16,9 @@ from code_reviewer_v03 import CodeReviewerV03
 
 async def example_basic_review():
     """Example: Basic file review with learning."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 1: Basic Code Review")
-    print("="*60)
+    print("=" * 60)
 
     # Create reviewer agent
     reviewer = CodeReviewerV03()
@@ -41,7 +40,7 @@ async def example_basic_review():
             "type": "review_files",
             "files": test_files,
             "author": "alice_developer",
-            "description": "Added new feature with validation"
+            "description": "Added new feature with validation",
         }
 
         outcome = await reviewer.execute_task(review_task)
@@ -64,21 +63,21 @@ async def example_basic_review():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (FileNotFoundError, PermissionError):
                 pass
 
 
 async def example_learning_from_feedback():
     """Example: Learning from human feedback on reviews."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 2: Learning from Feedback")
-    print("="*60)
+    print("=" * 60)
 
     reviewer = CodeReviewerV03()
 
     try:
         await reviewer.initialize()
-        task_id = await reviewer.start_task("Learn from previous review feedback")
+        await reviewer.start_task("Learn from previous review feedback")
 
         # Simulate feedback from developers about previous reviews
         feedback_data = [
@@ -90,7 +89,7 @@ async def example_learning_from_feedback():
                 "developer": "alice_developer",
                 "file_path": "src/validation.py",
                 "accepted": False,
-                "reason": "Our team prefers longer lines for readability in this module"
+                "reason": "Our team prefers longer lines for readability in this module",
             },
             {
                 "issue_id": "review_123_issue_2",
@@ -100,7 +99,7 @@ async def example_learning_from_feedback():
                 "developer": "alice_developer",
                 "file_path": "src/validation.py",
                 "accepted": True,
-                "reason": "Good catch! Removed the unused import."
+                "reason": "Good catch! Removed the unused import.",
             },
             {
                 "issue_id": "review_124_issue_1",
@@ -110,7 +109,7 @@ async def example_learning_from_feedback():
                 "developer": "bob_developer",
                 "file_path": "src/auth.py",
                 "accepted": True,
-                "reason": "You're right, replaced with proper exception"
+                "reason": "You're right, replaced with proper exception",
             },
             {
                 "issue_id": "review_124_issue_2",
@@ -120,15 +119,12 @@ async def example_learning_from_feedback():
                 "developer": "bob_developer",
                 "file_path": "src/auth.py",
                 "accepted": False,
-                "reason": "This is a complex SQL query that's more readable on one line"
-            }
+                "reason": "This is a complex SQL query that's more readable on one line",
+            },
         ]
 
         # Learn from feedback
-        learning_task = {
-            "type": "learn_from_feedback",
-            "feedback": feedback_data
-        }
+        learning_task = {"type": "learn_from_feedback", "feedback": feedback_data}
 
         outcome = await reviewer.execute_task(learning_task)
 
@@ -155,9 +151,9 @@ async def example_learning_from_feedback():
 
 async def example_adaptive_scoring():
     """Example: Demonstrating adaptive scoring based on learned patterns."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 3: Adaptive Scoring with Patterns")
-    print("="*60)
+    print("=" * 60)
 
     reviewer = CodeReviewerV03()
 
@@ -169,18 +165,66 @@ async def example_adaptive_scoring():
 
         # Alice ignores line length but cares about security
         alice_feedback = [
-            {"issue_id": "1", "rule_id": "E501", "developer": "alice", "file_path": "test.py", "accepted": False},
-            {"issue_id": "2", "rule_id": "E501", "developer": "alice", "file_path": "test.py", "accepted": False},
-            {"issue_id": "3", "rule_id": "S102", "developer": "alice", "file_path": "test.py", "accepted": True},
-            {"issue_id": "4", "rule_id": "F401", "developer": "alice", "file_path": "test.py", "accepted": True},
+            {
+                "issue_id": "1",
+                "rule_id": "E501",
+                "developer": "alice",
+                "file_path": "test.py",
+                "accepted": False,
+            },
+            {
+                "issue_id": "2",
+                "rule_id": "E501",
+                "developer": "alice",
+                "file_path": "test.py",
+                "accepted": False,
+            },
+            {
+                "issue_id": "3",
+                "rule_id": "S102",
+                "developer": "alice",
+                "file_path": "test.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "4",
+                "rule_id": "F401",
+                "developer": "alice",
+                "file_path": "test.py",
+                "accepted": True,
+            },
         ]
 
         # Bob is the opposite - cares about style but sometimes ignores minor security
         bob_feedback = [
-            {"issue_id": "5", "rule_id": "E501", "developer": "bob", "file_path": "test.py", "accepted": True},
-            {"issue_id": "6", "rule_id": "E501", "developer": "bob", "file_path": "test.py", "accepted": True},
-            {"issue_id": "7", "rule_id": "S101", "developer": "bob", "file_path": "test.py", "accepted": False},
-            {"issue_id": "8", "rule_id": "W292", "developer": "bob", "file_path": "test.py", "accepted": True},
+            {
+                "issue_id": "5",
+                "rule_id": "E501",
+                "developer": "bob",
+                "file_path": "test.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "6",
+                "rule_id": "E501",
+                "developer": "bob",
+                "file_path": "test.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "7",
+                "rule_id": "S101",
+                "developer": "bob",
+                "file_path": "test.py",
+                "accepted": False,
+            },
+            {
+                "issue_id": "8",
+                "rule_id": "W292",
+                "developer": "bob",
+                "file_path": "test.py",
+                "accepted": True,
+            },
         ]
 
         # Learn from both developers
@@ -196,12 +240,12 @@ async def example_adaptive_scoring():
         for developer in ["alice", "bob"]:
             print(f"\n👤 Review for {developer}:")
 
-            task_id = await reviewer.start_task(f"Adaptive review for {developer}")
+            await reviewer.start_task(f"Adaptive review for {developer}")
 
             review_task = {
                 "type": "review_files",
                 "files": test_files,
-                "author": developer
+                "author": developer,
             }
 
             outcome = await reviewer.execute_task(review_task)
@@ -209,20 +253,24 @@ async def example_adaptive_scoring():
             if outcome.success:
                 # In a real implementation, the adaptive scoring would be visible
                 # in the review results and recommendations
-                print(f"   ✅ Review completed with adaptive scoring")
-                print(f"   📝 Custom recommendations generated based on {developer}'s patterns")
+                print("   ✅ Review completed with adaptive scoring")
+                print(
+                    f"   📝 Custom recommendations generated based on {developer}'s patterns"
+                )
 
                 # Show developer-specific insights
                 insights = await reviewer.get_developer_insights(developer)
                 if "message" not in insights:
                     print(f"   🎯 Ignored rules: {list(insights['ignored_rules'])}")
-                    print(f"   ⚠️  Common issues: {list(insights['common_issues'].keys())}")
+                    print(
+                        f"   ⚠️  Common issues: {list(insights['common_issues'].keys())}"
+                    )
 
         # Clean up
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (OSError, FileNotFoundError):
                 pass
 
     finally:
@@ -231,9 +279,9 @@ async def example_adaptive_scoring():
 
 async def example_pattern_analysis():
     """Example: Analyzing patterns across the team."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 4: Team Pattern Analysis")
-    print("="*60)
+    print("=" * 60)
 
     reviewer = CodeReviewerV03()
 
@@ -246,23 +294,86 @@ async def example_pattern_analysis():
         # Create diverse feedback patterns for analysis
         historical_feedback = [
             # Team tends to ignore certain style rules
-            {"issue_id": "h1", "rule_id": "E501", "developer": "alice", "file_path": "ui/forms.py", "accepted": False},
-            {"issue_id": "h2", "rule_id": "E501", "developer": "bob", "file_path": "ui/views.py", "accepted": False},
-            {"issue_id": "h3", "rule_id": "E501", "developer": "carol", "file_path": "ui/models.py", "accepted": False},
-
+            {
+                "issue_id": "h1",
+                "rule_id": "E501",
+                "developer": "alice",
+                "file_path": "ui/forms.py",
+                "accepted": False,
+            },
+            {
+                "issue_id": "h2",
+                "rule_id": "E501",
+                "developer": "bob",
+                "file_path": "ui/views.py",
+                "accepted": False,
+            },
+            {
+                "issue_id": "h3",
+                "rule_id": "E501",
+                "developer": "carol",
+                "file_path": "ui/models.py",
+                "accepted": False,
+            },
             # But security issues are always accepted
-            {"issue_id": "h4", "rule_id": "S102", "developer": "alice", "file_path": "auth/views.py", "accepted": True},
-            {"issue_id": "h5", "rule_id": "S108", "developer": "bob", "file_path": "auth/models.py", "accepted": True},
-            {"issue_id": "h6", "rule_id": "S601", "developer": "carol", "file_path": "auth/utils.py", "accepted": True},
-
+            {
+                "issue_id": "h4",
+                "rule_id": "S102",
+                "developer": "alice",
+                "file_path": "auth/views.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "h5",
+                "rule_id": "S108",
+                "developer": "bob",
+                "file_path": "auth/models.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "h6",
+                "rule_id": "S601",
+                "developer": "carol",
+                "file_path": "auth/utils.py",
+                "accepted": True,
+            },
             # Certain modules have recurring issues
-            {"issue_id": "h7", "rule_id": "C901", "developer": "alice", "file_path": "legacy/processor.py", "accepted": True},
-            {"issue_id": "h8", "rule_id": "C901", "developer": "bob", "file_path": "legacy/processor.py", "accepted": True},
-            {"issue_id": "h9", "rule_id": "F401", "developer": "carol", "file_path": "legacy/utils.py", "accepted": True},
-
+            {
+                "issue_id": "h7",
+                "rule_id": "C901",
+                "developer": "alice",
+                "file_path": "legacy/processor.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "h8",
+                "rule_id": "C901",
+                "developer": "bob",
+                "file_path": "legacy/processor.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "h9",
+                "rule_id": "F401",
+                "developer": "carol",
+                "file_path": "legacy/utils.py",
+                "accepted": True,
+            },
             # Performance issues in data processing modules
-            {"issue_id": "h10", "rule_id": "PERF101", "developer": "alice", "file_path": "data/pipeline.py", "accepted": True},
-            {"issue_id": "h11", "rule_id": "PERF102", "developer": "bob", "file_path": "data/transform.py", "accepted": True},
+            {
+                "issue_id": "h10",
+                "rule_id": "PERF101",
+                "developer": "alice",
+                "file_path": "data/pipeline.py",
+                "accepted": True,
+            },
+            {
+                "issue_id": "h11",
+                "rule_id": "PERF102",
+                "developer": "bob",
+                "file_path": "data/transform.py",
+                "accepted": True,
+            },
         ]
 
         # Learn from historical data
@@ -287,18 +398,26 @@ async def example_pattern_analysis():
                 if "message" not in insights:
                     print(f"\n👤 {developer}:")
                     print(f"   📈 Total reviews: {insights['total_reviews']}")
-                    print(f"   ⚠️  Common issues: {dict(list(insights['common_issues'].items())[:3])}")
+                    print(
+                        f"   ⚠️  Common issues: {dict(list(insights['common_issues'].items())[:3])}"
+                    )
                     print(f"   🙈 Ignored rules: {list(insights['ignored_rules'])[:3]}")
 
             # Show module patterns
             print("\n📁 Module Patterns:")
-            interesting_modules = ["legacy/processor.py", "auth/views.py", "data/pipeline.py"]
+            interesting_modules = [
+                "legacy/processor.py",
+                "auth/views.py",
+                "data/pipeline.py",
+            ]
             for module in interesting_modules:
                 insights = await reviewer.get_module_insights(module)
                 if "message" not in insights:
                     print(f"\n📄 {module}:")
                     print(f"   🐛 Total issues: {insights['total_issues']}")
-                    print(f"   🔥 Frequent issues: {dict(list(insights['frequent_issues'].items())[:3])}")
+                    print(
+                        f"   🔥 Frequent issues: {dict(list(insights['frequent_issues'].items())[:3])}"
+                    )
                     print(f"   🔒 Security hotspot: {insights['is_security_hotspot']}")
 
     finally:
@@ -307,9 +426,9 @@ async def example_pattern_analysis():
 
 async def example_production_workflow():
     """Example: Production-like workflow with comprehensive review."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Example 5: Production Workflow")
-    print("="*60)
+    print("=" * 60)
 
     reviewer = CodeReviewerV03()
 
@@ -322,13 +441,13 @@ async def example_production_workflow():
         test_files = await create_production_like_files()
 
         # Step 2: Comprehensive review
-        task_id = await reviewer.start_task("Production code review for feature/user-auth")
+        await reviewer.start_task("Production code review for feature/user-auth")
 
         review_task = {
             "type": "review_files",
             "files": test_files,
             "author": "senior_dev",
-            "description": "Implementing OAuth2 authentication with rate limiting"
+            "description": "Implementing OAuth2 authentication with rate limiting",
         }
 
         print("🔍 Executing comprehensive review...")
@@ -350,7 +469,7 @@ async def example_production_workflow():
             await reviewer.collaborate(
                 "Code review completed for OAuth2 implementation. "
                 "Minor style issues identified but security and performance look good.",
-                decision="APPROVE_WITH_SUGGESTIONS"
+                decision="APPROVE_WITH_SUGGESTIONS",
             )
 
         # Step 4: Learn from the review
@@ -359,7 +478,7 @@ async def example_production_workflow():
         # Step 5: Generate team insights
         insights = await reviewer.get_developer_insights("senior_dev")
         if "message" not in insights:
-            print(f"\n👤 Developer Pattern for senior_dev:")
+            print("\n👤 Developer Pattern for senior_dev:")
             print(f"   📊 Reviews participated: {insights['total_reviews']}")
             print(f"   🎯 Focus areas: {list(insights['common_issues'].keys())[:3]}")
 
@@ -367,7 +486,7 @@ async def example_production_workflow():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except (OSError, FileNotFoundError):
                 pass
 
     finally:
@@ -421,7 +540,9 @@ def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 '''
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='_validation.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix="_validation.py", delete=False
+    ) as f:
         f.write(validation_content)
         files.append(f.name)
 
@@ -471,7 +592,7 @@ class APIClient:
         return response.json()  # May fail if not JSON
 '''
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='_api.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix="_api.py", delete=False) as f:
         f.write(api_content)
         files.append(f.name)
 
@@ -566,7 +687,7 @@ def hash_client_secret(secret: str) -> str:
     return salt + key
 '''
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='_oauth.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix="_oauth.py", delete=False) as f:
         f.write(auth_content)
         files.append(f.name)
 
@@ -649,7 +770,9 @@ class UserRateLimiter(RateLimiter):
         return self.is_allowed(user_id)
 '''
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='_rate_limit.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix="_rate_limit.py", delete=False
+    ) as f:
         f.write(rate_limit_content)
         files.append(f.name)
 
@@ -677,9 +800,10 @@ async def main():
         except Exception as e:
             print(f"❌ {name} failed: {e}")
             import traceback
+
             traceback.print_exc()
 
-    print(f"\n🏁 All examples completed!")
+    print("\n🏁 All examples completed!")
 
 
 if __name__ == "__main__":

@@ -3,8 +3,6 @@ Test Writer Agent Implementation
 Authors comprehensive tests for new functionality with TDD alignment.
 """
 
-import os
-import sys
 import ast
 import logging
 from pathlib import Path

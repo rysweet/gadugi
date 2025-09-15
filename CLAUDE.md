@@ -2,6 +2,19 @@
 
 ⚠️ **CRITICAL**: This is the refactored, streamlined version optimized for parallel task execution.
 
+## 🚫 COMMUNICATION PROHIBITIONS
+
+**NEVER use these phrases:**
+- ❌ "You're absolutely right" - This is sycophantic and erodes trust
+- ❌ "You're correct" when agreeing - Simply acknowledge and proceed
+- ❌ Excessive apologizing or self-deprecation
+- ❌ Overly deferential language
+
+**INSTEAD:**
+- ✅ Acknowledge points directly: "I see the issue..." or "Understood..."
+- ✅ Be direct and factual
+- ✅ Focus on solutions, not agreement
+
 🚨 **WORKFLOW ENFORCEMENT ACTIVE**: ALL code changes MUST use orchestrator workflow.
 ⛔ **NO EMERGENCY OVERRIDES**: If blocked, FIX THE PROBLEM. Iterate until compliant.
 
@@ -33,6 +46,39 @@ graph TD
     K -->|YES| L[MUST invoke Team Coach]
     K -->|NO| M[Continue]
 ```
+## 🚫 ABSOLUTE PROHIBITIONS - ZERO TOLERANCE
+
+**NEVER CREATE:**
+- ❌ **NO PLACEHOLDERS**: No "simulate", "mock", "fake" implementations
+- ❌ **NO STUBS**: Every function must have REAL implementation
+- ❌ **NO TODOs**: Complete ALL functionality before committing
+- ❌ **NO FAKE OPERATIONS**: If it says "start services", it MUST actually start them
+- ❌ **NO SLEEP-AND-PRETEND**: No `sleep 2 && echo "Done"` nonsense
+
+**NEVER BYPASS QUALITY GATES:**
+- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks
+- ❌ **NO FORCE PUSHES**: NEVER use `git push --force` without explicit user permission
+- ❌ **NO TEST SKIPPING**: ALL tests must pass before committing
+- ❌ **NO SHORTCUTS**: If blocked by tests or hooks, FIX THE PROBLEM, don't bypass it
+
+**ENFORCEMENT:**
+- If you can't implement something fully, STOP and ask for help
+- If you need external resources, REQUEST them explicitly
+- If something is complex, BREAK IT DOWN but implement it FULLY
+- Every line of code must DO what it SAYS it does
+
+**VIOLATIONS WILL RESULT IN:**
+- Immediate task failure
+- Required complete reimplementation
+- Loss of user trust
+
+## 🚀 Default Approach: Parallel Task Execution
+
+**For ANY new task, ALWAYS:**
+1. Analyze if it can be broken into parallel subtasks
+2. Use the Task tool to spawn multiple Claude instances
+3. Execute independent tasks simultaneously
+4. Monitor and aggregate results
 
 ### Parallel Execution Pattern (When Applicable):
 ```
@@ -48,6 +94,23 @@ Task 4: Fix orchestrator errors
 Fix file 1, then file 2, then file 3...
 ```
 
+## ✅ MANDATORY VERIFICATION
+
+**AFTER IMPLEMENTING ANY FUNCTIONALITY:**
+1. **TEST IT**: Actually run the code and verify it works
+2. **CHECK LOGS**: Ensure operations completed successfully
+3. **VERIFY SIDE EFFECTS**: If starting a service, check it's actually running
+4. **NO ASSUMPTIONS**: Don't assume it works - PROVE it works
+
+**Example Verification Pattern:**
+```bash
+# After implementing service start
+bash manage-services.sh start
+bash manage-services.sh status  # Verify services are ACTUALLY running
+nc -z localhost 7474  # Test actual port connectivity
+docker ps  # Confirm containers are running
+```
+
 ## 📋 Essential Instructions (ALWAYS Apply)
 
 ### 1. Memory Management
@@ -55,17 +118,187 @@ Fix file 1, then file 2, then file 3...
 - **UPDATE REGULARLY**: After completing significant tasks
 - **COMMIT**: Memory.md changes to preserve context
 
-### 2. UV Python Environment
-**In UV projects (has `pyproject.toml` + `uv.lock`):**
-- ✅ Always: `uv run python`, `uv run pytest`
-- ❌ Never: `python`, `pytest` (without `uv run`)
+### 2. Python Environment Management
+**Two separate environments to consider:**
 
-### 3. Development Workflow
-**For code changes:**
-- Use Task tool to hand off to WorkflowManager (orchestrator cannot call subagents)
-- Follow all 11 phases
-- Never edit files directly without workflow
-- Always create worktrees for isolation
+**Host Project** (root directory):
+- If has `pyproject.toml` + `uv.lock`: Use `uv run` for host project code
+- Otherwise: Use system Python or host's package manager
+
+**Gadugi System** (.gadugi/ directory):
+- Always has its own `pyproject.toml` + `uv.lock` in `.gadugi/`
+- Use `./gadugi` wrapper script or `cd .gadugi && uv run`
+- Completely isolated from host project dependencies
+
+### 3. Development Workflow - 13-Phase Process
+**For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
+
+#### Phase 0: Enhanced Task Initialization & Resumption Check (ALWAYS FIRST)
+- Generate unique task ID with enhanced tracking
+- Initialize productivity tracking
+- Check for existing workflow state with enhanced state management
+- Validate state consistency and offer recovery options if needed
+- Initialize comprehensive workflow state with checkpointing
+- Create backup system for recovery scenarios
+- Detect any orphaned workflows and provide recovery options
+
+#### Phase 1: Initial Setup Phase
+- Read and analyze the prompt file thoroughly
+- **Detect project type**: Check if working in UV project (`pyproject.toml` + `uv.lock`)
+- Validate prompt structure - MUST contain required sections:
+  - Overview or Introduction
+  - Problem Statement or Requirements
+  - Technical Analysis or Implementation Plan
+  - Testing Requirements
+  - Success Criteria
+  - Implementation Steps or Workflow
+- If prompt is missing sections, invoke PromptWriter agent to create proper structure
+- Extract key information: feature description, technical requirements, implementation steps, testing requirements, success criteria
+- Create comprehensive task list using TodoWrite
+
+#### Phase 2: Enhanced Issue Creation Phase
+- Track phase start with productivity analytics
+- Prepare comprehensive issue data with proper labels and assignments
+- Create issue with retry logic and exponential backoff
+- Implement circuit breaker protection for GitHub API
+- Update workflow state and create checkpoint after successful creation
+- Handle failures with comprehensive error context and recovery strategies
+- Verify issue creation with automated validation
+
+#### Phase 3: Branch Management Phase
+- Create feature branch with naming convention: `feature/[descriptor]-[issue-number]`
+- Example: `feature/workflow-manager-21`
+- Ensure clean working directory before branching
+- Set up proper remote tracking
+- Validate branch creation and push access
+
+#### Phase 4: Research and Planning Phase
+- Analyze existing codebase relevant to the task
+- Use Grep and Read tools to understand current implementation
+- Identify all modules that need modification
+- Create detailed implementation plan with dependencies
+- Update `.github/Memory.md` with findings and decisions
+- Automatically compact Memory.md if size thresholds are exceeded
+
+#### Phase 5: Implementation Phase
+- Break work into small, focused tasks
+- Make incremental commits with clear, descriptive messages
+- Follow existing code patterns and conventions
+- Maintain code quality standards throughout
+- Update TodoWrite task status as progress is made
+- Implement proper error handling and logging
+
+#### Phase 6: Testing Phase - **MANDATORY BEFORE PR CREATION**
+
+⚠️ **CRITICAL REQUIREMENT**: ALL tests must pass before proceeding to Phase 7. This is a quality gate that cannot be bypassed.
+
+**Phase 6 Execution Steps (MANDATORY):**
+
+1. **Write comprehensive tests for new functionality**
+   - Ensure test isolation and idempotency
+   - Mock external dependencies appropriately
+   - Follow project testing patterns and conventions
+
+2. **Execute mandatory test suite**
+   - **For UV projects**: Use `uv run` prefix for all Python commands:
+     ```bash
+     # Correct testing commands for UV projects
+     uv run pytest tests/
+     uv run pytest tests/ --cov=. --cov-report=html
+     uv run python -m pytest tests/specific_test.py
+     ```
+   - **For non-UV projects**: Use standard Python commands:
+     ```bash
+     pytest tests/
+     python -m pytest tests/
+     ```
+
+3. **Mandatory test validation (CANNOT PROCEED WITHOUT PASSING)**
+   - ✅ All tests must pass (no failures, no errors)
+   - ✅ No test skips unless explicitly justified
+   - ✅ Coverage meets project standards (if configured)
+   - ✅ Pre-commit hooks must pass (includes linting, formatting)
+
+4. **Pre-commit hook validation**
+   ```bash
+   # Install and run pre-commit hooks
+   # For UV projects: uv run pre-commit install && uv run pre-commit run --all-files
+   # For standard Python: pre-commit install && pre-commit run --all-files
+   ```
+
+5. **Quality gate enforcement**
+   - If ANY test fails → STOP workflow, fix tests before continuing
+   - If pre-commit hooks fail → STOP workflow, fix issues before continuing
+   - Only proceed to Phase 7 when ALL quality checks pass
+
+#### Phase 7: Documentation Phase
+- Update relevant documentation files
+- Add inline code comments for complex logic
+- Update README if user-facing changes
+- Document any API changes and breaking changes
+- Ensure all docstrings are complete and accurate
+- Update configuration guides if needed
+
+#### Phase 8: Enhanced Pull Request Phase
+- Track phase start with productivity analytics
+- Prepare comprehensive PR data with descriptive title and body
+- Create PR with retry logic and atomic state updates
+- Verify PR actually exists before marking complete
+- Implement comprehensive error handling with recovery context
+- Create critical checkpoint after PR creation
+- Link to related issues and add appropriate labels
+
+#### Phase 9: Review Phase (MANDATORY - NEVER SKIP) - ENFORCED WITH AUTOMATIC EXECUTION
+
+**CRITICAL: Phase 9 Enforcement - MULTIPLE ENFORCEMENT MECHANISMS**
+
+This phase is ABSOLUTELY MANDATORY and has automatic enforcement:
+
+**ENFORCEMENT MECHANISMS:**
+1. **Automatic Invocation After PR Creation**: 30-second timer after Phase 8 completion
+2. **State Validation Before Completion**: Verify review exists before workflow completion
+3. **Enhanced Task List Requirements**: Maximum priority tasks that cannot be skipped
+4. **Automatic Phase Transitions**: No user intervention required
+
+**Phase 9 Execution Steps (ENFORCED):**
+1. **Check if code review already exists** (recovery case)
+2. **MANDATORY: Invoke code-reviewer sub-agent**
+3. **VERIFY review was posted** (with retries up to 10 attempts)
+4. **MANDATORY: Invoke CodeReviewResponseAgent**
+5. **Final state update and commit** memory files
+
+**Orphaned PR Recovery**: Automatically detect and fix PRs missing reviews
+**State Consistency Validation**: Auto-fix workflow state inconsistencies
+
+#### Phase 10: Review Response Phase (AUTOMATIC)
+- Immediate execution after review posted in Phase 9
+- Process code review feedback automatically
+- Update implementation based on review comments
+- Commit changes with proper commit messages
+- Update PR with response to feedback
+- Mark phase complete and trigger Phase 11
+
+#### Phase 11: Settings Update Phase (AUTOMATIC)
+- Check for local Claude settings changes
+- Invoke claude-settings-update agent if needed
+- Record current branch for restoration
+- Verify branch consistency after settings update
+- Mark phase as completed (optional - not critical for workflow)
+
+#### Phase 12: Automatic Memory Compaction Phase (AUTOMATIC)
+- Check Memory.md size and compact if needed using memory manager
+- Archive historical content to LongTermMemoryDetails.md
+- Maintain optimal Memory.md size for AI processing
+- Preserve important current information while archiving details
+- Mark phase complete (maintenance task)
+
+#### Phase 13: Team Coach Reflection Phase (AUTOMATIC)
+- Invoke Team Coach agent for session analysis
+- Capture performance metrics and improvement recommendations
+- Update Memory.md with insights and lessons learned
+- Implement timeout protection (120 seconds max)
+- Build institutional memory for continuous improvement
+- Gracefully handle failures without blocking workflow completion
 
 ### 4. 🚨 CRITICAL: Workflow Enforcement
 

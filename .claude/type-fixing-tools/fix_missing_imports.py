@@ -86,10 +86,7 @@ def fix_missing_imports():
         for import_name, fix_info in import_fixes.items():
             if f'Import "{import_name}"' in error and "could not be resolved" in error:
                 # Extract file path from error
-                if (
-                    "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
-                    in error
-                ):
+                if "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/" in error:
                     file_path = error.split(
                         "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-TeamCoach/"
                     )[1].split(":")[0]

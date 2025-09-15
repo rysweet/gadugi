@@ -102,13 +102,13 @@ class EventPublisher:
         correlation_id: Optional[str] = None
     ) -> str:
         """Publish a single event"""
-        
+
     async def publish_batch(
         self,
         events: List[EventData]
     ) -> List[str]:
         """Publish multiple events atomically"""
-        
+
     def publish_sync(
         self,
         event_type: str,
@@ -128,13 +128,13 @@ class EventSubscriber:
         priority_min: Optional[Priority] = None
     ) -> str:
         """Subscribe to events matching pattern"""
-        
+
     async def unsubscribe(self, subscription_id: str):
         """Remove a subscription"""
-        
+
     async def pause_subscription(self, subscription_id: str):
         """Temporarily pause delivery"""
-        
+
     async def resume_subscription(self, subscription_id: str):
         """Resume paused subscription"""
 ```
@@ -144,16 +144,16 @@ class EventSubscriber:
 class EventRouter:
     async def start(self):
         """Start the event routing engine"""
-        
+
     async def stop(self):
         """Gracefully stop routing"""
-        
+
     async def route_event(self, event: Event):
         """Route event to subscribers"""
-        
+
     def add_routing_rule(self, rule: RoutingRule):
         """Add custom routing rule"""
-        
+
     def get_metrics(self) -> RouterMetrics:
         """Get router performance metrics"""
 ```

@@ -30,13 +30,14 @@ class StateValidationError(StateError):
     """Exception for state validation errors."""
 
     def __init__(self, message: str, validation_errors: List[str]):
-        super().__init__(message, 'validation', {})
+        super().__init__(message, "validation", {})
         self.validation_errors = validation_errors
 
 
 # Enums and data classes
 class WorkflowPhase(Enum):
     """Workflow phases enumeration."""
+
     INITIALIZATION = 0
     INITIAL_SETUP = 1
     ENVIRONMENT_SETUP = 1  # Alias for compatibility
@@ -54,21 +55,21 @@ class WorkflowPhase(Enum):
     def get_phase_name(cls, phase_number: int) -> str:
         """Get human-readable phase name."""
         phase_names = {
-            0: 'Task Initialization & Resumption Check',
-            1: 'Initial Setup',
-            2: 'Issue Creation',
-            3: 'Branch Management',
-            4: 'Research and Planning',
-            5: 'Implementation',
-            6: 'Testing',
-            7: 'Documentation',
-            8: 'Pull Request',
-            9: 'Review'
+            0: "Task Initialization & Resumption Check",
+            1: "Initial Setup",
+            2: "Issue Creation",
+            3: "Branch Management",
+            4: "Research and Planning",
+            5: "Implementation",
+            6: "Testing",
+            7: "Documentation",
+            8: "Pull Request",
+            9: "Review",
         }
-        return phase_names.get(phase_number, 'Unknown Phase')
+        return phase_names.get(phase_number, "Unknown Phase")
 
     @classmethod
-    def is_valid_phase(cls, phase_number: Union[int, 'WorkflowPhase']) -> bool:
+    def is_valid_phase(cls, phase_number: Union[int, "WorkflowPhase"]) -> bool:
         """Check if phase number is valid."""
         if isinstance(phase_number, cls):
             phase_number = phase_number.value
@@ -80,6 +81,7 @@ class WorkflowPhase(Enum):
 @dataclass
 class TaskState:
     """Data class representing task state."""
+
     task_id: str
     prompt_file: str
     status: str  # pending, in_progress, completed, error, cancelled
@@ -88,20 +90,30 @@ class TaskState:
     pr_number: Optional[int] = None
     current_phase: int = 0
     current_phase_name: Optional[str] = None
-    created_at: Optional[datetime] = field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: Optional[datetime] = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Optional[datetime] = field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
     context: Dict[str, Any] = field(default_factory=dict)
     error_info: Dict[str, Any] = field(default_factory=dict)
 
-    def __init__(self, task_id: str, prompt_file: str, status: str = "pending",
-                 phase: Optional[WorkflowPhase] = None, **kwargs):
+    def __init__(
+        self,
+        task_id: str,
+        prompt_file: str,
+        status: str = "pending",
+        phase: Optional[WorkflowPhase] = None,
+        **kwargs,
+    ):
         """Initialize TaskState with compatibility for phase parameter."""
         self.task_id = task_id
         self.prompt_file = prompt_file
         self.status = status
-        self.branch = kwargs.get('branch')
-        self.issue_number = kwargs.get('issue_number')
-        self.pr_number = kwargs.get('pr_number')
+        self.branch = kwargs.get("branch")
+        self.issue_number = kwargs.get("issue_number")
+        self.pr_number = kwargs.get("pr_number")
 
         # Handle phase parameter for API compatibility
         if phase is not None:
@@ -110,17 +122,21 @@ class TaskState:
                 self.current_phase_name = WorkflowPhase.get_phase_name(phase.value)
             else:
                 self.current_phase = int(phase)
-                self.current_phase_name = WorkflowPhase.get_phase_name(self.current_phase)
+                self.current_phase_name = WorkflowPhase.get_phase_name(
+                    self.current_phase
+                )
         else:
-            self.current_phase = kwargs.get('current_phase', 0)
-            self.current_phase_name = kwargs.get('current_phase_name')
+            self.current_phase = kwargs.get("current_phase", 0)
+            self.current_phase_name = kwargs.get("current_phase_name")
             if self.current_phase_name is None:
-                self.current_phase_name = WorkflowPhase.get_phase_name(self.current_phase)
+                self.current_phase_name = WorkflowPhase.get_phase_name(
+                    self.current_phase
+                )
 
-        self.created_at = kwargs.get('created_at', datetime.now(timezone.utc))
-        self.updated_at = kwargs.get('updated_at', datetime.now(timezone.utc))
-        self.context = kwargs.get('context', {})
-        self.error_info = kwargs.get('error_info', {})
+        self.created_at = kwargs.get("created_at", datetime.now(timezone.utc))
+        self.updated_at = kwargs.get("updated_at", datetime.now(timezone.utc))
+        self.context = kwargs.get("context", {})
+        self.error_info = kwargs.get("error_info", {})
 
     def __post_init__(self):
         """Post-initialization processing."""
@@ -132,48 +148,54 @@ class TaskState:
         """Convert to dictionary for serialization."""
         data = asdict(self)
         # Convert datetime objects to ISO strings
-        if isinstance(data['created_at'], datetime):
-            data['created_at'] = data['created_at'].isoformat() + 'Z'
-        if isinstance(data['updated_at'], datetime):
-            data['updated_at'] = data['updated_at'].isoformat() + 'Z'
+        if isinstance(data["created_at"], datetime):
+            data["created_at"] = data["created_at"].isoformat() + "Z"
+        if isinstance(data["updated_at"], datetime):
+            data["updated_at"] = data["updated_at"].isoformat() + "Z"
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'TaskState':
+    def from_dict(cls, data: Dict[str, Any]) -> "TaskState":
         """Create TaskState from dictionary."""
         # Convert ISO strings back to datetime objects
-        if 'created_at' in data and isinstance(data['created_at'], str):
-            data['created_at'] = datetime.fromisoformat(data['created_at'].rstrip('Z'))
-        if 'updated_at' in data and isinstance(data['updated_at'], str):
-            data['updated_at'] = datetime.fromisoformat(data['updated_at'].rstrip('Z'))
+        if "created_at" in data and isinstance(data["created_at"], str):
+            data["created_at"] = datetime.fromisoformat(data["created_at"].rstrip("Z"))
+        if "updated_at" in data and isinstance(data["updated_at"], str):
+            data["updated_at"] = datetime.fromisoformat(data["updated_at"].rstrip("Z"))
 
         return cls(**data)
 
-    def update_phase(self, phase: Union[int, WorkflowPhase], phase_name: Optional[str] = None):
+    def update_phase(
+        self, phase: Union[int, WorkflowPhase], phase_name: Optional[str] = None
+    ):
         """Update current phase and timestamp."""
         if isinstance(phase, WorkflowPhase):
             self.current_phase = phase.value
         else:
             self.current_phase = phase
-        self.current_phase_name = phase_name or WorkflowPhase.get_phase_name(self.current_phase)
+        self.current_phase_name = phase_name or WorkflowPhase.get_phase_name(
+            self.current_phase
+        )
         self.updated_at = datetime.now(timezone.utc)
 
     def set_error(self, error_info: Dict[str, Any]):
         """Set error information and update status."""
-        self.status = 'error'
+        self.status = "error"
         self.error_info = error_info.copy()
-        self.error_info['error_timestamp'] = datetime.now(timezone.utc).isoformat() + 'Z'
+        self.error_info["error_timestamp"] = (
+            datetime.now(timezone.utc).isoformat() + "Z"
+        )
         self.updated_at = datetime.now(timezone.utc)
 
     def clear_error(self):
         """Clear error information and reset status."""
-        self.status = 'pending'
+        self.status = "pending"
         self.error_info = {}
         self.updated_at = datetime.now(timezone.utc)
 
     def is_valid(self) -> bool:
         """Validate task state integrity."""
-        valid_statuses = ['pending', 'in_progress', 'completed', 'error', 'cancelled']
+        valid_statuses = ["pending", "in_progress", "completed", "error", "cancelled"]
         if self.status not in valid_statuses:
             return False
 
@@ -203,24 +225,41 @@ class StateManager:
             config: Configuration dictionary
         """
         self.config = config or {}
-        self.state_dir = Path(self.config.get('state_dir', '.github/workflow-states'))
-        self.backup_enabled = self.config.get('backup_enabled', True)
-        self.cleanup_after_days = self.config.get('cleanup_after_days', 30)
-        self.max_states_per_task = self.config.get('max_states_per_task', 20)
+        # Resolve state_dir relative to the repository root, not current working directory
+        default_state_dir = ".github/workflow-states"
+        if "state_dir" in self.config:
+            self.state_dir = Path(self.config["state_dir"])
+        else:
+            # Find repository root by looking for .git directory
+            repo_root = self._find_repo_root()
+            self.state_dir = repo_root / default_state_dir
+        self.backup_enabled = self.config.get("backup_enabled", True)
+        self.cleanup_after_days = self.config.get("cleanup_after_days", 30)
+        self.max_states_per_task = self.config.get("max_states_per_task", 20)
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Ensure state directory exists
         self.state_dir.mkdir(parents=True, exist_ok=True)
 
+    def _find_repo_root(self) -> Path:
+        """Find the repository root directory by looking for .git."""
+        current = Path.cwd().resolve()
+        while current != current.parent:
+            if (current / ".git").exists():
+                return current
+            current = current.parent
+        # Fallback to current directory if .git not found
+        return Path.cwd().resolve()
+
     def _get_state_file(self, task_id: str) -> Path:
         """Get path to state file for task."""
         task_dir = self.state_dir / task_id
         task_dir.mkdir(parents=True, exist_ok=True)
-        return task_dir / 'state.json'
+        return task_dir / "state.json"
 
     def _get_lock_file(self, task_id: str) -> Path:
         """Get path to lock file for task."""
-        return self.state_dir / task_id / 'state.lock'
+        return self.state_dir / task_id / "state.lock"
 
     def _acquire_lock(self, task_id: str):
         """Acquire file lock for concurrent access protection."""
@@ -232,7 +271,7 @@ class StateManager:
             lock_file.touch()
 
         # Open and lock the file
-        lock_fd = open(lock_file, 'w')
+        lock_fd = open(lock_file, "w")
         try:
             # Use non-blocking lock
             fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -259,7 +298,9 @@ class StateManager:
             True if successful, False otherwise
         """
         if not state.is_valid():
-            raise StateValidationError("Invalid task state", ["State validation failed"])
+            raise StateValidationError(
+                "Invalid task state", ["State validation failed"]
+            )
 
         lock_fd = None
         try:
@@ -273,10 +314,12 @@ class StateManager:
                 try:
                     self.backup_state(state.task_id)
                 except Exception as backup_error:
-                    self.logger.warning(f"Backup failed for task {state.task_id}: {backup_error}")
+                    self.logger.warning(
+                        f"Backup failed for task {state.task_id}: {backup_error}"
+                    )
 
             # Save state
-            with open(state_file, 'w') as f:
+            with open(state_file, "w") as f:
                 json.dump(state.to_dict(), f, indent=2)
 
             self.logger.info(f"Saved state for task {state.task_id}")
@@ -284,7 +327,9 @@ class StateManager:
 
         except Exception as e:
             self.logger.error(f"Failed to save state for task {state.task_id}: {e}")
-            raise StateError(f"Failed to save state: {e}", 'save_state', {'task_id': state.task_id})
+            raise StateError(
+                f"Failed to save state: {e}", "save_state", {"task_id": state.task_id}
+            )
         finally:
             self._release_lock(lock_fd)
 
@@ -308,20 +353,24 @@ class StateManager:
             lock_fd = self._acquire_lock(task_id)
             # Continue even if lock acquisition fails
 
-            with open(state_file, 'r') as f:
+            with open(state_file, "r") as f:
                 data = json.load(f)
 
             state = TaskState.from_dict(data)
 
             if not state.is_valid():
-                raise StateValidationError("Loaded state is invalid", ["State validation failed after loading"])
+                raise StateValidationError(
+                    "Loaded state is invalid", ["State validation failed after loading"]
+                )
 
             self.logger.debug(f"Loaded state for task {task_id}")
             return state
 
         except json.JSONDecodeError as e:
             self.logger.error(f"Invalid JSON in state file for task {task_id}: {e}")
-            raise StateValidationError(f"Corrupted state file: {e}", ["JSON decode error"])
+            raise StateValidationError(
+                f"Corrupted state file: {e}", ["JSON decode error"]
+            )
         except Exception as e:
             self.logger.error(f"Failed to load state for task {task_id}: {e}")
             return None
@@ -380,7 +429,9 @@ class StateManager:
 
         except Exception as e:
             self.logger.error(f"Failed to delete state for task {task_id}: {e}")
-            raise StateError(f"Failed to delete state: {e}", 'delete_state', {'task_id': task_id})
+            raise StateError(
+                f"Failed to delete state: {e}", "delete_state", {"task_id": task_id}
+            )
         finally:
             self._release_lock(lock_fd)
 
@@ -439,7 +490,7 @@ class StateManager:
                 if task_dir.is_dir():
                     state = self.load_state(task_dir.name)
                     if state and state.updated_at and state.updated_at < cutoff_date:
-                        if state.status in ['completed', 'cancelled']:
+                        if state.status in ["completed", "cancelled"]:
                             self.delete_state(state.task_id)
                             cleaned_count += 1
 
@@ -468,11 +519,11 @@ class StateManager:
             if not state_file.exists():
                 return None
 
-            backup_dir = self.state_dir / task_id / 'backups'
+            backup_dir = self.state_dir / task_id / "backups"
             backup_dir.mkdir(parents=True, exist_ok=True)
 
-            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
-            backup_file = backup_dir / f'state-{timestamp}.json'
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            backup_file = backup_dir / f"state-{timestamp}.json"
 
             shutil.copy2(state_file, backup_file)
 
@@ -483,7 +534,9 @@ class StateManager:
             self.logger.error(f"Failed to backup state for task {task_id}: {e}")
             return None
 
-    def restore_from_backup(self, task_id: str, backup_path: Path) -> Optional[TaskState]:
+    def restore_from_backup(
+        self, task_id: str, backup_path: Path
+    ) -> Optional[TaskState]:
         """
         Restore task state from backup.
 
@@ -502,7 +555,7 @@ class StateManager:
             lock_fd = self._acquire_lock(task_id)
 
             # Load backup data
-            with open(backup_path, 'r') as f:
+            with open(backup_path, "r") as f:
                 data = json.load(f)
 
             state = TaskState.from_dict(data)
@@ -510,7 +563,9 @@ class StateManager:
             # Save as current state
             self.save_state(state)
 
-            self.logger.info(f"Restored state for task {task_id} from backup {backup_path}")
+            self.logger.info(
+                f"Restored state for task {task_id} from backup {backup_path}"
+            )
             return state
 
         except Exception as e:
@@ -531,29 +586,33 @@ class StateManager:
             List of state history entries
         """
         try:
-            backup_dir = self.state_dir / task_id / 'backups'
+            backup_dir = self.state_dir / task_id / "backups"
             if not backup_dir.exists():
                 return []
 
             history = []
-            backup_files = sorted(backup_dir.glob('state-*.json'), reverse=True)
+            backup_files = sorted(backup_dir.glob("state-*.json"), reverse=True)
 
             for backup_file in backup_files[:limit]:
                 try:
-                    with open(backup_file, 'r') as f:
+                    with open(backup_file, "r") as f:
                         data = json.load(f)
 
                     # Extract timestamp from filename
-                    timestamp_str = backup_file.stem.replace('state-', '')
+                    timestamp_str = backup_file.stem.replace("state-", "")
 
-                    history.append({
-                        'timestamp': timestamp_str,
-                        'backup_file': str(backup_file),
-                        'phase': data.get('current_phase', 0),
-                        'status': data.get('status', 'unknown')
-                    })
+                    history.append(
+                        {
+                            "timestamp": timestamp_str,
+                            "backup_file": str(backup_file),
+                            "phase": data.get("current_phase", 0),
+                            "status": data.get("status", "unknown"),
+                        }
+                    )
                 except Exception as e:
-                    self.logger.warning(f"Failed to read backup file {backup_file}: {e}")
+                    self.logger.warning(
+                        f"Failed to read backup file {backup_file}: {e}"
+                    )
                     continue
 
             return history
@@ -577,20 +636,20 @@ class StateManager:
         try:
             state = self.load_state(task_id)
             if not state:
-                return False, ['State file not found']
+                return False, ["State file not found"]
 
             if not state.is_valid():
-                errors.append('State validation failed')
+                errors.append("State validation failed")
 
             # Additional integrity checks
             state_file = self._get_state_file(task_id)
             if state_file.stat().st_size == 0:
-                errors.append('State file is empty')
+                errors.append("State file is empty")
 
             return len(errors) == 0, errors
 
         except Exception as e:
-            errors.append(f'Integrity check failed: {e}')
+            errors.append(f"Integrity check failed: {e}")
             return False, errors
 
     def validate_state_consistency(self, state: TaskState) -> bool:
@@ -601,7 +660,13 @@ class StateManager:
                 return False
             if not state.prompt_file:
                 return False
-            if state.status not in ['pending', 'in_progress', 'completed', 'error', 'cancelled']:
+            if state.status not in [
+                "pending",
+                "in_progress",
+                "completed",
+                "error",
+                "cancelled",
+            ]:
                 return False
             return True
         except Exception:
@@ -631,7 +696,9 @@ class StateManager:
                 target_file = self._get_state_file(task_id)
                 shutil.copy2(backup_file, target_file)
                 restored_count += 1
-                self.logger.debug(f"Restored state file for task {task_id}: {target_file}")
+                self.logger.debug(
+                    f"Restored state file for task {task_id}: {target_file}"
+                )
 
             self.logger.info(f"Restored {restored_count} state files from backup")
             return True
@@ -647,7 +714,7 @@ class CheckpointManager:
     Provides atomic checkpoint creation and restoration.
     """
 
-    def __init__(self, config: Optional[Union[Dict[str, Any], 'StateManager']] = None):
+    def __init__(self, config: Optional[Union[Dict[str, Any], "StateManager"]] = None):
         """
         Initialize CheckpointManager.
 
@@ -655,7 +722,7 @@ class CheckpointManager:
             config: Configuration dictionary or StateManager instance for backward compatibility
         """
         # Handle backward compatibility where StateManager was passed
-        if hasattr(config, 'state_dir'):  # This is a StateManager
+        if hasattr(config, "state_dir"):  # This is a StateManager
             self.state_manager = config
             self.config = {}
         else:
@@ -664,17 +731,39 @@ class CheckpointManager:
 
         # Use default values when StateManager is passed instead of config
         if self.state_manager:
-            self.checkpoint_dir = Path('.github/workflow-checkpoints')
+            # Find repository root and use absolute path
+            repo_root = self._find_repo_root()
+            self.checkpoint_dir = repo_root / ".github/workflow-checkpoints"
             self.max_checkpoints_per_task = 10
             self.compression_enabled = False
         else:
-            self.checkpoint_dir = Path(str(self.config.get('checkpoint_dir', '.github/workflow-checkpoints')))  # type: ignore
-            self.max_checkpoints_per_task = int(self.config.get('max_checkpoints_per_task', 10))  # type: ignore
-            self.compression_enabled = bool(self.config.get('compression_enabled', False))  # type: ignore
+            # Resolve checkpoint_dir relative to repository root
+            default_checkpoint_dir = ".github/workflow-checkpoints"
+            if "checkpoint_dir" in self.config:
+                self.checkpoint_dir = Path(str(self.config["checkpoint_dir"]))
+            else:
+                repo_root = self._find_repo_root()
+                self.checkpoint_dir = repo_root / default_checkpoint_dir
+            self.max_checkpoints_per_task = int(
+                self.config.get("max_checkpoints_per_task", 10)
+            )  # type: ignore
+            self.compression_enabled = bool(
+                self.config.get("compression_enabled", False)
+            )  # type: ignore
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
 
         # Ensure checkpoint directory exists
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    def _find_repo_root(self) -> Path:
+        """Find the repository root directory by looking for .git."""
+        current = Path.cwd().resolve()
+        while current != current.parent:
+            if (current / ".git").exists():
+                return current
+            current = current.parent
+        # Fallback to current directory if .git not found
+        return Path.cwd().resolve()
 
     def create_checkpoint(self, state: TaskState, description: str) -> str:
         """
@@ -694,22 +783,24 @@ class CheckpointManager:
             task_checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
             checkpoint_data = {
-                'checkpoint_id': checkpoint_id,
-                'description': description,
-                'created_at': datetime.now(timezone.utc).isoformat() + 'Z',
-                'state': state.to_dict()
+                "checkpoint_id": checkpoint_id,
+                "description": description,
+                "created_at": datetime.now(timezone.utc).isoformat() + "Z",
+                "state": state.to_dict(),
             }
 
             if self.compression_enabled:
-                checkpoint_file = task_checkpoint_dir / f'{checkpoint_id}.json.gz'
-                with gzip.open(checkpoint_file, 'wt') as f:
+                checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json.gz"
+                with gzip.open(checkpoint_file, "wt") as f:
                     json.dump(checkpoint_data, f, indent=2)
             else:
-                checkpoint_file = task_checkpoint_dir / f'{checkpoint_id}.json'
-                with open(checkpoint_file, 'w') as f:
+                checkpoint_file = task_checkpoint_dir / f"{checkpoint_id}.json"
+                with open(checkpoint_file, "w") as f:
                     json.dump(checkpoint_data, f, indent=2)
 
-            self.logger.info(f"Created checkpoint {checkpoint_id} for task {state.task_id}")
+            self.logger.info(
+                f"Created checkpoint {checkpoint_id} for task {state.task_id}"
+            )
 
             # Cleanup old checkpoints if needed
             self.cleanup_old_checkpoints(state.task_id)
@@ -717,8 +808,14 @@ class CheckpointManager:
             return checkpoint_id
 
         except Exception as e:
-            self.logger.error(f"Failed to create checkpoint for task {state.task_id}: {e}")
-            raise StateError(f"Failed to create checkpoint: {e}", 'create_checkpoint', {'task_id': state.task_id})
+            self.logger.error(
+                f"Failed to create checkpoint for task {state.task_id}: {e}"
+            )
+            raise StateError(
+                f"Failed to create checkpoint: {e}",
+                "create_checkpoint",
+                {"task_id": state.task_id},
+            )
 
     def list_checkpoints(self, task_id: str) -> List[Dict[str, Any]]:
         """
@@ -738,30 +835,34 @@ class CheckpointManager:
             checkpoints = []
 
             # Find all checkpoint files
-            checkpoint_files = list(task_checkpoint_dir.glob('*.json*'))
+            checkpoint_files = list(task_checkpoint_dir.glob("*.json*"))
 
             for checkpoint_file in checkpoint_files:
                 try:
-                    if checkpoint_file.suffix == '.gz':
-                        with gzip.open(checkpoint_file, 'rt') as f:
+                    if checkpoint_file.suffix == ".gz":
+                        with gzip.open(checkpoint_file, "rt") as f:
                             data = json.load(f)
                     else:
-                        with open(checkpoint_file, 'r') as f:
+                        with open(checkpoint_file, "r") as f:
                             data = json.load(f)
 
-                    checkpoints.append({
-                        'checkpoint_id': data['checkpoint_id'],
-                        'description': data['description'],
-                        'created_at': data['created_at'],
-                        'file_path': str(checkpoint_file)
-                    })
+                    checkpoints.append(
+                        {
+                            "checkpoint_id": data["checkpoint_id"],
+                            "description": data["description"],
+                            "created_at": data["created_at"],
+                            "file_path": str(checkpoint_file),
+                        }
+                    )
 
                 except Exception as e:
-                    self.logger.warning(f"Failed to read checkpoint file {checkpoint_file}: {e}")
+                    self.logger.warning(
+                        f"Failed to read checkpoint file {checkpoint_file}: {e}"
+                    )
                     continue
 
             # Sort by creation time (newest first)
-            checkpoints.sort(key=lambda x: x['created_at'], reverse=True)
+            checkpoints.sort(key=lambda x: x["created_at"], reverse=True)
 
             return checkpoints
 
@@ -769,7 +870,9 @@ class CheckpointManager:
             self.logger.error(f"Failed to list checkpoints for task {task_id}: {e}")
             return []
 
-    def restore_checkpoint(self, task_id: str, checkpoint_id: str) -> Optional[TaskState]:
+    def restore_checkpoint(
+        self, task_id: str, checkpoint_id: str
+    ) -> Optional[TaskState]:
         """
         Restore task state from checkpoint.
 
@@ -785,8 +888,8 @@ class CheckpointManager:
 
             # Try both compressed and uncompressed formats
             checkpoint_files = [
-                task_checkpoint_dir / f'{checkpoint_id}.json.gz',
-                task_checkpoint_dir / f'{checkpoint_id}.json'
+                task_checkpoint_dir / f"{checkpoint_id}.json.gz",
+                task_checkpoint_dir / f"{checkpoint_id}.json",
             ]
 
             checkpoint_file = None
@@ -796,26 +899,30 @@ class CheckpointManager:
                     break
 
             if not checkpoint_file:
-                self.logger.error(f"Checkpoint {checkpoint_id} not found for task {task_id}")
+                self.logger.error(
+                    f"Checkpoint {checkpoint_id} not found for task {task_id}"
+                )
                 return None
 
             # Load checkpoint data
-            if checkpoint_file.suffix == '.gz':
-                with gzip.open(checkpoint_file, 'rt') as f:
+            if checkpoint_file.suffix == ".gz":
+                with gzip.open(checkpoint_file, "rt") as f:
                     data = json.load(f)
             else:
-                with open(checkpoint_file, 'r') as f:
+                with open(checkpoint_file, "r") as f:
                     data = json.load(f)
 
             # Extract and restore state
-            state_data = data['state']
+            state_data = data["state"]
             state = TaskState.from_dict(state_data)
 
             self.logger.info(f"Restored checkpoint {checkpoint_id} for task {task_id}")
             return state
 
         except Exception as e:
-            self.logger.error(f"Failed to restore checkpoint {checkpoint_id} for task {task_id}: {e}")
+            self.logger.error(
+                f"Failed to restore checkpoint {checkpoint_id} for task {task_id}: {e}"
+            )
             return None
 
     def cleanup_old_checkpoints(self, task_id: str) -> int:
@@ -835,20 +942,24 @@ class CheckpointManager:
                 return 0
 
             # Remove oldest checkpoints
-            checkpoints_to_remove = checkpoints[self.max_checkpoints_per_task:]
+            checkpoints_to_remove = checkpoints[self.max_checkpoints_per_task :]
             cleaned_count = 0
 
             for checkpoint in checkpoints_to_remove:
                 try:
-                    checkpoint_file = Path(checkpoint['file_path'])
+                    checkpoint_file = Path(checkpoint["file_path"])
                     if checkpoint_file.exists():
                         checkpoint_file.unlink()
                         cleaned_count += 1
                 except Exception as e:
-                    self.logger.warning(f"Failed to remove checkpoint file {checkpoint['file_path']}: {e}")
+                    self.logger.warning(
+                        f"Failed to remove checkpoint file {checkpoint['file_path']}: {e}"
+                    )
 
             if cleaned_count > 0:
-                self.logger.info(f"Cleaned up {cleaned_count} old checkpoints for task {task_id}")
+                self.logger.info(
+                    f"Cleaned up {cleaned_count} old checkpoints for task {task_id}"
+                )
 
             return cleaned_count
 
@@ -860,14 +971,16 @@ class CheckpointManager:
         """Get agent configuration by ID."""
         # Mock implementation for compatibility
         return {"agent_id": agent_id, "name": agent_id, "version": "1.0.0"}
-    
-    def save_agent_capability_profile(self, agent_id: str, profile_data: Dict[str, Any]) -> bool:
+
+    def save_agent_capability_profile(
+        self, agent_id: str, profile_data: Dict[str, Any]
+    ) -> bool:
         """Save agent capability profile."""
         # Mock implementation for compatibility
         try:
             profile_file = self.state_dir / f"agent_profiles/{agent_id}.json"  # type: ignore[attr-defined]
             profile_file.parent.mkdir(parents=True, exist_ok=True)
-            with open(profile_file, 'w') as f:
+            with open(profile_file, "w") as f:
                 json.dump(profile_data, f, indent=2, default=str)
             return True
         except Exception as e:

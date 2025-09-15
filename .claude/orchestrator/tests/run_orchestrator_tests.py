@@ -15,7 +15,10 @@ orchestrator_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(orchestrator_dir))
 
 # Import test modules
-from tests.test_orchestrator_integration import TestOrchestratorIntegration, TestOrchestratorPerformance
+from tests.test_orchestrator_integration import (
+    TestOrchestratorIntegration,
+    TestOrchestratorPerformance,
+)
 from tests.test_process_registry import TestProcessRegistry, TestProcessInfo
 
 
@@ -74,10 +77,10 @@ def run_specific_test(test_name):
 
     # Map test names to classes
     test_classes = {
-        'integration': TestOrchestratorIntegration,
-        'performance': TestOrchestratorPerformance,
-        'registry': TestProcessRegistry,
-        'process_info': TestProcessInfo,
+        "integration": TestOrchestratorIntegration,
+        "performance": TestOrchestratorPerformance,
+        "registry": TestProcessRegistry,
+        "process_info": TestProcessInfo,
     }
 
     if test_name in test_classes:
@@ -98,12 +101,20 @@ def validate_environment():
 
     # Check Python version
     python_version = sys.version_info
-    print(f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}")
+    print(
+        f"Python version: {python_version.major}.{python_version.minor}.{python_version.micro}"
+    )
 
     # Check required modules
     required_modules = [
-        'json', 'tempfile', 'unittest', 'pathlib', 'datetime',
-        'threading', 'subprocess', 'logging'
+        "json",
+        "tempfile",
+        "unittest",
+        "pathlib",
+        "datetime",
+        "threading",
+        "subprocess",
+        "logging",
     ]
 
     missing_modules = []
@@ -116,7 +127,7 @@ def validate_environment():
             print(f"❌ {module}")
 
     # Check optional modules
-    optional_modules = ['psutil']
+    optional_modules = ["psutil"]
     for module in optional_modules:
         try:
             __import__(module)
@@ -126,7 +137,9 @@ def validate_environment():
 
     # Check orchestrator components
     orchestrator_components = [
-        'orchestrator_main', 'orchestrator_cli', 'process_registry'
+        "orchestrator_main",
+        "orchestrator_cli",
+        "process_registry",
     ]
 
     for component in orchestrator_components:
@@ -141,7 +154,7 @@ def validate_environment():
         print(f"\n❌ Missing required modules: {', '.join(missing_modules)}")
         return 1
     else:
-        print(f"\n✅ Environment validation passed!")
+        print("\n✅ Environment validation passed!")
         return 0
 
 
@@ -150,14 +163,20 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Orchestrator Test Runner")
-    parser.add_argument("--test", help="Run specific test (integration, performance, registry, process_info)")
-    parser.add_argument("--validate", action="store_true", help="Validate test environment")
+    parser.add_argument(
+        "--test",
+        help="Run specific test (integration, performance, registry, process_info)",
+    )
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate test environment"
+    )
     parser.add_argument("--quiet", action="store_true", help="Reduce output verbosity")
 
     args = parser.parse_args()
 
     # Set up logging
     import logging
+
     if args.quiet:
         logging.basicConfig(level=logging.ERROR)
     else:

@@ -13,7 +13,7 @@ def fix_pr_backlog_test_stubs(filepath: Path) -> None:
     # Comment out the import of non-existent module
     content = re.sub(
         r"from claude\.agents\.pr_backlog_manager\.core import GitHubOperations",
-        "# from claude.agents.pr_backlog_manager.core import GitHubOperations  # Module doesn't exist",
+        "# from agents.pr_backlog_manager.core import GitHubOperations  # Module doesn't exist",
         content,
     )
 
@@ -42,11 +42,11 @@ def fix_enhanced_separation_tests(filepath: Path) -> None:
     content = filepath.read_text()
 
     # Fix the CircuitBreaker and ErrorHandler import issues
-    if "from claude.shared.utils.error_handling import" in content:
+    if "from shared.utils.error_handling import" in content:
         # Ensure all needed imports are listed
         content = re.sub(
-            r"from claude\.shared\.utils\.error_handling import \([^)]*\)",
-            """from claude.shared.utils.error_handling import (
+            r"from shared\.utils\.error_handling import \([^)]*\)",
+            """from shared.utils.error_handling import (
     CircuitBreaker,
     ErrorContext,
     ErrorHandler,
@@ -65,15 +65,17 @@ def fix_enhanced_separation_tests(filepath: Path) -> None:
 
     # Fix TaskPriority type issues - replace string literals with enum values
     content = re.sub(r"priority=['\"]high['\"]", "priority=TaskPriority.HIGH", content)
-    content = re.sub(r"priority=['\"]medium['\"]", "priority=TaskPriority.MEDIUM", content)
+    content = re.sub(
+        r"priority=['\"]medium['\"]", "priority=TaskPriority.MEDIUM", content
+    )
     content = re.sub(r"priority=['\"]low['\"]", "priority=TaskPriority.LOW", content)
 
     # Add TaskPriority import if needed
-    if "TaskPriority" in content and "from claude.shared.task_tracking import" in content:
+    if "TaskPriority" in content and "from shared.task_tracking import" in content:
         # Add TaskPriority to imports
         content = re.sub(
-            r"from claude\.shared\.task_tracking import ([^)]+)",
-            lambda m: f"from claude.shared.task_tracking import {m.group(1)}, TaskPriority"
+            r"from shared\.task_tracking import ([^)]+)",
+            lambda m: f"from shared.task_tracking import {m.group(1)}, TaskPriority"
             if "TaskPriority" not in m.group(1)
             else m.group(0),
             content,
@@ -109,8 +111,8 @@ def fix_error_handling_test(filepath: Path) -> None:
 
     # Fix the comprehensive import
     content = re.sub(
-        r"from claude\.shared\.utils\.error_handling import \([^)]*\)",
-        """from claude.shared.utils.error_handling import (
+        r"from shared\.utils\.error_handling import \([^)]*\)",
+        """from shared.utils.error_handling import (
     CircuitBreaker,
     ErrorContext,
     ErrorHandler,

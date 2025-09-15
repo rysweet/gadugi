@@ -25,30 +25,40 @@ import logging
 import os
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, asdict  # type: ignore
-from datetime import datetime, timedelta  # type: ignore
+from dataclasses import dataclass  # type: ignore
+from datetime import datetime  # type: ignore
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable, Dict, List, Optional, Union  # type: ignore
+from typing import Any, Callable, Dict, List, Optional  # type: ignore
 import uuid
 
 try:
     import docker  # type: ignore
     from docker.errors import DockerException, ContainerError, ImageNotFound  # type: ignore
+
     DOCKER_AVAILABLE = True
 except ImportError:
     logging.warning("Docker SDK not available. Install with: pip install docker")
     DOCKER_AVAILABLE = False
+
     # Fallback classes
-    class DockerException(Exception): pass
-    class ContainerError(Exception): pass
-    class ImageNotFound(Exception): pass
+    class DockerException(Exception):
+        pass
+
+    class ContainerError(Exception):
+        pass
+
+    class ImageNotFound(Exception):
+        pass
+
 
 try:
-    import websockets  # type: ignore
     import asyncio
+
     WEBSOCKET_AVAILABLE = True
 except ImportError:
-    logging.warning("WebSocket support not available. Install with: pip install websockets")
+    logging.warning(
+        "WebSocket support not available. Install with: pip install websockets"
+    )
     WEBSOCKET_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
@@ -57,6 +67,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ContainerConfig:
     """Configuration for container execution"""
+
     image: str = "claude-orchestrator:latest"
     cpu_limit: str = "2.0"  # CPU cores
     memory_limit: str = "4g"  # Memory limit
@@ -76,13 +87,14 @@ class ContainerConfig:
                 "--dangerously-skip-permissions",
                 "--verbose",
                 f"--max-turns={self.max_turns}",
-                f"--output-format={self.output_format}"
+                f"--output-format={self.output_format}",
             ]
 
 
 @dataclass
 class ContainerResult:
     """Result of container execution"""
+
     container_id: str
     task_id: str
     status: str  # 'success', 'failed', 'timeout', 'cancelled'
@@ -116,7 +128,7 @@ class ContainerOutputStreamer:
                 if not self.streaming:
                     break
 
-                log_text = log_line.decode('utf-8').strip()
+                log_text = log_line.decode("utf-8").strip()
 
                 # Broadcast to all WebSocket clients
                 if self.clients:  # type: ignore
@@ -124,7 +136,7 @@ class ContainerOutputStreamer:
                         "task_id": self.task_id,  # type: ignore
                         "container_id": self.container_id,  # type: ignore
                         "timestamp": datetime.now().isoformat(),
-                        "log": log_text
+                        "log": log_text,
                     }
 
                     # Send to all connected clients
@@ -172,7 +184,9 @@ class ContainerManager:
     def _initialize_docker(self):
         """Initialize Docker client"""
         if not DOCKER_AVAILABLE:
-            raise RuntimeError("Docker SDK not available. Please install: pip install docker")
+            raise RuntimeError(
+                "Docker SDK not available. Please install: pip install docker"
+            )
 
         try:  # type: ignore
             self.docker_client = docker.from_env()  # type: ignore
@@ -199,7 +213,7 @@ class ContainerManager:
     def _build_orchestrator_image(self):
         """Build the Claude orchestrator Docker image"""
         # Create Dockerfile content
-        dockerfile_content = '''
+        dockerfile_content = """
 FROM python:3.11-slim
 
 # Install system dependencies
@@ -224,10 +238,11 @@ WORKDIR /workspace
 
 # Default command
 CMD ["bash"]
-'''
+"""
 
         # Create temporary build context
         import tempfile
+
         with tempfile.TemporaryDirectory() as build_dir:
             dockerfile_path = Path(build_dir) / "Dockerfile"
             dockerfile_path.write_text(dockerfile_content)
@@ -236,15 +251,13 @@ CMD ["bash"]
                 # Build the image
                 logger.info("Building Claude orchestrator Docker image...")
                 image, build_logs = self.docker_client.images.build(  # type: ignore
-                    path=build_dir,
-                    tag=self.config.image,
-                    rm=True
+                    path=build_dir, tag=self.config.image, rm=True
                 )
 
                 # Log build output
                 for log in build_logs:
-                    if isinstance(log, dict) and 'stream' in log:
-                        stream_val = log.get('stream', '')
+                    if isinstance(log, dict) and "stream" in log:
+                        stream_val = log.get("stream", "")
                         if isinstance(stream_val, str):
                             logger.info(f"Docker build: {stream_val.strip()}")
 
@@ -260,7 +273,7 @@ CMD ["bash"]
         worktree_path: Path,
         prompt_file: str,
         task_context: Optional[Dict] = None,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> ContainerResult:
         """Execute a task in a Docker container"""
 
@@ -268,18 +281,24 @@ CMD ["bash"]
             raise RuntimeError("Docker client not initialized")
 
         # Try subprocess first as fallback for auth issues
-        subprocess_result = self._try_subprocess_execution(task_id, worktree_path, prompt_file)
+        subprocess_result = self._try_subprocess_execution(
+            task_id, worktree_path, prompt_file
+        )
         if subprocess_result.exit_code == 0:
-            logger.info(f"Task {task_id} completed successfully via subprocess fallback")
+            logger.info(
+                f"Task {task_id} completed successfully via subprocess fallback"
+            )
             return subprocess_result
 
         # If subprocess failed, try container execution
         logger.info(f"Subprocess failed for {task_id}, trying container execution...")
 
         # Validate API key before container creation (optional for subscription users)
-        api_key = os.getenv('CLAUDE_API_KEY', '').strip()
+        api_key = os.getenv("CLAUDE_API_KEY", "").strip()
         if not api_key:
-            logger.warning(f"CLAUDE_API_KEY not set for task {task_id}, relying on subscription auth")
+            logger.warning(
+                f"CLAUDE_API_KEY not set for task {task_id}, relying on subscription auth"
+            )
             # Don't fail here - let container try with mounted auth
 
         container_id = f"orchestrator-{task_id}-{uuid.uuid4().hex[:8]}"
@@ -288,9 +307,12 @@ CMD ["bash"]
         # Validate host system resources
         try:
             import psutil
+
             mem = psutil.virtual_memory()
             if mem.available < 1024 * 1024 * 1024:  # Less than 1GB available
-                logger.warning(f"Low memory available: {mem.available / (1024**3):.2f}GB")
+                logger.warning(
+                    f"Low memory available: {mem.available / (1024**3):.2f}GB"
+                )
                 if mem.available < 512 * 1024 * 1024:  # Less than 512MB
                     return ContainerResult(  # type: ignore
                         task_id=task_id,
@@ -302,7 +324,7 @@ CMD ["bash"]
                         start_time=start_time,
                         end_time=datetime.now(),
                         duration=0.0,
-                        resource_usage={}
+                        resource_usage={},
                     )
         except ImportError:
             logger.warning("psutil not available, skipping resource check")
@@ -310,36 +332,23 @@ CMD ["bash"]
         logger.info(f"Starting containerized task: {task_id}")
 
         # Prepare container volumes including auth directories
-        volumes = {
-            str(worktree_path.absolute()): {
-                'bind': '/workspace',
-                'mode': 'rw'
-            }
-        }
+        volumes = {str(worktree_path.absolute()): {"bind": "/workspace", "mode": "rw"}}
 
         # Mount Claude config directory for subscription auth
-        claude_config_dir = Path.home() / '.claude'
+        claude_config_dir = Path.home() / ".claude"
         if claude_config_dir.exists():
-            volumes[str(claude_config_dir)] = {
-                'bind': '/root/.claude',
-                'mode': 'ro'
-            }
+            volumes[str(claude_config_dir)] = {"bind": "/root/.claude", "mode": "ro"}
 
         # Mount GitHub config directory for gh CLI
-        gh_config_dir = Path.home() / '.config' / 'gh'
+        gh_config_dir = Path.home() / ".config" / "gh"
         if gh_config_dir.exists():
-            volumes[str(gh_config_dir)] = {
-                'bind': '/root/.config/gh',
-                'mode': 'ro'
-            }
+            volumes[str(gh_config_dir)] = {"bind": "/root/.config/gh", "mode": "ro"}
 
         # Prepare Claude CLI command with proper flags and path escaping
         import shlex
+
         escaped_prompt = shlex.quote(prompt_file)
-        claude_cmd = [
-            "claude",
-            "-p", escaped_prompt
-        ] + (self.config.claude_flags or [])
+        claude_cmd = ["claude", "-p", escaped_prompt] + (self.config.claude_flags or [])
 
         logger.info(f"Container command: {' '.join(claude_cmd)}")
 
@@ -357,15 +366,17 @@ CMD ["bash"]
                 auto_remove=self.config.auto_remove,  # type: ignore
                 name=container_id,  # type: ignore
                 environment={
-                    'PYTHONUNBUFFERED': '1',
-                    'CLAUDE_API_KEY': os.getenv('CLAUDE_API_KEY', ''),
-                    'CLAUDE_CODE_SSE_PORT': os.getenv('CLAUDE_CODE_SSE_PORT', ''),
-                    'CLAUDE_CODE_ENTRYPOINT': os.getenv('CLAUDE_CODE_ENTRYPOINT', 'cli'),
-                    'CLAUDECODE': os.getenv('CLAUDECODE', '1'),
-                    'GH_TOKEN': os.getenv('GH_TOKEN', ''),
-                    'GITHUB_TOKEN': os.getenv('GITHUB_TOKEN', ''),
-                    'TASK_ID': task_id  # type: ignore
-                }
+                    "PYTHONUNBUFFERED": "1",
+                    "CLAUDE_API_KEY": os.getenv("CLAUDE_API_KEY", ""),
+                    "CLAUDE_CODE_SSE_PORT": os.getenv("CLAUDE_CODE_SSE_PORT", ""),
+                    "CLAUDE_CODE_ENTRYPOINT": os.getenv(
+                        "CLAUDE_CODE_ENTRYPOINT", "cli"
+                    ),
+                    "CLAUDECODE": os.getenv("CLAUDECODE", "1"),
+                    "GH_TOKEN": os.getenv("GH_TOKEN", ""),
+                    "GITHUB_TOKEN": os.getenv("GITHUB_TOKEN", ""),
+                    "TASK_ID": task_id,  # type: ignore
+                },
             )
 
             self.active_containers[task_id] = container  # type: ignore
@@ -378,15 +389,17 @@ CMD ["bash"]
             if WEBSOCKET_AVAILABLE:
                 streaming_thread = threading.Thread(
                     target=lambda: asyncio.run(streamer.start_streaming(container)),  # type: ignore
-                    daemon=True
+                    daemon=True,
                 )
                 streaming_thread.start()
 
             # Wait for completion with timeout
-            exit_code = container.wait(timeout=self.config.timeout_seconds)['StatusCode']  # type: ignore
+            exit_code = container.wait(timeout=self.config.timeout_seconds)[
+                "StatusCode"
+            ]  # type: ignore
 
             # Get container logs
-            logs = container.logs().decode('utf-8')
+            logs = container.logs().decode("utf-8")
             stdout = logs  # Docker combines stdout/stderr
             stderr = ""
 
@@ -396,10 +409,16 @@ CMD ["bash"]
             # Get resource usage stats
             stats = container.stats(stream=False)
             resource_usage = {
-                'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
-                'cpu_usage': stats.get('cpu_stats', {}).get('cpu_usage', {}).get('total_usage', 0),
-                'network_rx': stats.get('networks', {}).get('eth0', {}).get('rx_bytes', 0),
-                'network_tx': stats.get('networks', {}).get('eth0', {}).get('tx_bytes', 0)
+                "memory_usage": stats.get("memory_stats", {}).get("usage", 0),
+                "cpu_usage": stats.get("cpu_stats", {})
+                .get("cpu_usage", {})
+                .get("total_usage", 0),
+                "network_rx": stats.get("networks", {})
+                .get("eth0", {})
+                .get("rx_bytes", 0),
+                "network_tx": stats.get("networks", {})
+                .get("eth0", {})
+                .get("tx_bytes", 0),
             }
 
         except docker.errors.ImageNotFound as e:  # type: ignore
@@ -422,8 +441,8 @@ CMD ["bash"]
             logger.error(f"Container error for {task_id}: {e}")  # type: ignore
             exit_code = e.exit_status  # type: ignore
             status = "failed"
-            stdout = e.stdout.decode('utf-8') if e.stdout else ""  # type: ignore
-            stderr = e.stderr.decode('utf-8') if e.stderr else str(e)  # type: ignore
+            stdout = e.stdout.decode("utf-8") if e.stdout else ""  # type: ignore
+            stderr = e.stderr.decode("utf-8") if e.stderr else str(e)  # type: ignore
             logs = []
             resource_usage = {}
         except Exception as e:  # type: ignore
@@ -439,7 +458,7 @@ CMD ["bash"]
             if task_id in self.active_containers:  # type: ignore
                 try:
                     container = self.active_containers[task_id]  # type: ignore
-                    logs = container.logs().decode('utf-8')
+                    logs = container.logs().decode("utf-8")
                     stdout = logs
                 except Exception:
                     pass
@@ -475,12 +494,18 @@ CMD ["bash"]
             exit_code=exit_code,
             stdout=stdout,
             stderr=stderr,
-            logs=logs.split('\n') if isinstance(logs, str) and logs else logs if isinstance(logs, list) else [],
+            logs=logs.split("\n")
+            if isinstance(logs, str) and logs
+            else logs
+            if isinstance(logs, list)
+            else [],
             resource_usage=resource_usage,
-            error_message=stderr if status == "failed" else None
+            error_message=stderr if status == "failed" else None,
         )
 
-        logger.info(f"Container task completed: {task_id}, status={status}, duration={duration:.1f}s")  # type: ignore
+        logger.info(
+            f"Container task completed: {task_id}, status={status}, duration={duration:.1f}s"
+        )  # type: ignore
 
         # Progress callback
         if progress_callback:  # type: ignore
@@ -492,7 +517,7 @@ CMD ["bash"]
         self,
         tasks: List[Dict],
         max_parallel: int = 4,
-        progress_callback: Optional[Callable] = None
+        progress_callback: Optional[Callable] = None,
     ) -> Dict[str, ContainerResult]:
         """Execute multiple tasks in parallel containers"""
 
@@ -508,10 +533,10 @@ CMD ["bash"]
             # Submit all tasks
             future_to_task = {}
             for task in tasks:
-                task_id = task['id']
-                worktree_path = Path(task['worktree_path'])
-                prompt_file = task['prompt_file']
-                task_context = task.get('context', {})
+                task_id = task["id"]
+                worktree_path = Path(task["worktree_path"])
+                prompt_file = task["prompt_file"]
+                task_context = task.get("context", {})
 
                 future = executor.submit(
                     self.execute_containerized_task,
@@ -519,7 +544,7 @@ CMD ["bash"]
                     worktree_path,
                     prompt_file,
                     task_context,
-                    progress_callback
+                    progress_callback,
                 )
                 future_to_task[future] = task_id
 
@@ -545,7 +570,7 @@ CMD ["bash"]
                         stderr=str(e),
                         logs=[],
                         resource_usage={},
-                        error_message=str(e)
+                        error_message=str(e),
                     )
 
         return results
@@ -577,14 +602,14 @@ CMD ["bash"]
             stats = container.stats(stream=False)
 
             return {
-                'task_id': task_id,
-                'container_id': container.id,
-                'status': container.status,
-                'created': container.attrs['Created'],
-                'started': container.attrs['State']['StartedAt'],
-                'memory_usage': stats.get('memory_stats', {}).get('usage', 0),
-                'cpu_percent': self._calculate_cpu_percent(stats),
-                'network_io': stats.get('networks', {})
+                "task_id": task_id,
+                "container_id": container.id,
+                "status": container.status,
+                "created": container.attrs["Created"],
+                "started": container.attrs["State"]["StartedAt"],
+                "memory_usage": stats.get("memory_stats", {}).get("usage", 0),
+                "cpu_percent": self._calculate_cpu_percent(stats),
+                "network_io": stats.get("networks", {}),
             }
         except Exception as e:
             logger.error(f"Failed to get status for task {task_id}: {e}")
@@ -593,17 +618,25 @@ CMD ["bash"]
     def _calculate_cpu_percent(self, stats: Dict) -> float:
         """Calculate CPU usage percentage from Docker stats"""
         try:
-            cpu_stats = stats.get('cpu_stats', {})
-            precpu_stats = stats.get('precpu_stats', {})
+            cpu_stats = stats.get("cpu_stats", {})
+            precpu_stats = stats.get("precpu_stats", {})
 
-            cpu_usage = cpu_stats.get('cpu_usage', {})
-            precpu_usage = precpu_stats.get('cpu_usage', {})
+            cpu_usage = cpu_stats.get("cpu_usage", {})
+            precpu_usage = precpu_stats.get("cpu_usage", {})
 
-            cpu_delta = cpu_usage.get('total_usage', 0) - precpu_usage.get('total_usage', 0)
-            system_delta = cpu_stats.get('system_cpu_usage', 0) - precpu_stats.get('system_cpu_usage', 0)
+            cpu_delta = cpu_usage.get("total_usage", 0) - precpu_usage.get(
+                "total_usage", 0
+            )
+            system_delta = cpu_stats.get("system_cpu_usage", 0) - precpu_stats.get(
+                "system_cpu_usage", 0
+            )
 
             if system_delta > 0 and cpu_delta > 0:
-                cpu_percent = (cpu_delta / system_delta) * len(cpu_usage.get('percpu_usage', [])) * 100
+                cpu_percent = (
+                    (cpu_delta / system_delta)
+                    * len(cpu_usage.get("percpu_usage", []))
+                    * 100
+                )
                 return round(cpu_percent, 2)
 
             return 0.0
@@ -631,8 +664,9 @@ CMD ["bash"]
 
         logger.info("ContainerManager cleanup complete")
 
-
-    def _try_subprocess_execution(self, task_id: str, worktree_path: Path, prompt_file: str) -> ContainerResult:
+    def _try_subprocess_execution(
+        self, task_id: str, worktree_path: Path, prompt_file: str
+    ) -> ContainerResult:
         """Fallback subprocess execution when Docker fails or auth issues occur"""
         import subprocess
         import shlex
@@ -647,7 +681,9 @@ CMD ["bash"]
 
             # Prepare Claude CLI command
             escaped_prompt = shlex.quote(prompt_file)
-            claude_cmd = ["claude", "-p", escaped_prompt] + (self.config.claude_flags or [])
+            claude_cmd = ["claude", "-p", escaped_prompt] + (
+                self.config.claude_flags or []
+            )
 
             logger.info(f"Subprocess command: {' '.join(claude_cmd)}")
 
@@ -657,7 +693,7 @@ CMD ["bash"]
                 capture_output=True,
                 text=True,
                 timeout=self.config.timeout_seconds,
-                cwd=worktree_path
+                cwd=worktree_path,
             )
 
             end_time = datetime.now()
@@ -670,11 +706,13 @@ CMD ["bash"]
                 exit_code=result.returncode,
                 stdout=result.stdout,
                 stderr=result.stderr,
-                logs=[result.stdout, result.stderr] if result.stderr else [result.stdout],
+                logs=[result.stdout, result.stderr]
+                if result.stderr
+                else [result.stdout],
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
-                resource_usage={}
+                resource_usage={},
             )
 
         except subprocess.TimeoutExpired:
@@ -691,7 +729,7 @@ CMD ["bash"]
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
-                resource_usage={}
+                resource_usage={},
             )
         except Exception as e:
             end_time = datetime.now()
@@ -708,7 +746,7 @@ CMD ["bash"]
                 start_time=start_time,
                 end_time=end_time,
                 duration=duration,
-                resource_usage={}
+                resource_usage={},
             )
         finally:
             # Restore original working directory
@@ -726,7 +764,9 @@ def main():
     parser.add_argument("--task-id", required=True, help="Task ID")
     parser.add_argument("--worktree-path", required=True, help="Worktree path")
     parser.add_argument("--prompt-file", required=True, help="Prompt file")
-    parser.add_argument("--image", default="claude-orchestrator:latest", help="Docker image")
+    parser.add_argument(
+        "--image", default="claude-orchestrator:latest", help="Docker image"
+    )
 
     args = parser.parse_args()
 
@@ -739,7 +779,7 @@ def main():
         result = manager.execute_containerized_task(
             task_id=args.task_id,
             worktree_path=Path(args.worktree_path),
-            prompt_file=args.prompt_file
+            prompt_file=args.prompt_file,
         )
 
         print(f"Task completed: {result.status}")
@@ -749,7 +789,7 @@ def main():
         if result.stdout:
             print(f"Output: {result.stdout[:500]}...")
 
-        return 0 if result.status == 'success' else 1
+        return 0 if result.status == "success" else 1
 
     except Exception as e:
         logger.error(f"Container execution failed: {e}")

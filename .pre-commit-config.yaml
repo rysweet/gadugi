@@ -39,7 +39,7 @@ repos:
         types: [python]
         pass_filenames: false
         always_run: false
-        stages: [pre-push]  # Only run on push, not every commit
+        stages: [commit]  # Run on every commit
 
   # Run tests (using local hook)
   - repo: local

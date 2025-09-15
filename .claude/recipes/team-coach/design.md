@@ -140,28 +140,28 @@ class TeamCoach:
         team_id: str
     ) -> TeamObservation:
         """Observe current team state"""
-        
+
     async def analyze_performance(
         self,
         team_id: str,
         period: Optional[TimePeriod] = None
     ) -> PerformanceAnalysis:
         """Analyze team performance"""
-        
+
     async def generate_recommendations(
         self,
         team_id: str,
         focus_areas: Optional[List[str]] = None
     ) -> List[CoachingRecommendation]:
         """Generate coaching recommendations"""
-        
+
     async def optimize_team(
         self,
         team_id: str,
         objectives: List[Objective]
     ) -> TeamOptimization:
         """Optimize team composition and roles"""
-        
+
     async def predict_outcome(
         self,
         team_id: str,
@@ -179,25 +179,25 @@ class PerformanceAnalytics:
         window: TimeWindow
     ) -> PerformanceMetrics:
         """Calculate agent performance metrics"""
-        
+
     async def compare_performance(
         self,
         agent_ids: List[str]
     ) -> ComparisonReport:
         """Compare agent performance"""
-        
+
     async def identify_patterns(
         self,
         team_id: str
     ) -> List[Pattern]:
         """Identify performance patterns"""
-        
+
     async def detect_issues(
         self,
         team_id: str
     ) -> List[PerformanceIssue]:
         """Detect performance issues"""
-        
+
     async def forecast_performance(
         self,
         team_id: str,
@@ -214,26 +214,26 @@ class CollaborationFacilitator:
         team_id: str
     ) -> CommunicationAnalysis:
         """Analyze team communication patterns"""
-        
+
     async def detect_conflicts(
         self,
         team_id: str
     ) -> List[Conflict]:
         """Detect team conflicts"""
-        
+
     async def suggest_collaboration(
         self,
         agents: List[str],
         task: Task
     ) -> CollaborationPlan:
         """Suggest collaboration approach"""
-        
+
     async def optimize_handoffs(
         self,
         team_id: str
     ) -> HandoffOptimization:
         """Optimize work handoffs"""
-        
+
     async def facilitate_knowledge_sharing(
         self,
         team_id: str

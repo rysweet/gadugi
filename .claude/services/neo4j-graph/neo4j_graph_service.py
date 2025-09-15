@@ -36,20 +36,25 @@ except ImportError:
         def close(self) -> None:
             pass
 
-        def session(self) -> 'MockSession':
+        def session(self) -> "MockSession":
             return MockSession()
 
     class MockSession:
         def close(self) -> None:
             pass
-            
-        def __enter__(self) -> 'MockSession':
+
+        def __enter__(self) -> "MockSession":
             return self
-            
-        def __exit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[Any]) -> None:
+
+        def __exit__(
+            self,
+            exc_type: Optional[type],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[Any],
+        ) -> None:
             pass
 
-        def run(self, *args: Any, **kwargs: Any) -> 'MockResult':
+        def run(self, *args: Any, **kwargs: Any) -> "MockResult":
             return MockResult()
 
         def execute_read(self, func: Any) -> Any:
@@ -61,17 +66,17 @@ except ImportError:
             return result or MockSummary()
 
     class MockTransaction:
-        def run(self, *args: Any, **kwargs: Any) -> 'MockResult':
+        def run(self, *args: Any, **kwargs: Any) -> "MockResult":
             return MockResult()
 
     class MockResult:
-        def single(self) -> 'MockRecord':
+        def single(self) -> "MockRecord":
             return MockRecord()
 
         def data(self) -> list[dict[str, Any]]:
             return []
 
-        def consume(self) -> 'MockSummary':
+        def consume(self) -> "MockSummary":
             return MockSummary()
 
     class MockRecord:
@@ -82,7 +87,7 @@ except ImportError:
             return default
 
     class MockSummary:
-        def counters(self) -> 'MockCounters':
+        def counters(self) -> "MockCounters":
             return MockCounters()
 
     class MockCounters:
@@ -330,7 +335,7 @@ class GraphDatabaseService:
             self.driver.close()
             self.connected = False
             self.logger.info("Disconnected from Neo4j database")
-    
+
     def _get_session(self):
         """Get a database session with proper null checking."""
         if not self.driver:
@@ -408,8 +413,12 @@ class GraphDatabaseService:
             props.update(
                 {
                     "id": node.id,
-                    "created_at": node.created_at.isoformat() if node.created_at else datetime.now().isoformat(),
-                    "updated_at": node.updated_at.isoformat() if node.updated_at else datetime.now().isoformat(),
+                    "created_at": node.created_at.isoformat()
+                    if node.created_at
+                    else datetime.now().isoformat(),
+                    "updated_at": node.updated_at.isoformat()
+                    if node.updated_at
+                    else datetime.now().isoformat(),
                 },
             )
 
@@ -658,7 +667,9 @@ class GraphDatabaseService:
             props.update(
                 {
                     "id": relationship.id,
-                    "created_at": relationship.created_at.isoformat() if relationship.created_at else datetime.now().isoformat(),
+                    "created_at": relationship.created_at.isoformat()
+                    if relationship.created_at
+                    else datetime.now().isoformat(),
                     "strength": relationship.strength,
                 },
             )
@@ -721,7 +732,9 @@ class GraphDatabaseService:
 
         except Exception as e:
             execution_time = time.time() - start_time
-            self.logger.exception(f"Failed to create relationship {relationship.id}: {e}")
+            self.logger.exception(
+                f"Failed to create relationship {relationship.id}: {e}"
+            )
 
             return QueryResult(
                 success=False,
@@ -803,7 +816,9 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "node_type": node_type.value if node_type else None,
-                        "filter_properties": list(properties.keys()) if properties else [],
+                        "filter_properties": list(properties.keys())
+                        if properties
+                        else [],
                         "result_count": len(nodes),
                         "limit": limit,
                     },
@@ -909,7 +924,9 @@ class GraphDatabaseService:
                     metadata={
                         "source_id": source_id,
                         "target_id": target_id,
-                        "relationship_type": relationship_type.value if relationship_type else None,
+                        "relationship_type": relationship_type.value
+                        if relationship_type
+                        else None,
                         "result_count": len(relationships),
                         "limit": limit,
                     },
@@ -1276,7 +1293,9 @@ class GraphDatabaseService:
             for key, query in queries.items():
                 result = tx.run(query)
                 if key in ["node_types", "relationship_types"]:
-                    results[key] = {record["type"]: record["count"] for record in result}
+                    results[key] = {
+                        record["type"]: record["count"] for record in result
+                    }
                 else:
                     results[key] = result.single()["count"]
 
@@ -1347,7 +1366,8 @@ class GraphDatabaseService:
 
                 if type_queries:
                     full_query = (
-                        " UNION ".join(type_queries) + " YIELD node RETURN DISTINCT node LIMIT 50"
+                        " UNION ".join(type_queries)
+                        + " YIELD node RETURN DISTINCT node LIMIT 50"
                     )
                 else:
                     # Fallback to property search
@@ -1402,7 +1422,9 @@ class GraphDatabaseService:
                     aggregations={},
                     metadata={
                         "search_query": query,
-                        "node_types": [nt.value for nt in node_types] if node_types else None,
+                        "node_types": [nt.value for nt in node_types]
+                        if node_types
+                        else None,
                         "result_count": len(nodes),
                     },
                     execution_time=execution_time,
@@ -1505,7 +1527,9 @@ class GraphDatabaseService:
 
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
-        avg_query_time = self.total_query_time / self.query_count if self.query_count > 0 else 0
+        avg_query_time = (
+            self.total_query_time / self.query_count if self.query_count > 0 else 0
+        )
 
         return {
             "connected": self.connected,

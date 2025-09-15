@@ -210,7 +210,7 @@ def main():
         else:
             # Show sample of remaining errors
             lines = result.stdout.splitlines()
-            error_lines = [l for l in lines if "error:" in l][:5]
+            error_lines = [line for line in lines if "error:" in line][:5]
             if error_lines:
                 print("\nSample of remaining errors:")
                 for line in error_lines:

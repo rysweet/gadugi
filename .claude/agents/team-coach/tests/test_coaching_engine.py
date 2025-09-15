@@ -1,11 +1,12 @@
-
 # Mock performance data class for testing
 from dataclasses import dataclass
 from typing import Dict, Any
 
+
 @dataclass
 class MockPerformanceData:
     """Mock performance data for testing."""
+
     agent_id: str
     success_rate: float
     average_execution_time: float
@@ -15,6 +16,7 @@ class MockPerformanceData:
     error_count: int
     error_types: Dict[str, int]
     metrics: Dict[str, Any]
+
 
 """
 Tests for TeamCoach Phase 3: Coaching Engine
@@ -30,7 +32,6 @@ from ..phase3.coaching_engine import (
     CoachingPriority,
     CoachingCategory,
 )
-from ..phase1.performance_analytics import AgentPerformanceData, PerformanceMetrics
 
 
 class TestCoachingEngine(unittest.TestCase):
@@ -51,7 +52,8 @@ class TestCoachingEngine(unittest.TestCase):
         )
 
         # Set up mock performance data
-        self.mock_performance = MockPerformanceData(agent_id="agent_1",
+        self.mock_performance = MockPerformanceData(
+            agent_id="agent_1",
             success_rate=0.65,  # Below target
             average_execution_time=150,  # Slow
             total_tasks=100,

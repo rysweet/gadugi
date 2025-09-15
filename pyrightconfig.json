@@ -1,38 +1,16 @@
 {
   "include": [
-    "gadugi",
-    "src",
-    "container_runtime",
-    "tests",
-    ".claude"
+    ".gadugi/**/*.py",
+    ".claude/**/*.py"
   ],
   "exclude": [
-    "**/__pycache__",
-    "**/node_modules",
-    "**/.venv",
-    "**/venv",
-    "build",
-    "dist",
-    "*.egg-info",
-    "out",
-    ".worktrees"
+    ".gadugi/.venv",
+    ".gadugi/.pytest_cache",
+    ".gadugi/node_modules",
+    "**/__pycache__"
   ],
-  "reportMissingImports": true,
-  "reportMissingTypeStubs": false,
-  "reportGeneralTypeIssues": true,
-  "reportPrivateImportUsage": false,
-  "pythonVersion": "3.9",
-  "pythonPlatform": "All",
-  "typeCheckingMode": "standard",
-  "useLibraryCodeForTypes": true,
-  "enableTypeIgnoreComments": true,
-  "reportUnusedImport": false,
-  "reportUnusedClass": false,
-  "reportUnusedFunction": false,
-  "reportUnusedVariable": false,
-  "reportDuplicateImport": true,
-  "reportUndefinedVariable": true,
-  "reportUnboundVariable": true,
-  "venvPath": ".",
-  "venv": ".venv"
+  "pythonVersion": "3.12",
+  "venvPath": ".gadugi",
+  "venv": ".venv",
+  "typeCheckingMode": "standard"
 }

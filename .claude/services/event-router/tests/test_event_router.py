@@ -6,7 +6,6 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
-from pathlib import Path  # type: ignore
 
 import pytest
 
@@ -18,7 +17,7 @@ from ..event_router import (  # type: ignore
     ProcessManager,
     Subscription,
     AgentProcess,
-    DeadLetterQueue
+    DeadLetterQueue,
 )
 
 
@@ -42,7 +41,7 @@ def sample_event():
         type=EventType.CUSTOM,
         topic="test.topic",
         source="test-source",
-        data={"message": "test"}
+        data={"message": "test"},
     )
 
 
@@ -62,7 +61,7 @@ class TestEvent:
             type=EventType.AGENT_STARTED,
             topic="agent.start",
             source="test",
-            data={"agent": "test"}
+            data={"agent": "test"},
         )
 
         assert event.id == "test-001"
@@ -88,7 +87,7 @@ class TestEvent:
             "source": "test",
             "data": {"test": True},
             "timestamp": datetime.utcnow().isoformat(),
-            "priority": 1
+            "priority": 1,
         }
 
         event = Event.from_dict(data)
@@ -103,20 +102,14 @@ class TestSubscription:
 
     def test_exact_match(self):
         """Test exact topic matching."""
-        sub = Subscription(
-            subscriber_id="test",
-            topic_pattern="agent.started"
-        )
+        sub = Subscription(subscriber_id="test", topic_pattern="agent.started")
 
         assert sub.matches("agent.started", "default") is True
         assert sub.matches("agent.stopped", "default") is False
 
     def test_wildcard_match(self):
         """Test wildcard topic matching."""
-        sub = Subscription(
-            subscriber_id="test",
-            topic_pattern="agent.*"
-        )
+        sub = Subscription(subscriber_id="test", topic_pattern="agent.*")
 
         assert sub.matches("agent.started", "default") is True
         assert sub.matches("agent.stopped", "default") is True
@@ -125,9 +118,7 @@ class TestSubscription:
     def test_namespace_match(self):
         """Test namespace filtering."""
         sub = Subscription(
-            subscriber_id="test",
-            topic_pattern="*",
-            namespace="production"
+            subscriber_id="test", topic_pattern="*", namespace="production"
         )
 
         assert sub.matches("any.topic", "production") is True
@@ -147,8 +138,7 @@ class TestProcessManager:
             mock_subprocess.return_value = mock_process
 
             agent = await process_manager.spawn_agent(
-                "test-agent",
-                ["python", "-m", "test"]
+                "test-agent", ["python", "-m", "test"]
             )
 
             assert agent.agent_id == "test-agent"
@@ -194,9 +184,7 @@ class TestProcessManager:
     def test_update_heartbeat(self, process_manager):
         """Test updating agent heartbeat."""
         agent = AgentProcess(
-            agent_id="test-agent",
-            process=MagicMock(),
-            command=["python"]
+            agent_id="test-agent", process=MagicMock(), command=["python"]
         )
 
         process_manager.processes["test-agent"] = agent
@@ -211,7 +199,7 @@ class TestProcessManager:
         agent = AgentProcess(
             agent_id="test-agent",
             process=MagicMock(returncode=None),
-            command=["python"]
+            command=["python"],
         )
 
         # Fresh agent should be healthy
@@ -249,11 +237,7 @@ class TestDeadLetterQueue:
         await dlq.add(sample_event, "Error 1")
 
         event2 = Event(
-            id="test-002",
-            type=EventType.CUSTOM,
-            topic="test",
-            source="test",
-            data={}
+            id="test-002", type=EventType.CUSTOM, topic="test", source="test", data={}
         )
         await dlq.add(event2, "Error 2")
 
@@ -294,10 +278,7 @@ class TestEventRouter:
     async def test_subscribe_unsubscribe(self, event_router):
         """Test subscription management."""
         # Subscribe
-        queue = event_router.subscribe(
-            "test-subscriber",
-            "test.*"
-        )
+        queue = event_router.subscribe("test-subscriber", "test.*")
 
         assert queue is not None
         assert "test-subscriber" in event_router.subscriptions
@@ -334,16 +315,11 @@ class TestEventRouter:
 
         # Subscribe to production namespace only
         prod_queue = event_router.subscribe(
-            "prod-subscriber",
-            "*",
-            namespace="production"
+            "prod-subscriber", "*", namespace="production"
         )
 
         # Subscribe to all namespaces
-        all_queue = event_router.subscribe(
-            "all-subscriber",
-            "*"
-        )
+        all_queue = event_router.subscribe("all-subscriber", "*")
 
         # Publish production event
         prod_event = Event(
@@ -352,7 +328,7 @@ class TestEventRouter:
             topic="test",
             source="test",
             data={},
-            namespace="production"
+            namespace="production",
         )
 
         await event_router.publish(prod_event)
@@ -364,7 +340,7 @@ class TestEventRouter:
             topic="test",
             source="test",
             data={},
-            namespace="development"
+            namespace="development",
         )
 
         await event_router.publish(dev_event)
@@ -403,7 +379,7 @@ class TestEventRouter:
             topic="test",
             source="test",
             data={},
-            priority=EventPriority.LOW
+            priority=EventPriority.LOW,
         )
 
         high_event = Event(
@@ -412,7 +388,7 @@ class TestEventRouter:
             topic="test",
             source="test",
             data={},
-            priority=EventPriority.HIGH
+            priority=EventPriority.HIGH,
         )
 
         critical_event = Event(
@@ -421,7 +397,7 @@ class TestEventRouter:
             topic="test",
             source="test",
             data={},
-            priority=EventPriority.CRITICAL
+            priority=EventPriority.CRITICAL,
         )
 
         # Publish in wrong order
@@ -446,7 +422,7 @@ class TestEventRouter:
     @pytest.mark.asyncio
     async def test_agent_started_handler(self, event_router):
         """Test agent started event handling."""
-        with patch.object(event_router.process_manager, 'spawn_agent') as mock_spawn:  # type: ignore
+        with patch.object(event_router.process_manager, "spawn_agent") as mock_spawn:  # type: ignore
             mock_spawn.return_value = AsyncMock()
 
             await event_router.start()
@@ -456,10 +432,7 @@ class TestEventRouter:
                 type=EventType.AGENT_STARTED,
                 topic="agent.start",
                 source="test",
-                data={
-                    "agent_id": "test-agent",
-                    "command": ["python", "-m", "test"]
-                }
+                data={"agent_id": "test-agent", "command": ["python", "-m", "test"]},
             )
 
             await event_router.publish(start_event)
@@ -467,10 +440,7 @@ class TestEventRouter:
             # Give router time to process
             await asyncio.sleep(0.1)
 
-            mock_spawn.assert_called_once_with(
-                "test-agent",
-                ["python", "-m", "test"]
-            )
+            mock_spawn.assert_called_once_with("test-agent", ["python", "-m", "test"])
 
             await event_router.stop()
 
@@ -488,9 +458,7 @@ class TestEventRouter:
             type=EventType.NEEDS_APPROVAL,
             topic="approval.request",
             source="test-agent",
-            data={
-                "operation": "create_branch"
-            }
+            data={"operation": "create_branch"},
         )
 
         await event_router.publish(approval_event)
@@ -519,9 +487,7 @@ class TestEventRouter:
             type=EventType.NEEDS_APPROVAL,
             topic="approval.request",
             source="test-agent",
-            data={
-                "operation": "production_deploy"
-            }
+            data={"operation": "production_deploy"},
         )
 
         await event_router.publish(approval_event)
@@ -544,9 +510,7 @@ class TestEventRouter:
             raise Exception("Delivery failed")
 
         event_router.subscribe(
-            "failing-subscriber",
-            "test.*",
-            callback=failing_callback
+            "failing-subscriber", "test.*", callback=failing_callback
         )
 
         # Set retry count to max

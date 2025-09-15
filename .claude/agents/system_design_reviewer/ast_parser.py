@@ -15,6 +15,7 @@ from enum import Enum
 
 class ChangeType(Enum):
     """Types of architectural changes"""
+
     ADDED = "added"
     MODIFIED = "modified"
     REMOVED = "removed"
@@ -23,6 +24,7 @@ class ChangeType(Enum):
 
 class ImpactLevel(Enum):
     """Impact levels for architectural changes"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -31,6 +33,7 @@ class ImpactLevel(Enum):
 
 class ElementType(Enum):
     """Types of architectural elements"""
+
     CLASS = "class"
     FUNCTION = "function"
     MODULE = "module"
@@ -44,6 +47,7 @@ class ElementType(Enum):
 @dataclass
 class ArchitecturalElement:
     """Represents an architectural element extracted from code"""
+
     element_type: ElementType
     name: str
     location: str  # file:line format
@@ -66,6 +70,7 @@ class ArchitecturalElement:
 @dataclass
 class ArchitecturalChange:
     """Represents a change with architectural impact"""
+
     change_type: ChangeType
     element: ArchitecturalElement
     impact_level: ImpactLevel
@@ -81,7 +86,7 @@ class ArchitecturalChange:
             ChangeType.ADDED: "Added",
             ChangeType.MODIFIED: "Modified",
             ChangeType.REMOVED: "Removed",
-            ChangeType.RENAMED: "Renamed"
+            ChangeType.RENAMED: "Renamed",
         }
 
         action = action_map[self.change_type]
@@ -106,8 +111,11 @@ class ASTParser(ABC):
         pass
 
     @abstractmethod
-    def analyze_changes(self, old_elements: List[ArchitecturalElement],
-                       new_elements: List[ArchitecturalElement]) -> List[ArchitecturalChange]:
+    def analyze_changes(
+        self,
+        old_elements: List[ArchitecturalElement],
+        new_elements: List[ArchitecturalElement],
+    ) -> List[ArchitecturalChange]:
         """Analyze changes between old and new elements"""
         pass
 
@@ -131,7 +139,7 @@ class ASTParser(ABC):
         return {
             "cyclomatic_complexity": 1,
             "cognitive_complexity": 1,
-            "nesting_depth": 0
+            "nesting_depth": 0,
         }
 
 
@@ -140,7 +148,7 @@ class PythonASTParser(ASTParser):
 
     def __init__(self):
         super().__init__()
-        self.supported_extensions = {'.py', '.pyx', '.pyi'}
+        self.supported_extensions = {".py", ".pyx", ".pyi"}
         self.architectural_patterns = {
             "singleton": ["__new__", "_instance", "instance"],
             "factory": ["create", "build", "make", "factory"],
@@ -151,13 +159,13 @@ class PythonASTParser(ASTParser):
             "dataclass": ["@dataclass", "dataclasses"],
             "abc": ["ABC", "abstractmethod", "@abstractmethod"],
             "enum": ["Enum", "IntEnum", "Flag"],
-            "protocol": ["Protocol", "runtime_checkable"]
+            "protocol": ["Protocol", "runtime_checkable"],
         }
 
     def parse_file(self, file_path: str) -> List[ArchitecturalElement]:
         """Parse Python file and extract architectural elements"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             tree = ast.parse(content, filename=file_path)
@@ -174,8 +182,11 @@ class PythonASTParser(ASTParser):
             print(f"Error parsing {file_path}: {e}")
             return []
 
-    def analyze_changes(self, old_elements: List[ArchitecturalElement],
-                       new_elements: List[ArchitecturalElement]) -> List[ArchitecturalChange]:
+    def analyze_changes(
+        self,
+        old_elements: List[ArchitecturalElement],
+        new_elements: List[ArchitecturalElement],
+    ) -> List[ArchitecturalChange]:
         """Analyze changes between old and new Python elements"""
         changes = []
 
@@ -191,7 +202,7 @@ class PythonASTParser(ASTParser):
                     change_type=ChangeType.ADDED,
                     element=elem,
                     impact_level=impact,
-                    requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]
+                    requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL],
                 )
                 change.design_implications = self._get_design_implications(change)
                 changes.append(change)
@@ -205,7 +216,7 @@ class PythonASTParser(ASTParser):
                     element=elem,
                     impact_level=impact,
                     old_element=elem,
-                    requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]
+                    requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL],
                 )
                 change.design_implications = self._get_design_implications(change)
                 changes.append(change)
@@ -221,31 +232,40 @@ class PythonASTParser(ASTParser):
                         element=elem,
                         impact_level=impact,
                         old_element=old_elem,
-                        requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL]
+                        requires_adr=impact in [ImpactLevel.HIGH, ImpactLevel.CRITICAL],
                     )
                     change.design_implications = self._get_design_implications(change)
                     changes.append(change)
 
         return changes
 
-    def _elements_differ(self, old: ArchitecturalElement, new: ArchitecturalElement) -> bool:
+    def _elements_differ(
+        self, old: ArchitecturalElement, new: ArchitecturalElement
+    ) -> bool:
         """Check if two elements are significantly different"""
         # Check important attributes that indicate architectural changes
         return (
-            old.dependencies != new.dependencies or
-            old.interfaces != new.interfaces or
-            old.patterns != new.patterns or
-            old.decorators != new.decorators or
-            old.is_async != new.is_async or
-            old.parameters != new.parameters or
-            old.return_type != new.return_type
+            old.dependencies != new.dependencies
+            or old.interfaces != new.interfaces
+            or old.patterns != new.patterns
+            or old.decorators != new.decorators
+            or old.is_async != new.is_async
+            or old.parameters != new.parameters
+            or old.return_type != new.return_type
         )
 
-    def _assess_impact_level(self, element: ArchitecturalElement, change_type: ChangeType) -> ImpactLevel:
+    def _assess_impact_level(
+        self, element: ArchitecturalElement, change_type: ChangeType
+    ) -> ImpactLevel:
         """Assess the architectural impact level of a change"""
         # High impact indicators
         high_impact_patterns = ["abc", "protocol", "singleton", "factory"]
-        high_impact_decorators = ["@abstractmethod", "@classmethod", "@staticmethod", "@property"]
+        high_impact_decorators = [
+            "@abstractmethod",
+            "@classmethod",
+            "@staticmethod",
+            "@property",
+        ]
 
         # Critical impact indicators
         critical_patterns = ["__init__", "__new__", "__enter__", "__exit__"]
@@ -276,10 +296,14 @@ class PythonASTParser(ASTParser):
             implications.append("May affect inheritance hierarchy and client code")
 
         if "abc" in element.patterns:
-            implications.append("Abstract base class change affects all implementations")
+            implications.append(
+                "Abstract base class change affects all implementations"
+            )
 
         if "singleton" in element.patterns:
-            implications.append("Singleton pattern change affects global state management")
+            implications.append(
+                "Singleton pattern change affects global state management"
+            )
 
         if element.is_async:
             implications.append("Async function change affects concurrency patterns")
@@ -308,7 +332,7 @@ class PythonASTVisitor(ast.NodeVisitor):
             element = ArchitecturalElement(
                 element_type=ElementType.IMPORT,
                 name=alias.name,
-                location=f"{self.file_path}:{node.lineno}"
+                location=f"{self.file_path}:{node.lineno}",
             )
             self.elements.append(element)
         self.generic_visit(node)
@@ -322,7 +346,7 @@ class PythonASTVisitor(ast.NodeVisitor):
             element = ArchitecturalElement(
                 element_type=ElementType.IMPORT,
                 name=import_name,
-                location=f"{self.file_path}:{node.lineno}"
+                location=f"{self.file_path}:{node.lineno}",
             )
             self.elements.append(element)
         self.generic_visit(node)
@@ -345,7 +369,7 @@ class PythonASTVisitor(ast.NodeVisitor):
             docstring=ast.get_docstring(node),
             patterns=[],  # Will be populated after element creation
             complexity_metrics=self.parser.calculate_complexity(node),
-            is_public=not node.name.startswith('_')
+            is_public=not node.name.startswith("_"),
         )
         element.patterns = self.parser.detect_patterns(element, self.content)
 
@@ -361,7 +385,9 @@ class PythonASTVisitor(ast.NodeVisitor):
         """Handle async function definitions"""
         self._handle_function(node, is_async=True)
 
-    def _handle_function(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef], is_async: bool):
+    def _handle_function(
+        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef], is_async: bool
+    ):
         """Common handler for function and async function definitions"""
         decorators = [self._get_decorator_name(d) for d in node.decorator_list]
         parameters = [arg.arg for arg in node.args.args]
@@ -377,11 +403,11 @@ class PythonASTVisitor(ast.NodeVisitor):
             docstring=ast.get_docstring(node),
             parent_element=self.current_class,
             is_async=is_async,
-            is_public=not node.name.startswith('_'),
+            is_public=not node.name.startswith("_"),
             parameters=parameters,
             return_type=self._get_return_type(node),
             patterns=[],  # Will be populated after element creation
-            complexity_metrics=self.parser.calculate_complexity(node)
+            complexity_metrics=self.parser.calculate_complexity(node),
         )
         element.patterns = self.parser.detect_patterns(element, self.content)
 
@@ -414,10 +440,16 @@ class PythonASTVisitor(ast.NodeVisitor):
             return f"{self._get_attr_name(node.value)}.{node.attr}"
         return str(node)
 
-    def _get_return_type(self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]) -> Optional[str]:
+    def _get_return_type(
+        self, node: Union[ast.FunctionDef, ast.AsyncFunctionDef]
+    ) -> Optional[str]:
         """Extract return type annotation if present"""
         if node.returns:
-            return ast.unparse(node.returns) if hasattr(ast, 'unparse') else str(node.returns)
+            return (
+                ast.unparse(node.returns)
+                if hasattr(ast, "unparse")
+                else str(node.returns)
+            )
         return None
 
 
@@ -426,7 +458,7 @@ class TypeScriptASTParser(ASTParser):
 
     def __init__(self):
         super().__init__()
-        self.supported_extensions = {'.ts', '.tsx', '.js', '.jsx'}
+        self.supported_extensions = {".ts", ".tsx", ".js", ".jsx"}
         self.architectural_patterns = {
             "decorator": ["@", "decorator"],
             "singleton": ["singleton", "instance"],
@@ -435,7 +467,7 @@ class TypeScriptASTParser(ASTParser):
             "promise": ["Promise", "async", "await"],
             "component": ["Component", "component"],
             "service": ["Service", "@Injectable"],
-            "module": ["Module", "@NgModule"]
+            "module": ["Module", "@NgModule"],
         }
 
     def parse_file(self, file_path: str) -> List[ArchitecturalElement]:
@@ -447,12 +479,15 @@ class TypeScriptASTParser(ASTParser):
                 element_type=ElementType.MODULE,
                 name=Path(file_path).stem,
                 location=f"{file_path}:1",
-                patterns=["typescript_module"]
+                patterns=["typescript_module"],
             )
         ]
 
-    def analyze_changes(self, old_elements: List[ArchitecturalElement],
-                       new_elements: List[ArchitecturalElement]) -> List[ArchitecturalChange]:
+    def analyze_changes(
+        self,
+        old_elements: List[ArchitecturalElement],
+        new_elements: List[ArchitecturalElement],
+    ) -> List[ArchitecturalChange]:
         """Analyze TypeScript changes - placeholder implementation"""
         # TODO: Implement TypeScript-specific change analysis
         return []
@@ -465,7 +500,7 @@ class ASTParserFactory:
         # Register only stable, fully-implemented parsers.  The TypeScript parser
         # remains a placeholder and is therefore not exposed until completed.
         self._parsers: Dict[str, ASTParser] = {
-            'python': PythonASTParser(),
+            "python": PythonASTParser(),
             # 'typescript': TypeScriptASTParser(),  # disabled – placeholder
         }
 

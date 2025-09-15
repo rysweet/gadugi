@@ -151,10 +151,10 @@ class TypeScriptASTParser(ASTParser):
 #### Integration with Enhanced Separation
 
 ```python
-from .claude.shared.github_operations import GitHubOperations
-from .claude.shared.state_management import StateManager
-from .claude.shared.error_handling import ErrorHandler
-from .claude.shared.task_tracking import TaskTracker
+from .gadugi/.gadugi/src/shared.github_operations import GitHubOperations
+from .gadugi/.gadugi/src/shared.state_management import StateManager
+from .gadugi/.gadugi/src/shared.error_handling import ErrorHandler
+from .gadugi/.gadugi/src/shared.task_tracking import TaskTracker
 
 class SystemDesignReviewer:
     """Main system design review agent"""

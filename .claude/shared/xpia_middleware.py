@@ -8,10 +8,10 @@ requiring changes to existing agent code.
 """
 
 import logging
-import time
-from typing import Dict, Any, Optional
-from pathlib import Path
 import sys
+import time
+from pathlib import Path
+from typing import Dict, Any, Optional
 
 # Add shared modules to path
 shared_path = Path(__file__).parent
@@ -68,7 +68,9 @@ class XPIAMiddleware:
             security_logger.addHandler(handler)
 
     def validate_user_input(
-        self, content: str, context: Dict[str, Any] = None  # type: ignore[assignment]
+        self,
+        content: str,
+        context: Dict[str, Any] = None,  # type: ignore[assignment]
     ) -> Dict[str, Any]:
         """
         Validate user input through XPIA defense.
@@ -443,7 +445,8 @@ def get_xpia_middleware(
 
 
 def xpia_validate_user_input(
-    content: str, context: Dict[str, Any] = None  # type: ignore[assignment]
+    content: str,
+    context: Dict[str, Any] = None,  # type: ignore[assignment]
 ) -> Dict[str, Any]:
     """Hook function for validating user input"""
     middleware = get_xpia_middleware()

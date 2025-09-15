@@ -3,7 +3,6 @@ Test suite for Code Reviewer V0.3 Agent
 """
 
 import asyncio
-import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,12 +10,18 @@ from unittest.mock import Mock, patch, AsyncMock
 
 # Add the current directory to Python path for testing
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent / "base"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "shared"))
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "engines"))
 
-from code_reviewer_v03 import CodeReviewerV03, ReviewFeedback, DeveloperPattern, ModulePattern
+from code_reviewer_v03 import (
+    CodeReviewerV03,
+    ReviewFeedback,
+    DeveloperPattern,
+    ModulePattern,
+)
 
 
 class TestCodeReviewerV03(unittest.TestCase):
@@ -45,12 +50,20 @@ class TestCodeReviewerV03(unittest.TestCase):
         """Test task handling detection."""
         # Should handle code review tasks
         self.assertTrue(asyncio.run(self.reviewer.can_handle_task("review this code")))
-        self.assertTrue(asyncio.run(self.reviewer.can_handle_task("check code quality")))
-        self.assertTrue(asyncio.run(self.reviewer.can_handle_task("security review needed")))
+        self.assertTrue(
+            asyncio.run(self.reviewer.can_handle_task("check code quality"))
+        )
+        self.assertTrue(
+            asyncio.run(self.reviewer.can_handle_task("security review needed"))
+        )
 
         # Should not handle unrelated tasks
-        self.assertFalse(asyncio.run(self.reviewer.can_handle_task("deploy to production")))
-        self.assertFalse(asyncio.run(self.reviewer.can_handle_task("write documentation")))
+        self.assertFalse(
+            asyncio.run(self.reviewer.can_handle_task("deploy to production"))
+        )
+        self.assertFalse(
+            asyncio.run(self.reviewer.can_handle_task("write documentation"))
+        )
 
     def test_developer_pattern_creation(self):
         """Test developer pattern tracking."""
@@ -88,7 +101,7 @@ class TestCodeReviewerV03(unittest.TestCase):
             module="test.py",
             file_path="/path/to/test.py",
             accepted=True,
-            feedback_reason="Good catch"
+            feedback_reason="Good catch",
         )
 
         # Check properties
@@ -116,7 +129,7 @@ class TestCodeReviewerIntegration(unittest.TestCase):
 
         self.reviewer.memory = self.mock_memory
 
-    @patch('code_reviewer_v03.CodeReviewerEngine')
+    @patch("code_reviewer_v03.CodeReviewerEngine")
     def test_review_files_task_execution(self, mock_engine_class):
         """Test file review task execution."""
         # Mock the review engine
@@ -129,11 +142,7 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         mock_engine_class.return_value = mock_engine
 
         # Create task
-        task = {
-            "type": "review_files",
-            "files": ["test.py"],
-            "author": "test_user"
-        }
+        task = {"type": "review_files", "files": ["test.py"], "author": "test_user"}
 
         # Execute task
         async def run_test():
@@ -147,7 +156,9 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         self.assertTrue(outcome.success)
         self.assertEqual(outcome.task_type, "review_files")
         if outcome.lessons_learned:
-            self.assertIn("review completed successfully", outcome.lessons_learned.lower())
+            self.assertIn(
+                "review completed successfully", outcome.lessons_learned.lower()
+            )
 
         # Verify engine was called
         mock_engine.review_files.assert_called_once_with(["test.py"])
@@ -163,9 +174,9 @@ class TestCodeReviewerIntegration(unittest.TestCase):
                     "developer": "test_user",
                     "file_path": "test.py",
                     "accepted": False,
-                    "reason": "We prefer longer lines"
+                    "reason": "We prefer longer lines",
                 }
-            ]
+            ],
         }
 
         async def run_test():
@@ -191,7 +202,10 @@ class TestCodeReviewerIntegration(unittest.TestCase):
         self.reviewer.developer_patterns["user1"].common_issues = {"E501": 5, "F401": 3}
 
         self.reviewer.module_patterns["test.py"] = ModulePattern(module_path="test.py")
-        self.reviewer.module_patterns["test.py"].frequent_issues = {"E501": 8, "W292": 2}
+        self.reviewer.module_patterns["test.py"].frequent_issues = {
+            "E501": 8,
+            "W292": 2,
+        }
 
         task = {"type": "analyze_patterns"}
 
@@ -259,6 +273,7 @@ class TestCodeReviewerIntegration(unittest.TestCase):
 
     def test_missing_pattern_insights(self):
         """Test getting insights for non-existent patterns."""
+
         async def run_test():
             dev_insights = await self.reviewer.get_developer_insights("missing_user")
             mod_insights = await self.reviewer.get_module_insights("missing/file.py")
@@ -291,7 +306,7 @@ class TestPatternUpdating(unittest.TestCase):
             developer="user1",
             module="test.py",
             file_path="test.py",
-            accepted=True
+            accepted=True,
         )
 
         async def run_test():
@@ -314,7 +329,7 @@ class TestPatternUpdating(unittest.TestCase):
             developer="user1",
             module="test.py",
             file_path="test.py",
-            accepted=False
+            accepted=False,
         )
 
         async def run_test():
@@ -346,7 +361,7 @@ def another_function(param1, param2, param3, param4, param5, param6):
     return 0
 '''
 
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
         f.write(content)
         return f.name
 
@@ -368,6 +383,8 @@ if __name__ == "__main__":
     # Exit with appropriate code
     exit_code = 0 if result.wasSuccessful() else 1
     print(f"\nTests {'PASSED' if result.wasSuccessful() else 'FAILED'}")
-    print(f"Ran {result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors")
+    print(
+        f"Ran {result.testsRun} tests, {len(result.failures)} failures, {len(result.errors)} errors"
+    )
 
     exit(exit_code)

@@ -2,15 +2,15 @@
 Enhanced tests for event-router service with memory integration.
 """
 
-import asyncio
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock, AsyncMock
-from typing import Any, Dict, List
+from typing import Any
 
 # Import based on available framework
 try:
     from fastapi.testclient import TestClient  # type: ignore[import-untyped]
+
     use_fastapi = True
 except ImportError:
     use_fastapi = False
@@ -27,13 +27,21 @@ if not use_fastapi:
         flask_app = None  # type: ignore[misc]
 
 from ..models import (
-    RequestModel, AgentEvent, EventType, EventPriority,
-    EventFilter, EventReplayRequest, TaskStartedEvent,
-    KnowledgeLearnedEvent, CollaborationMessageEvent
+    RequestModel,
+    AgentEvent,
+    EventType,
+    EventPriority,
+    EventFilter,
+    EventReplayRequest,
+    TaskStartedEvent,
+    KnowledgeLearnedEvent,
+    CollaborationMessageEvent,
 )
 from ..handlers import (
-    MemoryEventStorage, EventHandler, EventFilterEngine,
-    EventReplayEngine
+    MemoryEventStorage,
+    EventHandler,
+    EventFilterEngine,
+    EventReplayEngine,
 )
 
 
@@ -43,6 +51,7 @@ def client() -> Any:
     if use_fastapi and TestClient is not None:
         try:
             from ..main import app
+
             if app is not None:
                 return TestClient(app)
             else:
@@ -61,9 +70,7 @@ def client() -> Any:
 def sample_request() -> RequestModel:
     """Create sample request."""
     return RequestModel(
-        id="test-123",
-        data={"test": "data"},
-        metadata={"source": "test"}
+        id="test-123", data={"test": "data"}, metadata={"source": "test"}
     )
 
 
@@ -103,12 +110,11 @@ class TestRootEndpoint:
 class TestProcessEndpoint:
     """Test process endpoint."""
 
-    def test_process_valid_request(self, client: Any, sample_request: RequestModel) -> None:
+    def test_process_valid_request(
+        self, client: Any, sample_request: RequestModel
+    ) -> None:
         """Test processing valid request."""
-        response = client.post(
-            "/process",
-            json=sample_request.dict()
-        )
+        response = client.post("/process", json=sample_request.dict())
         assert response.status_code == 200
 
         if use_fastapi:
@@ -121,19 +127,13 @@ class TestProcessEndpoint:
 
     def test_process_invalid_request(self, client: Any) -> None:
         """Test processing invalid request."""
-        response = client.post(
-            "/process",
-            json={}
-        )
+        response = client.post("/process", json={})
         # FastAPI returns 422 for validation errors, Flask returns 400
         assert response.status_code in [400, 422]
 
     def test_process_empty_data(self, client: Any) -> None:
         """Test processing with empty data."""
-        response = client.post(
-            "/process",
-            json={"data": {}}
-        )
+        response = client.post("/process", json={"data": {}})
         # Should still work with empty data dict
         assert response.status_code == 200
 
@@ -160,18 +160,12 @@ class TestProcessErrorHandling:
 
     @patch(".claude.services.event-router.main.process_request")
     def test_process_error_handling(
-        self,
-        mock_process: MagicMock,
-        client: Any,
-        sample_request: RequestModel
+        self, mock_process: MagicMock, client: Any, sample_request: RequestModel
     ) -> None:
         """Test error handling in process endpoint."""
         mock_process.side_effect = Exception("Test error")
 
-        response = client.post(
-            "/process",
-            json=sample_request.dict()
-        )
+        response = client.post("/process", json=sample_request.dict())
         assert response.status_code == 500
 
         if use_fastapi:
@@ -184,17 +178,20 @@ class TestProcessErrorHandling:
 
 # ========== Memory Integration Tests ==========
 
+
 @pytest.fixture
 def mock_memory_storage():
     """Mock memory storage for testing."""
     storage = MagicMock(spec=MemoryEventStorage)
     storage.initialize = AsyncMock()
-    storage.store_event = AsyncMock(return_value={
-        "event_id": "test-event-123",
-        "stored_in_memory": True,
-        "stored_in_sqlite": True,
-        "memory_id": "mem-123"
-    })
+    storage.store_event = AsyncMock(
+        return_value={
+            "event_id": "test-event-123",
+            "stored_in_memory": True,
+            "stored_in_sqlite": True,
+            "memory_id": "mem-123",
+        }
+    )
     storage.get_events = AsyncMock(return_value=[])
     storage.get_storage_info = AsyncMock()
     storage.get_integration_status = AsyncMock()
@@ -216,7 +213,7 @@ def sample_agent_event() -> AgentEvent:
         session_id=None,
         metadata={},
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
 
@@ -236,7 +233,7 @@ def sample_task_started_event() -> TaskStartedEvent:
         tags=[],
         priority=EventPriority.NORMAL,
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
 
@@ -257,7 +254,7 @@ def sample_knowledge_event() -> KnowledgeLearnedEvent:
         tags=[],
         priority=EventPriority.NORMAL,
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
 
@@ -267,12 +264,10 @@ class TestMemoryEventStorage:
     @pytest.mark.asyncio
     async def test_storage_initialization(self):
         """Test memory storage initialization."""
-        with patch('sqlite3.connect'):
-            storage = MemoryEventStorage(
-                sqlite_db_path=":memory:"
-            )
+        with patch("sqlite3.connect"):
+            storage = MemoryEventStorage(sqlite_db_path=":memory:")
 
-            with patch.object(storage, 'sqlite_backend') as mock_backend:
+            with patch.object(storage, "sqlite_backend") as mock_backend:
                 mock_backend.initialize = AsyncMock()
                 await storage.initialize()
                 mock_backend.initialize.assert_called_once()
@@ -301,12 +296,14 @@ class TestMemoryEventStorage:
 
         # Mock the SQLite backend
         mock_backend = AsyncMock()
-        mock_backend.get_memories = AsyncMock(return_value=[
-            {
-                "content": '{"id": "event-1", "event_type": "task.started", "agent_id": "agent-1", "timestamp": "2023-01-01T10:00:00"}',
-                "metadata": {"event_type": "task.started"}
-            }
-        ])
+        mock_backend.get_memories = AsyncMock(
+            return_value=[
+                {
+                    "content": '{"id": "event-1", "event_type": "task.started", "agent_id": "agent-1", "timestamp": "2023-01-01T10:00:00"}',
+                    "metadata": {"event_type": "task.started"},
+                }
+            ]
+        )
         storage.sqlite_backend = mock_backend
 
         event_filter = EventFilter(
@@ -319,7 +316,7 @@ class TestMemoryEventStorage:
             tags=None,
             start_time=None,
             end_time=None,
-            offset=0
+            offset=0,
         )
 
         events = await storage.get_events(event_filter)
@@ -363,7 +360,7 @@ class TestEventHandler:
             metadata={},
             tags=[],
             stored_in_memory=False,
-            memory_id=None
+            memory_id=None,
         )
 
         await handler.handle_event(error_event)
@@ -393,7 +390,7 @@ class TestEventFilterEngine:
                 tags=[],
                 priority=EventPriority.NORMAL,
                 stored_in_memory=False,
-                memory_id=None
+                memory_id=None,
             ),
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
@@ -406,8 +403,8 @@ class TestEventFilterEngine:
                 tags=[],
                 priority=EventPriority.NORMAL,
                 stored_in_memory=False,
-                memory_id=None
-            )
+                memory_id=None,
+            ),
         ]
         mock_memory_storage.get_events.return_value = mock_events
 
@@ -421,10 +418,12 @@ class TestEventFilterEngine:
             tags=None,
             start_time=None,
             end_time=None,
-            offset=0
+            offset=0,
         )
 
-        filtered_events = await filter_engine.filter_events(mock_memory_storage, event_filter)
+        filtered_events = await filter_engine.filter_events(
+            mock_memory_storage, event_filter
+        )
 
         assert len(filtered_events) <= 10
         mock_memory_storage.get_events.assert_called_once_with(event_filter)
@@ -443,7 +442,7 @@ class TestEventFilterEngine:
             tags=None,
             start_time=None,
             end_time=None,
-            offset=0
+            offset=0,
         )
 
         cache_key = filter_engine._get_cache_key(event_filter)
@@ -474,7 +473,7 @@ class TestEventReplayEngine:
                 tags=[],
                 priority=EventPriority.NORMAL,
                 stored_in_memory=False,
-                memory_id=None
+                memory_id=None,
             ),
             AgentEvent(
                 event_type=EventType.TASK_COMPLETED,
@@ -488,8 +487,8 @@ class TestEventReplayEngine:
                 tags=[],
                 priority=EventPriority.NORMAL,
                 stored_in_memory=False,
-                memory_id=None
-            )
+                memory_id=None,
+            ),
         ]
         mock_memory_storage.get_events_by_session.return_value = session_events
 
@@ -498,7 +497,7 @@ class TestEventReplayEngine:
             agent_id=None,
             from_timestamp=None,
             to_timestamp=None,
-            event_types=None
+            event_types=None,
         )
 
         result = await replay_engine.replay_events(replay_request)
@@ -524,7 +523,7 @@ class TestEventReplayEngine:
             tags=[],
             priority=EventPriority.NORMAL,
             stored_in_memory=False,
-            memory_id=None
+            memory_id=None,
         )
 
         # Test agent ID filter
@@ -533,7 +532,7 @@ class TestEventReplayEngine:
             agent_id="agent-2",  # Different agent
             from_timestamp=None,
             to_timestamp=None,
-            event_types=None
+            event_types=None,
         )
 
         should_replay = replay_engine._should_replay_event(event, replay_request)
@@ -548,24 +547,26 @@ class TestEventReplayEngine:
 class TestEventEndpoints:
     """Test event-related HTTP endpoints."""
 
-    @patch('event_router.main.event_handler')
-    @patch('event_router.main.memory_storage')
+    @patch("event_router.main.event_handler")
+    @patch("event_router.main.memory_storage")
     def test_create_event_endpoint(self, mock_storage, mock_handler, client):
         """Test event creation endpoint."""
         if not client:
             pytest.skip("Client not available")
 
-        mock_handler.handle_event = AsyncMock(return_value={
-            "event_id": "test-event-123",
-            "stored_in_memory": True,
-            "memory_id": "mem-123"
-        })
+        mock_handler.handle_event = AsyncMock(
+            return_value={
+                "event_id": "test-event-123",
+                "stored_in_memory": True,
+                "memory_id": "mem-123",
+            }
+        )
 
         event_data = {
             "event_type": "task.started",
             "agent_id": "test-agent-001",
             "task_id": "task-123",
-            "data": {"description": "Test task"}
+            "data": {"description": "Test task"},
         }
 
         response = client.post("/events", json=event_data)
@@ -608,7 +609,9 @@ class TestSpecificEventTypes:
     """Test specific event type handling."""
 
     @pytest.mark.asyncio
-    async def test_task_started_event(self, sample_task_started_event, mock_memory_storage):
+    async def test_task_started_event(
+        self, sample_task_started_event, mock_memory_storage
+    ):
         """Test handling task started events."""
         filter_engine = EventFilterEngine()
         handler = EventHandler(mock_memory_storage, filter_engine)
@@ -621,7 +624,9 @@ class TestSpecificEventTypes:
         mock_memory_storage.store_event.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_knowledge_learned_event(self, sample_knowledge_event, mock_memory_storage):
+    async def test_knowledge_learned_event(
+        self, sample_knowledge_event, mock_memory_storage
+    ):
         """Test handling knowledge learned events."""
         filter_engine = EventFilterEngine()
         handler = EventHandler(mock_memory_storage, filter_engine)
@@ -650,7 +655,7 @@ class TestSpecificEventTypes:
             tags=[],
             priority=EventPriority.NORMAL,
             stored_in_memory=False,
-            memory_id=None
+            memory_id=None,
         )
 
         assert collab_event.event_type == EventType.COLLABORATION_MESSAGE
@@ -706,7 +711,7 @@ class TestEventSystemErrorHandling:
         storage = MemoryEventStorage(sqlite_db_path=":memory:")
 
         # Don't initialize storage to trigger error
-        event = AgentEvent(
+        AgentEvent(
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
             data={},
@@ -717,7 +722,7 @@ class TestEventSystemErrorHandling:
             tags=[],
             priority=EventPriority.NORMAL,
             stored_in_memory=False,
-            memory_id=None
+            memory_id=None,
         )
 
         # Should handle missing backend gracefully
@@ -731,7 +736,7 @@ class TestEventSystemErrorHandling:
             tags=None,
             start_time=None,
             end_time=None,
-            offset=0
+            offset=0,
         )
         events = await storage.get_events(event_filter)
         assert events == []
@@ -756,7 +761,7 @@ class TestEventSystemErrorHandling:
             tags=[],
             priority=EventPriority.NORMAL,
             stored_in_memory=False,
-            memory_id=None
+            memory_id=None,
         )
 
         await handler.initialize()

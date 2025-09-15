@@ -11,8 +11,20 @@ from io import BytesIO
 import base64
 
 # Import shared modules and Phase 1 components
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
-from ...shared.state_management import StateManager  # type: ignore
+try:
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
+except ImportError:
+    # Fallback to relative imports if needed
+    import sys
+    import os
+
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    )
+    sys.path.insert(0, base_dir)
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
 from .performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
 from .capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from .metrics_collector import MetricsCollector
@@ -158,7 +170,7 @@ class ReportingSystem:
 
         self.logger.info("ReportingSystem initialized")
 
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker()
     def generate_report(self, config: ReportConfig) -> GeneratedReport:
         """
         Generate a comprehensive report based on configuration.

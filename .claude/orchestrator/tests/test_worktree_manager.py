@@ -15,7 +15,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
-sys.path.insert(0, str(Path(__file__).parent.parent / 'components'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "components"))
 
 from worktree_manager import WorktreeInfo, WorktreeManager  # type: ignore[import]
 
@@ -33,13 +33,13 @@ class TestWorktreeManager(unittest.TestCase):
         self.init_fake_git_repo()
 
         self.manager = WorktreeManager(
-            project_root=str(self.project_root),
-            worktrees_dir=".worktrees"
+            project_root=str(self.project_root), worktrees_dir=".worktrees"
         )
 
     def tearDown(self):
         """Clean up test environment"""
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def init_fake_git_repo(self):
@@ -50,9 +50,11 @@ class TestWorktreeManager(unittest.TestCase):
 
         # Create some basic files
         (self.project_root / "README.md").write_text("Test repository")
-        (self.project_root / "pyproject.toml").write_text("[build-system]\nrequires = []")
+        (self.project_root / "pyproject.toml").write_text(
+            "[build-system]\nrequires = []"
+        )
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_create_worktree_success(self, mock_run):
         """Test successful worktree creation"""
         # Mock successful git worktree add command
@@ -68,28 +70,33 @@ class TestWorktreeManager(unittest.TestCase):
 
         # Verify git command was called correctly
         expected_cmd = [
-            "git", "worktree", "add",
+            "git",
+            "worktree",
+            "add",
             str(self.worktrees_dir / "task-task1"),
-            "-b", "feature/parallel-test-task-task1",
-            "main"
+            "-b",
+            "feature/parallel-test-task-task1",
+            "main",
         ]
         mock_run.assert_called_with(
             expected_cmd,
             cwd=self.project_root,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
 
         # Verify worktree is tracked
         self.assertIn("task1", self.manager.worktrees)
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_create_worktree_failure(self, mock_run):
         """Test worktree creation failure"""
         # Mock failed git worktree add command
-        error = subprocess.CalledProcessError(1, 'git worktree add')
-        error.stderr = "fatal: 'feature/parallel-test-task-task1' is already checked out"
+        error = subprocess.CalledProcessError(1, "git worktree add")
+        error.stderr = (
+            "fatal: 'feature/parallel-test-task-task1' is already checked out"
+        )
         mock_run.side_effect = error
 
         with self.assertRaises(RuntimeError) as context:
@@ -107,7 +114,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
 
         worktree2 = WorktreeInfo(
@@ -116,7 +123,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task2",
             branch_name="feature/parallel-task2",
             status="completed",
-            created_at="2025-08-01T12:30:00"
+            created_at="2025-08-01T12:30:00",
         )
 
         self.manager.worktrees = {"task1": worktree1, "task2": worktree2}
@@ -134,7 +141,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
 
         self.manager.worktrees["task1"] = worktree_info
@@ -154,7 +161,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
 
         self.manager.worktrees["task1"] = worktree_info
@@ -165,7 +172,7 @@ class TestWorktreeManager(unittest.TestCase):
         self.assertEqual(worktree_info.status, "completed")
         self.assertEqual(worktree_info.pid, 12345)
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_sync_worktree_from_main_success(self, mock_run):
         """Test successful worktree sync"""
         # Create a worktree
@@ -175,7 +182,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
         self.manager.worktrees["task1"] = worktree_info
 
@@ -192,18 +199,18 @@ class TestWorktreeManager(unittest.TestCase):
                 ["git", "fetch", "origin"],
                 cwd=worktree_info.worktree_path,
                 check=True,
-                capture_output=True
+                capture_output=True,
             ),
             call(
                 ["git", "merge", "origin/main"],
                 cwd=worktree_info.worktree_path,
                 check=True,
-                capture_output=True
-            )
+                capture_output=True,
+            ),
         ]
         mock_run.assert_has_calls(expected_calls)
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_sync_worktree_failure(self, mock_run):
         """Test worktree sync failure"""
         # Create a worktree
@@ -213,18 +220,18 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
         self.manager.worktrees["task1"] = worktree_info
 
         # Mock failed git command
-        mock_run.side_effect = subprocess.CalledProcessError(1, 'git merge')
+        mock_run.side_effect = subprocess.CalledProcessError(1, "git merge")
 
         result = self.manager.sync_worktree_from_main("task1")
 
         self.assertFalse(result)
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_collect_worktree_results(self, mock_run):
         """Test collecting results from worktree"""
         # Create a worktree
@@ -234,7 +241,7 @@ class TestWorktreeManager(unittest.TestCase):
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="completed",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
         self.manager.worktrees["task1"] = worktree_info
 
@@ -246,22 +253,26 @@ class TestWorktreeManager(unittest.TestCase):
 
         # Mock git commands for file changes and commits
         mock_run.side_effect = [
-            MagicMock(returncode=0, stdout="file1.py\nfile2.py"),  # git diff --name-only
-            MagicMock(returncode=0, stdout="abcd123 First commit\nefgh456 Second commit")  # git log --oneline
+            MagicMock(
+                returncode=0, stdout="file1.py\nfile2.py"
+            ),  # git diff --name-only
+            MagicMock(
+                returncode=0, stdout="abcd123 First commit\nefgh456 Second commit"
+            ),  # git log --oneline
         ]
 
         results = self.manager.collect_worktree_results("task1")
 
         self.assertIsNotNone(results)
-        self.assertEqual(results['task_id'], "task1")
-        self.assertEqual(results['task_name'], "Task 1")
-        self.assertEqual(results['status'], "completed")
-        self.assertEqual(results['files_changed'], ["file1.py", "file2.py"])
-        self.assertEqual(len(results['commits']), 2)
-        self.assertEqual(len(results['artifacts']), 1)
+        self.assertEqual(results["task_id"], "task1")
+        self.assertEqual(results["task_name"], "Task 1")
+        self.assertEqual(results["status"], "completed")
+        self.assertEqual(results["files_changed"], ["file1.py", "file2.py"])
+        self.assertEqual(len(results["commits"]), 2)
+        self.assertEqual(len(results["artifacts"]), 1)
 
-    @patch('os.kill')
-    @patch('subprocess.run')
+    @patch("os.kill")
+    @patch("subprocess.run")
     def test_cleanup_worktree_success(self, mock_run, mock_kill):
         """Test successful worktree cleanup"""
         # Create a worktree with a running process
@@ -275,7 +286,7 @@ class TestWorktreeManager(unittest.TestCase):
             branch_name="feature/parallel-task1",
             status="completed",
             created_at="2025-08-01T12:00:00",
-            pid=12345
+            pid=12345,
         )
         self.manager.worktrees["task1"] = worktree_info
 
@@ -293,7 +304,7 @@ class TestWorktreeManager(unittest.TestCase):
         # Verify git worktree remove was called
         mock_run.assert_called()
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_cleanup_all_worktrees(self, mock_run):
         """Test cleanup of all worktrees"""
         # Create multiple worktrees
@@ -308,7 +319,7 @@ class TestWorktreeManager(unittest.TestCase):
                 worktree_path=worktree_path,
                 branch_name=f"feature/parallel-task{i+1}",
                 status="completed",
-                created_at="2025-08-01T12:00:00"
+                created_at="2025-08-01T12:00:00",
             )
             self.manager.worktrees[task_id] = worktree_info
 
@@ -320,7 +331,7 @@ class TestWorktreeManager(unittest.TestCase):
         self.assertEqual(cleaned, 3)
         self.assertEqual(len(self.manager.worktrees), 0)
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_get_system_worktrees(self, mock_run):
         """Test getting system worktrees"""
         # Mock git worktree list output
@@ -343,12 +354,12 @@ detached
         self.assertEqual(len(worktrees), 3)
 
         # Check first worktree
-        self.assertEqual(worktrees[0]['path'], '/path/to/main')
-        self.assertEqual(worktrees[0]['head'], 'abc123')
-        self.assertEqual(worktrees[0]['branch'], 'refs/heads/main')
+        self.assertEqual(worktrees[0]["path"], "/path/to/main")
+        self.assertEqual(worktrees[0]["head"], "abc123")
+        self.assertEqual(worktrees[0]["branch"], "refs/heads/main")
 
         # Check detached worktree
-        self.assertTrue(worktrees[2].get('detached', False))
+        self.assertTrue(worktrees[2].get("detached", False))
 
     def test_validate_worktrees(self):
         """Test worktree validation"""
@@ -359,11 +370,11 @@ detached
             worktree_path=self.worktrees_dir / "task-task1",
             branch_name="feature/parallel-task1",
             status="active",
-            created_at="2025-08-01T12:00:00"
+            created_at="2025-08-01T12:00:00",
         )
         self.manager.worktrees["task1"] = worktree_info
 
-        with patch.object(self.manager, 'get_system_worktrees') as mock_get_system:
+        with patch.object(self.manager, "get_system_worktrees") as mock_get_system:
             mock_get_system.return_value = []  # No system worktrees
 
             issues = self.manager.validate_worktrees()
@@ -381,7 +392,7 @@ detached
             branch_name="feature/parallel-task1",
             status="active",
             created_at="2025-08-01T12:00:00",
-            pid=12345
+            pid=12345,
         )
         self.manager.worktrees["task1"] = worktree_info
 
@@ -390,8 +401,7 @@ detached
 
         # Create new manager and load state
         new_manager = WorktreeManager(
-            project_root=str(self.project_root),
-            worktrees_dir=".worktrees"
+            project_root=str(self.project_root), worktrees_dir=".worktrees"
         )
 
         # Verify state was loaded
@@ -405,7 +415,7 @@ detached
     def test_get_status_summary(self):
         """Test status summary generation"""
         # Create worktrees with different statuses
-        statuses = ['active', 'completed', 'failed', 'active']
+        statuses = ["active", "completed", "failed", "active"]
         for i, status in enumerate(statuses):
             task_id = f"task{i+1}"
             worktree_info = WorktreeInfo(
@@ -414,17 +424,17 @@ detached
                 worktree_path=self.worktrees_dir / f"task-{task_id}",
                 branch_name=f"feature/parallel-task{i+1}",
                 status=status,
-                created_at="2025-08-01T12:00:00"
+                created_at="2025-08-01T12:00:00",
             )
             self.manager.worktrees[task_id] = worktree_info
 
         summary = self.manager.get_status_summary()
 
-        self.assertEqual(summary['total'], 4)
-        self.assertEqual(summary['active'], 2)
-        self.assertEqual(summary['completed'], 1)
-        self.assertEqual(summary['failed'], 1)
-        self.assertEqual(summary.get('cleaning', 0), 0)
+        self.assertEqual(summary["total"], 4)
+        self.assertEqual(summary["active"], 2)
+        self.assertEqual(summary["completed"], 1)
+        self.assertEqual(summary["failed"], 1)
+        self.assertEqual(summary.get("cleaning", 0), 0)
 
 
 class TestWorktreeManagerIntegration(unittest.TestCase):
@@ -436,18 +446,29 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         self.project_root = Path(self.temp_dir)
 
         # Initialize real git repository
-        subprocess.run(['git', 'init'], cwd=self.project_root, check=True, capture_output=True)
-        subprocess.run(['git', 'config', 'user.name', 'Test User'], cwd=self.project_root, check=True)
-        subprocess.run(['git', 'config', 'user.email', 'test@example.com'], cwd=self.project_root, check=True)
+        subprocess.run(
+            ["git", "init"], cwd=self.project_root, check=True, capture_output=True
+        )
+        subprocess.run(
+            ["git", "config", "user.name", "Test User"],
+            cwd=self.project_root,
+            check=True,
+        )
+        subprocess.run(
+            ["git", "config", "user.email", "test@example.com"],
+            cwd=self.project_root,
+            check=True,
+        )
 
         # Create and commit initial file
-        (self.project_root / 'README.md').write_text('Test repository')
-        subprocess.run(['git', 'add', 'README.md'], cwd=self.project_root, check=True)
-        subprocess.run(['git', 'commit', '-m', 'Initial commit'], cwd=self.project_root, check=True)
+        (self.project_root / "README.md").write_text("Test repository")
+        subprocess.run(["git", "add", "README.md"], cwd=self.project_root, check=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit"], cwd=self.project_root, check=True
+        )
 
         self.manager = WorktreeManager(
-            project_root=str(self.project_root),
-            worktrees_dir=".worktrees"
+            project_root=str(self.project_root), worktrees_dir=".worktrees"
         )
 
     def tearDown(self):
@@ -459,9 +480,10 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
             pass  # Ignore cleanup errors
 
         import shutil
+
         shutil.rmtree(self.temp_dir, ignore_errors=True)
 
-    @unittest.skipIf(not shutil.which('git'), "Git not available")
+    @unittest.skipIf(not shutil.which("git"), "Git not available")
     def test_real_worktree_creation_and_cleanup(self):
         """Test actual worktree creation and cleanup with git"""
         # Create worktree
@@ -474,10 +496,10 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
 
         # Verify it appears in git worktree list
         result = subprocess.run(
-            ['git', 'worktree', 'list'],
+            ["git", "worktree", "list"],
             cwd=self.project_root,
             capture_output=True,
-            text=True
+            text=True,
         )
         self.assertIn(str(worktree_info.worktree_path), result.stdout)
 
@@ -491,19 +513,19 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
 
         # Verify it's removed from git worktree list
         result = subprocess.run(
-            ['git', 'worktree', 'list'],
+            ["git", "worktree", "list"],
             cwd=self.project_root,
             capture_output=True,
-            text=True
+            text=True,
         )
         self.assertNotIn(str(worktree_info.worktree_path), result.stdout)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import shutil
 
     # Skip integration tests if git is not available
-    if not shutil.which('git'):
+    if not shutil.which("git"):
         print("Warning: Git not available, skipping integration tests")
 
     unittest.main()

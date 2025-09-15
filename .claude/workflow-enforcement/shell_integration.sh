@@ -6,7 +6,7 @@
 gadugi_validate() {
     local task_desc="${1:-}"
     local files="${@:2}"
-    
+
     if [[ -n "$task_desc" ]]; then
         python "/Users/ryan/src/gadugi5/gadugi/.claude/workflow-enforcement/validate-workflow.py" \
             --task "$task_desc" \
@@ -21,7 +21,7 @@ gadugi_validate() {
 git_with_validation() {
     local git_command="$1"
     shift
-    
+
     case "$git_command" in
         "commit"|"add"|"rm"|"mv")
             if [[ -z "${GADUGI_ORCHESTRATOR_ACTIVE}" && -z "${GADUGI_EMERGENCY_OVERRIDE}" ]]; then
@@ -35,7 +35,7 @@ git_with_validation() {
             fi
             ;;
     esac
-    
+
     command git "$git_command" "$@"
 }
 

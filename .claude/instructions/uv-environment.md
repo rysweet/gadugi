@@ -68,7 +68,7 @@ uv_run_python "$(pwd)" script.py
 if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
     echo "UV project - setting up"
     source .claude/scripts/setup-uv-env.sh
-    
+
     if setup_uv_environment "$(pwd)" "--all-extras"; then
         echo "UV ready"
         uv_run_pytest "$(pwd)" tests/
@@ -132,31 +132,31 @@ check_uv_environment "$(pwd)"
 validate_uv_environment() {
     local path="$1"
     cd "$path"
-    
+
     # Check files
     if [[ ! -f "pyproject.toml" || ! -f "uv.lock" ]]; then
         echo "Not UV project"
         return 1
     fi
-    
+
     # Check UV installed
     if ! command -v uv &> /dev/null; then
         echo "UV not installed"
         return 1
     fi
-    
+
     # Check venv
     if [[ ! -d ".venv" ]]; then
         echo "Creating venv"
         uv sync --all-extras
     fi
-    
+
     # Test Python
     if ! uv run python -c "print('OK')"; then
         echo "UV not working"
         return 1
     fi
-    
+
     return 0
 }
 ```

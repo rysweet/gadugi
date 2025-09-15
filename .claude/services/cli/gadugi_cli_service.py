@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol, Union
+from typing import Any
 
 import psutil
 
@@ -55,29 +55,29 @@ else:
 
     class Table:
         """Mock Table class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize table."""
             pass
-        
+
         def add_column(self, *args: Any, **kwargs: Any) -> None:
             """Mock add_column method."""
             pass
-        
+
         def add_row(self, *args: Any, **kwargs: Any) -> None:
             """Mock add_row method."""
             pass
 
     class Panel:
         """Mock Panel class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize panel."""
             pass
 
     class Progress:
         """Mock Progress class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize progress."""
             pass
@@ -87,7 +87,7 @@ else:
 
     class TextColumn:
         """Mock TextColumn class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize text column."""
             pass
@@ -111,14 +111,14 @@ else:
 
     class Syntax:
         """Mock Syntax class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize syntax."""
             pass
 
     class Tree:
         """Mock Tree class for when rich is not available."""
-        
+
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             """Initialize tree."""
             pass
@@ -431,7 +431,9 @@ class ServiceManager:
                         # Calculate uptime
                         create_time = datetime.fromtimestamp(process.create_time())
                         uptime = datetime.now() - create_time
-                        service_info.uptime = str(uptime).split(".")[0]  # Remove microseconds
+                        service_info.uptime = str(uptime).split(".")[
+                            0
+                        ]  # Remove microseconds
                     else:
                         service_info.status = ServiceStatus.STOPPED
                         service_info.pid = None
@@ -447,7 +449,9 @@ class ServiceManager:
         if config:
             return ServiceInfo(
                 name=service_name,
-                type=ServiceType(service_name) if service_name != "all" else ServiceType.ALL,
+                type=ServiceType(service_name)
+                if service_name != "all"
+                else ServiceType.ALL,
                 status=ServiceStatus.STOPPED,
                 description=config["description"],
             )
@@ -1044,7 +1048,9 @@ Examples:
 
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M")
+                    if agent.last_used
+                    else "Never"
                 )
                 table.add_row(
                     agent.name,
@@ -1059,7 +1065,9 @@ Examples:
         else:
             for agent in agents:
                 last_used = (
-                    agent.last_used.strftime("%Y-%m-%d %H:%M") if agent.last_used else "Never"
+                    agent.last_used.strftime("%Y-%m-%d %H:%M")
+                    if agent.last_used
+                    else "Never"
                 )
 
     def _print_agent_info(self, agent: AgentInfo) -> None:
@@ -1148,9 +1156,7 @@ Examples:
             pass
 
         # Python version
-        python_version = (
-            f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-        )
+        python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
         # Platform info
         import platform
@@ -1234,7 +1240,14 @@ Examples:
             if process.returncode != 0:
                 raise subprocess.CalledProcessError(
                     process.returncode or 1,
-                    [sys.executable, "-m", "pip", "install", "-r", "requirements-dev.txt"],
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        "requirements-dev.txt",
+                    ],
                     stderr,
                 )
             if RICH_AVAILABLE:
@@ -1315,7 +1328,9 @@ Examples:
         # Run basic checks
         try:
             # Python syntax check
-            cmd = [sys.executable, "-m", "py_compile"] + [str(f) for f in Path().rglob("*.py")]
+            cmd = [sys.executable, "-m", "py_compile"] + [
+                str(f) for f in Path().rglob("*.py")
+            ]
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
@@ -1323,7 +1338,9 @@ Examples:
             )
             stdout, stderr = await process.communicate()
             if process.returncode != 0:
-                raise subprocess.CalledProcessError(process.returncode or 1, cmd, stderr)
+                raise subprocess.CalledProcessError(
+                    process.returncode or 1, cmd, stderr
+                )
 
             if RICH_AVAILABLE:
                 self.console.print("[green]Python syntax check passed[/green]")

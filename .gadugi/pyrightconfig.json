@@ -1,0 +1,41 @@
+{
+  "include": [
+    "gadugi",
+    "src",
+    "container_runtime",
+    "tests",
+    ".claude"
+  ],
+  "extraPaths": [
+    "src/src"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules",
+    "**/.venv",
+    "**/venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    "out",
+    ".worktrees"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportGeneralTypeIssues": true,
+  "reportPrivateImportUsage": false,
+  "pythonVersion": "3.9",
+  "pythonPlatform": "All",
+  "typeCheckingMode": "standard",
+  "useLibraryCodeForTypes": true,
+  "enableTypeIgnoreComments": true,
+  "reportUnusedImport": false,
+  "reportUnusedClass": false,
+  "reportUnusedFunction": false,
+  "reportUnusedVariable": false,
+  "reportDuplicateImport": true,
+  "reportUndefinedVariable": true,
+  "reportUnboundVariable": true,
+  "venvPath": ".",
+  "venv": ".venv"
+}

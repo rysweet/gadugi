@@ -308,7 +308,7 @@ def main():
         ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
     )
 
-    error_count = len([l for l in result.stdout.split("\n") if "error:" in l])
+    error_count = len([line for line in result.stdout.split("\n") if "error:" in line])
     print(f"\nErrors remaining: {error_count}")
 
 

@@ -11,20 +11,20 @@ def fix_import_paths(content: str) -> str:
 
     # Map of incorrect imports to correct imports
     import_fixes = {
-        "from github_operations import": "from claude.shared.github_operations import",
-        "from state_management import": "from claude.shared.state_management import",
-        "from interfaces import": "from claude.shared.interfaces import",
-        "from task_tracking import": "from claude.shared.task_tracking import",
-        "from utils.error_handling import": "from claude.shared.utils.error_handling import",
-        "import github_operations": "import claude.shared.github_operations as github_operations",
-        "import state_management": "import claude.shared.state_management as state_management",
-        "import interfaces": "import claude.shared.interfaces as interfaces",
-        "import task_tracking": "import claude.shared.task_tracking as task_tracking",
-        "import utils.error_handling": "import claude.shared.utils.error_handling",
-        "from xpia_defense import": "from claude.shared.xpia_defense import",
-        "from core import": "from claude.agents.pr_backlog_manager.core import",
+        "from github_operations import": "from shared.github_operations import",
+        "from state_management import": "from shared.state_management import",
+        "from interfaces import": "from shared.interfaces import",
+        "from task_tracking import": "from shared.task_tracking import",
+        "from utils.error_handling import": "from shared.utils.error_handling import",
+        "import github_operations": "import shared.github_operations as github_operations",
+        "import state_management": "import shared.state_management as state_management",
+        "import interfaces": "import shared.interfaces as interfaces",
+        "import task_tracking": "import shared.task_tracking as task_tracking",
+        "import utils.error_handling": "import shared.utils.error_handling",
+        "from xpia_defense import": "from shared.xpia_defense import",
+        "from core import": "from agents.pr_backlog_manager.core import",
         "from memory_compactor import": "from github.memory_manager.memory_compactor import",
-        "from agents.system_design_reviewer.": "from claude.agents.system_design_reviewer.",
+        "from agents.system_design_reviewer.": "from agents.system_design_reviewer.",
         "import shared_test_instructions": "",  # Remove these imports - they don't exist
         "import test_solver_agent": "",
         "import test_writer_agent": "",
@@ -33,7 +33,9 @@ def fix_import_paths(content: str) -> str:
     for old_import, new_import in import_fixes.items():
         if new_import == "":
             # Remove the import line entirely
-            content = re.sub(f"^.*{re.escape(old_import)}.*\n", "", content, flags=re.MULTILINE)
+            content = re.sub(
+                f"^.*{re.escape(old_import)}.*\n", "", content, flags=re.MULTILINE
+            )
         else:
             content = content.replace(old_import, new_import)
 
@@ -115,7 +117,10 @@ def add_missing_imports(content: str, filename: str) -> str:
 
     # Check if unittest.mock is used but not imported
     if "Mock(" in content or "MagicMock(" in content or "patch(" in content:
-        if "from unittest.mock import" not in content and "import unittest.mock" not in content:
+        if (
+            "from unittest.mock import" not in content
+            and "import unittest.mock" not in content
+        ):
             additions.append("from unittest.mock import Mock, MagicMock, patch")
 
     # Add imports at the beginning of the file

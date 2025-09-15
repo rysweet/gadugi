@@ -10,7 +10,6 @@ from typing import Dict, Any, List, Optional
 from task_decomposer_v03 import (
     TaskDecomposerV03,
     ExecutionFeedback,
-    DecompositionStrategy
 )
 from ...shared.memory_integration import AgentMemoryInterface
 
@@ -37,13 +36,17 @@ class MockMemoryInterface(AgentMemoryInterface):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._client = None
 
-    async def remember_short_term(self, content: str, tags: Optional[List[str]] = None, importance: float = 0.5) -> str:
-        self.memories.append({
-            'content': content,
-            'tags': tags or [],
-            'type': 'short_term',
-            'timestamp': datetime.now().isoformat()
-        })
+    async def remember_short_term(
+        self, content: str, tags: Optional[List[str]] = None, importance: float = 0.5
+    ) -> str:
+        self.memories.append(
+            {
+                "content": content,
+                "tags": tags or [],
+                "type": "short_term",
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
         return f"memory_{len(self.memories)}"
 
     async def remember_long_term(
@@ -51,16 +54,18 @@ class MockMemoryInterface(AgentMemoryInterface):
         content: str,
         memory_type: str = "semantic",
         tags: Optional[List[str]] = None,
-        importance: float = 0.7
+        importance: float = 0.7,
     ) -> str:
-        self.memories.append({
-            'content': content,
-            'tags': tags or [],
-            'type': 'long_term',
-            'memory_type': memory_type,
-            'importance': importance,
-            'timestamp': datetime.now().isoformat()
-        })
+        self.memories.append(
+            {
+                "content": content,
+                "tags": tags or [],
+                "type": "long_term",
+                "memory_type": memory_type,
+                "importance": importance,
+                "timestamp": datetime.now().isoformat(),
+            }
+        )
         return f"memory_{len(self.memories)}"
 
     async def recall_memories(
@@ -68,15 +73,15 @@ class MockMemoryInterface(AgentMemoryInterface):
         memory_type: Optional[str] = None,
         short_term_only: bool = False,
         long_term_only: bool = False,
-        limit: int = 50
+        limit: int = 50,
     ) -> List[Dict[str, Any]]:
         relevant_memories = []
         for memory in self.memories:
-            if short_term_only and memory['type'] != 'short_term':
+            if short_term_only and memory["type"] != "short_term":
                 continue
-            if long_term_only and memory['type'] != 'long_term':
+            if long_term_only and memory["type"] != "long_term":
                 continue
-            if memory_type and memory.get('memory_type') != memory_type:
+            if memory_type and memory.get("memory_type") != memory_type:
                 continue
             relevant_memories.append(memory)
         return relevant_memories[-limit:]
@@ -86,13 +91,13 @@ class MockMemoryInterface(AgentMemoryInterface):
         procedure_name: str,
         steps: List[str],
         context: str = "",
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> str:
         procedure = {
-            'procedure_name': procedure_name,
-            'steps': steps,
-            'context': context,
-            'timestamp': datetime.now().isoformat()
+            "procedure_name": procedure_name,
+            "steps": steps,
+            "context": context,
+            "timestamp": datetime.now().isoformat(),
         }
         self.procedures.append(procedure)
         return f"proc_{len(self.procedures)}"
@@ -101,37 +106,30 @@ class MockMemoryInterface(AgentMemoryInterface):
         self,
         procedure_name: Optional[str] = None,
         task_type: Optional[str] = None,
-        limit: int = 10
+        limit: int = 10,
     ) -> List[Dict[str, Any]]:
         return self.procedures
 
     async def add_knowledge(
-        self,
-        concept: str,
-        description: str,
-        confidence: float = 1.0
+        self, concept: str, description: str, confidence: float = 1.0
     ) -> str:
         knowledge = {
-            'concept': concept,
-            'description': description,
-            'confidence': confidence,
-            'timestamp': datetime.now().isoformat()
+            "concept": concept,
+            "description": description,
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat(),
         }
         self.knowledge.append(knowledge)
         return f"knowledge_{len(self.knowledge)}"
 
     async def start_task(self, task_description: str) -> str:
         self.current_task = {
-            'description': task_description,
-            'start_time': datetime.now().isoformat()
+            "description": task_description,
+            "start_time": datetime.now().isoformat(),
         }
         return "task_001"
 
-    async def write_to_whiteboard(
-        self,
-        section: str,
-        content: Dict[str, Any]
-    ) -> None:
+    async def write_to_whiteboard(self, section: str, content: Dict[str, Any]) -> None:
         self.whiteboard[section] = content
 
 
@@ -153,7 +151,9 @@ async def create_test_decomposer():
 async def test_basic_decomposition():
     """Test basic task decomposition functionality."""
     decomposer = await create_test_decomposer()
-    task_description = "Implement user authentication system with login and registration"
+    task_description = (
+        "Implement user authentication system with login and registration"
+    )
 
     result = await decomposer.decompose_task(task_description)
 
@@ -162,7 +162,10 @@ async def test_basic_decomposition():
     assert result.parallelization_score >= 0.0
     assert result.parallelization_score <= 1.0
     assert result.estimated_total_time > 0
-    assert result.strategy_used in decomposer.strategies or result.strategy_used == "adaptive"
+    assert (
+        result.strategy_used in decomposer.strategies
+        or result.strategy_used == "adaptive"
+    )
 
 
 @pytest.mark.asyncio
@@ -208,15 +211,19 @@ async def test_dependency_analysis(decomposer):
     assert len(result.dependency_graph) == len(result.subtasks)
 
     # Verify logical dependencies (testing should depend on implementation)
-    implementation_tasks = [st for st in result.subtasks if "implement" in st.name.lower()]
+    implementation_tasks = [
+        st for st in result.subtasks if "implement" in st.name.lower()
+    ]
     testing_tasks = [st for st in result.subtasks if "test" in st.name.lower()]
 
     if implementation_tasks and testing_tasks:
         test_task_id = testing_tasks[0].id
-        impl_task_id = implementation_tasks[0].id
+        implementation_tasks[0].id
         # Test task should have implementation as dependency
-        assert any(impl_task_id in result.dependency_graph.get(test_task_id, [])
-                  for impl_task_id in [impl.id for impl in implementation_tasks])
+        assert any(
+            impl_task_id in result.dependency_graph.get(test_task_id, [])
+            for impl_task_id in [impl.id for impl in implementation_tasks]
+        )
 
 
 @pytest.mark.asyncio
@@ -239,7 +246,7 @@ async def test_learning_from_execution(decomposer):
     """Test learning from execution feedback."""
     # First, decompose a task
     task_description = "Implement user profile management"
-    result = await decomposer.decompose_task(task_description)
+    await decomposer.decompose_task(task_description)
 
     # Simulate execution feedback
     feedback = ExecutionFeedback(
@@ -249,13 +256,9 @@ async def test_learning_from_execution(decomposer):
         parallelization_achieved=0.6,
         bottlenecks=["database_setup"],
         improvements=["parallel_testing"],
-        agent_performance={
-            "code-writer": 0.85,
-            "TestWriter": 0.90
-        }
+        agent_performance={"code-writer": 0.85, "TestWriter": 0.90},
     )
 
-    initial_decompositions = decomposer.total_decompositions
     await decomposer.learn_from_execution(feedback)
 
     # Check that learning was recorded
@@ -270,15 +273,12 @@ async def test_execution_task_interface(decomposer):
     """Test the execute_task interface."""
     task = {
         "description": "Create unit tests for authentication module",
-        "context": {
-            "time_constraint": "1 week",
-            "team_size": 2
-        }
+        "context": {"time_constraint": "1 week", "team_size": 2},
     }
 
     outcome = await decomposer.execute_task(task)
 
-    assert outcome.success == True
+    assert outcome.success
     assert outcome.task_type == "decomposition"
     assert len(outcome.steps_taken) > 0
     assert outcome.duration_seconds >= 0
@@ -376,10 +376,16 @@ if __name__ == "__main__":
 
             print("\nSubtasks:")
             for i, subtask in enumerate(result.subtasks):
-                deps = f" (depends on: {', '.join(subtask.dependencies)})" if subtask.dependencies else ""
+                deps = (
+                    f" (depends on: {', '.join(subtask.dependencies)})"
+                    if subtask.dependencies
+                    else ""
+                )
                 parallel_marker = " [PARALLEL]" if subtask.can_parallelize else ""
                 print(f"  {i+1}. {subtask.name}{parallel_marker}{deps}")
-                print(f"     Complexity: {subtask.complexity}, Time: {subtask.estimated_time}min")
+                print(
+                    f"     Complexity: {subtask.complexity}, Time: {subtask.estimated_time}min"
+                )
                 if subtask.agent_hint:
                     print(f"     Suggested agent: {subtask.agent_hint}")
 

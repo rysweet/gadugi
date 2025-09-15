@@ -8,16 +8,20 @@ based on detected architectural changes.
 import os
 import re
 from datetime import datetime
-from pathlib import Path  # type: ignore
-from typing import Dict, List, Any, Optional, Tuple  # type: ignore
+from typing import Dict, List, Any, Optional  # type: ignore
 from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ArchitecturalElement, ElementType, ImpactLevel  # type: ignore
+from .ast_parser import (
+    ArchitecturalChange,
+    ElementType,
+    ImpactLevel,
+)  # type: ignore
 
 
 @dataclass
 class DocumentationUpdate:
     """Represents a documentation update"""
+
     file_path: str
     section: str
     update_type: str  # add, modify, remove
@@ -38,11 +42,12 @@ class DocumentationManager:
             "security_architecture": self._generate_security_architecture,
             "performance_architecture": self._generate_performance_architecture,
             "integration_points": self._generate_integration_points,
-            "evolution_history": self._generate_evolution_history
+            "evolution_history": self._generate_evolution_history,
         }
 
-    def update_architecture_doc(self, changes: List[ArchitecturalChange],
-                              pr_info: Dict[str, Any]) -> List[str]:
+    def update_architecture_doc(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> List[str]:
         """Update ARCHITECTURE.md based on detected changes"""
         updates_made = []
 
@@ -53,7 +58,7 @@ class DocumentationManager:
                 updates_made.append(f"Created {self.architecture_file}")
 
             # Read current document
-            with open(self.architecture_file, 'r', encoding='utf-8') as f:
+            with open(self.architecture_file, "r", encoding="utf-8") as f:
                 current_content = f.read()
 
             # Analyze what sections need updates
@@ -72,12 +77,14 @@ class DocumentationManager:
             # Add evolution history entry
             evolution_entry = self._create_evolution_entry(changes, pr_info)
             if evolution_entry:
-                updated_content = self._add_evolution_entry(updated_content, evolution_entry)
+                updated_content = self._add_evolution_entry(
+                    updated_content, evolution_entry
+                )
                 updates_made.append("Added evolution history entry")
 
             # Write updated document if changes were made
             if updated_content != current_content:
-                with open(self.architecture_file, 'w', encoding='utf-8') as f:
+                with open(self.architecture_file, "w", encoding="utf-8") as f:
                     f.write(updated_content)
                 updates_made.append(f"Saved updated {self.architecture_file}")
 
@@ -181,10 +188,12 @@ Specialized Agents
 *Last updated: {timestamp}*
 """.format(timestamp=datetime.now().isoformat())
 
-        with open(self.architecture_file, 'w', encoding='utf-8') as f:
+        with open(self.architecture_file, "w", encoding="utf-8") as f:
             f.write(template)
 
-    def _identify_sections_to_update(self, changes: List[ArchitecturalChange]) -> List[str]:
+    def _identify_sections_to_update(
+        self, changes: List[ArchitecturalChange]
+    ) -> List[str]:
         """Identify which sections need updates based on changes"""
         sections_to_update = []
 
@@ -197,7 +206,10 @@ Specialized Agents
                     sections_to_update.append("component_architecture")
 
             # Agent ecosystem updates for agent-related changes
-            if "agent" in element.name.lower() or "agent" in str(element.location).lower():
+            if (
+                "agent" in element.name.lower()
+                or "agent" in str(element.location).lower()
+            ):
                 if "agent_ecosystem" not in sections_to_update:
                     sections_to_update.append("agent_ecosystem")
 
@@ -224,8 +236,9 @@ Specialized Agents
 
         return sections_to_update
 
-    def _update_section(self, section: str, changes: List[ArchitecturalChange],
-                       pr_info: Dict[str, Any]) -> Optional[str]:
+    def _update_section(
+        self, section: str, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Update a specific section based on changes"""
         if section in self.template_sections:
             return self.template_sections[section](changes, pr_info)
@@ -242,7 +255,7 @@ Specialized Agents
             "security_architecture": "Security Architecture",
             "performance_architecture": "Performance Architecture",
             "integration_points": "Integration Points",
-            "evolution_history": "Evolution History"
+            "evolution_history": "Evolution History",
         }
 
         section_title = section_titles.get(section, section.replace("_", " ").title())
@@ -256,24 +269,22 @@ Specialized Agents
             # Section doesn't exist, append before evolution history
             evolution_pattern = r"(##\s+Evolution History)"
             if re.search(evolution_pattern, content):
-                return re.sub(
-                    evolution_pattern,
-                    f"{new_content}\n\n\\1",
-                    content
-                )
+                return re.sub(evolution_pattern, f"{new_content}\n\n\\1", content)
             else:
                 # Append at end
                 return content + "\n\n" + new_content
 
-    def _generate_system_overview(self, changes: List[ArchitecturalChange],
-                                pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_system_overview(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated system overview section"""
         # For now, return None to keep existing content
         # Could be enhanced to detect major architectural shifts
         return None
 
-    def _generate_component_architecture(self, changes: List[ArchitecturalChange],
-                                       pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_component_architecture(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated component architecture section"""
         new_components = []
         modified_components = []
@@ -321,24 +332,30 @@ Specialized Agents
 
         return section
 
-    def _generate_agent_ecosystem(self, changes: List[ArchitecturalChange],
-                                pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_agent_ecosystem(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated agent ecosystem section"""
         # For now, return None to keep existing content
         return None
 
-    def _generate_data_flow(self, changes: List[ArchitecturalChange],
-                          pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_data_flow(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated data flow section"""
         return None
 
-    def _generate_security_architecture(self, changes: List[ArchitecturalChange],
-                                      pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_security_architecture(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated security architecture section"""
         security_changes = [
-            change for change in changes
-            if any(pattern in change.element.name.lower()
-                  for pattern in ["security", "auth", "xpia", "defense"])
+            change
+            for change in changes
+            if any(
+                pattern in change.element.name.lower()
+                for pattern in ["security", "auth", "xpia", "defense"]
+            )
         ]
 
         if not security_changes:
@@ -363,14 +380,18 @@ Specialized Agents
 
         return section
 
-    def _generate_performance_architecture(self, changes: List[ArchitecturalChange],
-                                         pr_info: Dict[str, Any]) -> str:
+    def _generate_performance_architecture(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> str:
         """Generate updated performance architecture section"""
         perf_changes = [
-            change for change in changes
-            if (change.element.is_async or
-                "performance" in change.element.name.lower() or
-                "parallel" in change.element.name.lower())
+            change
+            for change in changes
+            if (
+                change.element.is_async
+                or "performance" in change.element.name.lower()
+                or "parallel" in change.element.name.lower()
+            )
         ]
 
         if not perf_changes:
@@ -394,29 +415,34 @@ Specialized Agents
 
         return section
 
-    def _generate_integration_points(self, changes: List[ArchitecturalChange],
-                                   pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_integration_points(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated integration points section"""
         return None
 
-    def _generate_evolution_history(self, changes: List[ArchitecturalChange],
-                                  pr_info: Dict[str, Any]) -> Optional[str]:
+    def _generate_evolution_history(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Generate updated evolution history section"""
         return None  # Handled by _add_evolution_entry
 
-    def _create_evolution_entry(self, changes: List[ArchitecturalChange],
-                              pr_info: Dict[str, Any]) -> Optional[str]:
+    def _create_evolution_entry(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> Optional[str]:
         """Create an evolution history entry"""
         if not changes:
             return None
 
-        pr_number = pr_info.get('number', 'Unknown')
-        pr_title = pr_info.get('title', 'Untitled Change')
-        pr_author = pr_info.get('author', {}).get('login', 'Unknown')
+        pr_number = pr_info.get("number", "Unknown")
+        pr_title = pr_info.get("title", "Untitled Change")
+        pr_author = pr_info.get("author", {}).get("login", "Unknown")
 
         # Categorize changes
         high_impact_changes = [c for c in changes if c.impact_level == ImpactLevel.HIGH]
-        critical_changes = [c for c in changes if c.impact_level == ImpactLevel.CRITICAL]
+        critical_changes = [
+            c for c in changes if c.impact_level == ImpactLevel.CRITICAL
+        ]
 
         if not high_impact_changes and not critical_changes:
             return None
@@ -451,25 +477,21 @@ Specialized Agents
     def _add_evolution_entry(self, content: str, entry: str) -> str:
         """Add an entry to the evolution history section"""
         # Find evolution history section
-        pattern = r"(##\s+Evolution History.*?)(\n### Recent Changes.*?)(?=\n###|\n##|\Z)"
+        pattern = (
+            r"(##\s+Evolution History.*?)(\n### Recent Changes.*?)(?=\n###|\n##|\Z)"
+        )
 
         if re.search(pattern, content, re.DOTALL):
             # Replace "Recent Changes" with the new entry
             return re.sub(
-                pattern,
-                f"\\1\\n### Recent Changes{entry}",
-                content,
-                flags=re.DOTALL
+                pattern, f"\\1\\n### Recent Changes{entry}", content, flags=re.DOTALL
             )
         else:
             # Just append to evolution history section
             evolution_pattern = r"(##\s+Evolution History.*?)(?=\n##|\Z)"
             if re.search(evolution_pattern, content, re.DOTALL):
                 return re.sub(
-                    evolution_pattern,
-                    f"\\1{entry}",
-                    content,
-                    flags=re.DOTALL
+                    evolution_pattern, f"\\1{entry}", content, flags=re.DOTALL
                 )
             else:
                 # Append at end

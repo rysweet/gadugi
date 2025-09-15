@@ -5,8 +5,8 @@ description: Analyzes and resolves failing tests through systematic failure anal
 tools: Read, Write, Edit, Bash, Grep, LS
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker
-  from .claude.shared.interfaces import AgentConfig, OperationResult
+  from .gadugi/.gadugi/src/shared.utils.error_handling import ErrorHandler, CircuitBreaker
+  from .gadugi/.gadugi/src/shared.interfaces import AgentConfig, OperationResult
   from .shared_test_instructions import SharedTestInstructions, TestResult, TestStatus, SkipReason, TestAnalysis
 ---
 

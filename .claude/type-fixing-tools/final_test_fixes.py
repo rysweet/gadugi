@@ -11,11 +11,11 @@ def fix_integration_test_imports(filepath: Path) -> None:
     content = filepath.read_text()
 
     # Fix the import statement to include all required symbols
-    if "from claude.shared.utils.error_handling import" in content:
+    if "from shared.utils.error_handling import" in content:
         # Replace the import line with a comprehensive list
         content = re.sub(
-            r"from claude\.shared\.utils\.error_handling import.*$",
-            """from claude.shared.utils.error_handling import (
+            r"from shared\.utils\.error_handling import.*$",
+            """from shared.utils.error_handling import (
     CircuitBreaker,
     ErrorContext,
     ErrorHandler,
@@ -39,7 +39,9 @@ def fix_integration_test_imports(filepath: Path) -> None:
     ):
         # Add TaskPriority to imports
         content = re.sub(
-            r"(from claude\.shared\.task_tracking import[^)]+)", r"\1, TaskPriority", content
+            r"(from claude\.shared\.task_tracking import[^)]+)",
+            r"\1, TaskPriority",
+            content,
         )
 
     # Replace string literals with enum values
@@ -52,7 +54,9 @@ def fix_integration_test_imports(filepath: Path) -> None:
         # Import TaskList if needed
         if "TaskList" not in content:
             content = re.sub(
-                r"(from claude\.shared\.task_tracking import[^)]+)", r"\1, TaskList", content
+                r"(from claude\.shared\.task_tracking import[^)]+)",
+                r"\1, TaskList",
+                content,
             )
 
         # Fix the actual call
@@ -69,13 +73,22 @@ def fix_integration_test_imports(filepath: Path) -> None:
         # Fix lines with optional member access on task/result objects
         if "assert task.status" in line and "assert task is not None" not in line:
             new_lines.append(
-                line.replace("assert task.status", "assert task is not None and task.status")
+                line.replace(
+                    "assert task.status", "assert task is not None and task.status"
+                )
             )
         elif "assert result.status" in line and "assert result is not None" not in line:
             new_lines.append(
-                line.replace("assert result.status", "assert result is not None and result.status")
+                line.replace(
+                    "assert result.status",
+                    "assert result is not None and result.status",
+                )
             )
-        elif "tracker.get_task" in line and ".status" in line and "is not None" not in line:
+        elif (
+            "tracker.get_task" in line
+            and ".status" in line
+            and "is not None" not in line
+        ):
             # Handle patterns like: assert tracker.get_task("test-task-001").status == "completed"
             new_lines.append(
                 re.sub(
@@ -87,12 +100,20 @@ def fix_integration_test_imports(filepath: Path) -> None:
         elif ".context[" in line and "is not None" not in line:
             # Handle context access
             new_lines.append(
-                re.sub(r"assert (.*?)\.context\[", r"assert \1 is not None and \1.context[", line)
+                re.sub(
+                    r"assert (.*?)\.context\[",
+                    r"assert \1 is not None and \1.context[",
+                    line,
+                )
             )
         elif "updated_task.id" in line or "completed_task.id" in line:
             # Handle id access on tasks
             new_lines.append(
-                re.sub(r"assert (.*?_task)\.(\w+)", r"assert \1 is not None and \1.\2", line)
+                re.sub(
+                    r"assert (.*?_task)\.(\w+)",
+                    r"assert \1 is not None and \1.\2",
+                    line,
+                )
             )
         else:
             new_lines.append(line)
@@ -112,8 +133,8 @@ def fix_orchestrator_test(filepath: Path) -> None:
 
     # Fix the import issues first
     content = re.sub(
-        r"from claude\.shared\.utils\.error_handling import.*$",
-        """from claude.shared.utils.error_handling import (
+        r"from shared\.utils\.error_handling import.*$",
+        """from shared.utils.error_handling import (
     CircuitBreaker,
     ErrorContext,
     ErrorHandler,
@@ -141,7 +162,9 @@ def fix_orchestrator_test(filepath: Path) -> None:
     # Ensure TaskStatus is imported if needed
     if "TaskStatus.COMPLETED" in content and "TaskStatus" not in content:
         content = re.sub(
-            r"(from claude\.shared\.task_tracking import[^)]+)", r"\1, TaskStatus", content
+            r"(from claude\.shared\.task_tracking import[^)]+)",
+            r"\1, TaskStatus",
+            content,
         )
 
     filepath.write_text(content)

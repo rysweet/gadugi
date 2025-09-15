@@ -107,7 +107,7 @@ class ExecutionPlan:
     estimated_duration: int         # Estimated seconds
     parallelism_factor: float      # Degree of parallelism
     resource_requirements: ResourceRequirements
-    
+
 @dataclass
 class ExecutionStage:
     stage_number: int
@@ -126,7 +126,7 @@ class ResourceRequirements:
     network_bandwidth_mbps: Optional[int]
     gpu_count: Optional[int]
     custom_resources: Dict[str, int]
-    
+
 @dataclass
 class ResourceAllocation:
     allocation_id: str
@@ -147,32 +147,32 @@ class Orchestrator:
         workflow: Workflow
     ) -> str:
         """Submit workflow for execution"""
-        
+
     async def execute_workflow(
         self,
         workflow_id: str
     ) -> WorkflowResult:
         """Execute a submitted workflow"""
-        
+
     async def cancel_workflow(
         self,
         workflow_id: str,
         force: bool = False
     ) -> bool:
         """Cancel workflow execution"""
-        
+
     async def get_workflow_status(
         self,
         workflow_id: str
     ) -> WorkflowStatus:
         """Get current workflow status"""
-        
+
     async def pause_workflow(
         self,
         workflow_id: str
     ) -> bool:
         """Pause workflow execution"""
-        
+
     async def resume_workflow(
         self,
         workflow_id: str
@@ -189,27 +189,27 @@ class TaskScheduler:
         constraints: Optional[List[Constraint]] = None
     ) -> ScheduledTask:
         """Schedule a task for execution"""
-        
+
     async def get_next_task(
         self,
         agent_capabilities: List[str]
     ) -> Optional[Task]:
         """Get next task for agent"""
-        
+
     async def complete_task(
         self,
         task_id: str,
         result: TaskResult
     ) -> None:
         """Mark task as completed"""
-        
+
     async def fail_task(
         self,
         task_id: str,
         error: Exception
     ) -> None:
         """Mark task as failed"""
-        
+
     def analyze_dependencies(
         self,
         tasks: List[Task]
@@ -226,20 +226,20 @@ class TaskExecutor:
         agent: Agent
     ) -> TaskResult:
         """Execute task on agent"""
-        
+
     async def execute_parallel(
         self,
         tasks: List[Task],
         max_workers: int = None
     ) -> List[TaskResult]:
         """Execute tasks in parallel"""
-        
+
     async def execute_sequential(
         self,
         tasks: List[Task]
     ) -> List[TaskResult]:
         """Execute tasks sequentially"""
-        
+
     async def execute_with_timeout(
         self,
         task: Task,

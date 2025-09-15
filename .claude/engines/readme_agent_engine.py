@@ -244,7 +244,9 @@ class ReadmeAgentEngine:
             template_name = options.template_name
             if template_name not in self.templates:
                 template_name = (
-                    project_type.value if project_type.value in self.templates else "standard"
+                    project_type.value
+                    if project_type.value in self.templates
+                    else "standard"
                 )
 
             template = self.templates[template_name]
@@ -874,7 +876,8 @@ class ReadmeAgentEngine:
             "BADGES": badges_section,
             "BRIEF_DESCRIPTION": metadata.description
             or f"A {metadata.languages[0] if metadata.languages else ''} project",
-            "PROJECT_DESCRIPTION": metadata.description or f"Description for {metadata.name}",
+            "PROJECT_DESCRIPTION": metadata.description
+            or f"Description for {metadata.name}",
             "FEATURE_LIST": sections.get("features", "- Feature 1\n- Feature 2"),
             "INSTALLATION_INSTRUCTIONS": sections.get(
                 "installation",
@@ -943,7 +946,9 @@ console.log(result);
                 heading = line.lstrip("# ").strip()
 
                 # Create anchor link
-                anchor = heading.lower().replace(" ", "-").replace(".", "").replace(",", "")
+                anchor = (
+                    heading.lower().replace(" ", "-").replace(".", "").replace(",", "")
+                )
                 anchor = re.sub(r"[^\w\-]", "", anchor)
 
                 # Add to TOC with proper indentation
@@ -1205,7 +1210,9 @@ console.log(result);
         ]
 
         existing_keys = set(existing_sections.keys())
-        return [section for section in standard_sections if section not in existing_keys]
+        return [
+            section for section in standard_sections if section not in existing_keys
+        ]
 
     def _analyze_structure(self, content: str) -> dict[str, Any]:
         """Analyze document structure."""
@@ -1605,7 +1612,9 @@ class ContentDiscoverer:
         except Exception as e:
             logging.warning(f"Could not parse setup.py: {e}")
 
-    def _parse_pyproject_toml(self, pyproject_toml: Path, metadata: ProjectMetadata) -> None:
+    def _parse_pyproject_toml(
+        self, pyproject_toml: Path, metadata: ProjectMetadata
+    ) -> None:
         """Parse pyproject.toml for project information."""
         try:
             import tomllib  # type: ignore[import]
@@ -1641,7 +1650,11 @@ class ContentDiscoverer:
         """Parse requirements.txt for dependencies."""
         try:
             with open(requirements_txt) as f:
-                deps = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+                deps = [
+                    line.strip()
+                    for line in f
+                    if line.strip() and not line.startswith("#")
+                ]
             metadata.dependencies["runtime"] = deps
         except Exception as e:
             logging.warning(f"Could not parse requirements.txt: {e}")
@@ -1744,7 +1757,9 @@ class QualityAssessor:
 
         # Standard sections bonus
         standard_sections = ["installation", "usage", "api", "contributing", "license"]
-        found_sections = sum(1 for section in standard_sections if section in content.lower())
+        found_sections = sum(
+            1 for section in standard_sections if section in content.lower()
+        )
 
         completeness_bonus = (found_sections / len(standard_sections)) * 30
 

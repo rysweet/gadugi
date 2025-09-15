@@ -15,19 +15,19 @@ Load when you need to:
 if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
     # Setup environment (REQUIRED in worktrees)
     uv sync --all-extras
-    
+
     # Run tests (MUST pass to continue)
     uv run pytest tests/ -v
     uv run pytest tests/ --cov=. --cov-report=html
-    
+
     # Linting & Formatting (MANDATORY)
     uv run ruff check .
     uv run ruff format .
-    
+
     # Type checking
     uv run pyright
     uv run mypy . --ignore-missing-imports
-    
+
     # Pre-commit (MANDATORY before PR)
     uv run pre-commit install
     uv run pre-commit run --all-files
@@ -39,7 +39,7 @@ fi
 if [[ ! -f "uv.lock" ]]; then
     # Activate venv if available
     source venv/bin/activate 2>/dev/null || true
-    
+
     # Same commands without 'uv run' prefix
     pytest tests/ -v
     ruff check .
@@ -54,7 +54,7 @@ fi
 execute_phase_6_testing() {
     local worktree_path="$1"
     cd "$worktree_path"
-    
+
     # 1. Detect project type
     if [[ -f "pyproject.toml" && -f "uv.lock" ]]; then
         TEST_CMD="uv run pytest"
@@ -63,25 +63,25 @@ execute_phase_6_testing() {
         TEST_CMD="pytest"
         LINT_CMD="ruff"
     fi
-    
+
     # 2. Run tests (BLOCKING)
     $TEST_CMD tests/ -v --tb=short || {
         echo "❌ TESTS FAILED - Cannot continue"
         return 1
     }
-    
+
     # 3. Code quality (BLOCKING)
     $LINT_CMD check . || {
         echo "❌ LINTING FAILED - Cannot continue"
         return 1
     }
-    
+
     # 4. Pre-commit hooks (BLOCKING)
     pre-commit run --all-files || {
         echo "❌ PRE-COMMIT FAILED - Cannot continue"
         return 1
     }
-    
+
     echo "✅ ALL QUALITY GATES PASSED"
 }
 ```
@@ -119,7 +119,7 @@ repos:
       - id: ruff
         args: [--fix]
       - id: ruff-format
-      
+
   - repo: local
     hooks:
       - id: pytest

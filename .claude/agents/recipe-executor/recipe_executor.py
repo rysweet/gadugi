@@ -12,10 +12,12 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple  # type: ignore
+from typing import Any, Dict, List  # type: ignore
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -57,10 +59,7 @@ class RecipeExecutor:
         if not recipe_path.exists():
             raise FileNotFoundError(f"Recipe path does not exist: {recipe_path}")
 
-        recipe = Recipe(
-            name=recipe_path.name,
-            path=recipe_path
-        )
+        recipe = Recipe(name=recipe_path.name, path=recipe_path)
 
         # Load requirements
         requirements_file = recipe_path / "requirements.md"
@@ -87,7 +86,9 @@ class RecipeExecutor:
             logger.warning(f"No dependencies.json found for {recipe.name}")
 
         # Extract validation criteria from requirements
-        recipe.validation_criteria = self._extract_validation_criteria(recipe.requirements)
+        recipe.validation_criteria = self._extract_validation_criteria(
+            recipe.requirements
+        )
 
         self.recipes[recipe.name] = recipe
         return recipe
@@ -96,12 +97,15 @@ class RecipeExecutor:
         """Extract testable validation criteria from requirements."""
 
         criteria = []
-        lines = requirements.split('\n')
+        lines = requirements.split("\n")
 
         for line in lines:
             line = line.strip()
             # Look for lines that describe testable behavior
-            if any(keyword in line.lower() for keyword in ['must', 'should', 'shall', 'will']):
+            if any(
+                keyword in line.lower()
+                for keyword in ["must", "should", "shall", "will"]
+            ):
                 if len(line) > 10:  # Avoid trivial lines
                     criteria.append(line)
 
@@ -134,7 +138,11 @@ class RecipeExecutor:
 
         combined_text = (recipe.requirements + " " + recipe.design).lower()
 
-        if "service" in combined_text or "api" in combined_text or "server" in combined_text:
+        if (
+            "service" in combined_text
+            or "api" in combined_text
+            or "server" in combined_text
+        ):
             return "service"
         elif "agent" in combined_text:
             return "agent"
@@ -732,10 +740,10 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 '''.format(
-    name=recipe.name,
-    recipe_name=recipe.name,
-    name_class=recipe.name.replace("-", "").replace("_", "").title()
-)
+            name=recipe.name,
+            recipe_name=recipe.name,
+            name_class=recipe.name.replace("-", "").replace("_", "").title(),
+        )
 
     def _generate_tools_code(self, recipe: Recipe) -> str:
         """Generate tools code for agent."""
@@ -981,10 +989,10 @@ def create_instance(config: Optional[Dict[str, Any]] = None) -> {name_class}:
     """Factory function to create library instance."""
     return {name_class}(config)
 '''.format(
-    name=recipe.name,
-    recipe_name=recipe.name,
-    name_class=recipe.name.replace("-", "").replace("_", "").title()
-)
+            name=recipe.name,
+            recipe_name=recipe.name,
+            name_class=recipe.name.replace("-", "").replace("_", "").title(),
+        )
 
     def _generate_utils_code(self, recipe: Recipe) -> str:
         """Generate utilities code."""
@@ -1171,10 +1179,10 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())
 '''.format(
-    name=recipe.name,
-    recipe_name=recipe.name,
-    name_class=recipe.name.replace("-", "").replace("_", "").title()
-)
+            name=recipe.name,
+            recipe_name=recipe.name,
+            name_class=recipe.name.replace("-", "").replace("_", "").title(),
+        )
 
     def _generate_test_code(self, recipe: Recipe, component_type: str) -> str:
         """Generate comprehensive test code."""
@@ -1712,7 +1720,7 @@ class TestMain:
     def _generate_dockerfile(self, recipe: Recipe) -> str:
         """Generate Dockerfile."""
 
-        return f'''# Dockerfile for {recipe.name}
+        return f"""# Dockerfile for {recipe.name}
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -1740,7 +1748,7 @@ EXPOSE 8000
 
 # Run application
 CMD ["python", "-m", "main"]
-'''
+"""
 
     def _generate_requirements(self, recipe: Recipe) -> str:
         """Generate requirements.txt."""
@@ -1758,14 +1766,18 @@ CMD ["python", "-m", "main"]
 
         # Add FastAPI if needed
         if any("fastapi" in str(d).lower() for d in deps):
-            default_deps.extend([
-                "fastapi>=0.100.0",
-                "uvicorn[standard]>=0.23.0",
-            ])
+            default_deps.extend(
+                [
+                    "fastapi>=0.100.0",
+                    "uvicorn[standard]>=0.23.0",
+                ]
+            )
         else:
-            default_deps.extend([
-                "flask>=2.3.0",
-            ])
+            default_deps.extend(
+                [
+                    "flask>=2.3.0",
+                ]
+            )
 
         # Combine with recipe dependencies
         all_deps = set(default_deps)
@@ -1822,7 +1834,7 @@ CMD ["python", "-m", "main"]
         result = subprocess.run(
             ["python", "-m", "pyright", str(output_path)],
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode != 0:
@@ -1833,7 +1845,7 @@ CMD ["python", "-m", "main"]
         result = subprocess.run(
             ["python", "-m", "pytest", str(output_path / "tests"), "-v"],
             capture_output=True,
-            text=True
+            text=True,
         )
 
         if result.returncode != 0:
@@ -1849,10 +1861,14 @@ def main():
 
     import argparse
 
-    parser = argparse.ArgumentParser(description="Recipe Executor - Generate real implementations from recipes")
+    parser = argparse.ArgumentParser(
+        description="Recipe Executor - Generate real implementations from recipes"
+    )
     parser.add_argument("recipe_path", type=Path, help="Path to recipe directory")
     parser.add_argument("--output", type=Path, help="Output directory", default=None)
-    parser.add_argument("--validate", action="store_true", help="Validate generated implementation")
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate generated implementation"
+    )
 
     args = parser.parse_args()
 

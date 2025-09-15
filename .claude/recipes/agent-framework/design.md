@@ -143,32 +143,32 @@ class BaseAgent(ABC):
         self.status = AgentStatus.INITIALIZING
         self.capabilities = {}
         self.message_queue = asyncio.Queue()
-        
+
     @abstractmethod
     async def on_initialize(self) -> None:
         """Override to implement initialization logic"""
-        
+
     @abstractmethod
     async def on_start(self) -> None:
         """Override to implement startup logic"""
-        
+
     @abstractmethod
     async def on_stop(self) -> None:
         """Override to implement shutdown logic"""
-        
+
     @abstractmethod
     async def on_task(self, task: Task) -> TaskResult:
         """Override to implement task execution"""
-        
+
     async def send_message(self, to_agent: str, payload: Any) -> None:
         """Send message to another agent"""
-        
+
     async def broadcast_message(self, group: str, payload: Any) -> None:
         """Broadcast message to agent group"""
-        
+
     async def register_capability(self, capability: Capability) -> None:
         """Register a new capability"""
-        
+
     async def execute_capability(self, name: str, params: Dict) -> Any:
         """Execute a registered capability"""
 ```
@@ -182,33 +182,33 @@ class AgentManager:
         config: AgentConfig
     ) -> str:
         """Spawn a new agent instance"""
-        
+
     async def terminate_agent(
         self,
         agent_id: str,
         force: bool = False
     ) -> None:
         """Terminate an agent"""
-        
+
     async def get_agent_status(
         self,
         agent_id: str
     ) -> AgentStatus:
         """Get agent status"""
-        
+
     async def list_agents(
         self,
         filter_by: Optional[Dict] = None
     ) -> List[AgentInfo]:
         """List all agents with optional filtering"""
-        
+
     async def send_task(
         self,
         agent_id: str,
         task: Task
     ) -> TaskResult:
         """Send task to specific agent"""
-        
+
     async def broadcast_task(
         self,
         group: str,
@@ -225,27 +225,27 @@ class CapabilityRegistry:
         capability: Capability
     ) -> None:
         """Register a capability"""
-        
+
     def unregister(
         self,
         name: str,
         version: str
     ) -> None:
         """Unregister a capability"""
-        
+
     def get_capability(
         self,
         name: str,
         version: Optional[str] = None
     ) -> Capability:
         """Get capability by name and version"""
-        
+
     def list_capabilities(
         self,
         agent_type: Optional[str] = None
     ) -> List[CapabilityInfo]:
         """List available capabilities"""
-        
+
     def check_compatibility(
         self,
         capability: str,

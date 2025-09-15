@@ -7,14 +7,12 @@ Agents can share information, coordinate tasks, and make collective decisions.
 """
 
 import asyncio
-import json
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Callable
+from typing import Any, Dict, List, Optional, Callable
 import hashlib
-from pathlib import Path
 
 # Import memory backend
 from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend
@@ -22,6 +20,7 @@ from ...services.memory.sqlite_memory_backend import SQLiteMemoryBackend
 
 class AccessLevel(Enum):
     """Whiteboard access levels."""
+
     READ = "read"
     WRITE = "write"
     ADMIN = "admin"
@@ -29,6 +28,7 @@ class AccessLevel(Enum):
 
 class WhiteboardType(Enum):
     """Standard whiteboard types."""
+
     TASK_COORDINATION = "task_coordination"
     DESIGN_DECISION = "design_decision"
     PROBLEM_SOLVING = "problem_solving"
@@ -39,6 +39,7 @@ class WhiteboardType(Enum):
 @dataclass
 class WhiteboardEntry:
     """Single entry on a whiteboard."""
+
     entry_id: str
     agent_id: str
     content: Dict[str, Any]
@@ -50,6 +51,7 @@ class WhiteboardEntry:
 @dataclass
 class WhiteboardVersion:
     """Version snapshot of whiteboard state."""
+
     version: int
     timestamp: datetime
     entries: List[WhiteboardEntry]
@@ -68,7 +70,7 @@ class SharedWhiteboard:
         whiteboard_id: str,
         whiteboard_type: WhiteboardType,
         owner_agent: str,
-        backend: Optional[SQLiteMemoryBackend] = None
+        backend: Optional[SQLiteMemoryBackend] = None,
     ):
         """Initialize shared whiteboard."""
         self.whiteboard_id = whiteboard_id
@@ -77,9 +79,7 @@ class SharedWhiteboard:
         self.backend = backend or SQLiteMemoryBackend()
 
         # Access control
-        self.permissions: Dict[str, AccessLevel] = {
-            owner_agent: AccessLevel.ADMIN
-        }
+        self.permissions: Dict[str, AccessLevel] = {owner_agent: AccessLevel.ADMIN}
 
         # Versioning
         self.current_version = 0
@@ -102,7 +102,7 @@ class SharedWhiteboard:
 
     async def initialize(self):
         """Initialize whiteboard in backend."""
-        if not hasattr(self.backend, '_initialized'):
+        if not hasattr(self.backend, "_initialized"):
             await self.backend.initialize()
             self.backend._initialized = True  # type: ignore[attr-defined]
 
@@ -142,7 +142,7 @@ class SharedWhiteboard:
         agent_id: str,
         key: str,
         content: Dict[str, Any],
-        tags: Optional[List[str]] = None
+        tags: Optional[List[str]] = None,
     ) -> bool:
         """
         Write content to whiteboard.
@@ -168,7 +168,7 @@ class SharedWhiteboard:
                 content={key: content},
                 timestamp=datetime.now(),
                 version=self.current_version + 1,
-                tags=tags or []
+                tags=tags or [],
             )
 
             # Store entry
@@ -179,8 +179,7 @@ class SharedWhiteboard:
 
             # Update backend
             await self.backend.update_whiteboard(
-                self.whiteboard_id,
-                content={key: content}
+                self.whiteboard_id, content={key: content}
             )
 
             # Notify subscribers
@@ -190,9 +189,7 @@ class SharedWhiteboard:
             return True
 
     async def read(
-        self,
-        agent_id: str,
-        key: Optional[str] = None
+        self, agent_id: str, key: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
         Read content from whiteboard.
@@ -220,10 +217,7 @@ class SharedWhiteboard:
                 }
 
     async def update_atomic(
-        self,
-        agent_id: str,
-        key: str,
-        update_func: Callable[[Any], Any]
+        self, agent_id: str, key: str, update_func: Callable[[Any], Any]
     ) -> bool:
         """
         Atomically update a value.
@@ -265,7 +259,7 @@ class SharedWhiteboard:
             timestamp=datetime.now(),
             entries=list(self.entries.values()),
             modified_by=agent_id,
-            change_description=description
+            change_description=description,
         )
 
         self.version_history.append(snapshot)
@@ -292,10 +286,7 @@ class SharedWhiteboard:
 
         with self._lock:
             # Restore entries
-            self.entries = {
-                entry.entry_id: entry
-                for entry in snapshot.entries
-            }
+            self.entries = {entry.entry_id: entry for entry in snapshot.entries}
 
             # Create new version
             self._create_version_snapshot(agent_id, f"Rollback to version {version}")
@@ -330,18 +321,17 @@ class SharedWhiteboard:
     def get_stats(self) -> Dict[str, Any]:
         """Get whiteboard statistics."""
         return {
-            'whiteboard_id': self.whiteboard_id,
-            'type': self.whiteboard_type.value,
-            'owner': self.owner_agent,
-            'version': self.current_version,
-            'entries': len(self.entries),
-            'subscribers': len(self._subscribers),
-            'permissions': {
-                agent: level.value
-                for agent, level in self.permissions.items()
+            "whiteboard_id": self.whiteboard_id,
+            "type": self.whiteboard_type.value,
+            "owner": self.owner_agent,
+            "version": self.current_version,
+            "entries": len(self.entries),
+            "subscribers": len(self._subscribers),
+            "permissions": {
+                agent: level.value for agent, level in self.permissions.items()
             },
-            'created': self.created_at.isoformat(),
-            'modified': self.last_modified.isoformat()
+            "created": self.created_at.isoformat(),
+            "modified": self.last_modified.isoformat(),
         }
 
 
@@ -369,7 +359,7 @@ class WhiteboardManager:
         whiteboard_type: WhiteboardType,
         owner_agent: str,
         whiteboard_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> SharedWhiteboard:
         """Create a new whiteboard."""
         if not self._initialized:
@@ -389,7 +379,7 @@ class WhiteboardManager:
                 whiteboard_id=whiteboard_id,
                 whiteboard_type=whiteboard_type,
                 owner_agent=owner_agent,
-                backend=self.backend
+                backend=self.backend,
             )
 
             # Set metadata
@@ -412,7 +402,7 @@ class WhiteboardManager:
         self,
         whiteboard_type: Optional[WhiteboardType] = None,
         owner_agent: Optional[str] = None,
-        accessible_by: Optional[str] = None
+        accessible_by: Optional[str] = None,
     ) -> List[SharedWhiteboard]:
         """
         Find whiteboards matching criteria.
@@ -462,12 +452,11 @@ class WhiteboardManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get manager statistics."""
         return {
-            'total_whiteboards': len(self._whiteboards),
-            'by_type': self._count_by_type(),
-            'total_subscribers': sum(
-                len(wb._subscribers)
-                for wb in self._whiteboards.values()
-            )
+            "total_whiteboards": len(self._whiteboards),
+            "by_type": self._count_by_type(),
+            "total_subscribers": sum(
+                len(wb._subscribers) for wb in self._whiteboards.values()
+            ),
         }
 
     def _count_by_type(self) -> Dict[str, int]:
@@ -481,51 +470,64 @@ class WhiteboardManager:
 
 # Whiteboard templates for common patterns
 
+
 def create_task_coordination_whiteboard(
-    manager: WhiteboardManager,
-    owner_agent: str,
-    task_id: str
+    manager: WhiteboardManager, owner_agent: str, task_id: str
 ) -> SharedWhiteboard:
     """Create a task coordination whiteboard."""
-    return asyncio.run(manager.create_whiteboard(
-        whiteboard_type=WhiteboardType.TASK_COORDINATION,
-        owner_agent=owner_agent,
-        whiteboard_id=f"task_{task_id}",
-        metadata={
-            'task_id': task_id,
-            'sections': ['status', 'assignments', 'dependencies', 'progress']
-        }
-    ))
+    return asyncio.run(
+        manager.create_whiteboard(
+            whiteboard_type=WhiteboardType.TASK_COORDINATION,
+            owner_agent=owner_agent,
+            whiteboard_id=f"task_{task_id}",
+            metadata={
+                "task_id": task_id,
+                "sections": ["status", "assignments", "dependencies", "progress"],
+            },
+        )
+    )
 
 
 def create_design_decision_whiteboard(
-    manager: WhiteboardManager,
-    owner_agent: str,
-    decision_topic: str
+    manager: WhiteboardManager, owner_agent: str, decision_topic: str
 ) -> SharedWhiteboard:
     """Create a design decision whiteboard."""
-    return asyncio.run(manager.create_whiteboard(
-        whiteboard_type=WhiteboardType.DESIGN_DECISION,
-        owner_agent=owner_agent,
-        metadata={
-            'topic': decision_topic,
-            'sections': ['problem', 'options', 'pros_cons', 'decision', 'rationale']
-        }
-    ))
+    return asyncio.run(
+        manager.create_whiteboard(
+            whiteboard_type=WhiteboardType.DESIGN_DECISION,
+            owner_agent=owner_agent,
+            metadata={
+                "topic": decision_topic,
+                "sections": [
+                    "problem",
+                    "options",
+                    "pros_cons",
+                    "decision",
+                    "rationale",
+                ],
+            },
+        )
+    )
 
 
 def create_problem_solving_whiteboard(
-    manager: WhiteboardManager,
-    owner_agent: str,
-    problem_id: str
+    manager: WhiteboardManager, owner_agent: str, problem_id: str
 ) -> SharedWhiteboard:
     """Create a problem solving whiteboard."""
-    return asyncio.run(manager.create_whiteboard(
-        whiteboard_type=WhiteboardType.PROBLEM_SOLVING,
-        owner_agent=owner_agent,
-        whiteboard_id=f"problem_{problem_id}",
-        metadata={
-            'problem_id': problem_id,
-            'sections': ['description', 'analysis', 'hypotheses', 'solutions', 'results']
-        }
-    ))
+    return asyncio.run(
+        manager.create_whiteboard(
+            whiteboard_type=WhiteboardType.PROBLEM_SOLVING,
+            owner_agent=owner_agent,
+            whiteboard_id=f"problem_{problem_id}",
+            metadata={
+                "problem_id": problem_id,
+                "sections": [
+                    "description",
+                    "analysis",
+                    "hypotheses",
+                    "solutions",
+                    "results",
+                ],
+            },
+        )
+    )

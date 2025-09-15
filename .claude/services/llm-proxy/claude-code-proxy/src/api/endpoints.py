@@ -17,11 +17,12 @@ from src.core.model_manager import model_manager  # type: ignore
 
 router = APIRouter()
 
+
 @router.get("/health")
 async def health_check():  # type: ignore[misc]
     """Comprehensive health check endpoint with upstream validation."""
     import httpx
-    
+
     health_status = {
         "service": "claude-code-proxy",
         "proxy_status": "healthy",
@@ -32,30 +33,35 @@ async def health_check():  # type: ignore[misc]
             "models": {
                 "big": config.big_model,
                 "middle": config.middle_model,
-                "small": config.small_model
-            }
+                "small": config.small_model,
+            },
         },
         "errors": [],
-        "instructions": []
+        "instructions": [],
     }
-    
+
     # Check basic configuration
     if not config.openai_api_key:
         health_status["proxy_status"] = "error"
         health_status["errors"].append("No API key configured")
-        health_status["instructions"].append("Run: cd .claude/services/llm-proxy && uv run python configure_and_start_proxy.py --configure")
+        health_status["instructions"].append(
+            "Run: cd .claude/services/llm-proxy && uv run python configure_and_start_proxy.py --configure"
+        )
         return JSONResponse(status_code=503, content=health_status)
-    
+
     # Identify provider type
     if "azure.com" in config.openai_base_url.lower():
         health_status["configuration"]["provider"] = "Azure OpenAI"
     elif "openai.com" in config.openai_base_url.lower():
         health_status["configuration"]["provider"] = "OpenAI"
-    elif "localhost" in config.openai_base_url.lower() or "127.0.0.1" in config.openai_base_url:
+    elif (
+        "localhost" in config.openai_base_url.lower()
+        or "127.0.0.1" in config.openai_base_url
+    ):
         health_status["configuration"]["provider"] = "Ollama (Local)"
     else:
         health_status["configuration"]["provider"] = "Custom OpenAI-compatible"
-    
+
     # Test upstream connection
     try:
         # Different validation based on provider
@@ -63,89 +69,115 @@ async def health_check():  # type: ignore[misc]
             # Azure OpenAI validation
             test_url = f"{config.openai_base_url}/chat/completions?api-version={config.azure_api_version or '2024-02-15-preview'}"
             headers = {"api-key": config.openai_api_key}
-            
+
             # Simple test request
             test_payload = {
                 "messages": [{"role": "user", "content": "test"}],
                 "max_tokens": 1,
-                "temperature": 0
+                "temperature": 0,
             }
-            
+
             async with httpx.AsyncClient() as client:
-                response = await client.post(test_url, json=test_payload, headers=headers, timeout=10)
-                
+                response = await client.post(
+                    test_url, json=test_payload, headers=headers, timeout=10
+                )
+
                 if response.status_code == 404:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append("Azure OpenAI endpoint not found (404)")
-                    health_status["instructions"].extend([
-                        "Verify your Azure OpenAI configuration:",
-                        f"  - Endpoint: {config.openai_base_url}",
-                        f"  - Deployment name in URL is correct",
-                        f"  - API version: {config.azure_api_version or '2024-02-15-preview'}",
-                        "",
-                        "Common issues:",
-                        "  1. Wrong deployment name in URL",
-                        "  2. Deployment not yet created in Azure",
-                        "  3. Incorrect API version",
-                        "",
-                        "Re-configure with: uv run python configure_and_start_proxy.py --configure"
-                    ])
+                    health_status["errors"].append(
+                        "Azure OpenAI endpoint not found (404)"
+                    )
+                    health_status["instructions"].extend(
+                        [
+                            "Verify your Azure OpenAI configuration:",
+                            f"  - Endpoint: {config.openai_base_url}",
+                            "  - Deployment name in URL is correct",
+                            f"  - API version: {config.azure_api_version or '2024-02-15-preview'}",
+                            "",
+                            "Common issues:",
+                            "  1. Wrong deployment name in URL",
+                            "  2. Deployment not yet created in Azure",
+                            "  3. Incorrect API version",
+                            "",
+                            "Re-configure with: uv run python configure_and_start_proxy.py --configure",
+                        ]
+                    )
                 elif response.status_code == 401:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append("Azure OpenAI authentication failed (401)")
-                    health_status["instructions"].extend([
-                        "Your API key is invalid or expired.",
-                        "Get a new key from Azure Portal and reconfigure."
-                    ])
+                    health_status["errors"].append(
+                        "Azure OpenAI authentication failed (401)"
+                    )
+                    health_status["instructions"].extend(
+                        [
+                            "Your API key is invalid or expired.",
+                            "Get a new key from Azure Portal and reconfigure.",
+                        ]
+                    )
                 elif response.status_code == 429:
                     health_status["upstream_status"] = "warning"
                     health_status["errors"].append("Rate limit reached")
-                    health_status["instructions"].append("Consider using scheduled shutdown to manage rate limits")
+                    health_status["instructions"].append(
+                        "Consider using scheduled shutdown to manage rate limits"
+                    )
                 elif response.status_code == 200:
                     health_status["upstream_status"] = "healthy"
                 else:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(f"Unexpected response: {response.status_code}")
-                    
+                    health_status["errors"].append(
+                        f"Unexpected response: {response.status_code}"
+                    )
+
         elif "openai.com" in config.openai_base_url.lower():
             # OpenAI validation
             test_url = f"{config.openai_base_url}/models"
             headers = {"Authorization": f"Bearer {config.openai_api_key}"}
-            
+
             async with httpx.AsyncClient() as client:
                 response = await client.get(test_url, headers=headers, timeout=10)
-                
+
                 if response.status_code == 200:
                     health_status["upstream_status"] = "healthy"
                 elif response.status_code == 401:
                     health_status["upstream_status"] = "error"
                     health_status["errors"].append("OpenAI API key invalid")
-                    health_status["instructions"].append("Check your OpenAI API key and reconfigure")
+                    health_status["instructions"].append(
+                        "Check your OpenAI API key and reconfigure"
+                    )
                 else:
                     health_status["upstream_status"] = "error"
-                    health_status["errors"].append(f"OpenAI API error: {response.status_code}")
-                    
+                    health_status["errors"].append(
+                        f"OpenAI API error: {response.status_code}"
+                    )
+
         else:
             # Generic OpenAI-compatible endpoint
             health_status["upstream_status"] = "assumed-healthy"
-            health_status["instructions"].append("Custom endpoint - unable to validate automatically")
-            
+            health_status["instructions"].append(
+                "Custom endpoint - unable to validate automatically"
+            )
+
     except httpx.ConnectError:
         health_status["upstream_status"] = "error"
         health_status["errors"].append("Cannot connect to upstream API")
-        health_status["instructions"].extend([
-            f"Failed to connect to: {config.openai_base_url}",
-            "Check your network connection and endpoint URL"
-        ])
+        health_status["instructions"].extend(
+            [
+                f"Failed to connect to: {config.openai_base_url}",
+                "Check your network connection and endpoint URL",
+            ]
+        )
     except httpx.TimeoutException:
         health_status["upstream_status"] = "error"
         health_status["errors"].append("Upstream API timeout")
-        health_status["instructions"].append("The API endpoint is not responding - check if service is running")
+        health_status["instructions"].append(
+            "The API endpoint is not responding - check if service is running"
+        )
     except Exception as e:
         health_status["upstream_status"] = "error"
         health_status["errors"].append(f"Validation error: {str(e)}")
-        health_status["instructions"].append("Check logs for details: ~/.claude-proxy.log")
-    
+        health_status["instructions"].append(
+            "Check logs for details: ~/.claude-proxy.log"
+        )
+
     # Set overall status
     if health_status["upstream_status"] == "error":
         health_status["proxy_status"] = "degraded"
@@ -155,6 +187,7 @@ async def health_check():  # type: ignore[misc]
     else:
         return JSONResponse(status_code=200, content=health_status)
 
+
 openai_client = OpenAIClient(
     config.openai_api_key,  # type: ignore[assignment]
     config.openai_base_url,
@@ -162,41 +195,50 @@ openai_client = OpenAIClient(
     api_version=config.azure_api_version,
 )
 
-async def validate_api_key(x_api_key: Optional[str] = Header(None), authorization: Optional[str] = Header(None)):  # type: ignore
+
+async def validate_api_key(
+    x_api_key: Optional[str] = Header(None), authorization: Optional[str] = Header(None)
+):  # type: ignore
     """Validate the client's API key from either x-api-key header or Authorization header."""
     client_api_key = None
-    
+
     # Extract API key from headers
     if x_api_key:
         client_api_key = x_api_key
     elif authorization and authorization.startswith("Bearer "):
         client_api_key = authorization.replace("Bearer ", "")
-    
+
     # Skip validation if ANTHROPIC_API_KEY is not set in the environment
     if not config.anthropic_api_key:
         return
-        
+
     # Validate the client API key
     if not client_api_key or not config.validate_client_api_key(client_api_key):
-        logger.warning(f"Invalid API key provided by client")
+        logger.warning("Invalid API key provided by client")
         raise HTTPException(
             status_code=401,
-            detail="Invalid API key. Please provide a valid Anthropic API key."
+            detail="Invalid API key. Please provide a valid Anthropic API key.",
         )
 
+
 @router.post("/v1/messages")
-async def create_message(request: ClaudeMessagesRequest, http_request: Request, _: None = Depends(validate_api_key)):  # type: ignore
+async def create_message(
+    request: ClaudeMessagesRequest,
+    http_request: Request,
+    _: None = Depends(validate_api_key),
+):  # type: ignore
     try:
         # Log incoming request details (without message content for privacy)
         import logging
+
         request_logger = logging.getLogger("proxy.requests")
-        request_logger.info(f"[ENDPOINT] Received /v1/messages request")
+        request_logger.info("[ENDPOINT] Received /v1/messages request")
         request_logger.info(f"[MODEL] {request.model}")
         request_logger.info(f"[MAX_TOKENS] {request.max_tokens}")
         request_logger.info(f"[STREAM] {request.stream}")
         if request.messages:
             request_logger.info(f"[MESSAGE_COUNT] {len(request.messages)}")
-        
+
         logger.debug(
             f"Processing Claude request: model={request.model}, stream={request.stream}"
         )
@@ -267,7 +309,9 @@ async def create_message(request: ClaudeMessagesRequest, http_request: Request, 
 
 
 @router.post("/v1/messages/count_tokens")
-async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)):  # type: ignore
+async def count_tokens(
+    request: ClaudeTokenCountRequest, _: None = Depends(validate_api_key)
+):  # type: ignore
     try:
         # For token counting, we'll use a simple estimation
         # In a real implementation, you might want to use tiktoken or similar
@@ -304,16 +348,7 @@ async def count_tokens(request: ClaudeTokenCountRequest, _: None = Depends(valid
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "openai_api_configured": bool(config.openai_api_key),
-        "api_key_valid": config.validate_api_key(),
-        "client_api_key_validation": bool(config.anthropic_api_key),
-    }
+# Removed duplicate health_check function - keeping the more comprehensive one above
 
 
 @router.get("/test-connection")

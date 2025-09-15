@@ -336,9 +336,7 @@ def main():
     )
 
     # Conflicts command
-    subparsers.add_parser(
-        "conflicts", help="List synchronization conflicts"
-    )
+    subparsers.add_parser("conflicts", help="List synchronization conflicts")
 
     # Resolve conflict command
     resolve_parser = subparsers.add_parser(
@@ -351,9 +349,7 @@ def main():
     subparsers.add_parser("validate", help="Validate configuration")
 
     # Init command
-    subparsers.add_parser(
-        "init", help="Initialize Memory Manager configuration"
-    )
+    subparsers.add_parser("init", help="Initialize Memory Manager configuration")
 
     args = parser.parse_args()
 

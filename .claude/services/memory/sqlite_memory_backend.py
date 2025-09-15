@@ -6,7 +6,6 @@ This is a lightweight alternative to Neo4j for testing without Docker.
 
 import asyncio
 import json
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -95,11 +94,21 @@ class SQLiteMemoryBackend:
             """)
 
             # Create indices
-            await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_agent ON memories(agent_id)")
-            await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_task ON memories(task_id)")
-            await db.execute("CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)")
-            await db.execute("CREATE INDEX IF NOT EXISTS idx_knowledge_agent ON knowledge_nodes(agent_id)")
-            await db.execute("CREATE INDEX IF NOT EXISTS idx_whiteboard_task ON whiteboards(task_id)")
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_agent ON memories(agent_id)"
+            )
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_task ON memories(task_id)"
+            )
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)"
+            )
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_knowledge_agent ON knowledge_nodes(agent_id)"
+            )
+            await db.execute(
+                "CREATE INDEX IF NOT EXISTS idx_whiteboard_task ON whiteboards(task_id)"
+            )
 
             await db.commit()
 
@@ -110,26 +119,29 @@ class SQLiteMemoryBackend:
         memory_type: str,
         task_id: Optional[str] = None,
         importance_score: float = 0.5,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Store a memory."""
         memory_id = str(uuid4())
 
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 INSERT INTO memories (id, agent_id, content, memory_type, timestamp,
                                      importance_score, task_id, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                memory_id,
-                agent_id,
-                content,
-                memory_type,
-                datetime.utcnow().isoformat(),
-                importance_score,
-                task_id,
-                json.dumps(metadata) if metadata else None
-            ))
+            """,
+                (
+                    memory_id,
+                    agent_id,
+                    content,
+                    memory_type,
+                    datetime.utcnow().isoformat(),
+                    importance_score,
+                    task_id,
+                    json.dumps(metadata) if metadata else None,
+                ),
+            )
             await db.commit()
 
         return memory_id
@@ -139,7 +151,7 @@ class SQLiteMemoryBackend:
         agent_id: str,
         memory_type: Optional[str] = None,
         task_id: Optional[str] = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[Dict[str, Any]]:
         """Retrieve memories."""
         query = "SELECT * FROM memories WHERE agent_id = ?"
@@ -167,10 +179,13 @@ class SQLiteMemoryBackend:
         whiteboard_id = str(uuid4())
 
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 INSERT INTO whiteboards (id, task_id, agent_id)
                 VALUES (?, ?, ?)
-            """, (whiteboard_id, task_id, agent_id))
+            """,
+                (whiteboard_id, task_id, agent_id),
+            )
             await db.commit()
 
         return whiteboard_id
@@ -179,16 +194,19 @@ class SQLiteMemoryBackend:
         self,
         task_id: str,
         content: Optional[Dict[str, Any]] = None,
-        decision: Optional[str] = None
+        decision: Optional[str] = None,
     ) -> bool:
         """Update whiteboard content."""
         async with aiosqlite.connect(self.db_path) as db:
             if content:
-                await db.execute("""
+                await db.execute(
+                    """
                     UPDATE whiteboards
                     SET content = ?, updated_at = ?
                     WHERE task_id = ?
-                """, (json.dumps(content), datetime.utcnow().isoformat(), task_id))
+                """,
+                    (json.dumps(content), datetime.utcnow().isoformat(), task_id),
+                )
 
             if decision:
                 # Get current decisions
@@ -198,15 +216,24 @@ class SQLiteMemoryBackend:
                     row = await cursor.fetchone()
                     if row:
                         decisions = json.loads(row[0])
-                        decisions.append({
-                            "decision": decision,
-                            "timestamp": datetime.utcnow().isoformat()
-                        })
-                        await db.execute("""
+                        decisions.append(
+                            {
+                                "decision": decision,
+                                "timestamp": datetime.utcnow().isoformat(),
+                            }
+                        )
+                        await db.execute(
+                            """
                             UPDATE whiteboards
                             SET decisions = ?, updated_at = ?
                             WHERE task_id = ?
-                        """, (json.dumps(decisions), datetime.utcnow().isoformat(), task_id))
+                        """,
+                            (
+                                json.dumps(decisions),
+                                datetime.utcnow().isoformat(),
+                                task_id,
+                            ),
+                        )
 
             await db.commit()
 
@@ -222,8 +249,8 @@ class SQLiteMemoryBackend:
                 row = await cursor.fetchone()
                 if row:
                     result = dict(row)
-                    result['content'] = json.loads(result['content'])
-                    result['decisions'] = json.loads(result['decisions'])
+                    result["content"] = json.loads(result["content"])
+                    result["decisions"] = json.loads(result["decisions"])
                     return result
         return None
 
@@ -233,42 +260,44 @@ class SQLiteMemoryBackend:
         concept: str,
         description: Optional[str] = None,
         confidence: float = 0.5,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Add a knowledge node."""
         node_id = str(uuid4())
 
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 INSERT INTO knowledge_nodes (id, agent_id, concept, description, confidence, metadata)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                node_id,
-                agent_id,
-                concept,
-                description,
-                confidence,
-                json.dumps(metadata) if metadata else None
-            ))
+            """,
+                (
+                    node_id,
+                    agent_id,
+                    concept,
+                    description,
+                    confidence,
+                    json.dumps(metadata) if metadata else None,
+                ),
+            )
             await db.commit()
 
         return node_id
 
     async def add_knowledge_edge(
-        self,
-        source_id: str,
-        target_id: str,
-        relationship: str,
-        weight: float = 1.0
+        self, source_id: str, target_id: str, relationship: str, weight: float = 1.0
     ) -> str:
         """Add a knowledge edge."""
         edge_id = str(uuid4())
 
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 INSERT INTO knowledge_edges (id, source_id, target_id, relationship, weight)
                 VALUES (?, ?, ?, ?, ?)
-            """, (edge_id, source_id, target_id, relationship, weight))
+            """,
+                (edge_id, source_id, target_id, relationship, weight),
+            )
             await db.commit()
 
         return edge_id
@@ -285,44 +314,37 @@ class SQLiteMemoryBackend:
                 nodes = [dict(row) for row in await cursor.fetchall()]
 
             # Get edges for these nodes
-            node_ids = [n['id'] for n in nodes]
+            node_ids = [n["id"] for n in nodes]
             if node_ids:
-                placeholders = ','.join('?' * len(node_ids))
+                placeholders = ",".join("?" * len(node_ids))
                 async with db.execute(
                     f"SELECT * FROM knowledge_edges WHERE source_id IN ({placeholders}) OR target_id IN ({placeholders})",
-                    node_ids + node_ids
+                    node_ids + node_ids,
                 ) as cursor:
                     edges = [dict(row) for row in await cursor.fetchall()]
             else:
                 edges = []
 
-        return {
-            "agent_id": agent_id,
-            "nodes": nodes,
-            "edges": edges
-        }
+        return {"agent_id": agent_id, "nodes": nodes, "edges": edges}
 
     async def store_procedure(
         self,
         agent_id: str,
         procedure_name: str,
         steps: List[str],
-        context: Optional[str] = None
+        context: Optional[str] = None,
     ) -> str:
         """Store a procedure."""
         procedure_id = str(uuid4())
 
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
+            await db.execute(
+                """
                 INSERT INTO procedures (id, agent_id, procedure_name, steps, context)
                 VALUES (?, ?, ?, ?, ?)
-            """, (
-                procedure_id,
-                agent_id,
-                procedure_name,
-                json.dumps(steps),
-                context
-            ))
+            """,
+                (procedure_id, agent_id, procedure_name, json.dumps(steps), context),
+            )
             await db.commit()
 
         return procedure_id
@@ -333,13 +355,13 @@ class SQLiteMemoryBackend:
             db.row_factory = aiosqlite.Row
             async with db.execute(
                 "SELECT * FROM procedures WHERE agent_id = ? ORDER BY success_rate DESC",
-                (agent_id,)
+                (agent_id,),
             ) as cursor:
                 rows = await cursor.fetchall()
                 procedures = []
                 for row in rows:
                     proc = dict(row)
-                    proc['steps'] = json.loads(proc['steps'])
+                    proc["steps"] = json.loads(proc["steps"])
                     procedures.append(proc)
                 return procedures
 
@@ -358,15 +380,21 @@ class SQLiteMemoryBackend:
                 memory_counts = {row[0]: row[1] for row in rows}
 
             # Total counts
-            for table in ['memories', 'knowledge_nodes', 'knowledge_edges', 'whiteboards', 'procedures']:
+            for table in [
+                "memories",
+                "knowledge_nodes",
+                "knowledge_edges",
+                "whiteboards",
+                "procedures",
+            ]:
                 async with db.execute(f"SELECT COUNT(*) FROM {table}") as cursor:
                     count = await cursor.fetchone()
                     if count is not None:
-                        stats[f'total_{table}'] = count[0]
+                        stats[f"total_{table}"] = count[0]
                     else:
-                        stats[f'total_{table}'] = 0
+                        stats[f"total_{table}"] = 0
 
-            stats['memory_types'] = memory_counts
+            stats["memory_types"] = memory_counts
 
             return stats
 
@@ -403,7 +431,7 @@ async def test_sqlite_backend():
     await backend.update_whiteboard(
         task_id,
         content={"notes": "Testing memory system", "status": "in_progress"},
-        decision="Use SQLite for local testing"
+        decision="Use SQLite for local testing",
     )
     print("✅ Updated whiteboard")
 
@@ -414,17 +442,15 @@ async def test_sqlite_backend():
     node2 = await backend.add_knowledge_node(
         agent_id, "Memory System", "Stores agent memories", confidence=0.9
     )
-    edge = await backend.add_knowledge_edge(
-        node1, node2, "used_by", weight=0.8
-    )
-    print(f"✅ Added knowledge nodes and edge")
+    await backend.add_knowledge_edge(node1, node2, "used_by", weight=0.8)
+    print("✅ Added knowledge nodes and edge")
 
     # Store procedure
     proc_id = await backend.store_procedure(
         agent_id,
         "test_memory_system",
         ["Initialize backend", "Store memories", "Create whiteboard", "Add knowledge"],
-        context="Testing Gadugi v0.3"
+        context="Testing Gadugi v0.3",
     )
     print(f"✅ Stored procedure: {proc_id}")
 
@@ -439,7 +465,9 @@ async def test_sqlite_backend():
         print("⚠️ Whiteboard not found")
 
     graph = await backend.get_knowledge_graph(agent_id)
-    print(f"✅ Retrieved knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges")
+    print(
+        f"✅ Retrieved knowledge graph: {len(graph['nodes'])} nodes, {len(graph['edges'])} edges"
+    )
 
     procedures = await backend.get_procedures(agent_id)
     print(f"✅ Retrieved {len(procedures)} procedures")

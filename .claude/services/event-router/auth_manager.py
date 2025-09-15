@@ -14,9 +14,11 @@ from typing import Any, Dict, List, Optional
 
 try:
     import structlog  # type: ignore[import]
+
     logger = structlog.get_logger()
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
 
 
@@ -67,6 +69,7 @@ class AuthManager:
         if gh_config.exists():
             try:
                 import yaml
+
                 with open(gh_config) as f:
                     config = yaml.safe_load(f)
                     # Extract token from gh config
@@ -102,17 +105,11 @@ class AuthManager:
         return env
 
     def prepare_container_auth(
-        self,
-        agent_id: str,
-        container_work_dir: Path = Path("/app")
+        self, agent_id: str, container_work_dir: Path = Path("/app")
     ) -> Dict[str, Any]:
         """Prepare authentication for container execution."""
 
-        config = {
-            "environment": {},
-            "volumes": [],
-            "commands": []
-        }
+        config = {"environment": {}, "volumes": [], "commands": []}
 
         # Add GitHub token as environment variable
         if self.github_token:
@@ -122,20 +119,24 @@ class AuthManager:
         # Mount Claude directory for authentication
         if self.claude_dir.exists():
             # Create volume mount for .claude directory
-            config["volumes"].append({
-                "source": str(self.claude_dir),
-                "target": "/home/agent/.claude",
-                "type": "bind",
-                "read_only": True
-            })
+            config["volumes"].append(
+                {
+                    "source": str(self.claude_dir),
+                    "target": "/home/agent/.claude",
+                    "type": "bind",
+                    "read_only": True,
+                }
+            )
 
             # Also mount to root user's home if different
-            config["volumes"].append({
-                "source": str(self.claude_dir),
-                "target": "/root/.claude",
-                "type": "bind",
-                "read_only": True
-            })
+            config["volumes"].append(
+                {
+                    "source": str(self.claude_dir),
+                    "target": "/root/.claude",
+                    "type": "bind",
+                    "read_only": True,
+                }
+            )
 
             logger.info(f"Mounted .claude directory for container {agent_id}")
         else:
@@ -148,10 +149,8 @@ class AuthManager:
         config["commands"] = [
             # Create agent user if it doesn't exist
             "useradd -m -s /bin/bash agent || true",
-
             # Copy .claude to agent's home if mounted
             "if [ -d /root/.claude ]; then cp -r /root/.claude /home/agent/; chown -R agent:agent /home/agent/.claude; fi",
-
             # Set up git config for agent user
             "su - agent -c 'git config --global user.name \"Gadugi Agent\"'",
             "su - agent -c 'git config --global user.email \"agent@gadugi.ai\"'",
@@ -171,10 +170,10 @@ class AuthManager:
                     "driver_opts": {
                         "type": "none",
                         "o": "bind",
-                        "device": str(self.claude_dir)
-                    }
+                        "device": str(self.claude_dir),
+                    },
                 }
-            }
+            },
         }
 
         # Common environment for all services
@@ -189,8 +188,8 @@ class AuthManager:
                 "environment": common_env.copy(),
                 "volumes": [
                     "claude_auth:/home/agent/.claude:ro",
-                    "claude_auth:/root/.claude:ro"
-                ]
+                    "claude_auth:/root/.claude:ro",
+                ],
             }
 
         return compose_config
@@ -203,6 +202,7 @@ class AuthManager:
         # Add GitHub token
         if self.github_token:
             import base64
+
             secret_data["github-token"] = base64.b64encode(
                 self.github_token.encode()
             ).decode()
@@ -213,12 +213,9 @@ class AuthManager:
         k8s_config = {
             "apiVersion": "v1",
             "kind": "Secret",
-            "metadata": {
-                "name": "gadugi-auth",
-                "namespace": namespace
-            },
+            "metadata": {"name": "gadugi-auth", "namespace": namespace},
             "type": "Opaque",
-            "data": secret_data
+            "data": secret_data,
         }
 
         # Also create ConfigMap for .claude directory if it exists
@@ -237,30 +234,18 @@ class AuthManager:
             configmap = {
                 "apiVersion": "v1",
                 "kind": "ConfigMap",
-                "metadata": {
-                    "name": "claude-auth",
-                    "namespace": namespace
-                },
-                "binaryData": {
-                    "claude-auth.tar.gz": claude_tar_b64
-                }
+                "metadata": {"name": "claude-auth", "namespace": namespace},
+                "binaryData": {"claude-auth.tar.gz": claude_tar_b64},
             }
 
-            return {
-                "secret": k8s_config,
-                "configmap": configmap
-            }
+            return {"secret": k8s_config, "configmap": configmap}
 
         return {"secret": k8s_config}
 
     def validate_auth(self) -> Dict[str, bool]:
         """Validate that authentication is properly configured."""
 
-        validation = {
-            "github_token": False,
-            "claude_auth": False,
-            "gh_cli": False
-        }
+        validation = {"github_token": False, "claude_auth": False, "gh_cli": False}
 
         # Check GitHub token
         if self.github_token:
@@ -281,12 +266,10 @@ class AuthManager:
         if gh_path:
             # Try to run gh auth status
             import subprocess
+
             try:
                 result = subprocess.run(
-                    ["gh", "auth", "status"],
-                    capture_output=True,
-                    text=True,
-                    timeout=5
+                    ["gh", "auth", "status"], capture_output=True, text=True, timeout=5
                 )
                 if result.returncode == 0:
                     validation["gh_cli"] = True
@@ -295,11 +278,7 @@ class AuthManager:
 
         return validation
 
-    def setup_agent_workspace(
-        self,
-        agent_id: str,
-        workspace_path: Path
-    ) -> bool:
+    def setup_agent_workspace(self, agent_id: str, workspace_path: Path) -> bool:
         """Set up authentication in agent's workspace."""
 
         try:
@@ -346,14 +325,14 @@ class ContainerAuthBuilder:
             "RUN mkdir -p /home/agent/.claude /root/.claude",
             "",
             "# Copy mounted auth at runtime (handled by entrypoint)",
-            'COPY --chown=agent:agent entrypoint.sh /entrypoint.sh',
-            'RUN chmod +x /entrypoint.sh',
+            "COPY --chown=agent:agent entrypoint.sh /entrypoint.sh",
+            "RUN chmod +x /entrypoint.sh",
             "",
             "# Switch to agent user",
             "USER agent",
             "WORKDIR /home/agent",
             "",
-            'ENTRYPOINT ["/entrypoint.sh"]'
+            'ENTRYPOINT ["/entrypoint.sh"]',
         ]
 
         return lines
@@ -361,7 +340,7 @@ class ContainerAuthBuilder:
     def build_entrypoint_script(self) -> str:
         """Build entrypoint script for containers."""
 
-        return '''#!/bin/bash
+        return """#!/bin/bash
 set -e
 
 # Copy Claude auth if mounted
@@ -381,13 +360,10 @@ fi
 
 # Execute the actual command
 exec "$@"
-'''
+"""
 
     def build_compose_service(
-        self,
-        service_name: str,
-        image: str,
-        command: List[str]
+        self, service_name: str, image: str, command: List[str]
     ) -> Dict[str, Any]:
         """Build docker-compose service with auth."""
 
@@ -399,14 +375,12 @@ exec "$@"
             "environment": auth_config["environment"],
             "volumes": [],
             "command": command,
-            "networks": ["gadugi-network"]
+            "networks": ["gadugi-network"],
         }
 
         # Add volume mounts
         for volume in auth_config["volumes"]:
-            service["volumes"].append(
-                f"{volume['source']}:{volume['target']}:ro"
-            )
+            service["volumes"].append(f"{volume['source']}:{volume['target']}:ro")
 
         return service
 

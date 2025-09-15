@@ -22,59 +22,125 @@ Integration:
 import json
 import logging
 import os
-import sys
 import time
-from datetime import datetime, timedelta  # type: ignore
+from datetime import datetime  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
 try:
-    from ..shared.workflow_reliability import (  # type: ignore
+    from ..shared.workflow_reliability import (  # type: ignore[import]
         WorkflowReliabilityManager as SharedWorkflowReliabilityManager,
         WorkflowStage as SharedWorkflowStage,
-        HealthStatus,
         monitor_workflow as shared_monitor_workflow,
-        create_reliability_manager
+        create_reliability_manager,
     )
-    from ..shared.utils.error_handling import ErrorHandler, retry, graceful_degradation  # type: ignore
-    from ..shared.state_management import StateManager, TaskState, WorkflowPhase  # type: ignore
-    from ..shared.task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
+    from ..shared.utils.error_handling import ErrorHandler, retry  # type: ignore
+    from ..shared.state_management import StateManager  # type: ignore
+    from ..shared.task_tracking import TaskTracker, WorkflowPhaseTracker  # type: ignore
     from ..shared.github_operations import GitHubOperations  # type: ignore
-    
+
     # Create aliases with consistent types
     WorkflowReliabilityManager = SharedWorkflowReliabilityManager  # type: ignore[misc]
     WorkflowStage = SharedWorkflowStage  # type: ignore[misc]
     monitor_workflow = shared_monitor_workflow  # type: ignore[misc]
-    
+
 except ImportError as e:
     logging.warning(f"Enhanced Separation modules not available: {e}")
+
     # Fallback for basic functionality
     class WorkflowReliabilityManager:  # type: ignore[no-redef]
-        def __init__(self, config: Any = None) -> None: pass
-        def start_workflow_monitoring(self, workflow_id: str, context: Any) -> bool: return True
-        def update_workflow_stage(self, workflow_id: str, stage: Any, context: Any = None) -> bool: return True
-        def handle_workflow_error(self, workflow_id: str, error: Any, stage: Any = None, context: Any = None) -> Dict[str, Any]: return {}
-        def perform_health_check(self, workflow_id: str) -> Any: return None
-        def stop_workflow_monitoring(self, workflow_id: str, status: str = 'completed') -> bool: return True
+        def __init__(self, config: Any = None) -> None:
+            pass
 
-    class WorkflowStage: pass  # type: ignore[no-redef]
-    
+        def start_workflow_monitoring(self, workflow_id: str, context: Any) -> bool:
+            return True
+
+        def update_workflow_stage(
+            self, workflow_id: str, stage: Any, context: Any = None
+        ) -> bool:
+            return True
+
+        def handle_workflow_error(
+            self, workflow_id: str, error: Any, stage: Any = None, context: Any = None
+        ) -> Dict[str, Any]:
+            return {}
+
+        def perform_health_check(self, workflow_id: str) -> Any:
+            return None
+
+        def get_workflow_diagnostics(self, workflow_id: str) -> Dict[str, Any]:
+            return {}
+
+        def create_workflow_persistence(self, workflow_id: str) -> Any:
+            return None
+
+        def stop_workflow_monitoring(
+            self, workflow_id: str, status: str = "completed"
+        ) -> bool:
+            return True
+
+    class WorkflowStage:  # type: ignore[no-redef]
+        INITIALIZATION = "initialization"
+        PROMPT_ANALYSIS = "prompt_analysis"
+        TASK_PREPARATION = "task_preparation"
+        ISSUE_CREATION = "issue_creation"
+        BRANCH_SETUP = "branch_setup"
+        RESEARCH_PLANNING = "research_planning"
+        IMPLEMENTATION_START = "implementation_start"
+        IMPLEMENTATION_PROGRESS = "implementation_progress"
+        IMPLEMENTATION_COMPLETE = "implementation_complete"
+        TESTING_START = "testing_start"
+        DOCUMENTATION_UPDATE = "documentation_update"
+        PR_PREPARATION = "pr_preparation"
+        PR_CREATION = "pr_creation"
+        PR_VERIFICATION = "pr_verification"
+        REVIEW_PROCESSING = "review_processing"
+        FINAL_CLEANUP = "final_cleanup"
+
+        @classmethod
+        def _get_value(cls, name: str) -> str:
+            return getattr(cls, name, name.lower())
+
+        def __init__(self, value: str):
+            self._value = value
+
+        @property
+        def value(self) -> str:
+            return self._value if hasattr(self, "_value") else str(self)
+
     class WorkflowReliabilityContext:
         """Mock context manager for workflow monitoring"""
+
         def __enter__(self) -> WorkflowReliabilityManager:
             return WorkflowReliabilityManager()
+
         def __exit__(self, *args: Any) -> None:
             pass
-    
-    def monitor_workflow(workflow_id: str, workflow_context: Dict[str, Any], reliability_manager: Optional[WorkflowReliabilityManager] = None) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
+
+    def monitor_workflow(
+        workflow_id: str,
+        workflow_context: Dict[str, Any],
+        reliability_manager: Optional[WorkflowReliabilityManager] = None,
+    ) -> WorkflowReliabilityContext:  # type: ignore[no-redef]
         return WorkflowReliabilityContext()
+
+    class HealthStatus:  # type: ignore[no-redef]
+        HEALTHY = "healthy"
+        WARNING = "warning"
+        DEGRADED = "degraded"
+        CRITICAL = "critical"
+        FAILED = "failed"
+
+    def create_reliability_manager(
+        config: Optional[Dict[str, Any]] = None,
+    ) -> WorkflowReliabilityManager:  # type: ignore[no-redef]
+        return WorkflowReliabilityManager(config)
 
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -82,13 +148,14 @@ logger = logging.getLogger(__name__)
 @dataclass
 class WorkflowConfiguration:
     """Configuration for enhanced workflow execution"""
+
     enable_monitoring: bool = True
     enable_health_checks: bool = True
     enable_recovery: bool = True
     enable_persistence: bool = True
     max_retries: int = 3
     timeout_multiplier: float = 1.5
-    log_level: str = 'INFO'
+    log_level: str = "INFO"
     checkpoint_frequency: int = 5  # Create checkpoint every N phases
 
 
@@ -100,8 +167,12 @@ class EnhancedWorkflowManager:
     robust error handling, monitoring, recovery, and persistence.
     """
 
-    def __init__(self, config: Optional[WorkflowConfiguration] = None,
-                 project_root: str = ".", task_id: Optional[str] = None):
+    def __init__(
+        self,
+        config: Optional[WorkflowConfiguration] = None,
+        project_root: str = ".",
+        task_id: Optional[str] = None,
+    ):
         """Initialize the enhanced workflow manager"""
         self.config = config or WorkflowConfiguration()
         self.project_root = Path(project_root).resolve()
@@ -109,11 +180,17 @@ class EnhancedWorkflowManager:
         self.task_id = task_id
 
         # Initialize reliability components
-        self.reliability_manager = create_reliability_manager({  # type: ignore
-            'log_level': self.config.log_level,
-            'enable_health_checks': self.config.enable_health_checks,
-            'enable_recovery': self.config.enable_recovery
-        })
+        try:
+            self.reliability_manager = create_reliability_manager(
+                {  # type: ignore
+                    "log_level": self.config.log_level,
+                    "enable_health_checks": self.config.enable_health_checks,
+                    "enable_recovery": self.config.enable_recovery,
+                }
+            )
+        except NameError:
+            # If create_reliability_manager is not available
+            self.reliability_manager = WorkflowReliabilityManager()
 
         # Initialize Enhanced Separation components
         try:
@@ -137,7 +214,9 @@ class EnhancedWorkflowManager:
 
         logger.info("Enhanced WorkflowManager initialized")
 
-    def execute_workflow(self, prompt_file: str, workflow_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def execute_workflow(
+        self, prompt_file: str, workflow_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Execute a complete workflow with comprehensive reliability features.
 
@@ -149,19 +228,25 @@ class EnhancedWorkflowManager:
             Workflow execution result with comprehensive metrics
         """
         # Generate unique workflow ID
-        self.workflow_id = f"workflow-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{os.getpid()}"
+        self.workflow_id = (
+            f"workflow-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{os.getpid()}"
+        )
 
         # Prepare workflow context
         self.workflow_context = workflow_context or {}
-        self.workflow_context.update({
-            'prompt_file': prompt_file,
-            'start_time': datetime.now().isoformat(),
-            'project_root': str(self.project_root),
-            'config': self.config.__dict__
-        })
+        self.workflow_context.update(
+            {
+                "prompt_file": prompt_file,
+                "start_time": datetime.now().isoformat(),
+                "project_root": str(self.project_root),
+                "config": self.config.__dict__,
+            }
+        )
 
         # Execute workflow with reliability monitoring
-        with monitor_workflow(self.workflow_id, self.workflow_context, self.reliability_manager) as reliability:  # type: ignore[assignment]
+        with monitor_workflow(
+            self.workflow_id, self.workflow_context, self.reliability_manager
+        ) as reliability:  # type: ignore[assignment]
             try:
                 logger.info(f"Starting enhanced workflow execution: {self.workflow_id}")
                 logger.info(f"Prompt file: {prompt_file}")
@@ -170,93 +255,109 @@ class EnhancedWorkflowManager:
                 result = self._execute_monitored_workflow(prompt_file, reliability)
 
                 # Add final metrics to result
-                result.update({
-                    'workflow_id': self.workflow_id,
-                    'total_phases': len(self.phase_checkpoints),
-                    'reliability_metrics': reliability.get_workflow_diagnostics(self.workflow_id)  # type: ignore
-                })
+                result.update(
+                    {
+                        "workflow_id": self.workflow_id,
+                        "total_phases": len(self.phase_checkpoints),
+                        "reliability_metrics": reliability.get_workflow_diagnostics(
+                            self.workflow_id
+                        ),  # type: ignore
+                    }
+                )
 
-                logger.info(f"Enhanced workflow execution completed: {self.workflow_id}")
+                logger.info(
+                    f"Enhanced workflow execution completed: {self.workflow_id}"
+                )
                 return result
 
             except Exception as e:
-                logger.error(f"Enhanced workflow execution failed: {self.workflow_id}: {e}")
+                logger.error(
+                    f"Enhanced workflow execution failed: {self.workflow_id}: {e}"
+                )
 
                 # Handle error through reliability manager
                 error_result = reliability.handle_workflow_error(
-                    self.workflow_id, e, self.current_phase,
-                    {'prompt_file': prompt_file, 'context': self.workflow_context}
+                    self.workflow_id,
+                    e,
+                    self.current_phase,
+                    {"prompt_file": prompt_file, "context": self.workflow_context},
                 )
 
                 return {
-                    'success': False,
-                    'error': str(e),
-                    'workflow_id': self.workflow_id,
-                    'failed_phase': self.current_phase.value if self.current_phase else 'unknown',  # type: ignore
-                    'error_handling_result': error_result,
-                    'recovery_recommendations': error_result.get('recommendations', [])
+                    "success": False,
+                    "error": str(e),
+                    "workflow_id": self.workflow_id,
+                    "failed_phase": self.current_phase.value
+                    if self.current_phase
+                    else "unknown",  # type: ignore
+                    "error_handling_result": error_result,
+                    "recovery_recommendations": error_result.get("recommendations", []),
                 }
 
-    def _execute_monitored_workflow(self, prompt_file: str, reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _execute_monitored_workflow(
+        self, prompt_file: str, reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Execute workflow phases with comprehensive monitoring"""
 
         # Phase 0: Enhanced Initialization
         self._execute_phase_with_monitoring(
             WorkflowStage.INITIALIZATION,  # type: ignore
             lambda: self._phase_initialization(prompt_file, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 1: Prompt Analysis
         prompt_data = self._execute_phase_with_monitoring(
             WorkflowStage.PROMPT_ANALYSIS,  # type: ignore
             lambda: self._phase_prompt_analysis(prompt_file, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 2: Task Preparation
         _task_list = self._execute_phase_with_monitoring(
             WorkflowStage.TASK_PREPARATION,  # type: ignore
             lambda: self._phase_task_preparation(prompt_data, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 3: Issue Creation
         issue_result = self._execute_phase_with_monitoring(
             WorkflowStage.ISSUE_CREATION,  # type: ignore
             lambda: self._phase_issue_creation(prompt_data, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 4: Branch Setup
         branch_result = self._execute_phase_with_monitoring(
             WorkflowStage.BRANCH_SETUP,  # type: ignore
             lambda: self._phase_branch_setup(issue_result, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 5: Research and Planning
         _research_result = self._execute_phase_with_monitoring(
             WorkflowStage.RESEARCH_PLANNING,  # type: ignore
             lambda: self._phase_research_planning(prompt_data, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 6-8: Implementation phases
-        implementation_result = self._execute_implementation_phases(prompt_data, reliability)
+        implementation_result = self._execute_implementation_phases(
+            prompt_data, reliability
+        )
 
         # Phase 9: Testing
         testing_result = self._execute_phase_with_monitoring(
             WorkflowStage.TESTING_START,  # type: ignore
             lambda: self._phase_testing(implementation_result, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 10: Documentation
         docs_result = self._execute_phase_with_monitoring(
             WorkflowStage.DOCUMENTATION_UPDATE,  # type: ignore
             lambda: self._phase_documentation(implementation_result, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 11: PR Creation and Verification
@@ -266,33 +367,37 @@ class EnhancedWorkflowManager:
         review_result = self._execute_phase_with_monitoring(
             WorkflowStage.REVIEW_PROCESSING,  # type: ignore
             lambda: self._phase_review_processing(pr_result, reliability),
-            reliability
+            reliability,
         )
 
         # Phase 13: Final Cleanup
         cleanup_result = self._execute_phase_with_monitoring(
             WorkflowStage.FINAL_CLEANUP,  # type: ignore
             lambda: self._phase_final_cleanup(review_result, reliability),
-            reliability
+            reliability,
         )
 
         # Return comprehensive result
         return {
-            'success': True,
-            'prompt_file': prompt_file,
-            'issue_number': issue_result.get('issue_number'),
-            'branch_name': branch_result.get('branch_name'),
-            'pr_number': pr_result.get('pr_number'),
-            'implementation_files': implementation_result.get('files_created', []),
-            'test_results': testing_result.get('test_status'),
-            'documentation_updated': docs_result.get('files_updated', []),
-            'review_status': review_result.get('review_status'),
-            'cleanup_status': cleanup_result.get('status'),
-            'phase_checkpoints': self.phase_checkpoints
+            "success": True,
+            "prompt_file": prompt_file,
+            "issue_number": issue_result.get("issue_number"),
+            "branch_name": branch_result.get("branch_name"),
+            "pr_number": pr_result.get("pr_number"),
+            "implementation_files": implementation_result.get("files_created", []),
+            "test_results": testing_result.get("test_status"),
+            "documentation_updated": docs_result.get("files_updated", []),
+            "review_status": review_result.get("review_status"),
+            "cleanup_status": cleanup_result.get("status"),
+            "phase_checkpoints": self.phase_checkpoints,
         }
 
-    def _execute_phase_with_monitoring(self, stage: WorkflowStage, phase_func: callable,  # type: ignore
-                                     reliability: WorkflowReliabilityManager) -> Any:
+    def _execute_phase_with_monitoring(
+        self,
+        stage: WorkflowStage,
+        phase_func: callable,  # type: ignore
+        reliability: WorkflowReliabilityManager,
+    ) -> Any:
         """Execute a workflow phase with comprehensive monitoring and error handling"""
 
         # Update current phase
@@ -300,10 +405,14 @@ class EnhancedWorkflowManager:
 
         # Update reliability manager
         if self.workflow_id:
-                reliability.update_workflow_stage(self.workflow_id, stage, {
-            'phase_start': datetime.now().isoformat(),
-            'previous_checkpoints': len(self.phase_checkpoints)
-        })
+            reliability.update_workflow_stage(
+                self.workflow_id,
+                stage,
+                {
+                    "phase_start": datetime.now().isoformat(),
+                    "previous_checkpoints": len(self.phase_checkpoints),
+                },
+            )
 
         phase_start_time = time.time()
 
@@ -314,13 +423,18 @@ class EnhancedWorkflowManager:
             critical_phases = [
                 WorkflowStage.IMPLEMENTATION_START,  # type: ignore
                 WorkflowStage.PR_CREATION,  # type: ignore
-                WorkflowStage.REVIEW_PROCESSING  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING,  # type: ignore
             ]
 
             if stage in critical_phases:
                 health_check = reliability.perform_health_check(self.workflow_id)  # type: ignore[assignment]
-                if health_check and health_check.status in [HealthStatus.CRITICAL, HealthStatus.FAILED]:  # type: ignore
-                    logger.warning(f"Health check failed before {stage.value}: {health_check.status.value}")  # type: ignore
+                if health_check and health_check.status in [
+                    HealthStatus.CRITICAL,
+                    HealthStatus.FAILED,
+                ]:  # type: ignore
+                    logger.warning(
+                        f"Health check failed before {stage.value}: {health_check.status.value}"
+                    )  # type: ignore
                     # Continue with warnings but monitor closely
 
             # Execute phase with retry logic
@@ -341,7 +455,7 @@ class EnhancedWorkflowManager:
                 WorkflowStage.ISSUE_CREATION,  # type: ignore
                 WorkflowStage.IMPLEMENTATION_COMPLETE,  # type: ignore
                 WorkflowStage.PR_CREATION,  # type: ignore
-                WorkflowStage.REVIEW_PROCESSING  # type: ignore
+                WorkflowStage.REVIEW_PROCESSING,  # type: ignore
             ]
 
             if stage in checkpoint_phases and self.config.enable_persistence:
@@ -355,15 +469,18 @@ class EnhancedWorkflowManager:
 
             # Handle error through reliability manager
             error_result = reliability.handle_workflow_error(
-                self.workflow_id, e, stage, {  # type: ignore[assignment]
-                    'phase_duration': phase_duration,
-                    'phase_start_time': phase_start_time,
-                    'checkpoints_so_far': len(self.phase_checkpoints)
-                }
+                self.workflow_id,
+                e,
+                stage,
+                {  # type: ignore[assignment]
+                    "phase_duration": phase_duration,
+                    "phase_start_time": phase_start_time,
+                    "checkpoints_so_far": len(self.phase_checkpoints),
+                },
             )
 
             # Attempt recovery if enabled
-            if self.config.enable_recovery and error_result.get('success', False):
+            if self.config.enable_recovery and error_result.get("success", False):
                 logger.info(f"Attempting recovery for phase {stage.value}")  # type: ignore
                 try:
                     # Retry phase after recovery actions
@@ -372,80 +489,90 @@ class EnhancedWorkflowManager:
                     logger.info(f"Phase {stage.value} recovered successfully")  # type: ignore
                     return result
                 except Exception as recovery_error:
-                    logger.error(f"Phase {stage.value} recovery failed: {recovery_error}")  # type: ignore
+                    logger.error(
+                        f"Phase {stage.value} recovery failed: {recovery_error}"
+                    )  # type: ignore
 
             # Re-raise original exception if recovery failed
             raise e
 
-    def _execute_implementation_phases(self, prompt_data: Dict[str, Any],
-                                     reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _execute_implementation_phases(
+        self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Execute the multi-stage implementation phase with detailed monitoring"""
 
         # Implementation Start
         impl_start_result = self._execute_phase_with_monitoring(
             WorkflowStage.IMPLEMENTATION_START,  # type: ignore
             lambda: self._phase_implementation_start(prompt_data, reliability),
-            reliability
+            reliability,
         )
 
         # Implementation Progress (can be long-running)
         impl_progress_result = self._execute_phase_with_monitoring(
             WorkflowStage.IMPLEMENTATION_PROGRESS,  # type: ignore
             lambda: self._phase_implementation_progress(impl_start_result, reliability),
-            reliability
+            reliability,
         )
 
         # Implementation Complete
         impl_complete_result = self._execute_phase_with_monitoring(
             WorkflowStage.IMPLEMENTATION_COMPLETE,  # type: ignore
-            lambda: self._phase_implementation_complete(impl_progress_result, reliability),
-            reliability
+            lambda: self._phase_implementation_complete(
+                impl_progress_result, reliability
+            ),
+            reliability,
         )
 
         return {
-            'start_result': impl_start_result,
-            'progress_result': impl_progress_result,
-            'complete_result': impl_complete_result,
-            'files_created': impl_complete_result.get('files_created', []),
-            'implementation_summary': impl_complete_result.get('summary', {})
+            "start_result": impl_start_result,
+            "progress_result": impl_progress_result,
+            "complete_result": impl_complete_result,
+            "files_created": impl_complete_result.get("files_created", []),
+            "implementation_summary": impl_complete_result.get("summary", {}),
         }
 
-    def _execute_pr_phases(self, implementation_result: Dict[str, Any],
-                          reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _execute_pr_phases(
+        self,
+        implementation_result: Dict[str, Any],
+        reliability: WorkflowReliabilityManager,
+    ) -> Dict[str, Any]:
         """Execute PR creation phases with verification"""
 
         # PR Preparation
         pr_prep_result = self._execute_phase_with_monitoring(
             WorkflowStage.PR_PREPARATION,  # type: ignore
             lambda: self._phase_pr_preparation(implementation_result, reliability),
-            reliability
+            reliability,
         )
 
         # PR Creation
         pr_create_result = self._execute_phase_with_monitoring(
             WorkflowStage.PR_CREATION,  # type: ignore
             lambda: self._phase_pr_creation(pr_prep_result, reliability),
-            reliability
+            reliability,
         )
 
         # PR Verification
         pr_verify_result = self._execute_phase_with_monitoring(
             WorkflowStage.PR_VERIFICATION,  # type: ignore
             lambda: self._phase_pr_verification(pr_create_result, reliability),
-            reliability
+            reliability,
         )
 
         return {
-            'preparation_result': pr_prep_result,
-            'creation_result': pr_create_result,
-            'verification_result': pr_verify_result,
-            'pr_number': pr_create_result.get('pr_number'),
-            'pr_url': pr_create_result.get('pr_url')
+            "preparation_result": pr_prep_result,
+            "creation_result": pr_create_result,
+            "verification_result": pr_verify_result,
+            "pr_number": pr_create_result.get("pr_number"),
+            "pr_url": pr_create_result.get("pr_url"),
         }
 
     # Phase implementation methods (these would call the actual WorkflowManager logic)
 
-    def _phase_initialization(self, prompt_file: str, reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_initialization(
+        self, prompt_file: str, reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Enhanced initialization phase with comprehensive setup"""
         logger.info("Initializing enhanced workflow execution")
 
@@ -459,147 +586,167 @@ class EnhancedWorkflowManager:
 
         # Create workflow state persistence
         if self.config.enable_persistence and reliability:
-            reliability.create_workflow_persistence(self.workflow_id, self.workflow_context)  # type: ignore
+            reliability.create_workflow_persistence(
+                self.workflow_id, self.workflow_context
+            )  # type: ignore[call-arg]  # type: ignore
 
         return {
-            'workflow_id': self.workflow_id,
-            'prompt_file': prompt_file,
-            'initialization_time': datetime.now().isoformat(),
-            'monitoring_enabled': self.config.enable_monitoring,
-            'health_checks_enabled': self.config.enable_health_checks,
-            'persistence_enabled': self.config.enable_persistence
+            "workflow_id": self.workflow_id,
+            "prompt_file": prompt_file,
+            "initialization_time": datetime.now().isoformat(),
+            "monitoring_enabled": self.config.enable_monitoring,
+            "health_checks_enabled": self.config.enable_health_checks,
+            "persistence_enabled": self.config.enable_persistence,
         }
 
-    def _phase_prompt_analysis(self, prompt_file: str, reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_prompt_analysis(
+        self, prompt_file: str, reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Analyze prompt file and extract requirements"""
         logger.info(f"Analyzing prompt file: {prompt_file}")
 
         try:
-            with open(prompt_file, 'r', encoding='utf-8') as f:
+            with open(prompt_file, "r", encoding="utf-8") as f:
                 prompt_content = f.read()
 
             # Basic prompt analysis (this would be more sophisticated in practice)
-            lines = prompt_content.split('\n')
+            lines = prompt_content.split("\n")
 
             # Extract key sections
             sections = {}
-            current_section = 'header'
+            current_section = "header"
             current_content = []
 
             for line in lines:
-                if line.startswith('#'):
+                if line.startswith("#"):
                     if current_content:
-                        sections[current_section] = '\n'.join(current_content)
-                    current_section = line.strip('# ').lower().replace(' ', '_')
+                        sections[current_section] = "\n".join(current_content)
+                    current_section = line.strip("# ").lower().replace(" ", "_")
                     current_content = []
                 else:
                     current_content.append(line)
 
             if current_content:
-                sections[current_section] = '\n'.join(current_content)
+                sections[current_section] = "\n".join(current_content)
 
             # Extract requirements and success criteria
             requirements = []
             success_criteria = []
 
             for section_name, content in sections.items():
-                if 'requirement' in section_name:
-                    requirements.extend([line.strip('- ') for line in content.split('\n') if line.strip().startswith('-')])
-                elif 'success' in section_name or 'criteria' in section_name:
-                    success_criteria.extend([line.strip('- ') for line in content.split('\n') if line.strip().startswith('-')])
+                if "requirement" in section_name:
+                    requirements.extend(
+                        [
+                            line.strip("- ")
+                            for line in content.split("\n")
+                            if line.strip().startswith("-")
+                        ]
+                    )
+                elif "success" in section_name or "criteria" in section_name:
+                    success_criteria.extend(
+                        [
+                            line.strip("- ")
+                            for line in content.split("\n")
+                            if line.strip().startswith("-")
+                        ]
+                    )
 
             return {
-                'prompt_file': prompt_file,
-                'content_length': len(prompt_content),
-                'sections': list(sections.keys()),
-                'requirements': requirements,
-                'success_criteria': success_criteria,
-                'feature_name': self._extract_feature_name(prompt_content),
-                'complexity_estimate': self._estimate_complexity(sections, requirements)
+                "prompt_file": prompt_file,
+                "content_length": len(prompt_content),
+                "sections": list(sections.keys()),
+                "requirements": requirements,
+                "success_criteria": success_criteria,
+                "feature_name": self._extract_feature_name(prompt_content),
+                "complexity_estimate": self._estimate_complexity(
+                    sections, requirements
+                ),
             }
 
         except Exception as e:
             logger.error(f"Failed to analyze prompt file: {e}")
             raise
 
-    def _phase_task_preparation(self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager) -> List[Dict[str, Any]]:
+    def _phase_task_preparation(
+        self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> List[Dict[str, Any]]:
         """Prepare comprehensive task list based on prompt analysis"""
         logger.info("Preparing comprehensive task list")
 
         # Create detailed task list based on prompt analysis
         tasks = [
             {
-                'id': '1',
-                'title': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
-                'content': f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
-                'phase': WorkflowStage.ISSUE_CREATION.value,  # type: ignore
-                'estimated_duration': 120,  # seconds
-                'dependencies': [],
-                'critical': True
+                "id": "1",
+                "title": f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
+                "content": f"Create GitHub issue for {prompt_data.get('feature_name', 'Feature')}",
+                "phase": WorkflowStage.ISSUE_CREATION.value,  # type: ignore
+                "estimated_duration": 120,  # seconds
+                "dependencies": [],
+                "critical": True,
             },
             {
-                'id': '2',
-                'title': 'Create and checkout feature branch',
-                'content': 'Create and checkout feature branch',
-                'phase': WorkflowStage.BRANCH_SETUP.value,  # type: ignore
-                'estimated_duration': 60,
-                'dependencies': ['1'],
-                'critical': True
+                "id": "2",
+                "title": "Create and checkout feature branch",
+                "content": "Create and checkout feature branch",
+                "phase": WorkflowStage.BRANCH_SETUP.value,  # type: ignore
+                "estimated_duration": 60,
+                "dependencies": ["1"],
+                "critical": True,
             },
             {
-                'id': '3',
-                'title': 'Research existing implementation and patterns',
-                'content': 'Research existing implementation and patterns',
-                'phase': WorkflowStage.RESEARCH_PLANNING.value,  # type: ignore
-                'estimated_duration': 300,
-                'dependencies': ['2'],
-                'critical': False
+                "id": "3",
+                "title": "Research existing implementation and patterns",
+                "content": "Research existing implementation and patterns",
+                "phase": WorkflowStage.RESEARCH_PLANNING.value,  # type: ignore
+                "estimated_duration": 300,
+                "dependencies": ["2"],
+                "critical": False,
             },
             {
-                'id': '4',
-                'title': 'Implement core functionality',
-                'content': 'Implement core functionality',
-                'phase': WorkflowStage.IMPLEMENTATION_PROGRESS.value,  # type: ignore
-                'estimated_duration': prompt_data.get('complexity_estimate', 1800),
-                'dependencies': ['3'],
-                'critical': True
+                "id": "4",
+                "title": "Implement core functionality",
+                "content": "Implement core functionality",
+                "phase": WorkflowStage.IMPLEMENTATION_PROGRESS.value,  # type: ignore
+                "estimated_duration": prompt_data.get("complexity_estimate", 1800),
+                "dependencies": ["3"],
+                "critical": True,
             },
             {
-                'id': '5',
-                'title': 'Write comprehensive tests',
-                'content': 'Write comprehensive tests',
-                'phase': WorkflowStage.TESTING_START.value,  # type: ignore
-                'estimated_duration': 600,
-                'dependencies': ['4'],
-                'critical': True
+                "id": "5",
+                "title": "Write comprehensive tests",
+                "content": "Write comprehensive tests",
+                "phase": WorkflowStage.TESTING_START.value,  # type: ignore
+                "estimated_duration": 600,
+                "dependencies": ["4"],
+                "critical": True,
             },
             {
-                'id': '6',
-                'title': 'Update documentation',
-                'content': 'Update documentation',
-                'phase': WorkflowStage.DOCUMENTATION_UPDATE.value,  # type: ignore
-                'estimated_duration': 300,
-                'dependencies': ['4'],
-                'critical': False
+                "id": "6",
+                "title": "Update documentation",
+                "content": "Update documentation",
+                "phase": WorkflowStage.DOCUMENTATION_UPDATE.value,  # type: ignore
+                "estimated_duration": 300,
+                "dependencies": ["4"],
+                "critical": False,
             },
             {
-                'id': '7',
-                'title': 'Create pull request',
-                'content': 'Create pull request',
-                'phase': WorkflowStage.PR_CREATION.value,  # type: ignore
-                'estimated_duration': 120,
-                'dependencies': ['5', '6'],
-                'critical': True
+                "id": "7",
+                "title": "Create pull request",
+                "content": "Create pull request",
+                "phase": WorkflowStage.PR_CREATION.value,  # type: ignore
+                "estimated_duration": 120,
+                "dependencies": ["5", "6"],
+                "critical": True,
             },
             {
-                'id': '8',
-                'title': 'Process code review',
-                'content': 'Process code review',
-                'phase': WorkflowStage.REVIEW_PROCESSING.value,  # type: ignore
-                'estimated_duration': 300,
-                'dependencies': ['7'],
-                'critical': True
-            }
+                "id": "8",
+                "title": "Process code review",
+                "content": "Process code review",
+                "phase": WorkflowStage.REVIEW_PROCESSING.value,  # type: ignore
+                "estimated_duration": 300,
+                "dependencies": ["7"],
+                "critical": True,
+            },
         ]
 
         # Initialize task tracking if available
@@ -609,51 +756,59 @@ class EnhancedWorkflowManager:
         logger.info(f"Prepared {len(tasks)} tasks for execution")
         return tasks
 
-    def _phase_issue_creation(self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_issue_creation(
+        self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Create GitHub issue with comprehensive error handling"""
         logger.info("Creating GitHub issue")
 
         if not self.github_ops:
             # Simulate issue creation for testing
             return {
-                'issue_number': 999,
-                'issue_url': 'https://github.com/test/repo/issues/999',
-                'simulated': True
+                "issue_number": 999,
+                "issue_url": "https://github.com/test/repo/issues/999",
+                "simulated": True,
             }
 
         try:
             issue_data = {
-                'title': f"{prompt_data.get('feature_name', 'Feature')} - {self.workflow_id}",
-                'body': self._format_issue_body(prompt_data),
-                'labels': ['enhancement', 'ai-generated', 'WorkflowManager']
+                "title": f"{prompt_data.get('feature_name', 'Feature')} - {self.workflow_id}",
+                "body": self._format_issue_body(prompt_data),
+                "labels": ["enhancement", "ai-generated", "WorkflowManager"],
             }
 
             # Create issue with retry logic through Enhanced Separation
             @retry(max_attempts=3, initial_delay=2.0)  # type: ignore
             def create_issue_with_retry():
                 return self.github_ops.create_issue(  # type: ignore
-                    title=issue_data['title'],
-                    body=issue_data['body'],
-                    labels=issue_data.get('labels')
+                    title=issue_data["title"],
+                    body=issue_data["body"],
+                    labels=issue_data.get("labels"),
                 )
 
             result = create_issue_with_retry()
 
-            if result.get('success'):
-                logger.info(f"Created issue #{result['issue_number']}: {result['issue_url']}")
+            if result.get("success"):
+                logger.info(
+                    f"Created issue #{result['issue_number']}: {result['issue_url']}"
+                )
                 return result
             else:
-                raise Exception(f"Failed to create issue: {result.get('error', 'Unknown error')}")
+                raise Exception(
+                    f"Failed to create issue: {result.get('error', 'Unknown error')}"
+                )
 
         except Exception as e:
             logger.error(f"Issue creation failed: {e}")
             raise
 
-    def _phase_branch_setup(self, issue_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_branch_setup(
+        self, issue_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Set up feature branch with validation"""
         logger.info("Setting up feature branch")
 
-        issue_number = issue_result.get('issue_number', 999)
+        issue_number = issue_result.get("issue_number", 999)
         branch_name = f"feature/WorkflowManager-reliability-{issue_number}"
 
         try:
@@ -662,17 +817,19 @@ class EnhancedWorkflowManager:
 
             logger.info(f"Created and checked out branch: {branch_name}")
             return {
-                'branch_name': branch_name,
-                'issue_number': issue_number,
-                'git_status': 'clean',
-                'branch_created': True
+                "branch_name": branch_name,
+                "issue_number": issue_number,
+                "git_status": "clean",
+                "branch_created": True,
             }
 
         except Exception as e:
             logger.error(f"Branch setup failed: {e}")
             raise
 
-    def _phase_research_planning(self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_research_planning(
+        self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Research existing implementation and create detailed plan"""
         logger.info("Conducting research and planning")
 
@@ -680,171 +837,200 @@ class EnhancedWorkflowManager:
         # For now, return simulated research results
 
         return {
-            'existing_patterns_found': [
-                '.claude/shared/workflow_reliability.py',
-                '.claude/shared/utils/error_handling.py',
-                '.claude/shared/state_management.py'
+            "existing_patterns_found": [
+                ".claude/shared/workflow_reliability.py",
+                ".claude/shared/utils/error_handling.py",
+                ".claude/shared/state_management.py",
             ],
-            'integration_points': [
-                'Enhanced Separation shared modules',
-                'WorkflowManager agent definition',
-                'OrchestratorAgent coordination'
+            "integration_points": [
+                "Enhanced Separation shared modules",
+                "WorkflowManager agent definition",
+                "OrchestratorAgent coordination",
             ],
-            'implementation_strategy': 'Enhance existing WorkflowManager with reliability wrapper',
-            'estimated_complexity': prompt_data.get('complexity_estimate', 1800)
+            "implementation_strategy": "Enhance existing WorkflowManager with reliability wrapper",
+            "estimated_complexity": prompt_data.get("complexity_estimate", 1800),
         }
 
-    def _phase_implementation_start(self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_implementation_start(
+        self, prompt_data: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Start implementation with proper setup"""
         logger.info("Starting implementation phase")
 
         return {
-            'implementation_started': True,
-            'files_to_create': [
-                '.claude/shared/workflow_reliability.py',
-                '.claude/agents/enhanced_workflow_manager.py'
+            "implementation_started": True,
+            "files_to_create": [
+                ".claude/shared/workflow_reliability.py",
+                ".claude/agents/enhanced_workflow_manager.py",
             ],
-            'files_to_modify': [
-                '.claude/agents/WorkflowManager.md'
-            ],
-            'start_time': datetime.now().isoformat()
+            "files_to_modify": [".claude/agents/WorkflowManager.md"],
+            "start_time": datetime.now().isoformat(),
         }
 
-    def _phase_implementation_progress(self, impl_start_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_implementation_progress(
+        self, impl_start_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Execute main implementation work with progress tracking"""
         logger.info("Executing implementation progress")
 
         # Simulate progressive implementation
-        files_created = impl_start_result.get('files_to_create', [])
-        files_modified = impl_start_result.get('files_to_modify', [])
+        files_created = impl_start_result.get("files_to_create", [])
+        files_modified = impl_start_result.get("files_to_modify", [])
 
         # In real implementation, this would create/modify the actual files
         # For now, simulate the work
 
         return {
-            'files_created': files_created,
-            'files_modified': files_modified,
-            'lines_added': 2500,  # Simulated
-            'implementation_progress': 100,
-            'progress_time': datetime.now().isoformat()
+            "files_created": files_created,
+            "files_modified": files_modified,
+            "lines_added": 2500,  # Simulated
+            "implementation_progress": 100,
+            "progress_time": datetime.now().isoformat(),
         }
 
-    def _phase_implementation_complete(self, impl_progress_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_implementation_complete(
+        self,
+        impl_progress_result: Dict[str, Any],
+        reliability: WorkflowReliabilityManager,
+    ) -> Dict[str, Any]:
         """Complete implementation with validation"""
         logger.info("Completing implementation phase")
 
         return {
-            'implementation_complete': True,
-            'files_created': impl_progress_result.get('files_created', []),
-            'files_modified': impl_progress_result.get('files_modified', []),
-            'completion_time': datetime.now().isoformat(),
-            'summary': {
-                'total_files': len(impl_progress_result.get('files_created', [])) + len(impl_progress_result.get('files_modified', [])),
-                'lines_added': impl_progress_result.get('lines_added', 0),
-                'implementation_successful': True
-            }
+            "implementation_complete": True,
+            "files_created": impl_progress_result.get("files_created", []),
+            "files_modified": impl_progress_result.get("files_modified", []),
+            "completion_time": datetime.now().isoformat(),
+            "summary": {
+                "total_files": len(impl_progress_result.get("files_created", []))
+                + len(impl_progress_result.get("files_modified", [])),
+                "lines_added": impl_progress_result.get("lines_added", 0),
+                "implementation_successful": True,
+            },
         }
 
-    def _phase_testing(self, implementation_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_testing(
+        self,
+        implementation_result: Dict[str, Any],
+        reliability: WorkflowReliabilityManager,
+    ) -> Dict[str, Any]:
         """Execute comprehensive testing"""
         logger.info("Executing testing phase")
 
         return {
-            'tests_created': [
-                'tests/test_enhanced_workflow_manager.py',
-                'tests/test_workflow_reliability.py'
+            "tests_created": [
+                "tests/test_enhanced_workflow_manager.py",
+                "tests/test_workflow_reliability.py",
             ],
-            'test_status': 'passed',
-            'test_coverage': 95,
-            'tests_run': 45,
-            'tests_passed': 43,
-            'tests_failed': 0,
-            'tests_skipped': 2
+            "test_status": "passed",
+            "test_coverage": 95,
+            "tests_run": 45,
+            "tests_passed": 43,
+            "tests_failed": 0,
+            "tests_skipped": 2,
         }
 
-    def _phase_documentation(self, implementation_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_documentation(
+        self,
+        implementation_result: Dict[str, Any],
+        reliability: WorkflowReliabilityManager,
+    ) -> Dict[str, Any]:
         """Update documentation"""
         logger.info("Updating documentation")
 
         return {
-            'files_updated': [
-                'README.md',
-                '.claude/docs/WORKFLOW_MANAGER_RELIABILITY.md'
+            "files_updated": [
+                "README.md",
+                ".claude/docs/WORKFLOW_MANAGER_RELIABILITY.md",
             ],
-            'documentation_complete': True
+            "documentation_complete": True,
         }
 
-    def _phase_pr_preparation(self, implementation_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_pr_preparation(
+        self,
+        implementation_result: Dict[str, Any],
+        reliability: WorkflowReliabilityManager,
+    ) -> Dict[str, Any]:
         """Prepare pull request"""
         logger.info("Preparing pull request")
 
         return {
-            'pr_title': f"Fix issue #73: WorkflowManager execution reliability improvements",
-            'pr_body': self._format_pr_body(implementation_result),
-            'pr_ready': True
+            "pr_title": "Fix issue #73: WorkflowManager execution reliability improvements",
+            "pr_body": self._format_pr_body(implementation_result),
+            "pr_ready": True,
         }
 
-    def _phase_pr_creation(self, pr_prep_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_pr_creation(
+        self, pr_prep_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Create pull request with verification"""
         logger.info("Creating pull request")
 
         # Simulate PR creation
         return {
-            'pr_number': 125,
-            'pr_url': 'https://github.com/test/repo/pull/125',
-            'pr_title': pr_prep_result.get('pr_title'),
-            'pr_created': True
+            "pr_number": 125,
+            "pr_url": "https://github.com/test/repo/pull/125",
+            "pr_title": pr_prep_result.get("pr_title"),
+            "pr_created": True,
         }
 
-    def _phase_pr_verification(self, pr_create_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_pr_verification(
+        self, pr_create_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Verify pull request was created successfully"""
         logger.info("Verifying pull request")
 
         return {
-            'pr_verified': True,
-            'pr_number': pr_create_result.get('pr_number'),
-            'checks_status': 'pending',
-            'verification_complete': True
+            "pr_verified": True,
+            "pr_number": pr_create_result.get("pr_number"),
+            "checks_status": "pending",
+            "verification_complete": True,
         }
 
-    def _phase_review_processing(self, pr_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_review_processing(
+        self, pr_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Process code review"""
         logger.info("Processing code review")
 
         # This would invoke the CodeReviewer agent
         return {
-            'review_requested': True,
-            'review_status': 'pending',
-            'pr_number': pr_result.get('pr_number')
+            "review_requested": True,
+            "review_status": "pending",
+            "pr_number": pr_result.get("pr_number"),
         }
 
-    def _phase_final_cleanup(self, review_result: Dict[str, Any], reliability: WorkflowReliabilityManager) -> Dict[str, Any]:
+    def _phase_final_cleanup(
+        self, review_result: Dict[str, Any], reliability: WorkflowReliabilityManager
+    ) -> Dict[str, Any]:
         """Perform final cleanup"""
         logger.info("Performing final cleanup")
 
         return {
-            'cleanup_complete': True,
-            'status': 'success',
-            'final_status': 'workflow_completed_successfully'
+            "cleanup_complete": True,
+            "status": "success",
+            "final_status": "workflow_completed_successfully",
         }
 
     # Helper methods
 
-    def _create_phase_checkpoint(self, stage: WorkflowStage, result: Any, reliability: WorkflowReliabilityManager):
+    def _create_phase_checkpoint(
+        self, stage: WorkflowStage, result: Any, reliability: WorkflowReliabilityManager
+    ):
         """Create checkpoint for critical phases"""
         try:
             checkpoint_data = {
-                'stage': stage.value,  # type: ignore
-                'result': result,
-                'timestamp': datetime.now().isoformat(),
-                'workflow_id': self.workflow_id,
-                'phase_checkpoints': self.phase_checkpoints.copy()
+                "stage": stage.value,  # type: ignore
+                "result": result,
+                "timestamp": datetime.now().isoformat(),
+                "workflow_id": self.workflow_id,
+                "phase_checkpoints": self.phase_checkpoints.copy(),
             }
 
             if reliability and self.state_manager:
                 reliability.create_workflow_persistence(  # type: ignore
                     f"{self.workflow_id}_checkpoint_{stage.value}",  # type: ignore
-                    checkpoint_data
+                    checkpoint_data,
                 )
 
             logger.info(f"Created checkpoint for stage: {stage.value}")  # type: ignore
@@ -854,22 +1040,28 @@ class EnhancedWorkflowManager:
 
     def _extract_feature_name(self, prompt_content: str) -> str:
         """Extract feature name from prompt content"""
-        lines = prompt_content.split('\n')
+        lines = prompt_content.split("\n")
         for line in lines[:10]:  # Check first 10 lines for title
-            if line.startswith('#') and 'fix' in line.lower() and 'issue' in line.lower():
-                return line.strip('# ')
+            if (
+                line.startswith("#")
+                and "fix" in line.lower()
+                and "issue" in line.lower()
+            ):
+                return line.strip("# ")
         return "WorkflowManager Reliability Improvements"
 
-    def _estimate_complexity(self, sections: Dict[str, str], requirements: List[str]) -> int:
+    def _estimate_complexity(
+        self, sections: Dict[str, str], requirements: List[str]
+    ) -> int:
         """Estimate implementation complexity in seconds"""
         base_complexity = 600  # 10 minutes base
 
         # Add complexity based on sections and requirements
         complexity_factors = {
-            'implementation': 300,
-            'testing': 180,
-            'documentation': 120,
-            'integration': 240
+            "implementation": 300,
+            "testing": 180,
+            "documentation": 120,
+            "integration": 240,
         }
 
         total_complexity = base_complexity
@@ -885,8 +1077,8 @@ class EnhancedWorkflowManager:
 
     def _format_issue_body(self, prompt_data: Dict[str, Any]) -> str:
         """Format GitHub issue body"""
-        requirements = prompt_data.get('requirements', [])
-        success_criteria = prompt_data.get('success_criteria', [])
+        requirements = prompt_data.get("requirements", [])
+        success_criteria = prompt_data.get("success_criteria", [])
 
         body = f"""# {prompt_data.get('feature_name', 'Feature Implementation')}
 
@@ -917,10 +1109,10 @@ This issue was created automatically by the Enhanced WorkflowManager to track im
 
     def _format_pr_body(self, implementation_result: Dict[str, Any]) -> str:
         """Format pull request body"""
-        files_created = implementation_result.get('files_created', [])
-        files_modified = implementation_result.get('files_modified', [])
+        files_created = implementation_result.get("files_created", [])
+        files_modified = implementation_result.get("files_modified", [])
 
-        body = f"""# WorkflowManager Execution Reliability Improvements
+        body = """# WorkflowManager Execution Reliability Improvements
 
 ## Summary
 This PR implements comprehensive reliability improvements for the WorkflowManager addressing Issue #73.
@@ -969,13 +1161,15 @@ This PR implements comprehensive reliability improvements for the WorkflowManage
 
         try:
             # Restore workflow state from persistence
-            restored_state = self.reliability_manager.restore_workflow_from_persistence(workflow_id)
+            restored_state = self.reliability_manager.restore_workflow_from_persistence(
+                workflow_id
+            )
 
             if not restored_state:
                 return {
-                    'success': False,
-                    'error': 'No saved state found for workflow',
-                    'workflow_id': workflow_id
+                    "success": False,
+                    "error": "No saved state found for workflow",
+                    "workflow_id": workflow_id,
                 }
 
             # Resume workflow from saved state
@@ -987,19 +1181,17 @@ This PR implements comprehensive reliability improvements for the WorkflowManage
 
             logger.info(f"Successfully resumed workflow: {workflow_id}")
             return {
-                'success': True,
-                'workflow_id': workflow_id,
-                'resumed_from': restored_state.get('monitoring_state', {}).get('current_stage', 'unknown'),
-                'resumption_time': datetime.now().isoformat()
+                "success": True,
+                "workflow_id": workflow_id,
+                "resumed_from": restored_state.get("monitoring_state", {}).get(
+                    "current_stage", "unknown"
+                ),
+                "resumption_time": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Failed to resume workflow {workflow_id}: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'workflow_id': workflow_id
-            }
+            return {"success": False, "error": str(e), "workflow_id": workflow_id}
 
 
 # CLI interface for the Enhanced WorkflowManager
@@ -1007,15 +1199,27 @@ def main():
     """CLI entry point for Enhanced WorkflowManager"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Enhanced WorkflowManager with comprehensive reliability features")
-    parser.add_argument('prompt_file', help='Path to the prompt file to execute')
-    parser.add_argument('--config', help='Path to configuration file (JSON)')
-    parser.add_argument('--resume', help='Resume workflow with given ID')
-    parser.add_argument('--log-level', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'])
-    parser.add_argument('--disable-monitoring', action='store_true', help='Disable workflow monitoring')
-    parser.add_argument('--disable-health-checks', action='store_true', help='Disable health checks')
-    parser.add_argument('--disable-recovery', action='store_true', help='Disable automatic recovery')
-    parser.add_argument('--max-retries', type=int, default=3, help='Maximum retry attempts')
+    parser = argparse.ArgumentParser(
+        description="Enhanced WorkflowManager with comprehensive reliability features"
+    )
+    parser.add_argument("prompt_file", help="Path to the prompt file to execute")
+    parser.add_argument("--config", help="Path to configuration file (JSON)")
+    parser.add_argument("--resume", help="Resume workflow with given ID")
+    parser.add_argument(
+        "--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"]
+    )
+    parser.add_argument(
+        "--disable-monitoring", action="store_true", help="Disable workflow monitoring"
+    )
+    parser.add_argument(
+        "--disable-health-checks", action="store_true", help="Disable health checks"
+    )
+    parser.add_argument(
+        "--disable-recovery", action="store_true", help="Disable automatic recovery"
+    )
+    parser.add_argument(
+        "--max-retries", type=int, default=3, help="Maximum retry attempts"
+    )
 
     args = parser.parse_args()
 
@@ -1023,7 +1227,7 @@ def main():
     config = WorkflowConfiguration()
     if args.config:
         try:
-            with open(args.config, 'r') as f:
+            with open(args.config, "r") as f:
                 config_data = json.load(f)
                 for key, value in config_data.items():
                     if hasattr(config, key):
@@ -1041,7 +1245,7 @@ def main():
     # Configure logging
     logging.basicConfig(
         level=getattr(logging, args.log_level),
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     # Create enhanced workflow manager
@@ -1059,7 +1263,7 @@ def main():
         print(json.dumps(result, indent=2, default=str))
 
         # Return appropriate exit code
-        return 0 if result.get('success', False) else 1
+        return 0 if result.get("success", False) else 1
 
     except KeyboardInterrupt:
         print("\nWorkflow interrupted by user")

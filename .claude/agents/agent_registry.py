@@ -21,6 +21,7 @@ from base.v03_agent import V03Agent, AgentCapabilities
 
 class AgentType(Enum):
     """Enumeration of available agent types."""
+
     WORKFLOW_MANAGER = "WorkflowManager"
     ORCHESTRATOR = "orchestrator"
     CODE_REVIEWER = "CodeReviewer"
@@ -30,12 +31,13 @@ class AgentType(Enum):
     WORKTREE_MANAGER = "WorktreeManager"
     PR_BACKLOG_MANAGER = "PrBacklogManager"
     MEMORY_MANAGER = "MemoryManager"
-    EVENT_ROUTER_MANAGER = "EventRouterManager"
+    EVENT_ROUTER_SERVICE_MANAGER = "EventRouterServiceManager"
 
 
 @dataclass
 class AgentRegistration:
     """Registration information for an agent."""
+
     agent_type: AgentType
     agent_class: Type[V03Agent]
     module_path: str
@@ -68,7 +70,9 @@ class AgentRegistry:
         # Workflow Manager
         self._registry[AgentType.WORKFLOW_MANAGER] = AgentRegistration(
             agent_type=AgentType.WORKFLOW_MANAGER,
-            agent_class=self._lazy_load_class("WorkflowManager", "workflow_manager_v03", "WorkflowManagerV03"),
+            agent_class=self._lazy_load_class(
+                "WorkflowManager", "workflow_manager_v03", "WorkflowManagerV03"
+            ),
             module_path=".claude/agents/WorkflowManager/workflow_manager_v03.py",
             capabilities=AgentCapabilities(
                 can_create_prs=True,
@@ -78,18 +82,26 @@ class AgentRegistry:
                 can_test=True,
                 can_document=True,
                 expertise_areas=["git", "workflow", "pr_management", "ci_cd"],
-                max_parallel_tasks=5
+                max_parallel_tasks=5,
             ),
-            expertise_areas=["git", "pull_requests", "workflows", "ci_cd", "project_management"],
+            expertise_areas=[
+                "git",
+                "pull_requests",
+                "workflows",
+                "ci_cd",
+                "project_management",
+            ],
             knowledge_dir=Path(".claude/agents/WorkflowManager/knowledge"),
             description="Manages complete development workflows from requirements to PR merge",
-            enabled=True
+            enabled=True,
         )
 
         # Orchestrator
         self._registry[AgentType.ORCHESTRATOR] = AgentRegistration(
             agent_type=AgentType.ORCHESTRATOR,
-            agent_class=self._lazy_load_class("orchestrator", "orchestrator_v03", "OrchestratorV03"),
+            agent_class=self._lazy_load_class(
+                "orchestrator", "orchestrator_v03", "OrchestratorV03"
+            ),
             module_path=".claude/agents/orchestrator/orchestrator_v03.py",
             capabilities=AgentCapabilities(
                 can_parallelize=True,
@@ -98,19 +110,30 @@ class AgentRegistry:
                 can_review_code=False,
                 can_test=False,
                 can_document=False,
-                expertise_areas=["parallelization", "task_decomposition", "optimization"],
-                max_parallel_tasks=20
+                expertise_areas=[
+                    "parallelization",
+                    "task_decomposition",
+                    "optimization",
+                ],
+                max_parallel_tasks=20,
             ),
-            expertise_areas=["parallel_execution", "task_analysis", "dependency_resolution", "performance"],
+            expertise_areas=[
+                "parallel_execution",
+                "task_analysis",
+                "dependency_resolution",
+                "performance",
+            ],
             knowledge_dir=Path(".claude/agents/orchestrator/knowledge"),
             description="Orchestrates parallel task execution with intelligent decomposition",
-            enabled=True
+            enabled=True,
         )
 
         # Code Reviewer
         self._registry[AgentType.CODE_REVIEWER] = AgentRegistration(
             agent_type=AgentType.CODE_REVIEWER,
-            agent_class=self._lazy_load_class("CodeReviewer", "code_reviewer_v03", "CodeReviewerV03"),
+            agent_class=self._lazy_load_class(
+                "CodeReviewer", "code_reviewer_v03", "CodeReviewerV03"
+            ),
             module_path=".claude/agents/CodeReviewer/code_reviewer_v03.py",
             capabilities=AgentCapabilities(
                 can_parallelize=True,
@@ -119,19 +142,31 @@ class AgentRegistry:
                 can_review_code=True,
                 can_test=False,
                 can_document=False,
-                expertise_areas=["code_quality", "security", "performance", "best_practices"],
-                max_parallel_tasks=5
+                expertise_areas=[
+                    "code_quality",
+                    "security",
+                    "performance",
+                    "best_practices",
+                ],
+                max_parallel_tasks=5,
             ),
-            expertise_areas=["code_quality", "security_analysis", "performance_review", "patterns"],
+            expertise_areas=[
+                "code_quality",
+                "security_analysis",
+                "performance_review",
+                "patterns",
+            ],
             knowledge_dir=Path(".claude/agents/CodeReviewer/knowledge"),
             description="Reviews code with pattern recognition and learning from feedback",
-            enabled=True
+            enabled=True,
         )
 
         # Task Decomposer
         self._registry[AgentType.TASK_DECOMPOSER] = AgentRegistration(
             agent_type=AgentType.TASK_DECOMPOSER,
-            agent_class=self._lazy_load_class("TaskDecomposer", "task_decomposer_v03", "TaskDecomposerV03"),
+            agent_class=self._lazy_load_class(
+                "TaskDecomposer", "task_decomposer_v03", "TaskDecomposerV03"
+            ),
             module_path=".claude/agents/TaskDecomposer/task_decomposer_v03.py",
             capabilities=AgentCapabilities(
                 can_parallelize=True,
@@ -140,20 +175,32 @@ class AgentRegistry:
                 can_review_code=False,
                 can_test=False,
                 can_document=False,
-                expertise_areas=["task_analysis", "complexity_assessment", "parallelization"],
-                max_parallel_tasks=1
+                expertise_areas=[
+                    "task_analysis",
+                    "complexity_assessment",
+                    "parallelization",
+                ],
+                max_parallel_tasks=1,
             ),
-            expertise_areas=["task_breakdown", "complexity_analysis", "dependency_detection", "optimization"],
+            expertise_areas=[
+                "task_breakdown",
+                "complexity_analysis",
+                "dependency_detection",
+                "optimization",
+            ],
             knowledge_dir=Path(".claude/agents/TaskDecomposer/knowledge"),
             description="Decomposes complex tasks into optimal parallel subtasks",
-            enabled=True
+            enabled=True,
         )
 
-    def _lazy_load_class(self, agent_dir: str, module_name: str, class_name: str) -> Type[V03Agent]:
+    def _lazy_load_class(
+        self, agent_dir: str, module_name: str, class_name: str
+    ) -> Type[V03Agent]:
         """
         Lazy load an agent class.
         Returns a placeholder that loads the actual class when needed.
         """
+
         class LazyLoadedAgent:
             _actual_class = None
             _agent_dir = agent_dir
@@ -163,9 +210,13 @@ class AgentRegistry:
             def __new__(cls, *args, **kwargs):
                 if cls._actual_class is None:
                     # Load the actual class
-                    module_path = Path(__file__).parent / agent_dir / f"{cls._module_name}.py"
+                    module_path = (
+                        Path(__file__).parent / agent_dir / f"{cls._module_name}.py"
+                    )
                     if module_path.exists():
-                        spec = importlib.util.spec_from_file_location(cls._module_name, module_path)
+                        spec = importlib.util.spec_from_file_location(
+                            cls._module_name, module_path
+                        )
                         if spec and spec.loader:
                             module = importlib.util.module_from_spec(spec)
                             spec.loader.exec_module(module)
@@ -202,7 +253,9 @@ class AgentRegistry:
         """
         agents = []
         for reg in self._registry.values():
-            if hasattr(reg.capabilities, capability) and getattr(reg.capabilities, capability):
+            if hasattr(reg.capabilities, capability) and getattr(
+                reg.capabilities, capability
+            ):
                 agents.append(reg)
         return agents
 
@@ -218,7 +271,10 @@ class AgentRegistry:
         """
         agents = []
         for reg in self._registry.values():
-            if expertise in reg.expertise_areas or expertise in reg.capabilities.expertise_areas:
+            if (
+                expertise in reg.expertise_areas
+                or expertise in reg.capabilities.expertise_areas
+            ):
                 agents.append(reg)
         return agents
 
@@ -226,7 +282,7 @@ class AgentRegistry:
         self,
         agent_type: AgentType,
         agent_id: Optional[str] = None,
-        initialize: bool = True
+        initialize: bool = True,
     ) -> Optional[V03Agent]:
         """
         Create and optionally initialize an agent instance.
@@ -261,7 +317,7 @@ class AgentRegistry:
                 agent = registration.agent_class(
                     agent_id=agent_id,
                     agent_type=agent_type.value,
-                    capabilities=registration.capabilities
+                    capabilities=registration.capabilities,
                 )
 
                 # Initialize if requested
@@ -278,9 +334,7 @@ class AgentRegistry:
                 return None
 
     async def get_or_create_agent(
-        self,
-        agent_type: AgentType,
-        agent_id: Optional[str] = None
+        self, agent_type: AgentType, agent_id: Optional[str] = None
     ) -> Optional[V03Agent]:
         """
         Get existing agent instance or create new one.
@@ -310,13 +364,23 @@ class AgentRegistry:
         task_lower = task_description.lower()
 
         # Simple keyword matching (could be enhanced with NLP)
-        if any(word in task_lower for word in ["pr", "pull request", "workflow", "merge"]):
+        if any(
+            word in task_lower for word in ["pr", "pull request", "workflow", "merge"]
+        ):
             return AgentType.WORKFLOW_MANAGER
-        elif any(word in task_lower for word in ["parallel", "orchestrate", "decompose", "split"]):
+        elif any(
+            word in task_lower
+            for word in ["parallel", "orchestrate", "decompose", "split"]
+        ):
             return AgentType.ORCHESTRATOR
-        elif any(word in task_lower for word in ["review", "code quality", "security", "lint"]):
+        elif any(
+            word in task_lower
+            for word in ["review", "code quality", "security", "lint"]
+        ):
             return AgentType.CODE_REVIEWER
-        elif any(word in task_lower for word in ["break down", "subtask", "decomposition"]):
+        elif any(
+            word in task_lower for word in ["break down", "subtask", "decomposition"]
+        ):
             return AgentType.TASK_DECOMPOSER
 
         # Default to orchestrator for complex tasks
@@ -344,10 +408,10 @@ class AgentRegistry:
                     "can_parallelize": reg.capabilities.can_parallelize,
                     "can_create_prs": reg.capabilities.can_create_prs,
                     "can_review_code": reg.capabilities.can_review_code,
-                    "max_parallel_tasks": reg.capabilities.max_parallel_tasks
+                    "max_parallel_tasks": reg.capabilities.max_parallel_tasks,
                 }
                 for reg in self._registry.values()
-            }
+            },
         }
 
 
@@ -357,13 +421,13 @@ agent_registry = AgentRegistry()
 
 async def test_registry():
     """Test the agent registry."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Testing Agent Registry")
-    print("="*70)
+    print("=" * 70)
 
     # Get registry stats
     stats = agent_registry.get_registry_stats()
-    print(f"\nRegistry Statistics:")
+    print("\nRegistry Statistics:")
     print(f"  Total registered: {stats['total_registered']}")
     print(f"  Enabled agents: {stats['enabled_agents']}")
     print(f"  Agent types: {', '.join(stats['agent_types'])}")

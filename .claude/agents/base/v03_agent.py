@@ -17,7 +17,10 @@ from dataclasses import dataclass, field
 
 # Import the memory integration
 from ...shared.memory_integration import AgentMemoryInterface
-from .whiteboard_collaboration import WhiteboardManager, SharedWhiteboard, AccessLevel, WhiteboardType
+from .whiteboard_collaboration import (
+    WhiteboardManager,
+    SharedWhiteboard,
+)
 
 # Import aiohttp for event handling
 try:
@@ -41,12 +44,15 @@ try:
         KnowledgeLearnedEvent,
         CollaborationMessageEvent,
         EventType,
-        EventPriority
+        EventPriority,
     )
+
     EVENTS_AVAILABLE = True
 except (ImportError, SyntaxError) as e:
     # Fallback if event router models are not available or have dependency issues
-    print(f"Event models not available ({e.__class__.__name__}: {e}), using simplified event system")
+    print(
+        f"Event models not available ({e.__class__.__name__}: {e}), using simplified event system"
+    )
     AgentEvent = None
     AgentInitializedEvent = None
     TaskStartedEvent = None
@@ -61,6 +67,7 @@ except (ImportError, SyntaxError) as e:
 @dataclass
 class EventConfiguration:
     """Configuration for event publishing."""
+
     enabled: bool = True
     event_router_url: str = "http://localhost:8000"
     timeout_seconds: int = 5
@@ -75,6 +82,7 @@ class EventConfiguration:
 @dataclass
 class AgentCapabilities:
     """Defines what an agent can do and knows."""
+
     can_parallelize: bool = False
     can_create_prs: bool = False
     can_write_code: bool = False
@@ -88,6 +96,7 @@ class AgentCapabilities:
 @dataclass
 class TaskOutcome:
     """Result of a task execution."""
+
     success: bool
     task_id: str
     task_type: str
@@ -114,7 +123,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         agent_id: str,
         agent_type: str,
         capabilities: Optional[AgentCapabilities] = None,
-        event_config: Optional[EventConfiguration] = None
+        event_config: Optional[EventConfiguration] = None,
     ):
         """Initialize a v0.3 agent."""
         self.agent_id = agent_id
@@ -132,7 +141,9 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
 
         # Whiteboard collaboration
         self.whiteboard_manager: Optional[WhiteboardManager] = None
-        self.current_whiteboards: Dict[str, SharedWhiteboard] = {}  # task_id -> whiteboard
+        self.current_whiteboards: Dict[
+            str, SharedWhiteboard
+        ] = {}  # task_id -> whiteboard
 
         # Learning metrics
         self.tasks_completed = 0
@@ -154,10 +165,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         print(f"🚀 Initializing {self.agent_type} agent: {self.agent_id}")
 
         # Create memory interface
-        self.memory = AgentMemoryInterface(
-            agent_id=self.agent_id,
-            mcp_base_url=mcp_url
-        )
+        self.memory = AgentMemoryInterface(agent_id=self.agent_id, mcp_base_url=mcp_url)
 
         # Enter async context
         await self.memory.__aenter__()
@@ -177,13 +185,15 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         # Store initialization
         await self.memory.remember_short_term(
             f"Agent {self.agent_id} initialized",
-            tags=["initialization", self.agent_type]
+            tags=["initialization", self.agent_type],
         )
 
         # Emit initialization event
         await self.emit_initialized()
 
-        print(f"✅ {self.agent_type} agent ready with memory system, whiteboards, and event publishing")
+        print(
+            f"✅ {self.agent_type} agent ready with memory system, whiteboards, and event publishing"
+        )
 
     # Memory and whiteboard initialization are now handled by mixins
 
@@ -191,7 +201,7 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
         """Begin a new task with memory tracking."""
         # Start task using StateMixin
         task_id = await super().start_task(task_description)
-        
+
         # Initialize task in memory
         if self.memory:
             self.memory.task_id = self.current_task_id
@@ -211,37 +221,32 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
 
         return self.current_task_id or task_id
 
-
-
     async def learn_from_outcome(self, outcome: TaskOutcome) -> None:
         """Learn from task execution outcome."""
         # Learn using MemoryMixin
         await super().learn_from_outcome(outcome)
-        
+
         # Emit task completed event
         await self.emit_task_completed(
             outcome.task_id,
             outcome.task_type,
             success=outcome.success,
             duration_seconds=outcome.duration_seconds,
-            artifacts=getattr(outcome, 'artifacts', []),
-            result=outcome.lessons_learned or ("Task completed successfully" if outcome.success else "Task failed"),
-            error=outcome.error if not outcome.success else None
+            artifacts=getattr(outcome, "artifacts", []),
+            result=outcome.lessons_learned
+            or ("Task completed successfully" if outcome.success else "Task failed"),
+            error=outcome.error if not outcome.success else None,
         )
 
     async def collaborate(self, message: str, decision: Optional[str] = None) -> None:
         """Collaborate with other agents via whiteboard."""
         # Use WhiteboardMixin for collaboration
         await super().collaborate(message, decision)
-        
+
         # Emit collaboration event
         await self.emit_collaboration(
-            message=message,
-            message_type="collaboration",
-            decision=decision
+            message=message, message_type="collaboration", decision=decision
         )
-
-
 
     async def shutdown(self) -> None:
         """Clean shutdown with memory persistence."""
@@ -259,7 +264,6 @@ class V03Agent(MemoryMixin, WhiteboardMixin, EventHandlerMixin, StateMixin):
             await self.memory.__aexit__(None, None, None)
 
         print(f"👋 {self.agent_type} agent shut down gracefully")
-
 
     # =================
     # Abstract methods for subclasses to implement
@@ -283,12 +287,12 @@ class ExampleWorkflowAgent(V03Agent):
         capabilities = AgentCapabilities(
             can_create_prs=True,
             can_parallelize=True,
-            expertise_areas=["git", "workflow", "pr_management"]
+            expertise_areas=["git", "workflow", "pr_management"],
         )
         super().__init__(
             agent_id="workflow_example",
             agent_type="WorkflowManager",
-            capabilities=capabilities
+            capabilities=capabilities,
         )
 
     async def execute_task(self, task: Dict[str, Any]) -> TaskOutcome:
@@ -298,7 +302,9 @@ class ExampleWorkflowAgent(V03Agent):
         try:
             # Remember starting
             if self.memory:
-                await self.memory.remember_short_term(f"Starting workflow: {task.get('description')}")
+                await self.memory.remember_short_term(
+                    f"Starting workflow: {task.get('description')}"
+                )
 
             # Simulate workflow execution
             steps = [
@@ -306,7 +312,7 @@ class ExampleWorkflowAgent(V03Agent):
                 "Create branch",
                 "Implement changes",
                 "Run tests",
-                "Create PR"
+                "Create PR",
             ]
 
             for step in steps:
@@ -323,7 +329,7 @@ class ExampleWorkflowAgent(V03Agent):
                 task_type="workflow",
                 steps_taken=steps,
                 duration_seconds=duration,
-                lessons_learned="Workflow completed successfully"
+                lessons_learned="Workflow completed successfully",
             )
 
         except Exception as e:
@@ -335,15 +341,15 @@ class ExampleWorkflowAgent(V03Agent):
                 steps_taken=[],
                 duration_seconds=duration,
                 error=str(e),
-                lessons_learned=f"Error encountered: {e}"
+                lessons_learned=f"Error encountered: {e}",
             )
 
 
 async def test_v03_agent():
     """Test the V03Agent base class."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing V0.3 Agent with Memory")
-    print("="*60)
+    print("=" * 60)
 
     # Create and initialize agent
     agent = ExampleWorkflowAgent()
@@ -356,10 +362,9 @@ async def test_v03_agent():
         print(f"\n📋 Started task: {task_id}")
 
         # Execute task
-        outcome = await agent.execute_task({
-            "description": "Create PR for feature X",
-            "branch": "feature-x"
-        })
+        outcome = await agent.execute_task(
+            {"description": "Create PR for feature X", "branch": "feature-x"}
+        )
 
         # Learn from outcome
         await agent.learn_from_outcome(outcome)
@@ -367,20 +372,19 @@ async def test_v03_agent():
         # Collaborate via whiteboard
         await agent.collaborate(
             "Working on feature X implementation",
-            decision="Proceeding with implementation"
+            decision="Proceeding with implementation",
         )
 
         # Update task progress
         await agent.update_task_progress(
             completed_steps=["Set up JWT library", "Created user model"],
             current_step="Implementing login endpoint",
-            blocked_items=["Need security review"]
+            blocked_items=["Need security review"],
         )
 
         # Report an issue
         await agent.report_issue(
-            "Password complexity validation missing",
-            severity="medium"
+            "Password complexity validation missing", severity="medium"
         )
 
         # Discover relevant whiteboards
@@ -398,7 +402,7 @@ async def test_v03_agent():
         if design_wb_id:
             print(f"\n📋 Created design whiteboard: {design_wb_id}")
 
-        print(f"\n✅ Test completed successfully!")
+        print("\n✅ Test completed successfully!")
 
     finally:
         await agent.shutdown()

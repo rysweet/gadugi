@@ -22,8 +22,20 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 # Import shared modules and dependencies
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
-from ...shared.state_management import StateManager  # type: ignore
+try:
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
+except ImportError:
+    # Fallback to relative imports if needed
+    import sys
+    import os
+
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    )
+    sys.path.insert(0, base_dir)
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
 from ..phase1.capability_assessment import (
     CapabilityAssessment,
     AgentCapabilityProfile,
@@ -192,7 +204,7 @@ class TeamCompositionOptimizer:
 
         self.logger.info("TeamCompositionOptimizer initialized")
 
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker()
     def optimize_team_for_project(
         self,
         project_requirements: ProjectRequirements,
@@ -937,7 +949,9 @@ class TeamCompositionOptimizer:
             self.logger.error(f"Failed to update agent profiles: {e}")
 
     def compare_team_compositions(
-        self, compositions: List[TeamComposition], criteria: List[str] = None  # type: ignore[assignment]
+        self,
+        compositions: List[TeamComposition],
+        criteria: List[str] = None,  # type: ignore[assignment]
     ) -> Dict[str, Any]:
         """
         Compare multiple team compositions across specified criteria.

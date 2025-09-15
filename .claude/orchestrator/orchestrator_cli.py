@@ -21,14 +21,21 @@ from typing import List
 
 # Import orchestrator components
 try:
-    from .orchestrator_main import OrchestratorCoordinator, OrchestrationConfig, OrchestrationResult
+    from .orchestrator_main import (
+        OrchestratorCoordinator,
+        OrchestrationConfig,
+        OrchestrationResult,
+    )
 except ImportError:
-    from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig, OrchestrationResult
+    from orchestrator_main import (
+        OrchestratorCoordinator,
+        OrchestrationConfig,
+        OrchestrationResult,
+    )
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -65,7 +72,7 @@ class OrchestrationCLI:
         logger.info("Parsing user input for prompt files...")
 
         prompt_files = []
-        lines = user_input.strip().split('\n')
+        lines = user_input.strip().split("\n")
 
         # Look for prompt file specifications
         in_prompt_list = False
@@ -73,34 +80,35 @@ class OrchestrationCLI:
             line = line.strip()
 
             # Detect start of prompt list
-            if any(keyword in line.lower() for keyword in [
-                "execute these", "prompts in parallel", "prompt files"
-            ]):
+            if any(
+                keyword in line.lower()
+                for keyword in ["execute these", "prompts in parallel", "prompt files"]
+            ):
                 in_prompt_list = True
                 continue
 
             # Skip empty lines and headers
-            if not line or line.startswith('#'):
+            if not line or line.startswith("#"):
                 continue
 
             # Parse prompt file entries
             if in_prompt_list:
                 # Handle bullet points (-, *, +)
-                if line.startswith(('-', '*', '+')):
+                if line.startswith(("-", "*", "+")):
                     prompt_file = line[1:].strip()
                     if prompt_file:
                         prompt_files.append(prompt_file)
 
                 # Handle numbered lists (1., 2., etc.)
-                elif line[0].isdigit() and '.' in line:
-                    parts = line.split('.', 1)
+                elif line[0].isdigit() and "." in line:
+                    parts = line.split(".", 1)
                     if len(parts) > 1:
                         prompt_file = parts[1].strip()
                         if prompt_file:
                             prompt_files.append(prompt_file)
 
                 # Handle plain filenames (fallback)
-                elif line.endswith('.md'):
+                elif line.endswith(".md"):
                     prompt_files.append(line)
 
         # Validate prompt files
@@ -120,8 +128,8 @@ class OrchestrationCLI:
                 continue
 
             # Ensure .md extension
-            if not prompt_file.endswith('.md'):
-                prompt_file += '.md'
+            if not prompt_file.endswith(".md"):
+                prompt_file += ".md"
 
             # Check if file exists
             prompt_path = self.prompts_dir / prompt_file
@@ -129,14 +137,16 @@ class OrchestrationCLI:
                 validated_files.append(prompt_file)
                 logger.info(f"Validated prompt file: {prompt_file}")
             else:
-                logger.warning(f"Prompt file not found: {prompt_file} (path: {prompt_path})")
+                logger.warning(
+                    f"Prompt file not found: {prompt_file} (path: {prompt_path})"
+                )
 
         return validated_files
 
     def execute_orchestration(
         self,
         prompt_files: List[str],
-        config: OrchestrationConfig = None  # type: ignore[assignment]
+        config: OrchestrationConfig = None,  # type: ignore[assignment]
     ) -> OrchestrationResult:
         """Execute orchestration with specified prompt files"""
         if not prompt_files:
@@ -176,9 +186,9 @@ class OrchestrationCLI:
 
     def _report_results(self, result: OrchestrationResult) -> None:
         """Report orchestration results to user"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("ORCHESTRATION RESULTS")
-        print("="*60)
+        print("=" * 60)
 
         print(f"Orchestration ID: {result.task_id}")
         print(f"Total Tasks: {result.total_tasks}")
@@ -199,31 +209,35 @@ class OrchestrationCLI:
             print("\nTask Details:")
             for task_result in result.task_results:
                 status = "✅ SUCCESS" if task_result.success else "❌ FAILED"  # type: ignore
-                exec_time = getattr(task_result, 'execution_time', 0) or 0
+                exec_time = getattr(task_result, "execution_time", 0) or 0
                 print(f"  {task_result.task_id}: {status} ({exec_time:.1f}s)")
 
-                if not task_result.success and hasattr(task_result, 'error_message'):  # type: ignore
-                    error_msg = getattr(task_result, 'error_message', 'Unknown error')
+                if not task_result.success and hasattr(task_result, "error_message"):  # type: ignore
+                    error_msg = getattr(task_result, "error_message", "Unknown error")
                     print(f"    Error: {error_msg}")
 
         # Error summary
         if result.error_summary:
             print(f"\nError Summary: {result.error_summary}")
 
-        print("="*60)
+        print("=" * 60)
 
         # Log results
         if result.successful_tasks == result.total_tasks:
             logger.info("🎉 All tasks completed successfully!")
         elif result.successful_tasks > 0:
-            logger.info(f"⚠️  Partial success: {result.successful_tasks}/{result.total_tasks} tasks")
+            logger.info(
+                f"⚠️  Partial success: {result.successful_tasks}/{result.total_tasks} tasks"
+            )
         else:
             logger.error("❌ All tasks failed")
 
     def run_interactive_mode(self) -> None:
         """Run in interactive mode for testing and development"""
         print("Orchestrator Agent - Interactive Mode")
-        print("Enter prompt files to execute in parallel (one per line, empty line to start):")
+        print(
+            "Enter prompt files to execute in parallel (one per line, empty line to start):"
+        )
 
         prompt_files = []
         while True:
@@ -255,7 +269,9 @@ class OrchestrationCLI:
             if result.successful_tasks == result.total_tasks:
                 print("\n🎉 Orchestration completed successfully!")
             else:
-                print(f"\n⚠️  Orchestration completed with {result.failed_tasks} failures")
+                print(
+                    f"\n⚠️  Orchestration completed with {result.failed_tasks} failures"
+                )
 
         except Exception as e:
             print(f"\n❌ Orchestration failed: {e}")
@@ -279,24 +295,20 @@ Examples:
 
   # Parse from stdin (for agent invocation)
   echo "Execute these prompts: test.md" | python orchestrator_cli.py --stdin
-        """
+        """,
     )
 
     # Input options
     parser.add_argument(
-        "prompt_files",
-        nargs="*",
-        help="Prompt files to execute in parallel"
+        "prompt_files", nargs="*", help="Prompt files to execute in parallel"
     )
     parser.add_argument(
         "--stdin",
         action="store_true",
-        help="Read user input from stdin (for agent invocation)"
+        help="Read user input from stdin (for agent invocation)",
     )
     parser.add_argument(
-        "--interactive",
-        action="store_true",
-        help="Run in interactive mode"
+        "--interactive", action="store_true", help="Run in interactive mode"
     )
 
     # Configuration options
@@ -304,40 +316,34 @@ Examples:
         "--max-parallel",
         type=int,
         default=4,
-        help="Maximum number of parallel tasks (default: 4)"
+        help="Maximum number of parallel tasks (default: 4)",
     )
     parser.add_argument(
         "--timeout",
         type=int,
         default=12,
-        help="Execution timeout in hours (default: 12)"
+        help="Execution timeout in hours (default: 12)",
     )
     parser.add_argument(
         "--project-root",
         default=".",
-        help="Project root directory (default: current directory)"
+        help="Project root directory (default: current directory)",
     )
     parser.add_argument(
         "--monitoring-dir",
         default=".gadugi/monitoring",
-        help="Monitoring directory (default: .gadugi/monitoring)"
+        help="Monitoring directory (default: .gadugi/monitoring)",
     )
     parser.add_argument(
         "--no-fallback",
         action="store_true",
-        help="Disable fallback to sequential execution"
+        help="Disable fallback to sequential execution",
     )
 
     # Logging options
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose logging"
-    )
-    parser.add_argument(
-        "--quiet",
-        action="store_true",
-        help="Suppress output except errors"
+        "--quiet", action="store_true", help="Suppress output except errors"
     )
 
     return parser.parse_args()
@@ -389,7 +395,7 @@ def main():
             max_parallel_tasks=args.max_parallel,
             execution_timeout_hours=args.timeout,
             monitoring_dir=args.monitoring_dir,
-            fallback_to_sequential=not args.no_fallback
+            fallback_to_sequential=not args.no_fallback,
         )
 
         # Execute orchestration
@@ -409,6 +415,7 @@ def main():
         logger.error(f"CLI execution failed: {e}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 

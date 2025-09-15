@@ -90,9 +90,9 @@ create_worktrees() {
         (
             WORKTREE=".worktrees/task-${task_id}"
             BRANCH="feature/task-${task_id}"
-            
+
             git worktree add "$WORKTREE" -b "$BRANCH" origin/main
-            
+
             mkdir -p "$WORKTREE/.task"
             echo '{"task_id": "'${task_id}'"}' > "$WORKTREE/.task/metadata.json"
         ) &

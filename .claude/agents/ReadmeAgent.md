@@ -5,11 +5,11 @@ description: Manages and maintains README.md files on behalf of the Product Mana
 tools: Read, Write, Edit, Bash, Grep, LS
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import WorkflowStateManager
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, OperationResult
+  from .gadugi/.gadugi/src/shared.github_operations import GitHubOperations
+  from .gadugi/.gadugi/src/shared.state_management import WorkflowStateManager
+  from .gadugi/.gadugi/src/shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
+  from .gadugi/.gadugi/src/shared.task_tracking import TaskTracker, TodoWriteManager
+  from .gadugi/.gadugi/src/shared.interfaces import AgentConfig, PerformanceMetrics, OperationResult
 ---
 
 # README Agent for Gadugi

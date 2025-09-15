@@ -2,6 +2,7 @@
 Shared interfaces, protocols, and contracts for Gadugi Enhanced Separation architecture.
 Provides type-safe contracts for inter-component communication and dependency injection.
 """
+
 from typing import Any, Dict, Generic, List, Optional, Protocol, TypeVar
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -11,14 +12,15 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Type variables for generic interfaces
-T = TypeVar('T')
-ConfigType = TypeVar('ConfigType')
-ResultType = TypeVar('ResultType')
+T = TypeVar("T")
+ConfigType = TypeVar("ConfigType")
+ResultType = TypeVar("ResultType")
 
 
 # ============================================================================
 # Core Abstract Interfaces
 # ============================================================================
+
 
 class AgentInterface(ABC):
     """
@@ -158,7 +160,9 @@ class GitHubOperationsInterface(ABC):
         pass
 
     @abstractmethod
-    def create_pr(self, title: str, body: str, base: str, head: str, **kwargs) -> Dict[str, Any]:
+    def create_pr(
+        self, title: str, body: str, base: str, head: str, **kwargs
+    ) -> Dict[str, Any]:
         """
         Create a GitHub pull request.
 
@@ -231,7 +235,9 @@ class TaskTrackerInterface(ABC):
     """
 
     @abstractmethod
-    def create_task(self, content: str, priority: str = "medium", **kwargs) -> Dict[str, Any]:
+    def create_task(
+        self, content: str, priority: str = "medium", **kwargs
+    ) -> Dict[str, Any]:
         """
         Create a new task.
 
@@ -340,9 +346,11 @@ class ErrorHandlerInterface(ABC):
 # Data Models
 # ============================================================================
 
+
 @dataclass
 class AgentConfig:
     """Configuration data for agents."""
+
     agent_id: str
     name: str
     version: str = "1.0.0"
@@ -351,7 +359,7 @@ class AgentConfig:
     max_retries: int = 3
     config_data: Dict[str, Any] = field(default_factory=dict)
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate agent configuration."""
         errors = []
 
@@ -373,14 +381,15 @@ class AgentConfig:
 @dataclass
 class WorkflowPhase:
     """Represents a workflow phase."""
+
     name: str
     description: str
     order: int = 0
     timeout_minutes: int = 60
     dependencies: List[str] = field(default_factory=list)
-    tasks: List['TaskData'] = field(default_factory=list)
+    tasks: List["TaskData"] = field(default_factory=list)
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate workflow phase."""
         errors = []
 
@@ -396,6 +405,7 @@ class WorkflowPhase:
 @dataclass
 class TaskData:
     """Task data model."""
+
     id: str
     content: str
     status: str = "pending"
@@ -414,10 +424,10 @@ class TaskData:
             "id": self.id,
             "content": self.content,
             "status": self.status,
-            "priority": self.priority
+            "priority": self.priority,
         }
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate task data."""
         errors = []
 
@@ -441,6 +451,7 @@ class TaskData:
 @dataclass
 class StateData:
     """State data model."""
+
     state_id: str
     data: Dict[str, Any]
     created_at: datetime = field(default_factory=datetime.now)
@@ -448,7 +459,7 @@ class StateData:
     version: int = 1
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate state data."""
         errors = []
 
@@ -464,6 +475,7 @@ class StateData:
 @dataclass
 class GitHubIssue:
     """GitHub issue data model."""
+
     number: int
     title: str
     body: str = ""
@@ -474,7 +486,7 @@ class GitHubIssue:
     updated_at: Optional[datetime] = None
     closed_at: Optional[datetime] = None
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate GitHub issue data."""
         errors = []
 
@@ -494,6 +506,7 @@ class GitHubIssue:
 @dataclass
 class GitHubPR:
     """GitHub PR data model."""
+
     number: int
     title: str
     body: str = ""
@@ -506,7 +519,7 @@ class GitHubPR:
     updated_at: Optional[datetime] = None
     merged_at: Optional[datetime] = None
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate GitHub PR data."""
         errors = []
 
@@ -529,6 +542,7 @@ class GitHubPR:
 @dataclass
 class ErrorContext:
     """Error context information."""
+
     operation: str
     details: Dict[str, Any]
     timestamp: datetime = field(default_factory=datetime.now)
@@ -536,7 +550,7 @@ class ErrorContext:
     workflow_id: Optional[str] = None
     severity: str = "medium"
 
-    def validate(self) -> 'ValidationResult':
+    def validate(self) -> "ValidationResult":
         """Validate error context."""
         errors = []
 
@@ -554,9 +568,11 @@ class ErrorContext:
 # Result Types
 # ============================================================================
 
+
 @dataclass
 class OperationResult(Generic[T]):
     """Generic operation result."""
+
     success: bool
     data: Optional[T] = None
     error: Optional[str] = None
@@ -565,20 +581,29 @@ class OperationResult(Generic[T]):
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def success_result(cls, data: T, metadata: Optional[Dict[str, Any]] = None) -> 'OperationResult[T]':
+    def success_result(
+        cls, data: T, metadata: Optional[Dict[str, Any]] = None
+    ) -> "OperationResult[T]":
         """Create successful result."""
         return cls(success=True, data=data, metadata=metadata or {})
 
     @classmethod
-    def error_result(cls, error: str, error_code: Optional[str] = None,
-                    metadata: Optional[Dict[str, Any]] = None) -> 'OperationResult[T]':
+    def error_result(
+        cls,
+        error: str,
+        error_code: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> "OperationResult[T]":
         """Create error result."""
-        return cls(success=False, error=error, error_code=error_code, metadata=metadata or {})
+        return cls(
+            success=False, error=error, error_code=error_code, metadata=metadata or {}
+        )
 
 
 @dataclass
 class ValidationResult:
     """Validation result."""
+
     is_valid: bool
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
@@ -605,6 +630,7 @@ class ValidationResult:
 # ============================================================================
 # Protocols for Dependency Injection
 # ============================================================================
+
 
 class TodoWriteProvider(Protocol):
     """Protocol for TodoWrite functionality."""
@@ -682,6 +708,7 @@ class GitProvider(Protocol):
 # Configuration Schemas
 # ============================================================================
 
+
 class AgentConfigSchema:
     """Schema for agent configuration validation."""
 
@@ -691,9 +718,9 @@ class AgentConfigSchema:
 
         # Required fields
         required_fields = ["agent_id", "name"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Version validation
         if "version" in config:
@@ -767,13 +794,19 @@ class TaskConfigSchema:
 
         # Required fields
         required_fields = ["id", "content"]
-        for field in required_fields:
-            if field not in config or not config[field]:
-                result.add_error(f"Required field '{field}' is missing or empty")
+        for field_name in required_fields:
+            if field_name not in config or not config[field_name]:
+                result.add_error(f"Required field '{field_name}' is missing or empty")
 
         # Status validation
         if "status" in config:
-            valid_statuses = ["pending", "in_progress", "completed", "blocked", "cancelled"]
+            valid_statuses = [
+                "pending",
+                "in_progress",
+                "completed",
+                "blocked",
+                "cancelled",
+            ]
             if config["status"] not in valid_statuses:
                 result.add_error(f"Invalid status: {config['status']}")
 
@@ -789,6 +822,7 @@ class TaskConfigSchema:
 # ============================================================================
 # Factory Interfaces
 # ============================================================================
+
 
 class ComponentFactory(ABC):
     """Abstract factory for creating system components."""
@@ -816,7 +850,9 @@ class ComponentFactory(ABC):
         """
         return []
 
-    def validate_config(self, component_type: str, config: Dict[str, Any]) -> ValidationResult:
+    def validate_config(
+        self, component_type: str, config: Dict[str, Any]
+    ) -> ValidationResult:
         """
         Validate component configuration (optional override).
 
@@ -856,7 +892,9 @@ class AgentFactory(ABC):
         """
         return []
 
-    def validate_agent_config(self, agent_type: str, config: AgentConfig) -> ValidationResult:
+    def validate_agent_config(
+        self, agent_type: str, config: AgentConfig
+    ) -> ValidationResult:
         """
         Validate agent configuration (optional override).
 
@@ -873,6 +911,7 @@ class AgentFactory(ABC):
 # ============================================================================
 # Service Locator Interface
 # ============================================================================
+
 
 class ServiceLocator(ABC):
     """Service locator for dependency injection."""
@@ -933,6 +972,7 @@ class ServiceLocator(ABC):
 # ============================================================================
 # Event System Interfaces
 # ============================================================================
+
 
 class EventHandler(Protocol):
     """Protocol for event handlers."""
@@ -995,6 +1035,7 @@ class EventBus(ABC):
 # Configuration Management
 # ============================================================================
 
+
 class ConfigurationManager(ABC):
     """Abstract configuration manager."""
 
@@ -1055,7 +1096,10 @@ class ConfigurationManager(ABC):
 # Utility Functions
 # ============================================================================
 
-def validate_interface_implementation(instance: Any, interface_class: type) -> ValidationResult:
+
+def validate_interface_implementation(
+    instance: Any, interface_class: type
+) -> ValidationResult:
     """
     Validate that an instance properly implements an interface.
 
@@ -1073,7 +1117,7 @@ def validate_interface_implementation(instance: Any, interface_class: type) -> V
         return result
 
     # Check that all abstract methods are implemented
-    if hasattr(interface_class, '__abstractmethods__'):
+    if hasattr(interface_class, "__abstractmethods__"):
         for method_name in interface_class.__abstractmethods__:
             if not hasattr(instance, method_name):
                 result.add_error(f"Missing required method: {method_name}")
@@ -1083,8 +1127,9 @@ def validate_interface_implementation(instance: Any, interface_class: type) -> V
     return result
 
 
-def create_operation_result(success: bool, data: Any = None,
-                          error: Optional[str] = None) -> OperationResult:
+def create_operation_result(
+    success: bool, data: Any = None, error: Optional[str] = None
+) -> OperationResult:
     """
     Helper function to create operation results.
 
@@ -1106,13 +1151,16 @@ def create_operation_result(success: bool, data: Any = None,
 # Interface Registry
 # ============================================================================
 
+
 class InterfaceRegistry:
     """Registry for interface implementations."""
 
     def __init__(self):
         self._implementations: Dict[type, List[type]] = {}
 
-    def register_implementation(self, interface_class: type, implementation_class: type) -> None:
+    def register_implementation(
+        self, interface_class: type, implementation_class: type
+    ) -> None:
         """
         Register an implementation for an interface.
 
@@ -1125,7 +1173,9 @@ class InterfaceRegistry:
 
         if implementation_class not in self._implementations[interface_class]:
             self._implementations[interface_class].append(implementation_class)
-            logger.debug(f"Registered implementation {implementation_class.__name__} for {interface_class.__name__}")
+            logger.debug(
+                f"Registered implementation {implementation_class.__name__} for {interface_class.__name__}"
+            )
 
     def get_implementations(self, interface_class: type) -> List[type]:
         """

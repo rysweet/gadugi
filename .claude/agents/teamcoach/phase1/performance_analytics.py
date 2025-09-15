@@ -40,19 +40,19 @@ except ImportError:
     class TaskMetrics:
         def __init__(self, *args, **kwargs):
             pass
-        
+
         def get_agent_task_results(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_execution_times(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_resource_usage(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_quality_metrics(self, agent_id, start_time, end_time):
             return []
-        
+
         def get_agent_collaboration_metrics(self, agent_id, start_time, end_time):
             return []
 
@@ -183,7 +183,7 @@ class AgentPerformanceAnalyzer:
         self.task_metrics = task_metrics or TaskMetrics()
         self.error_handler = error_handler or ErrorHandler()
 
-        # Circuit breaker for performance analysis operations  
+        # Circuit breaker for performance analysis operations
         self.analysis_circuit_breaker = CircuitBreaker(
             failure_threshold=3, recovery_timeout=300.0
         )
@@ -291,7 +291,7 @@ class AgentPerformanceAnalyzer:
         """Calculate success rate and task completion metrics."""
         try:
             # Get task results from task metrics (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_task_results'):
+            if hasattr(self.task_metrics, "get_agent_task_results"):
                 task_results = self.task_metrics.get_agent_task_results(
                     performance_data.agent_id, time_period[0], time_period[1]
                 )
@@ -334,7 +334,7 @@ class AgentPerformanceAnalyzer:
         """Analyze execution time metrics."""
         try:
             # Get execution times from task metrics (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_execution_times'):
+            if hasattr(self.task_metrics, "get_agent_execution_times"):
                 execution_times = self.task_metrics.get_agent_execution_times(
                     performance_data.agent_id, time_period[0], time_period[1]
                 )
@@ -369,7 +369,7 @@ class AgentPerformanceAnalyzer:
         """Measure resource utilization metrics."""
         try:
             # Get resource usage data (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_resource_usage'):
+            if hasattr(self.task_metrics, "get_agent_resource_usage"):
                 resource_data = self.task_metrics.get_agent_resource_usage(
                     performance_data.agent_id, time_period[0], time_period[1]
                 )
@@ -426,7 +426,7 @@ class AgentPerformanceAnalyzer:
         """Assess output quality metrics."""
         try:
             # Get quality metrics from task results (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_quality_metrics'):
+            if hasattr(self.task_metrics, "get_agent_quality_metrics"):
                 quality_data = self.task_metrics.get_agent_quality_metrics(
                     performance_data.agent_id, time_period[0], time_period[1]
                 )
@@ -478,7 +478,7 @@ class AgentPerformanceAnalyzer:
         """Measure collaboration effectiveness metrics."""
         try:
             # Get collaboration data (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_collaboration_metrics'):
+            if hasattr(self.task_metrics, "get_agent_collaboration_metrics"):
                 collaboration_data = self.task_metrics.get_agent_collaboration_metrics(
                     performance_data.agent_id, time_period[0], time_period[1]
                 )
@@ -577,7 +577,7 @@ class AgentPerformanceAnalyzer:
         """Calculate composite performance score for a specific period."""
         try:
             # Get basic metrics for the period (with fallback)
-            if hasattr(self.task_metrics, 'get_agent_task_results'):
+            if hasattr(self.task_metrics, "get_agent_task_results"):
                 task_results = self.task_metrics.get_agent_task_results(
                     agent_id, period[0], period[1]
                 )
@@ -748,14 +748,16 @@ class AgentPerformanceAnalyzer:
         )
 
         return min(100.0, score * 100.0)
-    
+
     def get_agent_performance(self, agent_id: str):
         """Get agent performance data for strategic planner compatibility."""
+
         # Return a mock object with the expected interface
         class MockPerformance:
             def __init__(self):
                 self.metrics = {"efficiency_ratio": 0.65, "success_rate": 0.75}
                 self.success_rate = 0.75
+
         return MockPerformance()
 
 

@@ -6,7 +6,6 @@ Test the local memory system for Gadugi v0.3
 import asyncio
 import httpx
 from datetime import datetime
-import json
 
 
 async def test_memory_system():
@@ -36,34 +35,43 @@ async def test_memory_system():
         print("\n3. Storing Memories...")
 
         # Short-term memory
-        response = await client.post("/memory/agent/store", json={
-            "agent_id": agent_id,
-            "content": "Testing v0.3 memory system",
-            "memory_type": "short_term",
-            "task_id": task_id,
-            "importance_score": 0.8
-        })
+        response = await client.post(
+            "/memory/agent/store",
+            json={
+                "agent_id": agent_id,
+                "content": "Testing v0.3 memory system",
+                "memory_type": "short_term",
+                "task_id": task_id,
+                "importance_score": 0.8,
+            },
+        )
         mem1 = response.json()
         print(f"   ✅ Short-term memory: {mem1['id']}")
 
         # Long-term memory
-        response = await client.post("/memory/agent/store", json={
-            "agent_id": agent_id,
-            "content": "Gadugi v0.3 uses SQLite for local testing",
-            "memory_type": "long_term",
-            "importance_score": 0.95
-        })
+        response = await client.post(
+            "/memory/agent/store",
+            json={
+                "agent_id": agent_id,
+                "content": "Gadugi v0.3 uses SQLite for local testing",
+                "memory_type": "long_term",
+                "importance_score": 0.95,
+            },
+        )
         mem2 = response.json()
         print(f"   ✅ Long-term memory: {mem2['id']}")
 
         # Episodic memory
-        response = await client.post("/memory/agent/store", json={
-            "agent_id": agent_id,
-            "content": "Started testing at " + datetime.now().isoformat(),
-            "memory_type": "episodic",
-            "task_id": task_id,
-            "importance_score": 0.6
-        })
+        response = await client.post(
+            "/memory/agent/store",
+            json={
+                "agent_id": agent_id,
+                "content": "Started testing at " + datetime.now().isoformat(),
+                "memory_type": "episodic",
+                "task_id": task_id,
+                "importance_score": 0.6,
+            },
+        )
         mem3 = response.json()
         print(f"   ✅ Episodic memory: {mem3['id']}")
 
@@ -77,23 +85,25 @@ async def test_memory_system():
 
         # Create and update whiteboard
         print("\n5. Testing Whiteboard...")
-        response = await client.post("/whiteboard/create", json={
-            "task_id": task_id,
-            "agent_id": agent_id
-        })
+        response = await client.post(
+            "/whiteboard/create", json={"task_id": task_id, "agent_id": agent_id}
+        )
         wb = response.json()
         print(f"   ✅ Created whiteboard: {wb['id']}")
 
         # Update whiteboard
-        response = await client.post(f"/whiteboard/update/{task_id}", json={
-            "content": {
-                "notes": "Testing memory system",
-                "status": "in_progress",
-                "findings": ["SQLite backend works", "All memory types functional"]
+        response = await client.post(
+            f"/whiteboard/update/{task_id}",
+            json={
+                "content": {
+                    "notes": "Testing memory system",
+                    "status": "in_progress",
+                    "findings": ["SQLite backend works", "All memory types functional"],
+                },
+                "decision": "System is ready for use",
             },
-            "decision": "System is ready for use"
-        })
-        print(f"   ✅ Updated whiteboard")
+        )
+        print("   ✅ Updated whiteboard")
 
         # Get whiteboard
         response = await client.get(f"/whiteboard/{task_id}")
@@ -104,48 +114,65 @@ async def test_memory_system():
         print("\n6. Testing Knowledge Graph...")
 
         # Add nodes
-        response = await client.post("/knowledge/node/create", json={
-            "agent_id": agent_id,
-            "concept": "Gadugi v0.3",
-            "description": "Self-hosting AI system with memory",
-            "confidence": 0.9
-        })
+        response = await client.post(
+            "/knowledge/node/create",
+            json={
+                "agent_id": agent_id,
+                "concept": "Gadugi v0.3",
+                "description": "Self-hosting AI system with memory",
+                "confidence": 0.9,
+            },
+        )
         node1 = response.json()
         print(f"   ✅ Created node: {node1['concept']}")
 
-        response = await client.post("/knowledge/node/create", json={
-            "agent_id": agent_id,
-            "concept": "SQLite",
-            "description": "Lightweight database for testing",
-            "confidence": 0.95
-        })
+        response = await client.post(
+            "/knowledge/node/create",
+            json={
+                "agent_id": agent_id,
+                "concept": "SQLite",
+                "description": "Lightweight database for testing",
+                "confidence": 0.95,
+            },
+        )
         node2 = response.json()
         print(f"   ✅ Created node: {node2['concept']}")
 
-        response = await client.post("/knowledge/node/create", json={
-            "agent_id": agent_id,
-            "concept": "Memory System",
-            "description": "Stores agent memories and knowledge",
-            "confidence": 0.85
-        })
+        response = await client.post(
+            "/knowledge/node/create",
+            json={
+                "agent_id": agent_id,
+                "concept": "Memory System",
+                "description": "Stores agent memories and knowledge",
+                "confidence": 0.85,
+            },
+        )
         node3 = response.json()
         print(f"   ✅ Created node: {node3['concept']}")
 
         # Add edges
-        response = await client.post("/knowledge/edge/create", json={
-            "source_id": node1['id'],
-            "target_id": node3['id'],
-            "relationship": "contains",
-            "weight": 0.9
-        })
-        print(f"   ✅ Created edge: {node1['concept']} -> contains -> {node3['concept']}")
+        response = await client.post(
+            "/knowledge/edge/create",
+            json={
+                "source_id": node1["id"],
+                "target_id": node3["id"],
+                "relationship": "contains",
+                "weight": 0.9,
+            },
+        )
+        print(
+            f"   ✅ Created edge: {node1['concept']} -> contains -> {node3['concept']}"
+        )
 
-        response = await client.post("/knowledge/edge/create", json={
-            "source_id": node2['id'],
-            "target_id": node3['id'],
-            "relationship": "powers",
-            "weight": 0.8
-        })
+        response = await client.post(
+            "/knowledge/edge/create",
+            json={
+                "source_id": node2["id"],
+                "target_id": node3["id"],
+                "relationship": "powers",
+                "weight": 0.8,
+            },
+        )
         print(f"   ✅ Created edge: {node2['concept']} -> powers -> {node3['concept']}")
 
         # Get knowledge graph
@@ -155,20 +182,23 @@ async def test_memory_system():
 
         # Test procedures
         print("\n7. Testing Procedures...")
-        response = await client.post("/memory/procedural/store", json={
-            "agent_id": agent_id,
-            "procedure_name": "test_memory_system",
-            "steps": [
-                "Start memory service",
-                "Create agent and task",
-                "Store memories",
-                "Create whiteboard",
-                "Add knowledge nodes",
-                "Link knowledge with edges",
-                "Store procedure"
-            ],
-            "context": "Testing Gadugi v0.3"
-        })
+        response = await client.post(
+            "/memory/procedural/store",
+            json={
+                "agent_id": agent_id,
+                "procedure_name": "test_memory_system",
+                "steps": [
+                    "Start memory service",
+                    "Create agent and task",
+                    "Store memories",
+                    "Create whiteboard",
+                    "Add knowledge nodes",
+                    "Link knowledge with edges",
+                    "Store procedure",
+                ],
+                "context": "Testing Gadugi v0.3",
+            },
+        )
         proc = response.json()
         print(f"   ✅ Stored procedure: {proc['procedure_name']}")
 
@@ -179,17 +209,20 @@ async def test_memory_system():
 
         # Test project memory
         print("\n8. Testing Project Memory...")
-        response = await client.post("/memory/project/store", json={
-            "agent_id": agent_id,
-            "content": "Gadugi v0.3 successfully tested with SQLite backend",
-            "memory_type": "project_shared",
-            "importance_score": 1.0,
-            "metadata": {
-                "project": "gadugi",
-                "version": "0.3",
-                "test_date": datetime.now().isoformat()
-            }
-        })
+        response = await client.post(
+            "/memory/project/store",
+            json={
+                "agent_id": agent_id,
+                "content": "Gadugi v0.3 successfully tested with SQLite backend",
+                "memory_type": "project_shared",
+                "importance_score": 1.0,
+                "metadata": {
+                    "project": "gadugi",
+                    "version": "0.3",
+                    "test_date": datetime.now().isoformat(),
+                },
+            },
+        )
         proj_mem = response.json()
         print(f"   ✅ Stored project memory: {proj_mem['id']}")
 
@@ -197,16 +230,16 @@ async def test_memory_system():
         print("\n9. System Metrics...")
         response = await client.get("/metrics")
         metrics = response.json()
-        stats = metrics['stats']
+        stats = metrics["stats"]
         print(f"   Total memories: {stats.get('total_memories', 0)}")
         print(f"   Total knowledge nodes: {stats.get('total_knowledge_nodes', 0)}")
         print(f"   Total knowledge edges: {stats.get('total_knowledge_edges', 0)}")
         print(f"   Total whiteboards: {stats.get('total_whiteboards', 0)}")
         print(f"   Total procedures: {stats.get('total_procedures', 0)}")
 
-        if 'memory_types' in stats:
+        if "memory_types" in stats:
             print("\n   Memory breakdown:")
-            for mem_type, count in stats['memory_types'].items():
+            for mem_type, count in stats["memory_types"].items():
                 print(f"   - {mem_type}: {count}")
 
         print("\n" + "=" * 50)
@@ -225,14 +258,14 @@ async def test_agent_integration():
     # Import the memory interface
     import sys
     from pathlib import Path
+
     sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
     try:
         from shared.memory_integration import AgentMemoryInterface
 
         async with AgentMemoryInterface(
-            agent_id="integration_test_agent",
-            mcp_base_url="http://localhost:8000"
+            agent_id="integration_test_agent", mcp_base_url="http://localhost:8000"
         ) as memory:
             print("\n✅ Connected to memory system")
 
@@ -250,8 +283,7 @@ async def test_agent_integration():
 
             # Add knowledge
             knowledge_id = await memory.add_knowledge(
-                "Agent Integration",
-                "Successfully integrated with memory system"
+                "Agent Integration", "Successfully integrated with memory system"
             )
             print(f"✅ Added knowledge: {knowledge_id}")
 
@@ -259,8 +291,12 @@ async def test_agent_integration():
             # Instead, use learn_procedure which is available
             proc_id = await memory.learn_procedure(
                 "Test memory integration",
-                ["Step 1: Connect to memory", "Step 2: Store data", "Step 3: Retrieve data"],
-                context="Testing the memory integration workflow"
+                [
+                    "Step 1: Connect to memory",
+                    "Step 2: Store data",
+                    "Step 3: Retrieve data",
+                ],
+                context="Testing the memory integration workflow",
             )
             print(f"✅ Learned procedure: {proc_id}")
 
@@ -294,4 +330,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ Error: {e}")
         import traceback
+
         traceback.print_exc()

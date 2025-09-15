@@ -1,0 +1,81 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # Formatting and linting with Ruff
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Run the formatter first
+      - id: ruff-format
+        types_or: [python, pyi]
+      # Then run the linter
+      - id: ruff
+        types_or: [python, pyi]
+        args: ['--fix', '--exit-non-zero-on-fix']
+
+  # Additional Python code quality checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: debug-statements
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Type checking with pyright (using local hook)
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: uv run pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: false
+        stages: [pre-push]  # Only run on push, not every commit
+
+  # Run tests (using local hook)
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]  # Only run tests on push, not every commit
+
+# Global configuration
+default_language_version:
+  python: python3.12
+
+# Only run on specific stages if needed
+default_stages: [pre-commit, pre-push]
+
+# Files to exclude from all hooks
+exclude: |
+  (?x)^(
+    .*\.skip$|
+    \.venv/.*|
+    venv/.*|
+    \.git/.*|
+    \.pytest_cache/.*|
+    __pycache__/.*|
+    .*\.pyc$|
+    .*\.pyo$|
+    build/.*|
+    dist/.*|
+    .*\.egg-info/.*|
+    htmlcov/.*|
+    \.coverage$|
+    \.mypy_cache/.*|
+    \.ruff_cache/.*|
+    \.worktrees/.*
+  )

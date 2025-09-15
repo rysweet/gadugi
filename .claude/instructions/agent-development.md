@@ -96,7 +96,7 @@ class MockAgent:
     def __init__(self):
         self.called = False
         self.args = None
-    
+
     def invoke(self, *args, **kwargs):
         self.called = True
         self.args = (args, kwargs)
@@ -109,7 +109,7 @@ def test_agent_invocation():
     # Don't mock registration
     agent = load_agent("agent-name")
     assert agent is not None
-    
+
     # Then test execution
     result = agent.execute(task)
     assert result["success"]

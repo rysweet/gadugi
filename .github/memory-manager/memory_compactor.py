@@ -57,8 +57,6 @@ else:
             MemoryDocument,
             MemoryParser,
             MemorySection,
-            Task,
-            TaskStatus,
         )
     except ImportError as e:
         raise ImportError(

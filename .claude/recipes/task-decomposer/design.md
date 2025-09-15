@@ -125,13 +125,13 @@ class DecompositionStrategy:
     min_complexity: float         # Minimum complexity threshold
     max_subtasks: int            # Maximum subtasks to generate
     pattern_matchers: List[Pattern]  # Patterns to recognize
-    
+
     def score_applicability(self, task: Task) -> float:
         """Score how well this strategy fits the task"""
-        
+
     def decompose(self, task: Task) -> List[Subtask]:
         """Perform the decomposition"""
-        
+
     def estimate_performance(self, task: Task) -> PerformanceEstimate:
         """Estimate performance improvement"""
 ```
@@ -147,25 +147,25 @@ class TaskDecomposer:
         constraints: Optional[DecompositionConstraints] = None
     ) -> DecompositionResult:
         """Decompose a task into subtasks"""
-        
+
     async def analyze_task(
         self,
         task: Task
     ) -> ComplexityAnalysis:
         """Analyze task complexity"""
-        
+
     async def recommend_strategy(
         self,
         task: Task
     ) -> List[StrategyRecommendation]:
         """Recommend decomposition strategies"""
-        
+
     async def validate_decomposition(
         self,
         result: DecompositionResult
     ) -> ValidationResult:
         """Validate decomposition correctness"""
-        
+
     async def learn_from_execution(
         self,
         execution_result: ExecutionResult
@@ -182,7 +182,7 @@ class FunctionalDecomposition(DecompositionStrategy):
         # 2. Create subtask for each function
         # 3. Establish call dependencies
         # 4. Optimize function grouping
-        
+
 class DataParallelDecomposition(DecompositionStrategy):
     def decompose(self, task: Task) -> List[Subtask]:
         """Decompose by data partitioning"""
@@ -190,7 +190,7 @@ class DataParallelDecomposition(DecompositionStrategy):
         # 2. Partition data optimally
         # 3. Create worker subtasks
         # 4. Add aggregation subtask
-        
+
 class PipelineDecomposition(DecompositionStrategy):
     def decompose(self, task: Task) -> List[Subtask]:
         """Decompose into pipeline stages"""
@@ -208,20 +208,20 @@ class DecompositionPredictor:
         task: Task
     ) -> np.ndarray:
         """Extract ML features from task"""
-        
+
     async def predict_strategy(
         self,
         features: np.ndarray
     ) -> Tuple[str, float]:
         """Predict best strategy and confidence"""
-        
+
     async def predict_performance(
         self,
         task: Task,
         strategy: str
     ) -> PerformanceEstimate:
         """Predict execution performance"""
-        
+
     async def update_model(
         self,
         features: np.ndarray,

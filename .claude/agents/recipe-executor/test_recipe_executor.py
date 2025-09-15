@@ -49,15 +49,19 @@ def temp_recipe_dir(tmp_path):
 
     # Create dependencies.json
     deps = recipe_dir / "dependencies.json"
-    deps.write_text(json.dumps({
-        "python": [
-            "fastapi>=0.100.0",
-            "uvicorn>=0.23.0",
-            "sqlalchemy>=2.0.0",
-            "redis>=4.5.0"
-        ],
-        "system": ["postgresql", "redis"]
-    }))
+    deps.write_text(
+        json.dumps(
+            {
+                "python": [
+                    "fastapi>=0.100.0",
+                    "uvicorn>=0.23.0",
+                    "sqlalchemy>=2.0.0",
+                    "redis>=4.5.0",
+                ],
+                "system": ["postgresql", "redis"],
+            }
+        )
+    )
 
     return recipe_dir
 
@@ -109,7 +113,11 @@ class TestRecipeLoading:
 
         # Check that MUST/SHALL/SHOULD requirements are captured
         criteria_text = " ".join(recipe.validation_criteria).lower()
-        assert "must" in criteria_text or "shall" in criteria_text or "should" in criteria_text
+        assert (
+            "must" in criteria_text
+            or "shall" in criteria_text
+            or "should" in criteria_text
+        )
 
 
 class TestComponentTypeIdentification:
@@ -121,7 +129,7 @@ class TestComponentTypeIdentification:
             name="test-service",
             path=Path("."),
             requirements="Build a REST API service",
-            design="FastAPI-based microservice"
+            design="FastAPI-based microservice",
         )
 
         component_type = executor._identify_component_type(recipe)
@@ -133,7 +141,7 @@ class TestComponentTypeIdentification:
             name="test-agent",
             path=Path("."),
             requirements="Build an autonomous agent",
-            design="Agent with tool execution"
+            design="Agent with tool execution",
         )
 
         component_type = executor._identify_component_type(recipe)
@@ -145,7 +153,7 @@ class TestComponentTypeIdentification:
             name="test-lib",
             path=Path("."),
             requirements="Build a utility library",
-            design="Reusable module for data processing"
+            design="Reusable module for data processing",
         )
 
         component_type = executor._identify_component_type(recipe)
@@ -157,7 +165,7 @@ class TestComponentTypeIdentification:
             name="test-generic",
             path=Path("."),
             requirements="Build something",
-            design="Some implementation"
+            design="Some implementation",
         )
 
         component_type = executor._identify_component_type(recipe)
@@ -187,7 +195,7 @@ class TestImplementationGeneration:
             name="test-agent",
             path=Path("."),
             requirements="Build an agent",
-            design="Agent implementation"
+            design="Agent implementation",
         )
 
         impl = executor._generate_agent_implementation(recipe)
@@ -203,7 +211,7 @@ class TestImplementationGeneration:
             name="test-library",
             path=Path("."),
             requirements="Build a library",
-            design="Library implementation"
+            design="Library implementation",
         )
 
         impl = executor._generate_library_implementation(recipe)
@@ -230,7 +238,7 @@ class TestImplementationGeneration:
             path=Path("."),
             requirements="Simple service",
             design="Web service",
-            dependencies={"python": ["flask"]}
+            dependencies={"python": ["flask"]},
         )
 
         service_code = executor._generate_service_code(recipe)
@@ -250,14 +258,10 @@ class TestFileWriting:
             files={
                 "__init__.py": "# Init file",
                 "main.py": "# Main file",
-                "subdir/module.py": "# Module in subdir"
+                "subdir/module.py": "# Module in subdir",
             },
-            test_files={
-                "test_main.py": "# Test file"
-            },
-            config_files={
-                "config.json": '{"key": "value"}'
-            }
+            test_files={"test_main.py": "# Test file"},
+            config_files={"config.json": '{"key": "value"}'},
         )
 
         output_path = tmp_path / "output"
@@ -278,16 +282,13 @@ class TestFileWriting:
 class TestValidation:
     """Test implementation validation."""
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_validate_implementation_success(self, mock_run, executor, tmp_path):
         """Test successful validation."""
         # Setup mock responses
         mock_run.return_value = MagicMock(returncode=0, stdout="Success", stderr="")
 
-        impl = Implementation(
-            recipe_name="test",
-            files={"main.py": "print('hello')"}
-        )
+        impl = Implementation(recipe_name="test", files={"main.py": "print('hello')"})
 
         # Write files
         output_path = tmp_path / "test"
@@ -299,19 +300,16 @@ class TestValidation:
         assert result is True
         assert mock_run.called
 
-    @patch('subprocess.run')
+    @patch("subprocess.run")
     def test_validate_implementation_test_failure(self, mock_run, executor, tmp_path):
         """Test validation with test failures."""
         # First call for pyright succeeds, second for pytest fails
         mock_run.side_effect = [
             MagicMock(returncode=0, stdout="", stderr=""),
-            MagicMock(returncode=1, stdout="Test failed", stderr="")
+            MagicMock(returncode=1, stdout="Test failed", stderr=""),
         ]
 
-        impl = Implementation(
-            recipe_name="test",
-            files={"main.py": "print('hello')"}
-        )
+        impl = Implementation(recipe_name="test", files={"main.py": "print('hello')"})
 
         output_path = tmp_path / "test"
         executor.write_implementation(impl, output_path)
@@ -323,8 +321,7 @@ class TestValidation:
     def test_validate_missing_files(self, executor, tmp_path):
         """Test validation with missing files."""
         impl = Implementation(
-            recipe_name="test",
-            files={"main.py": "content", "missing.py": "content"}
+            recipe_name="test", files={"main.py": "content", "missing.py": "content"}
         )
 
         output_path = tmp_path / "test"
@@ -419,7 +416,7 @@ class TestCodeGeneration:
         recipe = Recipe(
             name="test",
             path=Path("."),
-            dependencies={"python": ["custom-package>=1.0.0"]}
+            dependencies={"python": ["custom-package>=1.0.0"]},
         )
 
         requirements = executor._generate_requirements(recipe)

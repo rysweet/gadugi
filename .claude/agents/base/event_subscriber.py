@@ -9,12 +9,10 @@ Agents can subscribe to events from other agents and react accordingly.
 import asyncio
 import re
 import threading
-from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Pattern, Set, Tuple
-import json
+from typing import Any, Callable, Dict, List, Optional, Pattern, Set
 import logging
 
 logger = logging.getLogger(__name__)
@@ -22,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class EventPriority(Enum):
     """Event priority levels."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -30,6 +29,7 @@ class EventPriority(Enum):
 
 class ReactionType(Enum):
     """Types of event reactions."""
+
     IMMEDIATE = "immediate"
     THROTTLED = "throttled"
     DEBOUNCED = "debounced"
@@ -39,6 +39,7 @@ class ReactionType(Enum):
 
 class FilterOperator(Enum):
     """Filter operators for custom filters."""
+
     EQUALS = "equals"
     NOT_EQUALS = "not_equals"
     CONTAINS = "contains"
@@ -53,6 +54,7 @@ class FilterOperator(Enum):
 @dataclass
 class CustomFilter:
     """Custom filter for event patterns."""
+
     field: str
     operator: FilterOperator
     value: Any
@@ -61,6 +63,7 @@ class CustomFilter:
 @dataclass
 class AgentEvent:
     """Represents an event from an agent."""
+
     event_type: str
     agent_id: str
     data: Dict[str, Any]
@@ -72,26 +75,27 @@ class AgentEvent:
 @dataclass
 class EventPattern:
     """Pattern for matching events."""
+
     event_types: Optional[Set[str]] = None
     agent_sources: Optional[Set[str]] = None
     priorities: Optional[Set[str]] = None
     tag_patterns: Optional[List[Pattern]] = None
     custom_filters: Optional[List[CustomFilter]] = None
-    
+
     def matches(self, event: AgentEvent) -> bool:
         """Check if an event matches this pattern."""
         # Check event type
         if self.event_types and event.event_type not in self.event_types:
             return False
-            
+
         # Check agent source
         if self.agent_sources and event.agent_id not in self.agent_sources:
             return False
-            
+
         # Check priority
         if self.priorities and event.priority.value not in self.priorities:
             return False
-            
+
         # Check tags
         if self.tag_patterns:
             if not any(
@@ -99,19 +103,19 @@ class EventPattern:
                 for pattern in self.tag_patterns
             ):
                 return False
-                
+
         # Apply custom filters
         if self.custom_filters:
             for cf in self.custom_filters:
                 field_value = self._get_nested_field(event.data, cf.field)
                 if not self._evaluate_filter(field_value, cf.operator, cf.value):
                     return False
-                    
+
         return True
-    
+
     def _get_nested_field(self, data: Dict[str, Any], field: str) -> Any:
         """Get a nested field from a dictionary."""
-        parts = field.split('.')
+        parts = field.split(".")
         value = data
         for part in parts:
             if isinstance(value, dict):
@@ -119,8 +123,10 @@ class EventPattern:
             else:
                 return None
         return value
-    
-    def _evaluate_filter(self, field_value: Any, operator: FilterOperator, value: Any) -> bool:
+
+    def _evaluate_filter(
+        self, field_value: Any, operator: FilterOperator, value: Any
+    ) -> bool:
         """Evaluate a custom filter."""
         if operator == FilterOperator.EQUALS:
             return field_value == value
@@ -146,6 +152,7 @@ class EventPattern:
 @dataclass
 class EventFilter:
     """Filter criteria for event subscriptions."""
+
     event_types: Optional[List[str]] = None
     agent_sources: Optional[List[str]] = None
     priorities: Optional[List[EventPriority]] = None
@@ -155,22 +162,22 @@ class EventFilter:
     def matches(self, event: Dict[str, Any]) -> bool:
         """Check if an event matches this filter."""
         # Check event type
-        if self.event_types and event.get('event_type') not in self.event_types:
+        if self.event_types and event.get("event_type") not in self.event_types:
             return False
 
         # Check agent source
-        if self.agent_sources and event.get('agent_id') not in self.agent_sources:
+        if self.agent_sources and event.get("agent_id") not in self.agent_sources:
             return False
 
         # Check priority
         if self.priorities:
-            event_priority = EventPriority(event.get('priority', 'normal'))
+            event_priority = EventPriority(event.get("priority", "normal"))
             if event_priority not in self.priorities:
                 return False
 
         # Check tags
         if self.tag_patterns:
-            event_tags = event.get('tags', [])
+            event_tags = event.get("tags", [])
             if not any(
                 any(pattern.match(tag) for tag in event_tags)
                 for pattern in self.tag_patterns
@@ -187,6 +194,7 @@ class EventFilter:
 @dataclass
 class EventSubscription:
     """Represents an event subscription."""
+
     subscription_id: str
     filter: EventFilter
     handler: Callable
@@ -212,7 +220,9 @@ class EventSubscription:
             except Exception as e:
                 retries += 1
                 if retries > self.max_retries:
-                    logger.error(f"Failed to handle event after {self.max_retries} retries: {e}")
+                    logger.error(
+                        f"Failed to handle event after {self.max_retries} retries: {e}"
+                    )
                     return False
                 await asyncio.sleep(self.retry_delay * retries)
 
@@ -222,6 +232,7 @@ class EventSubscription:
 @dataclass
 class ChainReaction:
     """Defines a chain reaction pattern."""
+
     trigger_event_type: str
     reaction_event_type: str
     transform: Optional[Callable[[Dict], Dict]] = None
@@ -232,6 +243,7 @@ class ChainReaction:
 @dataclass
 class AggregatedReaction:
     """Defines an aggregated reaction pattern."""
+
     required_events: List[str]
     window_seconds: float
     min_count: int
@@ -274,7 +286,9 @@ class EventSubscriberMixin:
 
         if self._processing_task is None or self._processing_task.done():
             self._processing_task = asyncio.create_task(self._process_events())
-            logger.info(f"Started event processing for agent {getattr(self, 'agent_id', 'unknown')}")
+            logger.info(
+                f"Started event processing for agent {getattr(self, 'agent_id', 'unknown')}"
+            )
 
     async def stop_event_processing(self):
         """Stop the event processing loop."""
@@ -287,14 +301,16 @@ class EventSubscriberMixin:
             except asyncio.CancelledError:
                 pass
 
-        logger.info(f"Stopped event processing for agent {getattr(self, 'agent_id', 'unknown')}")
+        logger.info(
+            f"Stopped event processing for agent {getattr(self, 'agent_id', 'unknown')}"
+        )
 
     def subscribe(
         self,
         event_types: Optional[List[str]] = None,
         handler: Optional[Callable] = None,
         filter: Optional[EventFilter] = None,
-        subscription_id: Optional[str] = None
+        subscription_id: Optional[str] = None,
     ) -> str:
         """
         Subscribe to events with specified criteria.
@@ -322,7 +338,7 @@ class EventSubscriberMixin:
                 subscription_id=subscription_id,
                 filter=filter,
                 handler=handler,
-                is_async=asyncio.iscoroutinefunction(handler)
+                is_async=asyncio.iscoroutinefunction(handler),
             )
             self._subscriptions[subscription_id] = subscription
 
@@ -350,7 +366,7 @@ class EventSubscriberMixin:
         self,
         event_type: Optional[str] = None,
         priority: Optional[EventPriority] = None,
-        agent_source: Optional[str] = None
+        agent_source: Optional[str] = None,
     ):
         """
         Decorator for registering event handlers.
@@ -360,12 +376,13 @@ class EventSubscriberMixin:
             async def on_task_completed(event):
                 print(f"Task completed: {event}")
         """
+
         def decorator(func):
             # Create filter based on decorator parameters
             filter = EventFilter(
                 event_types=[event_type] if event_type else None,
                 priorities=[priority] if priority else None,
-                agent_sources=[agent_source] if agent_source else None
+                agent_sources=[agent_source] if agent_source else None,
             )
 
             # Subscribe the handler
@@ -392,16 +409,15 @@ class EventSubscriberMixin:
 
     async def _process_events(self):
         """Main event processing loop."""
-        logger.info(f"Event processing loop started for {getattr(self, 'agent_id', 'unknown')}")
+        logger.info(
+            f"Event processing loop started for {getattr(self, 'agent_id', 'unknown')}"
+        )
 
         while not self._shutdown_event.is_set():
             try:
                 # Wait for event with timeout
                 if self._event_queue is not None:
-                    event = await asyncio.wait_for(
-                        self._event_queue.get(),
-                        timeout=1.0
-                    )
+                    event = await asyncio.wait_for(self._event_queue.get(), timeout=1.0)
                 else:
                     await asyncio.sleep(1.0)
                     continue
@@ -430,9 +446,7 @@ class EventSubscriberMixin:
         with self._subscription_lock:
             for subscription in self._subscriptions.values():
                 if subscription.filter.matches(event):
-                    task = asyncio.create_task(
-                        subscription.handle_event(event)
-                    )
+                    task = asyncio.create_task(subscription.handle_event(event))
                     tasks.append(task)
 
         if tasks:
@@ -447,7 +461,7 @@ class EventSubscriberMixin:
         reaction_event_type: str,
         transform: Optional[Callable[[Dict], Dict]] = None,
         condition: Optional[Callable[[Dict], bool]] = None,
-        delay: float = 0.0
+        delay: float = 0.0,
     ):
         """
         Add a chain reaction pattern.
@@ -464,13 +478,13 @@ class EventSubscriberMixin:
             reaction_event_type=reaction_event_type,
             transform=transform,
             condition=condition,
-            delay=delay
+            delay=delay,
         )
         self._chain_reactions.append(reaction)
 
     async def _check_chain_reactions(self, event: Dict[str, Any]):
         """Check and trigger chain reactions."""
-        event_type = event.get('event_type')
+        event_type = event.get("event_type")
 
         for reaction in self._chain_reactions:
             if reaction.trigger_event_type == event_type:
@@ -487,16 +501,15 @@ class EventSubscriberMixin:
                     reaction_event = reaction.transform(event)
                 else:
                     reaction_event = {
-                        'event_type': reaction.reaction_event_type,
-                        'triggered_by': event.get('id'),
-                        'data': event.get('data', {})
+                        "event_type": reaction.reaction_event_type,
+                        "triggered_by": event.get("id"),
+                        "data": event.get("data", {}),
                     }
 
                 # Emit reaction event
-                if hasattr(self, '_emit_event'):
+                if hasattr(self, "_emit_event"):
                     await self._emit_event(  # type: ignore[attr-defined]
-                        reaction.reaction_event_type,
-                        reaction_event.get('data', {})
+                        reaction.reaction_event_type, reaction_event.get("data", {})
                     )
 
     def add_aggregated_reaction(
@@ -505,7 +518,7 @@ class EventSubscriberMixin:
         required_events: List[str],
         window_seconds: float,
         min_count: int,
-        reaction: Callable[[List[Dict]], None]
+        reaction: Callable[[List[Dict]], None],
     ):
         """
         Add an aggregated reaction pattern.
@@ -521,12 +534,12 @@ class EventSubscriberMixin:
             required_events=required_events,
             window_seconds=window_seconds,
             min_count=min_count,
-            reaction=reaction
+            reaction=reaction,
         )
 
     async def _check_aggregated_reactions(self, event: Dict[str, Any]):
         """Check and trigger aggregated reactions."""
-        event_type = event.get('event_type')
+        event_type = event.get("event_type")
         current_time = datetime.now()
 
         for reaction_id, reaction in self._aggregated_reactions.items():
@@ -536,7 +549,9 @@ class EventSubscriberMixin:
                     reaction.window_start = current_time
 
                 # Check if window expired
-                if (current_time - reaction.window_start).total_seconds() > reaction.window_seconds:
+                if (
+                    current_time - reaction.window_start
+                ).total_seconds() > reaction.window_seconds:
                     # Reset window
                     reaction.collected_events = []
                     reaction.window_start = current_time
@@ -562,13 +577,14 @@ class EventSubscriberMixin:
     def get_subscription_stats(self) -> Dict[str, Any]:
         """Get statistics about event subscriptions and processing."""
         return {
-            'subscriptions': len(self._subscriptions),
-            'chain_reactions': len(self._chain_reactions),
-            'aggregated_reactions': len(self._aggregated_reactions),
-            'events_received': self._events_received,
-            'events_processed': self._events_processed,
-            'events_failed': self._events_failed,
-            'processing_active': self._processing_task and not self._processing_task.done()
+            "subscriptions": len(self._subscriptions),
+            "chain_reactions": len(self._chain_reactions),
+            "aggregated_reactions": len(self._aggregated_reactions),
+            "events_received": self._events_received,
+            "events_processed": self._events_processed,
+            "events_failed": self._events_failed,
+            "processing_active": self._processing_task
+            and not self._processing_task.done(),
         }
 
 
@@ -583,38 +599,39 @@ class EventSubscriberExamples:
             trigger_event_type="task.completed",
             reaction_event_type="knowledge.learned",
             transform=lambda e: {
-                'event_type': 'knowledge.learned',
-                'data': {
-                    'task_id': e.get('task_id'),
-                    'lesson': f"Task {e.get('task_id')} completed successfully",
-                    'confidence': 0.8
-                }
+                "event_type": "knowledge.learned",
+                "data": {
+                    "task_id": e.get("task_id"),
+                    "lesson": f"Task {e.get('task_id')} completed successfully",
+                    "confidence": 0.8,
+                },
             },
-            condition=lambda e: e.get('data', {}).get('success', False)
+            condition=lambda e: e.get("data", {}).get("success", False),
         )
 
     @staticmethod
     def error_aggregation_reaction():
         """Example: Aggregate errors and trigger alert."""
+
         def alert_on_errors(events: List[Dict]):
             error_count = len(events)
             logger.warning(f"ALERT: {error_count} errors in the last minute!")
             # Could emit an alert event or notify administrators
 
         return {
-            'reaction_id': 'error_alert',
-            'required_events': ['task.failed', 'agent.error'],
-            'window_seconds': 60.0,
-            'min_count': 5,
-            'reaction': alert_on_errors
+            "reaction_id": "error_alert",
+            "required_events": ["task.failed", "agent.error"],
+            "window_seconds": 60.0,
+            "min_count": 5,
+            "reaction": alert_on_errors,
         }
 
     @staticmethod
     def collaboration_filter():
         """Example: Filter for collaboration events from specific agents."""
         return EventFilter(
-            event_types=['collaboration.message'],
-            agent_sources=['WorkflowManager', 'orchestrator'],
+            event_types=["collaboration.message"],
+            agent_sources=["WorkflowManager", "orchestrator"],
             priorities=[EventPriority.HIGH, EventPriority.CRITICAL],
-            custom_filter=lambda e: 'urgent' in e.get('tags', [])
+            custom_filter=lambda e: "urgent" in e.get("tags", []),
         )

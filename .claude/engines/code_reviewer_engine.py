@@ -166,7 +166,9 @@ class ReviewResult:
 class AnalysisTool:
     """Base class for analysis tools."""
 
-    def __init__(self, name: str, language: str, config: dict[str, Any] | None = None) -> None:
+    def __init__(
+        self, name: str, language: str, config: dict[str, Any] | None = None
+    ) -> None:
         self.name = name
         self.language = language
         self.config = config or {}
@@ -182,7 +184,9 @@ class AnalysisTool:
                 stderr=asyncio.subprocess.PIPE,
             )
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10.0)
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=10.0
+                )
                 return process.returncode == 0
             except asyncio.TimeoutError:
                 process.terminate()
@@ -223,7 +227,9 @@ class RuffAnalyzer(AnalysisTool):
                 stderr=asyncio.subprocess.PIPE,
             )
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=300.0
+                )
                 result = subprocess.CompletedProcess(
                     cmd,
                     process.returncode,  # type: ignore[assignment]
@@ -486,7 +492,9 @@ class QualityGateValidator:
         if "min_test_coverage" in self.quality_gates:
             min_coverage = self.quality_gates["min_test_coverage"]
             actual_coverage = review_result.quality_metrics.test_coverage
-            results["coverage_check"] = "passed" if actual_coverage >= min_coverage else "failed"
+            results["coverage_check"] = (
+                "passed" if actual_coverage >= min_coverage else "failed"
+            )
 
         # Complexity validation
         if "max_cyclomatic_complexity" in self.quality_gates:
@@ -522,7 +530,9 @@ class QualityGateValidator:
                 for issue in fr.issues
                 if issue.category == IssueCategory.SECURITY and issue.severity >= 5
             )
-            results["security_check"] = "passed" if high_severity_security == 0 else "failed"
+            results["security_check"] = (
+                "passed" if high_severity_security == 0 else "failed"
+            )
 
         # Style validation
         style_errors = sum(
@@ -865,7 +875,9 @@ class CodeReviewerEngine:
     ) -> ReviewStatus:
         """Determine review status for a file."""
         # Check for critical issues
-        critical_issues = [i for i in issues if i.type == IssueType.ERROR and i.severity >= 4]
+        critical_issues = [
+            i for i in issues if i.type == IssueType.ERROR and i.severity >= 4
+        ]
         if critical_issues:
             return ReviewStatus.REJECTED
 
@@ -935,10 +947,12 @@ class CodeReviewerEngine:
             for fr in file_reviews
         )
         warnings = sum(
-            len([i for i in fr.issues if i.type == IssueType.WARNING]) for fr in file_reviews
+            len([i for i in fr.issues if i.type == IssueType.WARNING])
+            for fr in file_reviews
         )
         suggestions = sum(
-            len([i for i in fr.issues if i.type == IssueType.SUGGESTION]) for fr in file_reviews
+            len([i for i in fr.issues if i.type == IssueType.SUGGESTION])
+            for fr in file_reviews
         )
 
         return ReviewSummary(
@@ -1042,7 +1056,8 @@ class CodeReviewerEngine:
 
         # Style recommendations
         style_issues = sum(
-            len([i for i in fr.issues if i.category == IssueCategory.STYLE]) for fr in file_reviews
+            len([i for i in fr.issues if i.category == IssueCategory.STYLE])
+            for fr in file_reviews
         )
         if style_issues > 5:
             recommendations.append("Apply consistent code formatting and style")
@@ -1163,7 +1178,9 @@ Recommendations:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=5
+                )
                 if process.returncode == 0:
                     available_tools.append(tool_name)
                 else:
@@ -1195,7 +1212,9 @@ Recommendations:
                     stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE,
                 )
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=5)
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=5
+                )
 
     else:
         parser.print_help()

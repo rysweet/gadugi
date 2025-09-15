@@ -5,19 +5,24 @@ Shows agent lifecycle event tracking, persistence, filtering, and replay capabil
 """
 
 import asyncio
-import json
 from datetime import datetime, timedelta
-from typing import List
 
 from .models import (
-    AgentEvent, EventType, EventPriority,
-    AgentInitializedEvent, TaskStartedEvent, TaskCompletedEvent,
-    KnowledgeLearnedEvent, CollaborationMessageEvent,
-    EventFilter, EventReplayRequest
+    EventType,
+    EventPriority,
+    AgentInitializedEvent,
+    TaskStartedEvent,
+    TaskCompletedEvent,
+    KnowledgeLearnedEvent,
+    CollaborationMessageEvent,
+    EventFilter,
+    EventReplayRequest,
 )
 from .handlers import (
-    MemoryEventStorage, EventHandler, EventFilterEngine,
-    EventReplayEngine
+    MemoryEventStorage,
+    EventHandler,
+    EventFilterEngine,
+    EventReplayEngine,
 )
 from .config import get_settings
 
@@ -30,7 +35,7 @@ async def demonstrate_event_system():
 
     # Initialize settings and components
     settings = get_settings()
-    print(f"📋 Configuration:")
+    print("📋 Configuration:")
     print(f"  - Memory Backend: {settings.memory_backend_url}")
     print(f"  - SQLite Path: {settings.sqlite_db_path}")
     print(f"  - Memory Integration: {settings.enable_memory_integration}")
@@ -42,7 +47,7 @@ async def demonstrate_event_system():
 
         memory_storage = MemoryEventStorage(
             memory_backend_url=settings.memory_backend_url,
-            sqlite_db_path=settings.sqlite_db_path
+            sqlite_db_path=settings.sqlite_db_path,
         )
         await memory_storage.initialize()
         print("✅ Memory storage initialized")
@@ -100,7 +105,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         metadata={},
         tags=[],
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
     result = await event_handler.handle_event(init_event)
@@ -122,7 +127,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         metadata={},
         priority=EventPriority.NORMAL,
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
     result = await event_handler.handle_event(task_event)
@@ -144,7 +149,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         project_id=None,
         metadata={},
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
     result = await event_handler.handle_event(knowledge_event)
@@ -167,7 +172,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         metadata={},
         priority=EventPriority.NORMAL,
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
     result = await event_handler.handle_event(collab_event)
@@ -180,13 +185,17 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         task_id="task_feature_x_001",
         result="Successfully decomposed authentication system into 5 subtasks with security patterns identified",
         duration=95,  # minutes
-        artifacts=["task_breakdown.json", "security_requirements.md", "implementation_plan.md"],
+        artifacts=[
+            "task_breakdown.json",
+            "security_requirements.md",
+            "implementation_plan.md",
+        ],
         session_id=session_id,
         success_metrics={
             "subtasks_created": 5,
             "dependencies_mapped": 3,
             "security_patterns_identified": 2,
-            "estimated_vs_actual_duration": 0.79  # 95/120
+            "estimated_vs_actual_duration": 0.79,  # 95/120
         },
         tags=["completion", "authentication", "decomposition"],
         priority=EventPriority.NORMAL,
@@ -194,7 +203,7 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
         project_id=None,
         metadata={},
         stored_in_memory=False,
-        memory_id=None
+        memory_id=None,
     )
 
     result = await event_handler.handle_event(completion_event)
@@ -206,7 +215,9 @@ async def demonstrate_agent_lifecycle(event_handler: EventHandler):
     return session_id
 
 
-async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage: MemoryEventStorage):
+async def demonstrate_event_filtering(
+    filter_engine: EventFilterEngine, storage: MemoryEventStorage
+):
     """Demonstrate advanced event filtering capabilities."""
     print("\n🔍 Event Filtering Demonstration")
     print("-" * 40)
@@ -223,7 +234,7 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
         tags=None,
         start_time=None,
         end_time=None,
-        offset=0
+        offset=0,
     )
 
     task_events = await filter_engine.filter_events(storage, task_filter)
@@ -241,7 +252,7 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
         tags=None,
         start_time=None,
         end_time=None,
-        offset=0
+        offset=0,
     )
 
     high_priority_events = await filter_engine.filter_events(storage, priority_filter)
@@ -259,7 +270,7 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
         priority=None,
         start_time=None,
         end_time=None,
-        offset=0
+        offset=0,
     )
 
     security_events = await filter_engine.filter_events(storage, tag_filter)
@@ -277,7 +288,7 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
         priority=None,
         tags=None,
         end_time=None,
-        offset=0
+        offset=0,
     )
 
     recent_events = await filter_engine.filter_events(storage, time_filter)
@@ -286,7 +297,7 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
     # Show sample event details
     if recent_events:
         sample_event = recent_events[0]
-        print(f"\n📝 Sample Event Details:")
+        print("\n📝 Sample Event Details:")
         print(f"   🆔 ID: {sample_event.id}")
         print(f"   📋 Type: {sample_event.event_type}")
         print(f"   👤 Agent: {sample_event.agent_id}")
@@ -294,7 +305,9 @@ async def demonstrate_event_filtering(filter_engine: EventFilterEngine, storage:
         print(f"   🏷️  Tags: {', '.join(sample_event.tags)}")
 
 
-async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: MemoryEventStorage):
+async def demonstrate_event_replay(
+    replay_engine: EventReplayEngine, storage: MemoryEventStorage
+):
     """Demonstrate event replay for crash recovery."""
     print("\n🔄 Event Replay Demonstration")
     print("-" * 40)
@@ -310,7 +323,7 @@ async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: Me
         priority=None,
         tags=None,
         end_time=None,
-        offset=0
+        offset=0,
     )
 
     recent_events = await storage.get_events(recent_filter)
@@ -338,27 +351,27 @@ async def demonstrate_event_replay(replay_engine: EventReplayEngine, storage: Me
         from_timestamp=datetime.utcnow() - timedelta(hours=2),
         agent_id=None,
         to_timestamp=None,
-        event_types=None
+        event_types=None,
     )
 
     # Execute replay
     replay_result = await replay_engine.replay_events(replay_request)
 
-    print(f"   📊 Replay Results:")
+    print("   📊 Replay Results:")
     print(f"   🔢 Events replayed: {replay_result['event_count']}")
     print(f"   🎯 Event types: {list(replay_result['summary']['event_types'].keys())}")
     print(f"   👥 Agents involved: {len(replay_result['summary']['agents'])}")
     print(f"   📋 Tasks involved: {len(replay_result['summary']['tasks'])}")
 
-    if replay_result['summary']['time_range']:
-        time_range = replay_result['summary']['time_range']
+    if replay_result["summary"]["time_range"]:
+        time_range = replay_result["summary"]["time_range"]
         print(f"   ⏰ Time range: {time_range['start']} to {time_range['end']}")
 
-    print(f"\n   💡 Use Case: This replay data can be used to:")
-    print(f"      • Restore agent state after crashes")
-    print(f"      • Audit agent decision-making processes")
-    print(f"      • Debug collaborative workflows")
-    print(f"      • Generate performance analytics")
+    print("\n   💡 Use Case: This replay data can be used to:")
+    print("      • Restore agent state after crashes")
+    print("      • Audit agent decision-making processes")
+    print("      • Debug collaborative workflows")
+    print("      • Generate performance analytics")
 
 
 async def show_storage_statistics(storage: MemoryEventStorage):
@@ -372,13 +385,13 @@ async def show_storage_statistics(storage: MemoryEventStorage):
         print(f"📈 Total Events: {storage_info.total_events}")
 
         if storage_info.events_by_type:
-            print(f"🏷️  Events by Type:")
+            print("🏷️  Events by Type:")
             for event_type, count in storage_info.events_by_type.items():
                 print(f"   • {event_type}: {count}")
 
         # Get integration status
         integration_status = await storage.get_integration_status()
-        print(f"\n🔗 Integration Status:")
+        print("\n🔗 Integration Status:")
         print(f"   • Connected: {integration_status.connected}")
         print(f"   • Backend Type: {integration_status.backend_type}")
         print(f"   • Pending Events: {integration_status.pending_events}")
@@ -389,13 +402,17 @@ async def show_storage_statistics(storage: MemoryEventStorage):
 
         # Get health status
         health_status = await storage.get_health_status()
-        print(f"\n💚 Health Status:")
+        print("\n💚 Health Status:")
         print(f"   • Overall: {health_status['status']}")
-        print(f"   • SQLite Backend: {'✅' if health_status['sqlite_backend'] else '❌'}")
-        print(f"   • Memory Interface: {'✅' if health_status['memory_interface'] else '❌'}")
+        print(
+            f"   • SQLite Backend: {'✅' if health_status['sqlite_backend'] else '❌'}"
+        )
+        print(
+            f"   • Memory Interface: {'✅' if health_status['memory_interface'] else '❌'}"
+        )
         print(f"   • Cache Size: {health_status['cache_size']} events")
 
-        if 'sqlite_events' in health_status:
+        if "sqlite_events" in health_status:
             print(f"   • SQLite Events: {health_status['sqlite_events']}")
 
     except Exception as e:

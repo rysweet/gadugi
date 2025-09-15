@@ -7,9 +7,9 @@ from event_router_service import EventRouterService
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
+
 
 async def main():
     """Start the Event Router server."""
@@ -34,15 +34,12 @@ async def main():
     print()
     print("Press Ctrl+C to stop the server")
     print("=" * 60)
-    
+
     # Create and start service
     service = EventRouterService(
-        host="localhost",
-        port=9090,
-        max_workers=10,
-        queue_size=10000
+        host="localhost", port=9090, max_workers=10, queue_size=10000
     )
-    
+
     try:
         await service.start()
         # Keep running until interrupted
@@ -51,6 +48,7 @@ async def main():
         print("\nShutting down server...")
         await service.stop()
         print("Server stopped.")
+
 
 if __name__ == "__main__":
     try:

@@ -174,18 +174,23 @@ class IntegrationTestAgentEngine:
             self.metrics.average_processing_time = processing_time
         else:
             self.metrics.average_processing_time = (
-                self.metrics.average_processing_time * (self.metrics.operations_count - 1)
+                self.metrics.average_processing_time
+                * (self.metrics.operations_count - 1)
                 + processing_time
             ) / self.metrics.operations_count
 
         # Update error rate
         if error:
-            error_count = self.metrics.error_rate * (self.metrics.operations_count - 1) + 1
+            error_count = (
+                self.metrics.error_rate * (self.metrics.operations_count - 1) + 1
+            )
             self.metrics.error_rate = error_count / self.metrics.operations_count
 
         # Update cache hit rate
         if cache_hit:
-            hit_count = self.metrics.cache_hit_rate * (self.metrics.operations_count - 1) + 1
+            hit_count = (
+                self.metrics.cache_hit_rate * (self.metrics.operations_count - 1) + 1
+            )
             self.metrics.cache_hit_rate = hit_count / self.metrics.operations_count
 
         self.metrics.last_updated = datetime.now()
@@ -240,4 +245,6 @@ class IntegrationTestAgentManager:
 
     def get_operation_status(self, operation_id: str) -> dict[str, Any]:
         """Get status of submitted operation."""
-        return self.active_operations.get(operation_id, {"error": "Operation not found"})
+        return self.active_operations.get(
+            operation_id, {"error": "Operation not found"}
+        )

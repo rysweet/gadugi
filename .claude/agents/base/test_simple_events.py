@@ -6,13 +6,15 @@ Simple test for V03Agent event publishing without external dependencies.
 import asyncio
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 # Add the parent directory to sys.path
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Mock the memory integration to avoid dependency issues
-sys.modules['shared.memory_integration'] = MagicMock()
+sys.modules["shared.memory_integration"] = MagicMock()
+
+from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome  # noqa: E402
 
 
 class MockMemoryInterface:
@@ -45,13 +47,13 @@ class MockMemoryInterface:
 
 
 # Patch the memory integration
-from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome
-
 # Override the memory interface creation
 original_init = V03Agent.__init__
 
+
 def patched_init(self, *args, **kwargs):
     original_init(self, *args, **kwargs)
+
 
 def patched_initialize(self, mcp_url=None):
     """Initialize without external dependencies."""
@@ -62,6 +64,7 @@ def patched_initialize(self, mcp_url=None):
 
     # Initialize event system (this is what we want to test)
     return self._initialize_event_system_and_setup()
+
 
 async def _initialize_event_system_and_setup(self):
     """Setup without memory system dependencies."""
@@ -74,14 +77,14 @@ async def _initialize_event_system_and_setup(self):
 
     # Store initialization
     await self.memory.remember_short_term(
-        f"Agent {self.agent_id} initialized",
-        tags=["initialization", self.agent_type]
+        f"Agent {self.agent_id} initialized", tags=["initialization", self.agent_type]
     )
 
     # Emit initialization event
     await self.emit_initialized()
 
     print(f"✅ {self.agent_type} agent ready with event publishing")
+
 
 # Patch methods
 V03Agent.initialize = patched_initialize
@@ -95,7 +98,7 @@ class TestAgent(V03Agent):
         capabilities = AgentCapabilities(
             can_write_code=True,
             can_test=True,
-            expertise_areas=["testing", "event_publishing"]
+            expertise_areas=["testing", "event_publishing"],
         )
 
         # Configure events for testing
@@ -104,14 +107,14 @@ class TestAgent(V03Agent):
             event_router_url="http://localhost:8000",
             timeout_seconds=2,
             graceful_degradation=True,
-            emit_heartbeat=False  # Disable for testing
+            emit_heartbeat=False,  # Disable for testing
         )
 
         super().__init__(
             agent_id="test-agent-001",
             agent_type="test-agent",
             capabilities=capabilities,
-            event_config=event_config
+            event_config=event_config,
         )
 
     async def execute_task(self, task):
@@ -125,15 +128,15 @@ class TestAgent(V03Agent):
             task_type="test",
             steps_taken=["Step 1: Analyze", "Step 2: Execute", "Step 3: Verify"],
             duration_seconds=0.1,
-            lessons_learned="Test completed successfully"
+            lessons_learned="Test completed successfully",
         )
 
 
 async def test_event_system():
     """Test the core event system functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing V03Agent Event System (Simplified)")
-    print("="*60)
+    print("=" * 60)
 
     agent = TestAgent()
 
@@ -141,7 +144,7 @@ async def test_event_system():
         print("\n1. Initializing agent...")
         await agent.initialize()
 
-        print(f"\n   Event system status:")
+        print("\n   Event system status:")
         print(f"   - Enabled: {agent.event_config.enabled}")
         print(f"   - Publishing: {agent._event_publishing_enabled}")
         print(f"   - Router URL: {agent.event_config.event_router_url}")
@@ -157,21 +160,19 @@ async def test_event_system():
         result = await agent.emit_knowledge_learned(
             knowledge_type="pattern",
             content="Event system works with graceful degradation",
-            confidence=0.9
+            confidence=0.9,
         )
         print(f"   - Knowledge event emitted: {result}")
 
         # Test collaboration
         result = await agent.emit_collaboration(
-            message="Testing collaboration events",
-            message_type="status_update"
+            message="Testing collaboration events", message_type="status_update"
         )
         print(f"   - Collaboration event emitted: {result}")
 
         # Test error event
         result = await agent.emit_error(
-            error_type="test_error",
-            error_message="This is a test error"
+            error_type="test_error", error_message="This is a test error"
         )
         print(f"   - Error event emitted: {result}")
 
@@ -184,17 +185,16 @@ async def test_event_system():
             print(f"   - Flushed events: {flushed}")
 
         print("\n4. Testing task completion...")
-        outcome = await agent.execute_task({
-            "description": "Test task with events",
-            "type": "integration_test"
-        })
+        outcome = await agent.execute_task(
+            {"description": "Test task with events", "type": "integration_test"}
+        )
 
         await agent.learn_from_outcome(outcome)
 
         print("\n✅ Event system test completed successfully!")
 
         # Show final statistics
-        print(f"\n   Final statistics:")
+        print("\n   Final statistics:")
         print(f"   - Event publishing enabled: {agent._event_publishing_enabled}")
         print(f"   - HTTP session active: {agent._event_session is not None}")
         print(f"   - Remaining batched events: {len(agent._event_batch)}")
@@ -202,6 +202,7 @@ async def test_event_system():
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:
@@ -214,9 +215,9 @@ async def main():
     """Run the simplified test."""
     try:
         await test_event_system()
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🎉 Event system test completed!")
-        print("="*60)
+        print("=" * 60)
 
     except KeyboardInterrupt:
         print("\n⏹️  Test interrupted by user")
