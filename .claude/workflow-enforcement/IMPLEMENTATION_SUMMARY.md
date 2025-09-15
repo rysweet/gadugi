@@ -50,7 +50,7 @@ The comprehensive workflow enforcement system has been successfully implemented 
 - **Real-time monitoring** of git activity and file changes
 - **Violation detection** with automatic logging
 - **Compliance reporting** with statistics and trends
-- **Emergency override** system with justification requirements
+- **NO EMERGENCY OVERRIDES** - All changes must use workflow
 
 ## 🔧 System Components
 
@@ -72,7 +72,7 @@ The comprehensive workflow enforcement system has been successfully implemented 
 ### Git Integration
 - Pre-commit hook with workflow validation
 - Commit-msg hook with activity logging
-- Emergency override mechanism
+- NO emergency override mechanism - all changes must use workflow
 
 ## 📈 Enforcement Levels
 
@@ -147,11 +147,11 @@ $ python .claude/workflow-enforcement/setup-workflow-enforcement.py --validate
 .claude/workflow-enforcement/compliance-monitor.py --check
 ```
 
-### Emergency Override (When Needed)
+### NO Emergency Overrides Allowed
 ```bash
-export GADUGI_EMERGENCY_OVERRIDE=true
-git commit -m "Critical hotfix: Security vulnerability patch"
-unset GADUGI_EMERGENCY_OVERRIDE
+# ⛔ ALL changes must go through orchestrator workflow
+# NO EXCEPTIONS - If blocked, fix the underlying problem
+python .claude/orchestrator/main.py --task "your task description"
 ```
 
 ## 🎯 Achievement Metrics
@@ -167,7 +167,7 @@ unset GADUGI_EMERGENCY_OVERRIDE
 - **100% agent coverage** - All agents now include workflow requirements
 - **Git-level enforcement** - Pre-commit hooks prevent workflow bypass
 - **Real-time monitoring** - Continuous compliance checking
-- **Emergency procedures** - Controlled override system for critical situations
+- **NO EXCEPTIONS** - Zero tolerance for workflow bypass
 
 ### User Experience
 - **Clear guidance** - Comprehensive documentation and quick reference
@@ -192,7 +192,7 @@ While the core system is complete and operational, future enhancements could inc
 - [x] Clear documentation exists for workflow requirements
 - [x] Validation scripts prevent accidental violations
 - [x] Compliance can be monitored and reported
-- [x] Emergency overrides are logged and justified
+- [x] NO emergency overrides - zero tolerance policy
 - [x] System is fully tested and operational
 
 ---

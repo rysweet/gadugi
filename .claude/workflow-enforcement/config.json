@@ -16,9 +16,9 @@
     "weekly_reports": false
   },
   "emergency_override": {
-    "enabled": true,
-    "require_justification": true,
-    "log_overrides": true
+    "enabled": false,
+    "status": "STRICTLY_FORBIDDEN",
+    "message": "NO EXCEPTIONS - All changes must use workflow"
   },
   "excluded_paths": [
     ".git/",

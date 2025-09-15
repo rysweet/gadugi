@@ -24,14 +24,10 @@ git_with_validation() {
 
     case "$git_command" in
         "commit"|"add"|"rm"|"mv")
-            if [[ -z "${GADUGI_ORCHESTRATOR_ACTIVE}" && -z "${GADUGI_EMERGENCY_OVERRIDE}" ]]; then
-                echo "⚠️  Git operation detected without orchestrator context"
-                echo "   Consider using: python .claude/orchestrator/main.py"
-                read -p "Continue anyway? [y/N]: " -n 1 -r
-                echo
-                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                    return 1
-                fi
+            if [[ -z "${GADUGI_ORCHESTRATOR_ACTIVE}" ]]; then
+                echo "❌ Git operation blocked - orchestrator required"
+                echo "   NO EXCEPTIONS: Use python .claude/orchestrator/main.py"
+                return 1
             fi
             ;;
     esac
