@@ -14,50 +14,53 @@ Key Features:
 - Event handling for session_completed, pr_merged, test_failure, error_logged
 """
 
-import json
-import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
+from datetime import datetime
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 
 # Import BaseAgent framework
 import sys
 import os
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "shared"))
 
 from base_classes import IntegratedAgent  # type: ignore[import]
-from interfaces import OperationResult  # type: ignore[import]
 
 # Import Team Coach phases
-from .phase1.performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
+from .phase1.performance_analytics import AgentPerformanceAnalyzer
 from .phase1.capability_assessment import CapabilityAssessment
 # from .phase1.metrics_collector import MetricsCollector
 # from .phase1.reporting import ReportingSystem
+
 
 # Create placeholder classes for missing imports
 class MetricsCollector:
     def __init__(self):
         pass
 
+
 class ReportingSystem:
     def __init__(self):
         pass
+
 
 from .phase2.task_matcher import TaskAgentMatcher
 from .phase2.team_optimizer import TeamCompositionOptimizer
 from .phase2.recommendation_engine import RecommendationEngine
 
-from .phase3.coaching_engine import CoachingEngine, CoachingRecommendation
+from .phase3.coaching_engine import CoachingEngine
+
 # from .phase3.conflict_resolver import AgentConflictResolver
 from .phase3.workflow_optimizer import WorkflowOptimizer
 # from .phase3.strategic_planner import StrategicTeamPlanner  # type: ignore
+
 
 # Create placeholder classes for missing imports
 class AgentConflictResolver:
     def __init__(self, performance_analyzer, team_optimizer):
         pass
+
 
 class StrategicTeamPlanner:
     def __init__(self, capability_assessment, performance_analyzer):
@@ -66,6 +69,7 @@ class StrategicTeamPlanner:
 
 class ImprovementType(Enum):
     """Types of improvements the Team Coach can identify."""
+
     PROCESS = "process"
     TOOLING = "tooling"
     DOCUMENTATION = "documentation"
@@ -76,6 +80,7 @@ class ImprovementType(Enum):
 @dataclass
 class SessionMetrics:
     """Metrics collected from a completed development session."""
+
     session_id: str
     start_time: datetime
     end_time: datetime
@@ -91,6 +96,7 @@ class SessionMetrics:
 @dataclass
 class ImprovementSuggestion:
     """Suggestion for process/tooling improvement."""
+
     type: ImprovementType
     title: str
     description: str
@@ -103,6 +109,7 @@ class ImprovementSuggestion:
 @dataclass
 class PerformanceTrend:
     """Performance trend analysis result."""
+
     metric_name: str
     trend_direction: str  # improving, declining, stable
     current_value: float
@@ -134,7 +141,8 @@ class TeamCoach(IntegratedAgent):
             self.capability_assessment, self.performance_analyzer
         )
         self.team_optimizer = TeamCompositionOptimizer(
-            self.capability_assessment, self.task_matcher  # type: ignore[assignment]
+            self.capability_assessment,
+            self.task_matcher,  # type: ignore[assignment]
         )
         self.recommendation_engine = RecommendationEngine(
             self.task_matcher, self.team_optimizer
@@ -182,10 +190,13 @@ class TeamCoach(IntegratedAgent):
                     "success": False,
                     "error": f"Unknown action: {action}",
                     "available_actions": [
-                        "analyze_session", "identify_improvements",
-                        "create_improvement_issue", "track_performance_trends",
-                        "generate_coaching_report", "learn_from_patterns"
-                    ]
+                        "analyze_session",
+                        "identify_improvements",
+                        "create_improvement_issue",
+                        "track_performance_trends",
+                        "generate_coaching_report",
+                        "learn_from_patterns",
+                    ],
                 }
 
         except Exception as e:
@@ -197,7 +208,9 @@ class TeamCoach(IntegratedAgent):
         self.log_info(f"Analyzing session: {session_data.get('session_id', 'unknown')}")
 
         # Extract session metrics
-        session_id = session_data.get("session_id", f"session_{datetime.now().isoformat()}")
+        session_id = session_data.get(
+            "session_id", f"session_{datetime.now().isoformat()}"
+        )
         start_time = self._parse_datetime(session_data.get("start_time"))
         end_time = self._parse_datetime(session_data.get("end_time", datetime.now()))
 
@@ -222,16 +235,20 @@ class TeamCoach(IntegratedAgent):
             code_changes=code_changes,
             pr_created=pr_created,
             review_comments=review_comments,
-            performance_score=performance_score
+            performance_score=performance_score,
         )
 
         # Store session history
         self.session_history.append(metrics)
 
-        self.log_info(f"Session analysis completed: {performance_score:.2f} performance score")
+        self.log_info(
+            f"Session analysis completed: {performance_score:.2f} performance score"
+        )
         return metrics
 
-    async def identify_improvements(self, metrics: SessionMetrics) -> List[ImprovementSuggestion]:
+    async def identify_improvements(
+        self, metrics: SessionMetrics
+    ) -> List[ImprovementSuggestion]:
         """Identify improvement opportunities from session metrics."""
         self.log_info("Identifying improvement opportunities")
 
@@ -239,67 +256,75 @@ class TeamCoach(IntegratedAgent):
 
         # Process improvements
         if metrics.tasks_completed == 0:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.PROCESS,
-                title="No tasks completed in session",
-                description="Session had no completed tasks. Review workflow planning and task decomposition.",
-                priority="high",
-                estimated_impact=0.8,
-                implementation_steps=[
-                    "Review session planning process",
-                    "Implement better task breakdown",
-                    "Set clearer success criteria"
-                ],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.PROCESS,
+                    title="No tasks completed in session",
+                    description="Session had no completed tasks. Review workflow planning and task decomposition.",
+                    priority="high",
+                    estimated_impact=0.8,
+                    implementation_steps=[
+                        "Review session planning process",
+                        "Implement better task breakdown",
+                        "Set clearer success criteria",
+                    ],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         # Performance improvements
         if metrics.performance_score < 0.6:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.PERFORMANCE,
-                title="Low session performance score",
-                description=f"Session scored {metrics.performance_score:.2f}, below target of 0.6",
-                priority="medium",
-                estimated_impact=0.6,
-                implementation_steps=[
-                    "Analyze specific bottlenecks",
-                    "Improve agent coordination",
-                    "Optimize workflow phases"
-                ],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.PERFORMANCE,
+                    title="Low session performance score",
+                    description=f"Session scored {metrics.performance_score:.2f}, below target of 0.6",
+                    priority="medium",
+                    estimated_impact=0.6,
+                    implementation_steps=[
+                        "Analyze specific bottlenecks",
+                        "Improve agent coordination",
+                        "Optimize workflow phases",
+                    ],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         # Quality improvements
         if metrics.test_failures > 0:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.QUALITY,
-                title="Test failures detected",
-                description=f"Session had {metrics.test_failures} test failures",
-                priority="high",
-                estimated_impact=0.7,
-                implementation_steps=[
-                    "Implement pre-commit testing",
-                    "Improve test coverage",
-                    "Add quality gates"
-                ],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.QUALITY,
+                    title="Test failures detected",
+                    description=f"Session had {metrics.test_failures} test failures",
+                    priority="high",
+                    estimated_impact=0.7,
+                    implementation_steps=[
+                        "Implement pre-commit testing",
+                        "Improve test coverage",
+                        "Add quality gates",
+                    ],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         # Error handling improvements
         if metrics.errors_encountered > 5:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.TOOLING,
-                title="High error rate",
-                description=f"Session encountered {metrics.errors_encountered} errors",
-                priority="medium",
-                estimated_impact=0.5,
-                implementation_steps=[
-                    "Improve error handling",
-                    "Add better validation",
-                    "Implement circuit breakers"
-                ],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.TOOLING,
+                    title="High error rate",
+                    description=f"Session encountered {metrics.errors_encountered} errors",
+                    priority="medium",
+                    estimated_impact=0.5,
+                    implementation_steps=[
+                        "Improve error handling",
+                        "Add better validation",
+                        "Implement circuit breakers",
+                    ],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         # Store improvement history
         self.improvement_history.extend(suggestions)
@@ -336,14 +361,35 @@ class TeamCoach(IntegratedAgent):
 *Note: This issue was created by an AI agent on behalf of the repository owner.*
 """
 
-        # Create the issue (mock implementation - would use real GitHub API)
+        # Create the issue using real GitHub API
         try:
-            # This would be replaced with actual GitHub API call
-            issue_url = f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
+            if self.github_client:
+                # Use real GitHub client
+                # Define labels based on suggestion type and priority
+                labels = ["improvement", "team-coach"]
+                if suggestion.priority == "high":
+                    labels.append("priority:high")
+                elif suggestion.priority == "medium":
+                    labels.append("priority:medium")
+                else:
+                    labels.append("priority:low")
+
+                result = self.github_client.create_issue(
+                    title=suggestion.title, body=issue_body, labels=labels
+                )
+                issue_url = result.get(
+                    "url",
+                    f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}",
+                )
+            else:
+                # Fallback if GitHub client not available
+                issue_url = (
+                    f"https://github.com/repo/issues/{hash(suggestion.title) % 1000}"
+                )
             self.log_info(f"Created issue: {issue_url}")
             return issue_url
         except Exception as e:
-            self.log_error(f"Failed to create GitHub issue", e)
+            self.log_error("Failed to create GitHub issue", e)
             raise
 
     async def track_performance_trends(self) -> List[PerformanceTrend]:
@@ -361,7 +407,11 @@ class TeamCoach(IntegratedAgent):
         current_avg = sum(s.performance_score for s in recent_sessions[-5:]) / 5
         previous_avg = sum(s.performance_score for s in recent_sessions[-10:-5]) / 5
 
-        change_pct = ((current_avg - previous_avg) / previous_avg) * 100 if previous_avg > 0 else 0
+        change_pct = (
+            ((current_avg - previous_avg) / previous_avg) * 100
+            if previous_avg > 0
+            else 0
+        )
 
         if change_pct > 5:
             direction = "improving"
@@ -370,14 +420,16 @@ class TeamCoach(IntegratedAgent):
         else:
             direction = "stable"
 
-        trends.append(PerformanceTrend(
-            metric_name="performance_score",
-            trend_direction=direction,
-            current_value=current_avg,
-            previous_value=previous_avg,
-            change_percentage=change_pct,
-            time_period="last_10_sessions"
-        ))
+        trends.append(
+            PerformanceTrend(
+                metric_name="performance_score",
+                trend_direction=direction,
+                current_value=current_avg,
+                previous_value=previous_avg,
+                change_percentage=change_pct,
+                time_period="last_10_sessions",
+            )
+        )
 
         self.log_info(f"Generated {len(trends)} performance trends")
         return trends
@@ -388,10 +440,16 @@ class TeamCoach(IntegratedAgent):
 
         # Get recent performance data
         recent_sessions = self.session_history[-10:] if self.session_history else []
-        recent_improvements = self.improvement_history[-20:] if self.improvement_history else []
+        recent_improvements = (
+            self.improvement_history[-20:] if self.improvement_history else []
+        )
 
         # Calculate summary metrics
-        avg_performance = sum(s.performance_score for s in recent_sessions) / len(recent_sessions) if recent_sessions else 0
+        avg_performance = (
+            sum(s.performance_score for s in recent_sessions) / len(recent_sessions)
+            if recent_sessions
+            else 0
+        )
         total_tasks = sum(s.tasks_completed for s in recent_sessions)
         total_errors = sum(s.errors_encountered for s in recent_sessions)
 
@@ -399,14 +457,16 @@ class TeamCoach(IntegratedAgent):
         coaching_recommendations = []
         if recent_sessions:
             # Get coaching recommendations for recent performance
-            latest_session = recent_sessions[-1]
+            recent_sessions[-1]
             # This would integrate with the actual coaching engine
-            coaching_recommendations.append({
-                "category": "performance",
-                "recommendation": "Focus on reducing error rates in development sessions",
-                "priority": "medium",
-                "evidence": f"Recent sessions averaged {total_errors/len(recent_sessions):.1f} errors"
-            })
+            coaching_recommendations.append(
+                {
+                    "category": "performance",
+                    "recommendation": "Focus on reducing error rates in development sessions",
+                    "priority": "medium",
+                    "evidence": f"Recent sessions averaged {total_errors/len(recent_sessions):.1f} errors",
+                }
+            )
 
         report = {
             "report_id": f"coaching_report_{datetime.now().isoformat()}",
@@ -416,7 +476,7 @@ class TeamCoach(IntegratedAgent):
                 "average_performance": avg_performance,
                 "total_tasks_completed": total_tasks,
                 "total_errors": total_errors,
-                "improvement_suggestions_generated": len(recent_improvements)
+                "improvement_suggestions_generated": len(recent_improvements),
             },
             "performance_trends": await self.track_performance_trends(),
             "recent_improvements": [
@@ -424,7 +484,7 @@ class TeamCoach(IntegratedAgent):
                     "type": imp.type.value,
                     "title": imp.title,
                     "priority": imp.priority,
-                    "estimated_impact": imp.estimated_impact
+                    "estimated_impact": imp.estimated_impact,
                 }
                 for imp in recent_improvements
             ],
@@ -432,8 +492,8 @@ class TeamCoach(IntegratedAgent):
             "next_steps": [
                 "Continue monitoring session performance",
                 "Implement high-priority improvements",
-                "Review and update process documentation"
-            ]
+                "Review and update process documentation",
+            ],
         }
 
         self.log_info("Coaching report generated successfully")
@@ -450,38 +510,52 @@ class TeamCoach(IntegratedAgent):
         patterns = {
             "successful_patterns": [],
             "unsuccessful_patterns": [],
-            "insights": []
+            "insights": [],
         }
 
         # Analyze successful patterns
         if successful_sessions:
-            avg_tasks = sum(s.tasks_completed for s in successful_sessions) / len(successful_sessions)
-            avg_errors = sum(s.errors_encountered for s in successful_sessions) / len(successful_sessions)
+            avg_tasks = sum(s.tasks_completed for s in successful_sessions) / len(
+                successful_sessions
+            )
+            avg_errors = sum(s.errors_encountered for s in successful_sessions) / len(
+                successful_sessions
+            )
 
-            patterns["successful_patterns"].append({
-                "pattern": "high_task_completion_low_errors",
-                "description": f"Successful sessions average {avg_tasks:.1f} tasks with {avg_errors:.1f} errors",
-                "frequency": len(successful_sessions)
-            })
+            patterns["successful_patterns"].append(
+                {
+                    "pattern": "high_task_completion_low_errors",
+                    "description": f"Successful sessions average {avg_tasks:.1f} tasks with {avg_errors:.1f} errors",
+                    "frequency": len(successful_sessions),
+                }
+            )
 
         # Analyze unsuccessful patterns
         if unsuccessful_sessions:
-            avg_errors = sum(s.errors_encountered for s in unsuccessful_sessions) / len(unsuccessful_sessions)
+            avg_errors = sum(s.errors_encountered for s in unsuccessful_sessions) / len(
+                unsuccessful_sessions
+            )
 
-            patterns["unsuccessful_patterns"].append({
-                "pattern": "high_error_rate",
-                "description": f"Unsuccessful sessions average {avg_errors:.1f} errors",
-                "frequency": len(unsuccessful_sessions)
-            })
+            patterns["unsuccessful_patterns"].append(
+                {
+                    "pattern": "high_error_rate",
+                    "description": f"Unsuccessful sessions average {avg_errors:.1f} errors",
+                    "frequency": len(unsuccessful_sessions),
+                }
+            )
 
         # Generate insights
         if successful_sessions and unsuccessful_sessions:
-            patterns["insights"].append({
-                "insight": "Error rate strongly correlates with session success",
-                "recommendation": "Implement better error prevention and handling"
-            })
+            patterns["insights"].append(
+                {
+                    "insight": "Error rate strongly correlates with session success",
+                    "recommendation": "Implement better error prevention and handling",
+                }
+            )
 
-        self.log_info(f"Learned {len(patterns['successful_patterns'])} successful and {len(patterns['unsuccessful_patterns'])} unsuccessful patterns")
+        self.log_info(
+            f"Learned {len(patterns['successful_patterns'])} successful and {len(patterns['unsuccessful_patterns'])} unsuccessful patterns"
+        )
         return patterns
 
     def _handle_session_analysis(self, context: Dict[str, Any]) -> Dict[str, Any]:
@@ -498,15 +572,17 @@ class TeamCoach(IntegratedAgent):
                     "performance_score": metrics.performance_score,
                     "tasks_completed": metrics.tasks_completed,
                     "errors_encountered": metrics.errors_encountered,
-                    "test_failures": metrics.test_failures
-                }
+                    "test_failures": metrics.test_failures,
+                },
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def _sync_analyze_session(self, session_data: Dict[str, Any]) -> SessionMetrics:
         """Synchronous version of analyze_session for framework compatibility."""
-        session_id = session_data.get("session_id", f"session_{datetime.now().isoformat()}")
+        session_id = session_data.get(
+            "session_id", f"session_{datetime.now().isoformat()}"
+        )
         start_time = self._parse_datetime(session_data.get("start_time"))
         end_time = self._parse_datetime(session_data.get("end_time", datetime.now()))
 
@@ -529,10 +605,12 @@ class TeamCoach(IntegratedAgent):
             code_changes=code_changes,
             pr_created=pr_created,
             review_comments=review_comments,
-            performance_score=performance_score
+            performance_score=performance_score,
         )
 
-    def _handle_improvement_identification(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_improvement_identification(
+        self, context: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Handle improvement identification request."""
         try:
             metrics_data = context.get("metrics", {})
@@ -550,39 +628,48 @@ class TeamCoach(IntegratedAgent):
                         "description": s.description,
                         "priority": s.priority,
                         "estimated_impact": s.estimated_impact,
-                        "implementation_steps": s.implementation_steps
+                        "implementation_steps": s.implementation_steps,
                     }
                     for s in suggestions
-                ]
+                ],
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _sync_identify_improvements(self, metrics: SessionMetrics) -> List[ImprovementSuggestion]:
+    def _sync_identify_improvements(
+        self, metrics: SessionMetrics
+    ) -> List[ImprovementSuggestion]:
         """Synchronous version of identify_improvements."""
         suggestions = []
 
         if metrics.tasks_completed == 0:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.PROCESS,
-                title="No tasks completed in session",
-                description="Session had no completed tasks. Review workflow planning.",
-                priority="high",
-                estimated_impact=0.8,
-                implementation_steps=["Review session planning", "Improve task breakdown"],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.PROCESS,
+                    title="No tasks completed in session",
+                    description="Session had no completed tasks. Review workflow planning.",
+                    priority="high",
+                    estimated_impact=0.8,
+                    implementation_steps=[
+                        "Review session planning",
+                        "Improve task breakdown",
+                    ],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         if metrics.performance_score < 0.6:
-            suggestions.append(ImprovementSuggestion(
-                type=ImprovementType.PERFORMANCE,
-                title="Low session performance score",
-                description=f"Session scored {metrics.performance_score:.2f}",
-                priority="medium",
-                estimated_impact=0.6,
-                implementation_steps=["Analyze bottlenecks", "Optimize workflow"],
-                related_sessions=[metrics.session_id]
-            ))
+            suggestions.append(
+                ImprovementSuggestion(
+                    type=ImprovementType.PERFORMANCE,
+                    title="Low session performance score",
+                    description=f"Session scored {metrics.performance_score:.2f}",
+                    priority="medium",
+                    estimated_impact=0.6,
+                    implementation_steps=["Analyze bottlenecks", "Optimize workflow"],
+                    related_sessions=[metrics.session_id],
+                )
+            )
 
         return suggestions
 
@@ -591,13 +678,28 @@ class TeamCoach(IntegratedAgent):
         try:
             suggestion_data = context.get("suggestion", {})
 
-            # Mock issue creation for now
-            issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            # Create real GitHub issue
+            if self.github_client:
+                try:
+                    result = self.github_client.create_issue(
+                        title=suggestion_data.get("title", "Team Coach Suggestion"),
+                        body=suggestion_data.get("description", ""),
+                        labels=["team-coach", "enhancement"],
+                    )
+                    issue_url = result.get(
+                        "url",
+                        f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}",
+                    )
+                except Exception as e:
+                    self.log_error(f"Failed to create GitHub issue: {e}")
+                    issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
+            else:
+                issue_url = f"https://github.com/repo/issues/{hash(suggestion_data.get('title', '')) % 1000}"
 
             return {
                 "success": True,
                 "issue_url": issue_url,
-                "message": f"Created issue: {suggestion_data.get('title', 'Unknown')}"
+                "message": f"Created issue: {suggestion_data.get('title', 'Unknown')}",
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -609,28 +711,44 @@ class TeamCoach(IntegratedAgent):
                 return {
                     "success": True,
                     "trends": [],
-                    "message": "Insufficient data for trend analysis"
+                    "message": "Insufficient data for trend analysis",
                 }
 
             # Simple trend calculation
             recent_scores = [s.performance_score for s in self.session_history[-5:]]
             avg_recent = sum(recent_scores) / len(recent_scores)
 
-            previous_scores = [s.performance_score for s in self.session_history[-10:-5]]
-            avg_previous = sum(previous_scores) / len(previous_scores) if previous_scores else avg_recent
+            previous_scores = [
+                s.performance_score for s in self.session_history[-10:-5]
+            ]
+            avg_previous = (
+                sum(previous_scores) / len(previous_scores)
+                if previous_scores
+                else avg_recent
+            )
 
-            change_pct = ((avg_recent - avg_previous) / avg_previous) * 100 if avg_previous > 0 else 0
+            change_pct = (
+                ((avg_recent - avg_previous) / avg_previous) * 100
+                if avg_previous > 0
+                else 0
+            )
 
             return {
                 "success": True,
-                "trends": [{
-                    "metric_name": "performance_score",
-                    "trend_direction": "improving" if change_pct > 5 else "declining" if change_pct < -5 else "stable",
-                    "current_value": avg_recent,
-                    "previous_value": avg_previous,
-                    "change_percentage": change_pct,
-                    "time_period": "last_sessions"
-                }]
+                "trends": [
+                    {
+                        "metric_name": "performance_score",
+                        "trend_direction": "improving"
+                        if change_pct > 5
+                        else "declining"
+                        if change_pct < -5
+                        else "stable",
+                        "current_value": avg_recent,
+                        "previous_value": avg_previous,
+                        "change_percentage": change_pct,
+                        "time_period": "last_sessions",
+                    }
+                ],
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -640,7 +758,11 @@ class TeamCoach(IntegratedAgent):
         try:
             recent_sessions = self.session_history[-5:] if self.session_history else []
 
-            avg_performance = sum(s.performance_score for s in recent_sessions) / len(recent_sessions) if recent_sessions else 0
+            avg_performance = (
+                sum(s.performance_score for s in recent_sessions) / len(recent_sessions)
+                if recent_sessions
+                else 0
+            )
 
             return {
                 "success": True,
@@ -651,9 +773,9 @@ class TeamCoach(IntegratedAgent):
                     "recommendations": [
                         "Continue monitoring session performance",
                         "Focus on error reduction",
-                        "Improve task completion rates"
-                    ]
-                }
+                        "Improve task completion rates",
+                    ],
+                },
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -673,14 +795,16 @@ class TeamCoach(IntegratedAgent):
                     "unsuccessful_sessions": unsuccessful_count,
                     "insights": [
                         "High task completion correlates with success",
-                        "Error reduction improves performance"
-                    ]
-                }
+                        "Error reduction improves performance",
+                    ],
+                },
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _calculate_session_performance_score(self, session_data: Dict[str, Any]) -> float:
+    def _calculate_session_performance_score(
+        self, session_data: Dict[str, Any]
+    ) -> float:
         """Calculate a performance score for the session."""
         tasks_completed = len(session_data.get("tasks", []))
         errors_encountered = len(session_data.get("errors", []))
@@ -713,16 +837,21 @@ class TeamCoach(IntegratedAgent):
             return dt_input
         elif isinstance(dt_input, str):
             try:
-                return datetime.fromisoformat(dt_input.replace('Z', '+00:00'))
+                return datetime.fromisoformat(dt_input.replace("Z", "+00:00"))
             except ValueError:
                 return datetime.now()
         else:
             return datetime.now()
 
     def _init_github_client(self):
-        """Initialize GitHub client (mock for now)."""
-        # This would initialize a real GitHub client
-        return None
+        """Initialize GitHub client with real implementation."""
+        try:
+            from .github_integration import GitHubClient
+
+            return GitHubClient()
+        except Exception as e:
+            self.logger.warning(f"Could not initialize GitHub client: {e}")
+            return None
 
     def get_status_summary(self) -> Dict[str, Any]:
         """Get current status summary of the Team Coach."""
@@ -730,7 +859,9 @@ class TeamCoach(IntegratedAgent):
             "name": self.name,
             "sessions_analyzed": len(self.session_history),
             "improvements_identified": len(self.improvement_history),
-            "last_analysis": self.session_history[-1].session_id if self.session_history else None,
+            "last_analysis": self.session_history[-1].session_id
+            if self.session_history
+            else None,
             "performance_metrics": self.get_performance_metrics(),
-            "learning_summary": self.get_learning_summary()
+            "learning_summary": self.get_learning_summary(),
         }

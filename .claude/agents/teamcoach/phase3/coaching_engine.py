@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List, Dict, Any, Optional
-from ..phase1.performance_analytics import AgentPerformanceAnalyzer, AgentPerformanceData
+from ..phase1.performance_analytics import (
+    AgentPerformanceAnalyzer,
+    AgentPerformanceData,
+)
 from ..phase1.capability_assessment import CapabilityAssessment, AgentCapabilityProfile
 from ..phase2.task_matcher import TaskAgentMatcher
 
@@ -329,7 +332,8 @@ class CoachingEngine:
         weak_capabilities = [
             (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
             for domain, score in capabilities.capability_scores.items()
-            if score.proficiency_level.value < 3  # Below intermediate is considered weak
+            if score.proficiency_level.value
+            < 3  # Below intermediate is considered weak
         ]
 
         if weak_capabilities:
@@ -348,10 +352,19 @@ class CoachingEngine:
                         "Document learnings and create knowledge base",
                     ],
                     expected_impact=f"Improve {domain.value} capability to 80% within 6 weeks",
-                    metrics_to_track=[f"{domain.value}_score", f"{domain.value}_task_success_rate"],
+                    metrics_to_track=[
+                        f"{domain.value}_score",
+                        f"{domain.value}_task_success_rate",
+                    ],
                     resources=[
-                        {"type": "training", "name": f"{domain.value.title()} Fundamentals"},
-                        {"type": "mentor", "name": f"{domain.value.title()} Expert Agent"},
+                        {
+                            "type": "training",
+                            "name": f"{domain.value.title()} Fundamentals",
+                        },
+                        {
+                            "type": "mentor",
+                            "name": f"{domain.value.title()} Expert Agent",
+                        },
                     ],
                     timeframe="6 weeks",
                     created_at=datetime.utcnow(),
@@ -369,7 +382,8 @@ class CoachingEngine:
         strong_capabilities = [
             (domain, score.proficiency_level.value / 5.0)  # Convert to 0-1 scale
             for domain, score in capabilities.capability_scores.items()
-            if score.proficiency_level.value >= 4  # Advanced or expert is considered strong
+            if score.proficiency_level.value
+            >= 4  # Advanced or expert is considered strong
         ]
 
         for domain, score in strong_capabilities:
@@ -456,7 +470,9 @@ class CoachingEngine:
         recommendations = []
 
         # Check workload metrics
-        workload = min(1.0, performance.total_tasks / 10.0)  # Normalize workload based on task count
+        workload = min(
+            1.0, performance.total_tasks / 10.0
+        )  # Normalize workload based on task count
         task_variety = 0.5  # Placeholder - would need task type diversity calculation
 
         if workload > 0.85:  # Overloaded
@@ -734,7 +750,9 @@ class CoachingEngine:
         }
         return ranks.get(priority, 0)
 
-    def _get_domain_failures(self, performance: AgentPerformanceData, domain: str) -> int:
+    def _get_domain_failures(
+        self, performance: AgentPerformanceData, domain: str
+    ) -> int:
         """Get failure count related to a specific domain."""
         # This would analyze error patterns related to the domain
         return performance.failed_tasks  # Simplified - return total failures
@@ -757,7 +775,9 @@ class CoachingEngine:
         domain_coverage = {}
 
         for agent_id in agent_ids:
-            capabilities = self.capability_assessment.assess_agent_capabilities(agent_id)
+            capabilities = self.capability_assessment.assess_agent_capabilities(
+                agent_id
+            )
             for domain, score in capabilities.capability_scores.items():
                 all_domains.add(domain)
                 if domain not in domain_coverage:

@@ -20,7 +20,9 @@ class Neo4jConnectionTest:
     def connect(self) -> bool:
         """Establish connection to Neo4j"""
         try:
-            self.driver = GraphDatabase.driver(self.uri, auth=(self.user, self.password))
+            self.driver = GraphDatabase.driver(
+                self.uri, auth=(self.user, self.password)
+            )
             # Test the connection
             with self.driver.session() as session:  # type: ignore[attr-defined]
                 result = session.run("RETURN 1 as test")
@@ -45,7 +47,9 @@ class Neo4jConnectionTest:
                     RETURN count(a) as agent_count, collect(a.name) as agent_names
                 """)
                 agents = agents_result.single()
-                print(f"✅ Found {agents['agent_count']} agents: {agents['agent_names']}")
+                print(
+                    f"✅ Found {agents['agent_count']} agents: {agents['agent_names']}"
+                )
 
                 # Check for Tool nodes
                 tools_result = session.run("""
@@ -61,7 +65,9 @@ class Neo4jConnectionTest:
                     RETURN count(r) as rel_count, collect(distinct type(r)) as rel_types
                 """)
                 rels = rels_result.single()
-                print(f"✅ Found {rels['rel_count']} relationships: {rels['rel_types']}")
+                print(
+                    f"✅ Found {rels['rel_count']} relationships: {rels['rel_types']}"
+                )
 
                 # Check constraints
                 constraints_result = session.run("SHOW CONSTRAINTS")
@@ -73,7 +79,7 @@ class Neo4jConnectionTest:
                 indexes = list(indexes_result)
                 print(f"✅ Found {len(indexes)} indexes")
 
-                return agents['agent_count'] > 0 and tools['tool_count'] > 0
+                return agents["agent_count"] > 0 and tools["tool_count"] > 0
 
         except Exception as e:
             print(f"❌ Failed to verify schema: {e}")
@@ -149,7 +155,7 @@ def main():
     tester.cleanup()
 
     print("\n✅ All Neo4j tests passed!\n")
-    print(f"📊 Neo4j Browser: http://localhost:7475")
+    print("📊 Neo4j Browser: http://localhost:7475")
     print(f"🔌 Bolt URL: {uri}")
     print(f"👤 Username: {user}")
     print(f"🔑 Password: {password}\n")

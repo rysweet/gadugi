@@ -5,7 +5,7 @@ from __future__ import annotations
 import ast
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List
 
 from .models import GeneratedCode, RecipeSpec, TestCase, ValidationResult
 
@@ -69,9 +69,9 @@ class ImplementationValidator:
 
         # Determine overall validity
         result.is_valid = (
-            len(result.errors) == 0 and
-            result.get_test_pass_rate() >= 0.8 and
-            result.get_quality_score() >= 0.7
+            len(result.errors) == 0
+            and result.get_test_pass_rate() >= 0.8
+            and result.get_quality_score() >= 0.7
         )
 
         # Generate suggestions
@@ -87,15 +87,22 @@ class ImplementationValidator:
         except SyntaxError:
             return False
 
-    def _validate_structure(self, code: GeneratedCode, result: ValidationResult) -> bool:
+    def _validate_structure(
+        self, code: GeneratedCode, result: ValidationResult
+    ) -> bool:
         """Validate code structure matches recipe."""
         try:
             tree = ast.parse(code.content)
 
             # Check for required classes
-            found_classes = {node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)}
+            found_classes = {
+                node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)
+            }
             required_classes = {
-                interface.name for interface in (self.recipe_spec.interfaces if self.recipe_spec else [])
+                interface.name
+                for interface in (
+                    self.recipe_spec.interfaces if self.recipe_spec else []
+                )
                 if interface.type == "class"
             }
 
@@ -106,17 +113,23 @@ class ImplementationValidator:
 
             # Check for required functions
             found_functions = {
-                node.name for node in ast.walk(tree)
+                node.name
+                for node in ast.walk(tree)
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
             }
             required_functions = {
-                interface.name for interface in (self.recipe_spec.interfaces if self.recipe_spec else [])
+                interface.name
+                for interface in (
+                    self.recipe_spec.interfaces if self.recipe_spec else []
+                )
                 if interface.type == "function"
             }
 
             missing_functions = required_functions - found_functions
             if missing_functions:
-                result.warnings.append(f"Missing functions: {', '.join(missing_functions)}")
+                result.warnings.append(
+                    f"Missing functions: {', '.join(missing_functions)}"
+                )
 
             return True
 
@@ -124,7 +137,9 @@ class ImplementationValidator:
             result.errors.append(f"Structure validation error: {e}")
             return False
 
-    def _run_quality_checks(self, code_list: List[GeneratedCode], result: ValidationResult) -> None:
+    def _run_quality_checks(
+        self, code_list: List[GeneratedCode], result: ValidationResult
+    ) -> None:
         """Run code quality checks."""
         for code in code_list:
             # Check for docstrings
@@ -153,10 +168,14 @@ class ImplementationValidator:
                 pyright_result = self._run_pyright(code.file_path)
                 result.quality_checks["pyright_clean"] = pyright_result
 
-    def _run_tests(self, code_list: List[GeneratedCode], result: ValidationResult) -> None:
+    def _run_tests(
+        self, code_list: List[GeneratedCode], result: ValidationResult
+    ) -> None:
         """Run tests for the implementation."""
         # Find test files
-        test_files = [code for code in code_list if "test" in code.file_path.name.lower()]
+        test_files = [
+            code for code in code_list if "test" in code.file_path.name.lower()
+        ]
 
         if not test_files:
             result.warnings.append("No test files found")
@@ -174,12 +193,21 @@ class ImplementationValidator:
         for test_file in test_files:
             if test_file.file_path.exists():
                 pytest_result = self._run_pytest(test_file.file_path)
-                result.test_results[f"pytest_{test_file.file_path.name}"] = pytest_result
+                result.test_results[f"pytest_{test_file.file_path.name}"] = (
+                    pytest_result
+                )
 
-    def _validate_completeness(self, code_list: List[GeneratedCode], result: ValidationResult) -> None:
+    def _validate_completeness(
+        self, code_list: List[GeneratedCode], result: ValidationResult
+    ) -> None:
         """Validate implementation completeness."""
         # Check if all high-priority requirements are addressed
-        high_priority_reqs = self.recipe_spec.get_high_priority_requirements() if self.recipe_spec and hasattr(self.recipe_spec, 'get_high_priority_requirements') else []
+        high_priority_reqs = (
+            self.recipe_spec.get_high_priority_requirements()
+            if self.recipe_spec
+            and hasattr(self.recipe_spec, "get_high_priority_requirements")
+            else []
+        )
 
         # Simple check: look for requirement IDs in comments
         all_content = "\n".join(code.content for code in code_list)
@@ -204,22 +232,30 @@ class ImplementationValidator:
             result.suggestions.append("Add type hints for better code clarity")
 
         if not result.quality_checks.get("has_error_handling"):
-            result.suggestions.append("Add proper error handling with try/except blocks")
+            result.suggestions.append(
+                "Add proper error handling with try/except blocks"
+            )
 
         if not result.quality_checks.get("has_logging"):
             result.suggestions.append("Add logging for better debugging and monitoring")
 
         # Based on test results
         if result.get_test_pass_rate() < 1.0:
-            failed_tests = [tid for tid, passed in result.test_results.items() if not passed]
-            result.suggestions.append(f"Fix failing tests: {', '.join(failed_tests[:3])}")
+            failed_tests = [
+                tid for tid, passed in result.test_results.items() if not passed
+            ]
+            result.suggestions.append(
+                f"Fix failing tests: {', '.join(failed_tests[:3])}"
+            )
 
         # Based on errors and warnings
         if len(result.errors) > 0:
             result.suggestions.append("Address all errors before deployment")
 
         if len(result.warnings) > 3:
-            result.suggestions.append("Review and address warnings to improve code quality")
+            result.suggestions.append(
+                "Review and address warnings to improve code quality"
+            )
 
     def _check_docstrings(self, content: str) -> bool:
         """Check if code has docstrings."""
@@ -227,18 +263,22 @@ class ImplementationValidator:
             tree = ast.parse(content)
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if isinstance(
+                    node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+                ):
                     # Check if first statement is a docstring
-                    if (node.body and
-                        isinstance(node.body[0], ast.Expr) and
-                        isinstance(node.body[0].value, ast.Constant) and
-                        isinstance(node.body[0].value.value, str)):
+                    if (
+                        node.body
+                        and isinstance(node.body[0], ast.Expr)
+                        and isinstance(node.body[0].value, ast.Constant)
+                        and isinstance(node.body[0].value.value, str)
+                    ):
                         continue
                     else:
                         return False
 
             return True
-        except:
+        except (SyntaxError, ValueError, TypeError):
             return False
 
     def _check_type_hints(self, content: str) -> bool:
@@ -258,7 +298,7 @@ class ImplementationValidator:
                             return False
 
             return True
-        except:
+        except (SyntaxError, ValueError, TypeError):
             return False
 
     def _run_ruff(self, file_path: Path) -> bool:
@@ -302,7 +342,13 @@ class ImplementationValidator:
         test_cases = []
 
         from .models import RequirementType
-        functional_reqs = self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL) if self.recipe_spec and hasattr(self.recipe_spec, 'get_requirements_by_type') else []
+
+        functional_reqs = (
+            self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL)
+            if self.recipe_spec
+            and hasattr(self.recipe_spec, "get_requirements_by_type")
+            else []
+        )
         for i, req in enumerate(functional_reqs[:5]):
             test_case = TestCase(
                 id=f"TC-{req.id}",

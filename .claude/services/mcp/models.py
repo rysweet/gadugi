@@ -12,11 +12,11 @@ from typing import Any, Dict, List, Optional
 class MemoryType(Enum):
     """Types of memories supported by the system."""
 
-    EPISODIC = "episodic"      # Specific events and interactions
-    SEMANTIC = "semantic"       # Facts and knowledge
-    PROCEDURAL = "procedural"   # How-to knowledge
-    WORKING = "working"         # Current task context
-    SHARED = "shared"          # Team knowledge base
+    EPISODIC = "episodic"  # Specific events and interactions
+    SEMANTIC = "semantic"  # Facts and knowledge
+    PROCEDURAL = "procedural"  # How-to knowledge
+    WORKING = "working"  # Current task context
+    SHARED = "shared"  # Team knowledge base
 
 
 class ContextState(Enum):
@@ -63,7 +63,9 @@ class Memory:
             "access_count": self.access_count,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "last_accessed": self.last_accessed.isoformat() if self.last_accessed else None,
+            "last_accessed": self.last_accessed.isoformat()
+            if self.last_accessed
+            else None,
             "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "version": self.version,
             "parent_id": self.parent_id,
@@ -83,10 +85,18 @@ class Memory:
             metadata=data.get("metadata", {}),
             importance_score=data.get("importance_score", 0.5),
             access_count=data.get("access_count", 0),
-            created_at=datetime.fromisoformat(data.get("created_at", datetime.now().isoformat())),
-            updated_at=datetime.fromisoformat(data.get("updated_at", datetime.now().isoformat())),
-            last_accessed=datetime.fromisoformat(data["last_accessed"]) if data.get("last_accessed") else None,
-            expires_at=datetime.fromisoformat(data["expires_at"]) if data.get("expires_at") else None,
+            created_at=datetime.fromisoformat(
+                data.get("created_at", datetime.now().isoformat())
+            ),
+            updated_at=datetime.fromisoformat(
+                data.get("updated_at", datetime.now().isoformat())
+            ),
+            last_accessed=datetime.fromisoformat(data["last_accessed"])
+            if data.get("last_accessed")
+            else None,
+            expires_at=datetime.fromisoformat(data["expires_at"])
+            if data.get("expires_at")
+            else None,
             version=data.get("version", 1),
             parent_id=data.get("parent_id"),
             associations=data.get("associations", []),
@@ -97,7 +107,9 @@ class Memory:
         self.last_accessed = datetime.now()
         self.access_count += 1
 
-    def calculate_relevance_score(self, query_embedding: Optional[List[float]] = None) -> float:
+    def calculate_relevance_score(
+        self, query_embedding: Optional[List[float]] = None
+    ) -> float:
         """Calculate relevance score based on importance, recency, and similarity."""
         # Time decay factor (memories become less relevant over time)
         if self.last_accessed:
@@ -114,17 +126,17 @@ class Memory:
         if query_embedding and self.embedding:
             # Cosine similarity calculation
             dot_product = sum(a * b for a, b in zip(query_embedding, self.embedding))
-            norm_a = sum(a ** 2 for a in query_embedding) ** 0.5
-            norm_b = sum(b ** 2 for b in self.embedding) ** 0.5
+            norm_a = sum(a**2 for a in query_embedding) ** 0.5
+            norm_b = sum(b**2 for b in self.embedding) ** 0.5
             if norm_a > 0 and norm_b > 0:
                 similarity = dot_product / (norm_a * norm_b)
 
         # Combined relevance score
         relevance = (
-            self.importance_score * 0.3 +
-            time_decay * 0.2 +
-            frequency_factor * 0.2 +
-            similarity * 0.3
+            self.importance_score * 0.3
+            + time_decay * 0.2
+            + frequency_factor * 0.2
+            + similarity * 0.3
         )
 
         return relevance
@@ -174,8 +186,12 @@ class Context:
             working_memory=data.get("working_memory", {}),
             parent_context_id=data.get("parent_context_id"),
             child_contexts=data.get("child_contexts", []),
-            created_at=datetime.fromisoformat(data.get("created_at", datetime.now().isoformat())),
-            updated_at=datetime.fromisoformat(data.get("updated_at", datetime.now().isoformat())),
+            created_at=datetime.fromisoformat(
+                data.get("created_at", datetime.now().isoformat())
+            ),
+            updated_at=datetime.fromisoformat(
+                data.get("updated_at", datetime.now().isoformat())
+            ),
             metadata=data.get("metadata", {}),
         )
 
@@ -209,6 +225,7 @@ class Context:
 
 
 # API Request/Response Models
+
 
 @dataclass
 class MemorySearchRequest:

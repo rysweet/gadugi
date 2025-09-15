@@ -54,7 +54,8 @@ class TestStrategicPlanner(unittest.TestCase):
         ]
 
         # Mock performance data
-        self.mock_performance = PerformanceMetrics(metrics={"efficiency_ratio": 0.65, "capacity_multiplier": 1.0},
+        self.mock_performance = PerformanceMetrics(
+            metrics={"efficiency_ratio": 0.65, "capacity_multiplier": 1.0},
         )
 
         # Mock capability data

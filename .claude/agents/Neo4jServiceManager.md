@@ -1,3 +1,10 @@
+---
+name: Neo4jServiceManager
+model: inherit
+description: Manages Neo4j graph database service including setup, connections, and graph operations for memory storage
+tools: Read, Write, Edit, Bash, Grep, TodoWrite
+---
+
 # Neo4j Service Manager Agent
 
 

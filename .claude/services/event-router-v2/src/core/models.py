@@ -2,16 +2,17 @@
 """Core event models for Event Router V2."""
 
 from __future__ import annotations
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import IntEnum, Enum
-from typing import Any, Dict, List, Optional, Set, Callable
+from typing import Any, Dict, List, Optional, Callable
 import json
 import uuid
 
 
 class EventPriority(IntEnum):
     """Event priority levels (1-10)."""
+
     LOWEST = 1
     LOW = 3
     NORMAL = 5
@@ -22,6 +23,7 @@ class EventPriority(IntEnum):
 
 class EventType(str, Enum):
     """Standard event types."""
+
     # Agent lifecycle
     AGENT_STARTED = "agent.started"
     AGENT_STOPPED = "agent.stopped"
@@ -53,6 +55,7 @@ class EventType(str, Enum):
 
 class DeliveryStatus(str, Enum):
     """Event delivery status."""
+
     PENDING = "pending"
     DELIVERED = "delivered"
     FAILED = "failed"
@@ -63,6 +66,7 @@ class DeliveryStatus(str, Enum):
 @dataclass
 class EventMetadata:
     """Event metadata for tracking and debugging."""
+
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     correlation_id: Optional[str] = None
     causation_id: Optional[str] = None
@@ -98,6 +102,7 @@ class EventMetadata:
 @dataclass
 class Event:
     """Core event model."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     topic: str = ""  # e.g., "user.created", "order.processed"
     type: EventType = EventType.CUSTOM
@@ -130,7 +135,9 @@ class Event:
             "version": self.version,
             "delivery_status": self.delivery_status.value,
             "delivery_attempts": self.delivery_attempts,
-            "last_delivery_attempt": self.last_delivery_attempt.isoformat() if self.last_delivery_attempt else None,
+            "last_delivery_attempt": self.last_delivery_attempt.isoformat()
+            if self.last_delivery_attempt
+            else None,
             "delivery_error": self.delivery_error,
         }
 
@@ -156,7 +163,9 @@ class Event:
 
         if "last_delivery_attempt" in data and data["last_delivery_attempt"]:
             if isinstance(data["last_delivery_attempt"], str):
-                data["last_delivery_attempt"] = datetime.fromisoformat(data["last_delivery_attempt"])
+                data["last_delivery_attempt"] = datetime.fromisoformat(
+                    data["last_delivery_attempt"]
+                )
 
         # Handle metadata
         if "metadata" in data and isinstance(data["metadata"], dict):
@@ -199,6 +208,7 @@ class Event:
 @dataclass
 class Subscription:
     """Event subscription model."""
+
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     subscriber_id: str = ""
     topics: List[str] = field(default_factory=list)  # Topic patterns to match
@@ -268,7 +278,9 @@ class Subscription:
         """Create from dictionary."""
         # Handle enums
         if "types" in data:
-            data["types"] = [EventType(t) if isinstance(t, str) else t for t in data["types"]]
+            data["types"] = [
+                EventType(t) if isinstance(t, str) else t for t in data["types"]
+            ]
 
         if "priorities" in data:
             data["priorities"] = [EventPriority(int(p)) for p in data["priorities"]]
@@ -286,6 +298,7 @@ class Subscription:
 @dataclass
 class EventBatch:
     """Batch of events for efficient delivery."""
+
     events: List[Event] = field(default_factory=list)
     created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -307,6 +320,7 @@ class EventBatch:
 @dataclass
 class HealthStatus:
     """Health status for event router."""
+
     status: str = "healthy"  # healthy, degraded, unhealthy
     uptime: float = 0.0  # seconds
     events_processed: int = 0
@@ -327,6 +341,8 @@ class HealthStatus:
             "events_in_queue": self.events_in_queue,
             "active_subscriptions": self.active_subscriptions,
             "connected_clients": self.connected_clients,
-            "last_event_at": self.last_event_at.isoformat() if self.last_event_at else None,
+            "last_event_at": self.last_event_at.isoformat()
+            if self.last_event_at
+            else None,
             "errors": self.errors,
         }

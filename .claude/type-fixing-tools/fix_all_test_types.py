@@ -18,7 +18,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
     # Since all the classes exist but pyright has issues with multi-line imports in try blocks
     content = re.sub(
         r"from claude\.shared\.utils\.error_handling import \([^)]*\)",
-        "from claude.shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity",
+        "from shared.utils.error_handling import ErrorHandler, CircuitBreaker, ErrorSeverity",
         content,
         flags=re.DOTALL,
     )
@@ -48,14 +48,19 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
         # Fix result.status patterns
         elif "assert result.status" in line and "is not None" not in line:
             new_lines.append(
-                line.replace("assert result.status", "assert result is not None and result.status")
+                line.replace(
+                    "assert result.status",
+                    "assert result is not None and result.status",
+                )
             )
             modified = True
 
         # Fix task.status patterns
         elif "assert task.status" in line and "is not None" not in line:
             new_lines.append(
-                line.replace("assert task.status", "assert task is not None and task.status")
+                line.replace(
+                    "assert task.status", "assert task is not None and task.status"
+                )
             )
             modified = True
 
@@ -73,12 +78,17 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
                 modified = True
 
         # Fix .id access patterns
-        elif re.search(r"\w+_task\.id", line) and "assert" in line and "is not None" not in line:
+        elif (
+            re.search(r"\w+_task\.id", line)
+            and "assert" in line
+            and "is not None" not in line
+        ):
             match = re.search(r"assert (\w+_task)\.", line)
             if match:
                 new_lines.append(
                     line.replace(
-                        f"{match.group(1)}.", f"{match.group(1)} is not None and {match.group(1)}."
+                        f"{match.group(1)}.",
+                        f"{match.group(1)} is not None and {match.group(1)}.",
                     )
                 )
                 modified = True
@@ -95,7 +105,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
         # Add import
         content = re.sub(
             r"(from claude\.shared\.task_tracking import[^)]+\))",
-            r"\1\nfrom claude.shared.task_tracking import TaskPriority",
+            r"\1\nfrom shared.task_tracking import TaskPriority",
             content,
         )
 
@@ -110,7 +120,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
         if "TaskStatus" not in content:
             content = re.sub(
                 r"(from claude\.shared\.task_tracking import[^)]+\))",
-                r"\1\nfrom claude.shared.task_tracking import TaskStatus",
+                r"\1\nfrom shared.task_tracking import TaskStatus",
                 content,
             )
         # Replace literal strings with enum
@@ -129,7 +139,7 @@ def fix_integration_tests_comprehensively(filepath: Path) -> None:
         if "TaskList" not in content:
             content = re.sub(
                 r"(from claude\.shared\.task_tracking import[^)]+\))",
-                r"\1\nfrom claude.shared.task_tracking import TaskList",
+                r"\1\nfrom shared.task_tracking import TaskList",
                 content,
             )
         # Fix the calls
@@ -148,11 +158,17 @@ def fix_test_imports_with_ignore(filepath: Path) -> None:
     content = filepath.read_text()
 
     # Add type: ignore for imports we know don't exist
-    imports_to_ignore = ["shared_test_instructions", "test_solver_agent", "test_writer_agent"]
+    imports_to_ignore = [
+        "shared_test_instructions",
+        "test_solver_agent",
+        "test_writer_agent",
+    ]
 
     for imp in imports_to_ignore:
         content = re.sub(
-            f"from {imp} import", f"from {imp} import  # type: ignore[import-not-found]", content
+            f"from {imp} import",
+            f"from {imp} import  # type: ignore[import-not-found]",
+            content,
         )
 
     filepath.write_text(content)
@@ -205,7 +221,7 @@ def main():
         # Simplify imports
         content = re.sub(
             r"from claude\.shared\.utils\.error_handling import \([^)]*\)",
-            "from claude.shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext",
+            "from shared.utils.error_handling import ErrorHandler, ErrorSeverity, GadugiError, RecoverableError, NonRecoverableError, RetryStrategy, CircuitBreaker, ErrorContext",
             content,
             flags=re.DOTALL,
         )

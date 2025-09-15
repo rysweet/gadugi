@@ -16,13 +16,16 @@ echo "========================================="
 echo "Checking Python dependencies..."
 cd "$PROJECT_ROOT"
 
-# Install required packages
-if command -v uv >/dev/null 2>&1; then
-    echo "Installing dependencies with uv..."
-    uv add fastapi uvicorn aiosqlite --quiet 2>/dev/null || true
+# Check if packages are already installed instead of reinstalling
+if ! python3 -c "import fastapi, uvicorn, aiosqlite" 2>/dev/null; then
+    echo "Installing missing dependencies..."
+    if command -v uv >/dev/null 2>&1; then
+        uv pip install fastapi uvicorn aiosqlite 2>/dev/null || true
+    else
+        pip install fastapi uvicorn aiosqlite --quiet 2>/dev/null || true
+    fi
 else
-    echo "Installing dependencies with pip..."
-    pip install fastapi uvicorn aiosqlite --quiet 2>/dev/null || true
+    echo "Dependencies already installed"
 fi
 
 # Kill any existing MCP service
@@ -35,10 +38,10 @@ cd "$SCRIPT_DIR"
 
 if command -v uv >/dev/null 2>&1; then
     echo "Starting with uv..."
-    uv run uvicorn simple_mcp_service:app --host 0.0.0.0 --port 8000 --reload &
+    uv run uvicorn simple_mcp_service:app --host 0.0.0.0 --port 5000 --reload &
 else
     echo "Starting with Python..."
-    python -m uvicorn simple_mcp_service:app --host 0.0.0.0 --port 8000 --reload &
+    python -m uvicorn simple_mcp_service:app --host 0.0.0.0 --port 5000 --reload &
 fi
 
 MCP_PID=$!

@@ -1,0 +1,139 @@
+{
+  "worktrees": {
+    "fix-types-PrBacklogManager": {
+      "task_id": "fix-types-PrBacklogManager",
+      "task_name": "Fix Type Errors in PR Backlog Manager Tests",
+      "worktree_path": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-PrBacklogManager",
+      "branch_name": "feature/parallel-fix-type-errors-in-PrBacklogManager-tests-fix-types-PrBacklogManager",
+      "status": "active",
+      "created_at": "2025-08-05T08:50:11.228045",
+      "pid": null
+    },
+    "fix-types-container-runtime": {
+      "task_id": "fix-types-container-runtime",
+      "task_name": "Fix Type Errors in Container Runtime",
+      "worktree_path": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-container-runtime",
+      "branch_name": "feature/parallel-fix-type-errors-in-container-runtime-fix-types-container-runtime",
+      "status": "active",
+      "created_at": "2025-08-05T08:50:11.541804",
+      "pid": null
+    },
+    "fix-types-integration-tests": {
+      "task_id": "fix-types-integration-tests",
+      "task_name": "Fix Type Errors in Integration Tests",
+      "worktree_path": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-integration-tests",
+      "branch_name": "feature/parallel-fix-type-errors-in-integration-tests-fix-types-integration-tests",
+      "status": "active",
+      "created_at": "2025-08-05T08:50:12.005116",
+      "pid": null
+    },
+    "fix-types-misc-files": {
+      "task_id": "fix-types-misc-files",
+      "task_name": "Fix Type Errors in Miscellaneous Files",
+      "worktree_path": "/Users/ryan/src/gadugi/.worktrees/task-fix-types-misc-files",
+      "branch_name": "feature/parallel-fix-type-errors-in-miscellaneous-files-fix-types-misc-files",
+      "status": "active",
+      "created_at": "2025-08-05T08:50:12.367142",
+      "pid": null
+    },
+    "add-v0.1-release-notes": {
+      "task_id": "add-v0.1-release-notes",
+      "task_name": "Add v0.1 Release Notes to README",
+      "worktree_path": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-add-v0.1-release-notes",
+      "branch_name": "feature/parallel-add-v0.1-release-notes-to-readme-add-v0.1-release-notes",
+      "status": "active",
+      "created_at": "2025-08-07T14:39:53.242488",
+      "pid": null
+    },
+    "update-orchestrator-self-reinvoke": {
+      "task_id": "update-orchestrator-self-reinvoke",
+      "task_name": "Update Orchestrator Agent for Self-Reinvocation",
+      "worktree_path": "/Users/ryan/src/gadugi6/gadugi/.worktrees/task-update-orchestrator-self-reinvoke",
+      "branch_name": "feature/parallel-update-OrchestratorAgent-for-self-reinvocation-update-orchestrator-self-reinvoke",
+      "status": "active",
+      "created_at": "2025-08-07T14:39:54.520008",
+      "pid": null
+    },
+    "task-2-mcp-service": {
+      "task_id": "task-2-mcp-service",
+      "task_name": "Task 2: Implement MCP Service",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-2-mcp-service",
+      "branch_name": "feature/parallel-task-2-implement-mcp-service-task-2-mcp-service",
+      "status": "active",
+      "created_at": "2025-08-08T17:15:26.218206",
+      "pid": null
+    },
+    "task-3-agent-framework": {
+      "task_id": "task-3-agent-framework",
+      "task_name": "Task 3: Implement Agent Framework",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-3-agent-framework",
+      "branch_name": "feature/parallel-task-3-implement-agent-framework-task-3-agent-framework",
+      "status": "active",
+      "created_at": "2025-08-08T17:15:26.353607",
+      "pid": null
+    },
+    "fix-all-pyright-errors": {
+      "task_id": "fix-all-pyright-errors",
+      "task_name": "Fix All Pyright Errors in v0.3 Components",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-fix-all-pyright-errors",
+      "branch_name": "feature/parallel-fix-all-pyright-errors-in-v0.3-components-fix-all-pyright-errors",
+      "status": "active",
+      "created_at": "2025-08-08T23:02:58.003920",
+      "pid": null
+    },
+    "task-1-neo4j-setup": {
+      "task_id": "task-1-neo4j-setup",
+      "task_name": "Task 1: Start and Verify Neo4j for Gadugi",
+      "worktree_path": "/Users/ryan/src/gadugi2/gadugi/.worktrees/task-task-1-neo4j-setup",
+      "branch_name": "feature/parallel-task-1-start-and-verify-neo4j-for-gadugi-task-1-neo4j-setup",
+      "status": "active",
+      "created_at": "2025-08-09T21:18:26.135040",
+      "pid": null
+    },
+    "configure-claude-code-start-hook": {
+      "task_id": "configure-claude-code-start-hook",
+      "task_name": "Configure Claude Code Start Hook",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-configure-claude-code-start-hook",
+      "branch_name": "feature/parallel-configure-claude-code-start-hook-configure-claude-code-start-hook",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:44.836810",
+      "pid": null
+    },
+    "start-event-router-service": {
+      "task_id": "start-event-router-service",
+      "task_name": "Start Event Router Service",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-start-event-router-service",
+      "branch_name": "feature/parallel-start-event-router-service-start-event-router-service",
+      "status": "active",
+      "created_at": "2025-08-29T10:25:44.974492",
+      "pid": null
+    },
+    "rename-agents-to-camelcase": {
+      "task_id": "rename-agents-to-camelcase",
+      "task_name": "Rename All Agents from kebab-case to CamelCase",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-rename-agents-to-camelcase",
+      "branch_name": "feature/parallel-rename-all-agents-from-kebab-case-to-camelcase-rename-agents-to-camelcase",
+      "status": "active",
+      "created_at": "2025-08-29T10:40:04.979667",
+      "pid": null
+    },
+    "reinforce-workflow-for-code-changes": {
+      "task_id": "reinforce-workflow-for-code-changes",
+      "task_name": "Reinforce Workflow for Code Changes",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-reinforce-workflow-for-code-changes",
+      "branch_name": "feature/parallel-reinforce-workflow-for-code-changes-reinforce-workflow-for-code-changes",
+      "status": "active",
+      "created_at": "2025-08-29T10:40:05.127066",
+      "pid": null
+    },
+    "commit-claude-md-improvements": {
+      "task_id": "commit-claude-md-improvements",
+      "task_name": "Task: Commit Infrastructure Improvements to CLAUDE.md",
+      "worktree_path": "/Users/ryan/src/gadugi5/gadugi/.worktrees/task-commit-claude-md-improvements",
+      "branch_name": "feature/parallel-task-commit-infrastructure-improvements-to-claude.md-commit-claude-md-improvements",
+      "status": "active",
+      "created_at": "2025-08-29T12:23:03.242125",
+      "pid": null
+    }
+  }
+}

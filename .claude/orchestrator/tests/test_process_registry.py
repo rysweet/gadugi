@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo, RegistryStats
@@ -32,12 +33,15 @@ class TestProcessRegistry(unittest.TestCase):
     def tearDown(self):
         """Clean up test environment"""
         import shutil
+
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_registry_initialization(self):
         """Test registry initializes correctly"""
         self.assertTrue(self.registry_dir.exists())
-        self.assertTrue(self.registry.registry_file.exists() or True)  # May not exist initially
+        self.assertTrue(
+            self.registry.registry_file.exists() or True
+        )  # May not exist initially
         self.assertEqual(len(self.registry.processes), 0)
         self.assertEqual(self.registry.heartbeat_interval, 30)
 
@@ -49,7 +53,7 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.QUEUED,
             command="test command",
             working_directory="/tmp/test",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         self.registry.register_process(process_info)
@@ -74,12 +78,14 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.QUEUED,
             command="test command",
             working_directory="/tmp/test",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.registry.register_process(process_info)
 
         # Test queued -> running
-        success = self.registry.update_process_status("test-task-2", ProcessStatus.RUNNING, pid=12345)
+        success = self.registry.update_process_status(
+            "test-task-2", ProcessStatus.RUNNING, pid=12345
+        )
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
@@ -90,7 +96,9 @@ class TestProcessRegistry(unittest.TestCase):
             self.assertIsNotNone(process.started_at)
 
         # Test running -> completed
-        success = self.registry.update_process_status("test-task-2", ProcessStatus.COMPLETED)
+        success = self.registry.update_process_status(
+            "test-task-2", ProcessStatus.COMPLETED
+        )
         self.assertTrue(success)
 
         process = self.registry.get_process("test-task-2")
@@ -108,15 +116,13 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.RUNNING,
             command="test command",
             working_directory="/tmp/test",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.registry.register_process(process_info)
 
         # Test failure with error message
         success = self.registry.update_process_status(
-            "test-task-3",
-            ProcessStatus.FAILED,
-            error_message="Test error message"
+            "test-task-3", ProcessStatus.FAILED, error_message="Test error message"
         )
         self.assertTrue(success)
 
@@ -129,17 +135,42 @@ class TestProcessRegistry(unittest.TestCase):
 
     def test_nonexistent_process_update(self):
         """Test updating nonexistent process"""
-        success = self.registry.update_process_status("nonexistent", ProcessStatus.RUNNING)
+        success = self.registry.update_process_status(
+            "nonexistent", ProcessStatus.RUNNING
+        )
         self.assertFalse(success)
 
     def test_get_processes_by_status(self):
         """Test filtering processes by status"""
         # Register multiple processes with different statuses
         processes = [
-            ProcessInfo("task-1", "Task 1", ProcessStatus.QUEUED, "cmd1", "/tmp", datetime.now()),
-            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", "/tmp", datetime.now()),
-            ProcessInfo("task-3", "Task 3", ProcessStatus.COMPLETED, "cmd3", "/tmp", datetime.now()),
-            ProcessInfo("task-4", "Task 4", ProcessStatus.RUNNING, "cmd4", "/tmp", datetime.now()),
+            ProcessInfo(
+                "task-1", "Task 1", ProcessStatus.QUEUED, "cmd1", "/tmp", datetime.now()
+            ),
+            ProcessInfo(
+                "task-2",
+                "Task 2",
+                ProcessStatus.RUNNING,
+                "cmd2",
+                "/tmp",
+                datetime.now(),
+            ),
+            ProcessInfo(
+                "task-3",
+                "Task 3",
+                ProcessStatus.COMPLETED,
+                "cmd3",
+                "/tmp",
+                datetime.now(),
+            ),
+            ProcessInfo(
+                "task-4",
+                "Task 4",
+                ProcessStatus.RUNNING,
+                "cmd4",
+                "/tmp",
+                datetime.now(),
+            ),
         ]
 
         for process in processes:
@@ -162,10 +193,28 @@ class TestProcessRegistry(unittest.TestCase):
         """Test registry statistics generation"""
         # Register processes with different statuses
         processes = [
-            ProcessInfo("task-1", "Task 1", ProcessStatus.COMPLETED, "cmd1", "/tmp", datetime.now()),
-            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", "/tmp", datetime.now()),
-            ProcessInfo("task-3", "Task 3", ProcessStatus.FAILED, "cmd3", "/tmp", datetime.now()),
-            ProcessInfo("task-4", "Task 4", ProcessStatus.QUEUED, "cmd4", "/tmp", datetime.now()),
+            ProcessInfo(
+                "task-1",
+                "Task 1",
+                ProcessStatus.COMPLETED,
+                "cmd1",
+                "/tmp",
+                datetime.now(),
+            ),
+            ProcessInfo(
+                "task-2",
+                "Task 2",
+                ProcessStatus.RUNNING,
+                "cmd2",
+                "/tmp",
+                datetime.now(),
+            ),
+            ProcessInfo(
+                "task-3", "Task 3", ProcessStatus.FAILED, "cmd3", "/tmp", datetime.now()
+            ),
+            ProcessInfo(
+                "task-4", "Task 4", ProcessStatus.QUEUED, "cmd4", "/tmp", datetime.now()
+            ),
         ]
 
         for process in processes:
@@ -181,17 +230,17 @@ class TestProcessRegistry(unittest.TestCase):
         self.assertEqual(stats.failed_count, 1)
         self.assertEqual(stats.queued_count, 1)
 
-    @patch('psutil.Process')
+    @patch("psutil.Process")
     def test_heartbeat_monitoring(self, mock_process_class):
         """Test heartbeat monitoring and stale process detection"""
         # Mock psutil.Process
         mock_process = Mock()
         mock_process.is_running.return_value = True
         mock_process.cpu_percent.return_value = 15.5
-        mock_process.memory_info.return_value = Mock(rss=1024*1024*100)  # 100MB
+        mock_process.memory_info.return_value = Mock(rss=1024 * 1024 * 100)  # 100MB
         mock_process.memory_percent.return_value = 5.0
         mock_process.num_threads.return_value = 4
-        mock_process.status.return_value = 'running'
+        mock_process.status.return_value = "running"
         mock_process.create_time.return_value = 1234567890
         mock_process_class.return_value = mock_process
 
@@ -203,7 +252,7 @@ class TestProcessRegistry(unittest.TestCase):
             command="test command",
             working_directory="/tmp",
             created_at=datetime.now(),
-            pid=12345
+            pid=12345,
         )
         self.registry.register_process(process_info)
 
@@ -217,9 +266,9 @@ class TestProcessRegistry(unittest.TestCase):
             self.assertEqual(process.status, ProcessStatus.RUNNING)
             self.assertIsNotNone(process.resource_usage)
             if process.resource_usage is not None:
-                self.assertEqual(process.resource_usage['cpu_percent'], 15.5)
+                self.assertEqual(process.resource_usage["cpu_percent"], 15.5)
 
-    @patch('psutil.Process')
+    @patch("psutil.Process")
     def test_stale_process_detection(self, mock_process_class):
         """Test detection of stale processes"""
         # Mock process that's no longer running
@@ -235,7 +284,7 @@ class TestProcessRegistry(unittest.TestCase):
             working_directory="/tmp",
             created_at=old_time,
             pid=99999,
-            last_heartbeat=old_time
+            last_heartbeat=old_time,
         )
         self.registry.register_process(process_info)
 
@@ -259,7 +308,7 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.QUEUED,
             command="test command",
             working_directory="/tmp",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.registry.register_process(process_info)
 
@@ -287,7 +336,7 @@ class TestProcessRegistry(unittest.TestCase):
             command="test command",
             working_directory="/tmp",
             created_at=old_time,
-            completed_at=old_time
+            completed_at=old_time,
         )
         self.registry.register_process(process_info)
 
@@ -300,7 +349,7 @@ class TestProcessRegistry(unittest.TestCase):
             command="test command",
             working_directory="/tmp",
             created_at=recent_time,
-            completed_at=recent_time
+            completed_at=recent_time,
         )
         self.registry.register_process(process_info2)
 
@@ -321,7 +370,7 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.COMPLETED,
             command="test command",
             working_directory="/tmp",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.registry.register_process(process_info)
 
@@ -338,8 +387,22 @@ class TestProcessRegistry(unittest.TestCase):
         """Test export of monitoring data"""
         # Register test processes
         processes = [
-            ProcessInfo("task-1", "Task 1", ProcessStatus.COMPLETED, "cmd1", "/tmp", datetime.now()),
-            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", "/tmp", datetime.now()),
+            ProcessInfo(
+                "task-1",
+                "Task 1",
+                ProcessStatus.COMPLETED,
+                "cmd1",
+                "/tmp",
+                datetime.now(),
+            ),
+            ProcessInfo(
+                "task-2",
+                "Task 2",
+                ProcessStatus.RUNNING,
+                "cmd2",
+                "/tmp",
+                datetime.now(),
+            ),
         ]
 
         for process in processes:
@@ -369,7 +432,7 @@ class TestProcessRegistry(unittest.TestCase):
             status=ProcessStatus.COMPLETED,
             command="test command",
             working_directory="/tmp",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
         self.registry.register_process(process_info)
 
@@ -403,7 +466,7 @@ class TestProcessInfo(unittest.TestCase):
             command="test command",
             working_directory="/tmp/test",
             created_at=created_time,
-            prompt_file="test.md"
+            prompt_file="test.md",
         )
 
         self.assertEqual(process_info.task_id, "test-id")
@@ -420,9 +483,10 @@ class TestProcessInfo(unittest.TestCase):
         self.assertIsNone(process_info.completed_at)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Set up test environment
     import logging
+
     logging.basicConfig(level=logging.WARNING)
 
     # Run tests

@@ -29,14 +29,19 @@ try:
 except ImportError:
     # Mock imports for development
     class MCPService:
-        async def store(self, key: str, value: Any) -> None: pass
-        async def retrieve(self, key: str) -> Any: return None
+        async def store(self, key: str, value: Any) -> None:
+            pass
+
+        async def retrieve(self, key: str) -> Any:
+            return None
 
     class EventRouter:
-        async def publish(self, event: Any) -> None: pass
+        async def publish(self, event: Any) -> None:
+            pass
 
     class Event:
-        def __init__(self, **kwargs): pass
+        def __init__(self, **kwargs):
+            pass
 
     class EventType:
         MEMORY_CREATED = "memory.created"
@@ -45,6 +50,7 @@ except ImportError:
 
     class EventPriority:
         NORMAL = "normal"
+
 
 # Neo4j integration
 try:
@@ -98,10 +104,14 @@ class MemorySystem:
         # GitHub setup
         self.github_token = github_token or os.getenv("GITHUB_TOKEN")
         self.github_repo = github_repo or os.getenv("GITHUB_REPOSITORY")
-        self.github_headers = {
-            "Authorization": f"Bearer {self.github_token}",
-            "Accept": "application/vnd.github.v3+json",
-        } if self.github_token else {}
+        self.github_headers = (
+            {
+                "Authorization": f"Bearer {self.github_token}",
+                "Accept": "application/vnd.github.v3+json",
+            }
+            if self.github_token
+            else {}
+        )
 
         # Memory cache for performance
         self._memory_cache: Dict[str, Memory] = {}
@@ -118,9 +128,7 @@ class MemorySystem:
         # Create Neo4j indexes if available
         if self.neo4j_driver:
             async with self.neo4j_driver.session() as session:
-                await session.run(
-                    "CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.id)"
-                )
+                await session.run("CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.id)")
                 await session.run(
                     "CREATE INDEX IF NOT EXISTS FOR (m:Memory) ON (m.type)"
                 )
@@ -315,10 +323,7 @@ class MemorySystem:
                 result.errors.append(f"Failed to fetch issues: {response.text}")
                 return result
 
-            existing_issues = {
-                issue["title"]: issue
-                for issue in response.json()
-            }
+            existing_issues = {issue["title"]: issue for issue in response.json()}
 
             # Sync TODOs to issues
             for todo in todos:
@@ -408,19 +413,19 @@ class MemorySystem:
             content = filepath.read_text()
 
             # Parse sections
-            sections = re.split(r'^## ', content, flags=re.MULTILINE)
+            sections = re.split(r"^## ", content, flags=re.MULTILINE)
 
             for section in sections[1:]:  # Skip header
-                lines = section.strip().split('\n')
+                lines = section.strip().split("\n")
                 if not lines:
                     continue
 
                 section_title = lines[0].strip()
-                section_content = '\n'.join(lines[1:])
+                section_content = "\n".join(lines[1:])
 
                 if "Todo" in section_title or "TODO" in section_title:
                     # Parse TODO items
-                    todos = re.findall(r'[-*]\s+(.+)', section_content)
+                    todos = re.findall(r"[-*]\s+(.+)", section_content)
                     for todo_text in todos:
                         memory = Memory(
                             id=f"import_todo_{uuid.uuid4().hex[:8]}",
@@ -495,17 +500,22 @@ class MemorySystem:
                         memory_ids.add(record["id"])
 
                     # Archive memories (store to file before deletion)
-                    archive_path = Path(".memory_archive") / f"archive_{datetime.now():%Y%m%d}.json"
+                    archive_path = (
+                        Path(".memory_archive")
+                        / f"archive_{datetime.now():%Y%m%d}.json"
+                    )
                     archive_path.parent.mkdir(exist_ok=True)
 
                     archived_memories = []
                     for mem_id in memory_ids:
-                        memory_data = await self.mcp_service.retrieve(f"memory:{mem_id}")
+                        memory_data = await self.mcp_service.retrieve(
+                            f"memory:{mem_id}"
+                        )
                         if memory_data:
                             archived_memories.append(memory_data)
 
                     if archived_memories:
-                        with open(archive_path, 'w') as f:
+                        with open(archive_path, "w") as f:
                             json.dump(archived_memories, f, indent=2)
                         result.memories_archived = len(archived_memories)
 
@@ -525,7 +535,8 @@ class MemorySystem:
             async with self._cache_lock:
                 old_cache_size = len(self._memory_cache)
                 self._memory_cache = {
-                    k: v for k, v in self._memory_cache.items()
+                    k: v
+                    for k, v in self._memory_cache.items()
                     if v.updated_at >= cutoff_date
                 }
                 cache_cleared = old_cache_size - len(self._memory_cache)

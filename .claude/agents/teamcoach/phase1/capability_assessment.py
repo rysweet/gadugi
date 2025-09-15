@@ -15,6 +15,7 @@ Key Features:
 """
 
 import logging
+
 # import numpy as np  # type: ignore
 from typing import TYPE_CHECKING
 
@@ -31,9 +32,22 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 # Import available shared module components
-from ....shared.interfaces import AgentConfig, OperationResult  # type: ignore
-from ....shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
-from ....shared.state_management import StateManager  # type: ignore
+try:
+    from shared.interfaces import AgentConfig, OperationResult  # type: ignore
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
+except ImportError:
+    # Fallback to relative imports if needed
+    import sys
+    import os
+
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    )
+    sys.path.insert(0, base_dir)
+    from shared.interfaces import AgentConfig, OperationResult  # type: ignore
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
 
 # Define missing classes locally
 TaskResult = OperationResult
@@ -348,17 +362,27 @@ class CapabilityAssessment:
             # Calculate performance metrics
             success_rates = [1.0 if task.success else 0.0 for task in tasks]
             quality_scores = [
-                getattr(task, 'quality_score', None) for task in tasks if hasattr(task, 'quality_score') and getattr(task, 'quality_score', None) is not None
+                getattr(task, "quality_score", None)
+                for task in tasks
+                if hasattr(task, "quality_score")
+                and getattr(task, "quality_score", None) is not None
             ]
             execution_times = [
-                getattr(task, 'execution_time', None) for task in tasks if hasattr(task, 'execution_time') and getattr(task, 'execution_time', None) is not None
+                getattr(task, "execution_time", None)
+                for task in tasks
+                if hasattr(task, "execution_time")
+                and getattr(task, "execution_time", None) is not None
             ]
 
             # Calculate domain performance score
             if np is not None:
-                performance_score = float(np.mean(success_rates)) if success_rates else 0.0
+                performance_score = (
+                    float(np.mean(success_rates)) if success_rates else 0.0
+                )
             else:
-                performance_score = sum(success_rates) / len(success_rates) if success_rates else 0.0
+                performance_score = (
+                    sum(success_rates) / len(success_rates) if success_rates else 0.0
+                )
 
             # Adjust for quality if available
             if quality_scores:
@@ -425,7 +449,9 @@ class CapabilityAssessment:
 
         return domain_tasks
 
-    def _determine_task_domain(self, task: OperationResult) -> Optional[CapabilityDomain]:
+    def _determine_task_domain(
+        self, task: OperationResult
+    ) -> Optional[CapabilityDomain]:
         """Determine the primary capability domain for a task."""
         # This would analyze task type, description, etc. to determine domain
         # For now, use basic heuristics based on task type
@@ -513,8 +539,10 @@ class CapabilityAssessment:
             else:
                 # Manual standard deviation calculation
                 mean_val = sum(success_rates) / len(success_rates)
-                variance = sum((x - mean_val) ** 2 for x in success_rates) / len(success_rates)
-                consistency = 1.0 - (variance ** 0.5)
+                variance = sum((x - mean_val) ** 2 for x in success_rates) / len(
+                    success_rates
+                )
+                consistency = 1.0 - (variance**0.5)
             consistency_factor = max(0.0, consistency)
         else:
             consistency_factor = 0.5  # Moderate confidence for single data point
@@ -555,7 +583,11 @@ class CapabilityAssessment:
                 y_sum = sum(performances)
                 xy_sum = sum(x * y for x, y in zip(x_vals, performances))
                 x2_sum = sum(x * x for x in x_vals)
-                slope = (n * xy_sum - x_sum * y_sum) / (n * x2_sum - x_sum * x_sum) if (n * x2_sum - x_sum * x_sum) != 0 else 0
+                slope = (
+                    (n * xy_sum - x_sum * y_sum) / (n * x2_sum - x_sum * x_sum)
+                    if (n * x2_sum - x_sum * x_sum) != 0
+                    else 0
+                )
             return max(-1.0, min(1.0, slope * 10))  # Normalize to -1 to 1 range
 
         return 0.0
@@ -932,6 +964,7 @@ class CapabilityAssessment:
 
     def get_agent_capabilities(self, agent_id: str):
         """Get agent capabilities for strategic planner compatibility."""
+
         # Return a mock object with the expected interface
         class MockCapabilities:
             def __init__(self):
@@ -940,8 +973,9 @@ class CapabilityAssessment:
                     "java": 0.6,
                     "ml": 0.4,
                     "devops": 0.3,
-                    "testing": 0.7
+                    "testing": 0.7,
                 }
+
         return MockCapabilities()
 
 

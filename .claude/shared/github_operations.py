@@ -14,7 +14,13 @@ from typing import Dict, Any, List, Optional
 class GitHubError(Exception):
     """Base exception for GitHub operations."""
 
-    def __init__(self, message: str, operation: str, context: Dict[str, Any], details: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self,
+        message: str,
+        operation: str,
+        context: Dict[str, Any],
+        details: Optional[Dict[str, Any]] = None,
+    ):
         super().__init__(message)
         self.operation = operation
         self.context = context
@@ -25,7 +31,7 @@ class RateLimitError(GitHubError):
     """Exception for rate limit exceeded errors."""
 
     def __init__(self, message: str, reset_time: Optional[int] = None):
-        super().__init__(message, 'rate_limit', {})
+        super().__init__(message, "rate_limit", {})
         self.reset_time = reset_time
 
     def get_wait_time(self) -> int:
@@ -46,8 +52,13 @@ class GitHubOperations:
     Reduces 29% code duplication between OrchestratorAgent and WorkflowManager.
     """
 
-    def __init__(self, repo: Optional[str] = None, retry_config: Optional[Dict[str, Any]] = None,
-                 config: Optional[Dict[str, Any]] = None, task_id: Optional[str] = None):
+    def __init__(
+        self,
+        repo: Optional[str] = None,
+        retry_config: Optional[Dict[str, Any]] = None,
+        config: Optional[Dict[str, Any]] = None,
+        task_id: Optional[str] = None,
+    ):
         """
         Initialize GitHub operations.
 
@@ -61,9 +72,9 @@ class GitHubOperations:
         self.config = config or {}
         self.task_id = task_id
         self.retry_config = retry_config or {
-            'max_retries': 3,
-            'initial_delay': 1,
-            'backoff_factor': 2
+            "max_retries": 3,
+            "initial_delay": 1,
+            "backoff_factor": 2,
         }
         self.rate_limit_handler = self._setup_rate_limit_handler()
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
@@ -71,9 +82,9 @@ class GitHubOperations:
     def _setup_rate_limit_handler(self) -> Dict[str, Any]:
         """Setup rate limit handling configuration."""
         return {
-            'enabled': True,
-            'max_wait_time': 3600,  # 1 hour max wait
-            'backoff_multiplier': 1.5
+            "enabled": True,
+            "max_wait_time": 3600,  # 1 hour max wait
+            "backoff_multiplier": 1.5,
         }
 
     def _format_task_id_metadata(self) -> str:
@@ -107,13 +118,13 @@ class GitHubOperations:
             Dictionary with success status, data, and error information
         """
         retries = 0
-        delay = self.retry_config['initial_delay']
+        delay = self.retry_config["initial_delay"]
 
-        while retries < self.retry_config['max_retries']:
+        while retries < self.retry_config["max_retries"]:
             try:
-                cmd = ['gh'] + args
+                cmd = ["gh"] + args
                 if self.repo:
-                    cmd.extend(['--repo', self.repo])
+                    cmd.extend(["--repo", self.repo])
 
                 self.logger.debug(f"Executing GitHub command: {' '.join(cmd)}")
 
@@ -122,7 +133,7 @@ class GitHubOperations:
                     capture_output=True,
                     text=True,
                     check=True,
-                    timeout=60  # 60 second timeout
+                    timeout=60,  # 60 second timeout
                 )
 
                 # Try to parse JSON output
@@ -135,55 +146,60 @@ class GitHubOperations:
                         pass
 
                 return {
-                    'success': True,
-                    'data': parsed_data,
-                    'raw_output': result.stdout,
-                    'stderr': result.stderr
+                    "success": True,
+                    "data": parsed_data,
+                    "raw_output": result.stdout,
+                    "stderr": result.stderr,
                 }
 
             except subprocess.CalledProcessError as e:
                 retries += 1
 
                 # Check for rate limit
-                if hasattr(e, 'stderr') and e.stderr and 'rate limit' in e.stderr.lower():
+                if (
+                    hasattr(e, "stderr")
+                    and e.stderr
+                    and "rate limit" in e.stderr.lower()
+                ):
                     raise RateLimitError(f"GitHub API rate limit exceeded: {e.stderr}")
 
-                if retries >= self.retry_config['max_retries']:
-                    self.logger.error(f"GitHub command failed after {retries} retries: {e}")
+                if retries >= self.retry_config["max_retries"]:
+                    self.logger.error(
+                        f"GitHub command failed after {retries} retries: {e}"
+                    )
                     return {
-                        'success': False,
-                        'error': str(e),
-                        'stderr': getattr(e, 'stderr', ''),
-                        'returncode': getattr(e, 'returncode', -1)
+                        "success": False,
+                        "error": str(e),
+                        "stderr": getattr(e, "stderr", ""),
+                        "returncode": getattr(e, "returncode", -1),
                     }
 
-                self.logger.warning(f"GitHub command failed, retrying in {delay}s... (attempt {retries}/{self.retry_config['max_retries']})")
+                self.logger.warning(
+                    f"GitHub command failed, retrying in {delay}s... (attempt {retries}/{self.retry_config['max_retries']})"
+                )
                 time.sleep(delay)
-                delay *= self.retry_config['backoff_factor']
+                delay *= self.retry_config["backoff_factor"]
 
             except subprocess.TimeoutExpired as e:
                 self.logger.error(f"GitHub command timed out: {e}")
-                return {
-                    'success': False,
-                    'error': 'Command timed out',
-                    'timeout': True
-                }
+                return {"success": False, "error": "Command timed out", "timeout": True}
             except Exception as e:
                 self.logger.error(f"Unexpected error executing GitHub command: {e}")
-                return {
-                    'success': False,
-                    'error': str(e),
-                    'unexpected': True
-                }
+                return {"success": False, "error": str(e), "unexpected": True}
 
         return {
-            'success': False,
-            'error': 'Max retries exceeded',
-            'retries_exhausted': True
+            "success": False,
+            "error": "Max retries exceeded",
+            "retries_exhausted": True,
         }
 
-    def create_issue(self, title: str, body: str, labels: Optional[List[str]] = None,
-                    assignees: Optional[List[str]] = None) -> Dict[str, Any]:
+    def create_issue(
+        self,
+        title: str,
+        body: str,
+        labels: Optional[List[str]] = None,
+        assignees: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
         """
         Create a GitHub issue.
 
@@ -205,26 +221,32 @@ class GitHubOperations:
         # Append task ID metadata to body if available
         body_with_task_id = body + self._format_task_id_metadata()
 
-        args = ['issue', 'create', '--title', title, '--body', body_with_task_id]
+        args = ["issue", "create", "--title", title, "--body", body_with_task_id]
 
         if labels:
-            args.extend(['--label', ','.join(labels)])
+            args.extend(["--label", ",".join(labels)])
         if assignees:
-            args.extend(['--assignee', ','.join(assignees)])
+            args.extend(["--assignee", ",".join(assignees)])
 
-        args.extend(['--json', 'number,url,id'])
+        args.extend(["--json", "number,url,id"])
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.info(f"Created issue #{result['data']['number']}: {title}")
             if self.task_id:
                 self.logger.debug(f"Issue created with task ID: {self.task_id}")
 
         return result
 
-    def create_pr(self, title: str, body: str, base: str = 'main',
-                  head: Optional[str] = None, draft: bool = False) -> Dict[str, Any]:
+    def create_pr(
+        self,
+        title: str,
+        body: str,
+        base: str = "main",
+        head: Optional[str] = None,
+        draft: bool = False,
+    ) -> Dict[str, Any]:
         """
         Create a pull request.
 
@@ -244,18 +266,27 @@ class GitHubOperations:
         # Append task ID metadata to body if available
         body_with_task_id = body + self._format_task_id_metadata()
 
-        args = ['pr', 'create', '--title', title, '--body', body_with_task_id, '--base', base]
+        args = [
+            "pr",
+            "create",
+            "--title",
+            title,
+            "--body",
+            body_with_task_id,
+            "--base",
+            base,
+        ]
 
         if head:
-            args.extend(['--head', head])
+            args.extend(["--head", head])
         if draft:
-            args.append('--draft')
+            args.append("--draft")
 
-        args.extend(['--json', 'number,url,id'])
+        args.extend(["--json", "number,url,id"])
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.info(f"Created PR #{result['data']['number']}: {title}")
             if self.task_id:
                 self.logger.debug(f"PR created with task ID: {self.task_id}")
@@ -278,12 +309,17 @@ class GitHubOperations:
         if issue_number <= 0:
             raise ValueError("Issue number must be positive")
 
-        args = ['issue', 'view', str(issue_number), '--json',
-                'number,title,body,state,labels,assignees,createdAt,updatedAt']
+        args = [
+            "issue",
+            "view",
+            str(issue_number),
+            "--json",
+            "number,title,body,state,labels,assignees,createdAt,updatedAt",
+        ]
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.debug(f"Retrieved issue #{issue_number}")
 
         return result
@@ -301,18 +337,28 @@ class GitHubOperations:
         if pr_number <= 0:
             raise ValueError("PR number must be positive")
 
-        args = ['pr', 'view', str(pr_number), '--json',
-                'number,title,body,state,reviews,checks,baseRef,headRef,mergeable']
+        args = [
+            "pr",
+            "view",
+            str(pr_number),
+            "--json",
+            "number,title,body,state,reviews,checks,baseRef,headRef,mergeable",
+        ]
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.debug(f"Retrieved PR #{pr_number}")
 
         return result
 
-    def update_issue(self, issue_number: int, title: Optional[str] = None,
-                    body: Optional[str] = None, state: Optional[str] = None) -> Dict[str, Any]:
+    def update_issue(
+        self,
+        issue_number: int,
+        title: Optional[str] = None,
+        body: Optional[str] = None,
+        state: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Update an issue.
 
@@ -328,20 +374,20 @@ class GitHubOperations:
         if issue_number <= 0:
             raise ValueError("Issue number must be positive")
 
-        args = ['issue', 'edit', str(issue_number)]
+        args = ["issue", "edit", str(issue_number)]
 
         if title:
-            args.extend(['--title', title])
+            args.extend(["--title", title])
         if body:
-            args.extend(['--body', body])
+            args.extend(["--body", body])
         if state:
-            if state not in ['open', 'closed']:
+            if state not in ["open", "closed"]:
                 raise ValueError("State must be 'open' or 'closed'")
-            args.extend(['--state', state])
+            args.extend(["--state", state])
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Updated issue #{issue_number}")
 
         return result
@@ -365,19 +411,20 @@ class GitHubOperations:
         # Append task ID metadata to body if available
         body_with_task_id = body + self._format_task_id_metadata()
 
-        args = ['issue', 'comment', str(issue_number), '--body', body_with_task_id]
+        args = ["issue", "comment", str(issue_number), "--body", body_with_task_id]
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Added comment to issue #{issue_number}")
             if self.task_id:
                 self.logger.debug(f"Comment added with task ID: {self.task_id}")
 
         return result
 
-    def list_issues(self, state: str = 'open', labels: Optional[List[str]] = None,
-                   limit: int = 30) -> Dict[str, Any]:
+    def list_issues(
+        self, state: str = "open", labels: Optional[List[str]] = None, limit: int = 30
+    ) -> Dict[str, Any]:
         """
         List issues with filters.
 
@@ -389,25 +436,26 @@ class GitHubOperations:
         Returns:
             Result dictionary with issues list
         """
-        if state not in ['open', 'closed', 'all']:
+        if state not in ["open", "closed", "all"]:
             raise ValueError("State must be 'open', 'closed', or 'all'")
 
-        args = ['issue', 'list', '--state', state, '--limit', str(limit)]
+        args = ["issue", "list", "--state", state, "--limit", str(limit)]
 
         if labels:
-            args.extend(['--label', ','.join(labels)])
+            args.extend(["--label", ",".join(labels)])
 
-        args.extend(['--json', 'number,title,state,labels,updatedAt,assignees'])
+        args.extend(["--json", "number,title,state,labels,updatedAt,assignees"])
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.debug(f"Listed {len(result['data'])} issues")
 
         return result
 
-    def list_prs(self, state: str = 'open', base: Optional[str] = None,
-                 limit: int = 30) -> Dict[str, Any]:
+    def list_prs(
+        self, state: str = "open", base: Optional[str] = None, limit: int = 30
+    ) -> Dict[str, Any]:
         """
         List pull requests with filters.
 
@@ -419,24 +467,24 @@ class GitHubOperations:
         Returns:
             Result dictionary with PRs list
         """
-        if state not in ['open', 'closed', 'merged', 'all']:
+        if state not in ["open", "closed", "merged", "all"]:
             raise ValueError("State must be 'open', 'closed', 'merged', or 'all'")
 
-        args = ['pr', 'list', '--state', state, '--limit', str(limit)]
+        args = ["pr", "list", "--state", state, "--limit", str(limit)]
 
         if base:
-            args.extend(['--base', base])
+            args.extend(["--base", base])
 
-        args.extend(['--json', 'number,title,state,baseRef,headRef,updatedAt'])
+        args.extend(["--json", "number,title,state,baseRef,headRef,updatedAt"])
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.debug(f"Listed {len(result['data'])} PRs")
 
         return result
 
-    def create_branch(self, branch_name: str, base: str = 'main') -> bool:
+    def create_branch(self, branch_name: str, base: str = "main") -> bool:
         """
         Create a new branch.
 
@@ -452,11 +500,14 @@ class GitHubOperations:
 
         try:
             # First, fetch latest from remote
-            subprocess.run(['git', 'fetch', 'origin', base], check=True, timeout=30)
+            subprocess.run(["git", "fetch", "origin", base], check=True, timeout=30)
 
             # Create and checkout new branch
-            subprocess.run(['git', 'checkout', '-b', branch_name, f'origin/{base}'],
-                          check=True, timeout=30)
+            subprocess.run(
+                ["git", "checkout", "-b", branch_name, f"origin/{base}"],
+                check=True,
+                timeout=30,
+            )
 
             self.logger.info(f"Created branch: {branch_name}")
             return True
@@ -468,7 +519,9 @@ class GitHubOperations:
             self.logger.error(f"Timeout creating branch {branch_name}")
             return False
 
-    def push_branch(self, branch_name: Optional[str] = None, force: bool = False) -> bool:
+    def push_branch(
+        self, branch_name: Optional[str] = None, force: bool = False
+    ) -> bool:
         """
         Push branch to remote.
 
@@ -479,17 +532,17 @@ class GitHubOperations:
         Returns:
             True if successful, False otherwise
         """
-        args = ['git', 'push', 'origin']
+        args = ["git", "push", "origin"]
 
         if branch_name:
             args.append(branch_name)
         else:
-            args.append('HEAD')
+            args.append("HEAD")
 
         if force:
-            args.append('--force')
+            args.append("--force")
 
-        args.append('--set-upstream')
+        args.append("--set-upstream")
 
         try:
             subprocess.run(args, check=True, timeout=60)
@@ -503,7 +556,7 @@ class GitHubOperations:
             self.logger.error("Timeout pushing branch")
             return False
 
-    def merge_pr(self, pr_number: int, merge_method: str = 'squash') -> Dict[str, Any]:
+    def merge_pr(self, pr_number: int, merge_method: str = "squash") -> Dict[str, Any]:
         """
         Merge a pull request.
 
@@ -517,20 +570,22 @@ class GitHubOperations:
         if pr_number <= 0:
             raise ValueError("PR number must be positive")
 
-        valid_methods = ['squash', 'merge', 'rebase']
+        valid_methods = ["squash", "merge", "rebase"]
         if merge_method not in valid_methods:
             raise ValueError(f"Invalid merge method. Must be one of: {valid_methods}")
 
-        args = ['pr', 'merge', str(pr_number), f'--{merge_method}', '--json', 'merged']
+        args = ["pr", "merge", str(pr_number), f"--{merge_method}", "--json", "merged"]
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result.get('data', {}).get('merged'):
+        if result["success"] and result.get("data", {}).get("merged"):
             self.logger.info(f"Merged PR #{pr_number} using {merge_method}")
 
         return result
 
-    def close_issue(self, issue_number: int, reason: str = 'completed') -> Dict[str, Any]:
+    def close_issue(
+        self, issue_number: int, reason: str = "completed"
+    ) -> Dict[str, Any]:
         """
         Close an issue.
 
@@ -544,20 +599,22 @@ class GitHubOperations:
         if issue_number <= 0:
             raise ValueError("Issue number must be positive")
 
-        valid_reasons = ['completed', 'not_planned']
+        valid_reasons = ["completed", "not_planned"]
         if reason not in valid_reasons:
             raise ValueError(f"Invalid reason. Must be one of: {valid_reasons}")
 
-        args = ['issue', 'close', str(issue_number), '--reason', reason]
+        args = ["issue", "close", str(issue_number), "--reason", reason]
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Closed issue #{issue_number} (reason: {reason})")
 
         return result
 
-    def get_workflow_runs(self, workflow: Optional[str] = None, limit: int = 10) -> Dict[str, Any]:
+    def get_workflow_runs(
+        self, workflow: Optional[str] = None, limit: int = 10
+    ) -> Dict[str, Any]:
         """
         Get workflow run information.
 
@@ -568,16 +625,16 @@ class GitHubOperations:
         Returns:
             Result dictionary with workflow runs
         """
-        args = ['run', 'list', '--limit', str(limit)]
+        args = ["run", "list", "--limit", str(limit)]
 
         if workflow:
-            args.extend(['--workflow', workflow])
+            args.extend(["--workflow", workflow])
 
-        args.extend(['--json', 'status,conclusion,databaseId,workflowName,createdAt'])
+        args.extend(["--json", "status,conclusion,databaseId,workflowName,createdAt"])
 
         result = self._execute_gh_command(args)
 
-        if result['success'] and result['data']:
+        if result["success"] and result["data"]:
             self.logger.debug(f"Retrieved {len(result['data'])} workflow runs")
 
         return result
@@ -595,11 +652,11 @@ class GitHubOperations:
         if not run_id.strip():
             raise ValueError("Run ID cannot be empty")
 
-        args = ['run', 'watch', run_id]
+        args = ["run", "watch", run_id]
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Watched workflow run {run_id} to completion")
 
         return result
@@ -611,7 +668,7 @@ class GitHubOperations:
         Returns:
             Result dictionary with rate limit info
         """
-        args = ['api', 'rate_limit']
+        args = ["api", "rate_limit"]
         return self._execute_gh_command(args)
 
     def label_issue(self, issue_number: int, labels: List[str]) -> Dict[str, Any]:
@@ -630,11 +687,11 @@ class GitHubOperations:
         if not labels:
             raise ValueError("Labels list cannot be empty")
 
-        args = ['issue', 'edit', str(issue_number), '--add-label', ','.join(labels)]
+        args = ["issue", "edit", str(issue_number), "--add-label", ",".join(labels)]
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Added labels {labels} to issue #{issue_number}")
 
         return result
@@ -655,11 +712,11 @@ class GitHubOperations:
         if not labels:
             raise ValueError("Labels list cannot be empty")
 
-        args = ['issue', 'edit', str(issue_number), '--remove-label', ','.join(labels)]
+        args = ["issue", "edit", str(issue_number), "--remove-label", ",".join(labels)]
 
         result = self._execute_gh_command(args)
 
-        if result['success']:
+        if result["success"]:
             self.logger.info(f"Removed labels {labels} from issue #{issue_number}")
 
         return result
@@ -679,14 +736,14 @@ class GitHubOperations:
 
         results = []
         for issue in issues:
-            if 'title' not in issue or 'body' not in issue:
+            if "title" not in issue or "body" not in issue:
                 raise ValueError("Each issue must have 'title' and 'body'")
 
             result = self.create_issue(
-                title=issue['title'],
-                body=issue['body'],
-                labels=issue.get('labels'),
-                assignees=issue.get('assignees')
+                title=issue["title"],
+                body=issue["body"],
+                labels=issue.get("labels"),
+                assignees=issue.get("assignees"),
             )
             results.append(result)
 
@@ -704,9 +761,9 @@ class GitHubOperations:
             Issue status ('open', 'closed', or 'error')
         """
         result = self.get_issue(issue_number)
-        if result['success'] and result['data']:
-            return result['data']['state']
-        return 'error'
+        if result["success"] and result["data"]:
+            return result["data"]["state"]
+        return "error"
 
     def get_pr_status(self, pr_number: int) -> str:
         """
@@ -719,9 +776,9 @@ class GitHubOperations:
             PR status ('open', 'closed', 'merged', or 'error')
         """
         result = self.get_pr(pr_number)
-        if result['success'] and result['data']:
-            return result['data']['state']
-        return 'error'
+        if result["success"] and result["data"]:
+            return result["data"]["state"]
+        return "error"
 
     def is_pr_mergeable(self, pr_number: int) -> bool:
         """
@@ -734,8 +791,8 @@ class GitHubOperations:
             True if mergeable, False otherwise
         """
         result = self.get_pr(pr_number)
-        if result['success'] and result['data']:
-            return result['data'].get('mergeable', False)
+        if result["success"] and result["data"]:
+            return result["data"].get("mergeable", False)
         return False
 
     def get_pr_checks_status(self, pr_number: int) -> Dict[str, Any]:
@@ -749,22 +806,31 @@ class GitHubOperations:
             Dictionary with checks information
         """
         result = self.get_pr(pr_number)
-        if result['success'] and result['data']:
-            return result['data'].get('checks', {})
-        return {'totalCount': 0, 'passing': 0, 'failing': 0}
+        if result["success"] and result["data"]:
+            return result["data"].get("checks", {})
+        return {"totalCount": 0, "passing": 0, "failing": 0}
 
     # Method aliases for backward compatibility with tests
-    def create_pull_request(self, title: str, body: str, base: str = 'main',
-                          head: Optional[str] = None, draft: bool = False) -> Dict[str, Any]:
+    def create_pull_request(
+        self,
+        title: str,
+        body: str,
+        base: str = "main",
+        head: Optional[str] = None,
+        draft: bool = False,
+    ) -> Dict[str, Any]:
         """Alias for create_pr method."""
         return self.create_pr(title, body, base, head, draft)
 
-    def list_pull_requests(self, state: str = 'open', base: Optional[str] = None,
-                          limit: int = 30) -> Dict[str, Any]:
+    def list_pull_requests(
+        self, state: str = "open", base: Optional[str] = None, limit: int = 30
+    ) -> Dict[str, Any]:
         """Alias for list_prs method."""
         return self.list_prs(state, base, limit)
 
-    def batch_merge_pull_requests(self, pr_numbers: List[int], merge_method: str = 'squash') -> List[Dict[str, Any]]:
+    def batch_merge_pull_requests(
+        self, pr_numbers: List[int], merge_method: str = "squash"
+    ) -> List[Dict[str, Any]]:
         """
         Merge multiple pull requests in batch.
 
@@ -781,11 +847,9 @@ class GitHubOperations:
                 result = self.merge_pr(pr_number, merge_method)
                 results.append(result)
             except Exception as e:
-                results.append({
-                    'success': False,
-                    'error': str(e),
-                    'pr_number': pr_number
-                })
+                results.append(
+                    {"success": False, "error": str(e), "pr_number": pr_number}
+                )
         return results
 
     def verify_pull_request_exists(self, pr_number: int) -> Dict[str, Any]:
@@ -800,7 +864,7 @@ class GitHubOperations:
         """
         result = self.get_pr(pr_number)
         return {
-            'exists': result['success'] and result.get('data') is not None,
-            'pr_number': pr_number,
-            'data': result.get('data', {}) if result['success'] else None
+            "exists": result["success"] and result.get("data") is not None,
+            "pr_number": pr_number,
+            "data": result.get("data", {}) if result["success"] else None,
         }

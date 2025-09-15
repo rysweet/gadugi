@@ -13,6 +13,7 @@ except ImportError:
     print("Install with: pip install websockets")
     sys.exit(1)
 
+
 async def publisher_client():
     """Example publisher that sends events."""
     uri = "ws://localhost:9090"
@@ -35,13 +36,13 @@ async def publisher_client():
                         "payload": {
                             "agent_id": "agent-001",
                             "agent_type": "code_reviewer",
-                            "task": "Review PR #123"
+                            "task": "Review PR #123",
                         },
                         "metadata": {
                             "timestamp": datetime.now().isoformat(),
-                            "version": "1.0"
-                        }
-                    }
+                            "version": "1.0",
+                        },
+                    },
                 },
                 {
                     "type": "publish_event",
@@ -53,12 +54,10 @@ async def publisher_client():
                         "payload": {
                             "task_id": "task-456",
                             "description": "Process urgent data batch",
-                            "priority": "high"
+                            "priority": "high",
                         },
-                        "metadata": {
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    }
+                        "metadata": {"timestamp": datetime.now().isoformat()},
+                    },
                 },
                 {
                     "type": "publish_event",
@@ -70,13 +69,11 @@ async def publisher_client():
                         "payload": {
                             "alert_type": "performance",
                             "message": "High memory usage detected",
-                            "severity": "warning"
+                            "severity": "warning",
                         },
-                        "metadata": {
-                            "timestamp": datetime.now().isoformat()
-                        }
-                    }
-                }
+                        "metadata": {"timestamp": datetime.now().isoformat()},
+                    },
+                },
             ]
 
             for event in events:
@@ -96,6 +93,7 @@ async def publisher_client():
     except Exception as e:
         print(f"Publisher Error: {e}")
 
+
 async def subscriber_client():
     """Example subscriber that receives events."""
     uri = "ws://localhost:9090"
@@ -112,10 +110,14 @@ async def subscriber_client():
                 "subscription": {
                     "type": "filtered",
                     "filter": {
-                        "event_types": ["agent_started", "task_created", "system_alert"],
-                        "priorities": ["high", "critical", "normal"]
-                    }
-                }
+                        "event_types": [
+                            "agent_started",
+                            "task_created",
+                            "system_alert",
+                        ],
+                        "priorities": ["high", "critical", "normal"],
+                    },
+                },
             }
 
             print("Subscriber: Setting up subscription...")
@@ -137,11 +139,13 @@ async def subscriber_client():
 
                     if event_data.get("type") == "event_delivery":
                         event = event_data.get("event", {})
-                        print(f"\n📨 Received Event:")
+                        print("\n📨 Received Event:")
                         print(f"   Type: {event.get('type')}")
                         print(f"   Priority: {event.get('priority')}")
                         print(f"   Source: {event.get('source')}")
-                        print(f"   Payload: {json.dumps(event.get('payload', {}), indent=6)}")
+                        print(
+                            f"   Payload: {json.dumps(event.get('payload', {}), indent=6)}"
+                        )
                     else:
                         print(f"Subscriber: Received: {event_data}")
 
@@ -150,6 +154,7 @@ async def subscriber_client():
 
     except Exception as e:
         print(f"Subscriber Error: {e}")
+
 
 async def interactive_client():
     """Interactive client for testing."""
@@ -188,12 +193,7 @@ async def interactive_client():
                 elif command == "ping":
                     await websocket.send(json.dumps({"type": "ping"}))
                 elif command == "sub":
-                    sub_msg = {
-                        "type": "subscribe",
-                        "subscription": {
-                            "type": "all"
-                        }
-                    }
+                    sub_msg = {"type": "subscribe", "subscription": {"type": "all"}}
                     await websocket.send(json.dumps(sub_msg))
                 elif command.startswith("pub "):
                     parts = command.split(" ", 2)
@@ -204,8 +204,8 @@ async def interactive_client():
                                 "type": parts[1],
                                 "priority": "normal",
                                 "source": "interactive",
-                                "payload": {"message": parts[2]}
-                            }
+                                "payload": {"message": parts[2]},
+                            },
                         }
                         await websocket.send(json.dumps(event_msg))
                     else:
@@ -217,6 +217,7 @@ async def interactive_client():
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 async def main():
     """Run example clients."""
@@ -234,7 +235,7 @@ async def main():
         # Run both publisher and subscriber
         await asyncio.gather(
             subscriber_client(),
-            asyncio.create_task(asyncio.sleep(1)).then(publisher_client())  # type: ignore[attr-defined]
+            asyncio.create_task(asyncio.sleep(1)).then(publisher_client()),  # type: ignore[attr-defined]
         )
     elif choice == "2":
         await interactive_client()
@@ -244,6 +245,7 @@ async def main():
         await subscriber_client()
     else:
         print("Invalid choice")
+
 
 if __name__ == "__main__":
     try:

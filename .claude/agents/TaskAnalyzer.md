@@ -5,11 +5,11 @@ description: Enhanced task analyzer with intelligent decomposition, dependency a
 tools: Read, Grep, LS, Glob, Bash, TodoWrite
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import StateManager, CheckpointManager
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
-  from .claude.shared.task_tracking import TaskTracker, TaskMetrics, WorkflowPhaseTracker
-  from .claude.shared.interfaces import AgentConfig, TaskData, AnalysisResult, DependencyGraph
+  from .gadugi/.gadugi/src/shared.github_operations import GitHubOperations
+  from .gadugi/.gadugi/src/shared.state_management import StateManager, CheckpointManager
+  from .gadugi/.gadugi/src/shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker
+  from .gadugi/.gadugi/src/shared.task_tracking import TaskTracker, TaskMetrics, WorkflowPhaseTracker
+  from .gadugi/.gadugi/src/shared.interfaces import AgentConfig, TaskData, AnalysisResult, DependencyGraph
 ---
 
 # Enhanced TaskAnalyzer - Intelligent Task Analysis and Decomposition

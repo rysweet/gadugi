@@ -17,13 +17,12 @@ import signal
 import time
 import argparse
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 # Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 from client.client import EventRouterClient  # type: ignore[import]
-from core.models import EventPriority, EventType  # type: ignore[import]
 
 
 class EventRouterManager:
@@ -40,7 +39,7 @@ class EventRouterManager:
             "max_queue_size": 10000,
             "max_clients": 1000,
             "use_multi_queue": False,
-            "log_level": "INFO"
+            "log_level": "INFO",
         }
 
     def load_config(self) -> Dict[str, Any]:
@@ -52,7 +51,7 @@ class EventRouterManager:
 
     def save_config(self, config: Dict[str, Any]):
         """Save configuration to file."""
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(config, f, indent=2)
         print(f"Configuration saved to {self.config_file}")
 
@@ -104,7 +103,7 @@ if __name__ == "__main__":
 
         # Write start script
         script_file = Path("_start_router.py")
-        with open(script_file, 'w') as f:
+        with open(script_file, "w") as f:
             f.write(start_script)
 
         # Start process
@@ -112,13 +111,13 @@ if __name__ == "__main__":
             # Start as daemon
             process = subprocess.Popen(
                 [sys.executable, str(script_file)],
-                stdout=open(self.log_file, 'a'),
+                stdout=open(self.log_file, "a"),
                 stderr=subprocess.STDOUT,
-                start_new_session=True
+                start_new_session=True,
             )
 
             # Save PID
-            with open(self.pid_file, 'w') as f:
+            with open(self.pid_file, "w") as f:
                 f.write(str(process.pid))
 
             print(f"Event Router started as daemon (PID: {process.pid})")
@@ -202,7 +201,7 @@ if __name__ == "__main__":
             return
 
         config = self.load_config()
-        print(f"Event Router Status: RUNNING")
+        print("Event Router Status: RUNNING")
 
         if self.pid_file.exists():
             with open(self.pid_file) as f:
@@ -217,16 +216,18 @@ if __name__ == "__main__":
             if await client.connect():
                 health = await client.get_health()
                 if health:
-                    print(f"\nHealth Status:")
+                    print("\nHealth Status:")
                     print(f"  Status: {health.get('status', 'unknown')}")
                     print(f"  Uptime: {health.get('uptime', 0):.1f} seconds")
                     print(f"  Events Processed: {health.get('events_processed', 0)}")
                     print(f"  Events Failed: {health.get('events_failed', 0)}")
                     print(f"  Events in Queue: {health.get('events_in_queue', 0)}")
-                    print(f"  Active Subscriptions: {health.get('active_subscriptions', 0)}")
+                    print(
+                        f"  Active Subscriptions: {health.get('active_subscriptions', 0)}"
+                    )
                     print(f"  Connected Clients: {health.get('connected_clients', 0)}")
 
-                    if health.get('errors'):
+                    if health.get("errors"):
                         print(f"  Errors: {', '.join(health['errors'])}")
 
                 await client.disconnect()
@@ -243,13 +244,13 @@ if __name__ == "__main__":
         # Host
         host = input(f"Host [{config['host']}]: ").strip()
         if host:
-            config['host'] = host
+            config["host"] = host
 
         # Port
         port = input(f"Port [{config['port']}]: ").strip()
         if port:
             try:
-                config['port'] = int(port)
+                config["port"] = int(port)
             except ValueError:
                 print("Invalid port number")
                 return
@@ -258,7 +259,7 @@ if __name__ == "__main__":
         max_queue = input(f"Max Queue Size [{config['max_queue_size']}]: ").strip()
         if max_queue:
             try:
-                config['max_queue_size'] = int(max_queue)
+                config["max_queue_size"] = int(max_queue)
             except ValueError:
                 print("Invalid queue size")
                 return
@@ -267,27 +268,41 @@ if __name__ == "__main__":
         max_clients = input(f"Max Clients [{config['max_clients']}]: ").strip()
         if max_clients:
             try:
-                config['max_clients'] = int(max_clients)
+                config["max_clients"] = int(max_clients)
             except ValueError:
                 print("Invalid client limit")
                 return
 
         # Multi-queue
-        use_multi = input(f"Use Multi-Queue (y/n) [{'y' if config['use_multi_queue'] else 'n'}]: ").strip().lower()
+        use_multi = (
+            input(
+                f"Use Multi-Queue (y/n) [{'y' if config['use_multi_queue'] else 'n'}]: "
+            )
+            .strip()
+            .lower()
+        )
         if use_multi:
-            config['use_multi_queue'] = use_multi == 'y'
+            config["use_multi_queue"] = use_multi == "y"
 
         # Log level
-        log_level = input(f"Log Level (DEBUG/INFO/WARNING/ERROR) [{config.get('log_level', 'INFO')}]: ").strip().upper()
-        if log_level and log_level in ['DEBUG', 'INFO', 'WARNING', 'ERROR']:
-            config['log_level'] = log_level
+        log_level = (
+            input(
+                f"Log Level (DEBUG/INFO/WARNING/ERROR) [{config.get('log_level', 'INFO')}]: "
+            )
+            .strip()
+            .upper()
+        )
+        if log_level and log_level in ["DEBUG", "INFO", "WARNING", "ERROR"]:
+            config["log_level"] = log_level
 
         self.save_config(config)
 
         # Offer to restart if running
         if self.is_running():
-            restart = input("\nEvent Router is running. Restart now? (y/n): ").strip().lower()
-            if restart == 'y':
+            restart = (
+                input("\nEvent Router is running. Restart now? (y/n): ").strip().lower()
+            )
+            if restart == "y":
                 self.restart()
 
     async def monitor(self):
@@ -308,9 +323,19 @@ if __name__ == "__main__":
             # Subscribe to all events
             @client.on("*")
             async def log_event(event):
-                timestamp = event.metadata.created_at.strftime("%H:%M:%S") if event.metadata and event.metadata.created_at else "??:??:??"
-                priority = event.priority.name if hasattr(event.priority, 'name') else str(event.priority)
-                print(f"[{timestamp}] [{priority:8}] {event.topic:30} | {event.source:20} | {json.dumps(event.payload)[:100]}")
+                timestamp = (
+                    event.metadata.created_at.strftime("%H:%M:%S")
+                    if event.metadata and event.metadata.created_at
+                    else "??:??:??"
+                )
+                priority = (
+                    event.priority.name
+                    if hasattr(event.priority, "name")
+                    else str(event.priority)
+                )
+                print(
+                    f"[{timestamp}] [{priority:8}] {event.topic:30} | {event.source:20} | {json.dumps(event.payload)[:100]}"
+                )
 
             await client.subscribe(topics=["*"], callback=log_event)
 
@@ -344,16 +369,30 @@ if __name__ == "__main__":
 async def async_main():
     """Async main for commands that need it."""
     parser = argparse.ArgumentParser(description="Event Router Management CLI")
-    parser.add_argument("command", choices=[
-        "start", "stop", "restart", "status", "configure",
-        "monitor", "logs", "help"
-    ], help="Command to execute")
-    parser.add_argument("--daemon", "-d", action="store_true",
-                       help="Start as daemon (background process)")
-    parser.add_argument("--lines", "-n", type=int, default=50,
-                       help="Number of log lines to show")
-    parser.add_argument("--follow", "-f", action="store_true",
-                       help="Follow log output")
+    parser.add_argument(
+        "command",
+        choices=[
+            "start",
+            "stop",
+            "restart",
+            "status",
+            "configure",
+            "monitor",
+            "logs",
+            "help",
+        ],
+        help="Command to execute",
+    )
+    parser.add_argument(
+        "--daemon",
+        "-d",
+        action="store_true",
+        help="Start as daemon (background process)",
+    )
+    parser.add_argument(
+        "--lines", "-n", type=int, default=50, help="Number of log lines to show"
+    )
+    parser.add_argument("--follow", "-f", action="store_true", help="Follow log output")
 
     args = parser.parse_args()
     manager = EventRouterManager()
@@ -377,7 +416,9 @@ async def async_main():
         print("\nExamples:")
         print("  python manage_router.py start --daemon    # Start in background")
         print("  python manage_router.py status            # Check status and health")
-        print("  python manage_router.py monitor           # Monitor events in real-time")
+        print(
+            "  python manage_router.py monitor           # Monitor events in real-time"
+        )
         print("  python manage_router.py logs -f           # Follow logs")
         print("  python manage_router.py configure         # Interactive configuration")
 
@@ -392,16 +433,32 @@ def main():
     else:
         # Parse args for sync commands
         parser = argparse.ArgumentParser(description="Event Router Management CLI")
-        parser.add_argument("command", choices=[
-            "start", "stop", "restart", "status", "configure",
-            "monitor", "logs", "help"
-        ], help="Command to execute")
-        parser.add_argument("--daemon", "-d", action="store_true",
-                           help="Start as daemon (background process)")
-        parser.add_argument("--lines", "-n", type=int, default=50,
-                           help="Number of log lines to show")
-        parser.add_argument("--follow", "-f", action="store_true",
-                           help="Follow log output")
+        parser.add_argument(
+            "command",
+            choices=[
+                "start",
+                "stop",
+                "restart",
+                "status",
+                "configure",
+                "monitor",
+                "logs",
+                "help",
+            ],
+            help="Command to execute",
+        )
+        parser.add_argument(
+            "--daemon",
+            "-d",
+            action="store_true",
+            help="Start as daemon (background process)",
+        )
+        parser.add_argument(
+            "--lines", "-n", type=int, default=50, help="Number of log lines to show"
+        )
+        parser.add_argument(
+            "--follow", "-f", action="store_true", help="Follow log output"
+        )
 
         args = parser.parse_args()
         manager = EventRouterManager()
@@ -420,10 +477,16 @@ def main():
             parser.print_help()
             print("\nExamples:")
             print("  python manage_router.py start --daemon    # Start in background")
-            print("  python manage_router.py status            # Check status and health")
-            print("  python manage_router.py monitor           # Monitor events in real-time")
+            print(
+                "  python manage_router.py status            # Check status and health"
+            )
+            print(
+                "  python manage_router.py monitor           # Monitor events in real-time"
+            )
             print("  python manage_router.py logs -f           # Follow logs")
-            print("  python manage_router.py configure         # Interactive configuration")
+            print(
+                "  python manage_router.py configure         # Interactive configuration"
+            )
         else:
             # Async commands
             asyncio.run(async_main())

@@ -1,7 +1,6 @@
 """Example agent implementation using the BaseAgent framework."""
 
 import logging
-from pathlib import   # type: ignore
 from typing import Any, Dict
 
 from .base_agent import AgentResponse, BaseAgent
@@ -112,7 +111,10 @@ class ExampleAgent(BaseAgent):
                 )
 
             # Example: Execute command
-            elif "run" in task_description.lower() or "execute" in task_description.lower():
+            elif (
+                "run" in task_description.lower()
+                or "execute" in task_description.lower()
+            ):
                 command = data.get("command", "echo 'Hello World'")
                 result = await self.invoke_tool(
                     "shell_command",
@@ -158,9 +160,15 @@ class ExampleAgent(BaseAgent):
                 lines = content.split("\n")
                 stats = {
                     "lines": len(lines),
-                    "imports": sum(1 for line in lines if line.strip().startswith("import")),
-                    "functions": sum(1 for line in lines if line.strip().startswith("def ")),
-                    "classes": sum(1 for line in lines if line.strip().startswith("class ")),
+                    "imports": sum(
+                        1 for line in lines if line.strip().startswith("import")
+                    ),
+                    "functions": sum(
+                        1 for line in lines if line.strip().startswith("def ")
+                    ),
+                    "classes": sum(
+                        1 for line in lines if line.strip().startswith("class ")
+                    ),
                 }
 
                 return AgentResponse(

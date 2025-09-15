@@ -530,7 +530,9 @@ class MemoryManager:
 
                 # Apply tag filtering if specified
                 if query.tags:
-                    memories = [m for m in memories if any(tag in m.tags for tag in query.tags)]
+                    memories = [
+                        m for m in memories if any(tag in m.tags for tag in query.tags)
+                    ]
 
                 execution_time = time.time() - start_time
 
@@ -661,7 +663,9 @@ class MemoryManager:
                 memories_by_type = dict(cursor.fetchall())
 
                 # Storage size approximation
-                storage_size = os.path.getsize(self.db_path) if self.db_path.exists() else 0
+                storage_size = (
+                    os.path.getsize(self.db_path) if self.db_path.exists() else 0
+                )
 
                 return MemoryStats(
                     total_memories=total_memories,
@@ -768,7 +772,9 @@ class ContextManager:
                         "data": context_json,
                         "metadata": metadata_json,
                         "created_at": context.created_at.isoformat(),
-                        "expires_at": context.expires_at.isoformat() if context.expires_at else "",
+                        "expires_at": context.expires_at.isoformat()
+                        if context.expires_at
+                        else "",
                         "compressed": compressed,
                         "checksum": context.checksum,
                     }
@@ -805,7 +811,9 @@ class ContextManager:
                                 context_json,
                                 metadata_json,
                                 context.created_at.isoformat(),
-                                context.expires_at.isoformat() if context.expires_at else None,
+                                context.expires_at.isoformat()
+                                if context.expires_at
+                                else None,
                                 compressed,
                                 context.checksum,
                             ),
@@ -845,7 +853,9 @@ class ContextManager:
             with self.lock:
                 # Try Redis first
                 redis_key = f"context:{context_id}"
-                redis_data = self.redis_client.get(redis_key) if self.redis_client else None
+                redis_data = (
+                    self.redis_client.get(redis_key) if self.redis_client else None
+                )
 
                 if redis_data:
                     data = json.loads(redis_data)
@@ -915,7 +925,9 @@ class ContextManager:
                 # Get from Redis
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
+                    self.redis_client.keys(pattern)
+                    if hasattr(self.redis_client, "keys")
+                    else []  # type: ignore[attr-defined]
                 )
 
                 for key in redis_keys:
@@ -924,7 +936,10 @@ class ContextManager:
                         redis_data = self.redis_client.get(key_str)  # type: ignore[attr-defined]
                         if redis_data:
                             data = json.loads(redis_data)
-                            if context_type is None or data["type"] == context_type.value:
+                            if (
+                                context_type is None
+                                or data["type"] == context_type.value
+                            ):
                                 context_id = key_str.replace("context:", "")
                                 context = self._dict_to_context(context_id, data)
                                 contexts.append(context)
@@ -1039,7 +1054,9 @@ class ContextManager:
                 # Redis contexts expire automatically, but we can check manually
                 pattern = "context:*"
                 redis_keys = (
-                    self.redis_client.keys(pattern) if hasattr(self.redis_client, "keys") else []  # type: ignore[attr-defined]
+                    self.redis_client.keys(pattern)
+                    if hasattr(self.redis_client, "keys")
+                    else []  # type: ignore[attr-defined]
                 )
 
                 for key in redis_keys:
@@ -1416,7 +1433,8 @@ class MCPService:
                 "service_performance": {
                     "total_operations": self.operation_count,
                     "total_operation_time": self.total_operation_time,
-                    "average_operation_time": self.total_operation_time / self.operation_count
+                    "average_operation_time": self.total_operation_time
+                    / self.operation_count
                     if self.operation_count > 0
                     else 0,
                     "redis_available": self.redis_available,
@@ -1458,7 +1476,8 @@ class MCPService:
             "components": {"memory_manager": "unknown", "context_manager": "unknown"},
             "performance": {
                 "total_operations": self.operation_count,
-                "average_operation_time": self.total_operation_time / self.operation_count
+                "average_operation_time": self.total_operation_time
+                / self.operation_count
                 if self.operation_count > 0
                 else 0,
             },
@@ -1510,7 +1529,9 @@ class MCPService:
                 health_info["components"]["context_manager"] = "unhealthy"
 
             # Overall status
-            all_healthy = all(status == "healthy" for status in health_info["components"].values())
+            all_healthy = all(
+                status == "healthy" for status in health_info["components"].values()
+            )
             health_info["status"] = "healthy" if all_healthy else "degraded"
 
         except Exception as e:

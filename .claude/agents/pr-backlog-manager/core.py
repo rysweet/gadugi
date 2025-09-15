@@ -38,14 +38,18 @@ try:
 
     def retry_with_backoff(max_retries: int = 3, delay: float = 1.0):  # type: ignore[no-redef]
         """Decorator for retry with backoff"""
+
         def decorator(func):
             def wrapper(*args, **kwargs):
                 return func(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
     class CircuitBreaker:  # type: ignore[no-redef]
         """Circuit breaker pattern implementation"""
+
         def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 60):
             self.failure_threshold = failure_threshold
             self.recovery_timeout = recovery_timeout

@@ -130,9 +130,15 @@ class CodeWriterEngine:
             word in description for word in ["rest"]
         ):
             return "typescript"
-        if any(word in description for word in ["python", "py", "flask", "django", "fastapi"]):
+        if any(
+            word in description
+            for word in ["python", "py", "flask", "django", "fastapi"]
+        ):
             return "python"
-        if any(word in description for word in ["javascript", "js", "node", "express", "react"]):
+        if any(
+            word in description
+            for word in ["javascript", "js", "node", "express", "react"]
+        ):
             return "javascript"
         if any(word in description for word in ["angular", "vue"]):
             return "typescript"

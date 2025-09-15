@@ -7,20 +7,26 @@ Enhanced with fallback support for offline/resilient operation
 from __future__ import annotations
 
 import asyncio
-import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, cast, TYPE_CHECKING
 import httpx
 import logging
 
 # Import fallback system
 try:
     from .memory_fallback import (
-        Memory, MemoryType, MemoryScope, MemoryPersistence,
-        KnowledgeNode, Whiteboard, MemoryBackend,
-        create_simple_fallback_chain, MemoryFallbackChain
+        Memory,
+        MemoryType,
+        MemoryScope,
+        MemoryPersistence,
+        KnowledgeNode,
+        Whiteboard,
+        MemoryBackend,
+        create_simple_fallback_chain,
+        MemoryFallbackChain,
     )
+
     FALLBACK_AVAILABLE = True
 except ImportError:
     FALLBACK_AVAILABLE = False
@@ -69,9 +75,10 @@ class AgentMemoryInterface:
         try:
             self._client = httpx.AsyncClient(
                 base_url=self.mcp_base_url,
-                timeout=httpx.Timeout(5.0)  # Short timeout for fast fallback
+                timeout=httpx.Timeout(5.0),  # Short timeout for fast fallback
             )
             # Test connection
+            assert self._client is not None
             response = await self._client.get("/health", timeout=2.0)
             if response.status_code == 200:
                 self._use_http = True
@@ -98,16 +105,18 @@ class AgentMemoryInterface:
 
     async def _cleanup_backends(self) -> None:
         """Clean up all backend connections."""
-        if self._client:
+        if self._client is not None:
             await self._client.aclose()
 
-        if self._fallback_chain:
+        if self._fallback_chain is not None:
             await self._fallback_chain.disconnect()
 
-    async def _execute_with_fallback(self, operation_name: str, http_func, fallback_func, *args, **kwargs) -> Any:
+    async def _execute_with_fallback(
+        self, operation_name: str, http_func: Any, fallback_func: Any, *args: Any, **kwargs: Any
+    ) -> Any:
         """Execute operation with automatic fallback."""
         # Try HTTP first if available
-        if self._use_http and self._client:
+        if self._use_http and self._client is not None:
             try:
                 return await http_func(*args, **kwargs)
             except Exception as e:
@@ -116,7 +125,7 @@ class AgentMemoryInterface:
                 self._use_http = False
 
         # Use fallback chain
-        if self._fallback_chain:
+        if self._fallback_chain is not None:
             try:
                 return await fallback_func(*args, **kwargs)
             except Exception as e:
@@ -128,17 +137,15 @@ class AgentMemoryInterface:
     # ========== Short-term Memory ==========
 
     async def remember_short_term(
-        self,
-        content: str,
-        tags: Optional[List[str]] = None,
-        importance: float = 0.5
+        self, content: str, tags: Optional[List[str]] = None, importance: float = 0.5
     ) -> str:
         """Store a short-term memory."""
 
         async def http_store():
-            if not self._client:
+            if self._client is None:
                 raise RuntimeError("HTTP client not available")
 
+            assert self._client is not None
             response = await self._client.post(
                 "/memory/agent/store",
                 json={
@@ -149,8 +156,8 @@ class AgentMemoryInterface:
                     "task_id": self.task_id,
                     "project_id": self.project_id,
                     "tags": tags or [],
-                    "importance_score": importance
-                }
+                    "importance_score": importance,
+                },
             )
             response.raise_for_status()
             return response.json()["id"]
@@ -167,21 +174,21 @@ class AgentMemoryInterface:
                 task_id=self.task_id,
                 project_id=self.project_id,
                 tags=tags or [],
-                importance_score=importance
+                importance_score=importance,
             )
 
             stored_memory = await self._fallback_chain.store_memory(memory)
             return stored_memory.id
 
         return await self._execute_with_fallback(
-            "remember_short_term",
-            http_store,
-            fallback_store
+            "remember_short_term", http_store, fallback_store
         )
 
     # ========== Helper Methods ==========
 
-    def _convert_http_memory_to_dict(self, http_memory: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_http_memory_to_dict(
+        self, http_memory: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Convert HTTP memory response to standard format."""
         return http_memory
 
@@ -191,14 +198,16 @@ class AgentMemoryInterface:
             "id": memory.id,
             "agent_id": memory.agent_id,
             "content": memory.content,
-            "memory_type": memory.type.value if hasattr(memory.type, 'value') else str(memory.type),
+            "memory_type": memory.type.value
+            if hasattr(memory.type, "value")
+            else str(memory.type),
             "is_short_term": memory.persistence == MemoryPersistence.VOLATILE,
             "task_id": memory.task_id,
             "project_id": memory.project_id,
             "tags": memory.tags,
             "importance_score": memory.importance_score,
             "created_at": memory.created_at.isoformat() if memory.created_at else None,
-            "updated_at": memory.updated_at.isoformat() if memory.updated_at else None
+            "updated_at": memory.updated_at.isoformat() if memory.updated_at else None,
         }
 
     # ========== Long-term Memory ==========
@@ -208,14 +217,15 @@ class AgentMemoryInterface:
         content: str,
         memory_type: str = "semantic",
         tags: Optional[List[str]] = None,
-        importance: float = 0.7
+        importance: float = 0.7,
     ) -> str:
         """Store a long-term memory."""
 
         async def http_store():
-            if not self._client:
+            if self._client is None:
                 raise RuntimeError("HTTP client not available")
 
+            assert self._client is not None
             response = await self._client.post(
                 "/memory/agent/store",
                 json={
@@ -226,8 +236,8 @@ class AgentMemoryInterface:
                     "task_id": self.task_id,
                     "project_id": self.project_id,
                     "tags": tags or [],
-                    "importance_score": importance
-                }
+                    "importance_score": importance,
+                },
             )
             response.raise_for_status()
             return response.json()["id"]
@@ -241,7 +251,7 @@ class AgentMemoryInterface:
                 "semantic": MemoryType.SEMANTIC,
                 "episodic": MemoryType.EPISODIC,
                 "procedural": MemoryType.PROCEDURAL,
-                "long_term": MemoryType.LONG_TERM
+                "long_term": MemoryType.LONG_TERM,
             }
 
             memory = Memory(
@@ -252,16 +262,14 @@ class AgentMemoryInterface:
                 task_id=self.task_id,
                 project_id=self.project_id,
                 tags=tags or [],
-                importance_score=importance
+                importance_score=importance,
             )
 
             stored_memory = await self._fallback_chain.store_memory(memory)
             return stored_memory.id
 
         return await self._execute_with_fallback(
-            "remember_long_term",
-            http_store,
-            fallback_store
+            "remember_long_term", http_store, fallback_store
         )
 
     # ========== Memory Retrieval ==========
@@ -271,25 +279,25 @@ class AgentMemoryInterface:
         memory_type: Optional[str] = None,
         short_term_only: bool = False,
         long_term_only: bool = False,
-        limit: int = 50
+        limit: int = 50,
     ) -> List[Dict[str, Any]]:
         """Recall memories based on criteria."""
 
         async def http_recall():
-            if not self._client:
+            if self._client is None:
                 raise RuntimeError("HTTP client not available")
 
             params = {
                 "limit": limit,
                 "short_term_only": short_term_only,
-                "long_term_only": long_term_only
+                "long_term_only": long_term_only,
             }
             if memory_type:
                 params["memory_type"] = memory_type
 
+            assert self._client is not None
             response = await self._client.get(
-                f"/memory/agent/{self.agent_id}",
-                params=params
+                f"/memory/agent/{self.agent_id}", params=params
             )
             response.raise_for_status()
             return response.json()
@@ -306,7 +314,7 @@ class AgentMemoryInterface:
                     "episodic": MemoryType.EPISODIC,
                     "procedural": MemoryType.PROCEDURAL,
                     "short_term": MemoryType.SHORT_TERM,
-                    "long_term": MemoryType.LONG_TERM
+                    "long_term": MemoryType.LONG_TERM,
                 }
                 memory_type_enum = type_mapping.get(memory_type)
 
@@ -315,33 +323,25 @@ class AgentMemoryInterface:
                 memory_type=memory_type_enum,
                 short_term_only=short_term_only,
                 long_term_only=long_term_only,
-                limit=limit
+                limit=limit,
             )
 
             return [self._convert_fallback_memory_to_dict(m) for m in memories]
 
         return await self._execute_with_fallback(
-            "recall_memories",
-            http_recall,
-            fallback_recall
+            "recall_memories", http_recall, fallback_recall
         )
 
     async def search_memories(
-        self,
-        tags: Optional[List[str]] = None,
-        limit: int = 50
+        self, tags: Optional[List[str]] = None, limit: int = 50
     ) -> List[Dict[str, Any]]:
         """Search memories by tags."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
             "/memory/search",
-            json={
-                "agent_id": self.agent_id,
-                "tags": tags or [],
-                "limit": limit
-            }
+            json={"agent_id": self.agent_id, "tags": tags or [], "limit": limit},
         )
         response.raise_for_status()
         return response.json()
@@ -349,13 +349,10 @@ class AgentMemoryInterface:
     # ========== Procedural Memory ==========
 
     async def learn_procedure(
-        self,
-        procedure_name: str,
-        steps: List[str],
-        context: Optional[str] = None
+        self, procedure_name: str, steps: List[str], context: Optional[str] = None
     ) -> str:
         """Store procedural knowledge."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
@@ -364,18 +361,17 @@ class AgentMemoryInterface:
                 "agent_id": self.agent_id,
                 "procedure_name": procedure_name,
                 "steps": steps,
-                "context": context
-            }
+                "context": context,
+            },
         )
         response.raise_for_status()
         return response.json()["id"]
 
     async def recall_procedure(
-        self,
-        procedure_name: Optional[str] = None
+        self, procedure_name: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """Recall procedural knowledge."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         params = {}
@@ -383,8 +379,7 @@ class AgentMemoryInterface:
             params["procedure_name"] = procedure_name
 
         response = await self._client.get(
-            f"/memory/procedural/{self.agent_id}",
-            params=params
+            f"/memory/procedural/{self.agent_id}", params=params
         )
         response.raise_for_status()
         return response.json()
@@ -392,13 +387,10 @@ class AgentMemoryInterface:
     # ========== Knowledge Graph ==========
 
     async def add_knowledge(
-        self,
-        concept: str,
-        description: str,
-        confidence: float = 1.0
+        self, concept: str, description: str, confidence: float = 1.0
     ) -> str:
         """Add a concept to the knowledge graph."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
@@ -407,8 +399,8 @@ class AgentMemoryInterface:
                 "agent_id": self.agent_id,
                 "concept": concept,
                 "description": description,
-                "confidence": confidence
-            }
+                "confidence": confidence,
+            },
         )
         response.raise_for_status()
         return response.json()["id"]
@@ -418,10 +410,10 @@ class AgentMemoryInterface:
         concept1_id: str,
         concept2_id: str,
         relationship: str,
-        strength: float = 1.0
+        strength: float = 1.0,
     ) -> None:
         """Link two concepts in the knowledge graph."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
@@ -430,19 +422,18 @@ class AgentMemoryInterface:
                 "node1_id": concept1_id,
                 "node2_id": concept2_id,
                 "relationship": relationship,
-                "strength": strength
-            }
+                "strength": strength,
+            },
         )
         response.raise_for_status()
 
     async def explore_knowledge(self, max_depth: int = 2) -> Dict[str, Any]:
         """Explore the agent's knowledge graph."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.get(
-            f"/knowledge/graph/{self.agent_id}",
-            params={"max_depth": max_depth}
+            f"/knowledge/graph/{self.agent_id}", params={"max_depth": max_depth}
         )
         response.raise_for_status()
         return response.json()
@@ -454,29 +445,22 @@ class AgentMemoryInterface:
         if not self.task_id:
             raise ValueError("Task ID is required to create a whiteboard")
 
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
             "/whiteboard/create",
-            json={
-                "task_id": self.task_id,
-                "agent_id": self.agent_id
-            }
+            json={"task_id": self.task_id, "agent_id": self.agent_id},
         )
         response.raise_for_status()
         return response.json()["id"]
 
-    async def write_to_whiteboard(
-        self,
-        section: str,
-        content: Dict[str, Any]
-    ) -> None:
+    async def write_to_whiteboard(self, section: str, content: Dict[str, Any]) -> None:
         """Write to the task whiteboard."""
         if not self.task_id:
             raise ValueError("Task ID is required to write to whiteboard")
 
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
@@ -485,8 +469,8 @@ class AgentMemoryInterface:
                 "task_id": self.task_id,
                 "agent_id": self.agent_id,
                 "section": section,
-                "content": content
-            }
+                "content": content,
+            },
         )
         response.raise_for_status()
 
@@ -495,7 +479,7 @@ class AgentMemoryInterface:
         if not self.task_id:
             raise ValueError("Task ID is required to read whiteboard")
 
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.get(f"/whiteboard/{self.task_id}")
@@ -505,16 +489,13 @@ class AgentMemoryInterface:
     # ========== Project Shared Memory ==========
 
     async def share_with_project(
-        self,
-        content: str,
-        tags: Optional[List[str]] = None,
-        importance: float = 0.7
+        self, content: str, tags: Optional[List[str]] = None, importance: float = 0.7
     ) -> str:
         """Share a memory with the entire project."""
         if not self.project_id:
             raise ValueError("Project ID is required to share project memory")
 
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
@@ -524,8 +505,8 @@ class AgentMemoryInterface:
                 "content": content,
                 "created_by": self.agent_id,
                 "tags": tags or [],
-                "importance_score": importance
-            }
+                "importance_score": importance,
+            },
         )
         response.raise_for_status()
         return response.json()["id"]
@@ -535,12 +516,11 @@ class AgentMemoryInterface:
         if not self.project_id:
             raise ValueError("Project ID is required to get project knowledge")
 
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.get(
-            f"/memory/project/{self.project_id}",
-            params={"limit": limit}
+            f"/memory/project/{self.project_id}", params={"limit": limit}
         )
         response.raise_for_status()
         return response.json()
@@ -549,18 +529,19 @@ class AgentMemoryInterface:
 
     async def consolidate_memories(self, threshold_hours: int = 24) -> Dict[str, Any]:
         """Consolidate short-term memories into long-term storage."""
-        if not self._client:
+        if self._client is None:
             raise RuntimeError("Client not initialized. Use async with statement.")
 
         response = await self._client.post(
             f"/memory/agent/{self.agent_id}/consolidate",
-            params={"threshold_hours": threshold_hours}
+            params={"threshold_hours": threshold_hours},
         )
         response.raise_for_status()
         return response.json()
 
 
 # ========== Example Agent Implementation ==========
+
 
 class MemoryEnabledAgent:
     """Example of an agent that uses the memory system."""
@@ -569,7 +550,7 @@ class MemoryEnabledAgent:
         self,
         agent_id: str,
         agent_type: str = "worker",
-        project_id: Optional[str] = None
+        project_id: Optional[str] = None,
     ):
         self.agent_id = agent_id
         self.agent_type = agent_type
@@ -580,8 +561,7 @@ class MemoryEnabledAgent:
     async def initialize(self):
         """Initialize the agent and memory interface."""
         self.memory = AgentMemoryInterface(
-            agent_id=self.agent_id,
-            project_id=self.project_id
+            agent_id=self.agent_id, project_id=self.project_id
         )
 
     async def start_task(self, task_id: str, task_description: str):
@@ -596,14 +576,14 @@ class MemoryEnabledAgent:
                 await mem.remember_short_term(
                     f"Started task: {task_description}",
                     tags=["task_start", "event"],
-                    importance=0.8
+                    importance=0.8,
                 )
 
                 # Create a whiteboard for collaboration
                 await mem.create_whiteboard()
                 await mem.write_to_whiteboard(
                     "notes",
-                    {"initial_thoughts": f"Beginning work on: {task_description}"}
+                    {"initial_thoughts": f"Beginning work on: {task_description}"},
                 )
 
     async def learn_from_experience(self, experience: str, lesson: str):
@@ -613,26 +593,26 @@ class MemoryEnabledAgent:
 
         async with self.memory as mem:
             # Store the experience as episodic memory
-            experience_id = await mem.remember_long_term(
+            await mem.remember_long_term(
                 content=experience,
                 memory_type="episodic",
                 tags=["experience", "learning"],
-                importance=0.7
+                importance=0.7,
             )
 
             # Store the lesson as semantic knowledge
-            lesson_id = await mem.remember_long_term(
+            await mem.remember_long_term(
                 content=lesson,
                 memory_type="semantic",
                 tags=["lesson", "knowledge"],
-                importance=0.8
+                importance=0.8,
             )
 
             # Add to knowledge graph
-            concept_id = await mem.add_knowledge(
+            await mem.add_knowledge(
                 concept=f"Lesson_{datetime.now().strftime('%Y%m%d_%H%M')}",
                 description=lesson,
-                confidence=0.9
+                confidence=0.9,
             )
 
             print(f"Learned: {lesson}")
@@ -646,21 +626,17 @@ class MemoryEnabledAgent:
             # Write to whiteboard
             if decision:
                 await mem.write_to_whiteboard(
-                    "decisions",
-                    {"decision": decision, "reasoning": message}
+                    "decisions", {"decision": decision, "reasoning": message}
                 )
             else:
-                await mem.write_to_whiteboard(
-                    "notes",
-                    {"note": message}
-                )
+                await mem.write_to_whiteboard("notes", {"note": message})
 
             # Also share important decisions with project
             if decision and self.project_id:
                 await mem.share_with_project(
                     content=f"Decision made: {decision} - {message}",
                     tags=["decision", self.current_task_id],
-                    importance=0.9
+                    importance=0.9,
                 )
 
     async def recall_context(self) -> Dict[str, Any]:
@@ -668,17 +644,12 @@ class MemoryEnabledAgent:
         if not self.memory:
             return {}
 
-        context = {
-            "short_term": [],
-            "procedures": [],
-            "project_knowledge": []
-        }
+        context = {"short_term": [], "procedures": [], "project_knowledge": []}
 
         async with self.memory as mem:
             # Get recent short-term memories
             context["short_term"] = await mem.recall_memories(
-                short_term_only=True,
-                limit=10
+                short_term_only=True, limit=10
             )
 
             # Get relevant procedures
@@ -701,13 +672,12 @@ class MemoryEnabledAgent:
                 content=f"Completed task {self.current_task_id}: {result}",
                 memory_type="episodic",
                 tags=["task_complete", "result"],
-                importance=0.9
+                importance=0.9,
             )
 
             # Update whiteboard with final result
             await mem.write_to_whiteboard(
-                "action_items",
-                {"result": result, "completed": True}
+                "action_items", {"result": result, "completed": True}
             )
 
             # Consolidate short-term memories
@@ -719,14 +689,13 @@ class MemoryEnabledAgent:
 
 # ========== Example Usage ==========
 
+
 async def example_usage():
     """Example of how agents use the memory system."""
 
     # Create an agent
     agent = MemoryEnabledAgent(
-        agent_id="example_agent_001",
-        agent_type="worker",
-        project_id="gadugi_v03"
+        agent_id="example_agent_001", agent_type="worker", project_id="gadugi_v03"
     )
 
     await agent.initialize()
@@ -737,13 +706,13 @@ async def example_usage():
     # Learn from experience
     await agent.learn_from_experience(
         experience="Tried to implement OAuth without proper token validation",
-        lesson="Always validate OAuth tokens server-side to prevent security vulnerabilities"
+        lesson="Always validate OAuth tokens server-side to prevent security vulnerabilities",
     )
 
     # Collaborate
     await agent.collaborate(
         message="Considering JWT vs session-based auth",
-        decision="Use JWT for stateless authentication"
+        decision="Use JWT for stateless authentication",
     )
 
     # Recall context
@@ -762,6 +731,7 @@ if __name__ == "__main__":
 # ============================================================================
 # Enhanced Memory Interface with Full Fallback Support
 # ============================================================================
+
 
 class EnhancedAgentMemoryInterface(AgentMemoryInterface):
     """
@@ -782,10 +752,10 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
             "fallback_available": self._fallback_chain is not None,
             "current_backend": "HTTP" if self._use_http else "Fallback Chain",
             "storage_path": self.storage_path,
-            "fallback_chain_status": None
+            "fallback_chain_status": None,
         }
 
-        if self._fallback_chain and hasattr(self._fallback_chain, 'get_backend_status'):
+        if self._fallback_chain and hasattr(self._fallback_chain, "get_backend_status"):
             status["fallback_chain_status"] = self._fallback_chain.get_backend_status()
 
         return status
@@ -796,25 +766,26 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
             "overall_healthy": False,
             "http_healthy": False,
             "fallback_healthy": False,
-            "errors": []
+            "errors": [],
         }
 
         # Check HTTP backend
-        if self._client:
+        if self._client is not None:
             try:
-                response = await self._client.get("/health", timeout=5.0)
+                assert self._client is not None
+            response = await self._client.get("/health", timeout=5.0)
                 health_status["http_healthy"] = response.status_code == 200
             except Exception as e:
                 health_status["errors"].append(f"HTTP health check failed: {e}")
 
         # Check fallback chain
-        if self._fallback_chain:
+        if self._fallback_chain is not None:
             try:
                 fallback_healthy = await self._fallback_chain.is_available()
                 health_status["fallback_healthy"] = fallback_healthy
 
                 # Get detailed fallback status
-                if hasattr(self._fallback_chain, 'health_check_all_backends'):
+                if hasattr(self._fallback_chain, "health_check_all_backends"):
                     await self._fallback_chain.health_check_all_backends()
             except Exception as e:
                 health_status["errors"].append(f"Fallback health check failed: {e}")
@@ -830,7 +801,8 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
         if use_http and self._client:
             # Try to switch to HTTP
             try:
-                response = await self._client.get("/health", timeout=2.0)
+                assert self._client is not None
+            response = await self._client.get("/health", timeout=2.0)
                 if response.status_code == 200:
                     self._use_http = True
                     logger.info("Forced switch to HTTP backend")
@@ -847,7 +819,9 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
         logger.error("Cannot switch backends - target backend unavailable")
         return False
 
-    async def sync_memories_between_backends(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
+    async def sync_memories_between_backends(
+        self, agent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Attempt to sync memories between available backends."""
         if not agent_id:
             agent_id = self.agent_id
@@ -856,12 +830,14 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
             "synced_count": 0,
             "errors": [],
             "source_backend": None,
-            "target_backend": None
+            "target_backend": None,
         }
 
         # Only sync if we have both backends available
         if not (self._client and self._fallback_chain):
-            sync_result["errors"].append("Both HTTP and fallback backends must be available for sync")
+            sync_result["errors"].append(
+                "Both HTTP and fallback backends must be available for sync"
+            )
             return sync_result
 
         try:
@@ -872,7 +848,9 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
                 sync_result["target_backend"] = "Fallback"
 
                 # Get memories from HTTP
-                memories_data = await self.recall_memories(limit=1000)  # Use existing method
+                memories_data = await self.recall_memories(
+                    limit=1000
+                )  # Use existing method
 
                 # Store in fallback (would need more complex conversion)
                 # This is a simplified version - full implementation would need proper conversion
@@ -884,8 +862,10 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
                 sync_result["target_backend"] = "HTTP"
 
                 # Get memories from fallback
-                if self._fallback_chain:
-                    memories = await self._fallback_chain.get_agent_memories(agent_id, limit=1000)
+                if self._fallback_chain is not None:
+                    memories = await self._fallback_chain.get_agent_memories(
+                        agent_id, limit=1000
+                    )
                     # Would need to convert and store in HTTP backend
                     sync_result["synced_count"] = len(memories)
 
@@ -903,7 +883,7 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
             "short_term_memories": 0,
             "long_term_memories": 0,
             "procedural_memories": 0,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
         try:
@@ -931,13 +911,14 @@ class EnhancedAgentMemoryInterface(AgentMemoryInterface):
 # Factory Functions for Enhanced Interface
 # ============================================================================
 
+
 def create_enhanced_memory_interface(
     agent_id: str,
     mcp_base_url: str = "http://localhost:8000",
     project_id: Optional[str] = None,
     task_id: Optional[str] = None,
     use_fallback: bool = True,
-    storage_path: str = ".memory"
+    storage_path: str = ".memory",
 ) -> EnhancedAgentMemoryInterface:
     """
     Create an enhanced memory interface with fallback support.
@@ -959,7 +940,7 @@ def create_enhanced_memory_interface(
         project_id=project_id,
         task_id=task_id,
         use_fallback=use_fallback,
-        storage_path=storage_path
+        storage_path=storage_path,
     )
 
 
@@ -967,7 +948,7 @@ def create_fallback_only_interface(
     agent_id: str,
     project_id: Optional[str] = None,
     task_id: Optional[str] = None,
-    storage_path: str = ".memory"
+    storage_path: str = ".memory",
 ) -> EnhancedAgentMemoryInterface:
     """
     Create a memory interface that only uses fallback backends (offline mode).
@@ -987,7 +968,7 @@ def create_fallback_only_interface(
         project_id=project_id,
         task_id=task_id,
         use_fallback=True,
-        storage_path=storage_path
+        storage_path=storage_path,
     )
 
     # Force fallback mode

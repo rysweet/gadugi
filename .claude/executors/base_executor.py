@@ -46,7 +46,9 @@ class BaseExecutor(ABC):
         """
         pass
 
-    def validate_params(self, params: Dict[str, Any], required: List[str]) -> Dict[str, Any]:
+    def validate_params(
+        self, params: Dict[str, Any], required: List[str]
+    ) -> Dict[str, Any]:
         """Validate that required parameters are present.
 
         Args:
@@ -60,11 +62,11 @@ class BaseExecutor(ABC):
 
         if missing:
             return {
-                'success': False,
-                'error': f'Missing required parameters: {", ".join(missing)}'
+                "success": False,
+                "error": f'Missing required parameters: {", ".join(missing)}',
             }
 
-        return {'success': True}
+        return {"success": True}
 
     def log_operation(self, operation: str, details: Dict[str, Any] = None):  # type: ignore[assignment]
         """Log an operation for audit purposes.
@@ -74,10 +76,10 @@ class BaseExecutor(ABC):
             details: Additional details about the operation
         """
         log_entry = {
-            'timestamp': datetime.now().isoformat(),
-            'executor': self.name,
-            'operation': operation,
-            'details': details or {}
+            "timestamp": datetime.now().isoformat(),
+            "executor": self.name,
+            "operation": operation,
+            "details": details or {},
         }
         self.operations_log.append(log_entry)
 
@@ -98,7 +100,7 @@ class BaseExecutor(ABC):
         Returns:
             Success response dictionary
         """
-        response = {'success': True, 'executor': self.name}
+        response = {"success": True, "executor": self.name}
         response.update(kwargs)
         return response
 
@@ -112,11 +114,7 @@ class BaseExecutor(ABC):
         Returns:
             Error response dictionary
         """
-        response = {
-            'success': False,
-            'executor': self.name,
-            'error': error
-        }
+        response = {"success": False, "executor": self.name, "error": error}
         response.update(kwargs)
         return response
 
@@ -157,7 +155,9 @@ class ExecutorRegistry:
             KeyError: If executor not found
         """
         if name not in self._executors:
-            raise KeyError(f"Executor '{name}' not found. Available: {list(self._executors.keys())}")
+            raise KeyError(
+                f"Executor '{name}' not found. Available: {list(self._executors.keys())}"
+            )
 
         return self._executors[name]()
 

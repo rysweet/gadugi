@@ -138,7 +138,7 @@ async def convert_openai_streaming_to_claude(
                                     "args_buffer": "",
                                     "json_sent": False,
                                     "claude_index": None,
-                                    "started": False
+                                    "started": False,
                                 }
 
                             tool_call = current_tool_calls[tc_index]
@@ -153,7 +153,11 @@ async def convert_openai_streaming_to_claude(
                                 tool_call["name"] = function_data["name"]
 
                             # Start content block when we have complete initial data
-                            if (tool_call["id"] and tool_call["name"] and not tool_call["started"]):
+                            if (
+                                tool_call["id"]
+                                and tool_call["name"]
+                                and not tool_call["started"]
+                            ):
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
@@ -162,7 +166,11 @@ async def convert_openai_streaming_to_claude(
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': claude_index, 'content_block': {'type': Constants.CONTENT_TOOL_USE, 'id': tool_call['id'], 'name': tool_call['name'], 'input': {}}}, ensure_ascii=False)}\n\n"
 
                             # Handle function arguments
-                            if "arguments" in function_data and tool_call["started"] and function_data["arguments"] is not None:
+                            if (
+                                "arguments" in function_data
+                                and tool_call["started"]
+                                and function_data["arguments"] is not None
+                            ):
                                 tool_call["args_buffer"] += function_data["arguments"]
 
                                 # Try to parse complete JSON and send delta when we have valid JSON
@@ -259,13 +267,17 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                         usage = chunk.get("usage", None)
                         if usage:
                             cache_read_input_tokens = 0
-                            prompt_tokens_details = usage.get('prompt_tokens_details', {})
+                            prompt_tokens_details = usage.get(
+                                "prompt_tokens_details", {}
+                            )
                             if prompt_tokens_details:
-                                cache_read_input_tokens = prompt_tokens_details.get('cached_tokens', 0)
+                                cache_read_input_tokens = prompt_tokens_details.get(
+                                    "cached_tokens", 0
+                                )
                             usage_data = {
-                                'input_tokens': usage.get('prompt_tokens', 0),
-                                'output_tokens': usage.get('completion_tokens', 0),
-                                'cache_read_input_tokens': cache_read_input_tokens
+                                "input_tokens": usage.get("prompt_tokens", 0),
+                                "output_tokens": usage.get("completion_tokens", 0),
+                                "cache_read_input_tokens": cache_read_input_tokens,
                             }
                         choices = chunk.get("choices", [])
                         if not choices:
@@ -297,7 +309,7 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                                     "args_buffer": "",
                                     "json_sent": False,
                                     "claude_index": None,
-                                    "started": False
+                                    "started": False,
                                 }
 
                             tool_call = current_tool_calls[tc_index]
@@ -312,7 +324,11 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                                 tool_call["name"] = function_data["name"]
 
                             # Start content block when we have complete initial data
-                            if (tool_call["id"] and tool_call["name"] and not tool_call["started"]):
+                            if (
+                                tool_call["id"]
+                                and tool_call["name"]
+                                and not tool_call["started"]
+                            ):
                                 tool_block_counter += 1
                                 claude_index = text_block_index + tool_block_counter
                                 tool_call["claude_index"] = claude_index
@@ -321,7 +337,11 @@ async def convert_openai_streaming_to_claude_with_cancellation(
                                 yield f"event: {Constants.EVENT_CONTENT_BLOCK_START}\ndata: {json.dumps({'type': Constants.EVENT_CONTENT_BLOCK_START, 'index': claude_index, 'content_block': {'type': Constants.CONTENT_TOOL_USE, 'id': tool_call['id'], 'name': tool_call['name'], 'input': {}}}, ensure_ascii=False)}\n\n"
 
                             # Handle function arguments
-                            if "arguments" in function_data and tool_call["started"] and function_data["arguments"] is not None:
+                            if (
+                                "arguments" in function_data
+                                and tool_call["started"]
+                                and function_data["arguments"] is not None
+                            ):
                                 tool_call["args_buffer"] += function_data["arguments"]
 
                                 # Try to parse complete JSON and send delta when we have valid JSON

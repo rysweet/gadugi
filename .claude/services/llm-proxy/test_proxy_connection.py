@@ -2,12 +2,12 @@
 """Test that the LLM Proxy is working and proxying to Azure OpenAI."""
 
 import asyncio
-import json
 import sys
 from pathlib import Path
 
 # Add parent directories to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
+
 
 async def test_proxy_connection():
     """Test connection through the LLM Proxy service."""
@@ -24,14 +24,17 @@ async def test_proxy_connection():
         request = create_chat_request(
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": "Say 'Azure OpenAI via Proxy is working!' in exactly 6 words."}
+                {
+                    "role": "user",
+                    "content": "Say 'Azure OpenAI via Proxy is working!' in exactly 6 words.",
+                },
             ],
             model="gpt-4.1",  # Using the Azure deployment name
             max_tokens=20,
-            temperature=0
+            temperature=0,
         )
 
-        print(f"\n📤 Sending request to proxy at localhost:8080")
+        print("\n📤 Sending request to proxy at localhost:8080")
         print(f"   Model: {request.model}")
         print(f"   Request ID: {request.id}")
 
@@ -40,22 +43,28 @@ async def test_proxy_connection():
             # Convert request to dict for JSON serialization
             request_data = {
                 "id": request.id,
-                "type": request.type.value if hasattr(request.type, 'value') else str(request.type),
+                "type": request.type.value
+                if hasattr(request.type, "value")
+                else str(request.type),
                 "model": request.model,
                 "messages": request.messages,
                 "max_tokens": request.max_tokens,
                 "temperature": request.temperature,
-                "stream": False
+                "stream": False,
             }
 
             async with session.post(
                 "http://localhost:8080/v1/chat/completions",
                 json=request_data,
-                headers={"Content-Type": "application/json"}
+                headers={"Content-Type": "application/json"},
             ) as response:
                 if response.status == 200:
                     result = await response.json()
-                    content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+                    content = (
+                        result.get("choices", [{}])[0]
+                        .get("message", {})
+                        .get("content", "")
+                    )
                     print(f"\n✅ Response received: {content}")
                     print("\n🎉 Proxy is successfully routing to Azure OpenAI!")
                     return True
@@ -80,8 +89,10 @@ async def test_proxy_connection():
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 async def test_direct_service_call():
     """Test calling the service directly (not through HTTP)."""
@@ -92,7 +103,7 @@ async def test_direct_service_call():
 
     try:
         # Import proxy service components
-        from llm_proxy_service import LLMProxyService, create_chat_request
+        from llm_proxy_service import create_chat_request
 
         # The service should already be initialized if started correctly
         # But we'll create a test instance to verify the logic
@@ -100,14 +111,12 @@ async def test_direct_service_call():
 
         # Create request
         request = create_chat_request(
-            messages=[
-                {"role": "user", "content": "Test message"}
-            ],
+            messages=[{"role": "user", "content": "Test message"}],
             model="gpt-4.1",
-            max_tokens=10
+            max_tokens=10,
         )
 
-        print(f"✅ Request created successfully")
+        print("✅ Request created successfully")
         print(f"   Model: {request.model}")
         print(f"   Type: {request.type}")
 
@@ -120,6 +129,7 @@ async def test_direct_service_call():
         print(f"❌ Error: {e}")
         return False
 
+
 async def check_proxy_logs():
     """Check the proxy logs for activity."""
 
@@ -130,7 +140,9 @@ async def check_proxy_logs():
     log_dir = Path(__file__).parent / "logs"
 
     # Find the most recent log file
-    log_files = sorted(log_dir.glob("proxy_*.log"), key=lambda x: x.stat().st_mtime, reverse=True)
+    log_files = sorted(
+        log_dir.glob("proxy_*.log"), key=lambda x: x.stat().st_mtime, reverse=True
+    )
 
     if log_files:
         latest_log = log_files[0]
@@ -146,6 +158,7 @@ async def check_proxy_logs():
             print(f"  {line.strip()}")
     else:
         print("No log files found")
+
 
 async def main():
     """Run all tests."""
@@ -170,7 +183,10 @@ async def main():
     if not proxy_success:
         print("\nℹ️  Note: The LLM Proxy service appears to be running but might not")
         print("   expose an HTTP endpoint. The service might be designed to be")
-        print("   imported and used directly in Python code rather than as an HTTP proxy.")
+        print(
+            "   imported and used directly in Python code rather than as an HTTP proxy."
+        )
+
 
 if __name__ == "__main__":
     asyncio.run(main())

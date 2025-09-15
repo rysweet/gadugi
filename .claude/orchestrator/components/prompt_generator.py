@@ -7,7 +7,6 @@ This component addresses the critical issue where WorkflowManagers were receivin
 generic prompts instead of implementation-specific instructions.
 """
 
-import tempfile  # type: ignore
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -16,6 +15,7 @@ from typing import Dict, List, Optional
 @dataclass
 class PromptContext:
     """Context information for prompt generation"""
+
     task_id: str
     task_name: str
     original_prompt: str
@@ -30,16 +30,16 @@ class PromptGenerator:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root).resolve()
-        self.templates_dir = self.project_root / ".claude" / "orchestrator" / "templates"
+        self.templates_dir = (
+            self.project_root / ".claude" / "orchestrator" / "templates"
+        )
         self.templates_dir.mkdir(parents=True, exist_ok=True)
 
         # Initialize default templates if they don't exist
         self._create_default_templates()
 
     def generate_workflow_prompt(
-        self,
-        context: PromptContext,
-        worktree_path: Path
+        self, context: PromptContext, worktree_path: Path
     ) -> str:
         """Generate a complete workflow prompt for WorkflowManager execution"""
 
@@ -49,7 +49,7 @@ class PromptGenerator:
         prompt_file = worktree_path / "prompts" / f"{context.task_id}-workflow.md"
         prompt_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(prompt_file, 'w') as f:
+        with open(prompt_file, "w") as f:
             f.write(prompt_content)
 
         print(f"📝 Generated workflow prompt: {prompt_file}")
@@ -138,7 +138,7 @@ class PromptGenerator:
                 full_path = self.project_root / "prompts" / prompt_path
 
             if full_path.exists():
-                with open(full_path, 'r') as f:
+                with open(full_path, "r") as f:
                     return f.read()
             else:
                 return f"ERROR: Could not find prompt file: {prompt_path}"
@@ -152,25 +152,27 @@ class PromptGenerator:
         current_section = None
         current_content = []
 
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         for line in lines:
             # Check for major section headers
-            if line.startswith('## '):
+            if line.startswith("## "):
                 # Save previous section
                 if current_section:
-                    sections[current_section] = '\n'.join(current_content).strip()
+                    sections[current_section] = "\n".join(current_content).strip()
 
                 # New section
                 header = line[3:].lower().strip()
-                if 'requirement' in header:
-                    current_section = 'requirements'
-                elif 'technical' in header or 'analysis' in header:
-                    current_section = 'technical_analysis'
-                elif 'implementation' in header and ('plan' in header or 'step' in header):
-                    current_section = 'implementation_plan'
-                elif 'success' in header or 'criteria' in header:
-                    current_section = 'success_criteria'
+                if "requirement" in header:
+                    current_section = "requirements"
+                elif "technical" in header or "analysis" in header:
+                    current_section = "technical_analysis"
+                elif "implementation" in header and (
+                    "plan" in header or "step" in header
+                ):
+                    current_section = "implementation_plan"
+                elif "success" in header or "criteria" in header:
+                    current_section = "success_criteria"
                 else:
                     current_section = None
 
@@ -181,7 +183,7 @@ class PromptGenerator:
 
         # Save final section
         if current_section:
-            sections[current_section] = '\n'.join(current_content).strip()
+            sections[current_section] = "\n".join(current_content).strip()
 
         return sections
 
@@ -232,27 +234,24 @@ This template is used by PromptGenerator to create context-aware prompts
 for WorkflowManager execution in parallel worktree environments.
 """
 
-            with open(template_file, 'w') as f:
+            with open(template_file, "w") as f:
                 f.write(template_content)
 
             print(f"📄 Created default template: {template_file}")
 
     def create_context_from_task(
-        self,
-        task: Dict,
-        original_prompt_path: str,
-        phase_focus: Optional[str] = None
+        self, task: Dict, original_prompt_path: str, phase_focus: Optional[str] = None
     ) -> PromptContext:
         """Create PromptContext from task definition"""
 
         return PromptContext(
-            task_id=task.get('id', 'unknown'),
-            task_name=task.get('name', task.get('id', 'Unknown Task')),
+            task_id=task.get("id", "unknown"),
+            task_name=task.get("name", task.get("id", "Unknown Task")),
             original_prompt=original_prompt_path,
             phase_focus=phase_focus,
-            dependencies=task.get('dependencies', []),
-            target_files=task.get('target_files', []),
-            implementation_requirements=task.get('requirements', {})
+            dependencies=task.get("dependencies", []),
+            target_files=task.get("target_files", []),
+            implementation_requirements=task.get("requirements", {}),
         )
 
     def validate_prompt_content(self, prompt_path: str) -> List[str]:
@@ -260,14 +259,14 @@ for WorkflowManager execution in parallel worktree environments.
         issues = []
 
         try:
-            with open(prompt_path, 'r') as f:
+            with open(prompt_path, "r") as f:
                 content = f.read()
 
             required_sections = [
-                'Task Information',
-                'Implementation Requirements',
-                'Execution Instructions',
-                'Original Prompt Content'
+                "Task Information",
+                "Implementation Requirements",
+                "Execution Instructions",
+                "Original Prompt Content",
             ]
 
             for section in required_sections:
@@ -275,10 +274,10 @@ for WorkflowManager execution in parallel worktree environments.
                     issues.append(f"Missing required section: {section}")
 
             # Check for critical instructions
-            if 'CREATE ACTUAL FILES' not in content:
+            if "CREATE ACTUAL FILES" not in content:
                 issues.append("Missing critical file creation instruction")
 
-            if 'WorkflowManager workflow' not in content:
+            if "WorkflowManager workflow" not in content:
                 issues.append("Missing WorkflowManager workflow instruction")
 
         except Exception as e:
@@ -294,10 +293,14 @@ def main():
     parser = argparse.ArgumentParser(description="Generate WorkflowManager prompts")
     parser.add_argument("--task-id", required=True, help="Task ID")
     parser.add_argument("--task-name", required=True, help="Task name")
-    parser.add_argument("--original-prompt", required=True, help="Original prompt file path")
+    parser.add_argument(
+        "--original-prompt", required=True, help="Original prompt file path"
+    )
     parser.add_argument("--worktree-path", required=True, help="Target worktree path")
     parser.add_argument("--phase-focus", help="Specific phase to focus on")
-    parser.add_argument("--validate", action="store_true", help="Validate generated prompt")
+    parser.add_argument(
+        "--validate", action="store_true", help="Validate generated prompt"
+    )
 
     args = parser.parse_args()
 
@@ -307,14 +310,13 @@ def main():
         task_id=args.task_id,
         task_name=args.task_name,
         original_prompt=args.original_prompt,
-        phase_focus=args.phase_focus
+        phase_focus=args.phase_focus,
     )
 
     try:
         # Generate prompt
         prompt_file = generator.generate_workflow_prompt(
-            context,
-            Path(args.worktree_path)
+            context, Path(args.worktree_path)
         )
 
         print(f"✅ Generated prompt: {prompt_file}")

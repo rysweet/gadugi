@@ -326,13 +326,11 @@ class TeamCoachIntegration:
         self, optimization: WorkflowOptimization, workflow_state
     ) -> bool:
         """Apply optimization recommendation to workflow."""
-        try:  # type: ignore
-                optimization_record = None
-                optimization_record = None
-            logger.info(f"Applying optimization: {optimization.strategy.value}")  # type: ignore
+        try:
+            logger.info(f"Applying optimization: {optimization.strategy.value}")
 
             # Record optimization attempt
-            optimization_record = {  # type: ignore
+            optimization_record = {
                 "timestamp": datetime.now(),
                 "optimization": asdict(optimization),
                 "workflow_id": workflow_state.task_id,
@@ -360,11 +358,18 @@ class TeamCoachIntegration:
             )
             return True
 
-        except Exception as e:  # type: ignore
-            logger.error(  # type: ignore
+        except Exception as e:
+            logger.error(
                 f"Failed to apply optimization {optimization.strategy.value}: {e}"
             )
-            optimization_record["result"] = f"failed: {e}"
+            # Create a failed optimization record
+            optimization_record = {
+                "timestamp": datetime.now(),
+                "optimization": asdict(optimization),
+                "workflow_id": workflow_state.task_id,
+                "applied": False,
+                "result": f"failed: {e}",
+            }
             self.optimization_history.append(optimization_record)
             return False
 

@@ -8,9 +8,22 @@ from enum import Enum
 from collections import defaultdict, deque
 
 # Import shared modules
-from ...shared.task_tracking import TaskMetrics  # type: ignore
-from ...shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
-from ...shared.state_management import StateManager  # type: ignore
+try:
+    from shared.task_tracking import TaskMetrics  # type: ignore
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
+except ImportError:
+    # Fallback to relative imports if needed
+    import sys
+    import os
+
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    )
+    sys.path.insert(0, base_dir)
+    from shared.task_tracking import TaskMetrics  # type: ignore
+    from shared.utils.error_handling import ErrorHandler, CircuitBreaker  # type: ignore
+    from shared.state_management import StateManager  # type: ignore
 
 """
 TeamCoach Phase 1: Metrics Collection Infrastructure
@@ -246,7 +259,7 @@ class MetricsCollector:
                 f"Failed to register metric {metric_definition.name}: {e}"
             )
 
-    @ErrorHandler.with_circuit_breaker
+    @CircuitBreaker()
     def collect_metric(
         self,
         metric_name: str,
@@ -644,7 +657,9 @@ class MetricsCollector:
                     self.logger.error(
                         f"Error in collection worker for {source.value}: {e}"
                     )
-                    self.stop_collection.wait(60)  # Wait 1 minute on error  # type: ignore[attr-defined]
+                    self.stop_collection.wait(
+                        60
+                    )  # Wait 1 minute on error  # type: ignore[attr-defined]
 
         except Exception as e:
             self.logger.error(f"Collection worker {source.value} failed: {e}")

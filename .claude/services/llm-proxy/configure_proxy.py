@@ -13,6 +13,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import getpass
 
+
 class LLMProxyConfigurator:
     """Interactive configuration wizard for LLM Proxy Service."""
 
@@ -22,36 +23,37 @@ class LLMProxyConfigurator:
             "env_prefix": "AZURE_OPENAI",
             "required_fields": [
                 ("api_key", "Azure OpenAI API Key", True, None),
-                ("endpoint", "Azure Endpoint (e.g., https://YOUR-RESOURCE.openai.azure.com/)", False, None),
+                (
+                    "endpoint",
+                    "Azure Endpoint (e.g., https://YOUR-RESOURCE.openai.azure.com/)",
+                    False,
+                    None,
+                ),
                 ("api_version", "API Version", False, "2024-02-15-preview"),
-                ("deployment_name", "Deployment Name", False, None)
+                ("deployment_name", "Deployment Name", False, None),
             ],
-            "models": ["gpt-4", "gpt-3.5-turbo"]
+            "models": ["gpt-4", "gpt-3.5-turbo"],
         },
         "openai": {
             "name": "OpenAI",
             "env_prefix": "OPENAI",
             "required_fields": [
                 ("api_key", "OpenAI API Key", True, None),
-                ("org_id", "Organization ID (optional)", False, "")
+                ("org_id", "Organization ID (optional)", False, ""),
             ],
-            "models": ["gpt-4", "gpt-3.5-turbo", "gpt-4-turbo"]
+            "models": ["gpt-4", "gpt-3.5-turbo", "gpt-4-turbo"],
         },
         "anthropic": {
             "name": "Anthropic Claude",
             "env_prefix": "ANTHROPIC",
-            "required_fields": [
-                ("api_key", "Anthropic API Key", True, None)
-            ],
-            "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]
+            "required_fields": [("api_key", "Anthropic API Key", True, None)],
+            "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"],
         },
         "google": {
             "name": "Google Gemini",
             "env_prefix": "GOOGLE",
-            "required_fields": [
-                ("api_key", "Google AI API Key", True, None)
-            ],
-            "models": ["gemini-pro", "gemini-pro-vision"]
+            "required_fields": [("api_key", "Google AI API Key", True, None)],
+            "models": ["gemini-pro", "gemini-pro-vision"],
         },
         "ollama": {
             "name": "Ollama (Local)",
@@ -59,8 +61,8 @@ class LLMProxyConfigurator:
             "required_fields": [
                 ("host", "Ollama Host URL", False, "http://localhost:11434")
             ],
-            "models": ["llama2", "mistral", "codellama"]
-        }
+            "models": ["llama2", "mistral", "codellama"],
+        },
     }
 
     def __init__(self):
@@ -99,7 +101,9 @@ class LLMProxyConfigurator:
         # Offer to start service
         if self.ask_yes_no("\nWould you like to start the LLM Proxy service now?"):
             # Ask about scheduling
-            if self.ask_yes_no("\nWould you like to schedule automatic shutdown?", default=False):
+            if self.ask_yes_no(
+                "\nWould you like to schedule automatic shutdown?", default=False
+            ):
                 self.start_service_with_schedule()
             else:
                 self.start_service()
@@ -108,9 +112,9 @@ class LLMProxyConfigurator:
 
     def print_header(self):
         """Print wizard header."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🤖 LLM Proxy Configuration Wizard")
-        print("="*60)
+        print("=" * 60)
         print("\nThis wizard will help you configure LLM providers for the")
         print("proxy service and set up background logging.\n")
 
@@ -130,9 +134,9 @@ class LLMProxyConfigurator:
         while True:
             try:
                 choice = input("\n➤ Select provider (number): ").strip().lower()
-                if choice == 'q':
+                if choice == "q":
                     return None
-                if choice == '0':
+                if choice == "0":
                     return self.configure_multiple_providers()
 
                 idx = int(choice) - 1
@@ -145,7 +149,9 @@ class LLMProxyConfigurator:
     def configure_multiple_providers(self) -> Optional[str]:
         """Configure multiple providers."""
         print("\n🔄 Multiple Provider Configuration")
-        print("Configure providers one by one. The service will load balance between them.")
+        print(
+            "Configure providers one by one. The service will load balance between them."
+        )
 
         configured = []
         while True:
@@ -162,7 +168,9 @@ class LLMProxyConfigurator:
                 break
 
         if configured:
-            print(f"\n✅ Configured {len(configured)} providers: {', '.join(configured)}")
+            print(
+                f"\n✅ Configured {len(configured)} providers: {', '.join(configured)}"
+            )
             return "multiple"
         return None
 
@@ -175,8 +183,8 @@ class LLMProxyConfigurator:
 
         config = {
             "provider": provider,
-            "name": provider_info['name'],
-            "timestamp": datetime.now().isoformat()
+            "name": provider_info["name"],
+            "timestamp": datetime.now().isoformat(),
         }
         env_vars = {}
 
@@ -196,7 +204,7 @@ class LLMProxyConfigurator:
                 else:
                     use_existing = self.ask_yes_no(
                         f"{prompt}\n  Current value: {existing_value}\n  Use this value?",
-                        default=True
+                        default=True,
                     )
                     if use_existing:
                         value = existing_value
@@ -224,8 +232,10 @@ class LLMProxyConfigurator:
         # Model selection
         if provider_info.get("models"):
             print(f"\n🎯 Available models: {', '.join(provider_info['models'])}")
-            selected_model = input(f"  Primary model [{provider_info['models'][0]}]: ").strip()
-            config["primary_model"] = selected_model or provider_info['models'][0]
+            selected_model = input(
+                f"  Primary model [{provider_info['models'][0]}]: "
+            ).strip()
+            config["primary_model"] = selected_model or provider_info["models"][0]
 
         config["env_vars"] = env_vars
         return config
@@ -257,7 +267,7 @@ class LLMProxyConfigurator:
         config_file = self.config_dir / f"{provider}.json"
         env_vars = config.pop("env_vars", {})
 
-        with open(config_file, 'w') as f:
+        with open(config_file, "w") as f:
             json.dump(config, f, indent=2)
         print(f"\n✅ Configuration saved to: {config_file.relative_to(Path.cwd())}")
 
@@ -273,8 +283,8 @@ class LLMProxyConfigurator:
             with open(self.env_file) as f:
                 for line in f:
                     line = line.strip()
-                    if line and not line.startswith('#') and '=' in line:
-                        key, value = line.split('=', 1)
+                    if line and not line.startswith("#") and "=" in line:
+                        key, value = line.split("=", 1)
                         existing[key] = value
 
         # Update with new values
@@ -286,7 +296,7 @@ class LLMProxyConfigurator:
             "LLM_PROXY_LOG_LEVEL": "INFO",
             "LLM_PROXY_CACHE_SIZE": "1000",
             "LLM_PROXY_CACHE_TTL": "3600",
-            "LLM_PROXY_MAX_WORKERS": "10"
+            "LLM_PROXY_MAX_WORKERS": "10",
         }
 
         for key, value in defaults.items():
@@ -298,14 +308,17 @@ class LLMProxyConfigurator:
         existing["LLM_PROXY_LOG_FILE"] = str(log_file)
 
         # Write back
-        with open(self.env_file, 'w') as f:
+        with open(self.env_file, "w") as f:
             f.write("# LLM Proxy Service Configuration\n")
             f.write(f"# Generated: {datetime.now().isoformat()}\n\n")
 
             # Provider settings
             f.write("# Provider API Keys and Settings\n")
             for key in sorted(existing.keys()):
-                if any(prefix in key for prefix in ["AZURE", "OPENAI", "ANTHROPIC", "GOOGLE", "OLLAMA"]):
+                if any(
+                    prefix in key
+                    for prefix in ["AZURE", "OPENAI", "ANTHROPIC", "GOOGLE", "OLLAMA"]
+                ):
                     # Mask API keys in comments
                     if "API_KEY" in key:
                         f.write(f"# {key}=<configured>\n")
@@ -363,7 +376,7 @@ async def test():
 asyncio.run(test())
 """
 
-        with open(test_script, 'w') as f:
+        with open(test_script, "w") as f:
             f.write(test_code)
 
         try:
@@ -371,7 +384,7 @@ asyncio.run(test())
                 [sys.executable, str(test_script)],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
             success = result.returncode == 0
             if success:
@@ -419,14 +432,14 @@ asyncio.run(test())
 
     def get_shutdown_time_today(self):
         """Get shutdown time for today."""
-        from datetime import datetime, time
+        from datetime import datetime
 
         print("\n📅 Enter shutdown time for today")
         time_str = input("Time (e.g., 19:00 or 7:00 PM): ").strip()
 
         try:
             # Try parsing different formats
-            for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H:%M:%S']:
+            for fmt in ["%H:%M", "%I:%M %p", "%I:%M%p", "%H:%M:%S"]:
                 try:
                     parsed_time = datetime.strptime(time_str, fmt).time()
                     shutdown_dt = datetime.combine(datetime.now().date(), parsed_time)
@@ -434,7 +447,9 @@ asyncio.run(test())
                     # Check if time is in the future
                     if shutdown_dt > datetime.now():
                         duration = (shutdown_dt - datetime.now()).total_seconds()
-                        print(f"✅ Service will run until {shutdown_dt.strftime('%I:%M %p')} ({self.format_duration(duration)})")
+                        print(
+                            f"✅ Service will run until {shutdown_dt.strftime('%I:%M %p')} ({self.format_duration(duration)})"
+                        )
                         return shutdown_dt
                     else:
                         print("❌ Time must be in the future.")
@@ -460,17 +475,18 @@ asyncio.run(test())
         try:
             # Parse duration string
             import re
+
             total_seconds = 0
 
             # Match patterns like 2h, 30m, 45s
             patterns = {
-                'h': 3600,  # hours
-                'm': 60,    # minutes
-                's': 1      # seconds
+                "h": 3600,  # hours
+                "m": 60,  # minutes
+                "s": 1,  # seconds
             }
 
             for unit, multiplier in patterns.items():
-                match = re.search(rf'(\d+){unit}', duration_str)
+                match = re.search(rf"(\d+){unit}", duration_str)
                 if match:
                     total_seconds += int(match.group(1)) * multiplier
 
@@ -483,7 +499,9 @@ asyncio.run(test())
                     return None
 
             shutdown_dt = datetime.now() + timedelta(seconds=total_seconds)
-            print(f"✅ Service will run for {self.format_duration(total_seconds)} until {shutdown_dt.strftime('%I:%M %p')}")
+            print(
+                f"✅ Service will run for {self.format_duration(total_seconds)} until {shutdown_dt.strftime('%I:%M %p')}"
+            )
             return shutdown_dt
 
         except Exception as e:
@@ -499,14 +517,16 @@ asyncio.run(test())
 
         try:
             # Try parsing different formats
-            for fmt in ['%H:%M', '%I:%M %p', '%I:%M%p', '%H:%M:%S']:
+            for fmt in ["%H:%M", "%I:%M %p", "%I:%M%p", "%H:%M:%S"]:
                 try:
                     parsed_time = datetime.strptime(time_str, fmt).time()
                     tomorrow = datetime.now().date() + timedelta(days=1)
                     shutdown_dt = datetime.combine(tomorrow, parsed_time)
 
                     duration = (shutdown_dt - datetime.now()).total_seconds()
-                    print(f"✅ Service will run until tomorrow {shutdown_dt.strftime('%I:%M %p')} ({self.format_duration(duration)})")
+                    print(
+                        f"✅ Service will run until tomorrow {shutdown_dt.strftime('%I:%M %p')} ({self.format_duration(duration)})"
+                    )
                     return shutdown_dt
 
                 except ValueError:
@@ -542,7 +562,7 @@ asyncio.run(test())
             self.create_launch_script(launch_script)
 
         # Create unique log file for this session
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_file = self.log_dir / f"llm_proxy_{timestamp}.log"
 
         # Prepare environment with shutdown time if scheduled
@@ -554,10 +574,10 @@ asyncio.run(test())
         try:
             process = subprocess.Popen(
                 [sys.executable, str(launch_script)],
-                stdout=open(log_file, 'w'),
+                stdout=open(log_file, "w"),
                 stderr=subprocess.STDOUT,
                 start_new_session=True,
-                env=env
+                env=env,
             )
 
             # Save PID
@@ -566,10 +586,13 @@ asyncio.run(test())
 
             # If scheduled shutdown, also create a scheduler process
             if scheduled_shutdown:
-                self.create_shutdown_scheduler(process.pid, scheduled_shutdown, log_file)
+                self.create_shutdown_scheduler(
+                    process.pid, scheduled_shutdown, log_file
+                )
 
             # Wait a moment to check if it started successfully
             import time
+
             time.sleep(2)
 
             if process.poll() is None:
@@ -582,7 +605,9 @@ asyncio.run(test())
         except Exception as e:
             print(f"\n❌ Failed to start service: {e}")
 
-    def create_shutdown_scheduler(self, service_pid: int, shutdown_time, log_file: Path):
+    def create_shutdown_scheduler(
+        self, service_pid: int, shutdown_time, log_file: Path
+    ):
         """Create a background scheduler to shutdown the service at specified time."""
         scheduler_script = self.base_dir / f"scheduler_{service_pid}.py"
 
@@ -640,7 +665,7 @@ if __name__ == "__main__":
     main()
 '''
 
-        with open(scheduler_script, 'w') as f:
+        with open(scheduler_script, "w") as f:
             f.write(script_content)
         scheduler_script.chmod(0o755)
 
@@ -649,7 +674,7 @@ if __name__ == "__main__":
             [sys.executable, str(scheduler_script)],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
-            start_new_session=True
+            start_new_session=True,
         )
 
         # Save scheduler info
@@ -766,36 +791,39 @@ if __name__ == "__main__":
     asyncio.run(main())
 '''
 
-        with open(launch_script, 'w') as f:
+        with open(launch_script, "w") as f:
             f.write(script_content)
         launch_script.chmod(0o755)
 
     def print_success_message(self, pid: int, log_file: Path, scheduled_shutdown=None):
         """Print success message with monitoring instructions."""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ LLM Proxy Service Started Successfully!")
-        print("="*60)
+        print("=" * 60)
 
-        print(f"\n📌 Service Information:")
+        print("\n📌 Service Information:")
         print(f"   PID: {pid}")
-        print(f"   Status: Running")
+        print("   Status: Running")
         print(f"   Port: {os.getenv('LLM_PROXY_PORT', '8080')}")
 
         if scheduled_shutdown:
             from datetime import datetime
+
             remaining = (scheduled_shutdown - datetime.now()).total_seconds()
-            print(f"\n⏰ Scheduled Shutdown:")
+            print("\n⏰ Scheduled Shutdown:")
             print(f"   Time: {scheduled_shutdown.strftime('%I:%M %p on %B %d')}")
             print(f"   Duration: {self.format_duration(remaining)}")
-            print(f"   🔴 Service will automatically stop at {scheduled_shutdown.strftime('%I:%M %p')}")
+            print(
+                f"   🔴 Service will automatically stop at {scheduled_shutdown.strftime('%I:%M %p')}"
+            )
 
-        print(f"\n📁 Log File Location:")
+        print("\n📁 Log File Location:")
         print(f"   {log_file}")
 
-        print(f"\n📊 To monitor logs in real-time, copy and run this command:")
+        print("\n📊 To monitor logs in real-time, copy and run this command:")
         print(f"   tail -f {log_file}")
 
-        print(f"\n🔍 Service Management Commands:")
+        print("\n🔍 Service Management Commands:")
         print(f"   Check status:  ps -p {pid}")
         print(f"   View logs:     tail -n 50 {log_file}")
 
@@ -813,7 +841,7 @@ if __name__ == "__main__":
         else:
             print("\n💡 The service is now running in the background and will")
             print("   continue even after you close this terminal.")
-        print("="*60)
+        print("=" * 60)
 
     def show_manual_start_instructions(self):
         """Show instructions for manually starting the service."""
@@ -829,9 +857,9 @@ if __name__ == "__main__":
             response = input(f"{prompt} [{default_str}]: ").strip().lower()
             if not response:
                 return default
-            if response in ['y', 'yes']:
+            if response in ["y", "yes"]:
                 return True
-            if response in ['n', 'no']:
+            if response in ["n", "no"]:
                 return False
             print("Please answer 'y' or 'n'")
 
@@ -844,8 +872,9 @@ def main():
             import dotenv
         except ImportError:
             print("Installing required dependency: python-dotenv")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "python-dotenv"])
-            import dotenv
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", "python-dotenv"]
+            )
 
         configurator = LLMProxyConfigurator()
         configurator.run()
@@ -854,6 +883,7 @@ def main():
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
         import traceback
+
         traceback.print_exc()
 
 

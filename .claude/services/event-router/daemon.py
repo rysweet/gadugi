@@ -15,11 +15,12 @@ SERVICE_DIR = Path(__file__).parent
 PID_FILE = SERVICE_DIR / "logs" / "event-router.pid"
 LOG_FILE = SERVICE_DIR / "logs" / "event-router.log"
 
+
 def get_pid():
     """Get PID of running service if any."""
     if PID_FILE.exists():
         try:
-            with open(PID_FILE, 'r') as f:
+            with open(PID_FILE, "r") as f:
                 pid = int(f.read().strip())
             # Check if process is still running
             os.kill(pid, 0)
@@ -28,6 +29,7 @@ def get_pid():
             # Process no longer exists or invalid PID
             PID_FILE.unlink(missing_ok=True)
     return None
+
 
 def start_service():
     """Start the Event Router service."""
@@ -41,17 +43,17 @@ def start_service():
     os.makedirs(SERVICE_DIR / "logs", exist_ok=True)
 
     # Start the service
-    with open(LOG_FILE, 'w') as log:
+    with open(LOG_FILE, "w") as log:
         process = subprocess.Popen(
             [sys.executable, str(SERVICE_DIR / "start_event_router.py")],
             cwd=str(SERVICE_DIR),
             stdout=log,
             stderr=log,
-            start_new_session=True
+            start_new_session=True,
         )
 
     # Save PID
-    with open(PID_FILE, 'w') as f:
+    with open(PID_FILE, "w") as f:
         f.write(str(process.pid))
 
     # Wait a moment and check if service started successfully
@@ -68,6 +70,7 @@ def start_service():
         print("❌ Failed to start Event Router service")
         print(f"📝 Check logs: {LOG_FILE}")
         return False
+
 
 def stop_service():
     """Stop the Event Router service."""
@@ -104,6 +107,7 @@ def stop_service():
         PID_FILE.unlink(missing_ok=True)
         return False
 
+
 def status_service():
     """Check status of the Event Router service."""
     pid = get_pid()
@@ -117,7 +121,9 @@ def status_service():
             import urllib.request
             import json
 
-            with urllib.request.urlopen("http://localhost:8000/health", timeout=5) as response:
+            with urllib.request.urlopen(
+                "http://localhost:8000/health", timeout=5
+            ) as response:
                 if response.status == 200:
                     health_data = json.loads(response.read().decode())
                     print(f"💚 Health status: {health_data.get('status', 'unknown')}")
@@ -130,6 +136,7 @@ def status_service():
     else:
         print("❌ Event Router service is not running")
         return False
+
 
 def main():
     """Main function."""
@@ -156,6 +163,7 @@ def main():
         sys.exit(1)
 
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

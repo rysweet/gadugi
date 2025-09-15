@@ -175,7 +175,8 @@ class TestTaskAgentMatcher(unittest.TestCase):
         """Test capability match calculation"""
         # Test perfect match
         match_score = self.matcher._calculate_capability_match(
-            self.mock_capability_profile, self.task_requirements  # type: ignore
+            self.mock_capability_profile,
+            self.task_requirements,  # type: ignore
         )
 
         # Should be high score since agent has advanced code generation and intermediate testing
@@ -203,7 +204,8 @@ class TestTaskAgentMatcher(unittest.TestCase):
         )
 
         match_score = self.matcher._calculate_capability_match(
-            incomplete_profile, self.task_requirements  # type: ignore
+            incomplete_profile,
+            self.task_requirements,  # type: ignore
         )
 
         # Should be lower score due to missing capability

@@ -15,10 +15,11 @@ from .github_executor import GitHubExecutor, execute_github_operation
 from .worktree_executor import WorktreeExecutor, execute_worktree_operation
 
 # Register all executors
-registry.register('code', CodeExecutor)
-registry.register('test', TestExecutor)
-registry.register('github', GitHubExecutor)
-registry.register('worktree', WorktreeExecutor)
+registry.register("code", CodeExecutor)
+registry.register("test", TestExecutor)
+registry.register("github", GitHubExecutor)
+registry.register("worktree", WorktreeExecutor)
+
 
 # Convenience functions for CLAUDE.md orchestration
 def execute(executor_name: str, params: dict) -> dict:
@@ -62,23 +63,20 @@ def list_executors() -> list:
 # Export main interfaces
 __all__ = [
     # Base classes
-    'BaseExecutor',
-    'ExecutorRegistry',
-    'registry',
-
+    "BaseExecutor",
+    "ExecutorRegistry",
+    "registry",
     # Executor classes
-    'CodeExecutor',
-    'TestExecutor',
-    'GitHubExecutor',
-    'WorktreeExecutor',
-
+    "CodeExecutor",
+    "TestExecutor",
+    "GitHubExecutor",
+    "WorktreeExecutor",
     # Direct function interfaces
-    'execute_code_operation',
-    'execute_tests',
-    'execute_github_operation',
-    'execute_worktree_operation',
-
+    "execute_code_operation",
+    "execute_tests",
+    "execute_github_operation",
+    "execute_worktree_operation",
     # Convenience functions
-    'execute',
-    'list_executors'
+    "execute",
+    "list_executors",
 ]

@@ -18,7 +18,6 @@ import subprocess
 import json
 import time
 from datetime import datetime
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass, asdict
 from enum import Enum, auto
@@ -35,21 +34,36 @@ except ImportError:
 
     # Define minimal fallback types
     class StateManager:
-        def save_state(self, state: Any) -> None: pass
-        def load_state(self, task_id: str) -> Any: return None
+        def save_state(self, state: Any) -> None:
+            pass
+
+        def load_state(self, task_id: str) -> Any:
+            return None
 
     class GitHubOperations:
         def __init__(self, task_id: Optional[str] = None):
             self.task_id = task_id
-        def create_issue(self, title: str, body: str) -> Any: return None
-        def create_pr(self, title: str, body: str, base: str, head: str) -> Any: return None
+
+        def create_issue(self, title: str, body: str) -> Any:
+            return None
+
+        def create_pr(self, title: str, body: str, base: str, head: str) -> Any:
+            return None
 
     class TaskTracker:
-        def start_task(self, task_id: str) -> None: pass
-        def complete_task(self, task_id: str) -> None: pass
+        def start_task(self, task_id: str) -> None:
+            pass
+
+        def complete_task(self, task_id: str) -> None:
+            pass
 
     class ErrorHandler:
-        def handle_error(self, error: Any, category: Optional[str] = None, severity: Optional[str] = None) -> None:
+        def handle_error(
+            self,
+            error: Any,
+            category: Optional[str] = None,
+            severity: Optional[str] = None,
+        ) -> None:
             print(f"Error: {error}")
 
     class ErrorCategory:
@@ -61,6 +75,7 @@ except ImportError:
 
 class WorkflowPhase(Enum):
     """Enumeration of all workflow phases that must be executed"""
+
     INIT = auto()
     PROMPT_VALIDATION = auto()
     BRANCH_CREATION = auto()
@@ -79,6 +94,7 @@ class WorkflowPhase(Enum):
 @dataclass
 class WorkflowState:
     """Tracks the current state of workflow execution"""
+
     task_id: str
     prompt_file: str
     current_phase: WorkflowPhase
@@ -101,6 +117,7 @@ class WorkflowState:
 @dataclass
 class PhaseResult:
     """Result of executing a workflow phase"""
+
     phase: WorkflowPhase
     success: bool
     message: str
@@ -119,12 +136,14 @@ class WorkflowEngine:
     of all phases in the correct order.
     """
 
-    def __init__(self,
-                 state_manager: Optional[StateManager] = None,
-                 github_ops: Optional[GitHubOperations] = None,
-                 task_tracker: Optional[TaskTracker] = None,
-                 error_handler: Optional[ErrorHandler] = None,
-                 task_id: Optional[str] = None):
+    def __init__(
+        self,
+        state_manager: Optional[StateManager] = None,
+        github_ops: Optional[GitHubOperations] = None,
+        task_tracker: Optional[TaskTracker] = None,
+        error_handler: Optional[ErrorHandler] = None,
+        task_id: Optional[str] = None,
+    ):
         """Initialize the workflow engine with shared modules"""
 
         # Store task_id for GitHub operations
@@ -145,7 +164,9 @@ class WorkflowEngine:
         self.workflow_state: Optional[WorkflowState] = None
         self.execution_log: List[PhaseResult] = []
 
-    def execute_workflow(self, prompt_file: str, task_id: Optional[str] = None) -> Dict[str, Any]:
+    def execute_workflow(
+        self, prompt_file: str, task_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """
         Execute the complete workflow for a given prompt file.
 
@@ -165,14 +186,14 @@ class WorkflowEngine:
         self.task_id = task_id
 
         # If github_ops was already created, update its task_id
-        if hasattr(self.github_ops, 'task_id'):
+        if hasattr(self.github_ops, "task_id"):
             self.github_ops.task_id = task_id
 
         self.workflow_state = WorkflowState(
             task_id=task_id,
             prompt_file=prompt_file,
             current_phase=WorkflowPhase.INIT,
-            completed_phases=[]
+            completed_phases=[],
         )
 
         try:
@@ -190,7 +211,7 @@ class WorkflowEngine:
                 WorkflowPhase.PR_CREATION,
                 WorkflowPhase.CODE_REVIEW,
                 WorkflowPhase.REVIEW_RESPONSE,
-                WorkflowPhase.FINALIZATION
+                WorkflowPhase.FINALIZATION,
             ]
 
             for phase in phases_to_execute:
@@ -198,7 +219,9 @@ class WorkflowEngine:
                 self.execution_log.append(result)
 
                 if not result.success:
-                    return self._create_failure_result(f"Phase {phase.name} failed: {result.message}")
+                    return self._create_failure_result(
+                        f"Phase {phase.name} failed: {result.message}"
+                    )
 
                 # Update state
                 self.workflow_state.current_phase = phase
@@ -206,13 +229,18 @@ class WorkflowEngine:
                 self.workflow_state.last_checkpoint = datetime.now()
 
                 # Save checkpoint periodically
-                if len(self.workflow_state.completed_phases) % self.checkpoint_interval == 0:
+                if (
+                    len(self.workflow_state.completed_phases) % self.checkpoint_interval
+                    == 0
+                ):
                     self._save_checkpoint()
 
             return self._create_success_result()
 
         except Exception as e:
-            self.error_handler.handle_error(e, ErrorCategory.WORKFLOW_EXECUTION, ErrorSeverity.HIGH)
+            self.error_handler.handle_error(
+                e, ErrorCategory.WORKFLOW_EXECUTION, ErrorSeverity.HIGH
+            )
             return self._create_failure_result(f"Workflow execution failed: {str(e)}")
 
     def _execute_phase(self, phase: WorkflowPhase) -> PhaseResult:
@@ -261,7 +289,7 @@ class WorkflowEngine:
                     message=message,
                     data=data,
                     execution_time=execution_time,
-                    retry_count=retry_count
+                    retry_count=retry_count,
                 )
 
             except Exception as e:
@@ -273,11 +301,11 @@ class WorkflowEngine:
                         success=False,
                         message=f"Phase failed after {self.max_retries} retries: {str(e)}",
                         execution_time=execution_time,
-                        retry_count=retry_count
+                        retry_count=retry_count,
                     )
 
                 # Wait before retry (exponential backoff)
-                time.sleep(2 ** retry_count)
+                time.sleep(2**retry_count)
 
         # This should never be reached, but satisfy type checker
         return PhaseResult(
@@ -285,7 +313,7 @@ class WorkflowEngine:
             success=False,
             message="Unexpected error: max retries exceeded",
             execution_time=time.time() - start_time,
-            retry_count=retry_count
+            retry_count=retry_count,
         )
 
     # Phase Implementation Methods
@@ -295,16 +323,24 @@ class WorkflowEngine:
         try:
             # Validate prompt file exists
             if not os.path.exists(self.workflow_state.prompt_file):  # type: ignore
-                return False, f"Prompt file not found: {self.workflow_state.prompt_file}", {}  # type: ignore
+                return (
+                    False,
+                    f"Prompt file not found: {self.workflow_state.prompt_file}",
+                    {},
+                )  # type: ignore
 
             # Initialize task tracking
-            if hasattr(self.task_tracker, 'start_task'):
+            if hasattr(self.task_tracker, "start_task"):
                 self.task_tracker.start_task(self.workflow_state.task_id)  # type: ignore
 
-            return True, "Workflow initialization successful", {
-                "task_id": self.workflow_state.task_id,  # type: ignore
-                "prompt_file": self.workflow_state.prompt_file  # type: ignore
-            }
+            return (
+                True,
+                "Workflow initialization successful",
+                {
+                    "task_id": self.workflow_state.task_id,  # type: ignore
+                    "prompt_file": self.workflow_state.prompt_file,  # type: ignore
+                },
+            )
 
         except Exception as e:
             return False, f"Initialization failed: {str(e)}", {}
@@ -312,20 +348,21 @@ class WorkflowEngine:
     def _phase_prompt_validation(self) -> Tuple[bool, str, Dict[str, Any]]:
         """Validate prompt file format and content"""
         try:
-            with open(self.workflow_state.prompt_file, 'r') as f:  # type: ignore
+            with open(self.workflow_state.prompt_file, "r") as f:  # type: ignore
                 content = f.read()
 
             # Basic validation checks
             if len(content.strip()) < 50:
                 return False, "Prompt file content too short", {}
 
-            if not content.startswith('#'):
+            if not content.startswith("#"):
                 return False, "Prompt file should start with markdown header", {}
 
-            return True, "Prompt validation successful", {
-                "content_length": len(content),
-                "has_title": content.startswith('#')
-            }
+            return (
+                True,
+                "Prompt validation successful",
+                {"content_length": len(content), "has_title": content.startswith("#")},
+            )
 
         except Exception as e:
             return False, f"Prompt validation failed: {str(e)}", {}
@@ -338,37 +375,50 @@ class WorkflowEngine:
 
             # Try to extract issue number from filename
             import re
-            issue_match = re.search(r'issue-(\d+)', prompt_filename)
+
+            issue_match = re.search(r"issue-(\d+)", prompt_filename)
             if issue_match:
                 issue_number = issue_match.group(1)
-                branch_name = f"feature/fix-WorkflowManager-repeatability-{issue_number}"
+                branch_name = (
+                    f"feature/fix-WorkflowManager-repeatability-{issue_number}"
+                )
             else:
                 # Generate branch name from prompt title
-                with open(self.workflow_state.prompt_file, 'r') as f:  # type: ignore
+                with open(self.workflow_state.prompt_file, "r") as f:  # type: ignore
                     first_line = f.readline().strip()
-                title_slug = re.sub(r'[^a-zA-Z0-9\s-]', '', first_line.replace('#', '').strip())
-                title_slug = re.sub(r'\s+', '-', title_slug).lower()[:50]
+                title_slug = re.sub(
+                    r"[^a-zA-Z0-9\s-]", "", first_line.replace("#", "").strip()
+                )
+                title_slug = re.sub(r"\s+", "-", title_slug).lower()[:50]
 
                 # Use timestamp for uniqueness
-                timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+                timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
                 branch_name = f"feature/{title_slug}-{timestamp}"
 
             # Create branch
-            result = subprocess.run(['git', 'checkout', '-b', branch_name],
-                                  capture_output=True, text=True)
+            result = subprocess.run(
+                ["git", "checkout", "-b", branch_name], capture_output=True, text=True
+            )
 
             if result.returncode != 0:
                 # Branch might already exist, try to switch to it
-                result = subprocess.run(['git', 'checkout', branch_name],
-                                      capture_output=True, text=True)
+                result = subprocess.run(
+                    ["git", "checkout", branch_name], capture_output=True, text=True
+                )
                 if result.returncode != 0:
-                    return False, f"Failed to create/switch to branch: {result.stderr}", {}
+                    return (
+                        False,
+                        f"Failed to create/switch to branch: {result.stderr}",
+                        {},
+                    )
 
             self.workflow_state.branch_name = branch_name  # type: ignore
 
-            return True, f"Branch created successfully: {branch_name}", {
-                "branch_name": branch_name
-            }
+            return (
+                True,
+                f"Branch created successfully: {branch_name}",
+                {"branch_name": branch_name},
+            )
 
         except Exception as e:
             return False, f"Branch creation failed: {str(e)}", {}
@@ -387,28 +437,37 @@ class WorkflowEngine:
         """Create or update GitHub issue"""
         try:
             # Extract title from prompt file
-            with open(self.workflow_state.prompt_file, 'r') as f:  # type: ignore
+            with open(self.workflow_state.prompt_file, "r") as f:  # type: ignore
                 content = f.read()
 
-            title_line = content.split('\n')[0].replace('#', '').strip()
+            title_line = content.split("\n")[0].replace("#", "").strip()
 
             # Create issue using GitHub CLI
-            result = subprocess.run([
-                'gh', 'issue', 'create',
-                '--title', title_line,
-                '--body', f"Implementation of workflow improvements as specified in {self.workflow_state.prompt_file}\n\n*Note: This issue was created by an AI agent on behalf of the repository owner.*"  # type: ignore
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [
+                    "gh",
+                    "issue",
+                    "create",
+                    "--title",
+                    title_line,
+                    "--body",
+                    f"Implementation of workflow improvements as specified in {self.workflow_state.prompt_file}\n\n*Note: This issue was created by an AI agent on behalf of the repository owner.*",  # type: ignore
+                ],
+                capture_output=True,
+                text=True,
+            )
 
             if result.returncode == 0:
                 # Extract issue number from output
                 issue_url = result.stdout.strip()
-                issue_number = issue_url.split('/')[-1]
+                issue_number = issue_url.split("/")[-1]
                 self.workflow_state.issue_number = int(issue_number)  # type: ignore
 
-                return True, f"Issue created successfully: #{issue_number}", {
-                    "issue_number": issue_number,
-                    "issue_url": issue_url
-                }
+                return (
+                    True,
+                    f"Issue created successfully: #{issue_number}",
+                    {"issue_number": issue_number, "issue_url": issue_url},
+                )
             else:
                 return False, f"Failed to create issue: {result.stderr}", {}
 
@@ -438,12 +497,12 @@ class WorkflowEngine:
         """Commit all changes to git"""
         try:
             # Add all changes
-            result = subprocess.run(['git', 'add', '.'], capture_output=True, text=True)
+            result = subprocess.run(["git", "add", "."], capture_output=True, text=True)
             if result.returncode != 0:
                 return False, f"Failed to add changes: {result.stderr}", {}
 
             # Create commit message
-            commit_message = f"""feat: implement deterministic WorkflowEngine for consistent execution
+            commit_message = """feat: implement deterministic WorkflowEngine for consistent execution
 
 - Add WorkflowEngine class with deterministic phase execution
 - Implement PhaseEnforcer for automatic Phase 9/10 execution
@@ -459,15 +518,18 @@ code-based enforcement mechanisms.
 Co-Authored-By: Claude <noreply@anthropic.com>"""
 
             # Commit changes
-            result = subprocess.run(['git', 'commit', '-m', commit_message],
-                                  capture_output=True, text=True)
+            result = subprocess.run(
+                ["git", "commit", "-m", commit_message], capture_output=True, text=True
+            )
 
             if result.returncode != 0:
                 return False, f"Failed to commit changes: {result.stderr}", {}
 
-            return True, "Changes committed successfully", {
-                "commit_message": commit_message
-            }
+            return (
+                True,
+                "Changes committed successfully",
+                {"commit_message": commit_message},
+            )
 
         except Exception as e:
             return False, f"Commit failed: {str(e)}", {}
@@ -480,15 +542,20 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 return False, "No branch name available for push", {}
 
             # Push branch to remote
-            result = subprocess.run(['git', 'push', '-u', 'origin', branch_name],
-                                  capture_output=True, text=True)
+            result = subprocess.run(
+                ["git", "push", "-u", "origin", branch_name],
+                capture_output=True,
+                text=True,
+            )
 
             if result.returncode != 0:
                 return False, f"Failed to push to remote: {result.stderr}", {}
 
-            return True, f"Pushed to remote successfully: {branch_name}", {
-                "branch_name": branch_name
-            }
+            return (
+                True,
+                f"Pushed to remote successfully: {branch_name}",
+                {"branch_name": branch_name},
+            )
 
         except Exception as e:
             return False, f"Push to remote failed: {str(e)}", {}
@@ -497,10 +564,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Create pull request"""
         try:
             # Extract title from prompt file
-            with open(self.workflow_state.prompt_file, 'r') as f:  # type: ignore
+            with open(self.workflow_state.prompt_file, "r") as f:  # type: ignore
                 content = f.read()
 
-            title_line = content.split('\n')[0].replace('#', '').strip()
+            title_line = content.split("\n")[0].replace("#", "").strip()
 
             pr_body = f"""## Summary
 Implementation of deterministic WorkflowEngine to fix WorkflowManager repeatability and consistency issues.
@@ -531,22 +598,32 @@ Closes #{self.workflow_state.issue_number if self.workflow_state and self.workfl
 Co-Authored-By: Claude <noreply@anthropic.com>"""
 
             # Create PR using GitHub CLI
-            result = subprocess.run([
-                'gh', 'pr', 'create',
-                '--base', 'main',
-                '--title', title_line,
-                '--body', pr_body
-            ], capture_output=True, text=True)
+            result = subprocess.run(
+                [
+                    "gh",
+                    "pr",
+                    "create",
+                    "--base",
+                    "main",
+                    "--title",
+                    title_line,
+                    "--body",
+                    pr_body,
+                ],
+                capture_output=True,
+                text=True,
+            )
 
             if result.returncode == 0:
                 pr_url = result.stdout.strip()
-                pr_number = pr_url.split('/')[-1]
+                pr_number = pr_url.split("/")[-1]
                 self.workflow_state.pr_number = int(pr_number)  # type: ignore
 
-                return True, f"PR created successfully: #{pr_number}", {
-                    "pr_number": pr_number,
-                    "pr_url": pr_url
-                }
+                return (
+                    True,
+                    f"PR created successfully: #{pr_number}",
+                    {"pr_number": pr_number, "pr_url": pr_url},
+                )
             else:
                 return False, f"Failed to create PR: {result.stderr}", {}
 
@@ -561,10 +638,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
 
             # This would invoke the CodeReviewer agent
             # For now, we'll simulate successful review invocation
-            return True, f"Code review initiated for PR #{self.workflow_state.pr_number}", {  # type: ignore
-                "pr_number": self.workflow_state.pr_number,  # type: ignore
-                "review_requested": True
-            }
+            return (
+                True,
+                f"Code review initiated for PR #{self.workflow_state.pr_number}",
+                {  # type: ignore
+                    "pr_number": self.workflow_state.pr_number,  # type: ignore
+                    "review_requested": True,
+                },
+            )
 
         except Exception as e:
             return False, f"Code review failed: {str(e)}", {}
@@ -583,16 +664,22 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Finalize workflow execution"""
         try:
             # Update task tracking
-            if hasattr(self.task_tracker, 'complete_task'):
+            if hasattr(self.task_tracker, "complete_task"):
                 self.task_tracker.complete_task(self.workflow_state.task_id)  # type: ignore
 
             # Clean up temporary files
             self._cleanup_temp_files()
 
-            return True, "Workflow finalization completed", {
-                "total_phases": len(self.workflow_state.completed_phases),  # type: ignore
-                "execution_time": (datetime.now() - self.workflow_state.start_time).total_seconds()  # type: ignore
-            }
+            return (
+                True,
+                "Workflow finalization completed",
+                {
+                    "total_phases": len(self.workflow_state.completed_phases),  # type: ignore
+                    "execution_time": (
+                        datetime.now() - self.workflow_state.start_time
+                    ).total_seconds(),  # type: ignore
+                },
+            )
 
         except Exception as e:
             return False, f"Finalization failed: {str(e)}", {}
@@ -603,10 +690,10 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
         """Save workflow state as checkpoint"""
         try:
             checkpoint_data = asdict(self.workflow_state)  # type: ignore
-            checkpoint_data['timestamp'] = datetime.now().isoformat()
+            checkpoint_data["timestamp"] = datetime.now().isoformat()
 
             checkpoint_file = f".workflow_checkpoint_{self.workflow_state.task_id}.json"  # type: ignore
-            with open(checkpoint_file, 'w') as f:
+            with open(checkpoint_file, "w") as f:
                 json.dump(checkpoint_data, f, indent=2, default=str)
 
         except Exception as e:
@@ -633,7 +720,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             "branch_name": self.workflow_state.branch_name,  # type: ignore
             "issue_number": self.workflow_state.issue_number,  # type: ignore
             "pr_number": self.workflow_state.pr_number,  # type: ignore
-            "phase_results": [asdict(result) for result in self.execution_log]
+            "phase_results": [asdict(result) for result in self.execution_log],
         }
 
     def _create_failure_result(self, error_message: str) -> Dict[str, Any]:
@@ -646,7 +733,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             "task_id": self.workflow_state.task_id,  # type: ignore
             "completed_phases": len(self.workflow_state.completed_phases),  # type: ignore
             "execution_time": total_time,
-            "phase_results": [asdict(result) for result in self.execution_log]
+            "phase_results": [asdict(result) for result in self.execution_log],
         }
 
     # Minimal fallback implementations for shared modules
@@ -699,11 +786,11 @@ if __name__ == "__main__":
     if result["success"]:
         print(f"✅ Workflow completed successfully in {result['execution_time']:.2f}s")
         print(f"📋 Phases completed: {result['total_phases']}")
-        if result.get('pr_number'):
+        if result.get("pr_number"):
             print(f"🔗 PR created: #{result['pr_number']}")
     else:
         print(f"❌ Workflow failed: {result['error']}")
         print(f"📋 Phases completed: {result['completed_phases']}")
 
-    print(f"\n📊 Detailed results:")
+    print("\n📊 Detailed results:")
     print(json.dumps(result, indent=2, default=str))

@@ -7,13 +7,14 @@ import logging
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Callable, Any, Set
+from typing import Dict, List, Optional, Callable, Any
 from collections import defaultdict
 from enum import Enum
 
 try:
     import websockets
     from websockets.exceptions import WebSocketException
+
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     WEBSOCKET_AVAILABLE = False
@@ -22,15 +23,17 @@ except ImportError:
 
 import sys
 import os
+
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from core.models import Event, EventType, EventPriority, EventMetadata
+from core.models import Event, EventType, EventPriority
 
 logger = logging.getLogger(__name__)
 
 
 class ConnectionState(Enum):
     """Connection state."""
+
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
     CONNECTED = "connected"
@@ -49,7 +52,7 @@ class EventRouterClient:
         max_reconnect_interval: float = 30.0,
         reconnect_decay: float = 1.5,
         heartbeat_interval: float = 30.0,
-        timeout: float = 10.0
+        timeout: float = 10.0,
     ):
         """Initialize event router client.
 
@@ -118,12 +121,8 @@ class EventRouterClient:
             # Connect with timeout
             if websockets is not None:
                 self.websocket = await asyncio.wait_for(
-                    websockets.connect(
-                        self.url,
-                        max_size=10**7,
-                        compression=None
-                    ),
-                    timeout=self.timeout
+                    websockets.connect(self.url, max_size=10**7, compression=None),
+                    timeout=self.timeout,
                 )
             else:
                 raise RuntimeError("websockets module not available")
@@ -301,7 +300,10 @@ class EventRouterClient:
                 await asyncio.sleep(self.heartbeat_interval)
 
                 # Check for missed pong
-                if self.last_pong and time.time() - self.last_pong > self.heartbeat_interval * 2:
+                if (
+                    self.last_pong
+                    and time.time() - self.last_pong > self.heartbeat_interval * 2
+                ):
                     logger.warning("Heartbeat timeout, reconnecting...")
                     if self.websocket:
                         await self.websocket.close()
@@ -324,14 +326,16 @@ class EventRouterClient:
         self.state = ConnectionState.RECONNECTING
         self.reconnect_attempts += 1
 
-        logger.info(f"Reconnecting in {self.current_reconnect_interval:.1f}s (attempt {self.reconnect_attempts})")
+        logger.info(
+            f"Reconnecting in {self.current_reconnect_interval:.1f}s (attempt {self.reconnect_attempts})"
+        )
 
         await asyncio.sleep(self.current_reconnect_interval)
 
         # Exponential backoff
         self.current_reconnect_interval = min(
             self.current_reconnect_interval * self.reconnect_decay,
-            self.max_reconnect_interval
+            self.max_reconnect_interval,
         )
 
         # Attempt reconnection
@@ -341,10 +345,9 @@ class EventRouterClient:
         """Restore subscriptions after reconnection."""
         for sub_id, sub_data in list(self.subscriptions.items()):
             if sub_data.get("active"):
-                await self._send({
-                    "type": "subscribe",
-                    "subscription": sub_data["config"]
-                })
+                await self._send(
+                    {"type": "subscribe", "subscription": sub_data["config"]}
+                )
 
     async def _send_pending_messages(self):
         """Send pending messages after reconnection."""
@@ -389,7 +392,7 @@ class EventRouterClient:
         payload: Dict[str, Any],
         priority: EventPriority = EventPriority.NORMAL,
         type: EventType = EventType.CUSTOM,
-        target: Optional[str] = None
+        target: Optional[str] = None,
     ) -> Optional[str]:
         """Publish an event.
 
@@ -409,13 +412,10 @@ class EventRouterClient:
             priority=priority,
             type=type,
             target=target,
-            source=self.client_id or "client"
+            source=self.client_id or "client",
         )
 
-        success = await self._send({
-            "type": "publish",
-            "event": event.to_dict()
-        })
+        success = await self._send({"type": "publish", "event": event.to_dict()})
 
         if success:
             self.events_published += 1
@@ -429,7 +429,7 @@ class EventRouterClient:
         types: Optional[List[EventType]] = None,
         priorities: Optional[List[EventPriority]] = None,
         sources: Optional[List[str]] = None,
-        callback: Optional[Callable[[Event], None]] = None
+        callback: Optional[Callable[[Event], None]] = None,
     ) -> Optional[str]:
         """Subscribe to events.
 
@@ -447,7 +447,7 @@ class EventRouterClient:
             "topics": topics or ["*"],
             "types": [t.value for t in types] if types else [],
             "priorities": [int(p) for p in priorities] if priorities else [],
-            "sources": sources or []
+            "sources": sources or [],
         }
 
         sub_id = str(uuid.uuid4())
@@ -457,17 +457,14 @@ class EventRouterClient:
             "config": sub_config,
             "callback": callback,
             "active": True,
-            "confirmed": False
+            "confirmed": False,
         }
 
         if callback:
             self.subscription_callbacks[sub_id] = callback
 
         # Send subscription
-        success = await self._send({
-            "type": "subscribe",
-            "subscription": sub_config
-        })
+        success = await self._send({"type": "subscribe", "subscription": sub_config})
 
         if success:
             return sub_id
@@ -486,10 +483,9 @@ class EventRouterClient:
         if subscription_id not in self.subscriptions:
             return False
 
-        success = await self._send({
-            "type": "unsubscribe",
-            "subscription_id": subscription_id
-        })
+        success = await self._send(
+            {"type": "unsubscribe", "subscription_id": subscription_id}
+        )
 
         if success:
             self.subscriptions[subscription_id]["active"] = False
@@ -504,10 +500,7 @@ class EventRouterClient:
         Returns:
             True if sent
         """
-        return await self._send({
-            "type": "ping",
-            "echo": time.time()
-        })
+        return await self._send({"type": "ping", "echo": time.time()})
 
     async def get_health(self) -> Optional[Dict]:
         """Get server health status.
@@ -548,9 +541,11 @@ class EventRouterClient:
         Returns:
             Decorator function
         """
+
         def decorator(func):
             self.event_handlers[topic].append(func)
             return func
+
         return decorator
 
     def on_message(self, msg_type: str):
@@ -562,9 +557,11 @@ class EventRouterClient:
         Returns:
             Decorator function
         """
+
         def decorator(func):
             self.message_handlers[msg_type].append(func)
             return func
+
         return decorator
 
     async def wait_until_connected(self, timeout: float = 10.0) -> bool:

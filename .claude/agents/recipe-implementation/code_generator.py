@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from .models import (
     EvaluationReport,
     GeneratedCode,
-    GapSeverity,
     ImplementationGap,
     InterfaceSpec,
     RecipeSpec,
@@ -89,16 +88,26 @@ class CodeGenerator:
 
         # Generate classes for main components
         classes = []
-        for req in self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL):
-            if "service" in req.description.lower() or "manager" in req.description.lower():
+        for req in self.recipe_spec.get_requirements_by_type(
+            RequirementType.FUNCTIONAL
+        ):
+            if (
+                "service" in req.description.lower()
+                or "manager" in req.description.lower()
+            ):
                 class_code = self._generate_class_from_requirement(req)
                 if class_code:
                     classes.append(class_code)
 
         # Generate main functions
         functions = []
-        for req in self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL):
-            if "function" in req.description.lower() or "method" in req.description.lower():
+        for req in self.recipe_spec.get_requirements_by_type(
+            RequirementType.FUNCTIONAL
+        ):
+            if (
+                "function" in req.description.lower()
+                or "method" in req.description.lower()
+            ):
                 func_code = self._generate_function_from_requirement(req)
                 if func_code:
                     functions.append(func_code)
@@ -121,12 +130,14 @@ class CodeGenerator:
 
         # Add main block if needed
         if functions or classes:
-            content_parts.extend([
-                "",
-                'if __name__ == "__main__":',
-                '    # Example usage',
-                '    pass',
-            ])
+            content_parts.extend(
+                [
+                    "",
+                    'if __name__ == "__main__":',
+                    "    # Example usage",
+                    "    pass",
+                ]
+            )
 
         content = "\n".join(content_parts)
 
@@ -134,8 +145,14 @@ class CodeGenerator:
             recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
             file_path=Path(f"{self.recipe_spec.name.lower().replace(' ', '_')}.py"),
             content=content,
-            classes_added=[c.split("class ")[1].split("(")[0].split(":")[0] for c in classes if "class " in c],
-            functions_added=[f.split("def ")[1].split("(")[0] for f in functions if "def " in f],
+            classes_added=[
+                c.split("class ")[1].split("(")[0].split(":")[0]
+                for c in classes
+                if "class " in c
+            ],
+            functions_added=[
+                f.split("def ")[1].split("(")[0] for f in functions if "def " in f
+            ],
         )
 
     def _generate_interface_implementation(
@@ -199,11 +216,13 @@ def fix_{gap.requirement_id.lower().replace("-", "_")}():
             file_path=Path(f"fix_{gap.requirement_id.lower()}.py"),
             content=content,
             is_new_file=True,
-            modifications=[{
-                "type": "gap_fix",
-                "gap_id": gap.requirement_id,
-                "description": gap.suggested_fix,
-            }],
+            modifications=[
+                {
+                    "type": "gap_fix",
+                    "gap_id": gap.requirement_id,
+                    "description": gap.suggested_fix,
+                }
+            ],
         )
 
     def _generate_tests(self) -> Optional[GeneratedCode]:
@@ -234,7 +253,9 @@ class Test{self._to_class_name(self.recipe_spec.name)}:
 
         # Generate test methods for functional requirements
         test_methods = []
-        for req in self.recipe_spec.get_requirements_by_type(RequirementType.FUNCTIONAL)[:5]:
+        for req in self.recipe_spec.get_requirements_by_type(
+            RequirementType.FUNCTIONAL
+        )[:5]:
             test_method = self._generate_test_method(req)
             if test_method:
                 test_methods.append(test_method)
@@ -250,10 +271,14 @@ class Test{self._to_class_name(self.recipe_spec.name)}:
 
         return GeneratedCode(
             recipe_name=self.recipe_spec.name if self.recipe_spec else "unknown",
-            file_path=Path(f"test_{self.recipe_spec.name.lower().replace(' ', '_')}.py"),
+            file_path=Path(
+                f"test_{self.recipe_spec.name.lower().replace(' ', '_')}.py"
+            ),
             content=test_content,
             is_new_file=True,
-            tests_generated=[f"test_{req.id.lower()}" for req in self.recipe_spec.requirements[:5]],
+            tests_generated=[
+                f"test_{req.id.lower()}" for req in self.recipe_spec.requirements[:5]
+            ],
         )
 
     # Helper methods for code generation
@@ -332,7 +357,7 @@ def {func_name}(input_data: Any) -> Any:
                 method_name = param_dict["name"]
                 methods.append(self._generate_method_stub(method_name))
 
-        methods_str = "\n".join(methods) if methods else '    pass'
+        methods_str = "\n".join(methods) if methods else "    pass"
 
         class_code = f'''
 class {interface.name}:
@@ -434,8 +459,8 @@ class {name}:
         """Extract an identifier from text."""
         # Look for CamelCase or snake_case identifiers
         patterns = [
-            r'\b([A-Z][a-zA-Z0-9]+)\b',  # CamelCase
-            r'\b([a-z_][a-z0-9_]+)\b',    # snake_case
+            r"\b([A-Z][a-zA-Z0-9]+)\b",  # CamelCase
+            r"\b([a-z_][a-z0-9_]+)\b",  # snake_case
         ]
 
         for pattern in patterns:
@@ -455,11 +480,11 @@ class {name}:
         """Extract a class name from text."""
         # Look for patterns like "Service", "Manager", "Handler"
         patterns = [
-            r'(\w+Service)',
-            r'(\w+Manager)',
-            r'(\w+Handler)',
-            r'(\w+Controller)',
-            r'(\w+Repository)',
+            r"(\w+Service)",
+            r"(\w+Manager)",
+            r"(\w+Handler)",
+            r"(\w+Controller)",
+            r"(\w+Repository)",
         ]
 
         for pattern in patterns:
@@ -472,7 +497,17 @@ class {name}:
     def _extract_function_name(self, text: str) -> Optional[str]:
         """Extract a function name from text."""
         # Look for verb patterns
-        verbs = ["create", "get", "set", "update", "delete", "process", "handle", "validate", "check"]
+        verbs = [
+            "create",
+            "get",
+            "set",
+            "update",
+            "delete",
+            "process",
+            "handle",
+            "validate",
+            "check",
+        ]
 
         text_lower = text.lower()
         for verb in verbs:

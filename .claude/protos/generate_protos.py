@@ -4,7 +4,7 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 
 def generate_python_bindings(proto_dir: Optional[Path] = None) -> None:
@@ -47,18 +47,20 @@ def generate_python_bindings(proto_dir: Optional[Path] = None) -> None:
                 f"--proto_path={proto_dir}",
                 f"--python_out={output_dir}",
                 f"--pyi_out={output_dir}",  # Generate type stubs
-                str(proto_file)
+                str(proto_file),
             ]
             result = subprocess.run(cmd, capture_output=True, text=True)
 
             if result.returncode != 0:
                 # Fall back to grpc_tools if protoc fails
-                print(f"protoc failed, trying grpc_tools.protoc...")
+                print("protoc failed, trying grpc_tools.protoc...")
                 cmd = [
-                    sys.executable, "-m", "grpc_tools.protoc",
+                    sys.executable,
+                    "-m",
+                    "grpc_tools.protoc",
                     f"--proto_path={proto_dir}",
                     f"--python_out={output_dir}",
-                    str(proto_file)
+                    str(proto_file),
                 ]
                 result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -70,12 +72,14 @@ def generate_python_bindings(proto_dir: Optional[Path] = None) -> None:
 
         except FileNotFoundError:
             # protoc not found, use grpc_tools
-            print(f"protoc not found, using grpc_tools.protoc...")
+            print("protoc not found, using grpc_tools.protoc...")
             cmd = [
-                sys.executable, "-m", "grpc_tools.protoc",
+                sys.executable,
+                "-m",
+                "grpc_tools.protoc",
                 f"--proto_path={proto_dir}",
                 f"--python_out={output_dir}",
-                str(proto_file)
+                str(proto_file),
             ]
             result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -146,7 +150,10 @@ def verify_installation() -> bool:
         print("WARNING: Missing optional packages:")
         for pkg in missing_optional:
             print(f"  - {pkg}")
-        print("\nFor better protobuf support, install with: uv add " + " ".join(missing_optional))
+        print(
+            "\nFor better protobuf support, install with: uv add "
+            + " ".join(missing_optional)
+        )
 
     return True
 

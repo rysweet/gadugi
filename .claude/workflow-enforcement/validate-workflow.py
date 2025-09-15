@@ -4,29 +4,31 @@ Workflow Validation Script
 Quick validation tool for checking workflow compliance before execution.
 """
 
-import os
 import sys
 import json
 import argparse
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 from datetime import datetime
+
 
 # Colors for terminal output
 class Colors:
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    PURPLE = '\033[0;35m'
-    CYAN = '\033[0;36m'
-    WHITE = '\033[1;37m'
-    BOLD = '\033[1m'
-    END = '\033[0m'
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[1;33m"
+    BLUE = "\033[0;34m"
+    PURPLE = "\033[0;35m"
+    CYAN = "\033[0;36m"
+    WHITE = "\033[1;37m"
+    BOLD = "\033[1m"
+    END = "\033[0m"
+
 
 def print_colored(color: str, message: str):
     """Print colored message to terminal."""
     print(f"{color}{message}{Colors.END}")
+
 
 def print_header(title: str):
     """Print formatted header."""
@@ -34,10 +36,12 @@ def print_header(title: str):
     print_colored(Colors.WHITE + Colors.BOLD, f"  {title}")
     print_colored(Colors.CYAN, f"{'=' * 60}")
 
+
 def print_section(title: str):
     """Print section header."""
     print_colored(Colors.BLUE, f"\n📋 {title}")
     print_colored(Colors.BLUE, "-" * (len(title) + 3))
+
 
 class WorkflowValidator:
     """Validates workflow requirements and provides guidance."""
@@ -51,7 +55,7 @@ class WorkflowValidator:
         self,
         task_description: str,
         files: List[str] = None,
-        execution_method: str = "direct"
+        execution_method: str = "direct",
     ) -> Tuple[bool, List[str], List[str]]:
         """
         Validate a task against workflow requirements.
@@ -67,24 +71,20 @@ class WorkflowValidator:
         requires_orchestrator = self._requires_orchestrator(task_description, files)
 
         if requires_orchestrator and execution_method != "orchestrator":
-            violations.append(
-                f"❌ Code change detected but orchestrator not being used"
-            )
-            violations.append(
-                f"   Task: {task_description}"
-            )
+            violations.append("❌ Code change detected but orchestrator not being used")
+            violations.append(f"   Task: {task_description}")
             if files:
-                violations.append(
-                    f"   Files: {', '.join(files)}"
-                )
+                violations.append(f"   Files: {', '.join(files)}")
 
-            recommendations.extend([
-                "🚀 Use orchestrator for this task:",
-                f"   python .claude/orchestrator/main.py --task \"{task_description}\"",
-                "",
-                "📚 Review workflow requirements:",
-                "   cat .claude/workflow-enforcement/workflow-reminder.md"
-            ])
+            recommendations.extend(
+                [
+                    "🚀 Use orchestrator for this task:",
+                    f'   python .claude/orchestrator/main.py --task "{task_description}"',
+                    "",
+                    "📚 Review workflow requirements:",
+                    "   cat .claude/workflow-enforcement/workflow-reminder.md",
+                ]
+            )
 
         # Check orchestrator availability
         if requires_orchestrator:
@@ -102,36 +102,101 @@ class WorkflowValidator:
         # Check files
         if files:
             code_extensions = {
-                '.py', '.js', '.ts', '.jsx', '.tsx', '.go', '.java', '.cpp', '.c', '.h',
-                '.json', '.yaml', '.yml', '.md', '.txt', '.sh', '.bash', '.zsh',
-                '.css', '.scss', '.html', '.xml', '.sql', '.r', '.rb', '.php'
+                ".py",
+                ".js",
+                ".ts",
+                ".jsx",
+                ".tsx",
+                ".go",
+                ".java",
+                ".cpp",
+                ".c",
+                ".h",
+                ".json",
+                ".yaml",
+                ".yml",
+                ".md",
+                ".txt",
+                ".sh",
+                ".bash",
+                ".zsh",
+                ".css",
+                ".scss",
+                ".html",
+                ".xml",
+                ".sql",
+                ".r",
+                ".rb",
+                ".php",
             }
 
             for file_path in files:
                 if any(file_path.endswith(ext) for ext in code_extensions):
                     return True
                 # Also check for config files
-                config_indicators = ['config', 'settings', 'setup', 'requirements', 'package']
-                if any(indicator in file_path.lower() for indicator in config_indicators):
+                config_indicators = [
+                    "config",
+                    "settings",
+                    "setup",
+                    "requirements",
+                    "package",
+                ]
+                if any(
+                    indicator in file_path.lower() for indicator in config_indicators
+                ):
                     return True
 
         # Check task description
         code_change_indicators = [
             # Direct modification words
-            'fix', 'implement', 'create', 'add', 'update', 'modify', 'refactor',
-            'delete', 'remove', 'change', 'edit', 'write', 'develop', 'build',
-            'install', 'configure', 'setup', 'deploy', 'merge', 'commit',
-
+            "fix",
+            "implement",
+            "create",
+            "add",
+            "update",
+            "modify",
+            "refactor",
+            "delete",
+            "remove",
+            "change",
+            "edit",
+            "write",
+            "develop",
+            "build",
+            "install",
+            "configure",
+            "setup",
+            "deploy",
+            "merge",
+            "commit",
             # Technical operation words
-            'debug', 'optimize', 'enhance', 'improve', 'migrate', 'upgrade',
-            'patch', 'rename', 'move', 'copy', 'generate', 'compile',
-
+            "debug",
+            "optimize",
+            "enhance",
+            "improve",
+            "migrate",
+            "upgrade",
+            "patch",
+            "rename",
+            "move",
+            "copy",
+            "generate",
+            "compile",
             # Git operations
-            'branch', 'pull', 'push', 'rebase', 'cherry-pick', 'revert',
-
+            "branch",
+            "pull",
+            "push",
+            "rebase",
+            "cherry-pick",
+            "revert",
             # Package management
-            'pip install', 'npm install', 'yarn add', 'gem install',
-            'apt-get', 'brew install', 'conda install'
+            "pip install",
+            "npm install",
+            "yarn add",
+            "gem install",
+            "apt-get",
+            "brew install",
+            "conda install",
         ]
 
         task_lower = task_description.lower()
@@ -142,8 +207,14 @@ class WorkflowValidator:
 
         # Check for file operation patterns
         file_operation_patterns = [
-            'create file', 'delete file', 'modify file', 'edit file',
-            'new file', 'add file', 'remove file', 'update file'
+            "create file",
+            "delete file",
+            "modify file",
+            "edit file",
+            "new file",
+            "add file",
+            "remove file",
+            "update file",
         ]
 
         for pattern in file_operation_patterns:
@@ -187,7 +258,7 @@ class WorkflowValidator:
             "• Bug fixes and feature implementations",
             "• Code refactoring or optimization",
             "• Git operations (commits, branches, merges)",
-            "• Documentation updates that modify files"
+            "• Documentation updates that modify files",
         ]
         for task in orchestrator_tasks:
             print(f"  {task}")
@@ -199,7 +270,7 @@ class WorkflowValidator:
             "• Generating reports (without file output)",
             "• Searching and exploring the codebase",
             "• Code reviews and analysis",
-            "• Explaining how systems work"
+            "• Explaining how systems work",
         ]
         for task in direct_tasks:
             print(f"  {task}")
@@ -216,7 +287,7 @@ class WorkflowValidator:
             "8. Documentation - Update relevant documentation",
             "9. Review - Code review and validation",
             "10. Integration - Merge to target branch",
-            "11. Cleanup - Clean up temporary resources"
+            "11. Cleanup - Clean up temporary resources",
         ]
 
         for phase in phases:
@@ -225,19 +296,19 @@ class WorkflowValidator:
         print_section("🚀 How to Use Orchestrator")
         print_colored(Colors.CYAN, "  cd /Users/ryan/src/gadugi5/gadugi")
         print_colored(Colors.CYAN, "  python .claude/orchestrator/main.py \\")
-        print_colored(Colors.CYAN, "    --task \"Your task description\" \\")
+        print_colored(Colors.CYAN, '    --task "Your task description" \\')
         print_colored(Colors.CYAN, "    --auto-approve")
 
         print_section("🔍 Validation Commands")
         validation_commands = [
             "# Check if your task needs orchestrator:",
-            ".claude/workflow-enforcement/validate-workflow.py --task \"your task\"",
+            '.claude/workflow-enforcement/validate-workflow.py --task "your task"',
             "",
             "# Quick compliance check:",
             ".claude/workflow-enforcement/compliance-monitor.py --check",
             "",
             "# View workflow reminder:",
-            "cat .claude/workflow-enforcement/workflow-reminder.md"
+            "cat .claude/workflow-enforcement/workflow-reminder.md",
         ]
 
         for cmd in validation_commands:
@@ -247,8 +318,12 @@ class WorkflowValidator:
                 print_colored(Colors.WHITE, f"  {cmd}")
 
         print_colored(Colors.PURPLE, f"\n{'=' * 60}")
-        print_colored(Colors.WHITE + Colors.BOLD, "  Remember: The workflow protects code quality!")
+        print_colored(
+            Colors.WHITE + Colors.BOLD,
+            "  Remember: The workflow protects code quality!",
+        )
         print_colored(Colors.PURPLE, f"{'=' * 60}\n")
+
 
 def main():
     """Main function for command line usage."""
@@ -261,37 +336,26 @@ Examples:
   %(prog)s --task "Read config files" --files config.json settings.py
   %(prog)s --guide  # Show comprehensive workflow guide
   %(prog)s --task "Add new feature" --method orchestrator  # Should be compliant
-        """
+        """,
     )
 
-    parser.add_argument(
-        "--task",
-        help="Task description to validate"
-    )
+    parser.add_argument("--task", help="Task description to validate")
 
-    parser.add_argument(
-        "--files",
-        nargs="*",
-        help="Files that will be modified"
-    )
+    parser.add_argument("--files", nargs="*", help="Files that will be modified")
 
     parser.add_argument(
         "--method",
         default="direct",
         choices=["direct", "orchestrator"],
-        help="Execution method (default: direct)"
+        help="Execution method (default: direct)",
     )
 
     parser.add_argument(
-        "--guide",
-        action="store_true",
-        help="Show comprehensive workflow guide"
+        "--guide", action="store_true", help="Show comprehensive workflow guide"
     )
 
     parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output results in JSON format"
+        "--json", action="store_true", help="Output results in JSON format"
     )
 
     args = parser.parse_args()
@@ -309,9 +373,7 @@ Examples:
 
     # Validate the task
     is_compliant, violations, recommendations = validator.validate_task(
-        args.task,
-        args.files or [],
-        args.method
+        args.task, args.files or [], args.method
     )
 
     if args.json:
@@ -323,7 +385,7 @@ Examples:
             "compliant": is_compliant,
             "violations": violations,
             "recommendations": recommendations,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         print(json.dumps(result, indent=2))
     else:
@@ -336,10 +398,12 @@ Examples:
         print_colored(Colors.BLUE, f"⚙️  Method: {args.method}")
 
         if is_compliant:
-            print_colored(Colors.GREEN, f"\n✅ WORKFLOW COMPLIANT")
-            print_colored(Colors.GREEN, "   This task follows proper workflow requirements.")
+            print_colored(Colors.GREEN, "\n✅ WORKFLOW COMPLIANT")
+            print_colored(
+                Colors.GREEN, "   This task follows proper workflow requirements."
+            )
         else:
-            print_colored(Colors.RED, f"\n❌ WORKFLOW VIOLATION DETECTED")
+            print_colored(Colors.RED, "\n❌ WORKFLOW VIOLATION DETECTED")
             print_section("Issues Found")
             for violation in violations:
                 print_colored(Colors.RED, f"  {violation}")
@@ -353,6 +417,7 @@ Examples:
                         print_colored(Colors.WHITE, f"  {rec}")
 
     sys.exit(0 if is_compliant else 1)
+
 
 if __name__ == "__main__":
     main()

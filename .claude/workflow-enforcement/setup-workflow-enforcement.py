@@ -7,11 +7,11 @@ Comprehensive setup and initialization for the workflow enforcement system.
 import os
 import sys
 import json
-import subprocess
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 from datetime import datetime
 import argparse
+
 
 class WorkflowEnforcementSetup:
     """Sets up and initializes the complete workflow enforcement system."""
@@ -38,7 +38,7 @@ class WorkflowEnforcementSetup:
 
             # Create pre-commit hook
             pre_commit_hook = git_hooks_dir / "pre-commit"
-            hook_content = f'''#!/bin/bash
+            hook_content = f"""#!/bin/bash
 # Workflow Enforcement Pre-commit Hook
 # Ensures all commits go through proper workflow
 
@@ -61,9 +61,9 @@ fi
 
 echo "✅ Workflow compliance validated"
 exit 0
-'''
+"""
 
-            with open(pre_commit_hook, 'w') as f:
+            with open(pre_commit_hook, "w") as f:
                 f.write(hook_content)
 
             # Make hook executable
@@ -72,7 +72,7 @@ exit 0
 
             # Create commit-msg hook
             commit_msg_hook = git_hooks_dir / "commit-msg"
-            commit_msg_content = f'''#!/bin/bash
+            commit_msg_content = f"""#!/bin/bash
 # Workflow Enforcement Commit Message Hook
 # Validates commit messages and logs workflow events
 
@@ -91,9 +91,9 @@ if [[ ! "$COMMIT_MSG" =~ (orchestrator|workflow|phase) ]] && [[ ! "$COMMIT_MSG" 
 fi
 
 exit 0
-'''
+"""
 
-            with open(commit_msg_hook, 'w') as f:
+            with open(commit_msg_hook, "w") as f:
                 f.write(commit_msg_content)
 
             os.chmod(commit_msg_hook, 0o755)
@@ -122,12 +122,12 @@ exit 0
                     "interval": 30,
                     "check_git_status": True,
                     "check_file_changes": True,
-                    "check_orchestrator_status": True
+                    "check_orchestrator_status": True,
                 },
                 "notifications": {
                     "violation_warnings": True,
                     "compliance_reminders": True,
-                    "weekly_reports": False
+                    "weekly_reports": False,
                 },
                 "emergency_override": {
                     "enabled": False,
@@ -140,7 +140,7 @@ exit 0
                     "__pycache__/",
                     "*.pyc",
                     "*.log",
-                    ".DS_Store"
+                    ".DS_Store",
                 ],
                 "required_workflow_phases": [
                     "task_validation",
@@ -153,11 +153,11 @@ exit 0
                     "documentation",
                     "review",
                     "integration",
-                    "cleanup"
-                ]
+                    "cleanup",
+                ],
             }
 
-            with open(config_file, 'w') as f:
+            with open(config_file, "w") as f:
                 json.dump(config, f, indent=2)
 
             messages.append("✅ Workflow configuration created")
@@ -181,7 +181,7 @@ exit 0
             for log_file in log_files:
                 log_path = self.enforcement_dir / log_file
 
-                if log_file.endswith('.json'):
+                if log_file.endswith(".json"):
                     # Initialize JSON log files
                     if not log_path.exists():
                         initial_data = {
@@ -192,16 +192,18 @@ exit 0
                                 "total_checks": 0,
                                 "total_violations": 0,
                                 "total_compliant": 0,
-                                "compliance_rate": 1.0
-                            }
+                                "compliance_rate": 1.0,
+                            },
                         }
-                        with open(log_path, 'w') as f:
+                        with open(log_path, "w") as f:
                             json.dump(initial_data, f, indent=2)
                 else:
                     # Initialize text log files
                     if not log_path.exists():
-                        with open(log_path, 'w') as f:
-                            f.write(f"# Workflow Enforcement Log - Created {datetime.now().isoformat()}\\n")
+                        with open(log_path, "w") as f:
+                            f.write(
+                                f"# Workflow Enforcement Log - Created {datetime.now().isoformat()}\\n"
+                            )
 
                 messages.append(f"✅ Initialized {log_file}")
 
@@ -219,7 +221,7 @@ exit 0
             # Create shell function that can be sourced
             shell_integration = self.enforcement_dir / "shell_integration.sh"
 
-            shell_content = f'''#!/bin/bash
+            shell_content = f"""#!/bin/bash
 # Workflow Enforcement Shell Integration
 # Source this file in your shell profile for enhanced workflow support
 
@@ -269,16 +271,18 @@ echo "✅ Gadugi Workflow Enforcement loaded"
 echo "💡 Available commands:"
 echo "   gvalidate 'task' [files...]  - Validate workflow compliance"
 echo "   orchestrator                 - Launch orchestrator"
-'''
+"""
 
-            with open(shell_integration, 'w') as f:
+            with open(shell_integration, "w") as f:
                 f.write(shell_content)
 
             os.chmod(shell_integration, 0o755)
             messages.append("✅ Shell integration created")
 
             # Instructions for user
-            messages.append("💡 To enable shell integration, add to your shell profile:")
+            messages.append(
+                "💡 To enable shell integration, add to your shell profile:"
+            )
             messages.append(f"   source {shell_integration}")
 
             return True, messages
@@ -294,7 +298,7 @@ echo "   orchestrator                 - Launch orchestrator"
         try:
             reference_file = self.enforcement_dir / "QUICK_REFERENCE.md"
 
-            reference_content = '''# Workflow Enforcement Quick Reference
+            reference_content = """# Workflow Enforcement Quick Reference
 
 ## 🚀 Common Commands
 
@@ -399,9 +403,9 @@ python .claude/orchestrator/main.py --task "your task description"
 
 ---
 Remember: The workflow exists to protect code quality and ensure proper testing!
-'''
+"""
 
-            with open(reference_file, 'w') as f:
+            with open(reference_file, "w") as f:
                 f.write(reference_content)
 
             messages.append("✅ Quick reference guide created")
@@ -419,7 +423,7 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
             "git_hooks": {},
             "permissions": {},
             "configuration": {},
-            "overall_status": "unknown"
+            "overall_status": "unknown",
         }
 
         try:
@@ -433,7 +437,7 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
                 "update-agent-instructions.py",
                 "setup-workflow-enforcement.py",
                 "config.json",
-                "QUICK_REFERENCE.md"
+                "QUICK_REFERENCE.md",
             ]
 
             for file_name in required_files:
@@ -457,7 +461,7 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
 
                 validation_results["git_hooks"][hook] = {
                     "exists": exists,
-                    "executable": executable
+                    "executable": executable,
                 }
 
                 if exists and executable:
@@ -468,7 +472,12 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
                     messages.append(f"❌ Git hook {hook} not installed")
 
             # Check permissions on scripts
-            scripts = ["workflow-checker.py", "pre-task-hook.sh", "compliance-monitor.py", "validate-workflow.py"]
+            scripts = [
+                "workflow-checker.py",
+                "pre-task-hook.sh",
+                "compliance-monitor.py",
+                "validate-workflow.py",
+            ]
 
             for script in scripts:
                 script_path = self.enforcement_dir / script
@@ -485,10 +494,12 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
             config_file = self.enforcement_dir / "config.json"
             if config_file.exists():
                 try:
-                    with open(config_file, 'r') as f:
+                    with open(config_file, "r") as f:
                         config = json.load(f)
                     validation_results["configuration"]["valid"] = True
-                    validation_results["configuration"]["enforcement_level"] = config.get("enforcement_level", "unknown")
+                    validation_results["configuration"]["enforcement_level"] = (
+                        config.get("enforcement_level", "unknown")
+                    )
                     messages.append("✅ Configuration file is valid JSON")
                 except json.JSONDecodeError:
                     validation_results["configuration"]["valid"] = False
@@ -565,12 +576,17 @@ Remember: The workflow exists to protect code quality and ensure proper testing!
             print("🎉 Workflow Enforcement System Setup Complete!")
             print("\\n📚 Next steps:")
             print("   1. Review: cat .claude/workflow-enforcement/QUICK_REFERENCE.md")
-            print("   2. Test: .claude/workflow-enforcement/validate-workflow.py --guide")
-            print("   3. Monitor: .claude/workflow-enforcement/compliance-monitor.py --start")
+            print(
+                "   2. Test: .claude/workflow-enforcement/validate-workflow.py --guide"
+            )
+            print(
+                "   3. Monitor: .claude/workflow-enforcement/compliance-monitor.py --start"
+            )
         else:
             print("⚠️  Setup completed with some issues - review messages above")
 
         return all_success, all_messages
+
 
 def main():
     """Main function for command line usage."""
@@ -583,37 +599,25 @@ Examples:
   %(prog)s --validate       # Validate existing setup
   %(prog)s --git-hooks      # Setup git hooks only
   %(prog)s --config         # Create configuration only
-        """
+        """,
     )
 
     parser.add_argument(
-        "--setup",
-        action="store_true",
-        help="Run complete workflow enforcement setup"
+        "--setup", action="store_true", help="Run complete workflow enforcement setup"
     )
 
     parser.add_argument(
-        "--validate",
-        action="store_true",
-        help="Validate existing setup"
+        "--validate", action="store_true", help="Validate existing setup"
+    )
+
+    parser.add_argument("--git-hooks", action="store_true", help="Setup git hooks only")
+
+    parser.add_argument(
+        "--config", action="store_true", help="Create configuration only"
     )
 
     parser.add_argument(
-        "--git-hooks",
-        action="store_true",
-        help="Setup git hooks only"
-    )
-
-    parser.add_argument(
-        "--config",
-        action="store_true",
-        help="Create configuration only"
-    )
-
-    parser.add_argument(
-        "--shell-integration",
-        action="store_true",
-        help="Setup shell integration only"
+        "--shell-integration", action="store_true", help="Setup shell integration only"
     )
 
     args = parser.parse_args()
@@ -664,6 +668,7 @@ Examples:
     else:
         parser.print_help()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

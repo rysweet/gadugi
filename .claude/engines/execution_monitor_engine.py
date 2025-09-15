@@ -207,7 +207,9 @@ class ExecutionMonitorEngine:
             "file": self._write_file_alert,
         }
 
-    def start_monitoring(self, configuration: MonitoringConfiguration | None = None) -> None:
+    def start_monitoring(
+        self, configuration: MonitoringConfiguration | None = None
+    ) -> None:
         """Start the monitoring system."""
         if configuration:
             self.configuration = configuration
@@ -458,7 +460,9 @@ class ExecutionMonitorEngine:
 
         if process.end_time:
             status["end_time"] = process.end_time.isoformat()
-            status["total_duration"] = (process.end_time - process.start_time).total_seconds()
+            status["total_duration"] = (
+                process.end_time - process.start_time
+            ).total_seconds()
 
         if process.progress:
             status["progress"] = asdict(process.progress)
@@ -516,7 +520,9 @@ class ExecutionMonitorEngine:
         for process in self.monitored_processes.values():
             for alert in process.alerts:
                 if not alert.acknowledged:
-                    alert_counts[alert.severity] = alert_counts.get(alert.severity, 0) + 1
+                    alert_counts[alert.severity] = (
+                        alert_counts.get(alert.severity, 0) + 1
+                    )
 
         # Process breakdown by agent type
         agent_breakdown = {}
@@ -529,7 +535,9 @@ class ExecutionMonitorEngine:
             if process.resource_usage:
                 current_avg = agent_breakdown[agent_type]["avg_cpu"]
                 count = agent_breakdown[agent_type]["count"]
-                new_avg = (current_avg * (count - 1) + process.resource_usage.cpu_usage) / count
+                new_avg = (
+                    current_avg * (count - 1) + process.resource_usage.cpu_usage
+                ) / count
                 agent_breakdown[agent_type]["avg_cpu"] = new_avg
 
         return {
@@ -605,7 +613,8 @@ class ExecutionMonitorEngine:
                     # Attempt restart if configured
                     if (
                         self.configuration.auto_restart
-                        and process.restart_count < self.configuration.max_restart_attempts
+                        and process.restart_count
+                        < self.configuration.max_restart_attempts
                     ):
                         self._restart_process(process)
 
@@ -628,7 +637,9 @@ class ExecutionMonitorEngine:
                 memory_usage=memory_info.rss / (1024 * 1024),  # MB
                 disk_io=io_counters.read_bytes + io_counters.write_bytes,
                 network_io=0,  # Would need additional tracking
-                open_files=psutil_process.num_fds() if hasattr(psutil_process, "num_fds") else 0,
+                open_files=psutil_process.num_fds()
+                if hasattr(psutil_process, "num_fds")
+                else 0,
                 threads=psutil_process.num_threads(),
             )
 
@@ -647,9 +658,9 @@ class ExecutionMonitorEngine:
 
             # Keep only recent history (last 100 entries)
             if len(self.metrics_history[process.process_id]) > 100:
-                self.metrics_history[process.process_id] = self.metrics_history[process.process_id][
-                    -100:
-                ]
+                self.metrics_history[process.process_id] = self.metrics_history[
+                    process.process_id
+                ][-100:]
 
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             # Process no longer exists or is not accessible
@@ -777,7 +788,8 @@ class ExecutionMonitorEngine:
         recent_alerts = [
             alert
             for alert in process.alerts
-            if (datetime.now() - alert.timestamp).total_seconds() < 300  # Within 5 minutes
+            if (datetime.now() - alert.timestamp).total_seconds()
+            < 300  # Within 5 minutes
             and alert.type == new_alert.type
             and alert.message == new_alert.message
         ]
@@ -875,7 +887,9 @@ class ExecutionMonitorEngine:
         try:
             # Update configuration
             if "monitoring_interval" in new_config:
-                self.configuration.monitoring_interval = new_config["monitoring_interval"]
+                self.configuration.monitoring_interval = new_config[
+                    "monitoring_interval"
+                ]
 
             if "collect_metrics" in new_config:
                 self.configuration.collect_metrics = new_config["collect_metrics"]
@@ -884,7 +898,9 @@ class ExecutionMonitorEngine:
                 self.configuration.auto_restart = new_config["auto_restart"]
 
             if "notification_channels" in new_config:
-                self.configuration.notification_channels = new_config["notification_channels"]
+                self.configuration.notification_channels = new_config[
+                    "notification_channels"
+                ]
 
             # Update alert thresholds for existing processes
             if "alert_thresholds" in new_config:
@@ -1041,7 +1057,9 @@ class ExecutionMonitorEngine:
         target = request_data.get("target", {})
         parameters = request_data.get("parameters", {})
 
-        process_id = target.get("process_id") if target.get("process_id") != "all" else None
+        process_id = (
+            target.get("process_id") if target.get("process_id") != "all" else None
+        )
         include_metrics = parameters.get("include_metrics", True)
         include_history = parameters.get("include_history", False)
 

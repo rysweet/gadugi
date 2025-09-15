@@ -255,7 +255,7 @@ def main():
         ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
     )
 
-    final_errors = [l for l in result.stdout.split("\n") if "error:" in l]
+    final_errors = [line for line in result.stdout.split("\n") if "error:" in line]
     print(f"\nFinal error count: {len(final_errors)}")
 
     if len(final_errors) > 0 and len(final_errors) < 20:

@@ -105,37 +105,51 @@ class CodeEvaluator:
             tree = ast.parse(content)
 
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef) or isinstance(node, ast.AsyncFunctionDef):
+                if isinstance(node, ast.FunctionDef) or isinstance(
+                    node, ast.AsyncFunctionDef
+                ):
                     self.found_functions.add(node.name)
 
                     # Store function details
                     if file_path.name not in self.code_structure:
-                        self.code_structure[file_path.name] = {"functions": [], "classes": []}
+                        self.code_structure[file_path.name] = {
+                            "functions": [],
+                            "classes": [],
+                        }
 
-                    self.code_structure[file_path.name]["functions"].append({
-                        "name": node.name,
-                        "async": isinstance(node, ast.AsyncFunctionDef),
-                        "args": [arg.arg for arg in node.args.args],
-                        "decorators": [self._get_decorator_name(d) for d in node.decorator_list],
-                    })
+                    self.code_structure[file_path.name]["functions"].append(
+                        {
+                            "name": node.name,
+                            "async": isinstance(node, ast.AsyncFunctionDef),
+                            "args": [arg.arg for arg in node.args.args],
+                            "decorators": [
+                                self._get_decorator_name(d) for d in node.decorator_list
+                            ],
+                        }
+                    )
 
                 elif isinstance(node, ast.ClassDef):
                     self.found_classes.add(node.name)
 
                     # Store class details
                     if file_path.name not in self.code_structure:
-                        self.code_structure[file_path.name] = {"functions": [], "classes": []}
+                        self.code_structure[file_path.name] = {
+                            "functions": [],
+                            "classes": [],
+                        }
 
                     methods = []
                     for item in node.body:
                         if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                             methods.append(item.name)
 
-                    self.code_structure[file_path.name]["classes"].append({
-                        "name": node.name,
-                        "methods": methods,
-                        "bases": [self._get_base_name(base) for base in node.bases],
-                    })
+                    self.code_structure[file_path.name]["classes"].append(
+                        {
+                            "name": node.name,
+                            "methods": methods,
+                            "bases": [self._get_base_name(base) for base in node.bases],
+                        }
+                    )
 
                 elif isinstance(node, ast.Import):
                     for alias in node.names:
@@ -148,7 +162,9 @@ class CodeEvaluator:
         except Exception as e:
             print(f"Error analyzing {file_path}: {e}")
 
-    def _evaluate_requirement(self, requirement: Requirement) -> Optional[ImplementationGap]:
+    def _evaluate_requirement(
+        self, requirement: Requirement
+    ) -> Optional[ImplementationGap]:
         """Evaluate a single requirement."""
         # Check based on requirement type
         if requirement.type == RequirementType.FUNCTIONAL:
@@ -211,7 +227,9 @@ class CodeEvaluator:
         # This is handled separately in _evaluate_interface
         return None
 
-    def _evaluate_interface(self, interface: InterfaceSpec) -> Optional[ImplementationGap]:
+    def _evaluate_interface(
+        self, interface: InterfaceSpec
+    ) -> Optional[ImplementationGap]:
         """Evaluate an interface specification."""
         if interface.type == "class":
             if interface.name not in self.found_classes:
@@ -328,23 +346,54 @@ class CodeEvaluator:
         """Extract key terms from requirement text."""
         # Remove common words and extract meaningful terms
         stop_words = {
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for",
-            "of", "with", "by", "from", "as", "is", "was", "are", "were", "be",
-            "been", "being", "have", "has", "had", "do", "does", "did", "will",
-            "would", "could", "should", "may", "might", "must", "can", "shall",
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "as",
+            "is",
+            "was",
+            "are",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "must",
+            "can",
+            "shall",
         }
 
         # Extract words
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = re.findall(r"\b\w+\b", text.lower())
 
         # Filter out stop words and short words
-        key_terms = [
-            word for word in words
-            if word not in stop_words and len(word) > 3
-        ]
+        key_terms = [word for word in words if word not in stop_words and len(word) > 3]
 
         # Also extract CamelCase terms
-        camel_terms = re.findall(r'[A-Z][a-z]+(?:[A-Z][a-z]+)*', text)
+        camel_terms = re.findall(r"[A-Z][a-z]+(?:[A-Z][a-z]+)*", text)
         key_terms.extend([term.lower() for term in camel_terms])
 
         return list(set(key_terms))
@@ -373,7 +422,9 @@ class CodeEvaluator:
         penalty = critical_gaps * 0.1
 
         # Bonus for no high/critical gaps
-        if not any(g.severity in [GapSeverity.CRITICAL, GapSeverity.HIGH] for g in report.gaps):
+        if not any(
+            g.severity in [GapSeverity.CRITICAL, GapSeverity.HIGH] for g in report.gaps
+        ):
             bonus = 0.1
         else:
             bonus = 0
@@ -400,13 +451,9 @@ class CodeEvaluator:
                 "Low compliance score - significant implementation needed"
             )
         elif report.compliance_score < 0.8:
-            recommendations.append(
-                "Moderate compliance - focus on high-priority gaps"
-            )
+            recommendations.append("Moderate compliance - focus on high-priority gaps")
         else:
-            recommendations.append(
-                "Good compliance - minor improvements needed"
-            )
+            recommendations.append("Good compliance - minor improvements needed")
 
         # Check for missing tests
         if not self._check_for_tests():

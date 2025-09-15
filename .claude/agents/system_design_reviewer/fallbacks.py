@@ -9,12 +9,13 @@ import json
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional  # type: ignore
+from typing import Dict, Any, Optional  # type: ignore
 from enum import Enum
 
 
 class ErrorCategory(Enum):
     """Error categories for fallback error handler"""
+
     GITHUB_API = "github_api"
     FILE_SYSTEM = "file_system"
     PROCESS_EXECUTION = "process_execution"
@@ -24,6 +25,7 @@ class ErrorCategory(Enum):
 
 class ErrorSeverity(Enum):
     """Error severity levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -41,7 +43,9 @@ class GitHubOperations:
         """Get PR details using GitHub CLI"""
         try:
             cmd = f"gh pr view {pr_number} --json number,title,body,author,baseRefName,headRefName"
-            result = subprocess.run(cmd.split(), capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                cmd.split(), capture_output=True, text=True, timeout=30
+            )
 
             if result.returncode == 0:
                 return json.loads(result.stdout)
@@ -59,7 +63,7 @@ class GitHubOperations:
             action_map = {
                 "APPROVE": "--approve",
                 "REQUEST_CHANGES": "--request-changes",
-                "COMMENT": "--comment"
+                "COMMENT": "--comment",
             }
 
             action_flag = action_map.get(action, "--comment")
@@ -83,7 +87,9 @@ class StateManager:
     """Fallback state manager implementation"""
 
     def __init__(self, state_dir: Optional[Path] = None, task_id: str = "fallback"):
-        self.state_dir = state_dir or Path(".github/workflow-states/SystemDesignReviewer")
+        self.state_dir = state_dir or Path(
+            ".github/workflow-states/SystemDesignReviewer"
+        )
         self.task_id = task_id
         self.state_file = self.state_dir / "fallback_state.json"
         self.state_dir.mkdir(parents=True, exist_ok=True)
@@ -91,10 +97,10 @@ class StateManager:
     def save_state(self, state_data: Dict[str, Any]) -> bool:
         """Save state to file"""
         try:
-            state_data['last_updated'] = datetime.now().isoformat()
-            state_data['task_id'] = self.task_id
+            state_data["last_updated"] = datetime.now().isoformat()
+            state_data["task_id"] = self.task_id
 
-            with open(self.state_file, 'w') as f:
+            with open(self.state_file, "w") as f:
                 json.dump(state_data, f, indent=2, default=str)
             return True
         except Exception as e:
@@ -105,7 +111,7 @@ class StateManager:
         """Load state from file"""
         try:
             if self.state_file.exists():
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file, "r") as f:
                     return json.load(f)
             return self.get_default_state()
         except Exception as e:
@@ -115,23 +121,20 @@ class StateManager:
     def get_default_state(self) -> Dict[str, Any]:
         """Get default state structure"""
         return {
-            'active_reviews': {},
-            'completed_reviews': [],
-            'performance_metrics': {
-                'total_reviews': 0,
-                'average_review_time': 0
-            }
+            "active_reviews": {},
+            "completed_reviews": [],
+            "performance_metrics": {"total_reviews": 0, "average_review_time": 0},
         }
 
     def save_review_result(self, result) -> bool:
         """Save review result to state"""
         try:
             state = self.load_state()
-            state['completed_reviews'].append(result.to_dict())
+            state["completed_reviews"].append(result.to_dict())
 
             # Keep only last 50 reviews
-            if len(state['completed_reviews']) > 50:
-                state['completed_reviews'] = state['completed_reviews'][-50:]
+            if len(state["completed_reviews"]) > 50:
+                state["completed_reviews"] = state["completed_reviews"][-50:]
 
             return self.save_state(state)
         except Exception as e:
@@ -146,17 +149,21 @@ class ErrorHandler:
         self.agent_type = agent_type
         self.error_history = []
 
-    def handle_error(self, exception: Exception, category: ErrorCategory = ErrorCategory.UNKNOWN,
-                    severity: ErrorSeverity = ErrorSeverity.MEDIUM,
-                    context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def handle_error(
+        self,
+        exception: Exception,
+        category: ErrorCategory = ErrorCategory.UNKNOWN,
+        severity: ErrorSeverity = ErrorSeverity.MEDIUM,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
         """Handle error with basic logging"""
         error_info = {
-            'agent_type': self.agent_type,
-            'category': category.value,
-            'severity': severity.value,
-            'message': str(exception),
-            'context': context or {},
-            'timestamp': datetime.now().isoformat()
+            "agent_type": self.agent_type,
+            "category": category.value,
+            "severity": severity.value,
+            "message": str(exception),
+            "context": context or {},
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.error_history.append(error_info)
@@ -176,14 +183,16 @@ class TaskTracker:
         self.agent_type = agent_type
         self.tasks = {}
 
-    def create_task(self, task_id: str, content: str, priority: str = "medium") -> Dict[str, Any]:
+    def create_task(
+        self, task_id: str, content: str, priority: str = "medium"
+    ) -> Dict[str, Any]:
         """Create a new task"""
         task = {
-            'id': task_id,
-            'content': content,
-            'status': 'pending',
-            'priority': priority,
-            'created_at': datetime.now().isoformat()
+            "id": task_id,
+            "content": content,
+            "status": "pending",
+            "priority": priority,
+            "created_at": datetime.now().isoformat(),
         }
         self.tasks[task_id] = task
         print(f"Created task: {content}")
@@ -192,8 +201,8 @@ class TaskTracker:
     def update_task_status(self, task_id: str, status: str) -> bool:
         """Update task status"""
         if task_id in self.tasks:
-            self.tasks[task_id]['status'] = status
-            self.tasks[task_id]['updated_at'] = datetime.now().isoformat()
+            self.tasks[task_id]["status"] = status
+            self.tasks[task_id]["updated_at"] = datetime.now().isoformat()
             print(f"Updated task {task_id}: {status}")
             return True
         return False

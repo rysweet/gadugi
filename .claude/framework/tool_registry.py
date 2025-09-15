@@ -4,7 +4,7 @@ import asyncio
 import inspect
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Union  # type: ignore
+from typing import Any, Callable, Dict, List, Optional, Set  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,9 @@ class Tool:
                 continue
 
             param_info = {
-                "type": param.annotation if param.annotation != inspect.Parameter.empty else Any,
+                "type": param.annotation
+                if param.annotation != inspect.Parameter.empty
+                else Any,
                 "required": param.default == inspect.Parameter.empty,
             }
 
@@ -197,7 +199,9 @@ class ToolRegistry:
         # Check for required parameters
         for param_name, param_info in tool.parameters.items():
             if param_info.get("required", False) and param_name not in params:
-                raise TypeError(f"Tool {tool.name} missing required parameter: {param_name}")
+                raise TypeError(
+                    f"Tool {tool.name} missing required parameter: {param_name}"
+                )
 
         # Check for unknown parameters
         known_params = set(tool.parameters.keys())
@@ -287,6 +291,7 @@ class StandardTools:
             File contents
         """
         from pathlib import Path
+
         return Path(filepath).read_text(encoding=encoding)
 
     @staticmethod
@@ -299,6 +304,7 @@ class StandardTools:
             encoding: File encoding
         """
         from pathlib import Path
+
         Path(filepath).write_text(content, encoding=encoding)
 
     @staticmethod

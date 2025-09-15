@@ -300,7 +300,7 @@ def main():
         ["uv", "run", "pyright", ".claude"], capture_output=True, text=True
     )
 
-    error_lines = [l for l in result.stdout.split("\n") if "error:" in l]
+    error_lines = [line for line in result.stdout.split("\n") if "error:" in line]
     print(f"\nTotal errors remaining: {len(error_lines)}")
 
     if len(error_lines) > 0:

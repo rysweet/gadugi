@@ -2,7 +2,6 @@
 """Simple test to verify Event Router functionality."""
 
 import asyncio
-import json
 import sys
 from datetime import datetime
 from event_router_service import (
@@ -11,8 +10,9 @@ from event_router_service import (
     EventType,
     EventPriority,
     EventFilter,
-    Subscription
+    Subscription,
 )
+
 
 async def test_direct_api():
     """Test the Event Router using direct API calls (no WebSocket)."""
@@ -22,10 +22,7 @@ async def test_direct_api():
 
     # Create service
     service = EventRouterService(
-        host="localhost",
-        port=9090,
-        max_workers=5,
-        queue_size=1000
+        host="localhost", port=9090, max_workers=5, queue_size=1000
     )
 
     print("\n1. Creating Event Router Service...")
@@ -43,7 +40,7 @@ async def test_direct_api():
             source="test_script",
             target="worker",
             payload={"task": "high_priority_task"},
-            metadata={"test": True}
+            metadata={"test": True},
         ),
         Event(
             id="evt-002",
@@ -53,7 +50,7 @@ async def test_direct_api():
             source="test_script",
             target=None,
             payload={"agent": "test_agent"},
-            metadata={"test": True}
+            metadata={"test": True},
         ),
         Event(
             id="evt-003",
@@ -63,8 +60,8 @@ async def test_direct_api():
             source="test_script",
             target="admin",
             payload={"alert": "critical_issue"},
-            metadata={"test": True}
-        )
+            metadata={"test": True},
+        ),
     ]
 
     # Test publishing events
@@ -93,17 +90,17 @@ async def test_direct_api():
         subscription_type="filtered",  # type: ignore[assignment]
         filter=EventFilter(
             event_types=[EventType.TASK_CREATED, EventType.AGENT_STARTED],
-            priorities=[EventPriority.HIGH, EventPriority.NORMAL]
+            priorities=[EventPriority.HIGH, EventPriority.NORMAL],
         ),
         callback=event_handler,
-        endpoint=None
+        endpoint=None,
     )
 
     # Add subscription (not async)
     service.subscribe(
         subscriber_id="test_subscriber",
         event_filter=subscription.filter,
-        callback=event_handler
+        callback=event_handler,
     )
 
     print("   ✓ Created subscription for TASK_CREATED and AGENT_STARTED events")
@@ -125,7 +122,7 @@ async def test_direct_api():
         pass
 
     # Check results
-    print(f"\n7. Results:")
+    print("\n7. Results:")
     print(f"   - Events published: {len(events)}")
     print(f"   - Events in queue: {service.event_queue.qsize()}")
     print(f"   - Subscriptions active: {len(service.subscriptions)}")
@@ -136,8 +133,7 @@ async def test_direct_api():
 
     # Create a filter
     test_filter = EventFilter(
-        event_types=[EventType.TASK_CREATED],
-        priorities=[EventPriority.HIGH]
+        event_types=[EventType.TASK_CREATED], priorities=[EventPriority.HIGH]
     )
 
     # Check which events match
@@ -148,6 +144,7 @@ async def test_direct_api():
     print("\n✅ Event Router basic functionality test completed!")
 
     return True
+
 
 async def test_websocket_server():
     """Test starting the WebSocket server."""
@@ -160,7 +157,7 @@ async def test_websocket_server():
         host="localhost",
         port=9091,  # Different port to avoid conflicts
         max_workers=5,
-        queue_size=1000
+        queue_size=1000,
     )
 
     print("\n1. Starting WebSocket server on port 9091...")
@@ -191,6 +188,7 @@ async def test_websocket_server():
 
     return True
 
+
 async def main():
     """Run all tests."""
     try:
@@ -214,8 +212,10 @@ async def main():
     except Exception as e:
         print(f"\n❌ Test failed with error: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
+
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

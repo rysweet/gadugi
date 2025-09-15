@@ -1,0 +1,163 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gadugi"
+description = "Multi-Agent System for AI-Assisted Coding"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Gadugi Contributors", email = "noreply@example.com"}
+]
+requires-python = ">=3.9"
+dependencies = [
+    "psutil>=7.0.0",
+    "pyyaml>=6.0",
+    "aiohttp>=3.8.0",
+    "protobuf>=4.0.0",
+    "grpcio-tools>=1.60.0",
+    "neo4j>=5.0.0",
+    "python-dotenv>=1.1.1",
+    "openai>=1.101.0",
+    "fastapi>=0.116.1",
+    "uvicorn>=0.35.0",
+    "httpx>=0.28.1",
+    "websockets>=15.0.1",
+    "aiosqlite>=0.21.0",
+    "flask>=3.1.2",
+    "pydantic-settings>=2.10.1",
+    "seaborn>=0.13.0",
+    "matplotlib>=3.7.0",
+]
+dynamic = ["version"]
+
+[project.scripts]
+gadugi = "gadugi.event_service.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/rysweet/gadugi"
+Repository = "https://github.com/rysweet/gadugi"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "ruff>=0.8.0",
+    "pyright>=1.1.380",
+    "pre-commit>=3.5.0",
+    "mypy>=1.8.0",
+]
+test = [
+    "pytest>=7.0",
+    "pytest-mock>=3.10",
+    "pytest-asyncio>=0.21",
+    "docker>=6.0",
+    "psutil>=5.9",
+]
+qa = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.10",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.8.0",
+    "pyright>=1.1.380",
+    "pre-commit>=3.5.0",
+    "mypy>=1.8.0",
+    "black>=24.0.0",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "gadugi.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["gadugi*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+]
+markers = [
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    ".claude/*",
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [
+    ".git",
+    ".venv",
+    ".claude",
+    "__pycache__",
+    "node_modules",
+    "build",
+    "dist",
+]
+[tool.ruff.lint]
+select = ["E", "F", "W"]  # Basic errors and warnings only
+ignore = ["E501"]  # Fix issues rather than ignore them - E501 handled by formatter
+
+# Ignore async-related rules in test files since they often use subprocess for git setup
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
+]
+"tests/*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
+]
+"test_*.py" = [
+    "ASYNC220", "ASYNC221", "ASYNC230",  # async rules
+    "S101",     # assert statements (normal in tests)
+    "PLR2004",  # magic values (normal in tests)
+    "SLF001",   # private member access (normal in tests)
+    "DTZ005",   # datetime without timezone (acceptable in tests)
+    "DTZ006",   # datetime fromtimestamp without tz (acceptable in tests)
+]
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 88
+line-ending = "auto"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.2.0",
+]

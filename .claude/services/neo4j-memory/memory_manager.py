@@ -10,13 +10,12 @@ Implements all required memory types per specification:
 
 from __future__ import annotations
 
-import asyncio
 import json
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, cast
 from typing_extensions import LiteralString
 
 from neo4j import AsyncGraphDatabase, AsyncDriver
@@ -27,12 +26,12 @@ class MemoryType(Enum):
     """Extended memory types for comprehensive memory system."""
 
     # Individual Agent Memory
-    SHORT_TERM = "short_term"          # Temporary, task-specific memories
-    LONG_TERM = "long_term"            # Persistent agent memories
-    EPISODIC = "episodic"              # Specific events and interactions
-    SEMANTIC = "semantic"              # Facts and general knowledge
-    PROCEDURAL = "procedural"          # How-to knowledge and skills
-    WORKING = "working"                # Current task context
+    SHORT_TERM = "short_term"  # Temporary, task-specific memories
+    LONG_TERM = "long_term"  # Persistent agent memories
+    EPISODIC = "episodic"  # Specific events and interactions
+    SEMANTIC = "semantic"  # Facts and general knowledge
+    PROCEDURAL = "procedural"  # How-to knowledge and skills
+    WORKING = "working"  # Current task context
 
     # Shared Memory Spaces
     PROJECT_SHARED = "project_shared"  # Project-wide shared knowledge
@@ -47,20 +46,20 @@ class MemoryType(Enum):
 class MemoryScope(Enum):
     """Scope/visibility of memories."""
 
-    PRIVATE = "private"        # Only accessible to owning agent
-    TASK = "task"             # Shared within task context
-    TEAM = "team"             # Shared within team
-    PROJECT = "project"       # Shared across project
-    GLOBAL = "global"         # Globally accessible
+    PRIVATE = "private"  # Only accessible to owning agent
+    TASK = "task"  # Shared within task context
+    TEAM = "team"  # Shared within team
+    PROJECT = "project"  # Shared across project
+    GLOBAL = "global"  # Globally accessible
 
 
 class MemoryPersistence(Enum):
     """Persistence levels for memories."""
 
-    VOLATILE = "volatile"      # Lost on restart (short-term)
-    SESSION = "session"        # Persists for session
+    VOLATILE = "volatile"  # Lost on restart (short-term)
+    SESSION = "session"  # Persists for session
     PERSISTENT = "persistent"  # Long-term storage
-    ARCHIVED = "archived"      # Historical archive
+    ARCHIVED = "archived"  # Historical archive
 
 
 @dataclass
@@ -163,7 +162,7 @@ class MemoryManager:
         uri: str = "bolt://localhost:7687",
         user: str = "neo4j",
         password: str = "gadugi123!",
-        database: str = "neo4j"
+        database: str = "neo4j",
     ):
         self.uri = uri
         self.user = user
@@ -175,8 +174,7 @@ class MemoryManager:
         """Connect to Neo4j database."""
         if not self._driver:
             self._driver = AsyncGraphDatabase.driver(
-                self.uri,
-                auth=(self.user, self.password)
+                self.uri, auth=(self.user, self.password)
             )
             await self._initialize_schema()
 
@@ -200,12 +198,10 @@ class MemoryManager:
                 "CREATE INDEX memory_type IF NOT EXISTS FOR (m:Memory) ON (m.type)",
                 "CREATE INDEX memory_scope IF NOT EXISTS FOR (m:Memory) ON (m.scope)",
                 "CREATE INDEX memory_task IF NOT EXISTS FOR (m:Memory) ON (m.task_id)",
-
                 # Knowledge graph constraints
                 "CREATE CONSTRAINT knowledge_id IF NOT EXISTS FOR (k:KnowledgeNode) REQUIRE k.id IS UNIQUE",
                 "CREATE INDEX knowledge_agent IF NOT EXISTS FOR (k:KnowledgeNode) ON (k.agent_id)",
                 "CREATE INDEX knowledge_concept IF NOT EXISTS FOR (k:KnowledgeNode) ON (k.concept)",
-
                 # Whiteboard constraints
                 "CREATE CONSTRAINT whiteboard_id IF NOT EXISTS FOR (w:Whiteboard) REQUIRE w.id IS UNIQUE",
                 "CREATE INDEX whiteboard_task IF NOT EXISTS FOR (w:Whiteboard) ON (w.task_id)",
@@ -227,7 +223,7 @@ class MemoryManager:
         content: str,
         memory_type: MemoryType,
         is_short_term: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Memory:
         """Store a memory for an individual agent.
 
@@ -242,9 +238,11 @@ class MemoryManager:
             agent_id=agent_id,
             content=content,
             type=memory_type,
-            persistence=MemoryPersistence.VOLATILE if is_short_term else MemoryPersistence.PERSISTENT,
+            persistence=MemoryPersistence.VOLATILE
+            if is_short_term
+            else MemoryPersistence.PERSISTENT,
             scope=MemoryScope.PRIVATE,
-            **kwargs
+            **kwargs,
         )
 
         if is_short_term:
@@ -261,7 +259,7 @@ class MemoryManager:
         memory_type: Optional[MemoryType] = None,
         short_term_only: bool = False,
         long_term_only: bool = False,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[Memory]:
         """Retrieve memories for an agent.
 
@@ -305,9 +303,7 @@ class MemoryManager:
         return [self._record_to_memory(r["m"]) for r in records]
 
     async def consolidate_short_term_memories(
-        self,
-        agent_id: str,
-        threshold_hours: int = 24
+        self, agent_id: str, threshold_hours: int = 24
     ) -> List[Memory]:
         """Consolidate short-term memories into long-term memories.
 
@@ -333,7 +329,7 @@ class MemoryManager:
         params = {
             "agent_id": agent_id,
             "cutoff": cutoff.isoformat(),
-            "now": datetime.now().isoformat()
+            "now": datetime.now().isoformat(),
         }
 
         async with self._driver.session(database=self.database) as session:
@@ -345,11 +341,7 @@ class MemoryManager:
     # ========== Project Shared Memory ==========
 
     async def store_project_memory(
-        self,
-        project_id: str,
-        content: str,
-        created_by: str,
-        **kwargs
+        self, project_id: str, content: str, created_by: str, **kwargs
     ) -> Memory:
         """Store a project-wide shared memory."""
         memory = Memory(
@@ -359,16 +351,14 @@ class MemoryManager:
             type=MemoryType.PROJECT_SHARED,
             scope=MemoryScope.PROJECT,
             persistence=MemoryPersistence.PERSISTENT,
-            **kwargs
+            **kwargs,
         )
 
         await self._store_memory(memory)
         return memory
 
     async def get_project_memories(
-        self,
-        project_id: str,
-        limit: int = 100
+        self, project_id: str, limit: int = 100
     ) -> List[Memory]:
         """Retrieve project-wide shared memories."""
         if not self._driver:
@@ -392,16 +382,10 @@ class MemoryManager:
 
     # ========== Task Whiteboard (Shared Workspace) ==========
 
-    async def create_whiteboard(
-        self,
-        task_id: str,
-        agent_id: str
-    ) -> Whiteboard:
+    async def create_whiteboard(self, task_id: str, agent_id: str) -> Whiteboard:
         """Create a new task whiteboard."""
         whiteboard = Whiteboard(
-            task_id=task_id,
-            created_by=agent_id,
-            participants=[agent_id]
+            task_id=task_id, created_by=agent_id, participants=[agent_id]
         )
 
         if not self._driver:
@@ -433,7 +417,7 @@ class MemoryManager:
             "action_items": json.dumps(whiteboard.action_items),
             "created_at": whiteboard.created_at.isoformat(),
             "updated_at": whiteboard.updated_at.isoformat(),
-            "version": whiteboard.version
+            "version": whiteboard.version,
         }
 
         async with self._driver.session(database=self.database) as session:
@@ -442,17 +426,19 @@ class MemoryManager:
         return whiteboard
 
     async def update_whiteboard(
-        self,
-        task_id: str,
-        agent_id: str,
-        section: str,
-        content: Dict[str, Any]
+        self, task_id: str, agent_id: str, section: str, content: Dict[str, Any]
     ) -> None:
         """Update a section of the task whiteboard."""
         if not self._driver:
             raise RuntimeError("Not connected to database")
 
-        valid_sections = ["notes", "decisions", "action_items", "diagrams", "code_snippets"]
+        valid_sections = [
+            "notes",
+            "decisions",
+            "action_items",
+            "diagrams",
+            "code_snippets",
+        ]
         if section not in valid_sections:
             raise ValueError(f"Invalid section: {section}")
 
@@ -469,12 +455,14 @@ class MemoryManager:
         params = {
             "task_id": task_id,
             "agent_id": agent_id,
-            "content": json.dumps({
-                "agent_id": agent_id,
-                "timestamp": datetime.now().isoformat(),
-                "content": content
-            }),
-            "updated_at": datetime.now().isoformat()
+            "content": json.dumps(
+                {
+                    "agent_id": agent_id,
+                    "timestamp": datetime.now().isoformat(),
+                    "content": content,
+                }
+            ),
+            "updated_at": datetime.now().isoformat(),
         }
 
         async with self._driver.session(database=self.database) as session:
@@ -510,7 +498,7 @@ class MemoryManager:
             action_items=json.loads(record.get("action_items", "[]")),
             created_at=datetime.fromisoformat(record["created_at"]),
             updated_at=datetime.fromisoformat(record["updated_at"]),
-            version=record["version"]
+            version=record["version"],
         )
 
     # ========== Procedural Memory ==========
@@ -521,13 +509,13 @@ class MemoryManager:
         procedure_name: str,
         steps: List[str],
         context: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> Memory:
         """Store procedural knowledge (how-to information)."""
         structured_data = {
             "procedure_name": procedure_name,
             "steps": steps,
-            "context": context
+            "context": context,
         }
 
         memory = Memory(
@@ -537,16 +525,14 @@ class MemoryManager:
             type=MemoryType.PROCEDURAL,
             persistence=MemoryPersistence.PERSISTENT,
             scope=MemoryScope.PRIVATE,
-            **kwargs
+            **kwargs,
         )
 
         await self._store_memory(memory)
         return memory
 
     async def get_procedural_memories(
-        self,
-        agent_id: str,
-        procedure_name: Optional[str] = None
+        self, agent_id: str, procedure_name: Optional[str] = None
     ) -> List[Memory]:
         """Retrieve procedural memories for an agent."""
         if not self._driver:
@@ -577,18 +563,11 @@ class MemoryManager:
     # ========== Knowledge Graph Management ==========
 
     async def add_knowledge_node(
-        self,
-        agent_id: str,
-        concept: str,
-        description: str,
-        **kwargs
+        self, agent_id: str, concept: str, description: str, **kwargs
     ) -> KnowledgeNode:
         """Add a node to an agent's knowledge graph."""
         node = KnowledgeNode(
-            agent_id=agent_id,
-            concept=concept,
-            description=description,
-            **kwargs
+            agent_id=agent_id, concept=concept, description=description, **kwargs
         )
 
         if not self._driver:
@@ -616,7 +595,7 @@ class MemoryManager:
             "attributes": json.dumps(node.attributes),
             "confidence": node.confidence,
             "created_at": node.created_at.isoformat(),
-            "updated_at": node.updated_at.isoformat()
+            "updated_at": node.updated_at.isoformat(),
         }
 
         async with self._driver.session(database=self.database) as session:
@@ -625,11 +604,7 @@ class MemoryManager:
         return node
 
     async def link_knowledge_nodes(
-        self,
-        node1_id: str,
-        node2_id: str,
-        relationship: str,
-        strength: float = 1.0
+        self, node1_id: str, node2_id: str, relationship: str, strength: float = 1.0
     ) -> None:
         """Create a relationship between knowledge nodes."""
         if not self._driver:
@@ -650,26 +625,28 @@ class MemoryManager:
             "node2_id": node2_id,
             "relationship": relationship,
             "strength": strength,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
         }
 
         async with self._driver.session(database=self.database) as session:
             await session.run(cast(LiteralString, query), params)
 
     async def get_knowledge_graph(
-        self,
-        agent_id: str,
-        max_depth: int = 2
+        self, agent_id: str, max_depth: int = 2
     ) -> Dict[str, Any]:
         """Retrieve an agent's knowledge graph."""
         if not self._driver:
             raise RuntimeError("Not connected to database")
 
-        query = """
+        query = (
+            """
         MATCH (k:KnowledgeNode {agent_id: $agent_id})
-        OPTIONAL MATCH path = (k)-[r:RELATES_TO*1..""" + str(max_depth) + """]->(related)
+        OPTIONAL MATCH path = (k)-[r:RELATES_TO*1.."""
+            + str(max_depth)
+            + """]->(related)
         RETURN k, relationships(path) as rels, nodes(path) as nodes
         """
+        )
 
         params = {"agent_id": agent_id}
 
@@ -689,7 +666,7 @@ class MemoryManager:
                     "id": k["id"],
                     "concept": k["concept"],
                     "description": k["description"],
-                    "confidence": k["confidence"]
+                    "confidence": k["confidence"],
                 }
 
             # Add related nodes and edges
@@ -700,22 +677,21 @@ class MemoryManager:
                             "id": node["id"],
                             "concept": node["concept"],
                             "description": node["description"],
-                            "confidence": node["confidence"]
+                            "confidence": node["confidence"],
                         }
 
             if record["rels"]:
                 for rel in record["rels"]:
-                    edges.append({
-                        "from": rel.start_node["id"],
-                        "to": rel.end_node["id"],
-                        "type": rel["type"],
-                        "strength": rel["strength"]
-                    })
+                    edges.append(
+                        {
+                            "from": rel.start_node["id"],
+                            "to": rel.end_node["id"],
+                            "type": rel["type"],
+                            "strength": rel["strength"],
+                        }
+                    )
 
-        return {
-            "nodes": list(nodes.values()),
-            "edges": edges
-        }
+        return {"nodes": list(nodes.values()), "edges": edges}
 
     # ========== Helper Methods ==========
 
@@ -761,7 +737,9 @@ class MemoryManager:
             "project_id": memory.project_id,
             "team_id": memory.team_id,
             "content": memory.content,
-            "structured_data": json.dumps(memory.structured_data) if memory.structured_data else None,
+            "structured_data": json.dumps(memory.structured_data)
+            if memory.structured_data
+            else None,
             "tags": memory.tags,
             "metadata": json.dumps(memory.metadata),
             "importance_score": memory.importance_score,
@@ -772,7 +750,7 @@ class MemoryManager:
             "updated_at": memory.updated_at.isoformat(),
             "expires_at": memory.expires_at.isoformat() if memory.expires_at else None,
             "version": memory.version,
-            "is_active": memory.is_active
+            "is_active": memory.is_active,
         }
 
         async with self._driver.session(database=self.database) as session:
@@ -790,7 +768,9 @@ class MemoryManager:
             project_id=record.get("project_id"),
             team_id=record.get("team_id"),
             content=record["content"],
-            structured_data=json.loads(record["structured_data"]) if record.get("structured_data") else None,
+            structured_data=json.loads(record["structured_data"])
+            if record.get("structured_data")
+            else None,
             tags=record.get("tags", []),
             metadata=json.loads(record.get("metadata", "{}")),
             importance_score=record["importance_score"],
@@ -799,9 +779,11 @@ class MemoryManager:
             access_count=record["access_count"],
             created_at=datetime.fromisoformat(record["created_at"]),
             updated_at=datetime.fromisoformat(record["updated_at"]),
-            expires_at=datetime.fromisoformat(record["expires_at"]) if record.get("expires_at") else None,
+            expires_at=datetime.fromisoformat(record["expires_at"])
+            if record.get("expires_at")
+            else None,
             version=record["version"],
-            is_active=record["is_active"]
+            is_active=record["is_active"],
         )
 
     async def cleanup_expired_memories(self) -> int:

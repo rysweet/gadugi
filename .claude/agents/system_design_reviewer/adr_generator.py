@@ -11,12 +11,13 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 
-from .ast_parser import ArchitecturalChange, ImpactLevel, ChangeType, ElementType  # type: ignore
+from .ast_parser import ArchitecturalChange, ImpactLevel, ElementType  # type: ignore
 
 
 @dataclass
 class ADRData:
     """Data structure for an Architecture Decision Record"""
+
     number: int
     title: str
     date: datetime
@@ -45,11 +46,12 @@ class ADRGenerator:
             "interface_change": "Public interface modification",
             "security_change": "Security architecture modification",
             "performance_change": "Performance architecture change",
-            "integration_change": "External integration modification"
+            "integration_change": "External integration modification",
         }
 
-    def generate_adrs(self, changes: List[ArchitecturalChange],
-                     pr_info: Dict[str, Any]) -> List[str]:
+    def generate_adrs(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> List[str]:
         """Generate ADRs for significant architectural changes"""
         generated_adrs = []
 
@@ -71,7 +73,9 @@ class ADRGenerator:
 
         return generated_adrs
 
-    def _group_changes_by_decision(self, changes: List[ArchitecturalChange]) -> Dict[str, List[ArchitecturalChange]]:
+    def _group_changes_by_decision(
+        self, changes: List[ArchitecturalChange]
+    ) -> Dict[str, List[ArchitecturalChange]]:
         """Group changes by the type of architectural decision they represent"""
         groups = {decision_type: [] for decision_type in self.decision_patterns.keys()}
 
@@ -94,17 +98,30 @@ class ADRGenerator:
         element = change.element
 
         # Security-related changes
-        security_indicators = ["auth", "security", "xpia", "defense", "audit", "permission"]
+        security_indicators = [
+            "auth",
+            "security",
+            "xpia",
+            "defense",
+            "audit",
+            "permission",
+        ]
         if any(indicator in element.name.lower() for indicator in security_indicators):
             return "security_change"
 
         # Performance-related changes
-        if element.is_async or "performance" in element.name.lower() or "parallel" in element.name.lower():
+        if (
+            element.is_async
+            or "performance" in element.name.lower()
+            or "parallel" in element.name.lower()
+        ):
             return "performance_change"
 
         # Integration-related changes
         integration_indicators = ["github", "api", "webhook", "cli", "integration"]
-        if any(indicator in element.name.lower() for indicator in integration_indicators):
+        if any(
+            indicator in element.name.lower() for indicator in integration_indicators
+        ):
             return "integration_change"
 
         # Framework/technology changes
@@ -113,8 +130,11 @@ class ADRGenerator:
             return "framework_change"
 
         # Interface changes (public APIs)
-        if (element.element_type in [ElementType.CLASS, ElementType.FUNCTION] and
-            element.is_public and len(element.dependencies) > 3):
+        if (
+            element.element_type in [ElementType.CLASS, ElementType.FUNCTION]
+            and element.is_public
+            and len(element.dependencies) > 3
+        ):
             return "interface_change"
 
         # Pattern changes (architectural patterns)
@@ -125,12 +145,16 @@ class ADRGenerator:
         # Default to interface change for significant modifications
         return "interface_change"
 
-    def _create_adr_data(self, decision_type: str, changes: List[ArchitecturalChange],
-                        pr_info: Dict[str, Any]) -> ADRData:
+    def _create_adr_data(
+        self,
+        decision_type: str,
+        changes: List[ArchitecturalChange],
+        pr_info: Dict[str, Any],
+    ) -> ADRData:
         """Create ADR data structure for a group of changes"""
         adr_number = self._get_next_adr_number()
-        pr_number = pr_info.get('number', 'Unknown')
-        _pr_title = pr_info.get('title', 'Untitled Change')
+        pr_number = pr_info.get("number", "Unknown")
+        _pr_title = pr_info.get("title", "Untitled Change")
 
         # Generate title
         title = self._generate_title(decision_type, changes)
@@ -168,7 +192,7 @@ class ADRGenerator:
             alternatives=alternatives,
             implementation_notes=implementation_notes,
             related_changes=related_changes,
-            pr_number=pr_number
+            pr_number=pr_number,
         )
 
     def _get_next_adr_number(self) -> int:
@@ -187,7 +211,9 @@ class ADRGenerator:
 
         return max(numbers) + 1 if numbers else 1
 
-    def _generate_title(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
+    def _generate_title(
+        self, decision_type: str, changes: List[ArchitecturalChange]
+    ) -> str:
         """Generate ADR title"""
         base_title = self.decision_patterns.get(decision_type, "Architectural Change")
 
@@ -202,18 +228,22 @@ class ADRGenerator:
                 if change.element.parent_element:
                     component_names.add(change.element.parent_element)
                 else:
-                    component_names.add(change.element.name.split('.')[0])
+                    component_names.add(change.element.name.split(".")[0])
 
             if len(component_names) == 1:
                 return f"{base_title}: {list(component_names)[0]} Component"
             else:
                 return f"{base_title}: Multiple Components"
 
-    def _generate_context(self, decision_type: str, changes: List[ArchitecturalChange],
-                         pr_info: Dict[str, Any]) -> str:
+    def _generate_context(
+        self,
+        decision_type: str,
+        changes: List[ArchitecturalChange],
+        pr_info: Dict[str, Any],
+    ) -> str:
         """Generate context section"""
-        pr_number = pr_info.get('number', 'Unknown')
-        pr_title = pr_info.get('title', 'Untitled Change')
+        pr_number = pr_info.get("number", "Unknown")
+        pr_title = pr_info.get("title", "Untitled Change")
 
         context = f"This decision emerges from PR #{pr_number}: {pr_title}\n\n"
 
@@ -233,7 +263,9 @@ class ADRGenerator:
 
         return context
 
-    def _generate_decision(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
+    def _generate_decision(
+        self, decision_type: str, changes: List[ArchitecturalChange]
+    ) -> str:
         """Generate decision description"""
         decision_templates = {
             "new_pattern": "We will adopt the {pattern} architectural pattern for {component}.",
@@ -241,10 +273,12 @@ class ADRGenerator:
             "interface_change": "We will modify the public interface of {component} to {modification}.",
             "security_change": "We will implement {security_measure} to enhance system security.",
             "performance_change": "We will optimize {component} for improved performance characteristics.",
-            "integration_change": "We will modify the integration with {external_system}."
+            "integration_change": "We will modify the integration with {external_system}.",
         }
 
-        template = decision_templates.get(decision_type, "We will implement the following architectural change:")
+        template = decision_templates.get(
+            decision_type, "We will implement the following architectural change:"
+        )
 
         # Extract specific details from changes
         details = self._extract_decision_details(decision_type, changes)
@@ -253,10 +287,14 @@ class ADRGenerator:
             return template.format(**details)
         except KeyError:
             # Fallback if template formatting fails
-            return f"We will implement the following architectural changes:\n" + \
-                   "\n".join([f"- {change.get_description()}" for change in changes])
+            return (
+                "We will implement the following architectural changes:\n"
+                + "\n".join([f"- {change.get_description()}" for change in changes])
+            )
 
-    def _extract_decision_details(self, decision_type: str, changes: List[ArchitecturalChange]) -> Dict[str, str]:
+    def _extract_decision_details(
+        self, decision_type: str, changes: List[ArchitecturalChange]
+    ) -> Dict[str, str]:
         """Extract specific details for decision templating"""
         details = {}
 
@@ -267,52 +305,70 @@ class ADRGenerator:
                 patterns.update(change.element.patterns)
                 components.add(change.element.name)
 
-            details['pattern'] = ', '.join(patterns) if patterns else 'architectural pattern'
-            details['component'] = ', '.join(list(components)[:3]) if components else 'components'
+            details["pattern"] = (
+                ", ".join(patterns) if patterns else "architectural pattern"
+            )
+            details["component"] = (
+                ", ".join(list(components)[:3]) if components else "components"
+            )
 
         elif decision_type == "framework_change":
             frameworks = set()
             for change in changes:
-                if 'container' in change.element.name.lower():
-                    frameworks.add('containerization')
-                elif 'pytest' in change.element.name.lower():
-                    frameworks.add('pytest testing framework')
+                if "container" in change.element.name.lower():
+                    frameworks.add("containerization")
+                elif "pytest" in change.element.name.lower():
+                    frameworks.add("pytest testing framework")
                 # Add more framework detection logic
 
-            details['framework'] = ', '.join(frameworks) if frameworks else 'new framework'
+            details["framework"] = (
+                ", ".join(frameworks) if frameworks else "new framework"
+            )
 
         elif decision_type == "interface_change":
             components = [change.element.name for change in changes]
-            details['component'] = ', '.join(components[:3])
-            details['modification'] = 'support new functionality'
+            details["component"] = ", ".join(components[:3])
+            details["modification"] = "support new functionality"
 
         elif decision_type == "security_change":
             security_measures = []
             for change in changes:
-                if 'auth' in change.element.name.lower():
-                    security_measures.append('authentication mechanisms')
-                elif 'xpia' in change.element.name.lower():
-                    security_measures.append('XPIA defense systems')
+                if "auth" in change.element.name.lower():
+                    security_measures.append("authentication mechanisms")
+                elif "xpia" in change.element.name.lower():
+                    security_measures.append("XPIA defense systems")
 
-            details['security_measure'] = ', '.join(security_measures) if security_measures else 'security enhancements'
+            details["security_measure"] = (
+                ", ".join(security_measures)
+                if security_measures
+                else "security enhancements"
+            )
 
         elif decision_type == "performance_change":
-            components = [change.element.name for change in changes if change.element.is_async]
-            details['component'] = ', '.join(components) if components else 'system components'
+            components = [
+                change.element.name for change in changes if change.element.is_async
+            ]
+            details["component"] = (
+                ", ".join(components) if components else "system components"
+            )
 
         elif decision_type == "integration_change":
             systems = []
             for change in changes:
-                if 'github' in change.element.name.lower():
-                    systems.append('GitHub API')
-                elif 'api' in change.element.name.lower():
-                    systems.append('external APIs')
+                if "github" in change.element.name.lower():
+                    systems.append("GitHub API")
+                elif "api" in change.element.name.lower():
+                    systems.append("external APIs")
 
-            details['external_system'] = ', '.join(systems) if systems else 'external systems'
+            details["external_system"] = (
+                ", ".join(systems) if systems else "external systems"
+            )
 
         return details
 
-    def _generate_rationale(self, decision_type: str, changes: List[ArchitecturalChange]) -> str:
+    def _generate_rationale(
+        self, decision_type: str, changes: List[ArchitecturalChange]
+    ) -> str:
         """Generate rationale section"""
         rationale_templates = {
             "new_pattern": "This pattern provides better separation of concerns and improves maintainability.",
@@ -320,10 +376,12 @@ class ADRGenerator:
             "interface_change": "These interface modifications are necessary to support new functionality while maintaining backward compatibility.",
             "security_change": "These security enhancements are critical for maintaining system integrity and protecting against threats.",
             "performance_change": "These performance optimizations are necessary to maintain system responsiveness and scalability.",
-            "integration_change": "These integration changes improve system interoperability and external communication."
+            "integration_change": "These integration changes improve system interoperability and external communication.",
         }
 
-        base_rationale = rationale_templates.get(decision_type, "This change is necessary for system evolution.")
+        base_rationale = rationale_templates.get(
+            decision_type, "This change is necessary for system evolution."
+        )
 
         # Add specific justifications from change implications
         implications = set()
@@ -371,7 +429,9 @@ class ADRGenerator:
 
         return consequences
 
-    def _generate_alternatives(self, decision_type: str, changes: List[ArchitecturalChange]) -> List[str]:
+    def _generate_alternatives(
+        self, decision_type: str, changes: List[ArchitecturalChange]
+    ) -> List[str]:
         """Generate alternatives considered"""
         _alternatives = []
 
@@ -379,40 +439,43 @@ class ADRGenerator:
             "new_pattern": [
                 "Continue with existing implementation patterns",
                 "Adopt a different architectural pattern",
-                "Implement a hybrid approach combining multiple patterns"
+                "Implement a hybrid approach combining multiple patterns",
             ],
             "framework_change": [
                 "Maintain current technology stack",
                 "Evaluate alternative frameworks",
-                "Implement custom solution without external framework"
+                "Implement custom solution without external framework",
             ],
             "interface_change": [
                 "Maintain current interface with deprecated methods",
                 "Create entirely new interface while preserving old one",
-                "Implement breaking change with migration guide"
+                "Implement breaking change with migration guide",
             ],
             "security_change": [
                 "Implement minimal security measures",
                 "Use third-party security solutions",
-                "Delay security improvements to future release"
+                "Delay security improvements to future release",
             ],
             "performance_change": [
                 "Accept current performance characteristics",
                 "Implement different optimization approach",
-                "Scale infrastructure instead of optimizing code"
+                "Scale infrastructure instead of optimizing code",
             ],
             "integration_change": [
                 "Maintain current integration approach",
                 "Use different integration technology",
-                "Implement custom integration solution"
-            ]
+                "Implement custom integration solution",
+            ],
         }
 
-        return alternative_templates.get(decision_type, [
-            "Maintain status quo",
-            "Implement different approach",
-            "Defer decision to future iteration"
-        ])
+        return alternative_templates.get(
+            decision_type,
+            [
+                "Maintain status quo",
+                "Implement different approach",
+                "Defer decision to future iteration",
+            ],
+        )
 
     def _generate_implementation_notes(self, changes: List[ArchitecturalChange]) -> str:
         """Generate implementation notes"""
@@ -421,7 +484,7 @@ class ADRGenerator:
         # Add file-specific notes
         affected_files = set()
         for change in changes:
-            file_path = change.element.location.split(':')[0]
+            file_path = change.element.location.split(":")[0]
             affected_files.add(file_path)
 
         if affected_files:
@@ -449,18 +512,21 @@ class ADRGenerator:
 
         return notes
 
-    def _generate_related_changes(self, changes: List[ArchitecturalChange],
-                                pr_info: Dict[str, Any]) -> List[str]:
+    def _generate_related_changes(
+        self, changes: List[ArchitecturalChange], pr_info: Dict[str, Any]
+    ) -> List[str]:
         """Generate related changes references"""
         related = []
 
-        pr_number = pr_info.get('number')
+        pr_number = pr_info.get("number")
         if pr_number:
             related.append(f"PR #{pr_number}")
 
         # Add issue references if available
-        pr_body = pr_info.get('body', '')
-        issue_matches = re.findall(r'(?:closes|fixes|resolves)\s+#(\d+)', pr_body, re.IGNORECASE)
+        pr_body = pr_info.get("body", "")
+        issue_matches = re.findall(
+            r"(?:closes|fixes|resolves)\s+#(\d+)", pr_body, re.IGNORECASE
+        )
         for issue_num in issue_matches:
             related.append(f"Issue #{issue_num}")
 
@@ -476,7 +542,7 @@ class ADRGenerator:
 
         content = self._format_adr_content(adr_data)
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return str(file_path)
@@ -484,11 +550,11 @@ class ADRGenerator:
     def _slugify(self, title: str) -> str:
         """Convert title to filename-safe slug"""
         # Convert to lowercase and replace spaces/special chars with hyphens
-        slug = re.sub(r'[^\w\-_\.]', '-', title.lower())
+        slug = re.sub(r"[^\w\-_\.]", "-", title.lower())
         # Remove multiple consecutive hyphens
-        slug = re.sub(r'-+', '-', slug)
+        slug = re.sub(r"-+", "-", slug)
         # Remove leading/trailing hyphens
-        return slug.strip('-')
+        return slug.strip("-")
 
     def _format_adr_content(self, adr_data: ADRData) -> str:
         """Format ADR content according to standard template"""

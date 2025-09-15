@@ -9,8 +9,7 @@ import logging
 from typing import Any, Optional
 from dataclasses import dataclass
 
-from typing import Any, List, Optional, Tuple
-from dataclasses import dataclass
+from typing import List, Tuple
 from enum import Enum
 
 
@@ -18,11 +17,14 @@ class ErrorHandler:
     def __init__(self):
         pass
 
+
 # Add shared modules to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "shared"))
 
+
 class TestStatus(Enum):
     """Test execution status."""
+
     PASS = "pass"
     FAIL = "fail"
     SKIP = "skip"
@@ -31,6 +33,7 @@ class TestStatus(Enum):
 
 class SkipReason(Enum):
     """Valid reasons for skipping tests."""
+
     API_KEY_MISSING = "api_key_missing"
     PLATFORM_CONSTRAINT = "platform_constraint"
     UPSTREAM_BUG = "upstream_bug"
@@ -42,6 +45,7 @@ class SkipReason(Enum):
 @dataclass
 class OperationResult:
     """General operation result."""
+
     success: bool
     data: Any = None
     error: str = ""
@@ -50,6 +54,7 @@ class OperationResult:
 @dataclass
 class AgentConfig:
     """Basic agent configuration."""
+
     agent_id: str
     name: str
     version: str = "1.0.0"

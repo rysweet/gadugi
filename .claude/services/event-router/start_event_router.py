@@ -5,7 +5,6 @@ This script properly initializes the Flask-based event router service.
 """
 
 import sys
-import os
 import logging
 from pathlib import Path
 
@@ -13,26 +12,29 @@ from pathlib import Path
 service_dir = Path(__file__).parent
 sys.path.insert(0, str(service_dir))
 
+
 def setup_logging():
     """Configure logging for the service."""
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler(service_dir / 'logs' / 'event-router.log', mode='a')
-        ]
+            logging.FileHandler(service_dir / "logs" / "event-router.log", mode="a"),
+        ],
     )
+
 
 def ensure_directories():
     """Ensure required directories exist."""
     dirs_to_create = [
-        service_dir / 'logs',
-        service_dir / 'data',
+        service_dir / "logs",
+        service_dir / "data",
     ]
 
     for dir_path in dirs_to_create:
         dir_path.mkdir(parents=True, exist_ok=True)
+
 
 def main():
     """Main function to start the Event Router service."""
@@ -79,10 +81,7 @@ def main():
 
         # Start the Flask server
         app.run(
-            host=settings.host,
-            port=settings.port,
-            debug=settings.debug,
-            threaded=True
+            host=settings.host, port=settings.port, debug=settings.debug, threaded=True
         )
 
     except ImportError as e:
@@ -95,6 +94,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

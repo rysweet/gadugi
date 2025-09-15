@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Optional
 from contextlib import asynccontextmanager
 
 try:
@@ -19,16 +19,15 @@ try:
         MemoryBackendType,
         BackendConfig,
         HealthMonitorConfig,
-        create_memory_health_monitor
+        create_memory_health_monitor,
     )
     from .memory_integration import AgentMemoryInterface
 except ImportError:
     from memory_health import (
         MemoryHealthMonitor,
         MemoryBackendType,
-        BackendConfig,
         HealthMonitorConfig,
-        create_memory_health_monitor
+        create_memory_health_monitor,
     )
     from memory_integration import AgentMemoryInterface
 
@@ -52,7 +51,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
         task_id: Optional[str] = None,
         enable_health_monitoring: bool = True,
         health_check_interval: int = 30,
-        auto_failover: bool = True
+        auto_failover: bool = True,
     ):
         super().__init__(agent_id, mcp_base_url, project_id, task_id)
 
@@ -99,7 +98,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                 enable_auto_failover=self._auto_failover,
                 enable_periodic_monitoring=True,
                 log_backend_switches=True,
-                emit_events=True
+                emit_events=True,
             )
 
             # Event handler for backend changes
@@ -113,9 +112,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
 
             # Create health monitor
             self._health_monitor = create_memory_health_monitor(
-                config=config,
-                event_callback=on_health_event,
-                logger=self._logger
+                config=config, event_callback=on_health_event, logger=self._logger
             )
 
             # Start monitoring
@@ -135,13 +132,15 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
         """Clean up any cached backend connections."""
         for backend_type, connection in self._backend_connections.items():
             try:
-                if hasattr(connection, 'close'):
+                if hasattr(connection, "close"):
                     if asyncio.iscoroutinefunction(connection.close):
                         await connection.close()
                     else:
                         connection.close()
             except Exception as e:
-                self._logger.warning(f"Error closing {backend_type.value} connection: {e}")
+                self._logger.warning(
+                    f"Error closing {backend_type.value} connection: {e}"
+                )
 
         self._backend_connections.clear()
 
@@ -173,7 +172,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                 "healthy": result.is_healthy,
                 "response_time_ms": result.response_time_ms,
                 "error": result.error_message,
-                "details": result.details
+                "details": result.details,
             }
             for backend_type, result in health_results.items()
         }
@@ -181,7 +180,9 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
     async def trigger_failover(self, from_backend: str) -> bool:
         """Manually trigger a failover from the specified backend."""
         if not self._health_monitor:
-            self._logger.warning("Cannot trigger failover: health monitoring not enabled")
+            self._logger.warning(
+                "Cannot trigger failover: health monitoring not enabled"
+            )
             return False
 
         try:
@@ -203,7 +204,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
         content: str,
         tags: Optional[List[str]] = None,
         importance: float = 0.5,
-        retry_on_failure: bool = True
+        retry_on_failure: bool = True,
     ) -> str:
         """Store short-term memory with automatic retry on backend failure."""
         try:
@@ -225,7 +226,9 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                         )
 
                         # Retry with new backend
-                        return await super().remember_short_term(content, tags, importance)
+                        return await super().remember_short_term(
+                            content, tags, importance
+                        )
 
             raise  # Re-raise original exception if retry not enabled or failed
 
@@ -235,11 +238,13 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
         memory_type: str = "semantic",
         tags: Optional[List[str]] = None,
         importance: float = 0.7,
-        retry_on_failure: bool = True
+        retry_on_failure: bool = True,
     ) -> str:
         """Store long-term memory with automatic retry on backend failure."""
         try:
-            return await super().remember_long_term(content, memory_type, tags, importance)
+            return await super().remember_long_term(
+                content, memory_type, tags, importance
+            )
         except Exception as e:
             if retry_on_failure and self._health_monitor:
                 self._logger.warning(f"Long-term memory storage failed: {e}")
@@ -256,7 +261,9 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                         )
 
                         # Retry with new backend
-                        return await super().remember_long_term(content, memory_type, tags, importance)
+                        return await super().remember_long_term(
+                            content, memory_type, tags, importance
+                        )
 
             raise
 
@@ -266,11 +273,13 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
         short_term_only: bool = False,
         long_term_only: bool = False,
         limit: int = 50,
-        retry_on_failure: bool = True
+        retry_on_failure: bool = True,
     ) -> List[Dict[str, Any]]:
         """Recall memories with automatic retry on backend failure."""
         try:
-            return await super().recall_memories(memory_type, short_term_only, long_term_only, limit)
+            return await super().recall_memories(
+                memory_type, short_term_only, long_term_only, limit
+            )
         except Exception as e:
             if retry_on_failure and self._health_monitor:
                 self._logger.warning(f"Memory recall failed: {e}")
@@ -287,7 +296,9 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                         )
 
                         # Retry with new backend
-                        return await super().recall_memories(memory_type, short_term_only, long_term_only, limit)
+                        return await super().recall_memories(
+                            memory_type, short_term_only, long_term_only, limit
+                        )
 
             raise
 
@@ -301,7 +312,7 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
             "health_monitoring_enabled": self._enable_health_monitoring,
             "backend_health": None,
             "connection_test": None,
-            "memory_operations_test": None
+            "memory_operations_test": None,
         }
 
         # Health status
@@ -316,19 +327,20 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
                 diagnostics["connection_test"] = {
                     "status": "success",
                     "response_code": response.status_code,
-                    "response_time_ms": response.elapsed.total_seconds() * 1000 if response.elapsed else 0
+                    "response_time_ms": response.elapsed.total_seconds() * 1000
+                    if response.elapsed
+                    else 0,
                 }
         except Exception as e:
-            diagnostics["connection_test"] = {
-                "status": "failed",
-                "error": str(e)
-            }
+            diagnostics["connection_test"] = {"status": "failed", "error": str(e)}
 
         # Memory operations test
         try:
             # Try storing and retrieving a test memory
             test_content = f"Diagnostic test memory for {self.agent_id}"
-            memory_id = await self.remember_short_term(test_content, tags=["diagnostic"], importance=0.1)
+            memory_id = await self.remember_short_term(
+                test_content, tags=["diagnostic"], importance=0.1
+            )
 
             # Try retrieving it
             memories = await self.recall_memories(short_term_only=True, limit=1)
@@ -336,13 +348,13 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
             diagnostics["memory_operations_test"] = {
                 "status": "success",
                 "test_memory_id": memory_id,
-                "retrieved_memories": len(memories)
+                "retrieved_memories": len(memories),
             }
 
         except Exception as e:
             diagnostics["memory_operations_test"] = {
                 "status": "failed",
-                "error": str(e)
+                "error": str(e),
             }
 
         return diagnostics
@@ -350,12 +362,13 @@ class HealthAwareMemoryInterface(AgentMemoryInterface):
 
 # ========== Helper Functions ==========
 
+
 def create_health_aware_memory_interface(
     agent_id: str,
     mcp_base_url: str = "http://localhost:8000",
     project_id: Optional[str] = None,
     task_id: Optional[str] = None,
-    **health_options
+    **health_options,
 ) -> HealthAwareMemoryInterface:
     """Factory function to create a health-aware memory interface."""
     return HealthAwareMemoryInterface(
@@ -363,7 +376,7 @@ def create_health_aware_memory_interface(
         mcp_base_url=mcp_base_url,
         project_id=project_id,
         task_id=task_id,
-        **health_options
+        **health_options,
     )
 
 
@@ -372,14 +385,11 @@ async def memory_with_health_monitoring(
     agent_id: str,
     project_id: Optional[str] = None,
     task_id: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ):
     """Context manager for memory interface with health monitoring."""
     interface = create_health_aware_memory_interface(
-        agent_id=agent_id,
-        project_id=project_id,
-        task_id=task_id,
-        **kwargs
+        agent_id=agent_id, project_id=project_id, task_id=task_id, **kwargs
     )
 
     async with interface:
@@ -387,6 +397,7 @@ async def memory_with_health_monitoring(
 
 
 # ========== Enhanced Memory-Enabled Agent ==========
+
 
 class HealthAwareMemoryAgent:
     """Enhanced agent with health-aware memory management."""
@@ -396,7 +407,7 @@ class HealthAwareMemoryAgent:
         agent_id: str,
         agent_type: str = "worker",
         project_id: Optional[str] = None,
-        enable_health_monitoring: bool = True
+        enable_health_monitoring: bool = True,
     ):
         self.agent_id = agent_id
         self.agent_type = agent_type
@@ -411,7 +422,7 @@ class HealthAwareMemoryAgent:
         self.memory = HealthAwareMemoryInterface(
             agent_id=self.agent_id,
             project_id=self.project_id,
-            enable_health_monitoring=self._enable_health_monitoring
+            enable_health_monitoring=self._enable_health_monitoring,
         )
 
         self._logger.info(f"Initialized health-aware memory agent: {self.agent_id}")
@@ -429,7 +440,7 @@ class HealthAwareMemoryAgent:
                 await mem.remember_short_term(
                     f"Started task: {task_description} (backend: {backend_info})",
                     tags=["task_start", "event", "backend_info"],
-                    importance=0.8
+                    importance=0.8,
                 )
 
                 # Run initial diagnostics
@@ -448,7 +459,7 @@ class HealthAwareMemoryAgent:
             return {
                 "agent_id": self.agent_id,
                 "health_status": status,
-                "diagnostics": diagnostics
+                "diagnostics": diagnostics,
             }
 
     async def handle_memory_emergency(self) -> bool:
@@ -468,12 +479,15 @@ class HealthAwareMemoryAgent:
 
             # Find unhealthy backends
             unhealthy_backends = [
-                backend for backend, status in health_status.items()
+                backend
+                for backend, status in health_status.items()
                 if not status.get("healthy", False)
             ]
 
             if unhealthy_backends:
-                self._logger.warning(f"Unhealthy backends detected: {unhealthy_backends}")
+                self._logger.warning(
+                    f"Unhealthy backends detected: {unhealthy_backends}"
+                )
 
                 # Try to trigger failover from first unhealthy backend
                 if unhealthy_backends:
@@ -487,6 +501,7 @@ class HealthAwareMemoryAgent:
 
 # ========== Example Usage ==========
 
+
 async def example_health_aware_usage():
     """Example of using the health-aware memory system."""
 
@@ -494,7 +509,7 @@ async def example_health_aware_usage():
     agent = HealthAwareMemoryAgent(
         agent_id="health_demo_agent",
         project_id="gadugi_v03",
-        enable_health_monitoring=True
+        enable_health_monitoring=True,
     )
 
     await agent.initialize()
@@ -504,12 +519,13 @@ async def example_health_aware_usage():
         agent_id="test_agent",
         project_id="demo_project",
         enable_health_monitoring=True,
-        health_check_interval=15
+        health_check_interval=15,
     ) as memory:
-
         # Store some memories
         await memory.remember_short_term("Testing health-aware memory system")
-        await memory.remember_long_term("This is a persistent memory with health monitoring")
+        await memory.remember_long_term(
+            "This is a persistent memory with health monitoring"
+        )
 
         # Check memory health
         health_status = memory.get_memory_health_status()
@@ -529,7 +545,7 @@ if __name__ == "__main__":
     # Set up logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     # Run example

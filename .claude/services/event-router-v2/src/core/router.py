@@ -6,14 +6,14 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set, Callable, Any
 from collections import defaultdict
-import traceback
 
 try:
     import websockets
     from websockets.exceptions import WebSocketException
+
     WEBSOCKET_AVAILABLE = True
 except ImportError:
     WEBSOCKET_AVAILABLE = False
@@ -21,8 +21,12 @@ except ImportError:
     WebSocketException = Exception  # type: ignore
 
 from .models import (
-    Event, EventType, EventPriority, EventMetadata,
-    Subscription, HealthStatus, DeliveryStatus
+    Event,
+    EventType,
+    EventPriority,
+    Subscription,
+    HealthStatus,
+    DeliveryStatus,
 )
 from .queue import EventQueue, MultiQueue
 
@@ -38,7 +42,7 @@ class EventRouter:
         port: int = 9090,
         max_queue_size: int = 10000,
         max_clients: int = 1000,
-        use_multi_queue: bool = False
+        use_multi_queue: bool = False,
     ):
         """Initialize event router.
 
@@ -85,7 +89,9 @@ class EventRouter:
     async def start(self):
         """Start the event router service."""
         if not WEBSOCKET_AVAILABLE:
-            raise RuntimeError("websockets library not installed. Install with: pip install websockets")
+            raise RuntimeError(
+                "websockets library not installed. Install with: pip install websockets"
+            )
 
         self.running = True
         logger.info(f"Starting Event Router on {self.host}:{self.port}")
@@ -101,7 +107,7 @@ class EventRouter:
                 self.port,
                 max_size=10**7,  # 10MB max message size
                 max_queue=100,
-                compression=None  # Disable compression for lower latency
+                compression=None,  # Disable compression for lower latency
             ) as server:
                 self.server = server
                 logger.info(f"Event Router listening on ws://{self.host}:{self.port}")
@@ -135,19 +141,25 @@ class EventRouter:
 
         logger.info("Event Router stopped")
 
-    async def _handle_client(self, websocket: Any):  # WebSocketServerProtocol when available
+    async def _handle_client(
+        self, websocket: Any
+    ):  # WebSocketServerProtocol when available
         """Handle WebSocket client connection."""
         client_id = str(uuid.uuid4())
         client_address = websocket.remote_address
-        path = websocket.path if hasattr(websocket, 'path') else "/"
+        path = websocket.path if hasattr(websocket, "path") else "/"
 
         # Check max clients
         if len(self.clients) >= self.max_clients:
-            await websocket.send(json.dumps({
-                "type": "error",
-                "error": "max_clients_reached",
-                "message": f"Maximum clients ({self.max_clients}) reached"
-            }))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "type": "error",
+                        "error": "max_clients_reached",
+                        "message": f"Maximum clients ({self.max_clients}) reached",
+                    }
+                )
+            )
             await websocket.close()
             return
 
@@ -156,17 +168,21 @@ class EventRouter:
         self.client_info[client_id] = {
             "address": client_address,
             "connected_at": datetime.now(timezone.utc),
-            "path": path
+            "path": path,
         }
 
         logger.info(f"Client {client_id} connected from {client_address}")
 
         # Send welcome message
-        await websocket.send(json.dumps({
-            "type": "welcome",
-            "client_id": client_id,
-            "server_time": datetime.now(timezone.utc).isoformat()
-        }))
+        await websocket.send(
+            json.dumps(
+                {
+                    "type": "welcome",
+                    "client_id": client_id,
+                    "server_time": datetime.now(timezone.utc).isoformat(),
+                }
+            )
+        )
 
         try:
             # Handle client messages
@@ -209,11 +225,14 @@ class EventRouter:
 
     async def _handle_ping(self, client_id: str, data: Dict):
         """Handle ping message."""
-        await self._send_to_client(client_id, {
-            "type": "pong",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "echo": data.get("echo")
-        })
+        await self._send_to_client(
+            client_id,
+            {
+                "type": "pong",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "echo": data.get("echo"),
+            },
+        )
 
     async def _handle_publish(self, client_id: str, data: Dict):
         """Handle publish message."""
@@ -242,18 +261,20 @@ class EventRouter:
 
             if success:
                 logger.debug(f"Event {event.id} published by {client_id}")
-                await self._send_to_client(client_id, {
-                    "type": "published",
-                    "event_id": event.id,
-                    "status": "queued"
-                })
+                await self._send_to_client(
+                    client_id,
+                    {"type": "published", "event_id": event.id, "status": "queued"},
+                )
             else:
-                await self._send_to_client(client_id, {
-                    "type": "published",
-                    "event_id": event.id,
-                    "status": "dropped",
-                    "reason": "queue_full"
-                })
+                await self._send_to_client(
+                    client_id,
+                    {
+                        "type": "published",
+                        "event_id": event.id,
+                        "status": "dropped",
+                        "reason": "queue_full",
+                    },
+                )
 
         except Exception as e:
             logger.error(f"Error publishing event from {client_id}: {e}")
@@ -268,23 +289,32 @@ class EventRouter:
             subscription = Subscription(
                 subscriber_id=client_id,
                 topics=sub_data.get("topics", ["*"]),
-                types=[EventType(t) for t in sub_data.get("types", [])] if sub_data.get("types") else [],
-                priorities=[EventPriority(p) for p in sub_data.get("priorities", [])] if sub_data.get("priorities") else [],
+                types=[EventType(t) for t in sub_data.get("types", [])]
+                if sub_data.get("types")
+                else [],
+                priorities=[EventPriority(p) for p in sub_data.get("priorities", [])]
+                if sub_data.get("priorities")
+                else [],
                 sources=sub_data.get("sources", []),
-                endpoint=client_id  # Use client_id as endpoint for WebSocket delivery
+                endpoint=client_id,  # Use client_id as endpoint for WebSocket delivery
             )
 
             # Store subscription
             self.subscriptions[subscription.id] = subscription
             self.subscriber_subscriptions[client_id].add(subscription.id)
 
-            logger.info(f"Subscription {subscription.id} created for client {client_id}")
+            logger.info(
+                f"Subscription {subscription.id} created for client {client_id}"
+            )
 
-            await self._send_to_client(client_id, {
-                "type": "subscribed",
-                "subscription_id": subscription.id,
-                "topics": subscription.topics
-            })
+            await self._send_to_client(
+                client_id,
+                {
+                    "type": "subscribed",
+                    "subscription_id": subscription.id,
+                    "topics": subscription.topics,
+                },
+            )
 
         except Exception as e:
             logger.error(f"Error creating subscription for {client_id}: {e}")
@@ -300,10 +330,10 @@ class EventRouter:
                 del self.subscriptions[subscription_id]
                 self.subscriber_subscriptions[client_id].discard(subscription_id)
 
-                await self._send_to_client(client_id, {
-                    "type": "unsubscribed",
-                    "subscription_id": subscription_id
-                })
+                await self._send_to_client(
+                    client_id,
+                    {"type": "unsubscribed", "subscription_id": subscription_id},
+                )
             else:
                 await self._send_error(client_id, "Subscription not owned by client")
         else:
@@ -312,10 +342,9 @@ class EventRouter:
     async def _handle_get_health(self, client_id: str):
         """Handle health check request."""
         health = await self.get_health()
-        await self._send_to_client(client_id, {
-            "type": "health",
-            "health": health.to_dict()
-        })
+        await self._send_to_client(
+            client_id, {"type": "health", "health": health.to_dict()}
+        )
 
     async def _send_to_client(self, client_id: str, data: Dict):
         """Send message to specific client."""
@@ -329,11 +358,14 @@ class EventRouter:
 
     async def _send_error(self, client_id: str, error: str):
         """Send error message to client."""
-        await self._send_to_client(client_id, {
-            "type": "error",
-            "error": error,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+        await self._send_to_client(
+            client_id,
+            {
+                "type": "error",
+                "error": error,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
 
     async def _cleanup_client(self, client_id: str):
         """Clean up disconnected client."""
@@ -387,17 +419,22 @@ class EventRouter:
                 # Deliver via WebSocket
                 if subscription.endpoint in self.clients:
                     try:
-                        await self._send_to_client(subscription.endpoint, {
-                            "type": "event",
-                            "event": event.to_dict(),
-                            "subscription_id": sub_id
-                        })
+                        await self._send_to_client(
+                            subscription.endpoint,
+                            {
+                                "type": "event",
+                                "event": event.to_dict(),
+                                "subscription_id": sub_id,
+                            },
+                        )
                         delivered_to.add(subscription.subscriber_id)
                         event.delivery_status = DeliveryStatus.DELIVERED
                         event.delivery_attempts += 1
                         event.last_delivery_attempt = datetime.now(timezone.utc)
                     except Exception as e:
-                        logger.error(f"Failed to deliver event {event.id} to {subscription.subscriber_id}: {e}")
+                        logger.error(
+                            f"Failed to deliver event {event.id} to {subscription.subscriber_id}: {e}"
+                        )
                         event.delivery_status = DeliveryStatus.FAILED
                         event.delivery_error = str(e)
 
@@ -416,7 +453,9 @@ class EventRouter:
                         event.delivery_error = str(e)
 
         if delivered_to:
-            logger.debug(f"Event {event.id} delivered to {len(delivered_to)} subscribers")
+            logger.debug(
+                f"Event {event.id} delivered to {len(delivered_to)} subscribers"
+            )
         else:
             logger.debug(f"Event {event.id} had no matching subscribers")
 
@@ -441,7 +480,7 @@ class EventRouter:
         subscriber_id: str,
         topics: Optional[List[str]] = None,
         types: Optional[List[EventType]] = None,
-        callback: Optional[Callable[[Event], None]] = None
+        callback: Optional[Callable[[Event], None]] = None,
     ) -> str:
         """Create local subscription.
 
@@ -458,7 +497,7 @@ class EventRouter:
             subscriber_id=subscriber_id,
             topics=topics or ["*"],
             types=types or [],
-            callback=callback
+            callback=callback,
         )
 
         self.subscriptions[subscription.id] = subscription
@@ -475,7 +514,9 @@ class EventRouter:
         if subscription_id in self.subscriptions:
             subscription = self.subscriptions[subscription_id]
             del self.subscriptions[subscription_id]
-            self.subscriber_subscriptions[subscription.subscriber_id].discard(subscription_id)
+            self.subscriber_subscriptions[subscription.subscriber_id].discard(
+                subscription_id
+            )
 
     async def get_health(self) -> HealthStatus:
         """Get health status.
@@ -513,5 +554,5 @@ class EventRouter:
             active_subscriptions=len(self.subscriptions),
             connected_clients=len(self.clients),
             last_event_at=self.last_event_at,
-            errors=errors
+            errors=errors,
         )

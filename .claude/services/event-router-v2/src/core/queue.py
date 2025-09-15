@@ -5,7 +5,7 @@ import asyncio
 import heapq
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from collections import defaultdict
 import logging
 
@@ -17,12 +17,13 @@ logger = logging.getLogger(__name__)
 @dataclass(order=True)
 class PrioritizedEvent:
     """Event wrapper for priority queue."""
+
     priority: int = field(compare=True)
     timestamp: float = field(compare=True)
     event: Event = field(compare=False)
 
     @classmethod
-    def from_event(cls, event: Event) -> 'PrioritizedEvent':
+    def from_event(cls, event: Event) -> "PrioritizedEvent":
         """Create from event with inverted priority for max-heap behavior."""
         # Invert priority so higher priority events come first
         priority = -int(event.priority)
@@ -74,8 +75,13 @@ class EventQueue:
                 # Drop lowest priority event to make room
                 if self._queue:
                     # Find the lowest priority event (highest priority value due to inversion)
-                    lowest_idx = max(range(len(self._queue)),
-                                   key=lambda i: (self._queue[i].priority, self._queue[i].timestamp))
+                    lowest_idx = max(
+                        range(len(self._queue)),
+                        key=lambda i: (
+                            self._queue[i].priority,
+                            self._queue[i].timestamp,
+                        ),
+                    )
 
                     # Only drop if new event has higher priority
                     if -event.priority < self._queue[lowest_idx].priority:
@@ -83,7 +89,9 @@ class EventQueue:
                         heapq.heapify(self._queue)
                         self._size -= 1
                         self.total_dropped += 1
-                        logger.warning(f"Dropped lower priority event {dropped.event.id} for {event.id}")
+                        logger.warning(
+                            f"Dropped lower priority event {dropped.event.id} for {event.id}"
+                        )
                     else:
                         self.total_dropped += 1
                         logger.warning(f"Event {event.id} priority too low, dropped")
@@ -115,10 +123,7 @@ class EventQueue:
             # Wait for event if queue is empty
             if not self._queue:
                 try:
-                    await asyncio.wait_for(
-                        self._not_empty.wait(),
-                        timeout=timeout
-                    )
+                    await asyncio.wait_for(self._not_empty.wait(), timeout=timeout)
                 except asyncio.TimeoutError:
                     return None
 
@@ -138,7 +143,9 @@ class EventQueue:
                 return self._queue[0].event
             return None
 
-    async def get_batch(self, max_items: int = 10, timeout: Optional[float] = None) -> List[Event]:
+    async def get_batch(
+        self, max_items: int = 10, timeout: Optional[float] = None
+    ) -> List[Event]:
         """Get batch of events.
 
         Args:
@@ -199,10 +206,12 @@ class EventQueue:
                 "total_dequeued": self.total_dequeued,
                 "total_dropped": self.total_dropped,
                 "priority_distribution": dict(self.priority_counts),
-                "utilization": self._size / self.max_size if self.max_size > 0 else 0
+                "utilization": self._size / self.max_size if self.max_size > 0 else 0,
             }
 
-    async def get_events_by_priority(self, priority: EventPriority, limit: int = 10) -> List[Event]:
+    async def get_events_by_priority(
+        self, priority: EventPriority, limit: int = 10
+    ) -> List[Event]:
         """Get events with specific priority.
 
         Args:
@@ -253,10 +262,10 @@ class MultiQueue:
 
         # Default queue configuration
         default_configs = {
-            "system": 1000,   # System events
-            "high": 5000,     # High priority events
+            "system": 1000,  # System events
+            "high": 5000,  # High priority events
             "normal": 10000,  # Normal priority events
-            "low": 5000,      # Low priority events
+            "low": 5000,  # Low priority events
         }
 
         configs = queue_configs or default_configs

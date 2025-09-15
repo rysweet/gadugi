@@ -10,10 +10,12 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from typing import Any
+from unittest.mock import Mock, patch
 
 # Add orchestrator components to path
 import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # from orchestrator_cli import OrchestrationCLI
@@ -24,6 +26,7 @@ try:
     from orchestrator_cli import OrchestrationCLI  # type: ignore
     from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo  # type: ignore
     from orchestrator_main import OrchestratorCoordinator, OrchestrationConfig  # type: ignore
+
     ORCHESTRATOR_IMPORTS_AVAILABLE = True
 except ImportError:
     # Create mock classes for testing
@@ -60,7 +63,15 @@ except ImportError:
         FAILED = "failed"
 
     class ProcessInfo:
-        def __init__(self, task_id: str, task_name: str, status: str, command: str, working_directory: str, created_at: Any) -> None:  # type: ignore
+        def __init__(
+            self,
+            task_id: str,
+            task_name: str,
+            status: str,
+            command: str,
+            working_directory: str,
+            created_at: Any,
+        ) -> None:  # type: ignore
             self.task_id = task_id
             self.task_name = task_name
             self.status = status
@@ -75,10 +86,20 @@ except ImportError:
             self.orchestration_id = f"orchestration-{id(self)}"
 
         def orchestrate(self, prompt_files: list[str]) -> Any:  # type: ignore
-            return Mock(total_tasks=len(prompt_files), successful_tasks=0, execution_time_seconds=0.0)  # type: ignore
+            return Mock(
+                total_tasks=len(prompt_files),
+                successful_tasks=0,
+                execution_time_seconds=0.0,
+            )  # type: ignore
 
     class OrchestrationConfig:
-        def __init__(self, max_parallel_tasks: int = 4, execution_timeout_hours: int = 2, fallback_to_sequential: bool = True, **kwargs: Any) -> None:  # type: ignore
+        def __init__(
+            self,
+            max_parallel_tasks: int = 4,
+            execution_timeout_hours: int = 2,
+            fallback_to_sequential: bool = True,
+            **kwargs: Any,
+        ) -> None:  # type: ignore
             self.max_parallel_tasks = max_parallel_tasks
             self.execution_timeout_hours = execution_timeout_hours
             self.fallback_to_sequential = fallback_to_sequential
@@ -101,7 +122,7 @@ class TestOrchestratorIntegration(unittest.TestCase):
         self.test_prompts = [
             "test-feature-1.md",
             "test-feature-2.md",
-            "test-bug-fix.md"
+            "test-bug-fix.md",
         ]
 
         for prompt_file in self.test_prompts:
@@ -127,24 +148,25 @@ Test prompt for orchestrator integration testing.
             execution_timeout_hours=1,
             monitoring_interval_seconds=5,
             worktrees_dir=str(self.test_dir / ".worktrees"),
-            monitoring_dir=str(self.test_dir / ".gadugi/monitoring")
+            monitoring_dir=str(self.test_dir / ".gadugi/monitoring"),
         )
 
     def tearDown(self) -> None:
         """Clean up test environment"""
         import shutil
+
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_orchestrator_coordinator_initialization(self) -> None:
         """Test orchestrator coordinator initializes correctly"""
-        with patch('orchestrator_main.ExecutionEngine'), \
-             patch('orchestrator_main.WorktreeManager'), \
-             patch('orchestrator_main.TaskAnalyzer'), \
-             patch('orchestrator_main.PromptGenerator'):
-
+        with (
+            patch("orchestrator_main.ExecutionEngine"),
+            patch("orchestrator_main.WorktreeManager"),
+            patch("orchestrator_main.TaskAnalyzer"),
+            patch("orchestrator_main.PromptGenerator"),
+        ):
             coordinator = OrchestratorCoordinator(  # type: ignore
-                config=self.config,
-                project_root=str(self.test_dir)
+                config=self.config, project_root=str(self.test_dir)
             )
 
             self.assertIsNotNone(coordinator)
@@ -208,7 +230,9 @@ Process these prompts in parallel:
             status=ProcessStatus.QUEUED,  # type: ignore
             command="claude /agent:WorkflowManager",
             working_directory=str(self.test_dir),
-            created_at=registry._get_current_time() if hasattr(registry, '_get_current_time') else None  # type: ignore
+            created_at=time.time()
+            if hasattr(registry, "_get_current_time")
+            else None,  # type: ignore
         )
 
         registry.register_process(process_info)
@@ -231,12 +255,17 @@ Process these prompts in parallel:
         completed = registry.get_process("test-task-1")  # type: ignore
         self.assertEqual(completed.status, ProcessStatus.COMPLETED)  # type: ignore
 
-    @patch('orchestrator_main.ExecutionEngine')  # type: ignore
-    @patch('orchestrator_main.WorktreeManager')  # type: ignore
-    @patch('orchestrator_main.TaskAnalyzer')  # type: ignore
-    @patch('orchestrator_main.PromptGenerator')  # type: ignore
-    def test_orchestrator_workflow_stages(self, mock_prompt_gen: Mock, mock_task_analyzer: Mock,
-                                        mock_worktree_mgr: Mock, mock_exec_engine: Mock) -> None:
+    @patch("orchestrator_main.ExecutionEngine")  # type: ignore
+    @patch("orchestrator_main.WorktreeManager")  # type: ignore
+    @patch("orchestrator_main.TaskAnalyzer")  # type: ignore
+    @patch("orchestrator_main.PromptGenerator")  # type: ignore
+    def test_orchestrator_workflow_stages(
+        self,
+        mock_prompt_gen: Mock,
+        mock_task_analyzer: Mock,
+        mock_worktree_mgr: Mock,
+        mock_exec_engine: Mock,
+    ) -> None:
         """Test orchestrator workflow stages"""
 
         # Mock task analyzer
@@ -261,7 +290,9 @@ Process these prompts in parallel:
         mock_worktree_mgr.return_value.create_worktree.return_value = mock_worktree_info
 
         # Mock prompt generator
-        mock_prompt_gen.return_value.generate_workflow_prompt.return_value = "generated_prompt.md"
+        mock_prompt_gen.return_value.generate_workflow_prompt.return_value = (
+            "generated_prompt.md"
+        )
 
         # Mock execution engine
         mock_result = Mock()
@@ -274,8 +305,7 @@ Process these prompts in parallel:
 
         # Create coordinator and run orchestration
         coordinator = OrchestratorCoordinator(  # type: ignore
-            config=self.config,
-            project_root=str(self.test_dir)
+            config=self.config, project_root=str(self.test_dir)
         )
 
         result = coordinator.orchestrate(["test-feature-1.md"])
@@ -317,7 +347,7 @@ Execute these prompts:
         custom_config = OrchestrationConfig(  # type: ignore
             max_parallel_tasks=8,
             execution_timeout_hours=4,
-            fallback_to_sequential=False
+            fallback_to_sequential=False,
         )
         self.assertEqual(custom_config.max_parallel_tasks, 8)
         self.assertEqual(custom_config.execution_timeout_hours, 4)
@@ -330,10 +360,32 @@ Execute these prompts:
 
         # Add test processes
         from datetime import datetime
+
         processes = [
-            ProcessInfo("task-1", "Task 1", ProcessStatus.COMPLETED, "cmd1", str(self.test_dir), datetime.now()),  # type: ignore
-            ProcessInfo("task-2", "Task 2", ProcessStatus.RUNNING, "cmd2", str(self.test_dir), datetime.now()),  # type: ignore
-            ProcessInfo("task-3", "Task 3", ProcessStatus.FAILED, "cmd3", str(self.test_dir), datetime.now()),  # type: ignore
+            ProcessInfo(
+                "task-1",
+                "Task 1",
+                ProcessStatus.COMPLETED,
+                "cmd1",
+                str(self.test_dir),
+                datetime.now(),
+            ),  # type: ignore
+            ProcessInfo(
+                "task-2",
+                "Task 2",
+                ProcessStatus.RUNNING,
+                "cmd2",
+                str(self.test_dir),
+                datetime.now(),
+            ),  # type: ignore
+            ProcessInfo(
+                "task-3",
+                "Task 3",
+                ProcessStatus.FAILED,
+                "cmd3",
+                str(self.test_dir),
+                datetime.now(),
+            ),  # type: ignore
         ]
 
         for process in processes:
@@ -347,7 +399,7 @@ Execute these prompts:
         self.assertEqual(stats.running_count, 1)  # type: ignore
         self.assertEqual(stats.failed_count, 1)  # type: ignore
 
-    @patch('subprocess.run')  # type: ignore
+    @patch("subprocess.run")  # type: ignore
     def test_shell_script_integration(self, mock_subprocess: Mock) -> None:
         """Test shell script entry point integration"""
         # Mock successful subprocess execution
@@ -359,7 +411,7 @@ Execute these prompts:
         self.assertTrue(script_path.exists())
 
         # Check if script is executable (on Unix systems)
-        if os.name != 'nt':  # Not Windows
+        if os.name != "nt":  # Not Windows
             stat_info = script_path.stat()
             self.assertTrue(stat_info.st_mode & 0o111)  # Has execute permission
 
@@ -385,6 +437,7 @@ class TestOrchestratorPerformance(unittest.TestCase):
 
     def tearDown(self) -> None:
         import shutil
+
         shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_large_prompt_set_handling(self) -> None:
@@ -399,7 +452,9 @@ class TestOrchestratorPerformance(unittest.TestCase):
 
         # Test CLI parsing
         cli = OrchestrationCLI(str(self.test_dir))  # type: ignore
-        user_input = "Execute these prompts:\n" + "\n".join(f"- {pf}" for pf in prompt_files)
+        user_input = "Execute these prompts:\n" + "\n".join(
+            f"- {pf}" for pf in prompt_files
+        )
 
         parsed_files = cli.parse_user_input(user_input)
         self.assertEqual(len(parsed_files), 20)
@@ -407,8 +462,7 @@ class TestOrchestratorPerformance(unittest.TestCase):
     def test_resource_limit_configuration(self) -> None:
         """Test resource limit configuration"""
         config = OrchestrationConfig(  # type: ignore
-            max_parallel_tasks=16,
-            execution_timeout_hours=8
+            max_parallel_tasks=16, execution_timeout_hours=8
         )
 
         self.assertEqual(config.max_parallel_tasks, 16)
@@ -419,9 +473,10 @@ class TestOrchestratorPerformance(unittest.TestCase):
         self.assertLessEqual(config.execution_timeout_hours, 24)  # Reasonable timeout
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Set up test environment
     import logging
+
     logging.basicConfig(level=logging.WARNING)  # Reduce noise during testing
 
     # Run tests

@@ -4,16 +4,15 @@
 import asyncio
 import sys
 import logging
-from datetime import datetime
 
 # Setup path
-sys.path.append('src')
+sys.path.append("src")
 
 from core.router import EventRouter  # type: ignore[import]
-from core.models import Event, EventType, EventPriority  # type: ignore[import]
+from core.models import EventPriority  # type: ignore[import]
 from client.client import EventRouterClient  # type: ignore[import]
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -58,29 +57,36 @@ async def test_event_router():
     @consumer.on("test.*")
     async def handle_test_event(event):
         received_events.append(event)
-        print(f"   📨 Consumer received: {event.topic} - {event.payload.get('message')}")
+        print(
+            f"   📨 Consumer received: {event.topic} - {event.payload.get('message')}"
+        )
 
-    sub_id = await consumer.subscribe(
-        topics=["test.*"],
-        callback=handle_test_event
-    )
+    sub_id = await consumer.subscribe(topics=["test.*"], callback=handle_test_event)
     print(f"   ✅ Subscription created: {sub_id}")
 
     # 5. Publish events
     print("\n5. Publishing Events...")
     events_to_send = [
-        ("test.message", {"message": "Hello, Event Router!", "index": 1}, EventPriority.HIGH),
+        (
+            "test.message",
+            {"message": "Hello, Event Router!", "index": 1},
+            EventPriority.HIGH,
+        ),
         ("test.data", {"message": "Data update", "value": 42}, EventPriority.NORMAL),
-        ("test.alert", {"message": "Important alert!", "severity": "high"}, EventPriority.CRITICAL),
+        (
+            "test.alert",
+            {"message": "Important alert!", "severity": "high"},
+            EventPriority.CRITICAL,
+        ),
     ]
 
     for topic, payload, priority in events_to_send:
         event_id = await producer.publish(
-            topic=topic,
-            payload=payload,
-            priority=priority
+            topic=topic, payload=payload, priority=priority
         )
-        print(f"   📤 Published: {topic} (priority: {priority.name}) - Event ID: {event_id}")
+        print(
+            f"   📤 Published: {topic} (priority: {priority.name}) - Event ID: {event_id}"
+        )
         await asyncio.sleep(0.5)
 
     # 6. Wait for events to be processed
@@ -95,7 +101,9 @@ async def test_event_router():
     if len(received_events) == len(events_to_send):
         print("   ✅ All events successfully delivered!")
     else:
-        print(f"   ⚠️  Only {len(received_events)} of {len(events_to_send)} events received")
+        print(
+            f"   ⚠️  Only {len(received_events)} of {len(events_to_send)} events received"
+        )
 
     # 8. Check health
     print("\n8. Health Check:")
@@ -117,8 +125,7 @@ async def test_event_router():
 
         # Send another event after reconnection
         event_id = await producer.publish(
-            topic="test.reconnect",
-            payload={"message": "Sent after reconnection!"}
+            topic="test.reconnect", payload={"message": "Sent after reconnection!"}
         )
         print(f"   📤 Published after reconnect: {event_id}")
     else:

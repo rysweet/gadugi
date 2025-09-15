@@ -11,7 +11,18 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ...shared.utils.error_handling import ErrorHandler  # type: ignore
+try:
+    from shared.utils.error_handling import ErrorHandler  # type: ignore
+except ImportError:
+    # Fallback to relative imports if needed
+    import sys
+    import os
+
+    base_dir = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    )
+    sys.path.insert(0, base_dir)
+    from shared.utils.error_handling import ErrorHandler  # type: ignore
 from .task_matcher import TaskAgentMatcher, MatchingRecommendation
 from .team_optimizer import TeamCompositionOptimizer, OptimizationResult
 

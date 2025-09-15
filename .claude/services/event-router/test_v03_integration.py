@@ -7,24 +7,25 @@ Tests that events are properly emitted, routed, and persisted.
 import asyncio
 import sys
 import os
-from datetime import datetime
 import aiohttp
 
 # Add parent directories to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', '..'))  # Add gadugi root
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(
+    0, os.path.join(os.path.dirname(__file__), "..", "..", "..")
+)  # Add gadugi root
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-from claude.agents.base.v03_agent import V03Agent
+from agents.base.v03_agent import V03Agent
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from typing import List
 
 
 async def test_event_emission():
     """Test emitting events through V03Agent to Event Router."""
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🧪 V03AGENT EVENT EMISSION TEST")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     # Create a test agent instance
     print("📦 Creating test agent instance...")
@@ -64,7 +65,7 @@ async def test_event_emission():
                 agent_id="test-agent-001",
                 agent_type="testrunner",
                 capabilities=TestCapabilities(),
-                event_config=TestEventConfig()
+                event_config=TestEventConfig(),
             )
 
     agent = TestAgent()
@@ -83,8 +84,7 @@ async def test_event_emission():
     print("-" * 40)
     task_id = "test-task-001"
     success = await agent.emit_started(
-        input_data={"test": "Run integration tests"},
-        task_id=task_id
+        input_data={"test": "Run integration tests"}, task_id=task_id
     )
     print(f"  {'✅' if success else '❌'} emit_started: {success}")
 
@@ -94,7 +94,7 @@ async def test_event_emission():
     success = await agent.emit_task_started(
         task_description="Testing event emission",
         estimated_duration=60,
-        dependencies=["event-router", "v03-agent"]
+        dependencies=["event-router", "v03-agent"],
     )
     print(f"  {'✅' if success else '❌'} emit_task_started: {success}")
 
@@ -104,7 +104,7 @@ async def test_event_emission():
     success = await agent.emit_has_question(
         question="Should we proceed with the deployment?",
         context={"environment": "production", "risk": "medium"},
-        options=["Yes", "No", "Review changes first"]
+        options=["Yes", "No", "Review changes first"],
     )
     print(f"  {'✅' if success else '❌'} emit_has_question: {success}")
 
@@ -114,7 +114,7 @@ async def test_event_emission():
     success = await agent.emit_needs_approval(
         command="rm -rf /tmp/test_data",
         description="Clean up test data directory",
-        risk_level="low"
+        risk_level="low",
     )
     print(f"  {'✅' if success else '❌'} emit_needs_approval: {success}")
 
@@ -125,7 +125,7 @@ async def test_event_emission():
         knowledge_type="event-pattern",
         content="High priority events are routed through orchestration",
         confidence=0.95,
-        source="integration-test"
+        source="integration-test",
     )
     print(f"  {'✅' if success else '❌'} emit_knowledge_learned: {success}")
 
@@ -136,7 +136,7 @@ async def test_event_emission():
         message="Test results ready for review",
         message_type="notification",
         recipient_id="orchestration-001",
-        requires_response=False
+        requires_response=False,
     )
     print(f"  {'✅' if success else '❌'} emit_collaboration: {success}")
 
@@ -146,7 +146,7 @@ async def test_event_emission():
     success = await agent.emit_error(
         error_type="TestFailure",
         error_message="Integration test failed: Event routing not working",
-        context={"test_id": "test-001", "severity": "high"}
+        context={"test_id": "test-001", "severity": "high"},
     )
     print(f"  {'✅' if success else '❌'} emit_error: {success}")
 
@@ -159,7 +159,7 @@ async def test_event_emission():
         success=True,
         duration_seconds=2.5,
         artifacts=["test_results.json", "event_log.txt"],
-        result="All events successfully emitted"
+        result="All events successfully emitted",
     )
     print(f"  {'✅' if success else '❌'} emit_task_completed: {success}")
 
@@ -170,36 +170,40 @@ async def test_event_emission():
         output_data={"tests_passed": 10, "tests_failed": 0},
         task_id=task_id,
         success=True,
-        duration_seconds=3.0
+        duration_seconds=3.0,
     )
     print(f"  {'✅' if success else '❌'} emit_stopped: {success}")
 
     # Clean up
     await agent.cleanup()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✅ EVENT EMISSION TESTS COMPLETE")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
 
 async def check_event_persistence():
     """Check if events were persisted to storage."""
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🔍 CHECKING EVENT PERSISTENCE")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     async with aiohttp.ClientSession() as session:
         # Query recent events
         try:
-            async with session.get("http://localhost:8001/events/recent?limit=10") as response:
+            async with session.get(
+                "http://localhost:8001/events/recent?limit=10"
+            ) as response:
                 if response.status == 200:
                     events = await response.json()
                     print(f"📊 Found {len(events)} recent events:")
                     for event in events:
-                        print(f"  - {event.get('event_type', 'unknown')}: "
-                              f"{event.get('agent_id', 'unknown')} "
-                              f"[{event.get('priority', 'normal')}]")
+                        print(
+                            f"  - {event.get('event_type', 'unknown')}: "
+                            f"{event.get('agent_id', 'unknown')} "
+                            f"[{event.get('priority', 'normal')}]"
+                        )
                 else:
                     print(f"❌ Failed to query events: HTTP {response.status}")
         except Exception as e:
@@ -212,13 +216,13 @@ async def check_event_persistence():
             test_events = [
                 "testrunner.hasQuestion",
                 "testrunner.needsApproval",
-                "testrunner.stopped"
+                "testrunner.stopped",
             ]
 
             for event_type in test_events:
                 async with session.post(
                     "http://localhost:8001/events/query",
-                    json={"event_type": event_type}
+                    json={"event_type": event_type},
                 ) as response:
                     if response.status == 200:
                         result = await response.json()

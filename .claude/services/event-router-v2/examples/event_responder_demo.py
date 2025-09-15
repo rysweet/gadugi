@@ -10,17 +10,15 @@ This example demonstrates:
 """
 
 import asyncio
-import json
 import sys
 import os
 from datetime import datetime, timezone
-from typing import Dict, Any
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from src.core.router import EventRouter
-from src.core.models import Event, EventType, EventPriority
+from src.core.models import EventPriority
 from src.client.client import EventRouterClient
 
 
@@ -45,9 +43,9 @@ class TaskManagerAgent:
                     "task_id": task_id,
                     "type": "process_data" if i % 2 == 0 else "generate_report",
                     "priority": "high" if i == 0 else "normal",
-                    "created_at": datetime.now(timezone.utc).isoformat()
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 },
-                priority=EventPriority.HIGH if i == 0 else EventPriority.NORMAL
+                priority=EventPriority.HIGH if i == 0 else EventPriority.NORMAL,
             )
             print(f"[{self.name}] Created {task_id}")
 
@@ -88,8 +86,8 @@ class WorkerAgent:
             payload={
                 "task_id": task_id,
                 "worker_id": self.worker_id,
-                "claimed_at": datetime.now(timezone.utc).isoformat()
-            }
+                "claimed_at": datetime.now(timezone.utc).isoformat(),
+            },
         )
         print(f"[{self.name}] Claimed {task_id} ({task_type})")
 
@@ -98,6 +96,7 @@ class WorkerAgent:
 
         # Randomly succeed or fail (90% success rate)
         import random
+
         if random.random() < 0.9:
             # Publish task.completed event
             await self.client.publish(
@@ -106,9 +105,9 @@ class WorkerAgent:
                     "task_id": task_id,
                     "worker_id": self.worker_id,
                     "result": f"Processed {task_type} successfully",
-                    "completed_at": datetime.now(timezone.utc).isoformat()
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
                 },
-                priority=EventPriority.NORMAL
+                priority=EventPriority.NORMAL,
             )
             print(f"[{self.name}] Completed {task_id}")
         else:
@@ -119,9 +118,9 @@ class WorkerAgent:
                     "task_id": task_id,
                     "worker_id": self.worker_id,
                     "error": "Simulated processing error",
-                    "failed_at": datetime.now(timezone.utc).isoformat()
+                    "failed_at": datetime.now(timezone.utc).isoformat(),
                 },
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
             print(f"[{self.name}] Failed {task_id}")
 
@@ -155,9 +154,9 @@ class ErrorHandlerAgent:
                     "error": error,
                     "severity": "high",
                     "suggested_action": "retry_task",
-                    "created_at": datetime.now(timezone.utc).isoformat()
+                    "created_at": datetime.now(timezone.utc).isoformat(),
                 },
-                priority=EventPriority.CRITICAL
+                priority=EventPriority.CRITICAL,
             )
 
             # Also create a retry task
@@ -166,8 +165,8 @@ class ErrorHandlerAgent:
                 payload={
                     "original_task_id": task_id,
                     "retry_count": 1,
-                    "reason": error
-                }
+                    "reason": error,
+                },
             )
             print(f"[{self.name}] Created alert and retry request for {task_id}")
 
@@ -179,12 +178,7 @@ class MonitorAgent:
         self.client = client
         self.name = "Monitor"
         self.event_counts = {}
-        self.task_stats = {
-            "created": 0,
-            "claimed": 0,
-            "completed": 0,
-            "failed": 0
-        }
+        self.task_stats = {"created": 0, "claimed": 0, "completed": 0, "failed": 0}
 
     async def start(self):
         print(f"[{self.name}] Starting and subscribing to ALL events...")
@@ -220,12 +214,14 @@ class MonitorAgent:
                     payload={
                         "event_counts": self.event_counts,
                         "task_stats": self.task_stats,
-                        "timestamp": datetime.now(timezone.utc).isoformat()
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
                     },
-                    priority=EventPriority.LOW
+                    priority=EventPriority.LOW,
                 )
-                print(f"[{self.name}] Stats - Tasks: created={self.task_stats['created']}, "
-                      f"completed={self.task_stats['completed']}, failed={self.task_stats['failed']}")
+                print(
+                    f"[{self.name}] Stats - Tasks: created={self.task_stats['created']}, "
+                    f"completed={self.task_stats['completed']}, failed={self.task_stats['failed']}"
+                )
 
         asyncio.create_task(publish_stats())
 
@@ -257,11 +253,13 @@ class RetryCoordinator:
                         "priority": "high",  # Elevated priority for retries
                         "retry_of": original_task_id,
                         "retry_count": retry_count,
-                        "created_at": datetime.now(timezone.utc).isoformat()
+                        "created_at": datetime.now(timezone.utc).isoformat(),
                     },
-                    priority=EventPriority.HIGH
+                    priority=EventPriority.HIGH,
                 )
-                print(f"[{self.name}] Created retry task {new_task_id} (attempt {retry_count})")
+                print(
+                    f"[{self.name}] Created retry task {new_task_id} (attempt {retry_count})"
+                )
             else:
                 print(f"[{self.name}] Max retries exceeded for {original_task_id}")
 
@@ -271,9 +269,9 @@ class RetryCoordinator:
                     payload={
                         "task_id": original_task_id,
                         "reason": "max_retries_exceeded",
-                        "retry_count": retry_count
+                        "retry_count": retry_count,
                     },
-                    priority=EventPriority.CRITICAL
+                    priority=EventPriority.CRITICAL,
                 )
 
 

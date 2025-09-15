@@ -9,18 +9,14 @@ Handles protobuf events, spawns agent processes, and manages routing.
 import asyncio
 import json
 import os
-import subprocess  # type: ignore
-import sys  # type: ignore
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Tuple  # type: ignore
+from typing import Any, Callable, Dict, List, Optional  # type: ignore
 
-import psutil  # type: ignore
 import structlog  # type: ignore[import]
-from pydantic import BaseModel, Field  # type: ignore
 
 try:
     from .auth_manager import AuthManager, AuthConfig  # type: ignore
@@ -39,7 +35,7 @@ structlog.configure(
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
-        structlog.dev.ConsoleRenderer()
+        structlog.dev.ConsoleRenderer(),
     ],
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
@@ -51,6 +47,7 @@ logger = structlog.get_logger()
 
 class EventPriority(Enum):
     """Event priority levels."""
+
     CRITICAL = 0
     HIGH = 1
     NORMAL = 2
@@ -59,6 +56,7 @@ class EventPriority(Enum):
 
 class EventType(Enum):
     """Standard event types."""
+
     AGENT_STARTED = "agent.started"
     AGENT_STOPPED = "agent.stopped"
     AGENT_HEARTBEAT = "agent.heartbeat"
@@ -97,7 +95,7 @@ class Event:
             "priority": self.priority.value,
             "namespace": self.namespace,
             "correlation_id": self.correlation_id,
-            "retry_count": self.retry_count
+            "retry_count": self.retry_count,
         }
 
     @classmethod
@@ -113,7 +111,7 @@ class Event:
             priority=EventPriority(data.get("priority", 2)),
             namespace=data.get("namespace", "default"),
             correlation_id=data.get("correlation_id"),
-            retry_count=data.get("retry_count", 0)
+            retry_count=data.get("retry_count", 0),
         )
 
 
@@ -189,11 +187,13 @@ class ProcessManager:
         command: List[str],
         env: Optional[Dict[str, str]] = None,
         restart_policy: Optional[Dict[str, Any]] = None,
-        use_container: bool = False
+        use_container: bool = False,
     ) -> AgentProcess:
         """Spawn a new agent subprocess or container."""
 
-        logger.info(f"Spawning agent {agent_id}", command=command, container=use_container)
+        logger.info(
+            f"Spawning agent {agent_id}", command=command, container=use_container
+        )
 
         # Kill existing process if any
         if agent_id in self.processes:
@@ -215,14 +215,12 @@ class ProcessManager:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             env=process_env,
-            cwd=Path.cwd()
+            cwd=Path.cwd(),
         )
 
         # Create agent process entry
         agent_process = AgentProcess(
-            agent_id=agent_id,
-            process=process,
-            command=command
+            agent_id=agent_id, process=process, command=command
         )
 
         self.processes[agent_id] = agent_process
@@ -276,7 +274,7 @@ class ProcessManager:
         image: str,
         command: List[str],
         env: Optional[Dict[str, str]] = None,
-        restart_policy: Optional[Dict[str, Any]] = None
+        restart_policy: Optional[Dict[str, Any]] = None,
     ) -> AgentProcess:
         """Spawn an agent in a Docker container with proper authentication."""
 
@@ -289,7 +287,7 @@ class ProcessManager:
             auth_config = {
                 "environment": {"AGENT_ID": agent_id},
                 "volumes": [],
-                "commands": []
+                "commands": [],
             }
 
         if env:
@@ -312,9 +310,7 @@ class ProcessManager:
 
         # Spawn the container
         process = await asyncio.create_subprocess_exec(
-            *docker_cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            *docker_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
 
         # Wait for container ID
@@ -329,16 +325,14 @@ class ProcessManager:
         # Create a subprocess to monitor the container
         monitor_cmd = ["docker", "logs", "-f", container_id]
         monitor_process = await asyncio.create_subprocess_exec(
-            *monitor_cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            *monitor_cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
 
         # Create agent process entry
         agent_process = AgentProcess(
             agent_id=agent_id,
             process=monitor_process,  # Use log monitor as the process
-            command=docker_cmd
+            command=docker_cmd,
         )
 
         self.processes[agent_id] = agent_process
@@ -425,7 +419,7 @@ class ProcessManager:
             "is_healthy": agent.is_healthy,
             "started_at": agent.started_at.isoformat(),
             "last_heartbeat": agent.last_heartbeat.isoformat(),
-            "restart_count": agent.restart_count
+            "restart_count": agent.restart_count,
         }
 
     def list_agents(self) -> List[str]:
@@ -451,7 +445,7 @@ class DeadLetterQueue:
         dlq_entry = {
             "event": event.to_dict(),
             "error": error,
-            "failed_at": datetime.utcnow().isoformat()
+            "failed_at": datetime.utcnow().isoformat(),
         }
 
         file_path = self.storage_path / f"{event.id}.json"
@@ -549,7 +543,7 @@ class EventRouter:
         subscriber_id: str,
         topic_pattern: str,
         namespace: Optional[str] = None,
-        callback: Optional[Callable] = None
+        callback: Optional[Callable] = None,
     ) -> asyncio.Queue:
         """Subscribe to events matching topic pattern."""
 
@@ -560,7 +554,7 @@ class EventRouter:
             topic_pattern=topic_pattern,
             namespace=namespace,
             callback=callback,
-            queue=queue
+            queue=queue,
         )
 
         self.subscriptions[subscriber_id].append(subscription)
@@ -575,7 +569,8 @@ class EventRouter:
         if topic_pattern:
             # Remove specific subscription
             self.subscriptions[subscriber_id] = [
-                sub for sub in self.subscriptions[subscriber_id]
+                sub
+                for sub in self.subscriptions[subscriber_id]
                 if sub.topic_pattern != topic_pattern
             ]
         else:
@@ -599,8 +594,7 @@ class EventRouter:
             try:
                 # Get next event from priority queue
                 _priority, event = await asyncio.wait_for(
-                    self.event_queue.get(),
-                    timeout=1.0
+                    self.event_queue.get(), timeout=1.0
                 )
 
                 # Process event
@@ -707,7 +701,7 @@ class EventRouter:
                 type=EventType.CUSTOM,
                 topic=f"approval.{event.source}",
                 source="event-router",
-                data={"approved": True, "correlation_id": event.id}
+                data={"approved": True, "correlation_id": event.id},
             )
 
             await self.publish(approval_event)
@@ -736,8 +730,8 @@ async def main():
         data={
             "agent_id": "orchestrator-001",
             "command": ["claude", "-p", "orchestrator-prompt.md"],
-            "use_container": False
-        }
+            "use_container": False,
+        },
     )
 
     await router.publish(subprocess_event)
@@ -752,8 +746,8 @@ async def main():
             "agent_id": "worker-001",
             "command": ["python", "-m", "worker.main"],
             "use_container": True,
-            "container_image": "gadugi/python-agent:latest"
-        }
+            "container_image": "gadugi/python-agent:latest",
+        },
     )
 
     # Uncomment to test container spawning

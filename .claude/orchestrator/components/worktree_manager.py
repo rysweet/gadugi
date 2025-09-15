@@ -12,12 +12,13 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Tuple  # type: ignore
+from typing import Dict, List, Optional  # type: ignore
 
 
 @dataclass
 class WorktreeInfo:
     """Information about a managed worktree"""
+
     task_id: str
     task_name: str
     worktree_path: Path
@@ -34,7 +35,9 @@ class WorktreeManager:
         self.project_root = Path(project_root).resolve()
         self.worktrees_dir = self.project_root / worktrees_dir
         self.worktrees: Dict[str, WorktreeInfo] = {}
-        self.state_file = self.project_root / ".claude" / "orchestrator" / "worktree_state.json"
+        self.state_file = (
+            self.project_root / ".claude" / "orchestrator" / "worktree_state.json"
+        )
 
         # Ensure directories exist
         self.worktrees_dir.mkdir(exist_ok=True)
@@ -43,13 +46,17 @@ class WorktreeManager:
         # Load existing state
         self._load_state()
 
-    def create_worktree(self, task_id: str, task_name: str, base_branch: str = "main") -> WorktreeInfo:
+    def create_worktree(
+        self, task_id: str, task_name: str, base_branch: str = "main"
+    ) -> WorktreeInfo:
         """Create a new git worktree for a task"""
         print(f"🌳 Creating worktree for task: {task_id}")
 
         # Generate unique branch and directory names
         # Remove invalid characters for git branch names (including colons)
-        safe_task_name = task_name.lower().replace(' ', '-').replace(':', '').replace('/', '-')
+        safe_task_name = (
+            task_name.lower().replace(" ", "-").replace(":", "").replace("/", "-")
+        )
         branch_name = f"feature/parallel-{safe_task_name}-{task_id}"
         worktree_path = self.worktrees_dir / f"task-{task_id}"
 
@@ -61,18 +68,17 @@ class WorktreeManager:
         try:
             # Create the worktree
             cmd = [
-                "git", "worktree", "add",
+                "git",
+                "worktree",
+                "add",
                 str(worktree_path),
-                "-b", branch_name,
-                base_branch
+                "-b",
+                branch_name,
+                base_branch,
             ]
 
             _result = subprocess.run(
-                cmd,
-                cwd=self.project_root,
-                capture_output=True,
-                text=True,
-                check=True
+                cmd, cwd=self.project_root, capture_output=True, text=True, check=True
             )
 
             # Set up the worktree environment
@@ -85,7 +91,7 @@ class WorktreeManager:
                 worktree_path=worktree_path,
                 branch_name=branch_name,
                 status="active",
-                created_at=self._get_timestamp()
+                created_at=self._get_timestamp(),
             )
 
             self.worktrees[task_id] = worktree_info
@@ -109,7 +115,7 @@ class WorktreeManager:
             ".env.local",
             "pyproject.toml",
             "pytest.ini",
-            "requirements.txt"
+            "requirements.txt",
         ]
 
         for config_file in config_files:
@@ -123,11 +129,7 @@ class WorktreeManager:
                     print(f"⚠️  Warning: Failed to copy {config_file}: {e}")
 
         # Create task-specific directories
-        task_dirs = [
-            ".claude/logs",
-            "temp",
-            "results"
-        ]
+        task_dirs = [".claude/logs", "temp", "results"]
 
         for task_dir in task_dirs:
             (worktree_path / task_dir).mkdir(parents=True, exist_ok=True)
@@ -140,7 +142,9 @@ class WorktreeManager:
         """Get worktree information for a specific task"""
         return self.worktrees.get(task_id)
 
-    def update_worktree_status(self, task_id: str, status: str, pid: Optional[int] = None):
+    def update_worktree_status(
+        self, task_id: str, status: str, pid: Optional[int] = None
+    ):
         """Update worktree status"""
         if task_id in self.worktrees:
             self.worktrees[task_id].status = status
@@ -164,7 +168,7 @@ class WorktreeManager:
                 ["git", "fetch", "origin"],
                 cwd=worktree_info.worktree_path,
                 check=True,
-                capture_output=True
+                capture_output=True,
             )
 
             # Merge changes from base branch
@@ -172,7 +176,7 @@ class WorktreeManager:
                 ["git", "merge", f"origin/{base_branch}"],
                 cwd=worktree_info.worktree_path,
                 check=True,
-                capture_output=True
+                capture_output=True,
             )
 
             print(f"✅ Synced worktree {task_id}")
@@ -191,48 +195,48 @@ class WorktreeManager:
         results_dir = worktree_info.worktree_path / "results"
 
         results = {
-            'task_id': task_id,
-            'task_name': worktree_info.task_name,
-            'branch_name': worktree_info.branch_name,
-            'status': worktree_info.status,
-            'files_changed': [],
-            'commits': [],
-            'logs': None,
-            'artifacts': []
+            "task_id": task_id,
+            "task_name": worktree_info.task_name,
+            "branch_name": worktree_info.branch_name,
+            "status": worktree_info.status,
+            "files_changed": [],
+            "commits": [],
+            "logs": None,
+            "artifacts": [],
         }
 
         try:
             # Get list of changed files
             cmd = ["git", "diff", "--name-only", "HEAD~1..HEAD"]
             result = subprocess.run(
-                cmd,
-                cwd=worktree_info.worktree_path,
-                capture_output=True,
-                text=True
+                cmd, cwd=worktree_info.worktree_path, capture_output=True, text=True
             )
             if result.returncode == 0:
-                results['files_changed'] = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                results["files_changed"] = (
+                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                )
 
             # Get commit information
             cmd = ["git", "log", "--oneline", "-n", "5"]
             result = subprocess.run(
-                cmd,
-                cwd=worktree_info.worktree_path,
-                capture_output=True,
-                text=True
+                cmd, cwd=worktree_info.worktree_path, capture_output=True, text=True
             )
             if result.returncode == 0:
-                results['commits'] = result.stdout.strip().split('\n') if result.stdout.strip() else []
+                results["commits"] = (
+                    result.stdout.strip().split("\n") if result.stdout.strip() else []
+                )
 
             # Collect log files
-            log_files = list((worktree_info.worktree_path / ".claude" / "logs").glob("*.log"))
+            log_files = list(
+                (worktree_info.worktree_path / ".claude" / "logs").glob("*.log")
+            )
             if log_files:
-                results['logs'] = str(log_files[0])  # Most recent log
+                results["logs"] = str(log_files[0])  # Most recent log
 
             # Collect result artifacts
             if results_dir.exists():
                 artifacts = list(results_dir.glob("*"))
-                results['artifacts'] = [str(f) for f in artifacts]
+                results["artifacts"] = [str(f) for f in artifacts]
 
         except Exception as e:
             print(f"⚠️  Warning: Failed to collect some results for {task_id}: {e}")
@@ -269,10 +273,7 @@ class WorktreeManager:
                     cmd.append("--force")
 
                 result = subprocess.run(
-                    cmd,
-                    cwd=self.project_root,
-                    capture_output=True,
-                    text=True
+                    cmd, cwd=self.project_root, capture_output=True, text=True
                 )
 
                 if result.returncode != 0:
@@ -287,7 +288,7 @@ class WorktreeManager:
                         ["git", "branch", "-D", worktree_info.branch_name],
                         cwd=self.project_root,
                         capture_output=True,
-                        check=False  # Don't fail if branch doesn't exist
+                        check=False,  # Don't fail if branch doesn't exist
                     )
                 except Exception:
                     pass  # Branch cleanup is optional
@@ -326,25 +327,25 @@ class WorktreeManager:
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
 
             worktrees = []
             current_worktree = {}
 
-            for line in result.stdout.split('\n'):
-                if line.startswith('worktree '):
+            for line in result.stdout.split("\n"):
+                if line.startswith("worktree "):
                     if current_worktree:
                         worktrees.append(current_worktree)
-                    current_worktree = {'path': line[9:]}
-                elif line.startswith('HEAD '):
-                    current_worktree['head'] = line[5:]
-                elif line.startswith('branch '):
-                    current_worktree['branch'] = line[7:]
-                elif line == 'bare':
-                    current_worktree['bare'] = True  # type: ignore[assignment]
-                elif line == 'detached':
-                    current_worktree['detached'] = True  # type: ignore[assignment]
+                    current_worktree = {"path": line[9:]}
+                elif line.startswith("HEAD "):
+                    current_worktree["head"] = line[5:]
+                elif line.startswith("branch "):
+                    current_worktree["branch"] = line[7:]
+                elif line == "bare":
+                    current_worktree["bare"] = True  # type: ignore[assignment]
+                elif line == "detached":
+                    current_worktree["detached"] = True  # type: ignore[assignment]
 
             if current_worktree:
                 worktrees.append(current_worktree)
@@ -358,14 +359,16 @@ class WorktreeManager:
     def validate_worktrees(self) -> List[str]:
         """Validate all managed worktrees and return list of issues"""
         issues = []
-        system_worktrees = {wt['path']: wt for wt in self.get_system_worktrees()}
+        system_worktrees = {wt["path"]: wt for wt in self.get_system_worktrees()}
 
         for task_id, worktree_info in self.worktrees.items():
             path_str = str(worktree_info.worktree_path)
 
             # Check if worktree exists in git
             if path_str not in system_worktrees:
-                issues.append(f"Managed worktree {task_id} not found in git worktree list")
+                issues.append(
+                    f"Managed worktree {task_id} not found in git worktree list"
+                )
                 continue
 
             # Check if directory exists
@@ -379,10 +382,12 @@ class WorktreeManager:
                     ["git", "branch", "--list", worktree_info.branch_name],
                     cwd=self.project_root,
                     capture_output=True,
-                    text=True
+                    text=True,
                 )
                 if not result.stdout.strip():
-                    issues.append(f"Branch missing for worktree {task_id}: {worktree_info.branch_name}")
+                    issues.append(
+                        f"Branch missing for worktree {task_id}: {worktree_info.branch_name}"
+                    )
             except Exception as e:
                 issues.append(f"Failed to check branch for {task_id}: {e}")
 
@@ -392,19 +397,19 @@ class WorktreeManager:
         """Load worktree state from file"""
         if self.state_file.exists():
             try:
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file, "r") as f:
                     data = json.load(f)
 
                 self.worktrees = {}
-                for task_id, wt_data in data.get('worktrees', {}).items():
+                for task_id, wt_data in data.get("worktrees", {}).items():
                     self.worktrees[task_id] = WorktreeInfo(
-                        task_id=wt_data['task_id'],
-                        task_name=wt_data['task_name'],
-                        worktree_path=Path(wt_data['worktree_path']),
-                        branch_name=wt_data['branch_name'],
-                        status=wt_data['status'],
-                        created_at=wt_data['created_at'],
-                        pid=wt_data.get('pid')
+                        task_id=wt_data["task_id"],
+                        task_name=wt_data["task_name"],
+                        worktree_path=Path(wt_data["worktree_path"]),
+                        branch_name=wt_data["branch_name"],
+                        status=wt_data["status"],
+                        created_at=wt_data["created_at"],
+                        pid=wt_data.get("pid"),
                     )
 
             except Exception as e:
@@ -415,21 +420,21 @@ class WorktreeManager:
         """Save worktree state to file"""
         try:
             data = {
-                'worktrees': {
+                "worktrees": {
                     task_id: {
-                        'task_id': wt.task_id,
-                        'task_name': wt.task_name,
-                        'worktree_path': str(wt.worktree_path),
-                        'branch_name': wt.branch_name,
-                        'status': wt.status,
-                        'created_at': wt.created_at,
-                        'pid': wt.pid
+                        "task_id": wt.task_id,
+                        "task_name": wt.task_name,
+                        "worktree_path": str(wt.worktree_path),
+                        "branch_name": wt.branch_name,
+                        "status": wt.status,
+                        "created_at": wt.created_at,
+                        "pid": wt.pid,
                     }
                     for task_id, wt in self.worktrees.items()
                 }
             }
 
-            with open(self.state_file, 'w') as f:
+            with open(self.state_file, "w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -438,16 +443,17 @@ class WorktreeManager:
     def _get_timestamp(self) -> str:
         """Get current timestamp in ISO format"""
         from datetime import datetime
+
         return datetime.now().isoformat()
 
     def get_status_summary(self) -> Dict:
         """Get summary of all worktree statuses"""
         summary = {
-            'total': len(self.worktrees),
-            'active': 0,
-            'completed': 0,
-            'failed': 0,
-            'cleaning': 0
+            "total": len(self.worktrees),
+            "active": 0,
+            "completed": 0,
+            "failed": 0,
+            "cleaning": 0,
         }
 
         for worktree in self.worktrees.values():
@@ -460,8 +466,12 @@ def main():
     """CLI entry point for WorktreeManager"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Manage git worktrees for parallel execution")
-    parser.add_argument("command", choices=["list", "create", "cleanup", "validate", "status"])
+    parser = argparse.ArgumentParser(
+        description="Manage git worktrees for parallel execution"
+    )
+    parser.add_argument(
+        "command", choices=["list", "create", "cleanup", "validate", "status"]
+    )
     parser.add_argument("--task-id", help="Task ID for operations")
     parser.add_argument("--task-name", help="Task name for create operation")
     parser.add_argument("--force", action="store_true", help="Force operation")

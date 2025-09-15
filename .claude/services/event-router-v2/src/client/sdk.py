@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import functools
 import logging
 import uuid
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
@@ -39,7 +38,7 @@ class EventRouterClient:
         self,
         url: str = "localhost:8080",
         transport: str = "auto",
-        config: Optional[Dict[str, Any]] = None
+        config: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize Event Router client.
@@ -85,7 +84,12 @@ class EventRouterClient:
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type: Optional[type], exc_val: Optional[BaseException], exc_tb: Optional[object]) -> None:  # type: ignore
+    async def __aexit__(
+        self,
+        exc_type: Optional[type],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[object],
+    ) -> None:  # type: ignore
         """Async context manager exit."""
         await self.disconnect()
 
@@ -127,12 +131,7 @@ class EventRouterClient:
 
     # === Publishing Events ===
 
-    async def publish(
-        self,
-        event_type: str,
-        payload: Dict[str, Any],
-        **kwargs
-    ) -> str:
+    async def publish(self, event_type: str, payload: Dict[str, Any], **kwargs) -> str:
         """
         Publish an event.
 
@@ -164,7 +163,7 @@ class EventRouterClient:
             type=event_type,  # type: ignore[assignment]
             payload=payload,
             source=self.config.get("client_id", "unknown"),
-            **kwargs
+            **kwargs,
         )
 
         # Send through transport
@@ -174,10 +173,7 @@ class EventRouterClient:
         return event.id
 
     def publish_nowait(
-        self,
-        event_type: str,
-        payload: Dict[str, Any],
-        **kwargs
+        self, event_type: str, payload: Dict[str, Any], **kwargs
     ) -> None:
         """
         Publish event without waiting (fire and forget).
@@ -190,14 +186,9 @@ class EventRouterClient:
         Examples:
             client.publish_nowait("metric.recorded", {"cpu": 75})
         """
-        asyncio.create_task(
-            self.publish(event_type, payload, **kwargs)
-        )
+        asyncio.create_task(self.publish(event_type, payload, **kwargs))
 
-    async def publish_batch(
-        self,
-        events: List[Union[tuple, Event]]
-    ) -> List[str]:
+    async def publish_batch(self, events: List[Union[tuple, Event]]) -> List[str]:
         """
         Publish multiple events efficiently.
 
@@ -250,7 +241,10 @@ class EventRouterClient:
             async def handle_business_events(event):
                 await process_event(event)
         """
-        def decorator(func: Callable[[Event], Awaitable[None]]) -> Callable[[Event], Awaitable[None]]:
+
+        def decorator(
+            func: Callable[[Event], Awaitable[None]],
+        ) -> Callable[[Event], Awaitable[None]]:
             # Register handler  # type: ignore
             for event_type in event_types:
                 if event_type not in self.handlers:
@@ -276,7 +270,10 @@ class EventRouterClient:
             async def handle_user_lifecycle(event):
                 await update_user_cache(event)
         """
-        def decorator(func: Callable[[Event], Awaitable[None]]) -> Callable[[Event], Awaitable[None]]:
+
+        def decorator(
+            func: Callable[[Event], Awaitable[None]],
+        ) -> Callable[[Event], Awaitable[None]]:
             # Register pattern handler
             asyncio.create_task(  # type: ignore
                 self._create_pattern_subscription(pattern, func)
@@ -289,7 +286,7 @@ class EventRouterClient:
         self,
         topics: Union[str, List[str]],
         handler: Optional[Callable[[Event], Awaitable[None]]] = None,
-        event_filter: Optional[Dict[str, Any]] = None
+        event_filter: Optional[Dict[str, Any]] = None,
     ) -> Subscription:
         """
         Subscribe to events programmatically.
@@ -325,17 +322,16 @@ class EventRouterClient:
             subscriber_id=self.config.get("client_id", "unknown"),
             topics=topics,
             filter=event_filter,  # type: ignore[misc]
-            handler=handler  # type: ignore[misc]
+            handler=handler,  # type: ignore[misc]
         )
 
         # Register subscription
         self.subscriptions[subscription.id] = subscription
 
         # Send subscription to router
-        await self.transport.send({
-            "type": "subscribe",
-            "subscription": subscription.to_dict()
-        })
+        await self.transport.send(
+            {"type": "subscribe", "subscription": subscription.to_dict()}
+        )
 
         logger.info(f"Created subscription {subscription.id} for topics {topics}")
         return subscription
@@ -349,10 +345,9 @@ class EventRouterClient:
         """
         if subscription_id in self.subscriptions:
             # Send unsubscribe message
-            await self.transport.send({
-                "type": "unsubscribe",
-                "subscription_id": subscription_id
-            })
+            await self.transport.send(
+                {"type": "unsubscribe", "subscription_id": subscription_id}
+            )
 
             # Remove subscription
             del self.subscriptions[subscription_id]
@@ -365,7 +360,7 @@ class EventRouterClient:
         self,
         topics: Union[str, List[str]],
         batch_size: int = 1,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> Any:  # type: ignore
         """
         Stream events as async generator.
@@ -405,10 +400,7 @@ class EventRouterClient:
             while True:
                 try:
                     # Get event with timeout
-                    event = await asyncio.wait_for(
-                        queue.get(),
-                        timeout=timeout or 1.0
-                    )
+                    event = await asyncio.wait_for(queue.get(), timeout=timeout or 1.0)
 
                     if batch_size == 1:
                         yield event
@@ -432,10 +424,7 @@ class EventRouterClient:
     # === Request-Response Pattern ===
 
     async def request(
-        self,
-        event_type: str,
-        payload: Dict[str, Any],
-        timeout: float = 5.0
+        self, event_type: str, payload: Dict[str, Any], timeout: float = 5.0
     ) -> Event:
         """
         Make a request and wait for response.
@@ -471,23 +460,15 @@ class EventRouterClient:
                 await response_queue.put(event)
 
         response_subscription = await self.subscribe(
-            f"{event_type}.response",
-            handler=response_handler
+            f"{event_type}.response", handler=response_handler
         )
 
         try:
             # Send request
-            await self.publish(
-                event_type,
-                payload,
-                correlation_id=correlation_id
-            )
+            await self.publish(event_type, payload, correlation_id=correlation_id)
 
             # Wait for response
-            response = await asyncio.wait_for(
-                response_queue.get(),
-                timeout=timeout
-            )
+            response = await asyncio.wait_for(response_queue.get(), timeout=timeout)
 
             return response
 
@@ -509,7 +490,10 @@ class EventRouterClient:
                 y = request.payload["y"]
                 return {"result": x + y}
         """
-        def decorator(func: Callable[[Event], Awaitable[Dict[str, Any]]]) -> Callable[[Event], Awaitable[Dict[str, Any]]]:
+
+        def decorator(
+            func: Callable[[Event], Awaitable[Dict[str, Any]]],
+        ) -> Callable[[Event], Awaitable[Dict[str, Any]]]:
             @self.on(event_type)  # type: ignore
             async def handler(request: Event) -> None:  # type: ignore
                 try:
@@ -520,7 +504,7 @@ class EventRouterClient:
                     await self.publish(
                         f"{event_type}.response",
                         result,
-                        correlation_id=request.correlation_id  # type: ignore
+                        correlation_id=request.correlation_id,  # type: ignore
                     )
 
                 except Exception as e:
@@ -528,7 +512,7 @@ class EventRouterClient:
                     await self.publish(
                         f"{event_type}.error",
                         {"error": str(e)},
-                        correlation_id=request.correlation_id  # type: ignore
+                        correlation_id=request.correlation_id,  # type: ignore
                     )
 
             return func
@@ -573,10 +557,9 @@ class EventRouterClient:
             return
 
         # Send batch
-        await self.transport.send({
-            "type": "batch",
-            "events": [e.to_dict() for e in self.batch.events]
-        })
+        await self.transport.send(
+            {"type": "batch", "events": [e.to_dict() for e in self.batch.events]}
+        )
 
         # Clear batch
         self.batch = EventBatch()
@@ -636,9 +619,7 @@ class EventRouterClient:
         return event_type == pattern
 
     async def _create_subscription(
-        self,
-        event_types: tuple,
-        handler: Callable[[Event], Awaitable[None]]
+        self, event_types: tuple, handler: Callable[[Event], Awaitable[None]]
     ) -> None:
         """Create subscription for decorator."""
         if not self.connected:
@@ -647,9 +628,7 @@ class EventRouterClient:
         await self.subscribe(list(event_types), handler=handler)
 
     async def _create_pattern_subscription(
-        self,
-        pattern: str,
-        handler: Callable[[Event], Awaitable[None]]
+        self, pattern: str, handler: Callable[[Event], Awaitable[None]]
     ) -> None:
         """Create pattern subscription for decorator."""
         if not self.connected:
@@ -659,7 +638,7 @@ class EventRouterClient:
         await self.subscribe(
             "*",  # Subscribe to all
             handler=handler,
-            event_filter={"type": {"$regex": pattern}}
+            event_filter={"type": {"$regex": pattern}},
         )
 
 

@@ -12,8 +12,14 @@ def add_type_ignore_comments(filepath: Path) -> None:
 
     # Add type: ignore for common attribute access issues
     patterns = [
-        (r"(\w+)\.ASSERTION_ERROR", r"\1.ASSERTION_ERROR  # type: ignore[attr-defined]"),
-        (r"(\w+)\.API_KEY_MISSING", r"\1.API_KEY_MISSING  # type: ignore[attr-defined]"),
+        (
+            r"(\w+)\.ASSERTION_ERROR",
+            r"\1.ASSERTION_ERROR  # type: ignore[attr-defined]",
+        ),
+        (
+            r"(\w+)\.API_KEY_MISSING",
+            r"\1.API_KEY_MISSING  # type: ignore[attr-defined]",
+        ),
         (
             r"assert (\w+) is not None(?!.*# type: ignore)",
             r"assert \1 is not None  # type: ignore[comparison-overlap]",
@@ -46,7 +52,9 @@ def fix_optional_access_comprehensively(filepath: Path) -> None:
             match = re.search(r"assert (\w+)\.status", line)
             if match:
                 var = match.group(1)
-                line = line.replace(f"{var}.status", f"{var} is not None and {var}.status")
+                line = line.replace(
+                    f"{var}.status", f"{var} is not None and {var}.status"
+                )
 
         # Pattern 2: function().attribute access
         elif "assert" in line and re.search(r"\w+\([^)]*\)\.\w+", line):
@@ -91,10 +99,16 @@ def fix_type_assignments(filepath: Path) -> None:
     replacements = [
         # Fix priority assignments
         (r'priority="high"', "priority=TaskPriority.HIGH  # type: ignore[arg-type]"),
-        (r'priority="medium"', "priority=TaskPriority.MEDIUM  # type: ignore[arg-type]"),
+        (
+            r'priority="medium"',
+            "priority=TaskPriority.MEDIUM  # type: ignore[arg-type]",
+        ),
         (r'priority="low"', "priority=TaskPriority.LOW  # type: ignore[arg-type]"),
         # Fix status assignments
-        (r'status="completed"', "status=TaskStatus.COMPLETED  # type: ignore[arg-type]"),
+        (
+            r'status="completed"',
+            "status=TaskStatus.COMPLETED  # type: ignore[arg-type]",
+        ),
         (r'status="pending"', "status=TaskStatus.PENDING  # type: ignore[arg-type]"),
         # Fix assertions
         (
@@ -117,7 +131,9 @@ def add_missing_imports(filepath: Path) -> None:
     needs_imports = []
 
     if "TaskPriority.HIGH" in content or "TaskPriority.MEDIUM" in content:
-        if "TaskPriority" not in content.split("\n")[0:50]:  # Check first 50 lines for import
+        if (
+            "TaskPriority" not in content.split("\n")[0:50]
+        ):  # Check first 50 lines for import
             needs_imports.append("TaskPriority")
 
     if "TaskStatus.COMPLETED" in content or "TaskStatus.PENDING" in content:
@@ -126,7 +142,7 @@ def add_missing_imports(filepath: Path) -> None:
 
     # Add imports if needed
     if needs_imports:
-        import_line = f"from claude.shared.task_tracking import {', '.join(needs_imports)}  # type: ignore[import]\n"
+        import_line = f"from shared.task_tracking import {', '.join(needs_imports)}  # type: ignore[import]\n"
         # Add after other imports
         lines = content.split("\n")
         for i, line in enumerate(lines):
@@ -187,7 +203,9 @@ def main():
     # Final verification
     print("\nRunning final pyright check...")
     error_count = (
-        os.popen("uv run pyright tests/ 2>&1 | grep -c 'error:' || echo '0'").read().strip()
+        os.popen("uv run pyright tests/ 2>&1 | grep -c 'error:' || echo '0'")
+        .read()
+        .strip()
     )
 
     if error_count == "0":

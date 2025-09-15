@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set  # type: ignore
+from typing import Any, Dict, List, Optional  # type: ignore
 
 from .frontmatter_parser import parse_agent_definition
 from .tool_registry import ToolRegistry
@@ -19,8 +19,11 @@ try:
 except ImportError:
     # Mock imports for development
     class EventRouter:
-        async def subscribe(self, *args, **kwargs): pass
-        async def publish(self, event: Any): pass
+        async def subscribe(self, *args, **kwargs):
+            pass
+
+        async def publish(self, event: Any):
+            pass
 
     class Event:
         def __init__(self, **kwargs):
@@ -34,11 +37,15 @@ except ImportError:
         pass
 
     class MemorySystem:
-        async def store_memory(self, memory: Any): pass
-        async def retrieve_context(self, query: str, limit: int = 10): return []
+        async def store_memory(self, memory: Any):
+            pass
+
+        async def retrieve_context(self, query: str, limit: int = 10):
+            return []
 
     class Memory:
-        def __init__(self, **kwargs): pass
+        def __init__(self, **kwargs):
+            pass
 
     class MemoryType:
         CONTEXT = "context"
@@ -138,7 +145,9 @@ class BaseAgent(ABC):
         self._pending_questions: Dict[str, asyncio.Future[str]] = {}
         self._pending_approvals: Dict[str, asyncio.Future[bool]] = {}
 
-        logger.info(f"Initialized agent {self.agent_id} ({self.metadata.name} v{self.metadata.version})")
+        logger.info(
+            f"Initialized agent {self.agent_id} ({self.metadata.name} v{self.metadata.version})"
+        )
 
     def _register_tools(self) -> None:
         """Register tools from metadata."""
@@ -156,10 +165,12 @@ class BaseAgent(ABC):
 
     def _create_tool_handler(self, tool_name: str) -> Any:
         """Create a tool handler function."""
+
         async def handler(**kwargs: Any) -> Any:
             # Default implementation - can be overridden
             logger.debug(f"Invoking tool {tool_name} with params: {kwargs}")
             return {"tool": tool_name, "params": kwargs, "result": "success"}
+
         return handler
 
     @abstractmethod
@@ -232,7 +243,9 @@ class BaseAgent(ABC):
 
                 # Handle response
                 if not response.success:
-                    logger.error(f"Failed to process event {event.type}: {response.error}")
+                    logger.error(
+                        f"Failed to process event {event.type}: {response.error}"
+                    )
 
                 # Store processing result in memory
                 result_memory = Memory(
@@ -296,7 +309,9 @@ class BaseAgent(ABC):
         )
         await self.memory_system.store_memory(cleanup_memory)
 
-    async def invoke_tool(self, tool_name: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    async def invoke_tool(
+        self, tool_name: str, params: Optional[Dict[str, Any]] = None
+    ) -> Any:
         """Invoke a registered tool.
 
         Args:
@@ -316,7 +331,9 @@ class BaseAgent(ABC):
             logger.error(f"Failed to invoke tool {tool_name}: {e}")
             raise
 
-    async def ask_question(self, question: str, context: Optional[Dict[str, Any]] = None) -> str:
+    async def ask_question(
+        self, question: str, context: Optional[Dict[str, Any]] = None
+    ) -> str:
         """Interactive Q&A support.
 
         Args:
@@ -351,7 +368,9 @@ class BaseAgent(ABC):
             del self._pending_questions[question_id]
             return "No answer received (timeout)"
 
-    async def request_approval(self, action: str, details: Optional[Dict[str, Any]] = None) -> bool:
+    async def request_approval(
+        self, action: str, details: Optional[Dict[str, Any]] = None
+    ) -> bool:
         """Request user approval for an action.
 
         Args:

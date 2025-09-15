@@ -15,8 +15,4 @@ __all__ = [  # type: ignore[misc]
     "parse_agent_definition",
     "ToolRegistry",
     "Tool",
-<<<<<<< HEAD  # type: ignore[misc]
 ]
-=======  # type: ignore[misc]
-]  # type: ignore[misc]
->>>>>>> feature/gadugi-v0.3-regeneration  # type: ignore[misc]

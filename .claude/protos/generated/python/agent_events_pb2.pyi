@@ -2,19 +2,39 @@ import common_pb2 as _common_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
-from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Mapping, Optional as _Optional, Union as _Union
+from typing import (
+    ClassVar as _ClassVar,
+    Iterable as _Iterable,
+    Mapping as _Mapping,
+    Optional as _Optional,
+    Union as _Union,
+)
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class AgentStarted(_message.Message):
-    __slots__ = ("agent_id", "agent_type", "agent_name", "timestamp", "metadata", "version", "capabilities", "resources", "parent_agent_id", "config")
+    __slots__ = (
+        "agent_id",
+        "agent_type",
+        "agent_name",
+        "timestamp",
+        "metadata",
+        "version",
+        "capabilities",
+        "resources",
+        "parent_agent_id",
+        "config",
+    )
     class ConfigEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     AGENT_TYPE_FIELD_NUMBER: _ClassVar[int]
     AGENT_NAME_FIELD_NUMBER: _ClassVar[int]
@@ -35,17 +55,41 @@ class AgentStarted(_message.Message):
     resources: _common_pb2.ResourceRequirements
     parent_agent_id: str
     config: _containers.ScalarMap[str, str]
-    def __init__(self, agent_id: _Optional[str] = ..., agent_type: _Optional[str] = ..., agent_name: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ..., version: _Optional[str] = ..., capabilities: _Optional[_Iterable[str]] = ..., resources: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ..., parent_agent_id: _Optional[str] = ..., config: _Optional[_Mapping[str, str]] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        agent_type: _Optional[str] = ...,
+        agent_name: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ...,
+        version: _Optional[str] = ...,
+        capabilities: _Optional[_Iterable[str]] = ...,
+        resources: _Optional[_Union[_common_pb2.ResourceRequirements, _Mapping]] = ...,
+        parent_agent_id: _Optional[str] = ...,
+        config: _Optional[_Mapping[str, str]] = ...,
+    ) -> None: ...
 
 class AgentStopped(_message.Message):
-    __slots__ = ("agent_id", "timestamp", "reason", "exit_code", "error", "runtime_ms", "final_metrics", "will_restart")
+    __slots__ = (
+        "agent_id",
+        "timestamp",
+        "reason",
+        "exit_code",
+        "error",
+        "runtime_ms",
+        "final_metrics",
+        "will_restart",
+    )
     class FinalMetricsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: float
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[float] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[float] = ...
+        ) -> None: ...
+
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     REASON_FIELD_NUMBER: _ClassVar[int]
@@ -62,10 +106,31 @@ class AgentStopped(_message.Message):
     runtime_ms: int
     final_metrics: _containers.ScalarMap[str, float]
     will_restart: bool
-    def __init__(self, agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., reason: _Optional[str] = ..., exit_code: _Optional[int] = ..., error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ..., runtime_ms: _Optional[int] = ..., final_metrics: _Optional[_Mapping[str, float]] = ..., will_restart: bool = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        reason: _Optional[str] = ...,
+        exit_code: _Optional[int] = ...,
+        error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ...,
+        runtime_ms: _Optional[int] = ...,
+        final_metrics: _Optional[_Mapping[str, float]] = ...,
+        will_restart: bool = ...,
+    ) -> None: ...
 
 class AgentHasQuestion(_message.Message):
-    __slots__ = ("agent_id", "question_id", "question", "options", "priority", "timestamp", "timeout_seconds", "context", "requires_confirmation", "default_answer")
+    __slots__ = (
+        "agent_id",
+        "question_id",
+        "question",
+        "options",
+        "priority",
+        "timestamp",
+        "timeout_seconds",
+        "context",
+        "requires_confirmation",
+        "default_answer",
+    )
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     QUESTION_ID_FIELD_NUMBER: _ClassVar[int]
     QUESTION_FIELD_NUMBER: _ClassVar[int]
@@ -86,17 +151,45 @@ class AgentHasQuestion(_message.Message):
     context: str
     requires_confirmation: bool
     default_answer: str
-    def __init__(self, agent_id: _Optional[str] = ..., question_id: _Optional[str] = ..., question: _Optional[str] = ..., options: _Optional[_Iterable[str]] = ..., priority: _Optional[_Union[_common_pb2.Priority, str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., timeout_seconds: _Optional[int] = ..., context: _Optional[str] = ..., requires_confirmation: bool = ..., default_answer: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        question_id: _Optional[str] = ...,
+        question: _Optional[str] = ...,
+        options: _Optional[_Iterable[str]] = ...,
+        priority: _Optional[_Union[_common_pb2.Priority, str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        timeout_seconds: _Optional[int] = ...,
+        context: _Optional[str] = ...,
+        requires_confirmation: bool = ...,
+        default_answer: _Optional[str] = ...,
+    ) -> None: ...
 
 class AgentNeedsApproval(_message.Message):
-    __slots__ = ("agent_id", "approval_id", "action", "description", "parameters", "priority", "timestamp", "approvers", "timeout_seconds", "risk_level", "impacts", "auto_approve_on_timeout")
+    __slots__ = (
+        "agent_id",
+        "approval_id",
+        "action",
+        "description",
+        "parameters",
+        "priority",
+        "timestamp",
+        "approvers",
+        "timeout_seconds",
+        "risk_level",
+        "impacts",
+        "auto_approve_on_timeout",
+    )
     class ParametersEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     APPROVAL_ID_FIELD_NUMBER: _ClassVar[int]
     ACTION_FIELD_NUMBER: _ClassVar[int]
@@ -121,10 +214,34 @@ class AgentNeedsApproval(_message.Message):
     risk_level: str
     impacts: _containers.RepeatedScalarFieldContainer[str]
     auto_approve_on_timeout: bool
-    def __init__(self, agent_id: _Optional[str] = ..., approval_id: _Optional[str] = ..., action: _Optional[str] = ..., description: _Optional[str] = ..., parameters: _Optional[_Mapping[str, str]] = ..., priority: _Optional[_Union[_common_pb2.Priority, str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., approvers: _Optional[_Iterable[str]] = ..., timeout_seconds: _Optional[int] = ..., risk_level: _Optional[str] = ..., impacts: _Optional[_Iterable[str]] = ..., auto_approve_on_timeout: bool = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        approval_id: _Optional[str] = ...,
+        action: _Optional[str] = ...,
+        description: _Optional[str] = ...,
+        parameters: _Optional[_Mapping[str, str]] = ...,
+        priority: _Optional[_Union[_common_pb2.Priority, str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        approvers: _Optional[_Iterable[str]] = ...,
+        timeout_seconds: _Optional[int] = ...,
+        risk_level: _Optional[str] = ...,
+        impacts: _Optional[_Iterable[str]] = ...,
+        auto_approve_on_timeout: bool = ...,
+    ) -> None: ...
 
 class AgentResponse(_message.Message):
-    __slots__ = ("agent_id", "request_id", "answer", "approval", "error", "timestamp", "metadata", "responder_id", "justification")
+    __slots__ = (
+        "agent_id",
+        "request_id",
+        "answer",
+        "approval",
+        "error",
+        "timestamp",
+        "metadata",
+        "responder_id",
+        "justification",
+    )
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     REQUEST_ID_FIELD_NUMBER: _ClassVar[int]
     ANSWER_FIELD_NUMBER: _ClassVar[int]
@@ -143,17 +260,42 @@ class AgentResponse(_message.Message):
     metadata: _common_pb2.Metadata
     responder_id: str
     justification: str
-    def __init__(self, agent_id: _Optional[str] = ..., request_id: _Optional[str] = ..., answer: _Optional[str] = ..., approval: bool = ..., error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ..., responder_id: _Optional[str] = ..., justification: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        request_id: _Optional[str] = ...,
+        answer: _Optional[str] = ...,
+        approval: bool = ...,
+        error: _Optional[_Union[_common_pb2.Error, _Mapping]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        metadata: _Optional[_Union[_common_pb2.Metadata, _Mapping]] = ...,
+        responder_id: _Optional[str] = ...,
+        justification: _Optional[str] = ...,
+    ) -> None: ...
 
 class AgentHeartbeat(_message.Message):
-    __slots__ = ("agent_id", "timestamp", "status", "metrics", "memory_usage_mb", "cpu_usage_percent", "active_tasks", "queued_tasks", "health_status", "warnings")
+    __slots__ = (
+        "agent_id",
+        "timestamp",
+        "status",
+        "metrics",
+        "memory_usage_mb",
+        "cpu_usage_percent",
+        "active_tasks",
+        "queued_tasks",
+        "health_status",
+        "warnings",
+    )
     class MetricsEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: float
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[float] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[float] = ...
+        ) -> None: ...
+
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TIMESTAMP_FIELD_NUMBER: _ClassVar[int]
     STATUS_FIELD_NUMBER: _ClassVar[int]
@@ -174,10 +316,29 @@ class AgentHeartbeat(_message.Message):
     queued_tasks: int
     health_status: str
     warnings: _containers.RepeatedScalarFieldContainer[str]
-    def __init__(self, agent_id: _Optional[str] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ..., metrics: _Optional[_Mapping[str, float]] = ..., memory_usage_mb: _Optional[int] = ..., cpu_usage_percent: _Optional[float] = ..., active_tasks: _Optional[int] = ..., queued_tasks: _Optional[int] = ..., health_status: _Optional[str] = ..., warnings: _Optional[_Iterable[str]] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ...,
+        metrics: _Optional[_Mapping[str, float]] = ...,
+        memory_usage_mb: _Optional[int] = ...,
+        cpu_usage_percent: _Optional[float] = ...,
+        active_tasks: _Optional[int] = ...,
+        queued_tasks: _Optional[int] = ...,
+        health_status: _Optional[str] = ...,
+        warnings: _Optional[_Iterable[str]] = ...,
+    ) -> None: ...
 
 class AgentStateChanged(_message.Message):
-    __slots__ = ("agent_id", "previous_status", "new_status", "timestamp", "reason", "triggered_by")
+    __slots__ = (
+        "agent_id",
+        "previous_status",
+        "new_status",
+        "timestamp",
+        "reason",
+        "triggered_by",
+    )
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     PREVIOUS_STATUS_FIELD_NUMBER: _ClassVar[int]
     NEW_STATUS_FIELD_NUMBER: _ClassVar[int]
@@ -190,17 +351,36 @@ class AgentStateChanged(_message.Message):
     timestamp: _common_pb2.Timestamp
     reason: str
     triggered_by: str
-    def __init__(self, agent_id: _Optional[str] = ..., previous_status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ..., new_status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., reason: _Optional[str] = ..., triggered_by: _Optional[str] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        previous_status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ...,
+        new_status: _Optional[_Union[_common_pb2.AgentStatus, str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        reason: _Optional[str] = ...,
+        triggered_by: _Optional[str] = ...,
+    ) -> None: ...
 
 class AgentCapabilityRegistered(_message.Message):
-    __slots__ = ("agent_id", "capability_name", "capability_version", "description", "dependencies", "timestamp", "parameters")
+    __slots__ = (
+        "agent_id",
+        "capability_name",
+        "capability_version",
+        "description",
+        "dependencies",
+        "timestamp",
+        "parameters",
+    )
     class ParametersEntry(_message.Message):
         __slots__ = ("key", "value")
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
         value: str
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[str] = ...) -> None: ...
+        def __init__(
+            self, key: _Optional[str] = ..., value: _Optional[str] = ...
+        ) -> None: ...
+
     AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     CAPABILITY_NAME_FIELD_NUMBER: _ClassVar[int]
     CAPABILITY_VERSION_FIELD_NUMBER: _ClassVar[int]
@@ -215,10 +395,30 @@ class AgentCapabilityRegistered(_message.Message):
     dependencies: _containers.RepeatedScalarFieldContainer[str]
     timestamp: _common_pb2.Timestamp
     parameters: _containers.ScalarMap[str, str]
-    def __init__(self, agent_id: _Optional[str] = ..., capability_name: _Optional[str] = ..., capability_version: _Optional[str] = ..., description: _Optional[str] = ..., dependencies: _Optional[_Iterable[str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., parameters: _Optional[_Mapping[str, str]] = ...) -> None: ...
+    def __init__(
+        self,
+        agent_id: _Optional[str] = ...,
+        capability_name: _Optional[str] = ...,
+        capability_version: _Optional[str] = ...,
+        description: _Optional[str] = ...,
+        dependencies: _Optional[_Iterable[str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        parameters: _Optional[_Mapping[str, str]] = ...,
+    ) -> None: ...
 
 class AgentMessage(_message.Message):
-    __slots__ = ("from_agent_id", "to_agent_id", "message_id", "message_type", "payload", "priority", "timestamp", "correlation_id", "requires_response", "timeout_seconds")
+    __slots__ = (
+        "from_agent_id",
+        "to_agent_id",
+        "message_id",
+        "message_type",
+        "payload",
+        "priority",
+        "timestamp",
+        "correlation_id",
+        "requires_response",
+        "timeout_seconds",
+    )
     FROM_AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     TO_AGENT_ID_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_ID_FIELD_NUMBER: _ClassVar[int]
@@ -239,4 +439,16 @@ class AgentMessage(_message.Message):
     correlation_id: str
     requires_response: bool
     timeout_seconds: int
-    def __init__(self, from_agent_id: _Optional[str] = ..., to_agent_id: _Optional[str] = ..., message_id: _Optional[str] = ..., message_type: _Optional[str] = ..., payload: _Optional[bytes] = ..., priority: _Optional[_Union[_common_pb2.Priority, str]] = ..., timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ..., correlation_id: _Optional[str] = ..., requires_response: bool = ..., timeout_seconds: _Optional[int] = ...) -> None: ...
+    def __init__(
+        self,
+        from_agent_id: _Optional[str] = ...,
+        to_agent_id: _Optional[str] = ...,
+        message_id: _Optional[str] = ...,
+        message_type: _Optional[str] = ...,
+        payload: _Optional[bytes] = ...,
+        priority: _Optional[_Union[_common_pb2.Priority, str]] = ...,
+        timestamp: _Optional[_Union[_common_pb2.Timestamp, _Mapping]] = ...,
+        correlation_id: _Optional[str] = ...,
+        requires_response: bool = ...,
+        timeout_seconds: _Optional[int] = ...,
+    ) -> None: ...

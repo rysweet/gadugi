@@ -85,7 +85,9 @@ class SyncResult:
         result["end_time"] = self.end_time.isoformat()
         result["duration_seconds"] = self.duration.total_seconds()
         result["direction"] = self.direction.value
-        result["conflicts"] = [c.to_dict() if hasattr(c, "to_dict") else c for c in self.conflicts]
+        result["conflicts"] = [
+            c.to_dict() if hasattr(c, "to_dict") else c for c in self.conflicts
+        ]
         return result
 
 
@@ -114,7 +116,9 @@ class SyncConfig:
 class SyncEngine:
     """Bidirectional synchronization engine"""
 
-    def __init__(self, memory_path: str, repo_path: str = None, config: SyncConfig = None):
+    def __init__(
+        self, memory_path: str, repo_path: str = None, config: SyncConfig = None
+    ):
         """Initialize sync engine"""
         self.memory_path = Path(memory_path)
         self.repo_path = repo_path or str(self.memory_path.parent.parent)
@@ -204,7 +208,11 @@ class SyncEngine:
     ):
         """Sync Memory.md tasks to GitHub issues"""
         # Create mapping of existing issues
-        issue_map = {issue.memory_task_id: issue for issue in github_issues if issue.memory_task_id}
+        issue_map = {
+            issue.memory_task_id: issue
+            for issue in github_issues
+            if issue.memory_task_id
+        }
 
         for task in self._filter_tasks(memory_doc.tasks):
             if self.config.dry_run:
@@ -258,11 +266,15 @@ class SyncEngine:
         # For now, just track what would be updated
         for issue in github_issues:
             if issue.memory_task_id:
-                task = next((t for t in memory_doc.tasks if t.id == issue.memory_task_id), None)
+                task = next(
+                    (t for t in memory_doc.tasks if t.id == issue.memory_task_id), None
+                )
                 if task:
                     # Check if issue state differs from task status
                     expected_status = (
-                        TaskStatus.COMPLETED if issue.state == "closed" else TaskStatus.PENDING
+                        TaskStatus.COMPLETED
+                        if issue.state == "closed"
+                        else TaskStatus.PENDING
                     )
                     if task.status != expected_status:
                         if not self.config.dry_run:
@@ -291,16 +303,24 @@ class SyncEngine:
 
         for task in tasks:
             # Check include/exclude sections
-            if self.config.include_sections and task.section not in self.config.include_sections:
+            if (
+                self.config.include_sections
+                and task.section not in self.config.include_sections
+            ):
                 continue
-            if self.config.exclude_sections and task.section in self.config.exclude_sections:
+            if (
+                self.config.exclude_sections
+                and task.section in self.config.exclude_sections
+            ):
                 continue
 
             filtered.append(task)
 
         return filtered
 
-    def _detect_conflict(self, task: Task, issue: GitHubIssue) -> Optional[SyncConflict]:
+    def _detect_conflict(
+        self, task: Task, issue: GitHubIssue
+    ) -> Optional[SyncConflict]:
         """Detect conflicts between task and issue"""
         conflicts = []
 
@@ -309,7 +329,9 @@ class SyncEngine:
             conflicts.append("content_mismatch")
 
         # Check status consistency
-        expected_issue_state = "closed" if task.status == TaskStatus.COMPLETED else "open"
+        expected_issue_state = (
+            "closed" if task.status == TaskStatus.COMPLETED else "open"
+        )
         if issue.state != expected_issue_state:
             conflicts.append("status_mismatch")
 
@@ -337,7 +359,9 @@ class SyncEngine:
 
         return None
 
-    def _content_differs_significantly(self, task_content: str, issue_title: str) -> bool:
+    def _content_differs_significantly(
+        self, task_content: str, issue_title: str
+    ) -> bool:
         """Check if content differs significantly"""
         # Simple heuristic - check if core content is similar
         task_clean = self._clean_content_for_comparison(task_content)

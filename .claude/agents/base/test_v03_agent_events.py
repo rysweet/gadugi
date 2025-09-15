@@ -20,7 +20,7 @@ class TestAgent(V03Agent):
         capabilities = AgentCapabilities(
             can_write_code=True,
             can_test=True,
-            expertise_areas=["testing", "event_publishing"]
+            expertise_areas=["testing", "event_publishing"],
         )
 
         # Configure events with graceful degradation
@@ -29,14 +29,14 @@ class TestAgent(V03Agent):
             event_router_url="http://localhost:8000",
             timeout_seconds=2,
             graceful_degradation=True,
-            emit_heartbeat=False  # Disable for testing
+            emit_heartbeat=False,  # Disable for testing
         )
 
         super().__init__(
             agent_id="test-agent-001",
             agent_type="test-agent",
             capabilities=capabilities,
-            event_config=event_config
+            event_config=event_config,
         )
 
     async def execute_task(self, task):
@@ -50,15 +50,15 @@ class TestAgent(V03Agent):
             task_type="test",
             steps_taken=["Step 1: Analyze", "Step 2: Execute", "Step 3: Verify"],
             duration_seconds=0.1,
-            lessons_learned="Test completed successfully"
+            lessons_learned="Test completed successfully",
         )
 
 
 async def test_event_publishing():
     """Test the event publishing functionality."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing V03Agent Event Publishing")
-    print("="*60)
+    print("=" * 60)
 
     agent = TestAgent()
 
@@ -67,13 +67,15 @@ async def test_event_publishing():
         await agent.initialize(mcp_url="http://localhost:8000")
 
         print("\n2. Testing task lifecycle events...")
-        task_id = await agent.start_task("Test event publishing functionality")
+        _task_id = await agent.start_task("Test event publishing functionality")
 
         # Execute a test task
-        outcome = await agent.execute_task({
-            "description": "Test event publishing functionality",
-            "type": "integration_test"
-        })
+        outcome = await agent.execute_task(
+            {
+                "description": "Test event publishing functionality",
+                "type": "integration_test",
+            }
+        )
 
         # Learn from the outcome
         await agent.learn_from_outcome(outcome)
@@ -83,21 +85,21 @@ async def test_event_publishing():
             knowledge_type="pattern",
             content="Event publishing works correctly with graceful degradation",
             confidence=0.9,
-            source="integration_test"
+            source="integration_test",
         )
 
         print("\n4. Testing collaboration event...")
         await agent.emit_collaboration(
             message="Event publishing test completed successfully",
             message_type="status_update",
-            decision="Proceed with deployment"
+            decision="Proceed with deployment",
         )
 
         print("\n5. Testing error event...")
         await agent.emit_error(
             error_type="test_error",
             error_message="This is a test error for validation",
-            context={"test_case": "error_emission", "expected": True}
+            context={"test_case": "error_emission", "expected": True},
         )
 
         print("\n6. Testing batch flush...")
@@ -108,16 +110,17 @@ async def test_event_publishing():
 
         # Print event publishing status
         if agent._event_publishing_enabled:
-            print(f"  🟢 Event publishing: ENABLED")
+            print("  🟢 Event publishing: ENABLED")
             print(f"  📡 Event router: {agent.event_config.event_router_url}")
             print(f"  📦 Batched events: {len(agent._event_batch)}")
         else:
-            print(f"  🟡 Event publishing: DISABLED (graceful degradation)")
+            print("  🟡 Event publishing: DISABLED (graceful degradation)")
             print(f"  📦 Batched events: {len(agent._event_batch)}")
 
     except Exception as e:
         print(f"\n❌ Test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:
@@ -127,16 +130,16 @@ async def test_event_publishing():
 
 async def test_without_event_router():
     """Test graceful degradation when event router is unavailable."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Testing Graceful Degradation (No Event Router)")
-    print("="*60)
+    print("=" * 60)
 
     # Configure with a non-existent event router
     event_config = EventConfiguration(
         enabled=True,
         event_router_url="http://localhost:9999",  # Non-existent port
         timeout_seconds=1,
-        graceful_degradation=True
+        graceful_degradation=True,
     )
 
     capabilities = AgentCapabilities(expertise_areas=["resilience_testing"])
@@ -145,7 +148,7 @@ async def test_without_event_router():
         agent_id="resilience-test-agent",
         agent_type="resilience-test",
         capabilities=capabilities,
-        event_config=event_config
+        event_config=event_config,
     )
 
     try:
@@ -153,10 +156,12 @@ async def test_without_event_router():
         await agent.initialize()
 
         print("\n2. Testing operations with degraded event system...")
-        task_id = await agent.start_task("Test resilience without event router")
+        _task_id = await agent.start_task("Test resilience without event router")
 
         # These should all work despite event router being unavailable
-        await agent.emit_knowledge_learned("resilience", "System continues to work", 0.8)
+        await agent.emit_knowledge_learned(
+            "resilience", "System continues to work", 0.8
+        )
         await agent.emit_collaboration("Still collaborating despite events being down")
 
         print(f"\n  📦 Batched events (should have some): {len(agent._event_batch)}")
@@ -167,6 +172,7 @@ async def test_without_event_router():
     except Exception as e:
         print(f"\n❌ Graceful degradation test failed: {e}")
         import traceback
+
         traceback.print_exc()
 
     finally:
@@ -179,9 +185,9 @@ async def main():
         await test_event_publishing()
         await test_without_event_router()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("🎉 All tests completed!")
-        print("="*60)
+        print("=" * 60)
 
     except KeyboardInterrupt:
         print("\n⏹️  Tests interrupted by user")

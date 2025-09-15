@@ -6,10 +6,10 @@ Adds workflow enforcement requirements to all agent markdown files.
 
 import os
 import sys
-import re
 from pathlib import Path
 from typing import List, Tuple
 import argparse
+
 
 class AgentInstructionUpdater:
     """Updates agent markdown files with workflow enforcement requirements."""
@@ -73,7 +73,10 @@ Only for critical production issues:
 
     def has_workflow_section(self, content: str) -> bool:
         """Check if the file already has workflow enforcement section."""
-        return "CRITICAL: Workflow Enforcement" in content or "WORKFLOW ENFORCEMENT ACTIVE" in content
+        return (
+            "CRITICAL: Workflow Enforcement" in content
+            or "WORKFLOW ENFORCEMENT ACTIVE" in content
+        )
 
     def update_agent_file(self, file_path: Path) -> Tuple[bool, str]:
         """
@@ -84,7 +87,7 @@ Only for critical production issues:
         """
         try:
             # Read existing content
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Check if already updated
@@ -92,30 +95,32 @@ Only for critical production issues:
                 return True, "Already has workflow section"
 
             # Find insertion point (after title and before first section)
-            lines = content.split('\n')
+            lines = content.split("\n")
             insertion_point = 1  # Default to after first line
 
             # Look for title pattern
             for i, line in enumerate(lines):
-                if line.startswith('# '):  # Main title
+                if line.startswith("# "):  # Main title
                     # Look for first ## section or content after title
                     for j in range(i + 1, len(lines)):
-                        if lines[j].startswith('##') or (lines[j].strip() and not lines[j].startswith('#')):
+                        if lines[j].startswith("##") or (
+                            lines[j].strip() and not lines[j].startswith("#")
+                        ):
                             insertion_point = j
                             break
                     break
 
             # Insert workflow section
             lines.insert(insertion_point, self.workflow_section)
-            updated_content = '\n'.join(lines)
+            updated_content = "\n".join(lines)
 
             # Create backup
-            backup_path = file_path.with_suffix(file_path.suffix + '.backup')
-            with open(backup_path, 'w', encoding='utf-8') as f:
+            backup_path = file_path.with_suffix(file_path.suffix + ".backup")
+            with open(backup_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # Write updated content
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(updated_content)
 
             return True, "Updated successfully"
@@ -142,7 +147,7 @@ Only for critical production issues:
             if dry_run:
                 # Read and check only
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, "r", encoding="utf-8") as f:
                         content = f.read()
 
                     if self.has_workflow_section(content):
@@ -189,13 +194,13 @@ Only for critical production issues:
             relative_path = file_path.relative_to(self.repo_root)
 
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     content = f.read()
 
                 # Remove workflow section if present
                 if self.has_workflow_section(content):
                     # Find and remove the workflow section
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     new_lines = []
                     skip_section = False
 
@@ -203,9 +208,15 @@ Only for critical production issues:
                         if "CRITICAL: Workflow Enforcement" in line:
                             skip_section = True
                             continue
-                        elif skip_section and line.startswith('##') and "Workflow Enforcement" not in line:
+                        elif (
+                            skip_section
+                            and line.startswith("##")
+                            and "Workflow Enforcement" not in line
+                        ):
                             skip_section = False
-                        elif skip_section and "REMEMBER: This workflow protects" in line:
+                        elif (
+                            skip_section and "REMEMBER: This workflow protects" in line
+                        ):
                             skip_section = False
                             continue
 
@@ -213,8 +224,8 @@ Only for critical production issues:
                             new_lines.append(line)
 
                     # Write updated content
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        f.write('\n'.join(new_lines))
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write("\n".join(new_lines))
 
                     updated_count += 1
                     print(f"  📝 {relative_path} (workflow section removed)")
@@ -242,15 +253,15 @@ Only for critical production issues:
         print(f"Found {len(backup_files)} backup files")
 
         for backup_path in backup_files:
-            original_path = backup_path.with_suffix('')
+            original_path = backup_path.with_suffix("")
             relative_path = original_path.relative_to(self.repo_root)
 
             try:
                 # Restore from backup
-                with open(backup_path, 'r', encoding='utf-8') as f:
+                with open(backup_path, "r", encoding="utf-8") as f:
                     backup_content = f.read()
 
-                with open(original_path, 'w', encoding='utf-8') as f:
+                with open(original_path, "w", encoding="utf-8") as f:
                     f.write(backup_content)
 
                 # Remove backup file
@@ -266,6 +277,7 @@ Only for critical production issues:
 
         return restored_count, len(backup_files), error_messages
 
+
 def main():
     """Main function for command line usage."""
     parser = argparse.ArgumentParser(
@@ -277,37 +289,33 @@ Examples:
   %(prog)s --dry-run         # See what would be updated
   %(prog)s --remove          # Remove workflow sections
   %(prog)s --restore         # Restore from backups
-        """
+        """,
     )
 
     parser.add_argument(
         "--update",
         action="store_true",
-        help="Update all agent files with workflow requirements"
+        help="Update all agent files with workflow requirements",
     )
 
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Show what would be updated without making changes"
+        help="Show what would be updated without making changes",
     )
 
     parser.add_argument(
-        "--remove",
-        action="store_true",
-        help="Remove workflow sections from all files"
+        "--remove", action="store_true", help="Remove workflow sections from all files"
     )
 
     parser.add_argument(
-        "--restore",
-        action="store_true",
-        help="Restore all files from backups"
+        "--restore", action="store_true", help="Restore all files from backups"
     )
 
     parser.add_argument(
         "--repo-root",
         default=".",
-        help="Repository root directory (default: current directory)"
+        help="Repository root directory (default: current directory)",
     )
 
     args = parser.parse_args()
@@ -321,10 +329,12 @@ Examples:
     if args.dry_run:
         print("🔍 DRY RUN: Checking what would be updated...")
         updated_count, total_count, errors = updater.update_all_agents(dry_run=True)
-        print(f"\n📊 Summary: {updated_count} files would be updated out of {total_count} total")
+        print(
+            f"\n📊 Summary: {updated_count} files would be updated out of {total_count} total"
+        )
 
         if errors:
-            print(f"\n❌ Errors:")
+            print("\n❌ Errors:")
             for error in errors:
                 print(f"  {error}")
 
@@ -334,7 +344,7 @@ Examples:
         print(f"\n📊 Summary: {updated_count} files updated out of {total_count} total")
 
         if errors:
-            print(f"\n❌ Errors:")
+            print("\n❌ Errors:")
             for error in errors:
                 print(f"  {error}")
 
@@ -344,23 +354,26 @@ Examples:
         print(f"\n📊 Summary: {updated_count} files updated out of {total_count} total")
 
         if errors:
-            print(f"\n❌ Errors:")
+            print("\n❌ Errors:")
             for error in errors:
                 print(f"  {error}")
 
     elif args.restore:
         print("📁 Restoring all agent files from backups...")
         restored_count, total_backups, errors = updater.restore_backups()
-        print(f"\n📊 Summary: {restored_count} files restored from {total_backups} backups")
+        print(
+            f"\n📊 Summary: {restored_count} files restored from {total_backups} backups"
+        )
 
         if errors:
-            print(f"\n❌ Errors:")
+            print("\n❌ Errors:")
             for error in errors:
                 print(f"  {error}")
 
     else:
         parser.print_help()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

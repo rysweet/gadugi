@@ -20,14 +20,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import Any, Tuple
 from typing import AsyncGenerator
 
-from collections.abc import AsyncIterator
 
 # Optional provider imports with fallbacks
 try:
     import openai
+
     OPENAI_AVAILABLE = True
 except ImportError:
     openai = None  # type: ignore
@@ -35,6 +35,7 @@ except ImportError:
 
 try:
     import anthropic  # type: ignore
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     anthropic = None  # type: ignore
@@ -228,7 +229,9 @@ class RateLimiter:
 
             # Remove old entries
             self.request_times = [t for t in self.request_times if t > cutoff]
-            self.token_usage = [(t, tokens) for t, tokens in self.token_usage if t > cutoff]
+            self.token_usage = [
+                (t, tokens) for t, tokens in self.token_usage if t > cutoff
+            ]
 
             # Check request rate limit
             if len(self.request_times) >= self.requests_per_minute:
@@ -271,7 +274,10 @@ class LLMProviderBase(ABC):
 
     def can_handle_request(self, request: LLMRequest) -> bool:
         """Check if provider can handle the request."""
-        if request.type == RequestType.FUNCTION_CALL and not self.config.supports_functions:
+        if (
+            request.type == RequestType.FUNCTION_CALL
+            and not self.config.supports_functions
+        ):
             return False
 
         if request.stream and not self.config.supports_streaming:
@@ -285,7 +291,9 @@ class LLMProviderBase(ABC):
 
         return True
 
-    def update_stats(self, request: LLMRequest, response: LLMResponse, success: bool) -> None:
+    def update_stats(
+        self, request: LLMRequest, response: LLMResponse, success: bool
+    ) -> None:
         """Update provider statistics."""
         self.stats.total_requests += 1
         self.stats.last_request_time = datetime.now()
@@ -301,7 +309,8 @@ class LLMProviderBase(ABC):
             # Update average response time
             if self.stats.total_requests > 0:
                 self.stats.average_response_time = (
-                    self.stats.average_response_time * (self.stats.successful_requests - 1)
+                    self.stats.average_response_time
+                    * (self.stats.successful_requests - 1)
                     + response.response_time
                 ) / self.stats.successful_requests
         else:
@@ -309,7 +318,9 @@ class LLMProviderBase(ABC):
 
         # Update error rate
         if self.stats.total_requests > 0:
-            self.stats.error_rate = self.stats.failed_requests / self.stats.total_requests
+            self.stats.error_rate = (
+                self.stats.failed_requests / self.stats.total_requests
+            )
 
 
 class OpenAIProvider(LLMProviderBase):
@@ -337,7 +348,9 @@ class OpenAIProvider(LLMProviderBase):
                 formatted_messages = []
                 if request.messages:
                     for msg in request.messages:
-                        formatted_messages.append({"role": msg["role"], "content": msg["content"]})
+                        formatted_messages.append(
+                            {"role": msg["role"], "content": msg["content"]}
+                        )
 
                 # Handle function calls - OpenAI v1+ uses tools instead of functions
                 create_params = {
@@ -429,7 +442,9 @@ class OpenAIProvider(LLMProviderBase):
                 formatted_messages = []
                 if request.messages:
                     for msg in request.messages:
-                        formatted_messages.append({"role": msg["role"], "content": msg["content"]})
+                        formatted_messages.append(
+                            {"role": msg["role"], "content": msg["content"]}
+                        )
 
                 stream = await self.client.chat.completions.create(
                     model=self.config.model_name,
@@ -490,7 +505,8 @@ class AnthropicProvider(LLMProviderBase):
 
             response = await self.client.messages.create(
                 model=self.config.model_name,
-                messages=messages or [{"role": "user", "content": request.prompt or ""}],
+                messages=messages
+                or [{"role": "user", "content": request.prompt or ""}],
                 max_tokens=request.max_tokens or 1000,
                 temperature=request.temperature,
                 top_p=request.top_p,
@@ -508,7 +524,8 @@ class AnthropicProvider(LLMProviderBase):
                 usage={
                     "prompt_tokens": response.usage.input_tokens,
                     "completion_tokens": response.usage.output_tokens,
-                    "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
+                    "total_tokens": response.usage.input_tokens
+                    + response.usage.output_tokens,
                 },
                 finish_reason=response.stop_reason,
                 response_time=response_time,
@@ -555,7 +572,8 @@ class AnthropicProvider(LLMProviderBase):
 
             stream = await self.client.messages.create(
                 model=self.config.model_name,
-                messages=messages or [{"role": "user", "content": request.prompt or ""}],
+                messages=messages
+                or [{"role": "user", "content": request.prompt or ""}],
                 max_tokens=request.max_tokens or 1000,
                 temperature=request.temperature,
                 stream=True,
@@ -701,7 +719,9 @@ class ResponseCache:
     def clear_expired(self) -> None:
         """Clear expired cache entries."""
         with self.lock:
-            expired_keys = [key for key, entry in self.cache.items() if entry.is_expired]
+            expired_keys = [
+                key for key, entry in self.cache.items() if entry.is_expired
+            ]
 
             for key in expired_keys:
                 del self.cache[key]
@@ -715,14 +735,18 @@ class ResponseCache:
                 "size": len(self.cache),
                 "max_size": self.max_size,
                 "hit_ratio": 0.0,  # Would need to track hits/misses
-                "expired_entries": sum(1 for entry in self.cache.values() if entry.is_expired),
+                "expired_entries": sum(
+                    1 for entry in self.cache.values() if entry.is_expired
+                ),
             }
 
 
 class LoadBalancer:
     """Load balancer for distributing requests across providers."""
 
-    def __init__(self, strategy: LoadBalanceStrategy = LoadBalanceStrategy.ROUND_ROBIN) -> None:
+    def __init__(
+        self, strategy: LoadBalanceStrategy = LoadBalanceStrategy.ROUND_ROBIN
+    ) -> None:
         self.strategy = strategy
         self.providers: list[LLMProviderBase] = []
         self.current_index = 0
@@ -738,14 +762,18 @@ class LoadBalancer:
             return None
 
         # Filter providers that can handle the request
-        available_providers = [p for p in self.providers if p.can_handle_request(request)]
+        available_providers = [
+            p for p in self.providers if p.can_handle_request(request)
+        ]
 
         if not available_providers:
             return None
 
         with self.lock:
             if self.strategy == LoadBalanceStrategy.ROUND_ROBIN:
-                provider = available_providers[self.current_index % len(available_providers)]
+                provider = available_providers[
+                    self.current_index % len(available_providers)
+                ]
                 self.current_index += 1
                 return provider
 
@@ -1118,9 +1146,15 @@ class LLMProxyService:
             health_info["providers"] = provider_health
 
             # Overall status
-            if all(p["status"] in ["healthy", "available"] for p in provider_health.values()):
+            if all(
+                p["status"] in ["healthy", "available"]
+                for p in provider_health.values()
+            ):
                 health_info["status"] = "healthy"
-            elif any(p["status"] in ["healthy", "available"] for p in provider_health.values()):
+            elif any(
+                p["status"] in ["healthy", "available"]
+                for p in provider_health.values()
+            ):
                 health_info["status"] = "degraded"
             else:
                 health_info["status"] = "unhealthy"

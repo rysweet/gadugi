@@ -1,3 +1,10 @@
+---
+name: MemoryServiceManager
+model: inherit
+description: Manages memory service operations including Neo4j integration, memory synchronization, and persistent storage
+tools: Read, Write, Edit, Bash, Grep, TodoWrite
+---
+
 # Memory Service Manager Agent
 
 

@@ -5,6 +5,7 @@ Part of the Enhanced Task Decomposition Analyzer
 This module provides ML-based task pattern recognition and optimization
 for the Gadugi multi-agent system.
 """
+
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum

@@ -45,8 +45,12 @@ class DeadLetterEntry:
             subscription=None,  # Will need to be resolved separately
             error_message=data.get("error_message", ""),
             error_type=data.get("error_type", ""),
-            failed_at=datetime.fromisoformat(data.get("failed_at", datetime.now().isoformat())),
-            retry_after=datetime.fromisoformat(data["retry_after"]) if data.get("retry_after") else None,
+            failed_at=datetime.fromisoformat(
+                data.get("failed_at", datetime.now().isoformat())
+            ),
+            retry_after=datetime.fromisoformat(data["retry_after"])
+            if data.get("retry_after")
+            else None,
             permanent_failure=data.get("permanent_failure", False),
         )
 
@@ -116,8 +120,8 @@ class DeadLetterQueue:
             retry_after = None
             if not permanent_failure and event.should_retry():
                 backoff_seconds = min(
-                    self.retry_interval * (2 ** event.retry_count),
-                    3600  # Max 1 hour backoff
+                    self.retry_interval * (2**event.retry_count),
+                    3600,  # Max 1 hour backoff
                 )
                 retry_after = datetime.now() + timedelta(seconds=backoff_seconds)
 
@@ -138,15 +142,15 @@ class DeadLetterQueue:
 
             # Enforce max size
             if len(self.entries) > self.max_size:
-                self.entries = self.entries[-self.max_size:]
+                self.entries = self.entries[-self.max_size :]
 
             # Persist if configured
             if self.persistence_path:
                 await self._persist_entry(entry)
 
             self.logger.warning(
-                f"Added event {event.id} to dead letter queue: {error_message}",  # type: ignore[assignment]
-                extra={"event_id": event.id, "error_type": type(error).__name__}
+                f"Added event {event.id} to dead letter queue: {str(error)}",
+                extra={"event_id": event.id, "error_type": type(error).__name__},
             )
 
     async def get_retriable_events(self, limit: int = 100) -> List[DeadLetterEntry]:
@@ -200,10 +204,12 @@ class DeadLetterQueue:
         self.retry_successes += 1
         self.logger.info(
             f"Event {entry.event.id} successfully retried and removed from DLQ",
-            extra={"event_id": entry.event.id}
+            extra={"event_id": entry.event.id},
         )
 
-    async def mark_retry_failure(self, entry: DeadLetterEntry, error: Exception) -> None:
+    async def mark_retry_failure(
+        self, entry: DeadLetterEntry, error: Exception
+    ) -> None:
         """Mark an entry as failed retry.
 
         Args:
@@ -221,13 +227,13 @@ class DeadLetterQueue:
             entry.retry_after = None
             self.logger.error(
                 f"Event {entry.event.id} exhausted all retries, marked as permanent failure",
-                extra={"event_id": entry.event.id}
+                extra={"event_id": entry.event.id},
             )
         else:
             # Calculate next retry time with exponential backoff
             backoff_seconds = min(
-                self.retry_interval * (2 ** entry.event.retry_count),
-                3600  # Max 1 hour backoff
+                self.retry_interval * (2**entry.event.retry_count),
+                3600,  # Max 1 hour backoff
             )
             entry.retry_after = datetime.now() + timedelta(seconds=backoff_seconds)
 
@@ -248,8 +254,7 @@ class DeadLetterQueue:
             original_count = len(self.entries)
 
             self.entries = [
-                entry for entry in self.entries
-                if entry.failed_at > cutoff_date
+                entry for entry in self.entries if entry.failed_at > cutoff_date
             ]
 
             removed_count = original_count - len(self.entries)
@@ -301,7 +306,9 @@ class DeadLetterQueue:
                 retriable = await self.get_retriable_events()
 
                 if retriable:
-                    self.logger.info(f"Retrying {len(retriable)} events from dead letter queue")
+                    self.logger.info(
+                        f"Retrying {len(retriable)} events from dead letter queue"
+                    )
 
                     for entry in retriable:
                         try:
@@ -337,7 +344,9 @@ class DeadLetterQueue:
                     self.retry_successes = data.get("retry_successes", 0)
                     self.retry_failures = data.get("retry_failures", 0)
 
-                self.logger.info(f"Loaded {len(self.entries)} entries from dead letter queue")
+                self.logger.info(
+                    f"Loaded {len(self.entries)} entries from dead letter queue"
+                )
         except Exception as e:
             self.logger.exception(f"Error loading persisted dead letter entries: {e}")
 
@@ -382,7 +391,11 @@ class DeadLetterQueue:
     def get_statistics(self) -> Dict[str, Any]:
         """Get dead letter queue statistics."""
         permanent_failures = sum(1 for e in self.entries if e.permanent_failure)
-        retriable = sum(1 for e in self.entries if not e.permanent_failure and e.event.should_retry())
+        retriable = sum(
+            1
+            for e in self.entries
+            if not e.permanent_failure and e.event.should_retry()
+        )
 
         return {
             "current_size": len(self.entries),

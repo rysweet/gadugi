@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional
 
 class EventType(Enum):
     """Types of events that can be emitted."""
+
     AGENT_INITIALIZED = "agent_initialized"
     TASK_STARTED = "task_started"
     TASK_COMPLETED = "task_completed"
@@ -28,6 +29,7 @@ class EventType(Enum):
 
 class EventPriority(Enum):
     """Priority levels for events."""
+
     LOW = 1
     MEDIUM = 2
     HIGH = 3
@@ -37,6 +39,7 @@ class EventPriority(Enum):
 @dataclass
 class AgentEvent:
     """Base class for all agent events."""
+
     event_type: EventType
     agent_id: str
     timestamp: datetime = field(default_factory=datetime.now)
@@ -47,6 +50,7 @@ class AgentEvent:
 @dataclass
 class AgentInitializedEvent(AgentEvent):
     """Event emitted when an agent is initialized."""
+
     agent_type: str = ""
     capabilities: List[str] = field(default_factory=list)
 
@@ -57,6 +61,7 @@ class AgentInitializedEvent(AgentEvent):
 @dataclass
 class TaskStartedEvent(AgentEvent):
     """Event emitted when a task is started."""
+
     task_id: str = ""
     task_description: str = ""
     estimated_duration: Optional[int] = None
@@ -68,6 +73,7 @@ class TaskStartedEvent(AgentEvent):
 @dataclass
 class TaskCompletedEvent(AgentEvent):
     """Event emitted when a task is completed."""
+
     task_id: str = ""
     task_type: str = ""
     success: bool = False
@@ -77,12 +83,15 @@ class TaskCompletedEvent(AgentEvent):
     error: Optional[str] = None
 
     def __post_init__(self):
-        self.event_type = EventType.TASK_COMPLETED if self.success else EventType.TASK_FAILED
+        self.event_type = (
+            EventType.TASK_COMPLETED if self.success else EventType.TASK_FAILED
+        )
 
 
 @dataclass
 class KnowledgeLearnedEvent(AgentEvent):
     """Event emitted when new knowledge is learned."""
+
     knowledge_type: str = ""
     content: str = ""
     confidence: float = 0.0
@@ -95,6 +104,7 @@ class KnowledgeLearnedEvent(AgentEvent):
 @dataclass
 class CollaborationMessageEvent(AgentEvent):
     """Event emitted for collaboration messages."""
+
     message: str = ""
     message_type: str = ""
     recipient_agents: List[str] = field(default_factory=list)

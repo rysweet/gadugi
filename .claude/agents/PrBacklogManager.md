@@ -5,11 +5,11 @@ description: Manages the backlog of PRs by ensuring they are ready for review an
 tools: Read, Write, Edit, Bash, Grep, LS, TodoWrite, WebSearch
 imports: |
   # Enhanced Separation Architecture - Shared Modules
-  from .claude.shared.github_operations import GitHubOperations
-  from .claude.shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
-  from .claude.shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
-  from .claude.shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
-  from .claude.shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
+  from .gadugi/.gadugi/src/shared.github_operations import GitHubOperations
+  from .gadugi/.gadugi/src/shared.state_management import WorkflowStateManager, CheckpointManager, StateBackupRestore
+  from .gadugi/.gadugi/src/shared.error_handling import ErrorHandler, RetryManager, CircuitBreaker, RecoveryManager
+  from .gadugi/.gadugi/src/shared.task_tracking import TaskTracker, TodoWriteManager, WorkflowPhaseTracker, ProductivityAnalyzer
+  from .gadugi/.gadugi/src/shared.interfaces import AgentConfig, PerformanceMetrics, WorkflowState, TaskData, ErrorContext, WorkflowPhase
 ---
 
 # PR Backlog Manager Sub-Agent for Gadugi

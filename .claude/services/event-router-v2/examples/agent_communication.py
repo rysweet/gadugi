@@ -9,7 +9,6 @@ This example demonstrates:
 """
 
 import asyncio
-import json
 import logging
 import sys
 import os
@@ -25,8 +24,7 @@ from src.client.client import EventRouterClient
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -47,23 +45,28 @@ class TaskManagerAgent:
         # Subscribe to task events
         await self.client.subscribe(
             topics=["task.completed", "task.failed"],
-            callback=self.handle_task_update  # type: ignore[assignment]
+            callback=self.handle_task_update,  # type: ignore[assignment]
         )
 
         # Publish agent started event
         await self.client.publish(
             topic="agent.started",
             payload={"agent_id": self.agent_id, "type": "task_manager"},
-            type=EventType.AGENT_STARTED
+            type=EventType.AGENT_STARTED,
         )
 
-    async def create_task(self, task_id: str, description: str, priority: EventPriority = EventPriority.NORMAL):
+    async def create_task(
+        self,
+        task_id: str,
+        description: str,
+        priority: EventPriority = EventPriority.NORMAL,
+    ):
         """Create a new task."""
         task = {
             "task_id": task_id,
             "description": description,
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "status": "pending"
+            "status": "pending",
         }
 
         self.pending_tasks[task_id] = task
@@ -73,7 +76,7 @@ class TaskManagerAgent:
             topic="task.created",
             payload=task,
             priority=priority,
-            type=EventType.TASK_CREATED
+            type=EventType.TASK_CREATED,
         )
 
         logger.info(f"Created task {task_id}: {description} (event: {event_id})")
@@ -104,7 +107,7 @@ class TaskManagerAgent:
         return {
             "pending": len(self.pending_tasks),
             "completed": len(self.completed_tasks),
-            "total": len(self.pending_tasks) + len(self.completed_tasks)
+            "total": len(self.pending_tasks) + len(self.completed_tasks),
         }
 
 
@@ -125,14 +128,14 @@ class WorkerAgent:
         # Subscribe to task created events
         await self.client.subscribe(
             topics=["task.created", "task.assigned"],
-            callback=self.handle_task_event  # type: ignore[assignment]
+            callback=self.handle_task_event,  # type: ignore[assignment]
         )
 
         # Publish agent started event
         await self.client.publish(
             topic="agent.started",
             payload={"agent_id": self.agent_id, "type": "worker"},
-            type=EventType.AGENT_STARTED
+            type=EventType.AGENT_STARTED,
         )
 
     async def handle_task_event(self, event: Event):
@@ -148,9 +151,9 @@ class WorkerAgent:
                 payload={
                     "task_id": task_id,
                     "worker_id": self.worker_id,
-                    "assigned_at": datetime.now(timezone.utc).isoformat()
+                    "assigned_at": datetime.now(timezone.utc).isoformat(),
                 },
-                type=EventType.TASK_ASSIGNED
+                type=EventType.TASK_ASSIGNED,
             )
 
             logger.info(f"{self.agent_id} claimed task {task_id}")
@@ -171,9 +174,9 @@ class WorkerAgent:
             payload={
                 "task_id": task_id,
                 "worker_id": self.worker_id,
-                "started_at": datetime.now(timezone.utc).isoformat()
+                "started_at": datetime.now(timezone.utc).isoformat(),
             },
-            type=EventType.TASK_STARTED
+            type=EventType.TASK_STARTED,
         )
 
         # Simulate task processing
@@ -181,6 +184,7 @@ class WorkerAgent:
 
         # Simulate success/failure (90% success rate)
         import random
+
         if random.random() < 0.9:
             # Task succeeded
             result = f"Processed: {description} (by {self.worker_id})"
@@ -191,10 +195,10 @@ class WorkerAgent:
                     "task_id": task_id,
                     "worker_id": self.worker_id,
                     "result": result,
-                    "completed_at": datetime.now(timezone.utc).isoformat()
+                    "completed_at": datetime.now(timezone.utc).isoformat(),
                 },
                 type=EventType.TASK_COMPLETED,
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
 
             logger.info(f"{self.agent_id} completed task {task_id}")
@@ -209,10 +213,10 @@ class WorkerAgent:
                     "task_id": task_id,
                     "worker_id": self.worker_id,
                     "error": error,
-                    "failed_at": datetime.now(timezone.utc).isoformat()
+                    "failed_at": datetime.now(timezone.utc).isoformat(),
                 },
                 type=EventType.TASK_FAILED,
-                priority=EventPriority.HIGH
+                priority=EventPriority.HIGH,
             )
 
             logger.error(f"{self.agent_id} failed task {task_id}: {error}")
@@ -225,7 +229,7 @@ class WorkerAgent:
         return {
             "worker_id": self.worker_id,
             "tasks_processed": self.tasks_processed,
-            "busy": self.current_task is not None
+            "busy": self.current_task is not None,
         }
 
 
@@ -245,14 +249,14 @@ class MonitorAgent:
         # Subscribe to all events
         await self.client.subscribe(
             topics=["*"],
-            callback=self.handle_event  # type: ignore[assignment]
+            callback=self.handle_event,  # type: ignore[assignment]
         )
 
         # Publish agent started event
         await self.client.publish(
             topic="agent.started",
             payload={"agent_id": self.agent_id, "type": "monitor"},
-            type=EventType.AGENT_STARTED
+            type=EventType.AGENT_STARTED,
         )
 
         # Start periodic status reports
@@ -261,7 +265,9 @@ class MonitorAgent:
     async def handle_event(self, event: Event):
         """Handle any event for monitoring."""
         # Count events by type
-        event_type = event.type.value if hasattr(event.type, 'value') else str(event.type)
+        event_type = (
+            event.type.value if hasattr(event.type, "value") else str(event.type)
+        )
         self.event_counts[event_type] = self.event_counts.get(event_type, 0) + 1
 
         # Track agent status
@@ -274,7 +280,9 @@ class MonitorAgent:
 
         # Log high-priority events
         if event.priority >= EventPriority.HIGH:
-            logger.info(f"[MONITOR] High-priority event: {event.topic} from {event.source}")
+            logger.info(
+                f"[MONITOR] High-priority event: {event.topic} from {event.source}"
+            )
 
     async def periodic_status(self):
         """Send periodic status reports."""
@@ -285,18 +293,20 @@ class MonitorAgent:
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "event_counts": self.event_counts.copy(),
                 "agent_status": self.agent_status.copy(),
-                "total_events": sum(self.event_counts.values())
+                "total_events": sum(self.event_counts.values()),
             }
 
             await self.client.publish(
                 topic="system.status",
                 payload=status,
                 type=EventType.SYSTEM_INFO,
-                priority=EventPriority.LOW
+                priority=EventPriority.LOW,
             )
 
-            logger.info(f"[MONITOR] Status: {status['total_events']} total events, "
-                       f"{len(self.agent_status)} agents tracked")
+            logger.info(
+                f"[MONITOR] Status: {status['total_events']} total events, "
+                f"{len(self.agent_status)} agents tracked"
+            )
 
 
 async def run_example():
@@ -376,7 +386,7 @@ async def run_example():
 
     # Get router health
     health = await router.get_health()
-    print(f"\n7. Router Health:")
+    print("\n7. Router Health:")
     print(f"   Status: {health.status}")
     print(f"   Events Processed: {health.events_processed}")
     print(f"   Active Subscriptions: {health.active_subscriptions}")

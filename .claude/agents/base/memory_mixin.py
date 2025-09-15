@@ -9,9 +9,6 @@ This mixin handles all memory-related functionality including:
 - Knowledge retrieval and management
 """
 
-import asyncio
-import hashlib
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, TYPE_CHECKING
 
@@ -25,11 +22,12 @@ if TYPE_CHECKING:
 
 class MemoryMixinProtocol(Protocol):
     """Protocol defining expected attributes for classes using MemoryMixin."""
+
     memory: Optional[AgentMemoryInterface]
     agent_id: str
     agent_type: str
     current_task_id: Optional[str]
-    whiteboard_manager: Optional['WhiteboardManager']
+    whiteboard_manager: Optional["WhiteboardManager"]
     knowledge_loaded: bool
     learned_patterns: Dict[str, List[Dict[str, Any]]]
     tasks_completed: int
@@ -57,7 +55,7 @@ class MemoryMixin:
     agent_id: str
     agent_type: str
     current_task_id: Optional[str]
-    whiteboard_manager: Optional['WhiteboardManager']
+    whiteboard_manager: Optional["WhiteboardManager"]
     knowledge_loaded: bool
     learned_patterns: Dict[str, List[Dict[str, Any]]]
     tasks_completed: int
@@ -69,7 +67,9 @@ class MemoryMixin:
 
         if not knowledge_dir.exists():
             # Try alternative path
-            knowledge_dir = Path(f".claude/agents/{self.agent_type.replace('-', '_')}/knowledge")
+            knowledge_dir = Path(
+                f".claude/agents/{self.agent_type.replace('-', '_')}/knowledge"
+            )
 
         if knowledge_dir.exists():
             print(f"📚 Loading knowledge base from {knowledge_dir}")
@@ -80,25 +80,25 @@ class MemoryMixin:
                     content = md_file.read_text()
 
                     # Extract title from first # heading if present
-                    lines = content.split('\n')
+                    lines = content.split("\n")
                     title = md_file.stem
                     for line in lines:
-                        if line.startswith('# '):
+                        if line.startswith("# "):
                             title = line[2:].strip()
                             break
 
                     # Create knowledge node
                     if self.memory:
-                        knowledge_id = await self.memory.add_knowledge(
+                        await self.memory.add_knowledge(
                             concept=title,
                             description=content[:500],  # First 500 chars as description
-                            confidence=0.9  # High confidence for pre-loaded knowledge
+                            confidence=0.9,  # High confidence for pre-loaded knowledge
                         )
 
                         # Also store as long-term memory for retrieval
                         await self.memory.remember_long_term(
                             content,
-                            tags=["knowledge_base", md_file.stem, "foundational"]
+                            tags=["knowledge_base", md_file.stem, "foundational"],
                         )
 
                     loaded_count += 1
@@ -124,8 +124,8 @@ class MemoryMixin:
 
                 # Analyze patterns in recent memories
                 for memory in memories:
-                    if memory.get('memory_type') == 'procedural':
-                        task_type = memory.get('metadata', {}).get('task_type')
+                    if memory.get("memory_type") == "procedural":
+                        task_type = memory.get("metadata", {}).get("task_type")
                         if task_type:
                             if task_type not in self.learned_patterns:
                                 self.learned_patterns[task_type] = []
@@ -133,47 +133,45 @@ class MemoryMixin:
         except Exception as e:
             print(f"  ℹ️ No recent memories available: {e}")
 
-    async def learn_from_outcome(self, outcome: 'TaskOutcome') -> None:
+    async def learn_from_outcome(self, outcome: "TaskOutcome") -> None:
         """Learn from task execution outcome."""
         if outcome.success:
             # Store successful pattern
             if not self.memory:
                 return
-            procedure_id = await self.memory.learn_procedure(
+            await self.memory.learn_procedure(
                 procedure_name=f"successful_{outcome.task_type}",
                 steps=outcome.steps_taken,
-                context=f"Task {outcome.task_id} completed in {outcome.duration_seconds}s"
+                context=f"Task {outcome.task_id} completed in {outcome.duration_seconds}s",
             )
 
             # Remember the success
             await self.memory.remember_long_term(
                 f"Successfully completed {outcome.task_type}: {outcome.lessons_learned or 'No specific lessons'}",
                 tags=["success", outcome.task_type, "learning"],
-                importance=0.8
+                importance=0.8,
             )
 
             # Update success rate
             self.tasks_completed += 1
             self.success_rate = (
-                (self.success_rate * (self.tasks_completed - 1) + 1.0)
-                / self.tasks_completed
-            )
+                self.success_rate * (self.tasks_completed - 1) + 1.0
+            ) / self.tasks_completed
 
             print(f"✅ Learned from success: {outcome.task_type}")
         else:
             # Remember what didn't work
             if self.memory:
                 await self.memory.remember_long_term(
-                f"Failed {outcome.task_type}: {outcome.error}. Lesson: {outcome.lessons_learned or 'Analyze error'}",
-                tags=["failure", outcome.task_type, "learning", "error"],
-                importance=0.9  # High importance for failures
-            )
+                    f"Failed {outcome.task_type}: {outcome.error}. Lesson: {outcome.lessons_learned or 'Analyze error'}",
+                    tags=["failure", outcome.task_type, "learning", "error"],
+                    importance=0.9,  # High importance for failures
+                )
 
             # Update success rate
             self.tasks_completed += 1
             self.success_rate = (
-                self.success_rate * (self.tasks_completed - 1)
-                / self.tasks_completed
+                self.success_rate * (self.tasks_completed - 1) / self.tasks_completed
             )
 
             print(f"📝 Learned from failure: {outcome.task_type}")
@@ -190,7 +188,7 @@ class MemoryMixin:
         task_words = set(task_description.lower().split())
 
         for memory in memories:
-            content = memory.get('content', '').lower()
+            content = memory.get("content", "").lower()
             content_words = set(content.split())
 
             # Simple word overlap similarity
@@ -205,17 +203,14 @@ class MemoryMixin:
         if not self.memory:
             return []
         # Search long-term memories
-        memories = await self.memory.recall_memories(
-            long_term_only=True,
-            limit=20
-        )
+        memories = await self.memory.recall_memories(long_term_only=True, limit=20)
 
         # Filter for relevance (simple keyword matching)
         query_words = set(query.lower().split())
         relevant = []
 
         for memory in memories:
-            content = memory.get('content', '').lower()
+            content = memory.get("content", "").lower()
             if any(word in content for word in query_words):
                 relevant.append(memory)
 
@@ -228,8 +223,9 @@ class MemoryMixin:
 
         # Filter procedures related to topic
         relevant_procedures = [
-            p for p in procedures
-            if topic.lower() in p.get('procedure_name', '').lower()
+            p
+            for p in procedures
+            if topic.lower() in p.get("procedure_name", "").lower()
         ]
 
         return {
@@ -237,10 +233,10 @@ class MemoryMixin:
             "agent_type": self.agent_type,
             "expertise_shared": topic,
             "knowledge_items": len(knowledge),
-            "procedures": len(relevant_procedures),
+            "procedures_count": len(relevant_procedures),
             "confidence": self.success_rate,
             "knowledge": knowledge[:5],  # Top 5 items
-            "procedures": relevant_procedures[:3]  # Top 3 procedures
+            "procedures": relevant_procedures[:3],  # Top 3 procedures
         }
 
     async def remember_task_start(self, task_description: str) -> None:
@@ -249,7 +245,7 @@ class MemoryMixin:
             await self.memory.remember_short_term(
                 f"Started task: {task_description}",
                 tags=["task_start", "event"],
-                importance=0.8
+                importance=0.8,
             )
 
     async def remember_shutdown(self) -> None:
@@ -258,5 +254,5 @@ class MemoryMixin:
             return
         await self.memory.remember_long_term(
             f"Agent {self.agent_id} shutting down. Tasks completed: {self.tasks_completed}, Success rate: {self.success_rate:.2%}",
-            tags=["shutdown", "metrics"]
+            tags=["shutdown", "metrics"],
         )

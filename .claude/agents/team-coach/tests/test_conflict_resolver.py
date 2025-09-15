@@ -85,8 +85,11 @@ class TestConflictResolver(unittest.TestCase):
 
         # Verify database conflict
         db_conflicts = [
-            c for c in resource_conflicts if c.evidence.get("resource") == "database"
-         if c is not None]
+            c
+            for c in resource_conflicts
+            if c.evidence.get("resource") == "database"
+            if c is not None
+        ]
         self.assertEqual(len(db_conflicts), 1)
 
         conflict = db_conflicts[0]
@@ -108,8 +111,11 @@ class TestConflictResolver(unittest.TestCase):
 
         # Verify task_1 conflict
         task1_conflicts = [
-            c for c in task_conflicts if c.evidence.get("task_id") == "task_1"
-         if c is not None]
+            c
+            for c in task_conflicts
+            if c.evidence.get("task_id") == "task_1"
+            if c is not None
+        ]
         self.assertEqual(len(task1_conflicts), 1)
 
         conflict = task1_conflicts[0]
@@ -131,8 +137,11 @@ class TestConflictResolver(unittest.TestCase):
 
         # Verify specific coordination failure
         long_wait = [
-            c for c in coord_conflicts if c.evidence.get("wait_time", 0) >= 7200
-         if c is not None]
+            c
+            for c in coord_conflicts
+            if c.evidence.get("wait_time", 0) >= 7200
+            if c is not None
+        ]
         self.assertGreater(len(long_wait), 0)
 
         conflict = long_wait[0]
@@ -156,7 +165,8 @@ class TestConflictResolver(unittest.TestCase):
             c
             for c in cap_conflicts
             if "ml" in c.evidence.get("missing_capabilities", [])
-         if c is not None]
+            if c is not None
+        ]
         self.assertGreater(len(ml_conflicts), 0)
 
         conflict = ml_conflicts[0]

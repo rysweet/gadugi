@@ -11,17 +11,17 @@ import subprocess
 import time
 import threading
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from datetime import datetime, timedelta
 import logging
 import argparse
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 class ComplianceMonitor:
     """Monitors and enforces workflow compliance in real-time."""
@@ -51,11 +51,11 @@ class ComplianceMonitor:
                     "total_checks": 0,
                     "total_violations": 0,
                     "total_compliant": 0,
-                    "compliance_rate": 1.0
+                    "compliance_rate": 1.0,
                 },
-                "last_updated": datetime.now().isoformat()
+                "last_updated": datetime.now().isoformat(),
             }
-            with open(self.compliance_log, 'w') as f:
+            with open(self.compliance_log, "w") as f:
                 json.dump(initial_data, f, indent=2)
 
     def start_monitoring(self, interval: int = 30):
@@ -66,9 +66,7 @@ class ComplianceMonitor:
 
         self.monitoring_active = True
         self.monitor_thread = threading.Thread(
-            target=self._monitoring_loop,
-            args=(interval,),
-            daemon=True
+            target=self._monitoring_loop, args=(interval,), daemon=True
         )
         self.monitor_thread.start()
 
@@ -107,17 +105,16 @@ class ComplianceMonitor:
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,
-                cwd=self.repo_root
+                cwd=self.repo_root,
             )
 
             if result.returncode == 0 and result.stdout.strip():
                 # There are uncommitted changes
-                changes = result.stdout.strip().split('\n')
+                changes = result.stdout.strip().split("\n")
                 modified_files = []
 
                 for change in changes:
                     if change.strip():
-                        status = change[:2]
                         filepath = change[3:].strip()
                         modified_files.append(filepath)
 
@@ -125,8 +122,8 @@ class ComplianceMonitor:
                 if not self._is_orchestrator_active():
                     self._log_potential_violation(
                         "direct_git_modification",
-                        f"Uncommitted changes detected without orchestrator",
-                        modified_files
+                        "Uncommitted changes detected without orchestrator",
+                        modified_files,
                     )
 
         except subprocess.SubprocessError as e:
@@ -143,9 +140,7 @@ class ComplianceMonitor:
         # Check for orchestrator process
         try:
             result = subprocess.run(
-                ["pgrep", "-f", "orchestrator.*main.py"],
-                capture_output=True,
-                text=True
+                ["pgrep", "-f", "orchestrator.*main.py"], capture_output=True, text=True
             )
 
             orchestrator_running = result.returncode == 0 and result.stdout.strip()
@@ -155,7 +150,7 @@ class ComplianceMonitor:
                 "GADUGI_ORCHESTRATOR_ACTIVE",
                 "ORCHESTRATOR_TASK_ID",
                 "WORKFLOW_PHASE",
-                "GADUGI_WORKFLOW_ID"
+                "GADUGI_WORKFLOW_ID",
             ]
 
             env_active = any(os.getenv(var) for var in env_indicators)
@@ -169,10 +164,12 @@ class ComplianceMonitor:
         """Check if orchestrator is currently active."""
         return self._check_orchestrator_status()
 
-    def _log_potential_violation(self, violation_type: str, description: str, files: List[str]):
+    def _log_potential_violation(
+        self, violation_type: str, description: str, files: List[str]
+    ):
         """Log a potential workflow violation."""
         try:
-            with open(self.compliance_log, 'r') as f:
+            with open(self.compliance_log, "r") as f:
                 data = json.load(f)
 
             violation = {
@@ -181,13 +178,15 @@ class ComplianceMonitor:
                 "description": description,
                 "files": files,
                 "severity": "medium",
-                "auto_detected": True
+                "auto_detected": True,
             }
 
             # Avoid duplicate violations within short time periods
             recent_violations = [
-                v for v in data["violations"]
-                if (datetime.now() - datetime.fromisoformat(v["timestamp"])).seconds < 300
+                v
+                for v in data["violations"]
+                if (datetime.now() - datetime.fromisoformat(v["timestamp"])).seconds
+                < 300
             ]
 
             # Check if similar violation already recorded recently
@@ -201,10 +200,12 @@ class ComplianceMonitor:
                 data["statistics"]["total_violations"] += 1
                 data["last_updated"] = datetime.now().isoformat()
 
-                with open(self.compliance_log, 'w') as f:
+                with open(self.compliance_log, "w") as f:
                     json.dump(data, f, indent=2)
 
-                logger.warning(f"Potential workflow violation detected: {violation_type}")
+                logger.warning(
+                    f"Potential workflow violation detected: {violation_type}"
+                )
 
         except Exception as e:
             logger.error(f"Failed to log potential violation: {e}")
@@ -212,19 +213,19 @@ class ComplianceMonitor:
     def _log_monitoring_session(self, action: str, metadata: Dict[str, Any]):
         """Log monitoring session events."""
         try:
-            with open(self.compliance_log, 'r') as f:
+            with open(self.compliance_log, "r") as f:
                 data = json.load(f)
 
             session_event = {
                 "timestamp": datetime.now().isoformat(),
                 "action": action,
-                "metadata": metadata
+                "metadata": metadata,
             }
 
             data["monitoring_sessions"].append(session_event)
             data["last_updated"] = datetime.now().isoformat()
 
-            with open(self.compliance_log, 'w') as f:
+            with open(self.compliance_log, "w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -233,26 +234,28 @@ class ComplianceMonitor:
     def _update_statistics(self):
         """Update compliance statistics."""
         try:
-            with open(self.compliance_log, 'r') as f:
+            with open(self.compliance_log, "r") as f:
                 data = json.load(f)
 
             total_violations = len(data.get("violations", []))
             total_compliant = len(data.get("compliant_executions", []))
             total_checks = total_violations + total_compliant
 
-            compliance_rate = total_compliant / total_checks if total_checks > 0 else 1.0
+            compliance_rate = (
+                total_compliant / total_checks if total_checks > 0 else 1.0
+            )
 
             data["statistics"] = {
                 "total_checks": total_checks,
                 "total_violations": total_violations,
                 "total_compliant": total_compliant,
                 "compliance_rate": compliance_rate,
-                "last_calculated": datetime.now().isoformat()
+                "last_calculated": datetime.now().isoformat(),
             }
 
             data["last_updated"] = datetime.now().isoformat()
 
-            with open(self.compliance_log, 'w') as f:
+            with open(self.compliance_log, "w") as f:
                 json.dump(data, f, indent=2)
 
         except Exception as e:
@@ -261,19 +264,21 @@ class ComplianceMonitor:
     def generate_report(self, days: int = 7) -> Dict[str, Any]:
         """Generate comprehensive compliance report."""
         try:
-            with open(self.compliance_log, 'r') as f:
+            with open(self.compliance_log, "r") as f:
                 data = json.load(f)
 
             cutoff_date = datetime.now() - timedelta(days=days)
 
             # Filter recent data
             recent_violations = [
-                v for v in data.get("violations", [])
+                v
+                for v in data.get("violations", [])
                 if datetime.fromisoformat(v["timestamp"]) >= cutoff_date
             ]
 
             recent_compliant = [
-                c for c in data.get("compliant_executions", [])
+                c
+                for c in data.get("compliant_executions", [])
                 if datetime.fromisoformat(c["timestamp"]) >= cutoff_date
             ]
 
@@ -285,7 +290,9 @@ class ComplianceMonitor:
 
             # Calculate trends
             total_recent = len(recent_violations) + len(recent_compliant)
-            recent_compliance_rate = len(recent_compliant) / total_recent if total_recent > 0 else 1.0
+            recent_compliance_rate = (
+                len(recent_compliant) / total_recent if total_recent > 0 else 1.0
+            )
 
             report = {
                 "period": f"Last {days} days",
@@ -295,12 +302,12 @@ class ComplianceMonitor:
                     "violations": len(recent_violations),
                     "compliant_executions": len(recent_compliant),
                     "compliance_rate": recent_compliance_rate,
-                    "compliance_percentage": f"{recent_compliance_rate * 100:.1f}%"
+                    "compliance_percentage": f"{recent_compliance_rate * 100:.1f}%",
                 },
                 "violation_breakdown": violation_types,
                 "recent_violations": recent_violations[-10:],  # Last 10
                 "statistics": data.get("statistics", {}),
-                "recommendations": self._generate_recommendations(recent_violations)
+                "recommendations": self._generate_recommendations(recent_violations),
             }
 
             return report
@@ -356,44 +363,57 @@ class ComplianceMonitor:
                 ["git", "status", "--porcelain"],
                 capture_output=True,
                 text=True,
-                cwd=self.repo_root
+                cwd=self.repo_root,
             )
 
             if result.returncode == 0 and result.stdout.strip():
                 if not self._is_orchestrator_active():
-                    issues.append({
-                        "type": "uncommitted_changes",
-                        "severity": "medium",
-                        "description": "Uncommitted changes without orchestrator context"
-                    })
+                    issues.append(
+                        {
+                            "type": "uncommitted_changes",
+                            "severity": "medium",
+                            "description": "Uncommitted changes without orchestrator context",
+                        }
+                    )
         except Exception as e:
             logger.debug(f"Git status check failed: {e}")
 
         # Check orchestrator configuration
         orchestrator_path = self.claude_dir / "orchestrator" / "main.py"
         if not orchestrator_path.exists():
-            issues.append({
-                "type": "missing_orchestrator",
-                "severity": "high",
-                "description": "Orchestrator main.py not found"
-            })
+            issues.append(
+                {
+                    "type": "missing_orchestrator",
+                    "severity": "high",
+                    "description": "Orchestrator main.py not found",
+                }
+            )
 
         return {
             "timestamp": datetime.now().isoformat(),
             "compliant": len(issues) == 0,
             "issues": issues,
-            "orchestrator_active": self._is_orchestrator_active()
+            "orchestrator_active": self._is_orchestrator_active(),
         }
+
 
 def main():
     """Main function for command line usage."""
     parser = argparse.ArgumentParser(description="Workflow Compliance Monitor")
     parser.add_argument("--start", action="store_true", help="Start monitoring")
     parser.add_argument("--stop", action="store_true", help="Stop monitoring")
-    parser.add_argument("--report", action="store_true", help="Generate compliance report")
-    parser.add_argument("--check", action="store_true", help="Immediate compliance check")
-    parser.add_argument("--days", type=int, default=7, help="Days for report (default: 7)")
-    parser.add_argument("--interval", type=int, default=30, help="Monitoring interval in seconds")
+    parser.add_argument(
+        "--report", action="store_true", help="Generate compliance report"
+    )
+    parser.add_argument(
+        "--check", action="store_true", help="Immediate compliance check"
+    )
+    parser.add_argument(
+        "--days", type=int, default=7, help="Days for report (default: 7)"
+    )
+    parser.add_argument(
+        "--interval", type=int, default=30, help="Monitoring interval in seconds"
+    )
 
     args = parser.parse_args()
 
@@ -430,6 +450,7 @@ def main():
 
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

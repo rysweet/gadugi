@@ -84,8 +84,7 @@ class RecipeImplementationAgent:
         if code_path and code_path.exists():
             self.logger.info("Evaluating existing code...")
             self.current_evaluation = self.evaluator.evaluate_existing_code(
-                code_path,
-                self.current_recipe
+                code_path, self.current_recipe
             )
             self.logger.info(
                 f"Evaluation complete: {self.current_evaluation.coverage_percentage:.1f}% coverage, "
@@ -100,23 +99,26 @@ class RecipeImplementationAgent:
             )
             # All requirements are gaps for new implementation
             from .models import ImplementationGap, GapSeverity
+
             for req in self.current_recipe.requirements:
-                self.current_evaluation.gaps.append(ImplementationGap(
-                    requirement_id=req.id,
-                    description=f"Not implemented: {req.description}",
-                    severity=GapSeverity.HIGH if req.priority >= 3 else GapSeverity.MEDIUM,
-                    current_state="Not implemented",
-                    expected_state=req.description,
-                    suggested_fix=f"Implement {req.description}",
-                ))
+                self.current_evaluation.gaps.append(
+                    ImplementationGap(
+                        requirement_id=req.id,
+                        description=f"Not implemented: {req.description}",
+                        severity=GapSeverity.HIGH
+                        if req.priority >= 3
+                        else GapSeverity.MEDIUM,
+                        current_state="Not implemented",
+                        expected_state=req.description,
+                        suggested_fix=f"Implement {req.description}",
+                    )
+                )
 
         # Step 3: Generate implementation
         if auto_fix and self.current_evaluation.gaps:
             self.logger.info("Generating implementation...")
             self.generated_code = self.generator.generate_implementation(
-                self.current_recipe,
-                self.current_evaluation,
-                output_path
+                self.current_recipe, self.current_evaluation, output_path
             )
             self.logger.info(f"Generated {len(self.generated_code)} code files")
 
@@ -124,9 +126,7 @@ class RecipeImplementationAgent:
         if validate and self.generated_code:
             self.logger.info("Validating implementation...")
             self.validation_result = self.validator.validate_implementation(
-                self.generated_code,
-                self.current_recipe,
-                run_tests=True
+                self.generated_code, self.current_recipe, run_tests=True
             )
             self.logger.info(
                 f"Validation complete: {'PASSED' if self.validation_result.is_valid else 'FAILED'}"
@@ -211,11 +211,12 @@ class RecipeImplementationAgent:
         if test_code is None:
             # Return empty GeneratedCode if generation fails
             from pathlib import Path
+
             return GeneratedCode(
                 recipe_name=recipe.name if recipe else "unknown",
                 file_path=Path("test_empty.py"),
                 content="# Test generation failed\n",
-                metadata={}
+                metadata={},
             )
         return test_code
 
@@ -225,8 +226,12 @@ class RecipeImplementationAgent:
             "recipe": {
                 "name": self.current_recipe.name if self.current_recipe else None,
                 "version": self.current_recipe.version if self.current_recipe else None,
-                "requirements_count": len(self.current_recipe.requirements) if self.current_recipe else 0,
-                "interfaces_count": len(self.current_recipe.interfaces) if self.current_recipe else 0,
+                "requirements_count": len(self.current_recipe.requirements)
+                if self.current_recipe
+                else 0,
+                "interfaces_count": len(self.current_recipe.interfaces)
+                if self.current_recipe
+                else 0,
             },
             "evaluation": None,
             "generation": None,
@@ -250,9 +255,15 @@ class RecipeImplementationAgent:
         if self.generated_code:
             report["generation"] = {
                 "files_generated": len(self.generated_code),
-                "classes_added": sum(len(code.classes_added) for code in self.generated_code),
-                "functions_added": sum(len(code.functions_added) for code in self.generated_code),
-                "tests_generated": sum(len(code.tests_generated) for code in self.generated_code),
+                "classes_added": sum(
+                    len(code.classes_added) for code in self.generated_code
+                ),
+                "functions_added": sum(
+                    len(code.functions_added) for code in self.generated_code
+                ),
+                "tests_generated": sum(
+                    len(code.tests_generated) for code in self.generated_code
+                ),
             }
 
         if self.validation_result:
@@ -267,10 +278,11 @@ class RecipeImplementationAgent:
 
             report["summary"]["success"] = self.validation_result.is_valid
             report["summary"]["issues"] = (
-                self.validation_result.errors +
-                self.validation_result.warnings[:3]
+                self.validation_result.errors + self.validation_result.warnings[:3]
             )
-            report["summary"]["recommendations"] = self.validation_result.suggestions[:5]
+            report["summary"]["recommendations"] = self.validation_result.suggestions[
+                :5
+            ]
 
         return report
 
@@ -282,7 +294,9 @@ class RecipeImplementationAgent:
             "code_generated": len(self.generated_code) > 0,
             "validation_complete": self.validation_result is not None,
             "current_recipe": self.current_recipe.name if self.current_recipe else None,
-            "gaps_remaining": len(self.current_evaluation.gaps) if self.current_evaluation else None,
+            "gaps_remaining": len(self.current_evaluation.gaps)
+            if self.current_evaluation
+            else None,
         }
 
     def reset(self) -> None:
@@ -316,18 +330,20 @@ def main():
         print(f"Recipe: {result['recipe']['name']}")
         print(f"Requirements: {result['recipe']['requirements_count']}")
 
-        if result['generation']:
+        if result["generation"]:
             print(f"Files Generated: {result['generation']['files_generated']}")
             print(f"Classes Added: {result['generation']['classes_added']}")
             print(f"Functions Added: {result['generation']['functions_added']}")
 
-        if result['validation']:
-            print(f"Validation: {'PASSED' if result['validation']['is_valid'] else 'FAILED'}")
+        if result["validation"]:
+            print(
+                f"Validation: {'PASSED' if result['validation']['is_valid'] else 'FAILED'}"
+            )
             print(f"Test Pass Rate: {result['validation']['test_pass_rate']:.1%}")
             print(f"Quality Score: {result['validation']['quality_score']:.1%}")
 
         print("\nRecommendations:")
-        for rec in result['summary']['recommendations']:
+        for rec in result["summary"]["recommendations"]:
             print(f"  - {rec}")
     else:
         print(f"Recipe path not found: {recipe_path}")

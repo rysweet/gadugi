@@ -18,22 +18,38 @@ import sys
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass  # type: ignore
-from datetime import datetime, timedelta  # type: ignore
+from dataclasses import dataclass  # type: ignore
+from datetime import datetime  # type: ignore
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Tuple  # type: ignore
+from typing import Any, Dict, List, Optional  # type: ignore
 
 # Import existing orchestrator components
 try:
-    from .components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
+    from .components.execution_engine import (
+        ExecutionEngine,
+        ExecutionResult,
+        TaskExecutor,
+    )
     from .components.worktree_manager import WorktreeManager, WorktreeInfo
-    from .components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity  # type: ignore
+    from .components.task_analyzer import (
+        TaskAnalyzer,
+        TaskInfo,
+        TaskType,
+        TaskComplexity,
+    )  # type: ignore
     from .components.prompt_generator import PromptGenerator, PromptContext
 except ImportError:
     # Fallback for direct execution
-    from components.execution_engine import ExecutionEngine, ExecutionResult, TaskExecutor
+    from components.execution_engine import (
+        ExecutionEngine,
+        ExecutionResult,
+        TaskExecutor,
+    )
     from components.worktree_manager import WorktreeManager, WorktreeInfo
-    from components.task_analyzer import TaskAnalyzer, TaskInfo, TaskType, TaskComplexity  # type: ignore
+    from components.task_analyzer import (
+        TaskAnalyzer,
+        TaskInfo,
+    )  # type: ignore
     from components.prompt_generator import PromptGenerator, PromptContext
 
 # Import Enhanced Separation shared modules
@@ -45,41 +61,58 @@ try:
     from ..shared.interfaces import AgentConfig, OperationResult  # type: ignore
 except ImportError as e:
     logging.warning(f"Could not import shared modules: {e}")
+
     # Fallback definitions for development
     class GitHubOperations:
-        def __init__(self): pass
+        def __init__(self):
+            pass
+
     class StateManager:
-        def __init__(self): pass
+        def __init__(self):
+            pass
+
     class CheckpointManager:
-        def __init__(self, state_manager): pass
+        def __init__(self, state_manager):
+            pass
+
     class ErrorHandler:
-        def __init__(self): pass
+        def __init__(self):
+            pass
+
     class CircuitBreaker:
-        def __init__(self, failure_threshold=3, recovery_timeout=30.0): pass
+        def __init__(self, failure_threshold=3, recovery_timeout=30.0):
+            pass
+
     class RetryManager:
-        def __init__(self): pass
+        def __init__(self):
+            pass
+
     class TaskMetrics:
-        def __init__(self): pass
+        def __init__(self):
+            pass
+
     class WorkflowPhase:
         INITIALIZATION = "initialization"
         ORCHESTRATION = "orchestration"
         PARALLEL_EXECUTION = "parallel_execution"
         INTEGRATION = "integration"
         COMPLETION = "completion"
+
     @dataclass
     class AgentConfig:
         agent_id: str = "orchestrator"
         name: str = "OrchestratorAgent"
+
     @dataclass
     class OperationResult:
         success: bool
         result: Any = None
         error: Optional[str] = None
 
+
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -92,6 +125,7 @@ ProcessInfo = None
 @dataclass
 class OrchestrationConfig:
     """Configuration for orchestration execution"""
+
     max_parallel_tasks: int = 4
     execution_timeout_hours: int = 12
     monitoring_interval_seconds: int = 30
@@ -104,6 +138,7 @@ class OrchestrationConfig:
 @dataclass
 class OrchestrationResult:
     """Result of orchestration execution"""
+
     task_id: str
     total_tasks: int
     successful_tasks: int
@@ -126,7 +161,9 @@ class OrchestratorCoordinator:
         """Initialize the orchestrator with existing components"""
         self.config = config or OrchestrationConfig()
         self.project_root = Path(project_root).resolve()
-        self.orchestration_id = f"orchestration-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        self.orchestration_id = (
+            f"orchestration-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+        )
 
         # Initialize directories
         self.monitoring_dir = self.project_root / self.config.monitoring_dir
@@ -136,8 +173,7 @@ class OrchestratorCoordinator:
         logger.info("Initializing orchestrator components...")
         self.task_analyzer = TaskAnalyzer(project_root=str(self.project_root))
         self.worktree_manager = WorktreeManager(
-            str(self.project_root),
-            self.config.worktrees_dir
+            str(self.project_root), self.config.worktrees_dir
         )
         self.execution_engine = ExecutionEngine()
         self.prompt_generator = PromptGenerator(str(self.project_root))
@@ -145,7 +181,11 @@ class OrchestratorCoordinator:
         # Initialize process registry
         try:
             try:
-                from .process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
+                from .process_registry import (
+                    ProcessRegistry,
+                    ProcessStatus,
+                    ProcessInfo,
+                )
             except ImportError:
                 from process_registry import ProcessRegistry, ProcessStatus, ProcessInfo
 
@@ -153,9 +193,9 @@ class OrchestratorCoordinator:
                 registry_dir=str(self.monitoring_dir)
             )
             # Set module-level references for other methods
-            globals()['ProcessRegistry'] = ProcessRegistry
-            globals()['ProcessStatus'] = ProcessStatus
-            globals()['ProcessInfo'] = ProcessInfo
+            globals()["ProcessRegistry"] = ProcessRegistry
+            globals()["ProcessStatus"] = ProcessStatus
+            globals()["ProcessInfo"] = ProcessInfo
         except ImportError as e:
             logger.error(f"Could not import ProcessRegistry: {e}")
             self.process_registry = None
@@ -170,12 +210,10 @@ class OrchestratorCoordinator:
 
             # Configure circuit breakers
             self.github_circuit_breaker = CircuitBreaker(
-                failure_threshold=3,
-                recovery_timeout=300.0
+                failure_threshold=3, recovery_timeout=300.0
             )
             self.execution_circuit_breaker = CircuitBreaker(
-                failure_threshold=5,
-                recovery_timeout=600.0
+                failure_threshold=5, recovery_timeout=600.0
             )
         except Exception as e:
             logger.warning(f"Enhanced Separation modules not fully available: {e}")
@@ -186,7 +224,9 @@ class OrchestratorCoordinator:
         self._shutdown_requested = False
         self._monitoring_thread: Optional[threading.Thread] = None
 
-        logger.info(f"OrchestratorCoordinator initialized with ID: {self.orchestration_id}")
+        logger.info(
+            f"OrchestratorCoordinator initialized with ID: {self.orchestration_id}"
+        )
 
     def orchestrate(self, prompt_files: List[str]) -> OrchestrationResult:
         """
@@ -204,7 +244,7 @@ class OrchestratorCoordinator:
             successful_tasks=0,
             failed_tasks=0,
             execution_time_seconds=0.0,
-            task_results=[]
+            task_results=[],
         )
 
         try:
@@ -213,7 +253,9 @@ class OrchestratorCoordinator:
             task_analysis = self._analyze_tasks(prompt_files)
 
             if not task_analysis:
-                raise Exception("Task analysis failed - cannot proceed with orchestration")
+                raise Exception(
+                    "Task analysis failed - cannot proceed with orchestration"
+                )
 
             # Phase 2: Environment Setup
             logger.info("Phase 2: Setting up isolated execution environments...")
@@ -222,27 +264,31 @@ class OrchestratorCoordinator:
             # Phase 3: Parallel Execution
             logger.info("Phase 3: Executing tasks in parallel...")
             execution_results = self._execute_parallel_tasks(
-                task_analysis,
-                worktree_assignments
+                task_analysis, worktree_assignments
             )
 
             # Phase 4: Result Integration
             logger.info("Phase 4: Integrating results and cleanup...")
             result.task_results = execution_results
-            result.successful_tasks = len([r for r in execution_results if r.status == 'success'])
-            result.failed_tasks = len([r for r in execution_results if r.status != 'success'])
+            result.successful_tasks = len(
+                [r for r in execution_results if r.status == "success"]
+            )
+            result.failed_tasks = len(
+                [r for r in execution_results if r.status != "success"]
+            )
 
             # Calculate performance metrics
             result.execution_time_seconds = time.time() - start_time
             result.parallel_speedup = self._calculate_speedup(
-                result.execution_time_seconds,
-                len(prompt_files)
+                result.execution_time_seconds, len(prompt_files)
             )
 
             # Phase 5: Cleanup
             self._cleanup_orchestration(worktree_assignments)
 
-            logger.info(f"Orchestration completed: {result.successful_tasks}/{result.total_tasks} successful")
+            logger.info(
+                f"Orchestration completed: {result.successful_tasks}/{result.total_tasks} successful"
+            )
             return result
 
         except Exception as e:
@@ -268,14 +314,15 @@ class OrchestratorCoordinator:
 
             # Log analysis results
             for task_info in task_infos:
-                logger.info(f"Task {task_info.id}: {task_info.task_type.value}, complexity={task_info.complexity.name}")
+                logger.info(
+                    f"Task {task_info.id}: {task_info.task_type.value}, complexity={task_info.complexity.name}"
+                )
 
             return task_infos
 
         except Exception as e:
             logger.error(f"Task analysis failed: {e}")
             return []
-
 
     def _setup_worktrees(self, task_infos: List[TaskInfo]) -> Dict[str, WorktreeInfo]:
         """Set up isolated git worktrees for parallel execution"""
@@ -287,13 +334,13 @@ class OrchestratorCoordinator:
             try:
                 # Create worktree for this task
                 worktree_info = self.worktree_manager.create_worktree(
-                    task_id=task_info.id,
-                    task_name=task_info.name,
-                    base_branch="main"
+                    task_id=task_info.id, task_name=task_info.name, base_branch="main"
                 )
 
                 worktree_assignments[task_info.id] = worktree_info
-                logger.info(f"Created worktree for {task_info.id}: {worktree_info.worktree_path}")
+                logger.info(
+                    f"Created worktree for {task_info.id}: {worktree_info.worktree_path}"
+                )
 
             except Exception as e:
                 logger.error(f"Failed to create worktree for {task_info.id}: {e}")
@@ -303,9 +350,7 @@ class OrchestratorCoordinator:
         return worktree_assignments
 
     def _execute_parallel_tasks(
-        self,
-        task_infos: List[TaskInfo],
-        worktree_assignments: Dict[str, WorktreeInfo]
+        self, task_infos: List[TaskInfo], worktree_assignments: Dict[str, WorktreeInfo]
     ) -> List[ExecutionResult]:
         """Execute tasks in parallel using WorkflowManager agents"""
         logger.info("Starting parallel task execution...")
@@ -328,12 +373,11 @@ class OrchestratorCoordinator:
                 task_name=task_info.name,
                 original_prompt=task_info.prompt_file,
                 dependencies=task_info.dependencies,
-                target_files=task_info.target_files
+                target_files=task_info.target_files,
             )
 
             workflow_prompt = self.prompt_generator.generate_workflow_prompt(
-                prompt_context,
-                worktree_info.worktree_path
+                prompt_context, worktree_info.worktree_path
             )
 
             # Create task executor
@@ -342,10 +386,10 @@ class OrchestratorCoordinator:
                 worktree_path=worktree_info.worktree_path,
                 prompt_file=workflow_prompt,
                 task_context={
-                    'task_name': task_info.name,
-                    'working_directory': str(worktree_info.worktree_path),
-                    'timeout_seconds': self.config.execution_timeout_hours * 3600
-                }
+                    "task_name": task_info.name,
+                    "working_directory": str(worktree_info.worktree_path),
+                    "timeout_seconds": self.config.execution_timeout_hours * 3600,
+                },
             )
 
             task_executors.append(executor)
@@ -356,10 +400,10 @@ class OrchestratorCoordinator:
                     task_id=task_info.id,
                     task_name=task_info.name,
                     status=ProcessStatus.QUEUED,
-                    command=f"claude /agent:WorkflowManager",
+                    command="claude /agent:WorkflowManager",
                     working_directory=str(worktree_info.worktree_path),
                     created_at=datetime.now(),
-                    prompt_file=workflow_prompt
+                    prompt_file=workflow_prompt,
                 )
                 self.process_registry.register_process(process_info)
 
@@ -379,23 +423,29 @@ class OrchestratorCoordinator:
                 try:
                     result = future.result()
                     results.append(result)
-                    logger.info(f"Task completed: {task_executor.task_id}, status={result.status}")
+                    logger.info(
+                        f"Task completed: {task_executor.task_id}, status={result.status}"
+                    )
                 except Exception as e:
-                    logger.error(f"Task execution failed: {task_executor.task_id}, error={e}")
+                    logger.error(
+                        f"Task execution failed: {task_executor.task_id}, error={e}"
+                    )
                     # Create failed result
                     failed_result = ExecutionResult(
                         task_id=task_executor.task_id,
-                        task_name=task_executor.task_context.get('task_name', 'Unknown'),
-                        status='failed',
+                        task_name=task_executor.task_context.get(
+                            "task_name", "Unknown"
+                        ),
+                        status="failed",
                         start_time=datetime.now(),
                         end_time=datetime.now(),
                         duration=0.0,
                         exit_code=1,
-                        stdout='',
+                        stdout="",
                         stderr=str(e),
                         output_file=None,
                         error_message=str(e),
-                        resource_usage={}
+                        resource_usage={},
                     )
                     results.append(failed_result)
 
@@ -411,26 +461,26 @@ class OrchestratorCoordinator:
         # Update process status
         if self.process_registry and ProcessStatus:
             self.process_registry.update_process_status(
-                task_executor.task_id,
-                ProcessStatus.RUNNING
+                task_executor.task_id, ProcessStatus.RUNNING
             )
 
         try:
             # Use TaskExecutor directly to run the task
-            result = task_executor.execute(timeout=task_executor.task_context.get('timeout_seconds'))
+            result = task_executor.execute(
+                timeout=task_executor.task_context.get("timeout_seconds")
+            )
 
             # Update process status based on result
             if self.process_registry and ProcessStatus:
-                if result.status == 'success':
+                if result.status == "success":
                     self.process_registry.update_process_status(
-                        task_executor.task_id,
-                        ProcessStatus.COMPLETED
+                        task_executor.task_id, ProcessStatus.COMPLETED
                     )
                 else:
                     self.process_registry.update_process_status(
                         task_executor.task_id,
                         ProcessStatus.FAILED,
-                        error_message=result.error_message
+                        error_message=result.error_message,
                     )
 
             return result
@@ -441,25 +491,23 @@ class OrchestratorCoordinator:
             # Update process status
             if self.process_registry and ProcessStatus:
                 self.process_registry.update_process_status(
-                    task_executor.task_id,
-                    ProcessStatus.FAILED,
-                    error_message=str(e)
+                    task_executor.task_id, ProcessStatus.FAILED, error_message=str(e)
                 )
 
             # Return failed result
             return ExecutionResult(
                 task_id=task_executor.task_id,
-                task_name=task_executor.task_context.get('task_name', 'Unknown'),
-                status='failed',
+                task_name=task_executor.task_context.get("task_name", "Unknown"),
+                status="failed",
                 start_time=datetime.now(),
                 end_time=datetime.now(),
                 duration=0.0,
                 exit_code=1,
-                stdout='',
+                stdout="",
                 stderr=str(e),
                 output_file=None,
                 error_message=str(e),
-                resource_usage={}
+                resource_usage={},
             )
 
     def _start_monitoring(self):
@@ -469,8 +517,7 @@ class OrchestratorCoordinator:
 
         self._shutdown_requested = False
         self._monitoring_thread = threading.Thread(
-            target=self._monitoring_loop,
-            daemon=True
+            target=self._monitoring_loop, daemon=True
         )
         self._monitoring_thread.start()
         logger.info("Started monitoring thread")
@@ -492,8 +539,10 @@ class OrchestratorCoordinator:
 
                 # Save monitoring status
                 status = self._get_orchestration_status()
-                status_file = self.monitoring_dir / f"{self.orchestration_id}_status.json"
-                with open(status_file, 'w') as f:
+                status_file = (
+                    self.monitoring_dir / f"{self.orchestration_id}_status.json"
+                )
+                with open(status_file, "w") as f:
                     json.dump(status, f, indent=2, default=str)
 
                 # Sleep until next monitoring cycle
@@ -511,7 +560,7 @@ class OrchestratorCoordinator:
                 "timestamp": datetime.now(),
                 "total_processes": 0,
                 "status_breakdown": {},
-                "active_processes": []
+                "active_processes": [],
             }
 
         all_processes = self.process_registry.get_all_processes()
@@ -531,11 +580,11 @@ class OrchestratorCoordinator:
                     "task_id": p.task_id,
                     "task_name": p.task_name,
                     "status": p.status.value,
-                    "runtime_seconds": (datetime.now() - p.created_at).total_seconds()
+                    "runtime_seconds": (datetime.now() - p.created_at).total_seconds(),
                 }
                 for p in all_processes.values()
                 if p.status in [ProcessStatus.RUNNING, ProcessStatus.QUEUED]  # type: ignore
-            ]
+            ],
         }
 
     def _calculate_speedup(self, parallel_time: float, task_count: int) -> float:
@@ -564,16 +613,16 @@ class OrchestratorCoordinator:
         # Archive process registry
         if self.process_registry:
             try:
-                archive_file = self.monitoring_dir / f"{self.orchestration_id}_final.json"
+                archive_file = (
+                    self.monitoring_dir / f"{self.orchestration_id}_final.json"
+                )
                 self.process_registry.save_to_file(str(archive_file))
                 logger.info(f"Saved final process registry to {archive_file}")
             except Exception as e:
                 logger.error(f"Failed to save process registry: {e}")
 
     def _fallback_sequential_execution(
-        self,
-        prompt_files: List[str],
-        start_time: float
+        self, prompt_files: List[str], start_time: float
     ) -> OrchestrationResult:
         """Fallback to sequential execution if parallel fails"""
         logger.info("Executing fallback sequential execution...")
@@ -584,7 +633,7 @@ class OrchestratorCoordinator:
             successful_tasks=0,
             failed_tasks=0,
             execution_time_seconds=0.0,
-            task_results=[]
+            task_results=[],
         )
 
         # TODO: Implement sequential fallback using existing WorkflowManager
@@ -617,18 +666,25 @@ def main():
     """Main entry point for direct execution"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Orchestrator Main - Parallel Workflow Coordination")
-    parser.add_argument("prompt_files", nargs="+", help="Prompt files to execute in parallel")
-    parser.add_argument("--max-parallel", type=int, default=4, help="Maximum parallel tasks")
-    parser.add_argument("--timeout", type=int, default=12, help="Execution timeout in hours")
+    parser = argparse.ArgumentParser(
+        description="Orchestrator Main - Parallel Workflow Coordination"
+    )
+    parser.add_argument(
+        "prompt_files", nargs="+", help="Prompt files to execute in parallel"
+    )
+    parser.add_argument(
+        "--max-parallel", type=int, default=4, help="Maximum parallel tasks"
+    )
+    parser.add_argument(
+        "--timeout", type=int, default=12, help="Execution timeout in hours"
+    )
     parser.add_argument("--project-root", default=".", help="Project root directory")
 
     args = parser.parse_args()
 
     # Create configuration
     config = OrchestrationConfig(
-        max_parallel_tasks=args.max_parallel,
-        execution_timeout_hours=args.timeout
+        max_parallel_tasks=args.max_parallel, execution_timeout_hours=args.timeout
     )
 
     # Initialize and run orchestrator
@@ -638,7 +694,7 @@ def main():
         result = orchestrator.orchestrate(args.prompt_files)
 
         # Print results
-        print(f"\nOrchestration Results:")
+        print("\nOrchestration Results:")
         print(f"  Total tasks: {result.total_tasks}")
         print(f"  Successful: {result.successful_tasks}")
         print(f"  Failed: {result.failed_tasks}")

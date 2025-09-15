@@ -8,8 +8,7 @@ It follows the NO DELEGATION principle - all operations use direct subprocess ca
 import json
 import subprocess
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 
 from .base_executor import BaseExecutor
 
@@ -46,92 +45,78 @@ class GitHubExecutor(BaseExecutor):
                 - result: Operation-specific result data
                 - error: Error message if failed
         """
-        operation = params.get('operation')
+        operation = params.get("operation")
 
         if not operation:
-            return {
-                'success': False,
-                'error': 'operation is required'
-            }
+            return {"success": False, "error": "operation is required"}
 
         try:
-            if operation == 'create_issue':
+            if operation == "create_issue":
                 return self._create_issue(params)
-            elif operation == 'create_pr':
+            elif operation == "create_pr":
                 return self._create_pr(params)
-            elif operation == 'list_issues':
+            elif operation == "list_issues":
                 return self._list_issues(params)
-            elif operation == 'merge_pr':
+            elif operation == "merge_pr":
                 return self._merge_pr(params)
-            elif operation == 'close_issue':
+            elif operation == "close_issue":
                 return self._close_issue(params)
-            elif operation == 'pr_status':
+            elif operation == "pr_status":
                 return self._pr_status(params)
-            elif operation == 'add_labels':
+            elif operation == "add_labels":
                 return self._add_labels(params)
             else:
-                return {
-                    'success': False,
-                    'error': f'Unknown operation: {operation}'
-                }
+                return {"success": False, "error": f"Unknown operation: {operation}"}
         except Exception as e:
-            return {
-                'success': False,
-                'operation': operation,
-                'error': str(e)
-            }
+            return {"success": False, "operation": operation, "error": str(e)}
 
     def _create_issue(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Create a GitHub issue.
 
         Direct gh CLI execution - no agent delegation.
         """
-        title = params.get('title')
-        body = params.get('body', '')
-        labels = params.get('labels', [])
+        title = params.get("title")
+        body = params.get("body", "")
+        labels = params.get("labels", [])
 
         if not title:
             return {
-                'success': False,
-                'operation': 'create_issue',
-                'error': 'title is required for creating an issue'
+                "success": False,
+                "operation": "create_issue",
+                "error": "title is required for creating an issue",
             }
 
-        cmd = ['gh', 'issue', 'create', '--title', title]
+        cmd = ["gh", "issue", "create", "--title", title]
 
         if body:
-            cmd.extend(['--body', body])
+            cmd.extend(["--body", body])
 
         if labels:
-            cmd.extend(['--label', ','.join(labels)])
+            cmd.extend(["--label", ",".join(labels)])
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
             return {
-                'success': False,
-                'operation': 'create_issue',
-                'error': result.stderr
+                "success": False,
+                "operation": "create_issue",
+                "error": result.stderr,
             }
 
         # Parse issue number from output
         issue_url = result.stdout.strip()
-        issue_number = issue_url.split('/')[-1] if '/' in issue_url else None
+        issue_number = issue_url.split("/")[-1] if "/" in issue_url else None
 
         # Log the operation
-        self._log_operation('create_issue', {'title': title, 'number': issue_number})
+        self._log_operation("create_issue", {"title": title, "number": issue_number})
 
         return {
-            'success': True,
-            'operation': 'create_issue',
-            'issue_number': issue_number,
-            'issue_url': issue_url,
-            'title': title
+            "success": True,
+            "operation": "create_issue",
+            "issue_number": issue_number,
+            "issue_url": issue_url,
+            "title": title,
         }
 
     def _create_pr(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -139,59 +124,51 @@ class GitHubExecutor(BaseExecutor):
 
         Direct gh CLI execution - no agent delegation.
         """
-        title = params.get('title')
-        body = params.get('body', '')
-        base = params.get('base', 'main')
-        head = params.get('head')
-        draft = params.get('draft', False)
+        title = params.get("title")
+        body = params.get("body", "")
+        base = params.get("base", "main")
+        head = params.get("head")
+        draft = params.get("draft", False)
 
         if not title:
             return {
-                'success': False,
-                'operation': 'create_pr',
-                'error': 'title is required for creating a PR'
+                "success": False,
+                "operation": "create_pr",
+                "error": "title is required for creating a PR",
             }
 
-        cmd = ['gh', 'pr', 'create', '--title', title, '--base', base]
+        cmd = ["gh", "pr", "create", "--title", title, "--base", base]
 
         if body:
-            cmd.extend(['--body', body])
+            cmd.extend(["--body", body])
 
         if head:
-            cmd.extend(['--head', head])
+            cmd.extend(["--head", head])
 
         if draft:
-            cmd.append('--draft')
+            cmd.append("--draft")
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            return {
-                'success': False,
-                'operation': 'create_pr',
-                'error': result.stderr
-            }
+            return {"success": False, "operation": "create_pr", "error": result.stderr}
 
         # Parse PR URL from output
         pr_url = result.stdout.strip()
-        pr_number = pr_url.split('/')[-1] if '/' in pr_url else None
+        pr_number = pr_url.split("/")[-1] if "/" in pr_url else None
 
         # Log the operation
-        self._log_operation('create_pr', {'title': title, 'number': pr_number})
+        self._log_operation("create_pr", {"title": title, "number": pr_number})
 
         return {
-            'success': True,
-            'operation': 'create_pr',
-            'pr_number': pr_number,
-            'pr_url': pr_url,
-            'title': title,
-            'base': base,
-            'head': head
+            "success": True,
+            "operation": "create_pr",
+            "pr_number": pr_number,
+            "pr_url": pr_url,
+            "title": title,
+            "base": base,
+            "head": head,
         }
 
     def _list_issues(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -199,31 +176,27 @@ class GitHubExecutor(BaseExecutor):
 
         Direct gh CLI execution - no agent delegation.
         """
-        state = params.get('state', 'open')  # open, closed, all
-        limit = params.get('limit', 30)
-        labels = params.get('labels', [])
+        state = params.get("state", "open")  # open, closed, all
+        limit = params.get("limit", 30)
+        labels = params.get("labels", [])
 
-        cmd = ['gh', 'issue', 'list', '--state', state, '--limit', str(limit)]
+        cmd = ["gh", "issue", "list", "--state", state, "--limit", str(limit)]
 
         if labels:
-            cmd.extend(['--label', ','.join(labels)])
+            cmd.extend(["--label", ",".join(labels)])
 
         # Add JSON output for parsing
-        cmd.append('--json')
-        cmd.append('number,title,state,createdAt,labels')
+        cmd.append("--json")
+        cmd.append("number,title,state,createdAt,labels")
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
             return {
-                'success': False,
-                'operation': 'list_issues',
-                'error': result.stderr
+                "success": False,
+                "operation": "list_issues",
+                "error": result.stderr,
             }
 
         # Parse JSON output
@@ -233,13 +206,13 @@ class GitHubExecutor(BaseExecutor):
             issues = []
 
         # Log the operation
-        self._log_operation('list_issues', {'count': len(issues)})
+        self._log_operation("list_issues", {"count": len(issues)})
 
         return {
-            'success': True,
-            'operation': 'list_issues',
-            'issues': issues,
-            'count': len(issues)
+            "success": True,
+            "operation": "list_issues",
+            "issues": issues,
+            "count": len(issues),
         }
 
     def _merge_pr(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -249,54 +222,50 @@ class GitHubExecutor(BaseExecutor):
 
         IMPORTANT: This should only be called after user approval.
         """
-        pr_number = params.get('pr_number')
-        merge_method = params.get('merge_method', 'merge')  # merge, squash, rebase
-        delete_branch = params.get('delete_branch', True)
+        pr_number = params.get("pr_number")
+        merge_method = params.get("merge_method", "merge")  # merge, squash, rebase
+        delete_branch = params.get("delete_branch", True)
 
         if not pr_number:
             return {
-                'success': False,
-                'operation': 'merge_pr',
-                'error': 'pr_number is required for merging'
+                "success": False,
+                "operation": "merge_pr",
+                "error": "pr_number is required for merging",
             }
 
-        cmd = ['gh', 'pr', 'merge', str(pr_number)]
+        cmd = ["gh", "pr", "merge", str(pr_number)]
 
         # Add merge method
-        if merge_method == 'squash':
-            cmd.append('--squash')
-        elif merge_method == 'rebase':
-            cmd.append('--rebase')
+        if merge_method == "squash":
+            cmd.append("--squash")
+        elif merge_method == "rebase":
+            cmd.append("--rebase")
         else:
-            cmd.append('--merge')
+            cmd.append("--merge")
 
         # Add delete branch option
         if delete_branch:
-            cmd.append('--delete-branch')
+            cmd.append("--delete-branch")
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
             return {
-                'success': False,
-                'operation': 'merge_pr',
-                'pr_number': pr_number,
-                'error': result.stderr
+                "success": False,
+                "operation": "merge_pr",
+                "pr_number": pr_number,
+                "error": result.stderr,
             }
 
         # Log the operation
-        self._log_operation('merge_pr', {'pr_number': pr_number})
+        self._log_operation("merge_pr", {"pr_number": pr_number})
 
         return {
-            'success': True,
-            'operation': 'merge_pr',
-            'pr_number': pr_number,
-            'message': result.stdout.strip()
+            "success": True,
+            "operation": "merge_pr",
+            "pr_number": pr_number,
+            "message": result.stdout.strip(),
         }
 
     def _close_issue(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -304,47 +273,50 @@ class GitHubExecutor(BaseExecutor):
 
         Direct gh CLI execution - no agent delegation.
         """
-        issue_number = params.get('issue_number')
-        comment = params.get('comment')
+        issue_number = params.get("issue_number")
+        comment = params.get("comment")
 
         if not issue_number:
             return {
-                'success': False,
-                'operation': 'close_issue',
-                'error': 'issue_number is required'
+                "success": False,
+                "operation": "close_issue",
+                "error": "issue_number is required",
             }
 
         # Add comment if provided
         if comment:
-            comment_cmd = ['gh', 'issue', 'comment', str(issue_number), '--body', comment]
+            comment_cmd = [
+                "gh",
+                "issue",
+                "comment",
+                str(issue_number),
+                "--body",
+                comment,
+            ]
             subprocess.run(comment_cmd, capture_output=True, text=True)
 
         # Close the issue
-        cmd = ['gh', 'issue', 'close', str(issue_number)]
+        cmd = ["gh", "issue", "close", str(issue_number)]
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
             return {
-                'success': False,
-                'operation': 'close_issue',
-                'issue_number': issue_number,
-                'error': result.stderr
+                "success": False,
+                "operation": "close_issue",
+                "issue_number": issue_number,
+                "error": result.stderr,
             }
 
         # Log the operation
-        self._log_operation('close_issue', {'issue_number': issue_number})
+        self._log_operation("close_issue", {"issue_number": issue_number})
 
         return {
-            'success': True,
-            'operation': 'close_issue',
-            'issue_number': issue_number,
-            'message': f'Issue #{issue_number} closed'
+            "success": True,
+            "operation": "close_issue",
+            "issue_number": issue_number,
+            "message": f"Issue #{issue_number} closed",
         }
 
     def _pr_status(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -352,37 +324,35 @@ class GitHubExecutor(BaseExecutor):
 
         Direct gh CLI execution - no agent delegation.
         """
-        pr_number = params.get('pr_number')
+        pr_number = params.get("pr_number")
 
         if not pr_number:
             return {
-                'success': False,
-                'operation': 'pr_status',
-                'error': 'pr_number is required'
+                "success": False,
+                "operation": "pr_status",
+                "error": "pr_number is required",
             }
 
         # Get PR checks status
-        cmd = ['gh', 'pr', 'checks', str(pr_number)]
+        cmd = ["gh", "pr", "checks", str(pr_number)]
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         checks_passing = result.returncode == 0
         checks_output = result.stdout
 
         # Get PR review status
-        review_cmd = ['gh', 'pr', 'view', str(pr_number), '--json',
-                      'state,mergeable,reviews,statusCheckRollup']
+        review_cmd = [
+            "gh",
+            "pr",
+            "view",
+            str(pr_number),
+            "--json",
+            "state,mergeable,reviews,statusCheckRollup",
+        ]
 
-        review_result = subprocess.run(
-            review_cmd,
-            capture_output=True,
-            text=True
-        )
+        review_result = subprocess.run(review_cmd, capture_output=True, text=True)
 
         pr_data = {}
         if review_result.returncode == 0:
@@ -392,16 +362,16 @@ class GitHubExecutor(BaseExecutor):
                 pass
 
         # Log the operation
-        self._log_operation('pr_status', {'pr_number': pr_number})
+        self._log_operation("pr_status", {"pr_number": pr_number})
 
         return {
-            'success': True,
-            'operation': 'pr_status',
-            'pr_number': pr_number,
-            'checks_passing': checks_passing,
-            'checks_output': checks_output,
-            'pr_data': pr_data,
-            'mergeable': pr_data.get('mergeable') == 'MERGEABLE'
+            "success": True,
+            "operation": "pr_status",
+            "pr_number": pr_number,
+            "checks_passing": checks_passing,
+            "checks_output": checks_output,
+            "pr_data": pr_data,
+            "mergeable": pr_data.get("mergeable") == "MERGEABLE",
         }
 
     def _add_labels(self, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -409,59 +379,61 @@ class GitHubExecutor(BaseExecutor):
 
         Direct gh CLI execution - no agent delegation.
         """
-        item_type = params.get('type', 'issue')  # issue or pr
-        item_number = params.get('number')
-        labels = params.get('labels', [])
+        item_type = params.get("type", "issue")  # issue or pr
+        item_number = params.get("number")
+        labels = params.get("labels", [])
 
         if not item_number:
             return {
-                'success': False,
-                'operation': 'add_labels',
-                'error': 'number is required'
+                "success": False,
+                "operation": "add_labels",
+                "error": "number is required",
             }
 
         if not labels:
             return {
-                'success': False,
-                'operation': 'add_labels',
-                'error': 'labels are required'
+                "success": False,
+                "operation": "add_labels",
+                "error": "labels are required",
             }
 
-        cmd = ['gh', item_type, 'edit', str(item_number),
-               '--add-label', ','.join(labels)]
+        cmd = [
+            "gh",
+            item_type,
+            "edit",
+            str(item_number),
+            "--add-label",
+            ",".join(labels),
+        ]
 
         # Execute gh command
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True)
 
         if result.returncode != 0:
-            return {
-                'success': False,
-                'operation': 'add_labels',
-                'error': result.stderr
-            }
+            return {"success": False, "operation": "add_labels", "error": result.stderr}
 
         # Log the operation
-        self._log_operation('add_labels', {'type': item_type, 'number': item_number, 'labels': labels})
+        self._log_operation(
+            "add_labels", {"type": item_type, "number": item_number, "labels": labels}
+        )
 
         return {
-            'success': True,
-            'operation': 'add_labels',
-            'type': item_type,
-            'number': item_number,
-            'labels': labels
+            "success": True,
+            "operation": "add_labels",
+            "type": item_type,
+            "number": item_number,
+            "labels": labels,
         }
 
     def _log_operation(self, operation: str, details: Dict[str, Any]):
         """Log a GitHub operation for audit purposes."""
-        self.operations_log.append({
-            'timestamp': datetime.now().isoformat(),
-            'operation': operation,
-            'details': details
-        })
+        self.operations_log.append(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "operation": operation,
+                "details": details,
+            }
+        )
 
     def get_operations_log(self) -> List[Dict[str, Any]]:
         """Get the log of all GitHub operations."""

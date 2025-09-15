@@ -377,12 +377,14 @@ class WorkflowOptimizer:
                     affected_agents=[
                         t.get("agent_id")
                         for t in task_history
-                        if resource in t.get("resources_used", []) and t.get("agent_id") is not None
+                        if resource in t.get("resources_used", [])
+                        and t.get("agent_id") is not None
                     ],  # type: ignore
                     affected_tasks=[
                         t.get("task_id")
                         for t in task_history
-                        if resource in t.get("resources_used", []) and t.get("task_id") is not None
+                        if resource in t.get("resources_used", [])
+                        and t.get("task_id") is not None
                     ],  # type: ignore
                     description=f"Resource '{resource}' is overutilized ({utilization:.1%})",
                     evidence={
@@ -394,7 +396,8 @@ class WorkflowOptimizer:
                                 t
                                 for t in task_history
                                 if resource in t.get("resources_used", [])
-                             if t is not None]
+                                if t is not None
+                            ]
                         ),
                     },
                     detected_at=datetime.utcnow(),
@@ -455,7 +458,8 @@ class WorkflowOptimizer:
                         t.get("task_id")
                         for t in task_history
                         if skill in t.get("required_skills", [])
-                     if t.get("task_id") is not None],
+                        if t.get("task_id") is not None
+                    ],
                     description=f"Insufficient agents with '{skill}' skill (demand: {demand}, supply: {supply})",
                     evidence={
                         "skill": skill,
@@ -563,8 +567,11 @@ class WorkflowOptimizer:
                     affected_tasks=[  # type: ignore[assignment]
                         t.get("task_id")
                         for t in task_history
-                        if (t.get("communication_delay", 0) > self.bottleneck_thresholds["communication_delay"]
-                            and t.get("task_id") is not None)
+                        if (
+                            t.get("communication_delay", 0)
+                            > self.bottleneck_thresholds["communication_delay"]
+                            and t.get("task_id") is not None
+                        )
                     ],
                     description=f"Communication delays averaging {avg_delay / 60:.1f} minutes",
                     evidence={
@@ -589,7 +596,9 @@ class WorkflowOptimizer:
         bottlenecks = []
 
         # Check for high rework rates
-        rework_tasks = [t for t in task_history if t.get("is_rework", False) if t is not None]
+        rework_tasks = [
+            t for t in task_history if t.get("is_rework", False) if t is not None
+        ]
         rework_rate = len(rework_tasks) / len(task_history) if task_history else 0
 
         if rework_rate > self.bottleneck_thresholds["rework_rate"]:
@@ -598,8 +607,16 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Quality control process",
                 impact=rework_rate * 100,
-                affected_agents=[t.get("agent_id") for t in rework_tasks if t.get("agent_id") is not None],  # type: ignore
-                affected_tasks=[t.get("task_id") for t in rework_tasks if t.get("task_id") is not None],  # type: ignore[assignment]
+                affected_agents=[
+                    t.get("agent_id")
+                    for t in rework_tasks
+                    if t.get("agent_id") is not None
+                ],  # type: ignore
+                affected_tasks=[
+                    t.get("task_id")
+                    for t in rework_tasks
+                    if t.get("task_id") is not None
+                ],  # type: ignore[assignment]
                 description=f"High rework rate ({rework_rate:.1%}) indicating process issues",
                 evidence={
                     "rework_rate": rework_rate,
@@ -619,8 +636,16 @@ class WorkflowOptimizer:
                 type=BottleneckType.PROCESS_INEFFICIENCY,
                 location="Overall workflow",
                 impact=(0.7 - metrics.efficiency_ratio) * 100,
-                affected_agents=[t.get("agent_id") for t in task_history if t.get("agent_id") is not None],  # type: ignore
-                affected_tasks=[t.get("task_id") for t in task_history if t.get("task_id") is not None],  # type: ignore[assignment]
+                affected_agents=[
+                    t.get("agent_id")
+                    for t in task_history
+                    if t.get("agent_id") is not None
+                ],  # type: ignore
+                affected_tasks=[
+                    t.get("task_id")
+                    for t in task_history
+                    if t.get("task_id") is not None
+                ],  # type: ignore[assignment]
                 description=f"Low workflow efficiency ({metrics.efficiency_ratio:.1%})",
                 evidence={
                     "efficiency_ratio": metrics.efficiency_ratio,
@@ -1020,7 +1045,9 @@ class WorkflowOptimizer:
 
         return 7  # Default to 1 week
 
-    def _update_workflow_patterns(self, workflow_id: str, analysis: WorkflowAnalysis) -> None:
+    def _update_workflow_patterns(
+        self, workflow_id: str, analysis: WorkflowAnalysis
+    ) -> None:
         """Update workflow patterns for future learning."""
         if workflow_id not in self.workflow_patterns:
             self.workflow_patterns[workflow_id] = {

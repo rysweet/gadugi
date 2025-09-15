@@ -7,7 +7,7 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from neo4j import AsyncGraphDatabase, AsyncSession, AsyncDriver, Record, Query
+from neo4j import AsyncGraphDatabase, AsyncSession, AsyncDriver
 from neo4j.exceptions import ServiceUnavailable
 
 from .models import Context, ContextState, Memory, MemoryType
@@ -128,8 +128,12 @@ class Neo4jMemoryClient:
                 "access_count": memory.access_count,
                 "created_at": memory.created_at.isoformat(),
                 "updated_at": memory.updated_at.isoformat(),
-                "last_accessed": memory.last_accessed.isoformat() if memory.last_accessed else None,
-                "expires_at": memory.expires_at.isoformat() if memory.expires_at else None,
+                "last_accessed": memory.last_accessed.isoformat()
+                if memory.last_accessed
+                else None,
+                "expires_at": memory.expires_at.isoformat()
+                if memory.expires_at
+                else None,
                 "version": memory.version,
                 "parent_id": memory.parent_id,
             }
@@ -143,7 +147,9 @@ class Neo4jMemoryClient:
 
             # Create version relationship if this is an update
             if memory.parent_id:
-                await self._create_version_relationship(session, memory.id, memory.parent_id)
+                await self._create_version_relationship(
+                    session, memory.id, memory.parent_id
+                )
 
             if record is not None:
                 return record["id"]
@@ -205,11 +211,7 @@ class Neo4jMemoryClient:
                 RETURN m.id
             """
 
-            result = await session.run(
-                query,
-                id=old_id,
-                latest_version=memory.id
-            )
+            result = await session.run(query, id=old_id, latest_version=memory.id)
             record = await result.single()
 
             return record is not None
@@ -342,10 +344,7 @@ class Neo4jMemoryClient:
             """
 
             result = await session.run(
-                query,
-                id=memory_id,
-                threshold=threshold,
-                limit=limit
+                query, id=memory_id, threshold=threshold, limit=limit
             )
 
             memories = []
@@ -398,9 +397,7 @@ class Neo4jMemoryClient:
             # Create parent-child relationships
             if context.parent_context_id:
                 await self._create_context_hierarchy(
-                    session,
-                    context.id,
-                    context.parent_context_id
+                    session, context.id, context.parent_context_id
                 )
 
             if record is not None:
@@ -460,13 +457,12 @@ class Neo4jMemoryClient:
             # Suspend current context
             await session.run(
                 "MATCH (c:Context {id: $id}) SET c.state = 'suspended'",
-                id=from_context_id
+                id=from_context_id,
             )
 
             # Activate target context
             await session.run(
-                "MATCH (c:Context {id: $id}) SET c.state = 'active'",
-                id=to_context_id
+                "MATCH (c:Context {id: $id}) SET c.state = 'active'", id=to_context_id
             )
 
             return True
@@ -499,7 +495,6 @@ class Neo4jMemoryClient:
             # Merge into first context
             merged_context = None
             all_memories = set()
-            merged_working_memory = {}
 
             async for record in result:
                 context = self._record_to_context(dict(record))
@@ -514,7 +509,7 @@ class Neo4jMemoryClient:
                 if context is not None:
                     await session.run(
                         "MATCH (c:Context {id: $id}) SET c.state = 'merged'",
-                        id=context.id
+                        id=context.id,
                     )
 
             if merged_context:
@@ -607,9 +602,7 @@ class Neo4jMemoryClient:
             """
 
             result = await session.run(
-                query,
-                agent_id=agent_id,
-                hours=time_window_hours
+                query, agent_id=agent_id, hours=time_window_hours
             )
 
             consolidated = 0
@@ -708,10 +701,18 @@ class Neo4jMemoryClient:
             metadata=json.loads(node.get("metadata", "{}")),
             importance_score=node.get("importance_score", 0.5),
             access_count=node.get("access_count", 0),
-            created_at=datetime.fromisoformat(node.get("created_at", datetime.now().isoformat())),
-            updated_at=datetime.fromisoformat(node.get("updated_at", datetime.now().isoformat())),
-            last_accessed=datetime.fromisoformat(node["last_accessed"]) if node.get("last_accessed") else None,
-            expires_at=datetime.fromisoformat(node["expires_at"]) if node.get("expires_at") else None,
+            created_at=datetime.fromisoformat(
+                node.get("created_at", datetime.now().isoformat())
+            ),
+            updated_at=datetime.fromisoformat(
+                node.get("updated_at", datetime.now().isoformat())
+            ),
+            last_accessed=datetime.fromisoformat(node["last_accessed"])
+            if node.get("last_accessed")
+            else None,
+            expires_at=datetime.fromisoformat(node["expires_at"])
+            if node.get("expires_at")
+            else None,
             version=node.get("version", 1),
             parent_id=node.get("parent_id"),
             associations=record.get("associations", []),
@@ -733,7 +734,11 @@ class Neo4jMemoryClient:
             working_memory=json.loads(node.get("working_memory", "{}")),
             parent_context_id=record.get("parent_id"),
             child_contexts=record.get("children", []),
-            created_at=datetime.fromisoformat(node.get("created_at", datetime.now().isoformat())),
-            updated_at=datetime.fromisoformat(node.get("updated_at", datetime.now().isoformat())),
+            created_at=datetime.fromisoformat(
+                node.get("created_at", datetime.now().isoformat())
+            ),
+            updated_at=datetime.fromisoformat(
+                node.get("updated_at", datetime.now().isoformat())
+            ),
             metadata=json.loads(node.get("metadata", "{}")),
         )

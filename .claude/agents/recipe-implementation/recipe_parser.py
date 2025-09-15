@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import yaml
 
@@ -85,7 +85,9 @@ class RecipeParser:
 
         # Parse non-functional requirements
         if "Non-Functional Requirements" in sections:
-            self._parse_non_functional_requirements(sections["Non-Functional Requirements"])
+            self._parse_non_functional_requirements(
+                sections["Non-Functional Requirements"]
+            )
 
         # Parse interface requirements
         if "Interface Requirements" in sections:
@@ -241,7 +243,10 @@ class RecipeParser:
 
         decision_counter = 1
         for section_name, section_content in sections.items():
-            if "decision" in section_name.lower() or "architecture" in section_name.lower():
+            if (
+                "decision" in section_name.lower()
+                or "architecture" in section_name.lower()
+            ):
                 subsections = self._extract_subsections(section_content)
 
                 for category, text in subsections.items():
@@ -312,7 +317,9 @@ class RecipeParser:
             if self.recipe_spec:
                 self.recipe_spec.name = data.get("name", self.recipe_spec.name)
                 self.recipe_spec.version = data.get("version", self.recipe_spec.version)
-                self.recipe_spec.description = data.get("description", self.recipe_spec.description)
+                self.recipe_spec.description = data.get(
+                    "description", self.recipe_spec.description
+                )
                 self.recipe_spec.metadata = data.get("metadata", {})
 
         except json.JSONDecodeError as e:
@@ -329,11 +336,13 @@ class RecipeParser:
         # Find classes
         for match in re.finditer(class_pattern, code):
             class_name = match.group(1)
-            interfaces.append(InterfaceSpec(
-                name=class_name,
-                type="class",
-                description=f"Class {class_name}",
-            ))
+            interfaces.append(
+                InterfaceSpec(
+                    name=class_name,
+                    type="class",
+                    description=f"Class {class_name}",
+                )
+            )
 
         # Find functions/methods
         for match in re.finditer(method_pattern, code):
@@ -349,16 +358,20 @@ class RecipeParser:
                     if param and param != "self":
                         param_parts = param.split(":")
                         param_name = param_parts[0].strip()
-                        param_type = param_parts[1].strip() if len(param_parts) > 1 else "Any"
+                        param_type = (
+                            param_parts[1].strip() if len(param_parts) > 1 else "Any"
+                        )
                         param_list.append({"name": param_name, "type": param_type})
 
-            interfaces.append(InterfaceSpec(
-                name=func_name,
-                type="function",
-                description=f"Function {func_name}",
-                parameters=param_list,
-                returns={"type": returns} if returns else None,
-            ))
+            interfaces.append(
+                InterfaceSpec(
+                    name=func_name,
+                    type="function",
+                    description=f"Function {func_name}",
+                    parameters=param_list,
+                    returns={"type": returns} if returns else None,
+                )
+            )
 
         return interfaces
 
@@ -457,8 +470,15 @@ class RecipeParser:
                 rationale = ""
                 if i + 1 < len(lines):
                     next_line = lines[i + 1].strip()
-                    if "rationale:" in next_line.lower() or "because" in next_line.lower():
-                        rationale = next_line.split(":", 1)[1].strip() if ":" in next_line else next_line
+                    if (
+                        "rationale:" in next_line.lower()
+                        or "because" in next_line.lower()
+                    ):
+                        rationale = (
+                            next_line.split(":", 1)[1].strip()
+                            if ":" in next_line
+                            else next_line
+                        )
 
                 decisions.append((decision, rationale))
 

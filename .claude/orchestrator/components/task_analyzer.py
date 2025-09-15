@@ -19,20 +19,23 @@ import re
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple  # type: ignore
+from typing import Dict, List, Optional, Set  # type: ignore
 
 # Security: Define maximum limits to prevent resource exhaustion
 MAX_PROMPT_FILES = 50
 MAX_FILE_SIZE_MB = 10
 MAX_PARALLEL_TASKS = 8
-ALLOWED_FILE_EXTENSIONS = {'.md', '.txt', '.py', '.js', '.json'}
+ALLOWED_FILE_EXTENSIONS = {".md", ".txt", ".py", ".js", ".json"}
 
 # Configure secure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 class TaskComplexity(Enum):
     """Task complexity classification"""
+
     LOW = 1
     MEDIUM = 2
     HIGH = 3
@@ -41,6 +44,7 @@ class TaskComplexity(Enum):
 
 class TaskType(Enum):
     """Task type classification"""
+
     TEST_COVERAGE = "test_coverage"
     BUG_FIX = "bug_fix"
     FEATURE_IMPLEMENTATION = "feature_implementation"
@@ -52,6 +56,7 @@ class TaskType(Enum):
 @dataclass
 class TaskInfo:
     """Comprehensive task information"""
+
     id: str
     name: str
     prompt_file: str
@@ -87,7 +92,7 @@ class TaskAnalyzer:
         try:
             resolved_path = Path(path).resolve()
             # Prevent path traversal attacks - but allow relative paths that resolve to absolute
-            if '..' in Path(path).parts:  # Check original path for .. components
+            if ".." in Path(path).parts:  # Check original path for .. components
                 raise ValueError(f"Path traversal detected: {path}")
             return resolved_path
         except Exception as e:
@@ -108,7 +113,7 @@ class TaskAnalyzer:
                 raise ValueError(f"File too large: {path}")
 
             # Prevent path traversal
-            if '..' in str(path):
+            if ".." in str(path):
                 raise ValueError(f"Path traversal attempt detected: {file_path}")
 
             return path
@@ -123,16 +128,16 @@ class TaskAnalyzer:
 
         # Remove potentially dangerous patterns
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',
-            r'javascript:',
-            r'on\w+\s*=',
-            r'eval\s*\(',
-            r'exec\s*\(',
+            r"<script[^>]*>.*?</script>",
+            r"javascript:",
+            r"on\w+\s*=",
+            r"eval\s*\(",
+            r"exec\s*\(",
         ]
 
         sanitized = content
         for pattern in dangerous_patterns:
-            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
+            sanitized = re.sub(pattern, "", sanitized, flags=re.IGNORECASE | re.DOTALL)
 
         return sanitized
 
@@ -150,9 +155,13 @@ class TaskAnalyzer:
             raise ValueError("prompt_files must be a list")
 
         if len(prompt_files) > MAX_PROMPT_FILES:
-            raise ValueError(f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}")
+            raise ValueError(
+                f"Too many prompt files. Maximum allowed: {MAX_PROMPT_FILES}"
+            )
 
-        print(f"🔍 Analyzing {len(prompt_files)} prompt files for parallel execution opportunities...")
+        print(
+            f"🔍 Analyzing {len(prompt_files)} prompt files for parallel execution opportunities..."
+        )
 
         if not prompt_files:
             print("⚠️  No prompt files provided to analyze")
@@ -188,7 +197,9 @@ class TaskAnalyzer:
                 task_info = self._analyze_prompt_file(prompt_file)
                 if task_info:
                     self.tasks.append(task_info)
-                    print(f"✅ Analyzed: {task_info.name} ({task_info.task_type.value})")
+                    print(
+                        f"✅ Analyzed: {task_info.name} ({task_info.task_type.value})"
+                    )
             except Exception as e:
                 print(f"⚠️  Failed to analyze {prompt_file}: {e}")
 
@@ -210,7 +221,7 @@ class TaskAnalyzer:
         """
         # Simple check: look for "IMPLEMENTED" marker in file
         try:
-            with open(prompt_file, 'r', encoding='utf-8') as f:
+            with open(prompt_file, "r", encoding="utf-8") as f:
                 first_line = f.readline().strip()
                 if "IMPLEMENTED" in first_line or "COMPLETED" in first_line:
                     return True
@@ -225,7 +236,7 @@ class TaskAnalyzer:
 
     def _analyze_prompt_file(self, prompt_file: Path) -> Optional[TaskInfo]:
         """Analyze a single prompt file"""
-        with open(prompt_file, 'r', encoding='utf-8') as f:
+        with open(prompt_file, "r", encoding="utf-8") as f:
             content = f.read()
 
         # Extract basic information
@@ -259,15 +270,15 @@ class TaskAnalyzer:
             dependencies=dependencies,
             conflicts=[],  # Will be populated by _detect_conflicts
             parallelizable=False,  # Will be determined by _classify_parallelizability
-            description=description
+            description=description,
         )
 
     def _extract_task_name(self, content: str) -> str:
         """Extract task name from prompt content"""
         # Look for main heading
-        lines = content.split('\n')
+        lines = content.split("\n")
         for line in lines:
-            if line.startswith('# '):
+            if line.startswith("# "):
                 return line[2:].strip()
 
         # Fallback to first non-empty line
@@ -289,50 +300,69 @@ class TaskAnalyzer:
             TaskType.FEATURE_IMPLEMENTATION: 0,
             TaskType.REFACTORING: 0,
             TaskType.DOCUMENTATION: 0,
-            TaskType.CONFIGURATION: 0
+            TaskType.CONFIGURATION: 0,
         }
 
         # Test coverage indicators (must be strong indicators)
         test_indicators = [
-            'test coverage', 'unit test', 'integration test', 'pytest',
-            'write tests', 'test suite', 'coverage improvement'
+            "test coverage",
+            "unit test",
+            "integration test",
+            "pytest",
+            "write tests",
+            "test suite",
+            "coverage improvement",
         ]
         for indicator in test_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.TEST_COVERAGE] += 3
 
         # Look for test-specific patterns
-        if 'test_' in content_lower or 'test_' in name_lower:
+        if "test_" in content_lower or "test_" in name_lower:
             scores[TaskType.TEST_COVERAGE] += 2
-        if 'coverage' in name_lower:
+        if "coverage" in name_lower:
             scores[TaskType.TEST_COVERAGE] += 2
 
         # Bug fix indicators
-        bug_indicators = ['fix', 'bug', 'error', 'issue', 'problem', 'broken', 'circular import']
+        bug_indicators = [
+            "fix",
+            "bug",
+            "error",
+            "issue",
+            "problem",
+            "broken",
+            "circular import",
+        ]
         for indicator in bug_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.BUG_FIX] += 2
 
         # Feature implementation indicators
-        feature_indicators = ['implement', 'add', 'create', 'new feature', 'build']
+        feature_indicators = ["implement", "add", "create", "new feature", "build"]
         for indicator in feature_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.FEATURE_IMPLEMENTATION] += 2
 
         # Refactoring indicators
-        refactor_indicators = ['refactor', 'improve', 'optimize', 'restructure', 'cleanup']
+        refactor_indicators = [
+            "refactor",
+            "improve",
+            "optimize",
+            "restructure",
+            "cleanup",
+        ]
         for indicator in refactor_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.REFACTORING] += 2
 
         # Documentation indicators
-        doc_indicators = ['documentation', 'docs', 'readme', 'guide', 'tutorial']
+        doc_indicators = ["documentation", "docs", "readme", "guide", "tutorial"]
         for indicator in doc_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.DOCUMENTATION] += 2
 
         # Configuration indicators
-        config_indicators = ['config', 'setup', 'configure', 'settings', 'environment']
+        config_indicators = ["config", "setup", "configure", "settings", "environment"]
         for indicator in config_indicators:
             if indicator in content_lower or indicator in name_lower:
                 scores[TaskType.CONFIGURATION] += 2
@@ -363,25 +393,36 @@ class TaskAnalyzer:
 
         # Technical complexity indicators
         complex_keywords = [
-            'algorithm', 'optimization', 'performance', 'scalability',
-            'architecture', 'design pattern', 'concurrent', 'parallel',
-            'distributed', 'microservice', 'database', 'migration'
+            "algorithm",
+            "optimization",
+            "performance",
+            "scalability",
+            "architecture",
+            "design pattern",
+            "concurrent",
+            "parallel",
+            "distributed",
+            "microservice",
+            "database",
+            "migration",
         ]
-        complexity_score += sum(1 for keyword in complex_keywords if keyword in content.lower())
+        complexity_score += sum(
+            1 for keyword in complex_keywords if keyword in content.lower()
+        )
 
         # Number of files mentioned
-        file_mentions = len(re.findall(r'\w+\.(py|js|ts|java|cpp|c|h)(?:\w)*', content))
+        file_mentions = len(re.findall(r"\w+\.(py|js|ts|java|cpp|c|h)(?:\w)*", content))
         if file_mentions > 10:
             complexity_score += 2
         elif file_mentions > 5:
             complexity_score += 1
 
         # Testing requirements
-        if 'comprehensive test' in content.lower() or 'test suite' in content.lower():
+        if "comprehensive test" in content.lower() or "test suite" in content.lower():
             complexity_score += 1
 
         # Integration requirements
-        if any(word in content.lower() for word in ['integration', 'api', 'external']):
+        if any(word in content.lower() for word in ["integration", "api", "external"]):
             complexity_score += 1
 
         # Classify based on score
@@ -399,22 +440,22 @@ class TaskAnalyzer:
         target_files = []
 
         # Find Python file references
-        python_files = re.findall(r'(\w+(?:/\w+)*\.py)', content)
+        python_files = re.findall(r"(\w+(?:/\w+)*\.py)", content)
         target_files.extend(python_files)
 
         # Find specific file paths
-        file_paths = re.findall(r'`([^`]+\.(py|js|ts|md|json|yaml|yml))`', content)
+        file_paths = re.findall(r"`([^`]+\.(py|js|ts|md|json|yaml|yml))`", content)
         target_files.extend([path[0] for path in file_paths])
 
         # Look for directory references
-        _dir_patterns = re.findall(r'(\w+(?:/\w+)+/)', content)
+        _dir_patterns = re.findall(r"(\w+(?:/\w+)+/)", content)
 
         # Remove duplicates and clean paths
         cleaned_files = []
         seen = set()
         for file_path in target_files:
             # Clean and normalize path
-            clean_path = file_path.strip('`"\'').replace('\\', '/')
+            clean_path = file_path.strip("`\"'").replace("\\", "/")
             if clean_path and clean_path not in seen:
                 cleaned_files.append(clean_path)
                 seen.add(clean_path)
@@ -426,18 +467,14 @@ class TaskAnalyzer:
         test_files = []
 
         # Direct test file references
-        test_patterns = [
-            r'test_\w+\.py',
-            r'\w+_test\.py',
-            r'tests?/\w+\.py'
-        ]
+        test_patterns = [r"test_\w+\.py", r"\w+_test\.py", r"tests?/\w+\.py"]
 
         for pattern in test_patterns:
             test_files.extend(re.findall(pattern, content))
 
         # Infer test files from target files
         for target_file in target_files:
-            if target_file.endswith('.py') and not target_file.startswith('test_'):
+            if target_file.endswith(".py") and not target_file.startswith("test_"):
                 # Infer corresponding test file
                 base_name = Path(target_file).stem
                 test_file = f"tests/test_{base_name}.py"
@@ -452,10 +489,10 @@ class TaskAnalyzer:
 
         # Look for explicit dependencies
         dep_patterns = [
-            r'depends on (\w+)',
-            r'requires (\w+)',
-            r'after (\w+)',
-            r'prerequisite.*?(\w+)'
+            r"depends on (\w+)",
+            r"requires (\w+)",
+            r"after (\w+)",
+            r"prerequisite.*?(\w+)",
         ]
 
         for pattern in dep_patterns:
@@ -464,7 +501,7 @@ class TaskAnalyzer:
         # Analyze import dependencies for target files
         for target_file in target_files:
             file_path = self.project_root / target_file
-            if file_path.exists() and target_file.endswith('.py'):
+            if file_path.exists() and target_file.endswith(".py"):
                 deps = self._analyze_python_imports(file_path)
                 dependencies.extend(deps)
 
@@ -475,7 +512,7 @@ class TaskAnalyzer:
         dependencies = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Parse Python imports
@@ -483,10 +520,10 @@ class TaskAnalyzer:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     for alias in node.names:
-                        if alias.name.startswith('gadugi'):
+                        if alias.name.startswith("gadugi"):
                             dependencies.append(alias.name)
                 elif isinstance(node, ast.ImportFrom):
-                    if node.module and node.module.startswith('gadugi'):
+                    if node.module and node.module.startswith("gadugi"):
                         dependencies.append(node.module)
 
         except (SyntaxError, FileNotFoundError):
@@ -494,13 +531,15 @@ class TaskAnalyzer:
 
         return dependencies
 
-    def _estimate_duration(self, complexity: TaskComplexity, target_files: List[str]) -> int:
+    def _estimate_duration(
+        self, complexity: TaskComplexity, target_files: List[str]
+    ) -> int:
         """Estimate task duration in minutes"""
         base_duration = {
             TaskComplexity.LOW: 30,
             TaskComplexity.MEDIUM: 60,
             TaskComplexity.HIGH: 120,
-            TaskComplexity.CRITICAL: 240
+            TaskComplexity.CRITICAL: 240,
         }
 
         duration = base_duration[complexity]
@@ -511,48 +550,58 @@ class TaskAnalyzer:
         # Cap at reasonable maximum
         return min(duration, 480)  # Max 8 hours
 
-    def _estimate_resources(self, complexity: TaskComplexity, file_count: int) -> Dict[str, int]:
+    def _estimate_resources(
+        self, complexity: TaskComplexity, file_count: int
+    ) -> Dict[str, int]:
         """Estimate resource requirements"""
         base_resources = {
-            TaskComplexity.LOW: {'cpu': 1, 'memory': 512, 'disk': 100},
-            TaskComplexity.MEDIUM: {'cpu': 2, 'memory': 1024, 'disk': 200},
-            TaskComplexity.HIGH: {'cpu': 3, 'memory': 2048, 'disk': 500},
-            TaskComplexity.CRITICAL: {'cpu': 4, 'memory': 4096, 'disk': 1000}
+            TaskComplexity.LOW: {"cpu": 1, "memory": 512, "disk": 100},
+            TaskComplexity.MEDIUM: {"cpu": 2, "memory": 1024, "disk": 200},
+            TaskComplexity.HIGH: {"cpu": 3, "memory": 2048, "disk": 500},
+            TaskComplexity.CRITICAL: {"cpu": 4, "memory": 4096, "disk": 1000},
         }
 
         resources = base_resources[complexity].copy()
 
         # Scale with file count
-        resources['memory'] += file_count * 50
-        resources['disk'] += file_count * 25
+        resources["memory"] += file_count * 50
+        resources["disk"] += file_count * 25
 
         return resources
 
     def _extract_description(self, content: str) -> str:
         """Extract task description"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         # Look for overview or description section
         description_lines = []
         in_description = False
 
         for line in lines:
-            if line.lower().strip().startswith(('## overview', '## description', '## summary')):
+            if (
+                line.lower()
+                .strip()
+                .startswith(("## overview", "## description", "## summary"))
+            ):
                 in_description = True
                 continue
-            elif line.startswith('##') and in_description:
+            elif line.startswith("##") and in_description:
                 break
             elif in_description and line.strip():
                 description_lines.append(line.strip())
 
         if description_lines:
-            return ' '.join(description_lines)[:200] + ('...' if len(' '.join(description_lines)) > 200 else '')
+            return " ".join(description_lines)[:200] + (
+                "..." if len(" ".join(description_lines)) > 200 else ""
+            )
 
         # Fallback to first paragraph
-        paragraphs = content.split('\n\n')
+        paragraphs = content.split("\n\n")
         for paragraph in paragraphs:
             if len(paragraph.strip()) > 50:
-                return paragraph.strip()[:200] + ('...' if len(paragraph.strip()) > 200 else '')
+                return paragraph.strip()[:200] + (
+                    "..." if len(paragraph.strip()) > 200 else ""
+                )
 
         return "No description available"
 
@@ -567,9 +616,13 @@ class TaskAnalyzer:
             for dep in task.dependencies:
                 # Find matching tasks
                 for other_task in self.tasks:
-                    if (dep.lower() in other_task.name.lower() or
-                        dep.lower() in other_task.id.lower() or
-                        any(dep.lower() in f.lower() for f in other_task.target_files)):
+                    if (
+                        dep.lower() in other_task.name.lower()
+                        or dep.lower() in other_task.id.lower()
+                        or any(
+                            dep.lower() in f.lower() for f in other_task.target_files
+                        )
+                    ):
                         self.dependency_graph[task.id].append(other_task.id)
 
     def _detect_conflicts(self):
@@ -647,28 +700,31 @@ class TaskAnalyzer:
         speed_improvement = total_sequential_time / max(parallel_time, 1)
 
         return {
-            'total_tasks': len(self.tasks),
-            'parallelizable_tasks': len([t for t in self.tasks if t.parallelizable]),
-            'sequential_tasks': len([t for t in self.tasks if not t.parallelizable]),
-            'execution_groups': len(parallel_groups),
-            'estimated_sequential_time': total_sequential_time,
-            'estimated_parallel_time': parallel_time,
-            'speed_improvement': round(speed_improvement, 2),
-            'resource_requirements': self._calculate_total_resources(),
-            'groups': [
+            "total_tasks": len(self.tasks),
+            "parallelizable_tasks": len([t for t in self.tasks if t.parallelizable]),
+            "sequential_tasks": len([t for t in self.tasks if not t.parallelizable]),
+            "execution_groups": len(parallel_groups),
+            "estimated_sequential_time": total_sequential_time,
+            "estimated_parallel_time": parallel_time,
+            "speed_improvement": round(speed_improvement, 2),
+            "resource_requirements": self._calculate_total_resources(),
+            "groups": [
                 {
-                    'group_id': i,
-                    'tasks': [asdict(task) for task in group],
-                    'estimated_time': max(task.estimated_duration for task in group) if group else 0,
-                    'parallelizable': len(group) > 1 and all(task.parallelizable for task in group)
+                    "group_id": i,
+                    "tasks": [asdict(task) for task in group],
+                    "estimated_time": max(task.estimated_duration for task in group)
+                    if group
+                    else 0,
+                    "parallelizable": len(group) > 1
+                    and all(task.parallelizable for task in group),
                 }
                 for i, group in enumerate(parallel_groups)
-            ]
+            ],
         }
 
     def _calculate_total_resources(self) -> Dict[str, int]:
         """Calculate total resource requirements"""
-        total = {'cpu': 0, 'memory': 0, 'disk': 0}
+        total = {"cpu": 0, "memory": 0, "disk": 0}
 
         for task in self.tasks:
             for resource, amount in task.resource_requirements.items():
@@ -680,7 +736,7 @@ class TaskAnalyzer:
         """Save analysis results to JSON file"""
         execution_plan = self.generate_execution_plan()
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(execution_plan, f, indent=2, default=str)
 
         print(f"📄 Analysis saved to: {output_file}")
@@ -690,9 +746,17 @@ def main():
     """CLI entry point for TaskAnalyzer"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Analyze prompt files for parallel execution")
-    parser.add_argument("--prompts-dir", default="/prompts/", help="Directory containing prompt files")
-    parser.add_argument("--output", default="task_analysis.json", help="Output file for analysis results")
+    parser = argparse.ArgumentParser(
+        description="Analyze prompt files for parallel execution"
+    )
+    parser.add_argument(
+        "--prompts-dir", default="/prompts/", help="Directory containing prompt files"
+    )
+    parser.add_argument(
+        "--output",
+        default="task_analysis.json",
+        help="Output file for analysis results",
+    )
     parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
@@ -700,10 +764,10 @@ def main():
     analyzer = TaskAnalyzer(args.prompts_dir)
 
     try:
-        tasks = analyzer.analyze_all_prompts()  # type: ignore
+        analyzer.analyze_all_prompts()  # type: ignore
         execution_plan = analyzer.generate_execution_plan()
 
-        print(f"\n📊 Analysis Summary:")
+        print("\n📊 Analysis Summary:")
         print(f"Total tasks: {execution_plan['total_tasks']}")
         print(f"Parallelizable: {execution_plan['parallelizable_tasks']}")
         print(f"Sequential: {execution_plan['sequential_tasks']}")

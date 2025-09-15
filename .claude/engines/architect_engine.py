@@ -1074,7 +1074,9 @@ class ArchitectEngine:
             in [ArchitectureComplexity.SIMPLE, ArchitectureComplexity.MODERATE]
             else 2
         )
-        total_duration = f"{sum(int(phase.duration.split()[0]) for phase in phases)} weeks"
+        total_duration = (
+            f"{sum(int(phase.duration.split()[0]) for phase in phases)} weeks"
+        )
 
         return ImplementationPlan(
             phases=phases,
@@ -1225,7 +1227,10 @@ class ArchitectEngine:
         recommendations = []
 
         # Pattern-specific recommendations
-        if pattern == "microservices" and scope.complexity_level == ArchitectureComplexity.SIMPLE:
+        if (
+            pattern == "microservices"
+            and scope.complexity_level == ArchitectureComplexity.SIMPLE
+        ):
             recommendations.append(
                 Recommendation(
                     category="architecture",
@@ -1375,7 +1380,9 @@ class ArchitectEngine:
                 technology_stack=TechnologyStack(
                     language=primary_lang,
                     framework=framework,
-                    database=tech_prefs.databases[0] if tech_prefs.databases else "postgresql",
+                    database=tech_prefs.databases[0]
+                    if tech_prefs.databases
+                    else "postgresql",
                 ),
             )
         if "database" in name.lower() or "storage" in name.lower():
@@ -1397,7 +1404,9 @@ class ArchitectEngine:
                 technology_stack=TechnologyStack(
                     language="sql",
                     framework="",
-                    database=tech_prefs.databases[0] if tech_prefs.databases else "postgresql",
+                    database=tech_prefs.databases[0]
+                    if tech_prefs.databases
+                    else "postgresql",
                 ),
             )
         return ArchitectureComponent(
@@ -1614,7 +1623,8 @@ class ArchitectEngine:
 
         if (
             "security" in review_results.get("security_assessment", "").lower()
-            and "needs improvement" in review_results.get("security_assessment", "").lower()
+            and "needs improvement"
+            in review_results.get("security_assessment", "").lower()
         ):
             recommendations.append(
                 Recommendation(

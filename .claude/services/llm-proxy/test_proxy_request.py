@@ -4,6 +4,7 @@ import json
 import asyncio
 from datetime import datetime
 
+
 async def test_proxy():
     """Test the proxy with a valid request that should be logged."""
     url = "http://localhost:8082/v1/messages"
@@ -11,7 +12,7 @@ async def test_proxy():
     headers = {
         "Content-Type": "application/json",
         "anthropic-version": "2023-06-01",
-        "x-api-key": "test-key"  # Any key since validation is disabled
+        "x-api-key": "test-key",  # Any key since validation is disabled
     }
 
     payload = {
@@ -19,11 +20,11 @@ async def test_proxy():
         "messages": [
             {
                 "role": "user",
-                "content": "TEST_REQUEST: What is 2+2? This request should appear in logs."
+                "content": "TEST_REQUEST: What is 2+2? This request should appear in logs.",
             }
         ],
         "max_tokens": 50,
-        "temperature": 0.7
+        "temperature": 0.7,
     }
 
     print(f"[{datetime.now().isoformat()}] Sending test request to {url}")
@@ -32,7 +33,9 @@ async def test_proxy():
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(url, json=payload, headers=headers)
-            print(f"[{datetime.now().isoformat()}] Response status: {response.status_code}")
+            print(
+                f"[{datetime.now().isoformat()}] Response status: {response.status_code}"
+            )
             print(f"Response headers: {dict(response.headers)}")
 
             if response.status_code == 200:
@@ -47,6 +50,7 @@ async def test_proxy():
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(test_proxy())

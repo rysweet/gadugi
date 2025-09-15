@@ -1,3 +1,10 @@
+---
+name: EventRouterServiceManager
+model: inherit
+description: Manages the event router service for inter-agent communication, event distribution, and message routing
+tools: Read, Write, Edit, Bash, Grep, TodoWrite
+---
+
 # Event Router Service Manager Agent
 
 

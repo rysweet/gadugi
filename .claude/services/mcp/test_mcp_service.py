@@ -6,7 +6,6 @@ Test suite for MCP Service
 import asyncio
 import httpx
 import pytest
-from  import  # type: ignore[import]
 
 
 BASE_URL = "http://localhost:8000"
@@ -33,7 +32,7 @@ async def test_store_context():
             "content": "Test context for Gadugi MCP Service",
             "source": "test_suite",
             "metadata": {"test": True, "version": "0.3.0"},
-            "tags": ["test", "mcp", "gadugi"]
+            "tags": ["test", "mcp", "gadugi"],
         }
 
         response = await client.post(f"{BASE_URL}/context/store", json=context_data)
@@ -56,10 +55,12 @@ async def test_retrieve_context():
         context_data = {
             "content": "Context to retrieve",
             "source": "test_suite",
-            "tags": ["retrieve", "test"]
+            "tags": ["retrieve", "test"],
         }
 
-        store_response = await client.post(f"{BASE_URL}/context/store", json=context_data)
+        store_response = await client.post(
+            f"{BASE_URL}/context/store", json=context_data
+        )
         context_id = store_response.json()["id"]
 
         # Now retrieve it
@@ -78,18 +79,17 @@ async def test_search_contexts():
     async with httpx.AsyncClient() as client:
         # Store some test contexts
         for i in range(3):
-            await client.post(f"{BASE_URL}/context/store", json={
-                "content": f"Searchable context {i}",
-                "source": "search_test",
-                "tags": ["search", f"item-{i}"]
-            })
+            await client.post(
+                f"{BASE_URL}/context/store",
+                json={
+                    "content": f"Searchable context {i}",
+                    "source": "search_test",
+                    "tags": ["search", f"item-{i}"],
+                },
+            )
 
         # Search for them
-        search_request = {
-            "query": "Searchable",
-            "source": "search_test",
-            "limit": 10
-        }
+        search_request = {"query": "Searchable", "source": "search_test", "limit": 10}
 
         response = await client.post(f"{BASE_URL}/context/search", json=search_request)
         assert response.status_code == 200
