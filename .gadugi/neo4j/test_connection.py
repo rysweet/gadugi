@@ -38,7 +38,7 @@ class Neo4jConnection:
         except ServiceUnavailable:
             print(f"❌ Neo4j is not available at {self.uri}")
             print(
-                "   Please ensure Neo4j is running: docker-compose -f docker-compose.gadugi.yml up -d neo4j"
+                "   Please ensure Neo4j is running: docker-compose -f docker-compose.gadugi.yml up -d neo4j"  # noqa: E501
             )
             return False
         except AuthError:
@@ -82,14 +82,16 @@ class Neo4jConnection:
 
                 # Count constraints
                 result = session.run("SHOW CONSTRAINTS YIELD name RETURN count(*) AS count")
-                count = result.single()["count"]
+                record = result.single()
+                count = record["count"] if record else 0
                 print(f"✅ Found {count} constraints")
 
                 # Count indexes
                 result = session.run(
                     "SHOW INDEXES YIELD name WHERE name <> 'constraint' RETURN count(*) AS count"
                 )
-                count = result.single()["count"]
+                record = result.single()
+                count = record["count"] if record else 0
                 print(f"✅ Found {count} indexes")
 
                 return True
@@ -120,7 +122,8 @@ class Neo4jConnection:
                     content="This is a test memory created by the connection test script",
                 )
 
-                memory_id = result.single()["id"]
+                record = result.single()
+                memory_id = record["id"] if record else "unknown"
                 print(f"✅ Created test memory: {memory_id}")
                 return True
 
@@ -139,7 +142,8 @@ class Neo4jConnection:
                     """
                     MATCH (m:Memory)
                     WHERE m.id <> 'root'
-                    RETURN m.id AS id, m.type AS type, m.content AS content, m.timestamp AS timestamp
+                    RETURN m.id AS id, m.type AS type, m.content AS content,
+                        m.timestamp AS timestamp
                     ORDER BY m.timestamp DESC
                     LIMIT $limit
                     """,
@@ -223,17 +227,19 @@ class Neo4jConnection:
             try:
                 with self.driver.session() as session:
                     result = session.run("MATCH (n) RETURN count(n) AS nodes")
-                    node_count = result.single()["nodes"]
+                    record = result.single()
+                    node_count = record["nodes"] if record else 0
 
                     result = session.run("MATCH ()-[r]->() RETURN count(r) AS relationships")
-                    rel_count = result.single()["relationships"]
+                    record = result.single()
+                    rel_count = record["relationships"] if record else 0
 
                     print("\n📊 Basic Statistics:")
                     print(f"  Total nodes: {node_count}")
                     print(f"  Total relationships: {rel_count}")
 
                     return {"total_nodes": node_count, "total_relationships": rel_count}
-            except:
+            except Exception:
                 return {}
 
 
@@ -254,8 +260,8 @@ def main():
     print("\n🔍 Testing Schema...")
     if not conn.test_schema():
         print("\n⚠️  Schema not initialized. Run the init script:")
-        print(
-            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"
+        print(  # noqa: E501
+            "  docker exec gadugi-neo4j cypher-shell -u neo4j -p gadugi-password < neo4j/init/init_schema.cypher"  # noqa: E501
         )
 
     # Create test memory

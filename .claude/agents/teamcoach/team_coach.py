@@ -45,14 +45,14 @@ class ReportingSystem:
         pass
 
 
-from .phase2.task_matcher import TaskAgentMatcher
-from .phase2.team_optimizer import TeamCompositionOptimizer
-from .phase2.recommendation_engine import RecommendationEngine
+from .phase2.task_matcher import TaskAgentMatcher  # noqa: E402
+from .phase2.team_optimizer import TeamCompositionOptimizer  # noqa: E402
+from .phase2.recommendation_engine import RecommendationEngine  # noqa: E402
 
-from .phase3.coaching_engine import CoachingEngine
+from .phase3.coaching_engine import CoachingEngine  # noqa: E402
 
 # from .phase3.conflict_resolver import AgentConflictResolver
-from .phase3.workflow_optimizer import WorkflowOptimizer
+from .phase3.workflow_optimizer import WorkflowOptimizer  # noqa: E402
 # from .phase3.strategic_planner import StrategicTeamPlanner  # type: ignore
 
 

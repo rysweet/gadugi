@@ -180,7 +180,7 @@ async def interactive_client():
                         message = await websocket.recv()
                         print(f"\n📥 Received: {json.loads(message)}")
                         print("> ", end="", flush=True)
-                except:
+                except Exception:
                     pass
 
             listener = asyncio.create_task(listen())

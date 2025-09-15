@@ -378,7 +378,8 @@ Test the deterministic execution of workflow phases.
         assert "total_phases" in data
         assert "execution_time" in data
 
-    def test_execute_phase_with_retry(self):
+    @patch("time.sleep")  # Mock sleep to avoid delays in tests
+    def test_execute_phase_with_retry(self, mock_sleep):
         """Test phase execution with retry logic"""
         engine = WorkflowEngine()
         engine.workflow_state = WorkflowState(
@@ -407,7 +408,8 @@ Test the deterministic execution of workflow phases.
         assert result.retry_count == 2  # Failed twice before success
         assert call_count == 3
 
-    def test_execute_phase_max_retries_exceeded(self):
+    @patch("time.sleep")  # Mock sleep to avoid delays in tests
+    def test_execute_phase_max_retries_exceeded(self, mock_sleep):
         """Test phase execution when max retries are exceeded"""
         engine = WorkflowEngine()
         engine.max_retries = 2  # Reduce for faster test

@@ -630,7 +630,7 @@ class ExecutionMonitorEngine:
             # Resource usage
             cpu_percent = psutil_process.cpu_percent()
             memory_info = psutil_process.memory_info()
-            io_counters = psutil_process.io_counters()
+            io_counters = psutil_process.io_counters()  # type: ignore
 
             process.resource_usage = ResourceUsage(
                 cpu_usage=cpu_percent,

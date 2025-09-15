@@ -272,7 +272,7 @@ class WhiteboardMixin:
                 success = True
                 if success:
                     print(
-                        f"  📋 Granted {permission.value} access to {agent_id} for whiteboard {whiteboard_id}"
+                        f"  📋 Granted {permission.value} access to {agent_id} for whiteboard {whiteboard_id}"  # noqa: E501
                     )
                 return success
 

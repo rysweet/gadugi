@@ -234,7 +234,8 @@ class WorkflowEngine:
 
         except Exception as e:
             self.error_handler.handle_error(
-                e, context={"category": "workflow_execution", "severity": "high"}
+                e,
+                context={"category": "workflow_execution", "severity": "high"},  # type: ignore[call-arg]
             )
             return self._create_failure_result(f"Workflow execution failed: {str(e)}")
 
@@ -320,7 +321,7 @@ class WorkflowEngine:
             if not os.path.exists(self.workflow_state.prompt_file):  # type: ignore
                 return (
                     False,
-                    f"Prompt file not found: {self.workflow_state.prompt_file}",
+                    f"Prompt file not found: {self.workflow_state.prompt_file}",  # type: ignore[union-attr]
                     {},
                 )  # type: ignore
 
@@ -631,7 +632,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
             # For now, we'll simulate successful review invocation
             return (
                 True,
-                f"Code review initiated for PR #{self.workflow_state.pr_number}",
+                f"Code review initiated for PR #{self.workflow_state.pr_number}",  # type: ignore[union-attr]
                 {  # type: ignore
                     "pr_number": self.workflow_state.pr_number,  # type: ignore
                     "review_requested": True,
@@ -667,7 +668,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"""
                 {
                     "total_phases": len(self.workflow_state.completed_phases),  # type: ignore
                     "execution_time": (
-                        datetime.now() - self.workflow_state.start_time
+                        datetime.now() - self.workflow_state.start_time  # type: ignore[union-attr]
                     ).total_seconds(),  # type: ignore
                 },
             )

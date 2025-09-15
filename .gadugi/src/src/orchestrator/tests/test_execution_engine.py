@@ -7,21 +7,21 @@ Test suite for ExecutionEngine component of OrchestratorAgent
 Tests parallel execution, resource monitoring, and process management.
 """
 
-import json
-import shutil
-import subprocess
+import json  # noqa: E402
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
 
 # Add the components directory to the path
-import sys
-import tempfile
-import time
-import unittest
-from datetime import datetime, timedelta
-from pathlib import Path
+import sys  # noqa: E402
+import tempfile  # noqa: E402
+import time  # noqa: E402
+import unittest  # noqa: E402
+from datetime import datetime, timedelta  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "components"))
 
-from execution_engine import (  # type: ignore[import]
+from execution_engine import (  # type: ignore[import]  # noqa: E402
     ExecutionEngine,
     ExecutionResult,
     ResourceMonitor,

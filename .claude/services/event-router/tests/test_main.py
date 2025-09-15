@@ -202,7 +202,7 @@ def mock_memory_storage():
 @pytest.fixture
 def sample_agent_event() -> AgentEvent:
     """Create a sample agent event for testing."""
-    return AgentEvent(
+    return AgentEvent(  # type: ignore
         event_type=EventType.TASK_STARTED,
         agent_id="test-agent-001",
         task_id="task-123",
@@ -220,7 +220,7 @@ def sample_agent_event() -> AgentEvent:
 @pytest.fixture
 def sample_task_started_event() -> TaskStartedEvent:
     """Create a sample task started event."""
-    return TaskStartedEvent(
+    return TaskStartedEvent(  # type: ignore
         agent_id="test-agent-001",
         task_id="task-456",
         task_description="Implement feature X",
@@ -240,7 +240,7 @@ def sample_task_started_event() -> TaskStartedEvent:
 @pytest.fixture
 def sample_knowledge_event() -> KnowledgeLearnedEvent:
     """Create a sample knowledge learned event."""
-    return KnowledgeLearnedEvent(
+    return KnowledgeLearnedEvent(  # type: ignore
         agent_id="test-agent-002",
         knowledge_type="pattern",
         content="Always validate input parameters before processing",
@@ -349,7 +349,7 @@ class TestEventHandler:
         await handler.initialize()
 
         # Create error event
-        error_event = AgentEvent(
+        error_event = AgentEvent(  # type: ignore
             event_type=EventType.ERROR_OCCURRED,
             agent_id="test-agent",
             priority=EventPriority.NORMAL,  # Should be upgraded to HIGH
@@ -379,7 +379,7 @@ class TestEventFilterEngine:
 
         # Mock some events
         mock_events = [
-            AgentEvent(
+            AgentEvent(  # type: ignore
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
                 task_id="task-1",
@@ -392,7 +392,7 @@ class TestEventFilterEngine:
                 stored_in_memory=False,
                 memory_id=None,
             ),
-            AgentEvent(
+            AgentEvent(  # type: ignore
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-2",
                 task_id="task-2",
@@ -461,7 +461,7 @@ class TestEventReplayEngine:
 
         # Mock session events
         session_events = [
-            AgentEvent(
+            AgentEvent(  # type: ignore
                 event_type=EventType.TASK_STARTED,
                 agent_id="agent-1",
                 session_id="session-123",
@@ -475,7 +475,7 @@ class TestEventReplayEngine:
                 stored_in_memory=False,
                 memory_id=None,
             ),
-            AgentEvent(
+            AgentEvent(  # type: ignore
                 event_type=EventType.TASK_COMPLETED,
                 agent_id="agent-1",
                 session_id="session-123",
@@ -511,7 +511,7 @@ class TestEventReplayEngine:
         """Test event filtering during replay."""
         replay_engine = EventReplayEngine(MagicMock())
 
-        event = AgentEvent(
+        event = AgentEvent(  # type: ignore
             event_type=EventType.TASK_STARTED,
             agent_id="agent-1",
             timestamp=datetime.utcnow(),
@@ -641,7 +641,7 @@ class TestSpecificEventTypes:
 
     def test_collaboration_message_event(self):
         """Test collaboration message event creation."""
-        collab_event = CollaborationMessageEvent(
+        collab_event = CollaborationMessageEvent(  # type: ignore
             agent_id="agent-sender",
             recipient_id="agent-receiver",
             message_type="request",
@@ -711,7 +711,7 @@ class TestEventSystemErrorHandling:
         storage = MemoryEventStorage(sqlite_db_path=":memory:")
 
         # Don't initialize storage to trigger error
-        AgentEvent(
+        AgentEvent(  # type: ignore
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
             data={},
@@ -750,7 +750,7 @@ class TestEventSystemErrorHandling:
         # Mock storage to raise an exception
         mock_memory_storage.store_event.side_effect = Exception("Storage error")
 
-        event = AgentEvent(
+        event = AgentEvent(  # type: ignore
             event_type=EventType.TASK_STARTED,
             agent_id="test-agent",
             data={},

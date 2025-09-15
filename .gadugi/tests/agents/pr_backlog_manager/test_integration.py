@@ -39,7 +39,7 @@ sys.path.insert(0, shared_path)
 
 # Always use stubs for integration tests to ensure consistency
 # Real implementations have complex dependencies and different interfaces
-from .test_stubs import (
+from .test_stubs import (  # noqa: E402
     PRBacklogManager,
     PRStatus,
     ReadinessAssessor,

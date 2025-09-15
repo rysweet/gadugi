@@ -276,9 +276,9 @@ class LLMProxyManager:
                         proc = psutil.Process(pid)
                         if "python" in proc.name().lower():
                             return True
-                    except:
+                    except Exception:
                         pass
-            except:
+            except Exception:
                 pass
         return False
 
@@ -335,7 +335,7 @@ class LLMProxyManager:
                     print(f"✅ Proxy server started on {PROXY_URL}")
                     print(f"📝 Logs: {log_file}")
                     return True
-            except:
+            except Exception:
                 pass
             time.sleep(1)
 
@@ -355,7 +355,7 @@ class LLMProxyManager:
                 PROXY_PID_FILE.unlink()
                 print("🛑 Proxy stopped")
                 stopped = True
-            except:
+            except Exception:
                 pass
 
         # Stop scheduler if running
@@ -366,7 +366,7 @@ class LLMProxyManager:
                 SCHEDULER_PID_FILE.unlink()
                 print("🛑 Scheduler stopped")
                 stopped = True
-            except:
+            except Exception:
                 pass
 
         if not stopped:
@@ -430,7 +430,7 @@ class LLMProxyManager:
                     return None
 
                 return shutdown
-        except:
+        except Exception:
             print("❌ Invalid time format")
             return None
 
@@ -457,7 +457,7 @@ class LLMProxyManager:
                 return None
 
             return datetime.now() + timedelta(hours=hours, minutes=minutes)
-        except:
+        except Exception:
             print("❌ Invalid duration format")
             return None
 
@@ -471,7 +471,7 @@ class LLMProxyManager:
             return tomorrow.replace(
                 hour=int(hour), minute=int(minute), second=0, microsecond=0
             )
-        except:
+        except Exception:
             print("❌ Invalid time format")
             return None
 
@@ -498,14 +498,14 @@ while datetime.now() < shutdown_time:
 try:
     os.kill(int(pid), signal.SIGTERM)
     print(f"Proxy stopped at scheduled time: {{shutdown_time}}")
-except:
+except Exception:
     pass
 
 # Clean up PID files
 for f in ['{PROXY_PID_FILE}', '{SCHEDULER_PID_FILE}']:
     try:
         os.unlink(f)
-    except:
+    except Exception:
         pass
 """
 

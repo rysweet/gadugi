@@ -14,19 +14,19 @@ Key areas tested:
 4. End-to-end workflow execution validation
 """
 
-import os
-import shutil
-import sys
-import tempfile
-import unittest
-from pathlib import Path
+import os  # noqa: E402
+import shutil  # noqa: E402
+import sys  # noqa: E402
+import tempfile  # noqa: E402
+import unittest  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 # Add parent directory to path to import components
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from components.execution_engine import ExecutionEngine, TaskExecutor
-from components.prompt_generator import PromptContext, PromptGenerator
-from components.worktree_manager import WorktreeManager
+from components.execution_engine import ExecutionEngine, TaskExecutor  # noqa: E402
+from components.prompt_generator import PromptContext, PromptGenerator  # noqa: E402
+from components.worktree_manager import WorktreeManager  # noqa: E402
 
 
 class TestClaudeCLICommandFix(unittest.TestCase):

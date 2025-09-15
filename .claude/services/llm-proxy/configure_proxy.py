@@ -653,7 +653,7 @@ def main():
             # Clean up scheduler script
             try:
                 os.unlink(__file__)
-            except:
+            except Exception:
                 pass
 
             sys.exit(0)
@@ -869,7 +869,7 @@ def main():
     try:
         # Check for required dependencies
         try:
-            import dotenv
+            import dotenv  # noqa: F401
         except ImportError:
             print("Installing required dependency: python-dotenv")
             subprocess.check_call(

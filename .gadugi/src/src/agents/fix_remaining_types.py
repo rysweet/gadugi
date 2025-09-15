@@ -10,7 +10,7 @@ SPECIFIC_FIXES = {
         # Fix None check for task_id
         (
             'task_id = conflict.get("task")',
-            'task_id = conflict.get("task")\n            if task_id is None:\n                continue',
+            'task_id = conflict.get("task")\n            if task_id is None:\n                continue',  # noqa: E501
         ),
         # Fix return type
         ("return selected_agent", 'return selected_agent if selected_agent else ""'),
@@ -50,7 +50,7 @@ SPECIFIC_FIXES = {
         ),
         (
             "from ..phase1.performance_analytics import AgentPerformanceAnalyzer",
-            "from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]",
+            "from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # type: ignore[attr-defined]",  # noqa: E501
         ),
     ],
     "enhanced_workflow_manager.py": [
@@ -70,11 +70,11 @@ SPECIFIC_FIXES = {
         # Fix workflow_id None checks
         (
             "reliability.update_workflow_stage(self.workflow_id",
-            "if self.workflow_id:\n                reliability.update_workflow_stage(self.workflow_id",
+            "if self.workflow_id:\n                reliability.update_workflow_stage(self.workflow_id",  # noqa: E501
         ),
         (
             "health_issue = reliability.perform_health_check(self.workflow_id)",
-            "health_issue = reliability.perform_health_check(self.workflow_id) if self.workflow_id else None",
+            "health_issue = reliability.perform_health_check(self.workflow_id) if self.workflow_id else None",  # noqa: E501
         ),
     ],
     "PrBacklogManager/core.py": [
@@ -97,8 +97,8 @@ SPECIFIC_FIXES = {
     "recipe-implementation/recipe_parser.py": [
         # Fix indentation issues for conditional blocks
         (
-            r"if self\.recipe_spec:\n            self\.recipe_spec\.requirements\.append\(requirement\)",
-            "if self.recipe_spec:\n                self.recipe_spec.requirements.append(requirement)",
+            r"if self\.recipe_spec:\n            self\.recipe_spec\.requirements\.append\(requirement\)",  # noqa: E501
+            "if self.recipe_spec:\n                self.recipe_spec.requirements.append(requirement)",  # noqa: E501
         ),
     ],
     "system_design_reviewer/documentation_manager.py": [
@@ -166,7 +166,7 @@ def fix_list_comprehensions_with_none(content: str) -> str:
                 if get_match:
                     var = get_match.group(1)
                     # Add None check
-                    return f'[{comp} if {var}.get({get_match.group(0).split("(")[1].split(")")[0]}) is not None]'
+                    return f'[{comp} if {var}.get({get_match.group(0).split("(")[1].split(")")[0]}) is not None]'  # noqa: E501
 
         return f"[{comp}]"
 

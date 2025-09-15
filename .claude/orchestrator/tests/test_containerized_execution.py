@@ -29,7 +29,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 IMPORTS_AVAILABLE = False
 ExecutionEngine: Optional[Any] = None
 TaskExecutor: Optional[Any] = None
-ExecutionResult: Optional[Any] = None
 ContainerManager: Optional[Any] = None
 ContainerConfig: Optional[Any] = None
 ContainerResult: Optional[Any] = None
@@ -39,7 +38,6 @@ try:
     from components.execution_engine import (
         ExecutionEngine,
         TaskExecutor,
-        ExecutionResult,
     )
     from container_manager import ContainerManager, ContainerConfig, ContainerResult
     from monitoring.dashboard import OrchestrationMonitor

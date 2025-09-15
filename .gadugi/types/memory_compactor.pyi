@@ -48,7 +48,7 @@ def get_default() -> MemoryCompactor: ...
 
 __all__: List[str] = []
 
-from typing import Any as _Any
+from typing import Any as _Any  # noqa: E402
 
 def __getattr__(name: str) -> _Any:  # type: ignore[override]
     ...  # type: ignore[return-value]

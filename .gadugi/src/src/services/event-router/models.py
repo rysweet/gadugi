@@ -147,8 +147,8 @@ class AgentEvent(BaseModel):
 class AgentInitializedEvent(AgentEvent):
     """Event for agent initialization."""
 
-    event_type: EventType = Field(default=EventType.AGENT_INITIALIZED)
-    agent_type: str = Field(..., description="Type of agent (e.g., 'TaskDecomposer', 'CodeWriter')")
+    event_type: EventType = Field(default=EventType.AGENT_INITIALIZED)  # type: ignore[override]
+    agent_type: str = Field(..., description="Type of agent (e.g., 'TaskDecomposer', 'CodeWriter')")  # type: ignore[override]
     version: Optional[str] = Field(None, description="Agent version")
     capabilities: List[str] = Field(default_factory=list, description="Agent capabilities")
 
@@ -156,7 +156,7 @@ class AgentInitializedEvent(AgentEvent):
 class TaskStartedEvent(AgentEvent):
     """Event for task initiation."""
 
-    event_type: EventType = Field(default=EventType.TASK_STARTED)
+    event_type: EventType = Field(default=EventType.TASK_STARTED)  # type: ignore[override]
     task_description: str = Field(..., description="Description of the task")
     estimated_duration: Optional[int] = Field(None, description="Estimated duration in minutes")
     dependencies: List[str] = Field(default_factory=list, description="Task dependencies")
@@ -165,7 +165,7 @@ class TaskStartedEvent(AgentEvent):
 class TaskCompletedEvent(AgentEvent):
     """Event for task completion."""
 
-    event_type: EventType = Field(default=EventType.TASK_COMPLETED)
+    event_type: EventType = Field(default=EventType.TASK_COMPLETED)  # type: ignore[override]
     result: str = Field(..., description="Task result or outcome")
     duration: Optional[int] = Field(None, description="Actual duration in minutes")
     artifacts: List[str] = Field(default_factory=list, description="Generated artifacts")
@@ -175,7 +175,7 @@ class TaskCompletedEvent(AgentEvent):
 class KnowledgeLearnedEvent(AgentEvent):
     """Event for knowledge acquisition."""
 
-    event_type: EventType = Field(default=EventType.KNOWLEDGE_LEARNED)
+    event_type: EventType = Field(default=EventType.KNOWLEDGE_LEARNED)  # type: ignore[override]
     knowledge_type: str = Field(..., description="Type of knowledge (procedure, concept, pattern)")
     content: str = Field(..., description="Knowledge content")
     confidence: float = Field(default=0.8, ge=0.0, le=1.0, description="Confidence in knowledge")
@@ -185,7 +185,7 @@ class KnowledgeLearnedEvent(AgentEvent):
 class CollaborationMessageEvent(AgentEvent):
     """Event for inter-agent collaboration."""
 
-    event_type: EventType = Field(default=EventType.COLLABORATION_MESSAGE)
+    event_type: EventType = Field(default=EventType.COLLABORATION_MESSAGE)  # type: ignore[override]
     recipient_id: Optional[str] = Field(None, description="Target agent ID (None for broadcast)")
     message_type: str = Field(..., description="Message type (request, response, notification)")
     content: str = Field(..., description="Message content")

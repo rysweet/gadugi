@@ -72,6 +72,28 @@ At the end of each workflow session (Phase 13), you:
 4. Create GitHub issues for actionable improvements
 5. Update Memory.md with key insights
 
+## REPL Loop Integration
+
+**🔄 PROACTIVE INVOCATION**: The TeamCoach agent should be invoked automatically in each REPL loop to monitor team performance continuously:
+
+### When to Invoke TeamCoach:
+- **After each completed workflow session** (Phase 13 completion)
+- **At regular intervals** during long-running development sessions
+- **When performance metrics indicate declining trends**
+- **Upon task completion or error patterns detection**
+- **Before starting new major development phases**
+
+### REPL Integration Pattern:
+```bash
+# Example REPL loop integration
+# After completing any workflow task:
+/agent:TeamCoach
+Task: Analyze recent session and identify improvements
+Context: [Session data, metrics, outcomes]
+```
+
+This ensures continuous team performance monitoring and proactive coaching interventions.
+
 ## Session Analysis Instructions
 
 When invoked at the end of a workflow session:

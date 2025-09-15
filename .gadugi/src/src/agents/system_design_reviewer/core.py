@@ -27,7 +27,7 @@ try:
     from src.src.shared.state_management import StateManager  # type: ignore
     from src.src.shared.utils.error_handling import (  # type: ignore
         ErrorHandler,
-        ErrorSeverity,
+        ErrorSeverity,  # type: ignore[assignment]
     )
     from src.src.shared.task_tracking import TaskTracker  # type: ignore
 except ImportError:  # pragma: no cover – fall through to relative/fallback
@@ -122,10 +122,12 @@ class SystemDesignReviewer:
         self.state_manager = SystemDesignStateManager()
         # Handle both shared and fallback ErrorHandler signatures
         try:
-            self.error_handler = ErrorHandler()  # Shared ErrorHandler (no args)
+            self.error_handler = (
+                ErrorHandler()
+            )  # Shared ErrorHandler (no args)  # type: ignore[call-arg]
         except TypeError:
             self.error_handler = ErrorHandler(
-                "SystemDesignReviewer"
+                "SystemDesignReviewer"  # type: ignore[call-arg]
             )  # Fallback ErrorHandler requires agent_type
         self.task_tracker = TaskTracker("SystemDesignReviewer")
 
@@ -225,7 +227,7 @@ class SystemDesignReviewer:
             return result
 
         except Exception as e:
-            self.error_handler.handle_error(
+            self.error_handler.handle_error(  # type: ignore[attr-defined]
                 e,
                 context={"pr_number": pr_number},
             )

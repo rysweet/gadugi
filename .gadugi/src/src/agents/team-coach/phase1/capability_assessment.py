@@ -314,7 +314,7 @@ class CapabilityAssessment:
     def _assess_domain_capability(
         self,
         domain: CapabilityDomain,
-        tasks: List[TaskResult],
+        tasks: List[TaskResult],  # type: ignore[valid-type]
         agent_id: str,
     ) -> CapabilityScore:
         """Assess capability in a specific domain."""
@@ -349,11 +349,13 @@ class CapabilityAssessment:
             if execution_times:
                 # Normalize execution times (lower is better)
                 avg_time = np.mean(execution_times)
-                efficiency_factor = min(1.0, 300.0 / max(1.0, avg_time))  # 5 minutes as baseline
+                efficiency_factor = min(
+                    1.0, 300.0 / max(1.0, float(avg_time))
+                )  # 5 minutes as baseline
                 performance_score = (performance_score * 0.8) + (efficiency_factor * 0.2)
 
             # Determine proficiency level
-            proficiency_level = self._determine_proficiency_level(performance_score)
+            proficiency_level = self._determine_proficiency_level(performance_score)  # type: ignore[arg-type]
 
             # Calculate confidence based on evidence count and consistency
             confidence_score = self._calculate_confidence(success_rates, len(tasks))
@@ -367,7 +369,7 @@ class CapabilityAssessment:
                 confidence_score=confidence_score,
                 evidence_count=len(tasks),
                 last_updated=datetime.now(),
-                recent_performance=[performance_score],
+                recent_performance=[performance_score],  # type: ignore[arg-type]
                 improvement_trend=improvement_trend,
             )
 
@@ -476,12 +478,12 @@ class CapabilityAssessment:
         # Adjust for consistency
         if len(success_rates) > 1:
             consistency = 1.0 - np.std(success_rates)
-            consistency_factor = max(0.0, consistency)
+            consistency_factor = max(0.0, float(consistency))
         else:
             consistency_factor = 0.5  # Moderate confidence for single data point
 
         confidence = (count_factor * 0.6) + (consistency_factor * 0.4)
-        return min(1.0, confidence)
+        return min(1.0, confidence)  # type: ignore[return-value]
 
     def _calculate_improvement_trend(self, tasks: List[TaskResult]) -> float:  # type: ignore
         """Calculate improvement trend from task results."""

@@ -20,7 +20,7 @@ import secrets
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -39,115 +39,37 @@ try:
         CircuitBreaker,
     )
     from .claude.shared.interfaces import AgentConfig, WorkflowPhase  # type: ignore[import]
-except ImportError:
-    # Mock classes for type checking when imports are not available
-    class GitHubOperations:
-        def __init__(self, task_id: str):
-            pass
-
-        def create_issue(self, **kwargs) -> Any:
-            return None
-
-        def create_pull_request(self, **kwargs) -> Any:
-            return None
-
-    class StateManager:
-        pass
-
-    class TaskTracker:
-        pass
-
-    class TaskMetrics:
-        pass
-
-    class ErrorHandler:
-        pass
-
-    class RetryManager:
-        def execute_with_retry(self, func: Callable, **kwargs) -> Any:
-            return func()
-
-    class CircuitBreaker:
-        def __init__(self, **kwargs):
-            self.failure_count = 0
-            self.is_open = False
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *args):
-            pass
-
-    class AgentConfig:
-        def __init__(self, agent_id: str, name: str):
-            self.agent_id = agent_id
-            self.name = name
-
-    class WorkflowPhase:
-        INITIALIZATION = "initialization"
-        ISSUE_CREATION = "issue_creation"
-        BRANCH_MANAGEMENT = "branch_management"
-        RESEARCH_PLANNING = "research_planning"
-        IMPLEMENTATION = "implementation"
-        TESTING = "testing"
-        DOCUMENTATION = "documentation"
-        PULL_REQUEST_CREATION = "pull_request_creation"
-        REVIEW = "review"
+except ImportError as e:
+    raise ImportError(
+        "Required shared modules are not available. Please ensure the Enhanced Separation "
+        "architecture modules are properly installed and accessible. "
+        f"Missing import details: {e}"
+    )
 
 
 # Container execution imports
 try:
     from container_runtime.agent_integration import AgentContainerExecutor  # type: ignore[import]
-except ImportError:
-
-    class AgentContainerExecutor:
-        def __init__(self, **kwargs):
-            pass
-
-        def execute_python_code(self, **kwargs) -> Dict[str, Any]:
-            return {"success": True, "stdout": "", "stderr": ""}
-
-        def execute_command(self, **kwargs) -> Dict[str, Any]:
-            return {"success": True, "stdout": "", "stderr": ""}
-
-        def cleanup(self) -> None:
-            pass
-
-        def shutdown(self) -> None:
-            pass
+except ImportError as e:
+    raise ImportError(
+        "Container runtime modules are not available. Container execution is required "
+        "for secure workflow operations. Please ensure the container runtime is "
+        "properly installed and configured. "
+        f"Missing import details: {e}"
+    )
 
 
 # Test agent imports
 try:
     from test_solver_agent import TestSolverAgent  # type: ignore[import]
     from test_writer_agent import TestWriterAgent  # type: ignore[import]
-except ImportError:
-
-    class TestSolverResult:
-        def __init__(self):
-            self.resolution_applied = "mock"
-            self.final_status = type("Status", (), {"value": "pass"})()
-            self.skip_justification = "mock"
-
-    class TestWriterResult:
-        def __init__(self):
-            self.tests_created = []
-            self.fixtures_created = []
-            self.module_name = "mock"
-
-    class TestSolverAgent:
-        def __init__(self, config: AgentConfig):
-            pass
-
-        def solve_test_failure(self, test_id: str) -> TestSolverResult:
-            return TestSolverResult()
-
-    class TestWriterAgent:
-        def __init__(self, config: AgentConfig):
-            pass
-
-        def create_tests(self, file: str, context: str) -> TestWriterResult:
-            return TestWriterResult()
+except ImportError as e:
+    raise ImportError(
+        "Test agent modules are not available. Test agents are required for "
+        "comprehensive testing workflows. Please ensure the test agents are "
+        "properly installed and accessible. "
+        f"Missing import details: {e}"
+    )
 
 
 # Configure logging
@@ -556,49 +478,36 @@ class EnhancedWorkflowMaster:
                     if section.lower() not in prompt_content.lower():
                         logger.warning(f"Prompt missing section: {section}")
 
-            # Initialize workspace
-            workspace_code = f"""
-import os
-import json
-from pathlib import Path
+            # Real workspace initialization
+            workspace_dir = Path(f"/workspace/{workflow.task_id}")
+            try:
+                workspace_dir.mkdir(parents=True, exist_ok=True)
 
-# Create workspace structure
-workspace_dir = Path('/workspace/{workflow.task_id}')
-workspace_dir.mkdir(parents=True, exist_ok=True)
+                # Initialize state file with real data
+                state_file = workspace_dir / "state.json"
+                initial_state = {
+                    "task_id": workflow.task_id,
+                    "initialized_at": datetime.now().isoformat(),
+                    "workspace_dir": str(workspace_dir),
+                    "prompt_file": workflow.prompt_file,
+                }
 
-# Initialize state file
-state_file = workspace_dir / 'state.json'
-initial_state = {{
-    'task_id': '{workflow.task_id}',
-    'initialized_at': '{datetime.now().isoformat()}',
-    'workspace_dir': str(workspace_dir)
-}}
+                with open(state_file, "w") as f:
+                    json.dump(initial_state, f, indent=2)
 
-with open(state_file, 'w') as f:
-    json.dump(initial_state, f, indent=2)
-
-print(f"Workspace initialized: {{workspace_dir}}")
-"""
-
-            result = self.container_executor.execute_python_code(
-                code=workspace_code,
-                security_policy=task.container_policy,
-                timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
-            )
-
-            self.execution_stats["container_executions"] += 1
-
-            if result["success"]:
-                logger.info("Setup task completed successfully")
+                logger.info(f"Workspace initialized: {workspace_dir}")
                 return True
-            else:
-                logger.error(f"Setup task failed: {result['stderr']}")
-                return False
+
+            except OSError as e:
+                logger.error(f"Failed to create workspace directory {workspace_dir}: {e}")
+                raise OSError(f"Cannot create workspace directory: {e}")
+            except (TypeError, ValueError) as e:
+                logger.error(f"Failed to write state file: {e}")
+                raise RuntimeError(f"Cannot initialize workspace state: {e}")
 
         except Exception as e:
             logger.error(f"Setup task execution failed: {e}")
-            return False
+            raise RuntimeError(f"Setup task failed: {e}")
 
     def execute_issue_creation_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute GitHub issue creation with retry logic."""
@@ -631,7 +540,7 @@ This issue tracks the implementation of WorkflowMaster robustness and brittlenes
 *Note: This issue was created by an AI agent on behalf of the repository owner.*
 """
 
-            # Use circuit breaker for GitHub operations
+            # Use circuit breaker for GitHub operations - this will do REAL GitHub API calls
             with self.github_circuit_breaker:
                 result = self.retry_manager.execute_with_retry(
                     lambda: self.github_ops.create_issue(
@@ -643,18 +552,21 @@ This issue tracks the implementation of WorkflowMaster robustness and brittlenes
                     backoff_strategy="exponential",
                 )
 
-            if result and hasattr(result, "number"):
+            # Validate real GitHub API response
+            if result and hasattr(result, "number") and hasattr(result, "html_url"):
                 workflow.issue_number = result.number
                 workflow.issue_url = result.html_url
                 logger.info(f"Created issue #{result.number}: {result.html_url}")
                 return True
             else:
-                logger.error("Failed to create GitHub issue")
-                return False
+                error_msg = f"GitHub issue creation failed: Invalid response from API: {result}"
+                logger.error(error_msg)
+                raise RuntimeError(error_msg)
 
         except Exception as e:
-            logger.error(f"Issue creation failed: {e}")
-            return False
+            error_msg = f"Issue creation failed: {e}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
     def execute_branch_management_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute branch creation and management."""
@@ -1081,7 +993,7 @@ for pattern in patterns:
                 content = f.read().lower()
                 if pattern in content:
                     count += 1
-        except:
+        except Exception:
             pass
     if count > 0:
         analysis_results['patterns_found'].append({
@@ -1123,56 +1035,14 @@ print(json.dumps(analysis_results, indent=2))
 
     def execute_implementation_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute core implementation with containerized development."""
-        try:
-            # Implementation placeholder - would be specific to the feature being implemented
-            implementation_code = f"""
-import os
-import json
-from pathlib import Path
-
-# This would contain the actual implementation logic
-# For this example, we'll create a comprehensive enhancement
-
-implementation_status = {{
-    'enhanced_workflowmaster': 'implemented',
-    'container_integration': 'implemented',
-    'autonomous_decisions': 'implemented',
-    'state_management': 'enhanced',
-    'error_handling': 'robust',
-    'monitoring': 'comprehensive'
-}}
-
-# Create implementation artifacts
-artifacts_dir = Path('/workspace/{workflow.task_id}/artifacts')
-artifacts_dir.mkdir(parents=True, exist_ok=True)
-
-# Save implementation status
-with open(artifacts_dir / 'implementation_status.json', 'w') as f:
-    json.dump(implementation_status, f, indent=2)
-
-print("Core implementation completed successfully")
-print(f"Artifacts saved to: {{artifacts_dir}}")
-"""
-
-            result = self.container_executor.execute_python_code(
-                code=implementation_code,
-                security_policy=task.container_policy,
-                timeout=task.timeout_seconds,
-                user_id=workflow.task_id,
-            )
-
-            self.execution_stats["container_executions"] += 1
-
-            if result["success"]:
-                logger.info("Implementation task completed successfully")
-                return True
-            else:
-                logger.error(f"Implementation failed: {result['stderr']}")
-                return False
-
-        except Exception as e:
-            logger.error(f"Implementation execution failed: {e}")
-            return False
+        # This is a generic implementation task that must be specialized for specific features
+        raise NotImplementedError(
+            f"Implementation task for workflow {workflow.task_id} requires specific "
+            "implementation logic based on the actual feature being developed. "
+            "This method must be overridden or the workflow must specify the exact "
+            "implementation steps required. Generic implementation cannot proceed "
+            "without concrete requirements and implementation details."
+        )
 
     def execute_testing_task(self, task: TaskInfo, workflow: WorkflowState) -> bool:
         """Execute comprehensive testing with Test Solver and Test Writer agents."""

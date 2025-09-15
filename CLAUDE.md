@@ -1,5 +1,58 @@
 # Claude AI Assistant Core Instructions
 
+## 🔴 STOP! UNDERSTAND WHEN WORKFLOWS ARE REQUIRED
+
+### WORKFLOW TYPES AND TRIGGERS
+
+#### 1️⃣ **CODE CHANGES** → 14-Phase Development Workflow (MANDATORY)
+**Triggers:** "fix", "implement", "create", "update", "change", "refactor", "add", "remove"
+**When:** ANY file modification (code, config, docs)
+**Process:** All 14 phases including TeamCoach reflection
+
+#### 2️⃣ **ANALYSIS/RESEARCH** → Structured Investigation (RECOMMENDED)
+**Triggers:** "analyze", "investigate", "find", "search", "understand", "explain"
+**When:** Complex codebase exploration, debugging, understanding systems
+**Process:** Use TodoWrite to track investigation steps, findings, conclusions
+
+#### 3️⃣ **SIMPLE TASKS** → Direct Execution (ALLOWED)
+**Examples:** 
+- Reading a single file
+- Answering a simple question
+- Running a single command
+- Explaining a concept
+
+#### 4️⃣ **MULTI-STEP TASKS** → Task Decomposition (RECOMMENDED)
+**Triggers:** Multiple related requests, complex sequences
+**When:** Task has 3+ distinct steps
+**Process:** Use TodoWrite to track progress through steps
+
+### THE GOLDEN RULE:
+**If task has >3 steps OR modifies files → USE APPROPRIATE WORKFLOW**
+
+### 📝 WHEN TO USE TodoWrite TOOL:
+
+**ALWAYS USE for:**
+- 14-phase development workflow (mandatory for code changes)
+- Complex investigations with multiple search/analysis steps
+- Tasks with dependencies or sequential phases
+- Any task the user explicitly asks to track
+
+**CONSIDER USING for:**
+- Debugging sessions (track hypotheses and tests)
+- Research tasks (track sources and findings)
+- Multi-file analysis (track files examined)
+- Learning/exploration (track understanding progress)
+
+**DON'T NEED for:**
+- Single file reads
+- Simple questions/answers
+- Single command execution
+- Immediate responses
+
+**Session 2025-08-31 Learning:** Skipping workflow = 30% rework time
+
+---
+
 ⚠️ **CRITICAL**: This is the refactored, streamlined version optimized for parallel task execution.
 
 ## 🚫 COMMUNICATION PROHIBITIONS
@@ -56,10 +109,12 @@ graph TD
 - ❌ **NO SLEEP-AND-PRETEND**: No `sleep 2 && echo "Done"` nonsense
 
 **NEVER BYPASS QUALITY GATES:**
-- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks
+- ❌ **NO --no-verify**: NEVER use `git commit --no-verify` to bypass pre-commit hooks - THIS IS A CRITICAL VIOLATION
 - ❌ **NO FORCE PUSHES**: NEVER use `git push --force` without explicit user permission
 - ❌ **NO TEST SKIPPING**: ALL tests must pass before committing
 - ❌ **NO SHORTCUTS**: If blocked by tests or hooks, FIX THE PROBLEM, don't bypass it
+- ❌ **NO COMMITS WITH ERRORS**: NEVER commit if there are ANY pyright errors, ruff errors, or failing tests
+- ❌ **ITERATE UNTIL PERFECT**: Keep working until ALL checks pass - no exceptions
 
 **ENFORCEMENT:**
 - If you can't implement something fully, STOP and ask for help
@@ -71,6 +126,110 @@ graph TD
 - Immediate task failure
 - Required complete reimplementation
 - Loss of user trust
+
+## 🔥 ABSOLUTELY FORBIDDEN PATTERNS - FIRING OFFENSE
+
+**These code patterns are NEVER acceptable under ANY circumstances:**
+
+### ❌ FAKE METHOD IMPLEMENTATIONS
+```python
+# FORBIDDEN - Fake cache method
+def get_from_cache(self, key):
+    # TODO: Implement cache logic
+    return None
+
+# FORBIDDEN - Mock service call
+async def start_service(self):
+    # Simulate service start
+    time.sleep(2)
+    print("Service started")
+
+# FORBIDDEN - Empty stub with pass
+def process_data(self, data):
+    pass  # Will implement later
+```
+
+### ❌ FALLBACK CLASSES THAT DO NOTHING
+```python
+# FORBIDDEN - Empty fallback class
+class DatabaseManager:
+    def __init__(self):
+        pass  # Fallback when DB not available
+
+    def save(self, data):
+        pass  # No-op fallback
+```
+
+### ❌ FAKE EXTERNAL OPERATIONS
+```python
+# FORBIDDEN - Pretend file operations
+def backup_database(self):
+    print("Creating database backup...")
+    time.sleep(3)
+    print("Backup completed successfully")
+    return True  # Lie - no backup was created
+
+# FORBIDDEN - Fake service management
+def restart_docker_container(self):
+    subprocess.run(["echo", "Restarting container"])
+    return True  # Container was never restarted
+```
+
+### ❌ SLEEP-AND-PRETEND ANTIPATTERN
+```python
+# FORBIDDEN - The worst antipattern
+def deploy_application(self):
+    print("Deploying application...")
+    time.sleep(5)  # Pretend to deploy
+    print("Deployment successful!")
+    return {"status": "success"}  # Complete lie
+```
+
+### ✅ ACCEPTABLE ALTERNATIVES
+
+**Instead of fake implementations, use:**
+
+```python
+# CORRECT - Clear NotImplementedError
+def get_from_cache(self, key):
+    raise NotImplementedError(
+        "Cache implementation required. Please provide Redis client or implement cache backend."
+    )
+
+# CORRECT - Real fallback with clear limitations
+class DatabaseManager:
+    def __init__(self, db_client=None):
+        if not db_client:
+            logging.warning("No database client - using file-based fallback")
+        self.db_client = db_client
+
+    def save(self, data):
+        if self.db_client:
+            return self.db_client.save(data)
+        else:
+            # Real fallback - actually saves to file
+            with open("fallback_data.json", "a") as f:
+                json.dump(data, f)
+                f.write("\n")
+            return True
+
+# CORRECT - Real service operation with error handling
+def restart_docker_container(self, container_name):
+    try:
+        result = subprocess.run(
+            ["docker", "restart", container_name],
+            capture_output=True, text=True, check=True
+        )
+        return True
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to restart container {container_name}: {e}")
+```
+
+**ENFORCEMENT:**
+- Code review will REJECT any PR containing these patterns
+- Any discovered fake implementation triggers immediate rework
+- No exceptions, no "temporary" fake code
+- If you can't implement it fully, raise NotImplementedError with clear message
 
 ## 🚀 Default Approach: Parallel Task Execution
 
@@ -130,7 +289,64 @@ docker ps  # Confirm containers are running
 - Use `./gadugi` wrapper script or `cd .gadugi && uv run`
 - Completely isolated from host project dependencies
 
-### 3. Development Workflow - 13-Phase Process
+### 3. Development Workflow - 14-Phase Process
+
+## 🚨 MANDATORY WORKFLOW ENFORCEMENT - ZERO EXCEPTIONS
+
+### ⛔ WORKFLOW VIOLATION = TASK FAILURE
+
+**THE RULE:** If you write/edit ANY code without completing ALL workflow phases, you have FAILED the task.
+
+### 🔴 AUTOMATIC WORKFLOW TRIGGER
+
+**BEFORE touching ANY file (Read is OK, Write/Edit triggers workflow):**
+
+1. **IMMEDIATE STOP** - Freeze all actions
+2. **CREATE TODO LIST** - TodoWrite with all 14 phases IMMEDIATELY
+3. **ANNOUNCE WORKFLOW** - Tell user: "Starting 14-phase workflow for [task]"
+4. **EXECUTE PHASES** - Complete each phase with status updates
+5. **NO SHORTCUTS** - Skipping = Failure
+
+**TRIGGER DETECTION (any of these = MUST use workflow):**
+- User says: "fix", "implement", "create", "update", "refactor", "add", "remove", "change", "build", "modify", "enhance", "improve"
+- You plan to use: Write, Edit, MultiEdit, NotebookEdit tools
+- Task involves: code, configuration, documentation updates
+- ANY doubt = use workflow
+
+### 📝 WORKFLOW COMPLIANCE CHECKLIST
+
+```python
+# This is what you MUST do EVERY TIME:
+def handle_any_task(task):
+    if will_modify_files(task):
+        # STEP 1: Create todo list IMMEDIATELY
+        todo_list = create_14_phase_todos()
+        
+        # STEP 2: Announce to user
+        print(f"📋 Starting 14-phase workflow for: {task}")
+        
+        # STEP 3: Execute phases sequentially
+        for phase in todo_list:
+            execute_phase(phase)
+            update_todo_status(phase, "completed")
+            
+        # STEP 4: Run TeamCoach reflection
+        run_teamcoach_reflection()
+    else:
+        # Read-only tasks can proceed directly
+        execute_readonly_task(task)
+```
+
+### ❌ WHAT HAPPENS WHEN YOU SKIP WORKFLOW
+
+**Real Example from Session 2025-08-31:**
+- Task: "Remove all stubs/placeholders"
+- Skipped workflow → Jumped to implementation
+- Result: 3+ critical issues missed, 30% rework time
+- TeamCoach Rating: 2/10 for initial approach
+
+**LESSON: Workflow shortcuts ALWAYS cost more time than they save**
+
 **For ANY code changes, follow these phases YOURSELF (no separate WorkflowManager agent):**
 
 #### Phase 0: Enhanced Task Initialization & Resumption Check (ALWAYS FIRST)

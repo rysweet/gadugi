@@ -39,7 +39,7 @@ sys.path.insert(0, shared_path)
 
 # Always use stubs for GitHub Actions tests to ensure consistency
 # The real implementation has different signatures that don't match test expectations
-from .test_stubs import (
+from .test_stubs import (  # noqa: E402
     GitHubActionsIntegration,
     GitHubContext,
     SecurityConstraints,

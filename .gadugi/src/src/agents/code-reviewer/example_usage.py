@@ -63,7 +63,7 @@ async def example_basic_review():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except Exception:
                 pass
 
 
@@ -266,7 +266,7 @@ async def example_adaptive_scoring():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except Exception:
                 pass
 
     finally:
@@ -412,7 +412,7 @@ async def example_pattern_analysis():
                     print(f"\n📄 {module}:")
                     print(f"   🐛 Total issues: {insights['total_issues']}")
                     print(
-                        f"   🔥 Frequent issues: {dict(list(insights['frequent_issues'].items())[:3])}"
+                        f"   🔥 Frequent issues: {dict(list(insights['frequent_issues'].items())[:3])}"  # noqa: E501
                     )
                     print(f"   🔒 Security hotspot: {insights['is_security_hotspot']}")
 
@@ -482,7 +482,7 @@ async def example_production_workflow():
         for file_path in test_files:
             try:
                 Path(file_path).unlink()
-            except:
+            except Exception:
                 pass
 
     finally:

@@ -146,7 +146,7 @@ class TestEnhancedSeparationBasic:
             raise ValueError("Test error for error handler")
         except Exception as e:
             # This should not raise an exception now that we have a recovery strategy
-            result = self.error_handler.handle_error(e, context={"test": "error_handling"})
+            result = self.error_handler.handle_error(e, context={"test": "error_handling"})  # type: ignore[attr-defined]
             assert "Recovered from:" in result
 
         # Test error handler functionality

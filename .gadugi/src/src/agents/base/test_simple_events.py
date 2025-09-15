@@ -45,7 +45,7 @@ class MockMemoryInterface:
 
 
 # Patch the memory integration
-from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome
+from v03_agent import V03Agent, AgentCapabilities, EventConfiguration, TaskOutcome  # noqa: E402
 
 # Override the memory interface creation
 original_init = V03Agent.__init__

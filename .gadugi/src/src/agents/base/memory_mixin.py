@@ -145,7 +145,7 @@ class MemoryMixin:
 
             # Remember the success
             await self.memory.remember_long_term(
-                f"Successfully completed {outcome.task_type}: {outcome.lessons_learned or 'No specific lessons'}",
+                f"Successfully completed {outcome.task_type}: {outcome.lessons_learned or 'No specific lessons'}",  # noqa: E501
                 tags=["success", outcome.task_type, "learning"],
                 importance=0.8,
             )
@@ -161,7 +161,7 @@ class MemoryMixin:
             # Remember what didn't work
             if self.memory:
                 await self.memory.remember_long_term(
-                    f"Failed {outcome.task_type}: {outcome.error}. Lesson: {outcome.lessons_learned or 'Analyze error'}",
+                    f"Failed {outcome.task_type}: {outcome.error}. Lesson: {outcome.lessons_learned or 'Analyze error'}",  # noqa: E501
                     tags=["failure", outcome.task_type, "learning", "error"],
                     importance=0.9,  # High importance for failures
                 )
@@ -249,6 +249,6 @@ class MemoryMixin:
         if not self.memory:
             return
         await self.memory.remember_long_term(
-            f"Agent {self.agent_id} shutting down. Tasks completed: {self.tasks_completed}, Success rate: {self.success_rate:.2%}",
+            f"Agent {self.agent_id} shutting down. Tasks completed: {self.tasks_completed}, Success rate: {self.success_rate:.2%}",  # noqa: E501
             tags=["shutdown", "metrics"],
         )

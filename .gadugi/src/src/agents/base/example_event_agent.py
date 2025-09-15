@@ -167,7 +167,7 @@ async def demonstrate_event_agent():
         print(f"   - Tasks completed: {agent.tasks_completed}")
         print(f"   - Success rate: {agent.success_rate:.1%}")
         print(
-            f"   - Event publishing: {'✅ Enabled' if agent._event_publishing_enabled else '❌ Disabled'}"
+            f"   - Event publishing: {'✅ Enabled' if agent._event_publishing_enabled else '❌ Disabled'}"  # noqa: E501
         )
         print(f"   - Batched events: {len(agent._event_batch)}")
 

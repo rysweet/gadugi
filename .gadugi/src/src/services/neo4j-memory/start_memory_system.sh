@@ -32,7 +32,7 @@ docker-compose up -d
 echo "Waiting for Neo4j to be ready..."
 max_attempts=30
 attempt=0
-while ! docker exec gadugi-neo4j cypher-shell -u neo4j -p "gadugi123!" "RETURN 1" >/dev/null 2>&1; do
+while ! docker exec gadugi-neo4j cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-gadugi-password}" "RETURN 1" >/dev/null 2>&1; do
     attempt=$((attempt+1))
     if [ $attempt -ge $max_attempts ]; then
         echo "Error: Neo4j failed to start after $max_attempts attempts"
@@ -46,7 +46,7 @@ echo "Neo4j is ready!"
 
 # Initialize schema
 echo "Initializing Neo4j schema..."
-docker exec gadugi-neo4j cypher-shell -u neo4j -p "gadugi123!" < "$PROJECT_ROOT/neo4j/schema.cypher" || {
+docker exec gadugi-neo4j cypher-shell -u neo4j -p "${NEO4J_PASSWORD:-gadugi-password}" < "$PROJECT_ROOT/neo4j/schema.cypher" || {
     echo "Warning: Some schema constraints may already exist (this is normal)"
 }
 
@@ -99,7 +99,7 @@ echo "========================================="
 echo "Memory System Started Successfully!"
 echo "========================================="
 echo "Neo4j UI: http://localhost:7474"
-echo "Neo4j Bolt: bolt://localhost:7687"
+echo "Neo4j Bolt: bolt://localhost:7689"
 echo "MCP API: http://localhost:8000"
 echo "MCP Docs: http://localhost:8000/docs"
 echo ""

@@ -58,8 +58,8 @@ async def test_event_emission():
             super().__init__(
                 agent_id="test-agent-001",
                 agent_type="testrunner",
-                capabilities=TestCapabilities(),
-                event_config=TestEventConfig(),
+                capabilities=TestCapabilities(),  # type: ignore[arg-type]
+                event_config=TestEventConfig(),  # type: ignore[arg-type]
             )
 
     agent = TestAgent()

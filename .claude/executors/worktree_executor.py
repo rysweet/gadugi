@@ -339,7 +339,7 @@ class WorktreeExecutor(BaseExecutor):
             try:
                 with open(task_file) as f:
                     task_metadata = json.load(f)
-            except:
+            except Exception:
                 pass
 
         return {
@@ -374,7 +374,7 @@ class WorktreeExecutor(BaseExecutor):
             if path.exists():
                 try:
                     shutil.rmtree(path)
-                except:
+                except Exception:
                     return False
 
         return True

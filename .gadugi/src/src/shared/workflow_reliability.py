@@ -32,10 +32,10 @@ from enum import Enum
 try:
     from .utils.error_handling import ErrorHandler, CircuitBreaker, retry  # type: ignore
     from .state_management import (
-        StateManager,
-        TaskState,
-        WorkflowPhase,
-        CheckpointManager,
+        StateManager,  # type: ignore[assignment]
+        TaskState,  # type: ignore[assignment]
+        WorkflowPhase,  # type: ignore[assignment]
+        CheckpointManager,  # type: ignore[assignment]
     )  # type: ignore
     from .task_tracking import TaskTracker, TaskStatus, WorkflowPhaseTracker  # type: ignore
     from .github_operations import GitHubOperations  # type: ignore
@@ -627,13 +627,7 @@ class WorkflowReliabilityManager:
             else:
                 current_stage = stage or WorkflowStage.INITIALIZATION
 
-            # Create comprehensive error context
-            _error_context = ErrorContext(
-                error=error,
-                operation=f"workflow_stage_{current_stage.value}",
-                workflow_id=workflow_id,
-            )
-            # Store error information separately
+            # Store error information for handling
             error_details = {
                 "error": error,
                 "workflow_id": workflow_id,

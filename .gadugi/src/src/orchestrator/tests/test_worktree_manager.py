@@ -466,7 +466,7 @@ class TestWorktreeManagerIntegration(unittest.TestCase):
         # Clean up any worktrees first
         try:
             self.manager.cleanup_all_worktrees(force=True)
-        except:
+        except Exception:
             pass  # Ignore cleanup errors
 
         import shutil

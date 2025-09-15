@@ -42,7 +42,7 @@ print(f"  Python version: {sys.version}")
 print(f"  Platform: {platform.platform()}")
 print(f"  Current user: {os.getenv('USER', 'unknown')}")
 print(f"  Working directory: {os.getcwd()}")
-print(f"  Available disk space: {os.statvfs('.').f_bavail * os.statvfs('.').f_frsize / (1024*1024):.1f} MB")
+print(f"  Available disk space: {os.statvfs('.').f_bavail * os.statvfs('.').f_frsize / (1024*1024):.1f} MB")  # noqa: E501
 
 # Test some calculations
 import math
@@ -97,14 +97,14 @@ try:
         f.write('test')
     print("  /tmp write: SUCCESS")
     os.remove('/tmp/test_write.txt')
-except:
+except Exception:
     print("  /tmp write: FAILED")
 
 try:
     with open('/test_root_write.txt', 'w') as f:
         f.write('test')
     print("  Root write: SUCCESS (SECURITY ISSUE!)")
-except:
+except Exception:
     print("  Root write: BLOCKED (Good!)")
 """
 
@@ -169,7 +169,7 @@ if [ -r /etc/passwd ]; then echo "YES"; else echo "NO"; fi
 echo -n "  Can write to /tmp: "
 if touch /tmp/test_file 2>/dev/null; then echo "YES"; rm -f /tmp/test_file; else echo "NO"; fi
 echo -n "  Can write to root: "
-if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_file; else echo "NO (Good!)"; fi
+if touch /test_file 2>/dev/null; then echo "YES (SECURITY ISSUE!)"; rm -f /test_file; else echo "NO (Good!)"; fi  # noqa: E501
 """
 
         print("Executing shell script...")

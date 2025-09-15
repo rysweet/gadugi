@@ -826,13 +826,13 @@ class TestMemoryFallbackIntegration:
         await sqlite.disconnect()
 
         # All should retrieve the same memory content
-        assert in_memory_retrieved.content == memory.content
-        assert markdown_retrieved.content == memory.content
-        assert sqlite_retrieved.content == memory.content
+        assert in_memory_retrieved.content == memory.content  # type: ignore[union-attr]
+        assert markdown_retrieved.content == memory.content  # type: ignore[union-attr]
+        assert sqlite_retrieved.content == memory.content  # type: ignore[union-attr]
 
-        assert in_memory_retrieved.importance_score == memory.importance_score
-        assert markdown_retrieved.importance_score == memory.importance_score
-        assert sqlite_retrieved.importance_score == memory.importance_score
+        assert in_memory_retrieved.importance_score == memory.importance_score  # type: ignore[union-attr]
+        assert markdown_retrieved.importance_score == memory.importance_score  # type: ignore[union-attr]
+        assert sqlite_retrieved.importance_score == memory.importance_score  # type: ignore[union-attr]
 
     async def test_fallback_chain_robustness(self, temp_storage):
         """Test fallback chain behavior under various failure scenarios."""
@@ -1028,7 +1028,7 @@ class TestMemoryFallbackPerformance:
 
         # All backends should retrieve all memories
         for backend_name, result in results.items():
-            assert result["memory_count"] == memory_count
+            assert result["memory_count"] == memory_count  # type: ignore[possibly-undefined]
 
         # In-memory should be fastest
         assert results["InMemoryBackend"]["retrieval_time"] <= min(
@@ -1054,7 +1054,7 @@ if __name__ == "__main__":
             stored = await backend.store_memory(memory)
             retrieved = await backend.get_memory(stored.id)
 
-            assert retrieved.content == memory.content
+            assert retrieved.content == memory.content  # type: ignore[union-attr]
             print("✓ InMemoryBackend smoke test passed")
 
             await backend.disconnect()

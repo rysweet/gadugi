@@ -14,7 +14,8 @@ class Neo4jConfig:
     """Neo4j connection configuration."""
 
     uri: str = field(
-        default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST', 'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7687')}"
+        default_factory=lambda: f"bolt://{os.getenv('NEO4J_HOST',
+            'localhost')}:{os.getenv('NEO4J_BOLT_PORT', '7689')}"
     )
     username: str = field(default_factory=lambda: os.getenv("NEO4J_USERNAME", "neo4j"))
     password: str = field(default_factory=lambda: os.getenv("NEO4J_PASSWORD", "changeme"))
@@ -67,7 +68,8 @@ class Neo4jClient:
         try:
             with self.driver.session(database=self.config.database) as session:
                 result = session.run("RETURN 1 as test")
-                return result.single()["test"] == 1
+                record = result.single()
+                return record["test"] == 1 if record else False
         except Exception as e:
             self.logger.error(f"Connection verification failed: {e}")
             return False
@@ -107,7 +109,8 @@ class Neo4jClient:
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **agent_data)
-            return result.single()["agent_id"]
+            record = result.single()
+            return record["agent_id"] if record else None  # type: ignore
 
     def get_agent(self, agent_id: str) -> Optional[Dict[str, Any]]:
         """Get agent by ID.
@@ -286,7 +289,8 @@ class Neo4jClient:
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **task_data)
-            return result.single()["task_id"]
+            record = result.single()
+            return record["task_id"] if record else None  # type: ignore
 
     def assign_task_to_agent(self, task_id: str, agent_id: str) -> bool:
         """Assign a task to an agent.
@@ -346,8 +350,8 @@ class Neo4jClient:
             params = {"task_id": task_id, "status": status}
 
         with self.driver.session(database=self.config.database) as session:
-            result = session.run(query, **params)
-            return result.single() is not None
+            query_result = session.run(query, **params)  # type: ignore
+            return query_result.single() is not None  # type: ignore
 
     def get_task_dependencies(self, task_id: str) -> Dict[str, List[str]]:
         """Get task dependencies.
@@ -410,7 +414,8 @@ class Neo4jClient:
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **knowledge_data)
-            return result.single()["knowledge_id"]
+            record = result.single()
+            return record["knowledge_id"] if record else None  # type: ignore
 
     def find_related_knowledge(self, topic: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Find knowledge nodes related to a topic.
@@ -470,7 +475,8 @@ class Neo4jClient:
 
         with self.driver.session(database=self.config.database) as session:
             result = session.run(query, **team_data)
-            return result.single()["team_id"]
+            record = result.single()
+            return record["team_id"] if record else None  # type: ignore
 
     def add_agent_to_team(self, agent_id: str, team_id: str) -> bool:
         """Add an agent to a team.
@@ -527,7 +533,7 @@ class Neo4jClient:
             List of result records as dictionaries.
         """
         with self.driver.session(database=self.config.database) as session:
-            result = session.run(query, parameters or {})
+            result = session.run(query, parameters or {})  # type: ignore
             return [dict(record) for record in result]
 
     def clear_database(self) -> bool:

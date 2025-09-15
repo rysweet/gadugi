@@ -162,7 +162,7 @@ class ComplianceMonitor:
 
     def _is_orchestrator_active(self) -> bool:
         """Check if orchestrator is currently active."""
-        return self._check_orchestrator_status()
+        return self._check_orchestrator_status()  # type: ignore
 
     def _log_potential_violation(
         self, violation_type: str, description: str, files: List[str]

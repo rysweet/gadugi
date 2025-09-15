@@ -724,7 +724,7 @@ CMD ["bash"]
             # Restore original working directory
             try:
                 os.chdir(original_cwd)
-            except:
+            except Exception:
                 pass
 
 

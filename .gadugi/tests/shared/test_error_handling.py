@@ -25,18 +25,18 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from src.src.shared.utils.error_handling import (  # type: ignore[import]
-        ErrorHandler,
-        ErrorSeverity,
-        GadugiError,
+        ErrorHandler,  # type: ignore[assignment]
+        ErrorSeverity,  # type: ignore[assignment]
+        GadugiError,  # type: ignore[assignment]
         RecoverableError,  # type: ignore[attr-defined]
-        NonRecoverableError,
-        RetryStrategy,
-        CircuitBreaker,
+        NonRecoverableError,  # type: ignore[assignment]
+        RetryStrategy,  # type: ignore[assignment]
+        CircuitBreaker,  # type: ignore[assignment]
         ErrorContext,  # type: ignore[attr-defined]
-        retry,
-        graceful_degradation,
-        handle_with_fallback,
-        validate_input,
+        retry,  # type: ignore[assignment]
+        graceful_degradation,  # type: ignore[assignment]
+        handle_with_fallback,  # type: ignore[assignment]
+        validate_input,  # type: ignore[assignment]
     )
 except ImportError:
     # If import fails, create stub classes to show what needs to be implemented

@@ -116,7 +116,7 @@ class TestOrchestratorAgentIntegration:
             result = analysis_result
             assert result == analysis_result
         except Exception as e:
-            self.error_handler.handle_error(e, {"operation": "task_analysis"})
+            self.error_handler.handle_error(e, {"operation": "task_analysis"})  # type: ignore[attr-defined]
 
     def test_orchestration_state_management(self):
         """Test orchestration state management with shared modules"""
@@ -159,19 +159,19 @@ class TestOrchestratorAgentIntegration:
             TaskData(  # type: ignore[misc]
                 id="task-1",
                 content="Feature A",
-                status=TaskStatus.PENDING,
+                status=TaskStatus.PENDING,  # type: ignore[arg-type]
                 priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
                 id="task-2",
                 content="Feature B",
-                status=TaskStatus.PENDING,
+                status=TaskStatus.PENDING,  # type: ignore[arg-type]
                 priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
                 id="task-3",
                 content="Feature C",
-                status=TaskStatus.PENDING,
+                status=TaskStatus.PENDING,  # type: ignore[arg-type]
                 priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
         ]
@@ -200,7 +200,7 @@ class TestOrchestratorAgentIntegration:
                     # Task not found - create and update status
                     pass
             except Exception as e:
-                self.error_handler.handle_error(
+                self.error_handler.handle_error(  # type: ignore[attr-defined]
                     e, {"task_id": task.id, "phase": "parallel_execution"}
                 )
 
@@ -305,7 +305,7 @@ class TestOrchestratorAgentIntegration:
 
         # Test error handling
         with patch.object(self.error_handler, "handle_error") as mock_handle:
-            self.error_handler.handle_error(error_context)
+            self.error_handler.handle_error(error_context)  # type: ignore[attr-defined]
             mock_handle.assert_called_once_with(error_context)  # type: ignore[attr-defined]
 
         # Test recovery scenario with mocked recovery manager
@@ -373,13 +373,13 @@ class TestOrchestratorAgentIntegration:
             TaskData(  # type: ignore[misc]
                 id="task-1",
                 content="Feature A",
-                status=TaskStatus.PENDING,
+                status=TaskStatus.PENDING,  # type: ignore[arg-type]
                 priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
             TaskData(  # type: ignore[misc]
                 id="task-2",
                 content="Feature B",
-                status=TaskStatus.PENDING,
+                status=TaskStatus.PENDING,  # type: ignore[arg-type]
                 priority=TaskPriority.HIGH,  # type: ignore[arg-type]
             ),
         ]

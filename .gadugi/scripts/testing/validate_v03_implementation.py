@@ -64,7 +64,7 @@ class ImplementationValidator:
             cmd = f"python3 -c 'import {module}'"
             result = subprocess.run(cmd, shell=True, capture_output=True, timeout=5)
             return result.returncode == 0
-        except:
+        except Exception:
             return False
 
     def validate_component(self, name: str, path: str, requirements: List[str]):

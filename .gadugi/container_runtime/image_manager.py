@@ -232,7 +232,7 @@ class ImageManager:
 
     def _generate_image_tag(self, context: BuildContext) -> str:
         """Generate deterministic image tag based on context."""
-        context_str = f"{context.base_image}:{context.runtime}:{context.packages}:{context.security_hardening}"
+        context_str = f"{context.base_image}:{context.runtime}:{context.packages}:{context.security_hardening}"  # noqa: E501
         return hashlib.sha256(context_str.encode()).hexdigest()[:12]
 
     def _generate_dockerfile(self, context: BuildContext) -> str:

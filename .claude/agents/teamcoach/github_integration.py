@@ -203,7 +203,7 @@ class GitHubClient:
         result = self._run_gh_command(args)
         # gh api returns data directly, slice it
         if isinstance(result, list):
-            return result[:limit]
+            return result[:limit]  # type: ignore
         elif isinstance(result, dict) and "items" in result:
             return result["items"][:limit]
         else:

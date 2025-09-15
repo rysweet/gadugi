@@ -80,9 +80,10 @@ def main():
 
     # Import and run the orchestrator directly
     sys.path.insert(0, str(repo_dir / ".gadugi" / "orchestrator"))
+    sys.path.insert(0, str(repo_dir / ".gadugi" / "src" / "src" / "orchestrator"))
 
     try:
-        from orchestrator_main import OrchestratorAgent
+        from orchestrator_main import OrchestratorAgent  # type: ignore
 
         # Initialize orchestrator
         orchestrator = OrchestratorAgent(

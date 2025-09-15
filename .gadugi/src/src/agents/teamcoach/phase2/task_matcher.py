@@ -75,13 +75,13 @@ except ImportError:
 
 
 # Import Phase 1 components
-from ..phase1.capability_assessment import (
+from ..phase1.capability_assessment import (  # noqa: E402
     CapabilityAssessment,
     AgentCapabilityProfile,
     CapabilityDomain,
     ProficiencyLevel,
 )
-from ..phase1.performance_analytics import AgentPerformanceAnalyzer
+from ..phase1.performance_analytics import AgentPerformanceAnalyzer  # noqa: E402
 
 
 class MatchingStrategy(Enum):

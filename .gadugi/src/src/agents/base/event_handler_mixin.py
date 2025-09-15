@@ -175,7 +175,8 @@ class EventHandlerMixin:
                     ):
                         try:
                             await self.memory.remember_short_term(
-                                f"Event: {event_data.get('event_type')} - {event_data.get('data', {})}",
+                                f"Event: {event_data.get('event_type')} - {event_data.get('data',
+                                    {})}",
                                 tags=["event", event_data.get("event_type", "unknown")],
                             )
                         except Exception:

@@ -16,7 +16,7 @@ def check_port(host, port, timeout=2):
         result = sock.connect_ex((host, port))
         sock.close()
         return result == 0
-    except:
+    except Exception:
         return False
 
 
@@ -37,7 +37,7 @@ def check_docker_container(container_name):
             timeout=5,
         )
         return "Up" in result.stdout
-    except:
+    except Exception:
         return False
 
 

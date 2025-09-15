@@ -6,7 +6,7 @@ services:
     container_name: gadugi-neo4j
     ports:
       - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
+      - "7689:7687"  # Bolt (using 7689 external port to standardize)
     environment:
       - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/changeme}  # Uses env var or fallback
       - NEO4J_PLUGINS=["apoc", "graph-data-science"]

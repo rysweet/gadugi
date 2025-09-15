@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Union
 import aiosqlite
 import logging
 
@@ -553,7 +553,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             logger.error(f"Failed to save memories to {file_path}: {e}")
@@ -859,7 +859,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
@@ -914,7 +914,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
@@ -988,7 +988,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
@@ -1050,7 +1050,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
@@ -1141,7 +1141,7 @@ class MarkdownMemoryBackend(MemoryBackend):
             # Clean up temp file if it exists
             if "tmp_path" in locals():
                 try:
-                    os.unlink(tmp_path)
+                    os.unlink(tmp_path)  # type: ignore
                 except (FileNotFoundError, PermissionError, OSError):
                     pass
             raise
@@ -1399,10 +1399,10 @@ class SQLiteMemoryBackend(MemoryBackend):
             confidence_score=row["confidence_score"],
             decay_rate=row["decay_rate"],
             access_count=row["access_count"],
-            created_at=datetime.fromisoformat(row["created_at"])
+            created_at=datetime.fromisoformat(row["created_at"])  # type: ignore
             if row["created_at"]
             else None,
-            updated_at=datetime.fromisoformat(row["updated_at"])
+            updated_at=datetime.fromisoformat(row["updated_at"])  # type: ignore
             if row["updated_at"]
             else None,
             last_accessed=datetime.fromisoformat(row["last_accessed"])
@@ -1490,7 +1490,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             params.append(MemoryPersistence.VOLATILE.value)
 
         query += " ORDER BY created_at DESC LIMIT ?"
-        params.append(limit)
+        params.append(limit)  # type: ignore
 
         conn = await self._get_connection()
         try:
@@ -1521,7 +1521,7 @@ class SQLiteMemoryBackend(MemoryBackend):
             WHERE agent_id = ? AND is_active = 1 AND ({' OR '.join(tag_conditions)})
             ORDER BY created_at DESC LIMIT ?
         """
-        params.append(limit)
+        params.append(limit)  # type: ignore
 
         conn = await self._get_connection()
         try:
@@ -2167,7 +2167,7 @@ class MemoryFallbackChain(MemoryBackend):
         self,
         primary_backend: Optional[MemoryBackend] = None,
         fallback_config: Optional[Dict[str, Any]] = None,
-    ) -> Any:
+    ) -> Any:  # type: ignore
         self.fallback_config = fallback_config or {}
         self.backends: List[MemoryBackend] = []
         self.current_backend_index = 0
@@ -2264,7 +2264,7 @@ class MemoryFallbackChain(MemoryBackend):
 
     async def is_available(self) -> bool:
         """Check if any backend is available."""
-        return self.is_connected and await self._get_current_backend().is_available()
+        return self.is_connected and await self._get_current_backend().is_available()  # type: ignore
 
     async def _find_available_backend(self) -> None:
         """Find the first available backend and switch to it."""

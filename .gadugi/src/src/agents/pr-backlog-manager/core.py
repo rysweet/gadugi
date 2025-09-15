@@ -57,23 +57,33 @@ try:
 except ImportError as e:
     logging.warning(f"Failed to import shared modules: {e}")
 
-    # Fallback definitions for development/testing
+    # Import fallback - raise clear errors when shared modules are missing
     class GitHubOperations:
         def __init__(self, **kwargs):
-            pass
+            raise NotImplementedError(
+                "GitHubOperations requires shared.github_operations module. "
+                "Please ensure shared modules are properly installed and accessible."
+            )
 
     class StateManager:
         def __init__(self, **kwargs):
-            pass
+            raise NotImplementedError(
+                "StateManager requires shared.state_management module. "
+                "Please ensure shared modules are properly installed and accessible."
+            )
 
     class TaskTracker:
         def __init__(self, **kwargs):
-            pass
+            raise NotImplementedError(
+                "TaskTracker requires shared.task_tracking module. "
+                "Please ensure shared modules are properly installed and accessible."
+            )
 
     class AgentConfig:
         def __init__(self, agent_id: str, name: str, **kwargs):
             self.agent_id = agent_id
             self.name = name
+            # Minimal fallback that preserves core functionality
 
     class RetryStrategy(Enum):
         EXPONENTIAL = "exponential"
@@ -93,11 +103,17 @@ except ImportError as e:
 
     class CircuitBreaker:
         def __init__(self, failure_threshold: int, recovery_timeout: float):
-            pass
+            raise NotImplementedError(
+                "CircuitBreaker requires proper error handling implementation. "
+                "This fallback cannot provide circuit breaker functionality."
+            )
 
     def retry_with_backoff(max_attempts: int = 3, strategy=None):
         def decorator(func):
-            return func
+            raise NotImplementedError(
+                "retry_with_backoff requires proper error handling implementation. "
+                "This fallback cannot provide retry functionality."
+            )
 
         return decorator
 
@@ -539,7 +555,7 @@ class PRBacklogManager:
         for criteria, is_met in criteria_met.items():
             if not is_met:
                 issue_description = {
-                    ReadinessCriteria.NO_MERGE_CONFLICTS: "PR has merge conflicts that need resolution",
+                    ReadinessCriteria.NO_MERGE_CONFLICTS: "PR has merge conflicts that need resolution",  # noqa: E501
                     ReadinessCriteria.CI_PASSING: "CI checks are failing and need to be fixed",
                     ReadinessCriteria.UP_TO_DATE: "Branch is behind main and needs to be updated",
                     ReadinessCriteria.HUMAN_REVIEW_COMPLETE: "PR needs human review approval",

@@ -34,8 +34,6 @@ try:
     from .components.task_analyzer import (
         TaskAnalyzer,
         TaskInfo,
-        TaskType,
-        TaskComplexity,
     )  # type: ignore
     from .components.prompt_generator import PromptGenerator, PromptContext
 except ImportError:

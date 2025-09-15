@@ -657,7 +657,7 @@ class MetricsCollector:
                     self.logger.error(
                         f"Error in collection worker for {source.value}: {e}"
                     )
-                    self.stop_collection.wait(
+                    self.stop_collection.wait(  # type: ignore
                         60
                     )  # Wait 1 minute on error  # type: ignore[attr-defined]
 

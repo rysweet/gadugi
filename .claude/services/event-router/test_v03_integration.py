@@ -51,7 +51,7 @@ async def test_event_emission():
         can_review_code: bool = False
         can_test: bool = True
         can_document: bool = True
-        expertise_areas: List[str] = None
+        expertise_areas: List[str] = None  # type: ignore
         max_parallel_tasks: int = 3
 
         def __post_init__(self):
@@ -64,8 +64,8 @@ async def test_event_emission():
             super().__init__(
                 agent_id="test-agent-001",
                 agent_type="testrunner",
-                capabilities=TestCapabilities(),
-                event_config=TestEventConfig(),
+                capabilities=TestCapabilities(),  # type: ignore
+                event_config=TestEventConfig(),  # type: ignore
             )
 
     agent = TestAgent()
@@ -175,7 +175,7 @@ async def test_event_emission():
     print(f"  {'✅' if success else '❌'} emit_stopped: {success}")
 
     # Clean up
-    await agent.cleanup()
+    await agent.cleanup()  # type: ignore
 
     print("\n" + "=" * 60)
     print("✅ EVENT EMISSION TESTS COMPLETE")

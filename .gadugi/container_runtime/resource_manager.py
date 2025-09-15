@@ -490,7 +490,7 @@ class ResourceManager:
                             threshold=90.0,
                             timestamp=datetime.now(),
                             severity="critical",
-                            message=f"System memory usage {usage['memory_percent']:.1f}% is critical",
+                            message=f"System memory usage {usage['memory_percent']:.1f}% is critical",  # noqa: E501
                         )
                         self._handle_container_alert(alert)
 

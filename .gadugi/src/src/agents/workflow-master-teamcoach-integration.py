@@ -346,8 +346,8 @@ class TeamCoachIntegration:
             logger.error(  # type: ignore
                 f"Failed to apply optimization {optimization.strategy.value}: {e}"
             )
-            optimization_record["result"] = f"failed: {e}"
-            self.optimization_history.append(optimization_record)
+            optimization_record["result"] = f"failed: {e}"  # type: ignore[index]
+            self.optimization_history.append(optimization_record)  # type: ignore[possibly-undefined]
             return False
 
     def _apply_performance_optimization(self, optimization: WorkflowOptimization, workflow_state):

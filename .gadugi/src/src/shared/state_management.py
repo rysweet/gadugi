@@ -782,8 +782,8 @@ class CheckpointManager:
         else:
             # Resolve checkpoint_dir relative to repository root
             default_checkpoint_dir = ".github/workflow-checkpoints"
-            if "checkpoint_dir" in self.config:
-                self.checkpoint_dir = Path(str(self.config["checkpoint_dir"]))
+            if "checkpoint_dir" in self.config:  # type: ignore[operator]
+                self.checkpoint_dir = Path(str(self.config["checkpoint_dir"]))  # type: ignore[index]
             else:
                 repo_root = self._find_repo_root()
                 self.checkpoint_dir = repo_root / default_checkpoint_dir

@@ -328,7 +328,7 @@ class CapabilityAssessment:
     def _assess_domain_capability(
         self,
         domain: CapabilityDomain,
-        tasks: List[TaskResult],
+        tasks: List[TaskResult],  # type: ignore
         agent_id: str,
     ) -> CapabilityScore:
         """Assess capability in a specific domain."""
@@ -500,7 +500,7 @@ class CapabilityAssessment:
         # Adjust for consistency
         if len(success_rates) > 1:
             consistency = 1.0 - np.std(success_rates)
-            consistency_factor = max(0.0, consistency)
+            consistency_factor = max(0.0, consistency)  # type: ignore
         else:
             consistency_factor = 0.5  # Moderate confidence for single data point
 

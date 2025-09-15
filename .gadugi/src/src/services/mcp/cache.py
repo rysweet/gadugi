@@ -359,25 +359,64 @@ class MultiLevelCache:
         return removed_l1 or removed_l2
 
     async def _get_from_l2(self, key: str) -> Optional[Any]:
-        """Get value from L2 cache (implementation depends on client)."""
-        # This would be implemented based on the specific L2 client
-        # For example, with Redis:
-        # return await self.l2_client.get(key)
-        return None
+        """Get value from L2 cache."""
+        if not self.l2_client:
+            return None
+
+        # Assume Redis-like interface with get method
+        if hasattr(self.l2_client, "get"):
+            try:
+                result = await self.l2_client.get(key)
+                return result
+            except Exception:
+                # Log error but don't fail the operation
+                return None
+
+        raise NotImplementedError(
+            "L2 client must implement 'get' method for cache retrieval. "
+            "Expected Redis-like interface with async get(key) method."
+        )
 
     async def _put_to_l2(self, key: str, value: Any, ttl: Optional[float]) -> None:
-        """Put value in L2 cache (implementation depends on client)."""
-        # This would be implemented based on the specific L2 client
-        # For example, with Redis:
-        # await self.l2_client.set(key, value, ex=ttl)
-        pass
+        """Put value in L2 cache."""
+        if not self.l2_client:
+            return
+
+        # Assume Redis-like interface with set method
+        if hasattr(self.l2_client, "set"):
+            try:
+                if ttl is not None:
+                    await self.l2_client.set(key, value, ex=int(ttl))
+                else:
+                    await self.l2_client.set(key, value)
+                return
+            except Exception:
+                # Log error but don't fail the operation
+                return
+
+        raise NotImplementedError(
+            "L2 client must implement 'set' method for cache storage. "
+            "Expected Redis-like interface with async set(key, value, ex=ttl) method."
+        )
 
     async def _remove_from_l2(self, key: str) -> bool:
-        """Remove value from L2 cache (implementation depends on client)."""
-        # This would be implemented based on the specific L2 client
-        # For example, with Redis:
-        # return await self.l2_client.delete(key) > 0
-        return False
+        """Remove value from L2 cache."""
+        if not self.l2_client:
+            return False
+
+        # Assume Redis-like interface with delete method
+        if hasattr(self.l2_client, "delete"):
+            try:
+                result = await self.l2_client.delete(key)
+                return result > 0 if isinstance(result, int) else bool(result)
+            except Exception:
+                # Log error but don't fail the operation
+                return False
+
+        raise NotImplementedError(
+            "L2 client must implement 'delete' method for cache removal. "
+            "Expected Redis-like interface with async delete(key) method returning int."
+        )
 
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics.

@@ -154,7 +154,7 @@ class MemoryHealthMonitor:
         self._shutdown_event = asyncio.Event()
 
         # Backend connections
-        self._neo4j_driver: Optional[AsyncDriver] = None
+        self._neo4j_driver: Optional[AsyncDriver] = None  # type: ignore[valid-type]
         self._sqlite_connections: Dict[str, str] = {}  # path -> connection_id
 
         # Initialize current backend
@@ -187,17 +187,19 @@ class MemoryHealthMonitor:
 
         try:
             backend_config = config.config
-            uri = backend_config.get("uri", "bolt://localhost:7687")
+            uri = backend_config.get("uri", "bolt://localhost:7689")
             user = backend_config.get("user", "neo4j")
-            password = backend_config.get("password", "gadugi123!")
+            password = backend_config.get("password") or os.getenv(
+                "NEO4J_PASSWORD", "gadugi-password"
+            )
             database = backend_config.get("database", "neo4j")
 
             # Reuse existing driver or create new one
             if not self._neo4j_driver:
-                self._neo4j_driver = AsyncGraphDatabase.driver(uri, auth=(user, password))
+                self._neo4j_driver = AsyncGraphDatabase.driver(uri, auth=(user, password))  # type: ignore[possibly-undefined]
 
             # Test connection with a simple query
-            async with self._neo4j_driver.session(database=database) as session:
+            async with self._neo4j_driver.session(database=database) as session:  # type: ignore[union-attr]
                 result = await session.run("RETURN 1 as test")
                 record = await result.single()
                 if not record or record["test"] != 1:
@@ -255,7 +257,7 @@ class MemoryHealthMonitor:
             db_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Test file access and database operations
-            async with aiosqlite.connect(db_path) as db:
+            async with aiosqlite.connect(db_path) as db:  # type: ignore[possibly-undefined]
                 # Test basic query
                 async with db.execute("SELECT 1 as test") as cursor:
                     row = await cursor.fetchone()
@@ -503,7 +505,8 @@ class MemoryHealthMonitor:
         return True
 
     async def _find_healthy_backend(
-        self, exclude: List[MemoryBackendType] = None
+        self,
+        exclude: List[MemoryBackendType] = None,  # type: ignore[arg-type]
     ) -> Optional[BackendConfig]:
         """Find the highest priority healthy backend."""
         exclude = exclude or []
@@ -651,9 +654,9 @@ def create_default_backends() -> List[BackendConfig]:
             priority=100,  # Highest priority
             enabled=NEO4J_AVAILABLE,
             config={
-                "uri": os.getenv("NEO4J_URI", "bolt://localhost:7687"),
+                "uri": os.getenv("NEO4J_URI", "bolt://localhost:7689"),
                 "user": os.getenv("NEO4J_USER", "neo4j"),
-                "password": os.getenv("NEO4J_PASSWORD", "gadugi123!"),
+                "password": os.getenv("NEO4J_PASSWORD", "gadugi-password"),
                 "database": os.getenv("NEO4J_DATABASE", "neo4j"),
             },
         ),
