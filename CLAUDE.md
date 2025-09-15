@@ -18,6 +18,34 @@
 🚨 **WORKFLOW ENFORCEMENT ACTIVE**: ALL code changes MUST use orchestrator workflow.
 ⛔ **NO EMERGENCY OVERRIDES**: If blocked, FIX THE PROBLEM. Iterate until compliant.
 
+## 🛑 MANDATORY PRE-FLIGHT CHECKLIST (MUST COMPLETE BEFORE ANY TASK)
+□ 1. Read `.github/Memory.md` for context (create if missing)
+□ 2. Identify if task involves file changes → YES = MUST use WorkflowManager
+□ 3. Analyze for parallel execution opportunities
+□ 4. If ending session → MUST invoke Team Coach for session summary
+
+⚠️ **VIOLATION DETECTION**: If you find yourself typing `Edit`, `Write`, or `MultiEdit` directly, STOP IMMEDIATELY and use WorkflowManager instead.
+
+## 🚀 MANDATORY EXECUTION PROTOCOL
+
+### Decision Tree (MUST FOLLOW IN ORDER):
+```mermaid
+graph TD
+    A[New Task Received] --> B{Does it modify files?}
+    B -->|YES| C[MUST use WorkflowManager]
+    B -->|NO| D{Can it be parallelized?}
+    C --> E[Execute 13-phase workflow]
+    D -->|YES| F[Use Task tool for parallel execution]
+    D -->|NO| G[Direct execution allowed]
+    E --> H[Validate all phases complete]
+    F --> I[Monitor parallel tasks]
+    G --> J[Complete task]
+    H --> K{Session ending?}
+    I --> K
+    J --> K
+    K -->|YES| L[MUST invoke Team Coach]
+    K -->|NO| M[Continue]
+```
 ## 🚫 ABSOLUTE PROHIBITIONS - ZERO TOLERANCE
 
 **NEVER CREATE:**
@@ -52,7 +80,7 @@
 3. Execute independent tasks simultaneously
 4. Monitor and aggregate results
 
-### Example Pattern
+### Parallel Execution Pattern (When Applicable):
 ```
 # When given: "Fix all type errors in the codebase"
 # DO THIS (parallel):
@@ -324,6 +352,33 @@ NEVER use emergency overrides. If workflow blocks you:
 2. Iterate and improve until compliant
 3. Emergency overrides = failure to follow process
 
+## 🔍 ENFORCEMENT & VALIDATION
+
+### Self-Validation Commands (RUN BEFORE ANY TASK):
+```bash
+# Check if your task requires workflow
+python -c "
+task = input('Enter your task: ')
+requires_workflow = any(word in task.lower() for word in ['edit', 'write', 'create', 'update', 'fix', 'modify', 'change', 'delete', 'refactor'])
+print(f'Requires Workflow: {requires_workflow}')
+if requires_workflow:
+    print('MUST use WorkflowManager - DO NOT edit files directly!')
+"
+
+# Verify workflow compliance
+.claude/workflow-enforcement/validate-task.py --task "$TASK_DESCRIPTION"
+
+# Check for violations in current session
+grep -E "(Edit|Write|MultiEdit)" .claude/session.log 2>/dev/null || echo "No violations detected"
+```
+
+### Violation Recovery Protocol:
+1. **STOP** all current operations
+2. **REVERT** any direct file edits
+3. **RESTART** using WorkflowManager
+4. **DOCUMENT** the violation in Memory.md
+5. **PREVENT** future violations by updating checklist
+
 ### 5. PR Policy
 - **NEVER merge without explicit user approval**
 - Always wait for "merge it" or similar confirmation
@@ -367,15 +422,25 @@ cat .claude/instructions/troubleshooting.md
 cat .claude/instructions/agent-development.md
 ```
 
-## 🎯 Quick Decision Tree
+## 🎯 MANDATORY QUICK DECISION TREE
 
-**🚨 FIRST: Will this modify ANY files?** → ✅ MUST use orchestrator workflow
-**Multiple related tasks?** → Use parallel Task execution
-**Working with Python?** → Check for UV project (`uv.lock` exists)
-**Creating PR?** → Wait for user merge approval
-**Tests failing?** → Load testing-qa.md
-**Orchestrator issues?** → Load troubleshooting.md
-**Read-only analysis?** → ✅ Direct execution OK
+**🚨 STEP 1: Will this modify ANY files?** 
+→ ✅ YES: MUST use WorkflowManager (NO EXCEPTIONS)
+→ ❌ NO: Continue to Step 2
+
+**STEP 2: Can it be parallelized?**
+→ ✅ YES: Use parallel Task execution
+→ ❌ NO: Direct execution allowed
+
+**STEP 3: Session ending?**
+→ ✅ YES: MUST invoke Team Coach
+→ ❌ NO: Continue working
+
+**Additional Checks:**
+- **Working with Python?** → Check for UV project (`uv.lock` exists)
+- **Creating PR?** → Wait for user merge approval
+- **Tests failing?** → Load testing-qa.md
+- **Orchestrator issues?** → Load troubleshooting.md
 
 ## 🔧 Core Tool Usage for Parallel Execution
 
@@ -405,6 +470,28 @@ Each task runs in its own Claude subprocess with focused context.
 ---
 *This refactored version is ~100 lines vs 1,100 lines in the original.*
 *Load task-specific instructions only when needed to minimize context usage.*
+
+## 🏁 MANDATORY SESSION CLOSURE PROTOCOL
+
+### When Session is Ending (USER SAYS GOODBYE/THANKS/DONE):
+1. **MUST invoke Team Coach** for session summary
+2. **MUST update Memory.md** with session achievements
+3. **MUST commit any pending changes**
+4. **MUST validate all workflows completed**
+
+### Team Coach Invocation Command:
+```bash
+# Mandatory at session end
+/agent:team-coach "Session ending - provide summary and recommendations"
+```
+
+### Session Closure Checklist:
+□ All tasks completed or documented
+□ Memory.md updated with session notes
+□ All changes committed and pushed
+□ PRs created for completed work
+□ Team Coach invoked for summary
+□ No direct file edits bypassed workflow
 
 ## 📁 Repository Organization
 
