@@ -52,6 +52,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
         guidelines_path: Optional[Path] = None,
         claude_command: str = "claude",
         enforce_no_stubs: bool = True,
+        iterate_quality: bool = True,
     ):
         """Initialize with Python standards enforcement.
 
@@ -60,6 +61,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
             guidelines_path: Path to guidelines file
             claude_command: Command to invoke Claude
             enforce_no_stubs: If True, strictly enforce no stub implementations
+            iterate_quality: If True, iterate until quality gates pass
         """
         self.standards = standards or PythonStandards()
         self.guidelines_path = guidelines_path or Path(".claude/Guidelines.md")
@@ -78,6 +80,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
             self.claude_command = claude_command
             
         self.enforce_no_stubs = enforce_no_stubs
+        self.iterate_quality = iterate_quality
         self.stub_detector = StubDetector(strict_mode=True)
         self.intelligent_detector = IntelligentStubDetector(strict_mode=True)
         self.stub_remediator = None  # Will be set to StubRemediator(self) if needed
@@ -209,6 +212,30 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                             all_errors.extend(stub_errors)
                             stub_errors = stub_errors  # Track separately for reporting
                     
+                    # Run quality gates on generated files (but only after fixing critical issues)
+                    if self.iterate_quality and not syntax_errors and not stub_errors and iteration > 1:
+                        # Only run quality gates if no syntax/stub issues and iterate_quality is enabled
+                        logger.info("Running quality gate checks (iteration enabled)...")
+                        quality_errors = []
+                        
+                        # Check with pyright for type issues
+                        try:
+                            from .quality_gates import QualityGates
+                            gates = QualityGates()
+                            # Run gates on the temp directory
+                            gate_results = gates.run_all_gates(temp_path)
+                            failed_gates = [name for name, passed in gate_results.items() if not passed]
+                            if failed_gates:
+                                quality_errors.append(f"Failed quality gates: {failed_gates}")
+                                all_errors.extend(quality_errors)
+                                logger.info(f"Quality gates failed: {failed_gates}, will iterate to fix")
+                        except Exception as e:
+                            logger.warning(f"Quality gate check failed: {e}")
+                            # Don't fail on quality gate errors in early iterations
+                            if iteration > 3:
+                                quality_errors.append(f"Quality gate error: {str(e)}")
+                                all_errors.extend(quality_errors)
+                    
                     # Check if all validations passed
                     if not all_errors:
                         logger.info(f"Code generation successful after {iteration} iteration(s)")
@@ -216,7 +243,7 @@ class ClaudeCodeGenerator(BaseCodeGenerator):
                     else:
                         total_issues = len(all_errors)
                         logger.warning(
-                            f"Iteration {iteration} has {total_issues} total issues: {len(syntax_errors)} syntax, {len(stub_errors)} stubs"
+                            f"Iteration {iteration} has {total_issues} total issues: {len(syntax_errors)} syntax, {len(stub_errors)} stubs, {len(quality_errors)} quality"
                         )
                         print(
                             f"      ⚠️  Iteration {iteration} has {total_issues} issues, requesting fixes..."
@@ -332,6 +359,16 @@ Generate a complete, functional implementation of Recipe Executor based on the r
 5. Test your implementation as needed
 6. Use any tools necessary to complete the task
 
+## CRITICAL: PYTHON VERSION AND QUALITY REQUIREMENTS
+
+**ALL CODE MUST BE PYTHON 3.9 COMPATIBLE** - This is MANDATORY!
+
+- Use `from typing import Optional, List, Dict, Union` - NOT Python 3.10+ union syntax (`str | None`)
+- Use `if/elif/else` - NOT match/case statements
+- All functions MUST have complete type hints using typing module imports
+- All dataclass fields with mutable defaults MUST use `field(default_factory=...)`
+- Every function MUST have a real implementation - NO pass, NO ellipsis, NO NotImplementedError
+
 ## Recipe Name: {recipe.name}
 
 This is a FRESH implementation. Let the recipe guide your implementation.
@@ -343,98 +380,78 @@ This is a FRESH implementation. Let the recipe guide your implementation.
         path_instructions = """
 ## CRITICAL FILE CREATION INSTRUCTIONS
 
-**MANDATORY: You MUST create files using the Write tool with THESE EXACT file_path parameters. Do NOT interpret these as examples - use these EXACT paths:**
+**MANDATORY: You MUST create files with the exact paths listed below.**
 
-**IMPORTANT**: Your current working directory is the isolated build directory. Create all files relative to this directory.
+**IMPORTANT**: 
+1. Your current working directory is the isolated build directory
+2. Create all files relative to this directory
+3. If a file already exists, read it first before modifying
+4. Check if files exist with Bash tool (ls command) if needed
+5. Use proper file handling - read existing files before writing
 
-**STEP 1: Create the directory structure and files:**
-
-When creating Python module files, use these exact paths relative to your current directory:
-- src/recipe_executor/recipe_model.py
-- src/recipe_executor/recipe_parser.py
-- src/recipe_executor/__init__.py
-- tests/test_recipe_executor.py
-- etc.
-
-The files will be created in the correct structure automatically when you use these paths.
+**FILE CREATION APPROACH**:
+1. Check what files exist already (ls -la, ls src/, etc.)
+2. For existing files: Read them first, then use Edit or Write as appropriate
+3. For new files: Create them with Write tool
+4. Ensure proper directory structure (src/recipe_executor/, tests/, etc.)
 
 ## REQUIRED FILES - CREATE WITH EXACT PATHS
 
 You MUST create EVERY file listed below using the Write tool with the EXACT file_path shown:
 
 ### 1. Project Configuration Files
-```
-Write tool with file_path="pyproject.toml"
-Write tool with file_path="README.md"
-Write tool with file_path=".gitignore"
-```
+- pyproject.toml (project configuration with NO external dependencies)
+- README.md (project documentation)
+- .gitignore (git ignore patterns)
 
-### 2. Package Init Files
-```
-Write tool with file_path="src/__init__.py"
-Write tool with file_path="src/recipe_executor/__init__.py"
-Write tool with file_path="tests/__init__.py"
-```
+### 2. Package Init Files  
+- src/__init__.py
+- src/recipe_executor/__init__.py
+- tests/__init__.py
 
 ### 3. Core Recipe Models (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/recipe_model.py"
-Write tool with file_path="src/recipe_executor/recipe_parser.py"
-Write tool with file_path="src/recipe_executor/recipe_validator.py"
-Write tool with file_path="src/recipe_executor/recipe_decomposer.py"
-Write tool with file_path="src/recipe_executor/dependency_resolver.py"
-```
+- src/recipe_executor/recipe_model.py (data models for recipes)
+- src/recipe_executor/recipe_parser.py (parse recipe YAML/JSON files)
+- src/recipe_executor/recipe_validator.py (validate recipe structure)
+- src/recipe_executor/recipe_decomposer.py (decompose complex recipes)
+- src/recipe_executor/dependency_resolver.py (resolve dependencies - stdlib only, NO networkx)
 
 ### 4. Code Generation Components (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/claude_code_generator.py"
-Write tool with file_path="src/recipe_executor/test_generator.py"
-Write tool with file_path="src/recipe_executor/test_solver.py"
-Write tool with file_path="src/recipe_executor/base_generator.py"
-```
+- src/recipe_executor/claude_code_generator.py (Claude integration)
+- src/recipe_executor/test_generator.py (generate tests)
+- src/recipe_executor/test_solver.py (solve test failures)
+- src/recipe_executor/base_generator.py (base generator class)
 
 ### 5. Quality and Review Components (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/code_reviewer.py"
-Write tool with file_path="src/recipe_executor/code_review_response.py"
-Write tool with file_path="src/recipe_executor/requirements_validator.py"
-Write tool with file_path="src/recipe_executor/validator.py"
-Write tool with file_path="src/recipe_executor/quality_gates.py"
-```
+- src/recipe_executor/code_reviewer.py (review generated code)
+- src/recipe_executor/code_review_response.py (respond to reviews)
+- src/recipe_executor/requirements_validator.py (validate requirements)
+- src/recipe_executor/validator.py (general validation)
+- src/recipe_executor/quality_gates.py (quality checks)
 
 ### 6. Stub Detection Components (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/stub_detector.py"
-Write tool with file_path="src/recipe_executor/intelligent_stub_detector.py"
-```
+- src/recipe_executor/stub_detector.py (detect stub implementations)
+- src/recipe_executor/intelligent_stub_detector.py (intelligent detection)
 
 ### 7. Orchestration Components (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/orchestrator.py"
-Write tool with file_path="src/recipe_executor/state_manager.py"
-Write tool with file_path="src/recipe_executor/parallel_builder.py"
-```
+- src/recipe_executor/orchestrator.py (main orchestrator)
+- src/recipe_executor/state_manager.py (manage build state)
+- src/recipe_executor/parallel_builder.py (parallel builds)
 
 ### 8. Standards and Utilities (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/python_standards.py"
-Write tool with file_path="src/recipe_executor/pattern_manager.py"
-Write tool with file_path="src/recipe_executor/prompt_loader.py"
-Write tool with file_path="src/recipe_executor/language_detector.py"
-Write tool with file_path="src/recipe_executor/uv_environment.py"
-```
+- src/recipe_executor/python_standards.py (Python standards)
+- src/recipe_executor/pattern_manager.py (design patterns)
+- src/recipe_executor/prompt_loader.py (load prompts)
+- src/recipe_executor/language_detector.py (detect languages)
+- src/recipe_executor/uv_environment.py (UV environment support)
 
 ### 9. Entry Points (MUST CREATE ALL)
-```
-Write tool with file_path="src/recipe_executor/__main__.py"
-Write tool with file_path="src/recipe_executor/cli.py"
-```
+- src/recipe_executor/__main__.py (main entry point)
+- src/recipe_executor/cli.py (CLI interface)
 
 ### 10. Test Files (MUST CREATE ALL)
-```
-Write tool with file_path="tests/test_recipe_executor.py"
-Write tool with file_path="tests/conftest.py"
-```
+- tests/test_recipe_executor.py (main tests)
+- tests/conftest.py (pytest configuration)
 
 **VALIDATION CHECK**: You MUST create EXACTLY 31 Python files in src/recipe_executor/ directory.
 
@@ -1385,33 +1402,46 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
         logger.info(f"Reading generated files from {output_path}")
 
-        # Walk through the directory and read all files
-        for file_path in output_path.rglob("*"):
-            if file_path.is_file():
-                # Get relative path from output directory
-                rel_path = file_path.relative_to(output_path)
-
-                # Skip common non-source files
-                if file_path.suffix in [".pyc", ".pyo", ".pyd", ".so", ".dll"]:
-                    continue
-                if "__pycache__" in str(rel_path):
-                    continue
-
-                try:
-                    content = file_path.read_text()
+        # Only scan src/ directory for Python files, not .venv or other directories
+        src_path = output_path / "src"
+        paths_to_scan = []
+        
+        # If src/ exists, scan it. Otherwise scan output_path but with restrictions
+        if src_path.exists() and src_path.is_dir():
+            paths_to_scan = [src_path]
+        else:
+            paths_to_scan = [output_path]
+        
+        for scan_path in paths_to_scan:
+            # Walk through the directory and read all files
+            for file_path in scan_path.rglob("*"):
+                if file_path.is_file():
+                    # Get relative path from output directory
+                    rel_path = file_path.relative_to(output_path)
                     
-                    # Validate Python syntax before accepting the file
-                    if file_path.suffix == '.py':
-                        is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
-                        if not is_valid:
-                            logger.error(f"Syntax validation failed: {error_msg}")
-                            # Skip files with syntax errors to prevent ruff formatting failures
-                            continue
-                    
-                    generated_files[str(rel_path)] = content
-                    logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
-                except Exception as e:
-                    logger.warning(f"Could not read file {rel_path}: {e}")
+                    # Skip virtual environments and non-source directories
+                    if any(part in str(rel_path) for part in [".venv", "venv", "__pycache__", ".git", ".tox", ".pytest_cache", "node_modules"]):
+                        continue
+
+                    # Skip common non-source files
+                    if file_path.suffix in [".pyc", ".pyo", ".pyd", ".so", ".dll"]:
+                        continue
+
+                    try:
+                        content = file_path.read_text()
+                        
+                        # Validate Python syntax before accepting the file
+                        if file_path.suffix == '.py':
+                            is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
+                            if not is_valid:
+                                logger.error(f"Syntax validation failed: {error_msg}")
+                                # Skip files with syntax errors to prevent ruff formatting failures
+                                continue
+                        
+                        generated_files[str(rel_path)] = content
+                        logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
+                    except Exception as e:
+                        logger.warning(f"Could not read file {rel_path}: {e}")
 
         logger.info(f"Read {len(generated_files)} files from {output_path}")
         return generated_files
@@ -1423,32 +1453,45 @@ DO NOT use any other tools. Start reading the recipe files immediately.
 
         logger.info(f"Reading generated files from {output_path}")
 
-        # Walk through the directory and read all files
-        for file_path in output_path.rglob("*"):
-            if file_path.is_file():
-                # Get relative path from output directory
-                rel_path = file_path.relative_to(output_path)
-
-                # Skip common non-source files
-                if file_path.suffix in [".pyc", ".pyo", ".pyd", ".so", ".dll"]:
-                    continue
-                if "__pycache__" in str(rel_path):
-                    continue
-
-                try:
-                    content = file_path.read_text()
+        # Only scan src/ directory for Python files, not .venv or other directories
+        src_path = output_path / "src"
+        paths_to_scan = []
+        
+        # If src/ exists, scan it. Otherwise scan output_path but with restrictions
+        if src_path.exists() and src_path.is_dir():
+            paths_to_scan = [src_path]
+        else:
+            paths_to_scan = [output_path]
+        
+        for scan_path in paths_to_scan:
+            # Walk through the directory and read all files
+            for file_path in scan_path.rglob("*"):
+                if file_path.is_file():
+                    # Get relative path from output directory
+                    rel_path = file_path.relative_to(output_path)
                     
-                    # Validate Python syntax and track errors
-                    if file_path.suffix == '.py':
-                        is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
-                        if not is_valid:
-                            syntax_errors.append(f"SYNTAX ERROR: {error_msg}")
-                            # Still include the file so Claude can fix it
-                    
-                    generated_files[str(rel_path)] = content
-                    logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
-                except Exception as e:
-                    logger.warning(f"Could not read file {rel_path}: {e}")
+                    # Skip virtual environments and non-source directories
+                    if any(part in str(rel_path) for part in [".venv", "venv", "__pycache__", ".git", ".tox", ".pytest_cache", "node_modules"]):
+                        continue
+
+                    # Skip common non-source files
+                    if file_path.suffix in [".pyc", ".pyo", ".pyd", ".so", ".dll"]:
+                        continue
+
+                    try:
+                        content = file_path.read_text()
+                        
+                        # Validate Python syntax and track errors
+                        if file_path.suffix == '.py':
+                            is_valid, error_msg = self._validate_python_syntax(str(rel_path), content)
+                            if not is_valid:
+                                syntax_errors.append(f"SYNTAX ERROR: {error_msg}")
+                                # Still include the file so Claude can fix it
+                        
+                        generated_files[str(rel_path)] = content
+                        logger.debug(f"Read file: {rel_path} ({len(content)} chars)")
+                    except Exception as e:
+                        logger.warning(f"Could not read file {rel_path}: {e}")
 
         logger.info(f"Read {len(generated_files)} files with {len(syntax_errors)} syntax errors")
         return generated_files, syntax_errors

@@ -90,9 +90,19 @@ class PromptLoader:
                 # Prepend critical context to the prompt
                 context_sections: List[str] = []
 
-                # Always include CRITICAL_GUIDELINES first if it exists
+                # Include CRITICAL_QUALITY_REQUIREMENTS first (HIGHEST PRIORITY)
+                if "CRITICAL_QUALITY_REQUIREMENTS.md" in context_files:
+                    context_sections.append(context_files["CRITICAL_QUALITY_REQUIREMENTS.md"])
+                    context_sections.append("")  # Empty line separator
+
+                # Always include CRITICAL_GUIDELINES next if it exists
                 if "CRITICAL_GUIDELINES.md" in context_files:
                     context_sections.append(context_files["CRITICAL_GUIDELINES.md"])
+                    context_sections.append("")  # Empty line separator
+
+                # Include CRITICAL_ANTI_STUB_RULES if it exists
+                if "CRITICAL_ANTI_STUB_RULES.md" in context_files:
+                    context_sections.append(context_files["CRITICAL_ANTI_STUB_RULES.md"])
                     context_sections.append("")  # Empty line separator
 
                 # Include Guidelines.md if it exists
@@ -104,7 +114,7 @@ class PromptLoader:
 
                 # Include any other context files
                 for name, content in context_files.items():
-                    if name not in ["CRITICAL_GUIDELINES.md", "Guidelines.md"]:
+                    if name not in ["CRITICAL_GUIDELINES.md", "CRITICAL_ANTI_STUB_RULES.md", "Guidelines.md"]:
                         context_sections.append(f"## Additional Context: {name}")
                         context_sections.append("")
                         context_sections.append(content)

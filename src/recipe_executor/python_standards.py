@@ -22,7 +22,7 @@ class PythonStandards:
 name = "{name}"
 version = "{version}"
 description = "{description}"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = {dependencies}
 
 [project.optional-dependencies]
@@ -40,7 +40,7 @@ build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "RUF"]
@@ -78,7 +78,7 @@ reportUnusedExpression = true
 reportMatchNotExhaustive = true
 reportImplicitOverride = false
 reportShadowedImports = true
-pythonVersion = "3.10"
+pythonVersion = "3.9"
 pythonPlatform = "Linux"
 typeCheckingMode = "strict"
 """
@@ -153,13 +153,20 @@ __all__ = {exports}
             temp_path = f.name
 
         try:
-            # Decide whether to use uv run or direct ruff
-            if use_project_context and self.use_uv:
-                # Use UV within project context
+            # Always use uv run if available to avoid permission issues
+            if self.use_uv:
+                # Use UV to run ruff (works in isolated environments)
                 cmd = ["uv", "run", "ruff", "format", temp_path]
             else:
-                # Run ruff directly (for temp files outside project)
-                cmd = ["ruff", "format", temp_path]
+                # Try ruff directly as fallback
+                # First check if ruff is available
+                try:
+                    subprocess.run(["which", "ruff"], check=True, capture_output=True)
+                    cmd = ["ruff", "format", temp_path]
+                except subprocess.CalledProcessError:
+                    # Ruff not found, skip formatting
+                    logger.warning("ruff not found, skipping formatting")
+                    return code
                 
             subprocess.run(
                 cmd,

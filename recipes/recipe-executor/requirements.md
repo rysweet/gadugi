@@ -7,7 +7,22 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 
 ### 1. Recipe Structure Management
 
-#### 1.1 Recipe File Parsing
+#### 1.1 Recipe Directory Handling
+- MUST accept a recipe path that is a DIRECTORY (not a single file)
+- MUST support both directory paths (e.g., `recipes/recipe-executor`) and file paths that get resolved to directories
+- MUST check if the provided path is a directory containing recipe files
+- MUST NOT require recipes to be in a single file format (YAML, JSON, or Markdown)
+- MUST handle the standard recipe directory structure:
+  ```
+  recipe-name/
+  ├── requirements.md     # Functional and non-functional requirements
+  ├── design.md          # Technical design and architecture
+  ├── components.json    # Metadata and dependencies
+  ├── dependencies.json  # Optional: detailed dependency info
+  └── *.md              # Optional: supplementary documentation
+  ```
+
+#### 1.2 Recipe File Parsing
 - MUST read and parse three mandatory recipe files from each recipe directory:
   - `requirements.md`: Contains functional and non-functional requirements written in structured markdown format
   - `design.md`: Specifies the technical design, architecture, and implementation approach
@@ -15,15 +30,16 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 - MUST validate that all three files exist and contain valid content before proceeding with recipe execution
 - MUST parse markdown files to extract structured data such as requirement priorities (MUST, SHOULD, COULD), validation criteria, and success metrics
 - MUST parse JSON files with proper error handling, providing clear messages about malformed JSON or missing required fields
+- MUST support loading optional supplementary documentation files (e.g., execution-flow.md, complete-design.md)
 
-#### 1.2 Recipe Validation
+#### 1.3 Recipe Validation
 - MUST validate that each recipe contains all required sections and follows the expected structure
 - MUST ensure that requirement identifiers are unique within a recipe and follow a consistent naming pattern (e.g., "req_1", "req_2")
 - MUST verify that all referenced components in the design exist and are properly defined
 - MUST check that success criteria are measurable and linked to specific requirements
 - MUST validate that component types (service, agent, library, tool) are recognized and supported
 
-#### 1.3 Requirements vs Design Separation Validation
+#### 1.4 Requirements vs Design Separation Validation
 - MUST validate that requirements.md contains only WHAT needs to be done, not HOW
 - MUST detect design details (implementation specifics, technology choices, algorithms) in requirements
 - MUST validate that design.md contains only HOW to implement, not WHAT to implement
@@ -35,7 +51,7 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
   - Functional requirements in design (e.g., "The system validates user input" vs "Uses Zod schema validation")
   - Technology choices in requirements (e.g., "MUST use React" vs "MUST provide web interface")
 
-#### 1.4 Dependency Management
+#### 1.5 Dependency Management
 - MUST support hierarchical recipe dependencies where recipes can depend on other recipes (not Python packages)
   - Example: A "web-server" recipe might depend on "http-handler", "request-router", and "response-formatter" recipes
 - MUST clearly distinguish between recipe dependencies (in components.json) and Python package dependencies (in pyproject.toml)
@@ -144,6 +160,20 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 #### 5.2 AI-Powered Code Generation
 - MUST use AI-powered code generation, not template-based generation
 - **CRITICAL: ABSOLUTELY NO TIMEOUT on AI generation process - complex recipes require patience**
+- **CRITICAL: ZERO EXTERNAL DEPENDENCIES - Python standard library ONLY**
+  - **FORBIDDEN**: networkx, numpy, pandas, requests, pytest (except in test files), any non-stdlib package
+  - **ALLOWED ONLY**: os, sys, json, pathlib, logging, subprocess, typing, dataclasses, collections, enum, re, shutil, tempfile, datetime, hashlib, uuid, abc, functools, itertools, urllib, asyncio
+  - **MUST** implement all algorithms from scratch using only collections (deque, defaultdict) and built-in types
+- **CRITICAL: ABSOLUTELY ZERO STUBS, PLACEHOLDERS, OR NotImplementedError**
+  - **FORBIDDEN**: `pass` statements (except in abstract base classes)
+  - **FORBIDDEN**: `raise NotImplementedError` (except in abstract methods)
+  - **FORBIDDEN**: `TODO`, `FIXME`, `XXX` comments
+  - **FORBIDDEN**: Empty function bodies or placeholder returns
+  - **REQUIRED**: Every function must have complete, working implementation
+- **CRITICAL: ALL IMPORTS MUST BE RELATIVE FOR INTERNAL MODULES**
+  - **CORRECT**: `from .recipe_model import Recipe`
+  - **WRONG**: `from recipe_executor.recipe_model import Recipe`
+  - **EXCEPTION**: Only use absolute imports for standard library
 - **MUST wait INDEFINITELY for AI to complete code generation - DO NOT USE timeout parameters**
 - **MUST NOT terminate AI process due to inactivity or time elapsed - EVER**
 - **NO subprocess timeout, NO process.wait(timeout), NO signal alarms - PATIENCE IS MANDATORY**
@@ -451,15 +481,32 @@ The Recipe Executor is a self-hosting build system that transforms recipe specif
 
 1. **Self-Regeneration Test**: The Recipe Executor can successfully regenerate itself from its own recipe, and the regenerated version passes all tests and can itself regenerate the Recipe Executor, demonstrating complete self-hosting capability.
 
-2. **Complex Dependency Test**: Successfully builds a complex recipe graph with 10+ recipes, multiple dependency levels, and shared dependencies, executing in the correct order with parallel optimization where possible.
+2. **ZERO STUB REQUIREMENT**: ALL generated code MUST contain:
+   - ZERO pass statements (except in abstract base classes with @abstractmethod decorator)
+   - ZERO raise NotImplementedError (except in abstract base classes with @abstractmethod decorator)  
+   - ZERO TODO/FIXME/XXX/HACK comments
+   - ZERO placeholder implementations
+   - ZERO template code or boilerplate
+   - Every function MUST have substantive implementation logic
+   - Every method MUST do real work, not just return placeholders
 
-3. **Quality Compliance**: All generated code achieves:
+3. **Claude CLI Integration REQUIREMENT**: The ClaudeCodeGenerator MUST:
+   - Use subprocess.run() or subprocess.Popen() to invoke the actual Claude CLI binary
+   - NOT generate code directly via templates, string concatenation, or any method other than Claude CLI
+   - Include the _invoke_claude_code() method that calls subprocess
+   - Find the Claude binary using shutil.which() or common paths
+   - Handle Claude CLI failures with proper error reporting
+   - Support iterative refinement if stubs are detected by calling Claude again
+
+4. **Complex Dependency Test**: Successfully builds a complex recipe graph with 10+ recipes, multiple dependency levels, and shared dependencies, executing in the correct order with parallel optimization where possible.
+
+5. **Quality Compliance**: All generated code achieves:
    - Zero pyright errors in strict mode
    - 100% ruff formatting compliance
    - Minimum 90% test coverage
    - All tests passing with detailed reports
 
-4. **Error Handling Test**: Provides clear, actionable error messages for common failure scenarios including:
+6. **Error Handling Test**: Provides clear, actionable error messages for common failure scenarios including:
    - Missing recipe files with suggestions for creation
    - Circular dependencies with visualization of the cycle
    - Invalid recipe format with specific line numbers

@@ -45,9 +45,24 @@ class RecipeParser:
         self.code_block_pattern = re.compile(r"```(?:python|py)?\n(.*?)\n```", re.DOTALL)
 
     def parse_recipe(self, recipe_path: Path) -> Recipe:
-        """Parse a complete recipe from directory."""
+        """Parse a complete recipe from directory.
+        
+        Args:
+            recipe_path: Path to a recipe DIRECTORY (not a file!)
+                        e.g., Path("recipes/recipe-executor")
+        
+        Returns:
+            Recipe: Parsed recipe object
+            
+        Raises:
+            RecipeParseError: If path is not a directory or missing required files
+        """
         if not recipe_path.exists():
             raise RecipeParseError(f"Recipe path does not exist: {recipe_path}")
+        
+        # CRITICAL: Check if this is a directory, not a file
+        if not recipe_path.is_dir():
+            raise RecipeParseError(f"Recipe path must be a directory, not a file: {recipe_path}")
 
         # Parse individual files
         requirements_path = recipe_path / "requirements.md"
@@ -88,6 +103,23 @@ class RecipeParser:
             recipe.calculate_complexity()
         
         return recipe
+    
+    def parse(self, path: str | Path) -> Recipe:
+        """Parse a complete recipe from a DIRECTORY.
+        
+        This is an alias for parse_recipe() to maintain compatibility.
+        
+        Args:
+            path: Path to a recipe DIRECTORY (not a file!)
+                  e.g., "recipes/recipe-executor" or Path("recipes/my-recipe")
+        
+        Returns:
+            Recipe: Parsed recipe object
+            
+        Raises:
+            RecipeParseError: If path is not a directory or missing required files
+        """
+        return self.parse_recipe(Path(path))
 
     def _parse_requirements(self, path: Path) -> Requirements:
         """Parse requirements.md using markdown parser."""

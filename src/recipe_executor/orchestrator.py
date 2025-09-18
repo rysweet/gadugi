@@ -64,17 +64,18 @@ class BuildOptions:
     parallel: bool = False
     output_dir: Optional[Path] = None
     allow_self_overwrite: bool = False  # Dangerous: allows overwriting Recipe Executor itself
+    iterate_quality: bool = True  # Enable quality gate iteration until green
 
 
 class RecipeOrchestrator:
     """Main orchestration engine for recipe execution."""
 
-    def __init__(self, recipe_root: Optional[Path] = None):
+    def __init__(self, recipe_root: Optional[Path] = None, iterate_quality: bool = True):
         """Initialize orchestrator with all components."""
         self.recipe_root = recipe_root or Path("recipes")
         self.parser = RecipeParser()
-        self.resolver = DependencyResolver(self.recipe_root)
-        self.generator = ClaudeCodeGenerator()
+        self.resolver = DependencyResolver()
+        self.generator = ClaudeCodeGenerator(iterate_quality=iterate_quality)
         self.test_generator = TestGenerator()
         self.validator = Validator()
         self.state_manager = StateManager()
@@ -130,9 +131,9 @@ class RecipeOrchestrator:
 
             # Filter recipes that need rebuilding
             recipes_to_build = [
-                recipe
-                for recipe in build_order
-                if self.state_manager.needs_rebuild(recipe, options.force_rebuild)
+                recipes[recipe_name]  # Get actual Recipe object
+                for recipe_name in build_order
+                if self.state_manager.needs_rebuild(recipes[recipe_name], options.force_rebuild)
             ]
 
             if recipes_to_build:
@@ -155,7 +156,8 @@ class RecipeOrchestrator:
                     )
         else:
             # Sequential execution (original logic)
-            for recipe in build_order:
+            for recipe_name in build_order:
+                recipe = recipes[recipe_name]  # Get actual Recipe object
                 if self.state_manager.needs_rebuild(recipe, options.force_rebuild):
                     result = self._execute_single(recipe, options)
                     results.append(result)

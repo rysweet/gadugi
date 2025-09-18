@@ -1,5 +1,44 @@
 # CRITICAL CODE GENERATION GUIDELINES
 
+## 🧠 MANDATORY: THINK CAREFULLY BEFORE IMPLEMENTING
+
+**STOP AND THINK CAREFULLY** before writing ANY code. Take time to understand the requirements, design, and implications of your implementation.
+
+### Critical Thinking Checklist:
+1. **READ all requirements COMPLETELY** - understand WHAT is needed
+2. **READ the design COMPLETELY** - understand HOW to implement it  
+3. **THINK through edge cases** - what could go wrong?
+4. **CONSIDER compatibility** - will this work with existing code?
+5. **PLAN your approach** - think before you code
+
+### Think Especially Carefully About:
+- **RecipeParser Interface**: MUST handle recipe DIRECTORIES, not single files
+- **Self-Hosting Capability**: Your code MUST be able to regenerate itself
+- **Backward Compatibility**: Don't break existing functionality
+- **Error Handling**: Handle all failure modes gracefully
+
+## 🔄 SELF-HOSTING IS THE #1 REQUIREMENT
+
+**THE MOST CRITICAL REQUIREMENT**: Recipe Executor MUST be able to regenerate itself!
+
+### Self-Hosting Success Chain:
+1. **Generation 1** (current) → creates **Generation 2**
+2. **Generation 2** → MUST create **Generation 3**  
+3. **Generation 3** → MUST be fully functional
+
+### To Achieve Self-Hosting:
+```python
+# RecipeParser MUST handle directories:
+def parse(self, path: str | Path) -> Recipe:
+    recipe_path = Path(path)
+    if not recipe_path.is_dir():
+        raise ValueError(f"Recipe path must be a directory: {recipe_path}")
+    # Parse files WITHIN the directory
+    requirements = self._parse_requirements(recipe_path / "requirements.md")
+    design = self._parse_design(recipe_path / "design.md")
+    components = self._parse_components(recipe_path / "components.json")
+```
+
 ## CRITICAL: NO TIMEOUTS WHEN INVOKING CLAUDE CODE
 
 **WHEN CALLING CLAUDE CODE AS A SUBPROCESS - NEVER USE TIMEOUTS**

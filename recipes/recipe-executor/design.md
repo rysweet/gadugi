@@ -212,29 +212,74 @@ class Components:
     metadata: dict[str, Any]  # Additional metadata (e.g., self_hosting: true)
 ```
 
-### 2. Recipe Parser (`recipe_parser.py`)
+### 2. Recipe Parser (`recipe_parser.py`) 
+
+**CRITICAL**: The RecipeParser MUST handle recipe DIRECTORIES, not single files. This is the #1 requirement for self-hosting to work.
+
+**CRITICAL IMPLEMENTATION REQUIREMENT**: The Recipe Parser MUST handle recipe DIRECTORIES, not single files. Recipes are stored as directories containing multiple files.
+
 ```python
 class RecipeParser:
-    """Parses recipe files into structured models."""
+    """Parses recipe DIRECTORIES into structured models.
     
-    def parse_recipe(self, recipe_path: Path) -> Recipe:
-        """Parse a complete recipe from directory."""
-        # Validate all required files exist
-        self._validate_recipe_structure(recipe_path)
+    IMPORTANT: This parser handles recipe directories, NOT single files.
+    Each recipe is a directory containing:
+    - requirements.md: Functional and non-functional requirements
+    - design.md: Technical design and architecture
+    - components.json: Metadata and dependencies
+    - (optional) dependencies.json: Detailed dependency information
+    - (optional) *.md: Supplementary documentation
+    """
+    
+    def parse(self, path: str | Path) -> Recipe:
+        """Parse a complete recipe from a DIRECTORY.
         
+        Args:
+            path: Path to a recipe DIRECTORY (not a file!)
+                  e.g., "recipes/recipe-executor" or Path("recipes/my-recipe")
+        
+        Returns:
+            Recipe: Parsed recipe object
+            
+        Raises:
+            ValueError: If path is not a directory or missing required files
+        """
+        recipe_path = Path(path)
+        
+        # CRITICAL: Check if this is a directory, not a file
+        if not recipe_path.is_dir():
+            raise ValueError(f"Recipe path must be a directory, not a file: {recipe_path}")
+        
+        # Validate all required files exist in the directory
+        required_files = ["requirements.md", "design.md", "components.json"]
+        for file in required_files:
+            if not (recipe_path / file).exists():
+                raise ValueError(f"Required recipe file missing: {recipe_path / file}")
+        
+        # Parse each file from the directory
         requirements = self._parse_requirements(recipe_path / "requirements.md")
         design = self._parse_design(recipe_path / "design.md")
         components = self._parse_components(recipe_path / "components.json")
         
+        # Load optional files if they exist
+        dependencies = None
+        if (recipe_path / "dependencies.json").exists():
+            dependencies = self._parse_dependencies(recipe_path / "dependencies.json")
+        
+        # Load supplementary documentation
+        supplementary_docs = self._load_supplementary_docs(recipe_path)
+        
         # Create metadata with checksums for change detection
         metadata = self._create_metadata(recipe_path)
+        metadata.supplementary_docs = supplementary_docs
         
         return Recipe(
-            name=components.name,
+            name=components.name or recipe_path.name,
             path=recipe_path,
             requirements=requirements,
             design=design,
             components=components,
+            dependencies=dependencies,
             metadata=metadata
         )
     
@@ -260,7 +305,32 @@ class RecipeParser:
         # - MUST validate input files
         # - SHOULD support caching
         # - COULD provide timing information
-        pass
+        requirements = []
+        lines = content.split('\n')
+        in_section = False
+        requirement_id = 1
+        
+        for line in lines:
+            if section in line:
+                in_section = True
+                continue
+            elif in_section and line.startswith('#') and section not in line:
+                break
+            elif in_section and line.strip().startswith('-'):
+                for priority in ['MUST', 'SHOULD', 'COULD']:
+                    if priority in line:
+                        req_text = line.split(priority, 1)[1].strip()
+                        requirements.append(Requirement(
+                            id=f"req_{requirement_id}",
+                            description=req_text,
+                            priority=RequirementPriority[priority],
+                            validation_criteria=[],
+                            implemented=False
+                        ))
+                        requirement_id += 1
+                        break
+        
+        return requirements
 ```
 
 ### 3. Recipe Validator (`recipe_validator.py`)
@@ -376,9 +446,12 @@ class DependencyResolver:
         
         return groups
     
-    def _build_dependency_graph(self, recipes: dict[str, Recipe]) -> nx.DiGraph:
-        """Build directed acyclic graph from recipe dependencies."""
-        graph = nx.DiGraph()
+    def _build_dependency_graph(self, recipes: dict[str, Recipe]) -> DependencyGraph:
+        """Build directed acyclic graph from recipe dependencies.
+        
+        CRITICAL: NO networkx! Use only standard library collections.
+        """
+        graph = DependencyGraph()  # Our custom graph using defaultdict
         
         for name, recipe in recipes.items():
             graph.add_node(name, recipe=recipe)
@@ -391,16 +464,24 @@ class DependencyResolver:
 ```
 
 ### 4. Claude Code Generator (`claude_code_generator.py`)
+
+**CRITICAL IMPLEMENTATION REQUIREMENT**: This component MUST use subprocess to invoke the Claude CLI. It MUST NOT generate template code directly. Every method that generates code MUST call the Claude CLI using subprocess.run() or subprocess.Popen().
+
 ```python
 class ClaudeCodeGenerator:
-    """Generates code using Claude Code CLI with TDD approach."""
+    """Generates code using Claude Code CLI with TDD approach.
+    
+    MANDATORY: This class MUST invoke the actual Claude CLI using subprocess.
+    It MUST NOT generate code directly with templates or stubs.
+    """
     
     def __init__(self, claude_command: str = "claude"):
-        self.claude_command = claude_command
+        self.claude_command = self._find_claude_command()  # MUST find actual Claude binary
         self.standards = PythonStandards()
     
     def generate(self, recipe: Recipe, context: BuildContext) -> GeneratedCode:
-        """Generate code using TDD methodology."""
+        """Generate code using TDD methodology.
+        MUST invoke Claude CLI via subprocess, NOT generate templates."""
         # Step 1: Generate comprehensive tests first (TDD Red phase)
         test_prompt = self._create_tdd_test_prompt(recipe)
         test_output = self._invoke_claude_code(test_prompt, recipe)
@@ -1227,12 +1308,19 @@ if __name__ == '__main__':
     cli()
 ```
 
-### 17. Claude CLI Integration (`claude_code_generator.py`)
+### 17. Claude CLI Integration - CRITICAL FOR SELF-HOSTING (`claude_code_generator.py`)
+
+**IMPLEMENTATION MANDATE**: The ClaudeCodeGenerator class MUST contain the following method that uses subprocess to invoke Claude. This is NOT optional. If this method is missing or doesn't use subprocess, the implementation is INCORRECT.
+
 ```python
 class ClaudeCodeGenerator:
-    """Generates code using Claude Code CLI - the chosen AI implementation."""
+    """Generates code using Claude Code CLI - the chosen AI implementation.
     
-    def _invoke_claude_code(self, prompt: str, output_dir: Path) -> None:
+    CRITICAL: This class MUST use subprocess.run() or subprocess.Popen() to invoke Claude.
+    It MUST NOT generate code directly. Every code generation MUST go through Claude CLI.
+    """
+    
+    def _invoke_claude_code(self, prompt: str, output_dir: Path) -> str:
         """Invoke Claude CLI for code generation with proper automation flags.
         
         CRITICAL FLAGS FOR AUTOMATION:

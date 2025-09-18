@@ -196,20 +196,8 @@ class DependencyResolver:
         """Add a recipe to be resolved."""
         self.graph.add_recipe(recipe)
     
-    def resolve(self, recipes: Optional[Dict[str, Recipe]] = None) -> List[str]:
-        """Resolve dependencies and return build order.
-        
-        Args:
-            recipes: Optional dictionary of recipes to add before resolving
-            
-        Returns:
-            List of recipe names in build order
-        """
-        # Add recipes if provided
-        if recipes:
-            for recipe in recipes.values():
-                self.add_recipe(recipe)
-        
+    def resolve(self) -> List[str]:
+        """Resolve dependencies and return build order."""
         # Validate first
         errors = self.graph.validate_dependencies()
         if errors:
