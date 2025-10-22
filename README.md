@@ -1,3 +1,6 @@
+
+**this project has not been kept up to date for versions of claude code after early august 2025** - it is mostly here as a reference/inspiration for subsequent projects
+
 # Gadugi - Multi-Agent Parallel System for AI-Assisted Coding with built-in reflection loops
 
 > **Gadugi** is a multi-agent system for AI-assisted coding. It takes its name from the Cherokee word (gah-DOO-gee) that means communal work - where community members come together to accomplish tasks that benefit everyone, sharing collective wisdom and mutual support.
